@@ -1,16 +1,16 @@
-# QA REPORT - AI 쇼츠 제작 스튜디오 v0.8.0
+# QA REPORT - AI 쇼츠 제작 스튜디오 v0.8.1
 
 ## Summary
 
-- Version: 0.8.0
-- Patch: 파형 컷 마커 편집 패치
+- Version: 0.8.1
+- Patch: Lean Dock UI/UX 성능 패치
 - Command: `npm run check`
 - Result: PASS
 
 ```text
 AI Shorts Studio QA summary
-  Passed: 38/38
-  Failed: 0/38
+  Passed: 39/39
+  Failed: 0/39
 ```
 
 ## Covered
@@ -18,7 +18,10 @@ AI Shorts Studio QA summary
 - JavaScript syntax check
 - HTML anchor check
 - External dependency smoke check
-- UI/UX and bottom dock anchors
+- Lean two-button bottom dock anchors
+- Dock polling removal and RAF sync guardrails
+- Preview still RAF batching guardrail
+- CSS containment/content-visibility guardrail
 - Advanced editor anchors
 - Caption pro anchors
 - Output quality anchors
@@ -31,8 +34,9 @@ AI Shorts Studio QA summary
 
 ## Notes
 
-- `qa/cut_marker_smoke.js`로 파형 컷 마커 레이어, 시작/끝 컷 맞춤 버튼, 서비스 워커 캐시 등록을 검수했습니다.
-- 컷 마커는 기존 `state.autoCuts.timeline`과 `state.autoCuts.silenceSegments`를 재사용합니다.
-- 비트, 장면 전환, 무음 종료 마커는 파형 위 별도 오버레이로 표시됩니다.
-- 마커 클릭은 재생 위치 이동을 기본으로 하며, 선택 구간 밖의 마커는 가까운 경계를 보정합니다.
-- v0.7.0의 자막 적용/초기화 런타임 참조 문제도 현재 선택 추천 구간 기준으로 보정했습니다.
+- 하단 Dock은 📂 파일 열기와 ⚡ 분석하기 두 개만 표시됩니다.
+- 두 Dock 버튼은 50:50 반반 배치로 크게 표시됩니다.
+- 기존 추천/편집/미리보기/썸네일/내보내기 Dock 바로가기는 제거하고 화면 내부 버튼으로 유지했습니다.
+- `bottom-dock.js`의 polling `setInterval`을 제거했습니다.
+- Dock 동기화와 미리보기 정지 프레임 렌더링은 `requestAnimationFrame`으로 배치합니다.
+- CSS containment 규칙을 추가해 파일 로드 후 레이아웃 재계산 부담을 줄였습니다.

@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-8-0",
-  "version": "0.8.0",
+  "name": "ai-shorts-studio-v0-8-1",
+  "version": "0.8.1",
   "private": true,
-  "description": "AI Shorts Studio v0.8.0 - waveform cut markers for beat, silence and scene-change editing",
+  "description": "AI Shorts Studio v0.8.1 - lean two-button dock and UI performance stability pass",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -37,6 +37,7 @@
     "node qa/html_anchor_smoke.js",
     "node qa/uiux_anchor_smoke.js",
     "node qa/layout_dock_smoke.js",
+    "node qa/lean_dock_performance_smoke.js",
     "node qa/advanced_editor_smoke.js",
     "node qa/caption_pro_smoke.js",
     "node qa/recommendation_engine_smoke.js",

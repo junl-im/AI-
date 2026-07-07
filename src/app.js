@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.8.0 - main app
+// AI Shorts Studio v0.8.1 - main app with lean dock performance pass
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -24,6 +24,7 @@
     const els = {};
     let previewRaf = 0;
     let previewTimer = 0;
+    let previewStillRaf = 0;
 
     const CAPTION_DEFAULTS = Object.freeze({
         preset: 'creator',
@@ -566,10 +567,12 @@
         updateButtons();
     }
 
-    function renderPreviewStill() {
+    function renderPreviewStillNow() {
+        previewStillRaf = 0;
         if (!els.previewCanvas || !renderer.renderStill) return;
         const selected = getSelectedRecommendation();
         const media = state.fileKind === 'video' && els.sourceVideo.videoWidth ? els.sourceVideo : null;
+        const qualityOptions = getQualityOptions();
         renderer.renderStill(els.previewCanvas, media, {
             cropMode: state.settings.cropMode,
             title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
@@ -580,10 +583,15 @@
             captionStyle: state.settings.captionStyle,
             captionOptions: getCaptionOptions(),
             thumbnailTemplate: state.settings.thumbnailTemplate,
-            qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: getQualityOptions().safeGuide }),
+            qualityOptions: Object.assign({}, qualityOptions, { safeGuide: qualityOptions.safeGuide }),
             relativeTime: 0,
             segmentDuration: selected ? selected.duration : 0
         });
+    }
+
+    function renderPreviewStill() {
+        if (previewStillRaf) return;
+        previewStillRaf = requestAnimationFrame(renderPreviewStillNow);
     }
 
     function selectRecommendation(id) {
@@ -849,7 +857,10 @@
                 relativeTime: Math.max(0, media.currentTime - selected.start),
                 segmentDuration: selected.duration
             });
-            if (qualityEffects.calculateFadeVolume) media.volume = qualityEffects.calculateFadeVolume(Math.max(0, media.currentTime - selected.start), selected.duration, getQualityOptions());
+            if (qualityEffects.calculateFadeVolume) {
+                const relativeTime = Math.max(0, media.currentTime - selected.start);
+                media.volume = qualityEffects.calculateFadeVolume(relativeTime, selected.duration, getQualityOptions());
+            }
             previewRaf = requestAnimationFrame(draw);
         }
         draw();

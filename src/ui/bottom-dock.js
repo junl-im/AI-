@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.5.0 - bottom fixed workflow dock
+// AI Shorts Studio v0.8.1 - lean two-button bottom dock
 'use strict';
 
 (function bootBottomDock(global) {
@@ -11,18 +11,15 @@
         dot: 'bottomDockDot',
         title: 'bottomDockTitle',
         meta: 'bottomDockMeta',
+        file: 'bottomFileBtn',
         analyze: 'bottomAnalyzeBtn',
-        recommend: 'bottomRecommendBtn',
-        edit: 'bottomEditBtn',
-        preview: 'bottomPreviewBtn',
-        thumbnail: 'bottomThumbnailBtn',
-        export: 'bottomExportBtn',
         analyzeSource: 'analyzeBtn',
-        previewSource: 'previewBtn',
-        thumbnailSource: 'thumbnailBtn',
-        exportSource: 'exportBtn',
-        recommendationList: 'recommendationList'
+        fileInput: 'fileInput',
+        analysisStatus: 'analysisStatus',
+        importStatus: 'importStatus'
     };
+
+    let syncRaf = 0;
 
     function byId(id) {
         return document.getElementById(id);
@@ -37,83 +34,74 @@
         return recommendations.find(item => item && item.id === state.selectedRecommendationId) || null;
     }
 
-    function mirrorButton(target, source) {
-        if (!target || !source) return;
-        target.disabled = Boolean(source.disabled);
-        target.setAttribute('aria-disabled', target.disabled ? 'true' : 'false');
+    function compactName(name, limit) {
+        const text = String(name || '').trim();
+        if (!text) return '';
+        const max = Number(limit) || 34;
+        return text.length > max ? `${text.slice(0, max - 1)}…` : text;
     }
 
-    function clickWhenEnabled(source) {
-        if (!source || source.disabled) return;
-        source.click();
+    function mirrorAnalyzeButton() {
+        if (!els.analyze || !els.analyzeSource) return;
+        const disabled = Boolean(els.analyzeSource.disabled);
+        els.analyze.disabled = disabled;
+        els.analyze.setAttribute('aria-disabled', disabled ? 'true' : 'false');
     }
 
-    function scrollToPanel(selector) {
-        const panel = document.querySelector(selector);
-        if (!panel) return;
-        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    function clickAnalyzeWhenEnabled() {
+        if (!els.analyzeSource || els.analyzeSource.disabled) return;
+        els.analyzeSource.click();
     }
 
-    function fileLabel() {
-        const file = state.file;
-        if (!file || !file.name) return '파일을 열어주세요';
-        const type = state.fileKind === 'video' ? '영상' : '오디오';
-        return `${type} · ${file.name}`;
-    }
-
-    function syncBottomDock() {
+    function syncBottomDockNow() {
+        syncRaf = 0;
         const hasFile = Boolean(state.file);
-        const recommendations = Array.isArray(state.recommendations) ? state.recommendations : [];
-        const hasRecommendations = recommendations.length > 0;
         const selected = selectedRecommendation();
-        const hasExport = Boolean(state.exportInfo);
+        const hasRecommendations = Array.isArray(state.recommendations) && state.recommendations.length > 0;
 
         document.body.classList.toggle('has-media', hasFile);
         document.body.classList.toggle('has-recommendations', hasRecommendations);
+        document.body.classList.toggle('is-analyzing', Boolean(state.isAnalyzing));
 
-        mirrorButton(els.analyze, els.analyzeSource);
-        mirrorButton(els.preview, els.previewSource);
-        mirrorButton(els.thumbnail, els.thumbnailSource);
-        mirrorButton(els.export, els.exportSource);
-
-        if (els.recommend) els.recommend.disabled = !hasRecommendations;
-        if (els.edit) els.edit.disabled = !selected;
+        mirrorAnalyzeButton();
 
         if (els.title) {
             if (!hasFile) els.title.textContent = '파일을 열어주세요';
-            else if (!selected) els.title.textContent = fileLabel();
-            else els.title.textContent = selected.title || '선택된 추천 구간';
+            else els.title.textContent = compactName(state.file && state.file.name, 44) || '파일 준비됨';
         }
 
         if (els.meta) {
-            if (!hasFile) els.meta.textContent = '하단 Dock에서 파일 선택부터 내보내기까지 바로 실행합니다.';
-            else if (state.isAnalyzing) els.meta.textContent = '분석 중입니다. 완료되면 추천 카드가 생성됩니다.';
-            else if (!selected) els.meta.textContent = '분석 버튼을 누르면 쇼츠 후보를 추천합니다.';
-            else els.meta.textContent = `${selected.rangeText || ''} · 점수 ${Math.round(Number(selected.score) || 0)} · 편집/미리보기/내보내기 가능`;
+            if (!hasFile) els.meta.textContent = '📂 파일 열기 후 ⚡ 분석하기를 누르세요.';
+            else if (state.isAnalyzing) els.meta.textContent = '⚡ 쇼츠 후보를 분석 중입니다.';
+            else if (selected) els.meta.textContent = `선택 구간 ${selected.rangeText || ''} · 점수 ${Math.round(Number(selected.score) || 0)}`;
+            else els.meta.textContent = '⚡ 분석하기 버튼으로 후보를 생성하세요.';
         }
 
         if (els.dot) {
-            els.dot.classList.toggle('is-ready', Boolean(selected));
-            els.dot.classList.toggle('is-export', hasExport);
+            els.dot.classList.toggle('is-ready', hasRecommendations);
+            els.dot.classList.toggle('is-analyzing', Boolean(state.isAnalyzing));
         }
     }
 
+    function scheduleSync() {
+        if (syncRaf) return;
+        syncRaf = requestAnimationFrame(syncBottomDockNow);
+    }
+
     function installBottomDockActions() {
-        if (els.analyze) els.analyze.addEventListener('click', () => clickWhenEnabled(els.analyzeSource));
-        if (els.preview) els.preview.addEventListener('click', () => clickWhenEnabled(els.previewSource));
-        if (els.thumbnail) els.thumbnail.addEventListener('click', () => clickWhenEnabled(els.thumbnailSource));
-        if (els.export) els.export.addEventListener('click', () => clickWhenEnabled(els.exportSource));
-        if (els.recommend) els.recommend.addEventListener('click', () => scrollToPanel('.control-zone[aria-label="AI 추천 구간"]'));
-        if (els.edit) els.edit.addEventListener('click', () => scrollToPanel('.edit-tools-card'));
+        if (els.analyze) els.analyze.addEventListener('click', clickAnalyzeWhenEnabled);
+        if (els.file) els.file.addEventListener('click', scheduleSync);
+        if (els.fileInput) els.fileInput.addEventListener('change', scheduleSync);
+        if (els.analyzeSource) els.analyzeSource.addEventListener('click', scheduleSync);
     }
 
     function installBottomDockObservers() {
-        const observer = new MutationObserver(syncBottomDock);
-        [els.analyzeSource, els.previewSource, els.thumbnailSource, els.exportSource, els.recommendationList, byId('selectedRangeText'), byId('analysisStatus'), byId('importStatus')]
+        const observer = new MutationObserver(scheduleSync);
+        [els.analyzeSource, els.analysisStatus, els.importStatus]
             .filter(Boolean)
             .forEach(node => observer.observe(node, { attributes: true, childList: true, subtree: true, characterData: true }));
-        document.addEventListener('visibilitychange', syncBottomDock);
-        setInterval(syncBottomDock, 500);
+        document.addEventListener('visibilitychange', scheduleSync);
+        global.addEventListener('resize', scheduleSync, { passive: true });
     }
 
     function initBottomDock() {
@@ -121,7 +109,7 @@
         if (!els.dock) return;
         installBottomDockActions();
         installBottomDockObservers();
-        syncBottomDock();
+        syncBottomDockNow();
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initBottomDock);

@@ -1,60 +1,46 @@
-# HANDOFF - AI 쇼츠 제작 스튜디오 v0.8.0 파형 컷 마커 편집 패치
+# HANDOFF - AI 쇼츠 제작 스튜디오 v0.8.1 Lean Dock UI/UX 성능 패치
 
 ## 목적
 
-v0.7.0은 쇼츠 결과물 자체의 품질을 올리는 패치입니다. 자막 이후 단계에서 실제 출력 영상에 영향을 주는 밝기/대비/채도, 페이드, 워터마크, 인트로/아웃트로, 안전영역 가이드를 추가했습니다.
+사용자 피드백 기준으로 하단 Dock이 너무 많은 기능을 담아 복잡해졌고, 파일 로드 후 레이아웃/반응성 부담이 커질 수 있었습니다. v0.8.1은 Dock을 📂 파일 열기와 ⚡ 분석하기 두 개의 핵심 액션으로 축소하고, UI 동기화와 정지 미리보기 렌더링을 더 가볍게 정리했습니다.
 
 ## 주요 변경 파일
 
-- `index.html` : 결과물 품질 패널과 카피 다시 추천 버튼 추가
-- `assets/css/quality-tools.css` : 품질 패널 UI 스타일
-- `src/state/app-state.js` : `qualityOptions` 기본값 저장
-- `src/app.js` : 품질 UI 동기화, 프로젝트 저장 연동, 카피 재추천
-- `src/render/quality-effects.js` : 품질 보정/워터마크/페이드/안전영역 유틸
-- `src/render/vertical-renderer.js` : 미리보기/내보내기에 품질 옵션 적용
-- `qa/output_quality_smoke.js` : 품질 패치 앵커 검수
+- `index.html` : 하단 Dock 마크업을 2버튼 구조로 교체, v0.8.1 문구 반영
+- `assets/css/layout-dock.css` : Lean Dock 50:50 레이아웃, 큰 터치 버튼, containment 성능 규칙 추가
+- `src/ui/bottom-dock.js` : 7버튼 동기화 제거, 파일/분석 2버튼만 유지, polling 제거
+- `src/app.js` : 정지 미리보기 렌더링을 RAF 배치 방식으로 변경
+- `qa/layout_dock_smoke.js` : Lean Dock 앵커 검수로 갱신
+- `qa/lean_dock_performance_smoke.js` : Dock polling 제거, RAF 렌더, CSS containment 검수 추가
+- `package.json` : 버전 및 QA 체크 갱신
+- `sw.js` : 캐시 버전 v0.8.1로 갱신
 
-## 기능 메모
+## Dock 설계
 
-- 안전영역 가이드는 미리보기에서 확인하기 위한 기능입니다. 썸네일 저장과 실제 내보내기에는 기본적으로 태워 넣지 않습니다.
-- 오디오 페이드는 HTMLMediaElement 볼륨 제어를 통해 적용합니다. 브라우저의 captureStream 구현에 따라 녹음 반영 정도가 다를 수 있습니다.
-- 워터마크와 인트로/아웃트로 텍스트는 캔버스에 직접 렌더링되어 결과물에 포함됩니다.
+Dock은 사용자가 가장 자주 누르는 시작 액션만 남겼습니다.
 
-## 다음 추천 패치
+- 📂 파일 열기: 원본 오디오/영상 선택
+- ⚡ 분석하기: 현재 파일을 분석하고 쇼츠 후보 생성
 
-- v0.7.0 : 자동 자막/무음 컷/비트 컷 타임라인
-- v0.8.0 : 템플릿 저장, 프리셋 공유, 브랜드 키트
+추천, 편집, 미리보기, 썸네일, 내보내기는 기존 화면 내부 버튼으로 유지합니다. 이렇게 해야 Dock이 작고 빠르며, 모바일에서 하단을 과하게 차지하지 않습니다.
+
+## 성능 메모
+
+- `bottom-dock.js`의 `setInterval` polling을 제거했습니다.
+- 버튼 상태는 MutationObserver와 이벤트를 통해 감지한 뒤 `requestAnimationFrame`으로 한 번에 동기화합니다.
+- `renderPreviewStill()`은 여러 UI 입력에서 반복 호출되어도 한 프레임에 한 번만 실제 렌더링합니다.
+- 주요 패널에 `contain`/`content-visibility`를 적용해 파일 로드 후 레이아웃 재계산 부담을 줄였습니다.
 
 ## 검수 순서
 
 1. `npm run check` 실행
-2. `npm run serve` 실행 후 브라우저에서 파일 불러오기
-3. 추천 구간 생성, 자막 적용, 품질 패널 조절 확인
-4. 미리보기 안전영역 가이드 확인
-5. 썸네일 저장과 단일 내보내기 확인
-6. 후보 일괄 내보내기 확인
+2. `npm run serve` 실행 후 브라우저에서 열기
+3. 하단 Dock이 📂 파일 열기 / ⚡ 분석하기 두 개만 보이는지 확인
+4. 두 버튼이 동일한 폭으로 크게 표시되는지 확인
+5. 파일 선택 후 Dock이 깨지지 않고 분석 버튼이 활성화되는지 확인
+6. 분석 후 기존 추천/편집/미리보기/내보내기 기능이 화면 내부 버튼으로 정상 동작하는지 확인
 
 ## 알려진 제한
 
-- 브라우저 MediaRecorder 정책에 따라 MP4 대신 WebM으로 저장될 수 있습니다.
-- 일부 브라우저에서는 captureStream 오디오 볼륨이 페이드 인/아웃을 완전히 반영하지 않을 수 있습니다.
-- 긴 영상과 고해상도 원본은 모바일에서 렌더링 메모리 부담이 큽니다.
-
-
-## v0.7.0 인수인계 메모
-
-자동 컷 편집은 `src/analysis/auto-cut-detector.js`가 담당합니다. 앱은 오디오/영상 분석이 끝난 뒤 `buildAutoCutTimeline()`을 호출하고, 추천 생성 후 `enhanceRecommendations()`로 점수와 이유를 보강합니다. 컷 보정 버튼은 선택 후보 또는 전체 후보의 start/end/duration/rangeText를 직접 갱신합니다.
-
-브라우저 성능 이슈를 줄이기 위해 새 분석은 기존 오디오 프레임과 영상 모션 프레임을 재사용합니다. 별도 모델, 외부 API, 서버 업로드는 없습니다.
-
-
-## v0.8.0 인수인계
-
-이번 패치는 `src/ui/cut-marker-overlay.js`와 `assets/css/cut-markers.css`를 추가했습니다. 자동 컷 데이터는 기존 `state.autoCuts.timeline`과 `state.autoCuts.silenceSegments`를 그대로 사용합니다. 따라서 분석 엔진을 바꾸지 않아도 파형 위 마커 UI는 동작합니다.
-
-주의사항:
-
-- 컷 마커 레이어는 `waveform-drag-shell` 내부의 별도 DOM 오버레이입니다.
-- 기존 드래그 구간 오버레이와 겹치지만 `pointer-events`는 마커 버튼만 받도록 설계했습니다.
-- 마커 클릭은 재생 위치 이동을 기본으로 하고, 선택 구간 밖을 클릭하면 시작/끝 경계 보정까지 수행합니다.
-- `snapStartCutBtn`, `snapEndCutBtn`은 선택 구간 경계와 가장 가까운 컷 포인트를 찾습니다.
+- Dock에서 미리보기/내보내기 바로가기는 의도적으로 제거했습니다.
+- 저사양 모바일에서는 긴 영상 분석 자체가 오래 걸릴 수 있습니다. 다만 Dock UI 동기화와 정지 미리보기 렌더 부담은 v0.8.0보다 낮췄습니다.

@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.8.1 - Lean Dock UI/UX Performance Pass
+
+- Simplified the fixed bottom Dock from seven actions to two core actions.
+- Added large 50:50 Dock buttons: 📂 파일 열기 and ⚡ 분석하기.
+- Removed legacy Dock shortcut buttons for recommendation, edit, preview, thumbnail and export.
+- Removed polling-based Dock synchronization.
+- Added requestAnimationFrame-batched Dock synchronization.
+- Added requestAnimationFrame-batched still preview rendering.
+- Added CSS containment/content-visibility performance guardrails.
+- Updated layout Dock QA for the lean two-button design.
+- Added `qa/lean_dock_performance_smoke.js`.
+
 ## v0.8.0 - Waveform Cut Marker Editing
 
 - Added waveform-level cut marker overlay.
