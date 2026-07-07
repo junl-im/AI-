@@ -1,0 +1,408 @@
+/* AI Shorts Studio v0.4.1 - layout stability and bottom dock */
+body {
+    overflow-x: hidden;
+}
+.app-shell {
+    padding-bottom: 132px;
+}
+.studio-hero {
+    margin-bottom: 12px;
+}
+.brand-panel {
+    padding: 14px 16px;
+    border-radius: 22px;
+}
+.brand-panel::before {
+    width: 180px;
+    height: 180px;
+    inset: -72px -46px auto auto;
+}
+.brand-topline {
+    min-height: 30px;
+}
+.brand-right-actions,
+.designer-mini,
+.badge-device,
+.badge-free,
+.hero-meter {
+    display: none !important;
+}
+.hero-mainline {
+    margin-top: 8px;
+    align-items: center;
+}
+.hero-copy h1 {
+    font-size: clamp(28px, 4.6vw, 46px);
+    line-height: 1;
+    letter-spacing: -0.055em;
+}
+.hero-compact-note {
+    max-width: 560px !important;
+    margin-top: 8px !important;
+    color: #aab7ca !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+}
+.hero-cta-row {
+    margin-top: 10px;
+}
+.hero-cta-row .btn-primary,
+.hero-cta-row .btn-secondary {
+    min-height: 40px;
+    border-radius: 13px;
+    padding: 0 14px;
+    font-size: 13px;
+}
+.workflow-rail {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+.workflow-step {
+    min-width: 0;
+    padding: 8px 10px;
+    border-radius: 14px;
+    column-gap: 8px;
+}
+.workflow-step span {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+}
+.workflow-step strong {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.workflow-step em {
+    display: none;
+}
+.studio-grid {
+    grid-template-columns: minmax(300px, 0.78fr) minmax(480px, 1.48fr);
+    gap: 14px;
+}
+.console-panel {
+    position: sticky;
+    top: 12px;
+    max-height: calc(100vh - 156px);
+    overflow: auto;
+    scrollbar-width: thin;
+}
+.control-zone,
+.preview-card,
+.waveform-card,
+.copy-card,
+.edit-tools-card,
+.project-card {
+    padding: 14px;
+}
+.control-zone-load .upload-tile {
+    min-height: 104px;
+}
+.upload-icon {
+    font-size: 28px;
+    margin-bottom: 4px;
+}
+.upload-tile strong {
+    font-size: 16px;
+}
+.import-status,
+.helper-text,
+.batch-export-panel small,
+.drag-helper-row span {
+    font-size: 12px;
+}
+.recommendation-list {
+    max-height: 42vh;
+    overflow: auto;
+    padding-right: 2px;
+    scrollbar-width: thin;
+}
+.recommendation-card {
+    padding: 11px;
+}
+.rec-reasons {
+    max-height: 84px;
+    overflow: hidden;
+}
+.action-dock {
+    display: none !important;
+}
+.preview-card {
+    overflow: hidden;
+}
+.phone-frame {
+    width: min(330px, 76vw);
+    max-height: min(62vh, 620px);
+    margin-bottom: 10px;
+}
+.source-media,
+.source-media.is-visible {
+    display: block !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: auto !important;
+    width: 1px !important;
+    height: 1px !important;
+    max-height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+}
+.waveform-card canvas {
+    height: 160px;
+}
+.settings-grid {
+    gap: 10px;
+}
+.field {
+    gap: 6px;
+}
+select,
+input,
+textarea {
+    min-width: 0;
+}
+.transport-row button,
+.transport-row .file-button {
+    min-height: 42px;
+    border-radius: 13px;
+}
+.legacy-mobile-action-bar {
+    display: none !important;
+}
+.bottom-dock {
+    position: fixed;
+    left: max(12px, calc((100vw - 1480px) / 2));
+    right: max(12px, calc((100vw - 1480px) / 2));
+    bottom: 14px;
+    z-index: 75;
+    display: grid;
+    grid-template-columns: minmax(220px, 0.92fr) minmax(560px, 1.55fr);
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 24px;
+    background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.93), rgba(2, 6, 23, 0.90)),
+        radial-gradient(circle at 8% 30%, rgba(34, 211, 238, 0.16), transparent 30%),
+        radial-gradient(circle at 95% 40%, rgba(249, 115, 22, 0.14), transparent 28%);
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(22px);
+}
+.bottom-dock-status {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 10px;
+    padding: 4px 6px;
+}
+.bottom-dock-dot {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--warn);
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.12);
+}
+.bottom-dock-dot.is-ready {
+    background: var(--good);
+    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0.14);
+}
+.bottom-dock-dot.is-export {
+    background: var(--accent-2);
+    box-shadow: 0 0 0 6px rgba(34, 211, 238, 0.15);
+}
+.bottom-dock-copy {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+.bottom-dock-copy strong,
+.bottom-dock-copy small {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.bottom-dock-copy strong {
+    font-size: 14px;
+    letter-spacing: -0.03em;
+}
+.bottom-dock-copy small {
+    color: var(--muted);
+    font-size: 12px;
+}
+.bottom-dock-actions {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(74px, 1fr));
+    gap: 7px;
+    min-width: 0;
+}
+.bottom-dock-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    border: 1px solid rgba(148, 163, 184, 0.24);
+    border-radius: 16px;
+    padding: 0 10px;
+    background: rgba(15, 23, 42, 0.70);
+    color: #e2e8f0;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 160ms ease, filter 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+.bottom-dock-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    border-color: rgba(34, 211, 238, 0.55);
+    filter: brightness(1.08);
+}
+.bottom-dock-btn:disabled {
+    opacity: 0.46;
+    cursor: not-allowed;
+}
+.bottom-dock-primary {
+    border: 0;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent-2), var(--accent), var(--accent-3));
+    box-shadow: 0 14px 34px rgba(124, 58, 237, 0.30);
+}
+body.has-media .brand-panel {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+body.has-media .hero-compact-note {
+    display: none;
+}
+body.has-media .hero-copy h1 {
+    font-size: clamp(24px, 3.6vw, 36px);
+}
+body.has-media .workflow-rail {
+    margin-top: 8px;
+}
+body.has-media .studio-grid {
+    margin-top: 0;
+}
+@media (max-width: 1100px) {
+    .studio-grid {
+        grid-template-columns: 1fr;
+    }
+    .console-panel {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+    .recommendation-list {
+        max-height: 320px;
+    }
+    .bottom-dock {
+        grid-template-columns: 1fr;
+    }
+    .bottom-dock-actions {
+        overflow-x: auto;
+        grid-template-columns: repeat(7, minmax(86px, 1fr));
+        scrollbar-width: none;
+    }
+    .bottom-dock-actions::-webkit-scrollbar {
+        display: none;
+    }
+}
+@media (max-width: 720px) {
+    .app-shell {
+        width: min(100% - 16px, 760px);
+        padding-top: 10px;
+        padding-bottom: 150px;
+    }
+    .brand-panel {
+        padding: 12px;
+        border-radius: 18px;
+    }
+    .brand-kicker .badge-version {
+        min-height: 28px;
+        font-size: 11px;
+    }
+    .hero-mainline,
+    .brand-topline {
+        display: block;
+    }
+    .hero-copy h1 {
+        font-size: clamp(26px, 8vw, 34px);
+    }
+    .hero-cta-row {
+        display: none;
+    }
+    .workflow-rail {
+        display: flex;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+    }
+    .workflow-rail::-webkit-scrollbar {
+        display: none;
+    }
+    .workflow-step {
+        flex: 0 0 auto;
+        min-width: 116px;
+    }
+    .settings-grid,
+    .range-editor-grid {
+        grid-template-columns: 1fr;
+    }
+    .phone-frame {
+        width: min(300px, 86vw);
+        max-height: 58vh;
+    }
+    .waveform-card canvas {
+        height: 132px;
+    }
+    .rec-reasons {
+        max-height: 70px;
+    }
+    .bottom-dock {
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        padding: 8px;
+        border-radius: 22px;
+        gap: 8px;
+    }
+    .bottom-dock-status {
+        padding: 2px 4px;
+    }
+    .bottom-dock-copy strong {
+        font-size: 13px;
+    }
+    .bottom-dock-copy small {
+        display: none;
+    }
+    .bottom-dock-actions {
+        grid-template-columns: repeat(7, minmax(76px, 1fr));
+        gap: 6px;
+    }
+    .bottom-dock-btn {
+        min-height: 44px;
+        border-radius: 15px;
+        font-size: 11px;
+    }
+    .toast {
+        bottom: 112px !important;
+    }
+}
+@media (max-width: 420px) {
+    .workflow-step {
+        min-width: 106px;
+    }
+    .bottom-dock-actions {
+        grid-template-columns: repeat(7, minmax(70px, 1fr));
+    }
+    .bottom-dock-btn {
+        padding: 0 7px;
+    }
+}

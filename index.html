@@ -3,42 +3,44 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.4.0 - 드래그 타임라인, 썸네일 템플릿, 후보 일괄 내보내기" />
+<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.4.1 - UI 안정화, 상단 압축, 하단 고정 Dock" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
 <meta name="theme-color" content="#7c3aed" />
-<title>AI 쇼츠 제작 스튜디오 v0.4.0</title>
+<title>AI 쇼츠 제작 스튜디오 v0.4.1</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=0.4.0-drag-batch" />
-<link rel="stylesheet" href="assets/css/studio.css?v=0.4.0-drag-batch" />
-<link rel="stylesheet" href="assets/css/editor.css?v=0.4.0-drag-batch" />
-<link rel="stylesheet" href="assets/css/ux.css?v=0.4.0-drag-batch" />
-<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.4.0-drag-batch" />
-<script defer src="src/config/app-runtime-config.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/utils/core-utils.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/state/app-state.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/caption/caption-service.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/project/project-service.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/render/vertical-renderer.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/download/download-service.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/ui/waveform-view.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/ui/timeline-view.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/security/site-guards.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/boot/runtime-health.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/app.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/ui/ux-controls.js?v=0.4.0-drag-batch"></script>
-<script defer src="src/ui/range-drag-controls.js?v=0.4.0-drag-batch"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=0.4.1-layout-dock" />
+<link rel="stylesheet" href="assets/css/studio.css?v=0.4.1-layout-dock" />
+<link rel="stylesheet" href="assets/css/editor.css?v=0.4.1-layout-dock" />
+<link rel="stylesheet" href="assets/css/ux.css?v=0.4.1-layout-dock" />
+<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.4.1-layout-dock" />
+<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.4.1-layout-dock" />
+<script defer src="src/config/app-runtime-config.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/utils/core-utils.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/state/app-state.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/caption/caption-service.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/project/project-service.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/render/vertical-renderer.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/download/download-service.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/ui/waveform-view.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/ui/timeline-view.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/security/site-guards.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/boot/runtime-health.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/app.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/ui/ux-controls.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/ui/range-drag-controls.js?v=0.4.1-layout-dock"></script>
+<script defer src="src/ui/bottom-dock.js?v=0.4.1-layout-dock"></script>
 </head>
-<body data-build="0.4.0">
+<body data-build="0.4.1">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel" aria-label="앱 소개">
             <div class="brand-topline">
                 <div class="brand-kicker">
-                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.4.0 편집 강화</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.4.1 UI 안정화</button>
                     <span class="badge badge-device">PC · 모바일 브라우저</span>
                     <span class="badge badge-free">무료 기능 기반</span>
                 </div>
@@ -48,8 +50,8 @@
             </div>
             <div class="hero-mainline">
                 <div class="hero-copy">
-                    <h1>AI 쇼츠 제작 <span>스튜디오</span></h1>
-                    <p>풀 노래와 MP4 영상을 내 기기 안에서 분석하고, 추천부터 세로 편집·자막·썸네일·내보내기까지 한 화면에서 이어집니다. 파형 드래그 조절, 썸네일 템플릿, 후보 일괄 내보내기까지 연결해 제작 속도를 높였습니다.</p>
+                    <h1>AI 쇼츠 <span>스튜디오</span></h1>
+                    <p class="hero-compact-note">파일 로드 후에도 흔들리지 않는 컴팩트 제작 화면입니다.</p>
                 <div class="hero-cta-row" aria-label="빠른 시작 버튼">
                     <label class="btn-primary hero-file-btn" for="fileInput">파일 열기</label>
                     <button id="heroAnalyzeBtn" class="btn-secondary" type="button" disabled>바로 분석</button>
@@ -314,11 +316,30 @@
     </main>
 </div>
 
+<div id="bottomDock" class="bottom-dock" aria-label="하단 고정 작업 Dock">
+    <div class="bottom-dock-status">
+        <span id="bottomDockDot" class="bottom-dock-dot"></span>
+        <div class="bottom-dock-copy">
+            <strong id="bottomDockTitle">파일을 열어주세요</strong>
+            <small id="bottomDockMeta">파일 · 분석 · 편집 · 내보내기를 아래 Dock에서 바로 실행합니다.</small>
+        </div>
+    </div>
+    <div class="bottom-dock-actions" role="toolbar" aria-label="주요 제작 작업">
+        <label id="bottomFileBtn" class="bottom-dock-btn" for="fileInput">파일</label>
+        <button id="bottomAnalyzeBtn" class="bottom-dock-btn" type="button" disabled>분석</button>
+        <button id="bottomRecommendBtn" class="bottom-dock-btn" type="button" disabled>추천</button>
+        <button id="bottomEditBtn" class="bottom-dock-btn" type="button" disabled>편집</button>
+        <button id="bottomPreviewBtn" class="bottom-dock-btn" type="button" disabled>미리보기</button>
+        <button id="bottomThumbnailBtn" class="bottom-dock-btn" type="button" disabled>썸네일</button>
+        <button id="bottomExportBtn" class="bottom-dock-btn bottom-dock-primary" type="button" disabled>내보내기</button>
+    </div>
+</div>
+
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.4.0</h2>
-        <p>이 버전은 무료 로컬 기능으로 풀 노래와 영상을 분석해 쇼츠 후보를 추천하고, 파형 드래그 핸들, 썸네일 템플릿, 후보 일괄 내보내기를 강화했습니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.4.1</h2>
+        <p>이 버전은 파일 로드 후 레이아웃 붕괴를 줄이고, 상단 정보를 압축하며, 주요 작업을 하단 고정 Dock으로 모은 안정화 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
         <ul>
             <li>오디오 에너지, 피크, 트랜지언트, 무음 비율을 분석합니다.</li>
             <li>비디오 파일은 움직임 샘플링 점수를 보조로 사용합니다.</li>
@@ -332,7 +353,7 @@
 </div>
 
 
-<div id="mobileActionBar" class="mobile-action-bar" aria-label="모바일 빠른 작업">
+<div id="mobileActionBar" class="mobile-action-bar legacy-mobile-action-bar" aria-label="모바일 빠른 작업">
     <label class="mobile-action mobile-file" for="fileInput">파일</label>
     <button id="mobileAnalyzeBtn" class="mobile-action" type="button" disabled>분석</button>
     <button id="mobilePreviewBtn" class="mobile-action" type="button" disabled>미리보기</button>
