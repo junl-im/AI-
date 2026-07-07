@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.2.0 - download/share/diagnostics service
+// AI Shorts Studio v0.3.0 - download/share/diagnostics service
 'use strict';
 
 (function exposeDownloadService(global) {

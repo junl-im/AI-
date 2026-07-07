@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.2.0 - local caption parser and cue helper
+// AI Shorts Studio v0.3.0 - local caption parser and cue helper
 'use strict';
 
 (function exposeCaptionService(global) {

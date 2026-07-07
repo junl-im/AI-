@@ -1,9 +1,9 @@
-// AI Shorts Studio v0.2.0 - runtime config
+// AI Shorts Studio v0.3.0 - runtime config
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v0.2.0',
-    BUILD_KEY: '0.2.0-editor-caption-project',
+    APP_VERSION: 'v0.3.0',
+    BUILD_KEY: '0.3.0-uiux-polish',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -21,6 +21,6 @@ window.AIShortsRuntimeConfig = Object.freeze({
         'video/webm;codecs=vp8,opus',
         'video/webm'
     ],
-    LOCAL_STORAGE_KEY: 'ai-shorts-studio-v020-settings',
+    LOCAL_STORAGE_KEY: 'ai-shorts-studio-v030-settings',
     DIAGNOSTIC_HISTORY_LIMIT: 20
 });

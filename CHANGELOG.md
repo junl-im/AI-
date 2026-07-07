@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## v0.3.0 - UI/UX Button Convenience and Visual Polish
+
+- Added hero quick-start actions for file open, analyze and project load.
+- Added 4-step workflow rail: import, recommend, edit and export.
+- Added quick duration chips for auto, 15s, 30s, 60s and 90s recommendations.
+- Added sticky action dock for selected recommendation preview/export.
+- Added mobile bottom action bar for file, analyze, preview and export.
+- Added 1-second nudge buttons for selected range start/end.
+- Added selected recommendation dock summary with range and score.
+- Added keyboard shortcuts: Space for preview and E for export when available.
+- Added focus rings and larger touch targets for better accessibility.
+- Added hover/selected polish for recommendation cards.
+- Added `assets/css/ux.css`.
+- Added `src/ui/ux-controls.js`.
+- Updated service worker cache list for new UI assets.
+- Added UI/UX anchor smoke test.
+- QA result: 27/27 passed.
+
 ## v0.2.0 - Editor, Captions and Project Save
 
 - Added manual range editor for selected recommendation start/end.

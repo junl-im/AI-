@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.2.0 - waveform view
+// AI Shorts Studio v0.3.0 - waveform view
 'use strict';
 
 (function exposeWaveformView(global) {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.2.0 - vertical preview/export renderer
+// AI Shorts Studio v0.3.0 - vertical preview/export renderer
 'use strict';
 
 (function exposeVerticalRenderer(global) {

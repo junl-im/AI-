@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.2.0 - video motion analyzer
+// AI Shorts Studio v0.3.0 - video motion analyzer
 'use strict';
 
 (function exposeVideoMotionAnalyzer(global) {

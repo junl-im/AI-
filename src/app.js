@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.2.0 - main app
+// AI Shorts Studio v0.3.0 - main app
 'use strict';
 
 (function bootAIShortsStudio(global) {
