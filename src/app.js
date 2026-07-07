@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.4.0 - main app
+// AI Shorts Studio v0.6.0 - main app
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -12,6 +12,7 @@
     const captionService = global.AIShortsCaptionService || {};
     const projectService = global.AIShortsProjectService || {};
     const renderer = global.AIShortsVerticalRenderer || {};
+    const qualityEffects = global.AIShortsQualityEffects || {};
     const downloadService = global.AIShortsDownloadService || {};
     const waveformView = global.AIShortsWaveformView || {};
     const timelineView = global.AIShortsTimelineView || {};
@@ -21,6 +22,44 @@
     const els = {};
     let previewRaf = 0;
     let previewTimer = 0;
+
+    const CAPTION_DEFAULTS = Object.freeze({
+        preset: 'creator',
+        position: 'lower',
+        size: 58,
+        color: '#ffffff',
+        accent: '#facc15',
+        maxLines: 2,
+        boxOpacity: 0.52,
+        shadow: 0.78,
+        highlightWords: '',
+        uppercase: false,
+        autoBreak: true
+    });
+
+    const CAPTION_PRESETS = Object.freeze({
+        creator: { preset: 'creator', position: 'lower', size: 62, color: '#ffffff', accent: '#facc15', maxLines: 2, boxOpacity: 0.58, shadow: 0.86, highlightWords: 'AI,무료,하이라이트', uppercase: false, autoBreak: true },
+        news: { preset: 'news', position: 'safe-bottom', size: 52, color: '#111827', accent: '#22d3ee', maxLines: 2, boxOpacity: 0.82, shadow: 0.34, highlightWords: '', uppercase: false, autoBreak: true },
+        cinema: { preset: 'cinema', position: 'middle', size: 56, color: '#fef3c7', accent: '#fb7185', maxLines: 2, boxOpacity: 0.36, shadow: 0.92, highlightWords: '', uppercase: false, autoBreak: true },
+        minimal: { preset: 'minimal', position: 'lower', size: 46, color: '#cffafe', accent: '#a78bfa', maxLines: 1, boxOpacity: 0.18, shadow: 0.52, highlightWords: '', uppercase: false, autoBreak: true }
+    });
+
+
+    const QUALITY_DEFAULTS = Object.freeze({
+        brightness: 1,
+        contrast: 1.06,
+        saturation: 1.12,
+        vignette: 0.22,
+        fadeIn: 0.4,
+        fadeOut: 1.0,
+        introText: '',
+        outroText: '',
+        introDuration: 1.2,
+        outroDuration: 1.2,
+        watermarkText: '',
+        watermarkPosition: 'bottom-right',
+        safeGuide: true
+    });
 
     function $(id) { return document.getElementById(id); }
 
@@ -35,7 +74,15 @@
             'rangeStartInput', 'rangeEndInput', 'applyRangeBtn', 'thumbnailBtn',
             'captionStatus', 'captionStyleSelect', 'captionOffsetInput', 'captionTextInput',
             'captionFileInput', 'applyCaptionBtn', 'clearCaptionBtn', 'saveProjectBtn', 'projectFileInput',
-            'exportAllBtn', 'thumbnailTemplateSelect', 'batchLimitSelect'
+            'exportAllBtn', 'thumbnailTemplateSelect', 'batchLimitSelect',
+            'captionResetBtn', 'captionPositionSelect', 'captionMaxLinesSelect', 'captionSizeInput',
+            'captionSizeValue', 'captionBoxOpacityInput', 'captionBoxOpacityValue',
+            'captionShadowInput', 'captionShadowValue', 'captionColorSelect', 'captionAccentSelect',
+            'captionHighlightInput', 'captionUppercaseToggle', 'captionAutoBreakToggle',
+            'brightnessInput', 'brightnessValue', 'contrastInput', 'contrastValue', 'saturationInput', 'saturationValue',
+            'vignetteInput', 'vignetteValue', 'fadeInSelect', 'fadeOutSelect', 'introTextInput', 'outroTextInput',
+            'introDurationSelect', 'outroDurationSelect', 'watermarkTextInput', 'watermarkPositionSelect',
+            'safeGuideToggle', 'qualityResetBtn', 'copyBoostBtn'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -61,6 +108,158 @@
         if (els.captionStyleSelect) els.captionStyleSelect.value = state.settings.captionStyle || 'bold';
         if (els.captionOffsetInput) els.captionOffsetInput.value = Number(state.settings.captionOffset || 0);
         if (els.thumbnailTemplateSelect) els.thumbnailTemplateSelect.value = state.settings.thumbnailTemplate || 'neon';
+        syncCaptionOptionsToUI();
+        syncQualityOptionsToUI();
+    }
+
+    function getCaptionOptions() {
+        const raw = Object.assign({}, CAPTION_DEFAULTS, state && state.settings && state.settings.captionOptions || {});
+        raw.size = Math.max(36, Math.min(86, Number(raw.size) || CAPTION_DEFAULTS.size));
+        raw.maxLines = Math.max(1, Math.min(3, Number(raw.maxLines) || CAPTION_DEFAULTS.maxLines));
+        raw.boxOpacity = Math.max(0, Math.min(0.9, Number(raw.boxOpacity) || 0));
+        raw.shadow = Math.max(0, Math.min(1, Number(raw.shadow) || 0));
+        raw.uppercase = Boolean(raw.uppercase);
+        raw.autoBreak = raw.autoBreak !== false;
+        return raw;
+    }
+
+    function saveCaptionOptions(options) {
+        const next = Object.assign({}, CAPTION_DEFAULTS, options || {});
+        store.setSetting('captionOptions', next);
+        return next;
+    }
+
+    function syncCaptionOptionsToUI() {
+        const options = getCaptionOptions();
+        if (els.captionPositionSelect) els.captionPositionSelect.value = options.position;
+        if (els.captionMaxLinesSelect) els.captionMaxLinesSelect.value = String(options.maxLines);
+        if (els.captionSizeInput) els.captionSizeInput.value = String(options.size);
+        if (els.captionSizeValue) els.captionSizeValue.textContent = String(options.size);
+        if (els.captionBoxOpacityInput) els.captionBoxOpacityInput.value = String(Math.round(options.boxOpacity * 100));
+        if (els.captionBoxOpacityValue) els.captionBoxOpacityValue.textContent = `${Math.round(options.boxOpacity * 100)}%`;
+        if (els.captionShadowInput) els.captionShadowInput.value = String(Math.round(options.shadow * 100));
+        if (els.captionShadowValue) els.captionShadowValue.textContent = `${Math.round(options.shadow * 100)}%`;
+        if (els.captionColorSelect) els.captionColorSelect.value = options.color;
+        if (els.captionAccentSelect) els.captionAccentSelect.value = options.accent;
+        if (els.captionHighlightInput) els.captionHighlightInput.value = options.highlightWords || '';
+        if (els.captionUppercaseToggle) els.captionUppercaseToggle.checked = Boolean(options.uppercase);
+        if (els.captionAutoBreakToggle) els.captionAutoBreakToggle.checked = options.autoBreak !== false;
+        document.querySelectorAll('.caption-preset').forEach(button => {
+            button.classList.toggle('is-active', button.getAttribute('data-caption-preset') === options.preset);
+        });
+    }
+
+    function readCaptionOptionsFromUI() {
+        const current = getCaptionOptions();
+        const next = Object.assign({}, current, {
+            position: els.captionPositionSelect ? els.captionPositionSelect.value : current.position,
+            maxLines: els.captionMaxLinesSelect ? Number(els.captionMaxLinesSelect.value) || current.maxLines : current.maxLines,
+            size: els.captionSizeInput ? Number(els.captionSizeInput.value) || current.size : current.size,
+            boxOpacity: els.captionBoxOpacityInput ? (Number(els.captionBoxOpacityInput.value) || 0) / 100 : current.boxOpacity,
+            shadow: els.captionShadowInput ? (Number(els.captionShadowInput.value) || 0) / 100 : current.shadow,
+            color: els.captionColorSelect ? els.captionColorSelect.value : current.color,
+            accent: els.captionAccentSelect ? els.captionAccentSelect.value : current.accent,
+            highlightWords: els.captionHighlightInput ? els.captionHighlightInput.value : current.highlightWords,
+            uppercase: els.captionUppercaseToggle ? els.captionUppercaseToggle.checked : current.uppercase,
+            autoBreak: els.captionAutoBreakToggle ? els.captionAutoBreakToggle.checked : current.autoBreak
+        });
+        saveCaptionOptions(next);
+        syncCaptionOptionsToUI();
+        renderPreviewStill();
+    }
+
+    function applyCaptionPreset(name) {
+        const preset = CAPTION_PRESETS[name] || CAPTION_PRESETS.creator;
+        saveCaptionOptions(preset);
+        syncCaptionOptionsToUI();
+        renderPreviewStill();
+        toast(`${name === 'creator' ? '크리에이터' : name === 'news' ? '뉴스형' : name === 'cinema' ? '시네마' : '미니멀'} 자막 프리셋을 적용했습니다.`);
+    }
+
+    function resetCaptionOptions() {
+        saveCaptionOptions(CAPTION_DEFAULTS);
+        syncCaptionOptionsToUI();
+        renderPreviewStill();
+        toast('자막 디자인을 기본값으로 되돌렸습니다.');
+    }
+
+
+    function getQualityOptions() {
+        const raw = Object.assign({}, QUALITY_DEFAULTS, state && state.settings && state.settings.qualityOptions || {});
+        const normalized = qualityEffects.normalizeQualityOptions ? qualityEffects.normalizeQualityOptions(raw) : raw;
+        return Object.assign({}, QUALITY_DEFAULTS, normalized);
+    }
+
+    function saveQualityOptions(options) {
+        const next = qualityEffects.normalizeQualityOptions ? qualityEffects.normalizeQualityOptions(Object.assign({}, QUALITY_DEFAULTS, options || {})) : Object.assign({}, QUALITY_DEFAULTS, options || {});
+        store.setSetting('qualityOptions', next);
+        return next;
+    }
+
+    function syncQualityOptionsToUI() {
+        const options = getQualityOptions();
+        const setRange = (input, label, value, scale) => {
+            if (input) input.value = String(Math.round(Number(value) * scale));
+            if (label) label.textContent = `${Math.round(Number(value) * scale)}%`;
+        };
+        setRange(els.brightnessInput, els.brightnessValue, options.brightness, 100);
+        setRange(els.contrastInput, els.contrastValue, options.contrast, 100);
+        setRange(els.saturationInput, els.saturationValue, options.saturation, 100);
+        setRange(els.vignetteInput, els.vignetteValue, options.vignette, 100);
+        if (els.fadeInSelect) els.fadeInSelect.value = String(options.fadeIn);
+        if (els.fadeOutSelect) els.fadeOutSelect.value = String(options.fadeOut);
+        if (els.introTextInput) els.introTextInput.value = options.introText || '';
+        if (els.outroTextInput) els.outroTextInput.value = options.outroText || '';
+        if (els.introDurationSelect) els.introDurationSelect.value = String(options.introDuration);
+        if (els.outroDurationSelect) els.outroDurationSelect.value = String(options.outroDuration);
+        if (els.watermarkTextInput) els.watermarkTextInput.value = options.watermarkText || '';
+        if (els.watermarkPositionSelect) els.watermarkPositionSelect.value = options.watermarkPosition || 'bottom-right';
+        if (els.safeGuideToggle) els.safeGuideToggle.checked = options.safeGuide !== false;
+    }
+
+    function readQualityOptionsFromUI() {
+        const current = getQualityOptions();
+        const next = Object.assign({}, current, {
+            brightness: els.brightnessInput ? (Number(els.brightnessInput.value) || 100) / 100 : current.brightness,
+            contrast: els.contrastInput ? (Number(els.contrastInput.value) || 100) / 100 : current.contrast,
+            saturation: els.saturationInput ? (Number(els.saturationInput.value) || 100) / 100 : current.saturation,
+            vignette: els.vignetteInput ? (Number(els.vignetteInput.value) || 0) / 100 : current.vignette,
+            fadeIn: els.fadeInSelect ? Number(els.fadeInSelect.value) || 0 : current.fadeIn,
+            fadeOut: els.fadeOutSelect ? Number(els.fadeOutSelect.value) || 0 : current.fadeOut,
+            introText: els.introTextInput ? els.introTextInput.value : current.introText,
+            outroText: els.outroTextInput ? els.outroTextInput.value : current.outroText,
+            introDuration: els.introDurationSelect ? Number(els.introDurationSelect.value) || 0 : current.introDuration,
+            outroDuration: els.outroDurationSelect ? Number(els.outroDurationSelect.value) || 0 : current.outroDuration,
+            watermarkText: els.watermarkTextInput ? els.watermarkTextInput.value : current.watermarkText,
+            watermarkPosition: els.watermarkPositionSelect ? els.watermarkPositionSelect.value : current.watermarkPosition,
+            safeGuide: els.safeGuideToggle ? els.safeGuideToggle.checked : current.safeGuide
+        });
+        saveQualityOptions(next);
+        syncQualityOptionsToUI();
+        renderPreviewStill();
+    }
+
+    function resetQualityOptions() {
+        saveQualityOptions(QUALITY_DEFAULTS);
+        syncQualityOptionsToUI();
+        renderPreviewStill();
+        toast('결과물 품질 설정을 기본값으로 되돌렸습니다.');
+    }
+
+    function createBoostedCopy() {
+        const selected = getSelectedRecommendation();
+        const baseName = String(state.file && state.file.name || 'AI 쇼츠').replace(/\.[^.]+$/, '');
+        const platform = state.settings.platform || 'youtube';
+        const platformWord = platform === 'reels' ? '릴스' : platform === 'tiktok' ? '틱톡' : '쇼츠';
+        const mood = selected && selected.title ? selected.title.replace(/^추천\s*\d+\s*—\s*/, '') : '하이라이트';
+        const range = selected && selected.rangeText ? selected.rangeText : 'AI 추천 구간';
+        const score = selected && selected.score ? `점수 ${selected.score}` : 'AI 추천';
+        const title = `${baseName} ${platformWord} 하이라이트 | ${mood} (${range})`;
+        const tags = ['#쇼츠', platform === 'reels' ? '#Reels' : platform === 'tiktok' ? '#TikTok' : '#Shorts', '#AI추천', '#하이라이트', '#음악', '#영상편집', `#${score.replace(/\s+/g, '')}`].join(' ');
+        if (els.titleInput) els.titleInput.value = title.slice(0, 95);
+        if (els.hashtagInput) els.hashtagInput.value = tags;
+        renderPreviewStill();
+        toast('제목과 해시태그를 다시 추천했습니다.');
     }
 
     function updateButtons() {
@@ -129,7 +328,11 @@
             time: media ? media.currentTime : 0,
             captionText: getActiveCaptionText(media ? media.currentTime : (selected ? selected.start : 0)),
             captionStyle: state.settings.captionStyle,
-            thumbnailTemplate: state.settings.thumbnailTemplate
+            captionOptions: getCaptionOptions(),
+            thumbnailTemplate: state.settings.thumbnailTemplate,
+            qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: getQualityOptions().safeGuide }),
+            relativeTime: 0,
+            segmentDuration: selected ? selected.duration : 0
         });
     }
 
@@ -194,6 +397,24 @@
         if (els.captionStyleSelect) els.captionStyleSelect.addEventListener('change', () => { store.setSetting('captionStyle', els.captionStyleSelect.value); renderPreviewStill(); });
         if (els.thumbnailTemplateSelect) els.thumbnailTemplateSelect.addEventListener('change', () => { store.setSetting('thumbnailTemplate', els.thumbnailTemplateSelect.value); renderPreviewStill(); });
         if (els.captionOffsetInput) els.captionOffsetInput.addEventListener('change', () => { store.setSetting('captionOffset', Number(els.captionOffsetInput.value) || 0); renderPreviewStill(); updateCaptionStatus(); });
+        document.querySelectorAll('.caption-preset').forEach(button => button.addEventListener('click', () => applyCaptionPreset(button.getAttribute('data-caption-preset'))));
+        ['captionPositionSelect', 'captionMaxLinesSelect', 'captionSizeInput', 'captionBoxOpacityInput', 'captionShadowInput', 'captionColorSelect', 'captionAccentSelect'].forEach(id => {
+            if (!els[id]) return;
+            els[id].addEventListener('input', readCaptionOptionsFromUI);
+            els[id].addEventListener('change', readCaptionOptionsFromUI);
+        });
+        if (els.captionHighlightInput) els.captionHighlightInput.addEventListener('input', readCaptionOptionsFromUI);
+        if (els.captionUppercaseToggle) els.captionUppercaseToggle.addEventListener('change', readCaptionOptionsFromUI);
+        if (els.captionAutoBreakToggle) els.captionAutoBreakToggle.addEventListener('change', readCaptionOptionsFromUI);
+        if (els.captionResetBtn) els.captionResetBtn.addEventListener('click', resetCaptionOptions);
+        ['brightnessInput', 'contrastInput', 'saturationInput', 'vignetteInput', 'fadeInSelect', 'fadeOutSelect', 'introTextInput', 'outroTextInput', 'introDurationSelect', 'outroDurationSelect', 'watermarkTextInput', 'watermarkPositionSelect'].forEach(id => {
+            if (!els[id]) return;
+            els[id].addEventListener('input', readQualityOptionsFromUI);
+            els[id].addEventListener('change', readQualityOptionsFromUI);
+        });
+        if (els.safeGuideToggle) els.safeGuideToggle.addEventListener('change', readQualityOptionsFromUI);
+        if (els.qualityResetBtn) els.qualityResetBtn.addEventListener('click', resetQualityOptions);
+        if (els.copyBoostBtn) els.copyBoostBtn.addEventListener('click', createBoostedCopy);
         if (els.sourceVideo) els.sourceVideo.addEventListener('loadeddata', renderPreviewStill);
         if (els.sourceAudio) els.sourceAudio.addEventListener('timeupdate', renderPreviewStill);
         if (els.sourceVideo) els.sourceVideo.addEventListener('timeupdate', renderPreviewStill);
@@ -318,7 +539,10 @@
 
     function stopPreview() {
         const media = getActiveMediaElement();
-        if (media) media.pause();
+        if (media) {
+            media.pause();
+            media.volume = 1;
+        }
         if (previewRaf) cancelAnimationFrame(previewRaf);
         if (previewTimer) clearInterval(previewTimer);
         previewRaf = 0;
@@ -355,8 +579,13 @@
                 time: media.currentTime,
                 captionText: getActiveCaptionText(media.currentTime),
                 captionStyle: state.settings.captionStyle,
-                thumbnailTemplate: state.settings.thumbnailTemplate
+                captionOptions: getCaptionOptions(),
+                thumbnailTemplate: state.settings.thumbnailTemplate,
+                qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: getQualityOptions().safeGuide }),
+                relativeTime: Math.max(0, media.currentTime - selected.start),
+                segmentDuration: selected.duration
             });
+            if (qualityEffects.calculateFadeVolume) media.volume = qualityEffects.calculateFadeVolume(Math.max(0, media.currentTime - selected.start), selected.duration, getQualityOptions());
             previewRaf = requestAnimationFrame(draw);
         }
         draw();
@@ -381,9 +610,11 @@
                 rangeText: selected.rangeText,
                 waveformBins: state.waveformBins,
                 thumbnailTemplate: state.settings.thumbnailTemplate,
+                qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
                 captions: state.captions,
                 captionOffset: state.settings.captionOffset,
                 captionStyle: state.settings.captionStyle,
+                captionOptions: getCaptionOptions(),
                 fps: config.PREVIEW_FPS || 30
             }, setProgress);
             const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
@@ -431,9 +662,11 @@
                     rangeText: item.rangeText,
                     waveformBins: state.waveformBins,
                     thumbnailTemplate: state.settings.thumbnailTemplate,
+                    qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
                     captions: state.captions,
                     captionOffset: state.settings.captionOffset,
                     captionStyle: state.settings.captionStyle,
+                    captionOptions: getCaptionOptions(),
                     fps: config.PREVIEW_FPS || 30
                 }, (percent, status) => {
                     const local = Math.max(0, Math.min(1, Number(percent || 0) / 100));
@@ -480,7 +713,21 @@
     async function saveThumbnail() {
         const selected = getSelectedRecommendation();
         if (!selected || !els.previewCanvas) return;
-        renderPreviewStill();
+        const media = state.fileKind === 'video' && els.sourceVideo.videoWidth ? els.sourceVideo : null;
+        renderer.renderStill(els.previewCanvas, media, {
+            cropMode: state.settings.cropMode,
+            title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
+            rangeText: selected ? selected.rangeText : 'AI 추천 대기',
+            waveformBins: state.waveformBins,
+            time: media ? media.currentTime : 0,
+            captionText: getActiveCaptionText(media ? media.currentTime : selected.start),
+            captionStyle: state.settings.captionStyle,
+            captionOptions: getCaptionOptions(),
+            thumbnailTemplate: state.settings.thumbnailTemplate,
+            qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
+            relativeTime: 0,
+            segmentDuration: selected.duration
+        });
         const blob = await new Promise(resolve => {
             if (els.previewCanvas.toBlob) els.previewCanvas.toBlob(resolve, 'image/png');
             else resolve(null);

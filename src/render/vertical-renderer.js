@@ -1,9 +1,10 @@
-// AI Shorts Studio v0.4.0 - vertical preview/export renderer
+// AI Shorts Studio v0.6.0 - vertical preview/export renderer
 'use strict';
 
 (function exposeVerticalRenderer(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const utils = global.AIShortsCoreUtils || {};
+    const qualityEffects = global.AIShortsQualityEffects || {};
 
     function getCanvasContext(canvas) {
         if (!canvas) throw new Error('미리보기 캔버스가 없습니다.');
@@ -21,15 +22,16 @@
         ctx.fillRect(0, 0, width, height);
     }
 
-    function drawCoverImage(ctx, source, width, height, cropMode) {
+    function drawCoverImage(ctx, source, width, height, cropMode, qualityOptions) {
         const sourceWidth = source.videoWidth || source.naturalWidth || width;
         const sourceHeight = source.videoHeight || source.naturalHeight || height;
         if (!sourceWidth || !sourceHeight) return;
         const targetRatio = width / height;
         const sourceRatio = sourceWidth / sourceHeight;
+        const qualityFilter = qualityEffects.getCanvasFilter ? qualityEffects.getCanvasFilter(qualityOptions) : '';
         if (cropMode === 'blur-fit') {
             ctx.save();
-            ctx.filter = 'blur(34px) saturate(1.15) brightness(0.72)';
+            ctx.filter = `blur(34px) ${qualityFilter || 'saturate(1.15) brightness(0.72)'} brightness(0.72)`;
             const coverScale = Math.max(width / sourceWidth, height / sourceHeight);
             const bw = sourceWidth * coverScale;
             const bh = sourceHeight * coverScale;
@@ -38,7 +40,10 @@
             const containScale = Math.min(width / sourceWidth, height / sourceHeight);
             const cw = sourceWidth * containScale;
             const ch = sourceHeight * containScale;
+            ctx.save();
+            if (qualityFilter) ctx.filter = qualityFilter;
             ctx.drawImage(source, (width - cw) / 2, (height - ch) / 2, cw, ch);
+            ctx.restore();
             return;
         }
         let sx = 0;
@@ -54,7 +59,10 @@
             else if (cropMode === 'bottom') sy = sourceHeight - sh;
             else sy = (sourceHeight - sh) / 2;
         }
+        ctx.save();
+        if (qualityFilter) ctx.filter = qualityFilter;
         ctx.drawImage(source, sx, sy, sw, sh, 0, 0, width, height);
+        ctx.restore();
     }
 
     function drawAudioVisual(ctx, width, height, options) {
@@ -115,41 +123,142 @@
     }
 
 
-    function drawCaption(ctx, width, height, text, style) {
-        const caption = String(text || '').trim();
+    function drawCaption(ctx, width, height, text, style, captionOptions) {
+        let caption = String(text || '').trim();
         if (!caption) return;
         const mode = String(style || 'bold');
+        const options = normalizeCaptionOptions(captionOptions);
+        if (options.uppercase) caption = caption.replace(/[a-z][a-z0-9'’-]*/g, token => token.toUpperCase());
         const x = width / 2;
-        const y = height * 0.69;
-        const maxWidth = width * 0.82;
+        const y = getCaptionY(height, options.position);
+        const maxWidth = width * (mode === 'clean' ? 0.78 : 0.84);
+        const fontSize = options.size;
+        const lineHeight = Math.round(fontSize * 1.18);
+        const weight = mode === 'clean' || options.preset === 'minimal' ? 850 : 950;
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        const fontSize = mode === 'clean' ? 48 : 58;
-        const lineHeight = mode === 'clean' ? 58 : 68;
-        ctx.font = `900 ${fontSize}px system-ui, sans-serif`;
-        const lines = splitCaptionLines(ctx, caption, maxWidth, 2);
-        const boxHeight = lines.length * lineHeight + 34;
+        ctx.font = `${weight} ${fontSize}px system-ui, -apple-system, BlinkMacSystemFont, sans-serif`;
+        const lines = splitCaptionLines(ctx, caption, maxWidth, options.autoBreak ? options.maxLines : 1);
+        const boxPadX = Math.round(fontSize * 0.58);
+        const boxPadY = Math.round(fontSize * 0.34);
+        const boxHeight = lines.length * lineHeight + boxPadY * 2;
+        const boxWidth = Math.min(width - 96, maxWidth + boxPadX * 2);
         const boxY = y - boxHeight / 2;
-        if (mode === 'box' || mode === 'clean') {
-            ctx.fillStyle = mode === 'box' ? 'rgba(2, 6, 23, 0.76)' : 'rgba(2, 6, 23, 0.36)';
-            roundRect(ctx, (width - maxWidth) / 2 - 18, boxY, maxWidth + 36, boxHeight, 28);
+        const wantsBox = mode === 'box' || mode === 'clean' || options.boxOpacity > 0.05;
+        if (wantsBox) {
+            const darkText = options.color === '#111827';
+            ctx.fillStyle = darkText ? `rgba(255, 255, 255, ${Math.max(0.46, options.boxOpacity)})` : `rgba(2, 6, 23, ${options.boxOpacity})`;
+            roundRect(ctx, (width - boxWidth) / 2, boxY, boxWidth, boxHeight, Math.round(fontSize * 0.46));
             ctx.fill();
         }
+        const highlightSet = buildHighlightSet(options.highlightWords);
         lines.forEach((line, index) => {
-            const lineY = boxY + 22 + lineHeight * index + lineHeight / 2;
-            if (mode === 'bold') {
-                ctx.lineWidth = 14;
-                ctx.strokeStyle = 'rgba(0,0,0,0.72)';
-                ctx.strokeText(line, x, lineY);
-                ctx.lineWidth = 5;
-                ctx.strokeStyle = 'rgba(124,58,237,0.72)';
-                ctx.strokeText(line, x, lineY);
-            }
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(line, x, lineY);
+            const lineY = boxY + boxPadY + lineHeight * index + lineHeight / 2;
+            drawCaptionLine(ctx, line, x, lineY, maxWidth, {
+                mode,
+                color: options.color,
+                accent: options.accent,
+                shadow: options.shadow,
+                highlightSet,
+                fontSize
+            });
         });
         ctx.restore();
+    }
+
+    function normalizeCaptionOptions(input) {
+        const options = Object.assign({
+            preset: 'creator',
+            position: 'lower',
+            size: 58,
+            color: '#ffffff',
+            accent: '#facc15',
+            maxLines: 2,
+            boxOpacity: 0.52,
+            shadow: 0.78,
+            highlightWords: '',
+            uppercase: false,
+            autoBreak: true
+        }, input || {});
+        options.size = Math.max(36, Math.min(86, Number(options.size) || 58));
+        options.maxLines = Math.max(1, Math.min(3, Number(options.maxLines) || 2));
+        options.boxOpacity = Math.max(0, Math.min(0.9, Number(options.boxOpacity) || 0));
+        options.shadow = Math.max(0, Math.min(1, Number(options.shadow) || 0));
+        options.color = sanitizeColor(options.color, '#ffffff');
+        options.accent = sanitizeColor(options.accent, '#facc15');
+        options.uppercase = Boolean(options.uppercase);
+        options.autoBreak = options.autoBreak !== false;
+        return options;
+    }
+
+    function sanitizeColor(value, fallback) {
+        const text = String(value || '').trim();
+        return /^#[0-9a-fA-F]{6}$/.test(text) ? text.toLowerCase() : fallback;
+    }
+
+    function getCaptionY(height, position) {
+        if (position === 'upper') return height * 0.24;
+        if (position === 'middle') return height * 0.50;
+        if (position === 'safe-bottom') return height * 0.62;
+        return height * 0.69;
+    }
+
+    function buildHighlightSet(text) {
+        return new Set(String(text || '').split(/[,\n]/).map(item => item.trim().toLowerCase()).filter(Boolean));
+    }
+
+    function normalizeToken(text) {
+        return String(text || '').toLowerCase().replace(/^[^\p{L}\p{N}#]+|[^\p{L}\p{N}#]+$/gu, '');
+    }
+
+    function drawCaptionLine(ctx, line, x, y, maxWidth, options) {
+        const tokens = String(line || '').split(/(\s+)/).filter(part => part.length);
+        const hasHighlights = tokens.some(token => options.highlightSet.has(normalizeToken(token)));
+        const shadowAlpha = Math.max(0, Math.min(1, Number(options.shadow) || 0));
+        if (!hasHighlights) {
+            if (shadowAlpha || options.mode === 'bold') {
+                ctx.lineWidth = Math.max(4, options.fontSize * 0.20);
+                ctx.strokeStyle = `rgba(0,0,0,${Math.max(0.25, shadowAlpha)})`;
+                ctx.strokeText(line, x, y, maxWidth);
+                if (options.mode === 'bold') {
+                    ctx.lineWidth = Math.max(2, options.fontSize * 0.075);
+                    ctx.strokeStyle = toRgba(options.accent, 0.72);
+                    ctx.strokeText(line, x, y, maxWidth);
+                }
+            }
+            ctx.fillStyle = options.color;
+            ctx.fillText(line, x, y, maxWidth);
+            return;
+        }
+        const widths = tokens.map(token => ctx.measureText(token).width);
+        const totalWidth = widths.reduce((sum, value) => sum + value, 0);
+        let cursor = x - totalWidth / 2;
+        tokens.forEach((token, index) => {
+            const tokenX = cursor + widths[index] / 2;
+            const highlighted = options.highlightSet.has(normalizeToken(token));
+            if (shadowAlpha || options.mode === 'bold') {
+                ctx.lineWidth = Math.max(4, options.fontSize * 0.18);
+                ctx.strokeStyle = `rgba(0,0,0,${Math.max(0.22, shadowAlpha)})`;
+                ctx.strokeText(token, tokenX, y);
+            }
+            if (highlighted) {
+                ctx.lineWidth = Math.max(2, options.fontSize * 0.055);
+                ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+                ctx.strokeText(token, tokenX, y);
+            }
+            ctx.fillStyle = highlighted ? options.accent : options.color;
+            ctx.fillText(token, tokenX, y);
+            cursor += widths[index];
+        });
+    }
+
+    function toRgba(hex, alpha) {
+        const clean = sanitizeColor(hex, '#ffffff').slice(1);
+        const r = parseInt(clean.slice(0, 2), 16);
+        const g = parseInt(clean.slice(2, 4), 16);
+        const b = parseInt(clean.slice(4, 6), 16);
+        return `rgba(${r},${g},${b},${Math.max(0, Math.min(1, Number(alpha) || 0))})`;
     }
 
     function splitCaptionLines(ctx, text, maxWidth, maxLines) {
@@ -274,16 +383,21 @@
             ctx.fillStyle = '#cffafe';
             ctx.fillText(rangeText || 'AI 추천 구간', 74, height - 112);
         }
-        drawCaption(ctx, width, height, options && options.captionText, options && options.captionStyle);
+        drawCaption(ctx, width, height, options && options.captionText, options && options.captionStyle, options && options.captionOptions);
     }
 
     function renderStill(canvas, source, options) {
         const ctx = getCanvasContext(canvas);
         const width = canvas.width || Number(config.EXPORT_WIDTH || 1080);
         const height = canvas.height || Number(config.EXPORT_HEIGHT || 1920);
-        if (source && (source.videoWidth || source.naturalWidth)) drawCoverImage(ctx, source, width, height, options && options.cropMode || 'center');
+        const qualityOptions = options && options.qualityOptions || null;
+        if (source && (source.videoWidth || source.naturalWidth)) drawCoverImage(ctx, source, width, height, options && options.cropMode || 'center', qualityOptions);
         else drawAudioVisual(ctx, width, height, options || {});
+        if (qualityEffects.drawQualityOverlay) qualityEffects.drawQualityOverlay(ctx, width, height, qualityOptions);
         drawOverlay(ctx, width, height, options || {});
+        if (qualityEffects.drawWatermark) qualityEffects.drawWatermark(ctx, width, height, qualityOptions);
+        if (qualityEffects.drawIntroOutro) qualityEffects.drawIntroOutro(ctx, width, height, options && options.relativeTime || 0, options && options.segmentDuration || 0, qualityOptions);
+        if (qualityEffects.drawSafeGuide) qualityEffects.drawSafeGuide(ctx, width, height, qualityOptions);
     }
 
     function createCanvasStream(canvas, fps) {
@@ -322,19 +436,29 @@
         const captions = Array.isArray(options && options.captions) ? options.captions : [];
         const captionOffset = Number(options && options.captionOffset) || 0;
         const captionStyle = options && options.captionStyle || 'bold';
+        const captionOptions = options && options.captionOptions || null;
+        const qualityOptions = options && options.qualityOptions || null;
+        const originalVolume = sourceMedia ? sourceMedia.volume : 1;
         const captionService = global.AIShortsCaptionService || {};
         let raf = 0;
         let stopped = false;
         const ctx = getCanvasContext(canvas);
         function drawLoop() {
             const current = sourceMedia ? sourceMedia.currentTime : started;
+            const relativeTime = Math.max(0, current - started);
+            if (sourceMedia && qualityEffects.calculateFadeVolume) {
+                sourceMedia.volume = qualityEffects.calculateFadeVolume(relativeTime, duration, qualityOptions);
+            }
             if (sourceMedia && sourceMedia.videoWidth) {
-                drawCoverImage(ctx, sourceMedia, canvas.width, canvas.height, cropMode);
+                drawCoverImage(ctx, sourceMedia, canvas.width, canvas.height, cropMode, qualityOptions);
             } else {
                 drawAudioVisual(ctx, canvas.width, canvas.height, { time: current, title, waveformBins });
             }
+            if (qualityEffects.drawQualityOverlay) qualityEffects.drawQualityOverlay(ctx, canvas.width, canvas.height, qualityOptions);
             const activeCue = captionService.getActiveCue ? captionService.getActiveCue(captions, current, captionOffset) : null;
-            drawOverlay(ctx, canvas.width, canvas.height, { title, rangeText, captionText: activeCue && activeCue.text, captionStyle, thumbnailTemplate: options && options.thumbnailTemplate });
+            drawOverlay(ctx, canvas.width, canvas.height, { title, rangeText, captionText: activeCue && activeCue.text, captionStyle, captionOptions, thumbnailTemplate: options && options.thumbnailTemplate });
+            if (qualityEffects.drawWatermark) qualityEffects.drawWatermark(ctx, canvas.width, canvas.height, qualityOptions);
+            if (qualityEffects.drawIntroOutro) qualityEffects.drawIntroOutro(ctx, canvas.width, canvas.height, relativeTime, duration, qualityOptions);
             if (onProgress) {
                 const progress = Math.min(99, 8 + ((current - started) / duration) * 88);
                 onProgress(progress, '세로 쇼츠 렌더링 중');
@@ -345,12 +469,14 @@
             recorder.onerror = event => {
                 stopped = true;
                 if (raf) cancelAnimationFrame(raf);
+                if (sourceMedia) sourceMedia.volume = originalVolume;
                 reject(new Error(event.error && event.error.message || '녹화 오류'));
             };
             recorder.onstop = () => {
                 stopped = true;
                 if (raf) cancelAnimationFrame(raf);
                 stream.getTracks().forEach(track => track.stop());
+                if (sourceMedia) sourceMedia.volume = originalVolume;
                 const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'video/webm' });
                 resolve({ blob, mimeType: blob.type || recorder.mimeType || mimeType || 'video/webm' });
             };
@@ -378,6 +504,7 @@
             } catch (error) {
                 stopped = true;
                 if (raf) cancelAnimationFrame(raf);
+                if (sourceMedia) sourceMedia.volume = originalVolume;
                 reject(error);
             }
         });

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.4.1 - bottom fixed workflow dock
+// AI Shorts Studio v0.5.0 - bottom fixed workflow dock
 'use strict';
 
 (function bootBottomDock(global) {

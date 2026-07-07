@@ -3,44 +3,47 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.4.1 - UI 안정화, 상단 압축, 하단 고정 Dock" />
+<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.6.0 - 결과물 품질, 워터마크, 인트로/아웃트로, 안전영역 강화" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
 <meta name="theme-color" content="#7c3aed" />
-<title>AI 쇼츠 제작 스튜디오 v0.4.1</title>
+<title>AI 쇼츠 제작 스튜디오 v0.6.0</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=0.4.1-layout-dock" />
-<link rel="stylesheet" href="assets/css/studio.css?v=0.4.1-layout-dock" />
-<link rel="stylesheet" href="assets/css/editor.css?v=0.4.1-layout-dock" />
-<link rel="stylesheet" href="assets/css/ux.css?v=0.4.1-layout-dock" />
-<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.4.1-layout-dock" />
-<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.4.1-layout-dock" />
-<script defer src="src/config/app-runtime-config.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/utils/core-utils.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/state/app-state.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/caption/caption-service.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/project/project-service.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/render/vertical-renderer.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/download/download-service.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/ui/waveform-view.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/ui/timeline-view.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/security/site-guards.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/boot/runtime-health.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/app.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/ui/ux-controls.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/ui/range-drag-controls.js?v=0.4.1-layout-dock"></script>
-<script defer src="src/ui/bottom-dock.js?v=0.4.1-layout-dock"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=0.6.0-output-pro" />
+<link rel="stylesheet" href="assets/css/studio.css?v=0.6.0-output-pro" />
+<link rel="stylesheet" href="assets/css/editor.css?v=0.6.0-output-pro" />
+<link rel="stylesheet" href="assets/css/ux.css?v=0.6.0-output-pro" />
+<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.6.0-output-pro" />
+<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.6.0-output-pro" />
+<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.6.0-output-pro" />
+<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.6.0-output-pro" />
+<script defer src="src/config/app-runtime-config.js?v=0.6.0-output-pro"></script>
+<script defer src="src/utils/core-utils.js?v=0.6.0-output-pro"></script>
+<script defer src="src/state/app-state.js?v=0.6.0-output-pro"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=0.6.0-output-pro"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=0.6.0-output-pro"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.6.0-output-pro"></script>
+<script defer src="src/caption/caption-service.js?v=0.6.0-output-pro"></script>
+<script defer src="src/project/project-service.js?v=0.6.0-output-pro"></script>
+<script defer src="src/render/quality-effects.js?v=0.6.0-output-pro"></script>
+<script defer src="src/render/vertical-renderer.js?v=0.6.0-output-pro"></script>
+<script defer src="src/download/download-service.js?v=0.6.0-output-pro"></script>
+<script defer src="src/ui/waveform-view.js?v=0.6.0-output-pro"></script>
+<script defer src="src/ui/timeline-view.js?v=0.6.0-output-pro"></script>
+<script defer src="src/security/site-guards.js?v=0.6.0-output-pro"></script>
+<script defer src="src/boot/runtime-health.js?v=0.6.0-output-pro"></script>
+<script defer src="src/app.js?v=0.6.0-output-pro"></script>
+<script defer src="src/ui/ux-controls.js?v=0.6.0-output-pro"></script>
+<script defer src="src/ui/range-drag-controls.js?v=0.6.0-output-pro"></script>
+<script defer src="src/ui/bottom-dock.js?v=0.6.0-output-pro"></script>
 </head>
-<body data-build="0.4.1">
+<body data-build="0.6.0">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel" aria-label="앱 소개">
             <div class="brand-topline">
                 <div class="brand-kicker">
-                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.4.1 UI 안정화</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.6.0 결과물 품질</button>
                     <span class="badge badge-device">PC · 모바일 브라우저</span>
                     <span class="badge badge-free">무료 기능 기반</span>
                 </div>
@@ -51,7 +54,7 @@
             <div class="hero-mainline">
                 <div class="hero-copy">
                     <h1>AI 쇼츠 <span>스튜디오</span></h1>
-                    <p class="hero-compact-note">파일 로드 후에도 흔들리지 않는 컴팩트 제작 화면입니다.</p>
+                    <p class="hero-compact-note">화질 보정·페이드·워터마크·인트로까지 다듬는 쇼츠 제작 화면입니다.</p>
                 <div class="hero-cta-row" aria-label="빠른 시작 버튼">
                     <label class="btn-primary hero-file-btn" for="fileInput">파일 열기</label>
                     <button id="heroAnalyzeBtn" class="btn-secondary" type="button" disabled>바로 분석</button>
@@ -247,6 +250,172 @@
                         </select>
                     </label>
                 </div>
+
+                <section class="caption-pro-panel" aria-label="자막 스타일 세부 설정">
+                    <div class="caption-pro-head">
+                        <div>
+                            <strong>자막 디자인</strong>
+                            <small>미리보기·썸네일·내보내기에 동일 적용</small>
+                        </div>
+                        <button id="captionResetBtn" class="mini-action" type="button">기본값</button>
+                    </div>
+                    <div class="caption-preset-row" aria-label="자막 프리셋">
+                        <button type="button" class="caption-preset is-active" data-caption-preset="creator">크리에이터</button>
+                        <button type="button" class="caption-preset" data-caption-preset="news">뉴스형</button>
+                        <button type="button" class="caption-preset" data-caption-preset="cinema">시네마</button>
+                        <button type="button" class="caption-preset" data-caption-preset="minimal">미니멀</button>
+                    </div>
+                    <div class="settings-grid caption-pro-grid">
+                        <label class="field">
+                            <span>자막 위치</span>
+                            <select id="captionPositionSelect">
+                                <option value="upper">상단 안전영역</option>
+                                <option value="middle">중앙 강조</option>
+                                <option value="lower">하단 기본</option>
+                                <option value="safe-bottom">하단 버튼 회피</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span>줄 수</span>
+                            <select id="captionMaxLinesSelect">
+                                <option value="1">1줄</option>
+                                <option value="2">2줄</option>
+                                <option value="3">3줄</option>
+                            </select>
+                        </label>
+                        <label class="field slider-field">
+                            <span>크기 <b id="captionSizeValue">58</b></span>
+                            <input id="captionSizeInput" type="range" min="36" max="86" step="1" value="58" />
+                        </label>
+                        <label class="field slider-field">
+                            <span>박스 <b id="captionBoxOpacityValue">52%</b></span>
+                            <input id="captionBoxOpacityInput" type="range" min="0" max="90" step="1" value="52" />
+                        </label>
+                        <label class="field slider-field">
+                            <span>그림자 <b id="captionShadowValue">78%</b></span>
+                            <input id="captionShadowInput" type="range" min="0" max="100" step="1" value="78" />
+                        </label>
+                        <label class="field">
+                            <span>글자색</span>
+                            <select id="captionColorSelect">
+                                <option value="#ffffff">화이트</option>
+                                <option value="#fef3c7">웜 화이트</option>
+                                <option value="#cffafe">시안 화이트</option>
+                                <option value="#111827">다크 텍스트</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span>강조색</span>
+                            <select id="captionAccentSelect">
+                                <option value="#facc15">옐로우</option>
+                                <option value="#22d3ee">시안</option>
+                                <option value="#a78bfa">퍼플</option>
+                                <option value="#fb7185">로즈</option>
+                                <option value="#34d399">그린</option>
+                            </select>
+                        </label>
+                        <label class="field full">
+                            <span>강조 단어</span>
+                            <input id="captionHighlightInput" type="text" placeholder="예: 무료, AI, 하이라이트" />
+                        </label>
+                    </div>
+                    <div class="caption-toggle-row">
+                        <label><input id="captionUppercaseToggle" type="checkbox" /> 영문 대문자 강조</label>
+                        <label><input id="captionAutoBreakToggle" type="checkbox" checked /> 긴 문장 자동 줄바꿈</label>
+                    </div>
+                </section>
+
+                <section class="quality-panel" aria-label="결과물 품질 설정">
+                    <div class="quality-head">
+                        <div>
+                            <strong>결과물 품질</strong>
+                            <small>미리보기·내보내기·워터마크·인트로/아웃트로에 반영</small>
+                        </div>
+                        <button id="qualityResetBtn" class="mini-action" type="button">품질 기본값</button>
+                    </div>
+                    <div class="settings-grid quality-grid">
+                        <label class="field slider-field">
+                            <span>밝기 <b id="brightnessValue">100%</b></span>
+                            <input id="brightnessInput" type="range" min="70" max="130" step="1" value="100" />
+                        </label>
+                        <label class="field slider-field">
+                            <span>대비 <b id="contrastValue">106%</b></span>
+                            <input id="contrastInput" type="range" min="80" max="145" step="1" value="106" />
+                        </label>
+                        <label class="field slider-field">
+                            <span>채도 <b id="saturationValue">112%</b></span>
+                            <input id="saturationInput" type="range" min="70" max="160" step="1" value="112" />
+                        </label>
+                        <label class="field slider-field">
+                            <span>비네팅 <b id="vignetteValue">22%</b></span>
+                            <input id="vignetteInput" type="range" min="0" max="55" step="1" value="22" />
+                        </label>
+                        <label class="field">
+                            <span>페이드 인</span>
+                            <select id="fadeInSelect">
+                                <option value="0">없음</option>
+                                <option value="0.4">0.4초</option>
+                                <option value="0.8">0.8초</option>
+                                <option value="1.2">1.2초</option>
+                                <option value="2">2초</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span>페이드 아웃</span>
+                            <select id="fadeOutSelect">
+                                <option value="0">없음</option>
+                                <option value="0.6">0.6초</option>
+                                <option value="1">1초</option>
+                                <option value="1.6">1.6초</option>
+                                <option value="2.4">2.4초</option>
+                            </select>
+                        </label>
+                        <label class="field full">
+                            <span>인트로 텍스트</span>
+                            <input id="introTextInput" type="text" placeholder="예: 오늘의 하이라이트" />
+                        </label>
+                        <label class="field full">
+                            <span>아웃트로 텍스트</span>
+                            <input id="outroTextInput" type="text" placeholder="예: 더 많은 쇼츠는 팔로우" />
+                        </label>
+                        <label class="field">
+                            <span>인트로 길이</span>
+                            <select id="introDurationSelect">
+                                <option value="0">끄기</option>
+                                <option value="0.9">0.9초</option>
+                                <option value="1.2">1.2초</option>
+                                <option value="1.8">1.8초</option>
+                            </select>
+                        </label>
+                        <label class="field">
+                            <span>아웃트로 길이</span>
+                            <select id="outroDurationSelect">
+                                <option value="0">끄기</option>
+                                <option value="0.9">0.9초</option>
+                                <option value="1.2">1.2초</option>
+                                <option value="1.8">1.8초</option>
+                            </select>
+                        </label>
+                        <label class="field full">
+                            <span>워터마크/로고 텍스트</span>
+                            <input id="watermarkTextInput" type="text" placeholder="예: @my_channel" />
+                        </label>
+                        <label class="field">
+                            <span>워터마크 위치</span>
+                            <select id="watermarkPositionSelect">
+                                <option value="bottom-right">오른쪽 아래</option>
+                                <option value="bottom-left">왼쪽 아래</option>
+                                <option value="top-right">오른쪽 위</option>
+                                <option value="top-left">왼쪽 위</option>
+                            </select>
+                        </label>
+                        <label class="field checkbox-field">
+                            <span>가이드</span>
+                            <label><input id="safeGuideToggle" type="checkbox" checked /> 미리보기 안전영역 표시</label>
+                        </label>
+                    </div>
+                </section>
+
                 <div class="nudge-row" aria-label="구간 미세 조절">
                     <button type="button" class="nudge-btn" data-nudge="start:-1">시작 -1초</button>
                     <button type="button" class="nudge-btn" data-nudge="start:1">시작 +1초</button>
@@ -308,6 +477,7 @@
                     <textarea id="hashtagInput" rows="3">#쇼츠 #Shorts #음악 #하이라이트</textarea>
                 </label>
                 <div class="transport-row">
+                    <button id="copyBoostBtn" class="btn-secondary" type="button">카피 다시 추천</button>
                     <button id="copyCaptionBtn" class="btn-secondary" type="button">제목/해시태그 복사</button>
                     <button id="diagnosticsBtn" class="btn-secondary" type="button">진단 복사</button>
                 </div>
@@ -338,8 +508,8 @@
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.4.1</h2>
-        <p>이 버전은 파일 로드 후 레이아웃 붕괴를 줄이고, 상단 정보를 압축하며, 주요 작업을 하단 고정 Dock으로 모은 안정화 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.6.0</h2>
+        <p>이 버전은 밝기/대비/채도 보정, 오디오 페이드, 인트로/아웃트로, 워터마크, 안전영역 가이드를 더한 결과물 품질 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
         <ul>
             <li>오디오 에너지, 피크, 트랜지언트, 무음 비율을 분석합니다.</li>
             <li>비디오 파일은 움직임 샘플링 점수를 보조로 사용합니다.</li>
@@ -347,6 +517,7 @@
             <li>네온·클린·시네마틱·헤드라인 썸네일 템플릿을 선택하고 PNG 저장 또는 영상 내보내기에 반영할 수 있습니다.</li>
             <li>상위 추천 후보를 순서대로 일괄 내보내기할 수 있습니다.</li>
             <li>SRT/VTT 자막을 불러오거나 직접 붙여넣어 세로 프리뷰와 내보내기에 반영합니다.</li>
+            <li>밝기·대비·채도·비네팅, 페이드 인/아웃, 워터마크, 인트로/아웃트로 텍스트를 미리보기와 내보내기에 반영합니다.</li>
             <li>내보내기는 브라우저 MediaRecorder 지원 범위에 따라 WebM 또는 MP4가 될 수 있습니다.</li>
         </ul>
     </div>

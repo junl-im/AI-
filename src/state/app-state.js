@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.4.0 - state container
+// AI Shorts Studio v0.6.0 - state container
 'use strict';
 
 (function exposeState(global) {
@@ -32,12 +32,43 @@
             platform: 'youtube',
             captionStyle: 'bold',
             captionOffset: 0,
+            captionOptions: {
+                preset: 'creator',
+                position: 'lower',
+                size: 58,
+                color: '#ffffff',
+                accent: '#facc15',
+                maxLines: 2,
+                boxOpacity: 0.52,
+                shadow: 0.78,
+                highlightWords: '',
+                uppercase: false,
+                autoBreak: true
+            },
+            qualityOptions: {
+                brightness: 1,
+                contrast: 1.06,
+                saturation: 1.12,
+                vignette: 0.22,
+                fadeIn: 0.4,
+                fadeOut: 1.0,
+                introText: '',
+                outroText: '',
+                introDuration: 1.2,
+                outroDuration: 1.2,
+                watermarkText: '',
+                watermarkPosition: 'bottom-right',
+                safeGuide: true
+            },
             thumbnailTemplate: 'neon'
         };
         try {
             const raw = global.localStorage && global.localStorage.getItem(config.LOCAL_STORAGE_KEY || 'ai-shorts-settings');
             const parsed = raw ? JSON.parse(raw) : null;
-            return Object.assign({}, defaults, parsed || {});
+            const merged = Object.assign({}, defaults, parsed || {});
+            merged.captionOptions = Object.assign({}, defaults.captionOptions, parsed && parsed.captionOptions || {});
+            merged.qualityOptions = Object.assign({}, defaults.qualityOptions, parsed && parsed.qualityOptions || {});
+            return merged;
         } catch (error) {
             return defaults;
         }
