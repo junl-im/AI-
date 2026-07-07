@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.1.0 - 풀 노래와 MP4 영상을 로컬에서 분석해 쇼츠 후보를 추천하고 세로 영상으로 내보내는 무료 웹 프로그램" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
+<meta name="theme-color" content="#7c3aed" />
+<title>AI 쇼츠 제작 스튜디오 v0.1.0</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="assets/css/theme.css?v=0.1.0-local-highlight-mvp" />
+<link rel="stylesheet" href="assets/css/studio.css?v=0.1.0-local-highlight-mvp" />
+<link rel="stylesheet" href="assets/css/editor.css?v=0.1.0-local-highlight-mvp" />
+<script defer src="src/config/app-runtime-config.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/utils/core-utils.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/state/app-state.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/render/vertical-renderer.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/download/download-service.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/ui/waveform-view.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/ui/timeline-view.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/security/site-guards.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/boot/runtime-health.js?v=0.1.0-local-highlight-mvp"></script>
+<script defer src="src/app.js?v=0.1.0-local-highlight-mvp"></script>
+</head>
+<body data-build="0.1.0">
+<div class="app-shell">
+    <header class="studio-hero">
+        <section class="brand-panel" aria-label="앱 소개">
+            <div class="brand-topline">
+                <div class="brand-kicker">
+                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.1.0 로컬 쇼츠 MVP</button>
+                    <span class="badge badge-device">PC · 모바일 브라우저</span>
+                    <span class="badge badge-free">무료 기능 기반</span>
+                </div>
+                <div class="brand-right-actions">
+                    <span class="designer-mini"><span>DESIGNED FOR</span><strong>AI Shorts Studio</strong></span>
+                </div>
+            </div>
+            <div class="hero-mainline">
+                <div class="hero-copy">
+                    <h1>AI 쇼츠 제작 <span>스튜디오</span></h1>
+                    <p>풀 노래와 MP4 영상을 내 기기 안에서 분석하고, 쇼츠로 잘 먹힐 하이라이트 구간을 추천합니다. 서버 업로드 없이 세로 프리뷰와 내보내기까지 진행합니다.</p>
+                </div>
+                <div class="hero-meter" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+            </div>
+        </section>
+    </header>
+
+    <main class="studio-grid">
+        <section class="console-panel" aria-label="쇼츠 제작 컨트롤">
+            <section class="control-zone control-zone-load" aria-label="불러오기 영역">
+                <div class="panel-head">
+                    <strong>불러오기</strong>
+                    <span id="selectedBadge" class="badge">선택 없음</span>
+                </div>
+                <div id="dropZone" class="upload-stage">
+                    <label id="fileDrop" class="upload-tile" role="button" tabindex="0" aria-label="오디오 또는 영상 파일 열기">
+                        <span class="upload-icon">🎬</span>
+                        <strong>파일열기</strong>
+                        <span>MP3, WAV, M4A, MP4, MOV, WebM</span>
+                        <input type="file" id="fileInput" class="hidden" accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.mp4,.mov,.m4v,.webm" />
+                    </label>
+                </div>
+                <p id="importStatus" class="import-status" aria-live="polite">파일은 서버로 업로드되지 않습니다. 브라우저 안에서 분석합니다.</p>
+            </section>
+
+            <section class="control-zone" aria-label="추천 설정">
+                <div class="panel-head">
+                    <strong>추천 설정</strong>
+                    <small id="analysisStatus">파일 대기</small>
+                </div>
+                <div class="settings-grid">
+                    <label class="field">
+                        <span>후보 길이</span>
+                        <select id="durationSelect">
+                            <option value="auto">자동 추천</option>
+                            <option value="15">15초</option>
+                            <option value="30">30초</option>
+                            <option value="45">45초</option>
+                            <option value="60">60초</option>
+                            <option value="90">90초</option>
+                            <option value="180">180초</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>추천 스타일</span>
+                        <select id="styleSelect">
+                            <option value="balanced">균형형</option>
+                            <option value="impact">첫 3초 임팩트형</option>
+                            <option value="emotional">감성 하이라이트형</option>
+                            <option value="motion">영상 움직임형</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>세로 프레임</span>
+                        <select id="cropModeSelect">
+                            <option value="center">중앙 크롭</option>
+                            <option value="blur-fit">블러 배경 맞춤</option>
+                            <option value="top">상단 크롭</option>
+                            <option value="bottom">하단 크롭</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>플랫폼</span>
+                        <select id="platformSelect">
+                            <option value="youtube">YouTube Shorts</option>
+                            <option value="reels">Instagram Reels</option>
+                            <option value="tiktok">TikTok</option>
+                        </select>
+                    </label>
+                </div>
+                <button id="analyzeBtn" class="btn-primary" type="button" disabled>분석하고 추천받기</button>
+                <div class="progress-wrap" aria-label="처리 진행률">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+            </section>
+
+            <section class="control-zone" aria-label="AI 추천 구간">
+                <div class="panel-head">
+                    <strong>AI 추천 구간</strong>
+                    <small id="recommendationCount">0개</small>
+                </div>
+                <div id="recommendationList" class="recommendation-list empty-state">
+                    <p>파일을 분석하면 쇼츠 후보가 점수와 이유 카드로 표시됩니다.</p>
+                </div>
+            </section>
+        </section>
+
+        <section class="editor-panel" aria-label="쇼츠 미리보기 및 편집">
+            <section class="preview-card">
+                <div class="panel-head">
+                    <strong>9:16 세로 미리보기</strong>
+                    <small id="previewStatus">대기</small>
+                </div>
+                <div class="phone-frame">
+                    <canvas id="previewCanvas" width="1080" height="1920" aria-label="세로 쇼츠 미리보기 캔버스"></canvas>
+                    <div id="safeArea" class="safe-area" aria-hidden="true"></div>
+                </div>
+                <video id="sourceVideo" class="source-media" playsinline muted controls></video>
+                <audio id="sourceAudio" class="source-media" controls></audio>
+                <div class="transport-row">
+                    <button id="previewBtn" class="btn-secondary" type="button" disabled>선택 구간 미리보기</button>
+                    <button id="stopPreviewBtn" class="btn-secondary" type="button" disabled>정지</button>
+                    <button id="exportBtn" class="btn-primary" type="button" disabled>세로 쇼츠 내보내기</button>
+                </div>
+            </section>
+
+            <section class="waveform-card" aria-label="파형 타임라인">
+                <div class="panel-head">
+                    <strong>파형 · 추천 위치</strong>
+                    <small id="selectedRangeText">구간 없음</small>
+                </div>
+                <canvas id="waveformCanvas" width="1200" height="260" aria-label="오디오 파형"></canvas>
+                <div id="timelineView" class="timeline-view"></div>
+            </section>
+
+            <section class="copy-card" aria-label="제목과 해시태그">
+                <div class="panel-head">
+                    <strong>쇼츠 카피 초안</strong>
+                    <small>복사해서 사용</small>
+                </div>
+                <label class="field full">
+                    <span>제목</span>
+                    <input id="titleInput" type="text" value="AI가 고른 하이라이트 쇼츠" />
+                </label>
+                <label class="field full">
+                    <span>해시태그</span>
+                    <textarea id="hashtagInput" rows="3">#쇼츠 #Shorts #음악 #하이라이트</textarea>
+                </label>
+                <div class="transport-row">
+                    <button id="copyCaptionBtn" class="btn-secondary" type="button">제목/해시태그 복사</button>
+                    <button id="diagnosticsBtn" class="btn-secondary" type="button">진단 복사</button>
+                </div>
+            </section>
+        </section>
+    </main>
+</div>
+
+<div id="infoDialog" class="modal" hidden>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+        <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.1.0</h2>
+        <p>이 버전은 무료 로컬 기능으로 풀 노래와 영상을 분석해 쇼츠 후보를 추천합니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
+        <ul>
+            <li>오디오 에너지, 피크, 트랜지언트, 무음 비율을 분석합니다.</li>
+            <li>비디오 파일은 움직임 샘플링 점수를 보조로 사용합니다.</li>
+            <li>내보내기는 브라우저 MediaRecorder 지원 범위에 따라 WebM 또는 MP4가 될 수 있습니다.</li>
+        </ul>
+    </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

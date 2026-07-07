@@ -1,0 +1,95 @@
+// AI Shorts Studio v0.1.0 - video motion analyzer
+'use strict';
+
+(function exposeVideoMotionAnalyzer(global) {
+    const config = global.AIShortsRuntimeConfig || {};
+    const utils = global.AIShortsCoreUtils || {};
+
+    function waitForEvent(target, eventName, timeoutMs) {
+        return new Promise((resolve, reject) => {
+            let timer = 0;
+            function cleanup() {
+                target.removeEventListener(eventName, onEvent);
+                target.removeEventListener('error', onError);
+                if (timer) clearTimeout(timer);
+            }
+            function onEvent() { cleanup(); resolve(); }
+            function onError() { cleanup(); reject(new Error('비디오를 읽을 수 없습니다.')); }
+            target.addEventListener(eventName, onEvent, { once: true });
+            target.addEventListener('error', onError, { once: true });
+            if (timeoutMs) {
+                timer = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('비디오 응답 시간이 너무 깁니다.'));
+                }, timeoutMs);
+            }
+        });
+    }
+
+    async function seekVideo(video, time) {
+        const target = Math.max(0, Math.min(Number(time) || 0, Math.max(0, (video.duration || 0) - 0.05)));
+        if (Math.abs((video.currentTime || 0) - target) < 0.04) return;
+        const promise = waitForEvent(video, 'seeked', 2200).catch(() => {});
+        video.currentTime = target;
+        await promise;
+    }
+
+    function frameDiff(current, previous) {
+        if (!current || !previous || current.length !== previous.length) return 0;
+        let sum = 0;
+        const step = 4;
+        for (let i = 0; i < current.length; i += step) {
+            sum += Math.abs(current[i] - previous[i]);
+            sum += Math.abs(current[i + 1] - previous[i + 1]);
+            sum += Math.abs(current[i + 2] - previous[i + 2]);
+        }
+        return sum / (current.length / step * 3 * 255);
+    }
+
+    async function analyzeVideoMotion(fileUrl, onProgress) {
+        const video = document.createElement('video');
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        video.src = fileUrl;
+        await waitForEvent(video, 'loadedmetadata', 5000);
+        const duration = Number(video.duration) || 0;
+        if (!duration) return { duration: 0, frames: [], summary: { motionDensity: 0 } };
+        const samples = Math.min(Number(config.MAX_VIDEO_MOTION_SAMPLES || 160), Math.max(18, Math.floor(duration * 1.2)));
+        const width = 96;
+        const height = 170;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        let previous = null;
+        const raw = [];
+        for (let i = 0; i < samples; i += 1) {
+            const time = duration * (i / Math.max(1, samples - 1));
+            if (onProgress && i % 8 === 0) onProgress(78 + Math.round((i / samples) * 12), '영상 움직임 샘플링 중');
+            await seekVideo(video, time);
+            try {
+                ctx.drawImage(video, 0, 0, width, height);
+                const image = ctx.getImageData(0, 0, width, height).data;
+                const diff = previous ? frameDiff(image, previous) : 0;
+                previous = new Uint8ClampedArray(image);
+                raw.push({ time, diff });
+            } catch (error) {
+                raw.push({ time, diff: 0 });
+            }
+        }
+        const normalized = utils.normalizeList ? utils.normalizeList(raw.map(item => item.diff)) : raw.map(item => item.diff);
+        const frames = raw.map((item, index) => ({ time: Number(item.time.toFixed(3)), diff: item.diff, diffNorm: Number((normalized[index] || 0).toFixed(4)) }));
+        const active = frames.filter(frame => frame.diffNorm > 0.58).length;
+        return {
+            duration,
+            frames,
+            summary: {
+                motionDensity: active / Math.max(1, frames.length),
+                maxMotion: Math.max.apply(null, frames.map(frame => frame.diffNorm).concat([0]))
+            }
+        };
+    }
+
+    global.AIShortsVideoMotionAnalyzer = Object.freeze({ analyzeVideoMotion });
+})(window);

@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+'use strict';
+
+const { spawnSync } = require('child_process');
+const { qaChecks: checks } = require('../package.json');
+
+if (!Array.isArray(checks) || !checks.length) {
+    console.error('FAIL package.json qaChecks is missing or empty');
+    process.exit(1);
+}
+
+const results = [];
+for (const command of checks) {
+    const started = Date.now();
+    const result = spawnSync(command, { shell: true, stdio: 'inherit' });
+    const elapsed = Date.now() - started;
+    const ok = result.status === 0;
+    results.push({ command, ok, status: result.status, elapsed });
+    console.log(`${ok ? 'PASS' : 'FAIL'} ${command} (${elapsed}ms)`);
+}
+
+const failed = results.filter(item => !item.ok);
+console.log('\nAI Shorts Studio QA summary');
+console.log(`  Passed: ${results.length - failed.length}/${results.length}`);
+console.log(`  Failed: ${failed.length}/${results.length}`);
+if (failed.length) {
+    console.log('\nFailed checks:');
+    failed.forEach(item => console.log(`  - ${item.command} (status ${item.status})`));
+    process.exit(1);
+}
