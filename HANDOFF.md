@@ -1,4 +1,4 @@
-# HANDOFF - AI 쇼츠 제작 스튜디오 v0.7.0
+# HANDOFF - AI 쇼츠 제작 스튜디오 v0.8.0 파형 컷 마커 편집 패치
 
 ## 목적
 
@@ -46,3 +46,15 @@ v0.7.0은 쇼츠 결과물 자체의 품질을 올리는 패치입니다. 자막
 자동 컷 편집은 `src/analysis/auto-cut-detector.js`가 담당합니다. 앱은 오디오/영상 분석이 끝난 뒤 `buildAutoCutTimeline()`을 호출하고, 추천 생성 후 `enhanceRecommendations()`로 점수와 이유를 보강합니다. 컷 보정 버튼은 선택 후보 또는 전체 후보의 start/end/duration/rangeText를 직접 갱신합니다.
 
 브라우저 성능 이슈를 줄이기 위해 새 분석은 기존 오디오 프레임과 영상 모션 프레임을 재사용합니다. 별도 모델, 외부 API, 서버 업로드는 없습니다.
+
+
+## v0.8.0 인수인계
+
+이번 패치는 `src/ui/cut-marker-overlay.js`와 `assets/css/cut-markers.css`를 추가했습니다. 자동 컷 데이터는 기존 `state.autoCuts.timeline`과 `state.autoCuts.silenceSegments`를 그대로 사용합니다. 따라서 분석 엔진을 바꾸지 않아도 파형 위 마커 UI는 동작합니다.
+
+주의사항:
+
+- 컷 마커 레이어는 `waveform-drag-shell` 내부의 별도 DOM 오버레이입니다.
+- 기존 드래그 구간 오버레이와 겹치지만 `pointer-events`는 마커 버튼만 받도록 설계했습니다.
+- 마커 클릭은 재생 위치 이동을 기본으로 하고, 선택 구간 밖을 클릭하면 시작/끝 경계 보정까지 수행합니다.
+- `snapStartCutBtn`, `snapEndCutBtn`은 선택 구간 경계와 가장 가까운 컷 포인트를 찾습니다.

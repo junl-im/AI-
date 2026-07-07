@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.7.0 - main app
+// AI Shorts Studio v0.8.0 - main app
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -16,6 +16,7 @@
     const qualityEffects = global.AIShortsQualityEffects || {};
     const downloadService = global.AIShortsDownloadService || {};
     const waveformView = global.AIShortsWaveformView || {};
+    const cutMarkerOverlay = global.AIShortsCutMarkerOverlay || {};
     const timelineView = global.AIShortsTimelineView || {};
     const siteGuards = global.AIShortsSiteGuards || {};
     const runtimeHealth = global.AIShortsRuntimeHealth || {};
@@ -94,7 +95,8 @@
             'safeGuideToggle', 'qualityResetBtn', 'copyBoostBtn',
             'autoCutSummary', 'tempoScoreText', 'silenceRiskText', 'cutCountText', 'autoCutTimelineList',
             'silenceThresholdInput', 'silenceThresholdValue', 'beatSensitivityInput', 'beatSensitivityValue',
-            'motionSensitivityInput', 'motionSensitivityValue', 'handlePaddingSelect', 'autoTrimBtn', 'autoTrimAllBtn', 'refreshCutsBtn'
+            'motionSensitivityInput', 'motionSensitivityValue', 'handlePaddingSelect', 'autoTrimBtn', 'autoTrimAllBtn', 'refreshCutsBtn',
+            'cutMarkerOverlay', 'cutMarkerFocusText', 'snapStartCutBtn', 'snapEndCutBtn'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -427,6 +429,113 @@
         return cue ? cue.text : '';
     }
 
+
+    function getMediaDurationFallback(selected) {
+        return Number(state.fileMeta && state.fileMeta.duration) || Number(state.autoCuts && state.autoCuts.duration) || Number(selected && selected.end) || 0;
+    }
+
+    function setRecommendationRange(item, start, end, reason) {
+        if (!item) return null;
+        const maxDuration = getMediaDurationFallback(item);
+        let nextStart = Math.max(0, Number(start) || 0);
+        let nextEnd = Math.max(nextStart + 1, Number(end) || nextStart + 1);
+        if (maxDuration) nextEnd = Math.min(maxDuration, nextEnd);
+        if (nextEnd <= nextStart) nextEnd = Math.min(maxDuration || nextStart + 1, nextStart + 1);
+        item.start = Number(nextStart.toFixed(2));
+        item.end = Number(nextEnd.toFixed(2));
+        item.duration = Number(Math.max(1, item.end - item.start).toFixed(2));
+        item.rangeText = utils.formatRange ? utils.formatRange(item.start, item.end) : `${item.start.toFixed(1)} ~ ${item.end.toFixed(1)}`;
+        item.custom = true;
+        if (reason) item.reasons = Array.from(new Set([...(item.reasons || []), reason])).slice(0, 5);
+        state.selectedRange = { start: item.start, end: item.end, duration: item.duration, score: item.score };
+        return item;
+    }
+
+    function getAutoCutTimelinePoints() {
+        const points = state.autoCuts && Array.isArray(state.autoCuts.timeline) ? state.autoCuts.timeline : [];
+        return points.filter(point => Number.isFinite(Number(point.time))).sort((a, b) => Number(a.time) - Number(b.time));
+    }
+
+    function findNearestCutPoint(time) {
+        const points = getAutoCutTimelinePoints();
+        let best = null;
+        points.forEach(point => {
+            const distance = Math.abs(Number(point.time) - Number(time));
+            if (!best || distance < best.distance || (distance === best.distance && (point.score || 0) > (best.score || 0))) {
+                best = Object.assign({}, point, { distance });
+            }
+        });
+        return best;
+    }
+
+    function renderCutMarkerLayer(selected) {
+        if (!cutMarkerOverlay.renderCutMarkers || !els.cutMarkerOverlay) return;
+        const duration = getMediaDurationFallback(selected);
+        cutMarkerOverlay.renderCutMarkers(els.cutMarkerOverlay, state.autoCuts, selected, duration, {
+            onMarkerClick: handleCutMarkerClick,
+            onMarkerHover: point => {
+                if (els.cutMarkerFocusText && cutMarkerOverlay.summarizeFocusedPoint) els.cutMarkerFocusText.textContent = cutMarkerOverlay.summarizeFocusedPoint(point);
+            }
+        });
+    }
+
+    function updateCutMarkerControls(selected) {
+        const enabled = Boolean(selected && getAutoCutTimelinePoints().length);
+        if (els.snapStartCutBtn) els.snapStartCutBtn.disabled = !enabled;
+        if (els.snapEndCutBtn) els.snapEndCutBtn.disabled = !enabled;
+        if (els.cutMarkerFocusText && !enabled) els.cutMarkerFocusText.textContent = state.autoCuts ? '사용할 컷 마커가 없습니다.' : '분석 후 컷 마커가 표시됩니다.';
+        if (els.cutMarkerFocusText && enabled && cutMarkerOverlay.summarizeFocusedPoint) els.cutMarkerFocusText.textContent = '컷 마커를 클릭하면 해당 위치로 이동합니다.';
+    }
+
+    function handleCutMarkerClick(point) {
+        const time = Number(point && point.time);
+        if (!Number.isFinite(time)) return;
+        const media = getActiveMediaElement();
+        if (media) {
+            try { media.currentTime = Math.max(0, time); } catch (error) { /* ignored */ }
+        }
+        if (els.cutMarkerFocusText && cutMarkerOverlay.summarizeFocusedPoint) els.cutMarkerFocusText.textContent = cutMarkerOverlay.summarizeFocusedPoint(point);
+        const selected = getSelectedRecommendation();
+        if (!selected) {
+            renderPreviewStill();
+            toast('컷 마커 위치로 이동했습니다.');
+            return;
+        }
+        if (time < selected.start - 0.15) {
+            setRecommendationRange(selected, time, selected.end, '컷 마커 클릭으로 시작점을 보정했습니다.');
+            renderAll();
+            toast('선택 구간 시작점을 컷 마커에 맞췄습니다.');
+            return;
+        }
+        if (time > selected.end + 0.15) {
+            setRecommendationRange(selected, selected.start, time, '컷 마커 클릭으로 끝점을 보정했습니다.');
+            renderAll();
+            toast('선택 구간 끝점을 컷 마커에 맞췄습니다.');
+            return;
+        }
+        renderPreviewStill();
+        toast('컷 마커 위치로 이동했습니다.');
+    }
+
+    function snapSelectedBoundaryToNearestCut(boundary) {
+        const selected = getSelectedRecommendation();
+        if (!selected) return;
+        const baseTime = boundary === 'end' ? selected.end : selected.start;
+        const point = findNearestCutPoint(baseTime);
+        if (!point) {
+            toast('가까운 컷 마커가 없습니다.');
+            return;
+        }
+        if (boundary === 'end') setRecommendationRange(selected, selected.start, Number(point.time), '가까운 컷 마커에 끝점을 맞췄습니다.');
+        else setRecommendationRange(selected, Number(point.time), selected.end, '가까운 컷 마커에 시작점을 맞췄습니다.');
+        const media = getActiveMediaElement();
+        if (media) {
+            try { media.currentTime = boundary === 'end' ? selected.end : selected.start; } catch (error) { /* ignored */ }
+        }
+        renderAll();
+        toast(boundary === 'end' ? '끝점을 가까운 컷 마커에 맞췄습니다.' : '시작점을 가까운 컷 마커에 맞췄습니다.');
+    }
+
     function updateSelectedRangeControls(selected) {
         if (!selected) return;
         if (els.rangeStartInput) els.rangeStartInput.value = Number(selected.start || 0).toFixed(1);
@@ -444,6 +553,7 @@
     function renderAll() {
         const selected = getSelectedRecommendation();
         if (waveformView.drawWaveform) waveformView.drawWaveform(els.waveformCanvas, state.waveformBins, state.recommendations, state.selectedRecommendationId, state.fileMeta && state.fileMeta.duration);
+        renderCutMarkerLayer(selected);
         if (waveformView.renderRecommendations) waveformView.renderRecommendations(els.recommendationList, state.recommendations, state.selectedRecommendationId, selectRecommendation);
         if (timelineView.renderTimeline) timelineView.renderTimeline(els.timelineView, state.recommendations, state.selectedRecommendationId);
         if (els.recommendationCount) els.recommendationCount.textContent = `${(state.recommendations || []).length}개`;
@@ -451,6 +561,7 @@
         if (selected) updateSelectedRangeControls(selected);
         updateCaptionStatus();
         renderAutoCutSummary(selected);
+        updateCutMarkerControls(selected);
         renderPreviewStill();
         updateButtons();
     }
@@ -562,6 +673,8 @@
         if (els.autoTrimBtn) els.autoTrimBtn.addEventListener('click', autoTrimSelectedRange);
         if (els.autoTrimAllBtn) els.autoTrimAllBtn.addEventListener('click', autoTrimAllRecommendations);
         if (els.refreshCutsBtn) els.refreshCutsBtn.addEventListener('click', () => { buildAutoCutTimeline(); createRecommendations(); toast('컷 포인트를 다시 계산했습니다.'); });
+        if (els.snapStartCutBtn) els.snapStartCutBtn.addEventListener('click', () => snapSelectedBoundaryToNearestCut('start'));
+        if (els.snapEndCutBtn) els.snapEndCutBtn.addEventListener('click', () => snapSelectedBoundaryToNearestCut('end'));
         if (els.sourceVideo) els.sourceVideo.addEventListener('loadeddata', renderPreviewStill);
         if (els.sourceAudio) els.sourceAudio.addEventListener('timeupdate', renderPreviewStill);
         if (els.sourceVideo) els.sourceVideo.addEventListener('timeupdate', renderPreviewStill);
@@ -846,13 +959,7 @@
         const start = Math.max(0, Number(els.rangeStartInput && els.rangeStartInput.value) || 0);
         let end = Math.max(start + 1, Number(els.rangeEndInput && els.rangeEndInput.value) || selected.end || start + 15);
         if (maxDuration) end = Math.min(maxDuration, end);
-        selected.start = start;
-        selected.end = end;
-        selected.duration = Math.max(1, end - start);
-        selected.rangeText = utils.formatRange ? utils.formatRange(start, end) : `${start.toFixed(1)} ~ ${end.toFixed(1)}`;
-        selected.custom = true;
-        selected.reasons = Array.from(new Set([...(selected.reasons || []), '사용자가 직접 조절한 커스텀 구간']));
-        state.selectedRange = { start, end, duration: selected.duration, score: selected.score };
+        setRecommendationRange(selected, start, end, '사용자가 직접 조절한 커스텀 구간');
         const media = getActiveMediaElement();
         if (media) {
             try { media.currentTime = start; } catch (error) { /* ignored */ }
@@ -901,7 +1008,7 @@
         state.captions = cues;
         if (store.addDiagnostic) store.addDiagnostic({ type: 'captions-applied', count: cues.length });
         updateCaptionStatus();
-        renderAutoCutSummary(selected);
+        renderAutoCutSummary(getSelectedRecommendation());
         renderPreviewStill();
         toast(cues.length ? `${cues.length}개 자막을 적용했습니다.` : '적용할 자막을 찾지 못했습니다.');
     }
@@ -910,7 +1017,7 @@
         state.captions = [];
         if (els.captionTextInput) els.captionTextInput.value = '';
         updateCaptionStatus();
-        renderAutoCutSummary(selected);
+        renderAutoCutSummary(getSelectedRecommendation());
         renderPreviewStill();
         toast('자막을 비웠습니다.');
     }
@@ -1009,7 +1116,8 @@
         applyManualRange,
         exportSelectedRange,
         exportAllCandidates,
-        saveThumbnail
+        saveThumbnail,
+        snapSelectedBoundaryToNearestCut
     });
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

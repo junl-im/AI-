@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.8.0 - Waveform Cut Marker Editing
+
+- Added waveform-level cut marker overlay.
+- Added beat, scene-change and silence-exit marker colors.
+- Added silence segment shading directly on the waveform.
+- Added selected range band inside the cut marker overlay.
+- Added marker click seeking and boundary adjustment.
+- Added start/end snap-to-nearest-cut buttons.
+- Added `src/ui/cut-marker-overlay.js`.
+- Added `assets/css/cut-markers.css`.
+- Added `qa/cut_marker_smoke.js`.
+- Fixed caption apply/clear runtime references to use the current selected recommendation.
+
+
 ## v0.7.0 - 자동 컷 편집 패치
 
 - 무음 구간 자동 감지 추가

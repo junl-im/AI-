@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-7-0",
-  "version": "0.7.0",
+  "name": "ai-shorts-studio-v0-8-0",
+  "version": "0.8.0",
   "private": true,
-  "description": "AI Shorts Studio v0.7.0 - automatic cut editing with silence, beat and scene-change cut points",
+  "description": "AI Shorts Studio v0.8.0 - waveform cut markers for beat, silence and scene-change editing",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -22,6 +22,7 @@
     "node --check src/render/vertical-renderer.js",
     "node --check src/download/download-service.js",
     "node --check src/ui/waveform-view.js",
+    "node --check src/ui/cut-marker-overlay.js",
     "node --check src/ui/timeline-view.js",
     "node --check src/ui/ux-controls.js",
     "node --check src/ui/range-drag-controls.js",
@@ -40,6 +41,7 @@
     "node qa/caption_pro_smoke.js",
     "node qa/recommendation_engine_smoke.js",
     "node qa/auto_cut_smoke.js",
+    "node qa/cut_marker_smoke.js",
     "node qa/output_quality_smoke.js",
     "node qa/render_capability_smoke.js",
     "node qa/docs_handoff_smoke.js",
