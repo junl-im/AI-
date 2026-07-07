@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-9-0",
-  "version": "0.9.0",
+  "name": "ai-shorts-studio-v0-9-3",
+  "version": "0.9.3",
   "private": true,
-  "description": "AI Shorts Studio v0.9.0 - modular engine architecture and scoring reinforcement pass",
+  "description": "AI Shorts Studio v0.9.3 - stabilized modular pro engine and workflow hardening",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -21,6 +21,10 @@
     "node --check src/engine/analysis-pipeline.js",
     "node --check src/engine/performance-budget.js",
     "node --check src/engine/module-registry.js",
+    "node --check src/engine/stability-auditor.js",
+    "node --check src/engine/pro-engine-tuner.js",
+    "node --check src/engine/analysis-cache.js",
+    "node --check src/engine/module-contracts.js",
     "node --check src/caption/caption-service.js",
     "node --check src/project/project-service.js",
     "node --check src/render/quality-effects.js",
@@ -41,6 +45,7 @@
     "node qa/no_duplicate_functions_smoke.js",
     "node qa/no_external_dependency_smoke.js",
     "node qa/html_anchor_smoke.js",
+    "node qa/header_intro_smoke.js",
     "node qa/uiux_anchor_smoke.js",
     "node qa/layout_dock_smoke.js",
     "node qa/lean_dock_performance_smoke.js",
@@ -55,6 +60,9 @@
     "node qa/docs_handoff_smoke.js",
     "node qa/caption_service_smoke.js",
     "node qa/project_service_smoke.js",
-    "node qa/modular_engine_smoke.js"
+    "node qa/modular_engine_smoke.js",
+    "node qa/hyperflow_workflow_smoke.js",
+    "node qa/pro_engine_stability_smoke.js",
+    "node qa/engine_contracts_smoke.js"
   ]
 }

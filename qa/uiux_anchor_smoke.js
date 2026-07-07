@@ -6,7 +6,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const requiredIds = [
-    'heroAnalyzeBtn', 'quickDurationChips', 'stepImport', 'stepAnalyze', 'stepEdit', 'stepExport',
+    'quickDurationChips', 'stepImport', 'stepAnalyze', 'stepEdit', 'stepExport',
     'dockPreviewBtn', 'dockExportBtn', 'dockTitle', 'dockMeta', 'mobileActionBar',
     'mobileAnalyzeBtn', 'mobilePreviewBtn', 'mobileExportBtn'
 ];

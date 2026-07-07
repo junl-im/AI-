@@ -3,62 +3,68 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.9.0 - Modular Engine 강화 패치" />
+<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.9.3 - 음악과 영상을 쇼츠 후보로 자동 추천하는 로컬 웹 스튜디오" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
 <meta name="theme-color" content="#7c3aed" />
-<title>AI 쇼츠 제작 스튜디오 v0.9.0</title>
+<title>AI 쇼츠 제작 스튜디오 v0.9.3</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/studio.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/editor.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/ux.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/auto-cut.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/cut-markers.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/feedback-ux.css?v=0.9.0-modular-engine" />
-<link rel="stylesheet" href="assets/css/engine-panel.css?v=0.9.0-modular-engine" />
-<script defer src="src/config/app-runtime-config.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/utils/core-utils.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/state/app-state.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/analysis/auto-cut-detector.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/engine/module-registry.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/engine/performance-budget.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/engine/analysis-pipeline.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/engine/scoring-pipeline.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/engine/engine-kernel.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/caption/caption-service.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/project/project-service.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/render/quality-effects.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/render/vertical-renderer.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/download/download-service.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/ui/waveform-view.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/ui/cut-marker-overlay.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/ui/timeline-view.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/security/site-guards.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/boot/runtime-health.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/app.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/ui/ux-controls.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/ui/range-drag-controls.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/ui/bottom-dock.js?v=0.9.0-modular-engine"></script>
-<script defer src="src/ui/feedback-ux.js?v=0.9.0-modular-engine"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/studio.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/editor.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/ux.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/auto-cut.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/cut-markers.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/feedback-ux.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/engine-panel.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/pro-engine.css?v=0.9.3-pro-engine" />
+<link rel="stylesheet" href="assets/css/hyperflow-tabs.css?v=0.9.3-pro-engine" />
+<script defer src="src/config/app-runtime-config.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/utils/core-utils.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/state/app-state.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/analysis/auto-cut-detector.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/module-registry.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/module-contracts.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/analysis-cache.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/performance-budget.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/analysis-pipeline.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/scoring-pipeline.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/pro-engine-tuner.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/stability-auditor.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/engine/engine-kernel.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/caption/caption-service.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/project/project-service.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/render/quality-effects.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/render/vertical-renderer.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/download/download-service.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/ui/waveform-view.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/ui/cut-marker-overlay.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/ui/timeline-view.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/security/site-guards.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/boot/runtime-health.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/app.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/ui/ux-controls.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/ui/range-drag-controls.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/ui/bottom-dock.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/ui/hyperflow-tabs.js?v=0.9.3-pro-engine"></script>
+<script defer src="src/ui/feedback-ux.js?v=0.9.3-pro-engine"></script>
 </head>
-<body data-build="0.9.0" data-ui="modular-engine">
+<body data-build="0.9.3" data-ui="hyperflow-tabs" data-active-flow-tab="file">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel" aria-label="앱 소개">
             <div class="brand-topline">
                 <div class="brand-kicker">
-                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.9.0 Modular Engine</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button" aria-label="프로그램 정보 열기">v0.9.3</button>
                     <span class="badge badge-device">PC · 모바일 브라우저</span>
-                    <span class="badge badge-free">무료 기능 기반</span>
-                    <span class="feedback-badge">📳 햅틱 피드백</span>
+                    <span class="badge badge-free">무료 로컬 처리</span>
                 </div>
                 <div class="brand-right-actions">
                     <span class="brand-signature-pill"><span class="brand-mark" aria-hidden="true">🦊</span><span>Design by <strong>곰같은여우</strong></span></span>
@@ -67,34 +73,38 @@
             <div class="hero-mainline">
                 <div class="hero-copy">
                     <h1>AI 쇼츠 <span>스튜디오</span></h1>
-                    <p class="hero-compact-note">Design by 곰같은여우. Design by 곰같은여우. 분석·추천·컷·렌더를 모듈형 엔진으로 분리해 더 빠르고 강하게 확장할 수 있게 정리했습니다.</p>
+                    <p class="hero-compact-note">음악이나 영상을 열면 자동 분석하고, 쇼츠 후보 추천·세로 미리보기·자막·저장까지 이어주는 로컬 웹 스튜디오입니다.</p>
                 <div class="hero-cta-row" aria-label="빠른 시작 버튼">
-                    <label class="btn-primary hero-file-btn" for="fileInput">파일 열기</label>
-                    <button id="heroAnalyzeBtn" class="btn-secondary" type="button" disabled>바로 분석</button>
+                    <label class="btn-primary hero-file-btn" for="fileInput">📂 파일 열기</label>
                     <label class="btn-secondary hero-file-btn" for="projectFileInput">프로젝트 불러오기</label>
                 </div>
-                </div>
-                <div class="hero-meter" aria-hidden="true">
-                    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
                 </div>
             </div>
         
             <nav class="workflow-rail" aria-label="제작 진행 단계">
                 <div id="stepImport" class="workflow-step is-active"><span>1</span><strong>불러오기</strong><em>원본 선택</em></div>
-                <div id="stepAnalyze" class="workflow-step"><span>2</span><strong>AI 추천</strong><em>하이라이트 분석</em></div>
+                <div id="stepAnalyze" class="workflow-step"><span>2</span><strong>자동 분석</strong><em>파일 열면 시작</em></div>
                 <div id="stepEdit" class="workflow-step"><span>3</span><strong>편집</strong><em>구간·자막 조정</em></div>
                 <div id="stepExport" class="workflow-step"><span>4</span><strong>내보내기</strong><em>쇼츠 저장</em></div>
             </nav>
-            <div class="brand-signature-card" aria-label="디자인 바이 곰같은여우 크레딧과 피드백 안내">
-                <div><span>BRAND SIGNATURE</span><strong>디자인 바이 곰같은여우</strong></div>
-                <em class="feedback-hint">📳 버튼 클릭 · 성공 · 경고 · 오류별 진동 알림</em>
-            </div>
 </section>
     </header>
 
-    <main class="studio-grid">
+
+    <section id="hyperflowStage" class="hyperflow-stage" aria-label="초연결 작업 상태">
+        <div class="hyperflow-stage-main">
+            <span id="hyperflowStageIcon" class="hyperflow-stage-icon">📂</span>
+            <div>
+                <strong id="hyperflowStageTitle">파일을 열면 자동 분석합니다</strong>
+                <small id="hyperflowStageMeta">하단 Dock에서 8개 구간을 탭처럼 전환하세요.</small>
+            </div>
+        </div>
+        <button id="flowRecommendBtn" class="hyperflow-recommend-btn" type="button" disabled>✨ 추천 생성</button>
+    </section>
+
+    <main class="studio-grid" id="studioGrid">
         <section class="console-panel" aria-label="쇼츠 제작 컨트롤">
-            <section class="control-zone control-zone-load" aria-label="불러오기 영역">
+            <section class="control-zone control-zone-load" data-flow-panel="file" aria-label="불러오기 영역">
                 <div class="panel-head">
                     <strong>불러오기</strong>
                     <span id="selectedBadge" class="badge">선택 없음</span>
@@ -110,10 +120,10 @@
                 <p id="importStatus" class="import-status" aria-live="polite">파일은 서버로 업로드되지 않습니다. 브라우저 안에서 분석합니다.</p>
             </section>
 
-            <section class="control-zone" aria-label="추천 설정">
+            <section class="control-zone" data-flow-panel="recommend" aria-label="추천 설정">
                 <div class="panel-head">
                     <strong>추천 설정</strong>
-                    <small id="analysisStatus">파일 대기</small>
+                    <small id="analysisStatus">파일 대기 · 열면 자동 분석</small>
                 </div>
                 <div class="settings-grid">
                     <label class="field">
@@ -165,23 +175,25 @@
                         <button type="button" class="quick-chip" data-duration="90">90초</button>
                     </div>
                 </div>
-                <button id="analyzeBtn" class="btn-primary" type="button" disabled>분석하고 추천받기</button>
+                <button id="analyzeBtn" class="btn-primary recommend-generate-btn" type="button" disabled>✨ 추천 생성</button>
                 <div class="progress-wrap" aria-label="처리 진행률">
                     <div id="progressBar" class="progress-bar"></div>
                 </div>
                 <div class="engine-status-card" aria-label="모듈형 엔진 상태">
-                    <strong>🧠 모듈형 엔진 <span id="engineStatusText">대기</span></strong>
+                    <strong>🧠 프로 엔진 <span id="engineStatusText">대기</span></strong>
                     <div class="engine-pill-row">
-                        <span class="engine-pill">🎧 오디오 분석</span>
-                        <span class="engine-pill">🎬 영상 움직임</span>
-                        <span class="engine-pill">✂️ 자동 컷</span>
-                        <span class="engine-pill">🏆 점수 보강</span>
+                        <span class="engine-pill">🎧 오디오</span>
+                        <span class="engine-pill">🎬 모션</span>
+                        <span class="engine-pill">✂️ 컷</span>
+                        <span class="engine-pill">🏆 점수</span>
+                        <span class="engine-pill">🧩 모듈</span>
+                        <span class="engine-pill">🛡️ 안정화</span>
                     </div>
-                    <p>각 엔진은 독립 모듈로 분리되어 이후 Whisper, 얼굴추적, 고급 렌더러도 갈아끼울 수 있습니다.</p>
+                    <p>분석·추천·컷·렌더를 독립 모듈로 분리하고, 안정성 점검과 세션 캐시로 반복 작업을 더 빠르게 처리합니다.</p>
                 </div>
             </section>
 
-            <section class="control-zone" aria-label="AI 추천 구간">
+            <section class="control-zone" data-flow-panel="recommend" aria-label="AI 추천 구간">
                 <div class="panel-head">
                     <strong>AI 추천 구간</strong>
                     <small id="recommendationCount">0개</small>
@@ -207,7 +219,7 @@
                 </div>
             </section>
 
-            <section class="preview-card">
+            <section class="preview-card" data-flow-panel="preview">
                 <div class="panel-head">
                     <strong>9:16 세로 미리보기</strong>
                     <small id="previewStatus">대기</small>
@@ -225,7 +237,7 @@
                 </div>
             </section>
 
-            <section class="waveform-card" aria-label="파형 타임라인">
+            <section class="waveform-card" data-flow-panel="waveform" aria-label="파형 타임라인">
                 <div class="panel-head">
                     <strong>파형 · 추천 위치</strong>
                     <small id="selectedRangeText">구간 없음</small>
@@ -254,7 +266,7 @@
                 <div id="timelineView" class="timeline-view"></div>
             </section>
 
-            <section class="auto-cut-panel" aria-label="자동 컷 편집">
+            <section class="auto-cut-panel" data-flow-panel="cut" aria-label="자동 컷 편집">
                 <div class="auto-cut-head">
                     <div>
                         <strong>자동 컷 편집</strong>
@@ -301,7 +313,7 @@
                 </div>
             </section>
 
-            <section class="edit-tools-card" aria-label="구간 조절과 자막">
+            <section class="edit-tools-card" data-flow-panel="edit caption quality" aria-label="구간 조절과 자막">
                 <div class="panel-head">
                     <strong>구간 조절 · 자막</strong>
                     <small id="captionStatus">자막 없음</small>
@@ -537,7 +549,22 @@
                 </div>
             </section>
 
-            <section class="project-card" aria-label="프로젝트 저장과 불러오기">
+
+            <section class="export-card hyperflow-export-panel" data-flow-panel="export" aria-label="내보내기 퀵 패널">
+                <div class="panel-head">
+                    <strong>내보내기</strong>
+                    <small>썸네일 · 단일 · 일괄 저장</small>
+                </div>
+                <p class="helper-text">추천 구간을 선택하면 미리보기 탭으로 자동 이동합니다. 여기서는 결과물 저장만 빠르게 실행합니다.</p>
+                <div class="hyperflow-export-grid">
+                    <button id="flowPreviewBtn" class="btn-secondary" type="button" disabled>▶ 미리보기 재생</button>
+                    <button id="flowThumbnailBtn" class="btn-secondary" type="button" disabled>🖼 썸네일 저장</button>
+                    <button id="flowExportBtn" class="btn-primary" type="button" disabled>⬇ 쇼츠 저장</button>
+                    <button id="flowExportAllBtn" class="btn-secondary" type="button" disabled>📦 후보 일괄 저장</button>
+                </div>
+            </section>
+
+            <section class="project-card" data-flow-panel="project" aria-label="프로젝트 저장과 불러오기">
                 <div class="panel-head">
                     <strong>프로젝트</strong>
                     <small>원본 파일 제외 JSON 저장</small>
@@ -550,7 +577,7 @@
                 </div>
             </section>
 
-            <section class="copy-card" aria-label="제목과 해시태그">
+            <section class="copy-card" data-flow-panel="project" aria-label="제목과 해시태그">
                 <div class="panel-head">
                     <strong>쇼츠 카피 초안</strong>
                     <small>복사해서 사용</small>
@@ -573,38 +600,38 @@
     </main>
 </div>
 
-<div id="bottomDock" class="bottom-dock bottom-dock-lean" aria-label="하단 고정 빠른 실행 Dock">
+<div id="bottomDock" class="bottom-dock bottom-dock-hyperflow" aria-label="하단 고정 HyperFlow 탭 Dock">
     <div class="bottom-dock-status bottom-dock-status-sr" aria-live="polite">
         <span id="bottomDockDot" class="bottom-dock-dot"></span>
         <div class="bottom-dock-copy">
             <strong id="bottomDockTitle">파일을 열어주세요</strong>
-            <small id="bottomDockMeta">📂 파일 열기 · ⚡ 분석하기만 크게 제공합니다.</small>
+            <small id="bottomDockMeta">파일 열기 즉시 자동 분석 · 추천 생성 후 초연결 탭 전환</small>
         </div>
     </div>
-    <div class="bottom-dock-actions bottom-dock-actions-lean" role="toolbar" aria-label="빠른 실행">
-        <label id="bottomFileBtn" class="bottom-dock-btn bottom-dock-file" for="fileInput"><span class="dock-emoji" aria-hidden="true">📂</span><span>파일 열기</span></label>
-        <button id="bottomAnalyzeBtn" class="bottom-dock-btn bottom-dock-primary" type="button" disabled><span class="dock-emoji" aria-hidden="true">⚡</span><span>분석하기</span></button>
-    </div>
+    <nav class="bottom-dock-tabs" role="tablist" aria-label="제작 구간 퀵 메뉴">
+        <label id="bottomFileBtn" class="bottom-dock-tab is-active" role="tab" aria-selected="true" data-flow-tab="file" for="fileInput"><span>📂</span><b>파일</b></label>
+        <button class="bottom-dock-tab" role="tab" aria-selected="false" data-flow-tab="recommend" type="button"><span>✨</span><b>추천</b></button>
+        <button class="bottom-dock-tab" role="tab" aria-selected="false" data-flow-tab="preview" type="button"><span>📱</span><b>미리보기</b></button>
+        <button class="bottom-dock-tab" role="tab" aria-selected="false" data-flow-tab="waveform" type="button"><span>〰️</span><b>파형</b></button>
+        <button class="bottom-dock-tab" role="tab" aria-selected="false" data-flow-tab="cut" type="button"><span>✂️</span><b>컷</b></button>
+        <button class="bottom-dock-tab" role="tab" aria-selected="false" data-flow-tab="edit" type="button"><span>🎛️</span><b>편집</b></button>
+        <button class="bottom-dock-tab" role="tab" aria-selected="false" data-flow-tab="caption" type="button"><span>💬</span><b>자막</b></button>
+        <button class="bottom-dock-tab" role="tab" aria-selected="false" data-flow-tab="export" type="button"><span>⬇️</span><b>저장</b></button>
+    </nav>
 </div>
 
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.9.0</h2>
-        <p>이 버전은 Design by 곰같은여우 브랜딩과 버튼 클릭/구분별 진동 알림을 추가한 편의성 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.9.3</h2>
+        <p>긴 음악이나 영상을 열면 브라우저 안에서 자동 분석하고, 쇼츠로 쓰기 좋은 구간을 추천해 세로 미리보기와 저장까지 도와주는 제작 스튜디오입니다.</p>
         <ul>
-            <li>오디오 에너지, 피크, 트랜지언트, 무음 비율을 분석합니다.</li>
-            <li>무음·비트·장면 전환을 함께 계산해 컷 후보 타임라인과 템포 점수를 표시합니다.</li>
-            <li>비디오 파일은 움직임 샘플링 점수를 보조로 사용합니다.</li>
-            <li>추천 구간의 시작/끝을 숫자, 1초 미세 조절, 파형 드래그 핸들로 조절할 수 있습니다.</li>
-            <li>네온·클린·시네마틱·헤드라인 썸네일 템플릿을 선택하고 PNG 저장 또는 영상 내보내기에 반영할 수 있습니다.</li>
-            <li>상위 추천 후보를 순서대로 일괄 내보내기할 수 있습니다.</li>
-            <li>SRT/VTT 자막을 불러오거나 직접 붙여넣어 세로 프리뷰와 내보내기에 반영합니다.</li>
-            <li>밝기·대비·채도·비네팅, 페이드 인/아웃, 워터마크, 인트로/아웃트로 텍스트를 미리보기와 내보내기에 반영합니다.</li>
-            <li>하단 Dock은 📂 파일 열기와 ⚡ 분석하기 두 개의 큰 버튼으로 단순화했습니다.</li>
-            <li>버튼 클릭, 파일 열기, 분석, 저장, 복사, 경고, 오류 상태에 따라 서로 다른 햅틱 진동 패턴을 제공합니다.</li>
-            <li>알림 토스트는 성공/경고/오류/파일/내보내기 유형별 아이콘과 색상으로 구분됩니다.</li>
-            <li>내보내기는 브라우저 MediaRecorder 지원 범위에 따라 WebM 또는 MP4가 될 수 있습니다.</li>
+            <li>파일을 열면 자동으로 오디오 에너지, 피크, 무음, 움직임을 분석합니다.</li>
+            <li>추천 생성 후 원하는 후보를 고르면 미리보기로 자연스럽게 연결됩니다.</li>
+            <li>파형, 컷, 편집, 자막, 저장 메뉴를 하단 Dock에서 빠르게 전환합니다.</li>
+            <li>자막 디자인, 썸네일 템플릿, 밝기·대비·채도, 워터마크를 조절할 수 있습니다.</li>
+            <li>원본 파일은 서버로 업로드하지 않고 로컬 브라우저에서 처리합니다.</li>
+            <li>Design by 곰같은여우.</li>
         </ul>
     </div>
 </div>
@@ -612,7 +639,7 @@
 
 <div id="mobileActionBar" class="mobile-action-bar legacy-mobile-action-bar" aria-label="모바일 빠른 작업">
     <label class="mobile-action mobile-file" for="fileInput">파일</label>
-    <button id="mobileAnalyzeBtn" class="mobile-action" type="button" disabled>분석</button>
+    <button id="mobileAnalyzeBtn" class="mobile-action" type="button" disabled>추천</button>
     <button id="mobilePreviewBtn" class="mobile-action" type="button" disabled>미리보기</button>
     <button id="mobileExportBtn" class="mobile-action mobile-primary" type="button" disabled>내보내기</button>
 </div>

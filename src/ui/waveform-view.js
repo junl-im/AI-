@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.0 - waveform view with engine badges
+// AI Shorts Studio v0.9.3 - waveform view with engine badges
 'use strict';
 
 (function exposeWaveformView(global) {

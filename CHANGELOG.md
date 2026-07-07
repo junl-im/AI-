@@ -1,35 +1,10 @@
-# CHANGELOG
+# Changelog
 
-## v0.9.0 - Modular Engine Reinforcement
+## v0.9.3
 
-### Added
-
-- `src/engine/module-registry.js`
-- `src/engine/performance-budget.js`
-- `src/engine/analysis-pipeline.js`
-- `src/engine/scoring-pipeline.js`
-- `src/engine/engine-kernel.js`
-- `assets/css/engine-panel.css`
-- `qa/modular_engine_smoke.js`
-
-### Changed
-
-- 앱 분석 흐름을 `AIShortsEngineKernel.analyzeMedia()` 중심으로 연결
-- 추천 흐름을 `AIShortsEngineKernel.createRecommendations()` 중심으로 연결
-- 추천 후보에 품질 게이트와 엔진 배지 추가
-- 상태 저장소에 `engineMeta`, `engineOptions` 추가
-- 서비스워커 캐시를 v0.9.0으로 갱신
-- index 빌드/메타/스크립트 쿼리 v0.9.0으로 갱신
-
-### Preserved
-
-- Design by 곰같은여우 브랜딩
-- 📂 파일 열기 / ⚡ 분석하기 2버튼 하단 Dock
-- 햅틱 피드백/토스트 알림
-- 자막 스타일, 컷 마커, 품질 패널, 일괄 내보내기
-- 무료 로컬 브라우저 기반 처리 원칙
-
-### QA
-
-- 모듈형 엔진 가드레일 체크 추가
-- 전체 QA는 `npm run check`로 실행
+- 안정화 중심의 프로 엔진 패치.
+- 엔진 모듈 계약 검증, 분석 결과 정규화, 추천 후보 검증 추가.
+- 세션 분석 캐시 추가로 같은 파일 반복 작업의 재분석 비용 감소.
+- 프로 엔진 튜너 추가: 성능 예산, 추천 신뢰도, 후보 등급, 렌더 힌트 보강.
+- 런타임 안정성 점검 모듈 추가.
+- 하단 8탭 HyperFlow 구조와 깨끗한 상단 소개 정책 유지.

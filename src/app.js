@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.0 - main app with modular engine pass
+// AI Shorts Studio v0.9.3 - main app with clean intro and HyperFlow workflow
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -98,7 +98,9 @@
             'autoCutSummary', 'tempoScoreText', 'silenceRiskText', 'cutCountText', 'autoCutTimelineList',
             'silenceThresholdInput', 'silenceThresholdValue', 'beatSensitivityInput', 'beatSensitivityValue',
             'motionSensitivityInput', 'motionSensitivityValue', 'handlePaddingSelect', 'autoTrimBtn', 'autoTrimAllBtn', 'refreshCutsBtn',
-            'cutMarkerOverlay', 'cutMarkerFocusText', 'snapStartCutBtn', 'snapEndCutBtn', 'engineStatusText'
+            'cutMarkerOverlay', 'cutMarkerFocusText', 'snapStartCutBtn', 'snapEndCutBtn', 'engineStatusText',
+            'flowRecommendBtn', 'flowPreviewBtn', 'flowThumbnailBtn', 'flowExportBtn', 'flowExportAllBtn',
+            'hyperflowStageTitle', 'hyperflowStageMeta', 'hyperflowStageIcon'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -130,10 +132,31 @@
         }
         if (meta && meta.budget) {
             const modules = meta.registry && meta.registry.count ? `${meta.registry.count}개 모듈` : '모듈 활성';
-            els.engineStatusText.textContent = `${meta.budget.label || '모듈형'} · ${modules}`;
+            const cache = meta.cache && meta.cache.hitRate ? ` · 캐시 ${meta.cache.hitRate}%` : '';
+            const stability = meta.contract && meta.contract.score ? ` · 안정 ${meta.contract.score}` : '';
+            els.engineStatusText.textContent = `${meta.budget.label || '프로 엔진'} · ${modules}${stability}${cache}`;
             return;
         }
         els.engineStatusText.textContent = '대기';
+    }
+
+
+    function hasAnalysisReady() {
+        return Boolean(state && (state.audioAnalysis || state.motionAnalysis));
+    }
+
+    function activateFlowTab(tab, options) {
+        if (global.AIShortsHyperFlowTabs && global.AIShortsHyperFlowTabs.setActiveFlowTab) {
+            global.AIShortsHyperFlowTabs.setActiveFlowTab(tab, options || {});
+        } else if (document && document.body) {
+            document.body.dataset.activeFlowTab = tab;
+        }
+    }
+
+    function syncHyperFlow() {
+        if (global.AIShortsHyperFlowTabs && global.AIShortsHyperFlowTabs.scheduleSync) {
+            global.AIShortsHyperFlowTabs.scheduleSync();
+        }
     }
 
     function syncSettingsToUI() {
@@ -425,7 +448,12 @@
     function updateButtons() {
         const hasFile = Boolean(state.file);
         const hasRecs = Boolean(state.recommendations && state.recommendations.length);
-        if (els.analyzeBtn) els.analyzeBtn.disabled = !hasFile || state.isAnalyzing;
+        const analysisReady = hasAnalysisReady();
+        if (els.analyzeBtn) {
+            els.analyzeBtn.disabled = !analysisReady || state.isAnalyzing;
+            els.analyzeBtn.textContent = state.isAnalyzing ? '⚙️ 자동 분석 중' : '✨ 추천 생성';
+        }
+        if (els.flowRecommendBtn) els.flowRecommendBtn.disabled = !analysisReady || state.isAnalyzing;
         if (els.previewBtn) els.previewBtn.disabled = !hasRecs || state.isPreviewing;
         if (els.stopPreviewBtn) els.stopPreviewBtn.disabled = !state.isPreviewing;
         if (els.exportBtn) els.exportBtn.disabled = !hasRecs || state.isPreviewing;
@@ -435,6 +463,11 @@
         if (els.autoTrimBtn) els.autoTrimBtn.disabled = !hasRecs || !state.autoCuts;
         if (els.autoTrimAllBtn) els.autoTrimAllBtn.disabled = !hasRecs || !state.autoCuts;
         if (els.refreshCutsBtn) els.refreshCutsBtn.disabled = !(state.audioAnalysis || state.motionAnalysis);
+        if (els.flowPreviewBtn) els.flowPreviewBtn.disabled = !hasRecs || state.isPreviewing;
+        if (els.flowThumbnailBtn) els.flowThumbnailBtn.disabled = !hasRecs;
+        if (els.flowExportBtn) els.flowExportBtn.disabled = !hasRecs || state.isPreviewing;
+        if (els.flowExportAllBtn) els.flowExportAllBtn.disabled = !hasRecs || state.isPreviewing;
+        syncHyperFlow();
     }
 
     function getSelectedRecommendation() {
@@ -633,6 +666,8 @@
         }
         updateSelectedRangeControls(item);
         renderAll();
+        activateFlowTab('preview');
+        toast('선택한 추천 구간을 미리보기로 연결했습니다.', 'action');
     }
 
     function bindEvents() {
@@ -649,7 +684,7 @@
                 handleFiles(event.dataTransfer && event.dataTransfer.files);
             });
         }
-        if (els.analyzeBtn) els.analyzeBtn.addEventListener('click', analyzeCurrentFile);
+        if (els.analyzeBtn) els.analyzeBtn.addEventListener('click', generateRecommendationsFromAnalysis);
         if (els.previewBtn) els.previewBtn.addEventListener('click', previewSelectedRange);
         if (els.stopPreviewBtn) els.stopPreviewBtn.addEventListener('click', stopPreview);
         if (els.exportBtn) els.exportBtn.addEventListener('click', exportSelectedRange);
@@ -729,6 +764,8 @@
         if (store.addDiagnostic) store.addDiagnostic({ type: 'import', fileName: file.name, fileType: file.type, fileSize: file.size, kind });
         renderAll();
         updateButtons();
+        activateFlowTab('file', { scroll: false });
+        window.setTimeout(() => analyzeCurrentFile({ autoGenerate: false, source: 'file-open' }), 80);
     }
 
     function setupMediaPreview() {
@@ -756,7 +793,8 @@
         };
     }
 
-    async function analyzeCurrentFile() {
+    async function analyzeCurrentFile(options) {
+        const analysisOptions = Object.assign({ autoGenerate: false }, options || {});
         if (!state.file || state.isAnalyzing) return;
         state.isAnalyzing = true;
         state.recommendations = [];
@@ -787,8 +825,9 @@
                 state.autoCuts = result.autoCuts;
                 state.waveformBins = result.waveformBins || [];
                 state.fileMeta = Object.assign({}, state.fileMeta || {}, result.fileMeta || {});
-                state.engineMeta = result.engine || { version: '0.9.0' };
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '0.9.0', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
+                state.engineMeta = result.engine || { version: '0.9.3' };
+                if (engineKernel.auditRuntime) state.engineMeta.stability = engineKernel.auditRuntime(state);
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '0.9.3', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
             } else {
                 let audioResult = null;
                 try {
@@ -815,10 +854,17 @@
                 setProgress(90, '자동 컷 포인트 계산 중');
                 buildAutoCutTimeline();
             }
-            setProgress(92, '모듈형 추천 엔진 계산 중');
-            createRecommendations();
-            setProgress(100, '추천 완료');
-            toast('쇼츠 추천 구간을 만들었습니다.', 'success');
+            if (analysisOptions.autoGenerate) {
+                setProgress(92, '모듈형 추천 엔진 계산 중');
+                createRecommendations({ autoSelect: false });
+                setProgress(100, '추천 완료');
+                toast('쇼츠 추천 구간을 만들었습니다.', 'success');
+                activateFlowTab('recommend');
+            } else {
+                setProgress(100, '분석 완료 · 추천 생성 가능');
+                toast('자동 분석이 끝났습니다. 추천 생성을 눌러주세요.', 'success');
+                activateFlowTab('recommend');
+            }
         } catch (error) {
             setProgress(0, '분석 실패');
             toast(error.message || '분석에 실패했습니다.', 'error');
@@ -827,6 +873,30 @@
             state.isAnalyzing = false;
             updateButtons();
         }
+    }
+
+
+    function generateRecommendationsFromAnalysis() {
+        if (state.isAnalyzing) {
+            toast('자동 분석이 끝난 뒤 추천을 생성할 수 있습니다.', 'warning');
+            return;
+        }
+        if (!hasAnalysisReady()) {
+            if (state.file) {
+                toast('아직 분석 데이터가 없습니다. 파일 자동 분석을 다시 시작합니다.', 'warning');
+                analyzeCurrentFile({ autoGenerate: false, source: 'recommend-retry' });
+            } else {
+                toast('먼저 파일을 열어주세요.', 'warning');
+                activateFlowTab('file');
+            }
+            return;
+        }
+        setProgress(92, '추천 생성 중');
+        buildAutoCutTimeline();
+        createRecommendations({ autoSelect: false });
+        setProgress(100, '추천 생성 완료');
+        activateFlowTab('recommend');
+        toast('추천 후보를 생성했습니다. 마음에 드는 구간을 선택하세요.', 'success');
     }
 
     function createFallbackAudioAnalysis(duration) {
@@ -845,7 +915,8 @@
         return { duration: total, frames, summary: { fallback: true } };
     }
 
-    function createRecommendations() {
+    function createRecommendations(optionsOverride) {
+        const createOptions = Object.assign({ autoSelect: false }, optionsOverride || {});
         let recommendations = [];
         const options = {
             duration: state.settings.duration,
@@ -868,8 +939,11 @@
             if (autoCutDetector.enhanceRecommendations) recommendations = autoCutDetector.enhanceRecommendations(recommendations, state.autoCuts, getAutoCutOptions());
         }
         state.recommendations = recommendations;
+        state.selectedRecommendationId = '';
+        state.selectedRange = null;
+        if (engineKernel.auditRuntime) state.engineMeta = Object.assign({}, state.engineMeta || {}, { stability: engineKernel.auditRuntime(state) });
         if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-recommendations', count: recommendations.length, modular: Boolean(engineKernel.createRecommendations) });
-        if (recommendations.length) selectRecommendation(recommendations[0].id);
+        if (recommendations.length && createOptions.autoSelect) selectRecommendation(recommendations[0].id);
         else renderAll();
     }
 
@@ -893,6 +967,7 @@
         const selected = getSelectedRecommendation();
         const media = getActiveMediaElement();
         if (!selected || !media) return;
+        activateFlowTab('preview');
         stopPreview();
         state.isPreviewing = true;
         updateButtons();
@@ -937,6 +1012,7 @@
         const selected = getSelectedRecommendation();
         const media = getActiveMediaElement();
         if (!selected || !media) return;
+        activateFlowTab('export');
         stopPreview();
         setProgress(2, '내보내기 준비');
         if (els.previewStatus) els.previewStatus.textContent = '내보내기 중';

@@ -1,0 +1,28 @@
+/* AI Shorts Studio v0.9.3 - stabilized pro engine polish */
+.engine-status-card {
+    contain: layout style;
+}
+.engine-status-card strong span {
+    font-variant-numeric: tabular-nums;
+}
+.engine-pill-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.engine-pill {
+    justify-content: center;
+    min-height: 30px;
+}
+.engine-pill:nth-child(5),
+.engine-pill:nth-child(6) {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.24);
+}
+.engine-badge-mini:first-child {
+    background: rgba(16, 185, 129, 0.16);
+    border-color: rgba(16, 185, 129, 0.3);
+    color: #047857;
+}
+@media (max-width: 760px) {
+    .engine-pill-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

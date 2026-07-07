@@ -11,7 +11,6 @@
         analyzeBtn: 'analyzeBtn',
         exportBtn: 'exportBtn',
         previewBtn: 'previewBtn',
-        heroAnalyzeBtn: 'heroAnalyzeBtn',
         mobileAnalyzeBtn: 'mobileAnalyzeBtn',
         mobilePreviewBtn: 'mobilePreviewBtn',
         mobileExportBtn: 'mobileExportBtn',
@@ -103,7 +102,6 @@
     }
 
     function uxSyncMirrors() {
-        uxSetButtonMirror(els.heroAnalyzeBtn, els.analyzeBtn);
         uxSetButtonMirror(els.mobileAnalyzeBtn, els.analyzeBtn);
         uxSetButtonMirror(els.mobilePreviewBtn, els.previewBtn);
         uxSetButtonMirror(els.mobileExportBtn, els.exportBtn);
@@ -130,7 +128,6 @@
     }
 
     function uxInstallMirrorButtons() {
-        if (els.heroAnalyzeBtn) els.heroAnalyzeBtn.addEventListener('click', () => uxClickWhenEnabled(els.analyzeBtn));
         if (els.mobileAnalyzeBtn) els.mobileAnalyzeBtn.addEventListener('click', () => uxClickWhenEnabled(els.analyzeBtn));
         if (els.mobilePreviewBtn) els.mobilePreviewBtn.addEventListener('click', () => uxClickWhenEnabled(els.previewBtn));
         if (els.mobileExportBtn) els.mobileExportBtn.addEventListener('click', () => uxClickWhenEnabled(els.exportBtn));

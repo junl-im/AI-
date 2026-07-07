@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.0 - state container
+// AI Shorts Studio v0.9.3 - state container
 'use strict';
 
 (function exposeState(global) {
@@ -14,6 +14,7 @@
         motionAnalysis: null,
         autoCuts: null,
         engineMeta: null,
+            proEngine: { stabilityScore: 100, cacheEnabled: true },
         waveformBins: [],
         recommendations: [],
         selectedRecommendationId: '',
