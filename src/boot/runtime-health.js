@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - runtime health
+// AI Shorts Studio v0.2.0 - runtime health
 'use strict';
 
 (function exposeRuntimeHealth(global) {

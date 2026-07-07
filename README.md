@@ -1,10 +1,10 @@
-# AI 쇼츠 제작 스튜디오 v0.1.0
+# AI 쇼츠 제작 스튜디오 v0.2.0
 
-## Current patch: v0.1.0 로컬 하이라이트 추천 MVP
+## Current patch: v0.2.0 편집·자막·프로젝트 업그레이드
 
-- Runtime asset cache key: `0.1.0-local-highlight-mvp`
-- Service worker cache: `ai-shorts-studio-shell-v0.1.0-local-highlight-mvp`
-- Package version: `0.1.0`
+- Runtime asset cache key: `0.2.0-editor-caption-project`
+- Service worker cache: `ai-shorts-studio-shell-v0.2.0-editor-caption-project`
+- Package version: `0.2.0`
 - Manual QA doc: `qa/QA_REPORT.md`
 
 ## 목표
@@ -13,7 +13,7 @@
 
 서버 업로드 없이 로컬 브라우저에서 처리하는 것을 기본 원칙으로 합니다.
 
-## v0.1.0 기능
+## v0.2.0 기능
 
 - 오디오/비디오 파일 불러오기
 - Web Audio 기반 로컬 오디오 분석
@@ -24,6 +24,13 @@
 - 파형 위 추천 구간 표시
 - 9:16 세로 캔버스 미리보기
 - 중앙 크롭, 상단 크롭, 하단 크롭, 블러 배경 맞춤 프레임
+- 추천 구간 시작/끝 시간 수동 조절
+- SRT/VTT 자막 업로드 및 붙여넣기
+- 빠른 텍스트 자막 자동 분할 fallback
+- 자막 스타일 3종: 굵은 쇼츠 자막, 깔끔한 하단 자막, 검정 박스 자막
+- 자막 싱크 보정
+- 썸네일 PNG 저장
+- 프로젝트 JSON 저장/불러오기
 - 쇼츠 제목/해시태그 초안 생성
 - MediaRecorder 기반 로컬 내보내기
 - 다운로드/공유 진단 복사
@@ -50,13 +57,37 @@
 3. 오디오 또는 비디오 파일을 불러옵니다.
 4. `분석하고 추천받기`를 누릅니다.
 5. 추천 카드에서 구간을 선택합니다.
-6. `선택 구간 미리보기`로 확인합니다.
-7. `세로 쇼츠 내보내기`로 저장합니다.
+6. 필요한 경우 `시작 시간`과 `끝 시간`을 수정한 뒤 `선택 구간 적용`을 누릅니다.
+7. SRT/VTT 자막을 열거나 자막 텍스트를 붙여넣고 `자막 적용`을 누릅니다.
+8. `선택 구간 미리보기`로 확인합니다.
+9. `썸네일 PNG 저장` 또는 `세로 쇼츠 내보내기`로 저장합니다.
+10. 작업 상태를 이어가려면 `프로젝트 저장`으로 JSON을 보관합니다.
+
+## 프로젝트 JSON 주의사항
+
+프로젝트 파일에는 원본 미디어가 포함되지 않습니다. 저장되는 항목은 다음과 같습니다.
+
+- 추천 구간
+- 직접 수정한 시작/끝 시간
+- 자막 큐
+- 자막 스타일/싱크 설정
+- 제목/해시태그
+- 앱 설정
+
+다시 열 때는 같은 원본 파일을 먼저 불러온 뒤 프로젝트 JSON을 적용하는 방식이 가장 안전합니다.
 
 ## QA
 
 ```bash
 npm run check
+```
+
+v0.2.0 기준 자동 QA 결과:
+
+```text
+AI Shorts Studio QA summary
+  Passed: 25/25
+  Failed: 0/25
 ```
 
 ## 패키징
@@ -65,7 +96,7 @@ npm run check
 npm run package:clean
 ```
 
-결과물은 `dist/ai-shorts-studio-v0.1.0-release.zip`에 생성됩니다.
+결과물은 `dist/ai-shorts-studio-v0.2.0-release.zip`에 생성됩니다.
 
 ## 브라우저 주의사항
 

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - state container
+// AI Shorts Studio v0.2.0 - state container
 'use strict';
 
 (function exposeState(global) {
@@ -16,6 +16,7 @@
         recommendations: [],
         selectedRecommendationId: '',
         selectedRange: null,
+        captions: [],
         settings: loadSettings(),
         isAnalyzing: false,
         isPreviewing: false,
@@ -28,7 +29,9 @@
             duration: 'auto',
             style: 'balanced',
             cropMode: 'center',
-            platform: 'youtube'
+            platform: 'youtube',
+            captionStyle: 'bold',
+            captionOffset: 0
         };
         try {
             const raw = global.localStorage && global.localStorage.getItem(config.LOCAL_STORAGE_KEY || 'ai-shorts-settings');
@@ -73,6 +76,7 @@
         state.recommendations = [];
         state.selectedRecommendationId = '';
         state.selectedRange = null;
+        state.captions = [];
         state.exportInfo = null;
         state.isAnalyzing = false;
         state.isPreviewing = false;

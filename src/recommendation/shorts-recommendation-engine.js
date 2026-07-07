@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - explainable shorts recommendation engine
+// AI Shorts Studio v0.2.0 - explainable shorts recommendation engine
 'use strict';
 
 (function exposeRecommendationEngine(global) {

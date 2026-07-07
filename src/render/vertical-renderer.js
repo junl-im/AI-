@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - vertical preview/export renderer
+// AI Shorts Studio v0.2.0 - vertical preview/export renderer
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -114,6 +114,76 @@
         lines.slice(0, maxLines || 3).forEach((line, index) => ctx.fillText(line, x, y + index * lineHeight));
     }
 
+
+    function drawCaption(ctx, width, height, text, style) {
+        const caption = String(text || '').trim();
+        if (!caption) return;
+        const mode = String(style || 'bold');
+        const x = width / 2;
+        const y = height * 0.69;
+        const maxWidth = width * 0.82;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const fontSize = mode === 'clean' ? 48 : 58;
+        const lineHeight = mode === 'clean' ? 58 : 68;
+        ctx.font = `900 ${fontSize}px system-ui, sans-serif`;
+        const lines = splitCaptionLines(ctx, caption, maxWidth, 2);
+        const boxHeight = lines.length * lineHeight + 34;
+        const boxY = y - boxHeight / 2;
+        if (mode === 'box' || mode === 'clean') {
+            ctx.fillStyle = mode === 'box' ? 'rgba(2, 6, 23, 0.76)' : 'rgba(2, 6, 23, 0.36)';
+            roundRect(ctx, (width - maxWidth) / 2 - 18, boxY, maxWidth + 36, boxHeight, 28);
+            ctx.fill();
+        }
+        lines.forEach((line, index) => {
+            const lineY = boxY + 22 + lineHeight * index + lineHeight / 2;
+            if (mode === 'bold') {
+                ctx.lineWidth = 14;
+                ctx.strokeStyle = 'rgba(0,0,0,0.72)';
+                ctx.strokeText(line, x, lineY);
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = 'rgba(124,58,237,0.72)';
+                ctx.strokeText(line, x, lineY);
+            }
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(line, x, lineY);
+        });
+        ctx.restore();
+    }
+
+    function splitCaptionLines(ctx, text, maxWidth, maxLines) {
+        const words = String(text || '').split(/\s+/).filter(Boolean);
+        if (!words.length) return [];
+        const lines = [];
+        let current = '';
+        words.forEach(word => {
+            const test = current ? current + ' ' + word : word;
+            if (ctx.measureText(test).width > maxWidth && current) {
+                lines.push(current);
+                current = word;
+            } else {
+                current = test;
+            }
+        });
+        if (current) lines.push(current);
+        if (lines.length <= maxLines) return lines;
+        const limited = lines.slice(0, maxLines);
+        limited[maxLines - 1] = limited[maxLines - 1].replace(/…$/, '') + '…';
+        return limited;
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+        const r = Math.max(0, Math.min(radius || 0, width / 2, height / 2));
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + width, y, x + width, y + height, r);
+        ctx.arcTo(x + width, y + height, x, y + height, r);
+        ctx.arcTo(x, y + height, x, y, r);
+        ctx.arcTo(x, y, x + width, y, r);
+        ctx.closePath();
+    }
+
     function drawOverlay(ctx, width, height, options) {
         const title = String(options && options.title || '');
         const rangeText = String(options && options.rangeText || '');
@@ -130,6 +200,7 @@
         ctx.font = '800 34px system-ui, sans-serif';
         ctx.fillStyle = '#cffafe';
         ctx.fillText(rangeText || 'AI 추천 구간', 74, height - 112);
+        drawCaption(ctx, width, height, options && options.captionText, options && options.captionStyle);
     }
 
     function renderStill(canvas, source, options) {
@@ -174,6 +245,10 @@
         const title = options && options.title || 'AI Shorts Studio';
         const rangeText = options && options.rangeText || '';
         const waveformBins = options && options.waveformBins || [];
+        const captions = Array.isArray(options && options.captions) ? options.captions : [];
+        const captionOffset = Number(options && options.captionOffset) || 0;
+        const captionStyle = options && options.captionStyle || 'bold';
+        const captionService = global.AIShortsCaptionService || {};
         let raf = 0;
         let stopped = false;
         const ctx = getCanvasContext(canvas);
@@ -184,7 +259,8 @@
             } else {
                 drawAudioVisual(ctx, canvas.width, canvas.height, { time: current, title, waveformBins });
             }
-            drawOverlay(ctx, canvas.width, canvas.height, { title, rangeText });
+            const activeCue = captionService.getActiveCue ? captionService.getActiveCue(captions, current, captionOffset) : null;
+            drawOverlay(ctx, canvas.width, canvas.height, { title, rangeText, captionText: activeCue && activeCue.text, captionStyle });
             if (onProgress) {
                 const progress = Math.min(99, 8 + ((current - started) / duration) * 88);
                 onProgress(progress, '세로 쇼츠 렌더링 중');
@@ -236,6 +312,7 @@
     global.AIShortsVerticalRenderer = Object.freeze({
         drawCoverImage,
         drawAudioVisual,
+        drawCaption,
         drawOverlay,
         renderStill,
         createCanvasStream,

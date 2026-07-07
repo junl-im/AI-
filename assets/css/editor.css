@@ -118,3 +118,28 @@
     font-size: 26px;
     line-height: 1;
 }
+
+.edit-tools-card, .project-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: rgba(15, 23, 42, 0.58);
+    padding: 16px;
+}
+.range-editor-grid { margin-bottom: 12px; }
+.caption-drop { margin-top: 12px; }
+.helper-text {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.65;
+}
+.file-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    cursor: pointer;
+    text-align: center;
+}
+.caption-status-ok { color: #67e8f9 !important; }
+.caption-status-warn { color: #fef3c7 !important; }

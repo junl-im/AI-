@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - minimal site guards
+// AI Shorts Studio v0.2.0 - minimal site guards
 'use strict';
 
 (function installSiteGuards(global) {

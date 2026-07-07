@@ -1,28 +1,30 @@
-// AI Shorts Studio v0.1.0 service worker
+// AI Shorts Studio v0.2.0 service worker
 'use strict';
 
-const CACHE_NAME = 'ai-shorts-studio-shell-v0.1.0-local-highlight-mvp';
+const CACHE_NAME = 'ai-shorts-studio-shell-v0.2.0-editor-caption-project';
 const SHELL_FILES = [
     './',
     './index.html',
     './manifest.webmanifest',
-    './assets/css/theme.css?v=0.1.0-local-highlight-mvp',
-    './assets/css/studio.css?v=0.1.0-local-highlight-mvp',
-    './assets/css/editor.css?v=0.1.0-local-highlight-mvp',
+    './assets/css/theme.css?v=0.2.0-editor-caption-project',
+    './assets/css/studio.css?v=0.2.0-editor-caption-project',
+    './assets/css/editor.css?v=0.2.0-editor-caption-project',
     './assets/icons/ai-shorts.svg',
-    './src/config/app-runtime-config.js?v=0.1.0-local-highlight-mvp',
-    './src/utils/core-utils.js?v=0.1.0-local-highlight-mvp',
-    './src/state/app-state.js?v=0.1.0-local-highlight-mvp',
-    './src/analysis/audio-feature-extractor.js?v=0.1.0-local-highlight-mvp',
-    './src/analysis/video-motion-analyzer.js?v=0.1.0-local-highlight-mvp',
-    './src/recommendation/shorts-recommendation-engine.js?v=0.1.0-local-highlight-mvp',
-    './src/render/vertical-renderer.js?v=0.1.0-local-highlight-mvp',
-    './src/download/download-service.js?v=0.1.0-local-highlight-mvp',
-    './src/ui/waveform-view.js?v=0.1.0-local-highlight-mvp',
-    './src/ui/timeline-view.js?v=0.1.0-local-highlight-mvp',
-    './src/security/site-guards.js?v=0.1.0-local-highlight-mvp',
-    './src/boot/runtime-health.js?v=0.1.0-local-highlight-mvp',
-    './src/app.js?v=0.1.0-local-highlight-mvp',
+    './src/config/app-runtime-config.js?v=0.2.0-editor-caption-project',
+    './src/utils/core-utils.js?v=0.2.0-editor-caption-project',
+    './src/state/app-state.js?v=0.2.0-editor-caption-project',
+    './src/analysis/audio-feature-extractor.js?v=0.2.0-editor-caption-project',
+    './src/analysis/video-motion-analyzer.js?v=0.2.0-editor-caption-project',
+    './src/recommendation/shorts-recommendation-engine.js?v=0.2.0-editor-caption-project',
+    './src/caption/caption-service.js?v=0.2.0-editor-caption-project',
+    './src/project/project-service.js?v=0.2.0-editor-caption-project',
+    './src/render/vertical-renderer.js?v=0.2.0-editor-caption-project',
+    './src/download/download-service.js?v=0.2.0-editor-caption-project',
+    './src/ui/waveform-view.js?v=0.2.0-editor-caption-project',
+    './src/ui/timeline-view.js?v=0.2.0-editor-caption-project',
+    './src/security/site-guards.js?v=0.2.0-editor-caption-project',
+    './src/boot/runtime-health.js?v=0.2.0-editor-caption-project',
+    './src/app.js?v=0.2.0-editor-caption-project',
     './src/workers/highlight-analysis.worker.js'
 ];
 

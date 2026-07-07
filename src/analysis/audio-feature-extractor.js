@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - audio decode and worker bridge
+// AI Shorts Studio v0.2.0 - audio decode and worker bridge
 'use strict';
 
 (function exposeAudioFeatureExtractor(global) {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - timeline list view
+// AI Shorts Studio v0.2.0 - timeline list view
 'use strict';
 
 (function exposeTimelineView(global) {

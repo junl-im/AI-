@@ -3,36 +3,38 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.1.0 - 풀 노래와 MP4 영상을 로컬에서 분석해 쇼츠 후보를 추천하고 세로 영상으로 내보내는 무료 웹 프로그램" />
+<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.2.0 - 풀 노래와 MP4 영상을 로컬에서 분석해 쇼츠 후보를 추천하고 세로 영상으로 내보내는 무료 웹 프로그램" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
 <meta name="theme-color" content="#7c3aed" />
-<title>AI 쇼츠 제작 스튜디오 v0.1.0</title>
+<title>AI 쇼츠 제작 스튜디오 v0.2.0</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=0.1.0-local-highlight-mvp" />
-<link rel="stylesheet" href="assets/css/studio.css?v=0.1.0-local-highlight-mvp" />
-<link rel="stylesheet" href="assets/css/editor.css?v=0.1.0-local-highlight-mvp" />
-<script defer src="src/config/app-runtime-config.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/utils/core-utils.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/state/app-state.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/render/vertical-renderer.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/download/download-service.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/ui/waveform-view.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/ui/timeline-view.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/security/site-guards.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/boot/runtime-health.js?v=0.1.0-local-highlight-mvp"></script>
-<script defer src="src/app.js?v=0.1.0-local-highlight-mvp"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=0.2.0-editor-caption-project" />
+<link rel="stylesheet" href="assets/css/studio.css?v=0.2.0-editor-caption-project" />
+<link rel="stylesheet" href="assets/css/editor.css?v=0.2.0-editor-caption-project" />
+<script defer src="src/config/app-runtime-config.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/utils/core-utils.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/state/app-state.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/caption/caption-service.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/project/project-service.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/render/vertical-renderer.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/download/download-service.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/ui/waveform-view.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/ui/timeline-view.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/security/site-guards.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/boot/runtime-health.js?v=0.2.0-editor-caption-project"></script>
+<script defer src="src/app.js?v=0.2.0-editor-caption-project"></script>
 </head>
-<body data-build="0.1.0">
+<body data-build="0.2.0">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel" aria-label="앱 소개">
             <div class="brand-topline">
                 <div class="brand-kicker">
-                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.1.0 로컬 쇼츠 MVP</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.2.0 편집·자막 업그레이드</button>
                     <span class="badge badge-device">PC · 모바일 브라우저</span>
                     <span class="badge badge-free">무료 기능 기반</span>
                 </div>
@@ -43,7 +45,7 @@
             <div class="hero-mainline">
                 <div class="hero-copy">
                     <h1>AI 쇼츠 제작 <span>스튜디오</span></h1>
-                    <p>풀 노래와 MP4 영상을 내 기기 안에서 분석하고, 쇼츠로 잘 먹힐 하이라이트 구간을 추천합니다. 서버 업로드 없이 세로 프리뷰와 내보내기까지 진행합니다.</p>
+                    <p>풀 노래와 MP4 영상을 내 기기 안에서 분석하고, 쇼츠로 잘 먹힐 하이라이트 구간을 추천합니다. 서버 업로드 없이 세로 프리뷰, 구간 조절, 자막, 썸네일, 프로젝트 저장까지 진행합니다.</p>
                 </div>
                 <div class="hero-meter" aria-hidden="true">
                     <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
@@ -160,6 +162,62 @@
                 <div id="timelineView" class="timeline-view"></div>
             </section>
 
+            <section class="edit-tools-card" aria-label="구간 조절과 자막">
+                <div class="panel-head">
+                    <strong>구간 조절 · 자막</strong>
+                    <small id="captionStatus">자막 없음</small>
+                </div>
+                <div class="settings-grid range-editor-grid">
+                    <label class="field">
+                        <span>시작 시간</span>
+                        <input id="rangeStartInput" type="number" min="0" step="0.1" value="0" />
+                    </label>
+                    <label class="field">
+                        <span>끝 시간</span>
+                        <input id="rangeEndInput" type="number" min="0" step="0.1" value="0" />
+                    </label>
+                    <label class="field">
+                        <span>자막 스타일</span>
+                        <select id="captionStyleSelect">
+                            <option value="bold">굵은 쇼츠 자막</option>
+                            <option value="clean">깔끔한 하단 자막</option>
+                            <option value="box">검정 박스 자막</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>자막 싱크 보정</span>
+                        <input id="captionOffsetInput" type="number" step="0.1" value="0" />
+                    </label>
+                </div>
+                <div class="transport-row">
+                    <button id="applyRangeBtn" class="btn-secondary" type="button" disabled>선택 구간 적용</button>
+                    <button id="thumbnailBtn" class="btn-secondary" type="button" disabled>썸네일 PNG 저장</button>
+                </div>
+                <label class="field full caption-drop">
+                    <span>SRT/VTT 자막 붙여넣기 또는 업로드</span>
+                    <textarea id="captionTextInput" rows="5" placeholder="1&#10;00:00:00,000 --> 00:00:02,500&#10;첫 자막을 입력하세요"></textarea>
+                </label>
+                <div class="transport-row">
+                    <label class="btn-secondary file-button" for="captionFileInput">SRT/VTT 열기</label>
+                    <input id="captionFileInput" class="hidden" type="file" accept=".srt,.vtt,text/plain" />
+                    <button id="applyCaptionBtn" class="btn-secondary" type="button">자막 적용</button>
+                    <button id="clearCaptionBtn" class="btn-secondary" type="button">자막 비우기</button>
+                </div>
+            </section>
+
+            <section class="project-card" aria-label="프로젝트 저장과 불러오기">
+                <div class="panel-head">
+                    <strong>프로젝트</strong>
+                    <small>원본 파일 제외 JSON 저장</small>
+                </div>
+                <p class="helper-text">추천 구간, 수정한 시작/끝, 자막, 제목/해시태그를 JSON으로 저장합니다. 원본 미디어는 포함하지 않습니다.</p>
+                <div class="transport-row">
+                    <button id="saveProjectBtn" class="btn-secondary" type="button">프로젝트 저장</button>
+                    <label class="btn-secondary file-button" for="projectFileInput">프로젝트 불러오기</label>
+                    <input id="projectFileInput" class="hidden" type="file" accept="application/json,.json" />
+                </div>
+            </section>
+
             <section class="copy-card" aria-label="제목과 해시태그">
                 <div class="panel-head">
                     <strong>쇼츠 카피 초안</strong>
@@ -185,11 +243,13 @@
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.1.0</h2>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.2.0</h2>
         <p>이 버전은 무료 로컬 기능으로 풀 노래와 영상을 분석해 쇼츠 후보를 추천합니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
         <ul>
             <li>오디오 에너지, 피크, 트랜지언트, 무음 비율을 분석합니다.</li>
             <li>비디오 파일은 움직임 샘플링 점수를 보조로 사용합니다.</li>
+            <li>추천 구간의 시작/끝을 직접 조절하고 썸네일 PNG를 저장할 수 있습니다.</li>
+            <li>SRT/VTT 자막을 불러오거나 직접 붙여넣어 세로 프리뷰와 내보내기에 반영합니다.</li>
             <li>내보내기는 브라우저 MediaRecorder 지원 범위에 따라 WebM 또는 MP4가 될 수 있습니다.</li>
         </ul>
     </div>

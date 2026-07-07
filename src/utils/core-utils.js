@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - core utilities
+// AI Shorts Studio v0.2.0 - core utilities
 'use strict';
 
 (function exposeCoreUtils(global) {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - highlight analysis worker
+// AI Shorts Studio v0.2.0 - highlight analysis worker
 'use strict';
 
 function clamp(value, min, max) {

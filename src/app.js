@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.1.0 - main app
+// AI Shorts Studio v0.2.0 - main app
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -9,6 +9,8 @@
     const audioExtractor = global.AIShortsAudioFeatureExtractor || {};
     const motionAnalyzer = global.AIShortsVideoMotionAnalyzer || {};
     const recEngine = global.AIShortsRecommendationEngine || {};
+    const captionService = global.AIShortsCaptionService || {};
+    const projectService = global.AIShortsProjectService || {};
     const renderer = global.AIShortsVerticalRenderer || {};
     const downloadService = global.AIShortsDownloadService || {};
     const waveformView = global.AIShortsWaveformView || {};
@@ -29,7 +31,10 @@
             'analysisStatus', 'progressBar', 'recommendationList', 'recommendationCount', 'previewStatus',
             'previewCanvas', 'sourceVideo', 'sourceAudio', 'previewBtn', 'stopPreviewBtn', 'exportBtn',
             'waveformCanvas', 'timelineView', 'selectedRangeText', 'titleInput', 'hashtagInput',
-            'copyCaptionBtn', 'diagnosticsBtn', 'infoDialog', 'infoCloseBtn', 'toast'
+            'copyCaptionBtn', 'diagnosticsBtn', 'infoDialog', 'infoCloseBtn', 'toast',
+            'rangeStartInput', 'rangeEndInput', 'applyRangeBtn', 'thumbnailBtn',
+            'captionStatus', 'captionStyleSelect', 'captionOffsetInput', 'captionTextInput',
+            'captionFileInput', 'applyCaptionBtn', 'clearCaptionBtn', 'saveProjectBtn', 'projectFileInput'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -52,6 +57,8 @@
         if (els.styleSelect) els.styleSelect.value = state.settings.style || 'balanced';
         if (els.cropModeSelect) els.cropModeSelect.value = state.settings.cropMode || 'center';
         if (els.platformSelect) els.platformSelect.value = state.settings.platform || 'youtube';
+        if (els.captionStyleSelect) els.captionStyleSelect.value = state.settings.captionStyle || 'bold';
+        if (els.captionOffsetInput) els.captionOffsetInput.value = Number(state.settings.captionOffset || 0);
     }
 
     function updateButtons() {
@@ -61,6 +68,8 @@
         if (els.previewBtn) els.previewBtn.disabled = !hasRecs || state.isPreviewing;
         if (els.stopPreviewBtn) els.stopPreviewBtn.disabled = !state.isPreviewing;
         if (els.exportBtn) els.exportBtn.disabled = !hasRecs || state.isPreviewing;
+        if (els.applyRangeBtn) els.applyRangeBtn.disabled = !hasRecs;
+        if (els.thumbnailBtn) els.thumbnailBtn.disabled = !hasRecs;
     }
 
     function getSelectedRecommendation() {
@@ -71,6 +80,27 @@
         return state.fileKind === 'video' ? els.sourceVideo : els.sourceAudio;
     }
 
+
+    function getActiveCaptionText(time) {
+        if (!captionService.getActiveCue) return '';
+        const cue = captionService.getActiveCue(state.captions, time, state.settings.captionOffset);
+        return cue ? cue.text : '';
+    }
+
+    function updateSelectedRangeControls(selected) {
+        if (!selected) return;
+        if (els.rangeStartInput) els.rangeStartInput.value = Number(selected.start || 0).toFixed(1);
+        if (els.rangeEndInput) els.rangeEndInput.value = Number(selected.end || 0).toFixed(1);
+    }
+
+    function updateCaptionStatus() {
+        if (!els.captionStatus) return;
+        const count = (state.captions || []).length;
+        els.captionStatus.textContent = captionService.summarize ? captionService.summarize(state.captions) : `${count}개 자막`;
+        els.captionStatus.classList.toggle('caption-status-ok', count > 0);
+        els.captionStatus.classList.toggle('caption-status-warn', count === 0);
+    }
+
     function renderAll() {
         const selected = getSelectedRecommendation();
         if (waveformView.drawWaveform) waveformView.drawWaveform(els.waveformCanvas, state.waveformBins, state.recommendations, state.selectedRecommendationId);
@@ -78,6 +108,8 @@
         if (timelineView.renderTimeline) timelineView.renderTimeline(els.timelineView, state.recommendations, state.selectedRecommendationId);
         if (els.recommendationCount) els.recommendationCount.textContent = `${(state.recommendations || []).length}개`;
         if (els.selectedRangeText) els.selectedRangeText.textContent = selected ? selected.rangeText : '구간 없음';
+        if (selected) updateSelectedRangeControls(selected);
+        updateCaptionStatus();
         renderPreviewStill();
         updateButtons();
     }
@@ -91,7 +123,9 @@
             title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
             rangeText: selected ? selected.rangeText : 'AI 추천 대기',
             waveformBins: state.waveformBins,
-            time: media ? media.currentTime : 0
+            time: media ? media.currentTime : 0,
+            captionText: getActiveCaptionText(media ? media.currentTime : (selected ? selected.start : 0)),
+            captionStyle: state.settings.captionStyle
         });
     }
 
@@ -109,6 +143,7 @@
         if (media && Number.isFinite(item.start)) {
             try { media.currentTime = Math.max(0, item.start); } catch (error) { /* ignored */ }
         }
+        updateSelectedRangeControls(item);
         renderAll();
     }
 
@@ -130,6 +165,13 @@
         if (els.previewBtn) els.previewBtn.addEventListener('click', previewSelectedRange);
         if (els.stopPreviewBtn) els.stopPreviewBtn.addEventListener('click', stopPreview);
         if (els.exportBtn) els.exportBtn.addEventListener('click', exportSelectedRange);
+        if (els.applyRangeBtn) els.applyRangeBtn.addEventListener('click', applyManualRange);
+        if (els.thumbnailBtn) els.thumbnailBtn.addEventListener('click', saveThumbnail);
+        if (els.applyCaptionBtn) els.applyCaptionBtn.addEventListener('click', applyCaptionsFromText);
+        if (els.clearCaptionBtn) els.clearCaptionBtn.addEventListener('click', clearCaptions);
+        if (els.captionFileInput) els.captionFileInput.addEventListener('change', handleCaptionFile);
+        if (els.saveProjectBtn) els.saveProjectBtn.addEventListener('click', saveProject);
+        if (els.projectFileInput) els.projectFileInput.addEventListener('change', handleProjectFile);
         if (els.copyCaptionBtn) els.copyCaptionBtn.addEventListener('click', copyCaption);
         if (els.diagnosticsBtn) els.diagnosticsBtn.addEventListener('click', copyDiagnostics);
         if (els.programInfoBtn) els.programInfoBtn.addEventListener('click', () => { if (els.infoDialog) els.infoDialog.hidden = false; });
@@ -144,7 +186,11 @@
                 if ((id === 'durationSelect' || id === 'styleSelect') && state.audioAnalysis) createRecommendations();
             });
         });
+        if (els.captionStyleSelect) els.captionStyleSelect.addEventListener('change', () => { store.setSetting('captionStyle', els.captionStyleSelect.value); renderPreviewStill(); });
+        if (els.captionOffsetInput) els.captionOffsetInput.addEventListener('change', () => { store.setSetting('captionOffset', Number(els.captionOffsetInput.value) || 0); renderPreviewStill(); updateCaptionStatus(); });
         if (els.sourceVideo) els.sourceVideo.addEventListener('loadeddata', renderPreviewStill);
+        if (els.sourceAudio) els.sourceAudio.addEventListener('timeupdate', renderPreviewStill);
+        if (els.sourceVideo) els.sourceVideo.addEventListener('timeupdate', renderPreviewStill);
         if (els.titleInput) els.titleInput.addEventListener('input', renderPreviewStill);
     }
 
@@ -300,7 +346,9 @@
                 title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
                 rangeText: selected.rangeText,
                 waveformBins: state.waveformBins,
-                time: media.currentTime
+                time: media.currentTime,
+                captionText: getActiveCaptionText(media.currentTime),
+                captionStyle: state.settings.captionStyle
             });
             previewRaf = requestAnimationFrame(draw);
         }
@@ -325,6 +373,9 @@
                 title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
                 rangeText: selected.rangeText,
                 waveformBins: state.waveformBins,
+                captions: state.captions,
+                captionOffset: state.settings.captionOffset,
+                captionStyle: state.settings.captionStyle,
                 fps: config.PREVIEW_FPS || 30
             }, setProgress);
             const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
@@ -342,6 +393,117 @@
         } finally {
             updateButtons();
         }
+    }
+
+
+    function applyManualRange() {
+        const selected = getSelectedRecommendation();
+        if (!selected) return;
+        const maxDuration = Number(state.fileMeta && state.fileMeta.duration) || Number(selected.end) || 0;
+        const start = Math.max(0, Number(els.rangeStartInput && els.rangeStartInput.value) || 0);
+        let end = Math.max(start + 1, Number(els.rangeEndInput && els.rangeEndInput.value) || selected.end || start + 15);
+        if (maxDuration) end = Math.min(maxDuration, end);
+        selected.start = start;
+        selected.end = end;
+        selected.duration = Math.max(1, end - start);
+        selected.rangeText = utils.formatRange ? utils.formatRange(start, end) : `${start.toFixed(1)} ~ ${end.toFixed(1)}`;
+        selected.custom = true;
+        selected.reasons = Array.from(new Set([...(selected.reasons || []), '사용자가 직접 조절한 커스텀 구간']));
+        state.selectedRange = { start, end, duration: selected.duration, score: selected.score };
+        const media = getActiveMediaElement();
+        if (media) {
+            try { media.currentTime = start; } catch (error) { /* ignored */ }
+        }
+        renderAll();
+        toast('선택 구간을 적용했습니다.');
+    }
+
+    async function saveThumbnail() {
+        const selected = getSelectedRecommendation();
+        if (!selected || !els.previewCanvas) return;
+        renderPreviewStill();
+        const blob = await new Promise(resolve => {
+            if (els.previewCanvas.toBlob) els.previewCanvas.toBlob(resolve, 'image/png');
+            else resolve(null);
+        });
+        if (!blob) {
+            toast('이 브라우저는 썸네일 저장을 지원하지 않습니다.');
+            return;
+        }
+        const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name) : 'ai-shorts';
+        const filename = `${base}-${Math.round(selected.start)}s-thumbnail.png`;
+        downloadService.saveBlob(blob, filename);
+        toast('썸네일 PNG를 저장했습니다.');
+    }
+
+    function applyCaptionsFromText() {
+        const raw = els.captionTextInput ? els.captionTextInput.value : '';
+        let cues = captionService.parseCaptionText ? captionService.parseCaptionText(raw) : [];
+        if (!cues.length && captionService.createQuickCaptions) cues = captionService.createQuickCaptions(raw, getSelectedRecommendation(), 6);
+        state.captions = cues;
+        if (store.addDiagnostic) store.addDiagnostic({ type: 'captions-applied', count: cues.length });
+        updateCaptionStatus();
+        renderPreviewStill();
+        toast(cues.length ? `${cues.length}개 자막을 적용했습니다.` : '적용할 자막을 찾지 못했습니다.');
+    }
+
+    function clearCaptions() {
+        state.captions = [];
+        if (els.captionTextInput) els.captionTextInput.value = '';
+        updateCaptionStatus();
+        renderPreviewStill();
+        toast('자막을 비웠습니다.');
+    }
+
+    function handleCaptionFile(event) {
+        const file = event && event.target && event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (els.captionTextInput) els.captionTextInput.value = String(reader.result || '');
+            applyCaptionsFromText();
+        };
+        reader.onerror = () => toast('자막 파일을 읽지 못했습니다.');
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function saveProject() {
+        if (!projectService.createProjectSnapshot) return;
+        const snapshot = projectService.createProjectSnapshot(
+            state,
+            els.titleInput ? els.titleInput.value : '',
+            els.hashtagInput ? els.hashtagInput.value : ''
+        );
+        const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name || 'ai-shorts-project') : 'ai-shorts-project';
+        const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+        downloadService.saveBlob(blob, `${base}-project.json`);
+        toast('프로젝트 JSON을 저장했습니다.');
+    }
+
+    function handleProjectFile(event) {
+        const file = event && event.target && event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const project = projectService.parseProjectText(String(reader.result || ''));
+                projectService.applyProjectSnapshot(state, project);
+                if (project.copy) {
+                    if (els.titleInput) els.titleInput.value = project.copy.title || els.titleInput.value;
+                    if (els.hashtagInput) els.hashtagInput.value = project.copy.hashtags || els.hashtagInput.value;
+                }
+                if (els.captionTextInput && captionService.serializeCaptions) els.captionTextInput.value = captionService.serializeCaptions(state.captions || []);
+                syncSettingsToUI();
+                renderAll();
+                toast('프로젝트를 불러왔습니다. 원본 미디어가 다르면 다시 파일을 열어주세요.');
+            } catch (error) {
+                toast(error.message || '프로젝트 파일을 읽지 못했습니다.');
+            }
+        };
+        reader.onerror = () => toast('프로젝트 파일을 읽지 못했습니다.');
+        reader.readAsText(file);
+        event.target.value = '';
     }
 
     async function copyCaption() {
