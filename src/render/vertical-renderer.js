@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.3.0 - vertical preview/export renderer
+// AI Shorts Studio v0.4.0 - vertical preview/export renderer
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -184,22 +184,96 @@
         ctx.closePath();
     }
 
+    function drawTemplateChrome(ctx, width, height, template) {
+        const mode = String(template || 'neon');
+        ctx.save();
+        if (mode === 'clean') {
+            ctx.fillStyle = 'rgba(255,255,255,0.08)';
+            roundRect(ctx, 54, 72, width - 108, 82, 28);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.44)';
+            ctx.fillRect(0, height * 0.76, width, height * 0.24);
+        } else if (mode === 'cinematic') {
+            ctx.fillStyle = 'rgba(0,0,0,0.72)';
+            ctx.fillRect(0, 0, width, 132);
+            ctx.fillRect(0, height - 170, width, 170);
+            ctx.strokeStyle = 'rgba(255,255,255,0.24)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(52, 166, width - 104, height - 360);
+        } else if (mode === 'headline') {
+            const grad = ctx.createLinearGradient(0, 0, width, 0);
+            grad.addColorStop(0, 'rgba(249, 115, 22, 0.88)');
+            grad.addColorStop(1, 'rgba(124, 58, 237, 0.88)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, 158);
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.58)';
+            roundRect(ctx, 54, height - 520, width - 108, 390, 44);
+            ctx.fill();
+        } else {
+            ctx.globalAlpha = 0.86;
+            const grad = ctx.createLinearGradient(0, height * 0.18, width, height * 0.86);
+            grad.addColorStop(0, 'rgba(34, 211, 238, 0.14)');
+            grad.addColorStop(0.5, 'rgba(124, 58, 237, 0.18)');
+            grad.addColorStop(1, 'rgba(249, 115, 22, 0.14)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+            ctx.lineWidth = 8;
+            ctx.strokeStyle = 'rgba(34, 211, 238, 0.76)';
+            roundRect(ctx, 42, 50, width - 84, height - 100, 54);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
     function drawOverlay(ctx, width, height, options) {
         const title = String(options && options.title || '');
         const rangeText = String(options && options.rangeText || '');
-        const gradient = ctx.createLinearGradient(0, height * 0.66, 0, height);
+        const template = String(options && options.thumbnailTemplate || 'neon');
+        drawTemplateChrome(ctx, width, height, template);
+        const gradient = ctx.createLinearGradient(0, height * 0.60, 0, height);
         gradient.addColorStop(0, 'rgba(0,0,0,0)');
-        gradient.addColorStop(0.48, 'rgba(0,0,0,0.38)');
-        gradient.addColorStop(1, 'rgba(0,0,0,0.72)');
+        gradient.addColorStop(0.48, template === 'clean' ? 'rgba(2,6,23,0.22)' : 'rgba(0,0,0,0.38)');
+        gradient.addColorStop(1, template === 'cinematic' ? 'rgba(0,0,0,0.92)' : 'rgba(0,0,0,0.72)');
         ctx.fillStyle = gradient;
-        ctx.fillRect(0, height * 0.58, width, height * 0.42);
+        ctx.fillRect(0, height * 0.54, width, height * 0.46);
         ctx.textAlign = 'left';
         ctx.fillStyle = '#fff';
-        ctx.font = '900 58px system-ui, sans-serif';
-        wrapText(ctx, title, 74, height - 285, width - 148, 66, 2);
-        ctx.font = '800 34px system-ui, sans-serif';
-        ctx.fillStyle = '#cffafe';
-        ctx.fillText(rangeText || 'AI 추천 구간', 74, height - 112);
+        if (template === 'headline') {
+            ctx.font = '1000 42px system-ui, sans-serif';
+            ctx.fillText('AI PICK SHORTS', 70, 98);
+            ctx.font = '1000 72px system-ui, sans-serif';
+            wrapText(ctx, title, 82, height - 420, width - 164, 82, 3);
+            ctx.font = '900 34px system-ui, sans-serif';
+            ctx.fillStyle = '#fed7aa';
+            ctx.fillText(rangeText || 'AI 추천 구간', 82, height - 150);
+        } else if (template === 'clean') {
+            ctx.font = '900 32px system-ui, sans-serif';
+            ctx.fillStyle = '#cffafe';
+            ctx.fillText(rangeText || 'AI 추천 구간', 74, 126);
+            ctx.fillStyle = '#fff';
+            ctx.font = '950 56px system-ui, sans-serif';
+            wrapText(ctx, title, 74, height - 272, width - 148, 64, 2);
+        } else if (template === 'cinematic') {
+            ctx.font = '900 32px system-ui, sans-serif';
+            ctx.fillStyle = '#fef3c7';
+            ctx.fillText('AI HIGHLIGHT', 72, 86);
+            ctx.fillStyle = '#fff';
+            ctx.font = '950 54px system-ui, sans-serif';
+            wrapText(ctx, title, 74, height - 282, width - 148, 64, 2);
+            ctx.font = '800 30px system-ui, sans-serif';
+            ctx.fillStyle = '#e5e7eb';
+            ctx.fillText(rangeText || 'AI 추천 구간', 74, height - 82);
+        } else {
+            ctx.font = '900 30px system-ui, sans-serif';
+            ctx.fillStyle = '#67e8f9';
+            ctx.fillText('AI SHORTS PICK', 74, 120);
+            ctx.fillStyle = '#fff';
+            ctx.font = '1000 60px system-ui, sans-serif';
+            wrapText(ctx, title, 74, height - 298, width - 148, 68, 2);
+            ctx.font = '850 34px system-ui, sans-serif';
+            ctx.fillStyle = '#cffafe';
+            ctx.fillText(rangeText || 'AI 추천 구간', 74, height - 112);
+        }
         drawCaption(ctx, width, height, options && options.captionText, options && options.captionStyle);
     }
 
@@ -260,7 +334,7 @@
                 drawAudioVisual(ctx, canvas.width, canvas.height, { time: current, title, waveformBins });
             }
             const activeCue = captionService.getActiveCue ? captionService.getActiveCue(captions, current, captionOffset) : null;
-            drawOverlay(ctx, canvas.width, canvas.height, { title, rangeText, captionText: activeCue && activeCue.text, captionStyle });
+            drawOverlay(ctx, canvas.width, canvas.height, { title, rangeText, captionText: activeCue && activeCue.text, captionStyle, thumbnailTemplate: options && options.thumbnailTemplate });
             if (onProgress) {
                 const progress = Math.min(99, 8 + ((current - started) / duration) * 88);
                 onProgress(progress, '세로 쇼츠 렌더링 중');

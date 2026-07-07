@@ -1,10 +1,10 @@
-// AI Shorts Studio v0.3.0 - waveform view
+// AI Shorts Studio v0.4.0 - waveform view
 'use strict';
 
 (function exposeWaveformView(global) {
     const utils = global.AIShortsCoreUtils || {};
 
-    function drawWaveform(canvas, bins, recommendations, selectedId) {
+    function drawWaveform(canvas, bins, recommendations, selectedId, mediaDuration) {
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -31,7 +31,7 @@
             ctx.fillRect(i * barWidth, centerY - barHeight / 2, Math.max(1, barWidth * 0.66), barHeight);
         }
         ctx.globalAlpha = 1;
-        const totalDuration = Math.max(1, Math.max.apply(null, (recommendations || []).map(item => item.end).concat([1])));
+        const totalDuration = Math.max(1, Number(mediaDuration) || Math.max.apply(null, (recommendations || []).map(item => item.end).concat([1])));
         (recommendations || []).forEach(item => {
             const x = (item.start / totalDuration) * width;
             const w = Math.max(3, ((item.end - item.start) / totalDuration) * width);

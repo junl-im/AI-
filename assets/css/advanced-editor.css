@@ -1,0 +1,128 @@
+/* AI Shorts Studio v0.4.0 - draggable timeline, batch export, thumbnail templates */
+.waveform-drag-shell {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+.waveform-drag-shell canvas { position: relative; z-index: 1; }
+.range-drag-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+.drag-selection {
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    min-width: 34px;
+    border: 2px solid rgba(34, 211, 238, 0.94);
+    border-radius: 18px;
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.20), rgba(124, 58, 237, 0.18));
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.18), 0 14px 40px rgba(34, 211, 238, 0.16);
+    pointer-events: auto;
+    cursor: grab;
+}
+.drag-selection:active { cursor: grabbing; }
+.drag-selection::before {
+    content: "선택 구간";
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(2, 6, 23, 0.78);
+    color: #e0f2fe;
+    font-size: 11px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+.drag-handle {
+    position: absolute;
+    top: 50%;
+    width: 28px;
+    height: 76px;
+    margin-top: -38px;
+    border: 1px solid rgba(255,255,255,0.54);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ffffff, #bae6fd);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.34);
+    cursor: ew-resize;
+}
+.drag-handle::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 18px;
+    bottom: 18px;
+    width: 3px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.54);
+    box-shadow: 7px 0 0 rgba(15, 23, 42, 0.30), -7px 0 0 rgba(15, 23, 42, 0.30);
+}
+.drag-handle-start { left: -14px; }
+.drag-handle-end { right: -14px; }
+.drag-time-bubble {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    padding: 7px 10px;
+    border-radius: 12px;
+    background: rgba(2, 6, 23, 0.80);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+}
+.drag-helper-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.mini-action {
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.72);
+    color: #dbeafe;
+    font-size: 12px;
+    font-weight: 850;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.mini-action:disabled { opacity: 0.45; cursor: not-allowed; }
+.batch-export-panel {
+    display: grid;
+    grid-template-columns: minmax(160px, 0.8fr) minmax(180px, 1fr);
+    gap: 10px;
+    align-items: end;
+    margin: 12px 0;
+    padding: 12px;
+    border: 1px solid rgba(34, 211, 238, 0.20);
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.10), rgba(124, 58, 237, 0.09));
+}
+.batch-export-panel small {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.45;
+}
+.field.compact { margin: 0; }
+.field.compact select { min-height: 44px; }
+#thumbnailTemplateSelect option { color: #020617; }
+@media (max-width: 720px) {
+    .drag-helper-row { align-items: stretch; flex-direction: column; }
+    .mini-action { width: 100%; }
+    .batch-export-panel { grid-template-columns: 1fr; }
+}

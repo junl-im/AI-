@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.3.0 - main app
+// AI Shorts Studio v0.4.0 - main app
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -34,7 +34,8 @@
             'copyCaptionBtn', 'diagnosticsBtn', 'infoDialog', 'infoCloseBtn', 'toast',
             'rangeStartInput', 'rangeEndInput', 'applyRangeBtn', 'thumbnailBtn',
             'captionStatus', 'captionStyleSelect', 'captionOffsetInput', 'captionTextInput',
-            'captionFileInput', 'applyCaptionBtn', 'clearCaptionBtn', 'saveProjectBtn', 'projectFileInput'
+            'captionFileInput', 'applyCaptionBtn', 'clearCaptionBtn', 'saveProjectBtn', 'projectFileInput',
+            'exportAllBtn', 'thumbnailTemplateSelect', 'batchLimitSelect'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -59,6 +60,7 @@
         if (els.platformSelect) els.platformSelect.value = state.settings.platform || 'youtube';
         if (els.captionStyleSelect) els.captionStyleSelect.value = state.settings.captionStyle || 'bold';
         if (els.captionOffsetInput) els.captionOffsetInput.value = Number(state.settings.captionOffset || 0);
+        if (els.thumbnailTemplateSelect) els.thumbnailTemplateSelect.value = state.settings.thumbnailTemplate || 'neon';
     }
 
     function updateButtons() {
@@ -70,6 +72,7 @@
         if (els.exportBtn) els.exportBtn.disabled = !hasRecs || state.isPreviewing;
         if (els.applyRangeBtn) els.applyRangeBtn.disabled = !hasRecs;
         if (els.thumbnailBtn) els.thumbnailBtn.disabled = !hasRecs;
+        if (els.exportAllBtn) els.exportAllBtn.disabled = !hasRecs || state.isPreviewing;
     }
 
     function getSelectedRecommendation() {
@@ -103,7 +106,7 @@
 
     function renderAll() {
         const selected = getSelectedRecommendation();
-        if (waveformView.drawWaveform) waveformView.drawWaveform(els.waveformCanvas, state.waveformBins, state.recommendations, state.selectedRecommendationId);
+        if (waveformView.drawWaveform) waveformView.drawWaveform(els.waveformCanvas, state.waveformBins, state.recommendations, state.selectedRecommendationId, state.fileMeta && state.fileMeta.duration);
         if (waveformView.renderRecommendations) waveformView.renderRecommendations(els.recommendationList, state.recommendations, state.selectedRecommendationId, selectRecommendation);
         if (timelineView.renderTimeline) timelineView.renderTimeline(els.timelineView, state.recommendations, state.selectedRecommendationId);
         if (els.recommendationCount) els.recommendationCount.textContent = `${(state.recommendations || []).length}개`;
@@ -125,7 +128,8 @@
             waveformBins: state.waveformBins,
             time: media ? media.currentTime : 0,
             captionText: getActiveCaptionText(media ? media.currentTime : (selected ? selected.start : 0)),
-            captionStyle: state.settings.captionStyle
+            captionStyle: state.settings.captionStyle,
+            thumbnailTemplate: state.settings.thumbnailTemplate
         });
     }
 
@@ -167,6 +171,7 @@
         if (els.exportBtn) els.exportBtn.addEventListener('click', exportSelectedRange);
         if (els.applyRangeBtn) els.applyRangeBtn.addEventListener('click', applyManualRange);
         if (els.thumbnailBtn) els.thumbnailBtn.addEventListener('click', saveThumbnail);
+        if (els.exportAllBtn) els.exportAllBtn.addEventListener('click', exportAllCandidates);
         if (els.applyCaptionBtn) els.applyCaptionBtn.addEventListener('click', applyCaptionsFromText);
         if (els.clearCaptionBtn) els.clearCaptionBtn.addEventListener('click', clearCaptions);
         if (els.captionFileInput) els.captionFileInput.addEventListener('change', handleCaptionFile);
@@ -187,6 +192,7 @@
             });
         });
         if (els.captionStyleSelect) els.captionStyleSelect.addEventListener('change', () => { store.setSetting('captionStyle', els.captionStyleSelect.value); renderPreviewStill(); });
+        if (els.thumbnailTemplateSelect) els.thumbnailTemplateSelect.addEventListener('change', () => { store.setSetting('thumbnailTemplate', els.thumbnailTemplateSelect.value); renderPreviewStill(); });
         if (els.captionOffsetInput) els.captionOffsetInput.addEventListener('change', () => { store.setSetting('captionOffset', Number(els.captionOffsetInput.value) || 0); renderPreviewStill(); updateCaptionStatus(); });
         if (els.sourceVideo) els.sourceVideo.addEventListener('loadeddata', renderPreviewStill);
         if (els.sourceAudio) els.sourceAudio.addEventListener('timeupdate', renderPreviewStill);
@@ -348,7 +354,8 @@
                 waveformBins: state.waveformBins,
                 time: media.currentTime,
                 captionText: getActiveCaptionText(media.currentTime),
-                captionStyle: state.settings.captionStyle
+                captionStyle: state.settings.captionStyle,
+                thumbnailTemplate: state.settings.thumbnailTemplate
             });
             previewRaf = requestAnimationFrame(draw);
         }
@@ -373,6 +380,7 @@
                 title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
                 rangeText: selected.rangeText,
                 waveformBins: state.waveformBins,
+                thumbnailTemplate: state.settings.thumbnailTemplate,
                 captions: state.captions,
                 captionOffset: state.settings.captionOffset,
                 captionStyle: state.settings.captionStyle,
@@ -393,6 +401,57 @@
         } finally {
             updateButtons();
         }
+    }
+
+
+    async function exportAllCandidates() {
+        const recommendations = Array.isArray(state.recommendations) ? state.recommendations : [];
+        const media = getActiveMediaElement();
+        if (!recommendations.length || !media || state.isPreviewing) return;
+        const limit = Math.max(1, Math.min(recommendations.length, Number(els.batchLimitSelect && els.batchLimitSelect.value) || recommendations.length));
+        const queue = recommendations.slice(0, limit);
+        stopPreview();
+        if (els.exportAllBtn) els.exportAllBtn.disabled = true;
+        setProgress(1, `일괄 내보내기 준비 · ${queue.length}개`);
+        const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name) : 'ai-shorts';
+        let success = 0;
+        for (let index = 0; index < queue.length; index += 1) {
+            const item = queue[index];
+            state.selectedRecommendationId = item.id;
+            state.selectedRange = { start: item.start, end: item.end, duration: item.duration, score: item.score };
+            updateSelectedRangeControls(item);
+            renderAll();
+            setProgress(Math.round((index / queue.length) * 100), `일괄 내보내기 ${index + 1}/${queue.length}`);
+            try {
+                const exportResult = await renderer.recordVerticalSegment(els.previewCanvas, media, {
+                    start: item.start,
+                    end: item.end,
+                    cropMode: state.settings.cropMode,
+                    title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
+                    rangeText: item.rangeText,
+                    waveformBins: state.waveformBins,
+                    thumbnailTemplate: state.settings.thumbnailTemplate,
+                    captions: state.captions,
+                    captionOffset: state.settings.captionOffset,
+                    captionStyle: state.settings.captionStyle,
+                    fps: config.PREVIEW_FPS || 30
+                }, (percent, status) => {
+                    const local = Math.max(0, Math.min(1, Number(percent || 0) / 100));
+                    const total = ((index + local) / queue.length) * 100;
+                    setProgress(total, status || `일괄 내보내기 ${index + 1}/${queue.length}`);
+                });
+                const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
+                const filename = `${base}-candidate-${String(index + 1).padStart(2, '0')}-${Math.round(item.start)}s-${Math.round(item.duration)}s.${ext}`;
+                downloadService.saveBlob(exportResult.blob, filename);
+                success += 1;
+            } catch (error) {
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'batch-export-error', candidate: item.id, message: error.message });
+                toast(`${index + 1}번 후보 저장 실패: ${error.message || '오류'}`);
+            }
+        }
+        setProgress(100, `일괄 내보내기 완료 · ${success}/${queue.length}개`);
+        toast(`추천 후보 ${success}개를 저장했습니다.`);
+        updateButtons();
     }
 
 
@@ -431,7 +490,8 @@
             return;
         }
         const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name) : 'ai-shorts';
-        const filename = `${base}-${Math.round(selected.start)}s-thumbnail.png`;
+        const template = state.settings.thumbnailTemplate || 'neon';
+        const filename = `${base}-${template}-${Math.round(selected.start)}s-thumbnail.png`;
         downloadService.saveBlob(blob, filename);
         toast('썸네일 PNG를 저장했습니다.');
     }
@@ -489,6 +549,7 @@
             try {
                 const project = projectService.parseProjectText(String(reader.result || ''));
                 projectService.applyProjectSnapshot(state, project);
+                if (project.settings && project.settings.thumbnailTemplate && els.thumbnailTemplateSelect) els.thumbnailTemplateSelect.value = project.settings.thumbnailTemplate;
                 if (project.copy) {
                     if (els.titleInput) els.titleInput.value = project.copy.title || els.titleInput.value;
                     if (els.hashtagInput) els.hashtagInput.value = project.copy.hashtags || els.hashtagInput.value;
@@ -540,6 +601,16 @@
         setProgress(0, runtimeHealth.summaryText ? runtimeHealth.summaryText() : '준비 완료');
         registerServiceWorker();
     }
+
+
+    global.AIShortsStudioApp = Object.freeze({
+        selectRecommendation,
+        renderAll,
+        applyManualRange,
+        exportSelectedRange,
+        exportAllCandidates,
+        saveThumbnail
+    });
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();

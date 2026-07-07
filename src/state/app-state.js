@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.3.0 - state container
+// AI Shorts Studio v0.4.0 - state container
 'use strict';
 
 (function exposeState(global) {
@@ -31,7 +31,8 @@
             cropMode: 'center',
             platform: 'youtube',
             captionStyle: 'bold',
-            captionOffset: 0
+            captionOffset: 0,
+            thumbnailTemplate: 'neon'
         };
         try {
             const raw = global.localStorage && global.localStorage.getItem(config.LOCAL_STORAGE_KEY || 'ai-shorts-settings');

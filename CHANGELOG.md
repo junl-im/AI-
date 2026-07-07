@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v0.4.0 - Draggable Range, Thumbnail Templates and Batch Export
+
+- Added draggable range selection overlay on top of the waveform.
+- Added start/end handles for selected recommendation range editing.
+- Added whole-range move interaction for shifting the selected segment.
+- Added current playback position snap button for setting the range start.
+- Added thumbnail template selector with neon, clean, cinematic and headline styles.
+- Applied thumbnail templates to preview canvas, PNG thumbnail export and video export overlay.
+- Added recommendation batch export for top 3, top 5 or all candidates.
+- Added batch export progress status and per-candidate file naming.
+- Added `assets/css/advanced-editor.css`.
+- Added `src/ui/range-drag-controls.js`.
+- Added `qa/advanced_editor_smoke.js`.
+- Updated service worker cache list for new advanced editor assets.
+- QA result: 29/29 passed.
+
 ## v0.3.0 - UI/UX Button Convenience and Visual Polish
 
 - Added hero quick-start actions for file open, analyze and project load.

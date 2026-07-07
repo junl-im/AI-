@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-3-0",
-  "version": "0.3.0",
+  "name": "ai-shorts-studio-v0-4-0",
+  "version": "0.4.0",
   "private": true,
-  "description": "AI Shorts Studio v0.3.0 - local shorts recommendation with polished UI/UX, quick actions, caption tools, thumbnail export and project JSON save/load",
+  "description": "AI Shorts Studio v0.4.0 - local shorts recommendation with draggable waveform range editing, thumbnail templates, batch export, captions and project JSON save/load",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -22,6 +22,7 @@
     "node --check src/ui/waveform-view.js",
     "node --check src/ui/timeline-view.js",
     "node --check src/ui/ux-controls.js",
+    "node --check src/ui/range-drag-controls.js",
     "node --check src/security/site-guards.js",
     "node --check src/boot/runtime-health.js",
     "node --check src/workers/highlight-analysis.worker.js",
@@ -31,6 +32,7 @@
     "node qa/no_external_dependency_smoke.js",
     "node qa/html_anchor_smoke.js",
     "node qa/uiux_anchor_smoke.js",
+    "node qa/advanced_editor_smoke.js",
     "node qa/recommendation_engine_smoke.js",
     "node qa/render_capability_smoke.js",
     "node qa/docs_handoff_smoke.js",
