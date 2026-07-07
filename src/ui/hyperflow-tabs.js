@@ -1,5 +1,5 @@
 
-// AI Shorts Studio v0.9.3 - HyperFlow tab workflow controller
+// AI Shorts Studio v0.9.5 - HyperConnect tab workflow controller
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};
@@ -7,8 +7,8 @@
     const ORDER = ['file', 'recommend', 'preview', 'waveform', 'cut', 'edit', 'caption', 'export'];
     const META = {
         file: ['📂', '파일 열기', '파일을 열면 자동 분석이 시작됩니다.'],
-        recommend: ['✨', '추천 생성', '분석 완료 후 후보를 만들고 고릅니다.'],
-        preview: ['📱', '미리보기', '선택한 구간을 바로 확인합니다.'],
+        recommend: ['✨', '추천 · 선택', '추천을 생성하고 마음에 드는 후보를 고릅니다.'],
+        preview: ['📱', '미리보기', '선택한 후보가 자동으로 연결됩니다.'],
         waveform: ['〰️', '파형', '시작/끝과 컷 마커를 맞춥니다.'],
         cut: ['✂️', '자동 컷', '비트·장면·무음 회피 포인트를 확인합니다.'],
         edit: ['🎛️', '편집', '구간, 템플릿, 수동 조정을 관리합니다.'],
@@ -36,21 +36,17 @@
         const icon = byId('hyperflowStageIcon');
         const title = byId('hyperflowStageTitle');
         const small = byId('hyperflowStageMeta');
-        const recommendBtn = byId('flowRecommendBtn');
         if (icon) icon.textContent = meta[0];
         if (title) {
             if (state.isAnalyzing) title.textContent = '자동 분석 중입니다';
-            else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) title.textContent = '분석 완료 · 추천 생성을 눌러주세요';
+            else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) title.textContent = '분석 완료 · 추천을 생성하세요';
             else title.textContent = meta[1];
         }
         if (small) {
             if (!state.file) small.textContent = '하단 Dock의 📂 파일 탭에서 원본을 열어주세요.';
             else if (state.isAnalyzing) small.textContent = '파일을 읽고 오디오·영상·컷 엔진을 자동으로 돌리는 중입니다.';
-            else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) small.textContent = '✨ 추천 생성 후 마음에 드는 후보를 고르면 미리보기로 자동 이동합니다.';
+            else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) small.textContent = '아래 추천 탭의 ✨ 추천 생성 버튼 하나만 사용하면 됩니다.';
             else small.textContent = meta[2];
-        }
-        if (recommendBtn) {
-            recommendBtn.disabled = !hasAnalysis() || state.isAnalyzing;
         }
     }
     function syncExportMirrors() {
@@ -108,7 +104,6 @@
                 setActiveFlowTab(key);
             });
         });
-        const recommendBtn = byId('flowRecommendBtn');
         const analyzeBtn = byId('analyzeBtn');
         if (recommendBtn && analyzeBtn) recommendBtn.addEventListener('click', () => analyzeBtn.click());
         [

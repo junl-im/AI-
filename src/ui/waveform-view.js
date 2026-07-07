@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.3 - waveform view with engine badges
+// AI Shorts Studio v0.9.5 - waveform and recommendation selection view
 'use strict';
 
 (function exposeWaveformView(global) {
@@ -97,6 +97,10 @@
                 });
                 button.appendChild(badges);
             }
+            const cta = document.createElement('span');
+            cta.className = 'rec-select-cta';
+            cta.textContent = item.id === selectedId ? '✅ 선택됨 · 미리보기 연결' : '선택해서 미리보기 →';
+            button.appendChild(cta);
             button.addEventListener('click', () => onSelect && onSelect(item.id));
             container.appendChild(button);
         });

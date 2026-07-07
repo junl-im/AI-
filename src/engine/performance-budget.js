@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.3 - adaptive performance budget
+// AI Shorts Studio v0.9.5 - adaptive performance budget
 'use strict';
 
 (function exposePerformanceBudget(global) {

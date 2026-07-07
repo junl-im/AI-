@@ -1,0 +1,129 @@
+/* AI Shorts Studio v0.9.5 - render queue and save reliability UI */
+.render-queue-card {
+    margin-top: 14px;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    background: linear-gradient(145deg, rgba(15,23,42,0.92), rgba(30,41,59,0.76));
+    box-shadow: 0 18px 45px rgba(2,6,23,0.28);
+    overflow: hidden;
+}
+.render-queue-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px 10px;
+}
+.render-queue-head strong { font-size: 0.96rem; }
+.render-queue-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(124,58,237,0.18);
+    border: 1px solid rgba(167,139,250,0.28);
+    color: #ddd6fe;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+.render-queue-list {
+    display: grid;
+    gap: 8px;
+    max-height: 245px;
+    overflow: auto;
+    padding: 0 12px 12px;
+    overscroll-behavior: contain;
+}
+.render-queue-empty {
+    padding: 14px;
+    border-radius: 14px;
+    color: rgba(226,232,240,0.72);
+    background: rgba(15,23,42,0.48);
+    border: 1px dashed rgba(148,163,184,0.22);
+    text-align: center;
+    font-size: 0.86rem;
+}
+.render-queue-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+    align-items: center;
+    padding: 11px 12px;
+    border-radius: 16px;
+    background: rgba(15,23,42,0.62);
+    border: 1px solid rgba(148,163,184,0.16);
+    contain: content;
+}
+.render-queue-item.is-running { border-color: rgba(96,165,250,0.45); box-shadow: inset 0 0 0 1px rgba(96,165,250,0.08); }
+.render-queue-item.is-done { border-color: rgba(34,197,94,0.35); }
+.render-queue-item.is-failed { border-color: rgba(248,113,113,0.45); }
+.render-queue-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.render-queue-title b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.88rem;
+}
+.render-queue-badge {
+    flex: 0 0 auto;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    color: rgba(226,232,240,0.86);
+    font-size: 0.72rem;
+}
+.render-queue-progress {
+    grid-column: 1 / -1;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+}
+.render-queue-progress span {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #8b5cf6, #22d3ee, #34d399);
+    transition: width 160ms ease;
+}
+.render-queue-meta {
+    color: rgba(203,213,225,0.72);
+    font-size: 0.76rem;
+    text-align: right;
+    white-space: nowrap;
+}
+.render-queue-error {
+    grid-column: 1 / -1;
+    color: #fecaca;
+    font-size: 0.76rem;
+}
+.render-queue-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 12px 12px;
+}
+.render-queue-actions .btn-secondary {
+    min-height: 38px;
+}
+body[data-render-queue="running"] .hyperflow-export-panel,
+body[data-render-queue="running"] .batch-export-panel {
+    box-shadow: inset 0 0 0 1px rgba(96,165,250,0.18);
+}
+body[data-render-queue="running"] .bottom-dock-tabs {
+    border-top-color: rgba(96,165,250,0.36);
+}
+@media (max-width: 720px) {
+    .render-queue-head { align-items: flex-start; flex-direction: column; }
+    .render-queue-status { width: 100%; justify-content: center; }
+    .render-queue-item { grid-template-columns: 1fr; }
+    .render-queue-meta { text-align: left; }
+}

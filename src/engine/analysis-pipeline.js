@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.3 - modular analysis pipeline
+// AI Shorts Studio v0.9.5 - modular analysis pipeline
 'use strict';
 
 (function exposeAnalysisPipeline(global) {
@@ -27,7 +27,7 @@
                 silent: false
             });
         }
-        return { duration: total, frames, summary: { fallback: true, engine: 'v0.9.3' } };
+        return { duration: total, frames, summary: { fallback: true, engine: 'v0.9.5' } };
     }
 
     function createFallbackWaveform() {
@@ -53,7 +53,7 @@
             fileMeta,
             warnings: [],
             engine: {
-                version: '0.9.3',
+                version: '0.9.5',
                 mode: budget.label || '모듈형 엔진',
                 budget
             }

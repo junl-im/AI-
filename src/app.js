@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.3 - main app with clean intro and HyperFlow workflow
+// AI Shorts Studio v0.9.5 - main app with render queue and export reliability
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -16,6 +16,7 @@
     const renderer = global.AIShortsVerticalRenderer || {};
     const qualityEffects = global.AIShortsQualityEffects || {};
     const downloadService = global.AIShortsDownloadService || {};
+    const renderQueue = global.AIShortsRenderQueue || {};
     const waveformView = global.AIShortsWaveformView || {};
     const cutMarkerOverlay = global.AIShortsCutMarkerOverlay || {};
     const timelineView = global.AIShortsTimelineView || {};
@@ -99,8 +100,9 @@
             'silenceThresholdInput', 'silenceThresholdValue', 'beatSensitivityInput', 'beatSensitivityValue',
             'motionSensitivityInput', 'motionSensitivityValue', 'handlePaddingSelect', 'autoTrimBtn', 'autoTrimAllBtn', 'refreshCutsBtn',
             'cutMarkerOverlay', 'cutMarkerFocusText', 'snapStartCutBtn', 'snapEndCutBtn', 'engineStatusText',
-            'flowRecommendBtn', 'flowPreviewBtn', 'flowThumbnailBtn', 'flowExportBtn', 'flowExportAllBtn',
-            'hyperflowStageTitle', 'hyperflowStageMeta', 'hyperflowStageIcon'
+            'flowPreviewBtn', 'flowThumbnailBtn', 'flowExportBtn', 'flowExportAllBtn',
+            'hyperflowStageTitle', 'hyperflowStageMeta', 'hyperflowStageIcon',
+            'renderQueueStatus', 'renderQueueList', 'renderQueueRetryBtn', 'renderQueueClearBtn'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -445,28 +447,133 @@
         toast('제목과 해시태그를 다시 추천했습니다.');
     }
 
+
+    function getRenderQueueSnapshot() {
+        return renderQueue && renderQueue.snapshot ? renderQueue.snapshot() : { running: false, total: 0, done: 0, failed: 0, progress: 0, items: [] };
+    }
+
+    function renderRenderQueue(snapshot) {
+        const snap = snapshot || getRenderQueueSnapshot();
+        if (document && document.body) document.body.dataset.renderQueue = snap.running ? 'running' : 'idle';
+        if (els.renderQueueStatus) {
+            if (!snap.total) els.renderQueueStatus.textContent = '🟢 대기 중';
+            else if (snap.running && snap.current) els.renderQueueStatus.textContent = `🔄 ${snap.current.label} · ${snap.progress}%`;
+            else if (snap.failed) els.renderQueueStatus.textContent = `⚠️ 완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`;
+            else els.renderQueueStatus.textContent = `✅ 완료 ${snap.done}/${snap.total}`;
+        }
+        if (els.renderQueueList) {
+            const items = Array.isArray(snap.items) ? snap.items : [];
+            if (!items.length) {
+                els.renderQueueList.innerHTML = '<div class="render-queue-empty">저장 작업을 시작하면 진행 상태가 여기에 표시됩니다.</div>';
+            } else {
+                els.renderQueueList.innerHTML = items.map(item => {
+                    const statusIcon = item.status === 'done' ? '✅' : item.status === 'failed' ? '🚫' : item.status === 'running' ? '🔄' : '⏳';
+                    const statusText = item.status === 'done' ? '완료' : item.status === 'failed' ? '실패' : item.status === 'running' ? '렌더링' : '대기';
+                    const error = item.error ? `<div class="render-queue-error">${utils.escapeHtml ? utils.escapeHtml(item.error) : item.error}</div>` : '';
+                    const label = utils.escapeHtml ? utils.escapeHtml(item.label || '렌더 작업') : (item.label || '렌더 작업');
+                    const filename = utils.escapeHtml ? utils.escapeHtml(item.filenameHint || statusText) : (item.filenameHint || statusText);
+                    return `<div class="render-queue-item is-${item.status}">
+                        <div class="render-queue-title"><span>${statusIcon}</span><b>${label}</b><span class="render-queue-badge">${statusText}</span></div>
+                        <div class="render-queue-meta">${filename}</div>
+                        <div class="render-queue-progress"><span style="width:${Math.max(0, Math.min(100, Number(item.progress || 0)))}%"></span></div>
+                        ${error}
+                    </div>`;
+                }).join('');
+            }
+        }
+        if (els.renderQueueRetryBtn) els.renderQueueRetryBtn.disabled = snap.running || !snap.failed;
+        if (els.renderQueueClearBtn) els.renderQueueClearBtn.disabled = snap.running && !snap.done && !snap.failed;
+        updateButtons();
+    }
+
+    function buildExportPayload(candidate, index, total) {
+        const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name) : 'ai-shorts';
+        const extHint = 'webm';
+        const labelPrefix = total > 1 ? `후보 ${index + 1}/${total}` : '선택 구간';
+        return {
+            id: `export-${candidate.id || index}-${Math.round(candidate.start || 0)}`,
+            label: `${labelPrefix} · ${candidate.rangeText || Math.round(candidate.start || 0) + 's'}`,
+            candidateId: candidate.id || null,
+            filenameHint: `${base}-${Math.round(candidate.start || 0)}s.${extHint}`,
+            payload: {
+                candidate,
+                index,
+                total,
+                base
+            }
+        };
+    }
+
+    async function runRenderQueueJobs(jobs) {
+        if (!renderQueue || !renderQueue.runJobs) throw new Error('렌더 큐 모듈을 불러오지 못했습니다.');
+        activateFlowTab('export');
+        stopPreview();
+        const media = getActiveMediaElement();
+        if (!media) throw new Error('저장할 원본 미디어가 없습니다.');
+        const result = await renderQueue.runJobs(jobs, async (job, update) => {
+            const payload = job.payload || {};
+            const item = payload.candidate;
+            if (!item) throw new Error('렌더할 추천 구간이 없습니다.');
+            state.selectedRecommendationId = item.id;
+            state.selectedRange = { start: item.start, end: item.end, duration: item.duration, score: item.score };
+            updateSelectedRangeControls(item);
+            renderAll();
+            setProgress(2, `${job.label} 준비`);
+            if (els.previewStatus) els.previewStatus.textContent = '렌더 큐 실행 중';
+            const exportResult = await renderer.recordVerticalSegment(els.previewCanvas, media, {
+                start: item.start,
+                end: item.end,
+                cropMode: state.settings.cropMode,
+                title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
+                rangeText: item.rangeText,
+                waveformBins: state.waveformBins,
+                thumbnailTemplate: state.settings.thumbnailTemplate,
+                qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
+                captions: state.captions,
+                captionOffset: state.settings.captionOffset,
+                captionStyle: state.settings.captionStyle,
+                captionOptions: getCaptionOptions(),
+                fps: config.PREVIEW_FPS || 30
+            }, (percent, status) => {
+                update(percent, status || '렌더링');
+                setProgress(percent, status || job.label);
+            });
+            const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
+            const filename = `${payload.base || 'ai-shorts'}-${payload.total > 1 ? 'candidate-' + String(payload.index + 1).padStart(2, '0') + '-' : ''}${Math.round(item.start)}s-${Math.round(item.duration)}s-shorts.${ext}`;
+            update(96, filename);
+            state.exportInfo = { filename, size: exportResult.blob.size, mimeType: exportResult.mimeType, range: item.rangeText };
+            downloadService.saveBlob(exportResult.blob, filename);
+            update(100, filename);
+        });
+        setProgress(100, result.failed ? `렌더 큐 완료 · 실패 ${result.failed}` : '렌더 큐 완료');
+        if (els.previewStatus) els.previewStatus.textContent = result.failed ? '일부 저장 실패' : '저장 완료';
+        toast(result.failed ? `렌더 큐 완료 · 실패 ${result.failed}개` : `렌더 큐 저장 완료 · ${result.done}/${result.total}개`, result.failed ? 'warning' : 'export');
+        updateButtons();
+        return result;
+    }
+
     function updateButtons() {
         const hasFile = Boolean(state.file);
         const hasRecs = Boolean(state.recommendations && state.recommendations.length);
         const analysisReady = hasAnalysisReady();
+        const queueBusy = Boolean(renderQueue && renderQueue.isRunning && renderQueue.isRunning());
         if (els.analyzeBtn) {
             els.analyzeBtn.disabled = !analysisReady || state.isAnalyzing;
             els.analyzeBtn.textContent = state.isAnalyzing ? '⚙️ 자동 분석 중' : '✨ 추천 생성';
         }
-        if (els.flowRecommendBtn) els.flowRecommendBtn.disabled = !analysisReady || state.isAnalyzing;
         if (els.previewBtn) els.previewBtn.disabled = !hasRecs || state.isPreviewing;
         if (els.stopPreviewBtn) els.stopPreviewBtn.disabled = !state.isPreviewing;
-        if (els.exportBtn) els.exportBtn.disabled = !hasRecs || state.isPreviewing;
+        if (els.exportBtn) els.exportBtn.disabled = !hasRecs || state.isPreviewing || queueBusy;
         if (els.applyRangeBtn) els.applyRangeBtn.disabled = !hasRecs;
         if (els.thumbnailBtn) els.thumbnailBtn.disabled = !hasRecs;
-        if (els.exportAllBtn) els.exportAllBtn.disabled = !hasRecs || state.isPreviewing;
+        if (els.exportAllBtn) els.exportAllBtn.disabled = !hasRecs || state.isPreviewing || queueBusy;
         if (els.autoTrimBtn) els.autoTrimBtn.disabled = !hasRecs || !state.autoCuts;
         if (els.autoTrimAllBtn) els.autoTrimAllBtn.disabled = !hasRecs || !state.autoCuts;
         if (els.refreshCutsBtn) els.refreshCutsBtn.disabled = !(state.audioAnalysis || state.motionAnalysis);
         if (els.flowPreviewBtn) els.flowPreviewBtn.disabled = !hasRecs || state.isPreviewing;
         if (els.flowThumbnailBtn) els.flowThumbnailBtn.disabled = !hasRecs;
-        if (els.flowExportBtn) els.flowExportBtn.disabled = !hasRecs || state.isPreviewing;
-        if (els.flowExportAllBtn) els.flowExportAllBtn.disabled = !hasRecs || state.isPreviewing;
+        if (els.flowExportBtn) els.flowExportBtn.disabled = !hasRecs || state.isPreviewing || queueBusy;
+        if (els.flowExportAllBtn) els.flowExportAllBtn.disabled = !hasRecs || state.isPreviewing || queueBusy;
         syncHyperFlow();
     }
 
@@ -667,7 +774,7 @@
         updateSelectedRangeControls(item);
         renderAll();
         activateFlowTab('preview');
-        toast('선택한 추천 구간을 미리보기로 연결했습니다.', 'action');
+        toast('선택 완료 · 미리보기 탭으로 연결했습니다.', 'action');
     }
 
     function bindEvents() {
@@ -698,6 +805,14 @@
         if (els.projectFileInput) els.projectFileInput.addEventListener('change', handleProjectFile);
         if (els.copyCaptionBtn) els.copyCaptionBtn.addEventListener('click', copyCaption);
         if (els.diagnosticsBtn) els.diagnosticsBtn.addEventListener('click', copyDiagnostics);
+        if (els.renderQueueRetryBtn) els.renderQueueRetryBtn.addEventListener('click', async () => {
+            try { await renderQueue.retryFailed(); } catch (error) { toast(error.message || '재시도에 실패했습니다.', 'error'); }
+        });
+        if (els.renderQueueClearBtn) els.renderQueueClearBtn.addEventListener('click', () => {
+            if (renderQueue.clear) renderQueue.clear();
+            renderRenderQueue();
+            toast('렌더 큐 목록을 정리했습니다.', 'action');
+        });
         if (els.programInfoBtn) els.programInfoBtn.addEventListener('click', () => { if (els.infoDialog) els.infoDialog.hidden = false; });
         if (els.infoCloseBtn) els.infoCloseBtn.addEventListener('click', () => { if (els.infoDialog) els.infoDialog.hidden = true; });
         if (els.infoDialog) els.infoDialog.addEventListener('click', event => { if (event.target === els.infoDialog) els.infoDialog.hidden = true; });
@@ -825,9 +940,9 @@
                 state.autoCuts = result.autoCuts;
                 state.waveformBins = result.waveformBins || [];
                 state.fileMeta = Object.assign({}, state.fileMeta || {}, result.fileMeta || {});
-                state.engineMeta = result.engine || { version: '0.9.3' };
+                state.engineMeta = result.engine || { version: '0.9.5' };
                 if (engineKernel.auditRuntime) state.engineMeta.stability = engineKernel.auditRuntime(state);
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '0.9.3', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '0.9.5', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
             } else {
                 let audioResult = null;
                 try {
@@ -861,8 +976,8 @@
                 toast('쇼츠 추천 구간을 만들었습니다.', 'success');
                 activateFlowTab('recommend');
             } else {
-                setProgress(100, '분석 완료 · 추천 생성 가능');
-                toast('자동 분석이 끝났습니다. 추천 생성을 눌러주세요.', 'success');
+                setProgress(100, '분석 완료 · 추천 탭으로 이동');
+                toast('자동 분석 완료 · 추천 탭에서 후보를 생성하세요.', 'success');
                 activateFlowTab('recommend');
             }
         } catch (error) {
@@ -896,7 +1011,7 @@
         createRecommendations({ autoSelect: false });
         setProgress(100, '추천 생성 완료');
         activateFlowTab('recommend');
-        toast('추천 후보를 생성했습니다. 마음에 드는 구간을 선택하세요.', 'success');
+        toast('추천 후보를 생성했습니다. 후보 카드를 누르면 미리보기로 이동합니다.', 'success');
     }
 
     function createFallbackAudioAnalysis(duration) {
@@ -1008,38 +1123,12 @@
         }, 80);
     }
 
+
     async function exportSelectedRange() {
         const selected = getSelectedRecommendation();
-        const media = getActiveMediaElement();
-        if (!selected || !media) return;
-        activateFlowTab('export');
-        stopPreview();
-        setProgress(2, '내보내기 준비');
-        if (els.previewStatus) els.previewStatus.textContent = '내보내기 중';
+        if (!selected) return;
         try {
-            const exportResult = await renderer.recordVerticalSegment(els.previewCanvas, media, {
-                start: selected.start,
-                end: selected.end,
-                cropMode: state.settings.cropMode,
-                title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
-                rangeText: selected.rangeText,
-                waveformBins: state.waveformBins,
-                thumbnailTemplate: state.settings.thumbnailTemplate,
-                qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
-                captions: state.captions,
-                captionOffset: state.settings.captionOffset,
-                captionStyle: state.settings.captionStyle,
-                captionOptions: getCaptionOptions(),
-                fps: config.PREVIEW_FPS || 30
-            }, setProgress);
-            const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
-            const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name) : 'ai-shorts';
-            const filename = `${base}-${Math.round(selected.start)}s-${selected.duration}s-shorts.${ext}`;
-            state.exportInfo = { filename, size: exportResult.blob.size, mimeType: exportResult.mimeType, range: selected.rangeText };
-            downloadService.saveBlob(exportResult.blob, filename);
-            setProgress(100, '내보내기 완료');
-            if (els.previewStatus) els.previewStatus.textContent = '내보내기 완료';
-            toast(`${ext.toUpperCase()} 파일을 저장했습니다.`, 'export');
+            await runRenderQueueJobs([buildExportPayload(selected, 0, 1)]);
         } catch (error) {
             setProgress(0, '내보내기 실패');
             toast(error.message || '내보내기에 실패했습니다.', 'error');
@@ -1052,54 +1141,19 @@
 
     async function exportAllCandidates() {
         const recommendations = Array.isArray(state.recommendations) ? state.recommendations : [];
-        const media = getActiveMediaElement();
-        if (!recommendations.length || !media || state.isPreviewing) return;
+        if (!recommendations.length || state.isPreviewing) return;
         const limit = Math.max(1, Math.min(recommendations.length, Number(els.batchLimitSelect && els.batchLimitSelect.value) || recommendations.length));
-        const queue = recommendations.slice(0, limit);
-        stopPreview();
-        if (els.exportAllBtn) els.exportAllBtn.disabled = true;
-        setProgress(1, `일괄 내보내기 준비 · ${queue.length}개`);
-        const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name) : 'ai-shorts';
-        let success = 0;
-        for (let index = 0; index < queue.length; index += 1) {
-            const item = queue[index];
-            state.selectedRecommendationId = item.id;
-            state.selectedRange = { start: item.start, end: item.end, duration: item.duration, score: item.score };
-            updateSelectedRangeControls(item);
-            renderAll();
-            setProgress(Math.round((index / queue.length) * 100), `일괄 내보내기 ${index + 1}/${queue.length}`);
-            try {
-                const exportResult = await renderer.recordVerticalSegment(els.previewCanvas, media, {
-                    start: item.start,
-                    end: item.end,
-                    cropMode: state.settings.cropMode,
-                    title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
-                    rangeText: item.rangeText,
-                    waveformBins: state.waveformBins,
-                    thumbnailTemplate: state.settings.thumbnailTemplate,
-                    qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
-                    captions: state.captions,
-                    captionOffset: state.settings.captionOffset,
-                    captionStyle: state.settings.captionStyle,
-                    captionOptions: getCaptionOptions(),
-                    fps: config.PREVIEW_FPS || 30
-                }, (percent, status) => {
-                    const local = Math.max(0, Math.min(1, Number(percent || 0) / 100));
-                    const total = ((index + local) / queue.length) * 100;
-                    setProgress(total, status || `일괄 내보내기 ${index + 1}/${queue.length}`);
-                });
-                const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
-                const filename = `${base}-candidate-${String(index + 1).padStart(2, '0')}-${Math.round(item.start)}s-${Math.round(item.duration)}s.${ext}`;
-                downloadService.saveBlob(exportResult.blob, filename);
-                success += 1;
-            } catch (error) {
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'batch-export-error', candidate: item.id, message: error.message });
-                toast(`${index + 1}번 후보 저장 실패: ${error.message || '오류'}`);
-            }
+        const queue = recommendations.slice(0, limit).map((item, index) => buildExportPayload(item, index, limit));
+        try {
+            setProgress(1, `렌더 큐 준비 · ${queue.length}개`);
+            await runRenderQueueJobs(queue);
+        } catch (error) {
+            setProgress(0, '일괄 내보내기 실패');
+            toast(error.message || '일괄 저장에 실패했습니다.', 'error');
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'batch-export-error', message: error.message });
+        } finally {
+            updateButtons();
         }
-        setProgress(100, `일괄 내보내기 완료 · ${success}/${queue.length}개`);
-        toast(`추천 후보 ${success}개를 저장했습니다.`);
-        updateButtons();
     }
 
 
@@ -1253,6 +1307,7 @@
         initElements();
         syncSettingsToUI();
         bindEvents();
+        if (renderQueue.subscribe) renderQueue.subscribe(renderRenderQueue);
         if (siteGuards.blockDropNavigation) siteGuards.blockDropNavigation();
         if (siteGuards.installExitGuard) siteGuards.installExitGuard(() => Boolean(state.file && !state.exportInfo));
         renderAll();

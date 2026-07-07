@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-9-3",
-  "version": "0.9.3",
+  "name": "ai-shorts-studio-v0-9-5",
+  "version": "0.9.5",
   "private": true,
-  "description": "AI Shorts Studio v0.9.3 - stabilized modular pro engine and workflow hardening",
+  "description": "AI Shorts Studio v0.9.5 - HyperConnect flow cleanup and recommendation selection UX",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -29,6 +29,7 @@
     "node --check src/project/project-service.js",
     "node --check src/render/quality-effects.js",
     "node --check src/render/vertical-renderer.js",
+    "node --check src/render/render-queue.js",
     "node --check src/download/download-service.js",
     "node --check src/ui/waveform-view.js",
     "node --check src/ui/cut-marker-overlay.js",
@@ -62,7 +63,10 @@
     "node qa/project_service_smoke.js",
     "node qa/modular_engine_smoke.js",
     "node qa/hyperflow_workflow_smoke.js",
+    "node qa/hyperconnect_flow_smoke.js",
     "node qa/pro_engine_stability_smoke.js",
-    "node qa/engine_contracts_smoke.js"
+    "node qa/engine_contracts_smoke.js",
+    "node qa/render_queue_smoke.js",
+    "node --check src/ui/hyperconnect-flow.js"
   ]
 }

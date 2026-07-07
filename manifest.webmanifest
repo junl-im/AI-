@@ -1,7 +1,7 @@
 {
-  "name": "AI 쇼츠 제작 스튜디오 v0.9.3",
-  "short_name": "AI 쇼츠 v0.9.3",
-  "description": "Design by 곰같은여우. 무료 로컬 기반 쇼츠 추천, 편집, 햅틱 피드백 스튜디오.",
+  "name": "AI 쇼츠 제작 스튜디오",
+  "short_name": "AI Shorts",
+  "description": "음악이나 영상을 열면 자동 분석하고 쇼츠 후보 추천부터 저장까지 이어주는 로컬 웹 스튜디오",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

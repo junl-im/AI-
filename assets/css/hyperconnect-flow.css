@@ -1,0 +1,141 @@
+/* AI Shorts Studio v0.9.5 - HyperConnect flow cleanup */
+:root {
+    --hyperflow-dock-height: 154px;
+}
+body[data-ui="hyperconnect-flow"] {
+    scroll-padding-bottom: var(--hyperflow-dock-height);
+}
+body[data-ui="hyperconnect-flow"] .app-shell {
+    padding-bottom: calc(var(--hyperflow-dock-height) + 18px);
+}
+body[data-ui="hyperconnect-flow"] .brand-panel {
+    padding: 12px 14px 14px;
+}
+body[data-ui="hyperconnect-flow"] .brand-topline {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px;
+    min-height: 36px;
+}
+body[data-ui="hyperconnect-flow"] .brand-kicker {
+    display: flex !important;
+    flex: 0 0 auto;
+}
+body[data-ui="hyperconnect-flow"] .brand-right-actions {
+    display: flex !important;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+}
+body[data-ui="hyperconnect-flow"] .badge-device,
+body[data-ui="hyperconnect-flow"] .badge-free {
+    display: none !important;
+}
+body[data-ui="hyperconnect-flow"] .brand-signature-pill {
+    display: inline-flex !important;
+    white-space: nowrap;
+}
+body[data-ui="hyperconnect-flow"] .hero-mainline {
+    margin-top: 8px;
+}
+body[data-ui="hyperconnect-flow"] .hero-copy h1 {
+    margin-bottom: 7px;
+}
+body[data-ui="hyperconnect-flow"] .hero-compact-note {
+    max-width: 680px !important;
+}
+body[data-ui="hyperconnect-flow"] .hyperflow-stage {
+    justify-content: flex-start;
+    padding: 12px 14px;
+}
+body[data-ui="hyperconnect-flow"] .hyperflow-recommend-btn,
+body[data-ui="hyperconnect-flow"] #flowRecommendBtn {
+    display: none !important;
+}
+body[data-ui="hyperconnect-flow"] .recommend-generate-btn {
+    width: 100%;
+    min-height: 58px;
+    margin-top: 12px;
+    font-size: 16px;
+    border-radius: 20px;
+}
+body[data-ui="hyperconnect-flow"] .action-dock {
+    display: none !important;
+}
+.hyperconnect-helper {
+    margin: 8px 0 0;
+    color: #aab7ca;
+    font-size: 12px;
+    line-height: 1.45;
+}
+.hyperconnect-selection-guide {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(34, 211, 238, 0.18);
+    background: rgba(34, 211, 238, 0.08);
+    color: #dbeafe;
+    font-weight: 800;
+}
+.recommendation-card {
+    text-align: left;
+    position: relative;
+}
+.rec-select-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    min-height: 36px;
+    padding: 0 13px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: -0.025em;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.92), rgba(124, 58, 237, 0.92));
+    box-shadow: 0 8px 20px rgba(34, 211, 238, 0.15);
+}
+.recommendation-card.is-selected .rec-select-cta {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.94), rgba(34, 211, 238, 0.88));
+}
+.bottom-dock.bottom-dock-hyperflow {
+    padding-top: 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+.bottom-dock-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+}
+.bottom-dock-tab {
+    min-height: 60px;
+}
+.bottom-dock-tab b {
+    font-size: 12px;
+}
+body[data-active-flow-tab="recommend"] .bottom-dock-tab[data-flow-tab="recommend"],
+body[data-active-flow-tab="preview"] .bottom-dock-tab[data-flow-tab="preview"] {
+    transform: translateY(-1px);
+}
+@media (max-width: 680px) {
+    :root { --hyperflow-dock-height: 158px; }
+    body[data-ui="hyperconnect-flow"] .brand-topline {
+        display: flex !important;
+    }
+    body[data-ui="hyperconnect-flow"] .brand-signature-pill {
+        max-width: 56vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    body[data-ui="hyperconnect-flow"] .badge-version {
+        min-height: 30px;
+        padding-inline: 11px;
+    }
+    .bottom-dock-tab {
+        min-height: 58px;
+        border-radius: 16px;
+    }
+    .bottom-dock-tab span { font-size: 20px; }
+    .bottom-dock-tab b { font-size: 11px; }
+}

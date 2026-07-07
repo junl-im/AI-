@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.3 - pro engine tuning helpers
+// AI Shorts Studio v0.9.5 - pro engine tuning helpers
 'use strict';
 
 (function exposeProEngineTuner(global) {
@@ -51,7 +51,7 @@
                 proConfidence: confidence,
                 proGrade: grade,
                 engineBadges: badges.slice(0, 4),
-                engineVersion: 'v0.9.3-pro',
+                engineVersion: 'v0.9.5-pro',
                 proEngine: {
                     confidence,
                     grade,
@@ -68,7 +68,7 @@
         const silentFrames = frames.filter(frame => frame && frame.silent).length;
         const silenceRatio = frames.length ? silentFrames / frames.length : 0;
         return Object.freeze({
-            version: '0.9.3',
+            version: '0.9.5',
             class: budget && budget.engineClass || 'pro-balanced',
             frames: frames.length,
             silenceRatio: Math.round(silenceRatio * 100),

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.8.2 - lean two-button bottom dock with feedback labels
+// AI Shorts Studio v0.9.5 - HyperConnect dock status controller
 'use strict';
 
 (function bootBottomDock(global) {
@@ -12,8 +12,7 @@
         title: 'bottomDockTitle',
         meta: 'bottomDockMeta',
         file: 'bottomFileBtn',
-        analyze: 'bottomAnalyzeBtn',
-        analyzeSource: 'analyzeBtn',
+        recommend: 'analyzeBtn',
         fileInput: 'fileInput',
         analysisStatus: 'analysisStatus',
         importStatus: 'importStatus'
@@ -41,19 +40,6 @@
         return text.length > max ? `${text.slice(0, max - 1)}…` : text;
     }
 
-    function mirrorAnalyzeButton() {
-        if (!els.analyze || !els.analyzeSource) return;
-        const disabled = Boolean(els.analyzeSource.disabled);
-        els.analyze.disabled = disabled;
-        els.analyze.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-    }
-
-    function clickAnalyzeWhenEnabled() {
-        if (!els.analyzeSource || els.analyzeSource.disabled) return;
-        if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.vibrate) global.AIShortsFeedbackUX.vibrate('analyze');
-        els.analyzeSource.click();
-    }
-
     function syncBottomDockNow() {
         syncRaf = 0;
         const hasFile = Boolean(state.file);
@@ -64,7 +50,6 @@
         document.body.classList.toggle('has-recommendations', hasRecommendations);
         document.body.classList.toggle('is-analyzing', Boolean(state.isAnalyzing));
 
-        mirrorAnalyzeButton();
 
         if (els.title) {
             if (!hasFile) els.title.textContent = '파일을 열어주세요';
@@ -72,10 +57,11 @@
         }
 
         if (els.meta) {
-            if (!hasFile) els.meta.textContent = '📂 파일 열기 후 ⚡ 분석하기를 누르세요.';
-            else if (state.isAnalyzing) els.meta.textContent = '⚡ 쇼츠 후보를 분석 중입니다.';
-            else if (selected) els.meta.textContent = `선택 구간 ${selected.rangeText || ''} · 점수 ${Math.round(Number(selected.score) || 0)}`;
-            else els.meta.textContent = '⚡ 분석하기 버튼으로 후보를 생성하세요.';
+            if (!hasFile) els.meta.textContent = '📂 파일을 열면 자동 분석이 시작됩니다.';
+            else if (state.isAnalyzing) els.meta.textContent = '⚙️ 자동 분석 중 · 완료되면 추천 탭으로 이동합니다.';
+            else if (selected) els.meta.textContent = `📱 선택 구간 ${selected.rangeText || ''} · 미리보기 연결됨`;
+            else if (hasRecommendations) els.meta.textContent = '✨ 후보 카드를 선택하면 미리보기로 이동합니다.';
+            else els.meta.textContent = '✨ 추천 탭에서 추천 생성 버튼을 눌러 후보를 만드세요.';
         }
 
         if (els.dot) {
@@ -90,15 +76,14 @@
     }
 
     function installBottomDockActions() {
-        if (els.analyze) els.analyze.addEventListener('click', clickAnalyzeWhenEnabled);
         if (els.file) els.file.addEventListener('click', scheduleSync);
         if (els.fileInput) els.fileInput.addEventListener('change', scheduleSync);
-        if (els.analyzeSource) els.analyzeSource.addEventListener('click', scheduleSync);
+        if (els.recommend) els.recommend.addEventListener('click', scheduleSync);
     }
 
     function installBottomDockObservers() {
         const observer = new MutationObserver(scheduleSync);
-        [els.analyzeSource, els.analysisStatus, els.importStatus]
+        [els.recommend, els.analysisStatus, els.importStatus]
             .filter(Boolean)
             .forEach(node => observer.observe(node, { attributes: true, childList: true, subtree: true, characterData: true }));
         document.addEventListener('visibilitychange', scheduleSync);

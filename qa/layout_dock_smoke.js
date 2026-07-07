@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const requiredIds = ['bottomDock', 'bottomDockTitle', 'bottomDockMeta', 'bottomFileBtn', 'flowRecommendBtn', 'analyzeBtn'];
+const requiredIds = ['bottomDock', 'bottomDockTitle', 'bottomDockMeta', 'bottomFileBtn', 'analyzeBtn'];
 const missing = requiredIds.filter(id => !html.includes(`id="${id}"`));
 if (missing.length) {
     console.error('FAIL missing HyperFlow dock anchors: ' + missing.join(', '));
@@ -37,8 +37,12 @@ if (!css.includes('.bottom-dock-tabs') || !css.includes('grid-template-columns: 
     console.error('FAIL HyperFlow CSS missing two-row dock or panel visibility rules');
     process.exit(1);
 }
-if (!js.includes('setActiveFlowTab') || !js.includes('AIShortsHyperFlowTabs') || !js.includes('flowRecommendBtn')) {
-    console.error('FAIL HyperFlow JS missing tab controller or recommend bridge');
+if (!js.includes('setActiveFlowTab') || !js.includes('AIShortsHyperFlowTabs')) {
+    console.error('FAIL HyperFlow JS missing tab controller');
     process.exit(1);
 }
-console.log('PASS HyperFlow 8-tab bottom dock anchors present');
+if (html.includes('id="flowRecommendBtn"') || js.includes('flowRecommendBtn')) {
+    console.error('FAIL top duplicate recommend button bridge should not exist');
+    process.exit(1);
+}
+console.log('PASS HyperConnect 8-tab bottom dock anchors present');

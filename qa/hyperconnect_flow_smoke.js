@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+'use strict';
+const fs = require('fs');
+const html = fs.readFileSync('index.html', 'utf8');
+function fail(msg) { console.error('FAIL hyperconnect_flow_smoke:', msg); process.exit(1); }
+function count(substr) { return (html.match(new RegExp(substr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length; }
+if (!html.includes('data-ui="hyperconnect-flow"')) fail('body must use hyperconnect-flow UI mode');
+if (html.includes('id="flowRecommendBtn"')) fail('top duplicate recommendation button must be removed');
+if (count('id="analyzeBtn"') !== 1) fail('there must be exactly one recommendation generate button');
+if (!html.includes('[📂 파일]') && !html.includes('data-flow-tab="file"')) fail('bottom tab dock missing file tab');
+if (!html.includes('data-flow-tab="export"')) fail('bottom tab dock missing export tab');
+if (!html.includes('v0.9.5</button>')) fail('version badge missing simple v0.9.5');
+if (!html.includes('Design by <strong>곰같은여우</strong>')) fail('designer signature missing');
+const hyper = fs.readFileSync('src/ui/hyperconnect-flow.js', 'utf8');
+if (!hyper.includes('추천 탭의 ✨ 추천 생성 버튼 하나만')) fail('single recommendation guidance missing');
+const waveform = fs.readFileSync('src/ui/waveform-view.js', 'utf8');
+if (!waveform.includes('rec-select-cta')) fail('recommendation card selection CTA missing');
+console.log('PASS hyperconnect_flow_smoke');
