@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.4.0 - waveform view
+// AI Shorts Studio v0.9.0 - waveform view with engine badges
 'use strict';
 
 (function exposeWaveformView(global) {
@@ -86,6 +86,17 @@
             });
             button.appendChild(top);
             button.appendChild(reasons);
+            if (Array.isArray(item.engineBadges) && item.engineBadges.length) {
+                const badges = document.createElement('div');
+                badges.className = 'engine-badges';
+                item.engineBadges.forEach(label => {
+                    const badge = document.createElement('span');
+                    badge.className = 'engine-badge-mini';
+                    badge.textContent = label;
+                    badges.appendChild(badge);
+                });
+                button.appendChild(badges);
+            }
             button.addEventListener('click', () => onSelect && onSelect(item.id));
             container.appendChild(button);
         });

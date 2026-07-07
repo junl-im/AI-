@@ -1,74 +1,101 @@
-# HANDOFF - AI 쇼츠 제작 스튜디오 v0.8.2
+# HANDOFF - AI 쇼츠 제작 스튜디오 v0.9.0
 
-## 패치 목적
+## 이번 패치 목적
 
-사용자 요청에 따라 디자인 크레딧을 `Design by 곰같은여우`로 명확히 표시하고, 버튼 클릭 및 주요 상태 변화별 진동/알림 피드백을 추가했습니다.
+사용자 요청: “엔진 보강, 강화, 최강 엔진을 향해. 모든 것은 모듈화.”
 
-## 주요 변경 파일
+v0.9.0은 기존 UI/UX를 유지하면서 내부 구조를 **모듈형 엔진 아키텍처**로 전환한 패치입니다. 기능을 계속 얹는 방식에서 벗어나, 이후 고급 분석/자막/얼굴추적/렌더러를 안전하게 교체하거나 확장할 수 있게 만들었습니다.
 
-- `index.html`
-  - v0.8.2 메타/타이틀/빌드 갱신
-  - `assets/css/feedback-ux.css` 추가
-  - `src/ui/feedback-ux.js` 추가
-  - 상단 브랜드 시그니처와 햅틱 배지 추가
-  - 정보 모달 설명 업데이트
-
-- `assets/css/feedback-ux.css`
-  - 곰같은여우 브랜드 시그니처 스타일
-  - 버튼 리플/눌림 피드백
-  - 토스트 유형별 색상/아이콘
-  - Dock 색감 보강
-
-- `src/ui/feedback-ux.js`
-  - `navigator.vibrate` 지원 감지
-  - 버튼/라벨/카드 클릭 피드백
-  - 파일/분석/내보내기/복사/성공/경고/오류별 햅틱 패턴
-  - 토스트 MutationObserver 기반 유형 자동 분류
-
-- `src/app.js`
-  - `toast(message, kind)` 형태로 확장
-  - Feedback UX와 토스트 유형 연결
-
-- `src/ui/bottom-dock.js`
-  - Dock 분석 버튼 클릭 시 명시적 분석 햅틱 연결
-
-- `qa/feedback_ux_smoke.js`
-  - 브랜딩, CSS, JS, 앱 연결 검수 추가
-
-## Dock 정책
-
-v0.8.1 요청 정책을 유지합니다.
+## 주요 추가 파일
 
 ```text
-[ 📂 파일 열기 ] [ ⚡ 분석하기 ]
+src/engine/module-registry.js
+src/engine/performance-budget.js
+src/engine/analysis-pipeline.js
+src/engine/scoring-pipeline.js
+src/engine/engine-kernel.js
+assets/css/engine-panel.css
+qa/modular_engine_smoke.js
 ```
 
-Dock에는 추가 기능을 넣지 않습니다. 편집, 미리보기, 썸네일, 내보내기는 본문 내부 버튼에 유지합니다.
+## 앱 연결 지점
 
-## 주의 사항
+`index.html`에서 엔진 파일들은 기존 분석/추천 모듈 뒤, `src/app.js` 앞에 로드됩니다.
 
-- `navigator.vibrate`는 지원 브라우저/기기에서만 동작합니다.
-- 햅틱 실패는 기능 실패로 보지 않습니다. 토스트 시각 피드백은 항상 유지됩니다.
-- iOS Safari와 일부 인앱 브라우저는 진동 API를 무시할 수 있습니다.
-- 접근성 측면에서 모든 피드백은 진동 없이도 색상/아이콘/텍스트로 이해 가능해야 합니다.
+`src/app.js`는 다음 전역 엔진을 사용합니다.
 
-## QA
+```js
+global.AIShortsEngineKernel
+```
+
+분석 시:
+
+```js
+engineKernel.analyzeMedia(...)
+```
+
+추천 계산 시:
+
+```js
+engineKernel.createRecommendations(...)
+```
+
+## 엔진 모듈 개념
+
+현재 등록되는 기본 모듈은 다음과 같습니다.
+
+```text
+audio.feature.extractor
+video.motion.sampler
+auto.cut.detector
+recommendation.scoring.pipeline
+render.quality.effects
+```
+
+현재는 모두 브라우저 로컬 기반입니다. 서버 API나 유료 기능은 포함하지 않았습니다.
+
+## 중요 유지 정책
+
+- 하단 Dock은 사용자 요청대로 2개만 유지합니다.
+  - 📂 파일 열기
+  - ⚡ 분석하기
+- `Design by 곰같은여우` 브랜딩 유지
+- 버튼/상태별 햅틱 피드백 유지
+- 파일 로드 후 원본 video/audio 컨트롤이 UI를 밀지 않도록 숨김 유지
+- 모듈형 구조는 늘리되 화면 정보량은 늘리지 않는 방향 유지
+
+## 검수
 
 ```bash
 npm run check
 ```
 
-예상: 40개 체크 전부 통과.
+v0.9.0 기준 신규 체크:
+
+```text
+qa/modular_engine_smoke.js
+```
+
+이 체크는 엔진 파일 존재, index 로딩 순서, app 연결, state 저장소, 서비스워커 캐시, 추천 카드 엔진 배지를 검사합니다.
+
+## 다음 개발자가 봐야 할 곳
+
+1. `src/engine/engine-kernel.js` - 앱과 엔진 사이의 관문
+2. `src/engine/analysis-pipeline.js` - 분석 파이프라인
+3. `src/engine/scoring-pipeline.js` - 점수 보강/재정렬
+4. `src/app.js` - 실제 연결부
+5. `qa/modular_engine_smoke.js` - 구조 깨짐 방지 체크
+
 
 ## 검수 순서
 
-1. `npm run check`로 정적 QA를 먼저 실행합니다.
-2. `npm run serve` 후 브라우저에서 파일 열기, 분석하기, 추천 카드 선택, 토스트/햅틱 동작을 확인합니다.
-3. 햅틱 미지원 환경에서는 토스트 아이콘과 색상 구분이 유지되는지 확인합니다.
-4. 모바일에서는 하단 Dock 두 버튼이 반반 너비로 유지되는지 확인합니다.
+1. `npm run check` 실행
+2. `qa/modular_engine_smoke.js` 통과 확인
+3. 브라우저에서 파일 열기 → 분석하기 → 추천 카드 선택 → 미리보기 확인
+4. 하단 Dock이 📂 파일 열기 / ⚡ 분석하기 2개만 표시되는지 확인
 
 ## 알려진 제한
 
-- 진동 알림은 브라우저와 기기가 `navigator.vibrate`를 지원할 때만 동작합니다.
-- iOS Safari, 일부 인앱 브라우저, 데스크톱 브라우저에서는 햅틱이 무시될 수 있습니다.
-- 햅틱은 보조 피드백이므로 미지원 환경에서도 앱 기능은 정상 동작해야 합니다.
+- 모든 분석은 무료 브라우저 로컬 기반이므로 대용량/저사양 기기에서는 안전 모드로 동작할 수 있습니다.
+- 비디오 파일의 오디오 디코딩은 브라우저 코덱 정책에 따라 실패할 수 있으며, 이 경우 움직임 중심 fallback 분석을 사용합니다.
+- 햅틱 진동은 `navigator.vibrate`를 지원하는 기기에서만 실제로 울립니다.

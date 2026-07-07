@@ -3,53 +3,59 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.8.2 - Brand Feedback UI/UX 성능 패치" />
+<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.9.0 - Modular Engine 강화 패치" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
 <meta name="theme-color" content="#7c3aed" />
-<title>AI 쇼츠 제작 스튜디오 v0.8.2</title>
+<title>AI 쇼츠 제작 스튜디오 v0.9.0</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/studio.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/editor.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/ux.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/auto-cut.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/cut-markers.css?v=0.8.2-brand-feedback" />
-<link rel="stylesheet" href="assets/css/feedback-ux.css?v=0.8.2-brand-feedback" />
-<script defer src="src/config/app-runtime-config.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/utils/core-utils.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/state/app-state.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/analysis/auto-cut-detector.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/caption/caption-service.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/project/project-service.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/render/quality-effects.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/render/vertical-renderer.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/download/download-service.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/ui/waveform-view.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/ui/cut-marker-overlay.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/ui/timeline-view.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/security/site-guards.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/boot/runtime-health.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/app.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/ui/ux-controls.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/ui/range-drag-controls.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/ui/bottom-dock.js?v=0.8.2-brand-feedback"></script>
-<script defer src="src/ui/feedback-ux.js?v=0.8.2-brand-feedback"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/studio.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/editor.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/ux.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/auto-cut.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/cut-markers.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/feedback-ux.css?v=0.9.0-modular-engine" />
+<link rel="stylesheet" href="assets/css/engine-panel.css?v=0.9.0-modular-engine" />
+<script defer src="src/config/app-runtime-config.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/utils/core-utils.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/state/app-state.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/analysis/auto-cut-detector.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/engine/module-registry.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/engine/performance-budget.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/engine/analysis-pipeline.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/engine/scoring-pipeline.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/engine/engine-kernel.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/caption/caption-service.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/project/project-service.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/render/quality-effects.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/render/vertical-renderer.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/download/download-service.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/ui/waveform-view.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/ui/cut-marker-overlay.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/ui/timeline-view.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/security/site-guards.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/boot/runtime-health.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/app.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/ui/ux-controls.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/ui/range-drag-controls.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/ui/bottom-dock.js?v=0.9.0-modular-engine"></script>
+<script defer src="src/ui/feedback-ux.js?v=0.9.0-modular-engine"></script>
 </head>
-<body data-build="0.8.2" data-ui="brand-feedback">
+<body data-build="0.9.0" data-ui="modular-engine">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel" aria-label="앱 소개">
             <div class="brand-topline">
                 <div class="brand-kicker">
-                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.8.2 Brand Feedback</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.9.0 Modular Engine</button>
                     <span class="badge badge-device">PC · 모바일 브라우저</span>
                     <span class="badge badge-free">무료 기능 기반</span>
                     <span class="feedback-badge">📳 햅틱 피드백</span>
@@ -61,7 +67,7 @@
             <div class="hero-mainline">
                 <div class="hero-copy">
                     <h1>AI 쇼츠 <span>스튜디오</span></h1>
-                    <p class="hero-compact-note">Design by 곰같은여우. 하단 Dock은 📂 파일 열기와 ⚡ 분석하기만 크게 남기고, 버튼 클릭·상태별 알림은 햅틱 피드백으로 더 직관적으로 정리했습니다.</p>
+                    <p class="hero-compact-note">Design by 곰같은여우. Design by 곰같은여우. 분석·추천·컷·렌더를 모듈형 엔진으로 분리해 더 빠르고 강하게 확장할 수 있게 정리했습니다.</p>
                 <div class="hero-cta-row" aria-label="빠른 시작 버튼">
                     <label class="btn-primary hero-file-btn" for="fileInput">파일 열기</label>
                     <button id="heroAnalyzeBtn" class="btn-secondary" type="button" disabled>바로 분석</button>
@@ -162,6 +168,16 @@
                 <button id="analyzeBtn" class="btn-primary" type="button" disabled>분석하고 추천받기</button>
                 <div class="progress-wrap" aria-label="처리 진행률">
                     <div id="progressBar" class="progress-bar"></div>
+                </div>
+                <div class="engine-status-card" aria-label="모듈형 엔진 상태">
+                    <strong>🧠 모듈형 엔진 <span id="engineStatusText">대기</span></strong>
+                    <div class="engine-pill-row">
+                        <span class="engine-pill">🎧 오디오 분석</span>
+                        <span class="engine-pill">🎬 영상 움직임</span>
+                        <span class="engine-pill">✂️ 자동 컷</span>
+                        <span class="engine-pill">🏆 점수 보강</span>
+                    </div>
+                    <p>각 엔진은 독립 모듈로 분리되어 이후 Whisper, 얼굴추적, 고급 렌더러도 갈아끼울 수 있습니다.</p>
                 </div>
             </section>
 
@@ -574,7 +590,7 @@
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.8.2</h2>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.9.0</h2>
         <p>이 버전은 Design by 곰같은여우 브랜딩과 버튼 클릭/구분별 진동 알림을 추가한 편의성 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
         <ul>
             <li>오디오 에너지, 피크, 트랜지언트, 무음 비율을 분석합니다.</li>

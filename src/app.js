@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.8.2 - main app with brand feedback UX pass
+// AI Shorts Studio v0.9.0 - main app with modular engine pass
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -10,6 +10,7 @@
     const motionAnalyzer = global.AIShortsVideoMotionAnalyzer || {};
     const autoCutDetector = global.AIShortsAutoCutDetector || {};
     const recEngine = global.AIShortsRecommendationEngine || {};
+    const engineKernel = global.AIShortsEngineKernel || {};
     const captionService = global.AIShortsCaptionService || {};
     const projectService = global.AIShortsProjectService || {};
     const renderer = global.AIShortsVerticalRenderer || {};
@@ -97,7 +98,7 @@
             'autoCutSummary', 'tempoScoreText', 'silenceRiskText', 'cutCountText', 'autoCutTimelineList',
             'silenceThresholdInput', 'silenceThresholdValue', 'beatSensitivityInput', 'beatSensitivityValue',
             'motionSensitivityInput', 'motionSensitivityValue', 'handlePaddingSelect', 'autoTrimBtn', 'autoTrimAllBtn', 'refreshCutsBtn',
-            'cutMarkerOverlay', 'cutMarkerFocusText', 'snapStartCutBtn', 'snapEndCutBtn'
+            'cutMarkerOverlay', 'cutMarkerFocusText', 'snapStartCutBtn', 'snapEndCutBtn', 'engineStatusText'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -117,6 +118,22 @@
     function setProgress(percent, status) {
         if (els.progressBar) els.progressBar.style.width = `${Math.max(0, Math.min(100, Number(percent) || 0))}%`;
         if (els.analysisStatus && status) els.analysisStatus.textContent = status;
+        updateEngineStatus(status);
+    }
+
+    function updateEngineStatus(status) {
+        if (!els.engineStatusText) return;
+        const meta = state && state.engineMeta || null;
+        if (status && state && state.isAnalyzing) {
+            els.engineStatusText.textContent = status;
+            return;
+        }
+        if (meta && meta.budget) {
+            const modules = meta.registry && meta.registry.count ? `${meta.registry.count}개 모듈` : '모듈 활성';
+            els.engineStatusText.textContent = `${meta.budget.label || '모듈형'} · ${modules}`;
+            return;
+        }
+        els.engineStatusText.textContent = '대기';
     }
 
     function syncSettingsToUI() {
@@ -570,6 +587,7 @@
         updateCutMarkerControls(selected);
         renderPreviewStill();
         updateButtons();
+        updateEngineStatus();
     }
 
     function renderPreviewStillNow() {
@@ -746,31 +764,58 @@
         updateButtons();
         setProgress(3, '분석 시작');
         try {
-            let audioResult = null;
-            try {
-                audioResult = await audioExtractor.analyzeFileAudio(state.file, setProgress);
-            } catch (audioError) {
-                if (state.fileKind !== 'video') throw audioError;
-                toast('비디오 오디오 디코딩이 제한되어 움직임 중심으로 분석합니다.');
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'audio-decode-fallback', message: audioError.message });
-            }
-            if (audioResult) {
-                state.audioBuffer = audioResult.decoded;
-                state.channelData = audioResult.channelData;
-                state.audioAnalysis = audioResult.analysis;
-                state.waveformBins = audioResult.waveformBins;
-                state.fileMeta.duration = Number(audioResult.analysis.duration) || state.fileMeta.duration;
+            if (engineKernel.analyzeMedia) {
+                const budget = engineKernel.createBudget ? engineKernel.createBudget(state.fileMeta, config) : null;
+                const result = await engineKernel.analyzeMedia({
+                    file: state.file,
+                    fileKind: state.fileKind,
+                    fileUrl: state.fileUrl,
+                    fileMeta: state.fileMeta,
+                    config,
+                    budget,
+                    onProgress: setProgress,
+                    onWarning: message => {
+                        toast(message, 'warning');
+                        if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-warning', message });
+                    },
+                    getAutoCutOptions
+                });
+                state.audioBuffer = result.audioBuffer;
+                state.channelData = result.channelData;
+                state.audioAnalysis = result.audioAnalysis;
+                state.motionAnalysis = result.motionAnalysis;
+                state.autoCuts = result.autoCuts;
+                state.waveformBins = result.waveformBins || [];
+                state.fileMeta = Object.assign({}, state.fileMeta || {}, result.fileMeta || {});
+                state.engineMeta = result.engine || { version: '0.9.0' };
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '0.9.0', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
             } else {
-                state.audioAnalysis = createFallbackAudioAnalysis(state.fileMeta.duration || (els.sourceVideo && els.sourceVideo.duration) || 30);
-                state.waveformBins = new Array(160).fill(0).map((_, i) => 0.18 + Math.sin(i * 0.29) * 0.08);
+                let audioResult = null;
+                try {
+                    audioResult = await audioExtractor.analyzeFileAudio(state.file, setProgress);
+                } catch (audioError) {
+                    if (state.fileKind !== 'video') throw audioError;
+                    toast('비디오 오디오 디코딩이 제한되어 움직임 중심으로 분석합니다.');
+                    if (store.addDiagnostic) store.addDiagnostic({ type: 'audio-decode-fallback', message: audioError.message });
+                }
+                if (audioResult) {
+                    state.audioBuffer = audioResult.decoded;
+                    state.channelData = audioResult.channelData;
+                    state.audioAnalysis = audioResult.analysis;
+                    state.waveformBins = audioResult.waveformBins;
+                    state.fileMeta.duration = Number(audioResult.analysis.duration) || state.fileMeta.duration;
+                } else {
+                    state.audioAnalysis = createFallbackAudioAnalysis(state.fileMeta.duration || (els.sourceVideo && els.sourceVideo.duration) || 30);
+                    state.waveformBins = new Array(160).fill(0).map((_, i) => 0.18 + Math.sin(i * 0.29) * 0.08);
+                }
+                if (state.fileKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
+                    state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(state.fileUrl, setProgress);
+                    state.fileMeta.duration = state.fileMeta.duration || state.motionAnalysis.duration;
+                }
+                setProgress(90, '자동 컷 포인트 계산 중');
+                buildAutoCutTimeline();
             }
-            if (state.fileKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
-                state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(state.fileUrl, setProgress);
-                state.fileMeta.duration = state.fileMeta.duration || state.motionAnalysis.duration;
-            }
-            setProgress(90, '자동 컷 포인트 계산 중');
-            buildAutoCutTimeline();
-            setProgress(92, '추천 계산 중');
+            setProgress(92, '모듈형 추천 엔진 계산 중');
             createRecommendations();
             setProgress(100, '추천 완료');
             toast('쇼츠 추천 구간을 만들었습니다.', 'success');
@@ -801,15 +846,29 @@
     }
 
     function createRecommendations() {
-        if (!recEngine.createRecommendations) return;
-        let recommendations = recEngine.createRecommendations(state.audioAnalysis, state.motionAnalysis, {
+        let recommendations = [];
+        const options = {
             duration: state.settings.duration,
             style: state.settings.style,
-            count: config.DEFAULT_CANDIDATE_COUNT || 6,
-            autoCuts: state.autoCuts
-        });
-        if (autoCutDetector.enhanceRecommendations) recommendations = autoCutDetector.enhanceRecommendations(recommendations, state.autoCuts, getAutoCutOptions());
+            count: state.engineMeta && state.engineMeta.budget && state.engineMeta.budget.recommendationCount || config.DEFAULT_CANDIDATE_COUNT || 6,
+            autoCuts: state.autoCuts,
+            autoCutOptions: getAutoCutOptions()
+        };
+        if (engineKernel.createRecommendations) {
+            recommendations = engineKernel.createRecommendations({
+                audioAnalysis: state.audioAnalysis,
+                motionAnalysis: state.motionAnalysis,
+                autoCuts: state.autoCuts,
+                fileMeta: state.fileMeta,
+                config,
+                options
+            });
+        } else if (recEngine.createRecommendations) {
+            recommendations = recEngine.createRecommendations(state.audioAnalysis, state.motionAnalysis, options);
+            if (autoCutDetector.enhanceRecommendations) recommendations = autoCutDetector.enhanceRecommendations(recommendations, state.autoCuts, getAutoCutOptions());
+        }
         state.recommendations = recommendations;
+        if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-recommendations', count: recommendations.length, modular: Boolean(engineKernel.createRecommendations) });
         if (recommendations.length) selectRecommendation(recommendations[0].id);
         else renderAll();
     }

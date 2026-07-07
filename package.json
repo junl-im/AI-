@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-8-2",
-  "version": "0.8.2",
+  "name": "ai-shorts-studio-v0-9-0",
+  "version": "0.9.0",
   "private": true,
-  "description": "AI Shorts Studio v0.8.2 - Design by Gom-like Fox brand signature, haptic feedback, and convenience notification pass",
+  "description": "AI Shorts Studio v0.9.0 - modular engine architecture and scoring reinforcement pass",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -16,6 +16,11 @@
     "node --check src/analysis/video-motion-analyzer.js",
     "node --check src/analysis/auto-cut-detector.js",
     "node --check src/recommendation/shorts-recommendation-engine.js",
+    "node --check src/engine/engine-kernel.js",
+    "node --check src/engine/scoring-pipeline.js",
+    "node --check src/engine/analysis-pipeline.js",
+    "node --check src/engine/performance-budget.js",
+    "node --check src/engine/module-registry.js",
     "node --check src/caption/caption-service.js",
     "node --check src/project/project-service.js",
     "node --check src/render/quality-effects.js",
@@ -49,6 +54,7 @@
     "node qa/render_capability_smoke.js",
     "node qa/docs_handoff_smoke.js",
     "node qa/caption_service_smoke.js",
-    "node qa/project_service_smoke.js"
+    "node qa/project_service_smoke.js",
+    "node qa/modular_engine_smoke.js"
   ]
 }

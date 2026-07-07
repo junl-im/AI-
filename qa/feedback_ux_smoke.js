@@ -11,8 +11,8 @@ const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
 
 const requiredHtml = [
     'Design by <strong>곰같은여우</strong>',
-    'feedback-ux.css?v=0.8.2-brand-feedback',
-    'feedback-ux.js?v=0.8.2-brand-feedback',
+    'feedback-ux.css?v=0.9.0-modular-engine',
+    'feedback-ux.js?v=0.9.0-modular-engine',
     '📳 햅틱 피드백',
     '버튼 클릭 · 성공 · 경고 · 오류별 진동 알림'
 ];
