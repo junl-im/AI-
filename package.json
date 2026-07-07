@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-6-0",
-  "version": "0.6.0",
+  "name": "ai-shorts-studio-v0-7-0",
+  "version": "0.7.0",
   "private": true,
-  "description": "AI Shorts Studio v0.6.0 - output quality controls for brightness, contrast, saturation, fades, watermark, intro/outro and safe-area preview",
+  "description": "AI Shorts Studio v0.7.0 - automatic cut editing with silence, beat and scene-change cut points",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -14,6 +14,7 @@
     "node --check src/utils/core-utils.js",
     "node --check src/analysis/audio-feature-extractor.js",
     "node --check src/analysis/video-motion-analyzer.js",
+    "node --check src/analysis/auto-cut-detector.js",
     "node --check src/recommendation/shorts-recommendation-engine.js",
     "node --check src/caption/caption-service.js",
     "node --check src/project/project-service.js",
@@ -38,6 +39,7 @@
     "node qa/advanced_editor_smoke.js",
     "node qa/caption_pro_smoke.js",
     "node qa/recommendation_engine_smoke.js",
+    "node qa/auto_cut_smoke.js",
     "node qa/output_quality_smoke.js",
     "node qa/render_capability_smoke.js",
     "node qa/docs_handoff_smoke.js",

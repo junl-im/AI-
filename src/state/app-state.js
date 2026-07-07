@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.6.0 - state container
+// AI Shorts Studio v0.7.0 - state container
 'use strict';
 
 (function exposeState(global) {
@@ -12,6 +12,7 @@
         channelData: null,
         audioAnalysis: null,
         motionAnalysis: null,
+        autoCuts: null,
         waveformBins: [],
         recommendations: [],
         selectedRecommendationId: '',
@@ -60,6 +61,13 @@
                 watermarkPosition: 'bottom-right',
                 safeGuide: true
             },
+            autoCutOptions: {
+                silenceThreshold: 0.09,
+                beatSensitivity: 0.58,
+                motionSensitivity: 0.60,
+                handlePadding: 0.7,
+                maxSnapDistance: 1.4
+            },
             thumbnailTemplate: 'neon'
         };
         try {
@@ -68,6 +76,7 @@
             const merged = Object.assign({}, defaults, parsed || {});
             merged.captionOptions = Object.assign({}, defaults.captionOptions, parsed && parsed.captionOptions || {});
             merged.qualityOptions = Object.assign({}, defaults.qualityOptions, parsed && parsed.qualityOptions || {});
+            merged.autoCutOptions = Object.assign({}, defaults.autoCutOptions, parsed && parsed.autoCutOptions || {});
             return merged;
         } catch (error) {
             return defaults;
@@ -104,6 +113,7 @@
         state.channelData = null;
         state.audioAnalysis = null;
         state.motionAnalysis = null;
+        state.autoCuts = null;
         state.waveformBins = [];
         state.recommendations = [];
         state.selectedRecommendationId = '';

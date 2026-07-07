@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.6.0 - output quality helpers
+// AI Shorts Studio v0.7.0 - output quality helpers
 'use strict';
 
 (function exposeQualityEffects(global) {

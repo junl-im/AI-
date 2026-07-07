@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.6.0 - main app
+// AI Shorts Studio v0.7.0 - main app
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -8,6 +8,7 @@
     const state = store.state;
     const audioExtractor = global.AIShortsAudioFeatureExtractor || {};
     const motionAnalyzer = global.AIShortsVideoMotionAnalyzer || {};
+    const autoCutDetector = global.AIShortsAutoCutDetector || {};
     const recEngine = global.AIShortsRecommendationEngine || {};
     const captionService = global.AIShortsCaptionService || {};
     const projectService = global.AIShortsProjectService || {};
@@ -61,6 +62,14 @@
         safeGuide: true
     });
 
+    const AUTO_CUT_DEFAULTS = Object.freeze({
+        silenceThreshold: 0.09,
+        beatSensitivity: 0.58,
+        motionSensitivity: 0.60,
+        handlePadding: 0.7,
+        maxSnapDistance: 1.4
+    });
+
     function $(id) { return document.getElementById(id); }
 
     function initElements() {
@@ -82,7 +91,10 @@
             'brightnessInput', 'brightnessValue', 'contrastInput', 'contrastValue', 'saturationInput', 'saturationValue',
             'vignetteInput', 'vignetteValue', 'fadeInSelect', 'fadeOutSelect', 'introTextInput', 'outroTextInput',
             'introDurationSelect', 'outroDurationSelect', 'watermarkTextInput', 'watermarkPositionSelect',
-            'safeGuideToggle', 'qualityResetBtn', 'copyBoostBtn'
+            'safeGuideToggle', 'qualityResetBtn', 'copyBoostBtn',
+            'autoCutSummary', 'tempoScoreText', 'silenceRiskText', 'cutCountText', 'autoCutTimelineList',
+            'silenceThresholdInput', 'silenceThresholdValue', 'beatSensitivityInput', 'beatSensitivityValue',
+            'motionSensitivityInput', 'motionSensitivityValue', 'handlePaddingSelect', 'autoTrimBtn', 'autoTrimAllBtn', 'refreshCutsBtn'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -110,6 +122,7 @@
         if (els.thumbnailTemplateSelect) els.thumbnailTemplateSelect.value = state.settings.thumbnailTemplate || 'neon';
         syncCaptionOptionsToUI();
         syncQualityOptionsToUI();
+        syncAutoCutOptionsToUI();
     }
 
     function getCaptionOptions() {
@@ -239,6 +252,128 @@
         renderPreviewStill();
     }
 
+
+    function getAutoCutOptions() {
+        const raw = Object.assign({}, AUTO_CUT_DEFAULTS, state && state.settings && state.settings.autoCutOptions || {});
+        if (autoCutDetector.normalizeOptions) return autoCutDetector.normalizeOptions(raw);
+        raw.silenceThreshold = Math.max(0.04, Math.min(0.2, Number(raw.silenceThreshold) || AUTO_CUT_DEFAULTS.silenceThreshold));
+        raw.beatSensitivity = Math.max(0.35, Math.min(0.85, Number(raw.beatSensitivity) || AUTO_CUT_DEFAULTS.beatSensitivity));
+        raw.motionSensitivity = Math.max(0.35, Math.min(0.9, Number(raw.motionSensitivity) || AUTO_CUT_DEFAULTS.motionSensitivity));
+        raw.handlePadding = Math.max(0, Math.min(1.5, Number(raw.handlePadding) || AUTO_CUT_DEFAULTS.handlePadding));
+        raw.maxSnapDistance = Math.max(0.4, Math.min(3, Number(raw.maxSnapDistance) || AUTO_CUT_DEFAULTS.maxSnapDistance));
+        return raw;
+    }
+
+    function saveAutoCutOptions(options) {
+        const next = autoCutDetector.normalizeOptions ? autoCutDetector.normalizeOptions(Object.assign({}, AUTO_CUT_DEFAULTS, options || {})) : Object.assign({}, AUTO_CUT_DEFAULTS, options || {});
+        store.setSetting('autoCutOptions', next);
+        return next;
+    }
+
+    function syncAutoCutOptionsToUI() {
+        const options = getAutoCutOptions();
+        if (els.silenceThresholdInput) els.silenceThresholdInput.value = String(Math.round(options.silenceThreshold * 100));
+        if (els.silenceThresholdValue) els.silenceThresholdValue.textContent = `${Math.round(options.silenceThreshold * 100)}%`;
+        if (els.beatSensitivityInput) els.beatSensitivityInput.value = String(Math.round(options.beatSensitivity * 100));
+        if (els.beatSensitivityValue) els.beatSensitivityValue.textContent = `${Math.round(options.beatSensitivity * 100)}%`;
+        if (els.motionSensitivityInput) els.motionSensitivityInput.value = String(Math.round(options.motionSensitivity * 100));
+        if (els.motionSensitivityValue) els.motionSensitivityValue.textContent = `${Math.round(options.motionSensitivity * 100)}%`;
+        if (els.handlePaddingSelect) els.handlePaddingSelect.value = String(options.handlePadding);
+    }
+
+    function readAutoCutOptionsFromUI() {
+        const current = getAutoCutOptions();
+        const next = Object.assign({}, current, {
+            silenceThreshold: els.silenceThresholdInput ? (Number(els.silenceThresholdInput.value) || 9) / 100 : current.silenceThreshold,
+            beatSensitivity: els.beatSensitivityInput ? (Number(els.beatSensitivityInput.value) || 58) / 100 : current.beatSensitivity,
+            motionSensitivity: els.motionSensitivityInput ? (Number(els.motionSensitivityInput.value) || 60) / 100 : current.motionSensitivity,
+            handlePadding: els.handlePaddingSelect ? Number(els.handlePaddingSelect.value) || 0 : current.handlePadding
+        });
+        saveAutoCutOptions(next);
+        syncAutoCutOptionsToUI();
+        if (state.audioAnalysis || state.motionAnalysis) {
+            buildAutoCutTimeline();
+            createRecommendations();
+        } else {
+            renderAutoCutSummary(null);
+        }
+    }
+
+    function buildAutoCutTimeline() {
+        if (!autoCutDetector.createAutoCuts) return null;
+        state.autoCuts = autoCutDetector.createAutoCuts(state.audioAnalysis, state.motionAnalysis, getAutoCutOptions());
+        if (store.addDiagnostic) store.addDiagnostic({ type: 'auto-cuts-built', cuts: state.autoCuts && state.autoCuts.summary && state.autoCuts.summary.totalCuts || 0 });
+        return state.autoCuts;
+    }
+
+    function renderAutoCutSummary(selected) {
+        if (!els.autoCutSummary && !els.autoCutTimelineList) return;
+        const cuts = state.autoCuts || null;
+        const summary = cuts && cuts.summary || null;
+        const total = summary ? Number(summary.totalCuts || 0) : 0;
+        if (els.autoCutSummary) {
+            if (!summary) els.autoCutSummary.textContent = '분석 전';
+            else els.autoCutSummary.textContent = `비트 ${summary.beatCuts || 0} · 장면 ${summary.motionCuts || 0} · 무음 ${summary.silenceSegments || 0}`;
+        }
+        const insight = autoCutDetector.createCutInsight ? autoCutDetector.createCutInsight(selected, cuts) : null;
+        if (els.tempoScoreText) els.tempoScoreText.textContent = insight ? String(insight.tempoScore) : '--';
+        if (els.silenceRiskText) els.silenceRiskText.textContent = insight ? `${Math.round(insight.silenceRisk * 100)}%` : '--';
+        if (els.cutCountText) els.cutCountText.textContent = String(total || 0);
+        if (els.autoTrimBtn) els.autoTrimBtn.disabled = !selected || !summary;
+        if (els.autoTrimAllBtn) els.autoTrimAllBtn.disabled = !(state.recommendations && state.recommendations.length && summary);
+        if (els.refreshCutsBtn) els.refreshCutsBtn.disabled = !(state.audioAnalysis || state.motionAnalysis);
+        if (els.autoCutTimelineList) {
+            const points = cuts && Array.isArray(cuts.timeline) ? cuts.timeline.slice(0, 10) : [];
+            if (!points.length) {
+                els.autoCutTimelineList.innerHTML = '<p>분석 후 비트·장면전환·무음 회피 지점이 표시됩니다.</p>';
+            } else {
+                els.autoCutTimelineList.innerHTML = points.map(point => {
+                    const label = point.type === 'beat' ? '비트' : point.type === 'motion' ? '장면' : '무음 회피';
+                    const time = utils.formatTime ? utils.formatTime(point.time) : `${point.time.toFixed(1)}s`;
+                    const score = Math.round((Number(point.score) || 0) * 100);
+                    return `<span class="auto-cut-pill auto-cut-${point.type}"><b>${label}</b>${time}<em>${score}</em></span>`;
+                }).join('');
+            }
+        }
+    }
+
+    function applyAutoTrimToRecommendation(item) {
+        if (!item || !autoCutDetector.autoTrimRange) return item;
+        const totalDuration = Number(state.fileMeta && state.fileMeta.duration) || Number(item.end) || 0;
+        const adjusted = autoCutDetector.autoTrimRange(item, state.autoCuts, getAutoCutOptions(), totalDuration);
+        item.start = adjusted.start;
+        item.end = adjusted.end;
+        item.duration = adjusted.duration;
+        item.rangeText = utils.formatRange ? utils.formatRange(item.start, item.end) : `${item.start.toFixed(1)} ~ ${item.end.toFixed(1)}`;
+        item.autoTrimmed = true;
+        item.cutInfo = Object.assign({}, item.cutInfo || {}, adjusted.cutInfo || {});
+        item.reasons = Array.from(new Set([...(item.reasons || []), '자동 컷 보정으로 무음·전환 지점을 피해 앞뒤 여유를 맞췄습니다.'])).slice(0, 5);
+        return item;
+    }
+
+    function autoTrimSelectedRange() {
+        const selected = getSelectedRecommendation();
+        if (!selected || !state.autoCuts) return;
+        applyAutoTrimToRecommendation(selected);
+        state.selectedRange = { start: selected.start, end: selected.end, duration: selected.duration, score: selected.score };
+        const media = getActiveMediaElement();
+        if (media) {
+            try { media.currentTime = selected.start; } catch (error) { /* ignored */ }
+        }
+        updateSelectedRangeControls(selected);
+        renderAll();
+        toast('선택 구간을 자동 컷 기준으로 보정했습니다.');
+    }
+
+    function autoTrimAllRecommendations() {
+        if (!state.autoCuts || !(state.recommendations || []).length) return;
+        state.recommendations.forEach(applyAutoTrimToRecommendation);
+        const selected = getSelectedRecommendation();
+        if (selected) state.selectedRange = { start: selected.start, end: selected.end, duration: selected.duration, score: selected.score };
+        renderAll();
+        toast('모든 추천 후보를 자동 컷 기준으로 보정했습니다.');
+    }
+
     function resetQualityOptions() {
         saveQualityOptions(QUALITY_DEFAULTS);
         syncQualityOptionsToUI();
@@ -272,6 +407,9 @@
         if (els.applyRangeBtn) els.applyRangeBtn.disabled = !hasRecs;
         if (els.thumbnailBtn) els.thumbnailBtn.disabled = !hasRecs;
         if (els.exportAllBtn) els.exportAllBtn.disabled = !hasRecs || state.isPreviewing;
+        if (els.autoTrimBtn) els.autoTrimBtn.disabled = !hasRecs || !state.autoCuts;
+        if (els.autoTrimAllBtn) els.autoTrimAllBtn.disabled = !hasRecs || !state.autoCuts;
+        if (els.refreshCutsBtn) els.refreshCutsBtn.disabled = !(state.audioAnalysis || state.motionAnalysis);
     }
 
     function getSelectedRecommendation() {
@@ -312,6 +450,7 @@
         if (els.selectedRangeText) els.selectedRangeText.textContent = selected ? selected.rangeText : '구간 없음';
         if (selected) updateSelectedRangeControls(selected);
         updateCaptionStatus();
+        renderAutoCutSummary(selected);
         renderPreviewStill();
         updateButtons();
     }
@@ -415,6 +554,14 @@
         if (els.safeGuideToggle) els.safeGuideToggle.addEventListener('change', readQualityOptionsFromUI);
         if (els.qualityResetBtn) els.qualityResetBtn.addEventListener('click', resetQualityOptions);
         if (els.copyBoostBtn) els.copyBoostBtn.addEventListener('click', createBoostedCopy);
+        ['silenceThresholdInput', 'beatSensitivityInput', 'motionSensitivityInput', 'handlePaddingSelect'].forEach(id => {
+            if (!els[id]) return;
+            els[id].addEventListener('input', readAutoCutOptionsFromUI);
+            els[id].addEventListener('change', readAutoCutOptionsFromUI);
+        });
+        if (els.autoTrimBtn) els.autoTrimBtn.addEventListener('click', autoTrimSelectedRange);
+        if (els.autoTrimAllBtn) els.autoTrimAllBtn.addEventListener('click', autoTrimAllRecommendations);
+        if (els.refreshCutsBtn) els.refreshCutsBtn.addEventListener('click', () => { buildAutoCutTimeline(); createRecommendations(); toast('컷 포인트를 다시 계산했습니다.'); });
         if (els.sourceVideo) els.sourceVideo.addEventListener('loadeddata', renderPreviewStill);
         if (els.sourceAudio) els.sourceAudio.addEventListener('timeupdate', renderPreviewStill);
         if (els.sourceVideo) els.sourceVideo.addEventListener('timeupdate', renderPreviewStill);
@@ -495,6 +642,8 @@
                 state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(state.fileUrl, setProgress);
                 state.fileMeta.duration = state.fileMeta.duration || state.motionAnalysis.duration;
             }
+            setProgress(90, '자동 컷 포인트 계산 중');
+            buildAutoCutTimeline();
             setProgress(92, '추천 계산 중');
             createRecommendations();
             setProgress(100, '추천 완료');
@@ -527,11 +676,13 @@
 
     function createRecommendations() {
         if (!recEngine.createRecommendations) return;
-        const recommendations = recEngine.createRecommendations(state.audioAnalysis, state.motionAnalysis, {
+        let recommendations = recEngine.createRecommendations(state.audioAnalysis, state.motionAnalysis, {
             duration: state.settings.duration,
             style: state.settings.style,
-            count: config.DEFAULT_CANDIDATE_COUNT || 6
+            count: config.DEFAULT_CANDIDATE_COUNT || 6,
+            autoCuts: state.autoCuts
         });
+        if (autoCutDetector.enhanceRecommendations) recommendations = autoCutDetector.enhanceRecommendations(recommendations, state.autoCuts, getAutoCutOptions());
         state.recommendations = recommendations;
         if (recommendations.length) selectRecommendation(recommendations[0].id);
         else renderAll();
@@ -750,6 +901,7 @@
         state.captions = cues;
         if (store.addDiagnostic) store.addDiagnostic({ type: 'captions-applied', count: cues.length });
         updateCaptionStatus();
+        renderAutoCutSummary(selected);
         renderPreviewStill();
         toast(cues.length ? `${cues.length}개 자막을 적용했습니다.` : '적용할 자막을 찾지 못했습니다.');
     }
@@ -758,6 +910,7 @@
         state.captions = [];
         if (els.captionTextInput) els.captionTextInput.value = '';
         updateCaptionStatus();
+        renderAutoCutSummary(selected);
         renderPreviewStill();
         toast('자막을 비웠습니다.');
     }

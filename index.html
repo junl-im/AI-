@@ -3,47 +3,49 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.6.0 - 결과물 품질, 워터마크, 인트로/아웃트로, 안전영역 강화" />
+<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.7.0 - 무음·비트·장면 전환 기반 자동 컷 편집 패치" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
 <meta name="theme-color" content="#7c3aed" />
-<title>AI 쇼츠 제작 스튜디오 v0.6.0</title>
+<title>AI 쇼츠 제작 스튜디오 v0.7.0</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=0.6.0-output-pro" />
-<link rel="stylesheet" href="assets/css/studio.css?v=0.6.0-output-pro" />
-<link rel="stylesheet" href="assets/css/editor.css?v=0.6.0-output-pro" />
-<link rel="stylesheet" href="assets/css/ux.css?v=0.6.0-output-pro" />
-<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.6.0-output-pro" />
-<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.6.0-output-pro" />
-<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.6.0-output-pro" />
-<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.6.0-output-pro" />
-<script defer src="src/config/app-runtime-config.js?v=0.6.0-output-pro"></script>
-<script defer src="src/utils/core-utils.js?v=0.6.0-output-pro"></script>
-<script defer src="src/state/app-state.js?v=0.6.0-output-pro"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=0.6.0-output-pro"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=0.6.0-output-pro"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.6.0-output-pro"></script>
-<script defer src="src/caption/caption-service.js?v=0.6.0-output-pro"></script>
-<script defer src="src/project/project-service.js?v=0.6.0-output-pro"></script>
-<script defer src="src/render/quality-effects.js?v=0.6.0-output-pro"></script>
-<script defer src="src/render/vertical-renderer.js?v=0.6.0-output-pro"></script>
-<script defer src="src/download/download-service.js?v=0.6.0-output-pro"></script>
-<script defer src="src/ui/waveform-view.js?v=0.6.0-output-pro"></script>
-<script defer src="src/ui/timeline-view.js?v=0.6.0-output-pro"></script>
-<script defer src="src/security/site-guards.js?v=0.6.0-output-pro"></script>
-<script defer src="src/boot/runtime-health.js?v=0.6.0-output-pro"></script>
-<script defer src="src/app.js?v=0.6.0-output-pro"></script>
-<script defer src="src/ui/ux-controls.js?v=0.6.0-output-pro"></script>
-<script defer src="src/ui/range-drag-controls.js?v=0.6.0-output-pro"></script>
-<script defer src="src/ui/bottom-dock.js?v=0.6.0-output-pro"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=0.7.0-auto-cut" />
+<link rel="stylesheet" href="assets/css/studio.css?v=0.7.0-auto-cut" />
+<link rel="stylesheet" href="assets/css/editor.css?v=0.7.0-auto-cut" />
+<link rel="stylesheet" href="assets/css/ux.css?v=0.7.0-auto-cut" />
+<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.7.0-auto-cut" />
+<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.7.0-auto-cut" />
+<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.7.0-auto-cut" />
+<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.7.0-auto-cut" />
+<link rel="stylesheet" href="assets/css/auto-cut.css?v=0.7.0-auto-cut" />
+<script defer src="src/config/app-runtime-config.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/utils/core-utils.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/state/app-state.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/analysis/auto-cut-detector.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/caption/caption-service.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/project/project-service.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/render/quality-effects.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/render/vertical-renderer.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/download/download-service.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/ui/waveform-view.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/ui/timeline-view.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/security/site-guards.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/boot/runtime-health.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/app.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/ui/ux-controls.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/ui/range-drag-controls.js?v=0.7.0-auto-cut"></script>
+<script defer src="src/ui/bottom-dock.js?v=0.7.0-auto-cut"></script>
 </head>
-<body data-build="0.6.0">
+<body data-build="0.7.0">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel" aria-label="앱 소개">
             <div class="brand-topline">
                 <div class="brand-kicker">
-                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.6.0 결과물 품질</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.7.0 자동 컷</button>
                     <span class="badge badge-device">PC · 모바일 브라우저</span>
                     <span class="badge badge-free">무료 기능 기반</span>
                 </div>
@@ -54,7 +56,7 @@
             <div class="hero-mainline">
                 <div class="hero-copy">
                     <h1>AI 쇼츠 <span>스튜디오</span></h1>
-                    <p class="hero-compact-note">화질 보정·페이드·워터마크·인트로까지 다듬는 쇼츠 제작 화면입니다.</p>
+                    <p class="hero-compact-note">무음·비트·장면 전환을 읽고 컷 포인트까지 제안하는 쇼츠 제작 화면입니다.</p>
                 <div class="hero-cta-row" aria-label="빠른 시작 버튼">
                     <label class="btn-primary hero-file-btn" for="fileInput">파일 열기</label>
                     <button id="heroAnalyzeBtn" class="btn-secondary" type="button" disabled>바로 분석</button>
@@ -212,6 +214,53 @@
                     <button id="snapRangeBtn" class="mini-action" type="button" disabled>현재 재생 위치로 시작 맞춤</button>
                 </div>
                 <div id="timelineView" class="timeline-view"></div>
+            </section>
+
+            <section class="auto-cut-panel" aria-label="자동 컷 편집">
+                <div class="auto-cut-head">
+                    <div>
+                        <strong>자동 컷 편집</strong>
+                        <small>무음·비트·장면 전환을 기준으로 컷 포인트를 추천합니다.</small>
+                    </div>
+                    <span id="autoCutSummary" class="auto-cut-summary">분석 전</span>
+                </div>
+                <div class="auto-cut-metrics" aria-label="자동 컷 지표">
+                    <div><span>템포 점수</span><strong id="tempoScoreText">--</strong></div>
+                    <div><span>무음 위험</span><strong id="silenceRiskText">--</strong></div>
+                    <div><span>컷 후보</span><strong id="cutCountText">0</strong></div>
+                </div>
+                <div class="settings-grid auto-cut-grid">
+                    <label class="field slider-field">
+                        <span>무음 민감도 <b id="silenceThresholdValue">9%</b></span>
+                        <input id="silenceThresholdInput" type="range" min="4" max="20" step="1" value="9" />
+                    </label>
+                    <label class="field slider-field">
+                        <span>비트 컷 민감도 <b id="beatSensitivityValue">58%</b></span>
+                        <input id="beatSensitivityInput" type="range" min="35" max="85" step="1" value="58" />
+                    </label>
+                    <label class="field slider-field">
+                        <span>장면 전환 민감도 <b id="motionSensitivityValue">60%</b></span>
+                        <input id="motionSensitivityInput" type="range" min="35" max="90" step="1" value="60" />
+                    </label>
+                    <label class="field">
+                        <span>앞뒤 여유</span>
+                        <select id="handlePaddingSelect">
+                            <option value="0">딱 맞게</option>
+                            <option value="0.4">0.4초</option>
+                            <option value="0.7">0.7초</option>
+                            <option value="1.0">1초</option>
+                            <option value="1.5">1.5초</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="auto-cut-actions">
+                    <button id="autoTrimBtn" class="btn-secondary" type="button" disabled>선택 구간 자동 보정</button>
+                    <button id="autoTrimAllBtn" class="btn-secondary" type="button" disabled>모든 후보 컷 보정</button>
+                    <button id="refreshCutsBtn" class="mini-action" type="button" disabled>컷 다시 계산</button>
+                </div>
+                <div id="autoCutTimelineList" class="auto-cut-timeline-list">
+                    <p>분석 후 비트·장면전환·무음 회피 지점이 표시됩니다.</p>
+                </div>
             </section>
 
             <section class="edit-tools-card" aria-label="구간 조절과 자막">
@@ -508,10 +557,11 @@
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.6.0</h2>
-        <p>이 버전은 밝기/대비/채도 보정, 오디오 페이드, 인트로/아웃트로, 워터마크, 안전영역 가이드를 더한 결과물 품질 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.7.0</h2>
+        <p>이 버전은 무음·비트·장면 전환 포인트를 분석해 컷 후보를 만들고, 추천 구간의 앞뒤 여유를 자동 보정하는 자동 컷 편집 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
         <ul>
             <li>오디오 에너지, 피크, 트랜지언트, 무음 비율을 분석합니다.</li>
+            <li>무음·비트·장면 전환을 함께 계산해 컷 후보 타임라인과 템포 점수를 표시합니다.</li>
             <li>비디오 파일은 움직임 샘플링 점수를 보조로 사용합니다.</li>
             <li>추천 구간의 시작/끝을 숫자, 1초 미세 조절, 파형 드래그 핸들로 조절할 수 있습니다.</li>
             <li>네온·클린·시네마틱·헤드라인 썸네일 템플릿을 선택하고 PNG 저장 또는 영상 내보내기에 반영할 수 있습니다.</li>

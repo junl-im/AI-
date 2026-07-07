@@ -1,16 +1,16 @@
-# QA REPORT - AI 쇼츠 제작 스튜디오 v0.6.0
+# QA REPORT - AI 쇼츠 제작 스튜디오 v0.7.0
 
 ## Summary
 
-- Version: 0.6.0
-- Patch: 결과물 품질 패치
+- Version: 0.7.0
+- Patch: 자동 컷 편집 패치
 - Command: `npm run check`
 - Result: PASS
 
 ```text
 AI Shorts Studio QA summary
-  Passed: 34/34
-  Failed: 0/34
+  Passed: 36/36
+  Failed: 0/36
 ```
 
 ## Covered
@@ -22,6 +22,7 @@ AI Shorts Studio QA summary
 - Advanced editor anchors
 - Caption pro anchors
 - Output quality anchors
+- Auto cut detector smoke
 - Recommendation engine smoke
 - Render capability smoke
 - Caption/project service smoke
@@ -29,5 +30,6 @@ AI Shorts Studio QA summary
 
 ## Notes
 
-- 품질 패널 ID와 렌더러 토큰을 `qa/output_quality_smoke.js`로 검수했습니다.
-- 안전영역 가이드는 미리보기 중심이며, 썸네일/내보내기에는 기본적으로 포함하지 않도록 앱에서 옵션을 분리했습니다.
+- 자동 컷 패널 ID와 앱 연결 토큰을 `qa/auto_cut_smoke.js`로 검수했습니다.
+- 자동 컷은 기존 오디오 분석 프레임과 영상 모션 프레임을 재사용하며 외부 API나 서버 업로드를 사용하지 않습니다.
+- 무음, 비트, 장면 전환 컷 후보는 추천 카드 점수 보정과 선택/전체 후보 자동 보정에 반영됩니다.
