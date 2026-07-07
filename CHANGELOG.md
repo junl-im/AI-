@@ -1,6 +1,36 @@
+# CHANGELOG
+
+## v0.8.2 - Brand Feedback UX Patch
+
+### Added
+
+- `Design by 곰같은여우` 브랜드 시그니처
+- 햅틱 피드백 배지
+- 버튼/라벨/카드 클릭 리플 피드백
+- 버튼 클릭 시 가벼운 햅틱 진동
+- 파일/분석/내보내기/복사/성공/경고/오류별 햅틱 패턴
+- 토스트 알림 유형별 아이콘과 색상
+- `assets/css/feedback-ux.css`
+- `src/ui/feedback-ux.js`
+- `qa/feedback_ux_smoke.js`
+
+### Changed
+
+- 하단 Dock 2버튼 정책 유지 및 색감 보강
+- `toast(message, kind)` 형태로 앱 토스트 확장
+- 정보 모달 설명을 브랜드/피드백 UX 기준으로 갱신
+- 문서/패키지/서비스워커 버전 v0.8.2로 갱신
+
+### Notes
+
+- 햅틱은 `navigator.vibrate` 지원 환경에서만 동작합니다.
+- 햅틱 미지원 환경에서도 토스트 아이콘/색상 피드백은 유지됩니다.
+
+---
+
 # Changelog
 
-## v0.8.1 - Lean Dock UI/UX Performance Pass
+## v0.8.2 - Brand Feedback UI/UX Performance Pass
 
 - Simplified the fixed bottom Dock from seven actions to two core actions.
 - Added large 50:50 Dock buttons: 📂 파일 열기 and ⚡ 분석하기.

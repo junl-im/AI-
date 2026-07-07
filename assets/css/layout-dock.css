@@ -407,9 +407,9 @@ body.has-media .studio-grid {
     }
 }
 
-/* v0.8.1 Lean Dock + performance stability overrides */
+/* v0.8.2 Brand Feedback + performance stability overrides */
 :root {
-    --lean-dock-height: 86px;
+    --brand-feedback-height: 86px;
 }
 .app-shell {
     padding-bottom: 118px;
@@ -512,7 +512,7 @@ body.is-analyzing .bottom-dock-actions-lean .bottom-dock-primary {
 }
 @media (max-width: 720px) {
     :root {
-        --lean-dock-height: 78px;
+        --brand-feedback-height: 78px;
     }
     .app-shell {
         padding-bottom: 104px;

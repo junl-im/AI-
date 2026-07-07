@@ -1,42 +1,25 @@
-# QA REPORT - AI 쇼츠 제작 스튜디오 v0.8.1
+# QA REPORT - AI 쇼츠 제작 스튜디오 v0.8.2
 
-## Summary
+## Scope
 
-- Version: 0.8.1
-- Patch: Lean Dock UI/UX 성능 패치
-- Command: `npm run check`
-- Result: PASS
+- `Design by 곰같은여우` 브랜드 시그니처 표시
+- 하단 Dock 2버튼 유지
+- 햅틱 피드백 스크립트 문법 검수
+- 버튼 리플/눌림 피드백 CSS 앵커 검수
+- 토스트 성공/경고/오류/파일/내보내기/복사 유형 구분 검수
+- v0.8.1 성능 안정화 유지 검수
+- 기존 분석/자막/렌더/프로젝트/자동 컷/컷 마커 QA 유지
+
+## Automated Result
 
 ```text
 AI Shorts Studio QA summary
-  Passed: 39/39
-  Failed: 0/39
+Passed: 41/41
+Failed: 0/41
 ```
-
-## Covered
-
-- JavaScript syntax check
-- HTML anchor check
-- External dependency smoke check
-- Lean two-button bottom dock anchors
-- Dock polling removal and RAF sync guardrails
-- Preview still RAF batching guardrail
-- CSS containment/content-visibility guardrail
-- Advanced editor anchors
-- Caption pro anchors
-- Output quality anchors
-- Auto cut detector smoke
-- Cut marker overlay smoke
-- Recommendation engine smoke
-- Render capability smoke
-- Caption/project service smoke
-- Handoff/documentation smoke
 
 ## Notes
 
-- 하단 Dock은 📂 파일 열기와 ⚡ 분석하기 두 개만 표시됩니다.
-- 두 Dock 버튼은 50:50 반반 배치로 크게 표시됩니다.
-- 기존 추천/편집/미리보기/썸네일/내보내기 Dock 바로가기는 제거하고 화면 내부 버튼으로 유지했습니다.
-- `bottom-dock.js`의 polling `setInterval`을 제거했습니다.
-- Dock 동기화와 미리보기 정지 프레임 렌더링은 `requestAnimationFrame`으로 배치합니다.
-- CSS containment 규칙을 추가해 파일 로드 후 레이아웃 재계산 부담을 줄였습니다.
+- `navigator.vibrate`는 지원 브라우저/기기에서만 실제 진동이 발생합니다.
+- 햅틱 미지원 환경에서도 토스트 아이콘/색상 피드백은 유지됩니다.
+- 하단 Dock은 요청대로 `📂 파일 열기`와 `⚡ 분석하기` 두 개만 유지합니다.

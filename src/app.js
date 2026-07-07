@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.8.1 - main app with lean dock performance pass
+// AI Shorts Studio v0.8.2 - main app with brand feedback UX pass
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -101,8 +101,13 @@
         ].forEach(id => { els[id] = $(id); });
     }
 
-    function toast(message) {
+    function toast(message, kind) {
         if (!els.toast) return;
+        if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.setToastKind) {
+            const nextKind = kind || global.AIShortsFeedbackUX.classifyText && global.AIShortsFeedbackUX.classifyText(message) || 'action';
+            global.AIShortsFeedbackUX.setToastKind(els.toast, nextKind);
+            if (global.AIShortsFeedbackUX.announce) global.AIShortsFeedbackUX.announce(message, nextKind);
+        }
         els.toast.textContent = message;
         els.toast.classList.add('toast-visible');
         clearTimeout(els.toast._timer);
@@ -768,10 +773,10 @@
             setProgress(92, '추천 계산 중');
             createRecommendations();
             setProgress(100, '추천 완료');
-            toast('쇼츠 추천 구간을 만들었습니다.');
+            toast('쇼츠 추천 구간을 만들었습니다.', 'success');
         } catch (error) {
             setProgress(0, '분석 실패');
-            toast(error.message || '분석에 실패했습니다.');
+            toast(error.message || '분석에 실패했습니다.', 'error');
             if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-error', message: error.message });
         } finally {
             state.isAnalyzing = false;
@@ -899,10 +904,10 @@
             downloadService.saveBlob(exportResult.blob, filename);
             setProgress(100, '내보내기 완료');
             if (els.previewStatus) els.previewStatus.textContent = '내보내기 완료';
-            toast(`${ext.toUpperCase()} 파일을 저장했습니다.`);
+            toast(`${ext.toUpperCase()} 파일을 저장했습니다.`, 'export');
         } catch (error) {
             setProgress(0, '내보내기 실패');
-            toast(error.message || '내보내기에 실패했습니다.');
+            toast(error.message || '내보내기에 실패했습니다.', 'error');
             if (store.addDiagnostic) store.addDiagnostic({ type: 'export-error', message: error.message });
         } finally {
             updateButtons();
@@ -1009,7 +1014,7 @@
         const template = state.settings.thumbnailTemplate || 'neon';
         const filename = `${base}-${template}-${Math.round(selected.start)}s-thumbnail.png`;
         downloadService.saveBlob(blob, filename);
-        toast('썸네일 PNG를 저장했습니다.');
+        toast('썸네일 PNG를 저장했습니다.', 'export');
     }
 
     function applyCaptionsFromText() {
@@ -1056,7 +1061,7 @@
         const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name || 'ai-shorts-project') : 'ai-shorts-project';
         const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
         downloadService.saveBlob(blob, `${base}-project.json`);
-        toast('프로젝트 JSON을 저장했습니다.');
+        toast('프로젝트 JSON을 저장했습니다.', 'export');
     }
 
     function handleProjectFile(event) {
@@ -1089,13 +1094,13 @@
         const title = els.titleInput ? els.titleInput.value : '';
         const tags = els.hashtagInput ? els.hashtagInput.value : '';
         await utils.copyText(`${title}\n${tags}`.trim());
-        toast('제목과 해시태그를 복사했습니다.');
+        toast('제목과 해시태그를 복사했습니다.', 'copy');
     }
 
     async function copyDiagnostics() {
         try {
             await downloadService.copyDiagnostics({ health: runtimeHealth.collect ? runtimeHealth.collect() : null });
-            toast('진단 JSON을 복사했습니다.');
+            toast('진단 JSON을 복사했습니다.', 'copy');
         } catch (error) {
             toast('진단 복사에 실패했습니다.');
         }

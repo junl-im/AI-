@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.8.1 - lean two-button bottom dock
+// AI Shorts Studio v0.8.2 - lean two-button bottom dock with feedback labels
 'use strict';
 
 (function bootBottomDock(global) {
@@ -50,6 +50,7 @@
 
     function clickAnalyzeWhenEnabled() {
         if (!els.analyzeSource || els.analyzeSource.disabled) return;
+        if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.vibrate) global.AIShortsFeedbackUX.vibrate('analyze');
         els.analyzeSource.click();
     }
 

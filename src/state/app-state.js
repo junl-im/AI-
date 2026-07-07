@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.7.0 - state container
+// AI Shorts Studio v0.8.2 - state container
 'use strict';
 
 (function exposeState(global) {
@@ -68,7 +68,11 @@
                 handlePadding: 0.7,
                 maxSnapDistance: 1.4
             },
-            thumbnailTemplate: 'neon'
+            thumbnailTemplate: 'neon',
+            feedbackOptions: {
+                haptics: true,
+                toastKinds: true
+            }
         };
         try {
             const raw = global.localStorage && global.localStorage.getItem(config.LOCAL_STORAGE_KEY || 'ai-shorts-settings');
@@ -77,6 +81,7 @@
             merged.captionOptions = Object.assign({}, defaults.captionOptions, parsed && parsed.captionOptions || {});
             merged.qualityOptions = Object.assign({}, defaults.qualityOptions, parsed && parsed.qualityOptions || {});
             merged.autoCutOptions = Object.assign({}, defaults.autoCutOptions, parsed && parsed.autoCutOptions || {});
+            merged.feedbackOptions = Object.assign({}, defaults.feedbackOptions, parsed && parsed.feedbackOptions || {});
             return merged;
         } catch (error) {
             return defaults;

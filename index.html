@@ -3,62 +3,65 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.8.1 - Lean Dock UI/UX 성능 패치" />
+<meta name="description" content="AI 쇼츠 제작 스튜디오 v0.8.2 - Brand Feedback UI/UX 성능 패치" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
 <meta name="theme-color" content="#7c3aed" />
-<title>AI 쇼츠 제작 스튜디오 v0.8.1</title>
+<title>AI 쇼츠 제작 스튜디오 v0.8.2</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/studio.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/editor.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/ux.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/auto-cut.css?v=0.8.1-lean-dock" />
-<link rel="stylesheet" href="assets/css/cut-markers.css?v=0.8.1-lean-dock" />
-<script defer src="src/config/app-runtime-config.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/utils/core-utils.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/state/app-state.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/analysis/auto-cut-detector.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/caption/caption-service.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/project/project-service.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/render/quality-effects.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/render/vertical-renderer.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/download/download-service.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/ui/waveform-view.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/ui/cut-marker-overlay.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/ui/timeline-view.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/security/site-guards.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/boot/runtime-health.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/app.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/ui/ux-controls.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/ui/range-drag-controls.js?v=0.8.1-lean-dock"></script>
-<script defer src="src/ui/bottom-dock.js?v=0.8.1-lean-dock"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/studio.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/editor.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/ux.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/advanced-editor.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/layout-dock.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/caption-pro.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/quality-tools.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/auto-cut.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/cut-markers.css?v=0.8.2-brand-feedback" />
+<link rel="stylesheet" href="assets/css/feedback-ux.css?v=0.8.2-brand-feedback" />
+<script defer src="src/config/app-runtime-config.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/utils/core-utils.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/state/app-state.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/analysis/auto-cut-detector.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/caption/caption-service.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/project/project-service.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/render/quality-effects.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/render/vertical-renderer.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/download/download-service.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/ui/waveform-view.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/ui/cut-marker-overlay.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/ui/timeline-view.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/security/site-guards.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/boot/runtime-health.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/app.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/ui/ux-controls.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/ui/range-drag-controls.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/ui/bottom-dock.js?v=0.8.2-brand-feedback"></script>
+<script defer src="src/ui/feedback-ux.js?v=0.8.2-brand-feedback"></script>
 </head>
-<body data-build="0.8.1" data-ui="lean-dock">
+<body data-build="0.8.2" data-ui="brand-feedback">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel" aria-label="앱 소개">
             <div class="brand-topline">
                 <div class="brand-kicker">
-                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.8.1 Lean Dock</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button">v0.8.2 Brand Feedback</button>
                     <span class="badge badge-device">PC · 모바일 브라우저</span>
                     <span class="badge badge-free">무료 기능 기반</span>
+                    <span class="feedback-badge">📳 햅틱 피드백</span>
                 </div>
                 <div class="brand-right-actions">
-                    <span class="designer-mini"><span>DESIGNED FOR</span><strong>AI Shorts Studio</strong></span>
+                    <span class="brand-signature-pill"><span class="brand-mark" aria-hidden="true">🦊</span><span>Design by <strong>곰같은여우</strong></span></span>
                 </div>
             </div>
             <div class="hero-mainline">
                 <div class="hero-copy">
                     <h1>AI 쇼츠 <span>스튜디오</span></h1>
-                    <p class="hero-compact-note">하단 Dock은 파일 열기와 분석하기만 크게 남기고, 편집 화면은 더 가볍고 안정적으로 정리했습니다.</p>
+                    <p class="hero-compact-note">Design by 곰같은여우. 하단 Dock은 📂 파일 열기와 ⚡ 분석하기만 크게 남기고, 버튼 클릭·상태별 알림은 햅틱 피드백으로 더 직관적으로 정리했습니다.</p>
                 <div class="hero-cta-row" aria-label="빠른 시작 버튼">
                     <label class="btn-primary hero-file-btn" for="fileInput">파일 열기</label>
                     <button id="heroAnalyzeBtn" class="btn-secondary" type="button" disabled>바로 분석</button>
@@ -76,6 +79,10 @@
                 <div id="stepEdit" class="workflow-step"><span>3</span><strong>편집</strong><em>구간·자막 조정</em></div>
                 <div id="stepExport" class="workflow-step"><span>4</span><strong>내보내기</strong><em>쇼츠 저장</em></div>
             </nav>
+            <div class="brand-signature-card" aria-label="디자인 바이 곰같은여우 크레딧과 피드백 안내">
+                <div><span>BRAND SIGNATURE</span><strong>디자인 바이 곰같은여우</strong></div>
+                <em class="feedback-hint">📳 버튼 클릭 · 성공 · 경고 · 오류별 진동 알림</em>
+            </div>
 </section>
     </header>
 
@@ -555,7 +562,7 @@
         <span id="bottomDockDot" class="bottom-dock-dot"></span>
         <div class="bottom-dock-copy">
             <strong id="bottomDockTitle">파일을 열어주세요</strong>
-            <small id="bottomDockMeta">파일 열기 또는 분석하기를 실행할 수 있습니다.</small>
+            <small id="bottomDockMeta">📂 파일 열기 · ⚡ 분석하기만 크게 제공합니다.</small>
         </div>
     </div>
     <div class="bottom-dock-actions bottom-dock-actions-lean" role="toolbar" aria-label="빠른 실행">
@@ -567,8 +574,8 @@
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.8.1</h2>
-        <p>이 버전은 무음·비트·장면 전환 포인트를 분석해 컷 후보를 만들고, 추천 구간의 앞뒤 여유를 자동 보정하는 자동 컷 편집 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v0.8.2</h2>
+        <p>이 버전은 Design by 곰같은여우 브랜딩과 버튼 클릭/구분별 진동 알림을 추가한 편의성 패치입니다. 유료 AI API, 서버 업로드, 클라우드 렌더링을 사용하지 않습니다.</p>
         <ul>
             <li>오디오 에너지, 피크, 트랜지언트, 무음 비율을 분석합니다.</li>
             <li>무음·비트·장면 전환을 함께 계산해 컷 후보 타임라인과 템포 점수를 표시합니다.</li>
@@ -579,6 +586,8 @@
             <li>SRT/VTT 자막을 불러오거나 직접 붙여넣어 세로 프리뷰와 내보내기에 반영합니다.</li>
             <li>밝기·대비·채도·비네팅, 페이드 인/아웃, 워터마크, 인트로/아웃트로 텍스트를 미리보기와 내보내기에 반영합니다.</li>
             <li>하단 Dock은 📂 파일 열기와 ⚡ 분석하기 두 개의 큰 버튼으로 단순화했습니다.</li>
+            <li>버튼 클릭, 파일 열기, 분석, 저장, 복사, 경고, 오류 상태에 따라 서로 다른 햅틱 진동 패턴을 제공합니다.</li>
+            <li>알림 토스트는 성공/경고/오류/파일/내보내기 유형별 아이콘과 색상으로 구분됩니다.</li>
             <li>내보내기는 브라우저 MediaRecorder 지원 범위에 따라 WebM 또는 MP4가 될 수 있습니다.</li>
         </ul>
     </div>
