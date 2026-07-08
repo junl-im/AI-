@@ -1,19 +1,19 @@
-# PROJECT NOTES - v1.1.3
+# PROJECT NOTES v1.1.4
 
-이번 패치는 저장 이후 사용자의 다음 행동을 정리하는 데 집중했습니다.
+이번 패치는 디자인과 흐름 안정화를 동시에 다룹니다.
 
-## 설계 의도
+## 설계 결정
 
-렌더 큐가 완료되면 사용자가 다운로드 폴더를 확인해야 하는지, 실패를 재시도해야 하는지, 미리보기로 돌아가야 하는지 헷갈릴 수 있습니다. `export-finish-center`는 렌더 큐 상태를 구독해 완료/실패/부분 완료를 표시하고, 필요한 액션을 저장 탭 안에서 제공합니다.
-
-## 추가 모듈
-
-- `src/ui/export-finish-center.js`
-- `assets/css/export-finish-center.css`
-- `qa/export_finish_center_smoke.js`
+- 화면 이동은 `src/ui/flow-director-final.js`가 최종 소유합니다.
+- 기존 motion/workspace/flow 모듈은 유지하되, 마지막 로드되는 Final Director가 reveal API를 대체합니다.
+- 작업 패널은 활성 탭 하나만 공간을 차지하도록 CSS에서 최종 가드합니다.
+- 본문 상단의 상태 카드류는 숨기고, 단순 사용 방법과 Dock 중심 워크플로로 정리했습니다.
+- 셔터/플래시 연출은 상단 히어로 내부로만 제한해 작업 패널 떨림에 영향을 주지 않게 했습니다.
 
 ## 유지 원칙
 
-- Dock 이동은 기존 Motion Stability 흐름을 유지합니다.
-- 저장 실행은 기존 Render Queue를 그대로 사용합니다.
-- 새 모듈은 완료 상태를 읽고 안내만 담당합니다.
+- 무료 로컬 브라우저 처리
+- 글라스 디자인 유지
+- 하단 Dock 중심 네비게이션
+- 파일 열기 후 자동 분석
+- 추천 → 후보 → 미리보기 → 저장 초연결 흐름

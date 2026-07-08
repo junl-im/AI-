@@ -1,43 +1,51 @@
-# HANDOFF - AI 쇼츠 제작 스튜디오 v1.1.3
+# HANDOFF v1.1.4
 
-## 이번 버전 핵심
+## 요약
 
-v1.1.3은 저장 완료 후 흐름을 정리하는 `Export Finish Center` 패치입니다.
+v1.1.4는 상단 디자인 정리, 셔터 플래시 무드, 본 화면 단순화, Dock reveal 떨림 안정화를 반영한 패치입니다.
 
-### 추가 파일
+## 주요 파일
 
-- `assets/css/export-finish-center.css`
-- `src/ui/export-finish-center.js`
-- `qa/export_finish_center_smoke.js`
+- `assets/css/shutter-glass-flow.css`
+- `src/ui/flow-director-final.js`
+- `qa/shutter_flow_director_smoke.js`
 
-### 연결 위치
+## 중요 변경점
 
-- `index.html`에서 저장 탭 렌더 큐 아래에 동적으로 완료 센터가 생성됩니다.
-- `sw.js`에 신규 CSS/JS 캐시 항목을 추가했습니다.
-- `package.json` QA 목록에 신규 검사 2개를 추가했습니다.
+- `flow-director-final.js`가 마지막에 로드되어 `AIShortsMotionStability.reveal`과 `AIShortsHyperFlowTabs.setActiveFlowTab`을 단일 reveal 루트로 통합합니다.
+- CSS에서 비활성 `[data-flow-panel]`을 `display:none`으로 강하게 제한합니다.
+- 패널 애니메이션은 대부분 제거하고, 상단 셔터 연출만 유지합니다.
+- Dock 라벨은 `파일 열기 / 추천 / 후보 / 미리보기 / 파형 / 컷 / 편집 / 저장`으로 정리했습니다.
 
-### 동작
+## 확인 포인트
 
-1. 렌더 큐가 실행됩니다.
-2. 큐가 완료되면 완료 센터가 표시됩니다.
-3. 완료/실패/부분 완료 상태와 최근 작업 로그가 표시됩니다.
-4. 사용자는 미리보기, 후보 보기, 다시 저장, 실패 재시도, 진단 복사, 목록 정리를 바로 실행할 수 있습니다.
+1. PC에서 상단 좌측은 버전, 우측은 Design by 곰같은여우로 한 줄 정렬되어야 합니다.
+2. 상단 아래 YouTube/Reels/TikTok 셔터 타일이 보여야 합니다.
+3. Dock 탭을 눌러도 화면이 떨리지 않아야 합니다.
+4. Dock 탭 클릭 시 해당 패널이 전면에 가까운 위치로 이동해야 합니다.
+5. 한 번에 여러 작업 패널이 아래로 줄줄이 펼쳐지면 안 됩니다.
 
-### 주의
+## QA
 
-- 실제 파일 저장 위치는 브라우저 다운로드 정책을 따릅니다.
-- 실패 재시도는 기존 `AIShortsRenderQueue.retryFailed()` 또는 `renderQueueRetryBtn`을 사용합니다.
+- `npm run check`로 전체 스모크 테스트를 실행합니다.
+- v1.1.4에서는 `shutter_flow_director_smoke.js`가 상단 셔터 UI와 단일 Flow Director 연결을 확인합니다.
+
+## Known limitations
+
+- 원본 미디어 파일은 브라우저 보안 정책상 세션에 자동 저장하지 않습니다.
+- 모바일 Safari 및 일부 인앱 브라우저에서는 MediaRecorder 저장 형식과 진동 피드백이 제한될 수 있습니다.
+- 셔터 플래시 연출은 `prefers-reduced-motion` 환경에서 자동으로 비활성화됩니다.
 
 ## 검수 순서
 
 1. `npm run check` 실행
-2. 파일 열기 후 자동 분석 확인
-3. 추천 생성 후 후보 탭 이동 확인
-4. 후보 선택 후 미리보기 이동 확인
-5. 저장 탭에서 렌더 큐와 저장 완료 센터 표시 확인
+2. PC Dock 8탭 가독성 확인
+3. Dock 탭 클릭 시 화면 떨림 없이 해당 패널이 전면으로 올라오는지 확인
+4. 상단 버전/Design by 한 줄 정렬 확인
+5. 셔터 플래시 연출이 작업 패널에 영향을 주지 않는지 확인
 
 ## 알려진 제한
 
-- 원본 미디어 파일은 브라우저 보안상 자동 세션 저장에 포함되지 않습니다.
-- iOS Safari와 일부 인앱 브라우저에서는 다운로드, 진동, MediaRecorder 동작이 제한될 수 있습니다.
-- 저장 완료 후 실제 파일 위치는 브라우저 다운로드 설정을 따릅니다.
+- 원본 미디어 파일은 브라우저 보안 정책상 세션에 자동 저장하지 않습니다.
+- 모바일 Safari 및 일부 인앱 브라우저에서는 MediaRecorder 저장 형식과 진동 피드백이 제한될 수 있습니다.
+- 셔터 플래시 연출은 `prefers-reduced-motion` 환경에서 자동으로 비활성화됩니다.

@@ -1,0 +1,354 @@
+/* AI Shorts Studio v1.1.4 - Shutter Glass Flow polish
+   Goals: stable no-shake navigation, clean hero branding, simple home guide, camera/social shutter mood. */
+
+:root {
+    --flow-glass-bg: rgba(8, 12, 28, 0.66);
+    --flow-glass-line: rgba(255, 255, 255, 0.16);
+    --flow-glass-strong: rgba(255, 255, 255, 0.84);
+    --flow-glass-muted: rgba(203, 213, 225, 0.76);
+    --flow-youtube: #ff0033;
+    --flow-insta: #fd5;
+    --flow-tiktok: #25f4ee;
+}
+
+html {
+    scroll-behavior: auto !important;
+}
+
+body[data-ui="hyperflow-tabs"] {
+    background:
+        radial-gradient(circle at 14% 8%, rgba(124, 58, 237, 0.26), transparent 36rem),
+        radial-gradient(circle at 84% 14%, rgba(34, 211, 238, 0.18), transparent 34rem),
+        linear-gradient(180deg, #060711 0%, #090b16 48%, #060712 100%);
+}
+
+/* Hero: one-line version/signature, then simple cinematic title. */
+.studio-hero {
+    margin-bottom: 14px;
+}
+
+.cinematic-brand-panel,
+.brand-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    background:
+        linear-gradient(135deg, rgba(10, 15, 32, 0.84), rgba(12, 16, 34, 0.66)),
+        radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 46%) !important;
+    backdrop-filter: blur(18px) saturate(1.12);
+    box-shadow: 0 22px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.09) !important;
+}
+
+.brand-topline {
+    position: relative;
+    z-index: 3;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px;
+    width: 100%;
+    min-height: 34px;
+    margin-bottom: 18px;
+}
+
+.brand-version-left,
+.brand-right-actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.badge-version {
+    min-width: 74px;
+    justify-content: center;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.16) !important;
+    color: rgba(255,255,255,0.9) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.brand-signature-pill {
+    white-space: nowrap;
+    border-radius: 999px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.88);
+}
+
+.hero-mainline {
+    position: relative;
+    z-index: 3;
+}
+
+.cinematic-title {
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+}
+
+.hero-compact-note {
+    max-width: 760px;
+    color: rgba(226,232,240,0.78);
+}
+
+/* Social shutter strip: YouTube / Instagram / TikTok inspired, camera shutter flash. */
+.social-shutter-strip {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.shutter-tile {
+    position: relative;
+    overflow: hidden;
+    min-height: 62px;
+    padding: 12px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.07);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 40px rgba(0,0,0,0.22);
+}
+
+.shutter-tile::before {
+    content: '';
+    position: absolute;
+    inset: -65% -30%;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.72) 48%, transparent 60%);
+    opacity: 0;
+    transform: translateX(-42%) rotate(8deg);
+    animation: shutterFlash 5.8s steps(1, end) infinite;
+}
+
+.shutter-tile::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 52% 50%, rgba(255,255,255,0.18), transparent 38%);
+    opacity: 0.36;
+    mix-blend-mode: screen;
+}
+
+.shutter-tile:nth-child(2)::before { animation-delay: 1.3s; }
+.shutter-tile:nth-child(3)::before { animation-delay: 2.6s; }
+
+.shutter-tile.youtube { background: linear-gradient(135deg, rgba(255,0,51,0.20), rgba(255,255,255,0.055)); }
+.shutter-tile.instagram { background: linear-gradient(135deg, rgba(253,85,127,0.18), rgba(251,191,36,0.12), rgba(124,58,237,0.12)); }
+.shutter-tile.tiktok { background: linear-gradient(135deg, rgba(37,244,238,0.18), rgba(254,44,85,0.12), rgba(255,255,255,0.055)); }
+
+.shutter-icon {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.96rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.94);
+}
+
+.shutter-icon i {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 12px;
+    font-style: normal;
+    background: rgba(255,255,255,0.12);
+}
+
+.shutter-tile small {
+    position: relative;
+    z-index: 2;
+    display: block;
+    margin-top: 5px;
+    color: rgba(226,232,240,0.68);
+    font-weight: 700;
+}
+
+@keyframes shutterFlash {
+    0%, 81%, 100% { opacity: 0; transform: translateX(-48%) rotate(8deg); filter: brightness(0.85); }
+    83% { opacity: 0.86; transform: translateX(0%) rotate(8deg); filter: brightness(1.45); }
+    86% { opacity: 0.10; transform: translateX(48%) rotate(8deg); filter: brightness(0.92); }
+}
+
+/* Keep the home screen simple: no command clutter in the hero area. */
+.start-command-panel {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    border-radius: 26px !important;
+    background: rgba(255,255,255,0.055) !important;
+    border: 1px solid rgba(255,255,255,0.11) !important;
+    backdrop-filter: blur(14px);
+}
+
+.start-command-panel::before {
+    content: '사용 방법';
+    display: block;
+    font-size: 1.02rem;
+    font-weight: 950;
+    color: rgba(255,255,255,0.92);
+}
+
+.command-group {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.command-group-primary .command-buttons,
+.command-mini-row,
+.workflow-rail {
+    display: none !important;
+}
+
+.command-group-head {
+    display: grid !important;
+    grid-template-columns: 32px 1fr;
+    gap: 10px;
+    align-items: start;
+    padding: 8px 0;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.command-group:first-of-type .command-group-head { border-top: 0; }
+.command-group-head > span {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+}
+.command-group-head strong { color: rgba(255,255,255,0.9); }
+.command-group-head small { color: rgba(203,213,225,0.72); }
+
+/* Remove noisy status blocks from the main idle canvas. Dock and active panel are the navigator. */
+.hyperflow-stage,
+.flow-selection-summary {
+    display: none !important;
+}
+
+/* Final single-panel visibility: when tab mode is active, only active panel should occupy space. */
+body[data-ui="hyperflow-tabs"] [data-flow-panel] {
+    scroll-margin-top: 16px;
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel]:not(.is-flow-active) {
+    display: none !important;
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+}
+
+/* The edit section has multiple logical tabs; keep it visible for edit only. */
+body[data-active-flow-tab="edit"] [data-flow-panel~="edit"],
+body[data-active-flow-tab="caption"] [data-flow-panel~="caption"],
+body[data-active-flow-tab="quality"] [data-flow-panel~="quality"] {
+    display: block !important;
+}
+
+/* Disable panel motion that caused local shaking. Hero shutter keeps its own isolated animation. */
+body[data-ui="hyperflow-tabs"] [data-flow-panel],
+body[data-ui="hyperflow-tabs"] [data-flow-panel] *,
+body[data-ui="hyperflow-tabs"] .recommend-flow-guide,
+body[data-ui="hyperflow-tabs"] .hyperconnect-helper,
+body[data-ui="hyperflow-tabs"] .preview-ready-strip,
+body[data-ui="hyperflow-tabs"] .save-ready-card,
+body[data-ui="hyperflow-tabs"] .finish-center-card {
+    animation-name: none !important;
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-motion-stable-revealed,
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-workspace-revealed,
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-director-revealed {
+    animation: none !important;
+    outline: 1px solid rgba(34,211,238,0.20);
+    box-shadow: 0 0 0 1px rgba(34,211,238,0.08), 0 22px 60px rgba(0,0,0,0.26) !important;
+}
+
+/* Glass, but calmer and clearer. */
+.console-panel,
+.editor-panel,
+.control-zone,
+.preview-card,
+.waveform-card,
+.auto-cut-panel,
+.edit-tools-card,
+.project-card,
+.copy-card,
+.render-queue-panel,
+.save-readiness-panel,
+.export-finish-center,
+.candidates-zone {
+    background: var(--flow-glass-bg) !important;
+    border: 1px solid var(--flow-glass-line) !important;
+    backdrop-filter: blur(16px) saturate(1.08);
+}
+
+/* Dock readability and emoji/icon balancing. */
+.bottom-dock {
+    background: rgba(8, 12, 28, 0.80) !important;
+    border-top: 1px solid rgba(255,255,255,0.13) !important;
+    backdrop-filter: blur(22px) saturate(1.2);
+}
+
+.bottom-dock-tabs {
+    gap: 8px !important;
+}
+
+.bottom-dock-tab {
+    min-height: 56px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255,255,255,0.11) !important;
+    background: rgba(255,255,255,0.055) !important;
+    color: rgba(255,255,255,0.86) !important;
+}
+
+.bottom-dock-tab.is-active {
+    background: linear-gradient(135deg, rgba(124,58,237,0.30), rgba(34,211,238,0.14)) !important;
+    border-color: rgba(255,255,255,0.23) !important;
+}
+
+.bottom-dock-tab span { font-size: 1.18rem !important; line-height: 1; }
+.bottom-dock-tab b { font-size: 0.78rem !important; letter-spacing: -0.02em; }
+
+@media (min-width: 980px) {
+    .bottom-dock-tabs {
+        grid-template-columns: repeat(8, minmax(84px, 1fr)) !important;
+        max-width: 1180px;
+        margin: 0 auto;
+    }
+    .bottom-dock-tab {
+        min-width: 0 !important;
+        padding: 9px 8px !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .social-shutter-strip { grid-template-columns: 1fr; }
+    .shutter-tile { min-height: 54px; }
+    .brand-topline { margin-bottom: 12px; }
+    .brand-signature-pill { padding: 7px 10px; font-size: 0.8rem; }
+    .badge-version { min-width: 64px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .shutter-tile::before,
+    .film-strip,
+    .camera-frame-sweep,
+    .cinema-gradient-orb,
+    .cinematic-title::after {
+        animation: none !important;
+    }
+}

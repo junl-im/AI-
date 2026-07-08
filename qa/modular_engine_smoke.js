@@ -31,8 +31,8 @@ function assertIncludes(file, token) {
     }
 });
 
-assertIncludes('index.html', 'src/engine/module-registry.js?v=1.1.3-flow-audit');
-assertIncludes('index.html', 'src/engine/engine-kernel.js?v=1.1.3-flow-audit');
+assertIncludes('index.html', 'src/engine/module-registry.js?v=1.1.4-flow-audit');
+assertIncludes('index.html', 'src/engine/engine-kernel.js?v=1.1.4-flow-audit');
 assertIncludes('index.html', 'engineStatusText');
 assertIncludes('src/app.js', 'global.AIShortsEngineKernel');
 assertIncludes('src/app.js', 'engineKernel.analyzeMedia');
@@ -40,7 +40,7 @@ assertIncludes('src/app.js', 'engineKernel.createRecommendations');
 assertIncludes('src/state/app-state.js', 'engineMeta');
 assertIncludes('src/state/app-state.js', 'engineOptions');
 assertIncludes('src/ui/waveform-view.js', 'engineBadges');
-assertIncludes('sw.js', 'src/engine/scoring-pipeline.js?v=1.1.3-flow-audit');
+assertIncludes('sw.js', 'src/engine/scoring-pipeline.js?v=1.1.4-flow-audit');
 assertIncludes('README.md', '모듈형 엔진');
 
 const kernel = read('src/engine/engine-kernel.js');
