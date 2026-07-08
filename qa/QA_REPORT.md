@@ -1,20 +1,39 @@
-# QA Report - AI Shorts Studio v1.0.3
+# QA REPORT - AI 쇼츠 제작 스튜디오 v1.0.5
 
-## Summary
+## 결과
 
+```text
 AI Shorts Studio QA summary
+Passed: 75/75
+Failed: 0/75
+```
 
-- Passed: 72/72
-- Failed: 0/72
+## v1.0.5 추가 검수
 
-## Focus
+```text
+qa/workspace_comfort_smoke.js
+```
 
-v1.0.3 verifies the PC Dock readability fix, forced workspace reveal on Dock navigation, stable candidate guide copy, compact action buttons, and all previous modular engine / render / flow guardrails.
+검수 항목:
 
-## Added check
+```text
+├─ workspace-comfort.css 링크 확인
+├─ workspace-comfort.js 링크 확인
+├─ 서비스워커 캐시 등록 확인
+├─ 패키지 버전 v1.0.5 확인
+├─ PC Dock 8탭 가독성 가드 확인
+├─ 후보 카드 선택 배지/CTA 가드 확인
+├─ 작업 패널 reveal 하이라이트 확인
+├─ 추천 안내 문구 안정화 확인
+└─ 상단 v1.0.5 / Design by 곰같은여우 유지 확인
+```
 
-- `qa/pc_dock_reveal_smoke.js`
+## 전체 검수 명령
 
-## Manual follow-up
+```bash
+npm run check
+```
 
-Desktop visual inspection is recommended for the Dock width and label visibility at common PC breakpoints: 1180px, 1366px, 1440px, 1920px.
+## 메모
+
+이번 패치는 기능 확장보다 실제 사용감 안정화가 목적입니다. Dock 클릭 후 작업 패널이 전면에 보이는지, 후보 카드가 명확히 선택 가능해 보이는지, 글라스 UI가 가독성을 해치지 않는지를 우선 검수했습니다.

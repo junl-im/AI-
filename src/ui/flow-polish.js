@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.3 - flow polish controller with stable guide text
+// AI Shorts Studio v1.0.5 - flow polish controller with stable guide text
 'use strict';
 (function bootFlowPolish(global) {
     const store = global.AIShortsAppState || {};

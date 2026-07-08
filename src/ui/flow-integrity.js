@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.3 - flow integrity runtime guard
+// AI Shorts Studio v1.0.5 - flow integrity runtime guard
 'use strict';
 (function bootFlowIntegrity(global) {
     const store = global.AIShortsAppState || {};

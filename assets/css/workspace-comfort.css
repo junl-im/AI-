@@ -1,0 +1,186 @@
+/* AI Shorts Studio v1.0.5 - Workspace comfort polish
+   Focus: readable glass surfaces, predictable dock reveal, and clearer candidate selection. */
+:root {
+    --comfort-panel-top: 14px;
+    --comfort-dock-max: 1640px;
+    --comfort-glass-readable: rgba(7, 13, 25, 0.84);
+    --comfort-line: rgba(226, 232, 240, 0.20);
+    --comfort-cyan: rgba(34, 211, 238, 0.88);
+    --comfort-violet: rgba(139, 92, 246, 0.72);
+}
+
+body[data-ui="hyperflow-tabs"] {
+    scroll-padding-top: var(--comfort-panel-top);
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel] {
+    scroll-margin-top: var(--comfort-panel-top);
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
+    outline: 1px solid rgba(34, 211, 238, 0.08);
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-workspace-revealed {
+    animation: workspaceRevealPulse 1.05s ease-out 1;
+}
+
+@keyframes workspaceRevealPulse {
+    0% {
+        box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.36), 0 0 0 0 rgba(34, 211, 238, 0.28), var(--glass-shadow, 0 24px 80px rgba(0,0,0,.42));
+    }
+    100% {
+        box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.08), 0 0 0 22px rgba(34, 211, 238, 0), var(--glass-shadow, 0 24px 80px rgba(0,0,0,.42));
+    }
+}
+
+body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+}
+
+@media (min-width: 1180px) {
+    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs {
+        width: min(calc(100vw - 40px), var(--comfort-dock-max)) !important;
+        grid-template-columns: repeat(8, minmax(112px, 1fr)) !important;
+        gap: 12px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab {
+        min-height: 74px !important;
+        padding: 10px 12px 9px !important;
+        background: rgba(9, 17, 31, 0.78) !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b {
+        font-size: 13.5px !important;
+        letter-spacing: -0.02em !important;
+    }
+}
+
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab.is-disabled,
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-disabled="true"] {
+    opacity: 0.46;
+    filter: grayscale(0.22);
+}
+
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab.is-active,
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-selected="true"] {
+    background:
+        linear-gradient(145deg, rgba(34, 211, 238, 0.20), rgba(139, 92, 246, 0.12)),
+        rgba(8, 18, 34, 0.88) !important;
+}
+
+body[data-ui="hyperflow-tabs"] .recommend-flow-guide,
+body[data-ui="hyperflow-tabs"] .hyperconnect-selection-guide,
+body[data-ui="hyperflow-tabs"] .flow-selection-summary,
+body[data-ui="hyperflow-tabs"] .hyperflow-stage {
+    animation: none !important;
+    will-change: auto !important;
+}
+
+body[data-ui="hyperflow-tabs"] .recommend-flow-guide {
+    background:
+        linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(139, 92, 246, 0.08)),
+        rgba(7, 13, 25, 0.76) !important;
+    border: 1px solid rgba(34, 211, 238, 0.22) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+
+body[data-ui="hyperflow-tabs"] .recommendation-list:not(.empty-state) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr));
+    gap: 12px;
+}
+
+body[data-ui="hyperflow-tabs"] .recommendation-card {
+    position: relative;
+    text-align: left;
+    cursor: pointer;
+    min-height: 168px;
+    padding: 15px 15px 14px !important;
+    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease !important;
+}
+
+body[data-ui="hyperflow-tabs"] .recommendation-card:hover {
+    transform: translateY(-2px);
+}
+
+body[data-ui="hyperflow-tabs"] .recommendation-card:focus-visible {
+    outline: 3px solid rgba(34, 211, 238, 0.55);
+    outline-offset: 3px;
+}
+
+body[data-ui="hyperflow-tabs"] .recommendation-card::before {
+    content: "선택";
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 900;
+    color: rgba(248, 250, 252, 0.92);
+    background: rgba(15, 23, 42, 0.76);
+    border: 1px solid rgba(226, 232, 240, 0.16);
+}
+
+body[data-ui="hyperflow-tabs"] .recommendation-card.is-selected::before {
+    content: "선택됨";
+    color: #031018;
+    background: linear-gradient(135deg, #67e8f9, #c4b5fd);
+}
+
+body[data-ui="hyperflow-tabs"] .recommendation-card .rec-score {
+    margin-right: 56px;
+}
+
+body[data-ui="hyperflow-tabs"] .rec-select-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-height: 30px;
+    margin-top: 10px;
+    padding: 0 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    color: rgba(248, 250, 252, 0.96);
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+body[data-ui="hyperflow-tabs"] .recommendation-card.is-selected .rec-select-cta {
+    color: #031018;
+    background: linear-gradient(135deg, #67e8f9, #a78bfa);
+}
+
+body[data-ui="hyperflow-tabs"] .preview-card.is-flow-active .phone-frame {
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.28), 0 22px 80px rgba(0, 0, 0, 0.42);
+}
+
+body[data-ui="hyperflow-tabs"] .panel-head {
+    gap: 10px;
+}
+
+body[data-ui="hyperflow-tabs"] .panel-head small {
+    color: rgba(203, 213, 225, 0.78) !important;
+}
+
+@media (max-width: 720px) {
+    body[data-ui="hyperflow-tabs"] .recommendation-list:not(.empty-state) {
+        grid-template-columns: 1fr;
+    }
+    body[data-ui="hyperflow-tabs"] .recommendation-card {
+        min-height: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[data-ui="hyperflow-tabs"] [data-flow-panel].is-workspace-revealed,
+    body[data-ui="hyperflow-tabs"] .recommendation-card {
+        animation: none !important;
+        transition: none !important;
+    }
+}

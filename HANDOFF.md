@@ -1,37 +1,63 @@
-# Handoff - AI Shorts Studio v1.0.3
+# HANDOFF - AI 쇼츠 제작 스튜디오 v1.0.5
 
-## What changed
+## 요약
 
-This patch fixes PC Dock readability and workspace reveal behavior. It also stabilizes candidate guide copy to prevent flickering between flow modules.
+v1.0.5는 v1.0.4 글라스 UI 이후 실제 사용감을 다시 다듬은 안정화 패치입니다. 핵심은 **Dock 클릭 → 작업 패널 전면 reveal**, **후보 카드 선택성 강화**, **글라스 UI 가독성 보강**입니다.
 
-## Files touched
+## 변경 파일
 
-- `index.html`
-- `sw.js`
-- `package.json`
-- `assets/css/pc-dock-reveal-hotfix.css`
-- `src/ui/hyperflow-tabs.js`
-- `src/ui/flow-polish.js`
-- `src/ui/flow-doctor.js`
-- `qa/pc_dock_reveal_smoke.js`
+```text
+assets/css/workspace-comfort.css
+src/ui/workspace-comfort.js
+qa/workspace_comfort_smoke.js
+index.html
+sw.js
+package.json
+README.md
+CHANGELOG.md
+PROJECT_NOTES.md
+qa/QA_REPORT.md
+```
+
+## 적용 원칙
+
+```text
+상단 = 프로그램 소개와 시네마틱 브랜드
+시작 패널 = 파일 열기 / 프로젝트 불러오기 / 자동 분석 안내
+Dock = 작업 탭 + 패널 reveal
+후보 탭 = 선택 가능한 후보 카드
+미리보기 = 선택 후보 확인
+글라스 UI = 예쁘지만 가독성이 우선
+```
+
+## 주의
+
+- `workspace-comfort.css`는 `glass-pro-ui.css` 뒤에 로드되어야 합니다.
+- `workspace-comfort.js`는 기존 flow 모듈을 대체하지 않고, 마지막 편의 레이어로 보강합니다.
+- Dock 클릭 후 reveal 동작을 제거하지 마세요. 현재 사용성의 핵심입니다.
+- 후보 안내 문구에 shimmer/반짝임 애니메이션을 다시 넣지 마세요.
+
+## 검수
+
+```bash
+npm run check
+```
+
+현재 결과: 75/75 통과.
+
 
 ## 검수 순서
 
-아래 항목은 v1.0.3의 수동 검수 순서입니다.
-
-## Manual QA checklist
-
-1. Open on desktop width above 1180px.
-2. Confirm bottom Dock shows 8 readable labels in one row.
-3. Click each Dock tab and confirm the corresponding panel is revealed near the top of the viewport.
-4. Generate recommendations and move to 후보. Confirm guide text does not blink.
-5. Select a candidate. Confirm 미리보기 reveals and action buttons remain compact.
-6. Resize to tablet/mobile. Confirm Dock becomes readable 4+4.
+```text
+1. 문법 검수
+2. 기존 흐름 QA
+3. Dock reveal QA
+4. Workspace Comfort QA
+5. 문서/패키징 확인
+```
 
 ## 알려진 제한
 
-브라우저 미디어 저장 제한은 유지됩니다.
-
-## Known limitation
-
-Browser media export behavior still depends on MediaRecorder support. Chrome-based browsers remain the safest target for export testing.
+- 실제 미디어 렌더링 품질은 브라우저의 MediaRecorder/Canvas/captureStream 지원에 따라 달라집니다.
+- iOS 일부 브라우저에서는 진동 피드백이 무시될 수 있습니다.
+- 무료 로컬 브라우저 렌더링 방식이라 저장 포맷은 브라우저 지원에 따라 WebM으로 나올 수 있습니다.

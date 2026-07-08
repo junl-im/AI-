@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.3 - main app with render queue and export reliability
+// AI Shorts Studio v1.0.5 - main app with render queue and export reliability
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -946,9 +946,9 @@
                 state.autoCuts = result.autoCuts;
                 state.waveformBins = result.waveformBins || [];
                 state.fileMeta = Object.assign({}, state.fileMeta || {}, result.fileMeta || {});
-                state.engineMeta = result.engine || { version: '1.0.3' };
+                state.engineMeta = result.engine || { version: '1.0.5' };
                 if (engineKernel.auditRuntime) state.engineMeta.stability = engineKernel.auditRuntime(state);
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '1.0.3', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '1.0.5', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
             } else {
                 let audioResult = null;
                 try {

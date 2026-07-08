@@ -14,7 +14,7 @@ function fail(message) {
     process.exit(1);
 }
 
-if (!html.includes('assets/css/cinematic-hero.css?v=1.0.3-flow-audit')) fail('cinematic hero stylesheet link missing');
+if (!html.includes('assets/css/cinematic-hero.css?v=1.0.5-flow-audit')) fail('cinematic hero stylesheet link missing');
 if (!html.includes('class="brand-panel cinematic-brand-panel"')) fail('hero brand panel should use cinematic class');
 for (const token of ['cinema-hero-bg', 'film-strip film-strip-a', 'film-strip film-strip-b', 'camera-frame-sweep', 'viewfinder-mark-tl', 'viewfinder-mark-br', 'cinematic-title']) {
     if (!html.includes(token)) fail(`hero cinematic DOM token missing: ${token}`);
@@ -22,5 +22,5 @@ for (const token of ['cinema-hero-bg', 'film-strip film-strip-a', 'film-strip fi
 for (const token of ['@keyframes filmSlideLeft', '@keyframes filmSlideRight', '@keyframes cameraSweep', '@media (prefers-reduced-motion: reduce)', '.cinematic-brand-panel']) {
     if (!css.includes(token)) fail(`cinematic css guard missing: ${token}`);
 }
-if (!sw.includes('./assets/css/cinematic-hero.css?v=1.0.3-flow-audit')) fail('service worker should cache cinematic hero css');
+if (!sw.includes('./assets/css/cinematic-hero.css?v=1.0.5-flow-audit')) fail('service worker should cache cinematic hero css');
 console.log('PASS cinematic hero film/camera identity assets present');

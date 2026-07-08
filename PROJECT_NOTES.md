@@ -1,26 +1,33 @@
-# Project Notes - v1.0.3
+# PROJECT NOTES - v1.0.5
 
-## Focus
+## 점검 결과
 
-v1.0.3 focuses on real usability issues found during PC testing:
+v1.0.4에서 글라스 디자인은 좋은 방향이었지만, 실제 편집 앱에서는 예쁜 표면보다 **읽힘, 클릭 후 이동, 후보 선택의 명확성**이 더 중요합니다. v1.0.5는 그 사용감을 다시 안정화한 패치입니다.
 
-- Desktop Dock readability.
-- Manual tab click reveal behavior.
-- Candidate guide text flicker.
-- Compact action button density.
+## 이번 판단
 
-## Design decision
+```text
+문제 가능성
+├─ Dock을 눌러도 열린 작업 구간이 즉시 보이지 않으면 연결성이 약해짐
+├─ 후보 카드가 정보 카드처럼만 보이면 사용자가 어디를 눌러야 할지 헷갈림
+├─ 글라스 UI가 과하면 후보/버튼/패널의 대비가 약해짐
+└─ 여러 flow 모듈이 안내 문구를 동시에 바꾸면 반짝임처럼 보일 수 있음
+```
 
-The Dock is not a second command panel. It is a persistent navigation surface. On PC it should use the screen width and show all labels clearly. On mobile and tablet it should remain 4+4 for touch comfort.
+## v1.0.5 처리
 
-## Flow rule
+```text
+Dock reveal 보강
+→ 작업 패널 하이라이트
+→ 후보 카드 선택 CTA 추가
+→ 추천 안내 문구 안정화
+→ PC Dock 가독성 재보강
+→ Workspace Comfort QA 추가
+```
 
-Every manual Dock click should reveal the corresponding workspace panel. State-only tab switching is not enough.
+## 다음 후보
 
-## Guarded files
-
-- `assets/css/pc-dock-reveal-hotfix.css`
-- `src/ui/hyperflow-tabs.js`
-- `src/ui/flow-polish.js`
-- `src/ui/flow-doctor.js`
-- `qa/pc_dock_reveal_smoke.js`
+- 후보 카드 비교 화면을 더 전문적으로 정리.
+- 미리보기 탭에서 선택 구간 요약 고정.
+- 저장 탭에 예상 용량/길이/품질 프리셋 추가.
+- 모바일 실제 터치 테스트 후 Dock 높이와 버튼 간격 미세 조정.
