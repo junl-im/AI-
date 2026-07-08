@@ -10,7 +10,7 @@ function assert(cond, name, detail) { cond ? pass(name) : fail(name, detail); }
 const html = read('index.html');
 const css = read('assets/css/glass-pro-ui.css');
 const sw = read('sw.js');
-assert(html.includes('assets/css/glass-pro-ui.css?v=1.0.8-glass-pro'), 'glass pro stylesheet is loaded after layout fixes');
+assert(html.includes('assets/css/glass-pro-ui.css?v=1.1.0-glass-pro'), 'glass pro stylesheet is loaded after layout fixes');
 assert(css.includes('--glass-surface') && css.includes('--glass-blur'), 'glass design tokens are defined');
 assert(css.includes('backdrop-filter: blur(var(--glass-blur)) saturate(1.28)'), 'glass surfaces use backdrop blur');
 assert(css.includes('.brand-panel.cinematic-brand-panel'), 'cinematic hero receives glass skin');
@@ -18,4 +18,4 @@ assert(css.includes('film-cyan') && css.includes('film-violet') && css.includes(
 assert(css.includes('.bottom-dock-tab') && css.includes('min-height: 58px'), 'dock remains readable in glass skin');
 assert(css.includes('@supports not ((backdrop-filter: blur(1px))'), 'non-backdrop-filter fallback is included');
 assert(css.includes('@media (prefers-reduced-motion: reduce)'), 'reduced motion fallback is included');
-assert(sw.includes('./assets/css/glass-pro-ui.css?v=1.0.8-glass-pro'), 'service worker caches glass stylesheet');
+assert(sw.includes('./assets/css/glass-pro-ui.css?v=1.1.0-glass-pro'), 'service worker caches glass stylesheet');

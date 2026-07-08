@@ -2,8 +2,8 @@
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v0.9.6',
-    BUILD_KEY: '0.9.6-render-queue-stability',
+    APP_VERSION: 'v1.0.9',
+    BUILD_KEY: '1.0.9-render-quality-planner',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -21,7 +21,7 @@ window.AIShortsRuntimeConfig = Object.freeze({
         'video/webm;codecs=vp8,opus',
         'video/webm'
     ],
-    LOCAL_STORAGE_KEY: 'ai-shorts-studio-v094-settings',
+    LOCAL_STORAGE_KEY: 'ai-shorts-studio-v109-settings',
     DIAGNOSTIC_HISTORY_LIMIT: 20,
     RENDER_QUEUE_LIMIT: 12,
     RENDER_QUEUE_RETRY_LIMIT: 2

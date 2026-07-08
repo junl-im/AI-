@@ -420,8 +420,10 @@
         if (mediaStream) {
             mediaStream.getAudioTracks().forEach(track => stream.addTrack(track));
         }
-        const recorderOptions = mimeType ? { mimeType } : undefined;
-        const recorder = new MediaRecorder(stream, recorderOptions);
+        const bitrate = Number(options && options.videoBitsPerSecond) || 0;
+        const recorderOptions = mimeType ? { mimeType } : {};
+        if (bitrate > 0) recorderOptions.videoBitsPerSecond = bitrate;
+        const recorder = new MediaRecorder(stream, Object.keys(recorderOptions).length ? recorderOptions : undefined);
         const chunks = [];
         recorder.ondataavailable = event => {
             if (event.data && event.data.size) chunks.push(event.data);

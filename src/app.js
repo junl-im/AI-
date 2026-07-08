@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.8 - main app with render queue and export reliability
+// AI Shorts Studio v1.0.9 - main app with render preset planner and export reliability
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -303,6 +303,26 @@
     }
 
 
+
+    function getRenderPreset() {
+        const planner = global.AIShortsRenderQualityPlanner || {};
+        const key = planner.getPresetKey ? planner.getPresetKey() : (state.settings && state.settings.renderPreset || 'balanced');
+        const presets = planner.presets || {};
+        const preset = presets[key] || presets.balanced || { fps: config.PREVIEW_FPS || 30, bitrate: 8, label: '균형' };
+        return Object.assign({ key: key || 'balanced', fps: config.PREVIEW_FPS || 30, bitrate: 8, label: '균형' }, preset);
+    }
+
+    function getExportFrameRate() {
+        const preset = getRenderPreset();
+        return Math.max(18, Math.min(30, Number(preset.fps) || Number(config.PREVIEW_FPS || 30)));
+    }
+
+    function getExportBitrate() {
+        const preset = getRenderPreset();
+        const mbps = Math.max(3, Math.min(16, Number(preset.bitrate) || 8));
+        return Math.round(mbps * 1000000);
+    }
+
     function getAutoCutOptions() {
         const raw = Object.assign({}, AUTO_CUT_DEFAULTS, state && state.settings && state.settings.autoCutOptions || {});
         if (autoCutDetector.normalizeOptions) return autoCutDetector.normalizeOptions(raw);
@@ -533,7 +553,8 @@
                 captionOffset: state.settings.captionOffset,
                 captionStyle: state.settings.captionStyle,
                 captionOptions: getCaptionOptions(),
-                fps: config.PREVIEW_FPS || 30
+                fps: getExportFrameRate(),
+                videoBitsPerSecond: getExportBitrate()
             }, (percent, status) => {
                 update(percent, status || '렌더링');
                 setProgress(percent, status || job.label);
