@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.0 - flow integrity hotfix guard
+// AI Shorts Studio v1.0.1 - flow integrity hotfix guard
 'use strict';
 (function bootFlowHotfix(global) {
     const store = global.AIShortsAppState || {};

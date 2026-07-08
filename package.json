@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-0-0",
-  "version": "1.0.0",
+  "name": "ai-shorts-studio-v1-0-1",
+  "version": "1.0.1",
   "private": true,
-  "description": "AI Shorts Studio v1.0.0 - cinematic hero identity, film slide motion, camera frame background, flow stability polish",
+  "description": "AI Shorts Studio v1.0.1 - responsive PC/mobile workspace, separated hero commands, dock file-open label polish",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -76,6 +76,7 @@
     "node qa/flow_integrity_smoke.js",
     "node --check src/ui/flow-doctor.js",
     "node qa/flow_doctor_smoke.js",
-    "node qa/cinematic_hero_smoke.js"
+    "node qa/cinematic_hero_smoke.js",
+    "node qa/responsive_workspace_smoke.js"
   ]
 }

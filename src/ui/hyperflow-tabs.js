@@ -1,5 +1,5 @@
 
-// AI Shorts Studio v1.0.0 - HyperConnect tab workflow controller with stable panel reveal
+// AI Shorts Studio v1.0.1 - HyperConnect tab workflow controller with stable panel reveal
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};

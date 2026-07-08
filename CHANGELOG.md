@@ -1,11 +1,13 @@
-# Changelog - AI Shorts Studio v1.0.0
+# Changelog - AI Shorts Studio v1.0.1
 
-## v1.0.0 - Cinematic hero identity
+## v1.0.1 - Responsive workspace layout
 
-- Added a cinematic hero visual system for the top program title area.
-- Added moving film-strip background layers inspired by the original sample app's animated header feel.
-- Added camera-frame sweep, viewfinder marks and title light line for a shorts/video studio identity.
-- Kept header policy clean: version on the left, Design by 곰같은여우 on the right.
-- Added `prefers-reduced-motion` fallback for accessibility and lower-power devices.
-- Added service worker cache entry for the new hero stylesheet.
-- Added cinematic hero QA guard.
+- Separated the cinematic hero title area from quick actions and workflow controls.
+- Added a dedicated start command panel below the hero for file open, project import, auto-analysis guidance and edit flow guidance.
+- Renamed the bottom Dock file tab from `파일` to `파일 열기`.
+- Added desktop-specific layout rules for wider workspaces.
+- Added an 8-column desktop Dock while keeping the 4-column mobile Dock rows.
+- Preserved the cinematic film-strip and camera-frame hero visual from v1.0.0.
+- Added `assets/css/responsive-workspace.css`.
+- Added `qa/responsive_workspace_smoke.js`.
+- Updated service worker cache and package metadata.

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.0 - Flow Doctor runtime guard
+// AI Shorts Studio v1.0.1 - Flow Doctor runtime guard
 'use strict';
 (function bootFlowDoctor(global) {
     const store = global.AIShortsAppState || {};
