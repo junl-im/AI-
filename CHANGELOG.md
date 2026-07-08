@@ -1,12 +1,12 @@
 # CHANGELOG
 
-## v0.9.5 - HyperConnect Flow Cleanup
+## v0.9.7 - HyperConnect Flow Hotfix
 
-- 상단 중복 `추천 생성` 버튼 제거.
-- 추천 생성 버튼을 추천 탭 내부 하나로 통합.
-- 추천 후보 카드에 명확한 선택 CTA 추가.
-- 후보 선택 후 미리보기 탭 자동 전환 흐름 강화.
-- 상단 브랜드 줄을 왼쪽 버전 / 오른쪽 Design by 곰같은여우 구조로 정리.
-- 상단 패치성 정보 노출 방지.
-- HyperConnect 상태 가드 추가.
-- QA 59개로 확장.
+- Fixed the tab system not hiding inactive sections by restoring the HyperFlow UI mode.
+- Added a dedicated `👆 후보` tab between recommendation generation and preview.
+- Kept `✨ 추천 생성` only inside the recommendation tab.
+- Recommendation generation now moves to the candidates tab.
+- Candidate selection now moves to preview without forcing the page to the top.
+- Removed the dock caption tab and folded caption controls into the edit tab to keep the 4+4 dock layout.
+- Reduced oversized action buttons so preview/export/range buttons behave like buttons, not banners.
+- Added QA guards for tab mode, candidates panel, no-scroll switching, and compact buttons.

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - runtime stability auditor
+// AI Shorts Studio v0.9.6 - runtime stability auditor
 'use strict';
 
 (function exposeStabilityAuditor(global) {
@@ -17,7 +17,7 @@
         const modules = engineHealth && Number(engineHealth.modules || 0);
         if (engineHealth && modules < 5) findings.push({ level: 'warning', message: '활성 엔진 모듈 수가 적습니다.' });
         return Object.freeze({
-            version: '0.9.5',
+            version: '0.9.6',
             ok: !findings.some(item => item.level === 'error'),
             score: scoreFrom(findings),
             findings,

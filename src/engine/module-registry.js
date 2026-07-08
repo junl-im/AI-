@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - modular engine registry
+// AI Shorts Studio v0.9.6 - modular engine registry
 'use strict';
 
 (function exposeModuleRegistry(global) {
@@ -19,7 +19,7 @@
             if (!module || typeof module !== 'object') throw new Error('등록할 엔진 모듈이 없습니다.');
             if (!module.id) throw new Error('엔진 모듈 id가 필요합니다.');
             return Object.freeze(Object.assign({
-                version: '0.9.5',
+                version: '0.9.6',
                 stage: 'utility',
                 priority: 100,
                 enabled: true,

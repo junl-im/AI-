@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - main app with render queue and export reliability
+// AI Shorts Studio v0.9.7 - main app with render queue and export reliability
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -101,7 +101,7 @@
             'motionSensitivityInput', 'motionSensitivityValue', 'handlePaddingSelect', 'autoTrimBtn', 'autoTrimAllBtn', 'refreshCutsBtn',
             'cutMarkerOverlay', 'cutMarkerFocusText', 'snapStartCutBtn', 'snapEndCutBtn', 'engineStatusText',
             'flowPreviewBtn', 'flowThumbnailBtn', 'flowExportBtn', 'flowExportAllBtn',
-            'hyperflowStageTitle', 'hyperflowStageMeta', 'hyperflowStageIcon',
+            'hyperflowStageTitle', 'hyperflowStageMeta', 'hyperflowStageIcon', 'autoplayPreviewToggle',
             'renderQueueStatus', 'renderQueueList', 'renderQueueRetryBtn', 'renderQueueClearBtn'
         ].forEach(id => { els[id] = $(id); });
     }
@@ -728,6 +728,7 @@
         renderPreviewStill();
         updateButtons();
         updateEngineStatus();
+        if (global.AIShortsFlowPolish && global.AIShortsFlowPolish.scheduleSync) global.AIShortsFlowPolish.scheduleSync();
     }
 
     function renderPreviewStillNow() {
@@ -773,8 +774,13 @@
         }
         updateSelectedRangeControls(item);
         renderAll();
-        activateFlowTab('preview');
-        toast('선택 완료 · 미리보기 탭으로 연결했습니다.', 'action');
+        activateFlowTab('preview', { scroll: false });
+        if (els.autoplayPreviewToggle && els.autoplayPreviewToggle.checked) {
+            window.setTimeout(() => {
+                if (!state.isPreviewing && els.previewBtn && !els.previewBtn.disabled) previewSelectedRange();
+            }, 220);
+        }
+        toast(els.autoplayPreviewToggle && els.autoplayPreviewToggle.checked ? '선택 완료 · 미리보기 자동 재생을 시작합니다.' : '선택 완료 · 미리보기 탭으로 연결했습니다.', 'action');
     }
 
     function bindEvents() {
@@ -940,9 +946,9 @@
                 state.autoCuts = result.autoCuts;
                 state.waveformBins = result.waveformBins || [];
                 state.fileMeta = Object.assign({}, state.fileMeta || {}, result.fileMeta || {});
-                state.engineMeta = result.engine || { version: '0.9.5' };
+                state.engineMeta = result.engine || { version: '0.9.7' };
                 if (engineKernel.auditRuntime) state.engineMeta.stability = engineKernel.auditRuntime(state);
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '0.9.5', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '0.9.7', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
             } else {
                 let audioResult = null;
                 try {
@@ -974,7 +980,7 @@
                 createRecommendations({ autoSelect: false });
                 setProgress(100, '추천 완료');
                 toast('쇼츠 추천 구간을 만들었습니다.', 'success');
-                activateFlowTab('recommend');
+                activateFlowTab('candidates', { scroll: false });
             } else {
                 setProgress(100, '분석 완료 · 추천 탭으로 이동');
                 toast('자동 분석 완료 · 추천 탭에서 후보를 생성하세요.', 'success');
@@ -1010,8 +1016,9 @@
         buildAutoCutTimeline();
         createRecommendations({ autoSelect: false });
         setProgress(100, '추천 생성 완료');
-        activateFlowTab('recommend');
-        toast('추천 후보를 생성했습니다. 후보 카드를 누르면 미리보기로 이동합니다.', 'success');
+        activateFlowTab('candidates', { scroll: false });
+        toast('추천 후보를 생성했습니다. 후보 탭에서 카드를 선택하세요.', 'success');
+        if (global.AIShortsFlowPolish && global.AIShortsFlowPolish.scheduleSync) global.AIShortsFlowPolish.scheduleSync();
     }
 
     function createFallbackAudioAnalysis(duration) {

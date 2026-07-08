@@ -1,14 +1,15 @@
 
-// AI Shorts Studio v0.9.5 - HyperConnect tab workflow controller
+// AI Shorts Studio v0.9.7 - HyperConnect tab workflow controller
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
-    const ORDER = ['file', 'recommend', 'preview', 'waveform', 'cut', 'edit', 'caption', 'export'];
+    const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
         file: ['📂', '파일 열기', '파일을 열면 자동 분석이 시작됩니다.'],
-        recommend: ['✨', '추천 · 선택', '추천을 생성하고 마음에 드는 후보를 고릅니다.'],
-        preview: ['📱', '미리보기', '선택한 후보가 자동으로 연결됩니다.'],
+        recommend: ['✨', '추천 생성', '분석 결과로 쇼츠 후보를 생성합니다.'],
+        candidates: ['👆', '후보 선택', '마음에 드는 구간을 고르면 미리보기로 연결됩니다.'],
+        preview: ['📱', '미리보기', '선택한 후보의 세로 화면을 확인합니다.'],
         waveform: ['〰️', '파형', '시작/끝과 컷 마커를 맞춥니다.'],
         cut: ['✂️', '자동 컷', '비트·장면·무음 회피 포인트를 확인합니다.'],
         edit: ['🎛️', '편집', '구간, 템플릿, 수동 조정을 관리합니다.'],
@@ -28,7 +29,8 @@
     function isDisabled(tab) {
         if (tab === 'file') return false;
         if (tab === 'recommend') return !hasAnalysis() && !state.isAnalyzing && !state.file;
-        if (tab === 'preview' || tab === 'waveform' || tab === 'cut' || tab === 'edit' || tab === 'caption' || tab === 'export') return !hasRecommendations();
+        if (tab === 'candidates') return !hasRecommendations();
+        if (tab === 'preview' || tab === 'waveform' || tab === 'cut' || tab === 'edit' || tab === 'export') return !hasRecommendations();
         return false;
     }
     function updateStage(tab) {
@@ -40,12 +42,14 @@
         if (title) {
             if (state.isAnalyzing) title.textContent = '자동 분석 중입니다';
             else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) title.textContent = '분석 완료 · 추천을 생성하세요';
+            else if (tab === 'candidates' && hasRecommendations() && !hasSelection()) title.textContent = '후보를 선택하세요';
             else title.textContent = meta[1];
         }
         if (small) {
             if (!state.file) small.textContent = '하단 Dock의 📂 파일 탭에서 원본을 열어주세요.';
             else if (state.isAnalyzing) small.textContent = '파일을 읽고 오디오·영상·컷 엔진을 자동으로 돌리는 중입니다.';
-            else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) small.textContent = '아래 추천 탭의 ✨ 추천 생성 버튼 하나만 사용하면 됩니다.';
+            else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) small.textContent = '추천 탭의 ✨ 추천 생성 버튼 하나만 사용하면 됩니다.';
+            else if (tab === 'candidates' && hasRecommendations() && !hasSelection()) small.textContent = '카드를 누르면 선택 즉시 미리보기 탭으로 이동합니다.';
             else small.textContent = meta[2];
         }
     }
@@ -81,10 +85,7 @@
         active = next;
         document.body.dataset.activeFlowTab = active;
         syncTabs();
-        if (!options || options.scroll !== false) {
-            const stage = byId('hyperflowStage') || document.querySelector('[data-flow-panel~="' + active + '"]');
-            if (stage && stage.scrollIntoView) stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        // v0.9.7: 탭 전환은 화면 최상단으로 튀지 않도록 스크롤을 건드리지 않습니다.
         if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.vibrate) global.AIShortsFeedbackUX.vibrate('button');
     }
     function scheduleSync() {
@@ -105,7 +106,7 @@
             });
         });
         const analyzeBtn = byId('analyzeBtn');
-        if (recommendBtn && analyzeBtn) recommendBtn.addEventListener('click', () => analyzeBtn.click());
+        // v0.9.7: 추천 생성은 추천 탭 안의 단일 버튼만 사용합니다.
         [
             ['flowPreviewBtn', 'previewBtn'],
             ['flowThumbnailBtn', 'thumbnailBtn'],

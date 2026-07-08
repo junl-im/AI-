@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - state container
+// AI Shorts Studio v0.9.6 - state container
 'use strict';
 
 (function exposeState(global) {

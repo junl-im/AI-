@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-9-5",
-  "version": "0.9.5",
+  "name": "ai-shorts-studio-v0-9-7",
+  "version": "0.9.7",
   "private": true,
-  "description": "AI Shorts Studio v0.9.5 - HyperConnect flow cleanup and recommendation selection UX",
+  "description": "AI Shorts Studio v0.9.7 - HyperConnect flow hotfix, candidates tab, no-scroll tab switching, compact action buttons",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -67,6 +67,10 @@
     "node qa/pro_engine_stability_smoke.js",
     "node qa/engine_contracts_smoke.js",
     "node qa/render_queue_smoke.js",
-    "node --check src/ui/hyperconnect-flow.js"
+    "node --check src/ui/hyperconnect-flow.js",
+    "node --check src/ui/flow-polish.js",
+    "node qa/flow_polish_smoke.js",
+    "node --check src/ui/flow-hotfix.js",
+    "node qa/flow_hotfix_smoke.js"
   ]
 }

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - waveform and recommendation selection view
+// AI Shorts Studio v0.9.6 - waveform and recommendation selection view
 'use strict';
 
 (function exposeWaveformView(global) {
@@ -85,6 +85,11 @@
                 reasons.appendChild(li);
             });
             button.appendChild(top);
+            const metrics = document.createElement('div');
+            metrics.className = 'rec-compare-metrics';
+            const duration = Math.max(0, Number(item.duration) || (Number(item.end) || 0) - (Number(item.start) || 0));
+            metrics.innerHTML = '<span>길이 <b>' + Math.round(duration) + '초</b></span><span>시작 <b>' + Math.round(Number(item.start) || 0) + '초</b></span>';
+            button.appendChild(metrics);
             button.appendChild(reasons);
             if (Array.isArray(item.engineBadges) && item.engineBadges.length) {
                 const badges = document.createElement('div');

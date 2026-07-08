@@ -1,34 +1,20 @@
-# QA REPORT - AI Shorts Studio v0.9.5
-
-## Summary
-
-- Version: v0.9.5
-- Patch theme: HyperConnect flow cleanup, duplicate recommendation button removal, smoother selection-to-preview workflow
-- Result: Passed 59/59
-- Failed: 0/59
-
-## Verified
-
-- Top duplicate `flowRecommendBtn` is removed from the UI.
-- Only one visible recommendation generation button remains in the recommendation tab.
-- File open still triggers automatic analysis.
-- Analysis completion leads the user to the recommendation step.
-- Recommendation cards include a clear `선택해서 미리보기` CTA.
-- Candidate selection activates the preview flow.
-- Header uses left version / right `Design by 곰같은여우` layout.
-- Bottom 8-tab Dock remains available for quick navigation.
-- Modular engine, render queue, caption, cut marker, and project service checks pass.
-
-## Command
-
-```bash
-npm run check
-```
+# QA REPORT - AI 쇼츠 제작 스튜디오 v0.9.7
 
 ## Result
 
-```text
-AI Shorts Studio QA summary
-  Passed: 59/59
-  Failed: 0/59
-```
+Passed: 63/63
+Failed: 0/63
+
+## Added check
+
+- `qa/flow_hotfix_smoke.js`
+
+## Verified
+
+- HyperFlow tab CSS is enabled with `data-ui="hyperflow-tabs"`.
+- `👆 후보` tab exists in the 4+4 bottom dock.
+- Recommendation list lives in the candidates panel.
+- Recommendation generation switches to candidate selection.
+- Candidate selection switches to preview without scroll jump.
+- Oversized action buttons are compacted.
+- Header stays simple: version on the left, Design by 곰같은여우 on the right.

@@ -11,7 +11,7 @@ if (missing.length) {
     console.error('FAIL missing HyperFlow dock anchors: ' + missing.join(', '));
     process.exit(1);
 }
-const requiredTabs = ['file', 'recommend', 'preview', 'waveform', 'cut', 'edit', 'caption', 'export'];
+const requiredTabs = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
 const missingTabs = requiredTabs.filter(tab => !html.includes(`data-flow-tab="${tab}"`));
 if (missingTabs.length) {
     console.error('FAIL missing HyperFlow dock tabs: ' + missingTabs.join(', '));
@@ -21,7 +21,7 @@ if (html.includes('bottomAnalyzeBtn') || html.includes('분석하기</span></but
     console.error('FAIL legacy analysis dock button should be removed');
     process.exit(1);
 }
-['📂','✨','📱','〰️','✂️','🎛️','💬','⬇️'].forEach(icon => {
+['📂','✨','👆','📱','〰️','✂️','🎛️','⬇️'].forEach(icon => {
     if (!html.includes(icon)) {
         console.error('FAIL HyperFlow dock missing icon: ' + icon);
         process.exit(1);
@@ -45,4 +45,4 @@ if (html.includes('id="flowRecommendBtn"') || js.includes('flowRecommendBtn')) {
     console.error('FAIL top duplicate recommend button bridge should not exist');
     process.exit(1);
 }
-console.log('PASS HyperConnect 8-tab bottom dock anchors present');
+console.log('PASS HyperConnect 8-tab bottom dock anchors present with candidates tab');

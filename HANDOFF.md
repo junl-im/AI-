@@ -1,53 +1,53 @@
-# HANDOFF - AI 쇼츠 제작 스튜디오 v0.9.5
+# HANDOFF - AI 쇼츠 제작 스튜디오 v0.9.7
 
-## 이번 패치 목적
+## 이번 핫픽스 목적
 
-사용자가 지적한 흐름 문제를 기준으로 전체 UX 연결성을 정리했다.
+사용자가 지적한 흐름 문제를 우선 수정했습니다. v0.9.6에서는 `data-ui` 값이 바뀌면서 HyperFlow 탭 CSS가 적용되지 않아 각 구간 화면이 아래로 길게 노출될 수 있었습니다. v0.9.7은 탭 모드를 복구하고 후보 선택 단계를 별도 탭으로 분리했습니다.
 
-## 수정한 핵심
+## 사용자 흐름
 
-1. 상단 `✨ 추천 생성` 버튼 제거
-   - 추천 생성 버튼은 추천 탭 안의 `#analyzeBtn` 하나만 유지한다.
-   - 상단은 상태 안내만 담당한다.
+1. 파일을 연다.
+2. 자동 분석이 끝나면 추천 탭으로 간다.
+3. `✨ 추천 생성`을 누르면 `👆 후보` 탭으로 이동한다.
+4. 후보 카드를 누르면 스크롤 점프 없이 `📱 미리보기` 탭으로 이동한다.
+5. 파형/컷/편집/저장 탭에서 후속 작업을 한다.
 
-2. 후보 선택 UX 명확화
-   - 추천 카드 하단에 `선택해서 미리보기 →` CTA를 추가했다.
-   - 카드 클릭 시 기존처럼 `selectRecommendation()`이 실행되고 미리보기 탭으로 이동한다.
+## 중요 변경 파일
 
-3. 초연결 흐름 강화
-   - 파일 열기 후 자동 분석.
-   - 분석 완료 후 추천 탭 이동.
-   - 추천 생성 후 후보 선택 안내.
-   - 후보 선택 후 미리보기 자동 전환.
-
-4. 상단 정리
-   - 왼쪽: `v0.9.5`
-   - 오른쪽: `Design by 곰같은여우`
-   - PC/모바일/무료 배지와 패치성 문구는 제거.
-
-## 추가 파일
-
-- `assets/css/hyperconnect-flow.css`
-- `src/ui/hyperconnect-flow.js`
-- `qa/hyperconnect_flow_smoke.js`
+- `index.html`
+- `src/app.js`
+- `src/ui/hyperflow-tabs.js`
+- `src/ui/flow-polish.js`
+- `src/ui/flow-hotfix.js`
+- `assets/css/hyperflow-tabs.css`
+- `assets/css/flow-hotfix.css`
+- `qa/flow_hotfix_smoke.js`
 
 ## 주의
 
-- `#analyzeBtn` 이름은 내부 호환성을 위해 유지하지만 사용자에게는 `추천 생성` 버튼이다.
-- 자동 분석 버튼을 다시 노출하지 말 것.
-- `#flowRecommendBtn`을 다시 만들지 말 것.
+- 하단 Dock은 8개 유지: 파일/추천/후보/미리보기/파형/컷/편집/저장.
+- 자막은 별도 Dock 탭이 아니라 편집 탭 안에서 접근합니다.
+- 탭 전환 시 `scrollIntoView`를 쓰지 않습니다.
 
+## QA
+
+Run `npm run check` before release. v0.9.7 adds `qa/flow_hotfix_smoke.js` for candidates tab, no-scroll tab switching, and compact action buttons.
+
+## Known limitations
+
+- Export format still depends on browser MediaRecorder support.
+- Mobile Safari may ignore haptic vibration.
+- Original media files are not embedded in project JSON.
 
 ## 검수 순서
 
-1. `npm run check`로 전체 정적 검수 실행.
-2. 파일 열기 후 자동 분석이 시작되는지 확인.
-3. 분석 완료 후 추천 탭으로 이동하는지 확인.
-4. 추천 생성 버튼이 화면에 하나만 있는지 확인.
-5. 후보 카드를 선택하면 미리보기 탭으로 자동 이동하는지 확인.
+1. `npm run check`를 실행합니다.
+2. 파일 열기 후 자동 분석이 시작되는지 확인합니다.
+3. 추천 생성 후 👆 후보 탭으로 이동하는지 확인합니다.
+4. 후보 선택 후 최상단 점프 없이 📱 미리보기 탭으로 이동하는지 확인합니다.
 
 ## 알려진 제한
 
-- 브라우저/기기 정책에 따라 진동 알림은 동작하지 않을 수 있다.
-- MediaRecorder 지원 범위에 따라 저장 확장자는 WebM으로 나올 수 있다.
-- 긴 4K 영상은 모바일 브라우저에서 분석 시간이 길어질 수 있다.
+- 저장 파일 형식은 브라우저 MediaRecorder 지원 범위에 따릅니다.
+- 일부 모바일 브라우저는 진동 피드백을 무시할 수 있습니다.
+- 프로젝트 JSON에는 원본 미디어 파일이 포함되지 않습니다.

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - engine module contracts and result validation
+// AI Shorts Studio v0.9.6 - engine module contracts and result validation
 'use strict';
 
 (function exposeModuleContracts(global) {
@@ -24,7 +24,7 @@
         normalized.warnings = unique([].concat(normalized.warnings || []));
         normalized.fileMeta = Object.assign({ duration: 0, size: 0, type: '' }, normalized.fileMeta || {});
         normalized.waveformBins = Array.isArray(normalized.waveformBins) ? normalized.waveformBins : [];
-        normalized.engine = Object.assign({ version: '0.9.5', normalized: true }, normalized.engine || {});
+        normalized.engine = Object.assign({ version: '0.9.6', normalized: true }, normalized.engine || {});
         if (!normalized.audioAnalysis && !normalized.motionAnalysis) {
             normalized.warnings.push('분석 결과가 비어 있습니다. 브라우저 제한 또는 파일 형식을 확인하세요.');
         }
@@ -61,7 +61,7 @@
         ));
         const moduleCount = registrySnapshot && registrySnapshot.count || 0;
         return Object.freeze({
-            version: '0.9.5',
+            version: '0.9.6',
             ok: analysisCheck.ok && failedRecommendations === 0 && moduleCount >= 5,
             moduleCount,
             failedRecommendations,

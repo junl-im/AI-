@@ -1,0 +1,95 @@
+/* AI Shorts Studio v0.9.7 - HyperConnect flow hotfix */
+:root { --hyperflow-dock-height: 144px; }
+
+.brand-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.brand-right-actions { margin-left: auto; }
+
+.hyperflow-stage,
+.flow-selection-summary {
+    scroll-margin-top: 0;
+}
+
+.candidates-zone .panel-head {
+    margin-bottom: 10px;
+}
+.candidates-zone .recommendation-list {
+    min-height: 320px;
+}
+
+/* 버튼은 배너가 아니라 작업 버튼처럼 보이도록 컴팩트화 */
+body[data-ui="hyperflow-tabs"] .transport-row {
+    gap: 8px;
+    align-items: center;
+}
+body[data-ui="hyperflow-tabs"] .transport-row button,
+body[data-ui="hyperflow-tabs"] .transport-row .file-button,
+body[data-ui="hyperflow-tabs"] .hyperflow-export-grid button,
+body[data-ui="hyperflow-tabs"] .batch-export-panel button,
+body[data-ui="hyperflow-tabs"] #applyRangeBtn,
+body[data-ui="hyperflow-tabs"] #thumbnailBtn,
+body[data-ui="hyperflow-tabs"] #exportAllBtn,
+body[data-ui="hyperflow-tabs"] #previewBtn,
+body[data-ui="hyperflow-tabs"] #exportBtn,
+body[data-ui="hyperflow-tabs"] #stopPreviewBtn,
+body[data-ui="hyperflow-tabs"] #autoTrimBtn,
+body[data-ui="hyperflow-tabs"] #autoTrimAllBtn {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 116px;
+    min-height: 38px;
+    padding: 0 13px;
+    border-radius: 13px;
+    font-size: 0.88rem;
+    line-height: 1;
+    box-shadow: none;
+}
+body[data-ui="hyperflow-tabs"] .preview-transport-polish {
+    display: flex;
+    flex-wrap: wrap;
+}
+body[data-ui="hyperflow-tabs"] .hyperflow-export-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, max-content));
+    justify-content: start;
+    gap: 8px;
+}
+body[data-ui="hyperflow-tabs"] .nudge-row button {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 0.84rem;
+}
+
+/* 하단 Dock 4+4를 유지하면서 후보 탭을 명확히 */
+.bottom-dock-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.bottom-dock-tab[data-flow-tab="candidates"].is-live {
+    border-color: rgba(34, 211, 238, 0.52);
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.16), 0 12px 28px rgba(8, 145, 178, 0.20);
+}
+
+@media (max-width: 720px) {
+    body[data-ui="hyperflow-tabs"] .transport-row,
+    body[data-ui="hyperflow-tabs"] .preview-transport-polish {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    body[data-ui="hyperflow-tabs"] .transport-row button,
+    body[data-ui="hyperflow-tabs"] #previewBtn,
+    body[data-ui="hyperflow-tabs"] #exportBtn,
+    body[data-ui="hyperflow-tabs"] #stopPreviewBtn {
+        flex: 0 1 calc(50% - 6px);
+        min-width: 0;
+    }
+    .flow-selection-actions {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    .flow-selection-actions .mini-action {
+        min-width: 0;
+        padding-inline: 8px;
+    }
+}

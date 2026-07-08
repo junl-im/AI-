@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - HyperConnect dock status controller
+// AI Shorts Studio v0.9.6 - HyperConnect dock status controller
 'use strict';
 
 (function bootBottomDock(global) {

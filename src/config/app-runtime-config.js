@@ -2,8 +2,8 @@
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v0.9.5',
-    BUILD_KEY: '0.9.5-render-queue-stability',
+    APP_VERSION: 'v0.9.6',
+    BUILD_KEY: '0.9.6-render-queue-stability',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,

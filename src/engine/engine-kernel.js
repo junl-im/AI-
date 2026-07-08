@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - stabilized pro engine kernel facade
+// AI Shorts Studio v0.9.6 - stabilized pro engine kernel facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -45,7 +45,7 @@
         const registrySnapshot = registry && registry.snapshot ? registry.snapshot() : null;
         const summary = tuner.summarizeAnalysis ? tuner.summarizeAnalysis(result, budget) : null;
         result.engine = Object.assign({}, result.engine || {}, {
-            version: '0.9.5',
+            version: '0.9.6',
             mode: 'stabilized-pro-engine',
             budget,
             registry: registrySnapshot,
@@ -102,7 +102,7 @@
 
     function getHealthReport() {
         return {
-            version: '0.9.5',
+            version: '0.9.6',
             mode: 'stabilized-pro-engine',
             registry: registry && registry.snapshot ? registry.snapshot() : null,
             modules: registry && registry.list ? registry.list().length : 0,

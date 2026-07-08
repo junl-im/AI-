@@ -16,15 +16,15 @@ if (!app.includes("analyzeCurrentFile({ autoGenerate: false, source: 'file-open'
     console.error('FAIL file open should trigger automatic analysis');
     process.exit(1);
 }
-if (!app.includes('generateRecommendationsFromAnalysis') || !app.includes("activateFlowTab('recommend')") || !app.includes("activateFlowTab('preview')")) {
-    console.error('FAIL app should separate auto analysis, recommendation generation, and preview auto-transition');
+if (!app.includes('generateRecommendationsFromAnalysis') || !app.includes("activateFlowTab('candidates'") || !app.includes("activateFlowTab('preview', { scroll: false })")) {
+    console.error('FAIL app should separate auto analysis, candidate selection, and preview auto-transition');
     process.exit(1);
 }
 if (!app.includes('hasAnalysisReady') || !app.includes("els.analyzeBtn.textContent = state.isAnalyzing ? '⚙️ 자동 분석 중' : '✨ 추천 생성'")) {
     console.error('FAIL recommendation button state should be analysis-aware');
     process.exit(1);
 }
-if (!hyper.includes("const ORDER = ['file', 'recommend', 'preview', 'waveform', 'cut', 'edit', 'caption', 'export']")) {
+if (!hyper.includes("const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export']")) {
     console.error('FAIL HyperFlow tab order should be fixed at 8 workflow tabs');
     process.exit(1);
 }

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - lightweight in-session analysis cache
+// AI Shorts Studio v0.9.6 - lightweight in-session analysis cache
 'use strict';
 
 (function exposeAnalysisCache(global) {

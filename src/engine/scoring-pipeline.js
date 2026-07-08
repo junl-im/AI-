@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.5 - modular scoring pipeline
+// AI Shorts Studio v0.9.6 - modular scoring pipeline
 'use strict';
 
 (function exposeScoringPipeline(global) {
@@ -62,7 +62,7 @@
         return recommendations.map((item, index) => Object.assign({}, item, {
             rank: index + 1,
             title: String(item.title || '').replace(/추천 \d+/, `추천 ${index + 1}`),
-            engineVersion: 'v0.9.5-modular'
+            engineVersion: 'v0.9.6-modular'
         }));
     }
 

@@ -1,5 +1,5 @@
 
-/* AI Shorts Studio v0.9.5 - HyperFlow tabbed workflow */
+/* AI Shorts Studio v0.9.7 - HyperFlow tabbed workflow */
 :root {
     --hyperflow-dock-height: 146px;
 }
@@ -85,6 +85,7 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel] {
 }
 body[data-active-flow-tab="file"] [data-flow-panel~="file"],
 body[data-active-flow-tab="recommend"] [data-flow-panel~="recommend"],
+body[data-active-flow-tab="candidates"] [data-flow-panel~="candidates"],
 body[data-active-flow-tab="preview"] [data-flow-panel~="preview"],
 body[data-active-flow-tab="waveform"] [data-flow-panel~="waveform"],
 body[data-active-flow-tab="cut"] [data-flow-panel~="cut"],
@@ -101,7 +102,6 @@ body[data-active-flow-tab="caption"] .edit-tools-card .batch-export-panel,
 body[data-active-flow-tab="caption"] .edit-tools-card .quality-panel {
     display: none !important;
 }
-body[data-active-flow-tab="edit"] .edit-tools-card .caption-pro-panel,
 body[data-active-flow-tab="edit"] .edit-tools-card .quality-panel,
 body[data-active-flow-tab="edit"] .edit-tools-card .batch-export-panel {
     display: none !important;
