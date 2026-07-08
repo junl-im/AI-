@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-0-1",
-  "version": "1.0.1",
+  "name": "ai-shorts-studio-v1-0-2",
+  "version": "1.0.2",
   "private": true,
-  "description": "AI Shorts Studio v1.0.1 - responsive PC/mobile workspace, separated hero commands, dock file-open label polish",
+  "description": "AI Shorts Studio v1.0.2 - flow quality gate, runtime error guard, hyperconnected tab stability audit",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -77,6 +77,8 @@
     "node --check src/ui/flow-doctor.js",
     "node qa/flow_doctor_smoke.js",
     "node qa/cinematic_hero_smoke.js",
-    "node qa/responsive_workspace_smoke.js"
+    "node qa/responsive_workspace_smoke.js",
+    "node --check src/ui/flow-quality-gate.js",
+    "node qa/flow_quality_gate_smoke.js"
   ]
 }

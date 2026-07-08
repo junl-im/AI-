@@ -1,51 +1,48 @@
-# Handoff - AI Shorts Studio v1.0.1
+# HANDOFF - AI Shorts Studio v1.0.2
 
-## 목적
+## Focus
 
-v1.0.1은 PC와 모바일의 화면 사용 방식을 분리하고, 상단 프로그램명 영역과 실행 버튼 영역을 명확히 나눈 반응형 레이아웃 패치입니다.
+This patch stabilizes the hyperconnected workflow after the responsive layout and cinematic hero updates.
 
-## 주요 변경
+## Main changes
 
-- `assets/css/responsive-workspace.css` 추가
-  - PC 1180px 이상: 작업 폭 확장, 하단 Dock 8탭 1줄 구성
-  - 모바일 720px 이하: 하단 Dock 4탭 x 2줄 유지
-  - 상단 히어로 영역에는 버튼/단계 표시가 섞이지 않도록 가드
-  - 파일 열기/프로젝트 불러오기/자동 분석/편집 안내를 별도 시작 패널로 분리
-- `index.html` 수정
-  - 히어로 내부의 빠른 시작 버튼 제거
-  - 히어로 내부의 진행 단계 rail 제거
-  - 히어로 아래 `start-command-panel` 추가
-  - 하단 Dock 첫 탭 라벨을 `파일 열기`로 변경
-- `sw.js` 수정
-  - 새 CSS 캐시 포함
-- `qa/responsive_workspace_smoke.js` 추가
-  - 상단/하단 역할 분리, PC/모바일 Dock 구조, 새 CSS 링크를 검수
+- `src/ui/flow-quality-gate.js` is the new final runtime guard loaded after the existing flow modules.
+- It checks the current app state and keeps only the correct active panel visible.
+- It blocks or redirects invalid tab states.
+- It hides legacy duplicate controls at runtime.
+- It captures window errors and unhandled promise rejections into diagnostics.
 
-## UX 규칙
+## User workflow to test
 
-- 상단 히어로: 프로그램명, 간단 소개, 좌측 버전, 우측 Design by 곰같은여우만 표시합니다.
-- 실행 버튼: 상단 히어로 아래의 시작 패널에만 배치합니다.
-- 파일 열기: 파일을 열면 자동 분석이 시작됩니다.
-- 프로젝트 불러오기: 파일 열기와 별도 명령으로 분리합니다.
-- 하단 Dock: 이동 메뉴 역할만 합니다.
-- PC Dock: 8탭을 한 줄로 표시합니다.
-- 모바일 Dock: 4탭씩 두 줄로 표시합니다.
+1. Open a media file.
+2. Confirm auto-analysis starts.
+3. Confirm the app moves to the recommend step after analysis.
+4. Press the single recommend generation button.
+5. Confirm the candidates tab is shown.
+6. Select a candidate.
+7. Confirm the preview tab is shown.
+8. Move through waveform, cut, edit, and export tabs without jumping to the page top.
 
 ## QA
 
-- `qa/responsive_workspace_smoke.js` 추가
-- 전체 `npm run check` 통과 필요
+Run:
+
+```bash
+npm run check
+```
+
+Expected result: 71/71 passed.
 
 ## 검수 순서
 
 1. `npm run check`를 실행합니다.
-2. 상단 히어로 안에 파일 열기/프로젝트 불러오기 버튼이 없는지 확인합니다.
-3. 히어로 아래 시작 패널에 파일 열기, 프로젝트 불러오기, 자동 분석, 편집 흐름 안내가 분리되어 보이는지 확인합니다.
-4. PC 폭에서 하단 Dock이 8개 탭 한 줄로 보이는지 확인합니다.
-5. 모바일 폭에서 하단 Dock이 4개씩 두 줄로 유지되는지 확인합니다.
-6. 하단 Dock 첫 탭이 `파일 열기`로 표시되는지 확인합니다.
+2. 파일 열기 후 자동 분석 흐름을 확인합니다.
+3. 추천 생성 후 후보 탭 이동을 확인합니다.
+4. 후보 선택 후 미리보기 탭 이동을 확인합니다.
+5. 저장 탭에서 렌더 큐 상태를 확인합니다.
 
 ## 알려진 제한
 
-- 실제 PC/모바일 시각 확인은 브라우저 리사이즈 또는 기기 테스트가 필요합니다.
-- 기존 v1.0.0 시네마틱 히어로 모션은 유지되며, 모션 완화 설정에서는 정지 또는 축소됩니다.
+- 브라우저와 기기 정책에 따라 진동 피드백은 동작하지 않을 수 있습니다.
+- 일부 iOS 또는 인앱 브라우저에서는 미디어 저장과 자동 재생이 제한될 수 있습니다.
+- 프로젝트 JSON은 원본 미디어 파일을 포함하지 않습니다.

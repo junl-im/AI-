@@ -1,29 +1,27 @@
-# QA Report - AI Shorts Studio v1.0.1
+# QA Report - AI Shorts Studio v1.0.2
 
 ## Summary
 
-- Result: PASS
-- Passed: 69/69
-- Failed: 0/69
+- Passed: 71/71
+- Failed: 0/71
 
-## Focus
+## Added checks
 
-v1.0.1 focused on responsive workspace stability and separation of the cinematic hero area from command/actions.
+- `node --check src/ui/flow-quality-gate.js`
+- `node qa/flow_quality_gate_smoke.js`
 
-## Key checks
+## Areas checked
 
-- JavaScript syntax checks passed.
-- No external runtime dependencies detected in `index.html`.
-- Required DOM anchors are present.
-- Header remains a program introduction area, not a patch-note area.
-- Cinematic hero film/camera identity is preserved.
-- Start command panel exists below the hero.
-- Hero title panel does not include file/project/workflow buttons.
-- Bottom Dock first tab is `파일 열기`.
-- Desktop Dock uses 8 equal columns.
-- Mobile Dock keeps 4-column rows.
-- Service worker caches the new responsive workspace stylesheet.
+- JavaScript syntax checks
+- module architecture guards
+- recommendation engine smoke tests
+- caption/project/render smoke tests
+- HyperFlow workflow guards
+- Flow Doctor/Integrity guards
+- responsive PC/mobile workspace guards
+- cinematic hero guards
+- Flow Quality Gate guards
 
-## Added check
+## Result
 
-- `qa/responsive_workspace_smoke.js`
+The v1.0.2 package passes all current automated QA checks.
