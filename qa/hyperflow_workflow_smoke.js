@@ -16,7 +16,7 @@ if (!app.includes("analyzeCurrentFile({ autoGenerate: false, source: 'file-open'
     console.error('FAIL file open should trigger automatic analysis');
     process.exit(1);
 }
-if (!app.includes('generateRecommendationsFromAnalysis') || !app.includes("activateFlowTab('candidates'") || !app.includes("activateFlowTab('preview', { scroll: false })")) {
+if (!app.includes('generateRecommendationsFromAnalysis') || !app.includes("activateFlowTab('candidates'") || !app.includes("activateFlowTab('preview', { reveal: true })")) {
     console.error('FAIL app should separate auto analysis, candidate selection, and preview auto-transition');
     process.exit(1);
 }

@@ -1,20 +1,26 @@
-# QA REPORT - AI 쇼츠 제작 스튜디오 v0.9.7
+# QA Report - AI Shorts Studio v1.0.0
 
-## Result
+## Summary
 
-Passed: 63/63
-Failed: 0/63
+- Passed: 67/67
+- Failed: 0/67
+
+## Focus
+
+- Manual Dock tab clicks must not jump to the top.
+- Recommendation generation must connect to the candidate tab.
+- Candidate selection must connect to preview.
+- Candidate empty state must be understandable.
+- Header must stay simple and user-facing.
+- Action buttons must remain compact.
+- Flow Doctor CSS/JS must be loaded and cached.
 
 ## Added check
 
-- `qa/flow_hotfix_smoke.js`
+- `qa/flow_doctor_smoke.js`
 
-## Verified
+Run:
 
-- HyperFlow tab CSS is enabled with `data-ui="hyperflow-tabs"`.
-- `👆 후보` tab exists in the 4+4 bottom dock.
-- Recommendation list lives in the candidates panel.
-- Recommendation generation switches to candidate selection.
-- Candidate selection switches to preview without scroll jump.
-- Oversized action buttons are compacted.
-- Header stays simple: version on the left, Design by 곰같은여우 on the right.
+```bash
+npm run check
+```

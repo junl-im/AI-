@@ -13,6 +13,6 @@ assert(!html.includes('data-flow-tab="caption"'), 'caption tab should be removed
 assert(tabs.includes("'candidates'"), 'tab controller must know candidates tab');
 assert(!tabs.includes('scrollIntoView({ behavior'), 'tab switching must not force scroll to page top');
 assert(app.includes("activateFlowTab('candidates'"), 'recommendation generation must move to candidates tab');
-assert(app.includes("activateFlowTab('preview', { scroll: false })"), 'candidate selection must move to preview without scroll jump');
+assert(app.includes("activateFlowTab('preview', { reveal: true })"), 'candidate selection must reveal preview panel without top jump');
 assert(css.includes('min-height: 38px') && css.includes('#previewBtn'), 'large action buttons must be compacted');
 console.log('flow hotfix smoke passed');

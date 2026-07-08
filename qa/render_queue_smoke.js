@@ -22,5 +22,5 @@ assert(app.includes('runRenderQueueJobs'), 'app uses render queue jobs');
 assert(app.includes('buildExportPayload'), 'app builds export payloads');
 assert(app.includes('renderQueue.subscribe(renderRenderQueue)'), 'queue UI subscribes to updates');
 assert(css.includes('.render-queue-card') && css.includes('body[data-render-queue="running"]'), 'queue css state styles exist');
-assert(pkg.version === '0.9.7', 'package version is 0.9.7');
+assert(pkg.version === '1.0.0', 'package version is 1.0.0');
 console.log('PASS render_queue_smoke');

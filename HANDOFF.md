@@ -1,53 +1,50 @@
-# HANDOFF - AI 쇼츠 제작 스튜디오 v0.9.7
+# Handoff - AI Shorts Studio v1.0.0
 
-## 이번 핫픽스 목적
+## 목적
 
-사용자가 지적한 흐름 문제를 우선 수정했습니다. v0.9.6에서는 `data-ui` 값이 바뀌면서 HyperFlow 탭 CSS가 적용되지 않아 각 구간 화면이 아래로 길게 노출될 수 있었습니다. v0.9.7은 탭 모드를 복구하고 후보 선택 단계를 별도 탭으로 분리했습니다.
+v1.0.0는 상단 프로그램명 구간을 쇼츠 제작 스튜디오에 맞는 시네마틱 브랜드 영역으로 바꾼 디자인 패치입니다. 처음 제공된 샘플 프로그램의 움직이는 배경 감성은 유지하되, 쇼츠 앱에 맞게 필름 스트립, 카메라 프레임, 영상 슬라이드 느낌으로 재해석했습니다.
 
-## 사용자 흐름
+## 주요 변경
 
-1. 파일을 연다.
-2. 자동 분석이 끝나면 추천 탭으로 간다.
-3. `✨ 추천 생성`을 누르면 `👆 후보` 탭으로 이동한다.
-4. 후보 카드를 누르면 스크롤 점프 없이 `📱 미리보기` 탭으로 이동한다.
-5. 파형/컷/편집/저장 탭에서 후속 작업을 한다.
+- `assets/css/cinematic-hero.css` 추가
+  - 상단 브랜드 패널 전용 시네마틱 배경
+  - 좌우로 흐르는 필름 스트립 2개
+  - 카메라 프레임 빛 스윕
+  - 뷰파인더 코너 마크
+  - 프로그램명 하단 라이트 라인
+  - 모바일 대응 및 모션 완화 대응
+- `index.html` 수정
+  - `cinematic-brand-panel` 클래스 추가
+  - `cinema-hero-bg` 장식 DOM 추가
+  - 프로그램명에 `cinematic-title` 클래스 추가
+- `sw.js` 수정
+  - 새 CSS 캐시 포함
+- `qa/cinematic_hero_smoke.js` 추가
+  - 시네마틱 히어로 DOM/CSS/SW 캐시 존재 검수
 
-## 중요 변경 파일
+## UX 규칙
 
-- `index.html`
-- `src/app.js`
-- `src/ui/hyperflow-tabs.js`
-- `src/ui/flow-polish.js`
-- `src/ui/flow-hotfix.js`
-- `assets/css/hyperflow-tabs.css`
-- `assets/css/flow-hotfix.css`
-- `qa/flow_hotfix_smoke.js`
-
-## 주의
-
-- 하단 Dock은 8개 유지: 파일/추천/후보/미리보기/파형/컷/편집/저장.
-- 자막은 별도 Dock 탭이 아니라 편집 탭 안에서 접근합니다.
-- 탭 전환 시 `scrollIntoView`를 쓰지 않습니다.
+- 상단: 앱 소개, 좌측 `v1.0.0`, 우측 `Design by 곰같은여우`
+- 상단은 패치 정보가 아니라 제품 첫인상을 보여주는 영역
+- 마스터링 물결 느낌은 직접 복사하지 않고 쇼츠용 필름/카메라 연출로 변환
+- 하단 Dock: 기존 8탭 초연결 흐름 유지
+- 추천 생성: 추천 탭 안의 버튼 하나만
+- 후보 선택: 후보 탭에서만 명확히
 
 ## QA
 
-Run `npm run check` before release. v0.9.7 adds `qa/flow_hotfix_smoke.js` for candidates tab, no-scroll tab switching, and compact action buttons.
-
-## Known limitations
-
-- Export format still depends on browser MediaRecorder support.
-- Mobile Safari may ignore haptic vibration.
-- Original media files are not embedded in project JSON.
+- `qa/cinematic_hero_smoke.js` 추가
+- 전체 `npm run check` 통과 필요
 
 ## 검수 순서
 
 1. `npm run check`를 실행합니다.
-2. 파일 열기 후 자동 분석이 시작되는지 확인합니다.
-3. 추천 생성 후 👆 후보 탭으로 이동하는지 확인합니다.
-4. 후보 선택 후 최상단 점프 없이 📱 미리보기 탭으로 이동하는지 확인합니다.
+2. 상단 좌측에 `v1.0.0`, 우측에 `Design by 곰같은여우`가 한 줄로 보이는지 확인합니다.
+3. 상단 프로그램명 배경에 필름 스트립/카메라 프레임 느낌이 보이는지 확인합니다.
+4. 파일 열기 → 자동 분석 → 추천 생성 → 후보 선택 → 미리보기 흐름이 유지되는지 확인합니다.
+5. 모바일 화면에서 상단 연출이 본문을 밀거나 Dock을 가리지 않는지 확인합니다.
 
 ## 알려진 제한
 
-- 저장 파일 형식은 브라우저 MediaRecorder 지원 범위에 따릅니다.
-- 일부 모바일 브라우저는 진동 피드백을 무시할 수 있습니다.
-- 프로젝트 JSON에는 원본 미디어 파일이 포함되지 않습니다.
+- 모션 완화 설정이 켜진 기기에서는 애니메이션이 정지되거나 약하게 보입니다.
+- 저사양 모바일에서는 CSS 애니메이션 품질이 브라우저 성능에 따라 달라질 수 있습니다.

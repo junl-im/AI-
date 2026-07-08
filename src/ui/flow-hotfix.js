@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.7 - flow hotfix guard
+// AI Shorts Studio v1.0.0 - flow integrity hotfix guard
 'use strict';
 (function bootFlowHotfix(global) {
     const store = global.AIShortsAppState || {};
@@ -38,7 +38,7 @@
         const observer = new MutationObserver(sync);
         ['recommendationList','recommendationCount','previewStatus','analysisStatus'].map(id => document.getElementById(id)).filter(Boolean).forEach(node => observer.observe(node, { childList: true, subtree: true, attributes: true, characterData: true }));
         window.addEventListener('resize', sync, { passive: true });
-        window.setInterval(sync, 550);
+        document.addEventListener('ai-shorts-flow-sync', sync);
         sync();
     }
     global.AIShortsFlowHotfix = { sync, setTab };

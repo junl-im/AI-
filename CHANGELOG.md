@@ -1,12 +1,11 @@
-# CHANGELOG
+# Changelog - AI Shorts Studio v1.0.0
 
-## v0.9.7 - HyperConnect Flow Hotfix
+## v1.0.0 - Cinematic hero identity
 
-- Fixed the tab system not hiding inactive sections by restoring the HyperFlow UI mode.
-- Added a dedicated `👆 후보` tab between recommendation generation and preview.
-- Kept `✨ 추천 생성` only inside the recommendation tab.
-- Recommendation generation now moves to the candidates tab.
-- Candidate selection now moves to preview without forcing the page to the top.
-- Removed the dock caption tab and folded caption controls into the edit tab to keep the 4+4 dock layout.
-- Reduced oversized action buttons so preview/export/range buttons behave like buttons, not banners.
-- Added QA guards for tab mode, candidates panel, no-scroll switching, and compact buttons.
+- Added a cinematic hero visual system for the top program title area.
+- Added moving film-strip background layers inspired by the original sample app's animated header feel.
+- Added camera-frame sweep, viewfinder marks and title light line for a shorts/video studio identity.
+- Kept header policy clean: version on the left, Design by 곰같은여우 on the right.
+- Added `prefers-reduced-motion` fallback for accessibility and lower-power devices.
+- Added service worker cache entry for the new hero stylesheet.
+- Added cinematic hero QA guard.

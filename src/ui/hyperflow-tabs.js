@@ -1,5 +1,5 @@
 
-// AI Shorts Studio v0.9.7 - HyperConnect tab workflow controller
+// AI Shorts Studio v1.0.0 - HyperConnect tab workflow controller with stable panel reveal
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};
@@ -23,6 +23,34 @@
     function byId(id) { return document.getElementById(id); }
     function tabs() { return Array.from(document.querySelectorAll('[data-flow-tab]')); }
     function panels() { return Array.from(document.querySelectorAll('[data-flow-panel]')); }
+    function getPanelForTab(tab) {
+        return panels().find(panel => {
+            const value = String(panel.getAttribute('data-flow-panel') || '');
+            return value.split(/\s+/).includes(tab);
+        }) || null;
+    }
+    function revealActivePanel(tab, options) {
+        const opts = options || {};
+        if (opts.reveal === false) return;
+        const panel = getPanelForTab(tab);
+        if (!panel || !global || !global.requestAnimationFrame) return;
+        global.requestAnimationFrame(() => {
+            const dock = byId('bottomDock');
+            const dockRect = dock && dock.getBoundingClientRect ? dock.getBoundingClientRect() : null;
+            const panelRect = panel.getBoundingClientRect ? panel.getBoundingClientRect() : null;
+            if (!panelRect) return;
+            const topGuard = 10;
+            const bottomGuard = dockRect ? Math.max(120, global.innerHeight - dockRect.height - 14) : Math.max(260, global.innerHeight - 130);
+            const alreadyComfortable = panelRect.top >= topGuard && panelRect.top <= bottomGuard && panelRect.bottom > 120;
+            if (alreadyComfortable) return;
+            const absoluteTop = global.scrollY + panelRect.top;
+            const target = Math.max(0, absoluteTop - topGuard);
+            // Never jump to the document top for tab switching. Reveal the active workspace panel only.
+            if (Math.abs(global.scrollY - target) > 8) {
+                global.scrollTo({ top: target, behavior: opts.instant ? 'auto' : 'smooth' });
+            }
+        });
+    }
     function hasRecommendations() { return Array.isArray(state.recommendations) && state.recommendations.length > 0; }
     function hasAnalysis() { return Boolean(state.audioAnalysis || state.motionAnalysis); }
     function hasSelection() { return Boolean(state.selectedRecommendationId); }
@@ -82,10 +110,11 @@
     }
     function setActiveFlowTab(tab, options) {
         const next = ORDER.includes(tab) || tab === 'project' ? tab : 'file';
+        const opts = options || {};
         active = next;
         document.body.dataset.activeFlowTab = active;
         syncTabs();
-        // v0.9.7: 탭 전환은 화면 최상단으로 튀지 않도록 스크롤을 건드리지 않습니다.
+        revealActivePanel(active, opts);
         if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.vibrate) global.AIShortsFeedbackUX.vibrate('button');
     }
     function scheduleSync() {
@@ -102,7 +131,7 @@
                     if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.vibrate) global.AIShortsFeedbackUX.vibrate('warning');
                     return;
                 }
-                setActiveFlowTab(key);
+                setActiveFlowTab(key, { reveal: false });
             });
         });
         const analyzeBtn = byId('analyzeBtn');
@@ -122,7 +151,7 @@
         global.addEventListener('resize', scheduleSync, { passive: true });
         syncTabs();
     }
-    global.AIShortsHyperFlowTabs = { setActiveFlowTab, syncTabs, scheduleSync };
+    global.AIShortsHyperFlowTabs = { setActiveFlowTab, syncTabs, scheduleSync, revealActivePanel };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
     else install();
 })(window);

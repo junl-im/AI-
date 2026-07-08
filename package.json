@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v0-9-7",
-  "version": "0.9.7",
+  "name": "ai-shorts-studio-v1-0-0",
+  "version": "1.0.0",
   "private": true,
-  "description": "AI Shorts Studio v0.9.7 - HyperConnect flow hotfix, candidates tab, no-scroll tab switching, compact action buttons",
+  "description": "AI Shorts Studio v1.0.0 - cinematic hero identity, film slide motion, camera frame background, flow stability polish",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -71,6 +71,11 @@
     "node --check src/ui/flow-polish.js",
     "node qa/flow_polish_smoke.js",
     "node --check src/ui/flow-hotfix.js",
-    "node qa/flow_hotfix_smoke.js"
+    "node qa/flow_hotfix_smoke.js",
+    "node --check src/ui/flow-integrity.js",
+    "node qa/flow_integrity_smoke.js",
+    "node --check src/ui/flow-doctor.js",
+    "node qa/flow_doctor_smoke.js",
+    "node qa/cinematic_hero_smoke.js"
   ]
 }
