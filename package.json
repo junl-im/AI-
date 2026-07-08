@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-0-5",
-  "version": "1.0.5",
+  "name": "ai-shorts-studio-v1-0-6",
+  "version": "1.0.6",
   "private": true,
-  "description": "AI Shorts Studio v1.0.5 - workspace comfort, candidate card clarity, dock reveal stability",
+  "description": "AI Shorts Studio v1.0.6 - motion stability, no-shake tab reveal, single scroll owner",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -82,7 +82,7 @@
     "node qa/flow_quality_gate_smoke.js",
     "node qa/pc_dock_reveal_smoke.js",
     "node qa/glass_pro_ui_smoke.js",
-    "node --check src/ui/workspace-comfort.js",
+    "node --check src/ui/motion-stability.js",
     "node qa/workspace_comfort_smoke.js"
   ]
 }

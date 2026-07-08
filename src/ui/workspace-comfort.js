@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.5 - workspace comfort controller
+// AI Shorts Studio v1.0.6 - workspace comfort controller without duplicate smooth reveal
 'use strict';
 (function bootWorkspaceComfort(global) {
     const store = global.AIShortsAppState || {};
@@ -44,19 +44,14 @@
         const key = tab || activeTab();
         const panel = panelFor(key);
         if (!panel || !global.requestAnimationFrame) return;
+        if (global.AIShortsMotionStability && global.AIShortsMotionStability.reveal) {
+            global.AIShortsMotionStability.reveal(key, { source: 'workspace-comfort', force: opts.force, instant: true, highlight: false });
+        }
         global.requestAnimationFrame(() => {
-            const rect = panel.getBoundingClientRect && panel.getBoundingClientRect();
-            if (!rect) return;
-            const topOffset = Number(opts.offset) || 14;
-            const target = Math.max(0, global.scrollY + rect.top - topOffset);
-            const behavior = opts.instant ? 'auto' : 'smooth';
-            if (Math.abs(global.scrollY - target) > 6) global.scrollTo({ top: target, behavior });
             panel.classList.remove('is-workspace-revealed');
-            // Force reflow to replay pulse in a controlled way.
-            void panel.offsetWidth;
             panel.classList.add('is-workspace-revealed');
             clearTimeout(revealTimer);
-            revealTimer = setTimeout(() => panel.classList.remove('is-workspace-revealed'), 1250);
+            revealTimer = setTimeout(() => panel.classList.remove('is-workspace-revealed'), 520);
             try { panel.focus({ preventScroll: true }); } catch (error) { /* no-op */ }
         });
     }
@@ -94,9 +89,8 @@
     function handleTabClick(event) {
         const tab = event.target && event.target.closest && event.target.closest('[data-flow-tab]');
         if (!tab) return;
-        const key = tab.getAttribute('data-flow-tab') || 'file';
-        // Let the existing tab controller decide state/disabled rules, then reveal the resulting panel.
-        setTimeout(() => reveal(key, { offset: 14, force: true }), key === 'file' ? 80 : 30);
+        // v1.0.6: tab reveal is centralized in motion-stability.js to prevent double-scroll shake.
+        setTimeout(handleFlowSync, 30);
     }
     function handleCandidateClick(event) {
         const card = event.target && event.target.closest && event.target.closest('.recommendation-card');
@@ -124,7 +118,7 @@
         document.addEventListener('click', handleTabClick, false);
         document.addEventListener('click', handleCandidateClick, false);
         document.addEventListener('ai-shorts-flow-sync', handleFlowSync);
-        global.addEventListener('resize', () => setTimeout(() => reveal(activeTab(), { instant: true }), 80), { passive: true });
+        global.addEventListener('resize', () => setTimeout(handleFlowSync, 80), { passive: true });
         installObservers();
         handleFlowSync();
     }

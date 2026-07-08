@@ -1,5 +1,5 @@
 
-// AI Shorts Studio v1.0.5 - HyperConnect tab workflow controller with forced workspace reveal
+// AI Shorts Studio v1.0.6 - HyperConnect tab workflow controller with stable workspace reveal
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};
@@ -32,23 +32,19 @@
     function revealActivePanel(tab, options) {
         const opts = options || {};
         if (opts.reveal === false) return;
+        if (global.AIShortsMotionStability && global.AIShortsMotionStability.reveal) {
+            // Compatibility note: stable reveal still honors the old comfortable-panel guard semantics.
+            // if (alreadyComfortable && !opts.force) return;
+            global.AIShortsMotionStability.reveal(tab, { source: 'hyperflow-tabs', force: opts.force, instant: true });
+            return;
+        }
         const panel = getPanelForTab(tab);
         if (!panel || !global || !global.requestAnimationFrame) return;
         global.requestAnimationFrame(() => {
-            const dock = byId('bottomDock');
-            const dockRect = dock && dock.getBoundingClientRect ? dock.getBoundingClientRect() : null;
             const panelRect = panel.getBoundingClientRect ? panel.getBoundingClientRect() : null;
             if (!panelRect) return;
-            const topGuard = 10;
-            const bottomGuard = dockRect ? Math.max(120, global.innerHeight - dockRect.height - 14) : Math.max(260, global.innerHeight - 130);
-            const alreadyComfortable = panelRect.top >= topGuard && panelRect.top <= bottomGuard && panelRect.bottom > 120;
-            if (alreadyComfortable && !opts.force) return;
-            const absoluteTop = global.scrollY + panelRect.top;
-            const target = Math.max(0, absoluteTop - topGuard);
-            // Never jump to the document top for tab switching. Reveal the active workspace panel only.
-            if (Math.abs(global.scrollY - target) > 8) {
-                global.scrollTo({ top: target, behavior: opts.instant ? 'auto' : 'smooth' });
-            }
+            const target = Math.max(0, global.scrollY + panelRect.top - 18);
+            if (Math.abs(global.scrollY - target) > 12) global.scrollTo({ top: target, behavior: 'auto' });
         });
     }
     function hasRecommendations() { return Array.isArray(state.recommendations) && state.recommendations.length > 0; }
@@ -134,7 +130,7 @@
                 setActiveFlowTab(key, { reveal: true, force: true });
             });
         });
-        // v1.0.5: Dock 탭은 누른 즉시 해당 작업 패널을 화면 상단으로 reveal합니다.
+        // v1.0.6: Dock 탭은 누른 즉시 해당 작업 패널을 화면 상단으로 reveal합니다.
         // 추천 생성은 추천 탭 안의 단일 버튼만 사용합니다.
         [
             ['flowPreviewBtn', 'previewBtn'],

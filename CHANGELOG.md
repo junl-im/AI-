@@ -1,32 +1,37 @@
 # CHANGELOG
 
-## v1.0.5 - Workspace Comfort / Flow Polish
+## v1.0.6 - Motion Stability / No-Shake Tab Reveal
+
+### Fixed
+
+- Dock 탭 클릭 시 화면이 미세하게 떨리는 문제를 수정했습니다.
+- 여러 flow 모듈이 동시에 `smooth scroll`을 실행하던 구조를 정리했습니다.
+- 탭 전환 시 작업 패널이 두 번 이상 다시 잡히며 흔들려 보일 수 있던 현상을 방지했습니다.
+- 작업 패널 reveal 하이라이트가 과하게 번쩍이거나 흔들려 보이지 않도록 완화했습니다.
+- 추천/후보 안내 영역의 반짝임과 모션 충돌을 추가로 차단했습니다.
 
 ### Added
 
-- `assets/css/workspace-comfort.css`
-  - 현재 작업 패널 reveal 하이라이트.
-  - PC Dock 8탭 가독성 보강.
-  - 후보 카드 선택 가능 상태, 선택 배지, CTA 정리.
-  - 추천 안내 문구 반짝임 방지 보강.
-  - 글라스 UI 대비 개선.
-- `src/ui/workspace-comfort.js`
-  - Dock 탭 클릭 후 해당 패널로 부드럽게 스크롤.
-  - 후보 카드 선택 후 미리보기 패널 reveal 보강.
-  - 후보 카드 접근성 라벨과 선택 가능 상태 자동 부여.
-  - 추천 안내 문구 안정화.
-- `qa/workspace_comfort_smoke.js`
-  - 새 CSS/JS 링크, 서비스워커 캐시, 후보 카드 UI 가드, v1.0.5 버전 검수.
+- `src/ui/motion-stability.js`
+  - 탭 이동 스크롤을 한 곳에서만 처리하는 단일 모션 가드.
+  - 중복 스크롤 요청 병합.
+  - 가까운 시간 안의 동일 위치 재스크롤 차단.
+  - `auto` 기반 안정 reveal 적용.
+- `assets/css/motion-stability.css`
+  - 전역 `smooth scroll` 충돌 방지.
+  - 흔들림 없는 패널 하이라이트.
+  - 작업 패널 transform/animation 충돌 차단.
+- `qa/motion_stability_smoke.js`
+  - 모션 안정화 모듈 연결, 서비스워커 캐시, 중복 smooth scroll 제거 검수.
 
 ### Changed
 
-- 서비스워커 캐시를 `v1.0.5-workspace-comfort`로 갱신했습니다.
-- `package.json` QA를 75개로 확장했습니다.
-- 기존 Glass Pro UI는 유지하되, 실제 편집 화면의 가독성을 우선으로 보정했습니다.
+- `hyperflow-tabs.js`, `workspace-comfort.js`, `flow-quality-gate.js`의 reveal 동작을 `AIShortsMotionStability` 중심으로 정리했습니다.
+- `workspace-comfort.js`는 탭 이동 스크롤을 직접 실행하지 않고 카드 장식/안내 안정화 중심으로 동작합니다.
+- 서비스워커 캐시를 `v1.0.6-motion-stability`로 갱신했습니다.
 
 ### Guardrails
 
-- 후보 안내 문구에는 애니메이션을 다시 넣지 않습니다.
-- Dock 탭은 반드시 작업 패널 reveal 동작과 연결되어야 합니다.
-- PC Dock은 8개 탭이 한 줄로 보여도 글자가 잘려서는 안 됩니다.
-- 후보 카드는 선택 가능한 버튼처럼 보여야 하며, 선택 후 미리보기로 연결되어야 합니다.
+- Dock 탭 클릭 시 `smooth scroll`을 여러 모듈에서 동시에 실행하지 않습니다.
+- 패널 이동은 한 프레임 안에서 한 번만 처리합니다.
+- 작업 화면 강조는 위치를 흔드는 transform이 아니라 outline/box-shadow 중심으로 처리합니다.

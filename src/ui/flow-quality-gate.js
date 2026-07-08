@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.5 - Flow Quality Gate with direct workspace reveal
+// AI Shorts Studio v1.0.6 - Flow Quality Gate with direct workspace reveal
 'use strict';
 (function bootFlowQualityGate(global) {
     const store = global.AIShortsAppState || {};
@@ -150,17 +150,18 @@
         return { active, healed };
     }
     function revealActivePanel(tab) {
-        const panel = panelFor(tab || currentTab());
+        const key = tab || currentTab();
+        if (global.AIShortsMotionStability && global.AIShortsMotionStability.reveal) {
+            global.AIShortsMotionStability.reveal(key, { source: 'flow-quality-gate', force: false, instant: true });
+            return;
+        }
+        const panel = panelFor(key);
         if (!panel || !global.requestAnimationFrame) return;
         global.requestAnimationFrame(() => {
             const rect = panel.getBoundingClientRect && panel.getBoundingClientRect();
             if (!rect) return;
-            const dock = byId('bottomDock');
-            const dockHeight = dock && dock.getBoundingClientRect ? dock.getBoundingClientRect().height : 130;
-            const lowerLimit = Math.max(160, global.innerHeight - dockHeight - 18);
-            if (rect.top >= 8 && rect.top < lowerLimit && rect.bottom > 120) return;
-            const target = Math.max(0, global.scrollY + rect.top - 12);
-            if (Math.abs(global.scrollY - target) > 8) global.scrollTo({ top: target, behavior: 'smooth' });
+            const target = Math.max(0, global.scrollY + rect.top - 18);
+            if (Math.abs(global.scrollY - target) > 12) global.scrollTo({ top: target, behavior: 'auto' });
         });
     }
     function schedule(options) {
