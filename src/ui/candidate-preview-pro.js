@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.0 - candidate comparison and preview pro bridge
+// AI Shorts Studio v1.1.3 - candidate comparison and preview pro bridge
 'use strict';
 (function bootCandidatePreviewPro(global) {
     const store = global.AIShortsAppState || {};

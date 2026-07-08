@@ -13,7 +13,7 @@ if (!html.includes('compareModeBtn')) fail('comparison mode button missing');
 if (!html.includes('autoplayPreviewToggle')) fail('auto preview toggle missing');
 if ((html.match(/id="analyzeBtn"/g) || []).length !== 1) fail('recommendation generation button must remain single');
 if (!html.includes('tab-state-dot')) fail('bottom dock state badges missing');
-if (!html.includes('v1.1.0</button>')) fail('version badge must be simple v1.1.0');
+if (!html.includes('v1.1.3</button>')) fail('version badge must be simple v1.1.3');
 if (!html.includes('Design by <strong>곰같은여우</strong>')) fail('designer signature must stay on header line');
 if (tabs.includes('recommendBtn && analyzeBtn')) fail('undefined recommendBtn mirror must be removed');
 if (!app.includes('autoplayPreviewToggle')) fail('app must read auto preview toggle');

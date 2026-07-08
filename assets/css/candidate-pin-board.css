@@ -1,0 +1,219 @@
+/* AI Shorts Studio v1.1.3 - pinned candidates and save estimate comparison */
+:root {
+    --pin-board-surface: rgba(9, 16, 31, 0.78);
+    --pin-board-border: rgba(250, 204, 21, 0.24);
+    --pin-board-accent: rgba(250, 204, 21, 0.88);
+    --pin-board-cyan: rgba(34, 211, 238, 0.88);
+    --pin-board-muted: rgba(203, 213, 225, 0.76);
+}
+
+.candidate-pin-board,
+.candidate-save-compare {
+    border: 1px solid var(--pin-board-border);
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at 12% 0%, rgba(250, 204, 21, 0.14), transparent 32%),
+        linear-gradient(135deg, rgba(15, 23, 42, 0.84), rgba(2, 6, 23, 0.70));
+    box-shadow: 0 20px 56px rgba(2, 6, 23, 0.28), inset 0 1px 0 rgba(255,255,255,0.08);
+    color: rgba(248, 250, 252, 0.94);
+}
+
+.candidate-pin-board {
+    display: grid;
+    gap: 12px;
+    padding: 15px;
+    margin: 0 0 16px;
+}
+
+.candidate-save-compare {
+    display: grid;
+    gap: 12px;
+    padding: 15px;
+    margin: 0 0 16px;
+}
+
+.pin-board-head,
+.save-compare-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.pin-board-copy,
+.save-compare-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.pin-board-copy strong,
+.save-compare-copy strong {
+    font-size: 1rem;
+    font-weight: 950;
+    letter-spacing: -0.02em;
+}
+
+.pin-board-copy small,
+.save-compare-copy small,
+.pin-candidate-row small,
+.save-compare-row small {
+    color: var(--pin-board-muted);
+    line-height: 1.45;
+}
+
+.pin-board-actions,
+.save-compare-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.pin-board-actions button,
+.save-compare-actions button,
+.pin-candidate-row button,
+.save-compare-row button,
+.candidate-pin-toggle {
+    min-height: 32px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.62);
+    color: rgba(248, 250, 252, 0.92);
+    font-weight: 850;
+    font-size: 0.76rem;
+    padding: 7px 10px;
+    cursor: pointer;
+}
+
+.pin-board-actions button:hover,
+.save-compare-actions button:hover,
+.pin-candidate-row button:hover,
+.save-compare-row button:hover,
+.candidate-pin-toggle:hover,
+.candidate-pin-toggle.is-pinned {
+    border-color: rgba(250, 204, 21, 0.56);
+    background: rgba(250, 204, 21, 0.13);
+}
+
+.candidate-pin-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    min-width: 36px;
+    padding: 6px 9px;
+    backdrop-filter: blur(10px);
+}
+
+.recommendation-card.has-pin-toggle {
+    position: relative;
+    padding-right: min(64px, 18vw);
+}
+
+.recommendation-card.is-pinned-candidate,
+.candidate-pro-item.is-pinned-candidate {
+    border-color: rgba(250, 204, 21, 0.52) !important;
+    box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.14), 0 18px 44px rgba(250, 204, 21, 0.08) !important;
+}
+
+.pin-candidate-list,
+.save-compare-list {
+    display: grid;
+    gap: 8px;
+}
+
+.pin-candidate-row,
+.save-compare-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 11px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.46);
+}
+
+.pin-candidate-main,
+.save-compare-main {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.pin-candidate-main b,
+.save-compare-main b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.92rem;
+}
+
+.pin-candidate-meta,
+.save-compare-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.pin-candidate-chip,
+.save-compare-chip {
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 999px;
+    padding: 4px 7px;
+    background: rgba(15, 23, 42, 0.58);
+    color: rgba(226, 232, 240, 0.86);
+    font-size: 0.72rem;
+    font-weight: 850;
+}
+
+.pin-candidate-chip.is-score,
+.save-compare-chip.is-score {
+    border-color: rgba(34, 211, 238, 0.36);
+    color: var(--pin-board-cyan);
+}
+
+.pin-candidate-chip.is-size,
+.save-compare-chip.is-size {
+    border-color: rgba(250, 204, 21, 0.34);
+    color: var(--pin-board-accent);
+}
+
+.pin-board-empty,
+.save-compare-empty {
+    padding: 13px;
+    border: 1px dashed rgba(148, 163, 184, 0.24);
+    border-radius: 16px;
+    color: var(--pin-board-muted);
+    background: rgba(15, 23, 42, 0.30);
+}
+
+.save-compare-row.is-selected,
+.pin-candidate-row.is-selected {
+    border-color: rgba(34, 211, 238, 0.48);
+    background: rgba(34, 211, 238, 0.10);
+}
+
+@media (max-width: 760px) {
+    .pin-board-head,
+    .save-compare-head {
+        display: grid;
+    }
+    .pin-board-actions,
+    .save-compare-actions {
+        justify-content: stretch;
+    }
+    .pin-board-actions button,
+    .save-compare-actions button {
+        flex: 1 1 130px;
+    }
+    .pin-candidate-row,
+    .save-compare-row {
+        grid-template-columns: 1fr;
+    }
+    .candidate-pin-toggle {
+        top: 8px;
+        right: 8px;
+    }
+}
