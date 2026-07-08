@@ -1,27 +1,20 @@
-# QA Report - AI Shorts Studio v1.0.2
+# QA Report - AI Shorts Studio v1.0.3
 
 ## Summary
 
-- Passed: 71/71
-- Failed: 0/71
+AI Shorts Studio QA summary
 
-## Added checks
+- Passed: 72/72
+- Failed: 0/72
 
-- `node --check src/ui/flow-quality-gate.js`
-- `node qa/flow_quality_gate_smoke.js`
+## Focus
 
-## Areas checked
+v1.0.3 verifies the PC Dock readability fix, forced workspace reveal on Dock navigation, stable candidate guide copy, compact action buttons, and all previous modular engine / render / flow guardrails.
 
-- JavaScript syntax checks
-- module architecture guards
-- recommendation engine smoke tests
-- caption/project/render smoke tests
-- HyperFlow workflow guards
-- Flow Doctor/Integrity guards
-- responsive PC/mobile workspace guards
-- cinematic hero guards
-- Flow Quality Gate guards
+## Added check
 
-## Result
+- `qa/pc_dock_reveal_smoke.js`
 
-The v1.0.2 package passes all current automated QA checks.
+## Manual follow-up
+
+Desktop visual inspection is recommended for the Dock width and label visibility at common PC breakpoints: 1180px, 1366px, 1440px, 1920px.

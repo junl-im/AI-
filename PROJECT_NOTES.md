@@ -1,27 +1,26 @@
-# PROJECT NOTES - AI Shorts Studio v1.0.2
+# Project Notes - v1.0.3
 
-## Stability direction
+## Focus
 
-The app now has several UI flow modules. v1.0.2 adds a final quality gate instead of replacing the earlier modules. This keeps compatibility while preventing broken states from leaking into the user experience.
+v1.0.3 focuses on real usability issues found during PC testing:
 
-## New module
+- Desktop Dock readability.
+- Manual tab click reveal behavior.
+- Candidate guide text flicker.
+- Compact action button density.
 
-`src/ui/flow-quality-gate.js`
+## Design decision
 
-Responsibilities:
+The Dock is not a second command panel. It is a persistent navigation surface. On PC it should use the screen width and show all labels clearly. On mobile and tablet it should remain 4+4 for touch comfort.
 
-- canonical 8-tab order
-- state-aware fallback tab selection
-- one active panel at a time
-- legacy duplicate UI hiding
-- runtime error diagnostics
-- scroll-safe panel reveal support
+## Flow rule
 
-## Do not regress
+Every manual Dock click should reveal the corresponding workspace panel. State-only tab switching is not enough.
 
-- The hero must remain an introduction area only.
-- Patch details should stay in docs, not in the hero.
-- The bottom Dock first tab must read `파일 열기`.
-- Recommendation generation must stay in the recommendation tab only.
-- Candidate selection must happen in the candidates tab.
-- Candidate selection must connect to the preview tab.
+## Guarded files
+
+- `assets/css/pc-dock-reveal-hotfix.css`
+- `src/ui/hyperflow-tabs.js`
+- `src/ui/flow-polish.js`
+- `src/ui/flow-doctor.js`
+- `qa/pc_dock_reveal_smoke.js`

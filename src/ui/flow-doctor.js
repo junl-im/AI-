@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.2 - Flow Doctor runtime guard
+// AI Shorts Studio v1.0.3 - Flow Doctor runtime guard with stable candidate guide
 'use strict';
 (function bootFlowDoctor(global) {
     const store = global.AIShortsAppState || {};
@@ -16,7 +16,7 @@
     function setTab(tab, reveal) {
         if (!ORDER.includes(tab)) return;
         const api = tabApi();
-        if (api && api.setActiveFlowTab) api.setActiveFlowTab(tab, { reveal: Boolean(reveal) });
+        if (api && api.setActiveFlowTab) api.setActiveFlowTab(tab, { reveal: Boolean(reveal), force: Boolean(reveal) });
         else if (document.body && document.body.dataset) document.body.dataset.activeFlowTab = tab;
     }
     function setText(id, text) {
@@ -63,8 +63,8 @@
             return;
         }
         if (hasRecommendations() && !hasSelection()) {
-            setText('flowSelectionTitle', '👆 후보 탭에서 구간을 선택하세요');
-            setText('flowSelectionMeta', '후보 카드를 선택하면 📱 미리보기로 자동 연결됩니다.');
+            setText('flowSelectionTitle', '후보 카드를 선택하세요');
+            setText('flowSelectionMeta', '후보 탭에서 마음에 드는 구간을 누르면 미리보기로 자동 이동합니다.');
             return;
         }
         if (hasSelection()) {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.2 - Flow Quality Gate
+// AI Shorts Studio v1.0.3 - Flow Quality Gate with direct workspace reveal
 'use strict';
 (function bootFlowQualityGate(global) {
     const store = global.AIShortsAppState || {};

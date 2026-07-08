@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.7 - flow polish controller
+// AI Shorts Studio v1.0.3 - flow polish controller with stable guide text
 'use strict';
 (function bootFlowPolish(global) {
     const store = global.AIShortsAppState || {};
@@ -17,7 +17,7 @@
     function hasCaptions() { return Array.isArray(state.captions) && state.captions.length > 0; }
     function setTab(tab) {
         if (global.AIShortsHyperFlowTabs && global.AIShortsHyperFlowTabs.setActiveFlowTab) {
-            global.AIShortsHyperFlowTabs.setActiveFlowTab(tab);
+            global.AIShortsHyperFlowTabs.setActiveFlowTab(tab, { reveal: true, force: true });
         } else {
             document.body.dataset.activeFlowTab = tab;
         }
