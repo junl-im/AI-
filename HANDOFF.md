@@ -1,14 +1,16 @@
-# HANDOFF v1.1.4
+# HANDOFF v1.1.5
 
 ## 요약
 
-v1.1.4는 상단 디자인 정리, 셔터 플래시 무드, 본 화면 단순화, Dock reveal 떨림 안정화를 반영한 패치입니다.
+v1.1.5는 상단 디자인 정리, 셔터 플래시 무드, 본 화면 단순화, Dock reveal 떨림 안정화를 반영한 패치입니다.
 
 ## 주요 파일
 
 - `assets/css/shutter-glass-flow.css`
 - `src/ui/flow-director-final.js`
 - `qa/shutter_flow_director_smoke.js`
+- `src/ui/flow-command-bridge.js`
+- `qa/no_shake_command_bridge_smoke.js`
 
 ## 중요 변경점
 
@@ -16,10 +18,12 @@ v1.1.4는 상단 디자인 정리, 셔터 플래시 무드, 본 화면 단순화
 - CSS에서 비활성 `[data-flow-panel]`을 `display:none`으로 강하게 제한합니다.
 - 패널 애니메이션은 대부분 제거하고, 상단 셔터 연출만 유지합니다.
 - Dock 라벨은 `파일 열기 / 추천 / 후보 / 미리보기 / 파형 / 컷 / 편집 / 저장`으로 정리했습니다.
+- 상단 라인은 좌측 버전, 가운데 `PC · 모바일 호환`, 우측 `Design by 곰같은여우` 구조입니다.
+- `flow-command-bridge.js`가 Dock 클릭을 capture 단계에서 먼저 잡고 `stopImmediatePropagation()`으로 레거시 탭 클릭 핸들러의 중복 reveal을 막습니다.
 
 ## 확인 포인트
 
-1. PC에서 상단 좌측은 버전, 우측은 Design by 곰같은여우로 한 줄 정렬되어야 합니다.
+1. PC에서 상단 좌측은 버전, 가운데는 PC · 모바일 호환, 우측은 Design by 곰같은여우로 한 줄 정렬되어야 합니다.
 2. 상단 아래 YouTube/Reels/TikTok 셔터 타일이 보여야 합니다.
 3. Dock 탭을 눌러도 화면이 떨리지 않아야 합니다.
 4. Dock 탭 클릭 시 해당 패널이 전면에 가까운 위치로 이동해야 합니다.
@@ -28,7 +32,7 @@ v1.1.4는 상단 디자인 정리, 셔터 플래시 무드, 본 화면 단순화
 ## QA
 
 - `npm run check`로 전체 스모크 테스트를 실행합니다.
-- v1.1.4에서는 `shutter_flow_director_smoke.js`가 상단 셔터 UI와 단일 Flow Director 연결을 확인합니다.
+- v1.1.5에서는 `shutter_flow_director_smoke.js`가 상단 셔터 UI와 단일 Flow Director 연결을 확인합니다.
 
 ## Known limitations
 
@@ -41,8 +45,9 @@ v1.1.4는 상단 디자인 정리, 셔터 플래시 무드, 본 화면 단순화
 1. `npm run check` 실행
 2. PC Dock 8탭 가독성 확인
 3. Dock 탭 클릭 시 화면 떨림 없이 해당 패널이 전면으로 올라오는지 확인
-4. 상단 버전/Design by 한 줄 정렬 확인
+4. 상단 버전/PC · 모바일 호환/Design by 한 줄 정렬 확인
 5. 셔터 플래시 연출이 작업 패널에 영향을 주지 않는지 확인
+6. `flow-command-bridge.js`와 `flow-director-final.js`를 동시에 수정할 때는 중복 스크롤이 다시 생기지 않도록 Dock 클릭 capture 흐름을 먼저 확인
 
 ## 알려진 제한
 

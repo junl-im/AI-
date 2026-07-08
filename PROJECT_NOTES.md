@@ -1,4 +1,4 @@
-# PROJECT NOTES v1.1.4
+# PROJECT NOTES v1.1.5
 
 이번 패치는 디자인과 흐름 안정화를 동시에 다룹니다.
 

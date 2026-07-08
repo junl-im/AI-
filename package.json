@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-1-4",
-  "version": "1.1.4",
+  "name": "ai-shorts-studio-v1-1-5",
+  "version": "1.1.5",
   "private": true,
-  "description": "AI Shorts Studio v1.1.4 - shutter glass flow and no-shake final director",
+  "description": "AI Shorts Studio v1.1.5 - no-shake command bridge, clean hero guide, stronger handoff notes",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -99,6 +99,8 @@
     "node --check src/ui/export-finish-center.js",
     "node qa/export_finish_center_smoke.js",
     "node --check src/ui/flow-director-final.js",
-    "node qa/shutter_flow_director_smoke.js"
+    "node qa/shutter_flow_director_smoke.js",
+    "node --check src/ui/flow-command-bridge.js",
+    "node qa/no_shake_command_bridge_smoke.js"
   ]
 }

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.4 - Final single-owner flow director
+// AI Shorts Studio v1.1.5 - Final single-owner flow director
 // Owns tab visibility + scroll reveal to remove panel shaking from competing modules.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -119,7 +119,8 @@
             const key = tab.getAttribute('data-flow-tab') || 'file';
             if (tab.tagName !== 'LABEL') event.preventDefault();
             if (tab.classList.contains('is-disabled') || tab.getAttribute('aria-disabled') === 'true') return;
-            global.setTimeout(() => setActive(key, { force: true }), 0);
+            setActive(key, { force: true, source: 'final-capture' });
+            if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
         }, true);
         document.addEventListener('click', event => {
             const card = event.target && event.target.closest && event.target.closest('.recommendation-card');
@@ -179,12 +180,12 @@
     }
     function install() {
         if (document.body) {
-            document.body.dataset.build = '1.1.4';
+            document.body.dataset.build = '1.1.5';
             document.body.dataset.flowDirector = 'final';
         }
         installTabClicks();
         sync();
-        global.addEventListener('resize', () => reveal(activeTab(), { force: false }), { passive: true });
+        global.addEventListener('resize', () => setVisible(activeTab()), { passive: true });
         document.addEventListener('ai-shorts-flow-sync', () => sync());
         const observer = new MutationObserver(() => setVisible(activeTab()));
         observer.observe(document.body, { attributes: true, attributeFilter: ['data-active-flow-tab'] });

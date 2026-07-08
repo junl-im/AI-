@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.1.4 - Shutter Glass Flow polish
+/* AI Shorts Studio v1.1.5 - Shutter Glass Flow polish
    Goals: stable no-shake navigation, clean hero branding, simple home guide, camera/social shutter mood. */
 
 :root {
@@ -350,5 +350,63 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-director-revealed {
     .cinema-gradient-orb,
     .cinematic-title::after {
         animation: none !important;
+    }
+}
+
+
+/* v1.1.5: compatibility badge and no-shake command bridge guard. */
+.brand-compat-pill {
+    justify-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(34,211,238,0.20);
+    background: linear-gradient(135deg, rgba(34,211,238,0.12), rgba(124,58,237,0.10));
+    color: rgba(236,254,255,0.92);
+    font-size: 0.86rem;
+    font-weight: 900;
+    white-space: nowrap;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+body[data-flow-command-bridge="ready"] [data-flow-panel],
+body[data-flow-command-bridge="ready"] [data-flow-panel] *,
+body[data-flow-command-bridge="ready"] .control-zone,
+body[data-flow-command-bridge="ready"] .preview-card,
+body[data-flow-command-bridge="ready"] .waveform-card,
+body[data-flow-command-bridge="ready"] .auto-cut-panel,
+body[data-flow-command-bridge="ready"] .edit-tools-card {
+    scroll-behavior: auto !important;
+}
+
+body[data-flow-command-bridge="ready"] [data-flow-panel].is-command-bridge-revealed {
+    outline: 1px solid rgba(34,211,238,0.18);
+    box-shadow: 0 0 0 1px rgba(34,211,238,0.06), 0 20px 56px rgba(0,0,0,0.25) !important;
+}
+
+@media (min-width: 721px) {
+    .brand-topline {
+        display: grid !important;
+        grid-template-columns: 1fr auto 1fr;
+    }
+    .brand-version-left { justify-self: start; }
+    .brand-right-actions { justify-self: end; }
+}
+
+@media (max-width: 720px) {
+    .brand-topline {
+        display: grid !important;
+        grid-template-columns: 1fr auto;
+        row-gap: 8px;
+    }
+    .brand-compat-pill {
+        grid-column: 1 / -1;
+        justify-self: stretch;
+        width: 100%;
+        font-size: 0.82rem;
     }
 }
