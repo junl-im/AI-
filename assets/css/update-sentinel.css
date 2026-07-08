@@ -1,0 +1,114 @@
+/* AI Shorts Studio v1.1.7 - update sentinel and engine boost status */
+.update-sentinel-panel {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 22px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(8, 13, 28, 0.54));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 44px rgba(0,0,0,0.26);
+    backdrop-filter: blur(14px) saturate(1.08);
+}
+.update-sentinel-panel strong {
+    color: rgba(255,255,255,0.92);
+}
+.update-sentinel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.update-sentinel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(34, 211, 238, 0.24);
+    background: rgba(34, 211, 238, 0.09);
+    color: rgba(207, 250, 254, 0.92);
+    font-size: 0.8rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+.update-sentinel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+.update-sentinel-item {
+    min-width: 0;
+    padding: 11px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.055);
+}
+.update-sentinel-item span {
+    display: block;
+    margin-bottom: 5px;
+    color: rgba(203, 213, 225, 0.68);
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+.update-sentinel-item b {
+    display: block;
+    color: rgba(255,255,255,0.9);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.update-sentinel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+.update-sentinel-actions button {
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.075);
+    color: rgba(255,255,255,0.88);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+.update-sentinel-actions button:hover {
+    background: rgba(255,255,255,0.12);
+}
+.update-sentinel-note {
+    margin: 10px 0 0;
+    color: rgba(203,213,225,0.72);
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+.update-sentinel-live {
+    position: fixed;
+    right: 18px;
+    top: 18px;
+    z-index: 90;
+    max-width: min(320px, calc(100vw - 36px));
+    padding: 10px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(8, 13, 28, 0.78);
+    color: rgba(255,255,255,0.9);
+    box-shadow: 0 18px 48px rgba(0,0,0,0.32);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 160ms ease, transform 160ms ease;
+}
+.update-sentinel-live.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+@media (max-width: 720px) {
+    .update-sentinel-grid { grid-template-columns: 1fr; }
+    .update-sentinel-head { align-items: flex-start; flex-direction: column; }
+    .update-sentinel-live { top: 12px; right: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .update-sentinel-live { transition: none; transform: none; }
+}

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.9 - main app with render preset planner and export reliability
+// AI Shorts Studio v1.1.7 - main app with render preset planner and version-aware service worker update checks
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -1332,7 +1332,13 @@
 
     function registerServiceWorker() {
         if (!navigator.serviceWorker || location.protocol === 'file:') return;
-        navigator.serviceWorker.register('sw.js').catch(error => {
+        navigator.serviceWorker.register('sw.js').then(registration => {
+            if (registration.update) registration.update().catch(() => {});
+            if (store.addDiagnostic) {
+                const version = global.AIShortsVersionSync && global.AIShortsVersionSync.version || runtimeConfig.APP_VERSION || 'dev';
+                store.addDiagnostic({ type: 'service-worker-ready', version, scope: registration.scope });
+            }
+        }).catch(error => {
             if (store.addDiagnostic) store.addDiagnostic({ type: 'service-worker-error', message: error.message });
         });
     }

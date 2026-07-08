@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.5 - Final single-owner flow director
+// AI Shorts Studio v1.1.7 - Final single-owner flow director
 // Owns tab visibility + scroll reveal to remove panel shaking from competing modules.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -180,7 +180,7 @@
     }
     function install() {
         if (document.body) {
-            document.body.dataset.build = '1.1.5';
+            document.body.dataset.build = '1.1.7';
             document.body.dataset.flowDirector = 'final';
         }
         installTabClicks();

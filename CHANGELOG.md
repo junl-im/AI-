@@ -1,11 +1,13 @@
 # CHANGELOG
 
-## v1.1.5 - Shutter Glass Flow + Command Bridge / 떨림 안정화
+## v1.1.7 - Update Sentinel + Engine Boost Profile
 
-- 상단 브랜드 라인을 좌측 `v1.1.5`, 가운데 `PC · 모바일 호환`, 우측 `Design by 곰같은여우` 한 줄로 고정했습니다.
-- 상단 하단부에 YouTube / Reels / TikTok을 연상시키는 셔터 플래시 무드 스트립을 추가했습니다.
-- 본 화면은 복잡한 시작 버튼 묶음 대신 단순 사용 방법 중심으로 정리했습니다.
-- Dock 탭 이동과 작업 패널 reveal을 `flow-director-final.js` 단일 소유 구조로 통합하고, `flow-command-bridge.js`로 레거시 클릭 핸들러 중복 실행을 차단했습니다.
-- 특정 구간 화면 떨림을 유발하던 중복 스크롤/하이라이트 애니메이션을 최종 차단했습니다.
-- 글라스 UI 대비와 Dock 이모지/라벨 배치를 재정리했습니다.
-- QA에 `shutter_flow_director_smoke.js`, `no_shake_command_bridge_smoke.js`를 추가했습니다.
+- 정보 모달에 `🛰️ 업데이트 적용 상태` 패널을 추가했습니다.
+- 현재 버전, 빌드 키, 서비스워커 상태, 캐시 상태, 엔진 프로필을 한눈에 볼 수 있게 했습니다.
+- `업데이트 확인`, `이전 캐시 정리`, `진단 복사` 버튼을 추가했습니다.
+- `src/boot/update-sentinel.js`와 `assets/css/update-sentinel.css`를 추가했습니다.
+- `src/engine/engine-boost-profile.js`를 추가해 브라우저 성능을 `MAX-STABLE / PRO-STABLE / SAFE-STABLE`로 감지합니다.
+- Dock 후보 아이콘을 `🎯`, 저장 아이콘을 `📦`으로 재정리했습니다.
+- `qa/update_sentinel_smoke.js`와 `qa/engine_boost_profile_smoke.js`를 추가했습니다.
+- `qa/app_version_sync_smoke.js`를 패키지 버전 기반 동적 검수로 개선했습니다.
+- 인수인계 문서에 Update Sentinel, 캐시 정리 범위, 엔진 프로필 주의점을 추가했습니다.

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.5 - no-shake command bridge
+// AI Shorts Studio v1.1.7 - no-shake command bridge
 // Keeps Dock/navigation commands single-owned after legacy modules have loaded.
 'use strict';
 (function bootFlowCommandBridge(global) {
