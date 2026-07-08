@@ -1,5 +1,5 @@
 
-// AI Shorts Studio v1.0.6 - HyperConnect tab workflow controller with stable workspace reveal
+// AI Shorts Studio v1.0.8 - HyperConnect tab workflow controller with stable workspace reveal
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};
@@ -130,7 +130,7 @@
                 setActiveFlowTab(key, { reveal: true, force: true });
             });
         });
-        // v1.0.6: Dock 탭은 누른 즉시 해당 작업 패널을 화면 상단으로 reveal합니다.
+        // v1.0.8: Dock 탭은 누른 즉시 해당 작업 패널을 화면 상단으로 reveal합니다.
         // 추천 생성은 추천 탭 안의 단일 버튼만 사용합니다.
         [
             ['flowPreviewBtn', 'previewBtn'],

@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-0-6",
-  "version": "1.0.6",
+  "name": "ai-shorts-studio-v1-0-8",
+  "version": "1.0.8",
   "private": true,
-  "description": "AI Shorts Studio v1.0.6 - motion stability, no-shake tab reveal, single scroll owner",
+  "description": "AI Shorts Studio v1.0.8 - save readiness polish, candidate summary, export confidence",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -83,6 +83,10 @@
     "node qa/pc_dock_reveal_smoke.js",
     "node qa/glass_pro_ui_smoke.js",
     "node --check src/ui/motion-stability.js",
-    "node qa/workspace_comfort_smoke.js"
+    "node qa/workspace_comfort_smoke.js",
+    "node --check src/ui/handoff-coach.js",
+    "node qa/handoff_coach_smoke.js",
+    "node --check src/ui/save-readiness.js",
+    "node qa/save_readiness_smoke.js"
   ]
 }

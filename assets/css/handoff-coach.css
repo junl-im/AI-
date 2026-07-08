@@ -1,0 +1,157 @@
+/* AI Shorts Studio v1.0.8 - candidate handoff coach and preview bridge */
+:root {
+    --coach-surface: rgba(15, 23, 42, 0.72);
+    --coach-border: rgba(125, 211, 252, 0.24);
+    --coach-border-strong: rgba(34, 211, 238, 0.46);
+    --coach-text: rgba(248, 250, 252, 0.94);
+    --coach-muted: rgba(203, 213, 225, 0.74);
+}
+
+.candidate-handoff-card,
+.preview-handoff-ribbon {
+    border: 1px solid var(--coach-border);
+    border-radius: 18px;
+    background:
+        linear-gradient(135deg, rgba(34, 211, 238, 0.12), rgba(168, 85, 247, 0.08)),
+        var(--coach-surface);
+    box-shadow: 0 18px 44px rgba(2, 6, 23, 0.26), inset 0 1px 0 rgba(255,255,255,0.08);
+    color: var(--coach-text);
+}
+
+.candidate-handoff-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    margin: 12px 0 14px;
+}
+
+.candidate-handoff-copy,
+.preview-handoff-copy {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.candidate-handoff-title,
+.preview-handoff-title {
+    font-size: 0.96rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.candidate-handoff-meta,
+.preview-handoff-meta {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--coach-muted);
+}
+
+.candidate-handoff-actions,
+.preview-handoff-actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.candidate-handoff-actions .mini-action,
+.preview-handoff-actions .mini-action {
+    min-height: 34px;
+    padding: 8px 11px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.preview-handoff-ribbon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 14px;
+    margin: 0 0 14px;
+}
+
+.preview-handoff-ribbon.is-empty {
+    opacity: 0.72;
+}
+
+.recommendation-card {
+    position: relative;
+}
+
+.recommendation-card::after {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border-radius: 18px;
+    border: 1px solid transparent;
+    pointer-events: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.recommendation-card:hover::after,
+.recommendation-card:focus-visible::after {
+    border-color: rgba(125, 211, 252, 0.34);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.recommendation-card.is-selected::after {
+    border-color: var(--coach-border-strong);
+    box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.18), 0 0 30px rgba(34, 211, 238, 0.10);
+}
+
+body[data-active-flow-tab='preview'] .preview-handoff-ribbon {
+    animation: coachReveal 260ms ease both;
+}
+
+@keyframes coachReveal {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 980px) {
+    .candidate-handoff-card,
+    .preview-handoff-ribbon {
+        position: relative;
+        z-index: 1;
+    }
+}
+
+@media (max-width: 720px) {
+    .candidate-handoff-card,
+    .preview-handoff-ribbon {
+        align-items: stretch;
+        flex-direction: column;
+        border-radius: 16px;
+    }
+    .candidate-handoff-title,
+    .preview-handoff-title {
+        white-space: normal;
+    }
+    .candidate-handoff-actions,
+    .preview-handoff-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+    }
+    .candidate-handoff-actions .mini-action,
+    .preview-handoff-actions .mini-action {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .preview-handoff-ribbon,
+    .recommendation-card::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

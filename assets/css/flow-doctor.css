@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.0.6 - Flow Doctor stability layer */
+/* AI Shorts Studio v1.0.8 - Flow Doctor stability layer */
 :root { --flow-doctor-dock-safe: calc(var(--hyperflow-dock-height, 144px) + 18px); }
 
 body[data-ui="hyperflow-tabs"] {

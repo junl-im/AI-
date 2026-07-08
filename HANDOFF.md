@@ -1,65 +1,73 @@
-# HANDOFF - AI 쇼츠 제작 스튜디오 v1.0.6
+# HANDOFF - AI 쇼츠 제작 스튜디오 v1.0.8
 
-## 요약
+## 이번 버전 목적
 
-v1.0.6은 Dock 탭 이동 시 보이던 화면 떨림을 잡는 **Motion Stability 핫픽스**입니다. 핵심은 탭 reveal 스크롤을 한 곳에서만 처리하고, 기존 flow 모듈들은 상태/가이드 보정 위주로 동작하게 만든 것입니다.
+v1.0.8은 후보를 선택한 뒤 사용자가 바로 저장으로 넘어가도 되는지 판단하기 쉽도록 만든 사용성 안정화 버전입니다.
 
-## 변경 파일
-
-```text
-assets/css/motion-stability.css
-src/ui/motion-stability.js
-qa/motion_stability_smoke.js
-src/ui/hyperflow-tabs.js
-src/ui/workspace-comfort.js
-src/ui/flow-quality-gate.js
-index.html
-sw.js
-package.json
-README.md
-CHANGELOG.md
-PROJECT_NOTES.md
-qa/QA_REPORT.md
-```
-
-## 적용 원칙
+## 핵심 변경
 
 ```text
-상단 = 프로그램 소개와 시네마틱 브랜드
-시작 패널 = 파일 열기 / 프로젝트 불러오기 / 자동 분석 안내
-Dock = 작업 탭
-Motion Stability = 탭 클릭 후 패널 reveal 단일 담당
-Workspace Comfort = 후보 카드/안내 안정화
-Flow Quality Gate = 잘못된 단계 자동 복구
+후보 선택
+→ 미리보기 준비 스트립 표시
+→ 저장 탭 체크리스트 표시
+→ 후보/미리보기/편집/저장 이동 보조
 ```
 
-## 주의
+## 추가 파일
 
-- 탭 클릭 reveal을 여러 모듈에서 다시 `smooth scroll`로 추가하지 마세요.
-- `motion-stability.js`는 `hyperflow-tabs.js`보다 먼저 로드됩니다.
-- 작업 패널 강조는 transform/scale 대신 outline/box-shadow 중심으로 유지하세요.
-- `workspace-comfort.js`는 탭 클릭 시 직접 스크롤하지 않습니다.
+```text
+assets/css/save-readiness.css
+src/ui/save-readiness.js
+qa/save_readiness_smoke.js
+```
 
-## 검수
+## 확인해야 할 흐름
+
+1. 파일 열기 후 자동 분석된다.
+2. 추천 탭에서 추천 생성을 누른다.
+3. 후보 탭에서 후보 카드를 선택한다.
+4. 미리보기 탭에 선택 후보 준비 스트립이 보인다.
+5. 저장 탭에 선택 구간/길이/자막/예상 용량이 표시된다.
+6. Dock 클릭 시 화면 떨림 없이 해당 구간으로 이동한다.
+
+## QA
 
 ```bash
 npm run check
 ```
 
-현재 결과: 75/75 통과.
+현재 결과:
+
+```text
+Passed: 79/79
+Failed: 0/79
+```
+
+## 주의
+
+예상 용량은 브라우저 MediaRecorder/WebM 저장 기준의 안내값입니다. 실제 저장 용량은 기기와 브라우저 인코더 구현에 따라 달라질 수 있습니다.
 
 ## 검수 순서
 
+```bash
+npm run check
+```
+
+권장 순서:
+
 ```text
-1. 문법 검수
-2. 기존 흐름 QA
-3. Motion Stability QA
-4. Workspace Comfort QA
-5. 문서/패키징 확인
+1. 정적 문법 검사
+2. HTML/CSS/JS 앵커 검사
+3. 초연결 탭 흐름 검사
+4. 저장 준비 패널 검사
+5. 패키지 압축 생성
 ```
 
 ## 알려진 제한
 
-- 브라우저별 스크롤 물리감은 조금 다를 수 있습니다.
-- iOS 일부 브라우저에서는 진동 피드백이 무시될 수 있습니다.
-- 무료 로컬 브라우저 렌더링 방식이라 저장 포맷은 브라우저 지원에 따라 WebM으로 나올 수 있습니다.
+```text
+├─ 저장 예상 용량은 안내값이며 브라우저 인코더에 따라 달라질 수 있음
+├─ iOS Safari/인앱 브라우저에서는 일부 다운로드 또는 진동 피드백이 제한될 수 있음
+├─ 긴 영상은 기기 메모리와 브라우저 성능에 영향을 받음
+└─ 자동 추천은 로컬 분석 기반이며 저작권/게시 권한은 사용자가 확인해야 함
+```

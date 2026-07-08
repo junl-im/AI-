@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.6 - workspace comfort controller without duplicate smooth reveal
+// AI Shorts Studio v1.0.8 - workspace comfort controller without duplicate smooth reveal
 'use strict';
 (function bootWorkspaceComfort(global) {
     const store = global.AIShortsAppState || {};
@@ -89,7 +89,7 @@
     function handleTabClick(event) {
         const tab = event.target && event.target.closest && event.target.closest('[data-flow-tab]');
         if (!tab) return;
-        // v1.0.6: tab reveal is centralized in motion-stability.js to prevent double-scroll shake.
+        // v1.0.8: tab reveal is centralized in motion-stability.js to prevent double-scroll shake.
         setTimeout(handleFlowSync, 30);
     }
     function handleCandidateClick(event) {

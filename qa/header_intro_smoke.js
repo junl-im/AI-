@@ -27,10 +27,10 @@ if (!header.includes('Design by <strong>곰같은여우</strong>')) {
 if (header.includes('패치') || header.includes('Modular Engine') || header.includes('HyperFlow') || header.includes('바로 분석')) {
     fail('top header should not show patch labels, engine labels, HyperFlow jargon, or analysis button');
 }
-if (!html.includes('<title>AI 쇼츠 제작 스튜디오 v1.0.6</title>')) {
+if (!html.includes('<title>AI 쇼츠 제작 스튜디오 v1.0.8</title>')) {
     fail('document title should be clean and version-only');
 }
-if (!html.includes('>v1.0.6</button>')) {
+if (!html.includes('>v1.0.8</button>')) {
     fail('version badge should show only the version number');
 }
 if (dialog.includes('패치') || dialog.includes('HyperFlow') || dialog.includes('Modular Engine')) {

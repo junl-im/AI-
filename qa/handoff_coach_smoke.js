@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const root = path.resolve(__dirname, '..');
+function read(file) { return fs.readFileSync(path.join(root, file), 'utf8'); }
+function ok(condition, message) {
+    if (!condition) {
+        console.error('FAIL ' + message);
+        process.exit(1);
+    }
+    console.log('PASS ' + message);
+}
+const html = read('index.html');
+const sw = read('sw.js');
+const css = read('assets/css/handoff-coach.css');
+const js = read('src/ui/handoff-coach.js');
+const pkg = JSON.parse(read('package.json'));
+
+ok(pkg.version === '1.0.8', 'package version is v1.0.8');
+ok(html.includes('assets/css/handoff-coach.css?v=1.0.8-handoff-coach'), 'handoff coach stylesheet is linked');
+ok(html.includes('src/ui/handoff-coach.js?v=1.0.8-handoff-coach'), 'handoff coach script is linked');
+ok(sw.includes('./assets/css/handoff-coach.css?v=1.0.8-handoff-coach'), 'handoff coach stylesheet is cached');
+ok(sw.includes('./src/ui/handoff-coach.js?v=1.0.8-handoff-coach'), 'handoff coach script is cached');
+ok(css.includes('.candidate-handoff-card'), 'candidate handoff card styles exist');
+ok(css.includes('.preview-handoff-ribbon'), 'preview handoff ribbon styles exist');
+ok(css.includes('@media (max-width: 720px)'), 'mobile handoff layout exists');
+ok(js.includes('candidateHandoffCard'), 'candidate handoff card is created by runtime');
+ok(js.includes('previewHandoffRibbon'), 'preview handoff ribbon is created by runtime');
+ok(js.includes('AIShortsHandoffCoach'), 'handoff coach runtime API is exposed');
+ok(js.includes('setActiveFlowTab(tab, { reveal: true, force: true })'), 'handoff buttons use stable tab reveal');

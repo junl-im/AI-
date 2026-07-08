@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.6 - single-owner motion stability guard
+// AI Shorts Studio v1.0.8 - single-owner motion stability guard
 'use strict';
 (function bootMotionStability(global) {
     const store = global.AIShortsAppState || {};

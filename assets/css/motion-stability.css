@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.0.6 - motion stability guard
+/* AI Shorts Studio v1.0.8 - motion stability guard
    Removes tab-switch shake caused by overlapping smooth-scroll and pulse animations. */
 :root {
     --motion-stable-ring: rgba(34, 211, 238, 0.34);
