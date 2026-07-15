@@ -47,7 +47,10 @@
             if (label) label.textContent = meta[1];
         });
         const compat = document.querySelector('.brand-compat-pill');
-        if (compat) compat.textContent = '💻📱 PC · 모바일 호환';
+        if (compat) {
+            const label = compat.querySelector('[data-compat-label]') || compat.querySelector('span:last-child');
+            if (label && label.textContent !== 'LOCAL RENDER · 9:16 READY') label.textContent = 'LOCAL RENDER · 9:16 READY';
+        }
     }
     function syncTopLine() {
         const line = document.querySelector('.brand-topline');
@@ -55,8 +58,14 @@
         if (!line.querySelector('.brand-compat-pill')) {
             const compat = document.createElement('div');
             compat.className = 'brand-compat-pill';
-            compat.setAttribute('aria-label', 'PC 모바일 호환');
-            compat.textContent = '💻📱 PC · 모바일 호환';
+            compat.setAttribute('aria-label', '로컬 쇼츠 제작 상태');
+            const pulse = document.createElement('span');
+            pulse.className = 'compat-pulse';
+            pulse.setAttribute('aria-hidden', 'true');
+            const label = document.createElement('span');
+            label.setAttribute('data-compat-label', '');
+            label.textContent = 'LOCAL RENDER · 9:16 READY';
+            compat.append(pulse, label);
             const right = line.querySelector('.brand-right-actions');
             if (right) line.insertBefore(compat, right);
             else line.appendChild(compat);

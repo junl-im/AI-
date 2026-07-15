@@ -1,11 +1,11 @@
-// AI Shorts Studio v1.2.2 - visible update sentinel and cache refresh helper
+// AI Shorts Studio v1.2.3 - visible update sentinel and cache refresh helper
 'use strict';
 
 (function installUpdateSentinel(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const versionSync = global.AIShortsVersionSync || {};
-    const VERSION = versionSync.version || config.APP_VERSION || 'v1.2.2';
-    const BUILD_KEY = versionSync.buildKey || config.BUILD_KEY || '1.2.2-update-sentinel';
+    const VERSION = versionSync.version || config.APP_VERSION || 'v1.2.3';
+    const BUILD_KEY = versionSync.buildKey || config.BUILD_KEY || '1.2.3-update-sentinel';
     const STORAGE_KEY = 'ai-shorts-studio-update-sentinel-last-seen';
     let panel;
     let live;

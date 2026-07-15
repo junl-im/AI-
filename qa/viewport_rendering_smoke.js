@@ -20,4 +20,4 @@ for (const selector of ['.caption-pro-panel', '.quality-panel', '.batch-export-p
 }
 assert(css.includes('content-visibility: auto'), 'below-the-fold groups can skip initial paint');
 assert(css.includes('contain-intrinsic-size: auto 380px'), 'deferred groups preserve a stable estimated layout size');
-console.log('PASS v1.2.2 viewport rendering diet guardrails present');
+console.log('PASS v1.2.3 viewport rendering diet guardrails present');

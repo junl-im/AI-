@@ -13,12 +13,13 @@ function assert(condition, message) {
     process.exit(1);
   }
 }
-assert(html.includes('brand-compat-pill') && html.includes('LOCAL · PRIVATE · READY'), 'topline includes local/private readiness');
+assert(html.includes('brand-compat-pill') && html.includes('LOCAL RENDER · 9:16 READY'), 'topline includes local 9:16 readiness');
 assert(html.includes('src/ui/flow-command-bridge.js'), 'command bridge is loaded');
 assert(css.includes('brand-compat-pill'), 'compatibility pill styles exist');
 assert(css.includes('data-flow-command-bridge="ready"'), 'command bridge motion guard styles exist');
 assert(js.includes('stopImmediatePropagation'), 'tab click propagation is stopped before legacy handlers');
 assert(js.includes('AIShortsFlowCommandBridge'), 'command bridge exports API');
 assert(js.includes('AIShortsHyperFlowTabs') && js.includes('AIShortsMotionStability'), 'legacy navigation APIs are bridged');
-assert(finalJs.includes("document.body.dataset.build = '1.2.2'"), 'final director build is v1.2.2');
+assert(finalJs.includes("document.body.dataset.build = '1.2.3'"), 'final director build is v1.2.3');
 console.log('PASS no_shake_command_bridge_smoke');
+

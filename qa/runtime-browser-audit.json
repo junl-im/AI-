@@ -5,10 +5,10 @@
       "mutation": 58,
       "errors": []
     },
-    "build": "1.2.2",
+    "build": "1.2.3",
     "version": "true",
     "ready": "complete",
-    "nodes": 839
+    "nodes": 893
   },
   "sample_2_6s": {
     "audit": {
@@ -16,17 +16,12 @@
       "mutation": 58,
       "errors": []
     },
-    "build": "1.2.2",
+    "build": "1.2.3",
     "version": "true",
     "ready": "complete",
-    "nodes": 839
+    "nodes": 893
   },
-  "metrics": {
-    "Nodes": 2903,
-    "LayoutDuration": 0.58596,
-    "RecalcStyleDuration": 0.06341,
-    "ScriptDuration": 0.11842,
-    "TaskDuration": 1.74159
-  },
-  "cdp_exceptions": 0
+  "metrics": {},
+  "cdp_exceptions": 0,
+  "page_exceptions": []
 }

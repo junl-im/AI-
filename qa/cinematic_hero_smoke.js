@@ -15,14 +15,14 @@ function fail(message) {
 
 if (html.includes('assets/css/cinematic-hero.css')) fail('superseded cinematic hero stylesheet should not be requested');
 if (sw.includes('assets/css/cinematic-hero.css')) fail('superseded cinematic hero stylesheet should not be precached');
-if (!html.includes('class="brand-panel cinematic-brand-panel"')) fail('hero brand panel should preserve the stable cinematic class');
-for (const token of ['cinema-hero-bg', 'cinema-gradient-orb-a', 'cinema-gradient-orb-b', 'camera-frame-sweep', 'cinematic-title']) {
-    if (!html.includes(token)) fail(`editorial cinematic DOM token missing: ${token}`);
+if (!html.includes('class="brand-panel cinematic-brand-panel"')) fail('hero keeps the stable brand panel class');
+for (const token of ['shorts-hero-bg', 'shorts-glyph', 'shorts-timeline', 'shorts-frame-stack', 'cinematic-title']) {
+    if (!html.includes(token)) fail(`shorts identity DOM token missing: ${token}`);
 }
-for (const token of ['.cinema-gradient-orb', '.camera-frame-sweep', '@keyframes editorialSweep', '@media (prefers-reduced-motion: reduce)']) {
-    if (!css.includes(token)) fail(`editorial cinematic css guard missing: ${token}`);
+for (const token of ['.shorts-light', '.shorts-frame-main', '@keyframes shortsTimelinePulse', '@media (prefers-reduced-motion: reduce)']) {
+    if (!css.includes(token)) fail(`shorts identity css guard missing: ${token}`);
 }
-for (const removed of ['film-strip film-strip-a', 'film-strip film-strip-b', 'viewfinder-mark-tl', 'viewfinder-mark-br']) {
-    if (html.includes(removed)) fail(`dated decorative token should be removed: ${removed}`);
+for (const removed of ['film-strip film-strip-a', 'viewfinder-mark-tl', 'camera-frame-sweep', 'command-reel']) {
+    if (html.includes(removed)) fail(`dated decorative token should stay removed: ${removed}`);
 }
-console.log('PASS cinematic identity is consolidated into the restrained editorial masthead');
+console.log('PASS cinematic identity is expressed through a clean 9:16 shorts composition');
