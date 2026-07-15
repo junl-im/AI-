@@ -1,35 +1,39 @@
-# QA Report - AI 쇼츠 제작 스튜디오 v1.2.0
+# QA Report - AI 쇼츠 제작 스튜디오 v1.2.1
 
 ## Summary
 
-- Passed: 103/103
-- Failed: 0/103
+- Passed: 104/104
+- Failed: 0/104
 - Result: PASS
 
-## v1.2.0 Focus
+## v1.2.1 Focus
 
-- 사용자 노출 명칭: 하단 `Dock`을 `메뉴바`로 변경
-- 초기 응답성: 같은 값의 DOM 재작성과 Observer 피드백 루프 제거
-- 프레임 안정성: 상태 시그니처가 같으면 동기화 작업 생략
-- 관찰 범위: 자체 변경 속성을 다시 감지하지 않도록 후보·작업 공간 Observer 축소
-- 캐시 일치: v1.2.0 빌드 키와 Update Sentinel의 현재 캐시 식별 통일
-- 기존 화면: PC Prime 3열 작업실과 모바일 4단계 안내 유지
+- 상단 정보 구조: 제품 카피와 스튜디오 상태 데크의 PC 2열 구성
+- 시작 액션: 기존 `fileInput`을 사용하는 실제 label 연결
+- 신뢰 정보: 로컬 처리 안내와 `READY` 상태 표시
+- 반응형: 860px 이하 상태 데크 제거, 720px 이하 타이포그래피 압축
+- 접근성: 키보드 포커스 표시와 의미 있는 aria label 유지
+- 성능 대응: 저사양 모드와 모션 감소 환경에서 애니메이션·블러 축소
+- 캐시 일치: v1.2.1 버전, 빌드 키와 서비스워커 캐시 동기화
+- 기존 안정성: v1.2.0 Observer 피드백 루프 방지 규칙 유지
 
-## Browser Responsiveness Probe
+## Automated Checks
 
-- 전체 54개 초기 스크립트를 Chromium에서 함께 실행
-- DOMContentLoaded 완료, 페이지 오류 0건
-- 초기 RAF: 25회 예약 / 25회 실행
-- MutationObserver: 58회 콜백 / 138개 초기 변경 기록
-- 400ms, 1초, 2초 지점에서 RAF·Mutation 수가 동일해 반복 증가가 멈춘 것을 확인
-- 빌드 마커 `1.2.0`, 활성 메뉴 `file` 정상 확인
+- 문법, DOM 앵커와 버전 동기화
+- 분석·추천·컷·자막·렌더·저장 모듈 계약
+- PC Prime 3열 작업실과 모바일 4단계 진행 화면
+- 메뉴바 용어와 응답성 회귀 가드
+- 시네마틱 히어로 요소, 상태 데크, 기존 파일 입력 연결
+- 서비스워커의 새 상단 CSS 프리캐시
+- reduced-motion 및 performance-lite 폴백
 
 ## Visual Layout Checks
 
-- Desktop render: 1440x1000
-- Mobile render: 390x844
-- PC 3열 작업실과 하단 메뉴바 표시 확인
-- 모바일에서 중복 불러오기 카드 없이 4단계 안내와 메뉴바 표시 확인
+- Desktop static Chromium render: 1600x1000
+- Mobile static Chromium render: 390x844
+- PC에서 상단 2열 데크, 대형 제목, 기능 칩, 플랫폼 레일과 작업실 시작 영역 확인
+- 모바일에서 상태 데크와 플랫폼 레일이 제거되고 브랜드 소개·4단계 진행 화면·메뉴바가 표시되는지 확인
+- 이 시각 검수는 HTML과 전체 CSS를 통합 렌더한 정적 레이아웃 검사이며, 실제 런타임 기능 검사는 자동 QA와 사용자 브라우저 E2E로 별도 확인합니다.
 
 ## Command
 

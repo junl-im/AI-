@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - adaptive startup and rendering profile
+// AI Shorts Studio v1.2.1 - adaptive startup and rendering profile
 'use strict';
 
 (function bootStartupPerformance(global) {

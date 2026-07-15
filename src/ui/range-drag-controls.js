@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - event-driven draggable waveform range controls
+// AI Shorts Studio v1.2.1 - event-driven draggable waveform range controls
 'use strict';
 
 (function bootRangeDragControls(global) {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - flow integrity runtime guard without observer feedback loops
+// AI Shorts Studio v1.2.1 - flow integrity runtime guard without observer feedback loops
 'use strict';
 (function bootFlowIntegrity(global) {
     const store = global.AIShortsAppState || {};

@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.2.0 - Shutter Glass Flow polish
+/* AI Shorts Studio v1.2.1 - Shutter Glass Flow polish
    Goals: stable no-shake navigation, clean hero branding, simple home guide, camera/social shutter mood. */
 
 :root {
@@ -354,7 +354,7 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-director-revealed {
 }
 
 
-/* v1.2.0: compatibility badge and no-shake command bridge guard. */
+/* v1.2.1: compatibility badge and no-shake command bridge guard. */
 .brand-compat-pill {
     justify-self: center;
     display: inline-flex;

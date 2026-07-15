@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - loop-safe single-owner flow director
+// AI Shorts Studio v1.2.1 - loop-safe single-owner flow director
 // Owns tab visibility + scroll reveal to remove panel shaking from competing modules.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -193,7 +193,7 @@
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.2.0') document.body.dataset.build = '1.2.0';
+            if (document.body.dataset.build !== '1.2.1') document.body.dataset.build = '1.2.1';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
         }
         installTabClicks();

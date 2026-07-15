@@ -17,17 +17,17 @@ const js = read('src/ui/workspace-comfort.js');
 const sw = read('sw.js');
 const pkg = JSON.parse(read('package.json'));
 
-if (pkg.version !== '1.2.0') fail('package version must be 1.2.0');
-assertIncludes('index.html', 'assets/css/workspace-comfort.css?v=1.2.0-workspace-comfort');
-assertIncludes('index.html', 'src/ui/workspace-comfort.js?v=1.2.0-workspace-comfort');
-assertIncludes('sw.js', 'workspace-comfort.css?v=1.2.0-workspace-comfort');
-assertIncludes('sw.js', 'workspace-comfort.js?v=1.2.0-workspace-comfort');
+if (pkg.version !== '1.2.1') fail('package version must be 1.2.1');
+assertIncludes('index.html', 'assets/css/workspace-comfort.css?v=1.2.1-workspace-comfort');
+assertIncludes('index.html', 'src/ui/workspace-comfort.js?v=1.2.1-workspace-comfort');
+assertIncludes('sw.js', 'workspace-comfort.css?v=1.2.1-workspace-comfort');
+assertIncludes('sw.js', 'workspace-comfort.js?v=1.2.1-workspace-comfort');
 ['is-workspace-revealed', 'recommendation-card::before', 'grid-template-columns: repeat(8', 'recommendation-list:not(.empty-state)'].forEach(token => {
     if (!css.includes(token)) fail(`workspace CSS missing ${token}`);
 });
 ['AIShortsWorkspaceComfort', 'reveal(', 'decorateCards', 'stabilizeGuide', 'data-flow-tab', 'recommendation-card'].forEach(token => {
     if (!js.includes(token)) fail(`workspace JS missing ${token}`);
 });
-if (!html.includes('>v1.2.0</button>')) fail('header version badge must be v1.2.0');
+if (!html.includes('>v1.2.1</button>')) fail('header version badge must be v1.2.1');
 if (!html.includes('Design by <strong>곰같은여우</strong>')) fail('designer signature missing');
 console.log('PASS workspace comfort polish linked, cached, and guarded');

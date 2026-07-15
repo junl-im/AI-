@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - loop-safe flow doctor and candidate guide
+// AI Shorts Studio v1.2.1 - loop-safe flow doctor and candidate guide
 'use strict';
 (function bootFlowDoctor(global) {
     const store = global.AIShortsAppState || {};

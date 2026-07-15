@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - Flow Quality Gate with desktop prime visibility
+// AI Shorts Studio v1.2.1 - Flow Quality Gate with desktop prime visibility
 'use strict';
 (function bootFlowQualityGate(global) {
     const store = global.AIShortsAppState || {};

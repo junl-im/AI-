@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - render quality planner, estimates, and mobile save guidance
+// AI Shorts Studio v1.2.1 - render quality planner, estimates, and mobile save guidance
 'use strict';
 
 (function bootRenderQualityPlanner(global) {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - loop-safe workspace comfort controller
+// AI Shorts Studio v1.2.1 - loop-safe workspace comfort controller
 'use strict';
 (function bootWorkspaceComfort(global) {
     const store = global.AIShortsAppState || {};

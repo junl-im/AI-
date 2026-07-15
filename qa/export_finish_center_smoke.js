@@ -10,11 +10,11 @@ function assert(condition, message) { if (!condition) fail(message); }
 function includes(file, token) { assert(read(file).includes(token), `${file} must include ${token}`); }
 
 const pkg = JSON.parse(read('package.json'));
-assert(pkg.version === '1.2.0', 'package version must be 1.2.0');
-includes('index.html', 'assets/css/export-finish-center.css?v=1.2.0-export-finish');
-includes('index.html', 'src/ui/export-finish-center.js?v=1.2.0-export-finish');
-includes('sw.js', './assets/css/export-finish-center.css?v=1.2.0-export-finish');
-includes('sw.js', './src/ui/export-finish-center.js?v=1.2.0-export-finish');
+assert(pkg.version === '1.2.1', 'package version must be 1.2.1');
+includes('index.html', 'assets/css/export-finish-center.css?v=1.2.1-export-finish');
+includes('index.html', 'src/ui/export-finish-center.js?v=1.2.1-export-finish');
+includes('sw.js', './assets/css/export-finish-center.css?v=1.2.1-export-finish');
+includes('sw.js', './src/ui/export-finish-center.js?v=1.2.1-export-finish');
 includes('src/ui/export-finish-center.js', 'AIShortsExportFinishCenter');
 includes('src/ui/export-finish-center.js', 'ai-shorts-render-queue');
 includes('src/ui/export-finish-center.js', 'data-export-finish-action="retry"');

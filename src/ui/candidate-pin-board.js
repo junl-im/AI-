@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - loop-safe pinned candidates and save estimate comparison
+// AI Shorts Studio v1.2.1 - loop-safe pinned candidates and save estimate comparison
 'use strict';
 (function bootCandidatePinBoard(global) {
     const store = global.AIShortsAppState || {};

@@ -1,5 +1,5 @@
 
-// AI Shorts Studio v1.2.0 - stable menu bar workflow controller
+// AI Shorts Studio v1.2.1 - stable menu bar workflow controller
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};

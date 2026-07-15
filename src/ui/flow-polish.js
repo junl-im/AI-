@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.0 - flow polish controller with loop-safe DOM updates
+// AI Shorts Studio v1.2.1 - flow polish controller with loop-safe DOM updates
 'use strict';
 (function bootFlowPolish(global) {
     const store = global.AIShortsAppState || {};
