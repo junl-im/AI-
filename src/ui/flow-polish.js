@@ -1,10 +1,11 @@
-// AI Shorts Studio v1.0.8 - flow polish controller with stable guide text
+// AI Shorts Studio v1.2.0 - flow polish controller with loop-safe DOM updates
 'use strict';
 (function bootFlowPolish(global) {
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
     let raf = 0;
     let compareMode = false;
+    let lastSyncSignature = '';
 
     function byId(id) { return document.getElementById(id); }
     function selectedRecommendation() {
@@ -23,9 +24,12 @@
         }
     }
     function setTabState(tab, status) {
+        const desired = 'is-' + status;
         document.querySelectorAll('[data-flow-tab="' + tab + '"]').forEach(el => {
+            const current = ['is-done', 'is-live', 'is-warn', 'is-idle'].find(name => el.classList.contains(name)) || '';
+            if (current === desired) return;
             el.classList.remove('is-done', 'is-live', 'is-warn', 'is-idle');
-            el.classList.add('is-' + status);
+            el.classList.add(desired);
         });
     }
     function updateTabBadges() {
@@ -98,6 +102,10 @@
         if (raf) return;
         raf = requestAnimationFrame(() => {
             raf = 0;
+            const autoToggle = byId('autoplayPreviewToggle');
+            const signature = [hasFile(), hasAnalysis(), hasRecommendations(), state.isAnalyzing, state.selectedRecommendationId || '', Boolean(state.autoCuts), compareMode, Boolean(autoToggle && autoToggle.checked)].join('|');
+            if (signature === lastSyncSignature) return;
+            lastSyncSignature = signature;
             updateTabBadges();
             updateSelectionSummary();
             updateCompareMode();

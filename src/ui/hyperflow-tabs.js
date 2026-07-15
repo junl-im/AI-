@@ -1,5 +1,5 @@
 
-// AI Shorts Studio v1.0.8 - HyperConnect tab workflow controller with stable workspace reveal
+// AI Shorts Studio v1.2.0 - stable menu bar workflow controller
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};
@@ -21,6 +21,9 @@
     let raf = 0;
 
     function byId(id) { return document.getElementById(id); }
+    function setTextIfChanged(node, value) { if (node && node.textContent !== value) node.textContent = value; }
+    function setAttrIfChanged(node, name, value) { if (node && node.getAttribute(name) !== value) node.setAttribute(name, value); }
+    function setDisabledIfChanged(node, value) { const next = Boolean(value); if (node && node.disabled !== next) node.disabled = next; }
     function tabs() { return Array.from(document.querySelectorAll('[data-flow-tab]')); }
     function panels() { return Array.from(document.querySelectorAll('[data-flow-panel]')); }
     function getPanelForTab(tab) {
@@ -62,19 +65,19 @@
         const icon = byId('hyperflowStageIcon');
         const title = byId('hyperflowStageTitle');
         const small = byId('hyperflowStageMeta');
-        if (icon) icon.textContent = meta[0];
+        setTextIfChanged(icon, meta[0]);
         if (title) {
-            if (state.isAnalyzing) title.textContent = '자동 분석 중입니다';
-            else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) title.textContent = '분석 완료 · 추천을 생성하세요';
-            else if (tab === 'candidates' && hasRecommendations() && !hasSelection()) title.textContent = '후보를 선택하세요';
-            else title.textContent = meta[1];
+            const titleText = state.isAnalyzing ? '자동 분석 중입니다'
+                : tab === 'recommend' && hasAnalysis() && !hasRecommendations() ? '분석 완료 · 추천을 생성하세요'
+                    : tab === 'candidates' && hasRecommendations() && !hasSelection() ? '후보를 선택하세요' : meta[1];
+            setTextIfChanged(title, titleText);
         }
         if (small) {
-            if (!state.file) small.textContent = '하단 Dock의 📂 파일 탭에서 원본을 열어주세요.';
-            else if (state.isAnalyzing) small.textContent = '파일을 읽고 오디오·영상·컷 엔진을 자동으로 돌리는 중입니다.';
-            else if (tab === 'recommend' && hasAnalysis() && !hasRecommendations()) small.textContent = '추천 탭의 ✨ 추천 생성 버튼 하나만 사용하면 됩니다.';
-            else if (tab === 'candidates' && hasRecommendations() && !hasSelection()) small.textContent = '카드를 누르면 선택 즉시 미리보기 탭으로 이동합니다.';
-            else small.textContent = meta[2];
+            const smallText = !state.file ? '하단 메뉴바의 📂 파일 열기에서 원본을 선택해주세요.'
+                : state.isAnalyzing ? '파일을 읽고 오디오·영상·컷 엔진을 자동으로 돌리는 중입니다.'
+                    : tab === 'recommend' && hasAnalysis() && !hasRecommendations() ? '추천 메뉴의 ✨ 추천 생성 버튼 하나만 사용하면 됩니다.'
+                        : tab === 'candidates' && hasRecommendations() && !hasSelection() ? '카드를 누르면 선택 즉시 미리보기로 이동합니다.' : meta[2];
+            setTextIfChanged(small, smallText);
         }
     }
     function syncExportMirrors() {
@@ -88,7 +91,7 @@
             const mirror = byId(mirrorId);
             const source = byId(sourceId);
             if (!mirror || !source) return;
-            mirror.disabled = Boolean(source.disabled);
+            setDisabledIfChanged(mirror, source.disabled);
         });
     }
     function syncTabs() {
@@ -97,10 +100,10 @@
             const disabled = isDisabled(key);
             tab.classList.toggle('is-active', key === active);
             tab.classList.toggle('is-disabled', disabled);
-            tab.setAttribute('aria-selected', key === active ? 'true' : 'false');
-            tab.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+            setAttrIfChanged(tab, 'aria-selected', key === active ? 'true' : 'false');
+            setAttrIfChanged(tab, 'aria-disabled', disabled ? 'true' : 'false');
         });
-        document.body.dataset.activeFlowTab = active;
+        if (document.body.dataset.activeFlowTab !== active) document.body.dataset.activeFlowTab = active;
         updateStage(active);
         syncExportMirrors();
     }
@@ -108,7 +111,7 @@
         const next = ORDER.includes(tab) || tab === 'project' ? tab : 'file';
         const opts = options || {};
         active = next;
-        document.body.dataset.activeFlowTab = active;
+        if (document.body.dataset.activeFlowTab !== active) document.body.dataset.activeFlowTab = active;
         syncTabs();
         revealActivePanel(active, opts);
         if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.vibrate) global.AIShortsFeedbackUX.vibrate('button');
@@ -130,7 +133,7 @@
                 setActiveFlowTab(key, { reveal: true, force: true });
             });
         });
-        // v1.0.8: Dock 탭은 누른 즉시 해당 작업 패널을 화면 상단으로 reveal합니다.
+        // 메뉴바 항목은 누른 즉시 해당 작업 패널을 화면 상단으로 표시합니다.
         // 추천 생성은 추천 탭 안의 단일 버튼만 사용합니다.
         [
             ['flowPreviewBtn', 'previewBtn'],

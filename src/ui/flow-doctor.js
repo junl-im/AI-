@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.8 - Flow Doctor runtime guard with stable candidate guide
+// AI Shorts Studio v1.2.0 - loop-safe flow doctor and candidate guide
 'use strict';
 (function bootFlowDoctor(global) {
     const store = global.AIShortsAppState || {};
@@ -6,6 +6,7 @@
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     let raf = 0;
     let lastAutoTab = '';
+    let lastTickSignature = '';
 
     function byId(id) { return document.getElementById(id); }
     function activeTab() { return document.body && document.body.dataset ? document.body.dataset.activeFlowTab || 'file' : 'file'; }
@@ -25,16 +26,18 @@
     }
     function normalizeClickableTabs() {
         document.querySelectorAll('[data-flow-tab]').forEach((tab, index) => {
-            tab.setAttribute('aria-posinset', String(index + 1));
-            tab.setAttribute('aria-setsize', String(ORDER.length));
-            tab.removeAttribute('href');
+            const position = String(index + 1);
+            const size = String(ORDER.length);
+            if (tab.getAttribute('aria-posinset') !== position) tab.setAttribute('aria-posinset', position);
+            if (tab.getAttribute('aria-setsize') !== size) tab.setAttribute('aria-setsize', size);
+            if (tab.hasAttribute('href')) tab.removeAttribute('href');
         });
     }
     function normalizeCandidateEmptyState() {
         const list = byId('recommendationList');
         if (!list) return;
         if (!hasRecommendations()) {
-            list.classList.add('empty-state');
+            if (!list.classList.contains('empty-state')) list.classList.add('empty-state');
             const text = hasAnalysis()
                 ? '분석은 완료되었습니다. ✨ 추천 탭에서 추천 생성을 누르면 후보가 여기에 표시됩니다.'
                 : '파일을 열면 자동 분석됩니다. 분석 후 추천을 생성하세요.';
@@ -49,7 +52,7 @@
     function updateGuideText() {
         if (!state.file) {
             setText('flowSelectionTitle', '파일을 열면 자동 분석합니다');
-            setText('flowSelectionMeta', '하단 📂 파일 탭에서 원본을 열어주세요.');
+            setText('flowSelectionMeta', '하단 메뉴바의 📂 파일 열기에서 원본을 선택해주세요.');
             return;
         }
         if (state.isAnalyzing) {
@@ -87,6 +90,10 @@
     }
     function tick() {
         raf = 0;
+        const list = byId('recommendationList');
+        const signature = [Boolean(state.file), state.isAnalyzing, hasAnalysis(), hasRecommendations(), state.selectedRecommendationId || '', activeTab(), list ? list.childElementCount : -1].join('|');
+        if (signature === lastTickSignature) return;
+        lastTickSignature = signature;
         normalizeClickableTabs();
         normalizeCandidateEmptyState();
         updateGuideText();

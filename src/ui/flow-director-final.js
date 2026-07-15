@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.9 - Final single-owner flow director
+// AI Shorts Studio v1.2.0 - loop-safe single-owner flow director
 // Owns tab visibility + scroll reveal to remove panel shaking from competing modules.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -47,19 +47,21 @@
         const prime = isDesktopPrime();
         panels().forEach(panel => {
             const match = panelTabs(panel).includes(key);
-            panel.hidden = prime ? false : panel.hidden;
-            panel.classList.toggle('is-flow-active', match);
-            panel.setAttribute('aria-hidden', prime || match ? 'false' : 'true');
-            if (match) panel.setAttribute('tabindex', '-1');
+            if (prime && panel.hidden) panel.hidden = false;
+            if (panel.classList.contains('is-flow-active') !== match) panel.classList.toggle('is-flow-active', match);
+            const ariaHidden = prime || match ? 'false' : 'true';
+            if (panel.getAttribute('aria-hidden') !== ariaHidden) panel.setAttribute('aria-hidden', ariaHidden);
+            if (match && panel.getAttribute('tabindex') !== '-1') panel.setAttribute('tabindex', '-1');
         });
         tabs().forEach(tabNode => {
             const match = tabNode.getAttribute('data-flow-tab') === key;
-            tabNode.classList.toggle('is-active', match);
-            tabNode.setAttribute('aria-selected', match ? 'true' : 'false');
+            if (tabNode.classList.contains('is-active') !== match) tabNode.classList.toggle('is-active', match);
+            const selected = match ? 'true' : 'false';
+            if (tabNode.getAttribute('aria-selected') !== selected) tabNode.setAttribute('aria-selected', selected);
         });
         if (document.body) {
-            document.body.dataset.activeFlowTab = key;
-            document.body.dataset.flowDirector = 'final';
+            if (document.body.dataset.activeFlowTab !== key) document.body.dataset.activeFlowTab = key;
+            if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
         }
     }
     function targetTop(panel) {
@@ -153,8 +155,8 @@
             if (!spec) return;
             const icon = node.querySelector('span');
             const text = node.querySelector('b');
-            if (icon) icon.textContent = spec[0];
-            if (text) text.textContent = spec[1];
+            if (icon && icon.textContent !== spec[0]) icon.textContent = spec[0];
+            if (text && text.textContent !== spec[1]) text.textContent = spec[1];
         });
     }
     function installHeroSocial() {
@@ -175,9 +177,12 @@
         const importGroup = document.querySelector('.command-group-primary .command-group-head small');
         const analyzeGroup = document.querySelector('.command-group-status[aria-label="자동 분석 안내"] .command-group-head small');
         const editGroup = document.querySelector('.command-group-status[aria-label="편집 흐름 안내"] .command-group-head small');
-        if (importGroup) importGroup.textContent = '하단 Dock의 파일 열기로 원본을 선택합니다.';
-        if (analyzeGroup) analyzeGroup.textContent = '파일을 열면 자동으로 분석하고 추천 단계로 연결됩니다.';
-        if (editGroup) editGroup.textContent = '추천 → 후보 선택 → 미리보기 → 저장 순서로 진행합니다.';
+        const importText = '하단 메뉴바의 파일 열기로 원본을 선택합니다.';
+        const analyzeText = '파일을 열면 자동으로 분석하고 추천 단계로 연결됩니다.';
+        const editText = '추천 → 후보 선택 → 미리보기 → 저장 순서로 진행합니다.';
+        if (importGroup && importGroup.textContent !== importText) importGroup.textContent = importText;
+        if (analyzeGroup && analyzeGroup.textContent !== analyzeText) analyzeGroup.textContent = analyzeText;
+        if (editGroup && editGroup.textContent !== editText) editGroup.textContent = editText;
     }
     function sync() {
         patchGlobals();
@@ -188,8 +193,8 @@
     }
     function install() {
         if (document.body) {
-            document.body.dataset.build = '1.1.9';
-            document.body.dataset.flowDirector = 'final';
+            if (document.body.dataset.build !== '1.2.0') document.body.dataset.build = '1.2.0';
+            if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
         }
         installTabClicks();
         sync();

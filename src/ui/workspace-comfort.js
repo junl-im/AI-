@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.8 - workspace comfort controller without duplicate smooth reveal
+// AI Shorts Studio v1.2.0 - loop-safe workspace comfort controller
 'use strict';
 (function bootWorkspaceComfort(global) {
     const store = global.AIShortsAppState || {};
@@ -59,32 +59,35 @@
         clearTimeout(decorateTimer);
         decorateTimer = setTimeout(() => {
             document.querySelectorAll('.recommendation-card').forEach((card, index) => {
-                card.setAttribute('role', 'button');
-                card.setAttribute('aria-label', `${index + 1}번 후보 선택 후 미리보기로 이동`);
-                card.classList.add('is-selectable-candidate');
+                const label = `${index + 1}번 후보 선택 후 미리보기로 이동`;
+                if (card.getAttribute('role') !== 'button') card.setAttribute('role', 'button');
+                if (card.getAttribute('aria-label') !== label) card.setAttribute('aria-label', label);
+                if (!card.classList.contains('is-selectable-candidate')) card.classList.add('is-selectable-candidate');
             });
             const list = byId('recommendationList');
             if (list) {
                 const count = list.querySelectorAll('.recommendation-card').length;
-                list.dataset.candidateCount = String(count);
-                list.classList.toggle('has-candidates', count > 0);
+                const countText = String(count);
+                if (list.dataset.candidateCount !== countText) list.dataset.candidateCount = countText;
+                if (list.classList.contains('has-candidates') !== (count > 0)) list.classList.toggle('has-candidates', count > 0);
             }
         }, 0);
     }
     function stabilizeGuide() {
         const guide = byId('recommendFlowGuide');
         if (guide) {
-            guide.classList.add('is-stable-guide');
+            if (!guide.classList.contains('is-stable-guide')) guide.classList.add('is-stable-guide');
             if (Array.isArray(state.recommendations) && state.recommendations.length && !state.selectedRecommendationId) {
-                guide.innerHTML = '<span>1</span> 마음에 드는 후보 카드를 누르면 <b>미리보기 탭</b>으로 바로 이동합니다.';
+                const content = '<span>1</span> 마음에 드는 후보 카드를 누르면 <b>미리보기</b>로 바로 이동합니다.';
+                if (guide.innerHTML !== content) guide.innerHTML = content;
             }
         }
     }
     function syncPanelLabels() {
         const title = byId('hyperflowStageTitle');
         const active = activeTab();
-        if (document.body) document.body.dataset.workspaceComfort = 'ready';
-        if (title && PANEL_LABELS[active]) title.dataset.currentPanel = PANEL_LABELS[active];
+        if (document.body && document.body.dataset.workspaceComfort !== 'ready') document.body.dataset.workspaceComfort = 'ready';
+        if (title && PANEL_LABELS[active] && title.dataset.currentPanel !== PANEL_LABELS[active]) title.dataset.currentPanel = PANEL_LABELS[active];
     }
     function handleTabClick(event) {
         const tab = event.target && event.target.closest && event.target.closest('[data-flow-tab]');
@@ -106,12 +109,12 @@
         const list = byId('recommendationList');
         if (list && global.MutationObserver) {
             const observer = new MutationObserver(handleFlowSync);
-            observer.observe(list, { childList: true, subtree: true, attributes: true });
+            observer.observe(list, { childList: true, subtree: true });
         }
         ['recommendationCount', 'previewStatus', 'selectedRangeText', 'analysisStatus'].map(byId).filter(Boolean).forEach(node => {
             if (!global.MutationObserver) return;
             const observer = new MutationObserver(handleFlowSync);
-            observer.observe(node, { childList: true, subtree: true, characterData: true, attributes: true });
+            observer.observe(node, { childList: true, subtree: true, characterData: true });
         });
     }
     function install() {

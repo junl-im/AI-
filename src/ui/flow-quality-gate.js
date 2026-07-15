@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.9 - Flow Quality Gate with desktop prime visibility
+// AI Shorts Studio v1.2.0 - Flow Quality Gate with desktop prime visibility
 'use strict';
 (function bootFlowQualityGate(global) {
     const store = global.AIShortsAppState || {};
@@ -99,7 +99,7 @@
         if (!title || !meta) return;
         if (!hasFile()) {
             title.textContent = '파일을 열면 자동 분석합니다';
-            meta.textContent = isDesktopPrime() ? '왼쪽 불러오기 카드 또는 하단 Dock에서 원본을 여세요.' : '하단 Dock의 파일 열기를 사용하세요.';
+            meta.textContent = isDesktopPrime() ? '왼쪽 불러오기 카드 또는 하단 메뉴바에서 원본을 여세요.' : '하단 메뉴바의 파일 열기를 사용하세요.';
             return;
         }
         if (state.isAnalyzing) {

@@ -1,11 +1,11 @@
-// AI Shorts Studio v1.1.9 - visible update sentinel and cache refresh helper
+// AI Shorts Studio v1.2.0 - visible update sentinel and cache refresh helper
 'use strict';
 
 (function installUpdateSentinel(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const versionSync = global.AIShortsVersionSync || {};
-    const VERSION = versionSync.version || config.APP_VERSION || 'v1.1.9';
-    const BUILD_KEY = versionSync.buildKey || config.BUILD_KEY || '1.1.9-update-sentinel';
+    const VERSION = versionSync.version || config.APP_VERSION || 'v1.2.0';
+    const BUILD_KEY = versionSync.buildKey || config.BUILD_KEY || '1.2.0-update-sentinel';
     const STORAGE_KEY = 'ai-shorts-studio-update-sentinel-last-seen';
     let panel;
     let live;
@@ -110,7 +110,8 @@
             return;
         }
         const keys = await caches.keys().catch(() => []);
-        const current = `ai-shorts-studio-shell-${String(VERSION).replace(/^v/i, '')}-version-sync-cache-guard`;
+        const cacheSuffix = String(BUILD_KEY).replace(/^\d+\.\d+\.\d+-/, '');
+        const current = `ai-shorts-studio-shell-${VERSION}-${cacheSuffix}`;
         const targets = keys.filter(name => name.indexOf('ai-shorts-studio-shell-') === 0 && name !== current);
         await Promise.all(targets.map(name => caches.delete(name).catch(() => false)));
         await refreshPanel();

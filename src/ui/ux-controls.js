@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.9 - event-driven convenience controls and workflow polish
+// AI Shorts Studio v1.2.0 - event-driven convenience controls and workflow polish
 'use strict';
 
 (function bootAIShortsUxControls(global) {

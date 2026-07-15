@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.9 - max-stable engine capability profile
+// AI Shorts Studio v1.2.0 - max-stable engine capability profile
 'use strict';
 
 (function installEngineBoostProfile(global) {
