@@ -20,9 +20,9 @@ const heroStart = html.indexOf('<section class="brand-panel cinematic-brand-pane
 const heroEnd = html.indexOf('</section>\n    </header>', heroStart);
 const hero = html.slice(heroStart, heroEnd);
 
-assert(html.includes('assets/css/responsive-workspace.css?v=1.1.8-flow-audit'), 'responsive workspace stylesheet is linked');
-assert(sw.includes('responsive-workspace.css?v=1.1.8-flow-audit'), 'responsive workspace stylesheet is cached');
-assert(html.includes('class="start-command-panel"'), 'separated start command panel exists below hero');
+assert(html.includes('assets/css/responsive-workspace.css?v=1.1.9-flow-audit'), 'responsive workspace stylesheet is linked');
+assert(sw.includes('responsive-workspace.css?v=1.1.9-flow-audit'), 'responsive workspace stylesheet is cached');
+assert(html.includes('class="start-command-panel flow-overview-panel"'), 'mobile flow overview exists below hero');
 assert(!hero.includes('hero-cta-row'), 'hero title panel does not contain quick action buttons');
 assert(!hero.includes('workflow-rail'), 'hero title panel does not contain workflow rail');
 assert(html.includes('<b>파일 열기</b>'), 'bottom dock file tab label is 파일 열기');

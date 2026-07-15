@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.0.8 - Flow Quality Gate with direct workspace reveal
+// AI Shorts Studio v1.1.9 - Flow Quality Gate with desktop prime visibility
 'use strict';
 (function bootFlowQualityGate(global) {
     const store = global.AIShortsAppState || {};
@@ -19,6 +19,12 @@
 
     function byId(id) { return document.getElementById(id); }
     function currentTab() { return document.body && document.body.dataset ? document.body.dataset.activeFlowTab || 'file' : 'file'; }
+    function isDesktopPrime() {
+        return Boolean(document.body &&
+            document.body.dataset.desktopLayout === 'prime' &&
+            global.matchMedia &&
+            global.matchMedia('(min-width: 1180px)').matches);
+    }
     function hasFile() { return Boolean(state.file); }
     function hasAnalysis() { return Boolean(state.audioAnalysis || state.motionAnalysis || state.autoCuts); }
     function hasRecommendations() { return Array.isArray(state.recommendations) && state.recommendations.length > 0; }
@@ -68,12 +74,13 @@
         return 'file';
     }
     function setPanelVisibility(active) {
+        const prime = isDesktopPrime();
         panels().forEach(panel => {
             const isActive = panelTabs(panel).includes(active);
-            panel.hidden = !isActive;
+            panel.hidden = prime ? false : !isActive;
             panel.classList.toggle('is-flow-active', isActive);
             panel.classList.toggle('is-flow-standby', !isActive);
-            panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            panel.setAttribute('aria-hidden', prime || isActive ? 'false' : 'true');
         });
         tabs().forEach(tab => {
             const key = tab.getAttribute('data-flow-tab') || '';
@@ -92,7 +99,7 @@
         if (!title || !meta) return;
         if (!hasFile()) {
             title.textContent = '파일을 열면 자동 분석합니다';
-            meta.textContent = '아래 시작 패널 또는 하단 Dock의 파일 열기를 사용하세요.';
+            meta.textContent = isDesktopPrime() ? '왼쪽 불러오기 카드 또는 하단 Dock에서 원본을 여세요.' : '하단 Dock의 파일 열기를 사용하세요.';
             return;
         }
         if (state.isAnalyzing) {

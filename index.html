@@ -6,104 +6,105 @@
 <meta name="description" content="AI 쇼츠 제작 스튜디오 - 음악과 영상을 쇼츠 후보로 자동 추천하는 로컬 웹 스튜디오" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
 <meta name="theme-color" content="#7c3aed" />
-<meta name="ai-shorts-version" content="v1.1.8" />
-<meta name="ai-shorts-build-key" content="1.1.8-version-sync-cache-guard" />
-<title>AI 쇼츠 제작 스튜디오 v1.1.8</title>
+<meta name="ai-shorts-version" content="v1.1.9" />
+<meta name="ai-shorts-build-key" content="1.1.9-version-sync-cache-guard" />
+<title>AI 쇼츠 제작 스튜디오 v1.1.9</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/studio.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/editor.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/ux.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/advanced-editor.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/layout-dock.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/caption-pro.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/quality-tools.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/auto-cut.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/cut-markers.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/feedback-ux.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/engine-panel.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/pro-engine.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/hyperflow-tabs.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/render-queue.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/hyperconnect-flow.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/flow-polish.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/flow-hotfix.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/flow-integrity.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/flow-doctor.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/cinematic-hero.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/responsive-workspace.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/flow-quality-gate.css?v=1.1.8-flow-audit" />
-<link rel="stylesheet" href="assets/css/pc-dock-reveal-hotfix.css?v=1.1.8-dock-reveal" />
-<link rel="stylesheet" href="assets/css/glass-pro-ui.css?v=1.1.8-glass-pro" />
-<link rel="stylesheet" href="assets/css/workspace-comfort.css?v=1.1.8-workspace-comfort" />
-<link rel="stylesheet" href="assets/css/motion-stability.css?v=1.1.8-motion-stability" />
-<link rel="stylesheet" href="assets/css/handoff-coach.css?v=1.1.8-handoff-coach" />
-<link rel="stylesheet" href="assets/css/save-readiness.css?v=1.1.8-save-readiness" />
-<link rel="stylesheet" href="assets/css/render-quality-planner.css?v=1.1.8-render-quality" />
-<link rel="stylesheet" href="assets/css/candidate-preview-pro.css?v=1.1.8-candidate-preview" />
-<link rel="stylesheet" href="assets/css/candidate-pin-board.css?v=1.1.8-candidate-pin" />
-<link rel="stylesheet" href="assets/css/session-continuity.css?v=1.1.8-session-continuity" />
-<link rel="stylesheet" href="assets/css/export-finish-center.css?v=1.1.8-export-finish" />
-<link rel="stylesheet" href="assets/css/shutter-glass-flow.css?v=1.1.8-command-bridge" />
-<link rel="stylesheet" href="assets/css/update-sentinel.css?v=1.1.8-update-sentinel" />
-<link rel="stylesheet" href="assets/css/foundation-polish.css?v=1.1.8-foundation-polish" />
-<script defer src="src/config/app-runtime-config.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/boot/app-version-sync.js?v=1.1.8-version-sync"></script>
-<script defer src="src/boot/update-sentinel.js?v=1.1.8-update-sentinel"></script>
-<script defer src="src/utils/core-utils.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/state/app-state.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/analysis/auto-cut-detector.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/module-registry.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/module-contracts.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/analysis-cache.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/performance-budget.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/analysis-pipeline.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/scoring-pipeline.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/pro-engine-tuner.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/stability-auditor.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/engine/engine-boost-profile.js?v=1.1.8-engine-boost"></script>
-<script defer src="src/engine/engine-kernel.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/caption/caption-service.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/project/project-service.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/render/quality-effects.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/render/vertical-renderer.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/download/download-service.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/render/render-queue.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/waveform-view.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/cut-marker-overlay.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/timeline-view.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/security/site-guards.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/boot/runtime-health.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/app.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/ux-controls.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/range-drag-controls.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/bottom-dock.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/motion-stability.js?v=1.1.8-motion-stability"></script>
-<script defer src="src/ui/hyperflow-tabs.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/hyperconnect-flow.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/flow-polish.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/flow-hotfix.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/flow-integrity.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/flow-doctor.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/feedback-ux.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/flow-quality-gate.js?v=1.1.8-flow-audit"></script>
-<script defer src="src/ui/workspace-comfort.js?v=1.1.8-workspace-comfort"></script>
-<script defer src="src/ui/handoff-coach.js?v=1.1.8-handoff-coach"></script>
-<script defer src="src/ui/save-readiness.js?v=1.1.8-save-readiness"></script>
-<script defer src="src/ui/render-quality-planner.js?v=1.1.8-render-quality"></script>
-<script defer src="src/ui/candidate-preview-pro.js?v=1.1.8-candidate-preview"></script>
-<script defer src="src/ui/candidate-pin-board.js?v=1.1.8-candidate-pin"></script>
-<script defer src="src/ui/session-continuity.js?v=1.1.8-session-continuity"></script>
-<script defer src="src/ui/export-finish-center.js?v=1.1.8-export-finish"></script>
-<script defer src="src/ui/flow-director-final.js?v=1.1.8-command-bridge"></script>
-<script defer src="src/ui/flow-command-bridge.js?v=1.1.8-no-shake-command"></script>
-<script defer src="src/ui/startup-performance.js?v=1.1.8-foundation-polish"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/studio.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/editor.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/ux.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/advanced-editor.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/layout-dock.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/caption-pro.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/quality-tools.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/auto-cut.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/cut-markers.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/feedback-ux.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/engine-panel.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/pro-engine.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/hyperflow-tabs.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/render-queue.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/hyperconnect-flow.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/flow-polish.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/flow-hotfix.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/flow-integrity.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/flow-doctor.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/cinematic-hero.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/responsive-workspace.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/flow-quality-gate.css?v=1.1.9-flow-audit" />
+<link rel="stylesheet" href="assets/css/pc-dock-reveal-hotfix.css?v=1.1.9-dock-reveal" />
+<link rel="stylesheet" href="assets/css/glass-pro-ui.css?v=1.1.9-glass-pro" />
+<link rel="stylesheet" href="assets/css/workspace-comfort.css?v=1.1.9-workspace-comfort" />
+<link rel="stylesheet" href="assets/css/motion-stability.css?v=1.1.9-motion-stability" />
+<link rel="stylesheet" href="assets/css/handoff-coach.css?v=1.1.9-handoff-coach" />
+<link rel="stylesheet" href="assets/css/save-readiness.css?v=1.1.9-save-readiness" />
+<link rel="stylesheet" href="assets/css/render-quality-planner.css?v=1.1.9-render-quality" />
+<link rel="stylesheet" href="assets/css/candidate-preview-pro.css?v=1.1.9-candidate-preview" />
+<link rel="stylesheet" href="assets/css/candidate-pin-board.css?v=1.1.9-candidate-pin" />
+<link rel="stylesheet" href="assets/css/session-continuity.css?v=1.1.9-session-continuity" />
+<link rel="stylesheet" href="assets/css/export-finish-center.css?v=1.1.9-export-finish" />
+<link rel="stylesheet" href="assets/css/shutter-glass-flow.css?v=1.1.9-command-bridge" />
+<link rel="stylesheet" href="assets/css/update-sentinel.css?v=1.1.9-update-sentinel" />
+<link rel="stylesheet" href="assets/css/foundation-polish.css?v=1.1.9-foundation-polish" />
+<link rel="stylesheet" href="assets/css/desktop-prime-layout.css?v=1.1.9-desktop-prime" />
+<script defer src="src/config/app-runtime-config.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/boot/app-version-sync.js?v=1.1.9-version-sync"></script>
+<script defer src="src/boot/update-sentinel.js?v=1.1.9-update-sentinel"></script>
+<script defer src="src/utils/core-utils.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/state/app-state.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/analysis/auto-cut-detector.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/module-registry.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/module-contracts.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/analysis-cache.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/performance-budget.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/analysis-pipeline.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/scoring-pipeline.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/pro-engine-tuner.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/stability-auditor.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/engine/engine-boost-profile.js?v=1.1.9-engine-boost"></script>
+<script defer src="src/engine/engine-kernel.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/caption/caption-service.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/project/project-service.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/render/quality-effects.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/render/vertical-renderer.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/download/download-service.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/render/render-queue.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/waveform-view.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/cut-marker-overlay.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/timeline-view.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/security/site-guards.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/boot/runtime-health.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/app.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/ux-controls.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/range-drag-controls.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/bottom-dock.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/motion-stability.js?v=1.1.9-motion-stability"></script>
+<script defer src="src/ui/hyperflow-tabs.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/hyperconnect-flow.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/flow-polish.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/flow-hotfix.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/flow-integrity.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/flow-doctor.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/feedback-ux.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/flow-quality-gate.js?v=1.1.9-flow-audit"></script>
+<script defer src="src/ui/workspace-comfort.js?v=1.1.9-workspace-comfort"></script>
+<script defer src="src/ui/handoff-coach.js?v=1.1.9-handoff-coach"></script>
+<script defer src="src/ui/save-readiness.js?v=1.1.9-save-readiness"></script>
+<script defer src="src/ui/render-quality-planner.js?v=1.1.9-render-quality"></script>
+<script defer src="src/ui/candidate-preview-pro.js?v=1.1.9-candidate-preview"></script>
+<script defer src="src/ui/candidate-pin-board.js?v=1.1.9-candidate-pin"></script>
+<script defer src="src/ui/session-continuity.js?v=1.1.9-session-continuity"></script>
+<script defer src="src/ui/export-finish-center.js?v=1.1.9-export-finish"></script>
+<script defer src="src/ui/flow-director-final.js?v=1.1.9-command-bridge"></script>
+<script defer src="src/ui/flow-command-bridge.js?v=1.1.9-no-shake-command"></script>
+<script defer src="src/ui/startup-performance.js?v=1.1.9-foundation-polish"></script>
 </head>
-<body data-build="1.1.8" data-build-key="1.1.8-version-sync-cache-guard" data-ui="hyperflow-tabs" data-active-flow-tab="file">
+<body data-build="1.1.9" data-build-key="1.1.9-version-sync-cache-guard" data-ui="hyperflow-tabs" data-active-flow-tab="file" data-desktop-layout="prime">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel cinematic-brand-panel" aria-label="앱 소개">
@@ -118,7 +119,7 @@
             </div>
             <div class="brand-topline">
                 <div class="brand-kicker brand-version-left">
-                    <button id="programInfoBtn" class="badge badge-version" type="button" aria-label="프로그램 정보 열기">v1.1.8</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button" aria-label="프로그램 정보 열기">v1.1.9</button>
                 </div>
                 <div class="brand-compat-pill" aria-label="PC 모바일 호환">💻📱 PC · 모바일 호환</div>
                 <div class="brand-right-actions">
@@ -134,53 +135,17 @@
 </section>
     </header>
 
-    <section class="start-command-panel" aria-label="빠른 시작과 제작 단계">
-        <div class="command-group command-group-primary" aria-label="불러오기 명령">
-            <div class="command-group-head">
-                <span>📂</span>
-                <div>
-                    <strong>불러오기</strong>
-                    <small>원본 파일과 프로젝트를 분리해서 관리합니다.</small>
-                </div>
-            </div>
-            <div class="command-buttons">
-                <label class="btn-primary command-button" for="fileInput">파일 열기</label>
-                <label class="btn-secondary command-button" for="projectFileInput">프로젝트 불러오기</label>
-            </div>
-        </div>
-        <div class="command-group command-group-status" aria-label="자동 분석 안내">
-            <div class="command-group-head">
-                <span>⚙️</span>
-                <div>
-                    <strong>자동 분석</strong>
-                    <small>파일을 열면 별도 버튼 없이 분석이 시작됩니다.</small>
-                </div>
-            </div>
-            <div class="command-mini-row">
-                <span class="command-chip">로컬 처리</span>
-                <span class="command-chip">추천 준비</span>
-                <span class="command-chip">자동 연결</span>
-            </div>
-        </div>
-        <div class="command-group command-group-status" aria-label="편집 흐름 안내">
-            <div class="command-group-head">
-                <span>🎛️</span>
-                <div>
-                    <strong>편집 흐름</strong>
-                    <small>추천 생성 후 후보 선택, 미리보기, 저장으로 이어집니다.</small>
-                </div>
-            </div>
-            <div class="command-mini-row">
-                <span class="command-chip">후보 선택</span>
-                <span class="command-chip">미리보기</span>
-                <span class="command-chip">저장</span>
-            </div>
+    <section class="start-command-panel flow-overview-panel" aria-label="모바일 제작 진행 순서">
+        <div class="flow-overview-copy">
+            <span class="flow-overview-eyebrow">제작 순서 · 4단계</span>
+            <strong>아래 Dock에서 파일을 열고 순서대로 진행하세요</strong>
+            <small>파일 선택부터 추천, 편집, 저장까지 현재 위치를 한눈에 확인할 수 있습니다.</small>
         </div>
         <nav class="workflow-rail workflow-rail-separated" aria-label="제작 진행 단계">
-            <div id="stepImport" class="workflow-step is-active"><span>1</span><strong>불러오기</strong><em>원본 선택</em></div>
-            <div id="stepAnalyze" class="workflow-step"><span>2</span><strong>자동 분석</strong><em>파일 열면 시작</em></div>
-            <div id="stepEdit" class="workflow-step"><span>3</span><strong>편집</strong><em>구간·자막 조정</em></div>
-            <div id="stepExport" class="workflow-step"><span>4</span><strong>내보내기</strong><em>쇼츠 저장</em></div>
+            <div id="stepImport" class="workflow-step is-active"><span>1</span><strong>불러오기</strong><em>Dock에서 원본 선택</em></div>
+            <div id="stepAnalyze" class="workflow-step"><span>2</span><strong>자동 분석</strong><em>파일 열면 바로 시작</em></div>
+            <div id="stepEdit" class="workflow-step"><span>3</span><strong>편집</strong><em>후보·구간·자막 조정</em></div>
+            <div id="stepExport" class="workflow-step"><span>4</span><strong>내보내기</strong><em>세로 쇼츠 저장</em></div>
         </nav>
     </section>
 
@@ -754,7 +719,7 @@
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v1.1.8</h2>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v1.1.9</h2>
         <p>긴 음악이나 영상을 열면 브라우저 안에서 자동 분석하고, 쇼츠로 쓰기 좋은 구간을 추천해 세로 미리보기와 저장까지 도와주는 제작 스튜디오입니다.</p>
         <ul>
             <li>파일을 열면 자동으로 오디오 에너지, 피크, 무음, 움직임을 분석합니다.</li>

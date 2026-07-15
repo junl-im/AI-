@@ -1,28 +1,37 @@
-# QA Report - AI 쇼츠 제작 스튜디오 v1.1.8
+# QA Report - AI 쇼츠 제작 스튜디오 v1.1.9
 
 ## Summary
 
-- Passed: 99/99
-- Failed: 0/99
+- Passed: 102/102
+- Failed: 0/102
 - Result: PASS
 
-## v1.1.8 Focus
+## v1.1.9 Focus
 
-- Update Sentinel: information modal now exposes current version, build key, service worker state, cache state, engine profile, and diagnostic actions.
-- Cache diagnostics: old shell caches can be inspected and cleared without touching user project/session data.
-- Engine Boost Profile: browser capability is classified as `MAX-STABLE`, `PRO-STABLE`, or `SAFE-STABLE` for future analysis/render tuning.
-- Version sync guard: `package.json`, `src/config/app-runtime-config.js`, `index.html`, `sw.js`, and the visible header version are aligned.
-- Dock polish: candidate icon is `🎯` and save icon is `📦` while the 8-tab PC and 4+4 mobile layout remains guarded.
-- Existing no-shake Dock flow, shutter glass hero, PC/mobile compatibility line, and Final Flow Director remain active.
+- PC Prime 작업실: 1180px 이상에서 3열 분할 레이아웃 적용
+- 첫 작업 프레임: 불러오기, 추천, 미리보기, 후보, 파형 동시 노출
+- PC 흐름 제어: 기존 단일 패널 숨김 규칙보다 Prime 표시 규칙이 우선
+- 접근성 상태: PC에서 보이는 패널은 `hidden`과 `aria-hidden`도 해제
+- 모바일 시작 화면: 중복 파일/프로젝트 불러오기 버튼 제거
+- 모바일 진행 안내: 4단계 2x2 카드와 하단 Dock 파일 열기 유지
+- 헤더 정렬: 버전 왼쪽 끝, 디자인 서명 오른쪽 끝
+- 소개 문구: 최대 폭 720px과 기기별 안쪽 여백 적용
+- 기존 이벤트 기반 동기화, 파형 변경 감지, 저사양 성능 가드 유지
 
 ## Added / Updated Checks
 
-- `node --check src/boot/update-sentinel.js`
-- `node qa/update_sentinel_smoke.js`
-- `node --check src/engine/engine-boost-profile.js`
-- `node qa/engine_boost_profile_smoke.js`
-- `node qa/app_version_sync_smoke.js` updated to derive expected version from `package.json`.
-- `node qa/layout_dock_smoke.js` updated for the v1.1.8 Dock icon set.
+- `node qa/desktop_prime_layout_smoke.js`
+- `node qa/runtime_performance_smoke.js`
+- `node qa/responsive_workspace_smoke.js`
+- `node --check src/ui/flow-quality-gate.js`
+- `node --check src/ui/flow-director-final.js`
+
+## Visual Layout Checks
+
+- Desktop static render: 1440x1000
+- Mobile static render: 390x844
+- Desktop first viewport contains the five primary working regions and the next editing row.
+- Mobile empty state contains the brand header, four-step guide, and 4+4 Dock without a duplicate import card.
 
 ## Command
 
@@ -30,6 +39,6 @@
 npm run check
 ```
 
-## Notes
+## Remaining Manual E2E
 
-v1.1.8 keeps the main screen simple and places update/cache diagnostics inside the program information modal. This avoids cluttering the editing workflow while still making version mismatch and stale cache issues easy to confirm during handoff or user support.
+실제 MP3/MP4를 사용한 자동 분석, 추천 생성, 후보 선택, 미리보기, MediaRecorder 저장 과정은 사용자 브라우저와 실기기에서 추가 검증이 필요합니다.

@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v1.1.9 - Desktop Prime Workspace & Mobile Flow Landing
+
+- PC 화면을 3열 Prime 작업실로 재구성했습니다.
+- PC에서 불러오기, 추천, 미리보기, 후보, 파형을 동시에 확인할 수 있게 했습니다.
+- 컷, 정밀 편집, 저장, 프로젝트 영역을 같은 분할 그리드의 다음 행으로 연결했습니다.
+- 모바일 첫 화면의 파일 열기/프로젝트 불러오기 중복 카드를 제거했습니다.
+- 모바일 본문을 4단계 진행 순서 안내로 단순화하고 파일 선택은 하단 Dock에 맡겼습니다.
+- 상단 버전과 `Design by 곰같은여우`를 같은 줄 양 끝에 정렬했습니다.
+- 제목 아래 제품 설명의 최대 폭과 좌우 안쪽 여백을 조정했습니다.
+- `assets/css/desktop-prime-layout.css`와 `qa/desktop_prime_layout_smoke.js`를 추가했습니다.
+- 전체 QA를 102개로 확장했습니다.
+
 ## v1.1.8 - Foundation UX & Runtime Performance
 
 - 첫 화면을 실제 시작 명령과 4단계 워크플로 중심으로 재구성했습니다.

@@ -1,0 +1,414 @@
+/* AI Shorts Studio v1.1.9 - desktop prime workspace and mobile flow-only landing */
+:root {
+    --prime-workspace-max: 1580px;
+    --prime-gap: 12px;
+}
+
+/* Brand metadata always sits on one clean line: version left, signature right. */
+body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center !important;
+    width: 100%;
+    gap: 12px !important;
+}
+
+body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-kicker {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    margin: 0 !important;
+}
+
+body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-compat-pill {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+    margin: 0 !important;
+}
+
+body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
+    display: flex !important;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    min-width: 0;
+    margin-left: 0 !important;
+}
+
+.cinematic-brand-panel .hero-mainline {
+    width: 100%;
+    padding-inline: clamp(10px, 2.5vw, 38px);
+}
+
+.cinematic-brand-panel .hero-copy {
+    width: 100%;
+    min-width: 0;
+}
+
+body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
+    width: min(100%, 720px);
+    max-width: 720px !important;
+    margin-right: auto !important;
+}
+
+/* The old duplicated import card is replaced by a mobile-only process map. */
+.start-command-panel {
+    display: none !important;
+}
+
+.flow-overview-copy {
+    display: grid;
+    gap: 4px;
+    padding: 4px 4px 10px;
+}
+
+.flow-overview-eyebrow {
+    color: #67e8f9;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.flow-overview-copy strong {
+    font-size: 18px;
+    letter-spacing: -0.045em;
+}
+
+.flow-overview-copy small {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+@media (min-width: 1180px) {
+    :root {
+        --workspace-max: var(--prime-workspace-max);
+    }
+
+    .app-shell {
+        width: min(calc(100% - 24px), var(--prime-workspace-max)) !important;
+        padding-top: 10px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
+        min-height: 128px !important;
+        padding: 13px 18px 15px !important;
+        border-radius: 22px !important;
+    }
+
+    .cinematic-brand-panel .hero-mainline {
+        margin-top: 8px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .hero-copy h1,
+    .cinematic-title {
+        font-size: clamp(38px, 3.8vw, 54px) !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .hero-compact-note {
+        margin-top: 7px !important;
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .hyperflow-stage {
+        min-height: 58px;
+        margin: 8px 0 10px !important;
+        padding: 8px 12px !important;
+        border-radius: 18px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .hyperflow-stage-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+        font-size: 20px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .flow-selection-summary {
+        display: none !important;
+    }
+
+    /* Prime workspace: the first five stages remain visible together. */
+    body[data-ui="hyperflow-tabs"] .studio-grid {
+        display: grid !important;
+        grid-template-columns: minmax(260px, 0.76fr) minmax(350px, 1.05fr) minmax(300px, 0.88fr) !important;
+        grid-template-areas:
+            "load preview candidates"
+            "recommend preview waveform"
+            "cut edit export"
+            "project edit copy" !important;
+        grid-template-rows: clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto auto;
+        align-items: stretch;
+        gap: var(--prime-gap) !important;
+        width: 100%;
+        margin: 0 !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .console-panel,
+    body[data-ui="hyperflow-tabs"] .editor-panel {
+        display: contents !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] [data-flow-panel],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] [data-flow-panel][hidden],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-standby,
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] [data-flow-panel]:not(.is-flow-active) {
+        display: block !important;
+        width: 100%;
+        max-width: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        animation: none !important;
+        scroll-margin-top: 16px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .control-zone-load { grid-area: load; }
+    body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] { grid-area: recommend; }
+    body[data-ui="hyperflow-tabs"] .candidates-zone { grid-area: candidates; }
+    body[data-ui="hyperflow-tabs"] .preview-card { grid-area: preview; }
+    body[data-ui="hyperflow-tabs"] .waveform-card { grid-area: waveform; }
+    body[data-ui="hyperflow-tabs"] .auto-cut-panel { grid-area: cut; }
+    body[data-ui="hyperflow-tabs"] .edit-tools-card { grid-area: edit; }
+    body[data-ui="hyperflow-tabs"] .export-card { grid-area: export; }
+    body[data-ui="hyperflow-tabs"] .project-card { grid-area: project; }
+    body[data-ui="hyperflow-tabs"] .copy-card { grid-area: copy; }
+
+    body[data-ui="hyperflow-tabs"] .action-dock {
+        display: none !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .control-zone-load,
+    body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"],
+    body[data-ui="hyperflow-tabs"] .candidates-zone,
+    body[data-ui="hyperflow-tabs"] .preview-card,
+    body[data-ui="hyperflow-tabs"] .waveform-card {
+        height: 100%;
+        overflow: auto;
+        scrollbar-width: thin;
+    }
+
+    body[data-ui="hyperflow-tabs"] .control-zone-load .upload-tile {
+        min-height: 112px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .settings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .engine-status-card p,
+    body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .hyperconnect-helper {
+        display: none !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .engine-status-card {
+        margin-top: 8px;
+        padding: 10px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .engine-pill-row {
+        gap: 5px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .candidates-zone .recommendation-list {
+        max-height: 205px !important;
+        overflow: auto;
+    }
+
+    body[data-ui="hyperflow-tabs"] .preview-card {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        overflow: hidden;
+    }
+
+    body[data-ui="hyperflow-tabs"] .preview-card .phone-frame {
+        width: min(240px, 100%) !important;
+        max-height: none !important;
+        margin: 0 auto 10px !important;
+        border-radius: 30px;
+        padding: 8px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .preview-card .phone-frame::before {
+        top: 13px;
+        width: 58px;
+        height: 14px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .preview-card #previewCanvas {
+        border-radius: 24px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .preview-card .safe-area {
+        left: 26px;
+        right: 26px;
+        top: 84px;
+        bottom: 90px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .preview-card .transport-row {
+        gap: 7px;
+        margin-top: auto;
+    }
+
+    body[data-ui="hyperflow-tabs"] .preview-card .transport-row button {
+        min-height: 38px;
+        flex: 1 1 44%;
+        padding-inline: 8px;
+        font-size: 11.5px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .waveform-card canvas {
+        height: 112px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .waveform-card .drag-helper-row,
+    body[data-ui="hyperflow-tabs"] .waveform-card .cut-marker-control-row {
+        gap: 7px;
+        font-size: 11px;
+    }
+
+    body[data-ui="hyperflow-tabs"] .waveform-card .timeline-view {
+        max-height: 76px;
+        overflow: auto;
+    }
+
+    body[data-ui="hyperflow-tabs"] .auto-cut-panel,
+    body[data-ui="hyperflow-tabs"] .edit-tools-card,
+    body[data-ui="hyperflow-tabs"] .export-card,
+    body[data-ui="hyperflow-tabs"] .project-card,
+    body[data-ui="hyperflow-tabs"] .copy-card {
+        align-self: start;
+    }
+
+    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
+        padding-inline: max(14px, calc((100vw - var(--prime-workspace-max)) / 2)) !important;
+    }
+}
+
+@media (max-width: 720px) {
+    .app-shell {
+        padding-top: 6px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
+        min-height: 154px !important;
+        padding: 11px 12px 14px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
+        display: grid !important;
+        grid-template-columns: auto minmax(0, 1fr) auto !important;
+        gap: 7px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-compat-pill {
+        display: none !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-kicker {
+        grid-column: 1;
+        grid-row: 1;
+        justify-self: start;
+    }
+
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
+        grid-column: 3;
+        grid-row: 1;
+        justify-self: end;
+        margin-left: 0 !important;
+    }
+
+    .cinematic-brand-panel .brand-signature-pill {
+        max-width: none !important;
+        padding-inline: 8px !important;
+        font-size: 9.5px !important;
+        white-space: nowrap;
+    }
+
+    .cinematic-brand-panel .hero-mainline {
+        padding-inline: 8px !important;
+        margin-top: 12px !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .hero-copy h1,
+    .cinematic-title {
+        font-size: clamp(29px, 9.4vw, 40px) !important;
+    }
+
+    body[data-ui="hyperflow-tabs"] .hero-compact-note {
+        width: min(100%, 34rem);
+        max-width: 34rem !important;
+        margin-top: 8px !important;
+        padding-right: 8px;
+        font-size: 12px !important;
+        line-height: 1.5 !important;
+    }
+
+    .start-command-panel {
+        display: block !important;
+        margin: 8px 0 10px !important;
+        padding: 11px !important;
+        border: 1px solid rgba(148, 163, 184, 0.20) !important;
+        border-radius: 20px !important;
+        background:
+            linear-gradient(145deg, rgba(15, 23, 42, 0.86), rgba(2, 6, 23, 0.78)),
+            radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.14), transparent 34%) !important;
+    }
+
+    .start-command-panel .workflow-rail-separated {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+    }
+
+    .start-command-panel .workflow-step {
+        min-height: 76px !important;
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        align-content: center;
+        column-gap: 8px;
+        padding: 10px !important;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        background: rgba(255, 255, 255, 0.035) !important;
+    }
+
+    .start-command-panel .workflow-step span {
+        grid-row: 1 / 3;
+        align-self: center;
+        width: 28px;
+        height: 28px;
+    }
+
+    .start-command-panel .workflow-step strong {
+        align-self: end;
+        font-size: 12px;
+    }
+
+    .start-command-panel .workflow-step em {
+        display: block !important;
+        align-self: start;
+        color: var(--muted);
+        font-size: 10px;
+    }
+
+    /* On mobile the file tab already opens the picker, so no duplicate import screen is rendered. */
+    body:not(.has-media)[data-active-flow-tab="file"] .hyperflow-stage,
+    body:not(.has-media)[data-active-flow-tab="file"] .flow-selection-summary,
+    body:not(.has-media)[data-active-flow-tab="file"] .studio-grid {
+        display: none !important;
+    }
+
+    body.has-media .start-command-panel {
+        display: none !important;
+    }
+}

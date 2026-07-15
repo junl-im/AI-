@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.8 - Final single-owner flow director
+// AI Shorts Studio v1.1.9 - Final single-owner flow director
 // Owns tab visibility + scroll reveal to remove panel shaking from competing modules.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -24,6 +24,12 @@
         const body = document.body;
         return body && body.dataset && body.dataset.activeFlowTab ? body.dataset.activeFlowTab : 'file';
     }
+    function isDesktopPrime() {
+        return Boolean(document.body &&
+            document.body.dataset.desktopLayout === 'prime' &&
+            global.matchMedia &&
+            global.matchMedia('(min-width: 1180px)').matches);
+    }
     function tabs() { return Array.from(document.querySelectorAll('[data-flow-tab]')); }
     function panels() { return Array.from(document.querySelectorAll('[data-flow-panel]')); }
     function panelTabs(panel) { return String(panel.getAttribute('data-flow-panel') || '').split(/\s+/).filter(Boolean); }
@@ -38,10 +44,12 @@
     }
     function setVisible(tab) {
         const key = ORDER.includes(tab) ? tab : 'file';
+        const prime = isDesktopPrime();
         panels().forEach(panel => {
             const match = panelTabs(panel).includes(key);
+            panel.hidden = prime ? false : panel.hidden;
             panel.classList.toggle('is-flow-active', match);
-            panel.setAttribute('aria-hidden', match ? 'false' : 'true');
+            panel.setAttribute('aria-hidden', prime || match ? 'false' : 'true');
             if (match) panel.setAttribute('tabindex', '-1');
         });
         tabs().forEach(tabNode => {
@@ -180,7 +188,7 @@
     }
     function install() {
         if (document.body) {
-            document.body.dataset.build = '1.1.8';
+            document.body.dataset.build = '1.1.9';
             document.body.dataset.flowDirector = 'final';
         }
         installTabClicks();

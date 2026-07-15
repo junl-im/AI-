@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.1.8 - main app with render preset planner and version-aware service worker update checks
+// AI Shorts Studio v1.1.9 - main app with render preset planner and version-aware service worker update checks
 'use strict';
 
 (function bootAIShortsStudio(global) {
