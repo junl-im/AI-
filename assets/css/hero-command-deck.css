@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.2.3 - Shorts Pulse Hero
+/* AI Shorts Studio v1.2.4 - Shorts Pulse Hero + device compatibility rail
    A clean short-form identity built from 9:16 framing, cut timing and a single local-first action. */
 
 :root {
@@ -117,6 +117,63 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
     align-items: center;
     gap: 11px;
     min-width: 0;
+}
+
+
+.release-device-compat {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    color: rgba(226, 232, 240, 0.66);
+    font-size: 8px;
+    font-weight: 820;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+.device-pair-glyph {
+    position: relative;
+    display: inline-block;
+    width: 22px;
+    height: 12px;
+    flex: 0 0 auto;
+}
+
+.device-pair-glyph i,
+.device-pair-glyph b {
+    position: absolute;
+    display: block;
+    box-sizing: border-box;
+    border: 1px solid rgba(103, 232, 249, 0.64);
+    background: rgba(103, 232, 249, 0.05);
+}
+
+.device-pair-glyph i {
+    left: 0;
+    top: 2px;
+    width: 14px;
+    height: 9px;
+    border-radius: 2px;
+}
+
+.device-pair-glyph i::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    bottom: -3px;
+    height: 1px;
+    background: rgba(167, 139, 250, 0.7);
+}
+
+.device-pair-glyph b {
+    right: 0;
+    top: 0;
+    width: 7px;
+    height: 12px;
+    border-radius: 2px;
+    border-color: rgba(251, 113, 133, 0.64);
 }
 
 .cinematic-brand-panel .badge-version {
@@ -851,6 +908,22 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         display: none !important;
     }
 
+    .brand-release {
+        gap: 8px;
+    }
+
+    .release-device-compat {
+        gap: 5px;
+        font-size: 7px;
+    }
+
+    .device-pair-glyph {
+        width: 19px;
+        transform: scale(0.88);
+        transform-origin: left center;
+        margin-right: -2px;
+    }
+
     .signature-label {
         display: inline !important;
         font-size: 6px;
@@ -941,6 +1014,15 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         width: 85%;
         opacity: 0.42;
     }
+}
+
+
+@media (max-width: 420px) {
+    .brand-release { gap: 6px; }
+    .cinematic-brand-panel .badge-version { padding-left: 0 !important; }
+    .cinematic-brand-panel .badge-version::before { display: none; }
+    .release-device-compat { gap: 4px; font-size: 6.8px; }
+    .cinematic-brand-panel .brand-signature-pill .signature-label { display: none !important; }
 }
 
 body.performance-lite .shorts-light,

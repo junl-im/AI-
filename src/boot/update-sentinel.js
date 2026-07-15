@@ -1,11 +1,11 @@
-// AI Shorts Studio v1.2.3 - visible update sentinel and cache refresh helper
+// AI Shorts Studio v1.2.4 - visible update sentinel and cache refresh helper
 'use strict';
 
 (function installUpdateSentinel(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const versionSync = global.AIShortsVersionSync || {};
-    const VERSION = versionSync.version || config.APP_VERSION || 'v1.2.3';
-    const BUILD_KEY = versionSync.buildKey || config.BUILD_KEY || '1.2.3-update-sentinel';
+    const VERSION = versionSync.version || config.APP_VERSION || 'v1.2.4';
+    const BUILD_KEY = versionSync.buildKey || config.BUILD_KEY || '1.2.4-update-sentinel';
     const STORAGE_KEY = 'ai-shorts-studio-update-sentinel-last-seen';
     let panel;
     let live;
@@ -138,7 +138,7 @@
         panel.setAttribute('aria-label', '업데이트 적용 상태');
         panel.innerHTML = [
             '<div class="update-sentinel-head">',
-            '<strong>🛰️ 업데이트 적용 상태</strong>',
+            '<strong>↻ 업데이트 적용 상태</strong>',
             '<span class="update-sentinel-badge">실시간 버전 확인</span>',
             '</div>',
             '<div class="update-sentinel-grid">',

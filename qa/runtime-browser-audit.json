@@ -1,27 +1,61 @@
 {
-  "sample_0_8s": {
+  "before": {
+    "tab": "file",
+    "current": "file",
+    "compat": "모바일 · PC 호환",
     "audit": {
-      "raf": 25,
-      "mutation": 58,
+      "raf": 27,
+      "mutation": 57,
       "errors": []
-    },
-    "build": "1.2.3",
-    "version": "true",
-    "ready": "complete",
-    "nodes": 893
+    }
   },
-  "sample_2_6s": {
+  "after_file": {
+    "tab": "recommend",
+    "current": "recommend",
+    "target": "recommend",
+    "analyzeDisabled": false,
+    "fileName": null,
+    "scrollY": 765,
     "audit": {
-      "raf": 25,
-      "mutation": 58,
+      "raf": 115,
+      "mutation": 234,
       "errors": []
-    },
-    "build": "1.2.3",
-    "version": "true",
-    "ready": "complete",
-    "nodes": 893
+    }
   },
-  "metrics": {},
-  "cdp_exceptions": 0,
-  "page_exceptions": []
+  "after_recommend": {
+    "tab": "candidates",
+    "current": "candidates",
+    "target": "candidates",
+    "cards": 1,
+    "count": "1개 · 후보 카드를 선택하세요",
+    "scrollY": 503,
+    "audit": {
+      "raf": 153,
+      "mutation": 316,
+      "errors": []
+    }
+  },
+  "after_candidate": {
+    "tab": "preview",
+    "current": "preview",
+    "target": "preview",
+    "scrollY": 503,
+    "audit": {
+      "raf": 201,
+      "mutation": 414,
+      "errors": []
+    }
+  },
+  "final_audit": {
+    "raf": 201,
+    "mutation": 414,
+    "errors": []
+  },
+  "mobile": {
+    "compat": "모바일 · PC 호환",
+    "compatDisplay": "flex",
+    "visualDisplay": "none",
+    "active": "file",
+    "menuLabel": "하단 고정 제작 메뉴바"
+  }
 }

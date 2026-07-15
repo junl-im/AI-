@@ -66,7 +66,7 @@
             const preview = document.createElement('button');
             preview.id = 'candidateProPreviewBtn';
             preview.type = 'button';
-            preview.textContent = '📱 선택 미리보기';
+            preview.textContent = '▶ 선택 미리보기';
             preview.addEventListener('click', () => goTab(selected() ? 'preview' : 'candidates'));
             actions.appendChild(preview);
         }
@@ -86,7 +86,7 @@
         else preview.insertBefore(hud, preview.firstChild);
         const actions = byId('previewProActions');
         if (actions) {
-            [['👆 후보 변경', 'candidates'], ['〰️ 파형 조정', 'waveform'], ['⬇️ 저장으로', 'export']].forEach(([label, tab]) => {
+            [['◆ 후보 변경', 'candidates'], ['∿ 파형 조정', 'waveform'], ['↓ 저장으로', 'export']].forEach(([label, tab]) => {
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.textContent = label;
@@ -124,7 +124,7 @@
         if (!items.length) {
             const empty = document.createElement('div');
             empty.className = 'candidate-pro-item';
-            empty.innerHTML = '<span class="candidate-pro-rank">대기</span><b>추천 후보가 아직 없습니다</b><small>추천 탭에서 ✨ 추천 생성을 누르면 후보가 표시됩니다.</small>';
+            empty.innerHTML = '<span class="candidate-pro-rank">대기</span><b>추천 후보가 아직 없습니다</b><small>추천 메뉴에서 추천 생성을 누르면 후보가 표시됩니다.</small>';
             node.appendChild(empty);
             return;
         }

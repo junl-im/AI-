@@ -21,10 +21,10 @@
             stageMeta.textContent = '완료되면 추천 생성 단계로 이동합니다.';
         } else if (hasAnalysis() && !hasRecommendations()) {
             stageTitle.textContent = '분석 완료 · 추천 생성 준비';
-            stageMeta.textContent = '추천 탭의 ✨ 추천 생성 버튼 하나만 누르세요.';
+            stageMeta.textContent = '추천 메뉴의 추천 생성 버튼을 누르세요.';
         } else if (hasRecommendations() && !hasSelection()) {
             stageTitle.textContent = '후보 선택 단계';
-            stageMeta.textContent = '하단 👆 후보 탭에서 마음에 드는 구간을 선택하세요.';
+            stageMeta.textContent = '하단 후보 메뉴에서 마음에 드는 구간을 선택하세요.';
         } else if (hasSelection()) {
             stageTitle.textContent = '미리보기 연결 완료';
             stageMeta.textContent = '파형·컷·편집·자막·저장 탭으로 이어서 다듬을 수 있습니다.';

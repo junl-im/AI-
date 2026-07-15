@@ -42,8 +42,8 @@
         else zone.insertBefore(card, zone.firstChild);
         const actions = coachById('candidateHandoffActions');
         if (actions) {
-            actions.appendChild(coachMakeButton('✨ 추천으로', 'recommend', 'candidateGoRecommendBtn'));
-            actions.appendChild(coachMakeButton('📱 미리보기', 'preview', 'candidateGoPreviewBtn'));
+            actions.appendChild(coachMakeButton('✦ 추천으로', 'recommend', 'candidateGoRecommendBtn'));
+            actions.appendChild(coachMakeButton('▶ 미리보기', 'preview', 'candidateGoPreviewBtn'));
         }
         return card;
     }
@@ -61,9 +61,9 @@
         else preview.insertBefore(ribbon, preview.firstChild);
         const actions = coachById('previewHandoffActions');
         if (actions) {
-            actions.appendChild(coachMakeButton('👆 후보로', 'candidates', 'previewGoCandidatesBtn'));
-            actions.appendChild(coachMakeButton('〰️ 파형 조정', 'waveform', 'previewGoWaveformBtn'));
-            actions.appendChild(coachMakeButton('⬇️ 저장', 'export', 'previewGoExportBtn'));
+            actions.appendChild(coachMakeButton('◆ 후보로', 'candidates', 'previewGoCandidatesBtn'));
+            actions.appendChild(coachMakeButton('∿ 파형 조정', 'waveform', 'previewGoWaveformBtn'));
+            actions.appendChild(coachMakeButton('↓ 저장', 'export', 'previewGoExportBtn'));
         }
         return ribbon;
     }
@@ -89,7 +89,7 @@
             if (recommendButton) recommendButton.disabled = false;
         } else if (coachHasAnalysis()) {
             if (title) title.textContent = '추천 생성이 필요합니다';
-            if (meta) meta.textContent = '추천 탭에서 ✨ 추천 생성을 누르면 후보 카드가 이곳에 나타납니다.';
+            if (meta) meta.textContent = '추천 메뉴에서 추천 생성을 누르면 후보 카드가 이곳에 나타납니다.';
             if (previewButton) previewButton.disabled = true;
             if (recommendButton) recommendButton.disabled = false;
         } else {

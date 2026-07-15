@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.3 - main app with render preset planner and version-aware service worker update checks
+// AI Shorts Studio v1.2.4 - main app with render preset planner and version-aware service worker update checks
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -148,11 +148,21 @@
     }
 
     function activateFlowTab(tab, options) {
-        if (global.AIShortsHyperFlowTabs && global.AIShortsHyperFlowTabs.setActiveFlowTab) {
-            global.AIShortsHyperFlowTabs.setActiveFlowTab(tab, options || {});
+        const opts = Object.assign({ reveal: true, force: true, source: 'app-progress' }, options || {});
+        let handled = false;
+        if (global.AIShortsFlowCommandBridge && global.AIShortsFlowCommandBridge.setTab) {
+            global.AIShortsFlowCommandBridge.setTab(tab, opts);
+            handled = true;
+        } else if (global.AIShortsFlowDirectorFinal && global.AIShortsFlowDirectorFinal.setActive) {
+            global.AIShortsFlowDirectorFinal.setActive(tab, opts);
+            handled = true;
+        } else if (global.AIShortsHyperFlowTabs && global.AIShortsHyperFlowTabs.setActiveFlowTab) {
+            global.AIShortsHyperFlowTabs.setActiveFlowTab(tab, opts);
+            handled = true;
         } else if (document && document.body) {
             document.body.dataset.activeFlowTab = tab;
         }
+        if (!handled) document.dispatchEvent(new CustomEvent('ai-shorts-navigation-request', { detail: { tab, options: opts } }));
     }
 
     function syncHyperFlow() {
@@ -476,10 +486,10 @@
         const snap = snapshot || getRenderQueueSnapshot();
         if (document && document.body) document.body.dataset.renderQueue = snap.running ? 'running' : 'idle';
         if (els.renderQueueStatus) {
-            if (!snap.total) els.renderQueueStatus.textContent = '🟢 대기 중';
-            else if (snap.running && snap.current) els.renderQueueStatus.textContent = `🔄 ${snap.current.label} · ${snap.progress}%`;
-            else if (snap.failed) els.renderQueueStatus.textContent = `⚠️ 완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`;
-            else els.renderQueueStatus.textContent = `✅ 완료 ${snap.done}/${snap.total}`;
+            if (!snap.total) els.renderQueueStatus.textContent = '● 대기 중';
+            else if (snap.running && snap.current) els.renderQueueStatus.textContent = `◌ ${snap.current.label} · ${snap.progress}%`;
+            else if (snap.failed) els.renderQueueStatus.textContent = `! 완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`;
+            else els.renderQueueStatus.textContent = `✓ 완료 ${snap.done}/${snap.total}`;
         }
         if (els.renderQueueList) {
             const items = Array.isArray(snap.items) ? snap.items : [];
@@ -487,7 +497,7 @@
                 els.renderQueueList.innerHTML = '<div class="render-queue-empty">저장 작업을 시작하면 진행 상태가 여기에 표시됩니다.</div>';
             } else {
                 els.renderQueueList.innerHTML = items.map(item => {
-                    const statusIcon = item.status === 'done' ? '✅' : item.status === 'failed' ? '🚫' : item.status === 'running' ? '🔄' : '⏳';
+                    const statusIcon = item.status === 'done' ? '✓' : item.status === 'failed' ? '!' : item.status === 'running' ? '◌' : '·';
                     const statusText = item.status === 'done' ? '완료' : item.status === 'failed' ? '실패' : item.status === 'running' ? '렌더링' : '대기';
                     const error = item.error ? `<div class="render-queue-error">${utils.escapeHtml ? utils.escapeHtml(item.error) : item.error}</div>` : '';
                     const label = utils.escapeHtml ? utils.escapeHtml(item.label || '렌더 작업') : (item.label || '렌더 작업');
@@ -580,7 +590,7 @@
         const queueBusy = Boolean(renderQueue && renderQueue.isRunning && renderQueue.isRunning());
         if (els.analyzeBtn) {
             els.analyzeBtn.disabled = !analysisReady || state.isAnalyzing;
-            els.analyzeBtn.textContent = state.isAnalyzing ? '⚙️ 자동 분석 중' : '✨ 추천 생성';
+            els.analyzeBtn.textContent = state.isAnalyzing ? '◌ 자동 분석 중' : '✦ 추천 생성';
         }
         if (els.previewBtn) els.previewBtn.disabled = !hasRecs || state.isPreviewing;
         if (els.stopPreviewBtn) els.stopPreviewBtn.disabled = !state.isPreviewing;
@@ -939,6 +949,7 @@
         const analysisOptions = Object.assign({ autoGenerate: false }, options || {});
         if (!state.file || state.isAnalyzing) return;
         state.isAnalyzing = true;
+        activateFlowTab('recommend', { reveal: true, force: true, source: analysisOptions.source || 'analysis-start' });
         state.recommendations = [];
         state.selectedRecommendationId = '';
         updateButtons();
@@ -1040,7 +1051,7 @@
         const recommendationCount = (state.recommendations || []).length;
         if (recommendationCount) {
             activateFlowTab('candidates', { reveal: true });
-            toast(`${recommendationCount}개 후보를 만들었습니다. 👆 후보 탭에서 카드를 선택하세요.`, 'success');
+            toast(`${recommendationCount}개 후보를 만들었습니다. 후보 메뉴에서 카드를 선택하세요.`, 'success');
         } else {
             activateFlowTab('recommend', { reveal: true });
             toast('생성된 후보가 없습니다. 길이나 스타일을 바꿔 다시 생성하세요.', 'warning');

@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.2.3 - runtime config single source
+// AI Shorts Studio v1.2.4 - runtime config single source
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.2.3',
-    BUILD_KEY: '1.2.3-shorts-pulse-hero',
+    APP_VERSION: 'v1.2.4',
+    BUILD_KEY: '1.2.4-navigation-focus',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,

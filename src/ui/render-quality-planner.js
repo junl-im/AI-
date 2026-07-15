@@ -5,9 +5,9 @@
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
     const presets = Object.freeze({
-        fast: { label: '빠른 저장', emoji: '⚡', fps: 24, bitrate: 5.2, speed: 0.72, size: 0.72, note: '짧은 확인용·저사양 기기 추천' },
-        balanced: { label: '균형', emoji: '✨', fps: 30, bitrate: 8.0, speed: 1, size: 1, note: '기본 추천·품질과 속도 균형' },
-        high: { label: '고품질', emoji: '🎬', fps: 30, bitrate: 12.5, speed: 1.42, size: 1.55, note: '최종 업로드용·시간과 용량 증가' }
+        fast: { label: '빠른 저장', emoji: '›', fps: 24, bitrate: 5.2, speed: 0.72, size: 0.72, note: '짧은 확인용·저사양 기기 추천' },
+        balanced: { label: '균형', emoji: '◆', fps: 30, bitrate: 8.0, speed: 1, size: 1, note: '기본 추천·품질과 속도 균형' },
+        high: { label: '고품질', emoji: 'HQ', fps: 30, bitrate: 12.5, speed: 1.42, size: 1.55, note: '최종 업로드용·시간과 용량 증가' }
     });
     let raf = 0;
     let observer = null;
@@ -95,9 +95,9 @@
         if (grid) ['fast', 'balanced', 'high'].forEach(key => grid.appendChild(makePresetButton(key)));
         const actions = byId('renderQualityActions');
         if (actions) {
-            actions.appendChild(makeAction('📱 미리보기 확인', 'preview'));
-            actions.appendChild(makeAction('🎛️ 편집 조정', 'edit'));
-            actions.appendChild(makeAction('👆 후보 다시 보기', 'candidates'));
+            actions.appendChild(makeAction('▶ 미리보기 확인', 'preview'));
+            actions.appendChild(makeAction('◫ 편집 조정', 'edit'));
+            actions.appendChild(makeAction('◆ 후보 다시 보기', 'candidates'));
         }
         return panel;
     }

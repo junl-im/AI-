@@ -412,3 +412,96 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         display: none !important;
     }
 }
+
+
+/* v1.2.4 Navigation Focus: the menu bar now acts as a visible workflow navigator. */
+body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child,
+body[data-icon-language="studio-glyphs"] .hyperflow-stage-icon,
+body[data-icon-language="studio-glyphs"] .flow-selection-icon,
+body[data-icon-language="studio-glyphs"] .upload-icon {
+    font-family: Arial, "Segoe UI Symbol", sans-serif !important;
+    font-style: normal;
+    font-variant-emoji: text;
+}
+
+body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child {
+    display: grid !important;
+    width: 27px;
+    height: 27px;
+    place-items: center;
+    margin-inline: auto;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 9px;
+    background: rgba(148, 163, 184, 0.055);
+    color: rgba(203, 213, 225, 0.72);
+    font-size: 15px !important;
+    font-weight: 800;
+    line-height: 1;
+    transition: border-color 150ms ease, background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+body[data-icon-language="studio-glyphs"] .bottom-dock-tab.is-active > span:first-child,
+body[data-icon-language="studio-glyphs"] .bottom-dock-tab[aria-current="step"] > span:first-child {
+    border-color: rgba(103, 232, 249, 0.42);
+    background: linear-gradient(145deg, rgba(103, 232, 249, 0.16), rgba(167, 139, 250, 0.18));
+    color: #f8fafc;
+    box-shadow: 0 0 18px rgba(103, 232, 249, 0.12);
+    transform: translateY(-1px);
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target {
+    position: relative;
+    z-index: 3;
+    border-color: rgba(103, 232, 249, 0.42) !important;
+    box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.08), 0 22px 56px rgba(3, 7, 18, 0.26) !important;
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after {
+    content: attr(data-navigation-label);
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    z-index: 7;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: rgba(8, 12, 22, 0.82);
+    color: rgba(165, 243, 252, 0.9);
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    pointer-events: none;
+}
+
+@keyframes navigationFocusPulse {
+    0% { box-shadow: 0 0 0 0 rgba(103, 232, 249, 0.30), 0 22px 56px rgba(3, 7, 18, 0.26); }
+    100% { box-shadow: 0 0 0 10px rgba(103, 232, 249, 0), 0 22px 56px rgba(3, 7, 18, 0.26); }
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-pulse {
+    animation: navigationFocusPulse 620ms ease-out 1;
+}
+
+@media (min-width: 1180px) {
+    body[data-desktop-layout="prime"] [data-flow-panel] {
+        transition: border-color 150ms ease, box-shadow 150ms ease, opacity 150ms ease, transform 150ms ease;
+    }
+    body[data-desktop-layout="prime"] [data-flow-panel].is-navigation-target {
+        transform: translateY(-2px);
+    }
+}
+
+@media (max-width: 720px) {
+    body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after { display: none; }
+    body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child {
+        width: 25px;
+        height: 25px;
+        border-radius: 8px;
+        font-size: 14px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-pulse { animation: none !important; }
+    body[data-desktop-layout="prime"] [data-flow-panel],
+    body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child { transition: none !important; }
+}

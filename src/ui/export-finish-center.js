@@ -83,7 +83,7 @@
         root.innerHTML = [
             '<div class="export-finish-head">',
             '  <div class="export-finish-title">',
-            '    <span class="export-finish-icon" id="exportFinishIcon">✅</span>',
+            '    <span class="export-finish-icon" id="exportFinishIcon">✓</span>',
             '    <span><strong id="exportFinishTitle">저장 완료</strong><small id="exportFinishSub">렌더 결과를 확인하세요.</small></span>',
             '  </div>',
             '  <span class="export-finish-pill" id="exportFinishPill">완료</span>',
@@ -95,12 +95,12 @@
             '</div>',
             '<p class="export-finish-note" id="exportFinishNote">저장 작업이 끝나면 다운로드 폴더에서 결과물을 확인할 수 있습니다.</p>',
             '<div class="export-finish-actions">',
-            '  <button class="btn-secondary" type="button" data-export-finish-action="preview">📱 미리보기</button>',
-            '  <button class="btn-secondary" type="button" data-export-finish-action="candidates">👆 후보 보기</button>',
-            '  <button class="btn-primary" type="button" data-export-finish-action="save-again">⬇ 다시 저장</button>',
-            '  <button class="btn-secondary" type="button" data-export-finish-action="retry">🔁 실패 재시도</button>',
-            '  <button class="btn-secondary" type="button" data-export-finish-action="diagnostics">📋 진단 복사</button>',
-            '  <button class="btn-secondary" type="button" data-export-finish-action="clear">🧹 정리</button>',
+            '  <button class="btn-secondary" type="button" data-export-finish-action="preview">▶ 미리보기</button>',
+            '  <button class="btn-secondary" type="button" data-export-finish-action="candidates">◆ 후보 보기</button>',
+            '  <button class="btn-primary" type="button" data-export-finish-action="save-again">↓ 다시 저장</button>',
+            '  <button class="btn-secondary" type="button" data-export-finish-action="retry">↻ 실패 재시도</button>',
+            '  <button class="btn-secondary" type="button" data-export-finish-action="diagnostics">▣ 진단 복사</button>',
+            '  <button class="btn-secondary" type="button" data-export-finish-action="clear">× 정리</button>',
             '</div>',
             '<div class="export-finish-mini-log" id="exportFinishLog"></div>'
         ].join('');
@@ -130,7 +130,7 @@
         items.forEach(item => {
             const row = document.createElement('div');
             row.className = 'export-finish-log-item';
-            const icon = item.status === 'done' ? '✅' : item.status === 'failed' ? '🚫' : item.status === 'running' ? '🎬' : '⏳';
+            const icon = item.status === 'done' ? '✓' : item.status === 'failed' ? '!' : item.status === 'running' ? '◌' : '·';
             row.innerHTML = `<span>${icon} ${clampText(item.label, '렌더 작업')}</span><em>${item.status === 'failed' ? clampText(item.error, '실패') : `${Math.round(item.progress || 0)}%`}</em>`;
             log.appendChild(row);
         });
@@ -149,7 +149,7 @@
         const total = Number(snap.total || 0);
         const stateName = failed && done ? 'partial' : failed ? 'failed' : 'done';
         root.dataset.state = stateName;
-        setText('exportFinishIcon', stateName === 'done' ? '✅' : stateName === 'partial' ? '⚠️' : '🚫');
+        setText('exportFinishIcon', stateName === 'done' ? '✓' : stateName === 'partial' ? '!' : '!');
         setText('exportFinishTitle', stateName === 'done' ? '저장 완료' : stateName === 'partial' ? '일부 저장 완료' : '저장 실패');
         setText('exportFinishSub', stateName === 'done' ? '결과물을 다운로드 폴더에서 확인하세요.' : '실패 작업은 재시도하거나 진단을 복사하세요.');
         setText('exportFinishPill', stateName === 'done' ? '완료' : stateName === 'partial' ? '부분 완료' : '실패');

@@ -39,7 +39,7 @@
         if (!hasRecommendations()) {
             if (!list.classList.contains('empty-state')) list.classList.add('empty-state');
             const text = hasAnalysis()
-                ? '분석은 완료되었습니다. ✨ 추천 탭에서 추천 생성을 누르면 후보가 여기에 표시됩니다.'
+                ? '분석은 완료되었습니다. 추천 메뉴에서 후보를 생성하면 여기에 표시됩니다.'
                 : '파일을 열면 자동 분석됩니다. 분석 후 추천을 생성하세요.';
             if (!list.querySelector('.recommendation-card') && list.textContent.trim() !== text) {
                 list.textContent = '';
@@ -52,17 +52,17 @@
     function updateGuideText() {
         if (!state.file) {
             setText('flowSelectionTitle', '파일을 열면 자동 분석합니다');
-            setText('flowSelectionMeta', '하단 메뉴바의 📂 파일 열기에서 원본을 선택해주세요.');
+            setText('flowSelectionMeta', '하단 메뉴바의 파일 열기에서 원본을 선택해주세요.');
             return;
         }
         if (state.isAnalyzing) {
             setText('flowSelectionTitle', '자동 분석 중입니다');
-            setText('flowSelectionMeta', '완료되면 ✨ 추천 단계로 이어집니다.');
+            setText('flowSelectionMeta', '완료되면 추천 단계로 이어집니다.');
             return;
         }
         if (hasAnalysis() && !hasRecommendations()) {
             setText('flowSelectionTitle', '분석 완료 · 추천을 생성하세요');
-            setText('flowSelectionMeta', '✨ 추천 탭의 추천 생성 버튼만 누르면 됩니다.');
+            setText('flowSelectionMeta', '추천 메뉴의 추천 생성 버튼을 누르면 됩니다.');
             return;
         }
         if (hasRecommendations() && !hasSelection()) {

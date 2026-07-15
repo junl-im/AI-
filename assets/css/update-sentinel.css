@@ -107,7 +107,14 @@
 @media (max-width: 720px) {
     .update-sentinel-grid { grid-template-columns: 1fr; }
     .update-sentinel-head { align-items: flex-start; flex-direction: column; }
-    .update-sentinel-live { top: 12px; right: 12px; }
+    .update-sentinel-live {
+        top: auto;
+        right: 12px;
+        bottom: calc(112px + env(safe-area-inset-bottom));
+        left: 12px;
+        max-width: none;
+        text-align: center;
+    }
 }
 @media (prefers-reduced-motion: reduce) {
     .update-sentinel-live { transition: none; transform: none; }

@@ -54,35 +54,35 @@
         document.body.classList.toggle('flow-autoplay-preview', Boolean(byId('autoplayPreviewToggle') && byId('autoplayPreviewToggle').checked));
         if (selected) {
             if (candidatesBtn) candidatesBtn.disabled = false;
-            if (icon) icon.textContent = '✅';
+            if (icon) icon.textContent = '✓';
             if (title) title.textContent = selected.title || '선택 후보';
             if (meta) meta.textContent = `${selected.rangeText || ''} · ${Math.round(Number(selected.score) || 0)}점 · 미리보기/파형/저장으로 바로 연결됩니다.`;
             if (previewBtn) previewBtn.disabled = false;
             if (exportBtn) exportBtn.disabled = false;
         } else if (hasRecommendations()) {
             if (candidatesBtn) candidatesBtn.disabled = false;
-            if (icon) icon.textContent = '👆';
+            if (icon) icon.textContent = '◆';
             if (title) title.textContent = '후보 카드를 선택하세요';
             if (meta) meta.textContent = '후보 탭에서 마음에 드는 구간을 누르면 미리보기로 자동 이동합니다.';
             if (previewBtn) previewBtn.disabled = true;
             if (exportBtn) exportBtn.disabled = true;
         } else if (state.isAnalyzing) {
             if (candidatesBtn) candidatesBtn.disabled = true;
-            if (icon) icon.textContent = '⚙️';
+            if (icon) icon.textContent = '◌';
             if (title) title.textContent = '자동 분석 중입니다';
             if (meta) meta.textContent = '분석이 끝나면 추천 탭으로 연결됩니다.';
             if (previewBtn) previewBtn.disabled = true;
             if (exportBtn) exportBtn.disabled = true;
         } else if (hasAnalysis()) {
             if (candidatesBtn) candidatesBtn.disabled = true;
-            if (icon) icon.textContent = '✨';
+            if (icon) icon.textContent = '✦';
             if (title) title.textContent = '추천 생성만 누르면 후보가 나옵니다';
             if (meta) meta.textContent = '추천 탭에서 후보 길이와 스타일을 확인한 뒤 생성하세요.';
             if (previewBtn) previewBtn.disabled = true;
             if (exportBtn) exportBtn.disabled = true;
         } else {
             if (candidatesBtn) candidatesBtn.disabled = true;
-            if (icon) icon.textContent = '📂';
+            if (icon) icon.textContent = '＋';
             if (title) title.textContent = '파일을 열면 자동 분석합니다';
             if (meta) meta.textContent = '파일 열기 → 자동 분석 → 추천 생성 → 후보 선택 → 미리보기';
             if (previewBtn) previewBtn.disabled = true;
@@ -95,7 +95,7 @@
         if (list) list.classList.toggle('recommendations-compare', compareMode);
         if (btn) {
             btn.setAttribute('aria-pressed', compareMode ? 'true' : 'false');
-            btn.textContent = compareMode ? '↩ 기본 보기' : '🔍 비교 모드';
+            btn.textContent = compareMode ? '← 기본 보기' : '◇ 비교 모드';
         }
     }
     function scheduleSync() {

@@ -60,9 +60,9 @@
         else preview.insertBefore(strip, preview.firstChild);
         const actions = byId('previewReadyActions');
         if (actions) {
-            actions.appendChild(makeButton('〰️ 파형 다듬기', 'waveform', 'previewReadyWaveformBtn'));
-            actions.appendChild(makeButton('✂️ 컷 확인', 'cut', 'previewReadyCutBtn'));
-            actions.appendChild(makeButton('⬇️ 저장 준비', 'export', 'previewReadyExportBtn'));
+            actions.appendChild(makeButton('∿ 파형 다듬기', 'waveform', 'previewReadyWaveformBtn'));
+            actions.appendChild(makeButton('✂ 컷 확인', 'cut', 'previewReadyCutBtn'));
+            actions.appendChild(makeButton('↓ 저장 준비', 'export', 'previewReadyExportBtn'));
         }
         return strip;
     }
@@ -80,9 +80,9 @@
         else exportPanel.insertBefore(panel, exportPanel.firstChild);
         const actions = byId('saveReadinessActions');
         if (actions) {
-            actions.appendChild(makeButton('👆 후보 다시 보기', 'candidates', 'saveReadyCandidatesBtn'));
-            actions.appendChild(makeButton('📱 미리보기 확인', 'preview', 'saveReadyPreviewBtn'));
-            actions.appendChild(makeButton('🎛️ 편집 조정', 'edit', 'saveReadyEditBtn'));
+            actions.appendChild(makeButton('◆ 후보 다시 보기', 'candidates', 'saveReadyCandidatesBtn'));
+            actions.appendChild(makeButton('▶ 미리보기 확인', 'preview', 'saveReadyPreviewBtn'));
+            actions.appendChild(makeButton('◫ 편집 조정', 'edit', 'saveReadyEditBtn'));
         }
         return panel;
     }

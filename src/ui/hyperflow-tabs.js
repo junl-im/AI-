@@ -6,16 +6,16 @@
     const state = store.state || {};
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
-        file: ['📂', '파일 열기', '파일을 열면 자동 분석이 시작됩니다.'],
-        recommend: ['✨', '추천 생성', '분석 결과로 쇼츠 후보를 생성합니다.'],
-        candidates: ['👆', '후보 선택', '마음에 드는 구간을 고르면 미리보기로 연결됩니다.'],
-        preview: ['📱', '미리보기', '선택한 후보의 세로 화면을 확인합니다.'],
-        waveform: ['〰️', '파형', '시작/끝과 컷 마커를 맞춥니다.'],
-        cut: ['✂️', '자동 컷', '비트·장면·무음 회피 포인트를 확인합니다.'],
-        edit: ['🎛️', '편집', '구간, 템플릿, 수동 조정을 관리합니다.'],
-        caption: ['💬', '자막', '자막 스타일과 싱크를 다듬습니다.'],
-        export: ['⬇️', '저장', '썸네일과 쇼츠 결과물을 저장합니다.'],
-        project: ['🗂️', '프로젝트', '작업 JSON과 카피를 관리합니다.']
+        file: ['＋', '파일 열기', '파일을 열면 자동 분석이 시작됩니다.'],
+        recommend: ['✦', '추천 생성', '분석 결과로 쇼츠 후보를 생성합니다.'],
+        candidates: ['◆', '후보 선택', '마음에 드는 구간을 고르면 미리보기로 연결됩니다.'],
+        preview: ['▶', '미리보기', '선택한 후보의 세로 화면을 확인합니다.'],
+        waveform: ['∿', '파형', '시작/끝과 컷 마커를 맞춥니다.'],
+        cut: ['✂', '자동 컷', '비트·장면·무음 회피 포인트를 확인합니다.'],
+        edit: ['◫', '편집', '구간, 템플릿, 수동 조정을 관리합니다.'],
+        caption: ['CC', '자막', '자막 스타일과 싱크를 다듬습니다.'],
+        export: ['↓', '저장', '썸네일과 쇼츠 결과물을 저장합니다.'],
+        project: ['▦', '프로젝트', '작업 JSON과 카피를 관리합니다.']
     };
     let active = 'file';
     let raf = 0;
@@ -73,9 +73,9 @@
             setTextIfChanged(title, titleText);
         }
         if (small) {
-            const smallText = !state.file ? '하단 메뉴바의 📂 파일 열기에서 원본을 선택해주세요.'
+            const smallText = !state.file ? '하단 메뉴바의 파일 열기에서 원본을 선택해주세요.'
                 : state.isAnalyzing ? '파일을 읽고 오디오·영상·컷 엔진을 자동으로 돌리는 중입니다.'
-                    : tab === 'recommend' && hasAnalysis() && !hasRecommendations() ? '추천 메뉴의 ✨ 추천 생성 버튼 하나만 사용하면 됩니다.'
+                    : tab === 'recommend' && hasAnalysis() && !hasRecommendations() ? '추천 메뉴의 추천 생성 버튼을 누르면 됩니다.'
                         : tab === 'candidates' && hasRecommendations() && !hasSelection() ? '카드를 누르면 선택 즉시 미리보기로 이동합니다.' : meta[2];
             setTextIfChanged(small, smallText);
         }
@@ -95,6 +95,8 @@
         });
     }
     function syncTabs() {
+        const requested = document.body && document.body.dataset ? document.body.dataset.activeFlowTab : '';
+        if ((ORDER.includes(requested) || requested === 'project') && requested !== active) active = requested;
         tabs().forEach(tab => {
             const key = tab.getAttribute('data-flow-tab');
             const disabled = isDisabled(key);

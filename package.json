@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-2-3",
-  "version": "1.2.3",
+  "name": "ai-shorts-studio-v1-2-4",
+  "version": "1.2.4",
   "private": true,
-  "description": "AI Shorts Studio v1.2.3 - shorts-first 9:16 hero, cut timeline identity and viewport rendering diet",
+  "description": "AI Shorts Studio v1.2.4 - workflow navigation focus, mobile-PC compatibility rail and consistent studio glyphs",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -113,6 +113,7 @@
     "node qa/shutter_flow_director_smoke.js",
     "node --check src/ui/flow-command-bridge.js",
     "node qa/no_shake_command_bridge_smoke.js",
-    "node qa/runtime_responsiveness_smoke.js"
+    "node qa/runtime_responsiveness_smoke.js",
+    "node qa/navigation_focus_smoke.js"
   ]
 }

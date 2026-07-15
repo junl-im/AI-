@@ -83,7 +83,7 @@
         board.id = 'candidatePinBoard';
         board.className = 'candidate-pin-board';
         board.setAttribute('aria-label', '핀 고정 후보');
-        board.innerHTML = '<div class="pin-board-head"><div class="pin-board-copy"><strong id="pinBoardTitle">후보 핀 보드</strong><small id="pinBoardMeta">마음에 드는 후보를 핀으로 고정하고 비교하세요.</small></div><div class="pin-board-actions"><button id="pinOnlyToggle" type="button">📌 핀 후보만 보기</button><button id="pinClearBtn" type="button">핀 비우기</button></div></div><div id="pinCandidateList" class="pin-candidate-list"></div>';
+        board.innerHTML = '<div class="pin-board-head"><div class="pin-board-copy"><strong id="pinBoardTitle">후보 핀 보드</strong><small id="pinBoardMeta">마음에 드는 후보를 핀으로 고정하고 비교하세요.</small></div><div class="pin-board-actions"><button id="pinOnlyToggle" type="button">◇ 핀 후보만 보기</button><button id="pinClearBtn" type="button">핀 비우기</button></div></div><div id="pinCandidateList" class="pin-candidate-list"></div>';
         if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(board, anchor.nextSibling);
         else zone.insertBefore(board, zone.firstChild);
         const only = byId('pinOnlyToggle');
@@ -102,7 +102,7 @@
         panel.id = 'candidateSaveCompare';
         panel.className = 'candidate-save-compare';
         panel.setAttribute('aria-label', '후보별 저장 예상 비교');
-        panel.innerHTML = '<div class="save-compare-head"><div class="save-compare-copy"><strong id="saveCompareTitle">후보별 저장 예상</strong><small id="saveCompareMeta">선택 후보와 핀 후보의 예상 시간·용량을 비교합니다.</small></div><div class="save-compare-actions"><button id="saveCompareCandidateBtn" type="button">👆 후보로 이동</button><button id="saveComparePreviewBtn" type="button">📱 미리보기</button></div></div><div id="saveCompareList" class="save-compare-list"></div>';
+        panel.innerHTML = '<div class="save-compare-head"><div class="save-compare-copy"><strong id="saveCompareTitle">후보별 저장 예상</strong><small id="saveCompareMeta">선택 후보와 핀 후보의 예상 시간·용량을 비교합니다.</small></div><div class="save-compare-actions"><button id="saveCompareCandidateBtn" type="button">◆ 후보로 이동</button><button id="saveComparePreviewBtn" type="button">▶ 미리보기</button></div></div><div id="saveCompareList" class="save-compare-list"></div>';
         if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(panel, anchor.nextSibling);
         else exportPanel.insertBefore(panel, exportPanel.firstChild);
         const c = byId('saveCompareCandidateBtn');
@@ -134,7 +134,7 @@
             if (button.classList.contains('is-pinned') !== pinned) button.classList.toggle('is-pinned', pinned);
             const pressed = pinned ? 'true' : 'false';
             if (button.getAttribute('aria-pressed') !== pressed) button.setAttribute('aria-pressed', pressed);
-            const label = pinned ? '📌' : '핀';
+            const label = pinned ? '◆' : '핀';
             if (button.textContent !== label) button.textContent = label;
         });
         document.querySelectorAll('.candidate-pro-item[data-candidate-pro-id]').forEach(card => {
@@ -180,7 +180,7 @@
         const only = byId('pinOnlyToggle');
         if (only) {
             if (only.classList.contains('is-active') !== showPinnedOnly) only.classList.toggle('is-active', showPinnedOnly);
-            const onlyText = showPinnedOnly ? '전체 후보 보기' : '📌 핀 후보만 보기';
+            const onlyText = showPinnedOnly ? '전체 후보 보기' : '◇ 핀 후보만 보기';
             if (only.textContent !== onlyText) only.textContent = onlyText;
             if (only.disabled !== !all.length) only.disabled = !all.length;
         }
