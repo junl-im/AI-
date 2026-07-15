@@ -1,4 +1,4 @@
-# QA Report - AI 쇼츠 제작 스튜디오 v1.1.7
+# QA Report - AI 쇼츠 제작 스튜디오 v1.1.8
 
 ## Summary
 
@@ -6,7 +6,7 @@
 - Failed: 0/99
 - Result: PASS
 
-## v1.1.7 Focus
+## v1.1.8 Focus
 
 - Update Sentinel: information modal now exposes current version, build key, service worker state, cache state, engine profile, and diagnostic actions.
 - Cache diagnostics: old shell caches can be inspected and cleared without touching user project/session data.
@@ -22,7 +22,7 @@
 - `node --check src/engine/engine-boost-profile.js`
 - `node qa/engine_boost_profile_smoke.js`
 - `node qa/app_version_sync_smoke.js` updated to derive expected version from `package.json`.
-- `node qa/layout_dock_smoke.js` updated for the v1.1.7 Dock icon set.
+- `node qa/layout_dock_smoke.js` updated for the v1.1.8 Dock icon set.
 
 ## Command
 
@@ -32,4 +32,4 @@ npm run check
 
 ## Notes
 
-v1.1.7 keeps the main screen simple and places update/cache diagnostics inside the program information modal. This avoids cluttering the editing workflow while still making version mismatch and stale cache issues easy to confirm during handoff or user support.
+v1.1.8 keeps the main screen simple and places update/cache diagnostics inside the program information modal. This avoids cluttering the editing workflow while still making version mismatch and stale cache issues easy to confirm during handoff or user support.

@@ -45,4 +45,4 @@ if (html.includes('id="flowRecommendBtn"') || js.includes('flowRecommendBtn')) {
     console.error('FAIL top duplicate recommend button bridge should not exist');
     process.exit(1);
 }
-console.log('PASS HyperConnect 8-tab bottom dock anchors present with updated v1.1.7 icons');
+console.log('PASS HyperConnect 8-tab bottom dock anchors present with updated v1.1.8 icons');

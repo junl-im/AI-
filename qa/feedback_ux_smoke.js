@@ -11,8 +11,8 @@ const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
 
 const requiredHtml = [
     'Design by <strong>곰같은여우</strong>',
-    'feedback-ux.css?v=1.1.7-flow-audit',
-    'feedback-ux.js?v=1.1.7-flow-audit'
+    'feedback-ux.css?v=1.1.8-flow-audit',
+    'feedback-ux.js?v=1.1.8-flow-audit'
 ];
 const missingHtml = requiredHtml.filter(token => !html.includes(token));
 if (missingHtml.length) {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.3.0 - convenience controls and workflow polish
+// AI Shorts Studio v1.1.8 - event-driven convenience controls and workflow polish
 'use strict';
 
 (function bootAIShortsUxControls(global) {
@@ -31,6 +31,7 @@
         previewStatus: 'previewStatus'
     };
     const els = {};
+    let syncRaf = 0;
 
     function uxById(id) {
         return document.getElementById(id);
@@ -47,8 +48,9 @@
 
     function uxSetButtonMirror(mirror, source) {
         if (!mirror || !source) return;
-        mirror.disabled = Boolean(source.disabled);
-        mirror.setAttribute('aria-disabled', mirror.disabled ? 'true' : 'false');
+        const disabled = Boolean(source.disabled);
+        if (mirror.disabled !== disabled) mirror.disabled = disabled;
+        mirror.setAttribute('aria-disabled', disabled ? 'true' : 'false');
     }
 
     function uxSetWorkflowClass(element, isActive, isDone) {
@@ -70,19 +72,23 @@
         });
     }
 
+    function uxSetText(node, text) {
+        if (node && node.textContent !== text) node.textContent = text;
+    }
+
     function uxUpdateDock() {
         const hasFile = Boolean(state.file);
         const selected = uxSelectedRecommendation();
         const hasExport = Boolean(state.exportInfo);
-        if (els.dockTitle) {
-            if (!hasFile) els.dockTitle.textContent = '원본 파일을 열어주세요';
-            else if (!selected) els.dockTitle.textContent = state.file && state.file.name ? state.file.name : '분석 준비 완료';
-            else els.dockTitle.textContent = selected.title || '선택된 추천 구간';
-        }
-        if (els.dockMeta) {
-            if (!hasFile) els.dockMeta.textContent = '파일 열기 버튼으로 노래 또는 영상을 선택하세요.';
-            else if (!selected) els.dockMeta.textContent = '분석하고 추천받기를 누르면 후보 카드가 생성됩니다.';
-            else els.dockMeta.textContent = `${selected.rangeText || ''} · 점수 ${Math.round(Number(selected.score) || 0)} · 바로 미리보기/내보내기 가능`;
+        if (!hasFile) {
+            uxSetText(els.dockTitle, '원본 파일을 열어주세요');
+            uxSetText(els.dockMeta, '파일 열기 버튼으로 노래 또는 영상을 선택하세요.');
+        } else if (!selected) {
+            uxSetText(els.dockTitle, state.file && state.file.name ? state.file.name : '분석 준비 완료');
+            uxSetText(els.dockMeta, '분석이 끝나면 추천 탭에서 후보를 생성하세요.');
+        } else {
+            uxSetText(els.dockTitle, selected.title || '선택된 추천 구간');
+            uxSetText(els.dockMeta, `${selected.rangeText || ''} · 점수 ${Math.round(Number(selected.score) || 0)} · 미리보기와 저장 준비 완료`);
         }
         if (els.dockStatusDot) {
             els.dockStatusDot.classList.toggle('is-ready', Boolean(selected));
@@ -116,6 +122,15 @@
         uxUpdateWorkflow();
     }
 
+    function uxScheduleSync() {
+        if (syncRaf) return;
+        const schedule = global.requestAnimationFrame || (callback => global.setTimeout(callback, 16));
+        syncRaf = schedule(() => {
+            syncRaf = 0;
+            uxSyncAll();
+        });
+    }
+
     function uxInstallQuickDurations() {
         if (!els.quickDurationChips || !els.durationSelect) return;
         els.quickDurationChips.addEventListener('click', event => {
@@ -123,7 +138,7 @@
             if (!button) return;
             els.durationSelect.value = button.dataset.duration || 'auto';
             els.durationSelect.dispatchEvent(new Event('change', { bubbles: true }));
-            uxSyncAll();
+            uxScheduleSync();
         });
     }
 
@@ -146,7 +161,7 @@
             const next = Math.max(0, (Number(input.value) || 0) + delta);
             input.value = next.toFixed(1);
             if (els.applyRangeBtn && !els.applyRangeBtn.disabled) els.applyRangeBtn.click();
-            uxSyncAll();
+            uxScheduleSync();
         });
     }
 
@@ -166,11 +181,17 @@
     }
 
     function uxInstallObservers() {
-        const observer = new MutationObserver(uxSyncAll);
+        const observer = new MutationObserver(uxScheduleSync);
         [els.analyzeBtn, els.previewBtn, els.exportBtn, els.selectedBadge, els.recommendationCount, els.previewStatus].forEach(node => {
             if (node) observer.observe(node, { attributes: true, childList: true, subtree: true, characterData: true });
         });
-        setInterval(uxSyncAll, 700);
+        document.addEventListener('ai-shorts-flow-sync', uxScheduleSync);
+        document.addEventListener('change', uxScheduleSync, { passive: true });
+        global.addEventListener('focus', uxScheduleSync, { passive: true });
+        global.addEventListener('pageshow', uxScheduleSync, { passive: true });
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) uxScheduleSync();
+        });
     }
 
     function uxInit() {
@@ -183,6 +204,7 @@
         uxSyncAll();
     }
 
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', uxInit);
+    global.AIShortsUxControls = Object.freeze({ sync: uxScheduleSync });
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', uxInit, { once: true });
     else uxInit();
 })(window);
