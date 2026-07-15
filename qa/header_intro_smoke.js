@@ -21,16 +21,16 @@ const dialog = dialogMatch[0];
 if (!header.includes('음악이나 영상을 열면 자동 분석') || !header.includes('쇼츠 후보 추천')) {
     fail('top header should show a short product introduction');
 }
-if (!header.includes('Design by <strong>곰같은여우</strong>')) {
+if (!header.includes('class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>')) {
     fail('brand signature should remain in the header');
 }
 if (header.includes('패치') || header.includes('Modular Engine') || header.includes('HyperFlow') || header.includes('바로 분석')) {
     fail('top header should not show patch labels, engine labels, HyperFlow jargon, or analysis button');
 }
-if (!html.includes('<title>AI 쇼츠 제작 스튜디오 v1.2.1</title>')) {
+if (!html.includes('<title>AI 쇼츠 제작 스튜디오 v1.2.2</title>')) {
     fail('document title should be clean and version-only');
 }
-if (!html.includes('>v1.2.1</button>')) {
+if (!html.includes('>v1.2.2</button>')) {
     fail('version badge should show only the version number');
 }
 if (dialog.includes('패치') || dialog.includes('HyperFlow') || dialog.includes('Modular Engine')) {

@@ -10,9 +10,9 @@ const js = fs.readFileSync(path.join(root, 'src/ui/feedback-ux.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
 
 const requiredHtml = [
-    'Design by <strong>곰같은여우</strong>',
-    'feedback-ux.css?v=1.2.1-flow-audit',
-    'feedback-ux.js?v=1.2.1-flow-audit'
+    'class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>',
+    'feedback-ux.css?v=1.2.2-flow-audit',
+    'feedback-ux.js?v=1.2.2-flow-audit'
 ];
 const missingHtml = requiredHtml.filter(token => !html.includes(token));
 if (missingHtml.length) {

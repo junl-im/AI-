@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-2-1",
-  "version": "1.2.1",
+  "name": "ai-shorts-studio-v1-2-2",
+  "version": "1.2.2",
   "private": true,
-  "description": "AI Shorts Studio v1.2.1 - cinematic command-deck hero, runtime responsiveness guard, desktop prime workspace and mobile flow landing",
+  "description": "AI Shorts Studio v1.2.2 - editorial masthead, simplified brand metadata and viewport rendering diet",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -93,6 +93,7 @@
     "node qa/runtime_performance_smoke.js",
     "node qa/desktop_prime_layout_smoke.js",
     "node qa/hero_command_deck_smoke.js",
+    "node qa/viewport_rendering_smoke.js",
     "node qa/workspace_comfort_smoke.js",
     "node --check src/ui/handoff-coach.js",
     "node qa/handoff_coach_smoke.js",

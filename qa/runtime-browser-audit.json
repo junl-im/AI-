@@ -1,0 +1,32 @@
+{
+  "sample_0_8s": {
+    "audit": {
+      "raf": 25,
+      "mutation": 58,
+      "errors": []
+    },
+    "build": "1.2.2",
+    "version": "true",
+    "ready": "complete",
+    "nodes": 839
+  },
+  "sample_2_6s": {
+    "audit": {
+      "raf": 25,
+      "mutation": 58,
+      "errors": []
+    },
+    "build": "1.2.2",
+    "version": "true",
+    "ready": "complete",
+    "nodes": 839
+  },
+  "metrics": {
+    "Nodes": 2903,
+    "LayoutDuration": 0.58596,
+    "RecalcStyleDuration": 0.06341,
+    "ScriptDuration": 0.11842,
+    "TaskDuration": 1.74159
+  },
+  "cdp_exceptions": 0
+}

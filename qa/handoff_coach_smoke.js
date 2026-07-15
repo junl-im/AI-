@@ -18,11 +18,11 @@ const css = read('assets/css/handoff-coach.css');
 const js = read('src/ui/handoff-coach.js');
 const pkg = JSON.parse(read('package.json'));
 
-ok(pkg.version === '1.2.1', 'package version is v1.2.1');
-ok(html.includes('assets/css/handoff-coach.css?v=1.2.1-handoff-coach'), 'handoff coach stylesheet is linked');
-ok(html.includes('src/ui/handoff-coach.js?v=1.2.1-handoff-coach'), 'handoff coach script is linked');
-ok(sw.includes('./assets/css/handoff-coach.css?v=1.2.1-handoff-coach'), 'handoff coach stylesheet is cached');
-ok(sw.includes('./src/ui/handoff-coach.js?v=1.2.1-handoff-coach'), 'handoff coach script is cached');
+ok(pkg.version === '1.2.2', 'package version is v1.2.2');
+ok(html.includes('assets/css/handoff-coach.css?v=1.2.2-handoff-coach'), 'handoff coach stylesheet is linked');
+ok(html.includes('src/ui/handoff-coach.js?v=1.2.2-handoff-coach'), 'handoff coach script is linked');
+ok(sw.includes('./assets/css/handoff-coach.css?v=1.2.2-handoff-coach'), 'handoff coach stylesheet is cached');
+ok(sw.includes('./src/ui/handoff-coach.js?v=1.2.2-handoff-coach'), 'handoff coach script is cached');
 ok(css.includes('.candidate-handoff-card'), 'candidate handoff card styles exist');
 ok(css.includes('.preview-handoff-ribbon'), 'preview handoff ribbon styles exist');
 ok(css.includes('@media (max-width: 720px)'), 'mobile handoff layout exists');
