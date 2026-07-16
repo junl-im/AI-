@@ -14,7 +14,7 @@ const html = read('index.html');
 const refinement = read('assets/css/ui-refinement.css');
 const comfort = read('assets/css/workspace-comfort.css');
 const pcHotfix = read('assets/css/pc-dock-reveal-hotfix.css');
-const dockMarkup = (html.match(/<nav class="bottom-dock-tabs"[\s\S]*?<\/nav>/) || [''])[0];
+const dockMarkup = (html.match(/<nav[^>]*class="bottom-dock-tabs"[^>]*>[\s\S]*?<\/nav>/) || [''])[0];
 const tabs = (dockMarkup.match(/data-flow-tab=/g) || []).length;
 
 assert(tabs === 8, 'menu bar keeps exactly eight workflow destinations');
@@ -24,4 +24,4 @@ assert(refinement.includes('max-width: 100% !important;') && refinement.includes
 assert(comfort.includes('grid-template-columns: repeat(8, minmax(0, 1fr)) !important'), 'desktop comfort layer no longer forces 112px minimum columns');
 assert(!comfort.includes('--comfort-dock-max') && !comfort.includes('minmax(112px, 1fr)'), 'obsolete 1180px-plus inner rail constraint is removed');
 assert(pcHotfix.includes('@media (min-width: 721px) and (max-width: 1179px)') && pcHotfix.includes('repeat(4, minmax(0, 1fr))'), 'small PC and tablet widths retain a safe four-by-two layout');
-console.log('PASS v1.3.2 PC menu containment guardrails present');
+console.log('PASS v1.3.4 PC menu containment guardrails present');

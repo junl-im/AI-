@@ -1,18 +1,20 @@
-// AI Shorts Studio v1.3.2 - cancellable render queue, retries, and export reliability controller
+// AI Shorts Studio v1.3.4 - throttled render queue, ETA, retries, and cancellation
 'use strict';
 
 (function exposeRenderQueue(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const store = global.AIShortsAppState || {};
-    const state = store.state || {};
     const listeners = new Set();
     const MAX_ITEMS = Number(config.RENDER_QUEUE_LIMIT || 12);
     const RETRY_LIMIT = Number(config.RENDER_QUEUE_RETRY_LIMIT || 2);
+    const EMIT_INTERVAL_MS = 140;
 
     let items = [];
     let running = false;
     let lastWorker = null;
     let activeController = null;
+    let emitTimer = 0;
+    let lastEmitAt = 0;
 
     function now() { return Date.now(); }
     function clampPercent(value) {
@@ -29,6 +31,7 @@
             id: safe.id || uid('render'),
             label: safe.label || `렌더 작업 ${index + 1}`,
             filenameHint: safe.filenameHint || '',
+            statusText: safe.statusText || '',
             candidateId: safe.candidateId || null,
             payload: safe.payload || null,
             status: safe.status || 'queued',
@@ -37,7 +40,11 @@
             error: '',
             createdAt: safe.createdAt || now(),
             startedAt: 0,
-            finishedAt: 0
+            finishedAt: 0,
+            elapsedMs: 0,
+            etaSeconds: null,
+            progressRate: 0,
+            lastProgressAt: 0
         };
     }
     function snapshot() {
@@ -60,12 +67,24 @@
             items: items.map(item => Object.assign({}, item))
         };
     }
-    function emit() {
+    function emitNow() {
+        if (emitTimer) {
+            clearTimeout(emitTimer);
+            emitTimer = 0;
+        }
+        lastEmitAt = now();
         const snap = snapshot();
         try { global.dispatchEvent(new CustomEvent('ai-shorts-render-queue', { detail: snap })); } catch (error) { /* ignored */ }
         listeners.forEach(listener => {
             try { listener(snap); } catch (error) { /* ignored */ }
         });
+    }
+    function emit(force) {
+        if (force || now() - lastEmitAt >= EMIT_INTERVAL_MS) {
+            emitNow();
+            return;
+        }
+        if (!emitTimer) emitTimer = setTimeout(emitNow, Math.max(0, EMIT_INTERVAL_MS - (now() - lastEmitAt)));
     }
     function subscribe(listener) {
         if (typeof listener === 'function') {
@@ -74,16 +93,36 @@
         }
         return () => listeners.delete(listener);
     }
-    function setItem(item, patch) {
+    function setItem(item, patch, options) {
         Object.assign(item, patch || {});
         item.progress = clampPercent(item.progress);
-        emit();
+        emit(Boolean(options && options.force));
         return item;
+    }
+    function updateProgress(item, percent, statusText) {
+        const progress = clampPercent(percent);
+        const timestamp = now();
+        const roundedChanged = Math.round(progress) !== Math.round(item.progress);
+        const statusChanged = Boolean(statusText && statusText !== item.statusText);
+        if (!roundedChanged && !statusChanged && timestamp - item.lastProgressAt < EMIT_INTERVAL_MS) return;
+        item.progress = progress;
+        item.statusText = statusText || item.statusText;
+        item.lastProgressAt = timestamp;
+        item.elapsedMs = item.startedAt ? Math.max(0, timestamp - item.startedAt) : 0;
+        if (item.elapsedMs > 500 && progress > 2 && progress < 100) {
+            const rate = progress / item.elapsedMs;
+            const rawEta = rate > 0 ? ((100 - progress) / rate) / 1000 : null;
+            if (Number.isFinite(rawEta)) {
+                item.etaSeconds = Number.isFinite(item.etaSeconds) ? Math.round(item.etaSeconds * 0.68 + rawEta * 0.32) : Math.round(rawEta);
+                item.progressRate = rate * 1000;
+            }
+        }
+        emit(false);
     }
     function summarize() {
         const snap = snapshot();
         if (!snap.total) return '대기 중';
-        if (snap.running && snap.current) return `${snap.current.label} · ${snap.progress}%`;
+        if (snap.running && snap.current) return `${snap.current.label} · ${Math.round(snap.current.progress)}%`;
         if (snap.failed) return `완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`;
         if (snap.cancelled) return `완료 ${snap.done}/${snap.total} · 취소 ${snap.cancelled}`;
         return `완료 ${snap.done}/${snap.total}`;
@@ -97,7 +136,7 @@
         } else {
             items = [];
         }
-        emit();
+        emit(true);
     }
     function abortError(reason) {
         const error = new Error(String(reason || '렌더 작업이 취소되었습니다.'));
@@ -127,27 +166,27 @@
         lastWorker = worker;
         running = true;
         if (store.addDiagnostic) store.addDiagnostic({ type: 'render-queue-start', total: items.length });
-        emit();
+        emit(true);
         try {
             for (const item of items) {
                 if (signal && signal.aborted) {
-                    setItem(item, { status: 'cancelled', finishedAt: now(), error: String(signal.reason || '렌더 취소') });
+                    setItem(item, { status: 'cancelled', finishedAt: now(), error: String(signal.reason || '렌더 취소') }, { force: true });
                     continue;
                 }
                 item.attempts += 1;
-                setItem(item, { status: 'running', progress: 1, startedAt: now(), error: '' });
+                setItem(item, { status: 'running', progress: 1, startedAt: now(), error: '', statusText: '렌더 준비 중', etaSeconds: null, elapsedMs: 0 }, { force: true });
                 try {
                     await worker(item, (percent, status) => {
                         if (signal && signal.aborted) return;
-                        setItem(item, { progress: clampPercent(percent), filenameHint: status || item.filenameHint });
+                        updateProgress(item, percent, status);
                     }, signal);
                     if (signal && signal.aborted) throw abortError(signal.reason);
-                    setItem(item, { status: 'done', progress: 100, finishedAt: now() });
+                    setItem(item, { status: 'done', progress: 100, finishedAt: now(), elapsedMs: Math.max(0, now() - item.startedAt), etaSeconds: 0, statusText: '저장 완료' }, { force: true });
                 } catch (error) {
                     if (isAbortError(error) || (signal && signal.aborted)) {
-                        setItem(item, { status: 'cancelled', progress: item.progress || 0, finishedAt: now(), error: error && error.message || '렌더 취소' });
+                        setItem(item, { status: 'cancelled', progress: item.progress || 0, finishedAt: now(), elapsedMs: Math.max(0, now() - item.startedAt), etaSeconds: null, error: error && error.message || '렌더 취소', statusText: '사용자 취소' }, { force: true });
                     } else {
-                        setItem(item, { status: 'failed', progress: item.progress || 0, finishedAt: now(), error: error && error.message ? error.message : '렌더 실패' });
+                        setItem(item, { status: 'failed', progress: item.progress || 0, finishedAt: now(), elapsedMs: Math.max(0, now() - item.startedAt), etaSeconds: null, error: error && error.message ? error.message : '렌더 실패', statusText: '렌더 실패' }, { force: true });
                         if (store.addDiagnostic) store.addDiagnostic({ type: 'render-queue-error', id: item.id, label: item.label, message: item.error });
                     }
                 }
@@ -157,7 +196,7 @@
             if (externalSignal) externalSignal.removeEventListener('abort', relayAbort);
             activeController = null;
             if (store.addDiagnostic) store.addDiagnostic({ type: 'render-queue-finish', summary: summarize() });
-            emit();
+            emit(true);
         }
         return snapshot();
     }
@@ -166,10 +205,14 @@
             .filter(item => item.status === 'failed' && item.attempts <= RETRY_LIMIT)
             .map((item, index) => normalizeJob(Object.assign({}, item, {
                 status: 'queued',
+                statusText: '재시도 대기',
                 progress: 0,
                 error: '',
                 startedAt: 0,
-                finishedAt: 0
+                finishedAt: 0,
+                elapsedMs: 0,
+                etaSeconds: null,
+                progressRate: 0
             }), index));
     }
     async function retryFailed(worker, options) {

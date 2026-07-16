@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-3-2",
-  "version": "1.3.2",
+  "name": "ai-shorts-studio-v1-3-4",
+  "version": "1.3.4",
   "private": true,
-  "description": "AI Shorts Studio v1.3.2 - real-media E2E, worker fallback, render cancel, safe retry, and playback preflight",
+  "description": "AI Shorts Studio v1.3.4 - adaptive mobile workflow menu, lower peak decode memory, and long-media preflight",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -47,6 +47,7 @@
     "node --check src/ui/ux-controls.js",
     "node --check src/ui/range-drag-controls.js",
     "node --check src/ui/bottom-dock.js",
+    "node --check src/ui/mobile-menu-guide.js",
     "node --check src/ui/feedback-ux.js",
     "node --check src/security/site-guards.js",
     "node --check src/boot/runtime-health.js",
@@ -136,6 +137,10 @@
     "node qa/workspace_layout_controls_smoke.js",
     "node qa/audio_analysis_fallback_smoke.js",
     "node qa/render_recovery_smoke.js",
-    "node qa/media_e2e_audit_smoke.js"
+    "node qa/media_e2e_audit_smoke.js",
+    "node qa/long_media_performance_smoke.js",
+    "node qa/render_eta_smoke.js",
+    "node qa/mobile_menu_guide_smoke.js",
+    "node qa/decode_memory_preflight_smoke.js"
   ]
 }

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.1 - cancellable modular analysis pipeline
+// AI Shorts Studio v1.3.4 - long-media aware modular analysis pipeline
 'use strict';
 
 (function exposeAnalysisPipeline(global) {
@@ -77,7 +77,12 @@
         let audioResult = null;
         try {
             if (!audioExtractor.analyzeFileAudio) throw new Error('오디오 분석 모듈이 비활성화되어 있습니다.');
-            audioResult = await audioExtractor.analyzeFileAudio(file, onProgress, signal);
+            audioResult = await audioExtractor.analyzeFileAudio(file, onProgress, signal, {
+                maxSeconds: Number(budget.audioMaxSeconds || 1800),
+                targetSampleRate: Number(budget.analysisSampleRate || 8000),
+                retainDecoded: Boolean(budget.retainDecoded),
+                retainChannelData: Boolean(budget.retainChannelData)
+            });
             throwIfAborted();
         } catch (audioError) {
             if (audioError && audioError.name === 'AbortError') throw audioError;
@@ -86,10 +91,14 @@
         }
 
         if (audioResult) {
-            result.audioBuffer = audioResult.decoded;
-            result.channelData = audioResult.channelData;
+            result.audioBuffer = audioResult.decoded || null;
+            result.channelData = audioResult.channelData || null;
             result.audioAnalysis = audioResult.analysis;
             result.waveformBins = audioResult.waveformBins;
+            result.engine.audioPreparation = audioResult.preparation || null;
+            if (audioResult.preparation && audioResult.preparation.truncated) {
+                warn(`원본이 ${Math.round(audioResult.preparation.sourceDuration / 60)}분을 넘어 앞 ${Math.round(audioResult.preparation.analyzedDuration / 60)}분을 분석했습니다.`);
+            }
             result.fileMeta.duration = Number(audioResult.analysis && audioResult.analysis.duration) || Number(result.fileMeta.duration) || 0;
         } else {
             result.audioAnalysis = createFallbackAudioAnalysis(Number(fileMeta.duration) || 30);
@@ -99,7 +108,9 @@
 
         if (fileKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
             onProgress(72, '영상 움직임 샘플링 중');
-            result.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(fileUrl, onProgress, signal);
+            result.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(fileUrl, onProgress, signal, {
+                maxSamples: Number(budget.motionSamples || 120)
+            });
             throwIfAborted();
             result.fileMeta.duration = Number(result.fileMeta.duration) || Number(result.motionAnalysis && result.motionAnalysis.duration) || 0;
         }

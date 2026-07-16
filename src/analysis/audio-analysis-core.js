@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.2 - shared audio analysis core for worker and main-thread fallback
+// AI Shorts Studio v1.3.4 - shared adaptive-rate audio analysis core
 'use strict';
 
 (function exposeAudioAnalysisCore(global) {
@@ -36,7 +36,7 @@
 
     function createPlan(channelData, sampleRate) {
         const data = channelData || new Float32Array(0);
-        const sr = Math.max(8000, Number(sampleRate) || 44100);
+        const sr = Math.max(4000, Number(sampleRate) || 8000);
         const windowSize = Math.max(1024, Math.floor(sr * 1.0));
         const hopSize = Math.max(512, Math.floor(sr * 0.25));
         const frameCount = Math.max(1, Math.floor(Math.max(0, data.length - windowSize) / hopSize) + 1);

@@ -1,86 +1,52 @@
-# AI 쇼츠 스튜디오 v1.3.2 QA REPORT
+# QA REPORT — AI 쇼츠 스튜디오 v1.3.4
 
-## 요약
+## 결과
 
-v1.3.2는 자동 검사 **124/124**와 Chromium PC·모바일 런타임 감사, 합성 MP3·MP4 실미디어 E2E 감사를 통과했습니다. 이번 검수는 Worker 폴백, 렌더 사전 검사, 사용자 취소, 재생 실패 즉시 중단, 실패 작업의 새 operation 재시도와 출력 파일 재생 가능 여부를 포함합니다.
+- 자동 검사: **129/129 통과**
+- PC Chromium 1366×768: JavaScript 오류 0, Promise 거절 0, 콘솔 오류 0
+- 모바일 Chromium 390×844: JavaScript 오류 0, Promise 거절 0, 콘솔 오류 0
+- PC 메뉴바: 8/8 표시
+- 모바일 간단 메뉴: 핵심 4/4 표시, 현재 단계 포함
+- 모바일 전체 메뉴: 8/8 표시
+- PC·모바일 가로 overflow: 0px
+- 단계 네온 랜딩·지속 라인·PC 작업실 조절 정상
 
-## 자동 QA
+## 모바일 메뉴 감사
 
-- 총 검사: **124**
-- 통과: **124**
-- 실패: **0**
-- 포함 범위: 문법, DOM 앵커, 버전·캐시, 메뉴 containment, SVG 아이콘, 단계형 로딩, 모듈형 엔진, operation coordinator, 렌더 큐, Worker 폴백, 취소·재시도, 네온 랜딩, 작업실 조절, 브라우저 감사, 실미디어 감사와 이중 배포 계약
+- 초기 모드: `compact`
+- 초기 안내: `현재 파일 열기 · 다음 추천`
+- 핵심 메뉴: 파일 열기·추천·후보·미리보기
+- 전체 메뉴 버튼: 8개 메뉴 모두 실제 크기로 복원
+- 단계 변경 뒤 현재 메뉴가 핵심 4개 안에 유지됨
+- `aria-expanded`, 숨은 탭 `aria-hidden`, 가로 overflow 검증
 
-## Chromium 반응형 런타임 감사
+## 실미디어 E2E
 
-| 항목 | PC 1366×768 | 모바일 390×844 |
-|---|---:|---:|
-| JavaScript 오류 | 0 | 0 |
-| 처리되지 않은 Promise | 0 | 0 |
-| console.error | 0 | 0 |
-| 메뉴 표시 | 8/8 | 8/8 |
-| 가로 overflow | 0 | 0 |
-| 단계 랜딩 네온 | 확인 | 확인 |
-| 랜딩 종료 후 지속 강조 | 확인 | 확인 |
-| 작업실 리사이저 | 2/2 | 숨김 |
-| 미리보기 집중 폭 | 약 897px | 해당 없음 |
-| 파형 확대 폭 | 약 1334px | 해당 없음 |
+- 20초 MP3: 분석 → 추천 → 선택 → 2초 렌더 → 다운로드 완료
+- 20초 MP4: 오디오·움직임 분석 → 추천 → 선택 → 2초 렌더 → 다운로드 완료
+- 렌더 취소: cancelled 1, 다운로드 0, 활성 operation 0
+- 재생 실패 재시도: 첫 시도 failed 1, 두 번째 attempts 2·done 1
+- 10분 MP3: 분석 약 5.8초, 장시간 균형 모드, 8kHz 분석 트랙
+- 분석 트랙 약 18.3MB, decoded AudioBuffer·channelData 유지 없음
+- 디코딩 예상 메모리 약 219.7MB, 위험도 medium, raw buffer 추가 복사 없음
+- 6초 렌더 ETA와 유효 출력 파일 확인
 
-초기 안정화 샘플 사이 RAF는 증가하지 않았고 Mutation 증가는 PC 3회, 모바일 0회로 허용 범위 안이었습니다.
+## 엔진·메모리 점검
 
-감사 파일: `qa/runtime-browser-audit-v1.3.2.json`
+- metadata 확인 뒤 성능·디코딩 메모리 예산 생성
+- 파일 크기·길이·기기 메모리·무압축 여부 기반 위험도 계산
+- 고위험 파일 사용자 안내와 diagnostic 기록
+- 안정 범위 초과 파일 사전 차단 문구 확인
+- `decodeAudioData(arrayBuffer)` 직접 전달과 원본 버퍼 해제 확인
+- 분석 전용 저샘플레이트 트랙과 AbortSignal 유지
+- 렌더 진행 이벤트 제한, ETA·경과 시간·접근성 progressbar 유지
 
-## 실미디어 E2E 감사
+## 감사 파일
 
-### 합성 MP3 20초
+- `qa/runtime-browser-audit-v1.3.4.json`
+- `qa/runtime-media-e2e-v1.3.4.json`
 
-- 파일: `sample-20s.mp3`, 약 321KB
-- 분석·추천·후보 선택 완료
-- 사용자 구간: 00:00~00:02
-- 렌더 큐: done 1 / failed 0 / cancelled 0
-- 출력: MP4 계열 컨테이너, 약 1.90초, 약 340KB
-- Worker 폴백 경로 실행 확인
-- 런타임 오류와 남은 활성 operation: 0
+## 알려진 제한
 
-### 합성 MP4 20초
-
-- 파일: `sample-20s.mp4`, 약 3.2MB
-- 오디오·모션 분석, 추천·후보 선택 완료
-- 사용자 구간: 00:00~00:02
-- 렌더 큐: done 1 / failed 0 / cancelled 0
-- 출력: MP4 계열 컨테이너, 약 1.95초, 약 218KB
-- 런타임 오류와 남은 활성 operation: 0
-
-### 렌더 취소
-
-- 실행 중 취소 버튼 활성화 확인
-- 큐: cancelled 1 / done 0 / failed 0
-- 다운로드: 0건
-- 종료 후 활성 operation과 브라우저 오류: 0
-
-### 재생 실패와 재시도
-
-- 첫 시도에 원본 `play()` 실패를 주입
-- 첫 큐: failed 1, 재시도 버튼 활성화
-- 재시도는 새 operation으로 시작
-- 두 번째 시도: attempts 2 / done 1 / failed 0
-- 출력: MP4 계열 컨테이너, 약 2.00초, 약 398KB
-- 종료 후 오류와 활성 operation: 0
-
-감사 파일: `qa/runtime-media-e2e-v1.3.2.json`
-
-## 배포 검증
-
-- 전체 설치 ZIP과 v1.3.1 덮어쓰기 패치 ZIP 생성
-- 두 ZIP `unzip -t` 무결성 검사
-- 깨끗한 v1.3.1 복사본에 패치 적용
-- 패치 파일: **70개**, 누락 0건, 불일치 0건
-- 전체 ZIP: **241개 항목**
-- SHA-256 체크섬 생성
-
-## 남은 실기기 검증
-
-- 5분·15분·30분 대용량·고해상도 MP4 장시간 분석과 메모리 사용
-- 모바일 Safari·Samsung Internet·인앱 브라우저 MediaRecorder MIME·확장자
-- captureStream이 없는 브라우저에서 원본 오디오 포함 여부와 사용자 안내
-- 서비스워커 제어 상태와 영구 localStorage를 포함한 설치형 PWA 흐름
+- Web Audio 전체 디코딩 특성상 매우 긴 무압축 오디오의 순간 peak memory는 여전히 클 수 있습니다.
+- 15분·30분 고해상도 MP4와 모바일 Safari 장시간 출력은 실기기 검증이 필요합니다.

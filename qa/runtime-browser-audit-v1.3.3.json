@@ -1,0 +1,402 @@
+{
+  "version": "1.3.3",
+  "desktop": {
+    "ready": "complete",
+    "bodyBuild": "1.3.3",
+    "activeFlow": "file",
+    "navigationFocus": "file",
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "runtimeHealth": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "bodyScrollWidth": 1366,
+    "htmlScrollWidth": 1366,
+    "stage": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": false,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "landing": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": true,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "audit": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 30,
+      "mutations": 60
+    },
+    "auditAtFirstSample": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 30,
+      "mutations": 60
+    },
+    "dock": {
+      "left": 143,
+      "right": 1223,
+      "top": 670,
+      "bottom": 756,
+      "width": 1080,
+      "height": 86
+    },
+    "dockScrollWidth": 1062,
+    "dockClientWidth": 1062,
+    "tabs": [
+      {
+        "tab": "file",
+        "visible": true,
+        "rect": {
+          "left": 152,
+          "right": 279.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "recommend",
+        "visible": true,
+        "rect": {
+          "left": 285.5,
+          "right": 413,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "candidates",
+        "visible": true,
+        "rect": {
+          "left": 419,
+          "right": 546.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "preview",
+        "visible": true,
+        "rect": {
+          "left": 552.5,
+          "right": 680,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "waveform",
+        "visible": true,
+        "rect": {
+          "left": 686,
+          "right": 813.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "cut",
+        "visible": true,
+        "rect": {
+          "left": 819.5,
+          "right": 947,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "edit",
+        "visible": true,
+        "rect": {
+          "left": 953,
+          "right": 1080.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "export",
+        "visible": true,
+        "rect": {
+          "left": 1086.5,
+          "right": 1214,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      }
+    ],
+    "workspace": {
+      "mode": "balanced",
+      "ready": "ready",
+      "toolbarVisible": true,
+      "dividerVisible": [
+        true,
+        true
+      ],
+      "weights": {
+        "left": 0.82,
+        "center": 1.18,
+        "right": 0.9
+      },
+      "toolbar": {
+        "left": 16,
+        "right": 1349.984375,
+        "top": 8,
+        "bottom": 60,
+        "width": 1333.984375,
+        "height": 52
+      }
+    },
+    "workspaceTests": {
+      "keyboardResizeChanged": true,
+      "savedLayoutStorageAccessible": false,
+      "preview": {
+        "mode": "preview",
+        "visible": true,
+        "width": 897.296875,
+        "height": 599.03125
+      },
+      "waveform": {
+        "mode": "waveform",
+        "visible": true,
+        "width": 1333.984375,
+        "height": 390
+      }
+    }
+  },
+  "mobile": {
+    "ready": "complete",
+    "bodyBuild": "1.3.3",
+    "activeFlow": "recommend",
+    "navigationFocus": "recommend",
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "runtimeHealth": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "bodyScrollWidth": 390,
+    "htmlScrollWidth": 390,
+    "stage": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": false,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "landing": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": true,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "audit": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 28,
+      "mutations": 59
+    },
+    "auditAtFirstSample": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 28,
+      "mutations": 59
+    },
+    "dock": {
+      "left": 14,
+      "right": 376,
+      "top": 692,
+      "bottom": 836,
+      "width": 362,
+      "height": 144
+    },
+    "dockScrollWidth": 346,
+    "dockClientWidth": 346,
+    "tabs": [
+      {
+        "tab": "file",
+        "visible": true,
+        "rect": {
+          "left": 22,
+          "right": 105.5,
+          "top": 700,
+          "bottom": 762,
+          "width": 83.5,
+          "height": 62
+        }
+      },
+      {
+        "tab": "recommend",
+        "visible": true,
+        "rect": {
+          "left": 109.5,
+          "right": 193,
+          "top": 700,
+          "bottom": 762,
+          "width": 83.5,
+          "height": 62
+        }
+      },
+      {
+        "tab": "candidates",
+        "visible": true,
+        "rect": {
+          "left": 197,
+          "right": 280.5,
+          "top": 700,
+          "bottom": 762,
+          "width": 83.5,
+          "height": 62
+        }
+      },
+      {
+        "tab": "preview",
+        "visible": true,
+        "rect": {
+          "left": 284.5,
+          "right": 368,
+          "top": 700,
+          "bottom": 762,
+          "width": 83.5,
+          "height": 62
+        }
+      },
+      {
+        "tab": "waveform",
+        "visible": true,
+        "rect": {
+          "left": 22,
+          "right": 105.5,
+          "top": 766,
+          "bottom": 828,
+          "width": 83.5,
+          "height": 62
+        }
+      },
+      {
+        "tab": "cut",
+        "visible": true,
+        "rect": {
+          "left": 109.5,
+          "right": 193,
+          "top": 766,
+          "bottom": 828,
+          "width": 83.5,
+          "height": 62
+        }
+      },
+      {
+        "tab": "edit",
+        "visible": true,
+        "rect": {
+          "left": 197,
+          "right": 280.5,
+          "top": 766,
+          "bottom": 828,
+          "width": 83.5,
+          "height": 62
+        }
+      },
+      {
+        "tab": "export",
+        "visible": true,
+        "rect": {
+          "left": 284.5,
+          "right": 368,
+          "top": 766,
+          "bottom": 828,
+          "width": 83.5,
+          "height": 62
+        }
+      }
+    ],
+    "workspace": {
+      "mode": "balanced",
+      "ready": "ready",
+      "toolbarVisible": false,
+      "dividerVisible": [
+        false,
+        false
+      ],
+      "weights": {
+        "left": 0.82,
+        "center": 1.18,
+        "right": 0.9
+      },
+      "toolbar": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "workspaceTests": {
+      "mobileControlsHidden": true
+    }
+  }
+}

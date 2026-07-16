@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.2 - coordinated media operations, stage landing, and render safety
+// AI Shorts Studio v1.3.4 - coordinated media operations, adaptive mobile flow, and memory preflight
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -504,6 +504,14 @@
         return renderQueue && renderQueue.snapshot ? renderQueue.snapshot() : { running: false, total: 0, done: 0, failed: 0, progress: 0, items: [] };
     }
 
+    function formatQueueDuration(seconds) {
+        const value = Math.max(0, Math.round(Number(seconds) || 0));
+        if (value < 60) return `${value}초`;
+        const minutes = Math.floor(value / 60);
+        const remain = value % 60;
+        return remain ? `${minutes}분 ${remain}초` : `${minutes}분`;
+    }
+
     function renderRenderQueue(snapshot) {
         const snap = snapshot || getRenderQueueSnapshot();
         if (document && document.body) document.body.dataset.renderQueue = snap.running ? 'running' : 'idle';
@@ -511,7 +519,11 @@
             let queueState = 'done';
             let queueText = `완료 ${snap.done}/${snap.total}`;
             if (!snap.total) { queueState = 'idle'; queueText = '대기 중'; }
-            else if (snap.running && snap.current) { queueState = 'running'; queueText = `${snap.current.label} · ${snap.progress}%`; }
+            else if (snap.running && snap.current) {
+                queueState = 'running';
+                const eta = Number.isFinite(snap.current.etaSeconds) && snap.current.etaSeconds > 0 ? ` · 남은 약 ${formatQueueDuration(snap.current.etaSeconds)}` : '';
+                queueText = `${snap.current.label} · ${Math.round(snap.current.progress || 0)}%${eta}`;
+            }
             else if (snap.failed) { queueState = 'failed'; queueText = `완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`; }
             else if (snap.cancelled) { queueState = 'cancelled'; queueText = `완료 ${snap.done}/${snap.total} · 취소 ${snap.cancelled}`; }
             if (els.renderQueueStatus.dataset.state !== queueState) els.renderQueueStatus.dataset.state = queueState;
@@ -527,11 +539,15 @@
                     const statusText = item.status === 'done' ? '완료' : item.status === 'failed' ? '실패' : item.status === 'cancelled' ? '취소' : item.status === 'running' ? '렌더링' : '대기';
                     const error = item.error ? `<div class="render-queue-error">${utils.escapeHtml ? utils.escapeHtml(item.error) : item.error}</div>` : '';
                     const label = utils.escapeHtml ? utils.escapeHtml(item.label || '렌더 작업') : (item.label || '렌더 작업');
-                    const filename = utils.escapeHtml ? utils.escapeHtml(item.filenameHint || statusText) : (item.filenameHint || statusText);
+                    const filename = utils.escapeHtml ? utils.escapeHtml(item.filenameHint || '') : (item.filenameHint || '');
+                    const liveStatus = utils.escapeHtml ? utils.escapeHtml(item.statusText || '') : (item.statusText || '');
+                    const eta = item.status === 'running' && Number.isFinite(item.etaSeconds) && item.etaSeconds > 0 ? `남은 약 ${formatQueueDuration(item.etaSeconds)}` : '';
+                    const elapsed = Number(item.elapsedMs || 0) > 0 ? `경과 ${formatQueueDuration(item.elapsedMs / 1000)}` : '';
+                    const metaParts = [liveStatus, eta, elapsed, item.status === 'queued' ? filename : ''].filter(Boolean);
                     return `<div class="render-queue-item is-${item.status}">
                         <div class="render-queue-title"><span class="studio-icon" data-icon="${statusIcon}" aria-hidden="true"></span><b>${label}</b><span class="render-queue-badge">${statusText}</span></div>
-                        <div class="render-queue-meta">${filename}</div>
-                        <div class="render-queue-progress"><span style="width:${Math.max(0, Math.min(100, Number(item.progress || 0)))}%"></span></div>
+                        <div class="render-queue-meta">${metaParts.join(' · ') || filename || statusText}</div>
+                        <div class="render-queue-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(Number(item.progress || 0))}"><span style="width:${Math.max(0, Math.min(100, Number(item.progress || 0)))}%"></span></div>
                         ${error}
                     </div>`;
                 }).join('');
@@ -1024,13 +1040,45 @@
         };
     }
 
+    function waitForActiveMediaMetadata(token) {
+        const media = getActiveMediaElement();
+        if (!media) return Promise.resolve(0);
+        const known = Number(media.duration) || Number(state.fileMeta && state.fileMeta.duration) || 0;
+        if (known > 0 && Number.isFinite(known)) return Promise.resolve(known);
+        const timeoutMs = Number(config.MEDIA_METADATA_WAIT_MS || 5000);
+        return new Promise(resolve => {
+            let timer = 0;
+            let settled = false;
+            const signal = token && token.signal || null;
+            function cleanup() {
+                media.removeEventListener('loadedmetadata', finish);
+                media.removeEventListener('durationchange', finish);
+                media.removeEventListener('error', finish);
+                if (signal) signal.removeEventListener('abort', finish);
+                if (timer) clearTimeout(timer);
+            }
+            function finish() {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                const duration = Number(media.duration) || 0;
+                if (duration > 0 && Number.isFinite(duration)) state.fileMeta.duration = duration;
+                resolve(duration);
+            }
+            media.addEventListener('loadedmetadata', finish, { once: true });
+            media.addEventListener('durationchange', finish, { once: true });
+            media.addEventListener('error', finish, { once: true });
+            if (signal) signal.addEventListener('abort', finish, { once: true });
+            timer = setTimeout(finish, timeoutMs);
+        });
+    }
+
     async function analyzeCurrentFile(options) {
         const analysisOptions = Object.assign({ autoGenerate: false }, options || {});
         if (!state.file) return;
         const inputFile = state.file;
         const inputKind = state.fileKind;
         const inputUrl = state.fileUrl;
-        const inputMeta = Object.assign({}, state.fileMeta || {});
         const token = beginOperation('analysis', { fileName: inputFile.name, source: analysisOptions.source || 'manual' });
         state.isAnalyzing = true;
         activateFlowTab('recommend', { reveal: true, force: true, source: analysisOptions.source || 'analysis-start' });
@@ -1043,8 +1091,34 @@
             setProgress(percent, message);
         };
         try {
+            setProgress(2, '미디어 길이 확인 중');
+            await waitForActiveMediaMetadata(token);
+            assertOperation(token);
+            const inputMeta = Object.assign({}, state.fileMeta || {});
             if (engineKernel.analyzeMedia) {
                 const budget = engineKernel.createBudget ? engineKernel.createBudget(inputMeta, config) : null;
+                if (budget && budget.longMedia) {
+                    setProgress(4, `${budget.label} · 분석 메모리 약 ${budget.estimatedAnalysisMemoryMb || 0}MB`);
+                    if (store.addDiagnostic) store.addDiagnostic({
+                        type: 'long-media-budget',
+                        duration: inputMeta.duration,
+                        sizeMb: budget.sizeMb,
+                        sampleRate: budget.analysisSampleRate,
+                        estimatedMemoryMb: budget.estimatedAnalysisMemoryMb,
+                        estimatedDecodeMemoryMb: budget.estimatedDecodeMemoryMb,
+                        memoryRisk: budget.memoryRisk
+                    });
+                }
+                if (budget && budget.hardBlock) {
+                    throw new Error(`이 파일은 브라우저 디코딩 예상 메모리가 약 ${budget.estimatedDecodeMemoryMb || 0}MB로 너무 큽니다. MP3·AAC로 변환하거나 파일을 나눠 다시 열어주세요.`);
+                }
+                if (budget && budget.memoryRisk === 'high') {
+                    const memoryMessage = `긴 파일 메모리 주의 · 디코딩 예상 약 ${budget.estimatedDecodeMemoryMb || 0}MB`;
+                    setProgress(4, memoryMessage);
+                    toast('긴 파일을 안전 모드로 분석합니다. 다른 무거운 탭을 닫으면 더 안정적입니다.', 'warning');
+                    if (els.importStatus && !els.importStatus.textContent.includes('메모리 주의')) els.importStatus.textContent += ' · 메모리 주의';
+                    if (store.addDiagnostic) store.addDiagnostic({ type: 'decode-memory-warning', estimatedDecodeMemoryMb: budget.estimatedDecodeMemoryMb, sizeMb: budget.sizeMb, duration: budget.duration });
+                }
                 const result = await engineKernel.analyzeMedia({
                     file: inputFile,
                     fileKind: inputKind,
@@ -1075,7 +1149,12 @@
             } else {
                 let audioResult = null;
                 try {
-                    audioResult = await audioExtractor.analyzeFileAudio(inputFile, reportProgress, token && token.signal || null);
+                    audioResult = await audioExtractor.analyzeFileAudio(inputFile, reportProgress, token && token.signal || null, {
+                        maxSeconds: Number(config.MAX_ANALYSIS_SECONDS || 1800),
+                        targetSampleRate: 8000,
+                        retainDecoded: false,
+                        retainChannelData: false
+                    });
                     assertOperation(token);
                 } catch (audioError) {
                     if (isAbortError(audioError)) throw audioError;
@@ -1094,7 +1173,7 @@
                     state.waveformBins = new Array(160).fill(0).map((_, i) => 0.18 + Math.sin(i * 0.29) * 0.08);
                 }
                 if (inputKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
-                    state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(inputUrl, reportProgress, token && token.signal || null);
+                    state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(inputUrl, reportProgress, token && token.signal || null, { maxSamples: 120 });
                     assertOperation(token);
                     state.fileMeta.duration = state.fileMeta.duration || state.motionAnalysis.duration;
                 }

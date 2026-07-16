@@ -27,7 +27,7 @@ if (html.includes('bottomAnalyzeBtn') || html.includes('분석하기</span></but
         process.exit(1);
     }
 });
-if (/[＋✦◆▶∿✂◫↓]/.test((html.match(/<nav class="bottom-dock-tabs"[\s\S]*?<\/nav>/) || [''])[0])) {
+if (/[＋✦◆▶∿✂◫↓]/.test((html.match(/<nav[^>]*class="bottom-dock-tabs"[^>]*>[\s\S]*?<\/nav>/) || [''])[0])) {
     console.error('FAIL legacy glyph remains in menu bar');
     process.exit(1);
 }
@@ -49,4 +49,4 @@ if (html.includes('id="flowRecommendBtn"') || js.includes('flowRecommendBtn')) {
     console.error('FAIL top duplicate recommend button bridge should not exist');
     process.exit(1);
 }
-console.log('PASS HyperConnect 8-tab bottom dock anchors present with updated v1.3.2 vector icons');
+console.log('PASS HyperConnect 8-tab bottom dock anchors present with updated v1.3.4 vector icons');
