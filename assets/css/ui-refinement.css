@@ -228,7 +228,9 @@ body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
     left: 50% !important;
     right: auto !important;
     bottom: 12px !important;
-    width: min(970px, calc(100% - 28px)) !important;
+    width: min(1080px, calc(100% - 28px)) !important;
+    max-width: calc(100% - 28px) !important;
+    box-sizing: border-box !important;
     padding: 8px !important;
     transform: translateX(-50%);
     border: 1px solid rgba(148, 163, 184, 0.15) !important;
@@ -239,6 +241,10 @@ body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
     -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
 }
 body[data-ui="hyperflow-tabs"] .bottom-dock-tabs {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
     grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
     gap: 4px !important;
 }

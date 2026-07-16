@@ -1141,7 +1141,10 @@
             media.muted = false;
             await media.play();
         } catch (error) {
-            toast('브라우저 정책상 재생 버튼을 한 번 더 눌러야 할 수 있습니다.');
+            stopPreview();
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'preview-playback-error', message: error.message });
+            toast('브라우저가 재생을 막았습니다. 미리보기 버튼을 다시 눌러주세요.', 'warning');
+            return;
         }
         function draw() {
             if (!state.isPreviewing) return;

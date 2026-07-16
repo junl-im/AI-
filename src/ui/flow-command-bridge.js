@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.8 - vector-icon command bridge
+// AI Shorts Studio v1.2.9 - vector-icon command bridge
 // Keeps menu-bar/navigation commands single-owned after legacy modules have loaded.
 'use strict';
 (function bootFlowCommandBridge(global) {
@@ -102,10 +102,10 @@
         relabel();
         patchLegacyApis();
         installCaptureGuard();
-        document.addEventListener('ai-shorts-flow-sync', () => { syncTopLine(); relabel(); });
+        document.addEventListener('ai-shorts-flow-sync', relabel);
         global.addEventListener('orientationchange', () => setTab(currentTab(), { force: false, source: 'orientation' }), { passive: true });
     }
-    global.AIShortsFlowCommandBridge = Object.freeze({ setTab, relabel, panelFor, syncTopLine });
+    global.AIShortsFlowCommandBridge = Object.freeze({ setTab, relabel, panelFor });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
     else install();
 })(window);

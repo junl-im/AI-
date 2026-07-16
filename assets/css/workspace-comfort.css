@@ -2,7 +2,6 @@
    Focus: readable glass surfaces, predictable dock reveal, and clearer candidate selection. */
 :root {
     --comfort-panel-top: 14px;
-    --comfort-dock-max: 1640px;
     --comfort-glass-readable: rgba(7, 13, 25, 0.84);
     --comfort-line: rgba(226, 232, 240, 0.20);
     --comfort-cyan: rgba(34, 211, 238, 0.88);
@@ -41,9 +40,11 @@ body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
 
 @media (min-width: 1180px) {
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs {
-        width: min(calc(100vw - 40px), var(--comfort-dock-max)) !important;
-        grid-template-columns: repeat(8, minmax(112px, 1fr)) !important;
-        gap: 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+        gap: 6px !important;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab {

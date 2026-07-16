@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.8 - vector flow polish controller
+// AI Shorts Studio v1.2.9 - vector flow polish controller
 'use strict';
 (function bootFlowPolish(global) {
     const store = global.AIShortsAppState || {};

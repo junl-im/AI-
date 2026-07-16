@@ -1,33 +1,36 @@
-// AI Shorts Studio v1.2.6 - staged UI hydration loader
+// AI Shorts Studio v1.2.9 - staged UI hydration loader with cache-safe phase keys
 'use strict';
 
 (function installStagedUiLoader(global) {
     const doc = global.document;
     if (!doc) return;
 
-    const VERSION = '1.2.6';
+    const config = global.AIShortsRuntimeConfig || {};
+    const VERSION = String(config.APP_VERSION || 'v1.2.9').replace(/^v/i, '');
+    const BUILD_KEY = String(config.BUILD_KEY || `${VERSION}-staged-ui`);
+    const versioned = (path, label) => `${path}?v=${encodeURIComponent(BUILD_KEY)}-${label}`;
     const phases = Object.freeze({
         shell: [
-            `src/ui/ux-controls.js?v=${VERSION}-flow-audit`,
-            `src/ui/hyperconnect-flow.js?v=${VERSION}-flow-audit`,
-            `src/ui/flow-polish.js?v=${VERSION}-flow-audit`,
-            `src/ui/flow-hotfix.js?v=${VERSION}-flow-audit`,
-            `src/ui/flow-integrity.js?v=${VERSION}-flow-audit`,
-            `src/ui/flow-doctor.js?v=${VERSION}-flow-audit`,
-            `src/ui/flow-quality-gate.js?v=${VERSION}-flow-audit`,
-            `src/ui/workspace-comfort.js?v=${VERSION}-workspace-comfort`,
-            `src/ui/session-continuity.js?v=${VERSION}-session-continuity`
+            versioned('src/ui/ux-controls.js', 'shell'),
+            versioned('src/ui/hyperconnect-flow.js', 'shell'),
+            versioned('src/ui/flow-polish.js', 'shell'),
+            versioned('src/ui/flow-hotfix.js', 'shell'),
+            versioned('src/ui/flow-integrity.js', 'shell'),
+            versioned('src/ui/flow-doctor.js', 'shell'),
+            versioned('src/ui/flow-quality-gate.js', 'shell'),
+            versioned('src/ui/workspace-comfort.js', 'shell'),
+            versioned('src/ui/session-continuity.js', 'shell')
         ],
         editing: [
-            `src/ui/range-drag-controls.js?v=${VERSION}-flow-audit`,
-            `src/ui/handoff-coach.js?v=${VERSION}-handoff-coach`,
-            `src/ui/save-readiness.js?v=${VERSION}-save-readiness`,
-            `src/ui/render-quality-planner.js?v=${VERSION}-render-quality`,
-            `src/ui/candidate-preview-pro.js?v=${VERSION}-candidate-preview`,
-            `src/ui/candidate-pin-board.js?v=${VERSION}-candidate-pin`
+            versioned('src/ui/range-drag-controls.js', 'editing'),
+            versioned('src/ui/handoff-coach.js', 'editing'),
+            versioned('src/ui/save-readiness.js', 'editing'),
+            versioned('src/ui/render-quality-planner.js', 'editing'),
+            versioned('src/ui/candidate-preview-pro.js', 'editing'),
+            versioned('src/ui/candidate-pin-board.js', 'editing')
         ],
         export: [
-            `src/ui/export-finish-center.js?v=${VERSION}-export-finish`
+            versioned('src/ui/export-finish-center.js', 'export')
         ]
     });
 
@@ -59,14 +62,29 @@
         }
         return new Promise((resolve, reject) => {
             const script = doc.createElement('script');
-            script.src = url;
-            script.async = false;
-            script.dataset.stagedUi = 'true';
-            script.onload = () => {
+            let settled = false;
+            const finish = (error) => {
+                if (settled) return;
+                settled = true;
+                global.clearTimeout(timeoutId);
+                script.onload = null;
+                script.onerror = null;
+                if (error) {
+                    script.remove();
+                    const store = global.AIShortsAppState;
+                    if (store && store.addDiagnostic) store.addDiagnostic({ type: 'staged-ui-load-error', message: error.message, url });
+                    reject(error);
+                    return;
+                }
                 loadedScripts.add(url);
                 resolve(url);
             };
-            script.onerror = () => reject(new Error(`UI 모듈 로드 실패: ${url}`));
+            const timeoutId = global.setTimeout(() => finish(new Error(`UI 모듈 로드 시간 초과: ${url}`)), 10000);
+            script.src = url;
+            script.async = false;
+            script.dataset.stagedUi = 'true';
+            script.onload = () => finish();
+            script.onerror = () => finish(new Error(`UI 모듈 로드 실패: ${url}`));
             doc.head.appendChild(script);
         });
     }
@@ -103,7 +121,7 @@
         const flow = target.closest('[data-flow-tab]');
         const tab = flow && flow.getAttribute('data-flow-tab');
         if (tab === 'export') return 'export';
-        if (['candidates', 'preview', 'waveform', 'cut', 'editor'].includes(tab)) return 'editing';
+        if (['candidates', 'preview', 'waveform', 'cut', 'edit'].includes(tab)) return 'editing';
         if (target.closest('#exportBtn, #exportAllBtn, #flowExportBtn, #flowExportAllBtn, #thumbnailBtn')) return 'export';
         if (target.closest('#analyzeBtn, #recommendationList, .recommendation-card, #previewBtn, #applyRangeBtn, #captionTextInput, #saveProjectBtn')) return 'editing';
         if (target.closest('#fileInput, #bottomFileBtn, #dropZone, #programInfoBtn')) return 'shell';
@@ -133,7 +151,7 @@
         doc.addEventListener('ai-shorts-navigation-request', event => {
             const tab = event && event.detail && event.detail.tab;
             if (tab === 'export') ensure('export').catch(() => {});
-            else if (['candidates', 'preview', 'waveform', 'cut', 'editor'].includes(tab)) ensure('editing').catch(() => {});
+            else if (['candidates', 'preview', 'waveform', 'cut', 'edit'].includes(tab)) ensure('editing').catch(() => {});
             else ensure('shell').catch(() => {});
         });
     }

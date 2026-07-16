@@ -1,6 +1,7 @@
-// AI Shorts Studio v1.1.3 - session continuity and lightweight recovery
+// AI Shorts Studio v1.2.9 - session continuity with visibility-aware autosave
 'use strict';
 (function bootSessionContinuity(global) {
+    if (global.AIShortsSessionContinuity) return;
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
     const projectService = global.AIShortsProjectService || {};
@@ -9,6 +10,7 @@
     let saveTimer = 0;
     let syncTimer = 0;
     let panelReady = false;
+    let heartbeatTimer = 0;
 
     function byId(id) { return document.getElementById(id); }
     function safeParse(text) { try { return JSON.parse(text); } catch (error) { return null; } }
@@ -174,6 +176,28 @@
         clearTimeout(syncTimer);
         syncTimer = setTimeout(() => updatePanel(null, 'sync'), 160);
     }
+    function stopHeartbeat() {
+        if (heartbeatTimer) global.clearInterval(heartbeatTimer);
+        heartbeatTimer = 0;
+    }
+    function startHeartbeat() {
+        stopHeartbeat();
+        if (document.hidden) return;
+        heartbeatTimer = global.setInterval(() => {
+            if (document.hidden) return;
+            if (hasWork()) saveSnapshotNow('interval');
+            else scheduleSync();
+        }, 30000);
+    }
+    function handleVisibilityChange() {
+        if (document.hidden) {
+            if (hasWork()) saveSnapshotNow('hidden');
+            stopHeartbeat();
+            return;
+        }
+        scheduleSync();
+        startHeartbeat();
+    }
     function install() {
         ensurePanel();
         updatePanel(null, 'sync');
@@ -189,7 +213,9 @@
             document.addEventListener(eventName, () => { scheduleSave(eventName); scheduleSync(); });
         });
         window.addEventListener('beforeunload', () => saveSnapshotNow('beforeunload'));
-        setInterval(() => { if (hasWork()) saveSnapshotNow('interval'); else scheduleSync(); }, 15000);
+        window.addEventListener('pagehide', () => { if (hasWork()) saveSnapshotNow('pagehide'); stopHeartbeat(); });
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        startHeartbeat();
     }
     global.AIShortsSessionContinuity = Object.freeze({ saveSnapshotNow, restoreSnapshot, clearSnapshot, loadSnapshot, scheduleSave });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);

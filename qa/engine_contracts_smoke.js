@@ -20,7 +20,7 @@ function fail(message) { console.error('FAIL ' + message); process.exit(1); }
 ['enhanceBudget', 'tuneRecommendations', 'proConfidence', 'proGrade', 'summarizeAnalysis'].forEach(token => {
     if (!tuner.includes(token)) fail(`pro tuner missing ${token}`);
 });
-['module-contracts.js?v=1.2.8-header-meta', 'analysis-cache.js?v=1.2.8-header-meta', 'pro-engine-tuner.js?v=1.2.8-header-meta', 'stability-auditor.js?v=1.2.8-header-meta'].forEach(token => {
+['module-contracts.js?v=1.2.9-stability-audit', 'analysis-cache.js?v=1.2.9-stability-audit', 'pro-engine-tuner.js?v=1.2.9-stability-audit', 'stability-auditor.js?v=1.2.9-stability-audit'].forEach(token => {
     if (!sw.includes(token)) fail(`service worker missing ${token}`);
 });
 

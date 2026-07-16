@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.8 - vector export completion and recovery center
+// AI Shorts Studio v1.2.9 - vector export completion and recovery center
 'use strict';
 
 (function exposeExportFinishCenter(global) {

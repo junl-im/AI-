@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## v1.2.9 - Runtime Stability & PC Menu Containment
+
+- PC 메뉴바 바깥 프레임은 970px, 내부 메뉴 레일은 1180px였던 상충 규칙을 통합했습니다.
+- PC 1180·1280·1366·1920px에서 8개 메뉴를 한 줄로 표시하고, 1180px 미만에서는 4열×2행으로 안전하게 전환합니다.
+- `.bottom-dock-tabs`가 부모보다 넓어지지 않도록 `width/max-width/min-width` 소유권을 명확히 했습니다.
+- 단계형 UI 로더의 `editor`/`edit` 키 불일치와 v1.2.6 고정 버전 쿼리를 수정했습니다.
+- 지연 스크립트에 10초 타임아웃, 실패 자산 제거와 `staged-ui-load-error` 진단을 추가했습니다.
+- 런타임 건강 모듈이 `window.error`와 `unhandledrejection`을 수집하고 중복을 제거해 최근 오류를 제공합니다.
+- 미디어 재생 거절 시 미리보기 RAF와 interval이 시작되지 않도록 수정했습니다.
+- 렌더 성공·실패·중단 경로에서 RAF, interval, timeout, 캡처 트랙과 볼륨을 결정적으로 정리합니다.
+- 세션 연속성 저장 주기를 30초로 완화하고 숨김 탭과 pagehide에서 heartbeat를 중단합니다.
+- 제거된 `syncTopLine()`을 계속 호출하던 레거시 참조를 제거해 실제 브라우저 초기화 `ReferenceError`를 해결했습니다.
+- 실제 Chromium 감사 결과를 읽는 회귀 검사를 추가해 전체 자동 QA **115/115**를 통과했습니다.
+- 전체 설치 ZIP과 v1.2.8 덮어쓰기 패치 ZIP을 함께 생성합니다.
+
 ## v1.2.8 - Simplified Header Metadata Rail
 
 - 상단 중앙의 `LOCAL · PRIVATE · 9:16` 상태 문구와 점 표시를 제거했습니다.

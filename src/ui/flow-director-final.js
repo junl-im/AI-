@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.8 - vector-icon workflow navigation director
+// AI Shorts Studio v1.2.9 - vector-icon workflow navigation director
 // Owns menu state, progression reveal, panel spotlight and scroll positioning.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -217,7 +217,7 @@
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.2.8') document.body.dataset.build = '1.2.8';
+            if (document.body.dataset.build !== '1.2.9') document.body.dataset.build = '1.2.9';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
             document.body.dataset.iconLanguage = 'studio-vectors';
         }

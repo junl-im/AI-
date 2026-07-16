@@ -1,143 +1,121 @@
-# HANDOFF v1.2.8
+# HANDOFF v1.2.9
 
 ## 요약
 
-v1.2.8은 v1.2.7의 전용 SVG 아이콘과 이중 배포 구조를 유지하면서 **상단 메타 정보를 두 축으로 단순화한 패치**입니다. 중앙의 `LOCAL · PRIVATE · 9:16` 문구를 제거하고, 왼쪽에는 `BUILD + 버전 + 모바일·PC 호환`, 오른쪽에는 `DESIGNED BY + 곰같은여우`만 남겼습니다. 모바일에서도 BUILD와 DESIGNED BY를 숨기지 않습니다.
+v1.2.9는 **PC 메뉴바 잘림과 런타임에서만 드러나는 오류를 해결한 코드·엔진 안정화 릴리스**입니다. 1366px 화면에서 마지막 저장 메뉴가 보이지 않던 원인은 메뉴바 외부 프레임 970px과 내부 레일 1180px 규칙이 동시에 적용된 CSS 소유권 충돌이었습니다. 내부 레일을 부모 너비에 고정하고 1180px 미만을 4열×2행으로 전환했습니다.
+
+정적 QA가 놓친 `syncTopLine is not defined` 오류도 실제 Chromium 전체 스크립트 실행으로 발견해 제거했습니다. 단계 로더 키 불일치, 렌더 타이머 정리, 미리보기 재생 거절, 세션 heartbeat와 전역 오류 기록도 함께 보강했습니다.
 
 ## 이번 변경
 
-- `index.html`에서 중앙 `brand-compat-pill` 마크업을 제거했습니다.
-- `src/ui/flow-command-bridge.js`에서 중앙 상태 문구를 보정하거나 다시 생성하던 로직을 제거했습니다.
-- `assets/css/header-meta-rail.css`를 추가해 상단을 `왼쪽 정보 / 오른쪽 서명` 2열로 고정했습니다.
-- 720px 이하에서도 BUILD와 DESIGNED BY를 유지합니다.
-- 390px 이하에서는 숨김 대신 간격·글자 크기·기기 아이콘 비율만 줄입니다.
-- 기존 9:16 쇼츠 프레임, 타임라인, 전용 SVG 아이콘과 메뉴 내비게이션은 변경하지 않았습니다.
-- 버전·빌드 키·서비스워커 캐시를 v1.2.8 / `1.2.8-header-meta`로 동기화했습니다.
-- `PATCH_MANIFEST.txt`는 v1.2.7에서 v1.2.8로 변경된 파일을 명시합니다.
-- 전체 설치 ZIP과 v1.2.7 덮어쓰기 패치 ZIP을 함께 생성합니다.
-
-## 상단 메타 유지 규칙
-
-1. 중앙 상태 슬로건이나 점 표시를 다시 만들지 않습니다.
-2. 왼쪽은 BUILD·버전·기기 호환, 오른쪽은 DESIGNED BY·곰같은여우만 사용합니다.
-3. 모바일에서도 BUILD와 DESIGNED BY 라벨을 숨기지 않습니다.
-4. 작은 화면에서는 정보를 제거하지 말고 크기와 간격을 줄입니다.
-5. `FlowCommandBridge`를 포함한 런타임 모듈은 상단 메타 마크업을 생성하거나 덮어쓰지 않습니다.
-6. 상단 메타의 최종 CSS 소유자는 `header-meta-rail.css`입니다.
+- `assets/css/ui-refinement.css`: 메뉴바 프레임 폭을 최대 1080px로 조정하고 내부 레일의 너비 소유권을 고정했습니다.
+- `assets/css/workspace-comfort.css`: 1180px 독립 레일과 112px 최소 탭 폭을 제거하고 `repeat(8, minmax(0, 1fr))`를 사용합니다.
+- `src/boot/staged-ui-loader.js`: `editor`를 `edit`로 수정하고 런타임 빌드 키, 10초 타임아웃과 진단을 적용했습니다.
+- `src/boot/runtime-health.js`: `window.error`, `unhandledrejection`, 최근 오류와 중복 제거를 추가했습니다.
+- `src/app.js`: 미리보기 `play()` 거절 시 루프를 시작하지 않고 사용자 경고와 진단을 남깁니다.
+- `src/render/vertical-renderer.js`: 모든 종료 경로에서 RAF·interval·timeout·트랙·볼륨을 정리합니다.
+- `src/ui/session-continuity.js`: 30초 가시성 기반 heartbeat와 pagehide 정리를 사용합니다.
+- `src/ui/flow-command-bridge.js`: 제거된 `syncTopLine()` 잔존 호출과 공개 API 참조를 제거했습니다.
+- `qa/runtime_browser_audit_smoke.js`: 실제 Chromium 감사 JSON을 릴리스 QA에 포함합니다.
+- 버전·빌드 키·서비스워커 캐시를 v1.2.9 / `1.2.9-stability-audit`로 동기화했습니다.
 
 ## 사용자 디자인·UX 선호
 
 - 멋있지만 깔끔하고 쇼츠의 9:16·빠른 컷·타임라인 정체성이 첫눈에 보여야 합니다.
 - 게임 UI처럼 카드·배지·테두리·네온이 겹치면 안 됩니다.
 - 바깥 프레임은 한 번만 쓰고 내부 구분은 여백·명암·얇은 선으로 처리합니다.
-- 제목 → 현재 작업 → 주요 액션 → 세부 설정 순으로 읽혀야 합니다.
-- PC는 여러 작업 패널을 한눈에 보여주고 진행 단계에 맞춰 메뉴와 화면 포커스가 함께 이동해야 합니다.
-- 모바일은 기능을 중복 노출하지 않고 하단 메뉴바와 간결한 진행 안내를 사용합니다.
+- PC는 여러 작업 구간이 한 화면에 보이고, 진행 시 메뉴·패널 강조·화면 위치가 함께 이동해야 합니다.
+- 모바일은 본문 기능 중복을 피하고 하단 메뉴바와 진행 안내를 사용합니다.
 - 사용자 노출 명칭은 `Dock`이 아니라 `메뉴바`입니다.
-- 핵심 UI에는 운영체제별 이모지나 문자 기호 대신 프로젝트 전용 SVG 자산을 사용합니다.
-- 최적화는 기능 제거가 아니라 현재 필요한 기능만 먼저 준비하는 방식이어야 합니다.
+- 핵심 아이콘은 `assets/icons/studio/`의 전용 SVG만 사용합니다.
+- 상단 메타는 왼쪽 BUILD·버전·모바일/PC 호환, 오른쪽 DESIGNED BY·곰같은여우만 유지합니다.
 
-## 아이콘 시스템 유지 규칙
+## PC 메뉴바 유지 규칙
 
-1. 핵심 아이콘은 `assets/icons/studio/`의 SVG 자산만 사용합니다.
-2. 새 자산은 `viewBox="0 0 24 24"`, 1.75px 선, round linecap·linejoin을 유지합니다.
-3. SVG 내부에 고정 UI 색상을 넣지 않습니다. mask와 `currentColor`로 상태 색상을 제어합니다.
-4. 자산 이름은 기능 의미를 나타내는 영문 소문자를 사용하고 `icon-system.css`에 매핑합니다.
-5. 정적 HTML은 `data-icon`, 독립 아이콘은 `.studio-icon[data-icon]`을 사용합니다.
-6. 동적 UI는 문자 기호를 `textContent`나 템플릿 문자열로 삽입하지 않습니다.
-7. 메뉴 아이콘은 PC 26px, 모바일 24px 기준을 유지합니다.
-8. 활성 아이콘만 강하게 강조하고 모든 아이콘에 상시 글로우를 넣지 않습니다.
-9. 새 아이콘을 추가하면 서비스워커 캐시와 `qa/icon_system_smoke.js` 목록도 함께 갱신합니다.
-10. SVG가 장식 목적이면 접근성 트리에서 숨기고 버튼의 텍스트 또는 aria-label을 유지합니다.
+1. 외부 `.bottom-dock`이 너비를 소유합니다.
+2. 내부 `.bottom-dock-tabs`는 `width:100%; max-width:100%; min-width:0`을 유지합니다.
+3. 내부 레일에 viewport 기반 독립 폭을 다시 넣지 않습니다.
+4. 1180px 이상은 8개 한 줄, 미만은 4열×2행입니다.
+5. 항목은 `minmax(0, 1fr)`를 사용해 라벨이 레일을 늘리지 않게 합니다.
+6. 1180·1280·1366·1920px와 모바일 390px에서 모든 메뉴가 viewport 안에 있는지 검사합니다.
+7. `저장` 메뉴의 오른쪽 좌표가 viewport 폭을 넘지 않는지 회귀 검사합니다.
 
-## UI 유지 규칙
+## 코드·엔진 안정성 규칙
 
-1. 새로운 UI는 먼저 `ui-refinement.css`의 토큰과 표면 규칙을 사용합니다.
-2. 기능별 CSS에서 새 색상·반경·그림자를 임의로 추가하지 않습니다.
-3. 카드 안에 또 다른 강한 테두리 카드를 중첩하지 않습니다.
-4. 현재 작업 강조는 얇은 시안 테두리와 작은 상태 라벨만 사용합니다.
-5. PC 메뉴바는 1180px 이상에서 8개 항목 한 줄을 유지합니다.
-6. 모바일 메뉴바는 4열×2행을 유지하고 파일 열기·현재 단계의 대비를 가장 높게 둡니다.
-7. 모바일 첫 화면에는 파일 열기 버튼을 본문에 중복 추가하지 않습니다.
-8. 저사양·모션 감소 환경에서 사용성을 해치는 블러나 반복 애니메이션을 추가하지 않습니다.
+1. 메뉴 키는 실제 DOM 상태와 일치해야 하며 편집은 `edit`입니다.
+2. 단계 로더는 버전 문자열을 하드코딩하지 않고 런타임 config에서 파생합니다.
+3. 지연 자산은 timeout과 진단 경로를 갖고 실패한 script 요소를 정리합니다.
+4. 제거한 함수·DOM ID·상태 키가 리스너나 공개 API에 남지 않았는지 전체 검색합니다.
+5. `play()`가 실패하면 RAF·interval을 시작하지 않습니다.
+6. 렌더의 성공·오류·취소는 같은 cleanup 경로를 사용합니다.
+7. 세션 저장 heartbeat는 hidden/pagehide에서 멈춥니다.
+8. 전역 오류와 Promise 거절을 기록하고 릴리스 감사에서 0건을 요구합니다.
+9. 초기화 후 2초와 4초의 RAF·Mutation 수가 같아야 합니다.
+10. QA 보고서의 통과 수치는 실제 `npm test` 결과와 일치해야 합니다.
 
-## 단계 로딩 유지 규칙
+## Update Sentinel 유지 규칙
 
-1. 지연 모듈을 다시 개별 `<script defer>`로 추가하지 않습니다.
-2. 로딩 순서는 `shell → editing → export`를 유지합니다.
-3. 이미 준비된 단계와 스크립트를 중복 실행하지 않습니다.
-4. 포인터·포커스 시점의 사전 준비를 유지해 클릭 후 대기를 줄입니다.
-5. 지연 모듈 전체를 서비스워커 설치 프리캐시에 다시 넣지 않습니다.
-6. 단계 로딩 후 Observer·RAF가 같은 상태를 반복해서 쓰지 않는지 확인합니다.
+- Update Sentinel은 현재 버전·빌드 키·서비스워커 캐시를 진단하고 이전 셸 캐시를 정리합니다.
+- 새 릴리스에서는 CSS·스크립트 링크와 서비스워커 캐시 쿼리를 같은 빌드 키로 갱신합니다.
+- 런타임 건강 정보와 단계 로딩 오류가 진단 복사 내용에 포함되는지 확인합니다.
 
-## 진행 내비게이션 원칙
+## 검수 순서
 
-- 파일 선택 즉시 추천/분석 작업 영역으로 이동합니다.
-- 추천 생성 후 후보, 후보 선택 후 미리보기, 렌더 시작 후 저장 영역으로 이동합니다.
-- 자동 이동과 수동 메뉴 클릭은 `FlowDirectorFinal`과 `FlowCommandBridge`를 통해야 합니다.
-- PC는 모든 패널을 유지하되 현재 대상 카드에 시각적 포커스를 줍니다.
-- 모바일은 활성 작업을 우선 보여주고 메뉴 활성 상태가 함께 이동해야 합니다.
+1. `npm test`로 문법, DOM, 엔진 계약, 메뉴 containment, 런타임 감사와 배포 계약을 실행합니다.
+2. Chromium 1366×768과 390×844에서 전체 스크립트를 실행해 오류·Promise 거절·콘솔 오류를 확인합니다.
+3. 2초와 4초의 RAF·Mutation 카운터가 같은지 확인합니다.
+4. 1180·1280·1366·1920px에서 메뉴 8개가 모두 viewport 안에 있는지 확인합니다.
+5. `npm run package`로 전체 ZIP과 패치 ZIP을 만들고 `unzip -t`를 실행합니다.
+6. 깨끗한 v1.2.8 복사본에 패치를 적용해 매니페스트 파일을 바이트 단위로 비교합니다.
+7. SHA-256 체크섬을 생성하고 QA 보고서 수치와 실제 결과를 다시 맞춥니다.
 
 ## 배포 규칙
 
 1. 매 버전마다 전체 설치용 ZIP과 직전 버전 덮어쓰기용 패치 ZIP을 함께 만듭니다.
-2. `npm run package`는 두 ZIP을 모두 생성해야 합니다.
-3. 전체 ZIP에는 프로젝트 전체 파일이 포함됩니다.
-4. 패치 ZIP에는 `PATCH_MANIFEST.txt`에 기록된 변경·추가 파일만 포함됩니다.
-5. 패치 매니페스트의 `from`과 `to` 버전을 반드시 확인합니다.
-6. 삭제가 필요한 파일이 생기면 패치 ZIP만으로 처리하지 말고 별도 삭제 안내 또는 패치 스크립트를 제공합니다.
-7. 두 ZIP 모두 압축 무결성 검사와 SHA-256 체크섬을 생성합니다.
-8. 최종 안내에서 두 ZIP의 목적과 적용 방법을 분명히 구분합니다.
-
-## 검수 순서
-
-1. `npm run check`로 문법·DOM·엔진 계약·레이아웃·아이콘·배포 회귀 검사를 실행합니다.
-2. PC 1440×1080과 모바일 390×844에서 아이콘 크기, 메뉴 겹침, 활성 상태를 확인합니다.
-3. SVG mask 이미지가 `none`이 아니고 메뉴 아이콘이 PC 26px·모바일 24px인지 확인합니다.
-4. `npm run package` 후 전체 ZIP과 패치 ZIP의 압축 무결성을 검사합니다.
-5. 패치 ZIP을 깨끗한 v1.2.7 복사본에 덮어쓴 뒤 변경 파일이 v1.2.8과 일치하는지 확인합니다.
-6. Update Sentinel 정보 창에서 버전·빌드 키·서비스워커 캐시가 일치하는지 확인합니다.
+2. v1.2.9 패치 기준은 v1.2.8입니다.
+3. `PATCH_MANIFEST.txt`에 변경·추가 파일을 모두 기록합니다.
+4. 패치 적용 검증은 깨끗한 v1.2.8 복사본에서 수행합니다.
+5. 전체·패치 ZIP 모두 압축 무결성과 SHA-256을 확인합니다.
+6. 삭제 파일이 생기면 단순 덮어쓰기 외에 삭제 절차를 제공합니다.
 
 ## 검수 결과
 
-- `npm run check`: **112/112 통과**
-- 전용 SVG 자산: 20개
-- 메뉴 아이콘: PC 26px / 모바일 24px
-- Chromium 정적 렌더 페이지 오류: 0건
-- 직접 실행 핵심 스크립트: 39개 유지
-- 지연 UI: shell 9개 / editing 누적 15개 / export 누적 16개 유지
-- 분석·추천·렌더 엔진 계약 변경 없음
-- 전체 ZIP 221개 항목 / 패치 ZIP 57개 항목
-- v1.2.7 복사본 패치 적용 검증: 누락 0건 / 불일치 0건
-
-관리형 Chromium의 로컬 URL 제한 때문에 시각 검수는 CSP를 제거한 감사용 문서에 실제 HTML과 CSS를 주입하고 SVG를 data URI로 변환하여 Chromium 렌더 엔진에서 수행했습니다. 결과는 `qa/runtime-browser-audit-v1.2.8.json`에 기록합니다.
+- `npm test`: **115/115 통과**
+- Chromium desktop 1366×768: 오류 0, Promise 거절 0, 콘솔 오류 0
+- Chromium mobile 390×844: 오류 0, Promise 거절 0, 콘솔 오류 0
+- Desktop/menu: 8개 모두 표시, dock 1080px, 마지막 메뉴 viewport 내부
+- Mobile/menu: 4열×2행, 8개 모두 표시
+- RAF: 25 → 25, Mutation: 59 → 59로 안정화
+- 가로 overflow: PC·모바일 모두 0
+- 전체 ZIP 225개 항목 / 패치 ZIP 67개 파일
+- v1.2.8 복사본 패치 적용: 누락 0 / 불일치 0
+- serviceWorker/secureContext는 감사용 `about:blank` 주입 환경 특성상 false이며 제품 결함으로 판정하지 않습니다.
 
 ## 핵심 파일
 
-- `assets/icons/studio/*.svg`
-- `assets/css/header-meta-rail.css`
-- `assets/css/icon-system.css`
-- `assets/css/feedback-ux.css`
-- `index.html`
-- `sw.js`
-- `tools/create-release-zip.sh`
-- `tools/create-patch-zip.sh`
-- `tools/create-distribution-zips.sh`
-- `PATCH_MANIFEST.txt`
-- `qa/icon_system_smoke.js`
-- `qa/distribution_packaging_smoke.js`
+- `assets/css/ui-refinement.css`
+- `assets/css/workspace-comfort.css`
+- `src/boot/staged-ui-loader.js`
+- `src/boot/runtime-health.js`
+- `src/render/vertical-renderer.js`
+- `src/ui/session-continuity.js`
+- `src/ui/flow-command-bridge.js`
+- `src/app.js`
+- `qa/pc_menu_containment_smoke.js`
+- `qa/stability_audit_smoke.js`
+- `qa/runtime_browser_audit_smoke.js`
+- `qa/runtime-browser-audit-v1.2.9.json`
 
 ## 알려진 제한
 
-- 실제 대용량 MP4 분석·장시간 렌더·다운로드는 실기기 E2E가 더 필요합니다.
-- 모바일 Safari와 인앱 브라우저의 mask·MediaRecorder 출력 형식은 별도 검증이 필요합니다.
-- CSS와 핵심 스크립트 초기 경로는 추가 분리 대상입니다.
-- 패치 ZIP은 v1.2.7 기준이며 다른 버전에 바로 적용하면 안 됩니다.
+- 실제 대용량 MP4의 장시간 분석·렌더·다운로드 E2E는 아직 남아 있습니다.
+- 모바일 Safari와 인앱 브라우저의 MediaRecorder·SVG mask는 실기기 검증이 필요합니다.
+- 감사용 Chromium은 로컬 URL이 정책으로 차단되어 실제 자산을 CDP 문서에 주입해 실행했습니다.
 
 ## 다음 우선순위
 
-1. 실제 MP3·MP4 기반 분석 → 추천 → 미리보기 → 저장 E2E
-2. PC 3열 칼럼 드래그 조절과 미리보기·파형 집중 모드
-3. 모바일 메뉴바를 현재 단계와 다음 행동 중심으로 축약
-4. 초기 CSS를 핵심·편집·저장 단계로 분리
-5. 실제 콘텐츠 상태용 아이콘 애니메이션을 최소 범위에서 검토
+1. 실제 MP3·MP4 전체 E2E와 중단·재시도 시나리오
+2. 분석·추천·렌더 이벤트 및 상태 소유권 중복 감사
+3. PC 3열 칼럼 리사이즈와 집중 모드
+4. 모바일 단계형 메뉴 축약
+5. CSS 단계 로딩과 초기 페인트 추가 최적화

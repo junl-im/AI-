@@ -468,17 +468,36 @@
             if (!stopped) raf = requestAnimationFrame(drawLoop);
         }
         return new Promise((resolve, reject) => {
-            recorder.onerror = event => {
+            let intervalTimer = 0;
+            let stopTimer = 0;
+            let settled = false;
+
+            function cleanup() {
                 stopped = true;
                 if (raf) cancelAnimationFrame(raf);
-                if (sourceMedia) sourceMedia.volume = originalVolume;
-                reject(new Error(event.error && event.error.message || '녹화 오류'));
-            };
-            recorder.onstop = () => {
-                stopped = true;
-                if (raf) cancelAnimationFrame(raf);
+                if (intervalTimer) clearInterval(intervalTimer);
+                if (stopTimer) clearTimeout(stopTimer);
+                raf = 0;
+                intervalTimer = 0;
+                stopTimer = 0;
                 stream.getTracks().forEach(track => track.stop());
                 if (sourceMedia) sourceMedia.volume = originalVolume;
+            }
+
+            function fail(error) {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                reject(error instanceof Error ? error : new Error(String(error || '녹화 오류')));
+            }
+
+            recorder.onerror = event => {
+                fail(new Error(event.error && event.error.message || '녹화 오류'));
+            };
+            recorder.onstop = () => {
+                if (settled) return;
+                settled = true;
+                cleanup();
                 const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'video/webm' });
                 resolve({ blob, mimeType: blob.type || recorder.mimeType || mimeType || 'video/webm' });
             };
@@ -486,28 +505,29 @@
                 if (sourceMedia) {
                     sourceMedia.currentTime = started;
                     sourceMedia.muted = false;
-                    sourceMedia.play().catch(() => {});
+                    sourceMedia.play().catch(error => {
+                        const store = global.AIShortsAppState;
+                        if (store && store.addDiagnostic) store.addDiagnostic({ type: 'render-playback-warning', message: error.message });
+                    });
                 }
                 recorder.start(1000);
                 drawLoop();
-                const timer = setInterval(() => {
+                intervalTimer = setInterval(() => {
                     if (!sourceMedia) return;
                     if (sourceMedia.currentTime >= end || sourceMedia.ended) {
-                        clearInterval(timer);
+                        clearInterval(intervalTimer);
+                        intervalTimer = 0;
                         sourceMedia.pause();
                         if (recorder.state !== 'inactive') recorder.stop();
                     }
                 }, 100);
-                setTimeout(() => {
-                    clearInterval(timer);
+                stopTimer = setTimeout(() => {
+                    stopTimer = 0;
                     if (sourceMedia) sourceMedia.pause();
                     if (recorder.state !== 'inactive') recorder.stop();
                 }, Math.ceil(duration * 1000) + 1400);
             } catch (error) {
-                stopped = true;
-                if (raf) cancelAnimationFrame(raf);
-                if (sourceMedia) sourceMedia.volume = originalVolume;
-                reject(error);
+                fail(error);
             }
         });
     }
