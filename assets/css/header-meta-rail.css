@@ -1,0 +1,128 @@
+/* AI Shorts Studio v1.2.8 - simplified two-sided header metadata rail */
+
+body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
+.cinematic-brand-panel .brand-topline {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: clamp(10px, 2vw, 24px) !important;
+}
+
+.cinematic-brand-panel .brand-release {
+    grid-column: 1 !important;
+    min-width: 0;
+    overflow: hidden;
+}
+
+body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions,
+.cinematic-brand-panel .brand-right-actions {
+    display: flex !important;
+    grid-column: 2 !important;
+    justify-self: end !important;
+    min-width: max-content;
+}
+
+/* The center readiness slogan was intentionally removed in v1.2.8. */
+.cinematic-brand-panel .brand-compat-pill {
+    display: none !important;
+}
+
+@media (max-width: 920px) {
+    .cinematic-brand-panel .release-name {
+        display: none !important;
+    }
+}
+
+@media (max-width: 720px) {
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
+    .cinematic-brand-panel .brand-topline {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) auto !important;
+        gap: 8px !important;
+        min-height: 46px !important;
+    }
+
+    .cinematic-brand-panel .brand-release {
+        display: flex !important;
+        gap: 7px !important;
+        white-space: nowrap;
+    }
+
+    .cinematic-brand-panel .badge-version {
+        padding-left: 31px !important;
+        font-size: 9px !important;
+    }
+
+    .cinematic-brand-panel .badge-version::before {
+        display: block !important;
+        font-size: 6.5px !important;
+    }
+
+    .cinematic-brand-panel .release-device-compat {
+        display: inline-flex !important;
+        gap: 4px !important;
+        font-size: 6.8px !important;
+    }
+
+    .cinematic-brand-panel .brand-right-actions {
+        align-self: center !important;
+    }
+
+    .cinematic-brand-panel .brand-signature-pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        max-width: none !important;
+        margin: 0 !important;
+        gap: 6px !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+
+    .cinematic-brand-panel .brand-signature-pill .signature-label {
+        display: inline !important;
+        font-size: 6px !important;
+        letter-spacing: 0.11em !important;
+    }
+
+    .cinematic-brand-panel .brand-signature-pill strong {
+        font-size: 9px !important;
+    }
+}
+
+@media (max-width: 390px) {
+    .cinematic-brand-panel .brand-release {
+        gap: 5px !important;
+    }
+
+    .cinematic-brand-panel .badge-version {
+        padding-left: 27px !important;
+        font-size: 8.5px !important;
+    }
+
+    .cinematic-brand-panel .badge-version::before {
+        font-size: 5.8px !important;
+        letter-spacing: 0.12em !important;
+    }
+
+    .cinematic-brand-panel .release-device-compat {
+        font-size: 6.2px !important;
+    }
+
+    .cinematic-brand-panel .device-pair-glyph {
+        width: 17px !important;
+        transform: scale(0.82) !important;
+        margin-right: -3px !important;
+    }
+
+    .cinematic-brand-panel .brand-signature-pill {
+        gap: 4px !important;
+    }
+
+    .cinematic-brand-panel .brand-signature-pill .signature-label {
+        font-size: 5.5px !important;
+    }
+
+    .cinematic-brand-panel .brand-signature-pill strong {
+        font-size: 8.4px !important;
+    }
+}

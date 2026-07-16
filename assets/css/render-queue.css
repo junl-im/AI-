@@ -127,3 +127,18 @@ body[data-render-queue="running"] .bottom-dock-tabs {
     .render-queue-item { grid-template-columns: 1fr; }
     .render-queue-meta { text-align: left; }
 }
+
+/* v1.2.7 semantic queue status indicator */
+.render-queue-status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px color-mix(in srgb, currentColor 42%, transparent);
+}
+.render-queue-status[data-state="idle"] { color: #c4b5fd; }
+.render-queue-status[data-state="running"] { color: #a5f3fc; }
+.render-queue-status[data-state="done"] { color: #86efac; }
+.render-queue-status[data-state="failed"] { color: #fda4af; }

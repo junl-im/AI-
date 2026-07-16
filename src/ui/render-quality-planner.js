@@ -1,13 +1,13 @@
-// AI Shorts Studio v1.2.1 - render quality planner, estimates, and mobile save guidance
+// AI Shorts Studio v1.2.8 - vector render quality planner and save guidance
 'use strict';
 
 (function bootRenderQualityPlanner(global) {
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
     const presets = Object.freeze({
-        fast: { label: '빠른 저장', emoji: '›', fps: 24, bitrate: 5.2, speed: 0.72, size: 0.72, note: '짧은 확인용·저사양 기기 추천' },
-        balanced: { label: '균형', emoji: '◆', fps: 30, bitrate: 8.0, speed: 1, size: 1, note: '기본 추천·품질과 속도 균형' },
-        high: { label: '고품질', emoji: 'HQ', fps: 30, bitrate: 12.5, speed: 1.42, size: 1.55, note: '최종 업로드용·시간과 용량 증가' }
+        fast: { label: '빠른 저장', icon: 'render', fps: 24, bitrate: 5.2, speed: 0.72, size: 0.72, note: '짧은 확인용·저사양 기기 추천' },
+        balanced: { label: '균형', icon: 'check', fps: 30, bitrate: 8.0, speed: 1, size: 1, note: '기본 추천·품질과 속도 균형' },
+        high: { label: '고품질', icon: 'export', fps: 30, bitrate: 12.5, speed: 1.42, size: 1.55, note: '최종 업로드용·시간과 용량 증가' }
     });
     let raf = 0;
     let observer = null;
@@ -64,7 +64,7 @@
         button.type = 'button';
         button.className = 'render-preset-card';
         button.dataset.renderPreset = key;
-        button.innerHTML = `<strong>${preset.emoji} ${preset.label}</strong><span>${preset.note}</span>`;
+        button.innerHTML = `<strong><i class="studio-icon" data-icon="${preset.icon}" aria-hidden="true"></i>${preset.label}</strong><span>${preset.note}</span>`;
         button.addEventListener('click', () => setPresetKey(key));
         return button;
     }
@@ -73,6 +73,7 @@
         button.type = 'button';
         button.className = 'mini-action';
         button.textContent = label;
+        button.dataset.icon = ({ preview: 'preview', edit: 'edit', candidates: 'candidates', export: 'export' })[tab] || 'render';
         button.addEventListener('click', () => {
             const api = global.AIShortsHyperFlowTabs;
             if (api && api.setActiveFlowTab) api.setActiveFlowTab(tab, { reveal: true });
@@ -95,9 +96,9 @@
         if (grid) ['fast', 'balanced', 'high'].forEach(key => grid.appendChild(makePresetButton(key)));
         const actions = byId('renderQualityActions');
         if (actions) {
-            actions.appendChild(makeAction('▶ 미리보기 확인', 'preview'));
-            actions.appendChild(makeAction('◫ 편집 조정', 'edit'));
-            actions.appendChild(makeAction('◆ 후보 다시 보기', 'candidates'));
+            actions.appendChild(makeAction('미리보기 확인', 'preview'));
+            actions.appendChild(makeAction('편집 조정', 'edit'));
+            actions.appendChild(makeAction('후보 다시 보기', 'candidates'));
         }
         return panel;
     }
@@ -118,7 +119,7 @@
             button.classList.toggle('is-active', active);
             button.setAttribute('aria-pressed', active ? 'true' : 'false');
         });
-        setText('renderQualityBadge', `${preset.emoji} ${preset.label}`);
+        setText('renderQualityBadge', preset.label); const badge = byId('renderQualityBadge'); if (badge) badge.dataset.icon = preset.icon;
         setText('renderQualityMeta', candidate ? `${candidate.rangeText || '선택 구간'} · ${fmtSeconds(candidate.duration)} · 저장 전 품질을 고르세요.` : '후보를 선택하면 예상 렌더 시간과 용량이 표시됩니다.');
         setText('renderEstimateTime', candidate ? estimateTime(candidate, key) : '대기');
         setText('renderEstimateSize', candidate ? estimateSize(candidate, key) : '대기');

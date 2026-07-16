@@ -66,7 +66,7 @@
             const preview = document.createElement('button');
             preview.id = 'candidateProPreviewBtn';
             preview.type = 'button';
-            preview.textContent = '▶ 선택 미리보기';
+            preview.textContent = '선택 미리보기'; preview.dataset.icon = 'preview';
             preview.addEventListener('click', () => goTab(selected() ? 'preview' : 'candidates'));
             actions.appendChild(preview);
         }
@@ -86,10 +86,10 @@
         else preview.insertBefore(hud, preview.firstChild);
         const actions = byId('previewProActions');
         if (actions) {
-            [['◆ 후보 변경', 'candidates'], ['∿ 파형 조정', 'waveform'], ['↓ 저장으로', 'export']].forEach(([label, tab]) => {
+            [['후보 변경', 'candidates', 'candidates'], ['파형 조정', 'waveform', 'waveform'], ['저장으로', 'export', 'export']].forEach(([label, tab, icon]) => {
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.textContent = label;
+                button.textContent = label; button.dataset.icon = icon;
                 button.addEventListener('click', () => goTab(tab));
                 actions.appendChild(button);
             });

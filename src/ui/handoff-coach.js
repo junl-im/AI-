@@ -25,6 +25,7 @@
         button.type = 'button';
         button.className = 'mini-action';
         button.textContent = label;
+        button.dataset.icon = ({ recommend: 'spark', candidates: 'candidates', preview: 'preview', waveform: 'waveform', cut: 'cut', edit: 'edit', export: 'export' })[tab] || 'spark';
         button.addEventListener('click', () => coachSetTab(tab));
         return button;
     }
@@ -42,8 +43,8 @@
         else zone.insertBefore(card, zone.firstChild);
         const actions = coachById('candidateHandoffActions');
         if (actions) {
-            actions.appendChild(coachMakeButton('✦ 추천으로', 'recommend', 'candidateGoRecommendBtn'));
-            actions.appendChild(coachMakeButton('▶ 미리보기', 'preview', 'candidateGoPreviewBtn'));
+            actions.appendChild(coachMakeButton('추천으로', 'recommend', 'candidateGoRecommendBtn'));
+            actions.appendChild(coachMakeButton('미리보기', 'preview', 'candidateGoPreviewBtn'));
         }
         return card;
     }
@@ -61,9 +62,9 @@
         else preview.insertBefore(ribbon, preview.firstChild);
         const actions = coachById('previewHandoffActions');
         if (actions) {
-            actions.appendChild(coachMakeButton('◆ 후보로', 'candidates', 'previewGoCandidatesBtn'));
-            actions.appendChild(coachMakeButton('∿ 파형 조정', 'waveform', 'previewGoWaveformBtn'));
-            actions.appendChild(coachMakeButton('↓ 저장', 'export', 'previewGoExportBtn'));
+            actions.appendChild(coachMakeButton('후보로', 'candidates', 'previewGoCandidatesBtn'));
+            actions.appendChild(coachMakeButton('파형 조정', 'waveform', 'previewGoWaveformBtn'));
+            actions.appendChild(coachMakeButton('저장', 'export', 'previewGoExportBtn'));
         }
         return ribbon;
     }

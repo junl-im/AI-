@@ -1,33 +1,31 @@
-# QA Report - AI 쇼츠 제작 스튜디오 v1.2.6
+# QA Report - AI 쇼츠 제작 스튜디오 v1.2.8
 
 ## Summary
 
-- Passed: 109/109
-- Failed: 0/109
+- Passed: 112/112
+- Failed: 0/112
 - Result: PASS
 
-## v1.2.6 Focus
+## v1.2.8 Focus
 
-- 공통 디자인 토큰을 사용한 패널·입력·버튼·메뉴바 계층 통일
-- 강한 중첩 테두리와 글로우 감소
-- PC 8항목 단일 플로팅 메뉴바
-- 모바일 4열×2행 메뉴바의 높이·대비 개선
-- 모바일 상단과 4단계 안내 밀도·줄바꿈 조정
-- 저사양·모션 감소 폴백 유지
-- 단계형 UI 로딩과 진행 내비게이션 회귀 방지
-- v1.2.6 버전·빌드 키·서비스워커 캐시 동기화
+- 상단 중앙 `LOCAL · PRIVATE · 9:16` 문구와 상태 점 제거
+- 상단 메타를 왼쪽 빌드·기기 호환 / 오른쪽 디자인 서명의 2열 구조로 단순화
+- 모바일 720px·390px 구간에서 BUILD와 DESIGNED BY 라벨 유지
+- 런타임 내비게이션 모듈이 제거된 중앙 상태를 다시 생성하지 않도록 수정
+- `header-meta-rail.css`의 최종 캐스케이드 소유권 확인
+- v1.2.8 버전·빌드 키·서비스워커 캐시 동기화
+- 전체 설치 ZIP과 v1.2.7 덮어쓰기 패치 ZIP 계약 확인
 
 ## Automated Checks
 
 - 문법, DOM 앵커, 버전·빌드·캐시 동기화
 - 분석·추천·컷·자막·렌더·저장 모듈 계약
 - PC Prime 3열 작업실과 모바일 진행 중심 화면
-- 메뉴바 용어, 단색 글리프와 진행 내비게이션
+- 진행 내비게이션과 단계형 UI 로딩 회귀 방지
 - Observer 피드백 루프와 상시 폴링 회귀 방지
-- `shell → editing → export` 단계 의존성
-- UI refinement 스타일이 최종 캐스케이드인지 확인
-- PC 8열·모바일 4열 메뉴 구조 확인
-- 공통 표면·선 토큰과 저사양 폴백 확인
+- 전용 SVG 아이콘 20종과 메뉴 연결 유지
+- 중앙 메타 마크업·문구·런타임 재생성 로직 부재 확인
+- 전체/패치 배포 스크립트와 v1.2.7 → v1.2.8 매니페스트 확인
 
 ## Runtime Loading Baseline
 
@@ -38,24 +36,38 @@
 | Editing 준비 후 | 39 | 15 | shell, editing |
 | Export 준비 후 | 39 | 16 | shell, editing, export |
 
-기존 v1.2.5 단계 로딩 감사에서 브라우저 예외와 경고는 0건이었으며 v1.2.6은 로딩·엔진 로직을 변경하지 않았습니다. 상세 기준선은 `qa/runtime-browser-audit.json`에 있습니다.
+분석·추천·렌더 엔진과 단계 로딩 계약은 변경하지 않았습니다.
 
 ## Responsive Visual Checks
 
 - Desktop Chromium static render: 1440×1080
 - Mobile Chromium static render: 390×844
-- PC 상단과 3열 작업실의 간격·카드 계층 확인
-- PC 메뉴바 8개 항목 한 줄 표시 확인
-- 모바일 상단·4단계 안내·메뉴바가 한 화면 안에서 겹치지 않는지 확인
-- 모바일 중복 파일 불러오기 화면이 노출되지 않는지 확인
-- 버전 옆 `모바일 · PC 호환`과 디자인 서명 정렬 확인
+- 중앙 상태 요소: PC·모바일 모두 없음
+- Desktop metadata rail: BUILD/호환 왼쪽, DESIGNED BY 오른쪽
+- Mobile metadata rail: BUILD/호환 왼쪽, DESIGNED BY 오른쪽
+- Mobile horizontal overflow: 0px
+- Desktop horizontal overflow: 0px
+- Mobile version top: 24px
+- Mobile compatibility top: 23.5px
+- Mobile designer credit top: 28px
+- 페이지 렌더 오류: 0건
 
-관리형 Chromium이 로컬 URL 탐색을 차단하므로 시각 검수는 CDP 문서 주입과 CSS 인라인 방식으로 실제 Chromium 렌더 엔진에서 수행했습니다.
+관리형 Chromium의 로컬 URL 제한 때문에 실제 HTML과 CSS를 인라인 주입한 감사 문서로 Chromium 렌더 엔진을 검수했습니다. 세부 값은 `qa/runtime-browser-audit-v1.2.8.json`에 기록했습니다.
+
+## Distribution Checks
+
+- 전체 설치 ZIP: 프로젝트 전체 파일 포함
+- 덮어쓰기 패치 ZIP: v1.2.7 → v1.2.8 변경 파일만 포함
+- 패치 적용 후 대상 파일이 전체 버전과 바이트 단위로 일치하는지 확인
+- 전체 ZIP 221개 항목, 패치 ZIP 57개 항목
+- 패치 매니페스트 57개 파일의 누락 0건·불일치 0건
+- 두 ZIP 압축 무결성 검사와 SHA-256 생성
 
 ## Command
 
 ```bash
 npm run check
+npm run package
 ```
 
 ## Remaining Manual E2E

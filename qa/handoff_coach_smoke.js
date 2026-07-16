@@ -19,10 +19,10 @@ const css = read('assets/css/handoff-coach.css');
 const js = read('src/ui/handoff-coach.js');
 const pkg = JSON.parse(read('package.json'));
 
-ok(pkg.version === '1.2.6', 'package version is v1.2.6');
-ok(html.includes('assets/css/handoff-coach.css?v=1.2.6-handoff-coach'), 'handoff coach stylesheet is linked');
+ok(pkg.version === '1.2.8', 'package version is v1.2.8');
+ok(html.includes('assets/css/handoff-coach.css?v=1.2.8-header-meta'), 'handoff coach stylesheet is linked');
 ok(loader.includes('src/ui/handoff-coach.js?v=${VERSION}-handoff-coach'), 'handoff coach script is staged');
-ok(sw.includes('./assets/css/handoff-coach.css?v=1.2.6-handoff-coach'), 'handoff coach stylesheet is cached');
+ok(sw.includes('./assets/css/handoff-coach.css?v=1.2.8-header-meta'), 'handoff coach stylesheet is cached');
 ok(sw.includes('async function cacheFirst'), 'handoff coach script is cached on first use');
 ok(css.includes('.candidate-handoff-card'), 'candidate handoff card styles exist');
 ok(css.includes('.preview-handoff-ribbon'), 'preview handoff ribbon styles exist');

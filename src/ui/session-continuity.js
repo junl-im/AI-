@@ -96,7 +96,7 @@
         panel.id = 'sessionContinuityPanel';
         panel.className = 'session-continuity-panel';
         panel.setAttribute('aria-label', '작업 세션 복구');
-        panel.innerHTML = '<div class="session-continuity-copy"><span class="session-continuity-icon">↺</span><div><strong id="sessionContinuityTitle">작업 세션 자동 저장 준비</strong><small id="sessionContinuityMeta">후보와 선택 구간이 생기면 자동으로 가볍게 저장합니다.</small></div></div><div class="session-continuity-actions"><button id="sessionRestoreBtn" class="primary" type="button">이전 작업 복구</button><button id="sessionSaveBtn" type="button">지금 저장</button><button id="sessionClearBtn" type="button">기록 지우기</button></div>';
+        panel.innerHTML = '<div class="session-continuity-copy"><span class="session-continuity-icon studio-icon" data-icon="retry" aria-hidden="true"></span><div><strong id="sessionContinuityTitle">작업 세션 자동 저장 준비</strong><small id="sessionContinuityMeta">후보와 선택 구간이 생기면 자동으로 가볍게 저장합니다.</small></div></div><div class="session-continuity-actions"><button id="sessionRestoreBtn" class="primary" type="button">이전 작업 복구</button><button id="sessionSaveBtn" type="button">지금 저장</button><button id="sessionClearBtn" type="button">기록 지우기</button></div>';
         startPanel.insertAdjacentElement('afterend', panel);
         const restore = byId('sessionRestoreBtn');
         const save = byId('sessionSaveBtn');

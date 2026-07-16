@@ -1,12 +1,12 @@
-// AI Shorts Studio v1.2.6 - single-owner workflow navigation director
+// AI Shorts Studio v1.2.8 - vector-icon workflow navigation director
 // Owns menu state, progression reveal, panel spotlight and scroll positioning.
 'use strict';
 (function bootFlowDirectorFinal(global) {
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
-        file: ['＋', '파일 열기'], recommend: ['✦', '추천 생성'], candidates: ['◆', '후보 선택'],
-        preview: ['▶', '미리보기'], waveform: ['∿', '파형'], cut: ['✂', '컷 편집'],
-        edit: ['◫', '편집'], export: ['↓', '저장']
+        file: ['upload', '파일 열기'], recommend: ['spark', '추천 생성'], candidates: ['candidates', '후보 선택'],
+        preview: ['preview', '미리보기'], waveform: ['waveform', '파형'], cut: ['cut', '컷 편집'],
+        edit: ['edit', '편집'], export: ['export', '저장']
     };
     let raf = 0;
     let revealToken = 0;
@@ -197,7 +197,7 @@
         strip.id = 'socialShutterStrip';
         strip.className = 'social-shutter-strip';
         strip.setAttribute('aria-label', '쇼츠 플랫폼 무드');
-        strip.innerHTML = '<div class="shutter-tile youtube"><span class="shutter-icon"><i>▶</i>YouTube</span><small>하이라이트 컷</small></div><div class="shutter-tile instagram"><span class="shutter-icon"><i>◎</i>Reels</span><small>세로 프레임</small></div><div class="shutter-tile tiktok"><span class="shutter-icon"><i>♪</i>TikTok</span><small>빠른 템포</small></div>';
+        strip.innerHTML = '<div class="shutter-tile youtube"><span class="shutter-icon"><i class="studio-icon" data-icon="preview"></i>YouTube</span><small>하이라이트 컷</small></div><div class="shutter-tile instagram"><span class="shutter-icon"><i class="studio-icon" data-icon="candidates"></i>Reels</span><small>세로 프레임</small></div><div class="shutter-tile tiktok"><span class="shutter-icon"><i class="studio-icon" data-icon="waveform"></i>TikTok</span><small>빠른 템포</small></div>';
         hero.appendChild(strip);
     }
     function simplifyHomeCopy() {
@@ -217,9 +217,9 @@
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.2.6') document.body.dataset.build = '1.2.6';
+            if (document.body.dataset.build !== '1.2.8') document.body.dataset.build = '1.2.8';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
-            document.body.dataset.iconLanguage = 'studio-glyphs';
+            document.body.dataset.iconLanguage = 'studio-vectors';
         }
         installTabClicks();
         installProgressNavigation();

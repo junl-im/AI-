@@ -104,7 +104,7 @@
             }
             const cta = document.createElement('span');
             cta.className = 'rec-select-cta';
-            cta.textContent = item.id === selectedId ? '✓ 선택됨 · 미리보기 연결' : '선택해서 미리보기 →';
+            cta.textContent = item.id === selectedId ? '선택됨 · 미리보기 연결' : '선택해서 미리보기'; cta.dataset.icon = item.id === selectedId ? 'check' : 'preview';
             button.appendChild(cta);
             button.addEventListener('click', () => onSelect && onSelect(item.id));
             container.appendChild(button);

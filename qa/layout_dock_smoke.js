@@ -21,12 +21,16 @@ if (html.includes('bottomAnalyzeBtn') || html.includes('분석하기</span></but
     console.error('FAIL legacy analysis dock button should be removed');
     process.exit(1);
 }
-['＋','✦','◆','▶','∿','✂','◫','↓'].forEach(icon => {
-    if (!html.includes(icon)) {
-        console.error('FAIL HyperFlow dock missing icon: ' + icon);
+['upload','spark','candidates','preview','waveform','cut','edit','export'].forEach(icon => {
+    if (!html.includes(`data-icon="${icon}"`)) {
+        console.error('FAIL HyperFlow dock missing vector icon: ' + icon);
         process.exit(1);
     }
 });
+if (/[＋✦◆▶∿✂◫↓]/.test((html.match(/<nav class="bottom-dock-tabs"[\s\S]*?<\/nav>/) || [''])[0])) {
+    console.error('FAIL legacy glyph remains in menu bar');
+    process.exit(1);
+}
 if (!html.includes('assets/css/hyperflow-tabs.css') || !html.includes('src/ui/hyperflow-tabs.js')) {
     console.error('FAIL HyperFlow assets are not linked from index.html');
     process.exit(1);
@@ -45,4 +49,4 @@ if (html.includes('id="flowRecommendBtn"') || js.includes('flowRecommendBtn')) {
     console.error('FAIL top duplicate recommend button bridge should not exist');
     process.exit(1);
 }
-console.log('PASS HyperConnect 8-tab bottom dock anchors present with updated v1.2.6 icons');
+console.log('PASS HyperConnect 8-tab bottom dock anchors present with updated v1.2.8 vector icons');

@@ -1,12 +1,15 @@
 {
-  "name": "ai-shorts-studio-v1-2-6",
-  "version": "1.2.6",
+  "name": "ai-shorts-studio-v1-2-8",
+  "version": "1.2.8",
   "private": true,
-  "description": "AI Shorts Studio v1.2.6 - unified UI refinement for clearer hierarchy across desktop and mobile",
+  "description": "AI Shorts Studio v1.2.8 - simplified header metadata rail with persistent mobile build and designer credit",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
-    "package:clean": "bash tools/create-release-zip.sh"
+    "package:clean": "bash tools/create-distribution-zips.sh",
+    "package:full": "bash tools/create-release-zip.sh",
+    "package:patch": "bash tools/create-patch-zip.sh",
+    "package": "bash tools/create-distribution-zips.sh"
   },
   "qaChecks": [
     "node --check src/config/app-runtime-config.js",
@@ -94,6 +97,7 @@
     "node qa/runtime_performance_smoke.js",
     "node qa/desktop_prime_layout_smoke.js",
     "node qa/hero_command_deck_smoke.js",
+    "node qa/header_meta_rail_smoke.js",
     "node qa/viewport_rendering_smoke.js",
     "node qa/workspace_comfort_smoke.js",
     "node --check src/ui/handoff-coach.js",
@@ -117,6 +121,8 @@
     "node qa/runtime_responsiveness_smoke.js",
     "node qa/navigation_focus_smoke.js",
     "node qa/staged_ui_loading_smoke.js",
-    "node qa/ui_refinement_smoke.js"
+    "node qa/ui_refinement_smoke.js",
+    "node qa/icon_system_smoke.js",
+    "node qa/distribution_packaging_smoke.js"
   ]
 }

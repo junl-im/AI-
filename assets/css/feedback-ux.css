@@ -145,25 +145,25 @@ button, label[for], .bottom-dock-btn, .recommendation-card, .caption-preset, .mi
     border-color: rgba(52, 211, 153, 0.42);
     background: linear-gradient(135deg, rgba(6, 78, 59, 0.96), rgba(15, 23, 42, 0.96));
 }
-.toast.toast-kind-success::before { content: "✅"; }
+.toast.toast-kind-success::before { content: ""; --studio-icon-url: url("../icons/studio/check.svg"); }
 .toast.toast-kind-action {
     border-color: rgba(34, 211, 238, 0.42);
     background: linear-gradient(135deg, rgba(8, 47, 73, 0.96), rgba(15, 23, 42, 0.96));
 }
-.toast.toast-kind-action::before { content: "⚡"; }
+.toast.toast-kind-action::before { content: ""; --studio-icon-url: url("../icons/studio/spark.svg"); }
 .toast.toast-kind-warn {
     border-color: rgba(245, 158, 11, 0.46);
     background: linear-gradient(135deg, rgba(120, 53, 15, 0.96), rgba(15, 23, 42, 0.96));
 }
-.toast.toast-kind-warn::before { content: "⚠️"; }
+.toast.toast-kind-warn::before { content: ""; --studio-icon-url: url("../icons/studio/diagnostics.svg"); }
 .toast.toast-kind-error {
     border-color: rgba(251, 113, 133, 0.50);
     background: linear-gradient(135deg, rgba(127, 29, 29, 0.96), rgba(15, 23, 42, 0.96));
 }
-.toast.toast-kind-error::before { content: "🚫"; }
-.toast.toast-kind-file::before { content: "📂"; }
-.toast.toast-kind-export::before { content: "⬇️"; }
-.toast.toast-kind-copy::before { content: "📋"; }
+.toast.toast-kind-error::before { content: ""; --studio-icon-url: url("../icons/studio/close.svg"); }
+.toast.toast-kind-file::before { content: ""; --studio-icon-url: url("../icons/studio/upload.svg"); }
+.toast.toast-kind-export::before { content: ""; --studio-icon-url: url("../icons/studio/export.svg"); }
+.toast.toast-kind-copy::before { content: ""; --studio-icon-url: url("../icons/studio/diagnostics.svg"); }
 .feedback-badge {
     display: inline-flex;
     align-items: center;
@@ -213,4 +213,20 @@ body.has-media .brand-signature-card {
         display: block !important;
         margin-top: 8px;
     }
+}
+
+/* v1.2.7 vector toast icons */
+.toast.toast-kind-success::before,
+.toast.toast-kind-action::before,
+.toast.toast-kind-warn::before,
+.toast.toast-kind-error::before,
+.toast.toast-kind-file::before,
+.toast.toast-kind-export::before,
+.toast.toast-kind-copy::before {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    background: currentColor;
+    -webkit-mask: var(--studio-icon-url) center / contain no-repeat;
+    mask: var(--studio-icon-url) center / contain no-repeat;
 }

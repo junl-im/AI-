@@ -486,10 +486,13 @@
         const snap = snapshot || getRenderQueueSnapshot();
         if (document && document.body) document.body.dataset.renderQueue = snap.running ? 'running' : 'idle';
         if (els.renderQueueStatus) {
-            if (!snap.total) els.renderQueueStatus.textContent = '● 대기 중';
-            else if (snap.running && snap.current) els.renderQueueStatus.textContent = `◌ ${snap.current.label} · ${snap.progress}%`;
-            else if (snap.failed) els.renderQueueStatus.textContent = `! 완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`;
-            else els.renderQueueStatus.textContent = `✓ 완료 ${snap.done}/${snap.total}`;
+            let queueState = 'done';
+            let queueText = `완료 ${snap.done}/${snap.total}`;
+            if (!snap.total) { queueState = 'idle'; queueText = '대기 중'; }
+            else if (snap.running && snap.current) { queueState = 'running'; queueText = `${snap.current.label} · ${snap.progress}%`; }
+            else if (snap.failed) { queueState = 'failed'; queueText = `완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`; }
+            if (els.renderQueueStatus.dataset.state !== queueState) els.renderQueueStatus.dataset.state = queueState;
+            if (els.renderQueueStatus.textContent !== queueText) els.renderQueueStatus.textContent = queueText;
         }
         if (els.renderQueueList) {
             const items = Array.isArray(snap.items) ? snap.items : [];
@@ -497,13 +500,13 @@
                 els.renderQueueList.innerHTML = '<div class="render-queue-empty">저장 작업을 시작하면 진행 상태가 여기에 표시됩니다.</div>';
             } else {
                 els.renderQueueList.innerHTML = items.map(item => {
-                    const statusIcon = item.status === 'done' ? '✓' : item.status === 'failed' ? '!' : item.status === 'running' ? '◌' : '·';
+                    const statusIcon = item.status === 'done' ? 'check' : item.status === 'failed' ? 'close' : item.status === 'running' ? 'render' : 'retry';
                     const statusText = item.status === 'done' ? '완료' : item.status === 'failed' ? '실패' : item.status === 'running' ? '렌더링' : '대기';
                     const error = item.error ? `<div class="render-queue-error">${utils.escapeHtml ? utils.escapeHtml(item.error) : item.error}</div>` : '';
                     const label = utils.escapeHtml ? utils.escapeHtml(item.label || '렌더 작업') : (item.label || '렌더 작업');
                     const filename = utils.escapeHtml ? utils.escapeHtml(item.filenameHint || statusText) : (item.filenameHint || statusText);
                     return `<div class="render-queue-item is-${item.status}">
-                        <div class="render-queue-title"><span>${statusIcon}</span><b>${label}</b><span class="render-queue-badge">${statusText}</span></div>
+                        <div class="render-queue-title"><span class="studio-icon" data-icon="${statusIcon}" aria-hidden="true"></span><b>${label}</b><span class="render-queue-badge">${statusText}</span></div>
                         <div class="render-queue-meta">${filename}</div>
                         <div class="render-queue-progress"><span style="width:${Math.max(0, Math.min(100, Number(item.progress || 0)))}%"></span></div>
                         ${error}
@@ -590,7 +593,7 @@
         const queueBusy = Boolean(renderQueue && renderQueue.isRunning && renderQueue.isRunning());
         if (els.analyzeBtn) {
             els.analyzeBtn.disabled = !analysisReady || state.isAnalyzing;
-            els.analyzeBtn.textContent = state.isAnalyzing ? '◌ 자동 분석 중' : '✦ 추천 생성';
+            els.analyzeBtn.textContent = state.isAnalyzing ? '자동 분석 중' : '추천 생성'; els.analyzeBtn.dataset.icon = state.isAnalyzing ? 'render' : 'spark';
         }
         if (els.previewBtn) els.previewBtn.disabled = !hasRecs || state.isPreviewing;
         if (els.stopPreviewBtn) els.stopPreviewBtn.disabled = !state.isPreviewing;

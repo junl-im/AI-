@@ -1,17 +1,17 @@
-// AI Shorts Studio v1.2.1 - no-shake command bridge
+// AI Shorts Studio v1.2.8 - vector-icon command bridge
 // Keeps menu-bar/navigation commands single-owned after legacy modules have loaded.
 'use strict';
 (function bootFlowCommandBridge(global) {
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
-        file: ['＋', '파일 열기'],
-        recommend: ['✦', '추천'],
-        candidates: ['◆', '후보'],
-        preview: ['▶', '미리보기'],
-        waveform: ['∿', '파형'],
-        cut: ['✂', '컷'],
-        edit: ['◫', '편집'],
-        export: ['↓', '저장']
+        file: ['upload', '파일 열기'],
+        recommend: ['spark', '추천'],
+        candidates: ['candidates', '후보'],
+        preview: ['preview', '미리보기'],
+        waveform: ['waveform', '파형'],
+        cut: ['cut', '컷'],
+        edit: ['edit', '편집'],
+        export: ['export', '저장']
     };
     let lastCommand = '';
     let lastAt = 0;
@@ -43,33 +43,9 @@
             if (!meta) return;
             const icon = node.querySelector('span');
             const label = node.querySelector('b');
-            if (icon) icon.textContent = meta[0];
+            if (icon) { icon.textContent = ''; icon.classList.add('studio-icon'); icon.dataset.icon = meta[0]; }
             if (label) label.textContent = meta[1];
         });
-        const compat = document.querySelector('.brand-compat-pill');
-        if (compat) {
-            const label = compat.querySelector('[data-compat-label]') || compat.querySelector('span:last-child');
-            if (label && label.textContent !== 'LOCAL · PRIVATE · 9:16') label.textContent = 'LOCAL · PRIVATE · 9:16';
-        }
-    }
-    function syncTopLine() {
-        const line = document.querySelector('.brand-topline');
-        if (!line) return;
-        if (!line.querySelector('.brand-compat-pill')) {
-            const compat = document.createElement('div');
-            compat.className = 'brand-compat-pill';
-            compat.setAttribute('aria-label', '로컬 비공개 세로 렌더 상태');
-            const pulse = document.createElement('span');
-            pulse.className = 'compat-pulse';
-            pulse.setAttribute('aria-hidden', 'true');
-            const label = document.createElement('span');
-            label.setAttribute('data-compat-label', '');
-            label.textContent = 'LOCAL · PRIVATE · 9:16';
-            compat.append(pulse, label);
-            const right = line.querySelector('.brand-right-actions');
-            if (right) line.insertBefore(compat, right);
-            else line.appendChild(compat);
-        }
     }
     function setTab(tab, options) {
         const key = isAllowed(tab) ? tab : 'file';
@@ -123,7 +99,6 @@
             document.body.dataset.flowCommandBridge = 'ready';
             document.body.dataset.noShakeCommand = 'true';
         }
-        syncTopLine();
         relabel();
         patchLegacyApis();
         installCaptureGuard();
