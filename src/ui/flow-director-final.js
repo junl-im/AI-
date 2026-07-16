@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.9 - vector-icon workflow navigation director
+// AI Shorts Studio v1.3.0 - workflow navigation, landing beacon, and stage ownership director
 // Owns menu state, progression reveal, panel spotlight and scroll positioning.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -14,6 +14,8 @@
     let lastY = -1;
     let lastAt = 0;
     let clearFocusTimer = 0;
+    let lastSpotlightKey = '';
+    let liveRegion = null;
 
     function byId(id) { return document.getElementById(id); }
     function activeTab() {
@@ -42,19 +44,66 @@
             try { node.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'auto' }); } catch (_) { /* ignore */ }
         });
     }
-    function spotlight(panel, key) {
+    function ensureLiveRegion() {
+        if (liveRegion && liveRegion.isConnected) return liveRegion;
+        liveRegion = document.getElementById('workflowStageLive');
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.id = 'workflowStageLive';
+            liveRegion.className = 'sr-only';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(liveRegion);
+        }
+        return liveRegion;
+    }
+    function ensureStageDecor(panel, key) {
+        if (!panel) return;
+        let rail = panel.querySelector(':scope > .stage-neon-rail');
+        if (!rail) {
+            rail = document.createElement('span');
+            rail.className = 'stage-neon-rail';
+            rail.setAttribute('aria-hidden', 'true');
+            panel.appendChild(rail);
+        }
+        let chip = panel.querySelector(':scope > .stage-progress-chip');
+        if (!chip) {
+            chip = document.createElement('span');
+            chip.className = 'stage-progress-chip';
+            chip.setAttribute('aria-hidden', 'true');
+            panel.appendChild(chip);
+        }
+        const spec = META[key] || ['spark', '현재 작업'];
+        const signature = key + ':' + spec[0] + ':' + spec[1];
+        if (chip.dataset.signature !== signature) {
+            chip.dataset.signature = signature;
+            chip.innerHTML = '<span class="studio-icon" data-icon="' + spec[0] + '"></span><b>' + spec[1] + ' 진행 중</b>';
+        }
+        panel.dataset.stageKey = key;
+    }
+    function spotlight(panel, key, options) {
+        const opts = options || {};
         panels().forEach(node => {
-            if (node !== panel && node.classList.contains('is-navigation-target')) node.classList.remove('is-navigation-target');
+            if (node === panel) return;
+            node.classList.remove('is-navigation-target', 'is-navigation-pulse', 'is-stage-current', 'is-stage-landing');
+            delete node.dataset.stageKey;
         });
         if (!panel) return;
-        panel.classList.add('is-navigation-target');
+        const stageChanged = key !== lastSpotlightKey;
+        ensureStageDecor(panel, key);
+        panel.classList.add('is-navigation-target', 'is-stage-current');
         panel.dataset.navigationLabel = (META[key] && META[key][1]) || '현재 작업';
         if (document.body) document.body.dataset.navigationFocus = key;
-        clearTimeout(clearFocusTimer);
-        clearFocusTimer = global.setTimeout(() => panel.classList.remove('is-navigation-pulse'), 900);
-        panel.classList.remove('is-navigation-pulse');
-        void panel.offsetWidth;
-        panel.classList.add('is-navigation-pulse');
+        if (stageChanged || opts.forcePulse) {
+            clearTimeout(clearFocusTimer);
+            panel.classList.remove('is-navigation-pulse', 'is-stage-landing');
+            void panel.offsetWidth;
+            panel.classList.add('is-navigation-pulse', 'is-stage-landing');
+            clearFocusTimer = global.setTimeout(() => panel.classList.remove('is-navigation-pulse', 'is-stage-landing'), 940);
+            const region = ensureLiveRegion();
+            if (region) region.textContent = panel.dataset.navigationLabel + ' 단계로 이동했습니다.';
+        }
+        lastSpotlightKey = key;
     }
     function setVisible(tab) {
         const key = ORDER.includes(tab) ? tab : 'file';
@@ -98,7 +147,7 @@
         const opts = options || {};
         setVisible(key);
         const panel = panelFor(key);
-        spotlight(panel, key);
+        spotlight(panel, key, opts);
         focusMenuTab(key);
         if (!panel || !global.requestAnimationFrame) return false;
         const token = ++revealToken;
@@ -214,10 +263,11 @@
         installHeroSocial();
         simplifyHomeCopy();
         setVisible(activeTab());
+        spotlight(panelFor(activeTab()), activeTab(), { forcePulse: false });
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.2.9') document.body.dataset.build = '1.2.9';
+            if (document.body.dataset.build !== '1.3.0') document.body.dataset.build = '1.3.0';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
             document.body.dataset.iconLanguage = 'studio-vectors';
         }

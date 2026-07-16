@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v1.3.0 - Active Stage Beacon & Operation Coordination
+
+- 진행 단계가 바뀔 때 현재 패널 외곽에 밝은 네온 띠와 1회 랜딩 스윕을 표시합니다.
+- 단계별 `진행 중` 칩과 전용 SVG 아이콘을 추가하고 접근성 라이브 안내를 제공합니다.
+- 같은 단계의 반복 동기화에서는 애니메이션을 다시 실행하지 않습니다.
+- `AIShortsOperationCoordinator`를 추가해 분석·미리보기·렌더의 작업 ID와 미디어 세션을 관리합니다.
+- 새 파일을 열면 이전 분석·미리보기·렌더가 취소되고 오래된 결과가 새 상태를 덮어쓰지 못하게 했습니다.
+- 오디오 워커, 비디오 모션 샘플링, 분석 파이프라인, 렌더 큐와 MediaRecorder에 AbortSignal을 연결했습니다.
+- 렌더 큐에 `cancelled` 상태와 취소 API를 추가하고 종료 시 타이머·트랙·볼륨을 정리합니다.
+- PC 1366×768과 모바일 390×844 Chromium 감사에서 랜딩·지속 강조, 오류 0건, RAF·Mutation 안정화를 확인했습니다.
+- 전체 설치 ZIP과 v1.2.9 덮어쓰기 패치 ZIP을 함께 생성합니다.
+
 ## v1.2.9 - Runtime Stability & PC Menu Containment
 
 - PC 메뉴바 바깥 프레임은 970px, 내부 메뉴 레일은 1180px였던 상충 규칙을 통합했습니다.

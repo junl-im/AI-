@@ -8,6 +8,7 @@
         fileUrl: '',
         fileKind: '',
         fileMeta: null,
+        mediaSessionId: 0,
         audioBuffer: null,
         channelData: null,
         audioAnalysis: null,
@@ -122,6 +123,7 @@
         state.fileUrl = '';
         state.fileKind = '';
         state.fileMeta = null;
+        state.mediaSessionId = 0;
         state.audioBuffer = null;
         state.channelData = null;
         state.audioAnalysis = null;

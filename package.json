@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-2-9",
-  "version": "1.2.9",
+  "name": "ai-shorts-studio-v1-3-0",
+  "version": "1.3.0",
   "private": true,
-  "description": "AI Shorts Studio v1.2.9 - PC menu containment, staged-loader repair, runtime diagnostics and render cleanup",
+  "description": "AI Shorts Studio v1.3.0 - active-stage neon landing, async operation ownership, cancellation safety and render coordination",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -23,6 +23,7 @@
     "node --check src/analysis/video-motion-analyzer.js",
     "node --check src/analysis/auto-cut-detector.js",
     "node --check src/recommendation/shorts-recommendation-engine.js",
+    "node --check src/engine/operation-coordinator.js",
     "node --check src/engine/engine-kernel.js",
     "node --check src/engine/engine-boost-profile.js",
     "node --check src/engine/scoring-pipeline.js",
@@ -127,6 +128,8 @@
     "node qa/distribution_packaging_smoke.js",
     "node qa/pc_menu_containment_smoke.js",
     "node qa/stability_audit_smoke.js",
-    "node qa/runtime_browser_audit_smoke.js"
+    "node qa/runtime_browser_audit_smoke.js",
+    "node qa/operation_coordinator_smoke.js",
+    "node qa/active_stage_beacon_smoke.js"
   ]
 }

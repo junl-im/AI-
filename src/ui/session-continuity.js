@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.9 - session continuity with visibility-aware autosave
+// AI Shorts Studio v1.3.0 - session continuity with visibility-aware autosave
 'use strict';
 (function bootSessionContinuity(global) {
     if (global.AIShortsSessionContinuity) return;

@@ -1,5 +1,5 @@
 
-// AI Shorts Studio v1.2.9 - stable vector menu bar workflow controller
+// AI Shorts Studio v1.3.0 - stable vector menu bar workflow controller
 'use strict';
 (function bootHyperFlowTabs(global) {
     const store = global.AIShortsAppState || {};

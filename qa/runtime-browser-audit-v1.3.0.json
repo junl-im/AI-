@@ -1,0 +1,343 @@
+{
+  "version": "1.3.0",
+  "desktop": {
+    "audit": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 26,
+      "mutations": 60
+    },
+    "ready": "complete",
+    "bodyBuild": "1.3.0",
+    "activeFlow": "recommend",
+    "navigationFocus": "recommend",
+    "stage": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": false,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "runtimeHealth": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "dock": {
+      "left": 138,
+      "right": 1218,
+      "top": 670,
+      "bottom": 756,
+      "width": 1080,
+      "height": 86
+    },
+    "dockScrollWidth": 1078,
+    "dockClientWidth": 1078,
+    "tabs": [
+      {
+        "tab": "file",
+        "visible": true,
+        "rect": {
+          "left": 147,
+          "right": 274.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "recommend",
+        "visible": true,
+        "rect": {
+          "left": 280.5,
+          "right": 408,
+          "top": 678,
+          "bottom": 738.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "candidates",
+        "visible": true,
+        "rect": {
+          "left": 414,
+          "right": 541.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "preview",
+        "visible": true,
+        "rect": {
+          "left": 547.5,
+          "right": 675,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "waveform",
+        "visible": true,
+        "rect": {
+          "left": 681,
+          "right": 808.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "cut",
+        "visible": true,
+        "rect": {
+          "left": 814.5,
+          "right": 942,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "edit",
+        "visible": true,
+        "rect": {
+          "left": 948,
+          "right": 1075.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "export",
+        "visible": true,
+        "rect": {
+          "left": 1081.5,
+          "right": 1209,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      }
+    ],
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "bodyScrollWidth": 1356,
+    "htmlScrollWidth": 1356,
+    "auditAtFirstSample": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 26,
+      "mutations": 60
+    },
+    "landing": {
+      "active": "recommend",
+      "focus": "recommend",
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "landing": true,
+      "rail": true,
+      "chip": "추천 생성 진행 중",
+      "chipIcon": "spark"
+    }
+  },
+  "mobile": {
+    "audit": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 26,
+      "mutations": 60
+    },
+    "ready": "complete",
+    "bodyBuild": "1.3.0",
+    "activeFlow": "preview",
+    "navigationFocus": "preview",
+    "stage": {
+      "panel": "preview",
+      "stageKey": "preview",
+      "current": true,
+      "landing": false,
+      "rail": true,
+      "chip": "미리보기 진행 중"
+    },
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "runtimeHealth": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "dock": {
+      "left": 14,
+      "right": 366,
+      "top": 692,
+      "bottom": 836,
+      "width": 352,
+      "height": 144
+    },
+    "dockScrollWidth": 350,
+    "dockClientWidth": 350,
+    "tabs": [
+      {
+        "tab": "file",
+        "visible": true,
+        "rect": {
+          "left": 22,
+          "right": 103,
+          "top": 700,
+          "bottom": 762,
+          "width": 81,
+          "height": 62
+        }
+      },
+      {
+        "tab": "recommend",
+        "visible": true,
+        "rect": {
+          "left": 107,
+          "right": 188,
+          "top": 700,
+          "bottom": 762,
+          "width": 81,
+          "height": 62
+        }
+      },
+      {
+        "tab": "candidates",
+        "visible": true,
+        "rect": {
+          "left": 192,
+          "right": 273,
+          "top": 700,
+          "bottom": 762,
+          "width": 81,
+          "height": 62
+        }
+      },
+      {
+        "tab": "preview",
+        "visible": true,
+        "rect": {
+          "left": 277,
+          "right": 358,
+          "top": 699,
+          "bottom": 761,
+          "width": 81,
+          "height": 62
+        }
+      },
+      {
+        "tab": "waveform",
+        "visible": true,
+        "rect": {
+          "left": 22,
+          "right": 103,
+          "top": 766,
+          "bottom": 828,
+          "width": 81,
+          "height": 62
+        }
+      },
+      {
+        "tab": "cut",
+        "visible": true,
+        "rect": {
+          "left": 107,
+          "right": 188,
+          "top": 766,
+          "bottom": 828,
+          "width": 81,
+          "height": 62
+        }
+      },
+      {
+        "tab": "edit",
+        "visible": true,
+        "rect": {
+          "left": 192,
+          "right": 273,
+          "top": 766,
+          "bottom": 828,
+          "width": 81,
+          "height": 62
+        }
+      },
+      {
+        "tab": "export",
+        "visible": true,
+        "rect": {
+          "left": 277,
+          "right": 358,
+          "top": 766,
+          "bottom": 828,
+          "width": 81,
+          "height": 62
+        }
+      }
+    ],
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "bodyScrollWidth": 380,
+    "htmlScrollWidth": 380,
+    "auditAtFirstSample": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 26,
+      "mutations": 60
+    },
+    "landing": {
+      "active": "preview",
+      "focus": "preview",
+      "panel": "preview",
+      "stageKey": "preview",
+      "landing": true,
+      "rail": true,
+      "chip": "미리보기 진행 중",
+      "chipIcon": "preview"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.9 - runtime capability and error health monitor
+// AI Shorts Studio v1.3.0 - runtime capability and error health monitor
 'use strict';
 
 (function exposeRuntimeHealth(global) {

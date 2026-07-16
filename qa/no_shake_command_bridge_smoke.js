@@ -22,6 +22,6 @@ assert(js.includes('stopImmediatePropagation'), 'tab click propagation is stoppe
 assert(js.includes('AIShortsFlowCommandBridge'), 'command bridge exports API');
 assert(!js.includes('brand-compat-pill') && !js.includes('LOCAL · PRIVATE · 9:16'), 'command bridge cannot restore removed status markup');
 assert(js.includes('AIShortsHyperFlowTabs') && js.includes('AIShortsMotionStability'), 'legacy navigation APIs are bridged');
-assert(finalJs.includes("document.body.dataset.build = '1.2.9'"), 'final director build is v1.2.9');
+assert(finalJs.includes("document.body.dataset.build = '1.3.0'"), 'final director build is v1.3.0');
 console.log('PASS no_shake_command_bridge_smoke');
 

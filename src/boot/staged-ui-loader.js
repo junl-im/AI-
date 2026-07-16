@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.9 - staged UI hydration loader with cache-safe phase keys
+// AI Shorts Studio v1.3.0 - staged UI hydration loader with cache-safe phase keys
 'use strict';
 
 (function installStagedUiLoader(global) {
@@ -6,7 +6,7 @@
     if (!doc) return;
 
     const config = global.AIShortsRuntimeConfig || {};
-    const VERSION = String(config.APP_VERSION || 'v1.2.9').replace(/^v/i, '');
+    const VERSION = String(config.APP_VERSION || 'v1.3.0').replace(/^v/i, '');
     const BUILD_KEY = String(config.BUILD_KEY || `${VERSION}-staged-ui`);
     const versioned = (path, label) => `${path}?v=${encodeURIComponent(BUILD_KEY)}-${label}`;
     const phases = Object.freeze({

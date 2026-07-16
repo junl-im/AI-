@@ -1,20 +1,33 @@
-// AI Shorts Studio v0.3.0 - audio decode and worker bridge
+// AI Shorts Studio v1.3.0 - audio decode, worker bridge, and cancellation support
 'use strict';
 
 (function exposeAudioFeatureExtractor(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const utils = global.AIShortsCoreUtils || {};
 
-    async function decodeFileToAudioBuffer(file, onProgress) {
+    function abortError(reason) {
+        const error = new Error(String(reason || '오디오 분석이 취소되었습니다.'));
+        error.name = 'AbortError';
+        return error;
+    }
+
+    function throwIfAborted(signal) {
+        if (signal && signal.aborted) throw abortError(signal.reason);
+    }
+
+    async function decodeFileToAudioBuffer(file, onProgress, signal) {
         if (!file) throw new Error('파일이 없습니다.');
+        throwIfAborted(signal);
         const AudioContextClass = global.AudioContext || global.webkitAudioContext;
         if (!AudioContextClass) throw new Error('이 브라우저는 Web Audio 디코딩을 지원하지 않습니다.');
         if (onProgress) onProgress(8, '파일 읽는 중');
         const arrayBuffer = await file.arrayBuffer();
+        throwIfAborted(signal);
         if (onProgress) onProgress(18, '오디오 디코딩 중');
         const context = new AudioContextClass();
         try {
             const decoded = await context.decodeAudioData(arrayBuffer.slice(0));
+            throwIfAborted(signal);
             if (onProgress) onProgress(38, '오디오 디코딩 완료');
             return decoded;
         } finally {
@@ -35,16 +48,36 @@
         return output;
     }
 
-    function analyzeChannelData(channelData, sampleRate, duration, onProgress) {
+    function analyzeChannelData(channelData, sampleRate, duration, onProgress, signal) {
         return new Promise((resolve, reject) => {
             const workerUrl = config.ANALYSIS_WORKER_URL || 'src/workers/highlight-analysis.worker.js';
             let worker;
+            let settled = false;
+
+            function cleanup() {
+                if (worker) worker.terminate();
+                worker = null;
+                if (signal) signal.removeEventListener('abort', onAbort);
+            }
+            function finish(handler, value) {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                handler(value);
+            }
+            function onAbort() { finish(reject, abortError(signal && signal.reason)); }
+
+            if (signal && signal.aborted) {
+                reject(abortError(signal.reason));
+                return;
+            }
             try {
                 worker = new Worker(workerUrl);
             } catch (error) {
                 reject(new Error('분석 워커를 시작할 수 없습니다: ' + error.message));
                 return;
             }
+            if (signal) signal.addEventListener('abort', onAbort, { once: true });
             worker.onmessage = event => {
                 const message = event.data || {};
                 if (message.type === 'progress' && onProgress) {
@@ -52,19 +85,12 @@
                     return;
                 }
                 if (message.type === 'result') {
-                    worker.terminate();
-                    resolve(message.analysis);
+                    finish(resolve, message.analysis);
                     return;
                 }
-                if (message.type === 'error') {
-                    worker.terminate();
-                    reject(new Error(message.message || '분석 실패'));
-                }
+                if (message.type === 'error') finish(reject, new Error(message.message || '분석 실패'));
             };
-            worker.onerror = error => {
-                worker.terminate();
-                reject(new Error(error.message || '분석 워커 오류'));
-            };
+            worker.onerror = error => finish(reject, new Error(error.message || '분석 워커 오류'));
             const copy = new Float32Array(channelData || 0);
             worker.postMessage({
                 type: 'analyzeAudio',
@@ -75,12 +101,15 @@
         });
     }
 
-    async function analyzeFileAudio(file, onProgress) {
-        const decoded = await decodeFileToAudioBuffer(file, onProgress);
+    async function analyzeFileAudio(file, onProgress, signal) {
+        const decoded = await decodeFileToAudioBuffer(file, onProgress, signal);
+        throwIfAborted(signal);
         const maxSeconds = Number(config.MAX_ANALYSIS_SECONDS || 1200);
         const channelData = mixToMono(decoded, maxSeconds);
+        throwIfAborted(signal);
         const waveformBins = utils.createWaveformBins ? utils.createWaveformBins(channelData, 220) : [];
-        const analysis = await analyzeChannelData(channelData, decoded.sampleRate, Math.min(decoded.duration, maxSeconds), onProgress);
+        const analysis = await analyzeChannelData(channelData, decoded.sampleRate, Math.min(decoded.duration, maxSeconds), onProgress, signal);
+        throwIfAborted(signal);
         return { decoded, channelData, waveformBins, analysis };
     }
 

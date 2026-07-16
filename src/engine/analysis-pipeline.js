@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.6 - modular analysis pipeline
+// AI Shorts Studio v1.3.0 - cancellable modular analysis pipeline
 'use strict';
 
 (function exposeAnalysisPipeline(global) {
@@ -43,6 +43,14 @@
         const onProgress = input && input.onProgress || function progressNoop() {};
         const onWarning = input && input.onWarning || function warningNoop() {};
         const getAutoCutOptions = input && input.getAutoCutOptions || function empty() { return {}; };
+        const signal = input && input.signal || null;
+        function throwIfAborted() {
+            if (signal && signal.aborted) {
+                const error = new Error(String(signal.reason || '분석이 취소되었습니다.'));
+                error.name = 'AbortError';
+                throw error;
+            }
+        }
         const result = {
             audioBuffer: null,
             channelData: null,
@@ -64,12 +72,15 @@
             onWarning(message);
         }
 
+        throwIfAborted();
         onProgress(6, '모듈형 엔진 준비 중');
         let audioResult = null;
         try {
             if (!audioExtractor.analyzeFileAudio) throw new Error('오디오 분석 모듈이 비활성화되어 있습니다.');
-            audioResult = await audioExtractor.analyzeFileAudio(file, onProgress);
+            audioResult = await audioExtractor.analyzeFileAudio(file, onProgress, signal);
+            throwIfAborted();
         } catch (audioError) {
+            if (audioError && audioError.name === 'AbortError') throw audioError;
             if (fileKind !== 'video') throw audioError;
             warn('비디오 오디오 디코딩 제한으로 움직임 중심 보조 분석을 사용합니다.');
         }
@@ -88,15 +99,18 @@
 
         if (fileKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
             onProgress(72, '영상 움직임 샘플링 중');
-            result.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(fileUrl, onProgress);
+            result.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(fileUrl, onProgress, signal);
+            throwIfAborted();
             result.fileMeta.duration = Number(result.fileMeta.duration) || Number(result.motionAnalysis && result.motionAnalysis.duration) || 0;
         }
 
+        throwIfAborted();
         if (autoCutDetector.createAutoCuts) {
             onProgress(90, '자동 컷 포인트 계산 중');
             result.autoCuts = autoCutDetector.createAutoCuts(result.audioAnalysis, result.motionAnalysis, getAutoCutOptions());
         }
 
+        throwIfAborted();
         onProgress(93, '엔진 분석 결과 정리 중');
         return result;
     }

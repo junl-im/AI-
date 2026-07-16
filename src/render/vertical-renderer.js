@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.7.0 - vertical preview/export renderer
+// AI Shorts Studio v1.3.0 - cancellable vertical renderer with caption and quality effects
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -413,6 +413,13 @@
     }
 
     async function recordVerticalSegment(canvas, sourceMedia, options, onProgress) {
+        const signal = options && options.signal || null;
+        function abortError(reason) {
+            const error = new Error(String(reason || '렌더링이 취소되었습니다.'));
+            error.name = 'AbortError';
+            return error;
+        }
+        if (signal && signal.aborted) throw abortError(signal.reason);
         const mimeType = utils.getMediaRecorderMime ? utils.getMediaRecorderMime(config.EXPORT_MIME_CANDIDATES || []) : '';
         if (!global.MediaRecorder) throw new Error('이 브라우저는 MediaRecorder 내보내기를 지원하지 않습니다.');
         const stream = createCanvasStream(canvas, options && options.fps || config.PREVIEW_FPS || 30);
@@ -474,6 +481,7 @@
 
             function cleanup() {
                 stopped = true;
+                if (signal) signal.removeEventListener('abort', onAbort);
                 if (raf) cancelAnimationFrame(raf);
                 if (intervalTimer) clearInterval(intervalTimer);
                 if (stopTimer) clearTimeout(stopTimer);
@@ -484,6 +492,12 @@
                 if (sourceMedia) sourceMedia.volume = originalVolume;
             }
 
+            function onAbort() {
+                if (sourceMedia) sourceMedia.pause();
+                try { if (recorder.state !== 'inactive') recorder.stop(); } catch (error) { /* ignored */ }
+                fail(abortError(signal && signal.reason));
+            }
+
             function fail(error) {
                 if (settled) return;
                 settled = true;
@@ -491,6 +505,7 @@
                 reject(error instanceof Error ? error : new Error(String(error || '녹화 오류')));
             }
 
+            if (signal) signal.addEventListener('abort', onAbort, { once: true });
             recorder.onerror = event => {
                 fail(new Error(event.error && event.error.message || '녹화 오류'));
             };
@@ -502,6 +517,7 @@
                 resolve({ blob, mimeType: blob.type || recorder.mimeType || mimeType || 'video/webm' });
             };
             try {
+                if (signal && signal.aborted) throw abortError(signal.reason);
                 if (sourceMedia) {
                     sourceMedia.currentTime = started;
                     sourceMedia.muted = false;

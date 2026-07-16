@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.9 - vector render quality planner and save guidance
+// AI Shorts Studio v1.3.0 - vector render quality planner and save guidance
 'use strict';
 
 (function bootRenderQualityPlanner(global) {

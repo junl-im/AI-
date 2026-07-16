@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.6 - main app with render preset planner and version-aware service worker update checks
+// AI Shorts Studio v1.3.0 - coordinated media operations, stage landing, and render safety
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -22,11 +22,33 @@
     const timelineView = global.AIShortsTimelineView || {};
     const siteGuards = global.AIShortsSiteGuards || {};
     const runtimeHealth = global.AIShortsRuntimeHealth || {};
+    const operationCoordinator = global.AIShortsOperationCoordinator || {};
 
     const els = {};
     let previewRaf = 0;
     let previewTimer = 0;
     let previewStillRaf = 0;
+    let previewOperationToken = null;
+
+
+    function isAbortError(error) {
+        if (operationCoordinator.isAbortError) return operationCoordinator.isAbortError(error);
+        return Boolean(error && error.name === 'AbortError');
+    }
+
+    function beginOperation(channel, meta) {
+        return operationCoordinator.begin ? operationCoordinator.begin(channel, meta) : null;
+    }
+
+    function assertOperation(token, reason) {
+        if (token && operationCoordinator.assertCurrent) operationCoordinator.assertCurrent(token, reason);
+        return true;
+    }
+
+    function finishOperation(token, result) {
+        if (token && operationCoordinator.finish) return operationCoordinator.finish(token, { result: result || 'done' });
+        return true;
+    }
 
     const CAPTION_DEFAULTS = Object.freeze({
         preset: 'creator',
@@ -500,8 +522,8 @@
                 els.renderQueueList.innerHTML = '<div class="render-queue-empty">저장 작업을 시작하면 진행 상태가 여기에 표시됩니다.</div>';
             } else {
                 els.renderQueueList.innerHTML = items.map(item => {
-                    const statusIcon = item.status === 'done' ? 'check' : item.status === 'failed' ? 'close' : item.status === 'running' ? 'render' : 'retry';
-                    const statusText = item.status === 'done' ? '완료' : item.status === 'failed' ? '실패' : item.status === 'running' ? '렌더링' : '대기';
+                    const statusIcon = item.status === 'done' ? 'check' : item.status === 'failed' ? 'close' : item.status === 'cancelled' ? 'stop' : item.status === 'running' ? 'render' : 'retry';
+                    const statusText = item.status === 'done' ? '완료' : item.status === 'failed' ? '실패' : item.status === 'cancelled' ? '취소' : item.status === 'running' ? '렌더링' : '대기';
                     const error = item.error ? `<div class="render-queue-error">${utils.escapeHtml ? utils.escapeHtml(item.error) : item.error}</div>` : '';
                     const label = utils.escapeHtml ? utils.escapeHtml(item.label || '렌더 작업') : (item.label || '렌더 작업');
                     const filename = utils.escapeHtml ? utils.escapeHtml(item.filenameHint || statusText) : (item.filenameHint || statusText);
@@ -540,51 +562,68 @@
     async function runRenderQueueJobs(jobs) {
         if (!renderQueue || !renderQueue.runJobs) throw new Error('렌더 큐 모듈을 불러오지 못했습니다.');
         activateFlowTab('export', { reveal: true });
-        stopPreview();
+        stopPreview({ cancel: true, reason: '렌더 시작' });
         const media = getActiveMediaElement();
         if (!media) throw new Error('저장할 원본 미디어가 없습니다.');
-        const result = await renderQueue.runJobs(jobs, async (job, update) => {
-            const payload = job.payload || {};
-            const item = payload.candidate;
-            if (!item) throw new Error('렌더할 추천 구간이 없습니다.');
-            state.selectedRecommendationId = item.id;
-            state.selectedRange = { start: item.start, end: item.end, duration: item.duration, score: item.score };
-            updateSelectedRangeControls(item);
-            renderAll();
-            setProgress(2, `${job.label} 준비`);
-            if (els.previewStatus) els.previewStatus.textContent = '렌더 큐 실행 중';
-            const exportResult = await renderer.recordVerticalSegment(els.previewCanvas, media, {
-                start: item.start,
-                end: item.end,
-                cropMode: state.settings.cropMode,
-                title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
-                rangeText: item.rangeText,
-                waveformBins: state.waveformBins,
-                thumbnailTemplate: state.settings.thumbnailTemplate,
-                qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
-                captions: state.captions,
-                captionOffset: state.settings.captionOffset,
-                captionStyle: state.settings.captionStyle,
-                captionOptions: getCaptionOptions(),
-                fps: getExportFrameRate(),
-                videoBitsPerSecond: getExportBitrate()
-            }, (percent, status) => {
-                update(percent, status || '렌더링');
-                setProgress(percent, status || job.label);
-            });
-            const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
-            const filename = `${payload.base || 'ai-shorts'}-${payload.total > 1 ? 'candidate-' + String(payload.index + 1).padStart(2, '0') + '-' : ''}${Math.round(item.start)}s-${Math.round(item.duration)}s-shorts.${ext}`;
-            update(96, filename);
-            state.exportInfo = { filename, size: exportResult.blob.size, mimeType: exportResult.mimeType, range: item.rangeText };
-            downloadService.saveBlob(exportResult.blob, filename);
-            update(100, filename);
-        });
-        setProgress(100, result.failed ? `렌더 큐 완료 · 실패 ${result.failed}` : '렌더 큐 완료');
-        if (els.previewStatus) els.previewStatus.textContent = result.failed ? '일부 저장 실패' : '저장 완료';
-        toast(result.failed ? `렌더 큐 완료 · 실패 ${result.failed}개` : `렌더 큐 저장 완료 · ${result.done}/${result.total}개`, result.failed ? 'warning' : 'export');
-        updateButtons();
-        return result;
+        const token = beginOperation('render', { jobs: Array.isArray(jobs) ? jobs.length : 1, fileName: state.file && state.file.name || '' });
+        try {
+            const result = await renderQueue.runJobs(jobs, async (job, update, signal) => {
+                assertOperation(token);
+                const payload = job.payload || {};
+                const item = payload.candidate;
+                if (!item) throw new Error('렌더할 추천 구간이 없습니다.');
+                state.selectedRecommendationId = item.id;
+                state.selectedRange = { start: item.start, end: item.end, duration: item.duration, score: item.score };
+                updateSelectedRangeControls(item);
+                renderAll();
+                setProgress(2, `${job.label} 준비`);
+                if (els.previewStatus) els.previewStatus.textContent = '렌더 큐 실행 중';
+                const exportResult = await renderer.recordVerticalSegment(els.previewCanvas, media, {
+                    start: item.start,
+                    end: item.end,
+                    cropMode: state.settings.cropMode,
+                    title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
+                    rangeText: item.rangeText,
+                    waveformBins: state.waveformBins,
+                    thumbnailTemplate: state.settings.thumbnailTemplate,
+                    qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
+                    captions: state.captions,
+                    captionOffset: state.settings.captionOffset,
+                    captionStyle: state.settings.captionStyle,
+                    captionOptions: getCaptionOptions(),
+                    fps: getExportFrameRate(),
+                    videoBitsPerSecond: getExportBitrate(),
+                    signal: signal || token && token.signal || null
+                }, (percent, status) => {
+                    if (signal && signal.aborted) return;
+                    update(percent, status || '렌더링');
+                    setProgress(percent, status || job.label);
+                });
+                assertOperation(token, '원본이 변경되어 이전 렌더 결과를 저장하지 않습니다.');
+                const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
+                const filename = `${payload.base || 'ai-shorts'}-${payload.total > 1 ? 'candidate-' + String(payload.index + 1).padStart(2, '0') + '-' : ''}${Math.round(item.start)}s-${Math.round(item.duration)}s-shorts.${ext}`;
+                update(96, filename);
+                state.exportInfo = { filename, size: exportResult.blob.size, mimeType: exportResult.mimeType, range: item.rangeText };
+                downloadService.saveBlob(exportResult.blob, filename);
+                update(100, filename);
+            }, { signal: token && token.signal || null });
+            if (result.cancelled) {
+                setProgress(0, `렌더 취소 · ${result.cancelled}개`);
+                if (els.previewStatus) els.previewStatus.textContent = '렌더 취소';
+                toast('진행 중인 렌더를 안전하게 취소했습니다.', 'warning');
+            } else {
+                setProgress(100, result.failed ? `렌더 큐 완료 · 실패 ${result.failed}` : '렌더 큐 완료');
+                if (els.previewStatus) els.previewStatus.textContent = result.failed ? '일부 저장 실패' : '저장 완료';
+                toast(result.failed ? `렌더 큐 완료 · 실패 ${result.failed}개` : `렌더 큐 저장 완료 · ${result.done}/${result.total}개`, result.failed ? 'warning' : 'export');
+            }
+            finishOperation(token, result.cancelled ? 'render-cancelled' : 'render-complete');
+            updateButtons();
+            return result;
+        } finally {
+            finishOperation(token, 'render-finalized');
+        }
     }
+
 
     function updateButtons() {
         const hasFile = Boolean(state.file);
@@ -906,7 +945,13 @@
         const file = fileList && fileList[0];
         if (!file) return;
         const kind = utils.isVideoFile && utils.isVideoFile(file) ? 'video' : 'audio';
+        if (renderQueue && renderQueue.isRunning && renderQueue.isRunning() && renderQueue.cancel) {
+            renderQueue.cancel('새 원본 파일을 열어 진행 중인 렌더를 취소했습니다.');
+        }
+        stopPreview();
+        const mediaSessionId = operationCoordinator.startMediaSession ? operationCoordinator.startMediaSession({ fileName: file.name, fileType: file.type }) : Date.now();
         if (store.resetMedia) store.resetMedia();
+        state.mediaSessionId = mediaSessionId;
         state.file = file;
         state.fileKind = kind;
         state.fileUrl = utils.createObjectUrl ? utils.createObjectUrl(file) : URL.createObjectURL(file);
@@ -950,30 +995,42 @@
 
     async function analyzeCurrentFile(options) {
         const analysisOptions = Object.assign({ autoGenerate: false }, options || {});
-        if (!state.file || state.isAnalyzing) return;
+        if (!state.file) return;
+        const inputFile = state.file;
+        const inputKind = state.fileKind;
+        const inputUrl = state.fileUrl;
+        const inputMeta = Object.assign({}, state.fileMeta || {});
+        const token = beginOperation('analysis', { fileName: inputFile.name, source: analysisOptions.source || 'manual' });
         state.isAnalyzing = true;
         activateFlowTab('recommend', { reveal: true, force: true, source: analysisOptions.source || 'analysis-start' });
         state.recommendations = [];
         state.selectedRecommendationId = '';
         updateButtons();
         setProgress(3, '분석 시작');
+        const reportProgress = (percent, message) => {
+            if (token && operationCoordinator.isCurrent && !operationCoordinator.isCurrent(token)) return;
+            setProgress(percent, message);
+        };
         try {
             if (engineKernel.analyzeMedia) {
-                const budget = engineKernel.createBudget ? engineKernel.createBudget(state.fileMeta, config) : null;
+                const budget = engineKernel.createBudget ? engineKernel.createBudget(inputMeta, config) : null;
                 const result = await engineKernel.analyzeMedia({
-                    file: state.file,
-                    fileKind: state.fileKind,
-                    fileUrl: state.fileUrl,
-                    fileMeta: state.fileMeta,
+                    file: inputFile,
+                    fileKind: inputKind,
+                    fileUrl: inputUrl,
+                    fileMeta: inputMeta,
                     config,
                     budget,
-                    onProgress: setProgress,
+                    signal: token && token.signal || null,
+                    onProgress: reportProgress,
                     onWarning: message => {
+                        if (token && operationCoordinator.isCurrent && !operationCoordinator.isCurrent(token)) return;
                         toast(message, 'warning');
                         if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-warning', message });
                     },
                     getAutoCutOptions
                 });
+                assertOperation(token, '새 원본이 열려 이전 분석 결과를 폐기했습니다.');
                 state.audioBuffer = result.audioBuffer;
                 state.channelData = result.channelData;
                 state.audioAnalysis = result.audioAnalysis;
@@ -987,9 +1044,11 @@
             } else {
                 let audioResult = null;
                 try {
-                    audioResult = await audioExtractor.analyzeFileAudio(state.file, setProgress);
+                    audioResult = await audioExtractor.analyzeFileAudio(inputFile, reportProgress, token && token.signal || null);
+                    assertOperation(token);
                 } catch (audioError) {
-                    if (state.fileKind !== 'video') throw audioError;
+                    if (isAbortError(audioError)) throw audioError;
+                    if (inputKind !== 'video') throw audioError;
                     toast('비디오 오디오 디코딩이 제한되어 움직임 중심으로 분석합니다.');
                     if (store.addDiagnostic) store.addDiagnostic({ type: 'audio-decode-fallback', message: audioError.message });
                 }
@@ -1003,13 +1062,15 @@
                     state.audioAnalysis = createFallbackAudioAnalysis(state.fileMeta.duration || (els.sourceVideo && els.sourceVideo.duration) || 30);
                     state.waveformBins = new Array(160).fill(0).map((_, i) => 0.18 + Math.sin(i * 0.29) * 0.08);
                 }
-                if (state.fileKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
-                    state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(state.fileUrl, setProgress);
+                if (inputKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
+                    state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(inputUrl, reportProgress, token && token.signal || null);
+                    assertOperation(token);
                     state.fileMeta.duration = state.fileMeta.duration || state.motionAnalysis.duration;
                 }
                 setProgress(90, '자동 컷 포인트 계산 중');
                 buildAutoCutTimeline();
             }
+            assertOperation(token);
             if (analysisOptions.autoGenerate) {
                 setProgress(92, '모듈형 추천 엔진 계산 중');
                 createRecommendations({ autoSelect: false });
@@ -1021,13 +1082,22 @@
                 toast('자동 분석 완료 · 추천 탭에서 후보를 생성하세요.', 'success');
                 activateFlowTab('recommend', { reveal: true });
             }
+            finishOperation(token, 'analysis-complete');
         } catch (error) {
-            setProgress(0, '분석 실패');
-            toast(error.message || '분석에 실패했습니다.', 'error');
-            if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-error', message: error.message });
+            if (isAbortError(error)) {
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-cancelled', message: error.message });
+            } else {
+                setProgress(0, '분석 실패');
+                toast(error.message || '분석에 실패했습니다.', 'error');
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-error', message: error.message });
+            }
         } finally {
-            state.isAnalyzing = false;
-            updateButtons();
+            const ownsOperation = !token || !token.signal || !token.signal.aborted;
+            if (ownsOperation) {
+                finishOperation(token, 'analysis-finalized');
+                state.isAnalyzing = false;
+                updateButtons();
+            }
         }
     }
 
@@ -1111,7 +1181,8 @@
         else renderAll();
     }
 
-    function stopPreview() {
+    function stopPreview(options) {
+        const opts = options || {};
         const media = getActiveMediaElement();
         if (media) {
             media.pause();
@@ -1122,17 +1193,25 @@
         previewRaf = 0;
         previewTimer = 0;
         state.isPreviewing = false;
+        if (previewOperationToken) {
+            if (opts.cancel && operationCoordinator.cancel) operationCoordinator.cancel('preview', opts.reason || '미리보기 중단');
+            else finishOperation(previewOperationToken, opts.result || 'preview-stopped');
+            previewOperationToken = null;
+        }
         if (els.previewStatus) els.previewStatus.textContent = '정지';
         renderPreviewStill();
         updateButtons();
     }
+
 
     async function previewSelectedRange() {
         const selected = getSelectedRecommendation();
         const media = getActiveMediaElement();
         if (!selected || !media) return;
         activateFlowTab('preview', { reveal: true });
-        stopPreview();
+        stopPreview({ cancel: true, reason: '새 미리보기 시작' });
+        const token = beginOperation('preview', { candidateId: selected.id, start: selected.start, end: selected.end });
+        previewOperationToken = token;
         state.isPreviewing = true;
         updateButtons();
         if (els.previewStatus) els.previewStatus.textContent = '미리보기 재생 중';
@@ -1140,14 +1219,21 @@
             media.currentTime = selected.start;
             media.muted = false;
             await media.play();
+            assertOperation(token);
         } catch (error) {
-            stopPreview();
-            if (store.addDiagnostic) store.addDiagnostic({ type: 'preview-playback-error', message: error.message });
-            toast('브라우저가 재생을 막았습니다. 미리보기 버튼을 다시 눌러주세요.', 'warning');
+            stopPreview({ cancel: true, reason: '미리보기 재생 실패' });
+            if (!isAbortError(error)) {
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'preview-playback-error', message: error.message });
+                toast('브라우저가 재생을 막았습니다. 미리보기 버튼을 다시 눌러주세요.', 'warning');
+            }
             return;
         }
         function draw() {
             if (!state.isPreviewing) return;
+            if (token && operationCoordinator.isCurrent && !operationCoordinator.isCurrent(token)) {
+                stopPreview({ cancel: true, reason: '원본 또는 미리보기 변경' });
+                return;
+            }
             const isVideo = state.fileKind === 'video' && media.videoWidth;
             renderer.renderStill(els.previewCanvas, isVideo ? media : null, {
                 cropMode: state.settings.cropMode,
@@ -1171,7 +1257,7 @@
         }
         draw();
         previewTimer = setInterval(() => {
-            if (!media || media.currentTime >= selected.end || media.ended) stopPreview();
+            if (!media || media.currentTime >= selected.end || media.ended) stopPreview({ result: 'preview-complete' });
         }, 80);
     }
 
