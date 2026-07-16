@@ -1,20 +1,25 @@
-# HANDOFF v1.3.1
+# HANDOFF v1.3.2
 
 ## 요약
 
-v1.3.1은 PC Prime 작업실에 **드래그 가능한 3열 리사이저**, **미리보기 집중**, **파형 확대**를 추가한 작업성 개선 릴리스입니다.
+v1.3.2는 **실제 MP3·MP4 E2E**, **오디오 Worker 폴백**, **렌더 취소**, **재생 실패 즉시 중단**, **새 작업 기반 안전 재시도**를 추가한 엔진 안정화 릴리스입니다.
 
-기존의 단계형 메뉴 이동과 네온 랜딩은 그대로 유지합니다. 사용자가 열 폭을 조절하면 CSS 변수만 갱신하고 비율을 저장합니다. 집중 모드는 일시적인 보기이므로 새 실행에서는 항상 3열 균형으로 시작해 파일 열기와 추천 흐름을 가리지 않습니다.
+합성 20초 MP3와 MP4를 Chromium에 직접 넣어 분석 → 추천 → 후보 선택 → 2초 구간 렌더 → 다운로드까지 실행했습니다. 별도로 렌더 중 취소와 의도적인 재생 실패 후 재시도를 검증했습니다. v1.3.1의 3열 작업실 조절과 집중 보기, 자동 메뉴 이동, 단계 네온 랜딩은 유지합니다.
 
 ## 이번 변경
 
-- `assets/css/workspace-layout-controls.css`: 5트랙 Prime 그리드, 리사이저, 작업실 도구막대, 미리보기·파형 집중 배치를 추가했습니다.
-- `src/ui/workspace-layout-controls.js`: 포인터·키보드 리사이즈, 열 비율 저장, 보기 전환과 호환되지 않는 메뉴 이동 시 균형 복귀를 담당합니다.
-- `index.html`: 작업실 배치 도구막대와 접근 가능한 세로 separator 2개를 추가했습니다.
-- `sw.js`: 새 CSS·스크립트를 셸 캐시에 포함했습니다.
-- `qa/workspace_layout_controls_smoke.js`: 레이아웃 계약, 접근성, 저장 범위와 모바일 비노출을 검사합니다.
-- `qa/runtime-browser-audit-v1.3.1.json`: Chromium에서 키보드 리사이즈, 집중 보기, 메뉴와 네온 랜딩을 함께 검증합니다.
-- 버전·빌드 키·서비스워커 캐시를 v1.3.1 / `1.3.1-workspace-control`로 동기화했습니다.
+- `src/analysis/audio-analysis-core.js`: Worker와 메인 스레드가 공유하는 오디오 특징 분석 코어를 추가했습니다.
+- `src/workers/highlight-analysis.worker.js`: 공유 분석 코어를 사용하도록 정리했습니다.
+- `src/analysis/audio-feature-extractor.js`: Worker 생성·실행 실패 시 메인 스레드 비동기 폴백을 수행하고 진단을 기록합니다.
+- `src/render/vertical-renderer.js`: MediaRecorder·canvas captureStream 사전 검사와 원본 재생 실패 즉시 중단을 추가했습니다.
+- `src/render/render-queue.js`: 실패 작업을 새 queued 작업으로 재구성하는 `retryableJobs()`와 안전 재시도를 추가했습니다.
+- `src/app.js`: 렌더 취소 버튼, 실행 중 버튼 상태, 새 작업 토큰 기반 실패 재시도와 사전 호환성 검사를 연결했습니다.
+- `index.html`: 공유 분석 코어와 렌더 취소 버튼을 연결했습니다.
+- `assets/css/render-queue.css`: 취소 버튼, 취소 상태, PC 3열·모바일 1열 액션 배치를 추가했습니다.
+- `qa/run_media_e2e.py`: ffmpeg·Playwright가 있는 환경에서 MP3·MP4·취소·재시도를 재현하는 브라우저 감사 스크립트입니다.
+- `qa/runtime-media-e2e-v1.3.2.json`: 실제 미디어 감사 결과입니다.
+- `qa/audio_analysis_fallback_smoke.js`, `qa/render_recovery_smoke.js`, `qa/media_e2e_audit_smoke.js`: 신규 회귀 검사입니다.
+- 버전·빌드 키·서비스워커 캐시를 v1.3.2 / `1.3.2-media-e2e`로 동기화했습니다.
 
 ## 사용자 디자인·UX 선호
 
@@ -27,30 +32,39 @@ v1.3.1은 PC Prime 작업실에 **드래그 가능한 3열 리사이저**, **미
 - 사용자 노출 명칭은 `Dock`이 아니라 `메뉴바`입니다.
 - 핵심 아이콘은 `assets/icons/studio/`의 전용 SVG만 사용합니다.
 - 상단 메타는 왼쪽 BUILD·버전·모바일/PC 호환, 오른쪽 DESIGNED BY·곰같은여우만 유지합니다.
+- 매 릴리스마다 전체 설치 ZIP과 직전 버전 덮어쓰기 패치 ZIP을 함께 제공합니다.
 
-## 작업실 레이아웃 유지 규칙
+## 오디오 분석 유지 규칙
 
-1. 기본 모드는 `balanced`이며 새 실행마다 균형 모드로 시작합니다.
-2. 로컬 저장에는 `weights`만 기록하고 `preview`·`waveform` 모드는 기록하지 않습니다.
-3. 열 최소 폭은 왼쪽 260px, 가운데 350px, 오른쪽 300px입니다.
-4. 리사이저는 포인터 캡처를 사용하고 `pointerup`·`pointercancel` 모두에서 해제합니다.
-5. 키보드는 좌우 방향키, Shift+방향키와 Home 초기화를 지원합니다.
-6. 리사이즈 중에는 DOM 재배치나 패널 재생성을 하지 않고 세 개의 grid track CSS 변수만 바꿉니다.
-7. `미리보기 집중`은 preview·candidates·edit·export를 남깁니다.
-8. `파형 확대`는 waveform·cut·edit·preview·export를 남깁니다.
-9. 집중 보기와 맞지 않는 메뉴 클릭 또는 자동 내비게이션 요청에서는 균형 모드로 돌아옵니다.
-10. 1180px 미만에서는 도구막대와 리사이저를 모두 숨깁니다.
-11. 집중 보기의 hide 규칙은 기존 Prime `display:block !important`보다 높은 specificity를 유지합니다.
-12. `workspace-layout-controls.css`는 시각 CSS 중 마지막에 로드합니다.
+1. Worker와 메인 스레드 폴백은 `audio-analysis-core.js`의 같은 계산식을 사용합니다.
+2. Worker 실패는 분석 전체 실패로 확정하지 말고 폴백 가능 여부를 먼저 확인합니다.
+3. 폴백 루프는 배치 사이에 실행권을 양보하고 AbortSignal을 확인합니다.
+4. 취소된 분석은 결과를 상태에 기록하지 않습니다.
+5. Worker 폴백 발생은 `analysis-worker-fallback` 진단으로 남깁니다.
+6. 공유 코어의 입력·출력 형태를 바꾸면 Worker와 extractor 회귀 검사를 함께 갱신합니다.
 
-## 네온 단계 강조 유지 규칙
+## 렌더·복구 유지 규칙
 
-1. 단계 강조 최종 소유자는 `FlowDirectorFinal`입니다.
-2. 현재 패널에는 `is-stage-current`와 `.stage-neon-rail`을 유지합니다.
-3. 랜딩 애니메이션은 단계가 실제 변경될 때 한 번만 실행합니다.
-4. 같은 단계의 반복 동기화는 애니메이션을 다시 시작하지 않습니다.
-5. 집중 보기에서도 메뉴 활성, 화면 이동과 네온 단계 키가 일치해야 합니다.
-6. `prefers-reduced-motion`에서는 스윕과 펄스를 비활성화합니다.
+1. 렌더 전에 MediaRecorder와 canvas captureStream 필수 기능을 검사합니다.
+2. 원본 미디어의 `play()` 성공을 확인한 뒤에만 녹화를 시작합니다.
+3. 재생 거절 시 빈 영상이나 정지 프레임을 계속 녹화하지 않고 즉시 실패 처리합니다.
+4. 실행 중에는 `취소` 버튼만 활성화하고 큐 비우기·중복 시작을 막습니다.
+5. 취소는 다운로드를 만들지 않고 queue item을 `cancelled`로 종료합니다.
+6. 실패 재시도는 이전 operation token을 재사용하지 않고 `runRenderQueueJobs()`로 새 작업을 시작합니다.
+7. 재시도 횟수는 큐 item에 누적하고 무한 재시도를 허용하지 않습니다.
+8. 성공·실패·취소 모두에서 RAF·interval·timeout·MediaStreamTrack·MediaRecorder·원본 볼륨을 정리합니다.
+9. 결과 다운로드 직전에 현재 operation과 media session을 다시 검증합니다.
+
+## 작업실·단계 강조 유지 규칙
+
+1. 기본 작업실 모드는 `balanced`이며 새 실행마다 균형 모드로 시작합니다.
+2. 로컬 저장에는 열 `weights`만 기록하고 집중 모드는 기록하지 않습니다.
+3. 현재 단계 강조 최종 소유자는 `FlowDirectorFinal`입니다.
+4. 현재 패널에는 `is-stage-current`와 `.stage-neon-rail`을 유지합니다.
+5. 랜딩 애니메이션은 단계가 실제 변경될 때 한 번만 실행합니다.
+6. 집중 보기에서도 메뉴 활성, 화면 이동과 네온 단계 키가 일치해야 합니다.
+7. 1180px 미만에서는 PC 전용 도구막대와 리사이저를 숨깁니다.
+8. `prefers-reduced-motion`에서는 스윕과 펄스를 비활성화합니다.
 
 ## 비동기 엔진 유지 규칙
 
@@ -65,63 +79,71 @@ v1.3.1은 PC Prime 작업실에 **드래그 가능한 3열 리사이저**, **미
 ## Update Sentinel 유지 규칙
 
 - 새 릴리스에서는 CSS·스크립트 링크와 서비스워커 캐시 쿼리를 같은 빌드 키로 갱신합니다.
-- 신규 작업실 CSS와 컨트롤러를 셸 캐시에 포함합니다.
+- 신규 분석 코어와 QA 감사 파일을 배포 매니페스트에 포함합니다.
 - 이전 셸 캐시 정리와 진단 복사 기능을 유지합니다.
 
 ## 검수 순서
 
-1. `npm test`로 문법, DOM, 버전·캐시, 메뉴, 네온, 엔진 계약, 작업실 조절과 배포 계약을 실행합니다.
-2. Chromium 1366×768에서 두 리사이저가 표시되는지 확인합니다.
-3. 왼쪽 리사이저에 방향키를 보내 열 비율이 바뀌는지 확인합니다.
-4. 미리보기 집중 모드에서 preview 폭이 700px 이상인지 확인합니다.
-5. 파형 확대 모드에서 waveform 폭이 1000px 이상인지 확인합니다.
-6. Chromium 390×844에서 작업실 도구막대와 리사이저가 숨는지 확인합니다.
-7. 단계 랜딩 종료 뒤 두 샘플 구간의 RAF·Mutation 카운터가 같은지 확인합니다.
-8. `npm run package`로 전체 ZIP과 v1.3.0 패치 ZIP을 생성합니다.
-9. 깨끗한 v1.3.0 복사본에 패치를 적용해 매니페스트 파일을 바이트 단위로 비교합니다.
+1. `npm test`로 문법, DOM, 버전·캐시, 메뉴, 네온, 엔진 계약, Worker 폴백, 렌더 취소·재시도와 배포 계약을 실행합니다.
+2. `qa/runtime-browser-audit-v1.3.2.json`에서 PC·모바일 오류, 메뉴 8개, overflow와 작업실 조절을 확인합니다.
+3. ffmpeg·Python Playwright가 있으면 `python3 qa/run_media_e2e.py`를 실행합니다.
+4. MP3와 MP4가 분석·추천·선택·렌더·다운로드까지 완료되는지 확인합니다.
+5. ffprobe로 출력 파일의 컨테이너, 재생 시간과 크기를 확인합니다.
+6. 6초 렌더 도중 취소해 다운로드 0건, cancelled 1건, 활성 operation 0건인지 확인합니다.
+7. 원본 `play()` 실패를 주입하고 첫 작업 실패 후 재시도가 attempts 2로 정상 완료되는지 확인합니다.
+8. `npm run package`로 전체 ZIP과 v1.3.1 패치 ZIP을 생성합니다.
+9. 깨끗한 v1.3.1 복사본에 패치를 적용해 매니페스트 파일을 바이트 단위로 비교합니다.
 10. 전체·패치 ZIP에 `unzip -t`를 실행하고 SHA-256을 생성합니다.
 
 ## 배포 규칙
 
 1. 전체 설치용 ZIP과 직전 버전 덮어쓰기용 패치 ZIP을 함께 만듭니다.
-2. v1.3.1 패치 기준은 v1.3.0입니다.
-3. `PATCH_MANIFEST.txt`에 변경·추가 파일을 모두 기록합니다.
+2. v1.3.2 패치 기준은 v1.3.1입니다.
+3. `PATCH_MANIFEST.txt`는 실제 바이트 차이로 생성한 변경·추가 파일만 기록합니다.
 4. 전체·패치 ZIP 모두 압축 무결성과 SHA-256을 확인합니다.
 5. 삭제 파일이 생기면 단순 덮어쓰기 외에 삭제 절차를 제공합니다.
 
 ## 검수 결과
 
-- `npm test`: **120/120 통과**
+- `npm test`: **124/124 통과**
 - Chromium desktop 1366×768: 오류 0, Promise 거절 0, 콘솔 오류 0
 - Chromium mobile 390×844: 오류 0, Promise 거절 0, 콘솔 오류 0
-- Desktop 리사이저: 2/2 표시, 키보드 조절 확인
-- 미리보기 집중: 폭 약 891px
-- 파형 확대: 폭 약 1324px
-- 모바일 작업실 컨트롤: 숨김 확인
-- 메뉴 8개 모두 표시, 가로 overflow 0
-- 초기화 뒤 RAF·Mutation 추가 증가 없음
+- 합성 20초 MP3: 추천 1개, 2초 출력, 실패 0, 출력 약 340KB
+- 합성 20초 MP4: 추천 1개, 2초 출력, 실패 0, 출력 약 218KB
+- MP3·MP4 출력은 ffprobe에서 MP4 계열 컨테이너와 유효 재생 시간 확인
+- 렌더 취소: cancelled 1, 다운로드 0, 활성 operation 0
+- 재생 실패 재시도: 첫 시도 failed 1, 두 번째 attempts 2·done 1, 출력 약 398KB
+- 브라우저 감사 종료 뒤 오류와 활성 operation 없음
+- 덮어쓰기 패치: 70개 파일, 누락 0, 불일치 0
+- 전체 ZIP: 241개 항목, 전체·패치 압축 무결성 통과
 
 ## 핵심 파일
 
-- `assets/css/workspace-layout-controls.css`
-- `src/ui/workspace-layout-controls.js`
-- `assets/css/active-stage-beacon.css`
-- `src/ui/flow-director-final.js`
+- `src/analysis/audio-analysis-core.js`
+- `src/analysis/audio-feature-extractor.js`
+- `src/workers/highlight-analysis.worker.js`
+- `src/render/vertical-renderer.js`
+- `src/render/render-queue.js`
 - `src/engine/operation-coordinator.js`
-- `qa/workspace_layout_controls_smoke.js`
-- `qa/runtime-browser-audit-v1.3.1.json`
+- `src/app.js`
+- `assets/css/render-queue.css`
+- `qa/run_media_e2e.py`
+- `qa/runtime-media-e2e-v1.3.2.json`
+- `qa/runtime-browser-audit-v1.3.2.json`
 
 ## 알려진 제한
 
-- 실제 대용량 MP4의 장시간 분석·렌더·다운로드 E2E는 아직 남아 있습니다.
-- 모바일 Safari와 인앱 브라우저의 MediaRecorder·SVG mask는 실기기 검증이 필요합니다.
-- 명시적인 사용자 렌더 취소 버튼과 취소 후 복구 안내는 후속 대상입니다.
-- 열 비율 저장은 브라우저가 localStorage를 차단한 경우 현재 세션에만 적용됩니다.
+- 자동 실미디어 감사는 합성 20초 파일을 사용하며 수십 분짜리 대용량·고해상도 영상은 아직 검증하지 않았습니다.
+- 관리형 Chromium의 로컬 주소 제한 때문에 동일 자산을 인라인 하네스로 주입했으며 서비스워커와 영구 localStorage는 감사 범위 밖입니다.
+- 모바일 Safari와 인앱 브라우저의 MediaRecorder MIME 선택·파일 확장자는 실기기 검증이 필요합니다.
+- 브라우저가 원본 미디어 captureStream을 제공하지 않으면 영상 출력에 원본 오디오가 포함되지 않을 수 있으며 사전 검사에서 경고만 제공합니다.
+- ffmpeg와 Python Playwright가 없는 환경에서는 실제 미디어 감사를 재실행할 수 없고 저장된 감사 JSON 회귀 검사만 수행합니다.
 
 ## 다음 우선순위
 
-1. 실제 MP3·MP4 전체 E2E와 중단·재시도 시나리오
-2. 사용자용 렌더 취소 버튼과 복구 안내
-3. 모바일 단계형 메뉴 축약
-4. CSS 단계 로딩과 초기 페인트 추가 최적화
-5. 후보 비교·고정과 미리보기 연결 개선
+1. 5분·15분·30분 대용량 MP4 장시간 분석·렌더와 메모리 추적
+2. 모바일 Safari·Samsung Internet·인앱 브라우저 실기기 출력 검증
+3. 렌더 취소 후 사용자 복구 안내와 진행률 상세화
+4. 모바일 메뉴바를 현재 단계와 다음 행동 중심으로 축약
+5. CSS를 핵심·편집·저장 단계로 분리해 초기 페인트 추가 최적화
+6. 후보 비교·고정과 미리보기 연결 개선

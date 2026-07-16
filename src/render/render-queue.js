@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.1 - cancellable render queue, retries, and export reliability controller
+// AI Shorts Studio v1.3.2 - cancellable render queue, retries, and export reliability controller
 'use strict';
 
 (function exposeRenderQueue(global) {
@@ -161,18 +161,31 @@
         }
         return snapshot();
     }
-    async function retryFailed() {
+    function retryableJobs() {
+        return items
+            .filter(item => item.status === 'failed' && item.attempts <= RETRY_LIMIT)
+            .map((item, index) => normalizeJob(Object.assign({}, item, {
+                status: 'queued',
+                progress: 0,
+                error: '',
+                startedAt: 0,
+                finishedAt: 0
+            }), index));
+    }
+    async function retryFailed(worker, options) {
         if (running) throw new Error('렌더 큐가 실행 중입니다.');
-        if (!lastWorker) throw new Error('재시도할 렌더 실행기가 없습니다.');
-        const failed = items.filter(item => item.status === 'failed' && item.attempts <= RETRY_LIMIT).map(item => normalizeJob(Object.assign({}, item, { status: 'queued', progress: 0, error: '' }), 0));
+        const selectedWorker = typeof worker === 'function' ? worker : lastWorker;
+        if (!selectedWorker) throw new Error('재시도할 렌더 실행기가 없습니다.');
+        const failed = retryableJobs();
         if (!failed.length) return snapshot();
-        return runJobs(failed, lastWorker);
+        return runJobs(failed, selectedWorker, options);
     }
     function isRunning() { return running; }
 
     global.AIShortsRenderQueue = Object.freeze({
         runJobs,
         retryFailed,
+        retryableJobs,
         clear,
         subscribe,
         snapshot,

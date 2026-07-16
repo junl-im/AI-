@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.1 - cancellable vertical renderer with caption and quality effects
+// AI Shorts Studio v1.3.2 - cancellable vertical renderer with caption and quality effects
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -412,6 +412,24 @@
         return null;
     }
 
+    function inspectRenderCapability(canvas, sourceMedia) {
+        const reasons = [];
+        const warnings = [];
+        const mimeType = utils.getMediaRecorderMime ? utils.getMediaRecorderMime(config.EXPORT_MIME_CANDIDATES || []) : '';
+        if (!global.MediaRecorder) reasons.push('MediaRecorder를 지원하지 않는 브라우저입니다.');
+        if (!canvas || typeof canvas.captureStream !== 'function') reasons.push('Canvas captureStream을 지원하지 않는 브라우저입니다.');
+        if (!sourceMedia) reasons.push('저장할 원본 미디어가 없습니다.');
+        if (sourceMedia && !getCaptureStream(sourceMedia)) warnings.push('원본 오디오 캡처를 지원하지 않아 결과물에 소리가 포함되지 않을 수 있습니다.');
+        if (!mimeType) warnings.push('브라우저가 명시적인 출력 형식을 제공하지 않아 기본 형식으로 저장합니다.');
+        return Object.freeze({
+            ok: reasons.length === 0,
+            reasons: Object.freeze(reasons),
+            warnings: Object.freeze(warnings),
+            mimeType,
+            hasMediaCapture: Boolean(sourceMedia && getCaptureStream(sourceMedia))
+        });
+    }
+
     async function recordVerticalSegment(canvas, sourceMedia, options, onProgress) {
         const signal = options && options.signal || null;
         function abortError(reason) {
@@ -420,8 +438,9 @@
             return error;
         }
         if (signal && signal.aborted) throw abortError(signal.reason);
-        const mimeType = utils.getMediaRecorderMime ? utils.getMediaRecorderMime(config.EXPORT_MIME_CANDIDATES || []) : '';
-        if (!global.MediaRecorder) throw new Error('이 브라우저는 MediaRecorder 내보내기를 지원하지 않습니다.');
+        const capability = inspectRenderCapability(canvas, sourceMedia);
+        if (!capability.ok) throw new Error(capability.reasons.join(' '));
+        const mimeType = capability.mimeType;
         const stream = createCanvasStream(canvas, options && options.fps || config.PREVIEW_FPS || 30);
         const mediaStream = getCaptureStream(sourceMedia);
         if (mediaStream) {
@@ -516,35 +535,41 @@
                 const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'video/webm' });
                 resolve({ blob, mimeType: blob.type || recorder.mimeType || mimeType || 'video/webm' });
             };
-            try {
-                if (signal && signal.aborted) throw abortError(signal.reason);
-                if (sourceMedia) {
-                    sourceMedia.currentTime = started;
-                    sourceMedia.muted = false;
-                    sourceMedia.play().catch(error => {
-                        const store = global.AIShortsAppState;
-                        if (store && store.addDiagnostic) store.addDiagnostic({ type: 'render-playback-warning', message: error.message });
-                    });
-                }
-                recorder.start(1000);
-                drawLoop();
-                intervalTimer = setInterval(() => {
-                    if (!sourceMedia) return;
-                    if (sourceMedia.currentTime >= end || sourceMedia.ended) {
-                        clearInterval(intervalTimer);
-                        intervalTimer = 0;
+            async function startRecording() {
+                try {
+                    if (signal && signal.aborted) throw abortError(signal.reason);
+                    if (sourceMedia) {
                         sourceMedia.pause();
-                        if (recorder.state !== 'inactive') recorder.stop();
+                        sourceMedia.currentTime = started;
+                        sourceMedia.muted = false;
+                        try {
+                            await sourceMedia.play();
+                        } catch (error) {
+                            throw new Error('원본 미디어 재생을 시작할 수 없어 렌더를 중단했습니다: ' + (error && error.message || '재생 실패'));
+                        }
                     }
-                }, 100);
-                stopTimer = setTimeout(() => {
-                    stopTimer = 0;
-                    if (sourceMedia) sourceMedia.pause();
-                    if (recorder.state !== 'inactive') recorder.stop();
-                }, Math.ceil(duration * 1000) + 1400);
-            } catch (error) {
-                fail(error);
+                    if (signal && signal.aborted) throw abortError(signal.reason);
+                    recorder.start(1000);
+                    drawLoop();
+                    intervalTimer = setInterval(() => {
+                        if (!sourceMedia) return;
+                        if (sourceMedia.currentTime >= end || sourceMedia.ended) {
+                            clearInterval(intervalTimer);
+                            intervalTimer = 0;
+                            sourceMedia.pause();
+                            if (recorder.state !== 'inactive') recorder.stop();
+                        }
+                    }, 100);
+                    stopTimer = setTimeout(() => {
+                        stopTimer = 0;
+                        if (sourceMedia) sourceMedia.pause();
+                        if (recorder.state !== 'inactive') recorder.stop();
+                    }, Math.ceil(duration * 1000) + 1400);
+                } catch (error) {
+                    fail(error);
+                }
             }
+            startRecording();
         });
     }
 
@@ -555,6 +580,7 @@
         drawOverlay,
         renderStill,
         createCanvasStream,
+        inspectRenderCapability,
         recordVerticalSegment
     });
 })(window);

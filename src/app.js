@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.1 - coordinated media operations, stage landing, and render safety
+// AI Shorts Studio v1.3.2 - coordinated media operations, stage landing, and render safety
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -124,7 +124,7 @@
             'cutMarkerOverlay', 'cutMarkerFocusText', 'snapStartCutBtn', 'snapEndCutBtn', 'engineStatusText',
             'flowPreviewBtn', 'flowThumbnailBtn', 'flowExportBtn', 'flowExportAllBtn',
             'hyperflowStageTitle', 'hyperflowStageMeta', 'hyperflowStageIcon', 'autoplayPreviewToggle',
-            'renderQueueStatus', 'renderQueueList', 'renderQueueRetryBtn', 'renderQueueClearBtn'
+            'renderQueueStatus', 'renderQueueList', 'renderQueueCancelBtn', 'renderQueueRetryBtn', 'renderQueueClearBtn'
         ].forEach(id => { els[id] = $(id); });
     }
 
@@ -513,6 +513,7 @@
             if (!snap.total) { queueState = 'idle'; queueText = '대기 중'; }
             else if (snap.running && snap.current) { queueState = 'running'; queueText = `${snap.current.label} · ${snap.progress}%`; }
             else if (snap.failed) { queueState = 'failed'; queueText = `완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`; }
+            else if (snap.cancelled) { queueState = 'cancelled'; queueText = `완료 ${snap.done}/${snap.total} · 취소 ${snap.cancelled}`; }
             if (els.renderQueueStatus.dataset.state !== queueState) els.renderQueueStatus.dataset.state = queueState;
             if (els.renderQueueStatus.textContent !== queueText) els.renderQueueStatus.textContent = queueText;
         }
@@ -536,8 +537,9 @@
                 }).join('');
             }
         }
+        if (els.renderQueueCancelBtn) els.renderQueueCancelBtn.disabled = !snap.running;
         if (els.renderQueueRetryBtn) els.renderQueueRetryBtn.disabled = snap.running || !snap.failed;
-        if (els.renderQueueClearBtn) els.renderQueueClearBtn.disabled = snap.running && !snap.done && !snap.failed;
+        if (els.renderQueueClearBtn) els.renderQueueClearBtn.disabled = snap.running;
         updateButtons();
     }
 
@@ -565,7 +567,14 @@
         stopPreview({ cancel: true, reason: '렌더 시작' });
         const media = getActiveMediaElement();
         if (!media) throw new Error('저장할 원본 미디어가 없습니다.');
-        const token = beginOperation('render', { jobs: Array.isArray(jobs) ? jobs.length : 1, fileName: state.file && state.file.name || '' });
+        const capability = renderer.inspectRenderCapability ? renderer.inspectRenderCapability(els.previewCanvas, media) : { ok: true, reasons: [], warnings: [] };
+        if (!capability.ok) throw new Error(capability.reasons.join(' ') || '이 브라우저에서는 렌더를 시작할 수 없습니다.');
+        if (capability.warnings && capability.warnings.length) {
+            const warningText = capability.warnings.join(' ');
+            toast(warningText, 'warning');
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'render-capability-warning', message: warningText });
+        }
+        const token = beginOperation('render', { jobs: Array.isArray(jobs) ? jobs.length : 1, fileName: state.file && state.file.name || '', mimeType: capability.mimeType || '' });
         try {
             const result = await renderQueue.runJobs(jobs, async (job, update, signal) => {
                 assertOperation(token);
@@ -622,6 +631,19 @@
         } finally {
             finishOperation(token, 'render-finalized');
         }
+    }
+
+
+    async function retryFailedRenderJobs() {
+        if (!renderQueue || !renderQueue.retryableJobs) throw new Error('재시도 가능한 렌더 큐를 불러오지 못했습니다.');
+        const jobs = renderQueue.retryableJobs();
+        if (!jobs.length) {
+            toast('재시도할 실패 항목이 없습니다.', 'warning');
+            return null;
+        }
+        setProgress(1, `실패 항목 재시도 · ${jobs.length}개`);
+        if (store.addDiagnostic) store.addDiagnostic({ type: 'render-retry-start', total: jobs.length });
+        return runRenderQueueJobs(jobs);
     }
 
 
@@ -884,8 +906,17 @@
         if (els.projectFileInput) els.projectFileInput.addEventListener('change', handleProjectFile);
         if (els.copyCaptionBtn) els.copyCaptionBtn.addEventListener('click', copyCaption);
         if (els.diagnosticsBtn) els.diagnosticsBtn.addEventListener('click', copyDiagnostics);
+        if (els.renderQueueCancelBtn) els.renderQueueCancelBtn.addEventListener('click', () => {
+            const cancelled = renderQueue.cancel && renderQueue.cancel('사용자가 렌더 작업을 취소했습니다.');
+            if (cancelled) {
+                els.renderQueueCancelBtn.disabled = true;
+                setProgress(0, '렌더 취소 요청');
+                toast('현재 렌더를 안전하게 중단하고 있습니다.', 'warning');
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'render-cancel-request' });
+            }
+        });
         if (els.renderQueueRetryBtn) els.renderQueueRetryBtn.addEventListener('click', async () => {
-            try { await renderQueue.retryFailed(); } catch (error) { toast(error.message || '재시도에 실패했습니다.', 'error'); }
+            try { await retryFailedRenderJobs(); } catch (error) { toast(error.message || '재시도에 실패했습니다.', 'error'); }
         });
         if (els.renderQueueClearBtn) els.renderQueueClearBtn.addEventListener('click', () => {
             if (renderQueue.clear) renderQueue.clear();

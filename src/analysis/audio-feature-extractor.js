@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.1 - audio decode, worker bridge, and cancellation support
+// AI Shorts Studio v1.3.2 - audio decode, worker bridge, and main-thread compatibility fallback
 'use strict';
 
 (function exposeAudioFeatureExtractor(global) {
@@ -48,9 +48,21 @@
         return output;
     }
 
-    function analyzeChannelData(channelData, sampleRate, duration, onProgress, signal) {
+    async function analyzeChannelData(channelData, sampleRate, duration, onProgress, signal) {
+        const core = global.AIShortsAudioAnalysisCore || {};
+        const workerUrl = config.ANALYSIS_WORKER_URL || 'src/workers/highlight-analysis.worker.js';
+        const store = global.AIShortsAppState;
+
+        async function fallback(reason) {
+            if (!core.analyzeAudioAsync) throw new Error(reason || '호환 분석 코어를 불러오지 못했습니다.');
+            if (store && store.addDiagnostic) store.addDiagnostic({ type: 'analysis-worker-fallback', message: String(reason || '워커 사용 불가') });
+            if (onProgress) onProgress(40, '분석 워커 대체 모드 시작');
+            return core.analyzeAudioAsync(channelData, sampleRate, duration, onProgress, signal);
+        }
+
+        if (typeof global.Worker !== 'function') return fallback('이 환경은 Web Worker를 지원하지 않습니다.');
+
         return new Promise((resolve, reject) => {
-            const workerUrl = config.ANALYSIS_WORKER_URL || 'src/workers/highlight-analysis.worker.js';
             let worker;
             let settled = false;
 
@@ -66,15 +78,22 @@
                 handler(value);
             }
             function onAbort() { finish(reject, abortError(signal && signal.reason)); }
+            async function useFallback(reason) {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                try { resolve(await fallback(reason)); }
+                catch (error) { reject(error); }
+            }
 
             if (signal && signal.aborted) {
                 reject(abortError(signal.reason));
                 return;
             }
             try {
-                worker = new Worker(workerUrl);
+                worker = new global.Worker(workerUrl);
             } catch (error) {
-                reject(new Error('분석 워커를 시작할 수 없습니다: ' + error.message));
+                useFallback('분석 워커 시작 실패: ' + error.message);
                 return;
             }
             if (signal) signal.addEventListener('abort', onAbort, { once: true });
@@ -88,16 +107,20 @@
                     finish(resolve, message.analysis);
                     return;
                 }
-                if (message.type === 'error') finish(reject, new Error(message.message || '분석 실패'));
+                if (message.type === 'error') useFallback(message.message || '분석 워커 오류');
             };
-            worker.onerror = error => finish(reject, new Error(error.message || '분석 워커 오류'));
+            worker.onerror = error => useFallback(error.message || '분석 워커 오류');
             const copy = new Float32Array(channelData || 0);
-            worker.postMessage({
-                type: 'analyzeAudio',
-                channelData: copy,
-                sampleRate: Number(sampleRate) || 44100,
-                duration: Number(duration) || 0
-            }, [copy.buffer]);
+            try {
+                worker.postMessage({
+                    type: 'analyzeAudio',
+                    channelData: copy,
+                    sampleRate: Number(sampleRate) || 44100,
+                    duration: Number(duration) || 0
+                }, [copy.buffer]);
+            } catch (error) {
+                useFallback('분석 워커 데이터 전송 실패: ' + error.message);
+            }
         });
     }
 

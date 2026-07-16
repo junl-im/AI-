@@ -1,20 +1,19 @@
 # AI Shorts Studio overwrite patch manifest
-# from=1.3.0
-# to=1.3.1
-# Extract this ZIP over an existing v1.3.0 folder and replace files.
+# from=1.3.1
+# to=1.3.2
+# Extract this ZIP over an existing v1.3.1 folder and replace files.
 CHANGELOG.md
 HANDOFF.md
 PATCH_MANIFEST.txt
 PROJECT_NOTES.md
 README.md
-assets/css/active-stage-beacon.css
-assets/css/header-meta-rail.css
-assets/css/workspace-layout-controls.css
+assets/css/render-queue.css
 index.html
 package.json
 qa/QA_REPORT.md
 qa/active_stage_beacon_smoke.js
 qa/app_version_sync_smoke.js
+qa/audio_analysis_fallback_smoke.js
 qa/candidate_pin_board_smoke.js
 qa/cut_marker_smoke.js
 qa/desktop_prime_layout_smoke.js
@@ -34,6 +33,7 @@ qa/hero_command_deck_smoke.js
 qa/hyperconnect_flow_smoke.js
 qa/icon_system_smoke.js
 qa/layout_dock_smoke.js
+qa/media_e2e_audit_smoke.js
 qa/modular_engine_smoke.js
 qa/motion_stability_smoke.js
 qa/navigation_focus_smoke.js
@@ -43,8 +43,11 @@ qa/pc_menu_containment_smoke.js
 qa/pro_engine_stability_smoke.js
 qa/render_quality_planner_smoke.js
 qa/render_queue_smoke.js
+qa/render_recovery_smoke.js
 qa/responsive_workspace_smoke.js
-qa/runtime-browser-audit-v1.3.1.json
+qa/run_media_e2e.py
+qa/runtime-browser-audit-v1.3.2.json
+qa/runtime-media-e2e-v1.3.2.json
 qa/runtime_browser_audit_smoke.js
 qa/runtime_performance_smoke.js
 qa/runtime_responsiveness_smoke.js
@@ -57,24 +60,15 @@ qa/update_sentinel_smoke.js
 qa/viewport_rendering_smoke.js
 qa/workspace_comfort_smoke.js
 qa/workspace_layout_controls_smoke.js
+src/analysis/audio-analysis-core.js
 src/analysis/audio-feature-extractor.js
-src/analysis/video-motion-analyzer.js
 src/app.js
 src/boot/app-version-sync.js
-src/boot/runtime-health.js
 src/boot/staged-ui-loader.js
 src/boot/update-sentinel.js
 src/config/app-runtime-config.js
-src/engine/analysis-pipeline.js
-src/engine/operation-coordinator.js
 src/render/render-queue.js
 src/render/vertical-renderer.js
-src/ui/export-finish-center.js
-src/ui/flow-command-bridge.js
 src/ui/flow-director-final.js
-src/ui/flow-polish.js
-src/ui/hyperflow-tabs.js
-src/ui/render-quality-planner.js
-src/ui/session-continuity.js
-src/ui/workspace-layout-controls.js
+src/workers/highlight-analysis.worker.js
 sw.js

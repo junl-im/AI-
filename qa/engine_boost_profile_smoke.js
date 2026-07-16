@@ -14,8 +14,8 @@ function ok(condition, message) {
   }
 }
 const version = pkg.version;
-ok(html.includes(`src/engine/engine-boost-profile.js?v=${version}-workspace-control`), 'engine boost profile script linked');
-ok(sw.includes(`./src/engine/engine-boost-profile.js?v=${version}-workspace-control`), 'engine boost profile script cached');
+ok(html.includes(`src/engine/engine-boost-profile.js?v=${version}-media-e2e`), 'engine boost profile script linked');
+ok(sw.includes(`./src/engine/engine-boost-profile.js?v=${version}-media-e2e`), 'engine boost profile script cached');
 ok(engine.includes('AIShortsEngineBoostProfile'), 'engine boost profile exports API');
 ok(engine.includes('MAX-STABLE'), 'engine boost profile includes MAX-STABLE mode');
 ok(engine.includes('recommendedParallelism'), 'engine boost profile computes parallelism');

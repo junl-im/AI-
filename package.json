@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-3-1",
-  "version": "1.3.1",
+  "name": "ai-shorts-studio-v1-3-2",
+  "version": "1.3.2",
   "private": true,
-  "description": "AI Shorts Studio v1.3.1 - resizable three-column workspace, preview focus, waveform expansion and layout persistence",
+  "description": "AI Shorts Studio v1.3.2 - real-media E2E, worker fallback, render cancel, safe retry, and playback preflight",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -19,6 +19,7 @@
     "node --check src/boot/staged-ui-loader.js",
     "node --check src/state/app-state.js",
     "node --check src/utils/core-utils.js",
+    "node --check src/analysis/audio-analysis-core.js",
     "node --check src/analysis/audio-feature-extractor.js",
     "node --check src/analysis/video-motion-analyzer.js",
     "node --check src/analysis/auto-cut-detector.js",
@@ -132,6 +133,9 @@
     "node qa/operation_coordinator_smoke.js",
     "node qa/active_stage_beacon_smoke.js",
     "node --check src/ui/workspace-layout-controls.js",
-    "node qa/workspace_layout_controls_smoke.js"
+    "node qa/workspace_layout_controls_smoke.js",
+    "node qa/audio_analysis_fallback_smoke.js",
+    "node qa/render_recovery_smoke.js",
+    "node qa/media_e2e_audit_smoke.js"
   ]
 }

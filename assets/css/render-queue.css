@@ -142,3 +142,22 @@ body[data-render-queue="running"] .bottom-dock-tabs {
 .render-queue-status[data-state="running"] { color: #a5f3fc; }
 .render-queue-status[data-state="done"] { color: #86efac; }
 .render-queue-status[data-state="failed"] { color: #fda4af; }
+
+/* v1.3.2 explicit cancel and terminal queue states */
+.render-queue-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.render-queue-actions .render-cancel-btn:not(:disabled) {
+    color: #fecdd3;
+    border-color: rgba(251, 113, 133, 0.42);
+    background: rgba(159, 18, 57, 0.18);
+}
+.render-queue-actions .render-cancel-btn:not(:disabled):hover {
+    border-color: rgba(251, 113, 133, 0.72);
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.16);
+}
+.render-queue-item.is-cancelled { border-color: rgba(251, 191, 36, 0.38); }
+.render-queue-status[data-state="cancelled"] { color: #fde68a; }
+@media (max-width: 520px) {
+    .render-queue-actions { grid-template-columns: 1fr; }
+}

@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## v1.3.2 - Real Media E2E & Render Recovery
+
+- Worker와 메인 스레드가 공유하는 `audio-analysis-core.js`를 추가해 분석 계산의 중복 구현을 제거했습니다.
+- 오디오 분석 Worker 생성·실행 실패 시 배치형 메인 스레드 폴백으로 이어서 분석하고 AbortSignal을 확인합니다.
+- 렌더 시작 전에 MediaRecorder와 canvas captureStream 필수 기능을 검사합니다.
+- 원본 미디어 `play()`가 거절되면 빈 영상 녹화를 계속하지 않고 즉시 실패 처리합니다.
+- 렌더 큐에 사용자용 `취소` 버튼과 cancelled 상태를 추가하고 다운로드 없이 안전하게 종료합니다.
+- 실패 작업 재시도가 과거 operation token을 재사용하던 문제를 수정해 새 렌더 작업으로 다시 시작합니다.
+- 합성 20초 MP3·MP4의 분석 → 추천 → 선택 → 2초 렌더 → 다운로드를 실제 Chromium에서 검증했습니다.
+- 렌더 취소, 의도적인 재생 실패, 실패 항목 재시도와 ffprobe 출력 검증을 자동 감사에 포함했습니다.
+- 자동 QA 124/124와 PC·모바일 Chromium 런타임 오류 0건을 확인했습니다.
+- 전체 설치 ZIP과 v1.3.1 덮어쓰기 패치 ZIP을 함께 생성합니다.
+
 ## v1.3.1 - Resizable Prime Workspace & Focus Views
 
 - PC 3열 작업실에 두 개의 세로 리사이저를 추가해 불러오기·미리보기·후보 영역의 폭을 직접 조절할 수 있습니다.
