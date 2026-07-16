@@ -18,7 +18,7 @@ function assert(condition, message) {
 const version = `v${pkg.version}`;
 const plain = pkg.version;
 assert(config.includes(`APP_VERSION: '${version}'`), 'runtime config APP_VERSION matches package version');
-assert(config.includes(`BUILD_KEY: '${plain}-navigation-focus'`), 'runtime config build key is updated');
+assert(config.includes(`BUILD_KEY: '${plain}-staged-hydration'`), 'runtime config build key is updated');
 assert(html.includes(`<meta name="ai-shorts-version" content="${version}" />`), 'html has version meta tag');
 assert(html.includes(`>${version}</button>`), 'header version badge matches package version');
 assert(html.includes(`AI 쇼츠 제작 스튜디오 ${version}`), 'title/info title includes current version');
@@ -26,7 +26,7 @@ assert(html.includes('src/boot/app-version-sync.js'), 'version sync boot module 
 assert(sync.includes('AIShortsVersionSync'), 'version sync API is exported');
 assert(sync.includes('runtime-config'), 'version badge marks runtime config as source');
 assert(sw.includes('version-aware cache guard'), 'service worker documents version-aware cache guard');
-assert(sw.includes(`ai-shorts-studio-shell-${version}-navigation-focus`), 'service worker cache name matches the runtime stability build');
+assert(sw.includes(`ai-shorts-studio-shell-${version}-staged-hydration`), 'service worker cache name matches the runtime stability build');
 assert(sw.includes('networkFirst') && sw.includes('request.mode === \'navigate\''), 'service worker uses network-first navigation shell');
 assert(sw.includes(`app-version-sync.js?v=${plain}-version-sync`), 'service worker precaches version sync module');
 assert(app.includes('registration.update'), 'app asks service worker to check for updates');

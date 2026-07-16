@@ -12,15 +12,16 @@ function ok(condition, message) {
     console.log(`PASS ${message}`);
 }
 const html = read('index.html');
+const loader = read('src/boot/staged-ui-loader.js');
 const sw = read('sw.js');
 const pkg = require('../package.json');
 const css = read('assets/css/save-readiness.css');
 const js = read('src/ui/save-readiness.js');
-ok(pkg.version === '1.2.4', 'package version is v1.2.4');
-ok(html.includes('assets/css/save-readiness.css?v=1.2.4-save-readiness'), 'save readiness stylesheet linked');
-ok(html.includes('src/ui/save-readiness.js?v=1.2.4-save-readiness'), 'save readiness script linked');
-ok(sw.includes('./assets/css/save-readiness.css?v=1.2.4-save-readiness'), 'service worker caches save readiness css');
-ok(sw.includes('./src/ui/save-readiness.js?v=1.2.4-save-readiness'), 'service worker caches save readiness js');
+ok(pkg.version === '1.2.6', 'package version is v1.2.6');
+ok(html.includes('assets/css/save-readiness.css?v=1.2.6-save-readiness'), 'save readiness stylesheet linked');
+ok(loader.includes('src/ui/save-readiness.js?v=${VERSION}-save-readiness'), 'save readiness script staged');
+ok(sw.includes('./assets/css/save-readiness.css?v=1.2.6-save-readiness'), 'service worker caches save readiness css');
+ok(sw.includes('async function cacheFirst'), 'service worker caches save readiness JS on first use');
 ok(css.includes('.save-readiness-panel') && css.includes('.preview-ready-strip'), 'save readiness and preview strip styles exist');
 ok(css.includes('@media (prefers-reduced-motion: reduce)'), 'reduced motion fallback exists');
 ok(js.includes('AIShortsSaveReadiness'), 'global Save Readiness API exists');

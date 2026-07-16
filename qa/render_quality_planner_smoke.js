@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.4 - Render quality planner smoke test
+// AI Shorts Studio v1.2.6 - Render quality planner smoke test
 'use strict';
 
 const fs = require('fs');
@@ -13,6 +13,7 @@ const assert = (condition, message) => {
 };
 
 const html = read('index.html');
+const loader = read('src/boot/staged-ui-loader.js');
 const css = read('assets/css/render-quality-planner.css');
 const js = read('src/ui/render-quality-planner.js');
 const app = read('src/app.js');
@@ -21,8 +22,8 @@ const sw = read('sw.js');
 const pkg = JSON.parse(read('package.json'));
 
 assert(html.includes('assets/css/render-quality-planner.css'), 'render quality CSS is linked in HTML');
-assert(html.includes('src/ui/render-quality-planner.js'), 'render quality planner script is linked in HTML');
-assert(sw.includes('render-quality-planner.css') && sw.includes('render-quality-planner.js'), 'service worker caches render quality assets');
+assert(loader.includes('src/ui/render-quality-planner.js'), 'render quality planner script is staged');
+assert(sw.includes('render-quality-planner.css') && sw.includes('async function cacheFirst'), 'service worker precaches CSS and runtime-caches the staged planner JS');
 assert(js.includes('fast') && js.includes('balanced') && js.includes('high'), 'three render presets are defined');
 assert(js.includes('예상 시간') || css.includes('render-estimate'), 'render estimates are represented');
 assert(js.includes('모바일 저장 팁'), 'mobile save guide exists');

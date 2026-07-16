@@ -19,10 +19,10 @@ const html = read('index.html');
 const css = read('assets/css/hero-command-deck.css');
 const sw = read('sw.js');
 
-assert(pkg.version === '1.2.4', 'shorts pulse hero release version is v1.2.4');
-assert(html.includes('assets/css/hero-command-deck.css?v=1.2.4-navigation-focus'), 'shorts pulse hero stylesheet is linked');
+assert(pkg.version === '1.2.6', 'shorts pulse hero release version is v1.2.6');
+assert(html.includes('assets/css/hero-command-deck.css?v=1.2.6-staged-hydration'), 'shorts pulse hero stylesheet is linked');
 assert(html.indexOf('hero-command-deck.css') > html.indexOf('desktop-prime-layout.css'), 'hero stylesheet remains the final header override');
-assert(sw.includes('./assets/css/hero-command-deck.css?v=1.2.4-navigation-focus'), 'shorts pulse hero stylesheet is cached');
+assert(sw.includes('./assets/css/hero-command-deck.css?v=1.2.6-staged-hydration'), 'shorts pulse hero stylesheet is cached');
 assert(html.includes('class="brand-release"') && html.includes('SHORTS-FIRST STUDIO'), 'version metadata uses the shorts-first release rail');
 assert(html.includes('class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>'), 'designer signature stays typographic and aligned');
 assert(html.includes('LOCAL · PRIVATE · 9:16'), 'local vertical rendering state is clear');
@@ -37,4 +37,4 @@ assert(css.includes('.cinematic-title::after') && css.includes('display: none !i
 assert(css.includes('@media (max-width: 920px)') && css.includes('.hero-command-deck'), 'compact screens remove the duplicated desktop action visual');
 assert(css.includes('@media (prefers-reduced-motion: reduce)') && css.includes('body.performance-lite'), 'motion and low-performance fallbacks are present');
 assert(css.includes('.hero-start-button:focus-visible'), 'hero action keeps keyboard focus visibility');
-console.log('PASS v1.2.4 shorts pulse hero guardrails present');
+console.log('PASS v1.2.6 shorts pulse hero guardrails present');

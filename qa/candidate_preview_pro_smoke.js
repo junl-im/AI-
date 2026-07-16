@@ -6,6 +6,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const html = read('index.html');
+const loader = read('src/boot/staged-ui-loader.js');
 const css = read('assets/css/candidate-preview-pro.css');
 const js = read('src/ui/candidate-preview-pro.js');
 const pkg = JSON.parse(read('package.json'));
@@ -18,7 +19,7 @@ function assert(condition, message) {
 }
 
 assert(html.includes('assets/css/candidate-preview-pro.css'), 'candidate preview pro CSS must be linked in index.html');
-assert(html.includes('src/ui/candidate-preview-pro.js'), 'candidate preview pro JS must be loaded in index.html');
+assert(loader.includes('src/ui/candidate-preview-pro.js'), 'candidate preview pro JS must be staged');
 assert(css.includes('.candidate-pro-board') && css.includes('.preview-pro-hud'), 'candidate and preview pro surfaces must be styled');
 assert(js.includes('AIShortsCandidatePreviewPro'), 'candidate preview pro namespace must be exposed');
 assert(js.includes('candidateProBoard') && js.includes('previewProHud'), 'candidate board and preview HUD must be created');

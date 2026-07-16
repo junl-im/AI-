@@ -414,7 +414,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 }
 
 
-/* v1.2.4 Navigation Focus: the menu bar now acts as a visible workflow navigator. */
+/* v1.2.5 Navigation Focus: the menu bar now acts as a visible workflow navigator. */
 body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child,
 body[data-icon-language="studio-glyphs"] .hyperflow-stage-icon,
 body[data-icon-language="studio-glyphs"] .flow-selection-icon,

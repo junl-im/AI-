@@ -20,6 +20,6 @@ assert(css.includes('data-flow-command-bridge="ready"'), 'command bridge motion 
 assert(js.includes('stopImmediatePropagation'), 'tab click propagation is stopped before legacy handlers');
 assert(js.includes('AIShortsFlowCommandBridge'), 'command bridge exports API');
 assert(js.includes('AIShortsHyperFlowTabs') && js.includes('AIShortsMotionStability'), 'legacy navigation APIs are bridged');
-assert(finalJs.includes("document.body.dataset.build = '1.2.4'"), 'final director build is v1.2.4');
+assert(finalJs.includes("document.body.dataset.build = '1.2.6'"), 'final director build is v1.2.6');
 console.log('PASS no_shake_command_bridge_smoke');
 

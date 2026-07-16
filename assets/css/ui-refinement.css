@@ -1,0 +1,484 @@
+/* AI Shorts Studio v1.2.6 - unified editorial UI refinement */
+:root {
+    --ui-bg-0: #070a12;
+    --ui-bg-1: #0b1020;
+    --ui-surface: rgba(13, 19, 34, 0.92);
+    --ui-surface-soft: rgba(17, 25, 43, 0.72);
+    --ui-surface-raised: rgba(20, 29, 49, 0.94);
+    --ui-line: rgba(148, 163, 184, 0.13);
+    --ui-line-strong: rgba(148, 163, 184, 0.23);
+    --ui-text: #f4f7fb;
+    --ui-muted: #93a0b5;
+    --ui-dim: #667085;
+    --ui-cyan: #67e8f9;
+    --ui-violet: #a78bfa;
+    --ui-pink: #f0abfc;
+    --ui-radius-xl: 24px;
+    --ui-radius-lg: 18px;
+    --ui-radius-md: 13px;
+    --ui-shadow: 0 20px 50px rgba(0, 0, 0, 0.24);
+}
+
+html { background: var(--ui-bg-0); }
+body {
+    color: var(--ui-text);
+    background:
+        radial-gradient(circle at 6% -8%, rgba(103, 232, 249, 0.10), transparent 28rem),
+        radial-gradient(circle at 92% 4%, rgba(167, 139, 250, 0.10), transparent 30rem),
+        linear-gradient(180deg, #090d18 0%, #070a12 52%, #060810 100%) !important;
+}
+body::before { opacity: 0.42 !important; }
+
+/* One visual language for all working surfaces. */
+body[data-ui="hyperflow-tabs"] [data-flow-panel],
+body[data-ui="hyperflow-tabs"] .control-zone,
+body[data-ui="hyperflow-tabs"] .preview-card,
+body[data-ui="hyperflow-tabs"] .waveform-card,
+body[data-ui="hyperflow-tabs"] .auto-cut-panel,
+body[data-ui="hyperflow-tabs"] .edit-tools-card,
+body[data-ui="hyperflow-tabs"] .export-card,
+body[data-ui="hyperflow-tabs"] .project-card,
+body[data-ui="hyperflow-tabs"] .copy-card {
+    border: 1px solid var(--ui-line) !important;
+    border-radius: var(--ui-radius-xl) !important;
+    background:
+        linear-gradient(145deg, rgba(18, 26, 44, 0.91), rgba(8, 13, 25, 0.94)) !important;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.17) !important;
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel]::before,
+body[data-ui="hyperflow-tabs"] .control-zone::before,
+body[data-ui="hyperflow-tabs"] .preview-card::before,
+body[data-ui="hyperflow-tabs"] .waveform-card::before {
+    opacity: 0.18 !important;
+}
+
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target {
+    border-color: rgba(103, 232, 249, 0.32) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 18px 42px rgba(0, 0, 0, 0.22) !important;
+}
+body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after {
+    top: 13px !important;
+    right: 14px !important;
+    padding: 4px 8px !important;
+    border: 1px solid rgba(103, 232, 249, 0.15);
+    background: rgba(9, 14, 25, 0.88) !important;
+    color: rgba(165, 243, 252, 0.86) !important;
+    letter-spacing: 0.09em !important;
+}
+
+.panel-head,
+.auto-cut-head,
+.caption-pro-head,
+.quality-head,
+.batch-export-head,
+.export-head,
+.project-head {
+    align-items: flex-start !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.09);
+}
+.panel-head strong,
+.auto-cut-head strong,
+.caption-pro-head strong,
+.quality-head strong,
+.batch-export-head strong {
+    color: var(--ui-text) !important;
+    font-size: 15px !important;
+    font-weight: 830 !important;
+    letter-spacing: -0.025em !important;
+}
+.panel-head small,
+.auto-cut-head small,
+.caption-pro-head small,
+.quality-head small,
+.helper-text,
+.import-status {
+    color: var(--ui-muted) !important;
+}
+
+/* Form controls feel like one editor, not many accumulated modules. */
+.field { gap: 7px !important; color: #cbd5e1 !important; font-weight: 700 !important; }
+.field > span { color: #aeb9ca !important; font-size: 11.5px !important; }
+input:not([type="range"]):not([type="checkbox"]):not([type="file"]),
+select,
+textarea {
+    min-height: 43px !important;
+    border: 1px solid rgba(148, 163, 184, 0.16) !important;
+    border-radius: var(--ui-radius-md) !important;
+    color: #eef2f7 !important;
+    background: rgba(6, 10, 20, 0.58) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
+}
+textarea { padding-block: 11px !important; }
+input:not([type="range"]):not([type="checkbox"]):focus,
+select:focus,
+textarea:focus {
+    border-color: rgba(103, 232, 249, 0.48) !important;
+    outline: 3px solid rgba(103, 232, 249, 0.08) !important;
+    box-shadow: none !important;
+}
+
+button,
+.btn-primary,
+.btn-secondary,
+.mini-action,
+label.btn-secondary,
+.file-button {
+    border-radius: 12px !important;
+    letter-spacing: -0.02em !important;
+}
+.btn-primary,
+.recommend-generate-btn,
+.hyperflow-recommend-btn {
+    border: 1px solid rgba(165, 243, 252, 0.24) !important;
+    color: #07111e !important;
+    background: linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%) !important;
+    box-shadow: 0 10px 24px rgba(103, 232, 249, 0.12) !important;
+}
+.btn-secondary,
+.mini-action,
+label.btn-secondary,
+.file-button {
+    border: 1px solid rgba(148, 163, 184, 0.16) !important;
+    color: #d8e0eb !important;
+    background: rgba(18, 26, 43, 0.72) !important;
+    box-shadow: none !important;
+}
+.btn-secondary:not(:disabled):hover,
+.mini-action:not(:disabled):hover,
+label.btn-secondary:hover {
+    border-color: rgba(103, 232, 249, 0.30) !important;
+    background: rgba(25, 36, 58, 0.88) !important;
+}
+button:disabled,
+.btn-secondary:disabled,
+.mini-action:disabled { opacity: 0.42 !important; }
+
+.badge,
+.engine-pill,
+.auto-cut-summary,
+.caption-preset,
+.quality-preset,
+.tab-state-dot {
+    box-shadow: none !important;
+}
+
+.upload-tile {
+    border: 1px dashed rgba(148, 163, 184, 0.25) !important;
+    border-radius: var(--ui-radius-lg) !important;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%),
+        rgba(7, 11, 21, 0.42) !important;
+}
+.upload-tile:hover,
+.upload-tile:focus-visible {
+    border-color: rgba(103, 232, 249, 0.46) !important;
+    background: rgba(13, 22, 38, 0.75) !important;
+}
+.upload-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    margin-inline: auto;
+    border: 1px solid rgba(103, 232, 249, 0.22);
+    border-radius: 13px;
+    color: var(--ui-cyan) !important;
+    background: rgba(103, 232, 249, 0.07);
+}
+
+/* Candidate and timeline contents use spacing instead of more frames. */
+.recommendation-card,
+.candidate-card,
+.engine-status-card,
+.handoff-coach,
+.save-readiness-card,
+.render-quality-card,
+.export-finish-card {
+    border-color: rgba(148, 163, 184, 0.12) !important;
+    background: rgba(10, 16, 29, 0.58) !important;
+    box-shadow: none !important;
+}
+.recommendation-card.is-selected,
+.candidate-card.is-selected {
+    border-color: rgba(103, 232, 249, 0.32) !important;
+    background: linear-gradient(135deg, rgba(103, 232, 249, 0.075), rgba(167, 139, 250, 0.07)) !important;
+}
+.waveform-drag-shell,
+.phone-frame,
+.timeline-view,
+.auto-cut-timeline-list {
+    border-color: rgba(148, 163, 184, 0.13) !important;
+    box-shadow: none !important;
+}
+
+/* Subtle, consistent scrollbars. */
+* { scrollbar-color: rgba(148, 163, 184, 0.25) transparent; scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 7px; height: 7px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { border: 2px solid transparent; border-radius: 999px; background: rgba(148, 163, 184, 0.25); background-clip: padding-box; }
+
+/* The menu bar is a single floating tool rail. */
+body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
+    left: 50% !important;
+    right: auto !important;
+    bottom: 12px !important;
+    width: min(970px, calc(100% - 28px)) !important;
+    padding: 8px !important;
+    transform: translateX(-50%);
+    border: 1px solid rgba(148, 163, 184, 0.15) !important;
+    border-radius: 23px !important;
+    background: rgba(8, 13, 24, 0.91) !important;
+    box-shadow: 0 18px 52px rgba(0, 0, 0, 0.42) !important;
+    backdrop-filter: blur(18px) saturate(125%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(125%) !important;
+}
+body[data-ui="hyperflow-tabs"] .bottom-dock-tabs {
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+}
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab {
+    min-height: 58px !important;
+    gap: 5px !important;
+    border: 1px solid transparent !important;
+    border-radius: 16px !important;
+    color: #7f8ba0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab:not(.is-disabled):hover {
+    color: #dbe4ef !important;
+    background: rgba(148, 163, 184, 0.055) !important;
+}
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab.is-active,
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] {
+    border-color: rgba(103, 232, 249, 0.17) !important;
+    color: #f6f8fb !important;
+    background: linear-gradient(145deg, rgba(103, 232, 249, 0.10), rgba(167, 139, 250, 0.10)) !important;
+}
+body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: currentColor !important;
+}
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab b { font-weight: 760 !important; }
+body[data-ui="hyperflow-tabs"] .tab-state-dot {
+    top: 9px !important;
+    right: 10px !important;
+    width: 4px !important;
+    height: 4px !important;
+    background: rgba(148, 163, 184, 0.22) !important;
+}
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab.is-active .tab-state-dot,
+body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-dot {
+    background: var(--ui-cyan) !important;
+    box-shadow: 0 0 10px rgba(103, 232, 249, 0.5) !important;
+}
+
+@media (min-width: 1180px) {
+    body[data-ui="hyperflow-tabs"] .app-shell {
+        width: min(calc(100% - 32px), 1580px) !important;
+        padding-bottom: 104px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
+        min-height: 356px !important;
+        border: 1px solid rgba(148, 163, 184, 0.12) !important;
+        border-radius: 28px !important;
+        background:
+            radial-gradient(circle at 72% 18%, rgba(103, 232, 249, 0.085), transparent 28rem),
+            radial-gradient(circle at 84% 74%, rgba(167, 139, 250, 0.09), transparent 24rem),
+            linear-gradient(145deg, rgba(15, 20, 34, 0.97), rgba(8, 11, 22, 0.98)) !important;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.23) !important;
+    }
+    .cinematic-brand-panel .hero-mainline {
+        grid-template-columns: minmax(0, 1.42fr) minmax(360px, 0.72fr) !important;
+        gap: clamp(34px, 5vw, 78px) !important;
+        padding-inline: clamp(18px, 3vw, 46px) !important;
+    }
+    body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title {
+        font-size: clamp(52px, 5vw, 76px) !important;
+        letter-spacing: -0.065em !important;
+    }
+    body[data-ui="hyperflow-tabs"] .hero-compact-note {
+        max-width: 660px !important;
+        color: #9ba7b9 !important;
+        font-size: 13.5px !important;
+        line-height: 1.75 !important;
+    }
+    .shorts-timeline { max-width: 700px; }
+    body[data-ui="hyperflow-tabs"] .studio-grid {
+        gap: 14px !important;
+        grid-template-columns: minmax(270px, 0.8fr) minmax(390px, 1.08fr) minmax(310px, 0.9fr) !important;
+    }
+    body[data-ui="hyperflow-tabs"] [data-flow-panel],
+    body[data-ui="hyperflow-tabs"] .control-zone,
+    body[data-ui="hyperflow-tabs"] .preview-card,
+    body[data-ui="hyperflow-tabs"] .waveform-card,
+    body[data-ui="hyperflow-tabs"] .auto-cut-panel,
+    body[data-ui="hyperflow-tabs"] .edit-tools-card,
+    body[data-ui="hyperflow-tabs"] .export-card,
+    body[data-ui="hyperflow-tabs"] .project-card,
+    body[data-ui="hyperflow-tabs"] .copy-card {
+        padding: 18px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .preview-card .phone-frame {
+        border: 7px solid rgba(90, 101, 122, 0.72) !important;
+        background: #060914 !important;
+    }
+}
+
+@media (max-width: 1179px) and (min-width: 721px) {
+    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow { width: calc(100% - 24px) !important; }
+}
+
+@media (max-width: 720px) {
+    :root { --hyperflow-dock-height: 166px; }
+    body[data-ui="hyperflow-tabs"] .app-shell {
+        width: min(calc(100% - 20px), 680px) !important;
+        padding-bottom: calc(var(--hyperflow-dock-height) + 24px) !important;
+    }
+    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
+        min-height: 314px !important;
+        padding: 0 16px 17px !important;
+        border: 1px solid rgba(148, 163, 184, 0.12) !important;
+        border-radius: 27px !important;
+        background:
+            radial-gradient(circle at 22% 6%, rgba(103, 232, 249, 0.08), transparent 18rem),
+            linear-gradient(155deg, rgba(15, 20, 35, 0.98), rgba(8, 11, 22, 0.99)) !important;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.20) !important;
+    }
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
+        min-height: 50px !important;
+        padding-inline: 1px;
+        border-bottom-color: rgba(148, 163, 184, 0.10) !important;
+    }
+    .cinematic-brand-panel .brand-signature-pill { padding-inline: 0 !important; }
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-mainline {
+        padding: 22px 4px 0 !important;
+        margin-top: 0 !important;
+    }
+    .hero-eyebrow { margin-bottom: 13px !important; color: #aa9dc5 !important; }
+    body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title,
+    .cinematic-title {
+        font-size: clamp(38px, 11.6vw, 54px) !important;
+        line-height: 0.98 !important;
+        letter-spacing: -0.065em !important;
+    }
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
+        max-width: 32rem !important;
+        margin-top: 18px !important;
+        padding: 0 !important;
+        color: #98a4b6 !important;
+        font-size: 12.5px !important;
+        line-height: 1.68 !important;
+    }
+    .shorts-timeline { margin-top: 21px !important; }
+
+    .start-command-panel {
+        margin-top: 13px !important;
+        padding: 20px !important;
+        border: 1px solid rgba(148, 163, 184, 0.12) !important;
+        border-radius: 27px !important;
+        background: linear-gradient(155deg, rgba(14, 21, 37, 0.94), rgba(8, 13, 25, 0.97)) !important;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16) !important;
+    }
+    .flow-overview-copy { gap: 8px !important; padding: 0 2px 17px !important; }
+    .flow-overview-eyebrow { font-size: 10.5px !important; letter-spacing: 0.11em !important; }
+    .flow-overview-copy strong {
+        max-width: 18em;
+        font-size: clamp(22px, 6.6vw, 30px) !important;
+        line-height: 1.28 !important;
+        letter-spacing: -0.052em !important;
+        text-wrap: balance;
+    }
+    .flow-overview-copy small {
+        max-width: 36em;
+        font-size: 12px !important;
+        line-height: 1.62 !important;
+    }
+    .start-command-panel .workflow-rail-separated { gap: 8px !important; }
+    .start-command-panel .workflow-step {
+        min-height: 68px !important;
+        grid-template-columns: 31px minmax(0, 1fr) !important;
+        column-gap: 10px !important;
+        padding: 12px !important;
+        border: 1px solid rgba(148, 163, 184, 0.11) !important;
+        border-radius: 17px !important;
+        background: rgba(255, 255, 255, 0.022) !important;
+        box-shadow: none !important;
+    }
+    .start-command-panel .workflow-step::after { display: none !important; }
+    .start-command-panel .workflow-step span {
+        width: 31px !important;
+        height: 31px !important;
+        border-color: rgba(148, 163, 184, 0.18) !important;
+        background: rgba(8, 13, 25, 0.6) !important;
+        font-size: 12px !important;
+    }
+    .start-command-panel .workflow-step.is-active span {
+        border-color: rgba(103, 232, 249, 0.55) !important;
+        color: #e9fcff !important;
+        background: rgba(103, 232, 249, 0.08) !important;
+    }
+    .start-command-panel .workflow-step strong { font-size: 12.5px !important; }
+    .start-command-panel .workflow-step em { color: #8793a7 !important; font-size: 10px !important; }
+
+    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
+        bottom: 8px !important;
+        width: calc(100% - 16px) !important;
+        padding: 7px !important;
+        border-radius: 23px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .bottom-dock-tabs {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 4px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .bottom-dock-tab {
+        min-height: 66px !important;
+        gap: 4px !important;
+        padding: 6px 3px !important;
+        border-radius: 16px !important;
+        color: #6f7a8d !important;
+    }
+    body[data-ui="hyperflow-tabs"] .bottom-dock-tab:not(.is-disabled) { color: #9ba7b8 !important; }
+    body[data-ui="hyperflow-tabs"] .bottom-dock-tab.is-active,
+    body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] {
+        color: #f8fafc !important;
+    }
+    body[data-ui="hyperflow-tabs"] .bottom-dock-tab b { font-size: 11px !important; }
+    body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child {
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 15px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .tab-state-dot { top: 8px !important; right: 9px !important; }
+}
+
+@media (max-width: 390px) {
+    body[data-ui="hyperflow-tabs"] .app-shell { width: calc(100% - 14px) !important; }
+    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel { min-height: 296px !important; padding-inline: 13px !important; }
+    .release-device-compat span:last-child { font-size: 6.5px !important; }
+    body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title,
+    .cinematic-title { font-size: clamp(35px, 11.4vw, 45px) !important; }
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note { font-size: 11.5px !important; }
+    .start-command-panel { padding: 16px !important; }
+    .start-command-panel .workflow-step { min-height: 64px !important; padding: 10px !important; }
+    body[data-ui="hyperflow-tabs"] .bottom-dock-tab { min-height: 62px !important; }
+}
+
+body.performance-lite .bottom-dock.bottom-dock-hyperflow,
+body.performance-lite [data-flow-panel] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[data-ui="hyperflow-tabs"] .bottom-dock-tab,
+    body[data-ui="hyperflow-tabs"] [data-flow-panel] { transition: none !important; }
+}

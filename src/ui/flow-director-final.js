@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.2.4 - single-owner workflow navigation director
+// AI Shorts Studio v1.2.6 - single-owner workflow navigation director
 // Owns menu state, progression reveal, panel spotlight and scroll positioning.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -217,7 +217,7 @@
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.2.4') document.body.dataset.build = '1.2.4';
+            if (document.body.dataset.build !== '1.2.6') document.body.dataset.build = '1.2.6';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
             document.body.dataset.iconLanguage = 'studio-glyphs';
         }

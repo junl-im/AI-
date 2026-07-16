@@ -1,58 +1,56 @@
-# QA Report - AI 쇼츠 제작 스튜디오 v1.2.4
+# QA Report - AI 쇼츠 제작 스튜디오 v1.2.6
 
 ## Summary
 
-- Passed: 106/106
-- Failed: 0/106
+- Passed: 109/109
+- Failed: 0/109
 - Result: PASS
 
-## v1.2.4 Focus
+## v1.2.6 Focus
 
-- 진행 내비게이션: 파일 선택 → 추천 → 후보 → 미리보기 단계에서 메뉴 활성 상태, 대상 패널 강조와 화면 이동을 일치시켰습니다.
-- 런타임 충돌 수정: 레거시 `hyperflow-tabs`가 내부의 오래된 `active=file` 값을 다시 쓰던 문제를 제거했습니다.
-- PC 포커스: 현재 대상 패널에 `현재 작업` 레이블, 외곽 강조와 한 번의 포커스 펄스를 적용했습니다.
-- 상단 메타: 버전 바로 옆에 CSS 기반 기기 기호와 `모바일 · PC 호환`을 PC·모바일 모두 표시합니다.
-- 아이콘 언어: 주요 작업 기호를 `＋ ✦ ◆ ▶ ∿ ✂ ◫ ↓`로 통일하고 파형·저장·업데이트 문구의 컬러 이모지를 제거했습니다.
-- 모바일 알림: 업데이트 토스트를 상단에서 하단 메뉴바 위로 이동해 메타 정보를 가리지 않게 했습니다.
-- 캐시 일치: v1.2.4 버전, `1.2.4-navigation-focus` 빌드 키와 서비스워커 캐시를 동기화했습니다.
+- 공통 디자인 토큰을 사용한 패널·입력·버튼·메뉴바 계층 통일
+- 강한 중첩 테두리와 글로우 감소
+- PC 8항목 단일 플로팅 메뉴바
+- 모바일 4열×2행 메뉴바의 높이·대비 개선
+- 모바일 상단과 4단계 안내 밀도·줄바꿈 조정
+- 저사양·모션 감소 폴백 유지
+- 단계형 UI 로딩과 진행 내비게이션 회귀 방지
+- v1.2.6 버전·빌드 키·서비스워커 캐시 동기화
 
 ## Automated Checks
 
-- 문법, DOM 앵커와 버전 동기화
+- 문법, DOM 앵커, 버전·빌드·캐시 동기화
 - 분석·추천·컷·자막·렌더·저장 모듈 계약
 - PC Prime 3열 작업실과 모바일 진행 중심 화면
-- 메뉴바 용어와 Observer 피드백 루프 회귀 가드
-- 단일 내비게이션 소유권과 레거시 탭 상태 수용 규칙
-- 현재 작업 패널 강조, `aria-current=step`과 메뉴 중앙 정렬
-- 모바일·PC 호환 메타와 단색 스튜디오 글리프
-- reduced-motion 및 performance-lite 폴백
+- 메뉴바 용어, 단색 글리프와 진행 내비게이션
+- Observer 피드백 루프와 상시 폴링 회귀 방지
+- `shell → editing → export` 단계 의존성
+- UI refinement 스타일이 최종 캐스케이드인지 확인
+- PC 8열·모바일 4열 메뉴 구조 확인
+- 공통 표면·선 토큰과 저사양 폴백 확인
 
-## Runtime Browser E2E
+## Runtime Loading Baseline
 
-Chromium에서 합성 20초 WAV를 실제 파일 입력에 넣어 진행 흐름을 확인했습니다.
+| 시점 | 직접 스크립트 | 지연 스크립트 | 준비 단계 |
+|---|---:|---:|---|
+| 첫 렌더 직후 | 39 | 0 | Core |
+| Shell 준비 후 | 39 | 9 | shell |
+| Editing 준비 후 | 39 | 15 | shell, editing |
+| Export 준비 후 | 39 | 16 | shell, editing, export |
 
-| 시점 | body 활성 단계 | 메뉴 `aria-current` | 강조 패널 | 결과 |
-|---|---|---|---|---|
-| 초기 | file | file | - | 정상 |
-| 파일 분석 후 | recommend | recommend | recommend | 정상 |
-| 추천 생성 후 | candidates | candidates | candidates | 후보 1개 생성 |
-| 후보 선택 후 | preview | preview | preview | 정상 |
-
-- 브라우저 오류: 0건
-- 후보 선택 직후: RAF 201 / Mutation 414
-- 추가 1.8초 후: RAF 201 / Mutation 414
-- 단계 이동 종료 후 추가 반복 갱신 없음
-- 상세 결과: `qa/runtime-browser-audit.json`
+기존 v1.2.5 단계 로딩 감사에서 브라우저 예외와 경고는 0건이었으며 v1.2.6은 로딩·엔진 로직을 변경하지 않았습니다. 상세 기준선은 `qa/runtime-browser-audit.json`에 있습니다.
 
 ## Responsive Visual Checks
 
-- Desktop Chromium render: 1440×900
-- Mobile Chromium render: 390×844
-- PC에서 버전 옆 호환 정보, 중앙 상태, 디자인 서명과 3열 작업실 확인
-- PC 실제 진행 후 미리보기 메뉴와 대상 패널이 함께 활성화되는지 확인
-- 모바일에서 `모바일 · PC 호환`이 버전 옆에 표시되는지 확인
-- 모바일에서 PC용 9:16 시작 비주얼은 숨고 하단 제작 메뉴바가 유지되는지 확인
-- 업데이트 알림이 모바일 상단 메타를 가리지 않는 위치인지 확인
+- Desktop Chromium static render: 1440×1080
+- Mobile Chromium static render: 390×844
+- PC 상단과 3열 작업실의 간격·카드 계층 확인
+- PC 메뉴바 8개 항목 한 줄 표시 확인
+- 모바일 상단·4단계 안내·메뉴바가 한 화면 안에서 겹치지 않는지 확인
+- 모바일 중복 파일 불러오기 화면이 노출되지 않는지 확인
+- 버전 옆 `모바일 · PC 호환`과 디자인 서명 정렬 확인
+
+관리형 Chromium이 로컬 URL 탐색을 차단하므로 시각 검수는 CDP 문서 주입과 CSS 인라인 방식으로 실제 Chromium 렌더 엔진에서 수행했습니다.
 
 ## Command
 
@@ -62,4 +60,4 @@ npm run check
 
 ## Remaining Manual E2E
 
-실제 MP4의 영상 모션 분석, 장시간 MediaRecorder 렌더·저장, 모바일 Safari와 인앱 브라우저 출력 형식은 실기기에서 추가 검증이 필요합니다.
+실제 MP3·MP4 디코딩, 영상 모션 분석, 장시간 MediaRecorder 렌더·저장, 모바일 Safari와 인앱 브라우저 출력 형식은 실기기에서 추가 검증이 필요합니다.

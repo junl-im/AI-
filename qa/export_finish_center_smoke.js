@@ -10,11 +10,12 @@ function assert(condition, message) { if (!condition) fail(message); }
 function includes(file, token) { assert(read(file).includes(token), `${file} must include ${token}`); }
 
 const pkg = JSON.parse(read('package.json'));
-assert(pkg.version === '1.2.4', 'package version must be 1.2.4');
-includes('index.html', 'assets/css/export-finish-center.css?v=1.2.4-export-finish');
-includes('index.html', 'src/ui/export-finish-center.js?v=1.2.4-export-finish');
-includes('sw.js', './assets/css/export-finish-center.css?v=1.2.4-export-finish');
-includes('sw.js', './src/ui/export-finish-center.js?v=1.2.4-export-finish');
+const loader = read('src/boot/staged-ui-loader.js');
+assert(pkg.version === '1.2.6', 'package version must be 1.2.6');
+includes('index.html', 'assets/css/export-finish-center.css?v=1.2.6-export-finish');
+assert(loader.includes('src/ui/export-finish-center.js?v=${VERSION}-export-finish'), 'export finish center script must be staged');
+includes('sw.js', './assets/css/export-finish-center.css?v=1.2.6-export-finish');
+assert(read('sw.js').includes('async function cacheFirst'), 'export finish center uses runtime cache-first loading');
 includes('src/ui/export-finish-center.js', 'AIShortsExportFinishCenter');
 includes('src/ui/export-finish-center.js', 'ai-shorts-render-queue');
 includes('src/ui/export-finish-center.js', 'data-export-finish-action="retry"');
