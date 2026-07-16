@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.0 - vector-icon command bridge
+// AI Shorts Studio v1.3.1 - vector-icon command bridge
 // Keeps menu-bar/navigation commands single-owned after legacy modules have loaded.
 'use strict';
 (function bootFlowCommandBridge(global) {

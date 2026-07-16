@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.0 - cancellable modular analysis pipeline
+// AI Shorts Studio v1.3.1 - cancellable modular analysis pipeline
 'use strict';
 
 (function exposeAnalysisPipeline(global) {

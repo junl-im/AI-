@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.0 - async operation ownership and cancellation coordinator
+// AI Shorts Studio v1.3.1 - async operation ownership and cancellation coordinator
 'use strict';
 
 (function exposeOperationCoordinator(global) {

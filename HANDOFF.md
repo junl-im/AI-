@@ -1,23 +1,20 @@
-# HANDOFF v1.3.0
+# HANDOFF v1.3.1
 
 ## 요약
 
-v1.3.0은 **현재 작업 패널을 명확하게 보여주는 네온 랜딩 UI**와 **분석·미리보기·렌더의 비동기 작업 소유권**을 도입한 안정화 릴리스입니다.
+v1.3.1은 PC Prime 작업실에 **드래그 가능한 3열 리사이저**, **미리보기 집중**, **파형 확대**를 추가한 작업성 개선 릴리스입니다.
 
-단계가 바뀌면 메뉴 활성, 화면 이동, 패널 네온 테두리, 진행 칩이 함께 움직입니다. 진입 순간 밝은 라인이 한 번 흐르고 이후에는 현재 작업 테두리만 유지합니다. 새 파일을 열 때 이전 분석이나 렌더가 늦게 끝나 새 프로젝트를 덮어쓰는 경쟁 상태도 작업 세대와 AbortSignal로 차단했습니다.
+기존의 단계형 메뉴 이동과 네온 랜딩은 그대로 유지합니다. 사용자가 열 폭을 조절하면 CSS 변수만 갱신하고 비율을 저장합니다. 집중 모드는 일시적인 보기이므로 새 실행에서는 항상 3열 균형으로 시작해 파일 열기와 추천 흐름을 가리지 않습니다.
 
 ## 이번 변경
 
-- `assets/css/active-stage-beacon.css`: 단계별 네온 테두리, 랜딩 스윕, 진행 칩과 모션 감소 대응을 추가했습니다.
-- `src/ui/flow-director-final.js`: 단계 장식 생성, 지속 현재 단계, 1회 랜딩, 접근성 라이브 안내를 단일 소유합니다.
-- `src/engine/operation-coordinator.js`: 작업 ID, 미디어 세션, 채널별 취소·완료·현재성 검사를 제공합니다.
-- `src/app.js`: 파일 교체, 분석, 미리보기와 렌더를 작업 조정기에 연결했습니다.
-- `src/analysis/audio-feature-extractor.js`: 파일 읽기·디코딩·워커 분석에 AbortSignal을 적용했습니다.
-- `src/analysis/video-motion-analyzer.js`: 메타데이터 대기, seek와 샘플링 반복을 취소할 수 있습니다.
-- `src/engine/analysis-pipeline.js`: 분석 신호를 오디오·영상 모듈로 전달하고 취소를 fallback으로 오인하지 않습니다.
-- `src/render/render-queue.js`: 렌더 취소, `cancelled` 상태와 외부 신호 전달을 추가했습니다.
-- `src/render/vertical-renderer.js`: MediaRecorder 렌더를 AbortSignal로 중단하고 모든 자원을 정리합니다.
-- 버전·빌드 키·서비스워커 캐시를 v1.3.0 / `1.3.0-stage-beacon`으로 동기화했습니다.
+- `assets/css/workspace-layout-controls.css`: 5트랙 Prime 그리드, 리사이저, 작업실 도구막대, 미리보기·파형 집중 배치를 추가했습니다.
+- `src/ui/workspace-layout-controls.js`: 포인터·키보드 리사이즈, 열 비율 저장, 보기 전환과 호환되지 않는 메뉴 이동 시 균형 복귀를 담당합니다.
+- `index.html`: 작업실 배치 도구막대와 접근 가능한 세로 separator 2개를 추가했습니다.
+- `sw.js`: 새 CSS·스크립트를 셸 캐시에 포함했습니다.
+- `qa/workspace_layout_controls_smoke.js`: 레이아웃 계약, 접근성, 저장 범위와 모바일 비노출을 검사합니다.
+- `qa/runtime-browser-audit-v1.3.1.json`: Chromium에서 키보드 리사이즈, 집중 보기, 메뉴와 네온 랜딩을 함께 검증합니다.
+- 버전·빌드 키·서비스워커 캐시를 v1.3.1 / `1.3.1-workspace-control`로 동기화했습니다.
 
 ## 사용자 디자인·UX 선호
 
@@ -25,10 +22,26 @@ v1.3.0은 **현재 작업 패널을 명확하게 보여주는 네온 랜딩 UI**
 - 현재 진행 중인 구역은 밝은 네온 띠 라인으로 즉시 알아볼 수 있어야 합니다.
 - 네온은 현재 작업 한 곳에만 사용하고 카드·배지·테두리가 겹치지 않게 합니다.
 - PC는 여러 작업 구간이 보이고 진행 시 메뉴·패널 강조·화면 위치가 함께 이동해야 합니다.
+- PC의 넓은 화면은 한 화면 분할과 직접 조절 가능한 작업실로 활용합니다.
 - 모바일은 본문 기능 중복을 피하고 하단 메뉴바와 진행 안내를 사용합니다.
 - 사용자 노출 명칭은 `Dock`이 아니라 `메뉴바`입니다.
 - 핵심 아이콘은 `assets/icons/studio/`의 전용 SVG만 사용합니다.
 - 상단 메타는 왼쪽 BUILD·버전·모바일/PC 호환, 오른쪽 DESIGNED BY·곰같은여우만 유지합니다.
+
+## 작업실 레이아웃 유지 규칙
+
+1. 기본 모드는 `balanced`이며 새 실행마다 균형 모드로 시작합니다.
+2. 로컬 저장에는 `weights`만 기록하고 `preview`·`waveform` 모드는 기록하지 않습니다.
+3. 열 최소 폭은 왼쪽 260px, 가운데 350px, 오른쪽 300px입니다.
+4. 리사이저는 포인터 캡처를 사용하고 `pointerup`·`pointercancel` 모두에서 해제합니다.
+5. 키보드는 좌우 방향키, Shift+방향키와 Home 초기화를 지원합니다.
+6. 리사이즈 중에는 DOM 재배치나 패널 재생성을 하지 않고 세 개의 grid track CSS 변수만 바꿉니다.
+7. `미리보기 집중`은 preview·candidates·edit·export를 남깁니다.
+8. `파형 확대`는 waveform·cut·edit·preview·export를 남깁니다.
+9. 집중 보기와 맞지 않는 메뉴 클릭 또는 자동 내비게이션 요청에서는 균형 모드로 돌아옵니다.
+10. 1180px 미만에서는 도구막대와 리사이저를 모두 숨깁니다.
+11. 집중 보기의 hide 규칙은 기존 Prime `display:block !important`보다 높은 specificity를 유지합니다.
+12. `workspace-layout-controls.css`는 시각 CSS 중 마지막에 로드합니다.
 
 ## 네온 단계 강조 유지 규칙
 
@@ -36,10 +49,8 @@ v1.3.0은 **현재 작업 패널을 명확하게 보여주는 네온 랜딩 UI**
 2. 현재 패널에는 `is-stage-current`와 `.stage-neon-rail`을 유지합니다.
 3. 랜딩 애니메이션은 단계가 실제 변경될 때 한 번만 실행합니다.
 4. 같은 단계의 반복 동기화는 애니메이션을 다시 시작하지 않습니다.
-5. 진행 칩은 전용 SVG 아이콘과 한국어 단계 명칭을 사용합니다.
-6. 다른 CSS가 최종 강조를 덮지 않도록 `active-stage-beacon.css`를 마지막에 로드합니다.
-7. 모바일에서는 테두리와 그림자를 약하게 줄이되 진행 상태는 숨기지 않습니다.
-8. `prefers-reduced-motion`에서는 스윕과 펄스를 비활성화합니다.
+5. 집중 보기에서도 메뉴 활성, 화면 이동과 네온 단계 키가 일치해야 합니다.
+6. `prefers-reduced-motion`에서는 스윕과 펄스를 비활성화합니다.
 
 ## 비동기 엔진 유지 규칙
 
@@ -49,68 +60,68 @@ v1.3.0은 **현재 작업 패널을 명확하게 보여주는 네온 랜딩 UI**
 4. 결과 반영과 다운로드 직전에 현재 작업과 미디어 세션을 검증합니다.
 5. 오래된 진행 이벤트는 DOM에 쓰지 않습니다.
 6. AbortError는 사용자 오류로 표시하지 않고 조용한 취소로 처리합니다.
-7. 렌더 취소 시 queued/running 항목을 `cancelled`로 정리합니다.
-8. 자원 cleanup은 성공·실패·취소 모두에서 실행합니다.
+7. 자원 cleanup은 성공·실패·취소 모두에서 실행합니다.
 
 ## Update Sentinel 유지 규칙
 
 - 새 릴리스에서는 CSS·스크립트 링크와 서비스워커 캐시 쿼리를 같은 빌드 키로 갱신합니다.
-- 신규 CSS와 operation coordinator를 셸 캐시에 포함합니다.
+- 신규 작업실 CSS와 컨트롤러를 셸 캐시에 포함합니다.
 - 이전 셸 캐시 정리와 진단 복사 기능을 유지합니다.
 
 ## 검수 순서
 
-1. `npm test`로 문법, DOM, 엔진 계약, 네온 단계, 작업 조정기, 런타임 감사와 배포 계약을 실행합니다.
-2. Chromium 1366×768과 390×844에서 추천·미리보기 단계로 강제 이동해 랜딩 순간을 캡처합니다.
-3. 랜딩 종료 뒤 `is-stage-current`와 네온 레일이 유지되고 `is-stage-landing`이 제거되는지 확인합니다.
-4. 두 샘플 구간의 RAF·Mutation 카운터가 같은지 확인합니다.
-5. `npm run package`로 전체 ZIP과 v1.2.9 패치 ZIP을 만들고 `unzip -t`를 실행합니다.
-6. 깨끗한 v1.2.9 복사본에 패치를 적용해 매니페스트 파일을 바이트 단위로 비교합니다.
-7. SHA-256 체크섬을 생성하고 QA 보고서 수치와 실제 결과를 맞춥니다.
+1. `npm test`로 문법, DOM, 버전·캐시, 메뉴, 네온, 엔진 계약, 작업실 조절과 배포 계약을 실행합니다.
+2. Chromium 1366×768에서 두 리사이저가 표시되는지 확인합니다.
+3. 왼쪽 리사이저에 방향키를 보내 열 비율이 바뀌는지 확인합니다.
+4. 미리보기 집중 모드에서 preview 폭이 700px 이상인지 확인합니다.
+5. 파형 확대 모드에서 waveform 폭이 1000px 이상인지 확인합니다.
+6. Chromium 390×844에서 작업실 도구막대와 리사이저가 숨는지 확인합니다.
+7. 단계 랜딩 종료 뒤 두 샘플 구간의 RAF·Mutation 카운터가 같은지 확인합니다.
+8. `npm run package`로 전체 ZIP과 v1.3.0 패치 ZIP을 생성합니다.
+9. 깨끗한 v1.3.0 복사본에 패치를 적용해 매니페스트 파일을 바이트 단위로 비교합니다.
+10. 전체·패치 ZIP에 `unzip -t`를 실행하고 SHA-256을 생성합니다.
 
 ## 배포 규칙
 
 1. 전체 설치용 ZIP과 직전 버전 덮어쓰기용 패치 ZIP을 함께 만듭니다.
-2. v1.3.0 패치 기준은 v1.2.9입니다.
+2. v1.3.1 패치 기준은 v1.3.0입니다.
 3. `PATCH_MANIFEST.txt`에 변경·추가 파일을 모두 기록합니다.
 4. 전체·패치 ZIP 모두 압축 무결성과 SHA-256을 확인합니다.
 5. 삭제 파일이 생기면 단순 덮어쓰기 외에 삭제 절차를 제공합니다.
 
 ## 검수 결과
 
-- `npm test`: **118/118 통과**
+- `npm test`: **120/120 통과**
 - Chromium desktop 1366×768: 오류 0, Promise 거절 0, 콘솔 오류 0
 - Chromium mobile 390×844: 오류 0, Promise 거절 0, 콘솔 오류 0
-- Desktop landing: 추천 생성 진행 중, 네온 레일·랜딩 스윕 확인
-- Mobile landing: 미리보기 진행 중, 네온 레일·랜딩 스윕 확인
-- RAF: 26 → 26, Mutation: 60 → 60으로 안정화
+- Desktop 리사이저: 2/2 표시, 키보드 조절 확인
+- 미리보기 집중: 폭 약 891px
+- 파형 확대: 폭 약 1324px
+- 모바일 작업실 컨트롤: 숨김 확인
 - 메뉴 8개 모두 표시, 가로 overflow 0
+- 초기화 뒤 RAF·Mutation 추가 증가 없음
 
 ## 핵심 파일
 
+- `assets/css/workspace-layout-controls.css`
+- `src/ui/workspace-layout-controls.js`
 - `assets/css/active-stage-beacon.css`
 - `src/ui/flow-director-final.js`
 - `src/engine/operation-coordinator.js`
-- `src/analysis/audio-feature-extractor.js`
-- `src/analysis/video-motion-analyzer.js`
-- `src/engine/analysis-pipeline.js`
-- `src/render/render-queue.js`
-- `src/render/vertical-renderer.js`
-- `src/app.js`
-- `qa/active_stage_beacon_smoke.js`
-- `qa/operation_coordinator_smoke.js`
-- `qa/runtime-browser-audit-v1.3.0.json`
+- `qa/workspace_layout_controls_smoke.js`
+- `qa/runtime-browser-audit-v1.3.1.json`
 
 ## 알려진 제한
 
 - 실제 대용량 MP4의 장시간 분석·렌더·다운로드 E2E는 아직 남아 있습니다.
 - 모바일 Safari와 인앱 브라우저의 MediaRecorder·SVG mask는 실기기 검증이 필요합니다.
-- 현재 렌더 취소는 파일 교체·작업 교체 시 내부적으로 동작하며 명시적인 사용자 취소 버튼은 후속 대상입니다.
+- 명시적인 사용자 렌더 취소 버튼과 취소 후 복구 안내는 후속 대상입니다.
+- 열 비율 저장은 브라우저가 localStorage를 차단한 경우 현재 세션에만 적용됩니다.
 
 ## 다음 우선순위
 
 1. 실제 MP3·MP4 전체 E2E와 중단·재시도 시나리오
 2. 사용자용 렌더 취소 버튼과 복구 안내
-3. PC 3열 칼럼 리사이즈와 집중 모드
-4. 모바일 단계형 메뉴 축약
-5. CSS 단계 로딩과 초기 페인트 추가 최적화
+3. 모바일 단계형 메뉴 축약
+4. CSS 단계 로딩과 초기 페인트 추가 최적화
+5. 후보 비교·고정과 미리보기 연결 개선

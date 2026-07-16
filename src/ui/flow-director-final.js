@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.0 - workflow navigation, landing beacon, and stage ownership director
+// AI Shorts Studio v1.3.1 - workflow navigation, landing beacon, and stage ownership director
 // Owns menu state, progression reveal, panel spotlight and scroll positioning.
 'use strict';
 (function bootFlowDirectorFinal(global) {
@@ -267,7 +267,7 @@
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.3.0') document.body.dataset.build = '1.3.0';
+            if (document.body.dataset.build !== '1.3.1') document.body.dataset.build = '1.3.1';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
             document.body.dataset.iconLanguage = 'studio-vectors';
         }

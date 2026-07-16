@@ -1,0 +1,258 @@
+/* AI Shorts Studio v1.3.1 - resizable desktop workspace and focus views */
+:root {
+    --workspace-left-track: 0.82fr;
+    --workspace-center-track: 1.18fr;
+    --workspace-right-track: 0.9fr;
+    --workspace-divider-width: 8px;
+}
+
+.workspace-layout-toolbar,
+.workspace-column-divider {
+    display: none;
+}
+
+@media (min-width: 1180px) {
+    body[data-ui="hyperflow-tabs"] .studio-grid {
+        grid-template-columns:
+            minmax(260px, var(--workspace-left-track))
+            var(--workspace-divider-width)
+            minmax(350px, var(--workspace-center-track))
+            var(--workspace-divider-width)
+            minmax(300px, var(--workspace-right-track)) !important;
+        grid-template-areas:
+            "toolbar toolbar toolbar toolbar toolbar"
+            "load divider-left preview divider-right candidates"
+            "recommend divider-left preview divider-right waveform"
+            "cut divider-left edit divider-right export"
+            "project divider-left edit divider-right copy" !important;
+        grid-template-rows: auto clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto auto !important;
+        column-gap: 7px !important;
+        row-gap: var(--prime-gap, 12px) !important;
+    }
+
+    .workspace-layout-toolbar {
+        grid-area: toolbar;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 50px;
+        padding: 8px 10px 8px 14px;
+        border: 1px solid rgba(148, 163, 184, 0.13);
+        border-radius: 17px;
+        background: linear-gradient(135deg, rgba(10, 18, 32, 0.86), rgba(6, 11, 22, 0.74));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.045), 0 10px 30px rgba(0,0,0,0.16);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        position: sticky;
+        top: 8px;
+        z-index: 28;
+    }
+
+    .workspace-layout-copy {
+        display: flex;
+        align-items: baseline;
+        gap: 9px;
+        min-width: 0;
+    }
+
+    .workspace-layout-copy strong {
+        font-size: 13px;
+        letter-spacing: -0.025em;
+        white-space: nowrap;
+    }
+
+    .workspace-layout-copy small {
+        color: rgba(148, 163, 184, 0.82);
+        font-size: 11.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .workspace-layout-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .workspace-layout-button {
+        min-height: 34px;
+        padding: 0 11px;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        border-radius: 11px;
+        color: rgba(226, 232, 240, 0.82);
+        background: rgba(15, 23, 42, 0.52);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        font-size: 11.5px;
+        font-weight: 850;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+        transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 140ms ease;
+    }
+
+    .workspace-layout-button:hover {
+        transform: translateY(-1px);
+        border-color: rgba(103, 232, 249, 0.28);
+        color: #f8fafc;
+        background: rgba(17, 31, 50, 0.78);
+    }
+
+    .workspace-layout-button[aria-pressed="true"] {
+        color: #dffaff;
+        border-color: rgba(103, 232, 249, 0.44);
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.16), rgba(99, 102, 241, 0.10));
+        box-shadow: inset 0 0 0 1px rgba(103, 232, 249, 0.06), 0 0 22px rgba(34, 211, 238, 0.08);
+    }
+
+    .workspace-layout-button .studio-icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .workspace-column-divider {
+        display: grid;
+        place-items: center;
+        align-self: stretch;
+        width: var(--workspace-divider-width);
+        min-height: 120px;
+        border-radius: 999px;
+        cursor: col-resize;
+        touch-action: none;
+        position: relative;
+        z-index: 22;
+        outline: none;
+    }
+
+    .workspace-column-divider[data-workspace-divider="left"] { grid-area: divider-left; }
+    .workspace-column-divider[data-workspace-divider="right"] { grid-area: divider-right; }
+
+    .workspace-column-divider::before {
+        content: "";
+        width: 2px;
+        height: min(82%, 620px);
+        border-radius: 999px;
+        background: linear-gradient(180deg, transparent, rgba(148, 163, 184, 0.24) 12%, rgba(148, 163, 184, 0.24) 88%, transparent);
+        transition: width 140ms ease, background 140ms ease, box-shadow 140ms ease;
+    }
+
+    .workspace-column-divider:hover::before,
+    .workspace-column-divider:focus-visible::before,
+    .workspace-column-divider.is-dragging::before {
+        width: 4px;
+        background: linear-gradient(180deg, transparent, rgba(103, 232, 249, 0.74) 12%, rgba(129, 140, 248, 0.72) 88%, transparent);
+        box-shadow: 0 0 16px rgba(34, 211, 238, 0.38);
+    }
+
+    body.is-workspace-resizing {
+        cursor: col-resize !important;
+        user-select: none !important;
+    }
+
+    body.is-workspace-resizing * {
+        cursor: col-resize !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .studio-grid {
+        grid-template-columns: minmax(480px, 1.42fr) minmax(330px, 0.68fr) !important;
+        grid-template-areas:
+            "toolbar toolbar"
+            "preview candidates"
+            "preview edit"
+            "preview export" !important;
+        grid-template-rows: auto minmax(260px, auto) minmax(280px, auto) auto !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .workspace-column-divider,
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .workspace-column-divider {
+        display: none !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] [data-flow-panel="file"],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] [data-flow-panel="recommend"],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] [data-flow-panel="waveform"],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] [data-flow-panel="cut"],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] [data-flow-panel="project"] {
+        display: none !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .preview-card {
+        grid-area: preview !important;
+        height: min(78vh, 850px) !important;
+        min-height: 560px !important;
+        max-height: 850px !important;
+        align-self: start !important;
+        position: sticky !important;
+        top: 70px !important;
+        overflow: auto !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .preview-card .phone-frame {
+        width: min(370px, 100%) !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .candidates-zone { grid-area: candidates !important; }
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .edit-tools-card { grid-area: edit !important; }
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .export-card { grid-area: export !important; }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .studio-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.48fr) !important;
+        grid-template-areas:
+            "toolbar toolbar"
+            "waveform waveform"
+            "cut edit"
+            "preview export" !important;
+        grid-template-rows: auto minmax(390px, 46vh) auto auto !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] [data-flow-panel="file"],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] [data-flow-panel="recommend"],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] [data-flow-panel="candidates"],
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] [data-flow-panel="project"] {
+        display: none !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .waveform-card {
+        grid-area: waveform !important;
+        min-height: 390px !important;
+        overflow: visible !important;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .waveform-drag-shell {
+        min-height: 285px;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] #waveformCanvas {
+        width: 100% !important;
+        min-height: 285px;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .auto-cut-panel { grid-area: cut !important; }
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .edit-tools-card { grid-area: edit !important; }
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .preview-card { grid-area: preview !important; }
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .export-card { grid-area: export !important; }
+
+    @media (max-width: 1320px) {
+        .workspace-layout-copy small { display: none; }
+        .workspace-layout-button { padding-inline: 9px; }
+    }
+}
+
+@media (max-width: 1179px) {
+    .workspace-layout-toolbar,
+    .workspace-column-divider {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-layout-button,
+    .workspace-column-divider::before {
+        transition: none !important;
+    }
+}

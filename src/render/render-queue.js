@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.0 - cancellable render queue, retries, and export reliability controller
+// AI Shorts Studio v1.3.1 - cancellable render queue, retries, and export reliability controller
 'use strict';
 
 (function exposeRenderQueue(global) {

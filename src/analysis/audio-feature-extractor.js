@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.0 - audio decode, worker bridge, and cancellation support
+// AI Shorts Studio v1.3.1 - audio decode, worker bridge, and cancellation support
 'use strict';
 
 (function exposeAudioFeatureExtractor(global) {

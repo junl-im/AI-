@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.3.0 - simplified two-sided header metadata rail */
+/* AI Shorts Studio v1.3.1 - simplified two-sided header metadata rail */
 
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
 .cinematic-brand-panel .brand-topline {
@@ -22,7 +22,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions,
     min-width: max-content;
 }
 
-/* The center readiness slogan was intentionally removed in v1.3.0. */
+/* The center readiness slogan was intentionally removed in v1.3.1. */
 .cinematic-brand-panel .brand-compat-pill {
     display: none !important;
 }

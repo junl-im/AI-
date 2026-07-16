@@ -11,10 +11,10 @@ function includes(file, token) { assert(read(file).includes(token), `${file} mus
 
 const pkg = JSON.parse(read('package.json'));
 const loader = read('src/boot/staged-ui-loader.js');
-assert(pkg.version === '1.3.0', 'package version must be 1.2.9');
-includes('index.html', 'assets/css/export-finish-center.css?v=1.3.0-stage-beacon');
+assert(pkg.version === '1.3.1', 'package version must be 1.2.9');
+includes('index.html', 'assets/css/export-finish-center.css?v=1.3.1-workspace-control');
 assert(loader.includes("versioned('src/ui/export-finish-center.js', 'export')"), 'export finish center script must be staged');
-includes('sw.js', './assets/css/export-finish-center.css?v=1.3.0-stage-beacon');
+includes('sw.js', './assets/css/export-finish-center.css?v=1.3.1-workspace-control');
 assert(read('sw.js').includes('async function cacheFirst'), 'export finish center uses runtime cache-first loading');
 includes('src/ui/export-finish-center.js', 'AIShortsExportFinishCenter');
 includes('src/ui/export-finish-center.js', 'ai-shorts-render-queue');

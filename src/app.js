@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.0 - coordinated media operations, stage landing, and render safety
+// AI Shorts Studio v1.3.1 - coordinated media operations, stage landing, and render safety
 'use strict';
 
 (function bootAIShortsStudio(global) {

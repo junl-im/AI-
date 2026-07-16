@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.0 - cancellable vertical renderer with caption and quality effects
+// AI Shorts Studio v1.3.1 - cancellable vertical renderer with caption and quality effects
 'use strict';
 
 (function exposeVerticalRenderer(global) {
