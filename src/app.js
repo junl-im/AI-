@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.7 - coordinated media operations, adaptive mobile flow, and memory preflight
+// AI Shorts Studio v1.3.8 - coordinated media operations, adaptive mobile flow, and memory preflight
 'use strict';
 
 (function bootAIShortsStudio(global) {

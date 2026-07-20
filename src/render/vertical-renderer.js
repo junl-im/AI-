@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.7 - cancellable vertical renderer with caption and quality effects
+// AI Shorts Studio v1.3.8 - cancellable, range-safe vertical renderer with media-state restoration
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -477,9 +477,20 @@
         recorder.ondataavailable = event => {
             if (event.data && event.data.size) chunks.push(event.data);
         };
-        const started = Number(options && options.start) || 0;
-        const end = Number(options && options.end) || Math.min((sourceMedia && sourceMedia.duration) || 0, started + 15);
-        const duration = Math.max(1, end - started);
+        const mediaDuration = Number(sourceMedia && sourceMedia.duration);
+        const hasMediaDuration = Number.isFinite(mediaDuration) && mediaDuration > 0;
+        const requestedStart = Number(options && options.start);
+        const requestedEnd = Number(options && options.end);
+        const normalizedRange = utils.normalizeMediaRange
+            ? utils.normalizeMediaRange(requestedStart, Number.isFinite(requestedEnd) ? requestedEnd : (Number.isFinite(requestedStart) ? requestedStart : 0) + 15, hasMediaDuration ? mediaDuration : Infinity, 0.05)
+            : { start: Math.max(0, Number.isFinite(requestedStart) ? requestedStart : 0), end: Number.isFinite(requestedEnd) ? requestedEnd : Math.max(0, Number.isFinite(requestedStart) ? requestedStart : 0) + 15 };
+        const started = Number(normalizedRange.start) || 0;
+        const end = Number(normalizedRange.end) || 0;
+        const duration = end - started;
+        if (!Number.isFinite(duration) || duration <= 0) {
+            stopStreamTracks(stream, mediaStream);
+            throw new Error('렌더 구간이 올바르지 않습니다. 시작·종료 시간을 다시 확인해주세요.');
+        }
         const cropMode = options && options.cropMode || 'center';
         const title = options && options.title || 'AI Shorts Studio';
         const rangeText = options && options.rangeText || '';
@@ -491,6 +502,9 @@
         const qualityOptions = options && options.qualityOptions || null;
         const originalVolume = sourceMedia ? sourceMedia.volume : 1;
         const originalMuted = sourceMedia ? sourceMedia.muted : false;
+        const originalCurrentTime = sourceMedia ? Number(sourceMedia.currentTime) || 0 : 0;
+        const originalPlaybackRate = sourceMedia ? Number(sourceMedia.playbackRate) || 1 : 1;
+        const originalPaused = sourceMedia ? Boolean(sourceMedia.paused) : true;
         const captionService = global.AIShortsCaptionService || {};
         let raf = 0;
         let stopped = false;
@@ -532,8 +546,21 @@
                 stopTimer = 0;
                 stopStreamTracks(stream, mediaStream);
                 if (sourceMedia) {
+                    try { sourceMedia.pause(); } catch (error) { /* ignored */ }
+                    try {
+                        const ceiling = Number(sourceMedia.duration);
+                        const restoredTime = Number.isFinite(ceiling) && ceiling > 0 ? Math.min(Math.max(0, originalCurrentTime), Math.max(0, ceiling - 0.01)) : Math.max(0, originalCurrentTime);
+                        sourceMedia.currentTime = restoredTime;
+                    } catch (error) { /* ignored */ }
+                    try { sourceMedia.playbackRate = originalPlaybackRate; } catch (error) { /* ignored */ }
                     sourceMedia.volume = originalVolume;
                     sourceMedia.muted = originalMuted;
+                    if (!originalPaused && !(signal && signal.aborted)) {
+                        try {
+                            const resume = sourceMedia.play();
+                            if (resume && typeof resume.catch === 'function') resume.catch(() => {});
+                        } catch (error) { /* ignored */ }
+                    }
                 }
             }
 

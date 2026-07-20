@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.7 - bounded and schema-safe project save/load helpers
+// AI Shorts Studio v1.3.8 - bounded, schema-safe, and compatibility-preserving project helpers
 'use strict';
 
 (function exposeProjectService(global) {
@@ -108,18 +108,33 @@
         return output;
     }
 
+    function pickEnum(value, allowed) {
+        const text = String(value == null ? '' : value);
+        return allowed.includes(text) ? text : '';
+    }
+
     function sanitizeSettings(value) {
         const input = isPlainObject(value) ? value : {};
         const output = {};
-        ['duration', 'style', 'cropMode', 'platform', 'captionStyle', 'thumbnailTemplate'].forEach(key => {
-            if (input[key] != null) output[key] = safeText(input[key], 80);
+        const enums = {
+            duration: ['auto', '15', '30', '45', '60', '90', '180'],
+            style: ['balanced', 'impact', 'emotional', 'motion'],
+            cropMode: ['center', 'top', 'bottom', 'blur-fit'],
+            platform: ['youtube', 'reels', 'tiktok'],
+            captionStyle: ['bold', 'box', 'clean'],
+            thumbnailTemplate: ['neon', 'clean', 'cinematic', 'headline'],
+            renderPreset: ['fast', 'balanced', 'high']
+        };
+        Object.keys(enums).forEach(key => {
+            const selected = pickEnum(input[key], enums[key]);
+            if (selected) output[key] = selected;
         });
         if (Number.isFinite(Number(input.captionOffset))) output.captionOffset = finiteNumber(input.captionOffset, 0, -3600, 3600);
-        output.captionOptions = sanitizeNestedOptions(input.captionOptions, ['preset', 'position', 'size', 'color', 'accent', 'maxLines', 'boxOpacity', 'shadow', 'highlightWords', 'uppercase', 'autoBreak']);
-        output.qualityOptions = sanitizeNestedOptions(input.qualityOptions, ['brightness', 'contrast', 'saturation', 'vignette', 'fadeIn', 'fadeOut', 'introText', 'outroText', 'introDuration', 'outroDuration', 'watermarkText', 'watermarkPosition', 'safeGuide']);
-        output.autoCutOptions = sanitizeNestedOptions(input.autoCutOptions, ['silenceThreshold', 'beatSensitivity', 'motionSensitivity', 'handlePadding', 'maxSnapDistance']);
-        output.feedbackOptions = sanitizeNestedOptions(input.feedbackOptions, ['haptics', 'toastKinds']);
-        output.engineOptions = sanitizeNestedOptions(input.engineOptions, ['modular', 'performanceMode', 'qualityGate']);
+        if (isPlainObject(input.captionOptions)) output.captionOptions = sanitizeNestedOptions(input.captionOptions, ['preset', 'position', 'size', 'color', 'accent', 'maxLines', 'boxOpacity', 'shadow', 'highlightWords', 'uppercase', 'autoBreak']);
+        if (isPlainObject(input.qualityOptions)) output.qualityOptions = sanitizeNestedOptions(input.qualityOptions, ['brightness', 'contrast', 'saturation', 'vignette', 'fadeIn', 'fadeOut', 'introText', 'outroText', 'introDuration', 'outroDuration', 'watermarkText', 'watermarkPosition', 'safeGuide']);
+        if (isPlainObject(input.autoCutOptions)) output.autoCutOptions = sanitizeNestedOptions(input.autoCutOptions, ['silenceThreshold', 'beatSensitivity', 'motionSensitivity', 'handlePadding', 'maxSnapDistance']);
+        if (isPlainObject(input.feedbackOptions)) output.feedbackOptions = sanitizeNestedOptions(input.feedbackOptions, ['haptics', 'toastKinds']);
+        if (isPlainObject(input.engineOptions)) output.engineOptions = sanitizeNestedOptions(input.engineOptions, ['modular', 'performanceMode', 'qualityGate']);
         return output;
     }
 
@@ -234,7 +249,13 @@
     function applyProjectSnapshot(state, project) {
         if (!state || !project) return false;
         const safe = sanitizeProjectSnapshot(project);
-        state.settings = Object.assign({}, state.settings || {}, safe.settings || {});
+        const currentSettings = isPlainObject(state.settings) ? state.settings : {};
+        const importedSettings = isPlainObject(safe.settings) ? safe.settings : {};
+        state.settings = Object.assign({}, currentSettings, importedSettings);
+        ['captionOptions', 'qualityOptions', 'autoCutOptions', 'feedbackOptions', 'engineOptions'].forEach(key => {
+            if (!isPlainObject(importedSettings[key])) return;
+            state.settings[key] = Object.assign({}, isPlainObject(currentSettings[key]) ? currentSettings[key] : {}, importedSettings[key]);
+        });
         state.recommendations = safe.recommendations.map(item => Object.assign({}, item));
         state.captions = safe.captions.map(cue => Object.assign({}, cue));
         state.selectedRecommendationId = safe.selectedRecommendationId;

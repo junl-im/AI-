@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.7 - lower-peak audio decode, adaptive preparation, and worker fallback
+// AI Shorts Studio v1.3.8 - lower-peak audio decode with worker stall recovery
 'use strict';
 
 (function exposeAudioFeatureExtractor(global) {
@@ -110,8 +110,19 @@
         return new Promise((resolve, reject) => {
             let worker;
             let settled = false;
+            let stallTimer = 0;
+            const stallMs = Math.max(5000, Number(config.ANALYSIS_WORKER_STALL_MS || 45000));
 
+            function clearStallWatch() {
+                if (stallTimer) global.clearTimeout(stallTimer);
+                stallTimer = 0;
+            }
+            function armStallWatch() {
+                clearStallWatch();
+                stallTimer = global.setTimeout(() => useFallback(`분석 워커가 ${Math.round(stallMs / 1000)}초 동안 응답하지 않았습니다.`), stallMs);
+            }
             function cleanup() {
+                clearStallWatch();
                 if (worker) worker.terminate();
                 worker = null;
                 if (signal) signal.removeEventListener('abort', onAbort);
@@ -144,6 +155,7 @@
             if (signal) signal.addEventListener('abort', onAbort, { once: true });
             worker.onmessage = event => {
                 const message = event.data || {};
+                armStallWatch();
                 if (message.type === 'progress' && onProgress) {
                     onProgress(message.progress, message.status || '분석 중');
                     return;
@@ -155,6 +167,7 @@
                 if (message.type === 'error') useFallback(message.message || '분석 워커 오류');
             };
             worker.onerror = error => useFallback(error.message || '분석 워커 오류');
+            worker.onmessageerror = () => useFallback('분석 워커 응답 데이터를 해석하지 못했습니다.');
             const copy = new Float32Array(channelData || 0);
             try {
                 worker.postMessage({
@@ -163,6 +176,7 @@
                     sampleRate: Number(sampleRate) || 8000,
                     duration: Number(duration) || 0
                 }, [copy.buffer]);
+                armStallWatch();
             } catch (error) {
                 useFallback('분석 워커 데이터 전송 실패: ' + error.message);
             }

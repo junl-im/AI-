@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.1 - session continuity with visibility-aware autosave
+// AI Shorts Studio v1.3.8 - recoverable session continuity with visibility-aware autosave
 'use strict';
 (function bootSessionContinuity(global) {
     if (global.AIShortsSessionContinuity) return;
@@ -13,6 +13,7 @@
     let panelReady = false;
     let heartbeatTimer = 0;
     let invalidSnapshotReported = false;
+    let invalidSnapshotReason = '';
     const MAX_SNAPSHOT_CHARS = Math.max(1024, Number(config.MAX_PROJECT_TEXT_CHARS || 2500000));
 
     function byId(id) { return document.getElementById(id); }
@@ -61,17 +62,32 @@
         };
         return base;
     }
+    function readStoredSnapshotText() {
+        try { return localStorage.getItem(STORAGE_KEY) || ''; }
+        catch (error) {
+            invalidSnapshotReason = error && error.message || '로컬 저장소를 읽을 수 없습니다.';
+            return '';
+        }
+    }
     function loadSnapshot() {
+        const raw = readStoredSnapshotText();
+        if (!raw) {
+            invalidSnapshotReason = '';
+            invalidSnapshotReported = false;
+            return null;
+        }
         try {
-            const raw = localStorage.getItem(STORAGE_KEY) || '';
-            if (!raw || raw.length > MAX_SNAPSHOT_CHARS) throw new Error(raw ? '저장된 세션이 허용 크기를 초과했습니다.' : '');
+            if (raw.length > MAX_SNAPSHOT_CHARS) throw new Error('저장된 세션이 허용 크기를 초과했습니다.');
             const parsed = projectService.parseProjectText ? projectService.parseProjectText(raw) : safeParse(raw);
+            if (!parsed) throw new Error('저장된 세션 JSON이 손상되었습니다.');
+            invalidSnapshotReason = '';
             invalidSnapshotReported = false;
             return parsed;
         } catch (error) {
-            if (error && error.message && !invalidSnapshotReported && store.addDiagnostic) {
+            invalidSnapshotReason = error && error.message || '저장된 세션을 복구할 수 없습니다.';
+            if (!invalidSnapshotReported && store.addDiagnostic) {
                 invalidSnapshotReported = true;
-                store.addDiagnostic({ type: 'session-snapshot-invalid', message: error.message });
+                store.addDiagnostic({ type: 'session-snapshot-invalid', message: invalidSnapshotReason });
             }
             return null;
         }
@@ -95,6 +111,8 @@
     }
     function clearSnapshot() {
         try { localStorage.removeItem(STORAGE_KEY); } catch (error) { /* ignored */ }
+        invalidSnapshotReason = '';
+        invalidSnapshotReported = false;
         if (document.body) document.body.dataset.sessionContinuity = 'none';
         updatePanel(null, 'clear');
     }
@@ -127,18 +145,22 @@
     function updatePanel(snapshot, reason) {
         ensurePanel();
         const stored = snapshot || loadSnapshot();
+        const hasStoredRecord = Boolean(snapshot || readStoredSnapshotText());
+        const invalidStoredRecord = hasStoredRecord && !stored;
         const title = byId('sessionContinuityTitle');
         const meta = byId('sessionContinuityMeta');
         const restore = byId('sessionRestoreBtn');
         const save = byId('sessionSaveBtn');
         const clear = byId('sessionClearBtn');
         const canRestore = Boolean(stored && stored.app === 'AI Shorts Studio' && Array.isArray(stored.recommendations) && stored.recommendations.length);
-        if (document.body) document.body.dataset.sessionContinuity = canRestore ? 'available' : (hasWork() ? 'saved' : 'none');
+        if (document.body) document.body.dataset.sessionContinuity = invalidStoredRecord ? 'invalid' : (canRestore ? 'available' : (hasWork() ? 'saved' : 'none'));
         if (title) {
-            title.textContent = canRestore ? '이전 작업 세션이 있습니다' : '작업 세션 자동 저장';
+            title.textContent = invalidStoredRecord ? '자동 저장 기록을 복구할 수 없습니다' : (canRestore ? '이전 작업 세션이 있습니다' : '작업 세션 자동 저장');
         }
         if (meta) {
-            if (canRestore) {
+            if (invalidStoredRecord) {
+                meta.textContent = `${invalidSnapshotReason || '저장된 세션이 손상되었습니다.'} 기록을 지운 뒤 새 작업을 저장해주세요.`;
+            } else if (canRestore) {
                 const count = stored.recommendations.length;
                 const selected = stored.selectedRecommendationId ? ' · 선택 후보 있음' : '';
                 const timestamp = document.createElement('span');
@@ -151,7 +173,7 @@
         }
         if (restore) restore.disabled = !canRestore;
         if (save) save.disabled = !hasWork();
-        if (clear) clear.disabled = !stored;
+        if (clear) clear.disabled = !hasStoredRecord;
         if (reason && reason !== 'sync' && global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.toast) {
             if (reason === 'manual') global.AIShortsFeedbackUX.toast('작업 세션을 저장했습니다.', 'save');
             if (reason === 'clear') global.AIShortsFeedbackUX.toast('작업 세션 기록을 지웠습니다.', 'action');

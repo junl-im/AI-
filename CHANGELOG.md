@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## v1.3.8 - Recoverable Sessions, Scoped Caches & Deterministic Worker Fallback
+
+- 손상·과대 자동저장 세션을 별도 `invalid` 상태로 표시하고 복구 실패 상태에서도 기록 삭제를 항상 허용합니다.
+- 서비스워커 활성화 시 `ai-shorts-studio-shell-` prefix의 이전 앱 캐시만 삭제해 같은 origin의 다른 서비스 캐시를 보존합니다.
+- 렌더 종료 시 원본 미디어의 `currentTime`, `playbackRate`, `muted`, `volume`, 재생 상태를 작업 전 값으로 복원합니다.
+- 렌더 경계에서 미디어 범위를 다시 정규화해 잘못된 직접 호출도 차단합니다.
+- 분석 워커 무응답 watchdog과 `messageerror` 처리를 추가하고 정지 시 워커를 종료한 뒤 호환 분석으로 전환합니다.
+- localStorage·프로젝트 설정에 enum 허용 목록, 수치 상한, 문자열·색상 정제, 알 수 없는 키 차단을 적용합니다.
+- 부분·이전 프로젝트의 중첩 설정을 현재 상태에 깊은 병합해 누락 그룹이 사용자 설정을 지우지 않게 했습니다.
+- 손상 지속 상태, 워커 정지, 서비스워커 캐시 범위 전용 회귀 검사 3개를 추가했습니다.
+- 자동 QA **138/138**, PC·모바일 Chromium 오류 0건, MP3·MP4·취소·재시도·10분 미디어 E2E를 통과했습니다.
+- 배포 과정에서 `PATCH_MANIFEST.txt` 또는 동일 목적의 임시 목록 파일을 생성하지 않는 원칙을 유지합니다.
+
 ## v1.3.7 - Render Resource Ownership, Bounded Captions & Update Coalescing
 
 - 렌더 기능 사전 검사에서 `captureStream()`을 호출해 사용하지 않는 미디어 트랙이 남을 수 있던 부작용을 제거했습니다.

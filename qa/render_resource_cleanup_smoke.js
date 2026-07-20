@@ -100,7 +100,10 @@ function track(name) {
 
     const rendererSource = fs.readFileSync(path.join(root, 'src/render/vertical-renderer.js'), 'utf8');
     ok(rendererSource.includes('sourceMedia.muted = originalMuted'), 'renderer restores the original media muted state during cleanup');
-    console.log('PASS v1.3.7 render capture preflight and stream cleanup guardrails');
+    ok(rendererSource.includes('const originalCurrentTime') && rendererSource.includes('sourceMedia.currentTime = restoredTime'), 'renderer restores the original media position after export');
+    ok(rendererSource.includes('const originalPlaybackRate') && rendererSource.includes('sourceMedia.playbackRate = originalPlaybackRate'), 'renderer restores the original playback rate after export');
+    ok(rendererSource.includes('normalizeMediaRange') && rendererSource.includes('렌더 구간이 올바르지 않습니다'), 'renderer independently validates export range boundaries');
+    console.log('PASS v1.3.8 render capture preflight, range validation, and media-state cleanup guardrails');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

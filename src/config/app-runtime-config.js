@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.3.7 - runtime config single source
+// AI Shorts Studio v1.3.8 - runtime config single source
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.3.7',
-    BUILD_KEY: '1.3.7-adaptive-mobile',
+    APP_VERSION: 'v1.3.8',
+    BUILD_KEY: '1.3.8-adaptive-mobile',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -11,6 +11,7 @@ window.AIShortsRuntimeConfig = Object.freeze({
     DEFAULT_CANDIDATE_COUNT: 6,
     MAX_ANALYSIS_SECONDS: 30 * 60,
     ANALYSIS_PREP_YIELD_SAMPLES: 24000,
+    ANALYSIS_WORKER_STALL_MS: 45000,
     MEDIA_METADATA_WAIT_MS: 5000,
     MAX_VIDEO_MOTION_SAMPLES: 160,
     DEFAULT_DURATIONS: [15, 30, 45, 60, 90],

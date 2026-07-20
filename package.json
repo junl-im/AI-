@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-3-7",
-  "version": "1.3.7",
+  "name": "ai-shorts-studio-v1-3-8",
+  "version": "1.3.8",
   "private": true,
-  "description": "AI Shorts Studio v1.3.7 - render stream cleanup, bounded manual ranges and captions, unique imported candidates, and single-owner update checks",
+  "description": "AI Shorts Studio v1.3.8 - resilient session recovery, cache-scoped service worker cleanup, render state restoration, worker stall fallback, and sanitized persisted settings",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -147,6 +147,9 @@
     "node qa/long_media_performance_smoke.js",
     "node qa/render_eta_smoke.js",
     "node qa/mobile_menu_guide_smoke.js",
-    "node qa/decode_memory_preflight_smoke.js"
+    "node qa/decode_memory_preflight_smoke.js",
+    "node qa/persisted_state_recovery_smoke.js",
+    "node qa/analysis_worker_stall_smoke.js",
+    "node qa/service_worker_cache_scope_smoke.js"
   ]
 }

@@ -1,3 +1,109 @@
+# HANDOFF v1.3.8
+
+## 현재 상태
+
+v1.3.8은 v1.3.7의 **135/135 기준선**에서 저장 복구·서비스워커 캐시 범위·렌더 원본 상태·분석 워커 정지·지속 설정 손상을 재감사한 안정화 릴리스입니다.
+
+최종 자동 검사는 **138/138**이며 PC·모바일 Chromium 오류, Promise 거절, 콘솔 오류와 가로 overflow는 모두 0입니다. MP3·MP4 출력, 취소, 실패 후 재시도, 10분 MP3 분석과 6초 렌더도 다시 통과했습니다.
+
+## 이번 점검에서 발견한 실제 문제
+
+1. 손상되거나 상한을 넘은 자동저장 세션이 localStorage에 남으면 복구는 실패하면서 기록 삭제 버튼까지 비활성화돼 사용자가 정상 상태로 돌아갈 수 없었습니다.
+2. 서비스워커 활성화 시 현재 앱 캐시를 제외한 같은 origin의 모든 Cache Storage 항목을 삭제해 다른 앱·서비스 캐시까지 지울 수 있었습니다.
+3. 렌더 후 원본 미디어의 재생 위치와 재생 속도가 렌더 종료 상태에 남아 편집 흐름을 바꿀 수 있었습니다.
+4. 분석 워커가 오류 이벤트 없이 응답을 멈추면 Promise가 끝없이 대기해 자동 분석이 완료되지 않았습니다.
+5. localStorage 설정이나 프로젝트 설정이 변조·손상되면 잘못된 duration·enum·수치·문자열 값이 상태에 들어가 추천 0개, 비정상 렌더 옵션, UI 불일치를 만들 수 있었습니다.
+6. 부분 설정만 가진 이전 프로젝트를 불러올 때 중첩 설정 객체가 통째로 교체돼 현재 사용자의 자막·품질 설정이 사라질 수 있었습니다.
+
+## 적용한 수정
+
+- 손상 세션을 `invalid` 상태로 구분해 복구 실패 이유를 표시하고, 원본 레코드가 존재하면 삭제 버튼을 항상 사용할 수 있게 했습니다.
+- 서비스워커 캐시 삭제를 `ai-shorts-studio-shell-` 네임스페이스의 이전 버전으로 제한했습니다.
+- 렌더 전 `currentTime`, `playbackRate`, `muted`, `volume`, 재생 여부를 저장하고 성공·실패·취소 cleanup에서 복원합니다.
+- 렌더러 내부에서도 공용 `normalizeMediaRange()`를 다시 적용해 호출 계층을 우회한 잘못된 범위를 거부합니다.
+- 분석 워커에 무응답 watchdog을 추가하고 진행 메시지마다 갱신하며, 정지·잘못된 메시지에서는 워커를 종료한 뒤 메인 스레드 호환 분석으로 전환합니다.
+- `ANALYSIS_WORKER_STALL_MS`를 런타임 설정으로 분리하고 최소 안전값을 적용했습니다.
+- 상태 저장·복구에 enum 허용 목록, 수치 상한, 문자열·색상 정제, 알 수 없는 키 차단을 적용했습니다.
+- 프로젝트 설정은 검증된 키만 복구하고 중첩 그룹을 깊은 병합해 부분·이전 프로젝트가 현재 설정을 지우지 않도록 했습니다.
+- 신규 회귀 검사 3개를 추가해 QA를 135개에서 138개로 확장했습니다.
+- `PATCH_MANIFEST.txt` 또는 같은 목적의 임시 목록 파일은 생성하지 않습니다.
+
+## 주요 변경 파일
+
+- `src/ui/session-continuity.js`: 손상 세션 상태·삭제 가능 복구 흐름
+- `assets/css/session-continuity.css`: 손상 세션 경고 상태
+- `sw.js`: 앱 네임스페이스 한정 캐시 정리
+- `src/render/vertical-renderer.js`: 범위 재검증과 원본 미디어 상태 복원
+- `src/analysis/audio-feature-extractor.js`: 워커 무응답 watchdog·messageerror fallback
+- `src/config/app-runtime-config.js`: 분석 워커 정지 시간 예산
+- `src/state/app-state.js`: 지속 설정 허용 목록·정규화·안전 저장
+- `src/project/project-service.js`: 프로젝트 설정 정규화·부분 중첩 설정 깊은 병합
+- `qa/persisted_state_recovery_smoke.js`: 손상 설정·세션·부분 프로젝트 회귀
+- `qa/analysis_worker_stall_smoke.js`: 무응답·잘못된 워커 메시지 회귀
+- `qa/service_worker_cache_scope_smoke.js`: 다른 서비스 캐시 보존 회귀
+
+## 유지 규칙
+
+1. 자동저장 원문이 존재하면 파싱·스키마 검증 실패와 관계없이 사용자가 삭제할 수 있어야 합니다.
+2. 서비스워커는 자신의 캐시 prefix에 속한 이전 캐시만 삭제합니다.
+3. 렌더가 변경한 원본 미디어의 위치·속도·음량·음소거·재생 상태는 작업 전 값으로 복원합니다.
+4. 공개 UI에서 범위를 검증해도 렌더 경계에서 다시 검증합니다.
+5. 워커 기반 분석은 오류 이벤트뿐 아니라 무응답과 잘못된 메시지를 감지해 결정적으로 종료·대체해야 합니다.
+6. localStorage와 프로젝트에서 복구하는 설정은 동일한 허용 목록·상한·문자열 정제 정책을 따라야 합니다.
+7. 부분 프로젝트 설정은 현재 설정을 기반으로 깊은 병합하며 누락 그룹을 삭제하지 않습니다.
+8. 서비스워커 등록과 `registration.update()`는 `AIShortsServiceWorkerRegistration`만 소유합니다.
+9. **Update Sentinel**은 진단과 캐시 정리를 담당하며 등록 객체를 직접 업데이트하지 않습니다.
+10. 기존 **모듈형 엔진**과 operation coordinator의 작업 소유권 계약을 유지합니다.
+11. `PATCH_MANIFEST.txt`나 동일 목적의 임시 배포 목록 파일을 만들지 않습니다.
+
+## 검수 결과
+
+- `npm test`: **138/138 통과**
+- Chromium desktop 1366×768: 오류·Promise 거절·콘솔 오류 0, 가로 overflow 0px
+- Chromium mobile 390×844: 오류·Promise 거절·콘솔 오류 0, 가로 overflow 0px
+- 20초 MP3·MP4 출력 정상
+- 렌더 취소: 다운로드 0, 활성 operation 0
+- 재생 실패 후 새 작업 재시도 정상
+- 10분 MP3 분석: 약 **6.223초**
+- 장시간 분석 예산: 8kHz, 분석 트랙 약 **18.3MB**
+- 예상 decode 메모리 약 **219.7MB**, 위험도 medium
+- 분석 후 decoded AudioBuffer·channelData 미보유
+- 6초 렌더 출력: 약 **6.015초**, **1,426,623바이트**, ffprobe 통과
+- 렌더 중 ETA 약 3초 노출, 완료 후 활성 operation 0
+- 전체·패치 ZIP 압축 무결성 통과, 금지 항목 0
+- v1.3.7 전체 ZIP + v1.3.8 패치 결과가 v1.3.8 전체 ZIP 243개 파일과 해시 기준 완전 일치
+- 전체 설치 ZIP을 별도 디렉터리에 풀어 `npm test` 138/138 재통과
+
+## 배포·검수 순서
+
+1. `npm test`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset`
+4. `python3 qa/run_media_e2e.py --cases longAudio`
+5. `PATCH_BASE_ARCHIVE=/path/to/ai-shorts-studio-v1.3.7-release.zip npm run package`
+6. 전체·패치 ZIP `unzip -t`, SHA-256, 패치 적용 후 파일 해시 동일성 확인
+7. ZIP 내부에 `PATCH_MANIFEST.txt`, Python 캐시, `.git`, `node_modules`, 중첩 `dist`·ZIP이 없는지 확인
+
+## 다음 우선순위
+
+1. localhost/HTTPS에서 서비스워커 설치→대기→활성화→컨트롤 전환 자동 감사
+2. 렌더·취소·파일 교체 20회 반복 시 MediaStream·AudioContext·ObjectURL 누수 계측
+3. 15분·30분 MP4 분석 시간, decode peak memory, 장시간 렌더 성공률 계측
+4. 모바일 Safari·Samsung Internet 실기기 장시간 렌더 검증
+5. 손상 세션 내용을 다운로드해 복구·진단할 수 있는 사용자 도구 검토
+
+## 알려진 제한
+
+- 현재 Chromium 감사 하네스는 비보안 인라인 환경이라 실제 서비스워커 lifecycle을 실행하지 않습니다. 캐시 범위와 API 계약은 단위 검증됐지만 배포 서버의 waiting→activate 전환은 별도 확인이 필요합니다.
+- 워커 watchdog은 UI 영구 대기를 막지만 CPU·메모리 압박으로 정상 분석이 제한 시간을 넘으면 호환 분석을 다시 수행해 총 시간이 늘 수 있습니다.
+- Web Audio 전체 디코딩 특성상 매우 긴 무압축 오디오의 순간 peak memory는 여전히 클 수 있습니다.
+- 15분·30분 고해상도 MP4와 모바일 Safari·Samsung Internet 장시간 출력은 실기기 검증이 필요합니다.
+- 패치 ZIP은 삭제 파일을 적용할 수 없습니다. 삭제가 생기는 버전은 별도 삭제 절차나 전체 설치본이 필요합니다.
+
+---
+
+## 이전 인수인계 원문 — v1.3.7
+
 # HANDOFF v1.3.7
 
 ## 현재 상태
