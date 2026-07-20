@@ -135,7 +135,17 @@
             card.dataset.candidateProId = item.id;
             const title = item.title || `후보 ${index + 1}`;
             const duration = fmtSeconds(item.duration || ((Number(item.end) || 0) - (Number(item.start) || 0)));
-            card.innerHTML = `<span class="candidate-pro-rank">TOP ${index + 1}</span><b>${title}</b><small>${item.rangeText || ''} · ${duration}</small><span class="candidate-pro-score">${Math.round(Number(item.score) || 0)}점</span>`;
+            const rank = document.createElement('span');
+            rank.className = 'candidate-pro-rank';
+            rank.textContent = `TOP ${index + 1}`;
+            const heading = document.createElement('b');
+            heading.textContent = title;
+            const range = document.createElement('small');
+            range.textContent = `${item.rangeText || ''} · ${duration}`;
+            const score = document.createElement('span');
+            score.className = 'candidate-pro-score';
+            score.textContent = `${Math.round(Number(item.score) || 0)}점`;
+            card.replaceChildren(rank, heading, range, score);
             card.addEventListener('click', () => clickCandidate(item.id));
             node.appendChild(card);
         });

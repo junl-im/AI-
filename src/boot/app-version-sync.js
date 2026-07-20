@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.3.4 - single source version sync and update guard
+// AI Shorts Studio v1.3.5 - single source version sync and update guard
 'use strict';
 
 (function installAppVersionSync(global) {
-    const FALLBACK_VERSION = 'v1.3.4';
-    const FALLBACK_BUILD_KEY = '1.3.4-adaptive-mobile';
+    const FALLBACK_VERSION = 'v1.3.5';
+    const FALLBACK_BUILD_KEY = '1.3.5-adaptive-mobile';
     const config = global.AIShortsRuntimeConfig || {};
     const normalizeVersion = value => {
         const text = String(value || FALLBACK_VERSION).trim();

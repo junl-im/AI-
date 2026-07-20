@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.4 - lower-peak audio decode, adaptive preparation, and worker fallback
+// AI Shorts Studio v1.3.5 - lower-peak audio decode, adaptive preparation, and worker fallback
 'use strict';
 
 (function exposeAudioFeatureExtractor(global) {

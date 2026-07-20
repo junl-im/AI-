@@ -132,7 +132,15 @@
             row.className = 'export-finish-log-item';
             const icon = item.status === 'done' ? 'check' : item.status === 'failed' ? 'close' : item.status === 'running' ? 'render' : 'retry';
             row.classList.add(`is-${item.status || 'queued'}`);
-            row.innerHTML = `<span><i class="studio-icon" data-icon="${icon}" aria-hidden="true"></i>${clampText(item.label, '렌더 작업')}</span><em>${item.status === 'failed' ? clampText(item.error, '실패') : `${Math.round(item.progress || 0)}%`}</em>`;
+            const label = document.createElement('span');
+            const iconNode = document.createElement('i');
+            iconNode.className = 'studio-icon';
+            iconNode.dataset.icon = icon;
+            iconNode.setAttribute('aria-hidden', 'true');
+            label.append(iconNode, document.createTextNode(clampText(item.label, '렌더 작업')));
+            const status = document.createElement('em');
+            status.textContent = item.status === 'failed' ? clampText(item.error, '실패') : `${Math.round(item.progress || 0)}%`;
+            row.replaceChildren(label, status);
             log.appendChild(row);
         });
     }

@@ -126,7 +126,10 @@
             if (canRestore) {
                 const count = stored.recommendations.length;
                 const selected = stored.selectedRecommendationId ? ' · 선택 후보 있음' : '';
-                meta.innerHTML = `${stored.fileName || '이전 파일'} · 후보 ${count}개${selected} · <span class="session-continuity-timestamp">${formatSavedAt(stored.savedAt || stored.createdAt)}</span>`;
+                const timestamp = document.createElement('span');
+                timestamp.className = 'session-continuity-timestamp';
+                timestamp.textContent = formatSavedAt(stored.savedAt || stored.createdAt);
+                meta.replaceChildren(document.createTextNode(`${stored.fileName || '이전 파일'} · 후보 ${count}개${selected} · `), timestamp);
             } else {
                 meta.textContent = hasWork() ? '현재 작업 상태를 로컬에 보존하고 있습니다.' : '파일을 열고 후보를 만들면 자동으로 가볍게 저장합니다.';
             }

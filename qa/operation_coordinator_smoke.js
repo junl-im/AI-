@@ -13,7 +13,7 @@ const pipeline = read('src/engine/analysis-pipeline.js');
 const renderer = read('src/render/vertical-renderer.js');
 const queue = read('src/render/render-queue.js');
 function assert(value, message) { if (!value) { console.error('FAIL:', message); process.exit(1); } }
-assert(html.includes('src/engine/operation-coordinator.js?v=1.3.4-adaptive-mobile'), 'operation coordinator is loaded');
+assert(html.includes('src/engine/operation-coordinator.js?v=1.3.5-adaptive-mobile'), 'operation coordinator is loaded');
 assert(html.indexOf('operation-coordinator.js') < html.indexOf('src/app.js'), 'coordinator loads before main app');
 for (const api of ['begin','cancel','finish','isCurrent','assertCurrent','startMediaSession','snapshot']) assert(coordinator.includes(api), `coordinator exports ${api}`);
 assert(app.includes("startMediaSession({ fileName: file.name") && app.includes("beginOperation('analysis'") && app.includes("beginOperation('preview'") && app.includes("beginOperation('render'"), 'app coordinates media, analysis, preview and render generations');

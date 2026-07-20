@@ -9,6 +9,7 @@ const config = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js
 const sync = fs.readFileSync(path.join(root, 'src/boot/app-version-sync.js'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
+const swRegistration = fs.readFileSync(path.join(root, 'src/boot/service-worker-registration.js'), 'utf8');
 function assert(condition, message) {
   if (!condition) {
     console.error('FAIL:', message);
@@ -29,5 +30,8 @@ assert(sw.includes('version-aware cache guard'), 'service worker documents versi
 assert(sw.includes(`ai-shorts-studio-shell-${version}-adaptive-mobile`), 'service worker cache name matches the current build');
 assert(sw.includes('networkFirst') && sw.includes('request.mode === \'navigate\''), 'service worker uses network-first navigation shell');
 assert(sw.includes(`app-version-sync.js?v=${plain}-adaptive-mobile`), 'service worker precaches version sync module');
-assert(app.includes('registration.update'), 'app asks service worker to check for updates');
+assert(html.includes('src/boot/service-worker-registration.js'), 'service worker registration module is loaded');
+assert(sw.includes(`service-worker-registration.js?v=${plain}-adaptive-mobile`), 'service worker precaches registration module');
+assert(swRegistration.includes('registration.update') && swRegistration.includes('config.APP_VERSION'), 'registration module checks for updates with the runtime config version');
+assert(app.includes('serviceWorkerRegistration.register'), 'app delegates registration to the single-owner module');
 console.log('PASS app version sync and cache guard are aligned');

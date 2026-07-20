@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Optional real-media Chromium audit for AI Shorts Studio v1.3.4.
+"""Optional real-media Chromium audit for AI Shorts Studio v1.3.5.
 Requires ffmpeg and Python Playwright. It does not run as part of npm test.
 """
 import asyncio
@@ -11,7 +11,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-media-e2e-v1.3.4.json'
+OUTPUT = ROOT / 'qa' / 'runtime-media-e2e-v1.3.5.json'
 
 
 def build_inline_html() -> str:
@@ -235,7 +235,7 @@ async def main():
                 args=['--no-sandbox', '--autoplay-policy=no-user-gesture-required']
             )
             report = {
-                'version': '1.3.4',
+                'version': '1.3.5',
                 'harness': 'Chromium inline asset harness; service worker and localStorage are outside this audit',
                 'audio': await export_case(browser, mp3, temp),
                 'video': await export_case(browser, mp4, temp),

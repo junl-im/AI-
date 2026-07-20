@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.4 - coordinated media operations, adaptive mobile flow, and memory preflight
+// AI Shorts Studio v1.3.5 - coordinated media operations, adaptive mobile flow, and memory preflight
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -22,6 +22,7 @@
     const timelineView = global.AIShortsTimelineView || {};
     const siteGuards = global.AIShortsSiteGuards || {};
     const runtimeHealth = global.AIShortsRuntimeHealth || {};
+    const serviceWorkerRegistration = global.AIShortsServiceWorkerRegistration || {};
     const operationCoordinator = global.AIShortsOperationCoordinator || {};
 
     const els = {};
@@ -991,7 +992,15 @@
     async function handleFiles(fileList) {
         const file = fileList && fileList[0];
         if (!file) return;
-        const kind = utils.isVideoFile && utils.isVideoFile(file) ? 'video' : 'audio';
+        const kind = utils.detectMediaKind ? utils.detectMediaKind(file) : (utils.isVideoFile && utils.isVideoFile(file) ? 'video' : utils.isAudioFile && utils.isAudioFile(file) ? 'audio' : '');
+        if (!kind) {
+            if (els.fileInput) els.fileInput.value = '';
+            if (els.selectedBadge) els.selectedBadge.textContent = '지원 파일 필요';
+            if (els.importStatus) els.importStatus.textContent = '오디오 또는 영상 파일만 열 수 있습니다.';
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'unsupported-media', fileName: file.name, fileType: file.type, fileSize: file.size });
+            toast('지원하지 않는 파일 형식입니다. 오디오 또는 영상 파일을 선택해주세요.', 'warning');
+            return;
+        }
         if (renderQueue && renderQueue.isRunning && renderQueue.isRunning() && renderQueue.cancel) {
             renderQueue.cancel('새 원본 파일을 열어 진행 중인 렌더를 취소했습니다.');
         }
@@ -1543,19 +1552,6 @@
         }
     }
 
-    function registerServiceWorker() {
-        if (!navigator.serviceWorker || location.protocol === 'file:') return;
-        navigator.serviceWorker.register('sw.js').then(registration => {
-            if (registration.update) registration.update().catch(() => {});
-            if (store.addDiagnostic) {
-                const version = global.AIShortsVersionSync && global.AIShortsVersionSync.version || runtimeConfig.APP_VERSION || 'dev';
-                store.addDiagnostic({ type: 'service-worker-ready', version, scope: registration.scope });
-            }
-        }).catch(error => {
-            if (store.addDiagnostic) store.addDiagnostic({ type: 'service-worker-error', message: error.message });
-        });
-    }
-
     function init() {
         if (!state) return;
         initElements();
@@ -1566,7 +1562,7 @@
         if (siteGuards.installExitGuard) siteGuards.installExitGuard(() => Boolean(state.file && !state.exportInfo));
         renderAll();
         setProgress(0, runtimeHealth.summaryText ? runtimeHealth.summaryText() : '준비 완료');
-        registerServiceWorker();
+        if (serviceWorkerRegistration.register) serviceWorkerRegistration.register();
     }
 
 

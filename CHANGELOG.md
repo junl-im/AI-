@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.3.5 - Runtime Guard & Safe User Data Rendering
+
+- 서비스워커 등록을 전용 `AIShortsServiceWorkerRegistration` 모듈로 분리해 등록 소유권을 단일화했습니다.
+- 실제 HTTPS·localhost 등록 성공 뒤 선언되지 않은 `runtimeConfig.APP_VERSION`을 참조하던 오류를 제거했습니다.
+- 등록 성공·실패·중복 방지·업데이트 확인·실패 후 재시도를 자동 회귀 검사로 추가했습니다.
+- 드래그앤드롭으로 들어온 PDF·문서 등 미지원 파일을 오디오로 오인하지 않고 분석 전에 차단합니다.
+- 세션 파일명, 프로젝트 후보 제목·구간, 렌더 작업 라벨·오류를 동적 `innerHTML` 대신 안전한 텍스트 노드로 렌더링합니다.
+- 공용 유틸에 미디어 종류 판별과 HTML 이스케이프 함수를 추가했습니다.
+- 자동 QA를 131개로 확장하고 PC·모바일 Chromium UI 감사와 MP3·MP4·10분 미디어 E2E를 다시 통과했습니다.
+- 전체 설치 ZIP과 v1.3.4 덮어쓰기 패치 ZIP을 함께 배포합니다.
+
 ## v1.3.4 - Adaptive Mobile Menu & Decode Memory Preflight
 
 - 모바일 메뉴바를 현재 단계·다음 단계 중심의 핵심 4개 메뉴로 자동 축약했습니다.

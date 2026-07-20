@@ -9,32 +9,26 @@ for (const file of ['tools/create-release-zip.sh','tools/create-patch-zip.sh','t
 }
 if (!pkg.scripts['package:full'] || !pkg.scripts['package:patch'] || !pkg.scripts.package) throw new Error('dual package scripts missing');
 const manifest = fs.readFileSync(path.join(root, 'PATCH_MANIFEST.txt'), 'utf8');
-if (!manifest.includes('# from=1.3.3') || !manifest.includes('# to=1.3.4')) throw new Error('patch version range is not v1.3.3 to v1.3.4');
+if (!manifest.includes('# from=1.3.4') || !manifest.includes('# to=1.3.5')) throw new Error('patch version range is not v1.3.4 to v1.3.5');
 for (const required of [
-  'src/config/app-runtime-config.js',
-  'src/ui/mobile-menu-guide.js',
-  'assets/css/mobile-menu-guide.css',
-  'qa/mobile_menu_guide_smoke.js',
-  'qa/decode_memory_preflight_smoke.js',
-  'src/engine/performance-budget.js',
-  'src/engine/analysis-pipeline.js',
-  'src/analysis/audio-analysis-core.js',
-  'src/analysis/audio-feature-extractor.js',
-  'src/analysis/video-motion-analyzer.js',
-  'src/render/render-queue.js',
-  'assets/css/render-queue.css',
-  'qa/runtime-media-e2e-v1.3.4.json',
+  'src/boot/service-worker-registration.js',
+  'src/utils/core-utils.js',
+  'src/app.js',
+  'src/ui/session-continuity.js',
+  'src/ui/candidate-preview-pro.js',
+  'src/ui/export-finish-center.js',
+  'qa/runtime_guard_smoke.js',
+  'qa/runtime-media-e2e-v1.3.5.json',
   'qa/media_e2e_audit_smoke.js',
-  'qa/long_media_performance_smoke.js',
-  'qa/render_eta_smoke.js',
-  'qa/runtime-browser-audit-v1.3.4.json',
+  'qa/runtime-browser-audit-v1.3.5.json',
   'qa/runtime_browser_audit_smoke.js',
   'index.html',
   'sw.js',
   'package.json',
+  'README.md',
   'HANDOFF.md',
   'qa/QA_REPORT.md'
 ]) {
   if (!manifest.includes(required)) throw new Error(`patch manifest incomplete: ${required}`);
 }
-console.log('PASS full and v1.3.4 overwrite-patch-from-v1.3.3 distribution contract');
+console.log('PASS full and v1.3.5 overwrite-patch-from-v1.3.4 distribution contract');

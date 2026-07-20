@@ -55,6 +55,26 @@
         return type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|flac|ogg|opus|aiff|aif)$/i.test(name);
     }
 
+    function detectMediaKind(file) {
+        if (isVideoFile(file)) return 'video';
+        if (isAudioFile(file)) return 'audio';
+        return '';
+    }
+
+    function isSupportedMediaFile(file) {
+        return Boolean(detectMediaKind(file));
+    }
+
+    function escapeHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[char]));
+    }
+
     function mean(values) {
         if (!Array.isArray(values) && !(values instanceof Float32Array)) return 0;
         if (!values.length) return 0;
@@ -145,6 +165,9 @@
         extensionFromMime,
         isVideoFile,
         isAudioFile,
+        detectMediaKind,
+        isSupportedMediaFile,
+        escapeHtml,
         mean,
         percentile,
         normalizeList,
