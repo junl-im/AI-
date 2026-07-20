@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.6 - coordinated media operations, adaptive mobile flow, and memory preflight
+// AI Shorts Studio v1.3.7 - coordinated media operations, adaptive mobile flow, and memory preflight
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -712,13 +712,14 @@
     function setRecommendationRange(item, start, end, reason) {
         if (!item) return null;
         const maxDuration = getMediaDurationFallback(item);
-        let nextStart = Math.max(0, Number(start) || 0);
-        let nextEnd = Math.max(nextStart + 1, Number(end) || nextStart + 1);
-        if (maxDuration) nextEnd = Math.min(maxDuration, nextEnd);
-        if (nextEnd <= nextStart) nextEnd = Math.min(maxDuration || nextStart + 1, nextStart + 1);
-        item.start = Number(nextStart.toFixed(2));
-        item.end = Number(nextEnd.toFixed(2));
-        item.duration = Number(Math.max(1, item.end - item.start).toFixed(2));
+        const fallbackStart = Math.max(0, Number(start) || 0);
+        const fallbackEnd = Math.max(fallbackStart + 1, Number(end) || (fallbackStart + 1));
+        const normalized = utils.normalizeMediaRange
+            ? utils.normalizeMediaRange(start, end, maxDuration, 1)
+            : { start: fallbackStart, end: fallbackEnd };
+        item.start = Number(normalized.start.toFixed(2));
+        item.end = Number(normalized.end.toFixed(2));
+        item.duration = Number(Math.max(0.001, item.end - item.start).toFixed(2));
         item.rangeText = utils.formatRange ? utils.formatRange(item.start, item.end) : `${item.start.toFixed(1)} ~ ${item.end.toFixed(1)}`;
         item.custom = true;
         if (reason) item.reasons = Array.from(new Set([...(item.reasons || []), reason])).slice(0, 5);
@@ -1425,11 +1426,9 @@
     function applyManualRange() {
         const selected = getSelectedRecommendation();
         if (!selected) return;
-        const maxDuration = Number(state.fileMeta && state.fileMeta.duration) || Number(selected.end) || 0;
-        const start = Math.max(0, Number(els.rangeStartInput && els.rangeStartInput.value) || 0);
-        let end = Math.max(start + 1, Number(els.rangeEndInput && els.rangeEndInput.value) || selected.end || start + 15);
-        if (maxDuration) end = Math.min(maxDuration, end);
-        setRecommendationRange(selected, start, end, '사용자가 직접 조절한 커스텀 구간');
+        const start = Number(els.rangeStartInput && els.rangeStartInput.value);
+        const end = Number(els.rangeEndInput && els.rangeEndInput.value);
+        setRecommendationRange(selected, start, Number.isFinite(end) ? end : selected.end, '사용자가 직접 조절한 커스텀 구간');
         const media = getActiveMediaElement();
         if (media) {
             try { media.currentTime = start; } catch (error) { /* ignored */ }
@@ -1473,14 +1472,26 @@
 
     function applyCaptionsFromText() {
         const raw = els.captionTextInput ? els.captionTextInput.value : '';
-        let cues = captionService.parseCaptionText ? captionService.parseCaptionText(raw) : [];
-        if (!cues.length && captionService.createQuickCaptions) cues = captionService.createQuickCaptions(raw, getSelectedRecommendation(), 6);
-        state.captions = cues;
-        if (store.addDiagnostic) store.addDiagnostic({ type: 'captions-applied', count: cues.length });
-        updateCaptionStatus();
-        renderAutoCutSummary(getSelectedRecommendation());
-        renderPreviewStill();
-        toast(cues.length ? `${cues.length}개 자막을 적용했습니다.` : '적용할 자막을 찾지 못했습니다.');
+        const maxChars = Number(config.MAX_CAPTION_TEXT_CHARS || 1000000);
+        if (raw.length > maxChars) {
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'caption-text-too-large', length: raw.length, maxChars });
+            toast(`자막 텍스트가 너무 큽니다. ${maxChars.toLocaleString()}자 이하로 줄여주세요.`, 'warning');
+            return;
+        }
+        try {
+            let cues = captionService.parseCaptionText ? captionService.parseCaptionText(raw) : [];
+            if (!cues.length && captionService.createQuickCaptions) cues = captionService.createQuickCaptions(raw, getSelectedRecommendation(), 6);
+            const maxCues = Number(config.MAX_CAPTION_CUES || config.MAX_PROJECT_CAPTIONS || 5000);
+            state.captions = cues.slice(0, maxCues);
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'captions-applied', count: state.captions.length });
+            updateCaptionStatus();
+            renderAutoCutSummary(getSelectedRecommendation());
+            renderPreviewStill();
+            toast(state.captions.length ? `${state.captions.length}개 자막을 적용했습니다.` : '적용할 자막을 찾지 못했습니다.');
+        } catch (error) {
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'caption-parse-error', message: error.message });
+            toast(error.message || '자막을 처리하지 못했습니다.', 'error');
+        }
     }
 
     function clearCaptions() {

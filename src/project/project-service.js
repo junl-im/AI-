@@ -1,8 +1,9 @@
-// AI Shorts Studio v1.3.6 - bounded and schema-safe project save/load helpers
+// AI Shorts Studio v1.3.7 - bounded and schema-safe project save/load helpers
 'use strict';
 
 (function exposeProjectService(global) {
     const captionService = global.AIShortsCaptionService || {};
+    const utils = global.AIShortsCoreUtils || {};
     const config = global.AIShortsRuntimeConfig || {};
     const CURRENT_SCHEMA_VERSION = 3;
     const MAX_PROJECT_TEXT_CHARS = Math.max(1024, Number(config.MAX_PROJECT_TEXT_CHARS || 2_500_000));
@@ -32,12 +33,12 @@
 
     function sanitizeInterval(value, fallbackDuration, minimumDuration) {
         const minDuration = Math.max(0.001, Number(minimumDuration) || 0.001);
-        const maxStart = Math.max(0, MAX_MEDIA_SECONDS - minDuration);
-        const start = finiteNumber(value && value.start, 0, 0, maxStart);
+        const start = Number(value && value.start);
         const duration = Math.max(minDuration, Number(value && value.duration) || Number(fallbackDuration) || minDuration);
-        const requestedEnd = finiteNumber(value && value.end, start + duration, 0, MAX_MEDIA_SECONDS);
-        const end = Math.min(MAX_MEDIA_SECONDS, Math.max(start + minDuration, requestedEnd));
-        return { start, end };
+        const requestedEnd = Number.isFinite(Number(value && value.end)) ? Number(value.end) : (Number.isFinite(start) ? start : 0) + duration;
+        if (utils.normalizeMediaRange) return utils.normalizeMediaRange(start, requestedEnd, MAX_MEDIA_SECONDS, minDuration);
+        const safeStart = finiteNumber(start, 0, 0, Math.max(0, MAX_MEDIA_SECONDS - minDuration));
+        return { start: safeStart, end: Math.min(MAX_MEDIA_SECONDS, Math.max(safeStart + minDuration, requestedEnd)) };
     }
 
     function sanitizeStringList(value, limit, maxLength) {
@@ -69,7 +70,7 @@
     function sanitizeRecommendation(value, index) {
         if (!isPlainObject(value)) return null;
         const { start, end } = sanitizeInterval(value, 0.1, 0.1);
-        const id = safeText(value.id, 120) || `imported-${index + 1}`;
+        const id = safeText(value.id, 120).replace(/[\u0000-\u001f\u007f]/g, '').trim() || `imported-${index + 1}`;
         return {
             id,
             start: Number(start.toFixed(3)),
@@ -153,6 +154,18 @@
             .slice(0, MAX_RECOMMENDATIONS)
             .map(sanitizeRecommendation)
             .filter(Boolean);
+        const seenRecommendationIds = new Set();
+        recommendations.forEach((item, index) => {
+            const base = item.id || `imported-${index + 1}`;
+            let next = base;
+            let suffix = 2;
+            while (seenRecommendationIds.has(next)) {
+                next = `${base.slice(0, 108)}-${suffix}`;
+                suffix += 1;
+            }
+            item.id = next;
+            seenRecommendationIds.add(next);
+        });
         const captions = (Array.isArray(project.captions) ? project.captions : [])
             .slice(0, MAX_CAPTIONS)
             .map(sanitizeCaption)

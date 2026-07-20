@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.6 - throttled render queue, ETA, retries, and cancellation
+// AI Shorts Studio v1.3.7 - throttled render queue, ETA, retries, and cancellation
 'use strict';
 
 (function exposeRenderQueue(global) {

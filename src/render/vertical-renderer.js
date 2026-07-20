@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.6 - cancellable vertical renderer with caption and quality effects
+// AI Shorts Studio v1.3.7 - cancellable vertical renderer with caption and quality effects
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -405,11 +405,26 @@
         return canvas.captureStream(Number(fps) || Number(config.PREVIEW_FPS || 30));
     }
 
+    function supportsMediaCapture(mediaEl) {
+        return Boolean(mediaEl && (typeof mediaEl.captureStream === 'function' || typeof mediaEl.mozCaptureStream === 'function'));
+    }
+
     function getCaptureStream(mediaEl) {
-        if (!mediaEl) return null;
+        if (!supportsMediaCapture(mediaEl)) return null;
         if (typeof mediaEl.captureStream === 'function') return mediaEl.captureStream();
-        if (typeof mediaEl.mozCaptureStream === 'function') return mediaEl.mozCaptureStream();
-        return null;
+        return mediaEl.mozCaptureStream();
+    }
+
+    function stopStreamTracks() {
+        const stopped = new Set();
+        Array.from(arguments).forEach(stream => {
+            if (!stream || typeof stream.getTracks !== 'function') return;
+            stream.getTracks().forEach(track => {
+                if (!track || stopped.has(track)) return;
+                stopped.add(track);
+                try { track.stop(); } catch (error) { /* ignored */ }
+            });
+        });
     }
 
     function inspectRenderCapability(canvas, sourceMedia) {
@@ -419,14 +434,14 @@
         if (!global.MediaRecorder) reasons.push('MediaRecorder를 지원하지 않는 브라우저입니다.');
         if (!canvas || typeof canvas.captureStream !== 'function') reasons.push('Canvas captureStream을 지원하지 않는 브라우저입니다.');
         if (!sourceMedia) reasons.push('저장할 원본 미디어가 없습니다.');
-        if (sourceMedia && !getCaptureStream(sourceMedia)) warnings.push('원본 오디오 캡처를 지원하지 않아 결과물에 소리가 포함되지 않을 수 있습니다.');
+        if (sourceMedia && !supportsMediaCapture(sourceMedia)) warnings.push('원본 오디오 캡처를 지원하지 않아 결과물에 소리가 포함되지 않을 수 있습니다.');
         if (!mimeType) warnings.push('브라우저가 명시적인 출력 형식을 제공하지 않아 기본 형식으로 저장합니다.');
         return Object.freeze({
             ok: reasons.length === 0,
             reasons: Object.freeze(reasons),
             warnings: Object.freeze(warnings),
             mimeType,
-            hasMediaCapture: Boolean(sourceMedia && getCaptureStream(sourceMedia))
+            hasMediaCapture: supportsMediaCapture(sourceMedia)
         });
     }
 
@@ -441,15 +456,23 @@
         const capability = inspectRenderCapability(canvas, sourceMedia);
         if (!capability.ok) throw new Error(capability.reasons.join(' '));
         const mimeType = capability.mimeType;
-        const stream = createCanvasStream(canvas, options && options.fps || config.PREVIEW_FPS || 30);
-        const mediaStream = getCaptureStream(sourceMedia);
-        if (mediaStream) {
-            mediaStream.getAudioTracks().forEach(track => stream.addTrack(track));
+        let stream = null;
+        let mediaStream = null;
+        let recorder = null;
+        let ctx = null;
+        try {
+            stream = createCanvasStream(canvas, options && options.fps || config.PREVIEW_FPS || 30);
+            mediaStream = getCaptureStream(sourceMedia);
+            if (mediaStream) mediaStream.getAudioTracks().forEach(track => stream.addTrack(track));
+            const bitrate = Number(options && options.videoBitsPerSecond) || 0;
+            const recorderOptions = mimeType ? { mimeType } : {};
+            if (bitrate > 0) recorderOptions.videoBitsPerSecond = bitrate;
+            recorder = new MediaRecorder(stream, Object.keys(recorderOptions).length ? recorderOptions : undefined);
+            ctx = getCanvasContext(canvas);
+        } catch (error) {
+            stopStreamTracks(stream, mediaStream);
+            throw error;
         }
-        const bitrate = Number(options && options.videoBitsPerSecond) || 0;
-        const recorderOptions = mimeType ? { mimeType } : {};
-        if (bitrate > 0) recorderOptions.videoBitsPerSecond = bitrate;
-        const recorder = new MediaRecorder(stream, Object.keys(recorderOptions).length ? recorderOptions : undefined);
         const chunks = [];
         recorder.ondataavailable = event => {
             if (event.data && event.data.size) chunks.push(event.data);
@@ -467,10 +490,10 @@
         const captionOptions = options && options.captionOptions || null;
         const qualityOptions = options && options.qualityOptions || null;
         const originalVolume = sourceMedia ? sourceMedia.volume : 1;
+        const originalMuted = sourceMedia ? sourceMedia.muted : false;
         const captionService = global.AIShortsCaptionService || {};
         let raf = 0;
         let stopped = false;
-        const ctx = getCanvasContext(canvas);
         function drawLoop() {
             const current = sourceMedia ? sourceMedia.currentTime : started;
             const relativeTime = Math.max(0, current - started);
@@ -507,8 +530,11 @@
                 raf = 0;
                 intervalTimer = 0;
                 stopTimer = 0;
-                stream.getTracks().forEach(track => track.stop());
-                if (sourceMedia) sourceMedia.volume = originalVolume;
+                stopStreamTracks(stream, mediaStream);
+                if (sourceMedia) {
+                    sourceMedia.volume = originalVolume;
+                    sourceMedia.muted = originalMuted;
+                }
             }
 
             function onAbort() {

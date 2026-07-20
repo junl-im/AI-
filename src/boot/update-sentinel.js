@@ -1,10 +1,10 @@
-// AI Shorts Studio v1.3.6 - visible update sentinel and cache refresh helper
+// AI Shorts Studio v1.3.7 - visible update sentinel and cache refresh helper
 'use strict';
 
 (function installUpdateSentinel(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const versionSync = global.AIShortsVersionSync || {};
-    const VERSION = versionSync.version || config.APP_VERSION || 'v1.3.6';
+    const VERSION = versionSync.version || config.APP_VERSION || 'v1.3.7';
     const BUILD_KEY = versionSync.buildKey || config.BUILD_KEY || '1.3.0-update-sentinel';
     const STORAGE_KEY = 'ai-shorts-studio-update-sentinel-last-seen';
     let panel;
@@ -96,9 +96,10 @@
     }
 
     async function checkForUpdate() {
-        if (navigator.serviceWorker && navigator.serviceWorker.ready) {
-            registrationRef = await navigator.serviceWorker.ready.catch(() => registrationRef);
-            if (registrationRef && registrationRef.update) await registrationRef.update().catch(() => {});
+        const owner = global.AIShortsServiceWorkerRegistration;
+        if (owner && typeof owner.checkForUpdate === 'function') {
+            const result = await owner.checkForUpdate();
+            if (result && result.registration) registrationRef = result.registration;
         }
         await refreshPanel();
         showLive(`${VERSION} 적용 상태를 다시 확인했습니다.`);

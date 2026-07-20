@@ -17,6 +17,8 @@ assert(pkg.scripts['package:full'] && pkg.scripts['package:patch'] && pkg.script
 
 const patchScript = fs.readFileSync(path.join(root, 'tools/create-patch-zip.sh'), 'utf8');
 assert(patchScript.includes('PATCH_BASE_REF'), 'patch script must support an explicit git base ref');
+assert(patchScript.includes('PATCH_BASE_ARCHIVE') && patchScript.includes('PATCH_BASE_DIR'), 'patch script must support release-archive and directory bases without Git metadata');
+assert(patchScript.includes('zipfile.ZipFile'), 'archive-based patch generation must compare and write files without a manifest');
 assert(patchScript.includes('git -C "${ROOT_DIR}" diff --name-only'), 'patch file list must be derived from git changes');
 assert(patchScript.includes('git -C "${ROOT_DIR}" ls-files --others'), 'patch must include new untracked release files');
 assert(!patchScript.includes('MANIFEST=') && !patchScript.includes('readFileSync') && !patchScript.includes('grep -vE'), 'patch script must not depend on or generate a manifest file');

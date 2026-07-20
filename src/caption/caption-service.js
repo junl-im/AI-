@@ -1,11 +1,22 @@
-// AI Shorts Studio v0.3.0 - local caption parser and cue helper
+// AI Shorts Studio v1.3.7 - bounded local caption parser and cue helper
 'use strict';
 
 (function exposeCaptionService(global) {
     const utils = global.AIShortsCoreUtils || {};
+    const config = global.AIShortsRuntimeConfig || {};
+    const MAX_TEXT_CHARS = Math.max(1000, Number(config.MAX_CAPTION_TEXT_CHARS || 1000000));
+    const MAX_CUES = Math.max(1, Number(config.MAX_CAPTION_CUES || config.MAX_PROJECT_CAPTIONS || 5000));
 
     function normalizeNewlines(text) {
         return String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+    }
+
+    function assertCaptionTextSize(text) {
+        const source = String(text || '');
+        if (source.length > MAX_TEXT_CHARS) {
+            throw new Error(`자막 텍스트가 너무 큽니다. ${MAX_TEXT_CHARS.toLocaleString()}자 이하로 줄여주세요.`);
+        }
+        return source;
     }
 
     function parseTimecode(value) {
@@ -37,7 +48,7 @@
     }
 
     function parseCaptionText(text) {
-        const source = normalizeNewlines(text);
+        const source = normalizeNewlines(assertCaptionTextSize(text));
         if (!source) return [];
         const blocks = source
             .replace(/^WEBVTT[^\n]*(\n|$)/i, '')
@@ -45,31 +56,31 @@
             .map(block => block.trim())
             .filter(Boolean);
         const cues = [];
-        blocks.forEach((block, index) => {
-            const lines = block.split('\n').map(line => line.trim()).filter(Boolean);
-            if (!lines.length) return;
+        for (let index = 0; index < blocks.length && cues.length < MAX_CUES; index += 1) {
+            const lines = blocks[index].split('\n').map(line => line.trim()).filter(Boolean);
+            if (!lines.length) continue;
             let timingIndex = lines.findIndex(line => line.includes('-->'));
             if (timingIndex < 0 && lines.length > 1 && /^\d+$/.test(lines[0]) && lines[1].includes('-->')) timingIndex = 1;
-            if (timingIndex < 0) return;
+            if (timingIndex < 0) continue;
             const timing = lines[timingIndex].split('-->');
-            if (timing.length < 2) return;
+            if (timing.length < 2) continue;
             const start = parseTimecode(timing[0]);
             const end = parseTimecode(String(timing[1] || '').trim().split(/\s+/)[0]);
-            if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return;
+            if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) continue;
             const caption = lines.slice(timingIndex + 1).map(sanitizeLine).filter(Boolean).join('\n');
-            if (!caption) return;
+            if (!caption) continue;
             cues.push({
                 id: `cap-${index + 1}-${Math.round(start * 1000)}`,
                 start,
                 end,
                 text: caption.slice(0, 260)
             });
-        });
+        }
         return cues.sort((a, b) => a.start - b.start || a.end - b.end);
     }
 
     function createQuickCaptions(text, selectedRange, wordsPerCue) {
-        const cleaned = String(text || '').replace(/\s+/g, ' ').trim();
+        const cleaned = assertCaptionTextSize(text).replace(/\s+/g, ' ').trim();
         if (!cleaned) return [];
         const words = cleaned.split(' ').filter(Boolean);
         const range = selectedRange || { start: 0, end: Math.max(4, words.length * 0.35) };
@@ -77,7 +88,9 @@
         const end = Math.max(start + 2, Number(range.end) || start + 8);
         const group = Math.max(3, Math.floor(wordsPerCue || 6));
         const chunks = [];
-        for (let i = 0; i < words.length; i += group) chunks.push(words.slice(i, i + group).join(' '));
+        for (let i = 0; i < words.length && chunks.length < MAX_CUES; i += group) {
+            chunks.push(words.slice(i, i + group).join(' '));
+        }
         const slot = (end - start) / Math.max(1, chunks.length);
         return chunks.map((chunk, index) => ({
             id: `cap-quick-${index + 1}`,
@@ -93,7 +106,7 @@
     }
 
     function serializeCaptions(cues) {
-        return (Array.isArray(cues) ? cues : []).map((cue, index) => {
+        return (Array.isArray(cues) ? cues : []).slice(0, MAX_CUES).map((cue, index) => {
             return `${index + 1}\n${formatTimecode(cue.start)} --> ${formatTimecode(cue.end)}\n${cue.text || ''}`;
         }).join('\n\n');
     }
@@ -114,6 +127,7 @@
         createQuickCaptions,
         getActiveCue,
         serializeCaptions,
-        summarize
+        summarize,
+        limits: Object.freeze({ maxTextChars: MAX_TEXT_CHARS, maxCues: MAX_CUES })
     });
 })(window);

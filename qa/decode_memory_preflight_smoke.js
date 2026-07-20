@@ -17,4 +17,4 @@ assert(extractor.includes('decodeAudioData(arrayBuffer)') && !extractor.includes
 assert(extractor.includes('arrayBuffer = null') && extractor.includes('await context.close()'), 'raw file buffer and audio context are released after decode');
 assert(app.includes("type: 'decode-memory-warning'") && app.includes('budget.hardBlock'), 'app records high-risk decode warnings and blocks unsafe files');
 assert(app.includes('다른 무거운 탭을 닫으면 더 안정적입니다.'), 'user receives actionable long-file memory guidance');
-console.log('PASS v1.3.6 long-file decode memory preflight guardrails');
+console.log('PASS v1.3.7 long-file decode memory preflight guardrails');

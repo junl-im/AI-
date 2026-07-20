@@ -121,6 +121,27 @@
         return normalizeList(bins);
     }
 
+    function normalizeMediaRange(startValue, endValue, maxDuration, minimumDuration) {
+        const ceilingValue = Number(maxDuration);
+        const hasCeiling = Number.isFinite(ceilingValue) && ceilingValue > 0;
+        const ceiling = hasCeiling ? ceilingValue : Infinity;
+        const requestedMinimum = Math.max(0.001, Number(minimumDuration) || 0.001);
+        const minimum = hasCeiling ? Math.min(requestedMinimum, ceiling) : requestedMinimum;
+        let start = Number(startValue);
+        if (!Number.isFinite(start)) start = 0;
+        start = Math.max(0, start);
+        if (hasCeiling) start = Math.min(start, Math.max(0, ceiling - minimum));
+        let end = Number(endValue);
+        if (!Number.isFinite(end)) end = start + minimum;
+        end = Math.max(start + minimum, end);
+        if (hasCeiling) end = Math.min(ceiling, end);
+        if (end <= start) {
+            start = hasCeiling ? Math.max(0, ceiling - minimum) : Math.max(0, start);
+            end = hasCeiling ? ceiling : start + minimum;
+        }
+        return Object.freeze({ start, end, duration: Math.max(0, end - start) });
+    }
+
     function createObjectUrl(file) {
         if (!file) return '';
         return URL.createObjectURL(file);
@@ -172,6 +193,7 @@
         percentile,
         normalizeList,
         createWaveformBins,
+        normalizeMediaRange,
         createObjectUrl,
         revokeObjectUrl,
         getMediaRecorderMime,

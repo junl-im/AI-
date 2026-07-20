@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## v1.3.7 - Render Resource Ownership, Bounded Captions & Update Coalescing
+
+- 렌더 기능 사전 검사에서 `captureStream()`을 호출해 사용하지 않는 미디어 트랙이 남을 수 있던 부작용을 제거했습니다.
+- 실제 렌더는 원본 캡처 스트림을 한 번만 만들고 성공·실패·취소·설정 실패 경로에서 캔버스·오디오·원본 영상 트랙을 모두 정리합니다.
+- 렌더 과정에서 변경한 원본 미디어 `muted`·`volume`을 이전 값으로 복원합니다.
+- 미디어 길이보다 큰 수동 시작점, 역순 시작·종료, 1초 미만 미디어를 공용 `normalizeMediaRange()`로 안전하게 보정합니다.
+- 직접 붙여넣는 자막 텍스트를 100만 자, 자막 큐를 5,000개로 제한하고 초과 입력을 파싱 전에 거부합니다.
+- 프로젝트 후보 ID에서 제어 문자를 제거하고 중복 ID에 고유 접미사를 부여해 DOM 선택·비교 충돌을 막았습니다.
+- Update Sentinel과 버전 동기화 모듈의 직접 `registration.update()` 호출을 제거하고 서비스워커 소유 모듈의 `checkForUpdate()`로 통합했습니다.
+- 동시에 발생하는 업데이트 확인은 하나의 Promise와 하나의 브라우저 업데이트 요청으로 합칩니다.
+- 렌더 자원 정리, 범위·자막·후보 ID, 서비스워커 단일 소유 전용 회귀 검사 3개를 추가했습니다.
+- 자동 QA 135/135, PC·모바일 Chromium 오류 0건, MP3·MP4·취소·재시도·10분 미디어 E2E를 통과했습니다.
+- Git 메타데이터가 없는 전체 설치본에서도 `PATCH_BASE_ARCHIVE` 또는 `PATCH_BASE_DIR`로 직전 릴리스를 지정해 내용 기반 패치 ZIP을 만들 수 있습니다.
+- 배포 과정에서 `PATCH_MANIFEST.txt` 또는 동일 목적의 임시 목록 파일을 생성하지 않는 원칙을 유지합니다.
+
 ## v1.3.6 - Release Consistency, Bounded Project Restore & Checkpointed E2E
 
 - 실제 재검증에서 `index.html`의 v1.3.4 빌드 키와 v1.3.5 QA 기대값이 어긋나 100/131만 통과하던 배포 불일치를 수정했습니다.

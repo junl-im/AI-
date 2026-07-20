@@ -1,4 +1,113 @@
-# HANDOFF v1.3.6
+# HANDOFF v1.3.7
+
+## 현재 상태
+
+v1.3.7은 v1.3.6의 **132/132 기준선**에서 다음 감사 라운드를 시작해, 기존 QA가 놓친 렌더 스트림 수명·수동 범위 경계·직접 붙여넣기 자막·중복 후보 ID·서비스워커 수동 업데이트 경합을 수정한 안정화 릴리스입니다.
+
+최종 자동 검사는 **135/135**이며 PC·모바일 Chromium 오류, Promise 거절, 콘솔 오류와 가로 overflow는 모두 0입니다. MP3·MP4 저장, 취소, 재생 실패 후 재시도, 10분 MP3 분석·6초 렌더도 다시 통과했습니다.
+
+## 이번 점검에서 발견한 실제 문제
+
+1. 렌더 지원 여부를 확인하는 `inspectRenderCapability()`가 `captureStream()`을 호출해 검사만으로 미디어 트랙을 생성할 수 있었습니다.
+2. 실제 렌더 초기 설정이 중간에 실패하면 canvas·audio·source video 트랙 일부가 남을 수 있었습니다.
+3. 렌더가 원본 미디어의 `muted`를 변경한 뒤 항상 원래 상태로 돌려놓지는 않았습니다.
+4. 사용자가 미디어 길이보다 큰 시작점이나 역순 시작·종료를 직접 입력하면 종료가 시작보다 작아질 수 있었습니다.
+5. 직접 붙여넣는 자막은 파일 크기 사전 검사와 달리 텍스트·큐 개수 상한이 없어 UI와 렌더가 장시간 멈출 수 있었습니다.
+6. 가져온 프로젝트에 같은 후보 ID가 여러 개 있으면 선택·비교·핀 상태가 같은 항목으로 충돌할 수 있었습니다.
+7. Update Sentinel과 버전 동기화가 소유 모듈을 거치지 않고 `registration.update()`를 직접 호출해 동시에 여러 업데이트 요청이 생길 수 있었습니다.
+8. 전체 설치 ZIP에서 개발을 이어가는 비-Git 환경에서는 기존 패치 스크립트가 기준 commit을 찾지 못해 `npm run package`가 실패했습니다.
+
+## 적용한 수정
+
+- 렌더 사전 검사는 `captureStream` 함수 존재 여부만 확인하고 스트림을 만들지 않습니다.
+- 실제 렌더에서 source capture stream을 한 번만 생성하고, 성공·실패·취소·설정 실패 모두 생성한 트랙을 중지합니다.
+- 사용되지 않는 source video track도 cleanup 대상에 포함했습니다.
+- 렌더 전 원본 미디어의 `muted`와 `volume`을 저장하고 종료 시 복원합니다.
+- `src/utils/core-utils.js`에 `normalizeMediaRange()`를 추가해 수동 범위와 프로젝트 후보·자막 범위가 같은 규칙을 사용하게 했습니다.
+- 직접 붙여넣는 자막을 100만 자, 파싱 결과를 5,000개 큐로 제한하고 초과 시 진단을 남깁니다.
+- 프로젝트 후보 ID에서 제어 문자를 제거하고 중복 ID에는 고유 접미사를 부여합니다.
+- `AIShortsServiceWorkerRegistration.checkForUpdate()`를 추가해 Update Sentinel과 버전 동기화가 이 API에만 위임하도록 했습니다.
+- 동시 업데이트 확인은 공유 Promise로 합쳐 브라우저 `registration.update()`를 한 번만 실행합니다.
+- 패치 스크립트에 `PATCH_BASE_ARCHIVE`·`PATCH_BASE_DIR` 경로를 추가해 Git 없이도 직전 릴리스와 SHA-256 내용 비교로 변경 파일만 압축합니다.
+- 신규 회귀 검사 3개를 추가해 QA를 132개에서 135개로 확장했습니다.
+- `PATCH_MANIFEST.txt` 또는 같은 목적의 임시 목록 파일은 생성하지 않습니다.
+
+## 주요 변경 파일
+
+- `src/render/vertical-renderer.js`: 부작용 없는 기능 검사, 단일 캡처 생성, 트랙·미디어 상태 cleanup
+- `src/utils/core-utils.js`: 공용 `normalizeMediaRange()`
+- `src/app.js`: 수동 범위 보정, 직접 붙여넣기 자막 상한·진단
+- `src/caption/caption-service.js`: 텍스트·큐 상한을 적용한 bounded parser
+- `src/project/project-service.js`: 공용 범위 정규화, 후보 ID 정제·고유화
+- `src/boot/service-worker-registration.js`: 등록·업데이트 단일 소유와 동시 업데이트 합치기
+- `src/boot/update-sentinel.js`: 업데이트 확인을 소유 모듈에 위임
+- `src/boot/app-version-sync.js`: freshness 확인을 소유 모듈에 위임
+- `qa/render_resource_cleanup_smoke.js`: 캡처 사전 검사와 스트림 cleanup 회귀
+- `qa/range_caption_guard_smoke.js`: 범위·자막·후보 ID 경계값 회귀
+- `qa/service_worker_owner_smoke.js`: 업데이트 단일 소유·동시 호출 합치기 회귀
+
+## 유지 규칙
+
+1. 렌더 지원 여부 확인 함수는 스트림·AudioContext·ObjectURL을 생성하지 않습니다.
+2. 생성한 모든 MediaStreamTrack은 성공·실패·취소·초기화 실패에서 반드시 중지합니다.
+3. 렌더가 변경한 원본 미디어 상태는 작업 전 값으로 복구합니다.
+4. 미디어 시간 구간은 공용 `normalizeMediaRange()`를 통과해야 합니다.
+5. 후보·자막 구간은 양수 길이를 유지하면서 실제 미디어 끝을 넘지 않아야 합니다.
+6. 직접 붙여넣기와 파일 가져오기는 같은 자막 크기·큐 상한을 사용합니다.
+7. 프로젝트 후보 ID는 제어 문자가 없고 프로젝트 안에서 유일해야 합니다.
+8. 서비스워커 등록과 `registration.update()`는 `AIShortsServiceWorkerRegistration`만 소유합니다.
+9. **Update Sentinel**은 진단과 캐시 정리를 담당하며 등록 객체를 직접 업데이트하지 않습니다.
+10. 기존 **모듈형 엔진**과 operation coordinator의 작업 소유권 계약을 유지합니다.
+11. `PATCH_MANIFEST.txt`나 동일 목적의 임시 배포 목록 파일을 만들지 않습니다.
+
+## 검수 결과
+
+- `npm test`: **135/135 통과**
+- Chromium desktop 1366×768: 오류·Promise 거절·콘솔 오류 0
+- Chromium mobile 390×844: 오류·Promise 거절·콘솔 오류 0
+- PC 메뉴 8/8, 모바일 간단 메뉴 4/4, 전체 메뉴 8/8
+- PC·모바일 가로 overflow: 0px
+- 20초 MP3·MP4 출력 정상
+- 렌더 취소: 다운로드 0, 활성 operation 0
+- 재생 실패 후 새 작업 재시도 정상
+- 10분 MP3 분석: 약 6.734초
+- 장시간 분석 예산: 8kHz, 분석 트랙 약 18.3MB
+- 예상 decode 메모리 약 219.7MB, 위험도 medium
+- 분석 후 decoded AudioBuffer·channelData 미보유
+- 6초 렌더: 약 5.866초, 1,208,719바이트, ffprobe 통과
+- v1.3.6 전체 ZIP + v1.3.7 패치 적용 결과가 현재 소스 238개 파일과 해시 기준 완전 일치
+- 전체·패치 ZIP 압축 오류 0, 금지 항목 0
+- 렌더 중 ETA 표시와 완료 후 operation 해제 확인
+
+## 배포·검수 순서
+
+1. `npm test`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset`
+4. `python3 qa/run_media_e2e.py --cases longAudio`
+5. 전체 ZIP과 v1.3.6 기준 덮어쓰기 ZIP 생성(`PATCH_BASE_ARCHIVE` 또는 Git 기준 사용)
+6. `unzip -t`와 SHA-256 확인
+7. ZIP 내부에 `PATCH_MANIFEST.txt`, Python 캐시, `.git`, `node_modules`, 이전 배포 ZIP이 없는지 확인
+
+## 다음 우선순위
+
+1. localhost/HTTPS에서 서비스워커 설치→대기→활성화→컨트롤 전환 자동 감사
+2. 15분·30분 MP4 분석 시간, decode peak memory, 장시간 렌더 성공률 계측
+3. 렌더·취소·파일 교체를 20회 반복하는 MediaStream·AudioContext·ObjectURL 누수 스트레스 감사
+4. 모바일 Safari·Samsung Internet 실기기 장시간 렌더 검증
+5. 프로젝트 스키마 마이그레이션 로그와 사용자 복구 안내 개선
+
+## 알려진 제한
+
+- 현재 Chromium 감사 하네스는 비보안 인라인 환경이라 실제 서비스워커 lifecycle을 실행하지 않습니다. API 소유권과 경합은 단위 검증됐지만 배포 서버 전환은 별도 확인이 필요합니다.
+- Web Audio 전체 디코딩 특성상 매우 긴 무압축 오디오의 순간 peak memory는 여전히 클 수 있습니다.
+- 15분·30분 고해상도 MP4와 모바일 Safari·Samsung Internet 장시간 출력은 실기기 검증이 필요합니다.
+- 패치 ZIP은 삭제 파일을 적용할 수 없습니다. 삭제가 생기는 버전은 별도 삭제 절차나 전체 설치본이 필요합니다.
+
+---
+
+## 이전 인수인계 원문 — v1.3.6
+
 
 ## 요약
 

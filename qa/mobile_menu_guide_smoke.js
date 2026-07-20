@@ -13,14 +13,14 @@ function assert(value, message) {
   if (!value) { console.error(`FAIL ${message}`); process.exit(1); }
   console.log(`PASS ${message}`);
 }
-assert(pkg.version === '1.3.6', 'adaptive mobile menu release version is v1.3.6');
+assert(pkg.version === '1.3.7', 'adaptive mobile menu release version is v1.3.7');
 ['mobileDockGuide','mobileDockGuideText','mobileDockVisibleCount','mobileDockMenuToggle','bottomDockTabs'].forEach(id => assert(html.includes(`id="${id}"`), `${id} anchor exists`));
-assert(html.includes('assets/css/mobile-menu-guide.css?v=1.3.6-adaptive-mobile'), 'adaptive mobile menu stylesheet is linked');
-assert(html.includes('src/ui/mobile-menu-guide.js?v=1.3.6-adaptive-mobile'), 'adaptive mobile menu controller is linked');
+assert(html.includes('assets/css/mobile-menu-guide.css?v=1.3.7-adaptive-mobile'), 'adaptive mobile menu stylesheet is linked');
+assert(html.includes('src/ui/mobile-menu-guide.js?v=1.3.7-adaptive-mobile'), 'adaptive mobile menu controller is linked');
 assert(js.includes("const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export']"), 'mobile controller owns the complete workflow order');
 assert(js.includes('priorityTabs(current)') && js.includes("body.dataset.mobileMenuMode"), 'mobile controller computes current/next priorities and owns compact state');
 assert(js.includes("setAttribute('aria-expanded'") && js.includes("setAttribute('aria-hidden'"), 'mobile menu expansion and hidden tabs expose accessible state');
 assert(css.includes('data-mobile-menu-mode="compact"') && css.includes('data-mobile-priority="false"'), 'compact mode hides only non-priority tabs');
 assert(css.includes('data-mobile-menu-mode="expanded"') && css.includes('repeat(4, minmax(0, 1fr))'), 'expanded mode restores all eight tabs in a four-column grid');
-assert(sw.includes('./assets/css/mobile-menu-guide.css?v=1.3.6-adaptive-mobile') && sw.includes('./src/ui/mobile-menu-guide.js?v=1.3.6-adaptive-mobile'), 'service worker caches adaptive mobile menu assets');
-console.log('PASS v1.3.6 adaptive mobile current/next menu guardrails');
+assert(sw.includes('./assets/css/mobile-menu-guide.css?v=1.3.7-adaptive-mobile') && sw.includes('./src/ui/mobile-menu-guide.js?v=1.3.7-adaptive-mobile'), 'service worker caches adaptive mobile menu assets');
+console.log('PASS v1.3.7 adaptive mobile current/next menu guardrails');

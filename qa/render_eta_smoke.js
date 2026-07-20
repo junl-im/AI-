@@ -13,12 +13,12 @@ function assert(value, message) {
     if (!value) { console.error(`FAIL ${message}`); process.exit(1); }
     console.log(`PASS ${message}`);
 }
-assert(pkg.version === '1.3.6', 'render ETA release version is v1.3.6');
+assert(pkg.version === '1.3.7', 'render ETA release version is v1.3.7');
 assert(queue.includes('EMIT_INTERVAL_MS = 140') && queue.includes('function updateProgress'), 'render progress events are throttled');
 assert(queue.includes('etaSeconds') && queue.includes('elapsedMs') && queue.includes('progressRate'), 'queue tracks ETA and elapsed time');
 assert(queue.includes('statusText') && !queue.includes('filenameHint: status || item.filenameHint'), 'live status no longer overwrites the output filename');
 assert(app.includes('formatQueueDuration') && app.includes('남은 약'), 'render UI presents a readable remaining-time estimate');
 assert(app.includes('role="progressbar"') && app.includes('aria-valuenow'), 'render progress exposes accessible progress semantics');
 assert(html.includes('id="renderQueueStatus"') && html.includes('aria-live="polite"'), 'render queue status is announced without interrupting the user');
-assert(css.includes('v1.3.6 long-media render ETA'), 'render ETA layout has responsive styling');
-console.log('PASS v1.3.6 throttled render ETA guardrails');
+assert(css.includes('v1.3.7 long-media render ETA'), 'render ETA layout has responsive styling');
+console.log('PASS v1.3.7 throttled render ETA guardrails');
