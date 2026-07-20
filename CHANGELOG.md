@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## v1.3.6 - Release Consistency, Bounded Project Restore & Checkpointed E2E
+
+- 실제 재검증에서 `index.html`의 v1.3.4 빌드 키와 v1.3.5 QA 기대값이 어긋나 100/131만 통과하던 배포 불일치를 수정했습니다.
+- HTML·자산 쿼리·서비스워커 캐시·package·QA를 v1.3.6 / `1.3.6-adaptive-mobile`로 동기화했습니다.
+- 서비스워커 등록과 업데이트 확인을 `AIShortsServiceWorkerRegistration` 한 곳으로 통합하고 비보안 외부 HTTP 등록을 건너뜁니다.
+- manifest·service worker 제어 자산이 실패할 때 `index.html`로 잘못 폴백하지 않고 명시적인 503을 반환합니다.
+- 프로젝트 스키마를 v3으로 올리고 후보·자막·문자열·파일 크기·미디어 시간 상한과 허용 설정 키를 적용했습니다.
+- 미래 스키마, 과대 프로젝트·자막 입력, 프로토타입 오염 키, 비정상 시간 구간을 안전하게 거부하거나 보정합니다.
+- 같은 파일 재선택, 지연 자동 분석 세션 경합, 취소 후 분석 상태, 프로젝트 설정 저장 누락을 수정했습니다.
+- 최대 미디어 길이 경계에서 후보·자막 종료 시간이 상한을 넘을 수 있던 예외를 수정했습니다.
+- 후보 ID의 CSS 특수 문자가 비교·핀 선택자를 깨뜨릴 수 있던 경로를 `dataset.id` 정확 비교로 변경했습니다.
+- 실미디어 감사에 선택 시나리오와 체크포인트 저장을 추가하고 다운로드 감시 등록 경합을 제거했습니다.
+- 패치 ZIP은 Git 변경 파일에서 직접 계산하며 `PATCH_MANIFEST.txt` 같은 중간 목록 파일을 생성하지 않습니다.
+- 자동 QA 132/132, PC·모바일 Chromium 오류 0건, MP3·MP4·취소·재시도·10분 미디어 E2E를 통과했습니다.
+
 ## v1.3.5 - Runtime Guard & Safe User Data Rendering
 
 - 서비스워커 등록을 전용 `AIShortsServiceWorkerRegistration` 모듈로 분리해 등록 소유권을 단일화했습니다.

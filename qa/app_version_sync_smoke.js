@@ -24,6 +24,13 @@ assert(html.includes(`<meta name="ai-shorts-version" content="${version}" />`), 
 assert(html.includes(`>${version}</button>`), 'header version badge matches package version');
 assert(html.includes(`AI 쇼츠 제작 스튜디오 ${version}`), 'title/info title includes current version');
 assert(html.includes('src/boot/app-version-sync.js'), 'version sync boot module is loaded');
+
+const versionedAssets = Array.from(html.matchAll(/\?v=([^"']+)/g), match => match[1]);
+assert(versionedAssets.length > 40 && versionedAssets.every(value => value === `${plain}-adaptive-mobile`), 'all core HTML assets use the current build key');
+assert(!html.includes('1.3.4-adaptive-mobile') && !html.includes('1.3.5-adaptive-mobile'), 'stale HTML build keys are absent');
+const registrationIndex = html.indexOf('src/boot/service-worker-registration.js');
+const appIndex = html.indexOf('src/app.js');
+assert(registrationIndex >= 0 && registrationIndex < appIndex, 'service worker registration module loads before the app');
 assert(sync.includes('AIShortsVersionSync'), 'version sync API is exported');
 assert(sync.includes('runtime-config'), 'version badge marks runtime config as source');
 assert(sw.includes('version-aware cache guard'), 'service worker documents version-aware cache guard');
@@ -33,5 +40,9 @@ assert(sw.includes(`app-version-sync.js?v=${plain}-adaptive-mobile`), 'service w
 assert(html.includes('src/boot/service-worker-registration.js'), 'service worker registration module is loaded');
 assert(sw.includes(`service-worker-registration.js?v=${plain}-adaptive-mobile`), 'service worker precaches registration module');
 assert(swRegistration.includes('registration.update') && swRegistration.includes('config.APP_VERSION'), 'registration module checks for updates with the runtime config version');
+assert(!sync.includes('navigator.serviceWorker.ready') && !sync.includes('registration.update'), 'version sync does not issue a second service worker update');
+assert(sync.includes('AIShortsServiceWorkerRegistration'), 'manual freshness checks delegate to the registration owner');
+assert(sw.includes('isControlAsset') && sw.includes('navigationFallback: false'), 'manifest and worker control assets never fall back to index HTML');
+assert(sw.includes("status: 503") && sw.includes("Content-Type': 'text/plain; charset=utf-8'"), 'offline control-asset failures return an explicit non-HTML response');
 assert(app.includes('serviceWorkerRegistration.register'), 'app delegates registration to the single-owner module');
 console.log('PASS app version sync and cache guard are aligned');

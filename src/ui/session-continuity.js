@@ -5,12 +5,15 @@
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
     const projectService = global.AIShortsProjectService || {};
+    const config = global.AIShortsRuntimeConfig || {};
     const STORAGE_KEY = 'ai-shorts-session-continuity-v112';
     const SAVE_DELAY = 900;
     let saveTimer = 0;
     let syncTimer = 0;
     let panelReady = false;
     let heartbeatTimer = 0;
+    let invalidSnapshotReported = false;
+    const MAX_SNAPSHOT_CHARS = Math.max(1024, Number(config.MAX_PROJECT_TEXT_CHARS || 2500000));
 
     function byId(id) { return document.getElementById(id); }
     function safeParse(text) { try { return JSON.parse(text); } catch (error) { return null; } }
@@ -59,7 +62,19 @@
         return base;
     }
     function loadSnapshot() {
-        try { return safeParse(localStorage.getItem(STORAGE_KEY) || ''); } catch (error) { return null; }
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY) || '';
+            if (!raw || raw.length > MAX_SNAPSHOT_CHARS) throw new Error(raw ? '저장된 세션이 허용 크기를 초과했습니다.' : '');
+            const parsed = projectService.parseProjectText ? projectService.parseProjectText(raw) : safeParse(raw);
+            invalidSnapshotReported = false;
+            return parsed;
+        } catch (error) {
+            if (error && error.message && !invalidSnapshotReported && store.addDiagnostic) {
+                invalidSnapshotReported = true;
+                store.addDiagnostic({ type: 'session-snapshot-invalid', message: error.message });
+            }
+            return null;
+        }
     }
     function saveSnapshotNow(reason) {
         if (!hasWork()) return false;

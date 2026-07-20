@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.5 - worker bridge using shared adaptive audio analysis core
+// AI Shorts Studio v1.3.6 - worker bridge using shared adaptive audio analysis core
 'use strict';
 
 importScripts('../analysis/audio-analysis-core.js');

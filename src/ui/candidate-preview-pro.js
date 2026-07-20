@@ -7,6 +7,10 @@
     let currentSort = 'score';
 
     function byId(id) { return document.getElementById(id); }
+    function findRecommendationCard(id) {
+        const targetId = String(id == null ? '' : id);
+        return Array.from(document.querySelectorAll('.recommendation-card[data-id]')).find(card => card.dataset.id === targetId) || null;
+    }
     function list() { return Array.isArray(state.recommendations) ? state.recommendations : []; }
     function selected() { return list().find(item => item && item.id === state.selectedRecommendationId) || null; }
     function fmtSeconds(value) {
@@ -22,7 +26,7 @@
         }
     }
     function clickCandidate(id) {
-        const card = document.querySelector(`.recommendation-card[data-id="${String(id).replace(/"/g, '\\"')}"]`);
+        const card = findRecommendationCard(id);
         if (card) {
             card.classList.add('is-pro-focus');
             window.setTimeout(() => card.classList.remove('is-pro-focus'), 900);

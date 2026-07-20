@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.5 - single-owner service worker registration
+// AI Shorts Studio v1.3.6 - single-owner service worker registration
 'use strict';
 
 (function exposeServiceWorkerRegistration(global) {
@@ -20,12 +20,11 @@
     }
 
     function canRegister() {
-        return Boolean(
-            global.navigator &&
-            global.navigator.serviceWorker &&
-            global.location &&
-            global.location.protocol !== 'file:'
-        );
+        const location = global.location || {};
+        const protocol = String(location.protocol || '');
+        const hostname = String(location.hostname || '');
+        const secureOrigin = protocol === 'https:' || (protocol === 'http:' && /^(localhost|127\.0\.0\.1|\[::1\])$/i.test(hostname));
+        return Boolean(global.navigator && global.navigator.serviceWorker && secureOrigin && global.isSecureContext !== false);
     }
 
     function register(options) {

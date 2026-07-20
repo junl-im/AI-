@@ -4,31 +4,28 @@ const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
 const pkg = require(path.join(root, 'package.json'));
-for (const file of ['tools/create-release-zip.sh','tools/create-patch-zip.sh','tools/create-distribution-zips.sh','PATCH_MANIFEST.txt']) {
-  if (!fs.existsSync(path.join(root, file))) throw new Error(`missing distribution asset: ${file}`);
+
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
 }
-if (!pkg.scripts['package:full'] || !pkg.scripts['package:patch'] || !pkg.scripts.package) throw new Error('dual package scripts missing');
-const manifest = fs.readFileSync(path.join(root, 'PATCH_MANIFEST.txt'), 'utf8');
-if (!manifest.includes('# from=1.3.4') || !manifest.includes('# to=1.3.5')) throw new Error('patch version range is not v1.3.4 to v1.3.5');
-for (const required of [
-  'src/boot/service-worker-registration.js',
-  'src/utils/core-utils.js',
-  'src/app.js',
-  'src/ui/session-continuity.js',
-  'src/ui/candidate-preview-pro.js',
-  'src/ui/export-finish-center.js',
-  'qa/runtime_guard_smoke.js',
-  'qa/runtime-media-e2e-v1.3.5.json',
-  'qa/media_e2e_audit_smoke.js',
-  'qa/runtime-browser-audit-v1.3.5.json',
-  'qa/runtime_browser_audit_smoke.js',
-  'index.html',
-  'sw.js',
-  'package.json',
-  'README.md',
-  'HANDOFF.md',
-  'qa/QA_REPORT.md'
-]) {
-  if (!manifest.includes(required)) throw new Error(`patch manifest incomplete: ${required}`);
+
+for (const file of ['tools/create-release-zip.sh', 'tools/create-patch-zip.sh', 'tools/create-distribution-zips.sh']) {
+  assert(fs.existsSync(path.join(root, file)), `missing distribution asset: ${file}`);
 }
-console.log('PASS full and v1.3.5 overwrite-patch-from-v1.3.4 distribution contract');
+assert(!fs.existsSync(path.join(root, 'PATCH_MANIFEST.txt')), 'PATCH_MANIFEST.txt must not be generated or shipped');
+assert(pkg.scripts['package:full'] && pkg.scripts['package:patch'] && pkg.scripts.package, 'dual package scripts missing');
+
+const patchScript = fs.readFileSync(path.join(root, 'tools/create-patch-zip.sh'), 'utf8');
+assert(patchScript.includes('PATCH_BASE_REF'), 'patch script must support an explicit git base ref');
+assert(patchScript.includes('git -C "${ROOT_DIR}" diff --name-only'), 'patch file list must be derived from git changes');
+assert(patchScript.includes('git -C "${ROOT_DIR}" ls-files --others'), 'patch must include new untracked release files');
+assert(!patchScript.includes('MANIFEST=') && !patchScript.includes('readFileSync') && !patchScript.includes('grep -vE'), 'patch script must not depend on or generate a manifest file');
+assert(patchScript.includes('diff-filter=D'), 'patch script must guard unsupported file deletions');
+
+const releaseScript = fs.readFileSync(path.join(root, 'tools/create-release-zip.sh'), 'utf8');
+assert(releaseScript.includes("-x 'dist/*'"), 'full release must exclude nested distribution files');
+assert(releaseScript.includes("-x 'PATCH_MANIFEST.txt'"), 'full release must explicitly exclude legacy patch manifests');
+assert(releaseScript.includes("-x '*/__pycache__/*'") && releaseScript.includes("-x '*.pyc'"), 'full release must exclude Python cache artifacts');
+assert(patchScript.includes('*/__pycache__/*') && patchScript.includes('*.pyc'), 'patch release must ignore legacy Python cache artifacts');
+
+console.log(`PASS manifest-free full and dynamic overwrite-patch distribution contract for v${pkg.version}`);

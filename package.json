@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-3-5",
-  "version": "1.3.5",
+  "name": "ai-shorts-studio-v1-3-6",
+  "version": "1.3.6",
   "private": true,
-  "description": "AI Shorts Studio v1.3.5 - service worker runtime guard, safe media intake, and user-text rendering hardening",
+  "description": "AI Shorts Studio v1.3.6 - release consistency, manifest-free packaging, bounded project restore, and service worker ownership hardening",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -75,6 +75,7 @@
     "node qa/docs_handoff_smoke.js",
     "node qa/caption_service_smoke.js",
     "node qa/project_service_smoke.js",
+    "node qa/project_import_guard_smoke.js",
     "node qa/modular_engine_smoke.js",
     "node qa/engine_boost_profile_smoke.js",
     "node qa/hyperflow_workflow_smoke.js",

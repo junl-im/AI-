@@ -14,7 +14,10 @@ zip -qr "${OUTPUT_FILE}" . \
   -x '.git/*' \
   -x '.firebase/*' \
   -x 'node_modules/*' \
+  -x '*/__pycache__/*' \
+  -x '*.pyc' \
   -x 'dist/*' \
+  -x 'PATCH_MANIFEST.txt' \
   -x '*.zip' \
   -x 'check.log' \
   -x '.DS_Store'

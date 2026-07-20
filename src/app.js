@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.5 - coordinated media operations, adaptive mobile flow, and memory preflight
+// AI Shorts Studio v1.3.6 - coordinated media operations, adaptive mobile flow, and memory preflight
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -1012,6 +1012,7 @@
         state.fileKind = kind;
         state.fileUrl = utils.createObjectUrl ? utils.createObjectUrl(file) : URL.createObjectURL(file);
         state.fileMeta = { name: file.name, size: file.size, type: file.type, duration: 0 };
+        if (els.fileInput) els.fileInput.value = '';
         if (els.selectedBadge) els.selectedBadge.textContent = kind === 'video' ? '영상 선택됨' : '오디오 선택됨';
         if (els.importStatus) els.importStatus.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB`;
         setupMediaPreview();
@@ -1021,7 +1022,10 @@
         renderAll();
         updateButtons();
         activateFlowTab('file', { reveal: false, instant: true });
-        window.setTimeout(() => analyzeCurrentFile({ autoGenerate: false, source: 'file-open' }), 80);
+        window.setTimeout(() => {
+            if (state.mediaSessionId !== mediaSessionId || state.file !== file) return;
+            analyzeCurrentFile({ autoGenerate: false, source: 'file-open' });
+        }, 80);
     }
 
     function setupMediaPreview() {
@@ -1040,13 +1044,15 @@
         }
         const media = getActiveMediaElement();
         if (!media) return;
-        media.src = state.fileUrl;
-        media.preload = 'metadata';
+        const importBaseText = state.fileMeta ? `${state.fileMeta.name || ''} · ${((Number(state.fileMeta.size) || 0) / 1024 / 1024).toFixed(1)} MB` : '';
         media.onloadedmetadata = () => {
+            if (!state.fileMeta || media.src !== state.fileUrl && !media.src.endsWith(state.fileUrl)) return;
             state.fileMeta.duration = Number(media.duration) || 0;
-            if (els.importStatus) els.importStatus.textContent += state.fileMeta.duration ? ` · ${utils.formatTime(state.fileMeta.duration)}` : '';
+            if (els.importStatus) els.importStatus.textContent = importBaseText + (state.fileMeta.duration ? ` · ${utils.formatTime(state.fileMeta.duration)}` : '');
             renderPreviewStill();
         };
+        media.preload = 'metadata';
+        media.src = state.fileUrl;
     }
 
     function waitForActiveMediaMetadata(token) {
@@ -1211,9 +1217,11 @@
                 if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-error', message: error.message });
             }
         } finally {
-            const ownsOperation = !token || !token.signal || !token.signal.aborted;
-            if (ownsOperation) {
-                finishOperation(token, 'analysis-finalized');
+            const current = !token || !operationCoordinator.isCurrent || operationCoordinator.isCurrent(token);
+            const operationState = operationCoordinator.snapshot ? operationCoordinator.snapshot() : null;
+            const newerAnalysisActive = Boolean(operationState && operationState.active && operationState.active.some(item => item.channel === 'analysis' && (!token || item.id !== token.id)));
+            if (current) finishOperation(token, 'analysis-finalized');
+            if (state.file === inputFile && !newerAnalysisActive) {
                 state.isAnalyzing = false;
                 updateButtons();
             }
@@ -1487,6 +1495,13 @@
     function handleCaptionFile(event) {
         const file = event && event.target && event.target.files && event.target.files[0];
         if (!file) return;
+        const maxBytes = Number(config.MAX_CAPTION_FILE_BYTES || 1024 * 1024);
+        if (Number(file.size || 0) > maxBytes) {
+            event.target.value = '';
+            toast(`자막 파일이 너무 큽니다. ${Math.round(maxBytes / 1024 / 1024)}MB 이하 파일을 사용해주세요.`, 'warning');
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'caption-file-too-large', fileName: file.name, fileSize: file.size, maxBytes });
+            return;
+        }
         const reader = new FileReader();
         reader.onload = () => {
             if (els.captionTextInput) els.captionTextInput.value = String(reader.result || '');
@@ -1513,6 +1528,13 @@
     function handleProjectFile(event) {
         const file = event && event.target && event.target.files && event.target.files[0];
         if (!file) return;
+        const maxBytes = Number(config.MAX_PROJECT_FILE_BYTES || 2 * 1024 * 1024);
+        if (Number(file.size || 0) > maxBytes) {
+            event.target.value = '';
+            toast(`프로젝트 파일이 너무 큽니다. ${Math.round(maxBytes / 1024 / 1024)}MB 이하 파일을 사용해주세요.`, 'warning');
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'project-file-too-large', fileName: file.name, fileSize: file.size, maxBytes });
+            return;
+        }
         const reader = new FileReader();
         reader.onload = () => {
             try {
@@ -1524,11 +1546,14 @@
                     if (els.hashtagInput) els.hashtagInput.value = project.copy.hashtags || els.hashtagInput.value;
                 }
                 if (els.captionTextInput && captionService.serializeCaptions) els.captionTextInput.value = captionService.serializeCaptions(state.captions || []);
+                if (store.saveSettings) store.saveSettings();
                 syncSettingsToUI();
                 renderAll();
-                toast('프로젝트를 불러왔습니다. 원본 미디어가 다르면 다시 파일을 열어주세요.');
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'project-import', fileName: file.name, recommendations: (state.recommendations || []).length, captions: (state.captions || []).length });
+                toast('프로젝트를 불러왔습니다. 원본 미디어가 다르면 다시 파일을 열어주세요.', 'success');
             } catch (error) {
-                toast(error.message || '프로젝트 파일을 읽지 못했습니다.');
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'project-import-error', fileName: file.name, message: error.message });
+                toast(error.message || '프로젝트 파일을 읽지 못했습니다.', 'error');
             }
         };
         reader.onerror = () => toast('프로젝트 파일을 읽지 못했습니다.');

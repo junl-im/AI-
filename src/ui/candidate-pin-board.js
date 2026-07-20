@@ -10,6 +10,10 @@
     let observer = null;
 
     function byId(id) { return document.getElementById(id); }
+    function findRecommendationCard(id) {
+        const targetId = String(id == null ? '' : id);
+        return Array.from(document.querySelectorAll('.recommendation-card[data-id]')).find(card => card.dataset.id === targetId) || null;
+    }
     function candidates() { return Array.isArray(state.recommendations) ? state.recommendations.filter(Boolean) : []; }
     function selectedId() { return state.selectedRecommendationId || ''; }
     function selected() { return candidates().find(item => item.id === selectedId()) || null; }
@@ -61,7 +65,7 @@
         else if (global.AIShortsMotionStability && global.AIShortsMotionStability.reveal) global.AIShortsMotionStability.reveal(tab, { force: true });
     }
     function selectCandidate(id, tab) {
-        const card = document.querySelector(`.recommendation-card[data-id="${String(id).replace(/"/g, '\\"')}"]`);
+        const card = findRecommendationCard(id);
         if (card) card.click();
         if (tab) window.setTimeout(() => goTab(tab), 80);
     }

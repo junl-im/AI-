@@ -67,17 +67,30 @@ function loadBrowserModule(rel, windowOverrides) {
     ok(failedOnce.status === 'error' && failedTwice.status === 'error' && attempts === 2, 'failed service worker registration can be retried');
     ok(failures.filter(item => item.type === 'service-worker-error').length === 2, 'service worker failures stay diagnostic instead of unhandled');
 
+    let insecureCalls = 0;
+    const insecureWindow = loadBrowserModule('src/boot/service-worker-registration.js', {
+        location: { protocol: 'http:', hostname: 'example.test' },
+        navigator: { serviceWorker: { register: async () => { insecureCalls += 1; } } }
+    });
+    const insecureResult = await insecureWindow.AIShortsServiceWorkerRegistration.register();
+    ok(insecureResult.status === 'unsupported' && insecureCalls === 0, 'insecure non-local origins skip service worker registration');
+
+    const versionSync = read('src/boot/app-version-sync.js');
+    ok(!versionSync.includes('navigator.serviceWorker.ready') && !versionSync.includes('registration.update'), 'service worker update checks have a single owner');
     const app = read('src/app.js');
     const session = read('src/ui/session-continuity.js');
     const preview = read('src/ui/candidate-preview-pro.js');
     const finish = read('src/ui/export-finish-center.js');
+    const pinBoard = read('src/ui/candidate-pin-board.js');
     ok(!app.includes('runtimeConfig.APP_VERSION'), 'undefined runtimeConfig service worker reference is removed');
     ok(app.includes("type: 'unsupported-media'"), 'unsupported media rejection is wired into import flow');
     ok(!session.includes('meta.innerHTML = `${stored.fileName'), 'session file names are not injected through innerHTML');
     ok(preview.includes('heading.textContent = title') && !preview.includes('<b>${title}</b>'), 'imported candidate titles render as text');
+    ok(preview.includes("card.dataset.id === targetId") && !preview.includes('querySelector(`.recommendation-card[data-id='), 'candidate preview does not interpolate imported IDs into CSS selectors');
+    ok(pinBoard.includes("card.dataset.id === targetId") && !pinBoard.includes('querySelector(`.recommendation-card[data-id='), 'candidate pin board does not interpolate imported IDs into CSS selectors');
     ok(finish.includes('document.createTextNode(clampText(item.label') && !finish.includes('${clampText(item.label'), 'render job labels render as text');
 
-    console.log('PASS v1.3.5 runtime registration, media intake, and user-text safety guardrails');
+    console.log('PASS v1.3.6 runtime registration, media intake, and user-text safety guardrails');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

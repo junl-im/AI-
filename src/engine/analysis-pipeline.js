@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.5 - long-media aware modular analysis pipeline
+// AI Shorts Studio v1.3.6 - long-media aware modular analysis pipeline
 'use strict';
 
 (function exposeAnalysisPipeline(global) {
