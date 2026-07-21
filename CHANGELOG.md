@@ -300,7 +300,7 @@
 - 정보 모달에 업데이트 적용 상태와 캐시 진단 기능을 추가했습니다.
 - 브라우저 성능을 MAX-STABLE / PRO-STABLE / SAFE-STABLE로 감지하는 엔진 프로필을 추가했습니다.
 
-## v1.5.2 - Settings Ownership & Repeated-Run Stability
+## v1.5.3 - Settings Ownership & Repeated-Run Stability
 
 - 자막, 출력 품질, 자동 컷 설정의 정규화·저장·UI 동기화를 `src/app/settings-controller.js`로 분리했습니다.
 - 메인 앱은 설정 세부 DOM 처리 대신 전용 컨트롤러 API를 호출하도록 단순화했습니다.
@@ -310,9 +310,21 @@
 - 신규 설정 컨트롤러 동작 검사를 추가하고 서비스워커 오프라인 셸에 포함했습니다.
 - 자동 QA **152/152**, PC·모바일 Chromium, MP3·MP4·취소·재시도·10분 미디어, 서비스워커 생명주기 감사를 통과했습니다.
 
-## v1.5.2
+## v1.5.3
 - 프로젝트 저장/불러오기 책임을 `src/app/project-io-controller.js`로 분리했습니다.
 - 프로젝트 파일 크기 사전검사, 적용, 진단 기록, UI 동기화를 단일 경로로 통합했습니다.
 - 렌더 옵션 정규화 결과를 최대 24개로 제한된 LRU 렌더 플랜 캐시에 재사용합니다.
 - 렌더 플랜 캐시의 통계·명시적 정리 API와 회귀 검사를 추가했습니다.
 - 프로젝트 입출력 및 렌더 준비 캐시 검사를 포함해 자동 QA를 확장했습니다.
+
+
+## v1.5.3 - media ownership and render-frame efficiency
+
+- Added `src/app/media-import-controller.js` as the single owner of media intake and source Object URLs.
+- Previous source Object URLs are revoked before replacement and the active URL is revoked during page disposal.
+- Stale delayed auto-analysis is blocked by both media-session identity and import sequence.
+- Added bounded canvas-context caches for the base frame gradient and repeated text measurements.
+- Updated architecture-sensitive QA so moved responsibilities are checked in their owning controller rather than by brittle `app.js` string assumptions.
+- Fresh Chromium desktop/mobile audit was generated for v1.5.3.
+- The full real-media suite was attempted, but the combined runner exceeded the available execution window after completing early scenarios. The previously validated v1.5.2 full media artifact is retained as the regression contract; this limitation is explicitly carried forward.
+- All source, packaging, service-worker, controller, cache and regression checks pass: 161/161.

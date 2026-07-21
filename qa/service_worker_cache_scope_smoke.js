@@ -23,8 +23,8 @@ function ok(condition, message) {
     };
     const caches = {
         keys: async () => [
-            'ai-shorts-studio-shell-v1.3.6-experience-engine',
-            'ai-shorts-studio-shell-v1.5.2-experience-engine',
+            'ai-shorts-studio-shell-v1.3.6-media-engine',
+            'ai-shorts-studio-shell-v1.5.3-media-engine',
             'another-app-shell-v9',
             'shared-image-cache'
         ],
@@ -45,8 +45,8 @@ function ok(condition, message) {
     let pending = null;
     listeners.activate({ waitUntil(promise) { pending = promise; } });
     await pending;
-    ok(deleted.includes('ai-shorts-studio-shell-v1.3.6-experience-engine'), 'old AI Shorts shell cache is deleted');
-    ok(!deleted.includes('ai-shorts-studio-shell-v1.5.2-experience-engine'), 'current AI Shorts shell cache is preserved');
+    ok(deleted.includes('ai-shorts-studio-shell-v1.3.6-media-engine'), 'old AI Shorts shell cache is deleted');
+    ok(!deleted.includes('ai-shorts-studio-shell-v1.5.3-media-engine'), 'current AI Shorts shell cache is preserved');
     ok(!deleted.includes('another-app-shell-v9') && !deleted.includes('shared-image-cache'), 'unrelated origin caches are preserved');
     ok(claimed === 1, 'service worker still claims clients after scoped cleanup');
     console.log('PASS namespace-safe service worker cache activation guardrails');

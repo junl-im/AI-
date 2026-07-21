@@ -1,5 +1,5 @@
 {
-  "version": "1.5.2",
+  "version": "1.5.3",
   "auditMode": "isolated-service-worker-runtime",
   "handlers": [
     "activate",
@@ -8,8 +8,8 @@
   ],
   "install": {
     "skipWaitingCalls": 1,
-    "shellCached": true,
-    "currentCache": "ai-shorts-studio-shell-v1.5.2-experience-engine"
+    "shellCached": false,
+    "currentCache": ""
   },
   "activate": {
     "claimCalls": 1,

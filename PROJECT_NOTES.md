@@ -106,8 +106,12 @@
 5. 15분·30분 MP4 장시간 계측
 6. 모바일 Safari·Samsung Internet 실기기 검증
 
-## v1.5.2 구조 메모
+## v1.5.3 구조 메모
 - 프로젝트 파일 UI 입출력: `src/app/project-io-controller.js`
 - 프로젝트 데이터 검증/스키마: `src/project/project-service.js`
 - 렌더 준비 재사용: `AIShortsVerticalRenderer.prepareRenderPlan()`
 - 렌더 플랜 캐시는 순수 옵션만 보관하며 최대 24개입니다.
+
+
+### v1.5.3 ownership rule
+Media source Object URLs belong only to `media-import-controller.js`. Other modules may read `state.fileUrl` but must not create or revoke the active source URL. Render paint caches must remain bounded and context-scoped.

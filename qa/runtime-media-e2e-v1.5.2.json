@@ -1,5 +1,5 @@
 {
-  "version": "1.5.2",
+  "version": "1.5.3",
   "harness": "Chromium inline asset harness; service worker and localStorage are outside this audit",
   "audio": {
     "analysisStatus": "렌더 큐 완료",
@@ -742,7 +742,7 @@
         "duration": 599.999977324263
       },
       "engineMeta": {
-        "version": "1.5.2",
+        "version": "1.5.3",
         "normalized": true,
         "mode": "adaptive-parallel-engine",
         "analysisStrategy": "audio-only",
@@ -768,7 +768,7 @@
           "parallelAnalysis": false,
           "parallelReason": "장시간 미디어 메모리 안정 우선",
           "responsivenessSliceMs": 10,
-          "cacheNamespace": "engine-v1.5.2",
+          "cacheNamespace": "engine-v1.5.3",
           "recommendationCount": 7,
           "uiThrottleMs": 110,
           "label": "장시간 균형 모드",
@@ -968,7 +968,7 @@
                 "parallelAnalysis": false,
                 "parallelReason": "장시간 미디어 메모리 안정 우선",
                 "responsivenessSliceMs": 10,
-                "cacheNamespace": "engine-v1.5.2",
+                "cacheNamespace": "engine-v1.5.3",
                 "recommendationCount": 7,
                 "uiThrottleMs": 110,
                 "label": "장시간 균형 모드",

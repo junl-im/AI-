@@ -49,14 +49,14 @@
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 32,
+      "raf": 31,
       "mutations": 62
     },
     "auditAtFirstSample": {
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 32,
+      "raf": 31,
       "mutations": 62
     },
     "dock": {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Optional real-media Chromium audit for AI Shorts Studio v1.5.1.
+"""Optional real-media Chromium audit for AI Shorts Studio v1.5.3.
 Requires ffmpeg and Python Playwright. It does not run as part of npm test.
 """
 import argparse
@@ -13,7 +13,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-media-e2e-v1.5.1.json'
+OUTPUT = ROOT / 'qa' / 'runtime-media-e2e-v1.5.3.json'
 
 
 def build_inline_html() -> str:
@@ -240,7 +240,7 @@ def parse_args():
         help='Comma-separated cases: audio,video,cancel,retry,longAudio'
     )
     parser.add_argument('--workdir', help='Reusable media work directory; defaults to a temporary directory.')
-    parser.add_argument('--reset', action='store_true', help='Discard the existing v1.5.1 audit before running.')
+    parser.add_argument('--reset', action='store_true', help='Discard the existing v1.5.3 audit before running.')
     parser.add_argument('--keep-workdir', action='store_true', help='Keep an automatically-created work directory.')
     return parser.parse_args()
 
@@ -249,12 +249,12 @@ def load_report(reset=False):
     if not reset and OUTPUT.exists():
         try:
             existing = json.loads(OUTPUT.read_text(encoding='utf-8'))
-            if existing.get('version') == '1.5.1':
+            if existing.get('version') == '1.5.3':
                 return existing
         except (OSError, ValueError, TypeError):
             pass
     return {
-        'version': '1.5.1',
+        'version': '1.5.3',
         'harness': 'Chromium inline asset harness; service worker and localStorage are outside this audit'
     }
 

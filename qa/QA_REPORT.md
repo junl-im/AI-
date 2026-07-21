@@ -1,4 +1,4 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.2
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.3
 
 ## 최종 결과
 
@@ -11,7 +11,7 @@
 - 20회 operation 반복 감사: 각 주기 잔류 작업 **0건**
 - 서비스워커 설치·활성·캐시 정리·오프라인 복구 통과
 
-## v1.5.2 신규 검사
+## v1.5.3 신규 검사
 
 - `settings_controller_smoke.js`: 자막 경계값, 품질 UI 값, 컷 민감도, 프리셋 상태 검증
 - `repeated_operation_cleanup_smoke.js`: 20회 미디어 세션·분석·미리보기·렌더 소유권 정리 검증
@@ -165,3 +165,12 @@
 - Chromium 감사 하네스는 비보안 인라인 환경이므로 실제 서비스워커 설치→대기→활성화 전환과 localStorage 지속성은 별도 감사가 필요합니다.
 - 매우 긴 무압축 오디오의 순간 디코딩 메모리는 여전히 클 수 있습니다.
 - 15분·30분 고해상도 MP4와 모바일 Safari·Samsung Internet 장시간 출력은 실기기 검증이 필요합니다.
+
+
+## v1.5.3 신규 검사
+- media import controller and Object URL ownership
+- bounded render-frame gradient and text-measure caches
+- architecture-aware media import and operation ownership contracts
+- total automated checks: 161/161
+- fresh responsive Chromium audit generated
+- full media rerun limitation documented in HANDOFF.md

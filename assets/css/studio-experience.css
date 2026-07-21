@@ -127,9 +127,7 @@
     border-color: rgba(251, 191, 36, 0.34);
 }
 
-.analysis-cancel-button[hidden] {
-    display: none !important;
-}
+/* The native hidden attribute owns analysis-cancel visibility. */
 
 body[data-studio-focus="workspace"] .studio-hero {
     margin-bottom: 10px;

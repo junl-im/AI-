@@ -1,10 +1,33 @@
-// AI Shorts Studio v1.5.2 - cancellable, range-safe vertical renderer with media-state restoration
+// AI Shorts Studio v1.5.3 - cancellable, range-safe vertical renderer with media-state restoration
 'use strict';
 
 (function exposeVerticalRenderer(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const utils = global.AIShortsCoreUtils || {};
     const qualityEffects = global.AIShortsQualityEffects || {};
+    const gradientCache = new WeakMap();
+    const textMeasureCache = new WeakMap();
+
+    function cachedGradient(ctx, key, create) {
+        let cache = gradientCache.get(ctx);
+        if (!cache) { cache = new Map(); gradientCache.set(ctx, cache); }
+        if (cache.has(key)) return cache.get(key);
+        const value = create();
+        if (cache.size >= 24) cache.delete(cache.keys().next().value);
+        cache.set(key, value);
+        return value;
+    }
+
+    function measureTextWidth(ctx, text) {
+        let cache = textMeasureCache.get(ctx);
+        if (!cache) { cache = new Map(); textMeasureCache.set(ctx, cache); }
+        const key = `${ctx.font || ''}|${String(text || '')}`;
+        if (cache.has(key)) return cache.get(key);
+        const width = ctx.measureText(text).width;
+        if (cache.size >= 512) cache.delete(cache.keys().next().value);
+        cache.set(key, width);
+        return width;
+    }
 
     function getCanvasContext(canvas) {
         if (!canvas) throw new Error('미리보기 캔버스가 없습니다.');
@@ -14,10 +37,13 @@
     }
 
     function clear(ctx, width, height) {
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, '#07111f');
-        gradient.addColorStop(0.45, '#111827');
-        gradient.addColorStop(1, '#2e1065');
+        const gradient = cachedGradient(ctx, `clear:${width}x${height}`, () => {
+            const value = ctx.createLinearGradient(0, 0, width, height);
+            value.addColorStop(0, '#07111f');
+            value.addColorStop(0.45, '#111827');
+            value.addColorStop(1, '#2e1065');
+            return value;
+        });
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, width, height);
     }
@@ -85,15 +111,18 @@
         const barWidth = width * 0.68 / barCount;
         const startX = (width - barWidth * barCount) / 2;
         const centerY = height * 0.55;
+        const waveformGradient = cachedGradient(ctx, `waveform:${width}x${height}`, () => {
+            const value = ctx.createLinearGradient(0, centerY - 290, 0, centerY + 290);
+            value.addColorStop(0, '#22d3ee');
+            value.addColorStop(0.5, '#a78bfa');
+            value.addColorStop(1, '#f97316');
+            return value;
+        });
+        ctx.fillStyle = waveformGradient;
         for (let i = 0; i < barCount; i += 1) {
             const sourceIndex = Math.floor((i / barCount) * Math.max(1, bins.length - 1));
             const value = bins[sourceIndex] || (0.28 + Math.sin(i * 0.9 + time * 5) * 0.18);
             const h = 30 + value * 260;
-            const gradient = ctx.createLinearGradient(0, centerY - h, 0, centerY + h);
-            gradient.addColorStop(0, '#22d3ee');
-            gradient.addColorStop(0.5, '#a78bfa');
-            gradient.addColorStop(1, '#f97316');
-            ctx.fillStyle = gradient;
             ctx.fillRect(startX + i * barWidth, centerY - h / 2, Math.max(3, barWidth * 0.62), h);
         }
         ctx.fillStyle = '#ffffff';
@@ -111,7 +140,7 @@
         let current = '';
         for (const word of words.length ? words : [String(text || '')]) {
             const test = current ? current + ' ' + word : word;
-            if (ctx.measureText(test).width > maxWidth && current) {
+            if (measureTextWidth(ctx, test) > maxWidth && current) {
                 lines.push(current);
                 current = word;
             } else {
@@ -231,7 +260,7 @@
             ctx.fillText(line, x, y, maxWidth);
             return;
         }
-        const widths = tokens.map(token => ctx.measureText(token).width);
+        const widths = tokens.map(token => measureTextWidth(ctx, token));
         const totalWidth = widths.reduce((sum, value) => sum + value, 0);
         let cursor = x - totalWidth / 2;
         tokens.forEach((token, index) => {
@@ -268,7 +297,7 @@
         let current = '';
         words.forEach(word => {
             const test = current ? current + ' ' + word : word;
-            if (ctx.measureText(test).width > maxWidth && current) {
+            if (measureTextWidth(ctx, test) > maxWidth && current) {
                 lines.push(current);
                 current = word;
             } else {
@@ -310,9 +339,12 @@
             ctx.lineWidth = 2;
             ctx.strokeRect(52, 166, width - 104, height - 360);
         } else if (mode === 'headline') {
-            const grad = ctx.createLinearGradient(0, 0, width, 0);
-            grad.addColorStop(0, 'rgba(249, 115, 22, 0.88)');
-            grad.addColorStop(1, 'rgba(124, 58, 237, 0.88)');
+            const grad = cachedGradient(ctx, `headline:${width}x${height}`, () => {
+                const value = ctx.createLinearGradient(0, 0, width, 0);
+                value.addColorStop(0, 'rgba(249, 115, 22, 0.88)');
+                value.addColorStop(1, 'rgba(124, 58, 237, 0.88)');
+                return value;
+            });
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, width, 158);
             ctx.fillStyle = 'rgba(2, 6, 23, 0.58)';
@@ -320,10 +352,13 @@
             ctx.fill();
         } else {
             ctx.globalAlpha = 0.86;
-            const grad = ctx.createLinearGradient(0, height * 0.18, width, height * 0.86);
-            grad.addColorStop(0, 'rgba(34, 211, 238, 0.14)');
-            grad.addColorStop(0.5, 'rgba(124, 58, 237, 0.18)');
-            grad.addColorStop(1, 'rgba(249, 115, 22, 0.14)');
+            const grad = cachedGradient(ctx, `neon:${width}x${height}`, () => {
+                const value = ctx.createLinearGradient(0, height * 0.18, width, height * 0.86);
+                value.addColorStop(0, 'rgba(34, 211, 238, 0.14)');
+                value.addColorStop(0.5, 'rgba(124, 58, 237, 0.18)');
+                value.addColorStop(1, 'rgba(249, 115, 22, 0.14)');
+                return value;
+            });
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, width, height);
             ctx.lineWidth = 8;
@@ -339,10 +374,13 @@
         const rangeText = String(options && options.rangeText || '');
         const template = String(options && options.thumbnailTemplate || 'neon');
         drawTemplateChrome(ctx, width, height, template);
-        const gradient = ctx.createLinearGradient(0, height * 0.60, 0, height);
-        gradient.addColorStop(0, 'rgba(0,0,0,0)');
-        gradient.addColorStop(0.48, template === 'clean' ? 'rgba(2,6,23,0.22)' : 'rgba(0,0,0,0.38)');
-        gradient.addColorStop(1, template === 'cinematic' ? 'rgba(0,0,0,0.92)' : 'rgba(0,0,0,0.72)');
+        const gradient = cachedGradient(ctx, `overlay:${template}:${width}x${height}`, () => {
+            const value = ctx.createLinearGradient(0, height * 0.60, 0, height);
+            value.addColorStop(0, 'rgba(0,0,0,0)');
+            value.addColorStop(0.48, template === 'clean' ? 'rgba(2,6,23,0.22)' : 'rgba(0,0,0,0.38)');
+            value.addColorStop(1, template === 'cinematic' ? 'rgba(0,0,0,0.92)' : 'rgba(0,0,0,0.72)');
+            return value;
+        });
         ctx.fillStyle = gradient;
         ctx.fillRect(0, height * 0.54, width, height * 0.46);
         ctx.textAlign = 'left';

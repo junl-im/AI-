@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.2 - bounded state container and persisted-setting recovery
+// AI Shorts Studio v1.5.3 - bounded state container and persisted-setting recovery
 'use strict';
 
 (function exposeState(global) {
@@ -176,9 +176,10 @@
         state.diagnostics = state.diagnostics.slice(0, limit);
     }
 
-    function resetMedia() {
+    function resetMedia(options) {
+        const resetOptions = options || {};
         const utils = global.AIShortsCoreUtils || {};
-        if (state.fileUrl && utils.revokeObjectUrl) utils.revokeObjectUrl(state.fileUrl);
+        if (!resetOptions.skipFileUrlRevoke && state.fileUrl && utils.revokeObjectUrl) utils.revokeObjectUrl(state.fileUrl);
         state.file = null;
         state.fileUrl = '';
         state.fileKind = '';

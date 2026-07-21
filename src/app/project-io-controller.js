@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.2 - project import/export ownership controller
+// AI Shorts Studio v1.5.3 - project import/export ownership controller
 'use strict';
 
 (function exposeProjectIOController(global) {

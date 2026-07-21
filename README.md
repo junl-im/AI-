@@ -1,9 +1,9 @@
-# AI 쇼츠 제작 스튜디오 v1.5.2
+# AI 쇼츠 제작 스튜디오 v1.5.3
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
 
 
-## v1.5.2 적용 내용
+## v1.5.3 적용 내용
 
 - 자막·품질·자동 컷 설정의 정규화, 저장, UI 동기화를 전용 설정 컨트롤러로 분리했습니다.
 - 설정 범위 보정과 프리셋·초기화 경로를 중앙화해 화면과 저장 상태 불일치를 줄였습니다.
@@ -79,3 +79,7 @@ PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.4.1_Full.zip PATCH_FROM_VERSION=
 ## 알려진 제한
 
 실제 Chromium 감사 기기는 4GB 메모리로 보고돼 실미디어 영상은 안전 순차 전략을 사용했습니다. 병렬 분기는 모의 시간·부분 실패 검사로 통과했으며 8코어·8GB 이상 실기기 계측이 추가로 필요합니다. 모바일 Safari·Samsung Internet과 15분·30분 고해상도 MP4 장시간 출력도 별도 검증 대상입니다.
+
+
+### v1.5.3
+Media import and Object URL cleanup are isolated in `src/app/media-import-controller.js`; repeated render paint work uses bounded context-local caches.

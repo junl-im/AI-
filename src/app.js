@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.2 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
+// AI Shorts Studio v1.5.3 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -14,6 +14,7 @@
     const captionService = global.AIShortsCaptionService || {};
     const projectService = global.AIShortsProjectService || {};
     const projectIOControllerFactory = global.AIShortsProjectIOController || {};
+    const mediaImportControllerFactory = global.AIShortsMediaImportController || {};
     const renderer = global.AIShortsVerticalRenderer || {};
     const qualityEffects = global.AIShortsQualityEffects || {};
     const downloadService = global.AIShortsDownloadService || {};
@@ -36,6 +37,7 @@
     let renderWorkflow = null;
     let settingsController = null;
     let projectIOController = null;
+    let mediaImportController = null;
 
 
     function isAbortError(error) {
@@ -112,6 +114,17 @@
             toast, syncSettingsToUI, renderAll
         });
         return projectIOController;
+    }
+
+
+    function getMediaImportController() {
+        if (mediaImportController) return mediaImportController;
+        if (!mediaImportControllerFactory.createMediaImportController) return null;
+        mediaImportController = mediaImportControllerFactory.createMediaImportController({
+            state, utils, store, elements: els, operationCoordinator, renderQueue, toast, stopPreview,
+            setupMediaPreview, renderAll, updateButtons, activateFlowTab, setProgress, analyzeCurrentFile
+        });
+        return mediaImportController;
     }
 
     function getSettingsController() {
@@ -824,45 +837,12 @@
         if (els.sourceAudio) els.sourceAudio.addEventListener('timeupdate', renderPreviewStill);
         if (els.sourceVideo) els.sourceVideo.addEventListener('timeupdate', renderPreviewStill);
         if (els.titleInput) els.titleInput.addEventListener('input', renderPreviewStill);
+        global.addEventListener('beforeunload', () => { const controller = getMediaImportController(); if (controller) controller.dispose(); }, { once: true });
     }
 
     async function handleFiles(fileList) {
-        const file = fileList && fileList[0];
-        if (!file) return;
-        const kind = utils.detectMediaKind ? utils.detectMediaKind(file) : (utils.isVideoFile && utils.isVideoFile(file) ? 'video' : utils.isAudioFile && utils.isAudioFile(file) ? 'audio' : '');
-        if (!kind) {
-            if (els.fileInput) els.fileInput.value = '';
-            if (els.selectedBadge) els.selectedBadge.textContent = '지원 파일 필요';
-            if (els.importStatus) els.importStatus.textContent = '오디오 또는 영상 파일만 열 수 있습니다.';
-            if (store.addDiagnostic) store.addDiagnostic({ type: 'unsupported-media', fileName: file.name, fileType: file.type, fileSize: file.size });
-            toast('지원하지 않는 파일 형식입니다. 오디오 또는 영상 파일을 선택해주세요.', 'warning');
-            return;
-        }
-        if (renderQueue && renderQueue.isRunning && renderQueue.isRunning() && renderQueue.cancel) {
-            renderQueue.cancel('새 원본 파일을 열어 진행 중인 렌더를 취소했습니다.');
-        }
-        stopPreview();
-        const mediaSessionId = operationCoordinator.startMediaSession ? operationCoordinator.startMediaSession({ fileName: file.name, fileType: file.type }) : Date.now();
-        if (store.resetMedia) store.resetMedia();
-        state.mediaSessionId = mediaSessionId;
-        state.file = file;
-        state.fileKind = kind;
-        state.fileUrl = utils.createObjectUrl ? utils.createObjectUrl(file) : URL.createObjectURL(file);
-        state.fileMeta = { name: file.name, size: file.size, type: file.type, duration: 0 };
-        if (els.fileInput) els.fileInput.value = '';
-        if (els.selectedBadge) els.selectedBadge.textContent = kind === 'video' ? '영상 선택됨' : '오디오 선택됨';
-        if (els.importStatus) els.importStatus.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB`;
-        setupMediaPreview();
-        setProgress(0, '분석 준비');
-        if (els.recommendationList) els.recommendationList.classList.add('empty-state');
-        if (store.addDiagnostic) store.addDiagnostic({ type: 'import', fileName: file.name, fileType: file.type, fileSize: file.size, kind });
-        renderAll();
-        updateButtons();
-        activateFlowTab('file', { reveal: false, instant: true });
-        window.setTimeout(() => {
-            if (state.mediaSessionId !== mediaSessionId || state.file !== file) return;
-            analyzeCurrentFile({ autoGenerate: false, source: 'file-open' });
-        }, 80);
+        const controller = getMediaImportController();
+        return controller ? controller.importFiles(fileList) : false;
     }
 
     function setupMediaPreview() {

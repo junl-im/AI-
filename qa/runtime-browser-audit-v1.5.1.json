@@ -1,8 +1,8 @@
 {
-  "version": "1.5.2",
+  "version": "1.5.1",
   "desktop": {
     "ready": "complete",
-    "bodyBuild": "1.5.2",
+    "bodyBuild": "1.5.3",
     "activeFlow": "file",
     "navigationFocus": "file",
     "operations": {
@@ -49,14 +49,14 @@
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 32,
+      "raf": 31,
       "mutations": 62
     },
     "auditAtFirstSample": {
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 32,
+      "raf": 31,
       "mutations": 62
     },
     "dock": {
@@ -224,7 +224,7 @@
   },
   "mobile": {
     "ready": "complete",
-    "bodyBuild": "1.5.2",
+    "bodyBuild": "1.5.3",
     "activeFlow": "recommend",
     "navigationFocus": "recommend",
     "operations": {

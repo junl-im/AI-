@@ -1,0 +1,391 @@
+{
+  "version": "1.5.3",
+  "generatedAt": "2026-07-21T07:15:33.671Z",
+  "cssFiles": 46,
+  "importantCount": 912,
+  "duplicateSelectorCount": 255,
+  "highConflictSelectorCount": 38,
+  "topConflicts": [
+    {
+      "selector": ":root",
+      "owners": [
+        "active-stage-beacon.css",
+        "candidate-pin-board.css",
+        "candidate-preview-pro.css",
+        "desktop-prime-layout.css",
+        "feedback-ux.css",
+        "flow-doctor.css",
+        "flow-hotfix.css",
+        "flow-integrity.css",
+        "flow-polish.css",
+        "flow-quality-gate.css",
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "handoff-coach.css",
+        "hero-command-deck.css",
+        "hyperconnect-flow.css",
+        "hyperflow-tabs.css",
+        "icon-system.css",
+        "layout-dock.css",
+        "motion-stability.css",
+        "pc-dock-reveal-hotfix.css",
+        "responsive-workspace.css",
+        "shutter-glass-flow.css",
+        "theme.css",
+        "ui-refinement.css",
+        "workspace-comfort.css",
+        "workspace-layout-controls.css"
+      ],
+      "ownerCount": 26
+    },
+    {
+      "selector": ".recommendation-card",
+      "owners": [
+        "feedback-ux.css",
+        "flow-polish.css",
+        "glass-pro-ui.css",
+        "handoff-coach.css",
+        "hyperconnect-flow.css",
+        "layout-dock.css",
+        "studio.css",
+        "ui-refinement.css",
+        "ux.css"
+      ],
+      "ownerCount": 9
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel]",
+      "owners": [
+        "flow-doctor.css",
+        "flow-integrity.css",
+        "hyperflow-tabs.css",
+        "motion-stability.css",
+        "responsive-workspace.css",
+        "shutter-glass-flow.css",
+        "ui-refinement.css",
+        "workspace-comfort.css"
+      ],
+      "ownerCount": 8
+    },
+    {
+      "selector": ".brand-right-actions",
+      "owners": [
+        "feedback-ux.css",
+        "flow-hotfix.css",
+        "flow-polish.css",
+        "hero-command-deck.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "studio-experience.css"
+      ],
+      "ownerCount": 7
+    },
+    {
+      "selector": ".brand-signature-pill",
+      "owners": [
+        "feedback-ux.css",
+        "flow-polish.css",
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "responsive-workspace.css",
+        "shutter-glass-flow.css",
+        "studio-experience.css"
+      ],
+      "ownerCount": 7
+    },
+    {
+      "selector": ".cinematic-title",
+      "owners": [
+        "cinematic-hero.css",
+        "desktop-prime-layout.css",
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "hero-command-deck.css",
+        "shutter-glass-flow.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 7
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"]",
+      "owners": [
+        "flow-doctor.css",
+        "flow-integrity.css",
+        "hyperflow-tabs.css",
+        "mobile-menu-guide.css",
+        "pc-dock-reveal-hotfix.css",
+        "shutter-glass-flow.css",
+        "workspace-comfort.css"
+      ],
+      "ownerCount": 7
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-selection-summary",
+      "owners": [
+        "desktop-prime-layout.css",
+        "flow-doctor.css",
+        "flow-integrity.css",
+        "motion-stability.css",
+        "pc-dock-reveal-hotfix.css",
+        "responsive-workspace.css",
+        "workspace-comfort.css"
+      ],
+      "ownerCount": 7
+    },
+    {
+      "selector": "html",
+      "owners": [
+        "flow-integrity.css",
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "motion-stability.css",
+        "shutter-glass-flow.css",
+        "theme.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 7
+    },
+    {
+      "selector": ".app-shell",
+      "owners": [
+        "desktop-prime-layout.css",
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "studio.css",
+        "ux.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": ".bottom-dock-tab",
+      "owners": [
+        "flow-polish.css",
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "hyperconnect-flow.css",
+        "hyperflow-tabs.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": ".brand-topline",
+      "owners": [
+        "flow-hotfix.css",
+        "flow-polish.css",
+        "foundation-polish.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "studio.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": ".copy-card",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "hero-command-deck.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "studio.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": ".start-command-panel",
+      "owners": [
+        "desktop-prime-layout.css",
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "responsive-workspace.css",
+        "shutter-glass-flow.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "0%",
+      "owners": [
+        "cinematic-hero.css",
+        "glass-pro-ui.css",
+        "hero-command-deck.css",
+        "save-readiness.css",
+        "shutter-glass-flow.css",
+        "studio.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "body",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "responsive-workspace.css",
+        "theme.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .app-shell",
+      "owners": [
+        "flow-integrity.css",
+        "foundation-polish.css",
+        "hyperflow-tabs.css",
+        "pc-dock-reveal-hotfix.css",
+        "responsive-workspace.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "owners": [
+        "desktop-prime-layout.css",
+        "foundation-polish.css",
+        "mobile-menu-guide.css",
+        "pc-dock-reveal-hotfix.css",
+        "ui-refinement.css",
+        "workspace-comfort.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "select",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "studio.css",
+        "theme.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "textarea",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "studio.css",
+        "theme.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": ".badge-version",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "studio.css",
+        "theme.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".brand-panel",
+      "owners": [
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "studio.css",
+        "ux.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".cinematic-brand-panel .brand-topline",
+      "owners": [
+        "cinematic-hero.css",
+        "foundation-polish.css",
+        "header-meta-rail.css",
+        "hero-command-deck.css",
+        "responsive-workspace.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".cinematic-brand-panel .hero-mainline",
+      "owners": [
+        "cinematic-hero.css",
+        "desktop-prime-layout.css",
+        "foundation-polish.css",
+        "hero-command-deck.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".console-panel",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "studio.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".control-zone",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "studio.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".preview-card",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "studio.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".toast",
+      "owners": [
+        "feedback-ux.css",
+        "hyperflow-tabs.css",
+        "layout-dock.css",
+        "theme.css",
+        "ux.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".waveform-card",
+      "owners": [
+        "foundation-polish.css",
+        "glass-pro-ui.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "studio.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .auto-cut-panel",
+      "owners": [
+        "desktop-prime-layout.css",
+        "flow-doctor.css",
+        "flow-integrity.css",
+        "hyperflow-tabs.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 5
+    }
+  ]
+}

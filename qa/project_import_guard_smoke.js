@@ -72,12 +72,13 @@ assert(oversizedRejected, 'oversized project text is rejected before JSON parsin
 
 const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
 const projectIO = fs.readFileSync(path.join(root, 'src/app/project-io-controller.js'), 'utf8');
+const mediaImport = fs.readFileSync(path.join(root, 'src/app/media-import-controller.js'), 'utf8');
 const session = fs.readFileSync(path.join(root, 'src/ui/session-continuity.js'), 'utf8');
 assert(projectIO.includes('MAX_PROJECT_FILE_BYTES') && projectIO.includes("type: 'project-file-too-large'"), 'project file reader has a byte-size preflight');
 assert(app.includes('MAX_CAPTION_FILE_BYTES') && app.includes("type: 'caption-file-too-large'"), 'caption file reader has a byte-size preflight');
 assert(projectIO.includes('if (store.saveSettings) store.saveSettings();'), 'imported project settings are persisted');
-assert(app.includes('state.mediaSessionId !== mediaSessionId || state.file !== file'), 'stale delayed auto-analysis is discarded');
-assert(app.includes("if (els.fileInput) els.fileInput.value = '';"), 'the same media file can be selected again');
+assert(mediaImport.includes('state.mediaSessionId !== mediaSessionId || state.file !== file') && mediaImport.includes('sequence !== importSequence'), 'stale delayed auto-analysis is discarded');
+assert(mediaImport.includes("if (elements.fileInput) elements.fileInput.value = '';"), 'the same media file can be selected again');
 assert(session.includes('projectService.parseProjectText') && session.includes('MAX_SNAPSHOT_CHARS'), 'session restore reuses bounded project validation');
 
-console.log('PASS v1.5.2 project import, session restore, and file-size exception guardrails');
+console.log('PASS v1.5.3 project import, session restore, and file-size exception guardrails');
