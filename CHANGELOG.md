@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.5.5 - Mobile Control Ownership Consolidation
+
+- 모바일 토스트의 dock 상태별 bottom 위치는 `mobile-menu-guide.css`가 단독 소유하도록 통합했습니다.
+- bottom dock의 기본·모바일 geometry는 `ui-refinement.css`, 데스크톱 최종 높이·padding·radius는 `foundation-polish.css`가 소유하도록 정리했습니다.
+- transport·preview·export·batch action 크기는 `flow-doctor.css`가 단독 소유하며 이전 hotfix·integrity 중복 선언을 제거했습니다.
+- 시작 안내 패널의 desktop 표시 여부는 `desktop-prime-layout.css`, 모바일 surface와 workflow step geometry는 `ui-refinement.css`가 소유합니다.
+- 이전 HyperConnect 전용 dock 규칙을 UI mode로 scope해 HyperFlow 화면에 섞이지 않게 했습니다.
+- 활성 `!important`는 898→866, 실제 selector-property 충돌은 511→342, 고위험 충돌은 198→89, shadowed declaration은 675→431로 감소했습니다.
+- v1.5.4와 비교한 데스크톱·모바일 계산 스타일은 유지됐으며 숨겨진 desktop start panel의 비활성 grid 값만 제거됐습니다.
+- 자동 QA 162/162, PC·모바일 Chromium 오류 0건·가로 overflow 0px, 서비스워커 생명주기 검사를 통과했습니다.
+
 ## v1.5.4 - Classified CSS Ownership & Cascade Consolidation
 
 - CSS 감사를 단순 selector 중복 집계에서 실제 로드 순서·미디어 조건·selector·property·값·`!important`를 추적하는 cascade 보고서로 확장했습니다.

@@ -9,13 +9,15 @@ function fail(name, detail) { console.error('FAIL ' + name + (detail ? ' - ' + d
 function assert(cond, name, detail) { cond ? pass(name) : fail(name, detail); }
 const html = read('index.html');
 const css = read('assets/css/pc-dock-reveal-hotfix.css');
+const comfortCss = read('assets/css/workspace-comfort.css');
+const foundationCss = read('assets/css/foundation-polish.css');
 const tabs = read('src/ui/hyperflow-tabs.js');
 const polish = read('src/ui/flow-polish.js');
 const doctor = read('src/ui/flow-doctor.js');
 assert(html.includes('assets/css/pc-dock-reveal-hotfix.css'), 'pc dock hotfix stylesheet loaded');
-assert(css.includes('repeat(8, minmax(var(--pc-dock-button-min), 1fr))'), 'desktop dock uses readable 8-tab grid');
+assert(comfortCss.includes('grid-template-columns: repeat(8, minmax(0, 1fr))'), 'workspace comfort owns the readable desktop 8-tab grid');
 assert(css.includes('grid-template-columns: none !important'), 'desktop dock removes squeezed status grid columns');
-assert(css.includes('font-size: 13px !important'), 'desktop dock labels are large enough');
+assert(foundationCss.includes('font-size: 12px !important'), 'foundation polish owns the final desktop dock label size');
 assert(css.includes('grid-template-columns: repeat(4, minmax(0, 1fr))'), 'tablet/mobile dock preserves 4+4 layout');
 assert(css.includes('animation: none !important'), 'candidate guide shimmer disabled');
 assert(html.includes('<b>파일 열기</b>'), 'dock file tab label is 파일 열기');

@@ -1,4 +1,34 @@
-# HANDOFF v1.5.0
+# HANDOFF v1.5.5
+
+## v1.5.5 현재 상태
+
+v1.5.5는 v1.5.4의 162/162 기준선에서 모바일 toast, bottom dock, transport/export 버튼, start command panel의 중복 CSS 소유권을 정리한 CSS-only 릴리스입니다.
+
+- 자동 QA: **162/162 통과**
+- PC·모바일 Chromium 오류·Promise 거절·콘솔 오류: **0건**
+- PC·모바일 가로 overflow: **0px**
+- 서비스워커 생명주기: install·activate·old cache cleanup·offline navigation 통과
+- v1.5.4 전체본 + v1.5.5 패치 적용 결과는 v1.5.5 전체본과 파일 단위로 동일해야 합니다.
+
+## v1.5.5 적용 내용
+
+- `mobile-menu-guide.css`: compact/expanded 상태를 포함한 mobile toast bottom 단일 소유
+- `ui-refinement.css`: 기본·모바일 dock geometry와 mobile start panel 최종 surface 단일 소유
+- `foundation-polish.css`: desktop dock height·padding·radius 단일 소유
+- `flow-doctor.css`: transport·preview·export·batch action size 단일 소유
+- `desktop-prime-layout.css`: desktop start panel visibility 단일 소유
+- HyperConnect legacy dock selector를 `data-ui="hyperconnect-flow"`로 scope
+- CSS 상한: `!important` 866, conflicts 342, high-risk 89, shadowed 431
+
+## 다음 작업
+
+1. Chromium process RSS와 GPU·미디어 native memory 보조 계측
+2. 15분·30분 고해상도 MP4 장시간 반복 분석·출력
+3. 남은 고위험 CSS 묶음의 계산 스타일 보존형 소유권 통합
+
+---
+
+# HANDOFF HISTORY — v1.5.0
 
 ## 현재 상태
 

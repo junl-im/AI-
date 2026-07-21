@@ -43,19 +43,13 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs {
-        width: min(100%, var(--workspace-max, 1560px)) !important;
         margin: 0 auto !important;
         display: grid !important;
-        grid-template-columns: repeat(8, minmax(var(--pc-dock-button-min), 1fr)) !important;
-        gap: 10px !important;
         align-items: stretch !important;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab {
         min-width: var(--pc-dock-button-min) !important;
-        min-height: 68px !important;
-        padding: 9px 10px 8px !important;
-        border-radius: 18px !important;
         gap: 5px !important;
         line-height: 1.1 !important;
         letter-spacing: -0.025em !important;
@@ -72,7 +66,6 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
         overflow: visible !important;
         text-overflow: clip !important;
         white-space: nowrap !important;
-        font-size: 13px !important;
         font-weight: 950 !important;
     }
 
@@ -140,20 +133,3 @@ body[data-ui="hyperflow-tabs"] .flow-selection-summary.is-flow-guide-stable {
     border-style: solid;
 }
 
-/* Compact action buttons must stay buttons, not banners. */
-body[data-ui="hyperflow-tabs"] #previewBtn,
-body[data-ui="hyperflow-tabs"] #exportBtn,
-body[data-ui="hyperflow-tabs"] #stopPreviewBtn,
-body[data-ui="hyperflow-tabs"] #applyRangeBtn,
-body[data-ui="hyperflow-tabs"] #thumbnailBtn,
-body[data-ui="hyperflow-tabs"] #exportAllBtn,
-body[data-ui="hyperflow-tabs"] #autoTrimBtn,
-body[data-ui="hyperflow-tabs"] #autoTrimAllBtn,
-body[data-ui="hyperflow-tabs"] .hyperflow-export-grid button,
-body[data-ui="hyperflow-tabs"] .transport-row button {
-    max-width: max-content !important;
-    min-height: 36px !important;
-    padding: 0 13px !important;
-    border-radius: 13px !important;
-    font-size: 0.86rem !important;
-}

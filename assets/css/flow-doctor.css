@@ -71,11 +71,35 @@ body[data-ui="hyperflow-tabs"] .transport-row button,
 body[data-ui="hyperflow-tabs"] .transport-row label.file-button,
 body[data-ui="hyperflow-tabs"] .hyperflow-export-grid button,
 body[data-ui="hyperflow-tabs"] .auto-cut-actions button,
-body[data-ui="hyperflow-tabs"] .batch-export-panel button {
-    min-height: 34px !important;
+body[data-ui="hyperflow-tabs"] #applyRangeBtn,
+body[data-ui="hyperflow-tabs"] #thumbnailBtn,
+body[data-ui="hyperflow-tabs"] #exportAllBtn,
+body[data-ui="hyperflow-tabs"] #previewBtn,
+body[data-ui="hyperflow-tabs"] #exportBtn,
+body[data-ui="hyperflow-tabs"] #stopPreviewBtn,
+body[data-ui="hyperflow-tabs"] #autoTrimBtn,
+body[data-ui="hyperflow-tabs"] #autoTrimAllBtn {
+    flex: 0 1 auto !important;
+    width: auto !important;
+    max-width: max-content !important;
     min-width: 96px !important;
+    min-height: 36px !important;
+    padding: 0 13px !important;
+    border-radius: 13px !important;
+    font-size: 0.86rem !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
+}
+body[data-ui="hyperflow-tabs"] .batch-export-panel button {
+    width: auto !important;
+    max-width: max-content !important;
+    min-width: 96px !important;
+    min-height: 34px !important;
     padding: 0 11px !important;
+    border-radius: 12px !important;
     font-size: 0.82rem !important;
+    line-height: 1 !important;
+    box-shadow: none !important;
 }
 body[data-ui="hyperflow-tabs"] .recommend-generate-btn {
     min-height: 44px !important;
@@ -98,13 +122,13 @@ body[data-ui="hyperflow-tabs"] .brand-signature-pill {
     body[data-ui="hyperflow-tabs"] .flow-selection-summary {
         margin-bottom: 8px;
     }
-    body[data-ui="hyperflow-tabs"] .bottom-dock-tab {
-        min-height: 52px !important;
-    }
     body[data-ui="hyperflow-tabs"] .transport-row button,
     body[data-ui="hyperflow-tabs"] .transport-row label.file-button,
-    body[data-ui="hyperflow-tabs"] .hyperflow-export-grid button {
-        flex: 0 1 auto !important;
-        min-width: 92px !important;
+    body[data-ui="hyperflow-tabs"] .hyperflow-export-grid button,
+    body[data-ui="hyperflow-tabs"] #previewBtn,
+    body[data-ui="hyperflow-tabs"] #exportBtn,
+    body[data-ui="hyperflow-tabs"] #stopPreviewBtn {
+        flex: 0 1 calc(50% - 5px) !important;
+        min-width: 0 !important;
     }
 }

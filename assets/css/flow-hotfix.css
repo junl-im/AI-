@@ -26,28 +26,6 @@ body[data-ui="hyperflow-tabs"] .transport-row {
     gap: 8px;
     align-items: center;
 }
-body[data-ui="hyperflow-tabs"] .transport-row button,
-body[data-ui="hyperflow-tabs"] .transport-row .file-button,
-body[data-ui="hyperflow-tabs"] .hyperflow-export-grid button,
-body[data-ui="hyperflow-tabs"] .batch-export-panel button,
-body[data-ui="hyperflow-tabs"] #applyRangeBtn,
-body[data-ui="hyperflow-tabs"] #thumbnailBtn,
-body[data-ui="hyperflow-tabs"] #exportAllBtn,
-body[data-ui="hyperflow-tabs"] #previewBtn,
-body[data-ui="hyperflow-tabs"] #exportBtn,
-body[data-ui="hyperflow-tabs"] #stopPreviewBtn,
-body[data-ui="hyperflow-tabs"] #autoTrimBtn,
-body[data-ui="hyperflow-tabs"] #autoTrimAllBtn {
-    flex: 0 1 auto;
-    width: auto;
-    min-width: 116px;
-    min-height: 38px;
-    padding: 0 13px;
-    border-radius: 13px;
-    font-size: 0.88rem;
-    line-height: 1;
-    box-shadow: none;
-}
 body[data-ui="hyperflow-tabs"] .preview-transport-polish {
     display: flex;
     flex-wrap: wrap;
@@ -77,13 +55,6 @@ body[data-ui="hyperflow-tabs"] .nudge-row button {
     body[data-ui="hyperflow-tabs"] .preview-transport-polish {
         display: flex;
         flex-wrap: wrap;
-    }
-    body[data-ui="hyperflow-tabs"] .transport-row button,
-    body[data-ui="hyperflow-tabs"] #previewBtn,
-    body[data-ui="hyperflow-tabs"] #exportBtn,
-    body[data-ui="hyperflow-tabs"] #stopPreviewBtn {
-        flex: 0 1 calc(50% - 6px);
-        min-width: 0;
     }
     .flow-selection-actions {
         grid-template-columns: repeat(4, 1fr);

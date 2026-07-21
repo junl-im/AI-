@@ -24,10 +24,6 @@ body {
 }
 .start-command-panel {
     width: min(100%, var(--workspace-max));
-    margin: 12px auto 14px;
-    display: grid;
-    grid-template-columns: minmax(260px, 1.15fr) minmax(220px, 0.9fr) minmax(220px, 0.9fr);
-    gap: 12px;
     contain: layout paint;
 }
 .command-group,
@@ -208,9 +204,6 @@ body.has-media .command-group-head small {
     }
 }
 @media (max-width: 1179px) {
-    .start-command-panel {
-        grid-template-columns: 1fr;
-    }
     .workflow-rail-separated {
         grid-column: auto;
     }
@@ -227,10 +220,6 @@ body.has-media .command-group-head small {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-    }
-    .start-command-panel {
-        margin: 8px auto 10px;
-        gap: 8px;
     }
     .command-group {
         padding: 11px;

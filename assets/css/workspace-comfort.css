@@ -48,13 +48,10 @@ body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab {
-        min-height: 74px !important;
-        padding: 10px 12px 9px !important;
         background: rgba(9, 17, 31, 0.78) !important;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b {
-        font-size: 13.5px !important;
         letter-spacing: -0.02em !important;
     }
 }

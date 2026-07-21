@@ -55,7 +55,6 @@ body::before {
 .preview-card,
 .waveform-card,
 .copy-card,
-.start-command-panel,
 .command-group,
 .render-queue-card,
 .engine-status-card,
@@ -135,7 +134,6 @@ body::before {
     overflow: hidden;
 }
 
-.start-command-panel::before,
 .console-panel::before,
 .editor-panel > section::before {
     content: "";
@@ -181,10 +179,16 @@ body::before {
         rgba(5, 12, 24, 0.52) !important;
 }
 
-.recommendation-card.is-selected,
+.recommendation-card.is-selected {
+    border-color: rgba(34, 211, 238, 0.58) !important;
+    box-shadow:
+        0 0 0 1px rgba(34, 211, 238, 0.12),
+        0 20px 60px rgba(34, 211, 238, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+}
+
 .bottom-dock-tab.is-active,
 .bottom-dock-tab[aria-selected="true"] {
-    border-color: rgba(34, 211, 238, 0.58) !important;
     box-shadow:
         0 0 0 1px rgba(34, 211, 238, 0.12),
         0 20px 60px rgba(34, 211, 238, 0.14),
@@ -223,9 +227,6 @@ body::before {
 }
 
 .bottom-dock-tab {
-    min-height: 58px;
-    border: 1px solid rgba(255, 255, 255, 0.13) !important;
-    background: rgba(255, 255, 255, 0.065) !important;
     backdrop-filter: blur(16px) saturate(1.16);
     -webkit-backdrop-filter: blur(16px) saturate(1.16);
 }
@@ -267,7 +268,6 @@ label:focus-visible {
     .preview-card,
     .waveform-card,
     .copy-card,
-    .start-command-panel,
     .command-group,
     .bottom-dock {
         background: rgba(10, 18, 34, 0.96) !important;
@@ -285,8 +285,5 @@ label:focus-visible {
     :root { --glass-blur: 16px; }
     .brand-panel.cinematic-brand-panel {
         min-height: 174px;
-    }
-    .bottom-dock-tab {
-        min-height: 54px;
     }
 }

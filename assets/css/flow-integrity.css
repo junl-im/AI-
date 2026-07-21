@@ -92,45 +92,11 @@ body[data-ui="hyperflow-tabs"] .transport-row {
     gap: 7px;
     align-items: center;
 }
-body[data-ui="hyperflow-tabs"] .transport-row button,
-body[data-ui="hyperflow-tabs"] .transport-row label.file-button,
-body[data-ui="hyperflow-tabs"] .auto-cut-actions button,
-body[data-ui="hyperflow-tabs"] .hyperflow-export-grid button,
-body[data-ui="hyperflow-tabs"] .batch-export-panel button,
-body[data-ui="hyperflow-tabs"] #applyRangeBtn,
-body[data-ui="hyperflow-tabs"] #thumbnailBtn,
-body[data-ui="hyperflow-tabs"] #exportAllBtn,
-body[data-ui="hyperflow-tabs"] #previewBtn,
-body[data-ui="hyperflow-tabs"] #exportBtn,
-body[data-ui="hyperflow-tabs"] #stopPreviewBtn,
-body[data-ui="hyperflow-tabs"] #autoTrimBtn,
-body[data-ui="hyperflow-tabs"] #autoTrimAllBtn {
-    width: auto !important;
-    max-width: 100%;
-    min-width: 104px !important;
-    min-height: 36px !important;
-    padding: 0 12px !important;
-    border-radius: 12px !important;
-    font-size: 0.84rem !important;
-    line-height: 1 !important;
-    box-shadow: none !important;
-}
 body[data-ui="hyperflow-tabs"] .hyperflow-export-grid {
     grid-template-columns: repeat(auto-fit, minmax(136px, max-content));
     justify-content: start;
     gap: 8px;
 }
-
-/* Dock는 탭 역할만 한다. */
-body[data-ui="hyperflow-tabs"] .bottom-dock-tabs {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-body[data-ui="hyperflow-tabs"] .bottom-dock-tab {
-    min-height: 56px;
-    border-radius: 16px;
-}
-body[data-ui="hyperflow-tabs"] .bottom-dock-tab span { font-size: 20px; }
-body[data-ui="hyperflow-tabs"] .bottom-dock-tab b { font-size: 11px; }
 
 @media (max-width: 720px) {
     body[data-ui="hyperflow-tabs"] #studioGrid { width: min(100% - 18px, 1180px); }
@@ -139,16 +105,4 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab b { font-size: 11px; }
     body[data-ui="hyperflow-tabs"] .hero-file-btn { min-height: 42px; padding-inline: 10px; }
     body[data-ui="hyperflow-tabs"] .flow-selection-copy strong,
     body[data-ui="hyperflow-tabs"] .flow-selection-copy small { white-space: normal; }
-    body[data-ui="hyperflow-tabs"] .transport-row button,
-    body[data-ui="hyperflow-tabs"] #previewBtn,
-    body[data-ui="hyperflow-tabs"] #exportBtn,
-    body[data-ui="hyperflow-tabs"] #stopPreviewBtn {
-        flex: 0 1 calc(50% - 5px);
-        min-width: 0 !important;
-    }
-}
-@media (max-width: 390px) {
-    body[data-ui="hyperflow-tabs"] .bottom-dock-tab { min-height: 50px; }
-    body[data-ui="hyperflow-tabs"] .bottom-dock-tab span { font-size: 18px; }
-    body[data-ui="hyperflow-tabs"] .bottom-dock-tab b { font-size: 10px; }
 }

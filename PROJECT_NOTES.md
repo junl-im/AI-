@@ -1,4 +1,30 @@
-# PROJECT NOTES v1.5.4
+# PROJECT NOTES v1.5.5
+
+
+## 모바일 컨트롤 소유권 규칙
+
+- 모바일 toast bottom은 `mobile-menu-guide.css`만 소유합니다.
+- HyperFlow dock geometry는 기본·모바일 `ui-refinement.css`, 1180px 이상 `foundation-polish.css`가 소유합니다.
+- transport·preview·export 버튼의 최소 크기, padding, radius, font-size는 `flow-doctor.css`가 소유합니다.
+- 시작 안내 패널은 desktop 표시 여부 `desktop-prime-layout.css`, 모바일 surface·workflow step `ui-refinement.css`로 분리합니다.
+- HyperConnect용 generic dock selector는 반드시 `body[data-ui="hyperconnect-flow"]`로 scope합니다.
+
+## v1.5.5 QA·배포 기준
+
+- 자동 QA 기준은 **162/162**입니다.
+- CSS 상한은 활성 `!important` 866, 실제 충돌 342, 고위험 충돌 89, shadowed declaration 431입니다.
+- v1.5.4 대비 visible computed style 변경 없이 데스크톱·모바일 오류와 가로 overflow가 0이어야 합니다.
+- 런타임 build key는 `1.5.5-mobile-control-ownership`입니다.
+
+## 다음 우선순위
+
+1. Chromium process RSS와 GPU/미디어 native memory 보조 계측
+2. 15분·30분 고해상도 MP4 장시간 분석·출력 반복 검증
+3. 남은 고위험 layout·skin selector의 다음 소유권 묶음 통합
+
+---
+
+## v1.5.4 기준에서 이어받은 CSS 소유권 규칙
 
 ## CSS 소유권 규칙
 
@@ -16,13 +42,6 @@
 - PC·모바일 Chromium 오류와 가로 overflow는 0이어야 하며, 데스크톱 workspace 리사이즈·집중 모드가 유지되어야 합니다.
 - 런타임 CSS 변경 시 APP_VERSION, BUILD_KEY, HTML asset query, 서비스워커 cache name을 함께 올립니다.
 - CSS-only 릴리스는 JS 미디어 경로가 동일함을 명시할 때 직전 실미디어·힙 감사 결과를 상속할 수 있지만, 브라우저·CSS·서비스워커 감사는 새 버전으로 재생성합니다.
-
-## 다음 우선순위
-
-1. 모바일 toast bottom 위치 소유권 통합
-2. bottom dock tab 높이와 transport/export 버튼 최소 크기 소유권 통합
-3. start command panel 표시·grid 구조 소유권 통합
-4. Chromium 프로세스 RSS·GPU/미디어 네이티브 메모리 보조 계측
 
 ---
 

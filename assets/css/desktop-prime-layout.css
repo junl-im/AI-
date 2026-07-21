@@ -341,12 +341,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     .start-command-panel {
         display: block !important;
         margin: 8px 0 10px !important;
-        padding: 11px !important;
-        border: 1px solid rgba(148, 163, 184, 0.20) !important;
-        border-radius: 20px !important;
-        background:
-            linear-gradient(145deg, rgba(15, 23, 42, 0.86), rgba(2, 6, 23, 0.78)),
-            radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.14), transparent 34%) !important;
     }
 
     .start-command-panel .workflow-rail-separated {
@@ -359,34 +353,23 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     .start-command-panel .workflow-step {
-        min-height: 76px !important;
         display: grid;
-        grid-template-columns: 28px minmax(0, 1fr);
         grid-template-rows: auto auto;
         align-content: center;
-        column-gap: 8px;
-        padding: 10px !important;
-        border: 1px solid rgba(148, 163, 184, 0.16);
-        background: rgba(255, 255, 255, 0.035) !important;
     }
 
     .start-command-panel .workflow-step span {
         grid-row: 1 / 3;
         align-self: center;
-        width: 28px;
-        height: 28px;
     }
 
     .start-command-panel .workflow-step strong {
         align-self: end;
-        font-size: 12px;
     }
 
     .start-command-panel .workflow-step em {
         display: block !important;
         align-self: start;
-        color: var(--muted);
-        font-size: 10px;
     }
 
     /* On mobile the file tab already opens the picker, so no duplicate import screen is rendered. */
@@ -481,8 +464,6 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-pulse {
 @media (max-width: 720px) {
     body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after { display: none; }
     body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child {
-        width: 25px;
-        height: 25px;
         border-radius: 8px;
         font-size: 14px !important;
     }

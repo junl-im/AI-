@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.4 - parallel analysis and clone-safe cache kernel facade
+// AI Shorts Studio v1.5.5 - parallel analysis and clone-safe cache kernel facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -45,7 +45,7 @@
         const registrySnapshot = registry && registry.snapshot ? registry.snapshot() : null;
         const summary = tuner.summarizeAnalysis ? tuner.summarizeAnalysis(result, budget) : null;
         result.engine = Object.assign({}, result.engine || {}, {
-            version: '1.5.4',
+            version: '1.5.5',
             mode: 'adaptive-parallel-engine',
             budget,
             registry: registrySnapshot,
@@ -101,7 +101,7 @@
 
     function getHealthReport() {
         return {
-            version: '1.5.4',
+            version: '1.5.5',
             mode: 'adaptive-parallel-engine',
             registry: registry && registry.snapshot ? registry.snapshot() : null,
             modules: registry && registry.list ? registry.list().length : 0,

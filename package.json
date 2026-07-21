@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-5-4",
-  "version": "1.5.4",
+  "name": "ai-shorts-studio-v1-5-5",
+  "version": "1.5.5",
   "private": true,
-  "description": "AI Shorts Studio v1.5.4 - selector-property CSS ownership classification and cascade consolidation",
+  "description": "AI Shorts Studio v1.5.5 - mobile control, dock, toast, and start panel CSS ownership consolidation",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",

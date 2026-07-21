@@ -1,6 +1,6 @@
 {
-  "version": "1.5.4",
-  "generatedAt": "2026-07-21T08:59:02.784Z",
+  "version": "1.5.5",
+  "generatedAt": "2026-07-21T09:03:59.987Z",
   "cssFiles": 46,
   "linkedCssFiles": 45,
   "activeCssFiles": 45,
@@ -371,6 +371,655 @@
           {
             "file": "workspace-layout-controls.css",
             "value": "var(--prime-gap, 12px)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "mobileToast": {
+      "bottom": {
+        "owners": [
+          "mobile-menu-guide.css"
+        ],
+        "winner": {
+          "file": "mobile-menu-guide.css",
+          "value": "144px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "mobile-menu-guide.css",
+            "value": "144px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "dockBase": {
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "58px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "58px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "16px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "16px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "mobileDockTab": {
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "66px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "66px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "6px 3px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "6px 3px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "16px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "16px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "desktopDockTab": {
+      "min-height": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "58px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "58px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "7px 9px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "7px 9px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "15px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "15px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "startPanelVisibility": {
+      "display": {
+        "owners": [
+          "desktop-prime-layout.css"
+        ],
+        "winner": {
+          "file": "desktop-prime-layout.css",
+          "value": "none",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "desktop-prime-layout.css",
+            "value": "none",
+            "important": true
+          }
+        ]
+      }
+    },
+    "mobileStartPanel": {
+      "padding": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "20px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "20px",
+            "important": true
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(148, 163, 184, 0.12)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(148, 163, 184, 0.12)",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "27px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "27px",
+            "important": true
+          }
+        ]
+      },
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "linear-gradient(155deg, rgba(14, 21, 37, 0.94), rgba(8, 13, 25, 0.97))",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "linear-gradient(155deg, rgba(14, 21, 37, 0.94), rgba(8, 13, 25, 0.97))",
+            "important": true
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0 14px 40px rgba(0, 0, 0, 0.16)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0 14px 40px rgba(0, 0, 0, 0.16)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "mobileStartStep": {
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "68px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "68px",
+            "important": true
+          }
+        ]
+      },
+      "grid-template-columns": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "31px minmax(0, 1fr)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "31px minmax(0, 1fr)",
+            "important": true
+          }
+        ]
+      },
+      "column-gap": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "10px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "10px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "12px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "12px",
+            "important": true
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(148, 163, 184, 0.11)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(148, 163, 184, 0.11)",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "17px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "17px",
+            "important": true
+          }
+        ]
+      },
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "rgba(255, 255, 255, 0.022)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "rgba(255, 255, 255, 0.022)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "transportButton": {
+      "min-width": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "96px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "96px",
+            "important": true
+          }
+        ]
+      },
+      "min-height": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "36px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "36px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0 13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0 13px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "13px",
+            "important": true
+          }
+        ]
+      },
+      "font-size": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0.86rem",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0.86rem",
+            "important": true
+          }
+        ]
+      }
+    },
+    "exportButton": {
+      "min-width": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "96px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "96px",
+            "important": true
+          }
+        ]
+      },
+      "min-height": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "36px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "36px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0 13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0 13px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "13px",
+            "important": true
+          }
+        ]
+      },
+      "font-size": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0.86rem",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0.86rem",
+            "important": true
+          }
+        ]
+      }
+    },
+    "exportAllButton": {
+      "min-width": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "96px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "96px",
+            "important": true
+          }
+        ]
+      },
+      "min-height": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "36px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "36px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0 13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0 13px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "13px",
+            "important": true
+          }
+        ]
+      },
+      "font-size": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0.86rem",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0.86rem",
             "important": true
           }
         ]

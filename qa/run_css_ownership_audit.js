@@ -340,6 +340,48 @@ const criticalOwnership = {
         'body[data-ui="hyperflow-tabs"] .studio-grid',
         '@media (min-width: 1180px)',
         ['display', 'width', 'margin', 'grid-template-columns', 'grid-template-areas', 'grid-template-rows', 'column-gap', 'row-gap']
+    ),
+    mobileToast: ownershipSnapshot('.toast', '@media (max-width: 720px)', ['bottom']),
+    dockBase: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .bottom-dock-tab',
+        'base',
+        ['min-height', 'border-radius']
+    ),
+    mobileDockTab: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .bottom-dock-tab',
+        '@media (max-width: 720px)',
+        ['min-height', 'padding', 'border-radius']
+    ),
+    desktopDockTab: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab',
+        '@media (min-width: 1180px)',
+        ['min-height', 'padding', 'border-radius']
+    ),
+    startPanelVisibility: ownershipSnapshot('.start-command-panel', 'base', ['display']),
+    mobileStartPanel: ownershipSnapshot(
+        '.start-command-panel',
+        '@media (max-width: 720px)',
+        ['padding', 'border', 'border-radius', 'background', 'box-shadow']
+    ),
+    mobileStartStep: ownershipSnapshot(
+        '.start-command-panel .workflow-step',
+        '@media (max-width: 720px)',
+        ['min-height', 'grid-template-columns', 'column-gap', 'padding', 'border', 'border-radius', 'background']
+    ),
+    transportButton: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .transport-row button',
+        'base',
+        ['min-width', 'min-height', 'padding', 'border-radius', 'font-size']
+    ),
+    exportButton: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] #exportBtn',
+        'base',
+        ['min-width', 'min-height', 'padding', 'border-radius', 'font-size']
+    ),
+    exportAllButton: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] #exportAllBtn',
+        'base',
+        ['min-width', 'min-height', 'padding', 'border-radius', 'font-size']
     )
 };
 

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.4 - resilient adaptive parallel media analysis pipeline
+// AI Shorts Studio v1.5.5 - resilient adaptive parallel media analysis pipeline
 'use strict';
 
 (function exposeAnalysisPipeline(global) {
@@ -31,7 +31,7 @@
                 silent: false
             });
         }
-        return { duration: total, frames, summary: { fallback: true, engine: 'v1.5.4' } };
+        return { duration: total, frames, summary: { fallback: true, engine: 'v1.5.5' } };
     }
 
     function createFallbackWaveform() {
@@ -76,7 +76,7 @@
             fileMeta,
             warnings: [],
             engine: {
-                version: '1.5.4',
+                version: '1.5.5',
                 mode: budget.label || '모듈형 엔진',
                 analysisStrategy: 'sequential',
                 budget,

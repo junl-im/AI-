@@ -271,7 +271,6 @@ button:focus-visible,
     .dock-actions { display: grid; grid-template-columns: 1fr 1fr; }
     .mobile-action-bar { display: grid; }
     .app-shell { padding-bottom: 94px; }
-    .toast { bottom: 86px; }
 }
 @media (max-width: 480px) {
     .workflow-rail { grid-template-columns: 1fr; }

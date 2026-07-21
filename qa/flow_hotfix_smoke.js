@@ -4,7 +4,8 @@ const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const tabs = fs.readFileSync(path.join(root, 'src/ui/hyperflow-tabs.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
-const css = fs.readFileSync(path.join(root, 'assets/css/flow-hotfix.css'), 'utf8');
+const hotfix = fs.readFileSync(path.join(root, 'assets/css/flow-hotfix.css'), 'utf8');
+const doctor = fs.readFileSync(path.join(root, 'assets/css/flow-doctor.css'), 'utf8');
 function assert(condition, message) { if (!condition) { console.error(message); process.exit(1); } }
 assert(html.includes('data-ui="hyperflow-tabs"'), 'body data-ui must enable HyperFlow tab CSS');
 assert(html.includes('data-flow-tab="candidates"'), 'bottom dock must include candidates tab');
@@ -14,5 +15,6 @@ assert(tabs.includes("'candidates'"), 'tab controller must know candidates tab')
 assert(!tabs.includes('scrollIntoView({ behavior'), 'tab switching must not force scroll to page top');
 assert(app.includes("activateFlowTab('candidates'"), 'recommendation generation must move to candidates tab');
 assert(app.includes("activateFlowTab('preview', { reveal: true })"), 'candidate selection must reveal preview panel without top jump');
-assert(css.includes('min-height: 38px') && css.includes('#previewBtn'), 'large action buttons must be compacted');
+assert(doctor.includes('body[data-ui="hyperflow-tabs"] #previewBtn') && doctor.includes('min-height: 36px'), 'flow doctor must own compact action sizing');
+assert(!hotfix.includes('body[data-ui="hyperflow-tabs"] #previewBtn'), 'flow hotfix must not duplicate action sizing');
 console.log('flow hotfix smoke passed');

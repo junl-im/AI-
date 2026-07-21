@@ -15,7 +15,7 @@ for (const name of required) {
   if (!css.includes(`[data-icon="${name}"]`)) throw new Error(`missing CSS mapping: ${name}`);
   if (!sw.includes(`./assets/icons/studio/${name}.svg`)) throw new Error(`missing service worker icon cache: ${name}`);
 }
-if (!html.includes('assets/css/icon-system.css?v=1.5.4-css-ownership')) throw new Error('icon stylesheet not loaded');
+if (!html.includes('assets/css/icon-system.css?v=1.5.5-mobile-control-ownership')) throw new Error('icon stylesheet not loaded');
 const menu = html.match(/<nav[^>]*class="bottom-dock-tabs"[^>]*>[\s\S]*?<\/nav>/)?.[0] || '';
 for (const name of ['upload','spark','candidates','preview','waveform','cut','edit','export']) {
   if (!menu.includes(`data-icon="${name}"`)) throw new Error(`menu icon missing: ${name}`);

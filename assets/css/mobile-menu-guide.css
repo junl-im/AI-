@@ -88,6 +88,7 @@
     body[data-mobile-menu-mode="expanded"] .bottom-dock-tab {
         min-height: 56px !important;
     }
+    .toast { bottom: 144px !important; }
     body[data-mobile-menu-mode="compact"] .toast { bottom: 120px !important; }
     body[data-mobile-menu-mode="expanded"] .toast { bottom: 186px !important; }
 }

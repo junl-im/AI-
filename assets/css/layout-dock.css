@@ -391,9 +391,6 @@ body.has-media .studio-grid {
         border-radius: 15px;
         font-size: 11px;
     }
-    .toast {
-        bottom: 112px !important;
-    }
 }
 @media (max-width: 420px) {
     .workflow-step {
@@ -537,9 +534,6 @@ body.is-analyzing .bottom-dock-actions-lean .bottom-dock-primary {
     }
     .bottom-dock-actions-lean .bottom-dock-btn .dock-emoji {
         font-size: 23px;
-    }
-    .toast {
-        bottom: 96px !important;
     }
 }
 @media (max-width: 360px) {

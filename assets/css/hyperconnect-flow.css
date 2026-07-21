@@ -100,18 +100,18 @@ body[data-ui="hyperconnect-flow"] .action-dock {
 .recommendation-card.is-selected .rec-select-cta {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.94), rgba(34, 211, 238, 0.88));
 }
-.bottom-dock.bottom-dock-hyperflow {
+body[data-ui="hyperconnect-flow"] .bottom-dock.bottom-dock-hyperflow {
     padding-top: 12px;
     padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
-.bottom-dock-tabs {
+body[data-ui="hyperconnect-flow"] .bottom-dock-tabs {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 9px;
 }
-.bottom-dock-tab {
+body[data-ui="hyperconnect-flow"] .bottom-dock-tab {
     min-height: 60px;
 }
-.bottom-dock-tab b {
+body[data-ui="hyperconnect-flow"] .bottom-dock-tab b {
     font-size: 12px;
 }
 body[data-active-flow-tab="recommend"] .bottom-dock-tab[data-flow-tab="recommend"],
@@ -132,10 +132,10 @@ body[data-active-flow-tab="preview"] .bottom-dock-tab[data-flow-tab="preview"] {
         min-height: 30px;
         padding-inline: 11px;
     }
-    .bottom-dock-tab {
+    body[data-ui="hyperconnect-flow"] .bottom-dock-tab {
         min-height: 58px;
         border-radius: 16px;
     }
-    .bottom-dock-tab span { font-size: 20px; }
-    .bottom-dock-tab b { font-size: 11px; }
+    body[data-ui="hyperconnect-flow"] .bottom-dock-tab span { font-size: 20px; }
+    body[data-ui="hyperconnect-flow"] .bottom-dock-tab b { font-size: 11px; }
 }

@@ -62,8 +62,6 @@ body[data-ui="hyperflow-tabs"] .hero-compact-note {
 
 /* Startup is now actionable: one clear import card plus a visible four-step rail. */
 .start-command-panel {
-    display: grid !important;
-    grid-template-columns: minmax(300px, 0.8fr) minmax(520px, 1.4fr) !important;
     align-items: stretch;
     gap: 10px !important;
     margin: 10px auto 12px !important;
@@ -283,12 +281,6 @@ body.performance-lite .bottom-dock {
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.26) !important;
 }
 
-@media (max-width: 900px) {
-    .start-command-panel {
-        grid-template-columns: 1fr !important;
-    }
-}
-
 @media (max-width: 720px) {
     .app-shell {
         width: min(calc(100% - 14px), var(--workspace-max));
@@ -316,21 +308,12 @@ body.performance-lite .bottom-dock {
         font-size: 10px !important;
     }
 
-    .start-command-panel {
-        margin: 7px auto 8px !important;
-        padding: 7px !important;
-    }
-
     .start-command-panel .command-group-primary .command-buttons {
         grid-template-columns: 1fr !important;
     }
 
     .start-command-panel .workflow-rail-separated {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-
-    .start-command-panel .workflow-step {
-        min-height: 62px;
     }
 
     .control-zone,

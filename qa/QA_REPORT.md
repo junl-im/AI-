@@ -1,3 +1,23 @@
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.5
+
+## 최종 결과
+
+- 자동 검사: **162/162 통과**
+- PC·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- PC·모바일 가로 overflow: **0px**
+- 모바일 compact/expanded dock와 toast 위치, desktop 8-tab dock 계산 스타일 유지
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+
+## CSS ownership 감사
+
+- 활성 `!important`: **898 → 866**
+- 실제 selector-property 충돌: **511 → 342**
+- 고위험 충돌: **198 → 89**
+- shadowed declaration: **675 → 431**
+- toast, dock geometry, transport/export 버튼, start command panel 단일 소유권 smoke 통과
+
+---
+
 # QA REPORT — AI 쇼츠 스튜디오 v1.5.4
 
 ## 최종 결과

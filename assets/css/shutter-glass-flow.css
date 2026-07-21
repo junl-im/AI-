@@ -177,22 +177,8 @@ body[data-ui="hyperflow-tabs"] {
 
 /* Keep the home screen simple: no command clutter in the hero area. */
 .start-command-panel {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    padding: 16px !important;
-    border-radius: 26px !important;
-    background: rgba(255,255,255,0.055) !important;
     border: 1px solid rgba(255,255,255,0.11) !important;
     backdrop-filter: blur(14px);
-}
-
-.start-command-panel::before {
-    content: '사용 방법';
-    display: block;
-    font-size: 1.02rem;
-    font-weight: 950;
-    color: rgba(255,255,255,0.92);
 }
 
 .command-group {
@@ -308,7 +294,6 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-director-revealed {
 }
 
 .bottom-dock-tab {
-    min-height: 56px !important;
     border-radius: 18px !important;
     border: 1px solid rgba(255,255,255,0.11) !important;
     background: rgba(255,255,255,0.055) !important;

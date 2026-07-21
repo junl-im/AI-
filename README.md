@@ -1,6 +1,15 @@
-# AI 쇼츠 제작 스튜디오 v1.5.4
+# AI 쇼츠 제작 스튜디오 v1.5.5
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
+
+
+## v1.5.5 적용 내용
+
+- 모바일 toast, bottom dock, transport/export 버튼, 시작 안내 패널의 CSS 소유권을 단일화했습니다.
+- dock의 화면별 최종 크기와 기존 동작을 유지하면서 중복 cascade를 제거했습니다.
+- 활성 `!important` 866개, 실제 충돌 342개, 고위험 충돌 89개로 기준을 낮췄습니다.
+- 서비스워커 캐시 키를 `1.5.5-mobile-control-ownership`으로 갱신했습니다.
+- 자동 QA 162/162와 PC·모바일 Chromium, 서비스워커 생명주기 검사를 통과했습니다.
 
 
 ## v1.5.4 적용 내용
@@ -80,10 +89,10 @@ node qa/run_service_worker_lifecycle.js
 
 ```bash
 npm run package:full
-PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.3_Heap_Stability_Full.zip PATCH_FROM_VERSION=1.5.3 npm run package:patch
+PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.4_CSS_Ownership_Full.zip PATCH_FROM_VERSION=1.5.4 npm run package:patch
 ```
 
-전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.3 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
+전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.4 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
 
 ## 알려진 제한
 

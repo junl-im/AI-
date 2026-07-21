@@ -24,10 +24,10 @@ if (JSON.stringify(report.archivedCssFiles) !== JSON.stringify(['cinematic-hero.
 if (!Array.isArray(report.propertyConflicts) || report.propertyConflicts.length !== report.conflictingPropertyCount) {
     throw new Error('full selector-property conflict inventory is missing');
 }
-if (report.importantCount > 898) throw new Error('CSS !important count exceeded the ownership baseline');
-if (report.conflictingPropertyCount > 511) throw new Error('selector-property conflicts exceeded the ownership baseline');
-if (report.highRiskConflictCount > 198) throw new Error('high-risk CSS conflicts exceeded the ownership baseline');
-if (report.shadowedDeclarationCount > 675) throw new Error('shadowed CSS declarations exceeded the ownership baseline');
+if (report.importantCount > 866) throw new Error('CSS !important count exceeded the ownership baseline');
+if (report.conflictingPropertyCount > 342) throw new Error('selector-property conflicts exceeded the ownership baseline');
+if (report.highRiskConflictCount > 89) throw new Error('high-risk CSS conflicts exceeded the ownership baseline');
+if (report.shadowedDeclarationCount > 431) throw new Error('shadowed CSS declarations exceeded the ownership baseline');
 if (report.highConflictSelectorCount < 1) throw new Error('high-conflict selector inventory is unexpectedly empty');
 
 const categoryTotal = Object.values(report.conflictCategoryCounts || {}).reduce((sum, count) => sum + count, 0);
@@ -63,6 +63,38 @@ for (const property of ['grid-template-columns', 'grid-template-areas', 'grid-te
     assertSingleOwner(desktopGrid, property, 'workspace-layout-controls.css');
 }
 
+const mobileToast = report.criticalOwnership?.mobileToast;
+if (!mobileToast) throw new Error('mobile toast ownership snapshot is missing');
+assertSingleOwner(mobileToast, 'bottom', 'mobile-menu-guide.css');
+
+const dockBase = report.criticalOwnership?.dockBase;
+const mobileDock = report.criticalOwnership?.mobileDockTab;
+const desktopDock = report.criticalOwnership?.desktopDockTab;
+if (!dockBase || !mobileDock || !desktopDock) throw new Error('dock ownership snapshots are missing');
+for (const property of ['min-height', 'border-radius']) assertSingleOwner(dockBase, property, 'ui-refinement.css');
+for (const property of ['min-height', 'padding', 'border-radius']) assertSingleOwner(mobileDock, property, 'ui-refinement.css');
+for (const property of ['min-height', 'padding', 'border-radius']) assertSingleOwner(desktopDock, property, 'foundation-polish.css');
+
+const startVisibility = report.criticalOwnership?.startPanelVisibility;
+const mobileStart = report.criticalOwnership?.mobileStartPanel;
+const mobileStep = report.criticalOwnership?.mobileStartStep;
+if (!startVisibility || !mobileStart || !mobileStep) throw new Error('start command ownership snapshots are missing');
+assertSingleOwner(startVisibility, 'display', 'desktop-prime-layout.css');
+for (const property of ['padding', 'border', 'border-radius', 'background', 'box-shadow']) {
+    assertSingleOwner(mobileStart, property, 'ui-refinement.css');
+}
+for (const property of ['min-height', 'grid-template-columns', 'column-gap', 'padding', 'border', 'border-radius', 'background']) {
+    assertSingleOwner(mobileStep, property, 'ui-refinement.css');
+}
+
+for (const key of ['transportButton', 'exportButton', 'exportAllButton']) {
+    const snapshot = report.criticalOwnership?.[key];
+    if (!snapshot) throw new Error(`${key} ownership snapshot is missing`);
+    for (const property of ['min-width', 'min-height', 'padding', 'border-radius', 'font-size']) {
+        assertSingleOwner(snapshot, property, 'flow-doctor.css');
+    }
+}
+
 const forbiddenConflicts = report.propertyConflicts.filter(item => (
     item.selector === '.recommendation-card'
     && item.context === 'base'
@@ -78,4 +110,4 @@ const forbiddenConflicts = report.propertyConflicts.filter(item => (
 ));
 if (forbiddenConflicts.length) throw new Error('consolidated CSS ownership conflicts reappeared');
 
-console.log('PASS v1.5.4 CSS selector-property classification and consolidated ownership ceilings');
+console.log('PASS v1.5.5 mobile control CSS ownership and consolidated cascade ceilings');
