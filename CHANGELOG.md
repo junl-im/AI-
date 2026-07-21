@@ -328,3 +328,12 @@
 - Fresh Chromium desktop/mobile audit was generated for v1.5.3.
 - The full real-media suite was attempted, but the combined runner exceeded the available execution window after completing early scenarios. The previously validated v1.5.2 full media artifact is retained as the regression contract; this limitation is explicitly carried forward.
 - All source, packaging, service-worker, controller, cache and regression checks pass: 161/161.
+
+## v1.5.3 - Repeated Real-Media Heap Stability Audit
+
+- Added a same-page 20-cycle Chromium audit covering real MP3 import, analysis, recommendation generation, one-second rendering, and download cleanup.
+- Added forced-GC V8 heap sampling through CDP and trend checks using warm-window/last-window medians plus per-cycle slope.
+- Instrumented source and export Object URLs to verify one live source during work, no accumulating export URLs, and zero active URLs after disposal.
+- Added fast regression validation of the committed browser audit artifact to the regular QA suite.
+- Documented that V8 heap evidence does not fully cover GPU memory, whole-process RSS, or native media-decoder allocations.
+- The 20-cycle audit passed with 0.381 MiB median-window growth, -0.011 MiB/cycle slope, all 40 Object URLs revoked, and the full automated suite at 162/162.

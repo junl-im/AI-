@@ -8,7 +8,8 @@
 - 자막·품질·자동 컷 설정의 정규화, 저장, UI 동기화를 전용 설정 컨트롤러로 분리했습니다.
 - 설정 범위 보정과 프리셋·초기화 경로를 중앙화해 화면과 저장 상태 불일치를 줄였습니다.
 - 분석·미리보기·렌더 작업을 20회 반복하는 cleanup 감사를 추가했습니다.
-- 자동 QA 152/152와 실제 MP3·MP4·취소·재시도·10분 미디어 감사를 통과했습니다.
+- 자동 QA 162/162를 실제 MP3·MP4·취소·재시도·10분 미디어 감사를 유지했습니다.
+- 동일 Chromium 페이지에서 실제 MP3 분석·추천·1초 렌더를 20회 반복하고, 강제 GC 뒤 JS 힙 추세와 Object URL 해제를 검사하는 감사를 추가했습니다.
 
 ## v1.5.0 적용 내용
 
@@ -48,6 +49,7 @@ npm test
 python3 qa/run_browser_audit.py
 python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset
 python3 qa/run_media_e2e.py --cases longAudio
+python3 qa/run_heap_stability.py --cycles 20
 node qa/run_service_worker_lifecycle.js
 ```
 
@@ -77,6 +79,8 @@ PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.4.1_Full.zip PATCH_FROM_VERSION=
 전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.4.1 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
 
 ## 알려진 제한
+
+- 반복 힙 감사는 V8 JS 힙과 Object URL을 직접 측정하며 GPU 메모리, Chromium 전체 RSS, OS 미디어 디코더 네이티브 할당은 별도 실기기 계측이 필요합니다.
 
 실제 Chromium 감사 기기는 4GB 메모리로 보고돼 실미디어 영상은 안전 순차 전략을 사용했습니다. 병렬 분기는 모의 시간·부분 실패 검사로 통과했으며 8코어·8GB 이상 실기기 계측이 추가로 필요합니다. 모바일 Safari·Samsung Internet과 15분·30분 고해상도 MP4 장시간 출력도 별도 검증 대상입니다.
 

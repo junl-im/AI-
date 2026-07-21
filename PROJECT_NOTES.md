@@ -115,3 +115,12 @@
 
 ### v1.5.3 ownership rule
 Media source Object URLs belong only to `media-import-controller.js`. Other modules may read `state.fileUrl` but must not create or revoke the active source URL. Render paint caches must remain bounded and context-scoped.
+
+## v1.5.3 반복 힙 감사 규칙
+
+- 실제 반복 누수 감사는 새 브라우저를 매번 열지 않고 동일 Chromium 페이지에서 수행합니다.
+- 주기별 정상 상태는 active operation 0, 렌더 큐 비실행·빈 목록, 원본 Object URL 1개입니다.
+- 페이지 disposal 뒤 계측된 source/export Object URL은 모두 0개여야 합니다.
+- JS 힙은 강제 GC 뒤 기록하고 워밍업 구간 중앙값과 마지막 구간 중앙값, 선형 기울기를 함께 판정합니다.
+- `runtime-heap-stability-v*.json`은 재현 가능한 실브라우저 감사 산출물이며 `heap_stability_smoke.js`가 릴리스 계약을 확인합니다.
+- 이 감사는 V8 힙 누적을 감시하지만 GPU·브라우저 전체 RSS·OS 디코더 네이티브 메모리의 완전한 누수 증명으로 해석하지 않습니다.

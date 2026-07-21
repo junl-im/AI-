@@ -2,7 +2,7 @@
 
 ## 최종 결과
 
-- 자동 검사: **152/152 통과**
+- 자동 검사: **162/162 통과**
 - PC·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
 - PC·모바일 가로 overflow: **0px**
 - MP3·MP4 분석→추천→렌더·다운로드 통과
@@ -174,3 +174,15 @@
 - total automated checks: 161/161
 - fresh responsive Chromium audit generated
 - full media rerun limitation documented in HANDOFF.md
+
+## v1.5.3 실제 미디어 20회 힙 안정성 감사
+
+- 동일 Chromium 페이지에서 16초 MP3 파일 교체 → 자동 분석 → 추천 생성 → 1초 렌더 → 다운로드를 20회 반복합니다.
+- 각 주기 뒤 active operation 0건, 렌더 큐 비실행·빈 목록을 확인합니다.
+- 원본 Object URL은 작업 중 1개, 임시 출력 URL은 비누적, disposal 뒤 전체 0개를 확인합니다.
+- 강제 GC 뒤 V8 JS 힙의 워밍업 구간 중앙값, 마지막 구간 중앙값, 회귀 기울기를 기록합니다.
+- 빠른 `heap_stability_smoke.js`를 일반 자동 QA에 추가해 실브라우저 감사 산출물의 20회 완료와 모든 판정 통과를 보장합니다.
+- 측정 결과: 워밍업 중앙값 **3.812 MiB**, 마지막 5회 중앙값 **4.193 MiB**, 증가 **0.381 MiB(10.0%)**, 기울기 **-0.011 MiB/회**입니다.
+- Object URL은 생성 40개·해제 40개이며 disposal 뒤 활성 0개입니다.
+- 전체 자동 QA는 신규 smoke를 포함해 **162/162 통과**했습니다.
+- 제한: GPU·전체 Chromium RSS·OS 미디어 디코더 네이티브 메모리는 이번 판정의 직접 범위가 아닙니다.

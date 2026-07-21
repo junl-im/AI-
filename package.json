@@ -2,7 +2,7 @@
   "name": "ai-shorts-studio-v1-5-3",
   "version": "1.5.3",
   "private": true,
-  "description": "AI Shorts Studio v1.5.3 - media import ownership, Object URL cleanup, and render-frame cache hardening",
+  "description": "AI Shorts Studio v1.5.3 - media ownership, render-frame cache hardening, and repeated real-media heap stability audit",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -44,6 +44,7 @@
     "node --check src/app/settings-controller.js",
     "node qa/settings_controller_smoke.js",
     "node qa/repeated_operation_cleanup_smoke.js",
+    "node qa/heap_stability_smoke.js",
     "node qa/render_workflow_controller_smoke.js",
     "node --check src/download/download-service.js",
     "node --check src/ui/waveform-view.js",
