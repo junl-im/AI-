@@ -719,3 +719,77 @@ v1.3.6는 v1.3.5 작업물의 검수 결과를 다시 재현하면서 발견된 
 - Web Audio 전체 디코딩 특성상 매우 긴 무압축 오디오의 순간 peak memory는 여전히 클 수 있습니다.
 - 15분·30분 고해상도 MP4와 모바일 Safari·Samsung Internet 장시간 출력은 실기기 검증이 필요합니다.
 - 패치 ZIP은 삭제 파일을 자동 처리하지 않습니다. 삭제가 필요한 릴리스는 별도 삭제 절차가 필요합니다.
+
+---
+
+# HANDOFF v1.5.2 추가 기록
+
+## 패치 목표
+
+v1.5.0 이후 남아 있던 `src/app.js`의 설정 UI 책임과 반복 작업 후 소유권 잔류 가능성을 줄이는 구조 안정화 패치입니다.
+
+## 적용 내용
+
+- `src/app/settings-controller.js` 신규 추가
+  - 자막 옵션 정규화·저장·UI 동기화·프리셋·초기화 소유
+  - 품질 옵션 정규화·저장·UI 동기화·초기화 소유
+  - 자동 컷 옵션 정규화·저장·UI 동기화 소유
+- `src/app.js`의 관련 함수는 전용 컨트롤러에 위임하고 미리보기·추천 재계산 같은 앱 오케스트레이션만 유지
+- 서비스워커 셸 캐시에 설정 컨트롤러 추가
+- `qa/settings_controller_smoke.js` 추가
+- `qa/repeated_operation_cleanup_smoke.js` 추가
+  - 미디어 세션, 분석, 미리보기, 렌더를 20회 반복
+  - 각 주기 종료 후 active operation 0건 및 취소 signal 확인
+
+## 검증 결과
+
+- 자동 QA: 152/152
+- 데스크톱·모바일 오류, Promise rejection, console error: 0
+- 가로 overflow: 0px
+- 실제 MP3·MP4 분석·추천·렌더 성공
+- 렌더 취소 및 실패 후 재시도 성공
+- 10분 MP3 장시간 분석·렌더 성공
+- 20회 반복 operation cleanup: 잔류 0건
+- 서비스워커 install·activate·offline navigation 감사 성공
+
+## 유지 계약
+
+- 설정 값의 경계 처리와 DOM 반영은 `settings-controller.js`가 단일 소유합니다.
+- `app.js`는 설정 변경 이후 필요한 미리보기, 추천, 자동 컷 재계산만 담당합니다.
+- 설정 컨트롤러는 `app.js`보다 먼저 로드되어야 하며 서비스워커 셸에 포함되어야 합니다.
+- operation coordinator의 각 채널은 완료 또는 취소 후 active map에 남아서는 안 됩니다.
+
+## 알려진 제한
+
+- 현재 브라우저 감사는 inline asset harness이므로 실제 localhost 서비스워커 제어권 획득은 별도 환경에서 확인해야 합니다.
+- 이번 반복 감사는 operation 소유권과 취소 신호를 검증하며 브라우저 힙의 장기 추세 계측은 다음 패치 대상으로 남깁니다.
+
+## 다음 우선순위
+
+1. 20회 실제 미디어 분석·렌더 브라우저 힙 추세 감사
+2. 렌더 준비 단계의 canvas/audio graph 재사용 가능성 검토
+3. `app.js`의 파일 가져오기·프로젝트 입출력 컨트롤러 분리
+4. 누적 CSS 레이어의 중복 selector와 `!important` 소유권 통합
+
+## v1.5.2 인수인계 기록
+### 적용
+- 프로젝트 JSON 저장/불러오기 UI 책임을 `AIShortsProjectIOController`로 이동했습니다.
+- `app.js`는 컨트롤러 생성과 이벤트 연결만 담당합니다.
+- 렌더러는 동일 구간·자막·품질 옵션의 정규화 결과를 bounded LRU 캐시로 재사용합니다.
+- 캐시 상한은 24개이며 `clearRenderPlanCache()`로 즉시 비울 수 있습니다.
+
+### 유지 계약
+- 프로젝트 본문 스키마 검증은 계속 `project-service.js`가 소유합니다.
+- 파일 크기 제한과 사용자 파일 읽기는 `project-io-controller.js`가 소유합니다.
+- 미디어가 교체되면 기존 operation/session 방어 로직을 우회하지 않습니다.
+- 렌더 플랜에는 런타임 미디어 객체, 스트림, 캔버스, AbortSignal을 저장하지 않습니다.
+
+### 검증
+- project I/O controller smoke와 bounded render plan cache smoke를 추가했습니다.
+- 전체 정적·동작 QA, 브라우저 감사 계약, 실미디어 감사 계약을 재검증했습니다.
+
+### 다음 우선순위
+- 실제 Chromium heap snapshot 기반 20회 미디어 반복 추세 측정.
+- 파일 가져오기 전용 controller 분리와 object URL 생명주기 단일 소유권화.
+- 46개 CSS 파일의 selector 충돌 보고서 생성 및 레이어 통합.
+- 렌더 프레임에서 반복 생성되는 gradient/text measurement 비용 계측.

@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.0 - runtime config single source
+// AI Shorts Studio v1.5.2 - runtime config single source
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.5.0',
-    BUILD_KEY: '1.5.0-experience-engine',
+    APP_VERSION: 'v1.5.2',
+    BUILD_KEY: '1.5.2-experience-engine',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,

@@ -1,6 +1,14 @@
-# AI 쇼츠 제작 스튜디오 v1.5.0
+# AI 쇼츠 제작 스튜디오 v1.5.2
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
+
+
+## v1.5.2 적용 내용
+
+- 자막·품질·자동 컷 설정의 정규화, 저장, UI 동기화를 전용 설정 컨트롤러로 분리했습니다.
+- 설정 범위 보정과 프리셋·초기화 경로를 중앙화해 화면과 저장 상태 불일치를 줄였습니다.
+- 분석·미리보기·렌더 작업을 20회 반복하는 cleanup 감사를 추가했습니다.
+- 자동 QA 152/152와 실제 MP3·MP4·취소·재시도·10분 미디어 감사를 통과했습니다.
 
 ## v1.5.0 적용 내용
 
@@ -53,6 +61,7 @@ node qa/run_service_worker_lifecycle.js
 - 적응형 분석 예산: `src/engine/performance-budget.js`
 - 병렬·순차 분석 파이프라인: `src/engine/analysis-pipeline.js`
 - clone-safe LRU 분석 캐시: `src/engine/analysis-cache.js`
+- 설정 정규화·저장·UI 동기화: `src/app/settings-controller.js`
 - 렌더 워크플로·큐 UI: `src/app/render-workflow-controller.js`
 - 렌더 실행·미디어 복원: `src/render/vertical-renderer.js`
 - 서비스워커 등록·업데이트: `src/boot/service-worker-registration.js`

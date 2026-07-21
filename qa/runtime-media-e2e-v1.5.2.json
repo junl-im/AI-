@@ -1,0 +1,1174 @@
+{
+  "version": "1.5.2",
+  "harness": "Chromium inline asset harness; service worker and localStorage are outside this audit",
+  "audio": {
+    "analysisStatus": "렌더 큐 완료",
+    "recommendationCount": 1,
+    "selectedCount": 1,
+    "fileMeta": {
+      "name": "sample-20s.mp3",
+      "size": 321068,
+      "type": "audio/mpeg",
+      "duration": 19.99997732426304
+    },
+    "queue": {
+      "running": false,
+      "total": 1,
+      "done": 1,
+      "failed": 0,
+      "cancelled": 0,
+      "queued": 0,
+      "progress": 100,
+      "current": null,
+      "items": [
+        {
+          "id": "export-rec-15-40-0",
+          "label": "선택 구간 · 00:00 ~ 00:02",
+          "filenameHint": "sample-20s-0s.webm",
+          "statusText": "저장 완료",
+          "candidateId": "rec-15-40",
+          "payload": {
+            "candidate": {
+              "id": "rec-15-40",
+              "start": 0,
+              "end": 2,
+              "duration": 2,
+              "scoreRaw": 0.45313672863932014,
+              "score": 74,
+              "stats": {
+                "score": 0.45313672863932014,
+                "end": 19,
+                "energy": 0.4106770374486882,
+                "peak": 1,
+                "transient": 0.2033542029313099,
+                "silence": 0.13333333333333333,
+                "ramp": 0.5604236685738521,
+                "motion": 0,
+                "calm": 0.9850832599179011
+              },
+              "rank": 1,
+              "title": "추천 1 — 첫 3초 임팩트형",
+              "rangeText": "00:00 ~ 00:02",
+              "reasons": [
+                "피크가 선명해서 첫 인상이 강합니다.",
+                "비트·전환 컷 후보가 충분해 쇼츠 템포가 좋습니다.",
+                "무음 겹침이 적어 컷 편집 안정성이 높습니다.",
+                "사용자가 직접 조절한 커스텀 구간"
+              ],
+              "cutInfo": {
+                "cutsInside": 8,
+                "silenceRisk": 0.05,
+                "tempoScore": 87
+              },
+              "engineScore": 74,
+              "engineBadges": [
+                "보정 필요",
+                "강한 피크"
+              ],
+              "engineQuality": {
+                "originalScore": 74,
+                "bonus": 0,
+                "penalty": 0,
+                "silenceRisk": "medium"
+              },
+              "engineVersion": "v0.9.6-pro",
+              "proConfidence": 62,
+              "proGrade": "보정 필요",
+              "proEngine": {
+                "confidence": 62,
+                "grade": "보정 필요",
+                "scoreDepth": "balanced",
+                "renderHint": "균형 우선"
+              },
+              "custom": true
+            },
+            "index": 0,
+            "total": 1,
+            "base": "sample-20s"
+          },
+          "status": "done",
+          "progress": 100,
+          "attempts": 1,
+          "error": "",
+          "createdAt": 1784612092166,
+          "startedAt": 1784612092175,
+          "finishedAt": 1784612094490,
+          "elapsedMs": 2315,
+          "etaSeconds": 0,
+          "progressRate": 41.50453955901427,
+          "lastProgressAt": 1784612094490
+        }
+      ]
+    },
+    "operations": {
+      "mediaSessionId": 1,
+      "active": []
+    },
+    "runtime": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "usedWorkerFallback": true,
+    "download": "sample-20s-0s-2s-shorts.mp4",
+    "outputProbe": {
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "duration": "1.968267",
+      "size": "534335"
+    },
+    "errors": []
+  },
+  "video": {
+    "analysisStatus": "렌더 큐 완료",
+    "recommendationCount": 1,
+    "selectedCount": 1,
+    "fileMeta": {
+      "name": "sample-20s.mp4",
+      "size": 3207922,
+      "type": "video/mp4",
+      "duration": 20
+    },
+    "queue": {
+      "running": false,
+      "total": 1,
+      "done": 1,
+      "failed": 0,
+      "cancelled": 0,
+      "queued": 0,
+      "progress": 100,
+      "current": null,
+      "items": [
+        {
+          "id": "export-rec-15-40-0",
+          "label": "선택 구간 · 00:00 ~ 00:02",
+          "filenameHint": "sample-20s-0s.webm",
+          "statusText": "저장 완료",
+          "candidateId": "rec-15-40",
+          "payload": {
+            "candidate": {
+              "id": "rec-15-40",
+              "start": 0,
+              "end": 2,
+              "duration": 2,
+              "scoreRaw": 0.5621014654657022,
+              "score": 84,
+              "stats": {
+                "score": 0.5621014654657022,
+                "end": 19,
+                "energy": 0.5895096348353058,
+                "peak": 1,
+                "transient": 0.10738734416327313,
+                "silence": 0.13114754098360656,
+                "ramp": 1,
+                "motion": 0.3266352941176471,
+                "calm": 0.7287845842635106
+              },
+              "rank": 1,
+              "title": "추천 1 — 후렴 상승형",
+              "rangeText": "00:00 ~ 00:02",
+              "reasons": [
+                "피크가 선명해서 첫 인상이 강합니다.",
+                "구간 안에서 에너지가 상승해 후렴·드롭 후보로 좋습니다.",
+                "비트·전환 컷 후보가 충분해 쇼츠 템포가 좋습니다.",
+                "무음 겹침이 적어 컷 편집 안정성이 높습니다.",
+                "사용자가 직접 조절한 커스텀 구간"
+              ],
+              "cutInfo": {
+                "cutsInside": 6,
+                "silenceRisk": 0.05,
+                "tempoScore": 87
+              },
+              "engineScore": 84,
+              "engineBadges": [
+                "B급 후보",
+                "강한 피크",
+                "상승감"
+              ],
+              "engineQuality": {
+                "originalScore": 81,
+                "bonus": 3,
+                "penalty": 0,
+                "silenceRisk": "medium"
+              },
+              "engineVersion": "v0.9.6-pro",
+              "proConfidence": 72,
+              "proGrade": "B급 후보",
+              "proEngine": {
+                "confidence": 72,
+                "grade": "B급 후보",
+                "scoreDepth": "balanced",
+                "renderHint": "균형 우선"
+              },
+              "custom": true
+            },
+            "index": 0,
+            "total": 1,
+            "base": "sample-20s"
+          },
+          "status": "done",
+          "progress": 100,
+          "attempts": 1,
+          "error": "",
+          "createdAt": 1784612099872,
+          "startedAt": 1784612099880,
+          "finishedAt": 1784612102071,
+          "elapsedMs": 2191,
+          "etaSeconds": 0,
+          "progressRate": 43.83561643835616,
+          "lastProgressAt": 1784612102071
+        }
+      ]
+    },
+    "operations": {
+      "mediaSessionId": 1,
+      "active": []
+    },
+    "runtime": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "usedWorkerFallback": true,
+    "download": "sample-20s-0s-2s-shorts.mp4",
+    "outputProbe": {
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "duration": "1.920667",
+      "size": "178470"
+    },
+    "errors": []
+  },
+  "cancel": {
+    "queue": {
+      "running": false,
+      "total": 1,
+      "done": 0,
+      "failed": 0,
+      "cancelled": 1,
+      "queued": 0,
+      "progress": 26,
+      "current": null,
+      "items": [
+        {
+          "id": "export-rec-15-40-0",
+          "label": "선택 구간 · 00:00 ~ 00:06",
+          "filenameHint": "sample-20s-0s.webm",
+          "statusText": "사용자 취소",
+          "candidateId": "rec-15-40",
+          "payload": {
+            "candidate": {
+              "id": "rec-15-40",
+              "start": 0,
+              "end": 6,
+              "duration": 6,
+              "scoreRaw": 0.5621014654657022,
+              "score": 84,
+              "stats": {
+                "score": 0.5621014654657022,
+                "end": 19,
+                "energy": 0.5895096348353058,
+                "peak": 1,
+                "transient": 0.10738734416327313,
+                "silence": 0.13114754098360656,
+                "ramp": 1,
+                "motion": 0.3266352941176471,
+                "calm": 0.7287845842635106
+              },
+              "rank": 1,
+              "title": "추천 1 — 후렴 상승형",
+              "rangeText": "00:00 ~ 00:06",
+              "reasons": [
+                "피크가 선명해서 첫 인상이 강합니다.",
+                "구간 안에서 에너지가 상승해 후렴·드롭 후보로 좋습니다.",
+                "비트·전환 컷 후보가 충분해 쇼츠 템포가 좋습니다.",
+                "무음 겹침이 적어 컷 편집 안정성이 높습니다.",
+                "사용자가 직접 조절한 커스텀 구간"
+              ],
+              "cutInfo": {
+                "cutsInside": 6,
+                "silenceRisk": 0.05,
+                "tempoScore": 87
+              },
+              "engineScore": 84,
+              "engineBadges": [
+                "B급 후보",
+                "강한 피크",
+                "상승감"
+              ],
+              "engineQuality": {
+                "originalScore": 81,
+                "bonus": 3,
+                "penalty": 0,
+                "silenceRisk": "medium"
+              },
+              "engineVersion": "v0.9.6-pro",
+              "proConfidence": 72,
+              "proGrade": "B급 후보",
+              "proEngine": {
+                "confidence": 72,
+                "grade": "B급 후보",
+                "scoreDepth": "balanced",
+                "renderHint": "균형 우선"
+              },
+              "custom": true
+            },
+            "index": 0,
+            "total": 1,
+            "base": "sample-20s"
+          },
+          "status": "cancelled",
+          "progress": 25.970597333333334,
+          "attempts": 1,
+          "error": "사용자가 렌더 작업을 취소했습니다.",
+          "createdAt": 1784612107688,
+          "startedAt": 1784612107697,
+          "finishedAt": 1784612109106,
+          "elapsedMs": 1409,
+          "etaSeconds": null,
+          "progressRate": 19.381042786069653,
+          "lastProgressAt": 1784612109037
+        }
+      ]
+    },
+    "operations": {
+      "mediaSessionId": 1,
+      "active": []
+    },
+    "status": "완료 0/1 · 취소 1",
+    "cancelDisabledAfter": true,
+    "cancelEnabledDuringRun": true,
+    "downloads": [],
+    "errors": []
+  },
+  "retry": {
+    "failed": {
+      "queue": {
+        "running": false,
+        "total": 1,
+        "done": 0,
+        "failed": 1,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 1,
+        "current": null,
+        "items": [
+          {
+            "id": "export-rec-15-40-0",
+            "label": "선택 구간 · 00:00 ~ 00:02",
+            "filenameHint": "sample-20s-0s.webm",
+            "statusText": "렌더 실패",
+            "candidateId": "rec-15-40",
+            "payload": {
+              "candidate": {
+                "id": "rec-15-40",
+                "start": 0,
+                "end": 2,
+                "duration": 2,
+                "scoreRaw": 0.5457408169470739,
+                "score": 84,
+                "stats": {
+                  "score": 0.5457408169470739,
+                  "end": 19,
+                  "energy": 0.54006369321569,
+                  "peak": 1,
+                  "transient": 0.2359044747584384,
+                  "silence": 0.05,
+                  "ramp": 0.7986779937534056,
+                  "motion": 0,
+                  "calm": 0.807898090854896
+                },
+                "rank": 1,
+                "title": "추천 1 — 후렴 상승형",
+                "rangeText": "00:00 ~ 00:02",
+                "reasons": [
+                  "피크가 선명해서 첫 인상이 강합니다.",
+                  "구간 안에서 에너지가 상승해 후렴·드롭 후보로 좋습니다.",
+                  "무음·저에너지 구간이 적어 이탈 위험이 낮습니다.",
+                  "비트·전환 컷 후보가 충분해 쇼츠 템포가 좋습니다.",
+                  "무음 겹침이 적어 컷 편집 안정성이 높습니다."
+                ],
+                "cutInfo": {
+                  "cutsInside": 7,
+                  "silenceRisk": 0,
+                  "tempoScore": 88
+                },
+                "engineScore": 84,
+                "engineBadges": [
+                  "B급 후보",
+                  "강한 피크",
+                  "상승감",
+                  "무음 낮음"
+                ],
+                "engineQuality": {
+                  "originalScore": 81,
+                  "bonus": 3,
+                  "penalty": 0,
+                  "silenceRisk": "low"
+                },
+                "engineVersion": "v0.9.6-pro",
+                "proConfidence": 71,
+                "proGrade": "B급 후보",
+                "proEngine": {
+                  "confidence": 71,
+                  "grade": "B급 후보",
+                  "scoreDepth": "balanced",
+                  "renderHint": "균형 우선"
+                },
+                "custom": true
+              },
+              "index": 0,
+              "total": 1,
+              "base": "sample-20s"
+            },
+            "status": "failed",
+            "progress": 1,
+            "attempts": 1,
+            "error": "원본 미디어 재생을 시작할 수 없어 렌더를 중단했습니다: E2E injected playback failure",
+            "createdAt": 1784612131029,
+            "startedAt": 1784612131038,
+            "finishedAt": 1784612131045,
+            "elapsedMs": 7,
+            "etaSeconds": null,
+            "progressRate": 0,
+            "lastProgressAt": 0
+          }
+        ]
+      },
+      "retryDisabled": false
+    },
+    "retried": {
+      "queue": {
+        "running": false,
+        "total": 1,
+        "done": 1,
+        "failed": 0,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 100,
+        "current": null,
+        "items": [
+          {
+            "id": "export-rec-15-40-0",
+            "label": "선택 구간 · 00:00 ~ 00:02",
+            "filenameHint": "sample-20s-0s.webm",
+            "statusText": "저장 완료",
+            "candidateId": "rec-15-40",
+            "payload": {
+              "candidate": {
+                "id": "rec-15-40",
+                "start": 0,
+                "end": 2,
+                "duration": 2,
+                "scoreRaw": 0.5457408169470739,
+                "score": 84,
+                "stats": {
+                  "score": 0.5457408169470739,
+                  "end": 19,
+                  "energy": 0.54006369321569,
+                  "peak": 1,
+                  "transient": 0.2359044747584384,
+                  "silence": 0.05,
+                  "ramp": 0.7986779937534056,
+                  "motion": 0,
+                  "calm": 0.807898090854896
+                },
+                "rank": 1,
+                "title": "추천 1 — 후렴 상승형",
+                "rangeText": "00:00 ~ 00:02",
+                "reasons": [
+                  "피크가 선명해서 첫 인상이 강합니다.",
+                  "구간 안에서 에너지가 상승해 후렴·드롭 후보로 좋습니다.",
+                  "무음·저에너지 구간이 적어 이탈 위험이 낮습니다.",
+                  "비트·전환 컷 후보가 충분해 쇼츠 템포가 좋습니다.",
+                  "무음 겹침이 적어 컷 편집 안정성이 높습니다."
+                ],
+                "cutInfo": {
+                  "cutsInside": 7,
+                  "silenceRisk": 0,
+                  "tempoScore": 88
+                },
+                "engineScore": 84,
+                "engineBadges": [
+                  "B급 후보",
+                  "강한 피크",
+                  "상승감",
+                  "무음 낮음"
+                ],
+                "engineQuality": {
+                  "originalScore": 81,
+                  "bonus": 3,
+                  "penalty": 0,
+                  "silenceRisk": "low"
+                },
+                "engineVersion": "v0.9.6-pro",
+                "proConfidence": 71,
+                "proGrade": "B급 후보",
+                "proEngine": {
+                  "confidence": 71,
+                  "grade": "B급 후보",
+                  "scoreDepth": "balanced",
+                  "renderHint": "균형 우선"
+                },
+                "custom": true
+              },
+              "index": 0,
+              "total": 1,
+              "base": "sample-20s"
+            },
+            "status": "done",
+            "progress": 100,
+            "attempts": 2,
+            "error": "",
+            "createdAt": 1784612131029,
+            "startedAt": 1784612131351,
+            "finishedAt": 1784612133606,
+            "elapsedMs": 2255,
+            "etaSeconds": 0,
+            "progressRate": 42.6098535286285,
+            "lastProgressAt": 1784612133606
+          }
+        ]
+      },
+      "retryDisabled": true,
+      "operations": {
+        "mediaSessionId": 1,
+        "active": []
+      },
+      "download": "sample-20s-0s-2s-shorts.mp4",
+      "outputProbe": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "1.963733",
+        "size": "365967"
+      },
+      "errors": []
+    }
+  },
+  "longAudio": {
+    "analysisSeconds": 5.737,
+    "duringRender": {
+      "queue": {
+        "running": true,
+        "total": 1,
+        "done": 0,
+        "failed": 0,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 29,
+        "current": {
+          "id": "export-rec-15-970-0",
+          "label": "선택 구간 · 00:00 ~ 00:06",
+          "filenameHint": "sample-10m-0s.webm",
+          "statusText": "세로 쇼츠 렌더링 중",
+          "candidateId": "rec-15-970",
+          "payload": {
+            "candidate": {
+              "id": "rec-15-970",
+              "start": 0,
+              "end": 6,
+              "duration": 6,
+              "scoreRaw": 0.5797976033532756,
+              "score": 87,
+              "stats": {
+                "score": 0.5797976033532756,
+                "end": 112,
+                "energy": 0.6533502692535066,
+                "peak": 1,
+                "transient": 0.254372293649747,
+                "silence": 0.01639344262295082,
+                "ramp": 0.805927089530515,
+                "motion": 0,
+                "calm": 0.6266395691943893
+              },
+              "rank": 1,
+              "title": "추천 1 — 후렴 상승형",
+              "rangeText": "00:00 ~ 00:06",
+              "reasons": [
+                "피크가 선명해서 첫 인상이 강합니다.",
+                "구간 안에서 에너지가 상승해 후렴·드롭 후보로 좋습니다.",
+                "무음·저에너지 구간이 적어 이탈 위험이 낮습니다.",
+                "비트·전환 컷 후보가 충분해 쇼츠 템포가 좋습니다.",
+                "무음 겹침이 적어 컷 편집 안정성이 높습니다."
+              ],
+              "cutInfo": {
+                "cutsInside": 8,
+                "silenceRisk": 0,
+                "tempoScore": 88
+              },
+              "engineScore": 87,
+              "engineBadges": [
+                "B급 후보",
+                "강한 피크",
+                "상승감",
+                "무음 낮음"
+              ],
+              "engineQuality": {
+                "originalScore": 83,
+                "bonus": 4,
+                "penalty": 0,
+                "silenceRisk": "low"
+              },
+              "engineVersion": "v0.9.6-pro",
+              "proConfidence": 74,
+              "proGrade": "B급 후보",
+              "proEngine": {
+                "confidence": 74,
+                "grade": "B급 후보",
+                "scoreDepth": "balanced",
+                "renderHint": "균형 우선"
+              },
+              "custom": true
+            },
+            "index": 0,
+            "total": 1,
+            "base": "sample-10m"
+          },
+          "status": "running",
+          "progress": 28.50907466666667,
+          "attempts": 1,
+          "error": "",
+          "createdAt": 1784612143982,
+          "startedAt": 1784612143993,
+          "finishedAt": 0,
+          "elapsedMs": 1485,
+          "etaSeconds": 3,
+          "progressRate": 19.198030078563413,
+          "lastProgressAt": 1784612145478
+        },
+        "items": [
+          {
+            "id": "export-rec-15-970-0",
+            "label": "선택 구간 · 00:00 ~ 00:06",
+            "filenameHint": "sample-10m-0s.webm",
+            "statusText": "세로 쇼츠 렌더링 중",
+            "candidateId": "rec-15-970",
+            "payload": {
+              "candidate": {
+                "id": "rec-15-970",
+                "start": 0,
+                "end": 6,
+                "duration": 6,
+                "scoreRaw": 0.5797976033532756,
+                "score": 87,
+                "stats": {
+                  "score": 0.5797976033532756,
+                  "end": 112,
+                  "energy": 0.6533502692535066,
+                  "peak": 1,
+                  "transient": 0.254372293649747,
+                  "silence": 0.01639344262295082,
+                  "ramp": 0.805927089530515,
+                  "motion": 0,
+                  "calm": 0.6266395691943893
+                },
+                "rank": 1,
+                "title": "추천 1 — 후렴 상승형",
+                "rangeText": "00:00 ~ 00:06",
+                "reasons": [
+                  "피크가 선명해서 첫 인상이 강합니다.",
+                  "구간 안에서 에너지가 상승해 후렴·드롭 후보로 좋습니다.",
+                  "무음·저에너지 구간이 적어 이탈 위험이 낮습니다.",
+                  "비트·전환 컷 후보가 충분해 쇼츠 템포가 좋습니다.",
+                  "무음 겹침이 적어 컷 편집 안정성이 높습니다."
+                ],
+                "cutInfo": {
+                  "cutsInside": 8,
+                  "silenceRisk": 0,
+                  "tempoScore": 88
+                },
+                "engineScore": 87,
+                "engineBadges": [
+                  "B급 후보",
+                  "강한 피크",
+                  "상승감",
+                  "무음 낮음"
+                ],
+                "engineQuality": {
+                  "originalScore": 83,
+                  "bonus": 4,
+                  "penalty": 0,
+                  "silenceRisk": "low"
+                },
+                "engineVersion": "v0.9.6-pro",
+                "proConfidence": 74,
+                "proGrade": "B급 후보",
+                "proEngine": {
+                  "confidence": 74,
+                  "grade": "B급 후보",
+                  "scoreDepth": "balanced",
+                  "renderHint": "균형 우선"
+                },
+                "custom": true
+              },
+              "index": 0,
+              "total": 1,
+              "base": "sample-10m"
+            },
+            "status": "running",
+            "progress": 28.50907466666667,
+            "attempts": 1,
+            "error": "",
+            "createdAt": 1784612143982,
+            "startedAt": 1784612143993,
+            "finishedAt": 0,
+            "elapsedMs": 1485,
+            "etaSeconds": 3,
+            "progressRate": 19.198030078563413,
+            "lastProgressAt": 1784612145478
+          }
+        ]
+      },
+      "statusText": "선택 구간 · 00:00 ~ 00:06 · 28% · 남은 약 3초",
+      "fileMeta": {
+        "name": "sample-10m.mp3",
+        "size": 4800428,
+        "type": "audio/mpeg",
+        "duration": 599.999977324263
+      },
+      "engineMeta": {
+        "version": "1.5.2",
+        "normalized": true,
+        "mode": "adaptive-parallel-engine",
+        "analysisStrategy": "audio-only",
+        "budget": {
+          "tier": "balanced",
+          "sizeMb": 4.6,
+          "duration": 600,
+          "cores": 56,
+          "memory": 4,
+          "longMedia": true,
+          "audioMaxSeconds": 600,
+          "analysisSampleRate": 8000,
+          "motionSamples": 88,
+          "estimatedAnalysisMemoryMb": 18.3,
+          "estimatedDecodeMemoryMb": 219.7,
+          "memoryRisk": "medium",
+          "memoryRiskLabel": "메모리 확인",
+          "hardBlock": false,
+          "isUncompressedAudio": false,
+          "rawBufferCopyAvoided": true,
+          "retainDecoded": false,
+          "retainChannelData": false,
+          "parallelAnalysis": false,
+          "parallelReason": "장시간 미디어 메모리 안정 우선",
+          "responsivenessSliceMs": 10,
+          "cacheNamespace": "engine-v1.5.2",
+          "recommendationCount": 7,
+          "uiThrottleMs": 110,
+          "label": "장시간 균형 모드",
+          "engineClass": "pro-balanced",
+          "analysisWindow": "adaptive",
+          "cutSensitivity": 0.58,
+          "scoreDepth": "balanced",
+          "renderHint": "균형 우선",
+          "cacheLimit": 4
+        },
+        "timings": {
+          "totalMs": 5404,
+          "audioMs": 5401,
+          "motionMs": 0,
+          "finalizeMs": 3
+        },
+        "audioPreparation": {
+          "sourceDuration": 599.999977324263,
+          "analyzedDuration": 599.999977324263,
+          "sampleRate": 8000,
+          "sampleCount": 4799999,
+          "approximateBytes": 19199996,
+          "truncated": false
+        },
+        "parallelGainEligible": false,
+        "registry": {
+          "namespace": "ai-shorts-studio-pro-engine",
+          "count": 8,
+          "modules": [
+            {
+              "id": "audio.feature.extractor",
+              "version": "0.9.6",
+              "stage": "analysis",
+              "priority": 10,
+              "capabilities": [
+                "decode",
+                "waveform",
+                "rms",
+                "transient",
+                "local-only"
+              ]
+            },
+            {
+              "id": "video.motion.sampler",
+              "version": "0.9.6",
+              "stage": "analysis",
+              "priority": 20,
+              "capabilities": [
+                "motion",
+                "scene-hint",
+                "adaptive-sampling"
+              ]
+            },
+            {
+              "id": "auto.cut.detector",
+              "version": "0.9.6",
+              "stage": "cut",
+              "priority": 30,
+              "capabilities": [
+                "silence",
+                "beat",
+                "motion-cut",
+                "snap-range"
+              ]
+            },
+            {
+              "id": "recommendation.scoring.pipeline",
+              "version": "0.9.6",
+              "stage": "recommendation",
+              "priority": 40,
+              "capabilities": [
+                "quality-gate",
+                "engine-badge",
+                "rerank"
+              ]
+            },
+            {
+              "id": "pro.engine.tuner",
+              "version": "0.9.6",
+              "stage": "recommendation",
+              "priority": 45,
+              "capabilities": [
+                "confidence",
+                "grade",
+                "score-depth"
+              ]
+            },
+            {
+              "id": "render.quality.effects",
+              "version": "0.9.6",
+              "stage": "render",
+              "priority": 50,
+              "capabilities": [
+                "caption",
+                "quality",
+                "watermark"
+              ]
+            },
+            {
+              "id": "analysis.cache",
+              "version": "0.9.6",
+              "stage": "utility",
+              "priority": 60,
+              "capabilities": [
+                "session-cache",
+                "repeat-open-boost"
+              ]
+            },
+            {
+              "id": "stability.auditor",
+              "version": "0.9.6",
+              "stage": "stability",
+              "priority": 70,
+              "capabilities": [
+                "health-score",
+                "contract-report"
+              ]
+            }
+          ],
+          "events": [
+            {
+              "type": "register",
+              "id": "stability.auditor",
+              "stage": "stability",
+              "at": "2026-07-21T05:35:34.723Z"
+            },
+            {
+              "type": "register",
+              "id": "analysis.cache",
+              "stage": "utility",
+              "at": "2026-07-21T05:35:34.723Z"
+            },
+            {
+              "type": "register",
+              "id": "render.quality.effects",
+              "stage": "render",
+              "at": "2026-07-21T05:35:34.723Z"
+            },
+            {
+              "type": "register",
+              "id": "pro.engine.tuner",
+              "stage": "recommendation",
+              "at": "2026-07-21T05:35:34.723Z"
+            },
+            {
+              "type": "register",
+              "id": "recommendation.scoring.pipeline",
+              "stage": "recommendation",
+              "at": "2026-07-21T05:35:34.723Z"
+            },
+            {
+              "type": "register",
+              "id": "auto.cut.detector",
+              "stage": "cut",
+              "at": "2026-07-21T05:35:34.723Z"
+            },
+            {
+              "type": "register",
+              "id": "video.motion.sampler",
+              "stage": "analysis",
+              "at": "2026-07-21T05:35:34.723Z"
+            },
+            {
+              "type": "register",
+              "id": "audio.feature.extractor",
+              "stage": "analysis",
+              "at": "2026-07-21T05:35:34.723Z"
+            }
+          ]
+        },
+        "profile": {
+          "label": "analysis",
+          "totalMs": 5409,
+          "marks": [
+            {
+              "name": "budget",
+              "t": 0,
+              "meta": {
+                "tier": "balanced",
+                "sizeMb": 4.6,
+                "duration": 600,
+                "cores": 56,
+                "memory": 4,
+                "longMedia": true,
+                "audioMaxSeconds": 600,
+                "analysisSampleRate": 8000,
+                "motionSamples": 88,
+                "estimatedAnalysisMemoryMb": 18.3,
+                "estimatedDecodeMemoryMb": 219.7,
+                "memoryRisk": "medium",
+                "memoryRiskLabel": "메모리 확인",
+                "hardBlock": false,
+                "isUncompressedAudio": false,
+                "rawBufferCopyAvoided": true,
+                "retainDecoded": false,
+                "retainChannelData": false,
+                "parallelAnalysis": false,
+                "parallelReason": "장시간 미디어 메모리 안정 우선",
+                "responsivenessSliceMs": 10,
+                "cacheNamespace": "engine-v1.5.2",
+                "recommendationCount": 7,
+                "uiThrottleMs": 110,
+                "label": "장시간 균형 모드",
+                "engineClass": "pro-balanced",
+                "analysisWindow": "adaptive",
+                "cutSensitivity": 0.58,
+                "scoreDepth": "balanced",
+                "renderHint": "균형 우선",
+                "cacheLimit": 4
+              }
+            },
+            {
+              "name": "analysis-complete",
+              "t": 5404,
+              "meta": null
+            }
+          ]
+        },
+        "summary": {
+          "version": "0.9.6",
+          "class": "pro-balanced",
+          "frames": 2396,
+          "silenceRatio": 0,
+          "cutPoints": 237,
+          "renderHint": "균형 우선"
+        },
+        "cache": {
+          "size": 1,
+          "limit": 4,
+          "maxAgeMs": 1800000,
+          "hits": 0,
+          "misses": 1,
+          "evictions": 0,
+          "expired": 0,
+          "lastHitAgeMs": 0,
+          "cloneSafe": true,
+          "hitRate": 0
+        },
+        "cacheHit": false,
+        "contract": {
+          "version": "0.9.6",
+          "ok": true,
+          "moduleCount": 8,
+          "failedRecommendations": 0,
+          "warnings": [],
+          "score": 88
+        },
+        "stability": {
+          "version": "0.9.6",
+          "ok": true,
+          "score": 100,
+          "findings": [],
+          "checkedAt": "2026-07-21T05:35:41.197Z"
+        }
+      },
+      "audioSummary": {
+        "avgRms": 0.0315423972885874,
+        "peak": 0.054533444344997406,
+        "loudnessDensity": 0.251669449081803,
+        "silenceRatio": 0,
+        "dynamicRangeProxy": 0.00016573843101651276,
+        "transientDensity": 0.2996661101836394,
+        "sourceDuration": 599.999977324263,
+        "analyzedDuration": 599.999977324263,
+        "analysisSampleRate": 8000,
+        "truncated": false
+      },
+      "retainedAudioBuffer": false,
+      "retainedChannelData": false,
+      "diagnostics": [
+        {
+          "at": "2026-07-21T05:35:35.572Z",
+          "type": "long-media-budget",
+          "duration": 600,
+          "sizeMb": 4.6,
+          "sampleRate": 8000,
+          "estimatedMemoryMb": 18.3,
+          "estimatedDecodeMemoryMb": 219.7,
+          "memoryRisk": "medium"
+        }
+      ]
+    },
+    "final": {
+      "queue": {
+        "running": false,
+        "total": 1,
+        "done": 1,
+        "failed": 0,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 100,
+        "current": null,
+        "items": [
+          {
+            "id": "export-rec-15-970-0",
+            "label": "선택 구간 · 00:00 ~ 00:06",
+            "filenameHint": "sample-10m-0s.webm",
+            "statusText": "저장 완료",
+            "candidateId": "rec-15-970",
+            "payload": {
+              "candidate": {
+                "id": "rec-15-970",
+                "start": 0,
+                "end": 6,
+                "duration": 6,
+                "scoreRaw": 0.5797976033532756,
+                "score": 87,
+                "stats": {
+                  "score": 0.5797976033532756,
+                  "end": 112,
+                  "energy": 0.6533502692535066,
+                  "peak": 1,
+                  "transient": 0.254372293649747,
+                  "silence": 0.01639344262295082,
+                  "ramp": 0.805927089530515,
+                  "motion": 0,
+                  "calm": 0.6266395691943893
+                },
+                "rank": 1,
+                "title": "추천 1 — 후렴 상승형",
+                "rangeText": "00:00 ~ 00:06",
+                "reasons": [
+                  "피크가 선명해서 첫 인상이 강합니다.",
+                  "구간 안에서 에너지가 상승해 후렴·드롭 후보로 좋습니다.",
+                  "무음·저에너지 구간이 적어 이탈 위험이 낮습니다.",
+                  "비트·전환 컷 후보가 충분해 쇼츠 템포가 좋습니다.",
+                  "무음 겹침이 적어 컷 편집 안정성이 높습니다."
+                ],
+                "cutInfo": {
+                  "cutsInside": 8,
+                  "silenceRisk": 0,
+                  "tempoScore": 88
+                },
+                "engineScore": 87,
+                "engineBadges": [
+                  "B급 후보",
+                  "강한 피크",
+                  "상승감",
+                  "무음 낮음"
+                ],
+                "engineQuality": {
+                  "originalScore": 83,
+                  "bonus": 4,
+                  "penalty": 0,
+                  "silenceRisk": "low"
+                },
+                "engineVersion": "v0.9.6-pro",
+                "proConfidence": 74,
+                "proGrade": "B급 후보",
+                "proEngine": {
+                  "confidence": 74,
+                  "grade": "B급 후보",
+                  "scoreDepth": "balanced",
+                  "renderHint": "균형 우선"
+                },
+                "custom": true
+              },
+              "index": 0,
+              "total": 1,
+              "base": "sample-10m"
+            },
+            "status": "done",
+            "progress": 100,
+            "attempts": 1,
+            "error": "",
+            "createdAt": 1784612143982,
+            "startedAt": 1784612143993,
+            "finishedAt": 1784612150282,
+            "elapsedMs": 6289,
+            "etaSeconds": 0,
+            "progressRate": 15.272033089405028,
+            "lastProgressAt": 1784612150282
+          }
+        ]
+      },
+      "operations": {
+        "mediaSessionId": 1,
+        "active": []
+      },
+      "runtime": {
+        "webAudio": true,
+        "worker": true,
+        "mediaRecorder": true,
+        "canvasCaptureStream": true,
+        "mediaCaptureStream": true,
+        "serviceWorker": false,
+        "serviceWorkerControlled": false,
+        "secureContext": false,
+        "crossOriginIsolated": false,
+        "hydrationReady": "core",
+        "hydrationError": "",
+        "runtimeErrors": 0
+      },
+      "download": "sample-10m-0s-6s-shorts.mp4",
+      "outputProbe": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "5.856500",
+        "size": "1420694"
+      },
+      "errors": []
+    }
+  }
+}

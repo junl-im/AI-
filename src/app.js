@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.0 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
+// AI Shorts Studio v1.5.2 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -13,6 +13,7 @@
     const engineKernel = global.AIShortsEngineKernel || {};
     const captionService = global.AIShortsCaptionService || {};
     const projectService = global.AIShortsProjectService || {};
+    const projectIOControllerFactory = global.AIShortsProjectIOController || {};
     const renderer = global.AIShortsVerticalRenderer || {};
     const qualityEffects = global.AIShortsQualityEffects || {};
     const downloadService = global.AIShortsDownloadService || {};
@@ -25,6 +26,7 @@
     const serviceWorkerRegistration = global.AIShortsServiceWorkerRegistration || {};
     const operationCoordinator = global.AIShortsOperationCoordinator || {};
     const renderWorkflowController = global.AIShortsRenderWorkflowController || {};
+    const settingsControllerFactory = global.AIShortsSettingsController || {};
 
     const els = {};
     let previewRaf = 0;
@@ -32,6 +34,8 @@
     let previewStillRaf = 0;
     let previewOperationToken = null;
     let renderWorkflow = null;
+    let settingsController = null;
+    let projectIOController = null;
 
 
     function isAbortError(error) {
@@ -98,6 +102,27 @@
         handlePadding: 0.7,
         maxSnapDistance: 1.4
     });
+
+
+    function getProjectIOController() {
+        if (projectIOController) return projectIOController;
+        if (!projectIOControllerFactory.createProjectIOController) return null;
+        projectIOController = projectIOControllerFactory.createProjectIOController({
+            state, projectService, downloadService, utils, config, store, captionService, elements: els,
+            toast, syncSettingsToUI, renderAll
+        });
+        return projectIOController;
+    }
+
+    function getSettingsController() {
+        if (settingsController) return settingsController;
+        if (!settingsControllerFactory.createSettingsController) return null;
+        settingsController = settingsControllerFactory.createSettingsController({
+            state, store, elements: els, captionDefaults: CAPTION_DEFAULTS, captionPresets: CAPTION_PRESETS,
+            qualityDefaults: QUALITY_DEFAULTS, autoCutDefaults: AUTO_CUT_DEFAULTS, qualityEffects, autoCutDetector
+        });
+        return settingsController;
+    }
 
     function $(id) { return document.getElementById(id); }
 
@@ -212,130 +237,62 @@
     }
 
     function getCaptionOptions() {
-        const raw = Object.assign({}, CAPTION_DEFAULTS, state && state.settings && state.settings.captionOptions || {});
-        raw.size = Math.max(36, Math.min(86, Number(raw.size) || CAPTION_DEFAULTS.size));
-        raw.maxLines = Math.max(1, Math.min(3, Number(raw.maxLines) || CAPTION_DEFAULTS.maxLines));
-        raw.boxOpacity = Math.max(0, Math.min(0.9, Number(raw.boxOpacity) || 0));
-        raw.shadow = Math.max(0, Math.min(1, Number(raw.shadow) || 0));
-        raw.uppercase = Boolean(raw.uppercase);
-        raw.autoBreak = raw.autoBreak !== false;
-        return raw;
+        const controller = getSettingsController();
+        return controller ? controller.getCaptionOptions() : Object.assign({}, CAPTION_DEFAULTS);
     }
 
     function saveCaptionOptions(options) {
-        const next = Object.assign({}, CAPTION_DEFAULTS, options || {});
-        store.setSetting('captionOptions', next);
-        return next;
+        const controller = getSettingsController();
+        return controller ? controller.saveCaptionOptions(options) : options;
     }
 
     function syncCaptionOptionsToUI() {
-        const options = getCaptionOptions();
-        if (els.captionPositionSelect) els.captionPositionSelect.value = options.position;
-        if (els.captionMaxLinesSelect) els.captionMaxLinesSelect.value = String(options.maxLines);
-        if (els.captionSizeInput) els.captionSizeInput.value = String(options.size);
-        if (els.captionSizeValue) els.captionSizeValue.textContent = String(options.size);
-        if (els.captionBoxOpacityInput) els.captionBoxOpacityInput.value = String(Math.round(options.boxOpacity * 100));
-        if (els.captionBoxOpacityValue) els.captionBoxOpacityValue.textContent = `${Math.round(options.boxOpacity * 100)}%`;
-        if (els.captionShadowInput) els.captionShadowInput.value = String(Math.round(options.shadow * 100));
-        if (els.captionShadowValue) els.captionShadowValue.textContent = `${Math.round(options.shadow * 100)}%`;
-        if (els.captionColorSelect) els.captionColorSelect.value = options.color;
-        if (els.captionAccentSelect) els.captionAccentSelect.value = options.accent;
-        if (els.captionHighlightInput) els.captionHighlightInput.value = options.highlightWords || '';
-        if (els.captionUppercaseToggle) els.captionUppercaseToggle.checked = Boolean(options.uppercase);
-        if (els.captionAutoBreakToggle) els.captionAutoBreakToggle.checked = options.autoBreak !== false;
-        document.querySelectorAll('.caption-preset').forEach(button => {
-            button.classList.toggle('is-active', button.getAttribute('data-caption-preset') === options.preset);
-        });
+        const controller = getSettingsController();
+        return controller ? controller.syncCaptionOptionsToUI() : null;
     }
 
     function readCaptionOptionsFromUI() {
-        const current = getCaptionOptions();
-        const next = Object.assign({}, current, {
-            position: els.captionPositionSelect ? els.captionPositionSelect.value : current.position,
-            maxLines: els.captionMaxLinesSelect ? Number(els.captionMaxLinesSelect.value) || current.maxLines : current.maxLines,
-            size: els.captionSizeInput ? Number(els.captionSizeInput.value) || current.size : current.size,
-            boxOpacity: els.captionBoxOpacityInput ? (Number(els.captionBoxOpacityInput.value) || 0) / 100 : current.boxOpacity,
-            shadow: els.captionShadowInput ? (Number(els.captionShadowInput.value) || 0) / 100 : current.shadow,
-            color: els.captionColorSelect ? els.captionColorSelect.value : current.color,
-            accent: els.captionAccentSelect ? els.captionAccentSelect.value : current.accent,
-            highlightWords: els.captionHighlightInput ? els.captionHighlightInput.value : current.highlightWords,
-            uppercase: els.captionUppercaseToggle ? els.captionUppercaseToggle.checked : current.uppercase,
-            autoBreak: els.captionAutoBreakToggle ? els.captionAutoBreakToggle.checked : current.autoBreak
-        });
-        saveCaptionOptions(next);
-        syncCaptionOptionsToUI();
+        const controller = getSettingsController();
+        const result = controller ? controller.readCaptionOptionsFromUI() : null;
         renderPreviewStill();
+        return result;
     }
 
     function applyCaptionPreset(name) {
-        const preset = CAPTION_PRESETS[name] || CAPTION_PRESETS.creator;
-        saveCaptionOptions(preset);
-        syncCaptionOptionsToUI();
+        const controller = getSettingsController();
+        if (controller) controller.applyCaptionPreset(name);
         renderPreviewStill();
         toast(`${name === 'creator' ? '크리에이터' : name === 'news' ? '뉴스형' : name === 'cinema' ? '시네마' : '미니멀'} 자막 프리셋을 적용했습니다.`);
     }
 
     function resetCaptionOptions() {
-        saveCaptionOptions(CAPTION_DEFAULTS);
-        syncCaptionOptionsToUI();
+        const controller = getSettingsController();
+        if (controller) controller.resetCaptionOptions();
         renderPreviewStill();
         toast('자막 디자인을 기본값으로 되돌렸습니다.');
     }
 
 
     function getQualityOptions() {
-        const raw = Object.assign({}, QUALITY_DEFAULTS, state && state.settings && state.settings.qualityOptions || {});
-        const normalized = qualityEffects.normalizeQualityOptions ? qualityEffects.normalizeQualityOptions(raw) : raw;
-        return Object.assign({}, QUALITY_DEFAULTS, normalized);
+        const controller = getSettingsController();
+        return controller ? controller.getQualityOptions() : Object.assign({}, QUALITY_DEFAULTS);
     }
 
     function saveQualityOptions(options) {
-        const next = qualityEffects.normalizeQualityOptions ? qualityEffects.normalizeQualityOptions(Object.assign({}, QUALITY_DEFAULTS, options || {})) : Object.assign({}, QUALITY_DEFAULTS, options || {});
-        store.setSetting('qualityOptions', next);
-        return next;
+        const controller = getSettingsController();
+        return controller ? controller.saveQualityOptions(options) : options;
     }
 
     function syncQualityOptionsToUI() {
-        const options = getQualityOptions();
-        const setRange = (input, label, value, scale) => {
-            if (input) input.value = String(Math.round(Number(value) * scale));
-            if (label) label.textContent = `${Math.round(Number(value) * scale)}%`;
-        };
-        setRange(els.brightnessInput, els.brightnessValue, options.brightness, 100);
-        setRange(els.contrastInput, els.contrastValue, options.contrast, 100);
-        setRange(els.saturationInput, els.saturationValue, options.saturation, 100);
-        setRange(els.vignetteInput, els.vignetteValue, options.vignette, 100);
-        if (els.fadeInSelect) els.fadeInSelect.value = String(options.fadeIn);
-        if (els.fadeOutSelect) els.fadeOutSelect.value = String(options.fadeOut);
-        if (els.introTextInput) els.introTextInput.value = options.introText || '';
-        if (els.outroTextInput) els.outroTextInput.value = options.outroText || '';
-        if (els.introDurationSelect) els.introDurationSelect.value = String(options.introDuration);
-        if (els.outroDurationSelect) els.outroDurationSelect.value = String(options.outroDuration);
-        if (els.watermarkTextInput) els.watermarkTextInput.value = options.watermarkText || '';
-        if (els.watermarkPositionSelect) els.watermarkPositionSelect.value = options.watermarkPosition || 'bottom-right';
-        if (els.safeGuideToggle) els.safeGuideToggle.checked = options.safeGuide !== false;
+        const controller = getSettingsController();
+        return controller ? controller.syncQualityOptionsToUI() : null;
     }
 
     function readQualityOptionsFromUI() {
-        const current = getQualityOptions();
-        const next = Object.assign({}, current, {
-            brightness: els.brightnessInput ? (Number(els.brightnessInput.value) || 100) / 100 : current.brightness,
-            contrast: els.contrastInput ? (Number(els.contrastInput.value) || 100) / 100 : current.contrast,
-            saturation: els.saturationInput ? (Number(els.saturationInput.value) || 100) / 100 : current.saturation,
-            vignette: els.vignetteInput ? (Number(els.vignetteInput.value) || 0) / 100 : current.vignette,
-            fadeIn: els.fadeInSelect ? Number(els.fadeInSelect.value) || 0 : current.fadeIn,
-            fadeOut: els.fadeOutSelect ? Number(els.fadeOutSelect.value) || 0 : current.fadeOut,
-            introText: els.introTextInput ? els.introTextInput.value : current.introText,
-            outroText: els.outroTextInput ? els.outroTextInput.value : current.outroText,
-            introDuration: els.introDurationSelect ? Number(els.introDurationSelect.value) || 0 : current.introDuration,
-            outroDuration: els.outroDurationSelect ? Number(els.outroDurationSelect.value) || 0 : current.outroDuration,
-            watermarkText: els.watermarkTextInput ? els.watermarkTextInput.value : current.watermarkText,
-            watermarkPosition: els.watermarkPositionSelect ? els.watermarkPositionSelect.value : current.watermarkPosition,
-            safeGuide: els.safeGuideToggle ? els.safeGuideToggle.checked : current.safeGuide
-        });
-        saveQualityOptions(next);
-        syncQualityOptionsToUI();
+        const controller = getSettingsController();
+        const result = controller ? controller.readQualityOptionsFromUI() : null;
         renderPreviewStill();
+        return result;
     }
 
 
@@ -360,43 +317,23 @@
     }
 
     function getAutoCutOptions() {
-        const raw = Object.assign({}, AUTO_CUT_DEFAULTS, state && state.settings && state.settings.autoCutOptions || {});
-        if (autoCutDetector.normalizeOptions) return autoCutDetector.normalizeOptions(raw);
-        raw.silenceThreshold = Math.max(0.04, Math.min(0.2, Number(raw.silenceThreshold) || AUTO_CUT_DEFAULTS.silenceThreshold));
-        raw.beatSensitivity = Math.max(0.35, Math.min(0.85, Number(raw.beatSensitivity) || AUTO_CUT_DEFAULTS.beatSensitivity));
-        raw.motionSensitivity = Math.max(0.35, Math.min(0.9, Number(raw.motionSensitivity) || AUTO_CUT_DEFAULTS.motionSensitivity));
-        raw.handlePadding = Math.max(0, Math.min(1.5, Number(raw.handlePadding) || AUTO_CUT_DEFAULTS.handlePadding));
-        raw.maxSnapDistance = Math.max(0.4, Math.min(3, Number(raw.maxSnapDistance) || AUTO_CUT_DEFAULTS.maxSnapDistance));
-        return raw;
+        const controller = getSettingsController();
+        return controller ? controller.getAutoCutOptions() : Object.assign({}, AUTO_CUT_DEFAULTS);
     }
 
     function saveAutoCutOptions(options) {
-        const next = autoCutDetector.normalizeOptions ? autoCutDetector.normalizeOptions(Object.assign({}, AUTO_CUT_DEFAULTS, options || {})) : Object.assign({}, AUTO_CUT_DEFAULTS, options || {});
-        store.setSetting('autoCutOptions', next);
-        return next;
+        const controller = getSettingsController();
+        return controller ? controller.saveAutoCutOptions(options) : options;
     }
 
     function syncAutoCutOptionsToUI() {
-        const options = getAutoCutOptions();
-        if (els.silenceThresholdInput) els.silenceThresholdInput.value = String(Math.round(options.silenceThreshold * 100));
-        if (els.silenceThresholdValue) els.silenceThresholdValue.textContent = `${Math.round(options.silenceThreshold * 100)}%`;
-        if (els.beatSensitivityInput) els.beatSensitivityInput.value = String(Math.round(options.beatSensitivity * 100));
-        if (els.beatSensitivityValue) els.beatSensitivityValue.textContent = `${Math.round(options.beatSensitivity * 100)}%`;
-        if (els.motionSensitivityInput) els.motionSensitivityInput.value = String(Math.round(options.motionSensitivity * 100));
-        if (els.motionSensitivityValue) els.motionSensitivityValue.textContent = `${Math.round(options.motionSensitivity * 100)}%`;
-        if (els.handlePaddingSelect) els.handlePaddingSelect.value = String(options.handlePadding);
+        const controller = getSettingsController();
+        return controller ? controller.syncAutoCutOptionsToUI() : null;
     }
 
     function readAutoCutOptionsFromUI() {
-        const current = getAutoCutOptions();
-        const next = Object.assign({}, current, {
-            silenceThreshold: els.silenceThresholdInput ? (Number(els.silenceThresholdInput.value) || 9) / 100 : current.silenceThreshold,
-            beatSensitivity: els.beatSensitivityInput ? (Number(els.beatSensitivityInput.value) || 58) / 100 : current.beatSensitivity,
-            motionSensitivity: els.motionSensitivityInput ? (Number(els.motionSensitivityInput.value) || 60) / 100 : current.motionSensitivity,
-            handlePadding: els.handlePaddingSelect ? Number(els.handlePaddingSelect.value) || 0 : current.handlePadding
-        });
-        saveAutoCutOptions(next);
-        syncAutoCutOptionsToUI();
+        const controller = getSettingsController();
+        if (controller) controller.readAutoCutOptionsFromUI();
         if (state.audioAnalysis || state.motionAnalysis) {
             buildAutoCutTimeline();
             createRecommendations();
@@ -1425,52 +1362,13 @@
     }
 
     function saveProject() {
-        if (!projectService.createProjectSnapshot) return;
-        const snapshot = projectService.createProjectSnapshot(
-            state,
-            els.titleInput ? els.titleInput.value : '',
-            els.hashtagInput ? els.hashtagInput.value : ''
-        );
-        const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name || 'ai-shorts-project') : 'ai-shorts-project';
-        const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
-        downloadService.saveBlob(blob, `${base}-project.json`);
-        toast('프로젝트 JSON을 저장했습니다.', 'export');
+        const controller = getProjectIOController();
+        return controller ? controller.saveProject() : false;
     }
 
     function handleProjectFile(event) {
-        const file = event && event.target && event.target.files && event.target.files[0];
-        if (!file) return;
-        const maxBytes = Number(config.MAX_PROJECT_FILE_BYTES || 2 * 1024 * 1024);
-        if (Number(file.size || 0) > maxBytes) {
-            event.target.value = '';
-            toast(`프로젝트 파일이 너무 큽니다. ${Math.round(maxBytes / 1024 / 1024)}MB 이하 파일을 사용해주세요.`, 'warning');
-            if (store.addDiagnostic) store.addDiagnostic({ type: 'project-file-too-large', fileName: file.name, fileSize: file.size, maxBytes });
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = () => {
-            try {
-                const project = projectService.parseProjectText(String(reader.result || ''));
-                projectService.applyProjectSnapshot(state, project);
-                if (project.settings && project.settings.thumbnailTemplate && els.thumbnailTemplateSelect) els.thumbnailTemplateSelect.value = project.settings.thumbnailTemplate;
-                if (project.copy) {
-                    if (els.titleInput) els.titleInput.value = project.copy.title || els.titleInput.value;
-                    if (els.hashtagInput) els.hashtagInput.value = project.copy.hashtags || els.hashtagInput.value;
-                }
-                if (els.captionTextInput && captionService.serializeCaptions) els.captionTextInput.value = captionService.serializeCaptions(state.captions || []);
-                if (store.saveSettings) store.saveSettings();
-                syncSettingsToUI();
-                renderAll();
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'project-import', fileName: file.name, recommendations: (state.recommendations || []).length, captions: (state.captions || []).length });
-                toast('프로젝트를 불러왔습니다. 원본 미디어가 다르면 다시 파일을 열어주세요.', 'success');
-            } catch (error) {
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'project-import-error', fileName: file.name, message: error.message });
-                toast(error.message || '프로젝트 파일을 읽지 못했습니다.', 'error');
-            }
-        };
-        reader.onerror = () => toast('프로젝트 파일을 읽지 못했습니다.');
-        reader.readAsText(file);
-        event.target.value = '';
+        const controller = getProjectIOController();
+        return controller ? controller.handleProjectFile(event) : Promise.resolve(null);
     }
 
     async function copyCaption() {

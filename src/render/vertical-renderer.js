@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.0 - cancellable, range-safe vertical renderer with media-state restoration
+// AI Shorts Studio v1.5.2 - cancellable, range-safe vertical renderer with media-state restoration
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -445,6 +445,34 @@
         });
     }
 
+    const renderPlanCache = new Map();
+    const RENDER_PLAN_LIMIT = 24;
+
+    function prepareRenderPlan(options) {
+        const input = options || {};
+        const rangeKey = `${Number(input.start) || 0}:${Number(input.end) || 0}`;
+        const key = [rangeKey, input.cropMode || 'center', input.captionStyle || 'bold', input.thumbnailTemplate || 'neon', JSON.stringify(input.captionOptions || {}), JSON.stringify(input.qualityOptions || {})].join('|');
+        if (renderPlanCache.has(key)) {
+            const cached = renderPlanCache.get(key);
+            renderPlanCache.delete(key);
+            renderPlanCache.set(key, cached);
+            return cached;
+        }
+        const plan = Object.freeze({
+            cropMode: input.cropMode || 'center',
+            captionStyle: input.captionStyle || 'bold',
+            captionOptions: Object.freeze(normalizeCaptionOptions(input.captionOptions || {})),
+            qualityOptions: Object.freeze(Object.assign({}, input.qualityOptions || {})),
+            thumbnailTemplate: input.thumbnailTemplate || 'neon'
+        });
+        renderPlanCache.set(key, plan);
+        while (renderPlanCache.size > RENDER_PLAN_LIMIT) renderPlanCache.delete(renderPlanCache.keys().next().value);
+        return plan;
+    }
+
+    function clearRenderPlanCache() { renderPlanCache.clear(); }
+    function getRenderPlanCacheStats() { return Object.freeze({ size: renderPlanCache.size, limit: RENDER_PLAN_LIMIT }); }
+
     async function recordVerticalSegment(canvas, sourceMedia, options, onProgress) {
         const signal = options && options.signal || null;
         function abortError(reason) {
@@ -491,15 +519,16 @@
             stopStreamTracks(stream, mediaStream);
             throw new Error('렌더 구간이 올바르지 않습니다. 시작·종료 시간을 다시 확인해주세요.');
         }
-        const cropMode = options && options.cropMode || 'center';
+        const renderPlan = prepareRenderPlan(options);
+        const cropMode = renderPlan.cropMode;
         const title = options && options.title || 'AI Shorts Studio';
         const rangeText = options && options.rangeText || '';
         const waveformBins = options && options.waveformBins || [];
         const captions = Array.isArray(options && options.captions) ? options.captions : [];
         const captionOffset = Number(options && options.captionOffset) || 0;
-        const captionStyle = options && options.captionStyle || 'bold';
-        const captionOptions = options && options.captionOptions || null;
-        const qualityOptions = options && options.qualityOptions || null;
+        const captionStyle = renderPlan.captionStyle;
+        const captionOptions = renderPlan.captionOptions;
+        const qualityOptions = renderPlan.qualityOptions;
         const originalVolume = sourceMedia ? sourceMedia.volume : 1;
         const originalMuted = sourceMedia ? sourceMedia.muted : false;
         const originalCurrentTime = sourceMedia ? Number(sourceMedia.currentTime) || 0 : 0;
@@ -634,6 +663,9 @@
         renderStill,
         createCanvasStream,
         inspectRenderCapability,
-        recordVerticalSegment
+        recordVerticalSegment,
+        prepareRenderPlan,
+        clearRenderPlanCache,
+        getRenderPlanCacheStats
     });
 })(window);

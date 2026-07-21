@@ -7,7 +7,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/active-stage-beacon.css'), 'utf8');
 const director = fs.readFileSync(path.join(root, 'src/ui/flow-director-final.js'), 'utf8');
 function assert(value, message) { if (!value) { console.error('FAIL:', message); process.exit(1); } }
-assert(html.includes('assets/css/active-stage-beacon.css?v=1.5.0-experience-engine'), 'active stage beacon stylesheet is loaded');
+assert(html.includes('assets/css/active-stage-beacon.css?v=1.5.2-experience-engine'), 'active stage beacon stylesheet is loaded');
 assert(html.indexOf('active-stage-beacon.css') > html.indexOf('header-meta-rail.css'), 'stage beacon is the final visual override');
 assert(css.includes('.stage-neon-rail') && css.includes('.stage-progress-chip'), 'persistent rail and progress chip are styled');
 assert(css.includes('stageLandingSweep') && css.includes('stageLandingGlow'), 'landing sweep and glow animations exist');

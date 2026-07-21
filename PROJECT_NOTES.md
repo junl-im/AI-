@@ -105,3 +105,9 @@
 4. 렌더·취소·파일 교체 20회 반복 자원 누수 감사
 5. 15분·30분 MP4 장시간 계측
 6. 모바일 Safari·Samsung Internet 실기기 검증
+
+## v1.5.2 구조 메모
+- 프로젝트 파일 UI 입출력: `src/app/project-io-controller.js`
+- 프로젝트 데이터 검증/스키마: `src/project/project-service.js`
+- 렌더 준비 재사용: `AIShortsVerticalRenderer.prepareRenderPlan()`
+- 렌더 플랜 캐시는 순수 옵션만 보관하며 최대 24개입니다.
