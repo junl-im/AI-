@@ -1,3 +1,12 @@
+# PROJECT NOTES v1.4.1
+
+- 서비스워커 등록과 업데이트 소유자는 계속 `AIShortsServiceWorkerRegistration` 하나입니다.
+- 생명주기 상태 조회는 `getStatus()`, 제어 대기는 `waitUntilControlled()`를 사용합니다.
+- controller/update/state 전환은 진단 로그에 남겨야 합니다.
+- 로컬 포트 차단 환경에서는 격리 생명주기 감사를 사용하되, localhost/HTTPS 실브라우저 검증 미실행 사실을 인수인계에 명시합니다.
+
+---
+
 # PROJECT NOTES v1.4.0
 
 ## 설계 결정

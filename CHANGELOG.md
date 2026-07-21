@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v1.4.1 - Observable Service Worker Lifecycle
+
+- 서비스워커 등록·활성·제어 상태를 조회하는 `getStatus()`를 추가했습니다.
+- 등록 후 제어 여부를 확인하는 `waitUntilControlled()`를 추가했습니다.
+- controller, update 발견, worker 상태 전환을 진단 기록에 남깁니다.
+- 실제 `sw.js` 이벤트를 실행하는 격리 생명주기 감사를 추가했습니다.
+- 이전 캐시 정리, 즉시 활성화, client claim, 오프라인 navigation 복구를 자동 검증합니다.
+- 자동 QA **145/145**, 브라우저·실미디어 감사를 통과했습니다.
+
 ## v1.4.0 - Modular Render Workflow & Safe Queue DOM
 
 - 렌더 큐 UI, export payload, 작업 실행, 실패 재시도, 편집 선택 복원을 `src/app/render-workflow-controller.js`로 분리했습니다.

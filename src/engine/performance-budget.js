@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.4.0 - adaptive long-media and decode-memory performance budget
+// AI Shorts Studio v1.4.1 - adaptive long-media and decode-memory performance budget
 'use strict';
 
 (function exposePerformanceBudget(global) {

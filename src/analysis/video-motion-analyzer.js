@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.4.0 - cancellable adaptive video motion analyzer
+// AI Shorts Studio v1.4.1 - cancellable adaptive video motion analyzer
 'use strict';
 
 (function exposeVideoMotionAnalyzer(global) {

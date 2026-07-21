@@ -1,3 +1,50 @@
+# HANDOFF v1.4.1
+
+## 현재 상태
+
+v1.4.1은 서비스워커 등록 모듈에 관찰 가능한 생명주기 상태를 추가하고, 실제 `sw.js` 이벤트 코드를 격리 런타임에서 실행해 설치·활성화·이전 캐시 정리·클라이언트 claim·오프라인 navigation fallback을 검증한 안정화 패치입니다. 자동 QA는 **145/145**를 통과했습니다.
+
+## 적용한 수정
+
+- `AIShortsServiceWorkerRegistration.getStatus()`로 지원·등록·활성·대기·제어 상태와 controller 전환 횟수를 조회합니다.
+- `waitUntilControlled()`를 추가해 등록 완료와 페이지 제어 여부를 한 API에서 확인할 수 있게 했습니다.
+- `controllerchange`, `updatefound`, worker `statechange`를 진단 기록에 남깁니다.
+- 서비스워커 설치·활성화·fetch handler를 실제 소스 그대로 VM에서 실행하는 `qa/run_service_worker_lifecycle.js`를 추가했습니다.
+- 이전 앱 캐시 삭제, 현재 셸 캐시 보존, `skipWaiting()`, `clients.claim()`, 오프라인 navigation 셸 복구를 자동 검증합니다.
+- 브라우저·실미디어 감사를 v1.4.1 기준으로 다시 생성했습니다.
+
+## 검수 순서
+
+1. `node qa/run_service_worker_lifecycle.js`
+2. `npm test`
+3. `python3 qa/run_browser_audit.py`
+4. `python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset`
+5. `python3 qa/run_media_e2e.py --cases longAudio`
+6. 전체 ZIP과 v1.4.0 기준 붙여넣기 패치 ZIP 무결성 및 적용 일치 검사
+
+## 검수 결과
+
+- 자동 QA: **145/145**
+- 서비스워커 격리 생명주기 감사: install·activate·fetch 3개 handler 실행 통과
+- `skipWaiting()` 1회, `clients.claim()` 1회 확인
+- 이전 AI Shorts 셸 캐시 삭제 및 현재 셸 캐시 보존 확인
+- 오프라인 navigation fallback HTTP 200 확인
+- PC·모바일 Chromium 오류·Promise 거절·콘솔 오류 0
+- MP3·MP4·취소·재시도·10분 MP3 E2E 통과
+
+## 알려진 제한
+
+현재 작업 실행 환경은 로컬 TCP 포트 바인딩이 차단되어 localhost에서의 실제 서비스워커 설치→제어 전환 E2E를 실행할 수 없었습니다. 이번 감사는 실제 `sw.js`를 격리 Service Worker API 모형에서 실행하는 결정적 검사입니다. 배포 서버 또는 로컬 개발 환경에서 localhost/HTTPS 실브라우저 생명주기 감사를 추가 실행해야 합니다.
+
+## 다음 우선순위
+
+1. 자막 설정 컨트롤러를 `src/app.js`에서 분리
+2. 품질·자동 컷 설정 컨트롤러 분리
+3. 누적 CSS 레이어의 소유권 통합과 중복 selector 측정
+4. localhost/HTTPS 서비스워커 실브라우저 생명주기 감사
+
+---
+
 # HANDOFF v1.4.0
 
 ## 현재 상태
