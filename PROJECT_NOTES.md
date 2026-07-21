@@ -1,3 +1,31 @@
+# PROJECT NOTES v1.5.4
+
+## CSS 소유권 규칙
+
+- 감사 대상 cascade는 `index.html`에 실제 연결된 45개 CSS만 사용하며, 보관 파일은 별도 inventory로 기록합니다.
+- 충돌 단위는 동일 at-rule context의 동일 selector와 property입니다. 값 또는 `!important`가 다를 때만 실제 충돌로 분류합니다.
+- 추천 카드: 구조는 `studio.css`, 상호작용은 `ux.css`, backdrop 재질은 `glass-pro-ui.css`, 기본·선택 스킨은 `ui-refinement.css`가 소유합니다.
+- 모바일 시네마틱 헤더의 min-height, padding, border-radius, background, box-shadow는 `ui-refinement.css`가 소유합니다.
+- 1180px 이상 기본 작업 그리드의 columns, areas, rows, column-gap, row-gap은 `workspace-layout-controls.css`가 소유합니다. display, width, margin은 `desktop-prime-layout.css`가 소유합니다.
+- 소유권 통합은 최종 computed style을 바꾸지 않는 완전 shadowed 선언부터 제거합니다.
+
+## QA·배포 기준
+
+- 현재 자동 QA 기준은 **162/162**입니다.
+- CSS 상한은 활성 `!important` 898, 실제 충돌 511, 고위험 충돌 198, shadowed declaration 675입니다.
+- PC·모바일 Chromium 오류와 가로 overflow는 0이어야 하며, 데스크톱 workspace 리사이즈·집중 모드가 유지되어야 합니다.
+- 런타임 CSS 변경 시 APP_VERSION, BUILD_KEY, HTML asset query, 서비스워커 cache name을 함께 올립니다.
+- CSS-only 릴리스는 JS 미디어 경로가 동일함을 명시할 때 직전 실미디어·힙 감사 결과를 상속할 수 있지만, 브라우저·CSS·서비스워커 감사는 새 버전으로 재생성합니다.
+
+## 다음 우선순위
+
+1. 모바일 toast bottom 위치 소유권 통합
+2. bottom dock tab 높이와 transport/export 버튼 최소 크기 소유권 통합
+3. start command panel 표시·grid 구조 소유권 통합
+4. Chromium 프로세스 RSS·GPU/미디어 네이티브 메모리 보조 계측
+
+---
+
 # PROJECT NOTES v1.5.0
 
 ## UI·UX 소유권

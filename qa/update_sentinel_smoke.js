@@ -16,10 +16,10 @@ function ok(condition, message) {
   }
 }
 const version = pkg.version;
-ok(html.includes(`assets/css/update-sentinel.css?v=${version}-media-engine`), 'update sentinel css linked');
-ok(html.includes(`src/boot/update-sentinel.js?v=${version}-media-engine`), 'update sentinel script linked');
-ok(sw.includes(`./assets/css/update-sentinel.css?v=${version}-media-engine`), 'update sentinel css cached');
-ok(sw.includes(`./src/boot/update-sentinel.js?v=${version}-media-engine`), 'update sentinel script cached');
+ok(html.includes(`assets/css/update-sentinel.css?v=${version}-css-ownership`), 'update sentinel css linked');
+ok(html.includes(`src/boot/update-sentinel.js?v=${version}-css-ownership`), 'update sentinel script linked');
+ok(sw.includes(`./assets/css/update-sentinel.css?v=${version}-css-ownership`), 'update sentinel css cached');
+ok(sw.includes(`./src/boot/update-sentinel.js?v=${version}-css-ownership`), 'update sentinel script cached');
 ok(sentinel.includes('AIShortsUpdateSentinel'), 'sentinel exports global API');
 ok(sentinel.includes('clearOldShellCaches'), 'sentinel can clear previous shell caches');
 ok(sentinel.includes('copyDiagnostics'), 'sentinel can copy update diagnostics');

@@ -10,7 +10,7 @@ function assert(value, message) {
 }
 assert(fs.existsSync(auditPath), 'real-media E2E audit artifact exists');
 const report = JSON.parse(fs.readFileSync(auditPath, 'utf8'));
-assert(report.version === '1.5.3', 'real-media E2E audit matches v1.5.3');
+assert(report.version === '1.5.3', 'real-media E2E audit retains the v1.5.3 runtime contract');
 for (const key of ['audio', 'video']) {
     const result = report[key];
     assert(result.analysisStatus === '렌더 큐 완료', `${key} reaches render completion`);
@@ -37,4 +37,4 @@ assert(longAudio.duringRender.queue.current.etaSeconds > 0 && /남은 약/.test(
 assert(longAudio.final.queue.done === 1 && longAudio.final.operations.active.length === 0, 'long-media render completes and releases operation state');
 assert(longAudio.final.runtime.runtimeErrors === 0 && longAudio.final.errors.length === 0, 'long-media flow has no runtime errors');
 assert(Number(longAudio.final.outputProbe.duration) >= 5 && Number(longAudio.final.outputProbe.size) > 10000, 'long-media flow produces a playable output');
-console.log('PASS v1.5.3 MP3, MP4, cancel, retry, long-media, and ETA browser E2E audit');
+console.log('PASS v1.5.4 inherits the unchanged v1.5.3 MP3, MP4, cancel, retry, long-media, and ETA audit');

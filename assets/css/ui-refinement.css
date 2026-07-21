@@ -318,10 +318,6 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
         line-height: 1.75 !important;
     }
     .shorts-timeline { max-width: 700px; }
-    body[data-ui="hyperflow-tabs"] .studio-grid {
-        gap: 14px !important;
-        grid-template-columns: minmax(270px, 0.8fr) minmax(390px, 1.08fr) minmax(310px, 0.9fr) !important;
-    }
     body[data-ui="hyperflow-tabs"] [data-flow-panel],
     body[data-ui="hyperflow-tabs"] .control-zone,
     body[data-ui="hyperflow-tabs"] .preview-card,

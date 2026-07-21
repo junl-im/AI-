@@ -295,11 +295,6 @@ body.performance-lite .bottom-dock {
         padding-top: 7px;
     }
 
-    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
-        min-height: 142px !important;
-        padding: 12px !important;
-        border-radius: 20px !important;
-    }
 
     body[data-ui="hyperflow-tabs"] .hero-copy h1,
     .cinematic-title {

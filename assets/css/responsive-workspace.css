@@ -129,8 +129,7 @@ body.has-media .command-group-head small {
     }
     body[data-ui="hyperflow-tabs"] .studio-hero,
     body[data-ui="hyperflow-tabs"] .hyperflow-stage,
-    body[data-ui="hyperflow-tabs"] .flow-selection-summary,
-    body[data-ui="hyperflow-tabs"] .studio-grid {
+    body[data-ui="hyperflow-tabs"] .flow-selection-summary {
         width: min(100%, var(--workspace-max));
         margin-left: auto;
         margin-right: auto;
@@ -152,10 +151,6 @@ body.has-media .command-group-head small {
     body[data-ui="hyperflow-tabs"] .hyperflow-stage,
     body[data-ui="hyperflow-tabs"] .flow-selection-summary {
         padding: 12px 16px;
-    }
-    body[data-ui="hyperflow-tabs"] .studio-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
     }
     body[data-ui="hyperflow-tabs"] [data-flow-panel] {
         max-width: min(100%, 1380px);

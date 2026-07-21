@@ -1,7 +1,16 @@
-# AI 쇼츠 제작 스튜디오 v1.5.3
+# AI 쇼츠 제작 스튜디오 v1.5.4
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
 
+
+## v1.5.4 적용 내용
+
+- 실제 활성 CSS 45개의 로드 순서와 미디어 조건을 따라 동일 selector·property의 값 충돌을 분류합니다.
+- 추천 카드, 모바일 시네마틱 헤더, 데스크톱 작업 그리드의 최종 소유 파일을 단일화했습니다.
+- 활성 CSS의 `!important`를 911개에서 898개로, 실제 충돌을 526개에서 511개로 줄였습니다.
+- 전체 충돌 목록·위험도·최종 cascade winner는 `qa/runtime-css-ownership-v1.5.4.json`에 기록됩니다.
+- 서비스워커 캐시 키를 `1.5.4-css-ownership`으로 갱신해 기존 설치에서도 새 스타일을 받습니다.
+- 자동 QA 162/162, PC·모바일 Chromium 오류 0건·가로 overflow 0px, 서비스워커 생명주기 감사를 통과했습니다.
 
 ## v1.5.3 적용 내용
 
@@ -24,15 +33,13 @@
 
 ## 검수 결과
 
-- 자동 QA: **149/149**
+- 자동 QA: **162/162**
 - PC·모바일 Chromium 오류, Promise 거절, 콘솔 오류: **0건**
 - PC·모바일 가로 overflow: **0px**
-- MP3·MP4 분석→추천→선택→MP4 저장 통과
-- 렌더 취소와 의도적 재생 실패 후 재시도 통과
-- 10분 MP3 분석: **5.423초**
-- 6초 MP4 출력 작업: **6.190초**, **1,908,764바이트**
-- 병렬 분석 시간 단축과 움직임 분석 실패 축소 동작 통과
-- 서비스워커 설치·활성·캐시 정리·오프라인 복구 격리 감사 통과
+- 데스크톱 작업 그리드·키보드 리사이즈·미리보기/웨이브폼 집중 모드 통과
+- 모바일 핵심 메뉴 4개·전체 메뉴 8개와 데스크톱 전용 컨트롤 비노출 통과
+- 서비스워커 install·activate·이전 캐시 정리·offline navigation 통과
+- v1.5.3 실미디어 MP3·MP4·취소·재시도·10분 미디어 및 20회 힙 감사 계약 유지
 
 ## 실행
 
@@ -73,10 +80,10 @@ node qa/run_service_worker_lifecycle.js
 
 ```bash
 npm run package:full
-PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.4.1_Full.zip PATCH_FROM_VERSION=1.4.1 npm run package:patch
+PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.3_Heap_Stability_Full.zip PATCH_FROM_VERSION=1.5.3 npm run package:patch
 ```
 
-전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.4.1 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
+전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.3 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
 
 ## 알려진 제한
 
@@ -87,3 +94,10 @@ PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.4.1_Full.zip PATCH_FROM_VERSION=
 
 ### v1.5.3
 Media import and Object URL cleanup are isolated in `src/app/media-import-controller.js`; repeated render paint work uses bounded context-local caches.
+
+
+### v1.5.4 CSS ownership rule
+
+- 추천 카드의 구조·상호작용·재질·최종 스킨은 각각 지정된 파일만 소유합니다.
+- 1180px 이상 기본 작업 그리드의 track·area·row·gap은 `workspace-layout-controls.css`만 소유합니다.
+- 새 CSS 변경은 `qa/run_css_ownership_audit.js`와 `qa/css_ownership_smoke.js`의 위험도·상한 계약을 함께 갱신해야 합니다.

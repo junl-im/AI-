@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v1.5.4 - Classified CSS Ownership & Cascade Consolidation
+
+- CSS 감사를 단순 selector 중복 집계에서 실제 로드 순서·미디어 조건·selector·property·값·`!important`를 추적하는 cascade 보고서로 확장했습니다.
+- 디스크의 CSS 46개 중 실제 로드되는 45개와 보관 전용 `cinematic-hero.css`를 구분해 비활성 파일이 충돌 통계를 부풀리지 않게 했습니다.
+- 충돌을 layout, skin, typography, interaction, token, other로 분류하고 위험도·최종 winner·전체 occurrence 목록을 JSON에 기록합니다.
+- 추천 카드는 구조(`studio.css`), 상호작용(`ux.css`), 유리 재질(`glass-pro-ui.css`), 최종 스킨(`ui-refinement.css`)으로 소유권을 분리했습니다.
+- 모바일 시네마틱 헤더의 크기·여백·라운드·배경·그림자는 `ui-refinement.css`가 단독 소유합니다.
+- 1180px 이상 데스크톱 그리드의 열·영역·행·간격은 `workspace-layout-controls.css`, 표시·외곽 폭은 `desktop-prime-layout.css`가 단독 소유합니다.
+- 활성 CSS 기준 `!important` 911→898, selector-property 충돌 526→511, 고위험 충돌 206→198, 가려진 선언 701→675로 감소했습니다.
+- 런타임 자산 변경을 즉시 갱신하도록 버전과 서비스워커 캐시 키를 v1.5.4 / `1.5.4-css-ownership`으로 올렸습니다.
+- 자동 QA 162/162, 새 PC·모바일 Chromium 감사, 새 서비스워커 생명주기 감사를 통과했습니다. 실미디어·20회 힙 감사는 런타임 JS가 바뀌지 않은 CSS-only 릴리스이므로 검증된 v1.5.3 결과를 명시적으로 상속합니다.
+
 ## v1.5.0 - Workspace-First UX & Adaptive Parallel Analysis
 
 - 파일을 열거나 작업 단계를 이동하면 소개 영역을 한 줄 작업 헤더로 접어 실제 작업 공간을 더 빠르게 보여줍니다.

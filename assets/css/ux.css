@@ -203,13 +203,6 @@
 }
 .recommendation-card:hover {
     transform: translateY(-1px);
-    border-color: rgba(167, 139, 250, 0.55);
-    background: rgba(15, 23, 42, 0.54);
-}
-.recommendation-card.is-selected {
-    background:
-        linear-gradient(135deg, rgba(34, 211, 238, 0.11), rgba(124, 58, 237, 0.13)),
-        rgba(2, 6, 23, 0.42);
 }
 .phone-frame {
     max-height: 72vh;

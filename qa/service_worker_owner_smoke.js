@@ -48,7 +48,7 @@ function ok(condition, message) {
         if (/registration\.update\s*\(/.test(fs.readFileSync(path.join(root, rel), 'utf8'))) directUpdateFiles.push(rel);
     }
     ok(directUpdateFiles.length === 0, 'no secondary module calls registration.update directly');
-    console.log('PASS v1.5.3 single-owner service worker update guardrails');
+    console.log('PASS v1.5.4 single-owner service worker update guardrails');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

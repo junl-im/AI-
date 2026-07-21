@@ -36,7 +36,7 @@ function createHarness(raw, parseProjectText) {
         window: null,
         document,
         localStorage,
-        AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.3', MAX_PROJECT_TEXT_CHARS: 2500000 },
+        AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.4', MAX_PROJECT_TEXT_CHARS: 2500000 },
         AIShortsAppState: { state: {}, addDiagnostic(event) { diagnostics.push(event); } },
         AIShortsProjectService: { parseProjectText },
         AIShortsDownloadService: { saveBlob(blob, filename) { downloads.push({ blob, filename }); } },

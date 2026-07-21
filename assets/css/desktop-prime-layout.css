@@ -134,15 +134,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     /* Prime workspace: the first five stages remain visible together. */
     body[data-ui="hyperflow-tabs"] .studio-grid {
         display: grid !important;
-        grid-template-columns: minmax(260px, 0.76fr) minmax(350px, 1.05fr) minmax(300px, 0.88fr) !important;
-        grid-template-areas:
-            "load preview candidates"
-            "recommend preview waveform"
-            "cut edit export"
-            "project edit copy" !important;
-        grid-template-rows: clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto auto;
         align-items: stretch;
-        gap: var(--prime-gap) !important;
         width: 100%;
         margin: 0 !important;
     }
@@ -296,10 +288,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         padding-top: 6px !important;
     }
 
-    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
-        min-height: 154px !important;
-        padding: 11px 12px 14px !important;
-    }
 
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
         display: grid !important;

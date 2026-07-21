@@ -1,3 +1,33 @@
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.4
+
+## 최종 결과
+
+- 자동 검사: **162/162 통과**
+- PC·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- PC·모바일 가로 overflow: **0px**
+- 데스크톱 workspace toolbar·두 column resizer·키보드 resize·preview/waveform focus 통과
+- 모바일에서 데스크톱 toolbar·resizer 비노출, 핵심 메뉴 4개·전체 메뉴 8개 통과
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+
+## CSS ownership 감사
+
+- 디스크 CSS: 46개, 활성 CSS: 45개, 보관 CSS: `cinematic-hero.css` 1개
+- 활성 `!important`: **911 → 898**
+- 실제 selector-property 충돌: **526 → 511**
+- 고위험 충돌: **206 → 198**
+- shadowed declaration: **701 → 675**
+- 최종 분류: layout 194, skin 196, typography 70, interaction 8, token 9, other 34
+- 추천 카드·모바일 시네마틱 헤더·데스크톱 studio grid의 단일 소유권 smoke 통과
+
+## 감사 파일
+
+- `qa/runtime-css-ownership-v1.5.4.json`
+- `qa/runtime-browser-audit-v1.5.4.json`
+- `qa/runtime-service-worker-lifecycle-v1.5.4.json`
+- 실미디어·20회 힙 경로는 CSS-only 변경으로 v1.5.3 검증 산출물을 상속
+
+---
+
 # QA REPORT — AI 쇼츠 스튜디오 v1.5.3
 
 ## 최종 결과
