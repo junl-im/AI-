@@ -102,8 +102,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
 .cinematic-brand-panel .brand-topline {
     position: relative;
     z-index: 4;
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: 18px;
     min-height: 49px;

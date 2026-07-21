@@ -6,8 +6,6 @@
 
 /* Brand metadata always sits on one clean line: version left, signature right. */
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
-    display: grid !important;
-    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center !important;
     width: 100%;
     gap: 12px !important;
@@ -28,8 +26,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-compat-pill {
 }
 
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
-    display: flex !important;
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1;
     justify-self: end;
     min-width: 0;
@@ -290,8 +287,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
 
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
-        display: grid !important;
-        grid-template-columns: auto minmax(0, 1fr) auto !important;
         gap: 7px !important;
     }
 
@@ -306,7 +301,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
-        grid-column: 3;
+        grid-column: 2;
         grid-row: 1;
         justify-self: end;
         margin-left: 0 !important;

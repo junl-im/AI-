@@ -1,4 +1,29 @@
-# PROJECT NOTES v1.5.5
+# PROJECT NOTES v1.5.6
+
+## UI clarity 소유권 규칙
+
+- desktop/mobile cinematic hero의 최종 밀도와 surface는 `ui-refinement.css`가 소유합니다.
+- header metadata의 `display`, `grid-template-columns`, action placement는 `header-meta-rail.css`가 소유합니다.
+- panel heading accent와 workspace layout button의 최종 visual state는 `ui-refinement.css`가 소유합니다.
+- `studio-experience.css`는 hyperflow stage의 표시와 작업실 focus 전환을 계속 소유합니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **163/163**입니다.
+- CSS 상한은 활성 `!important` 863, 실제 충돌 338, 고위험 충돌 85, shadowed declaration 422입니다.
+- 데스크톱·모바일 runtime error와 horizontal overflow는 0이어야 합니다.
+- 런타임 build key는 `1.5.6-ui-clarity`입니다.
+
+## 다음 우선순위
+
+1. 태블릿·소형 노트북 중간 breakpoint UI 감사
+2. header/brand/stage 고위험 CSS 소유권 추가 통합
+3. Chromium RSS·GPU·미디어 native memory 보조 계측
+4. 장시간 고해상도 MP4 반복 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.5
 
 
 ## 모바일 컨트롤 소유권 규칙

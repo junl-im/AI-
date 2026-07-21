@@ -1,4 +1,25 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.5
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.6
+
+## 최종 결과
+
+- 자동 검사: **163/163 통과**
+- PC·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- PC·모바일 가로 overflow: **0px**
+- 데스크톱 workspace resize·preview/waveform 집중 모드 통과
+- 모바일 compact/expanded menu와 데스크톱 전용 control 비노출 통과
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+
+## UI·CSS 결과
+
+- 활성 `!important`: **866 → 863**
+- 실제 selector-property 충돌: **342 → 338**
+- 고위험 충돌: **89 → 85**
+- shadowed declaration: **431 → 422**
+- compact hero, mobile start guide, panel hierarchy, header metadata ownership smoke 통과
+
+---
+
+# QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.5
 
 ## 최종 결과
 

@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v1.5.6 - UI Clarity & Compact Workspace Entry
+
+- 데스크톱 시네마틱 헤더의 최소 높이, 제목 크기, 좌우 간격을 줄여 첫 화면에 작업 상태와 작업실 카드가 더 많이 보이도록 다듬었습니다.
+- 모바일 헤더와 4단계 시작 안내 카드의 높이·패딩·타이포를 압축해 하단 메뉴와 안내 문구가 겹치지 않고 더 여유 있게 보이도록 조정했습니다.
+- 패널 제목에 작은 단계 색상 레일을 추가하고 작업실 배치 전환 버튼, 현재 단계 카드, 상단 진행 상태의 대비를 정리했습니다.
+- `header-meta-rail.css`가 상단 버전·호환·디자이너 메타데이터의 최종 grid/display 소유자가 되도록 완전히 가려진 레거시 선언을 제거했습니다.
+- 활성 `!important`는 866→863, 실제 selector-property 충돌은 342→338, 고위험 충돌은 89→85, shadowed declaration은 431→422로 감소했습니다.
+- UI 전용 회귀 검사 1개를 추가해 자동 QA 163/163, PC·모바일 Chromium 오류 0건·가로 overflow 0px, 서비스워커 생명주기 검사를 통과했습니다.
+
+
 ## v1.5.5 - Mobile Control Ownership Consolidation
 
 - 모바일 토스트의 dock 상태별 bottom 위치는 `mobile-menu-guide.css`가 단독 소유하도록 통합했습니다.

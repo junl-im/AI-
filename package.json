@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-5-5",
-  "version": "1.5.5",
+  "name": "ai-shorts-studio-v1-5-6",
+  "version": "1.5.6",
   "private": true,
-  "description": "AI Shorts Studio v1.5.5 - mobile control, dock, toast, and start panel CSS ownership consolidation",
+  "description": "AI Shorts Studio v1.5.6 - compact hero, clearer workspace hierarchy, and header CSS ownership cleanup",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -142,6 +142,7 @@
     "node qa/navigation_focus_smoke.js",
     "node qa/staged_ui_loading_smoke.js",
     "node qa/ui_refinement_smoke.js",
+    "node qa/ui_clarity_smoke.js",
     "node qa/run_css_ownership_audit.js",
     "node qa/css_ownership_smoke.js",
     "node qa/icon_system_smoke.js",

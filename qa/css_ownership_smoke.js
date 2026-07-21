@@ -24,10 +24,10 @@ if (JSON.stringify(report.archivedCssFiles) !== JSON.stringify(['cinematic-hero.
 if (!Array.isArray(report.propertyConflicts) || report.propertyConflicts.length !== report.conflictingPropertyCount) {
     throw new Error('full selector-property conflict inventory is missing');
 }
-if (report.importantCount > 866) throw new Error('CSS !important count exceeded the ownership baseline');
-if (report.conflictingPropertyCount > 342) throw new Error('selector-property conflicts exceeded the ownership baseline');
-if (report.highRiskConflictCount > 89) throw new Error('high-risk CSS conflicts exceeded the ownership baseline');
-if (report.shadowedDeclarationCount > 431) throw new Error('shadowed CSS declarations exceeded the ownership baseline');
+if (report.importantCount > 863) throw new Error('CSS !important count exceeded the ownership baseline');
+if (report.conflictingPropertyCount > 338) throw new Error('selector-property conflicts exceeded the ownership baseline');
+if (report.highRiskConflictCount > 85) throw new Error('high-risk CSS conflicts exceeded the ownership baseline');
+if (report.shadowedDeclarationCount > 422) throw new Error('shadowed CSS declarations exceeded the ownership baseline');
 if (report.highConflictSelectorCount < 1) throw new Error('high-conflict selector inventory is unexpectedly empty');
 
 const categoryTotal = Object.values(report.conflictCategoryCounts || {}).reduce((sum, count) => sum + count, 0);
@@ -110,4 +110,4 @@ const forbiddenConflicts = report.propertyConflicts.filter(item => (
 ));
 if (forbiddenConflicts.length) throw new Error('consolidated CSS ownership conflicts reappeared');
 
-console.log('PASS v1.5.5 mobile control CSS ownership and consolidated cascade ceilings');
+console.log('PASS v1.5.6 UI clarity CSS ownership and consolidated cascade ceilings');

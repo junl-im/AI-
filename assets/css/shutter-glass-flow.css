@@ -42,7 +42,6 @@ body[data-ui="hyperflow-tabs"] {
 .brand-topline {
     position: relative;
     z-index: 3;
-    display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
     gap: 12px;
@@ -51,9 +50,12 @@ body[data-ui="hyperflow-tabs"] {
     margin-bottom: 18px;
 }
 
-.brand-version-left,
-.brand-right-actions {
+.brand-version-left {
     display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+.brand-right-actions {
     align-items: center;
     flex: 0 0 auto;
 }

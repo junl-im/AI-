@@ -18,7 +18,7 @@ function assert(condition, message) {
 }
 const version = `v${pkg.version}`;
 const plain = pkg.version;
-const buildKey = `${plain}-mobile-control-ownership`;
+const buildKey = `${plain}-ui-clarity`;
 assert(config.includes(`APP_VERSION: '${version}'`), 'runtime config APP_VERSION matches package version');
 assert(config.includes(`BUILD_KEY: '${buildKey}'`), 'runtime config build key is updated');
 assert(html.includes(`<meta name="ai-shorts-version" content="${version}" />`), 'html has version meta tag');
@@ -35,7 +35,7 @@ assert(registrationIndex >= 0 && registrationIndex < appIndex, 'service worker r
 assert(sync.includes('AIShortsVersionSync'), 'version sync API is exported');
 assert(sync.includes('runtime-config'), 'version badge marks runtime config as source');
 assert(sw.includes('version-aware cache guard'), 'service worker documents version-aware cache guard');
-assert(sw.includes(`ai-shorts-studio-shell-${version}-mobile-control-ownership`), 'service worker cache name matches the current build');
+assert(sw.includes(`ai-shorts-studio-shell-${version}-ui-clarity`), 'service worker cache name matches the current build');
 assert(sw.includes('networkFirst') && sw.includes('request.mode === \'navigate\''), 'service worker uses network-first navigation shell');
 assert(sw.includes(`app-version-sync.js?v=${buildKey}`), 'service worker precaches version sync module');
 assert(html.includes('src/boot/service-worker-registration.js'), 'service worker registration module is loaded');

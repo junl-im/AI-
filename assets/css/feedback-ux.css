@@ -209,10 +209,7 @@ body.has-media .brand-signature-card {
     display: none;
 }
 @media (max-width: 720px) {
-    .brand-right-actions {
-        display: block !important;
-        margin-top: 8px;
-    }
+    .brand-right-actions { margin-top: 0; }
 }
 
 /* v1.2.7 vector toast icons */
