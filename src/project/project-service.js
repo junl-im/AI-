@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.4.1 - bounded, schema-safe, and compatibility-preserving project helpers
+// AI Shorts Studio v1.5.0 - bounded, schema-safe, and compatibility-preserving project helpers
 'use strict';
 
 (function exposeProjectService(global) {

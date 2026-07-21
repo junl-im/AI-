@@ -22,11 +22,11 @@ const startup = read('src/ui/startup-performance.js');
 const ux = read('src/ui/ux-controls.js');
 const range = read('src/ui/range-drag-controls.js');
 
-assert(pkg.version === '1.4.1', 'runtime polish package version is v1.4.1');
-assert(html.includes('assets/css/foundation-polish.css?v=1.4.1-adaptive-mobile'), 'foundation polish stylesheet is linked');
-assert(html.includes('src/ui/startup-performance.js?v=1.4.1-adaptive-mobile'), 'startup performance module is linked');
-assert(sw.includes('foundation-polish.css?v=1.4.1-adaptive-mobile'), 'foundation polish stylesheet is cached');
-assert(sw.includes('startup-performance.js?v=1.4.1-adaptive-mobile'), 'startup performance module is cached');
+assert(pkg.version === '1.5.0', 'runtime polish package version is v1.5.0');
+assert(html.includes('assets/css/foundation-polish.css?v=1.5.0-experience-engine'), 'foundation polish stylesheet is linked');
+assert(html.includes('src/ui/startup-performance.js?v=1.5.0-experience-engine'), 'startup performance module is linked');
+assert(sw.includes('foundation-polish.css?v=1.5.0-experience-engine'), 'foundation polish stylesheet is cached');
+assert(sw.includes('startup-performance.js?v=1.5.0-experience-engine'), 'startup performance module is cached');
 assert(!ux.includes('setInterval(uxSyncAll, 700)'), '700ms UX polling loop is removed');
 assert(ux.includes('MutationObserver(uxScheduleSync)') && ux.includes('requestAnimationFrame'), 'UX synchronization is event-driven and frame-batched');
 assert(!range.includes('setInterval(render, 500)'), '500ms waveform DOM rebuild loop is removed');
@@ -35,4 +35,4 @@ assert(startup.includes('AIShortsStartupPerformance') && startup.includes("entry
 assert(primeCss.includes('.flow-overview-copy') && primeCss.includes('@media (max-width: 720px)'), 'mobile startup is a compact flow overview');
 assert(primeCss.includes('repeat(2, minmax(0, 1fr))'), 'mobile four-step rail uses a readable two-by-two layout');
 assert(primeCss.includes('body.has-media .start-command-panel'), 'mobile startup guidance collapses after media is loaded');
-console.log('PASS v1.4.1 runtime performance and startup hierarchy guardrails present');
+console.log('PASS v1.5.0 runtime performance and startup hierarchy guardrails present');

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chromium responsive/runtime audit for AI Shorts Studio v1.4.1."""
+"""Chromium responsive/runtime audit for AI Shorts Studio v1.5.0."""
 import asyncio
 import json
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.4.1.json'
+OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.5.0.json'
 
 INSTRUMENT = r'''<script>
 window.__aiAudit={errors:[],rejections:[],consoleErrors:[],raf:0,mutations:0};
@@ -46,7 +46,8 @@ def build_inline_html():
         'src/ui/flow-quality-gate.js', 'src/ui/workspace-comfort.js', 'src/ui/session-continuity.js',
         'src/ui/range-drag-controls.js', 'src/ui/handoff-coach.js', 'src/ui/save-readiness.js',
         'src/ui/render-quality-planner.js', 'src/ui/candidate-preview-pro.js',
-        'src/ui/candidate-pin-board.js', 'src/ui/export-finish-center.js'
+        'src/ui/candidate-pin-board.js', 'src/ui/export-finish-center.js',
+        'src/ui/studio-experience-controller.js'
     ]
     scripts = ''.join(
         '<script data-source="{0}">{1}</script>'.format(
@@ -163,7 +164,7 @@ async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, executable_path='/usr/bin/chromium', args=['--no-sandbox'])
         report = {
-            'version': '1.4.1',
+            'version': '1.5.0',
             'desktop': await audit_mode(browser, 'desktop', {'width': 1366, 'height': 768}),
             'mobile': await audit_mode(browser, 'mobile', {'width': 390, 'height': 844}),
         }

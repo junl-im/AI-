@@ -1,3 +1,140 @@
+# HANDOFF v1.5.0
+
+## 현재 상태
+
+v1.5.0은 v1.4.1의 **145/145 기준선**에서 화면 진입 동선, 분석 취소 가능성, 단계별 다음 행동, 영상 분석 직렬 병목, 재사용 캐시의 변경 가능성을 다시 감사한 UI·UX/기능/엔진 개선 릴리스입니다.
+
+최종 자동 QA는 **149/149**이며 PC·모바일 Chromium 오류, Promise 거절, 콘솔 오류와 가로 overflow는 모두 0입니다. 실제 MP3·MP4 분석·출력, 렌더 취소, 의도적 실패 후 재시도, 10분 MP3 분석·6초 출력, 격리 서비스워커 생명주기 감사도 통과했습니다.
+
+## 이번 점검에서 확인한 문제
+
+1. 작업을 시작한 뒤에도 큰 소개 헤더가 화면 높이를 차지해 파일·추천·미리보기 패널이 첫 화면 아래로 밀렸습니다.
+2. 사용자는 현재 단계는 볼 수 있었지만 전체 진행률과 가장 적절한 다음 행동을 한 곳에서 실행하기 어려웠습니다.
+3. 자동 분석은 operation coordinator로 취소 가능한 구조였으나 사용자에게 분석 취소 버튼이 제공되지 않았습니다.
+4. 영상 분석은 기기 성능과 파일 크기에 관계없이 오디오 분석 뒤 움직임 분석을 순차 실행했습니다.
+5. 분석 캐시는 객체 참조를 그대로 반환해 호출부가 진단 메타데이터를 붙일 때 캐시 원본까지 변형될 가능성이 있었습니다.
+6. 기존 UI 보정 레이어의 `min-height: !important` 때문에 소개 내용을 숨겨도 빈 높이가 남는 충돌이 있었습니다.
+
+## 적용한 변경
+
+### UI·UX
+
+- `assets/css/studio-experience.css`를 최종 UI 소유 레이어로 추가했습니다.
+- 파일을 열거나 다른 작업 단계로 이동하면 `data-studio-focus="workspace"`로 전환해 소개 콘텐츠와 장식 요소를 접고 헤더를 한 줄 작업 바 형태로 축소합니다.
+- `소개 보기 / 작업실 바로가기` 토글로 사용자가 언제든 소개 모드와 작업 모드를 전환할 수 있습니다.
+- `#hyperflowStage`에 현재 작업 설명, 접근 가능한 progressbar, 상황별 다음 행동 버튼을 추가했습니다.
+- 다음 행동은 파일 열기, 분석 취소, 분석 재시도, 추천 생성, 후보 선택, 미리보기, 편집, 저장, 결과 확인 상태를 순서대로 해석합니다.
+- 모바일에서도 축소 헤더, 세션 상태, 분석 진행률·취소, 현재 패널이 첫 화면에 더 빨리 나타나도록 레이아웃을 정리했습니다.
+- 초기 구현에서 남았던 빈 소개 높이를 최종 CSS에서 명시적으로 52px까지 축소해 수정했습니다.
+
+### 기능 안정화
+
+- `#analysisCancelBtn`을 추가하고 `AIShortsOperationCoordinator.cancel('analysis', ...)` 단일 소유 경로로 자동 분석을 취소합니다.
+- 분석 취소 중·취소 완료 상태를 버튼, 진행 표시, 토스트, 진단 기록에 동기화합니다.
+- `ai-shorts-analysis-request` 이벤트를 추가해 다음 행동 컨트롤러가 기존 분석 실행 경로를 중복 구현하지 않고 재사용합니다.
+- 취소 또는 실패 뒤 다음 행동이 다시 분석으로 연결되고, 상태 갱신 때 `ai-shorts-experience-sync` 이벤트를 발생시킵니다.
+- 중복 모바일 파일 CTA는 기존 가져오기 동선과 충돌해 제거했습니다.
+
+### 분석·성능 엔진
+
+- `performance-budget.js`가 파일 길이·크기·CPU 코어·기기 메모리·메모리 위험도를 기반으로 `parallelAnalysis` 여부와 이유를 결정합니다.
+- 8분 이하, 300MB 이하, 6코어 이상, 6GB 이상, 낮은 메모리 위험 조건의 영상은 오디오 분석과 움직임 샘플링을 병렬 실행합니다.
+- 장시간 미디어, 저메모리, 안전 티어는 기존 안전 순차 분석을 유지합니다.
+- `analysis-pipeline.js`는 `Promise.allSettled()` 기반 병렬 분석과 단조 증가 진행률을 사용합니다.
+- 오디오 또는 움직임 한쪽이 실패해도 가능한 분석을 유지하고 사용자 경고와 전략 메타데이터를 남깁니다.
+- 엔진 결과에 `parallel`, `sequential-safe`, `audio-only` 전략과 audio/motion/finalize/total 시간을 기록합니다.
+- 분석 캐시는 clone-safe 스냅샷, typed-array 복제, 30분 TTL, LRU 상한, hits/misses/evictions/expired 통계를 제공합니다.
+- 캐시 키에 sample rate, motion sample 수, cache namespace를 포함하고 런타임 annotation 이전 결과만 저장합니다.
+
+## 주요 변경 파일
+
+- 신규: `assets/css/studio-experience.css`
+- 신규: `src/ui/studio-experience-controller.js`
+- 신규: `qa/studio_experience_smoke.js`
+- 신규: `qa/analysis_cache_safety_smoke.js`
+- 신규: `qa/parallel_analysis_smoke.js`
+- 수정: `index.html`, `src/app.js`, `src/boot/staged-ui-loader.js`
+- 수정: `src/engine/performance-budget.js`, `analysis-pipeline.js`, `analysis-cache.js`, `engine-kernel.js`
+- 수정: `sw.js`, 버전 계약 QA, 브라우저·실미디어·서비스워커 감사 파일
+
+## 최종 검증 결과
+
+- 자동 QA: **149/149 통과**
+- PC Chromium 1366×768: 오류 0, Promise 거절 0, 콘솔 오류 0, 가로 overflow 0px
+- 모바일 Chromium 390×844: 오류 0, Promise 거절 0, 콘솔 오류 0, 가로 overflow 0px
+- PC 메뉴 8/8, 모바일 핵심 메뉴 4/4, 전체 메뉴 8/8
+- 20초 MP3 출력 작업: **2.131초**, MP4 **397,377바이트**, ffprobe 통과
+- 20초 MP4 출력 작업: **2.257초**, MP4 **133,975바이트**, ffprobe 통과
+- 렌더 취소: cancelled 1, 다운로드 0, 활성 operation 0
+- 의도적 재생 실패 후 재시도: attempts 2, **2.195초**, MP4 **389,921바이트**, ffprobe 통과
+- 10분 MP3 분석: **5.423초**
+- 10분 분석 트랙: 8kHz, 약 **18.3MB**, 예상 decode 메모리 약 **219.7MB**
+- 분석 후 decoded AudioBuffer·channelData 미보유, cache clone-safe 확인
+- 6초 출력 작업: **6.190초**, MP4 **1,908,764바이트**, ffprobe 통과
+- 병렬 모의 계측: 70ms 오디오 + 70ms 움직임 작업에서 병렬 경로가 순차 경로보다 최소 35ms 이상 단축
+- 움직임 분석 실패 시 오디오 중심 결과 유지와 경고 발생 확인
+- 서비스워커 install·skipWaiting·activate·이전 캐시 정리·clients.claim·오프라인 navigation 복구 통과
+- 현재 배포 대상 유효 파일 **267개**, v1.4.1 기준 변경·신규 파일 **101개**, 삭제 파일 0
+
+## 실행·검수 기록
+
+1. v1.4.1 전체 설치본 압축 해제 및 자동 QA **145/145** 기준선 확인
+2. PC·모바일 초기 화면, 작업 진입 높이, 메뉴·패널 접근 경로 감사
+3. workspace-first CSS와 소개/작업실 토글 적용
+4. 상태 기반 진행률·다음 행동 controller를 단계형 로더로 분리
+5. 자동 분석 취소·재시도 사용자 경로 추가
+6. 적응형 병렬 분석, 부분 실패 축소, clone-safe LRU 캐시 적용
+7. 중복 모바일 파일 CTA를 QA 발견 후 제거
+8. 누적 `min-height: !important` 충돌로 남은 빈 소개 높이를 화면 감사 후 수정
+9. `python3 qa/run_browser_audit.py` 실행 및 Chromium 감사 통과
+10. `python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset` 실행
+11. `python3 qa/run_media_e2e.py --cases longAudio` 실행
+12. `node qa/run_service_worker_lifecycle.js` 실행
+13. 최종 `npm test` **149/149** 확인
+14. 전체 설치 ZIP과 v1.4.1 기준 붙여넣기 패치 ZIP 생성·압축·적용 동일성 검증
+
+## 배포·검수 순서
+
+1. `npm test`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset`
+4. `python3 qa/run_media_e2e.py --cases longAudio`
+5. `node qa/run_service_worker_lifecycle.js`
+6. `npm run package:full`
+7. `PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.4.1_Full.zip PATCH_FROM_VERSION=1.4.1 npm run package:patch`
+8. 전체·패치 ZIP `unzip -t`, 금지 항목, 패치 적용 후 전체 파일 해시 동일성, 적용본 `npm test` 확인
+
+## 설계·소유권 결정
+
+- `src/app.js`는 상태와 기존 기능을 소유하고, 단계별 안내·다음 행동 해석은 `AIShortsStudioExperience`가 소유합니다.
+- 새 UI controller는 직접 부트 스크립트 수를 늘리지 않고 `staged-ui-loader`가 shell 단계에서 로드합니다.
+- 분석 취소는 UI controller가 AbortController를 직접 만지지 않고 operation coordinator를 통해 요청합니다.
+- 병렬 분석 여부는 UI가 아니라 performance budget이 결정합니다.
+- 병렬 분기와 순차 분기는 같은 최종 분석 계약을 반환해야 합니다.
+- 캐시에는 런타임 annotation이 없는 clone-safe 결과만 저장합니다.
+- UI 최종 보정은 `studio-experience.css`가 소유하지만 장기적으로 46개 CSS 레이어를 기능별로 통합해야 합니다.
+
+## 알려진 제한
+
+- 현재 실제 Chromium 하네스의 `navigator.deviceMemory`는 4GB로 보고되어 실미디어 영상은 안전 순차 전략을 사용했습니다. 병렬 분기는 동일 파이프라인을 실행하는 모의 시간·부분 실패 검사로 검증했으며, 8코어·8GB 이상 실기기 벤치마크가 추가로 필요합니다.
+- Chromium 감사는 비보안 인라인 환경이라 실제 localhost 서비스워커 제어와 localStorage 영속성은 실행하지 않습니다. 서비스워커 이벤트 코드는 격리 생명주기 감사로 검증했습니다.
+- 모바일 Safari·Samsung Internet 실기기, 15분·30분 고해상도 MP4, 렌더·취소·파일 교체 반복 자원 누수는 추가 검증이 필요합니다.
+- `src/app.js`는 여전히 1,526줄·87,917바이트이며 자막·품질·자동 컷 설정 책임을 더 분리해야 합니다.
+- CSS 파일은 46개로 누적돼 최종 selector 소유권을 기능별 bundle로 통합해야 합니다.
+- 패치 ZIP은 삭제 파일을 적용할 수 없습니다. 삭제가 생기는 버전은 전체 설치본 또는 별도 삭제 절차가 필요합니다.
+
+## 다음 우선순위
+
+1. 자막·품질·자동 컷 설정 controller 분리와 `src/app.js` 축소
+2. CSS 46개 레이어의 selector 중복·`!important`·반응형 소유권 통합
+3. 8코어·8GB 이상 실기기 병렬 분석 벤치마크와 전략 경계 조정
+4. 렌더·취소·파일 교체 20회 반복 자원 누수 감사
+5. 15분·30분 MP4 및 모바일 Safari·Samsung Internet 장시간 검증
+
+---
+
+## 이전 인수인계 원문 — v1.4.1
+
 # HANDOFF v1.4.1
 
 ## 현재 상태

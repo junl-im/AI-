@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-4-1",
-  "version": "1.4.1",
+  "name": "ai-shorts-studio-v1-5-0",
+  "version": "1.5.0",
   "private": true,
-  "description": "AI Shorts Studio v1.4.1 - real service-worker lifecycle audit, controller diagnostics, offline reload verification, and retained modular render workflow",
+  "description": "AI Shorts Studio v1.5.0 - workspace-first UI/UX, cancellable analysis, adaptive parallel video analysis, and clone-safe engine cache",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -157,6 +157,10 @@
     "node qa/decode_memory_preflight_smoke.js",
     "node qa/persisted_state_recovery_smoke.js",
     "node qa/analysis_worker_stall_smoke.js",
-    "node qa/service_worker_cache_scope_smoke.js"
+    "node qa/service_worker_cache_scope_smoke.js",
+    "node --check src/ui/studio-experience-controller.js",
+    "node qa/studio_experience_smoke.js",
+    "node qa/analysis_cache_safety_smoke.js",
+    "node qa/parallel_analysis_smoke.js"
   ]
 }

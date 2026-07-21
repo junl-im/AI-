@@ -4,7 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
-const auditPath = path.join(root, 'qa', 'runtime-browser-audit-v1.4.1.json');
+const auditPath = path.join(root, 'qa', 'runtime-browser-audit-v1.5.0.json');
 
 function assert(condition, message) {
   if (!condition) {
@@ -14,9 +14,9 @@ function assert(condition, message) {
   console.log(`PASS ${message}`);
 }
 
-assert(fs.existsSync(auditPath), 'v1.4.1 browser audit artifact exists');
+assert(fs.existsSync(auditPath), 'v1.5.0 browser audit artifact exists');
 const report = JSON.parse(fs.readFileSync(auditPath, 'utf8'));
-assert(report.version === '1.4.1', 'browser audit version matches release');
+assert(report.version === '1.5.0', 'browser audit version matches release');
 
 for (const mode of ['desktop', 'mobile']) {
   const result = report[mode];
@@ -54,4 +54,4 @@ const mobile = report.mobile;
 assert(mobile.workspaceTests && mobile.workspaceTests.mobileControlsHidden === true, 'mobile hides desktop-only workspace controls');
 assert(mobile.workspace && mobile.workspace.toolbarVisible === false && mobile.workspace.dividerVisible.every(value => value === false), 'mobile keeps toolbar and resizers out of layout');
 
-console.log('PASS v1.4.1 real-browser stability, adaptive mobile menu, stage landing and workspace control audit');
+console.log('PASS v1.5.0 real-browser stability, adaptive mobile menu, stage landing and workspace control audit');

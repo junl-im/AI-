@@ -1,0 +1,245 @@
+/* AI Shorts Studio v1.5.0 - workspace-first focus, next-action guidance, and analysis cancellation */
+
+.brand-right-actions {
+    gap: 10px;
+}
+
+.studio-focus-toggle {
+    min-height: 32px;
+    padding: 7px 11px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 999px;
+    background: rgba(8, 12, 24, 0.72);
+    color: #dbeafe;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.studio-focus-toggle:hover,
+.studio-focus-toggle:focus-visible {
+    border-color: rgba(34, 211, 238, 0.62);
+    background: rgba(12, 27, 48, 0.92);
+    outline: none;
+}
+
+.studio-focus-toggle:active {
+    transform: translateY(1px);
+}
+
+
+.hyperflow-stage {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.hyperflow-stage-main {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.studio-journey {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.7fr) auto;
+    align-items: center;
+    gap: 10px;
+    min-width: min(390px, 100%);
+}
+
+.studio-journey-meter {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.studio-journey-copy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.studio-journey-copy strong {
+    color: #e2e8f0;
+    font-size: 11px;
+}
+
+.studio-journey-track {
+    position: relative;
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+}
+
+.studio-journey-progress {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #22d3ee, #8b5cf6 62%, #f472b6);
+    box-shadow: 0 0 16px rgba(34, 211, 238, 0.34);
+    transition: width 220ms ease;
+}
+
+.hyperflow-next-button {
+    min-height: 42px;
+    padding: 9px 15px;
+    border: 1px solid rgba(34, 211, 238, 0.45);
+    border-radius: 13px;
+    background: linear-gradient(135deg, rgba(14, 116, 144, 0.9), rgba(91, 33, 182, 0.9));
+    color: white;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 12px 28px rgba(8, 145, 178, 0.18);
+}
+
+.hyperflow-next-button[data-action="cancel-analysis"] {
+    border-color: rgba(251, 191, 36, 0.48);
+    background: linear-gradient(135deg, rgba(180, 83, 9, 0.92), rgba(190, 24, 93, 0.88));
+}
+
+.hyperflow-next-button:disabled {
+    cursor: wait;
+    opacity: 0.62;
+}
+
+.analysis-primary-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.analysis-cancel-button {
+    min-width: 108px;
+    border-color: rgba(251, 191, 36, 0.34);
+}
+
+.analysis-cancel-button[hidden] {
+    display: none !important;
+}
+
+body[data-studio-focus="workspace"] .studio-hero {
+    margin-bottom: 10px;
+}
+
+body[data-studio-focus="workspace"] .brand-panel.cinematic-brand-panel {
+    min-height: 52px !important;
+    height: auto !important;
+    padding: 8px 18px !important;
+    border-radius: 18px !important;
+}
+
+body[data-studio-focus="workspace"] .cinematic-brand-panel .hero-mainline,
+body[data-studio-focus="workspace"] .cinematic-brand-panel .social-shutter-strip,
+body[data-studio-focus="workspace"] .cinematic-brand-panel .shorts-hero-bg,
+body[data-studio-focus="workspace"] .cinematic-brand-panel::before,
+body[data-studio-focus="workspace"] .cinematic-brand-panel::after {
+    display: none !important;
+}
+
+body[data-studio-focus="workspace"] .cinematic-brand-panel .brand-topline {
+    margin: 0;
+    min-height: 34px;
+}
+
+body[data-studio-focus="workspace"] .flow-overview-panel {
+    max-height: 0;
+    min-height: 0;
+    margin-block: 0;
+    padding-block: 0;
+    border-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+body[data-studio-focus="workspace"] .hyperflow-stage {
+    position: sticky;
+    top: 8px;
+    z-index: 28;
+    backdrop-filter: blur(20px) saturate(1.2);
+}
+
+body[data-studio-focus="intro"] .studio-focus-toggle::before {
+    content: "";
+}
+
+@media (max-width: 900px) {
+    .brand-signature-pill {
+        display: none !important;
+    }
+
+    .studio-focus-toggle {
+        min-height: 30px;
+        padding-inline: 9px;
+        font-size: 10px;
+    }
+
+    .hyperflow-stage {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .studio-journey {
+        width: 100%;
+        min-width: 0;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .hyperflow-next-button {
+        min-height: 44px;
+    }
+
+    body[data-studio-focus="workspace"] .brand-panel.cinematic-brand-panel {
+        min-height: 48px !important;
+        padding: 7px 10px !important;
+        border-radius: 0 0 16px 16px !important;
+    }
+
+    body[data-studio-focus="workspace"] .cinematic-brand-panel .release-name,
+    body[data-studio-focus="workspace"] .cinematic-brand-panel .release-device-compat span:last-child {
+        display: none;
+    }
+
+    body[data-studio-focus="workspace"] .hyperflow-stage {
+        top: 6px;
+    }
+}
+
+@media (max-width: 560px) {
+    .studio-journey {
+        grid-template-columns: 1fr;
+    }
+
+    .hyperflow-next-button {
+        width: 100%;
+    }
+
+    .analysis-primary-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .analysis-cancel-button {
+        min-width: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .studio-journey-progress,
+    .studio-focus-toggle {
+        transition: none;
+    }
+}

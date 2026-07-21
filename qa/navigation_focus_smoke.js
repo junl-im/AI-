@@ -16,7 +16,7 @@ const bridge = read('src/ui/flow-command-bridge.js');
 const legacyTabs = read('src/ui/hyperflow-tabs.js');
 const css = read('assets/css/desktop-prime-layout.css');
 const iconCss = read('assets/css/icon-system.css');
-assert(pkg.version === '1.4.1', 'navigation focus release version is v1.4.1');
+assert(pkg.version === '1.5.0', 'navigation focus release version is v1.5.0');
 assert(html.includes('release-device-compat') && html.includes('모바일 · PC 호환'), 'device compatibility sits next to the visible version');
 assert(html.includes('data-flow-tab="file"') && html.includes('data-icon="upload"') && html.includes('data-icon="export"') && html.includes('<b>저장</b>'), 'menu uses consistent semantic studio vector icons');
 assert(app.includes("activateFlowTab('recommend', { reveal: true, force: true") && app.includes('ai-shorts-navigation-request'), 'file analysis and app milestones request visible navigation');
@@ -29,4 +29,4 @@ assert(!bridge.includes('LOCAL · PRIVATE · 9:16') && !bridge.includes('brand-c
 assert(css.includes('.is-navigation-target') && css.includes('navigationFocusPulse'), 'desktop workspace visibly highlights the active destination');
 assert(iconCss.includes('studio-icon') && iconCss.includes('mask: var(--studio-icon-url)') && director.includes('studio-vectors'), 'menu uses platform-independent vector assets');
 assert(!html.includes('⬇') && !read('src/ui/handoff-coach.js').includes('⬇️') && !read('src/boot/update-sentinel.js').includes('🛰️'), 'prominent workflow copy avoids mismatched colorful emoji');
-console.log('PASS v1.4.1 navigation focus and icon consistency guardrails present');
+console.log('PASS v1.5.0 navigation focus and icon consistency guardrails present');

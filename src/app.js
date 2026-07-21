@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.4.1 - coordinated media operations, adaptive mobile flow, and memory preflight
+// AI Shorts Studio v1.5.0 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -104,7 +104,7 @@
     function initElements() {
         [
             'programInfoBtn', 'selectedBadge', 'dropZone', 'fileDrop', 'fileInput', 'importStatus',
-            'durationSelect', 'styleSelect', 'cropModeSelect', 'platformSelect', 'analyzeBtn',
+            'durationSelect', 'styleSelect', 'cropModeSelect', 'platformSelect', 'analyzeBtn', 'analysisCancelBtn',
             'analysisStatus', 'progressBar', 'recommendationList', 'recommendationCount', 'previewStatus',
             'previewCanvas', 'sourceVideo', 'sourceAudio', 'previewBtn', 'stopPreviewBtn', 'exportBtn',
             'waveformCanvas', 'timelineView', 'selectedRangeText', 'titleInput', 'hashtagInput',
@@ -161,7 +161,8 @@
             const modules = meta.registry && meta.registry.count ? `${meta.registry.count}개 모듈` : '모듈 활성';
             const cache = meta.cache && meta.cache.hitRate ? ` · 캐시 ${meta.cache.hitRate}%` : '';
             const stability = meta.contract && meta.contract.score ? ` · 안정 ${meta.contract.score}` : '';
-            els.engineStatusText.textContent = `${meta.budget.label || '프로 엔진'} · ${modules}${stability}${cache}`;
+            const strategy = meta.analysisStrategy === 'parallel' ? ' · 동시 분석' : meta.analysisStrategy === 'sequential-safe' ? ' · 안전 순차' : '';
+            els.engineStatusText.textContent = `${meta.budget.label || '프로 엔진'} · ${modules}${strategy}${stability}${cache}`;
             return;
         }
         els.engineStatusText.textContent = '대기';
@@ -543,7 +544,16 @@
         const queueBusy = Boolean(renderQueue && renderQueue.isRunning && renderQueue.isRunning());
         if (els.analyzeBtn) {
             els.analyzeBtn.disabled = !analysisReady || state.isAnalyzing;
-            els.analyzeBtn.textContent = state.isAnalyzing ? '자동 분석 중' : '추천 생성'; els.analyzeBtn.dataset.icon = state.isAnalyzing ? 'render' : 'spark';
+            els.analyzeBtn.textContent = state.isAnalyzing ? '자동 분석 중' : '추천 생성';
+            els.analyzeBtn.dataset.icon = state.isAnalyzing ? 'render' : 'spark';
+        }
+        if (els.analysisCancelBtn) {
+            els.analysisCancelBtn.hidden = !state.isAnalyzing;
+            els.analysisCancelBtn.disabled = !state.isAnalyzing;
+            if (!state.isAnalyzing) {
+                els.analysisCancelBtn.textContent = '분석 취소';
+                delete els.analysisCancelBtn.dataset.cancelRequested;
+            }
         }
         if (els.previewBtn) els.previewBtn.disabled = !hasRecs || state.isPreviewing;
         if (els.stopPreviewBtn) els.stopPreviewBtn.disabled = !state.isPreviewing;
@@ -559,6 +569,7 @@
         if (els.flowExportBtn) els.flowExportBtn.disabled = !hasRecs || state.isPreviewing || queueBusy;
         if (els.flowExportAllBtn) els.flowExportAllBtn.disabled = !hasRecs || state.isPreviewing || queueBusy;
         syncHyperFlow();
+        document.dispatchEvent(new CustomEvent('ai-shorts-experience-sync'));
     }
 
     function getSelectedRecommendation() {
@@ -783,6 +794,22 @@
             });
         }
         if (els.analyzeBtn) els.analyzeBtn.addEventListener('click', generateRecommendationsFromAnalysis);
+        if (els.analysisCancelBtn) els.analysisCancelBtn.addEventListener('click', () => {
+            if (els.analysisCancelBtn.disabled || !state.isAnalyzing) return;
+            const cancelled = operationCoordinator.cancel && operationCoordinator.cancel('analysis', '사용자가 자동 분석을 취소했습니다.');
+            if (!cancelled) return;
+            els.analysisCancelBtn.disabled = true;
+            els.analysisCancelBtn.textContent = '중단 중';
+            els.analysisCancelBtn.dataset.cancelRequested = 'true';
+            setProgress(0, '분석 취소 요청');
+            toast('자동 분석을 안전하게 중단하고 있습니다.', 'warning');
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-cancel-request', fileName: state.file && state.file.name || '' });
+            document.dispatchEvent(new CustomEvent('ai-shorts-experience-sync'));
+        });
+        document.addEventListener('ai-shorts-analysis-request', event => {
+            if (!state.file || state.isAnalyzing) return;
+            analyzeCurrentFile({ autoGenerate: false, source: event && event.detail && event.detail.source || 'external-request' });
+        });
         if (els.previewBtn) els.previewBtn.addEventListener('click', previewSelectedRange);
         if (els.stopPreviewBtn) els.stopPreviewBtn.addEventListener('click', stopPreview);
         if (els.exportBtn) els.exportBtn.addEventListener('click', exportSelectedRange);
@@ -1083,6 +1110,8 @@
             finishOperation(token, 'analysis-complete');
         } catch (error) {
             if (isAbortError(error)) {
+                setProgress(0, '분석 취소됨');
+                toast('자동 분석을 취소했습니다. 다음 작업 버튼에서 다시 시작할 수 있습니다.', 'warning');
                 if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-cancelled', message: error.message });
             } else {
                 setProgress(0, '분석 실패');

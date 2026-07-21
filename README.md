@@ -1,80 +1,72 @@
-# AI 쇼츠 제작 스튜디오 v1.4.1
+# AI 쇼츠 제작 스튜디오 v1.5.0
 
-## v1.4.1 적용 내용과 결과
+음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
 
-서비스워커 상태를 앱에서 관찰할 수 있게 하고 설치·활성화·캐시 정리·오프라인 복구 동작을 자동 검증했습니다.
+## v1.5.0 적용 내용
 
-- `getStatus()`와 `waitUntilControlled()` 생명주기 API 추가
-- controller·update·worker 상태 전환 진단 기록 추가
-- 실제 `sw.js` 이벤트 실행 감사 추가
-- 자동 QA **145/145** 통과
-- PC·모바일 Chromium 오류 0건
-- MP3·MP4·취소·재시도·10분 미디어 E2E 통과
+- 작업 시작 후 큰 소개 영역을 자동으로 접어 작업 패널을 첫 화면에 더 빨리 표시합니다.
+- 상단 상태 카드에서 전체 진행률, 현재 단계, 가장 적절한 다음 행동을 확인하고 실행할 수 있습니다.
+- 자동 분석을 직접 취소하고 취소·실패 뒤 다시 시작할 수 있습니다.
+- UI 안내 책임을 `studio-experience-controller`로 분리해 지연 로드합니다.
+- 성능 여유가 있는 짧은 영상은 오디오와 움직임을 병렬 분석합니다.
+- 장시간·저메모리 환경은 안전 순차 분석을 유지합니다.
+- 한 분석 축이 실패해도 가능한 결과를 유지하고 경고를 제공합니다.
+- 분석 캐시는 clone-safe LRU·30분 TTL·상태 통계를 사용해 재사용 결과 오염을 막습니다.
 
-# AI 쇼츠 제작 스튜디오 v1.4.0
+## 검수 결과
 
-음악이나 영상을 브라우저 안에서 분석하고, 하이라이트 추천부터 9:16 미리보기와 저장까지 이어주는 로컬 웹 스튜디오입니다. 파일과 분석 결과는 서버로 전송하지 않습니다.
+- 자동 QA: **149/149**
+- PC·모바일 Chromium 오류, Promise 거절, 콘솔 오류: **0건**
+- PC·모바일 가로 overflow: **0px**
+- MP3·MP4 분석→추천→선택→MP4 저장 통과
+- 렌더 취소와 의도적 재생 실패 후 재시도 통과
+- 10분 MP3 분석: **5.423초**
+- 6초 MP4 출력 작업: **6.190초**, **1,908,764바이트**
+- 병렬 분석 시간 단축과 움직임 분석 실패 축소 동작 통과
+- 서비스워커 설치·활성·캐시 정리·오프라인 복구 격리 감사 통과
 
-## v1.4.0 핵심 개선
-
-이번 버전은 메인 앱에 집중돼 있던 렌더 책임을 분리하고 렌더 큐 표시와 작업 종료를 더 안전하고 결정적으로 만들었습니다.
-
-- 렌더 큐 UI, 내보내기 payload, 작업 실행, 실패 재시도, 편집 선택 복원을 전용 `render-workflow-controller`로 분리했습니다.
-- 렌더 큐의 제목·파일명·상태·오류를 HTML 문자열 대신 안전한 DOM과 `textContent`로 표시합니다.
-- 렌더 operation 종료를 공통 `finally` 한 곳으로 통합해 정확히 한 번만 종료합니다.
-- 렌더 성공·실패·취소 뒤 사용자가 보던 후보와 수동 범위를 복원합니다.
-- `src/app.js`를 약 11.4% 축소했습니다.
-- 실제 가짜 DOM·렌더 큐 실행 검사를 추가해 자동 QA를 **143/143**로 확장했습니다.
-
-## 실행과 검수
+## 실행
 
 ```bash
 npm run serve
+```
+
+브라우저에서 `http://localhost:8080`을 엽니다.
+
+## 전체 검수
+
+```bash
 npm test
 python3 qa/run_browser_audit.py
 python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset
 python3 qa/run_media_e2e.py --cases longAudio
+node qa/run_service_worker_lifecycle.js
 ```
 
-최종 검수 결과:
+## 주요 구조
 
-- 자동 QA: **143/143**
-- PC·모바일 Chromium JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
-- PC·모바일 페이지 가로 overflow: **0px**
-- 20초 MP3·MP4 분석→추천→선택→MP4 저장 통과
-- 렌더 취소와 의도적 재생 실패 후 재시도 통과
-- 10분 MP3 분석: 약 **6.164초**
-- 10분 분석 트랙: 8kHz, 약 **18.3MB**
-- 예상 디코딩 메모리: 약 **219.7MB**, 위험도 medium
-- decoded AudioBuffer·channelData 분석 후 미보유 확인
-- 6초 렌더 출력: 약 **6.346초**, **1,670,118바이트**, ffprobe 통과
+분석·추천·렌더 기능은 기존 **모듈형 엔진** 계약 위에서 동작하며, v1.5.0은 그 위에 적응형 병렬 분석과 clone-safe 캐시를 추가합니다.
+
+
+- 메인 앱 상태·오케스트레이션: `src/app.js`
+- 작업 진행률·다음 행동·소개/작업실 전환: `src/ui/studio-experience-controller.js`
+- 적응형 분석 예산: `src/engine/performance-budget.js`
+- 병렬·순차 분석 파이프라인: `src/engine/analysis-pipeline.js`
+- clone-safe LRU 분석 캐시: `src/engine/analysis-cache.js`
+- 렌더 워크플로·큐 UI: `src/app/render-workflow-controller.js`
+- 렌더 실행·미디어 복원: `src/render/vertical-renderer.js`
+- 서비스워커 등록·업데이트: `src/boot/service-worker-registration.js`
+- 변경·검수·제약 누적 기록: `HANDOFF.md`
 
 ## 배포 파일 생성
 
 ```bash
 npm run package:full
-PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.3.9_Improved.zip npm run package:patch
+PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.4.1_Full.zip PATCH_FROM_VERSION=1.4.1 npm run package:patch
 ```
 
-전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.3.9 설치 폴더 위에 같은 경로로 덮어쓰는 변경·신규 파일만 포함합니다.
-
-배포 ZIP에는 `PATCH_MANIFEST.txt`, Python 캐시, Git 메타데이터, `node_modules`, 이전 배포 ZIP을 포함하지 않습니다.
-
-## 주요 구조
-
-- 메인 앱 오케스트레이션: `src/app.js`
-- 렌더 워크플로·큐 UI·편집 선택 복원: `src/app/render-workflow-controller.js`
-- 렌더 실행·미디어 상태 복원: `src/render/vertical-renderer.js`
-- 렌더 작업 상태·취소·재시도: `src/render/render-queue.js`
-- 세션 백업·손상 기록 내보내기: `src/ui/session-continuity.js`
-- 안전한 클립보드·범위 정규화: `src/utils/core-utils.js`
-- 서비스워커 등록·업데이트 소유권: `src/boot/service-worker-registration.js`
-- 안전한 지속 설정: `src/state/app-state.js`
-- 프로젝트 설정 검증·병합: `src/project/project-service.js`
-- 모듈형 엔진 커널·계약·파이프라인: `src/engine/`
-- 비동기 작업 소유권: `src/engine/operation-coordinator.js`
-- 체크포인트 실미디어 감사: `qa/run_media_e2e.py`
+전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.4.1 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
 
 ## 알려진 제한
 
-현재 Chromium 인라인 감사는 실제 서비스워커 lifecycle과 localStorage 지속성을 실행하지 않습니다. 매우 긴 무압축 오디오의 순간 디코딩 메모리, 15분·30분 고해상도 MP4, 모바일 Safari·Samsung Internet 장시간 출력도 추가 검증이 필요합니다.
+실제 Chromium 감사 기기는 4GB 메모리로 보고돼 실미디어 영상은 안전 순차 전략을 사용했습니다. 병렬 분기는 모의 시간·부분 실패 검사로 통과했으며 8코어·8GB 이상 실기기 계측이 추가로 필요합니다. 모바일 Safari·Samsung Internet과 15분·30분 고해상도 MP4 장시간 출력도 별도 검증 대상입니다.

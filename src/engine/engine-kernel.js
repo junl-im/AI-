@@ -1,4 +1,4 @@
-// AI Shorts Studio v0.9.6 - stabilized pro engine kernel facade
+// AI Shorts Studio v1.5.0 - parallel analysis and clone-safe cache kernel facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -12,7 +12,7 @@
     const stability = global.AIShortsStabilityAuditor || {};
 
     const registry = registryFactory.createRegistry ? registryFactory.createRegistry('ai-shorts-studio-pro-engine') : null;
-    const analysisCache = cacheFactory.createAnalysisCache ? cacheFactory.createAnalysisCache(4) : null;
+    const analysisCache = cacheFactory.createAnalysisCache ? cacheFactory.createAnalysisCache(4, { maxAgeMs: 30 * 60 * 1000 }) : null;
     let lastContractReport = null;
     let lastStabilityReport = null;
 
@@ -45,8 +45,8 @@
         const registrySnapshot = registry && registry.snapshot ? registry.snapshot() : null;
         const summary = tuner.summarizeAnalysis ? tuner.summarizeAnalysis(result, budget) : null;
         result.engine = Object.assign({}, result.engine || {}, {
-            version: '0.9.6',
-            mode: 'stabilized-pro-engine',
+            version: '1.5.0',
+            mode: 'adaptive-parallel-engine',
             budget,
             registry: registrySnapshot,
             profile,
@@ -73,9 +73,8 @@
         let result = await analysis.analyzeMedia(Object.assign({}, input || {}, { budget }));
         if (contracts.normalizeAnalysisResult) result = contracts.normalizeAnalysisResult(result);
         if (profiler) profiler.mark('analysis-complete');
-        annotateEngine(result, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: false });
         if (analysisCache && analysisCache.set) analysisCache.set(cacheKey, result);
-        return result;
+        return annotateEngine(result, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: false });
     }
 
     function createRecommendations(input) {
@@ -102,8 +101,8 @@
 
     function getHealthReport() {
         return {
-            version: '0.9.6',
-            mode: 'stabilized-pro-engine',
+            version: '1.5.0',
+            mode: 'adaptive-parallel-engine',
             registry: registry && registry.snapshot ? registry.snapshot() : null,
             modules: registry && registry.list ? registry.list().length : 0,
             cache: analysisCache && analysisCache.stats ? analysisCache.stats() : null,

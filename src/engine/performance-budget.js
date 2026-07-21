@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.4.1 - adaptive long-media and decode-memory performance budget
+// AI Shorts Studio v1.5.0 - adaptive decode, concurrency, and responsiveness budget
 'use strict';
 
 (function exposePerformanceBudget(global) {
@@ -51,6 +51,14 @@
         const audioMaxSeconds = Math.min(maxCoverage, duration > 0 ? duration : maxCoverage);
         const motionSamples = duration > 900 ? 64 : duration > 300 ? 88 : tier === 'safe' ? 72 : tier === 'max' ? 160 : 120;
         const estimatedAnalysisMemoryMb = Math.round((audioMaxSeconds * analysisSampleRate * 4 / 1024 / 1024) * 10) / 10;
+        const parallelAnalysis = Boolean(
+            duration > 0 && duration <= 8 * 60 && sizeMb <= 300 &&
+            cores >= 6 && memory >= 6 && memoryRisk === 'low' && tier !== 'safe'
+        );
+        const parallelReason = parallelAnalysis
+            ? '오디오와 영상 움직임 동시 분석'
+            : longMedia ? '장시간 미디어 메모리 안정 우선' : memoryRisk !== 'low' ? '디코딩 메모리 안정 우선' : '기기 자원 안정 우선';
+        const responsivenessSliceMs = tier === 'safe' ? 8 : tier === 'max' ? 14 : 10;
         return {
             tier,
             sizeMb: Math.round(sizeMb * 10) / 10,
@@ -70,6 +78,10 @@
             rawBufferCopyAvoided: true,
             retainDecoded: false,
             retainChannelData: false,
+            parallelAnalysis,
+            parallelReason,
+            responsivenessSliceMs,
+            cacheNamespace: 'engine-v1.5.0',
             recommendationCount: tier === 'safe' ? 5 : tier === 'max' ? 9 : 7,
             uiThrottleMs: tier === 'safe' ? 180 : tier === 'max' ? 70 : 110,
             label: longMedia ? (tier === 'safe' ? '장시간 안전 모드' : '장시간 균형 모드') : tier === 'safe' ? '안전 모드' : tier === 'max' ? '최대 성능' : '균형 성능'

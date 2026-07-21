@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.4.1 - cancellable, range-safe vertical renderer with media-state restoration
+// AI Shorts Studio v1.5.0 - cancellable, range-safe vertical renderer with media-state restoration
 'use strict';
 
 (function exposeVerticalRenderer(global) {

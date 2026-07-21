@@ -1,3 +1,71 @@
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.0
+
+## 결과
+
+- 자동 검사: **149/149 통과**
+- PC Chromium 1366×768: JavaScript 오류 0, Promise 거절 0, 콘솔 오류 0, 가로 overflow 0px
+- 모바일 Chromium 390×844: JavaScript 오류 0, Promise 거절 0, 콘솔 오류 0, 가로 overflow 0px
+- PC 메뉴 8/8, 모바일 핵심 메뉴 4/4, 전체 메뉴 8/8
+- workspace-first 축소 헤더, 진행률, 다음 행동, 분석 취소·재시도 계약 통과
+
+## UI·UX 신규 검사
+
+- 소개/작업실 토글과 상태별 `data-studio-focus` 전환
+- 접근 가능한 journey progressbar와 다음 행동 버튼
+- 작업 모드에서 소개 영역 높이 축소 및 장식 요소 제거
+- 분석 실행 중 취소 버튼 노출, 취소 후 재시도 연결
+- controller의 shell 단계 지연 로딩과 직접 부트 스크립트 예산 유지
+- 모바일 중복 파일 CTA 방지와 현재/다음 메뉴 유지
+
+## 엔진 신규 검사
+
+- 성능 예산의 병렬 분석 조건과 안전 순차 fallback
+- 70ms 오디오·70ms 움직임 모의 작업에서 병렬 경로의 wall-time 단축
+- 움직임 분석 실패 시 오디오 결과 유지와 경고 발생
+- 분석 전략·단계별 timing 메타데이터
+- cache set/get 스냅샷 격리와 typed-array 복제
+- 30분 TTL, LRU 상한, 품질 설정·namespace 기반 cache key
+- 런타임 annotation 이전 결과 캐싱
+
+## 실미디어 E2E
+
+- 20초 MP3: 출력 작업 2.131초, MP4 397,377바이트, ffprobe 통과
+- 20초 MP4: 출력 작업 2.257초, MP4 133,975바이트, ffprobe 통과
+- 렌더 취소: cancelled 1, 다운로드 0, 활성 operation 0
+- 의도적 재생 실패 후 재시도: attempts 2, 출력 작업 2.195초, MP4 389,921바이트
+- 10분 MP3 분석: **5.423초**
+- 장시간 분석: 8kHz, 분석 트랙 약 18.3MB, 예상 decode 메모리 약 219.7MB
+- 분석 뒤 decoded AudioBuffer·channelData 미보유
+- 6초 출력 작업: **6.190초**, MP4 **1,908,764바이트**, ffprobe 통과
+- 모든 시나리오 런타임 오류 0, 완료 뒤 활성 operation 0
+
+## 서비스워커 감사
+
+- install, shell cache, skipWaiting 통과
+- activate, 이전 앱 cache 정리, clients.claim 통과
+- 캐시된 offline navigation fallback HTTP 200 통과
+- localhost 실브라우저 제어 E2E는 실행 환경의 포트 제한으로 미실행
+
+## 감사 파일
+
+- `qa/runtime-browser-audit-v1.5.0.json`
+- `qa/runtime-media-e2e-v1.5.0.json`
+- `qa/runtime-service-worker-lifecycle-v1.5.0.json`
+
+## 배포 대상
+
+- 유효 파일 267개
+- v1.4.1 기준 변경·신규 파일 101개
+- 삭제 파일 0개
+- 임시 화면 PNG, Python cache, Git metadata, node_modules, 중첩 ZIP 제외
+
+## 알려진 제한
+
+- 실미디어 Chromium 환경은 deviceMemory 4GB로 병렬 조건에 해당하지 않았습니다. 병렬 경로는 실제 파이프라인 모의 시간·부분 실패 검사로 검증했습니다.
+- 8코어·8GB 이상 실기기, 모바일 Safari·Samsung Internet, 15분·30분 고해상도 MP4와 반복 자원 누수 감사를 추가해야 합니다.
+
+---
+
 # QA REPORT — AI 쇼츠 스튜디오 v1.4.1
 
 - 자동 QA: **145/145**
