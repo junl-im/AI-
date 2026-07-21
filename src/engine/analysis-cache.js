@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.6 - clone-safe bounded in-session analysis cache
+// AI Shorts Studio v1.5.7 - clone-safe bounded in-session analysis cache
 'use strict';
 
 (function exposeAnalysisCache(global) {
@@ -12,7 +12,7 @@
             budget && budget.tier || 'balanced',
             budget && budget.analysisSampleRate || 0,
             budget && budget.motionSamples || 0,
-            budget && budget.cacheNamespace || 'engine-v1.5.6'
+            budget && budget.cacheNamespace || 'engine-v1.5.7'
         ];
         return parts.map(item => String(item).replace(/\s+/g, '_')).join('::');
     }

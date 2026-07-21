@@ -77,25 +77,37 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
     }
 }
 
-/* Tablet/small laptop: keep labels visible instead of squeezing all 8 into one tiny row. */
+/* Tablet/small laptop: one compact row keeps the workspace visible. */
 @media (min-width: 721px) and (max-width: 1179px) {
-    :root { --hyperflow-dock-height: 142px; }
+    :root { --hyperflow-dock-height: 72px; }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
         display: block !important;
-        padding: 10px 14px 12px !important;
-        border-radius: 24px 24px 0 0 !important;
+        bottom: 8px !important;
+        min-height: var(--hyperflow-dock-height) !important;
+        padding: 8px !important;
+        border-radius: 20px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status,
+    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status-sr {
+        display: none !important;
     }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs {
         display: grid !important;
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        gap: 8px !important;
+        grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+        gap: 5px !important;
     }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab {
-        min-height: 58px !important;
-        padding: 7px 8px !important;
+        min-width: 0 !important;
+        min-height: 54px !important;
+        gap: 3px !important;
+        padding: 5px 3px !important;
+        border-radius: 13px !important;
     }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b {
-        font-size: 12px !important;
+        overflow: hidden !important;
+        font-size: 10px !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
 }
 

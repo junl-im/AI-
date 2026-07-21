@@ -267,7 +267,7 @@
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.5.6') document.body.dataset.build = '1.5.6';
+            if (document.body.dataset.build !== '1.5.7') document.body.dataset.build = '1.5.7';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
             document.body.dataset.iconLanguage = 'studio-vectors';
         }

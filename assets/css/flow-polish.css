@@ -131,7 +131,6 @@ body.flow-autoplay-preview .preview-card { border-color: rgba(34,211,238,0.28); 
     .flow-selection-summary { grid-template-columns: 1fr; padding: 11px; border-radius: 18px; margin-bottom: 10px; }
     .flow-selection-actions { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; }
     .flow-selection-copy strong, .flow-selection-copy small { white-space: normal; }
-    .brand-topline { display: flex; }
     .brand-signature-pill { font-size: 0.78rem; }
     .recommendation-list.recommendations-compare { grid-template-columns: 1fr; }
     .preview-transport-polish { display: grid; grid-template-columns: 1fr; }

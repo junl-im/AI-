@@ -1,29 +1,43 @@
-# HANDOFF v1.5.6
+# HANDOFF v1.5.7
 
 ## 현재 상태
 
-v1.5.6은 v1.5.5의 기능 경로를 유지하면서 소개 화면과 작업실 진입 밀도, 패널 제목 위계, 상단 메타데이터 CSS 소유권을 정리한 UI 중심 릴리스입니다.
+v1.5.7은 v1.5.6 기능 경로를 유지하면서 태블릿·소형 노트북의 첫 화면 밀도와 dock 점유 높이를 정리한 responsive UI 릴리스입니다.
 
-- 자동 QA: **163/163 통과**
-- PC·모바일 Chromium 오류·Promise 거절·콘솔 오류: **0건**
-- PC·모바일 가로 overflow: **0px**
+- 자동 QA: **164/164 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 Chromium 오류·Promise 거절·콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- 태블릿 1024px: 초기 hero 300px, dock 73px, 8개 메뉴 단일 행
+- 소형 노트북 1280px: 초기 hero 275px, dock 86px
 - 서비스워커 생명주기: install·activate·old cache cleanup·offline navigation 통과
-- CSS 상한: `!important` 863, conflicts 338, high-risk 85, shadowed 422
+- CSS 기준: `!important` 904, conflicts 334, high-risk 81, shadowed 414
 
 ## 적용 내용
 
-- 데스크톱 hero 최소 높이 316px, 제목 최대 68px로 작업실 첫 화면 가시성 개선
-- 모바일 hero 278px, 390px 이하 266px로 압축
-- 모바일 4단계 안내 카드와 dock geometry 축소
-- 패널 제목 accent rail과 workspace layout control 상태 대비 개선
-- header metadata layout의 display/grid 소유권을 `header-meta-rail.css`로 통합
-- `qa/ui_clarity_smoke.js` 추가
-- runtime build key `1.5.6-ui-clarity` 적용
+- 721~1179px 구간에서 하단 메뉴를 4+4 두 줄에서 8단계 단일 행으로 변경
+- 태블릿 hero, title, 설명, timeline, 세로 frame을 전용 밀도로 압축
+- 1180~1399px 구간에서 hero를 275px 수준으로 줄이고 작업 배치·카드를 첫 화면으로 당김
+- `header-meta-rail.css`가 모바일 topline 높이를, `active-stage-beacon.css`가 navigation target border/shadow를 최종 소유
+- Chromium runtime 감사를 2개 viewport에서 4개 viewport로 확장하고 초기 화면 density를 기록
+- runtime build key `1.5.7-responsive-density` 적용
+
+## 검수 순서
+
+1. `node qa/run_css_ownership_audit.js`
+2. `python3 qa/run_browser_audit.py`
+3. `node qa/run_service_worker_lifecycle.js`
+4. `npm test`
+
+## 알려진 제한
+
+- 중간 breakpoint의 기존 다중 CSS cascade를 안전하게 덮기 위해 전용 `!important`가 증가했습니다. 다음 CSS 패치에서 custom property와 소유 파일 이동으로 다시 줄여야 합니다.
+- 실미디어·20회 힙 경로는 JS 미디어 코드가 동일한 CSS/UI 릴리스이므로 v1.5.3 검증 결과를 상속합니다.
+- Safari·Samsung Internet 실기기와 GPU·미디어 디코더 네이티브 메모리는 이번 Chromium layout 감사 범위 밖입니다.
 
 ## 다음 작업
 
-1. 721~1179px 태블릿·소형 노트북 구간의 hero, dock, 작업 카드 밀도 전용 감사
-2. 남은 고위험 CSS 충돌 85개 중 header/brand와 stage surface 묶음 추가 통합
+1. 중간 breakpoint responsive 값을 custom property로 전환해 `!important` 증가분 정리
+2. 남은 header/brand/stage surface 고위험 CSS 충돌 통합
 3. Chromium process RSS와 GPU·미디어 native memory 보조 계측
 4. 15분·30분 고해상도 MP4 장시간 반복 분석·출력
 

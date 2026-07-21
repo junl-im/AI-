@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.5.6 - compact editorial clarity and hierarchy refinement */
+/* AI Shorts Studio v1.5.7 - compact editorial clarity and hierarchy refinement */
 :root {
     --ui-bg-0: #070a12;
     --ui-bg-1: #0b1020;
@@ -53,12 +53,6 @@ body[data-ui="hyperflow-tabs"] .waveform-card::before {
     opacity: 0.18 !important;
 }
 
-body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target {
-    border-color: rgba(103, 232, 249, 0.32) !important;
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.035),
-        0 18px 42px rgba(0, 0, 0, 0.22) !important;
-}
 body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after {
     top: 13px !important;
     right: 14px !important;
@@ -335,8 +329,103 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
     }
 }
 
-@media (max-width: 1179px) and (min-width: 721px) {
-    body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow { width: calc(100% - 24px) !important; }
+@media (min-width: 1180px) and (max-width: 1399px) {
+    body[data-ui="hyperflow-tabs"] .app-shell {
+        width: calc(100% - 24px) !important;
+        padding-bottom: 96px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
+        min-height: 264px !important;
+        border-radius: 24px !important;
+    }
+    .cinematic-brand-panel .hero-mainline {
+        grid-template-columns: minmax(0, 1.52fr) minmax(300px, 0.62fr) !important;
+        gap: 24px !important;
+        padding: 12px 22px 8px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title {
+        font-size: clamp(43px, 4.05vw, 52px) !important;
+    }
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
+        max-width: 620px !important;
+        margin-top: 12px !important;
+        font-size: 12.5px !important;
+        line-height: 1.55 !important;
+    }
+    .hero-eyebrow { margin-bottom: 10px !important; }
+    .shorts-timeline { margin-top: 15px !important; padding-top: 11px; }
+    .hero-command-deck {
+        grid-template-columns: minmax(138px, 0.68fr) minmax(132px, 0.54fr);
+        gap: 8px 12px;
+        min-height: 166px;
+        padding-left: 22px;
+    }
+    .shorts-frame-stack {
+        width: 124px;
+        height: 164px;
+        transform: scale(0.86);
+        transform-origin: center;
+    }
+    .social-shutter-strip { display: none !important; }
+    body[data-ui="hyperflow-tabs"] .hyperflow-stage {
+        min-height: 54px;
+        margin: 8px 0 9px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .workspace-layout-toolbar {
+        padding-block: 7px;
+    }
+}
+
+@media (min-width: 721px) and (max-width: 1179px) {
+    :root { --hyperflow-dock-height: 72px; }
+    body[data-ui="hyperflow-tabs"] {
+        scroll-padding-bottom: 94px;
+    }
+    body[data-ui="hyperflow-tabs"] .app-shell {
+        width: calc(100% - 24px) !important;
+        padding-top: 10px !important;
+        padding-bottom: 94px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
+        min-height: 300px !important;
+        padding: 0 18px 14px !important;
+        border-radius: 24px !important;
+    }
+    .cinematic-brand-panel .hero-mainline {
+        grid-template-columns: minmax(0, 1.35fr) minmax(250px, 0.65fr) !important;
+        gap: 20px !important;
+        padding: 16px 6px 8px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title {
+        font-size: clamp(42px, 5.5vw, 54px) !important;
+    }
+    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
+        max-width: 560px !important;
+        margin-top: 12px !important;
+        font-size: 12.5px !important;
+        line-height: 1.55 !important;
+    }
+    .hero-eyebrow { margin-bottom: 8px !important; }
+    .shorts-timeline { max-width: 560px; margin-top: 14px !important; padding-top: 11px; }
+    .hero-command-deck {
+        grid-template-columns: minmax(132px, 0.68fr) minmax(118px, 0.54fr);
+        gap: 8px 10px;
+        min-height: 160px;
+        padding-left: 18px;
+    }
+    .shorts-frame-stack {
+        width: 118px;
+        height: 158px;
+        transform: scale(0.82);
+        transform-origin: center;
+    }
+    .social-shutter-strip { display: none !important; }
+    body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child {
+        width: 22px !important;
+        height: 22px !important;
+        font-size: 14px !important;
+    }
+    body[data-ui="hyperflow-tabs"] .tab-state-dot { top: 7px !important; right: 7px !important; }
 }
 
 @media (max-width: 720px) {
@@ -356,7 +445,6 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
         box-shadow: 0 18px 50px rgba(0, 0, 0, 0.20) !important;
     }
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
-        min-height: 50px !important;
         padding-inline: 1px;
         border-bottom-color: rgba(148, 163, 184, 0.10) !important;
     }
@@ -474,7 +562,7 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
     body[data-ui="hyperflow-tabs"] .bottom-dock-tab { min-height: 58px !important; }
 }
 
-/* v1.5.6 hierarchy pass: clearer panel rhythm without adding another CSS layer. */
+/* v1.5.7 hierarchy pass: clearer panel rhythm without adding another CSS layer. */
 body[data-ui="hyperflow-tabs"] .panel-head,
 body[data-ui="hyperflow-tabs"] .auto-cut-head,
 body[data-ui="hyperflow-tabs"] .caption-pro-head,

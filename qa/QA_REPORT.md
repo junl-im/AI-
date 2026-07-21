@@ -1,4 +1,25 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.6
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.7
+
+## 최종 결과
+
+- 자동 검사: **164/164 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- 태블릿 8단계 단일 행 dock, 데스크톱·소형 노트북 workspace resize·focus mode 통과
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+
+## UI·CSS 결과
+
+- 태블릿 초기 hero: **300px**, dock: **73px**
+- 소형 노트북 초기 hero: **275px**, dock: **86px**
+- 실제 selector-property 충돌: **338 → 334**
+- 고위험 충돌: **85 → 81**
+- shadowed declaration: **422 → 414**
+- 활성 `!important`: **904** — 중간 breakpoint custom property 전환 시 회수 예정
+
+---
+
+# QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.6
 
 ## 최종 결과
 

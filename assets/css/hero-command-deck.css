@@ -892,7 +892,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
         grid-template-columns: 1fr auto;
-        min-height: 41px;
         gap: 10px;
     }
 

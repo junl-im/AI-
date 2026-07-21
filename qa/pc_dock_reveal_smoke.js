@@ -18,7 +18,7 @@ assert(html.includes('assets/css/pc-dock-reveal-hotfix.css'), 'pc dock hotfix st
 assert(comfortCss.includes('grid-template-columns: repeat(8, minmax(0, 1fr))'), 'workspace comfort owns the readable desktop 8-tab grid');
 assert(css.includes('grid-template-columns: none !important'), 'desktop dock removes squeezed status grid columns');
 assert(foundationCss.includes('font-size: 12px !important'), 'foundation polish owns the final desktop dock label size');
-assert(css.includes('grid-template-columns: repeat(4, minmax(0, 1fr))'), 'tablet/mobile dock preserves 4+4 layout');
+assert(css.includes('grid-template-columns: repeat(8, minmax(0, 1fr))'), 'tablet dock uses a compact single-row 8-tab layout');
 assert(css.includes('animation: none !important'), 'candidate guide shimmer disabled');
 assert(html.includes('<b>파일 열기</b>'), 'dock file tab label is 파일 열기');
 assert(tabs.includes('force: true'), 'dock tab navigation forces workspace reveal');

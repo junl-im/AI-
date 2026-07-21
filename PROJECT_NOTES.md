@@ -1,23 +1,26 @@
-# PROJECT NOTES v1.5.6
+# PROJECT NOTES v1.5.7
 
-## UI clarity 소유권 규칙
+## Responsive density 소유권 규칙
 
-- desktop/mobile cinematic hero의 최종 밀도와 surface는 `ui-refinement.css`가 소유합니다.
-- header metadata의 `display`, `grid-template-columns`, action placement는 `header-meta-rail.css`가 소유합니다.
-- panel heading accent와 workspace layout button의 최종 visual state는 `ui-refinement.css`가 소유합니다.
-- `studio-experience.css`는 hyperflow stage의 표시와 작업실 focus 전환을 계속 소유합니다.
+- 721~1179px tablet dock geometry는 `pc-dock-reveal-hotfix.css`가 소유하고 8개 단일 행을 유지합니다.
+- tablet·small-laptop hero 최종 density와 skin은 `ui-refinement.css`가 소유합니다.
+- 모바일 header의 display/grid/min-height는 `header-meta-rail.css`가 최종 소유합니다.
+- navigation target의 border와 box-shadow는 `active-stage-beacon.css`만 소유합니다.
+- 1180px 이상 workspace grid 구조는 기존대로 `workspace-layout-controls.css`가 소유합니다.
 
 ## QA·배포 기준
 
-- 자동 QA 기준은 **163/163**입니다.
-- CSS 상한은 활성 `!important` 863, 실제 충돌 338, 고위험 충돌 85, shadowed declaration 422입니다.
-- 데스크톱·모바일 runtime error와 horizontal overflow는 0이어야 합니다.
-- 런타임 build key는 `1.5.6-ui-clarity`입니다.
+- 자동 QA 기준은 **164/164**입니다.
+- CSS 상한은 활성 `!important` 904, 실제 충돌 334, 고위험 충돌 81, shadowed declaration 414입니다.
+- 데스크톱 1366×768, 소형 노트북 1280×720, 태블릿 1024×768, 모바일 390×844 runtime error와 horizontal overflow는 0이어야 합니다.
+- tablet 초기 hero는 320px 이하, dock은 80px 이하이며 8개 메뉴가 한 행에 들어가야 합니다.
+- small-laptop 초기 hero는 290px 이하, dock은 90px 이하여야 합니다.
+- 런타임 build key는 `1.5.7-responsive-density`입니다.
 
 ## 다음 우선순위
 
-1. 태블릿·소형 노트북 중간 breakpoint UI 감사
-2. header/brand/stage 고위험 CSS 소유권 추가 통합
+1. responsive custom property 전환과 `!important` 회수
+2. header/brand/stage surface 고위험 CSS 소유권 추가 통합
 3. Chromium RSS·GPU·미디어 native memory 보조 계측
 4. 장시간 고해상도 MP4 반복 검증
 

@@ -418,8 +418,6 @@ body[data-icon-language="studio-glyphs"] .bottom-dock-tab[aria-current="step"] >
 body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target {
     position: relative;
     z-index: 3;
-    border-color: rgba(103, 232, 249, 0.42) !important;
-    box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.08), 0 22px 56px rgba(3, 7, 18, 0.26) !important;
 }
 
 body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after {

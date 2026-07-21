@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.5.7 - Tablet & Small-Laptop Responsive Density
+
+- 721~1179px 태블릿 dock을 4+4 두 줄에서 8단계 단일 행으로 변경해 높이를 약 154px에서 73px로 줄였습니다.
+- 1180~1399px 소형 노트북 hero를 약 418px에서 275px로 압축해 진행 상태와 작업 카드가 첫 화면에 더 많이 보이도록 했습니다.
+- tablet/small-laptop 전용 title, 설명, timeline, vertical frame 밀도를 추가하고 social strip은 해당 구간에서 숨겼습니다.
+- 모바일 header display/min-height 중복과 navigation target border/shadow 중복을 제거해 실제 CSS 충돌을 338→334, 고위험 충돌을 85→81, shadowed declaration을 422→414로 낮췄습니다.
+- Chromium 감사를 desktop·small laptop·tablet·mobile 4개 viewport로 확장하고 초기 hero/dock density를 계약으로 기록합니다.
+- 자동 QA 164/164, 4개 viewport 오류·가로 overflow 0, 서비스워커 생명주기 검사를 통과했습니다.
+- 중간 breakpoint의 안전한 최종 override로 `!important`가 904개로 늘어 다음 CSS 소유권 패치의 우선 회수 대상으로 기록했습니다.
+
+
 ## v1.5.6 - UI Clarity & Compact Workspace Entry
 
 - 데스크톱 시네마틱 헤더의 최소 높이, 제목 크기, 좌우 간격을 줄여 첫 화면에 작업 상태와 작업실 카드가 더 많이 보이도록 다듬었습니다.

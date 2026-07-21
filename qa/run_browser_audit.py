@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chromium responsive/runtime audit for AI Shorts Studio v1.5.6."""
+"""Chromium responsive/runtime audit for AI Shorts Studio v1.5.7."""
 import asyncio
 import json
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.5.6.json'
+OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.5.7.json'
 
 INSTRUMENT = r'''<script>
 window.__aiAudit={errors:[],rejections:[],consoleErrors:[],raf:0,mutations:0};
@@ -104,6 +104,19 @@ async def audit_mode(browser, mode, viewport):
         await page.click('#mobileDockMenuToggle')
         await page.wait_for_timeout(80)
         expanded_tabs = await page.evaluate("""() => [...document.querySelectorAll('[data-flow-tab]')].map(el=>{const r=el.getBoundingClientRect();const cs=getComputedStyle(el);return {tab:el.dataset.flowTab,visible:cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0};})""")
+    initial_density = await page.evaluate("""() => {
+      const hero=document.querySelector('.cinematic-brand-panel')?.getBoundingClientRect();
+      const stage=document.querySelector('#hyperflowStage')?.getBoundingClientRect();
+      const firstPanel=document.querySelector('[data-flow-panel]')?.getBoundingClientRect();
+      const dock=document.querySelector('#bottomDock')?.getBoundingClientRect();
+      return {
+        heroHeight: hero ? hero.height : 0,
+        stageHeight: stage ? stage.height : 0,
+        firstPanelTop: firstPanel ? firstPanel.top : 0,
+        dockHeight: dock ? dock.height : 0,
+        viewportWorkArea: Math.max(0, innerHeight - (dock ? dock.height : 0))
+      };
+    }""")
     initial_stage = await collect_stage(page)
     await page.evaluate("() => AIShortsFlowDirectorFinal.setActive('recommend',{force:true,source:'runtime-audit'})")
     await page.wait_for_timeout(80)
@@ -142,11 +155,24 @@ async def audit_mode(browser, mode, viewport):
       operations:AIShortsOperationCoordinator.snapshot(),runtimeHealth:AIShortsRuntimeHealth.collect(),
       viewport:{width:innerWidth,height:innerHeight},bodyScrollWidth:document.body.scrollWidth,htmlScrollWidth:document.documentElement.scrollWidth
     })""")
+    density = await page.evaluate("""() => {
+      const hero=document.querySelector('.cinematic-brand-panel')?.getBoundingClientRect();
+      const stage=document.querySelector('#hyperflowStage')?.getBoundingClientRect();
+      const firstPanel=document.querySelector('[data-flow-panel]')?.getBoundingClientRect();
+      return {
+        heroHeight: hero ? hero.height : 0,
+        stageHeight: stage ? stage.height : 0,
+        firstPanelTop: firstPanel ? firstPanel.top : 0,
+        viewportWorkArea: Math.max(0, innerHeight - (document.querySelector('#bottomDock')?.getBoundingClientRect().height || 0))
+      };
+    }""")
     result.update({
         'stage': stage or initial_stage,
         'landing': landing,
         'audit': final_audit,
         'auditAtFirstSample': first,
+        'initialDensity': initial_density,
+        'density': density,
         'dock': dock_rect,
         'dockScrollWidth': dock_sizes['scrollWidth'],
         'dockClientWidth': dock_sizes['clientWidth'],
@@ -163,10 +189,18 @@ async def audit_mode(browser, mode, viewport):
 async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+        desktop, small_laptop, tablet, mobile = await asyncio.gather(
+            audit_mode(browser, 'desktop', {'width': 1366, 'height': 768}),
+            audit_mode(browser, 'desktop', {'width': 1280, 'height': 720}),
+            audit_mode(browser, 'tablet', {'width': 1024, 'height': 768}),
+            audit_mode(browser, 'mobile', {'width': 390, 'height': 844}),
+        )
         report = {
-            'version': '1.5.6',
-            'desktop': await audit_mode(browser, 'desktop', {'width': 1366, 'height': 768}),
-            'mobile': await audit_mode(browser, 'mobile', {'width': 390, 'height': 844}),
+            'version': '1.5.7',
+            'desktop': desktop,
+            'smallLaptop': small_laptop,
+            'tablet': tablet,
+            'mobile': mobile,
         }
         await browser.close()
     OUTPUT.write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.6 - lower-peak audio decode with worker stall recovery
+// AI Shorts Studio v1.5.7 - lower-peak audio decode with worker stall recovery
 'use strict';
 
 (function exposeAudioFeatureExtractor(global) {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.6 - workspace focus and actionable next-step controller
+// AI Shorts Studio v1.5.7 - workspace focus and actionable next-step controller
 'use strict';
 
 (function exposeStudioExperience(global) {

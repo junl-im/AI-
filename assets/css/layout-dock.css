@@ -327,8 +327,7 @@ body.has-media .studio-grid {
         min-height: 28px;
         font-size: 11px;
     }
-    .hero-mainline,
-    .brand-topline {
+    .hero-mainline {
         display: block;
     }
     .hero-copy h1 {
