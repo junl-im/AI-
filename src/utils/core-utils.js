@@ -160,19 +160,29 @@
 
     async function copyText(text) {
         const value = String(text || '');
-        if (global.navigator && global.navigator.clipboard && global.navigator.clipboard.writeText) {
-            await global.navigator.clipboard.writeText(value);
-            return true;
+        if (global.navigator && global.navigator.clipboard && typeof global.navigator.clipboard.writeText === 'function') {
+            try {
+                await global.navigator.clipboard.writeText(value);
+                return true;
+            } catch (error) {
+                // Permission and focus policies vary by browser. Fall through to the legacy local copy path.
+            }
         }
-        const textarea = document.createElement('textarea');
+        const doc = global.document;
+        if (!doc || !doc.body || typeof doc.createElement !== 'function' || typeof doc.execCommand !== 'function') return false;
+        const textarea = doc.createElement('textarea');
         textarea.value = value;
         textarea.setAttribute('readonly', 'readonly');
+        textarea.setAttribute('aria-hidden', 'true');
         textarea.style.position = 'fixed';
         textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
+        textarea.style.top = '0';
+        doc.body.appendChild(textarea);
+        textarea.focus();
         textarea.select();
         let ok = false;
-        try { ok = document.execCommand('copy'); } finally { textarea.remove(); }
+        try { ok = Boolean(doc.execCommand('copy')); } catch (error) { ok = false; }
+        finally { textarea.remove(); }
         return ok;
     }
 

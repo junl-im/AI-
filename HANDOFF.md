@@ -1,3 +1,227 @@
+# HANDOFF v1.4.0
+
+## 현재 상태
+
+v1.4.0은 v1.3.9의 **141/141 기준선**에서 `src/app.js`의 렌더 책임을 분리하고, 렌더 큐 DOM 안전성 및 operation 종료 수명주기를 정리한 구조 개선 릴리스입니다.
+
+최종 자동 검사는 **143/143**이며 PC·모바일 Chromium 오류, Promise 거절, 콘솔 오류와 가로 overflow는 모두 0입니다. MP3·MP4 출력, 취소, 실패 후 재시도, 10분 MP3 분석과 6초 렌더도 새 컨트롤러 구조에서 다시 통과했습니다.
+
+## 이번 점검에서 발견한 실제 문제
+
+1. 약 96KB·1,600줄이던 `src/app.js`가 렌더 큐 UI, 내보내기 payload, 작업 실행, 재시도, 편집 선택 복원까지 동시에 소유해 변경 영향 범위가 지나치게 넓었습니다.
+2. 렌더 큐 항목은 사용자·런타임 문자열을 HTML 템플릿으로 조립했습니다. 현재 escape 유틸이 존재해도 모듈 누락이나 미래 변경에서 안전성이 쉽게 깨질 수 있는 구조였습니다.
+3. 렌더 operation은 성공 경로에서 `finishOperation()`을 호출한 뒤 공통 `finally`에서 다시 종료를 시도했습니다. coordinator가 두 번째 호출을 무시해 즉시 오류는 없었지만 종료 소유권과 진단 의미가 불명확했습니다.
+4. 렌더 관련 QA가 구현 위치를 `src/app.js`로 고정해 책임 분리를 방해하고 있었습니다.
+5. 새 핵심 컨트롤러가 추가되면서 직접 로딩 스크립트 예산이 44개에서 45개로 바뀌므로 명시적인 성능 계약 갱신이 필요했습니다.
+
+## 적용한 수정
+
+- `src/app/render-workflow-controller.js`를 추가해 렌더 큐 표시, export payload 생성, 렌더 실행, 실패 재시도, 편집 선택 캡처·복원을 한 소유자로 통합했습니다.
+- `src/app.js`는 전용 컨트롤러를 생성하고 이벤트·내보내기 요청을 위임하도록 변경했습니다.
+- 렌더 큐의 제목, 파일명, 상태, 오류를 `innerHTML` 템플릿 대신 `createElement()`와 `textContent`로 생성합니다.
+- 렌더 operation은 결과 상태를 `completionResult`에 기록하고 공통 `finally`에서 정확히 한 번만 종료합니다.
+- 렌더 성공·부분 실패·취소·예외 후에도 원래 후보와 수동 범위를 복원하며, 파일이 교체되면 이전 스냅샷을 복원하지 않습니다.
+- 새 컨트롤러를 HTML 로딩 순서와 서비스워커 셸 캐시에 포함했습니다.
+- 렌더 큐·재시도·operation·품질·ETA·편집 상태 QA를 새 소유권에 맞게 갱신했습니다.
+- 가짜 DOM과 가짜 렌더 큐를 실제 실행하는 `qa/render_workflow_controller_smoke.js`를 추가했습니다.
+- `src/app.js`를 **96,893바이트에서 85,874바이트로 약 11.4% 축소**했습니다.
+- 자동 QA를 141개에서 **143개**로 확장했습니다.
+
+## 주요 변경 파일
+
+- `src/app/render-workflow-controller.js`: 렌더 워크플로 단일 소유자, 안전한 큐 DOM, 단일 operation 종료
+- `src/app.js`: 렌더 책임 위임 및 이벤트 연결
+- `index.html`: 컨트롤러를 메인 앱보다 먼저 로딩
+- `sw.js`: 컨트롤러 오프라인 셸 캐시 포함
+- `qa/render_workflow_controller_smoke.js`: 안전 DOM·단일 종료·선택 복원 동작 회귀
+- `qa/render_queue_smoke.js`: 렌더 소유권 계약 갱신
+- `qa/render_recovery_smoke.js`: 실패 재시도 위임 계약 갱신
+- `qa/editor_state_preservation_smoke.js`: 단일 종료·공통 복원 경로 계약
+- `qa/render_eta_smoke.js`: ETA·접근성 UI 소유 위치 갱신
+- `qa/render_quality_planner_smoke.js`: bitrate 전달 위치 갱신
+- `qa/operation_coordinator_smoke.js`: 앱과 렌더 컨트롤러의 작업 소유권 검사
+- `qa/staged_ui_loading_smoke.js`: 핵심 직접 스크립트 예산 45개로 갱신
+
+## 유지 규칙
+
+1. `src/app.js`는 렌더 큐 행 DOM이나 MediaRecorder export payload를 직접 소유하지 않습니다.
+2. 렌더 큐의 사용자·런타임 문자열은 `innerHTML`로 삽입하지 않고 `textContent`를 사용합니다.
+3. 렌더 operation 종료는 하나의 공통 경로에서 정확히 한 번 호출합니다.
+4. 렌더 내부 후보 순회는 사용자의 최종 선택 후보와 수동 범위를 변경하지 않습니다.
+5. 미디어 세션이 교체되면 이전 렌더 스냅샷을 새 파일에 복원하지 않습니다.
+6. 새 필수 앱 모듈은 `index.html`에서 의존 대상보다 먼저 로드하고 `sw.js` 셸 캐시에 포함합니다.
+7. 렌더 컨트롤러의 안전성은 문자열 검사뿐 아니라 가짜 DOM·작업 큐 동작 검사로 유지합니다.
+8. 서비스워커 등록과 `registration.update()`는 `AIShortsServiceWorkerRegistration`만 소유합니다.
+9. 기존 모듈형 엔진과 operation coordinator의 작업 소유권 계약을 유지합니다.
+10. `PATCH_MANIFEST.txt`나 동일 목적의 임시 배포 목록 파일을 만들지 않습니다.
+
+## 검수 결과
+
+- `npm test`: **143/143 통과**
+- Chromium desktop 1366×768: 오류·Promise 거절·콘솔 오류 0, 가로 overflow 0px
+- Chromium mobile 390×844: 오류·Promise 거절·콘솔 오류 0, 가로 overflow 0px
+- PC 메뉴 8/8, 모바일 간단 메뉴 4/4, 전체 메뉴 8/8
+- 20초 MP3 출력: 2.264초, 418,961바이트, ffprobe 통과
+- 20초 MP4 출력: 2.240초, 194,560바이트, ffprobe 통과
+- 렌더 취소: cancelled 1, 다운로드 0, 활성 operation 0
+- 재생 실패 후 재시도: attempts 2, 2.212초, 382,921바이트, ffprobe 통과
+- 10분 MP3 분석: 약 **6.164초**
+- 장시간 분석 예산: 8kHz, 분석 트랙 약 **18.3MB**
+- 예상 decode 메모리 약 **219.7MB**, 위험도 medium
+- 분석 후 decoded AudioBuffer·channelData 미보유
+- 6초 렌더 출력: 약 **6.346초**, **1,670,118바이트**, ffprobe 통과
+- 렌더 중 ETA 약 3초 노출, 완료 후 활성 operation 0
+- 전체 설치본 유효 파일 **254개**, ZIP 항목 278개, 금지 항목 0
+- v1.3.9 기준 덮어쓰기 패치 **91개 파일**, 금지 항목 0
+- v1.3.9 전체 설치본 + v1.4.0 패치 결과가 v1.4.0 전체 설치본과 파일명·SHA-256 기준 완전 일치
+- 전체 설치 ZIP을 별도 디렉터리에 풀어 `npm test` **143/143 재통과**
+
+## 실행·검수 기록
+
+1. v1.3.9 전체 설치본 압축 해제 및 `npm test` **141/141** 기준선 확인
+2. 렌더 워크플로 컨트롤러 분리 및 `src/app.js` 위임 적용
+3. 안전 DOM·단일 종료 동작 QA 추가
+4. `npm test` 중 신규 버전 감사 파일 부재를 제외한 141/143 확인
+5. `python3 qa/run_browser_audit.py` 실행
+6. `python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset` 실행
+7. `python3 qa/run_media_e2e.py --cases longAudio` 실행
+8. 최종 `npm test` **143/143** 확인
+9. 전체 ZIP과 v1.3.9 기준 덮어쓰기 패치 ZIP 생성·검증
+
+## 배포·검수 순서
+
+1. `npm test`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset`
+4. `python3 qa/run_media_e2e.py --cases longAudio`
+5. `npm run package:full`
+6. `PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.3.9_Improved.zip npm run package:patch`
+7. 전체·패치 ZIP `unzip -t`, 금지 항목, 패치 적용 후 전체 파일 해시 동일성 확인
+
+## 다음 우선순위
+
+1. 자막·품질·자동 컷 설정을 `src/app.js`에서 editor settings controller로 분리
+2. 45개 CSS 레이어의 최종 소유자와 override 순서를 기능별로 통합
+3. localhost/HTTPS 서비스워커 설치→대기→활성화→컨트롤 전환 자동 감사
+4. 렌더·취소·파일 교체 20회 반복 자원 누수 감사
+5. 15분·30분 MP4 장시간 분석·렌더 계측
+6. 모바일 Safari·Samsung Internet 실기기 검증
+
+## 알려진 제한
+
+- 현재 Chromium 감사 하네스는 비보안 인라인 환경이라 실제 서비스워커 lifecycle과 localStorage 지속성을 실행하지 않습니다.
+- 새 렌더 컨트롤러는 핵심 경로라 직접 로딩 스크립트가 45개입니다. 다음 구조 패치에서 부트 번들·모듈 로더 통합을 검토해야 합니다.
+- Web Audio 전체 디코딩 특성상 매우 긴 무압축 오디오의 순간 peak memory는 여전히 클 수 있습니다.
+- 15분·30분 고해상도 MP4와 모바일 Safari·Samsung Internet 장시간 출력은 실기기 검증이 필요합니다.
+- 패치 ZIP은 삭제 파일을 적용할 수 없습니다. 삭제가 생기는 버전은 별도 삭제 절차나 전체 설치본이 필요합니다.
+
+---
+
+## 이전 인수인계 원문 — v1.3.9
+
+# HANDOFF v1.3.9
+
+## 현재 상태
+
+v1.3.9는 v1.3.8의 **138/138 기준선**에서 세션 피드백, 손상 기록 보존, 클립보드 권한 실패, 일괄 렌더 후 편집 상태 변형을 재감사한 안정화 릴리스입니다.
+
+최종 자동 검사는 **141/141**이며 PC·모바일 Chromium 오류, Promise 거절, 콘솔 오류와 가로 overflow는 모두 0입니다. MP3·MP4 출력, 취소, 실패 후 재시도, 10분 MP3 분석과 6초 렌더도 새 버전 기준으로 통과했습니다.
+
+## 이번 점검에서 발견한 실제 문제
+
+1. 세션 연속성 모듈은 `AIShortsFeedbackUX.toast()`를 호출했지만 피드백 모듈에 해당 공개 메서드가 없어 수동 저장·복구·삭제 결과가 사용자에게 표시되지 않았습니다.
+2. 클립보드 API가 권한·포커스 문제로 거부되면 fallback 없이 즉시 실패했고, 일부 호출부는 실제 복사 여부를 확인하지 않아 성공처럼 안내할 수 있었습니다.
+3. 일괄 렌더가 후보를 순회하면서 전역 선택 후보를 바꾼 뒤 마지막 후보를 남겨 사용자가 보던 편집 대상과 수동 구간이 바뀔 수 있었습니다.
+4. 수동 구간을 정규화한 뒤에도 미디어 seek는 원래 입력 시작값을 사용해 화면 위치와 실제 렌더 범위가 어긋날 수 있었습니다.
+5. 손상 자동저장은 삭제할 수는 있었지만 원문을 보존해 외부 복구·진단에 활용할 방법이 없었습니다.
+6. 기존 QA 상당수는 문자열 계약 검사라 위와 같은 실제 API 누락·실패 fallback을 잡지 못했습니다.
+
+## 적용한 수정
+
+- `AIShortsFeedbackUX.toast(message, kind, options)` 공개 API를 추가해 실제 토스트, 접근성 안내, 햅틱까지 연결했습니다.
+- Clipboard API 실패 시 숨김 textarea와 `execCommand('copy')` fallback을 사용하고 최종 결과를 Boolean으로 반환합니다.
+- 자막·진단 복사는 실제 복사 성공을 확인하고 실패 시 진단과 오류 안내를 남깁니다.
+- 일괄 렌더 전 선택 후보·수동 범위를 캡처하고 성공·실패·취소 공통 `finally`에서 복원합니다.
+- 렌더 중 파일이 교체된 경우 오래된 편집 스냅샷을 새 미디어에 적용하지 않습니다.
+- 수동 범위 seek는 공용 정규화 결과의 `selected.start`를 사용합니다.
+- 세션 카드에 `기록 백업`/`손상 기록 저장` 버튼을 추가했습니다.
+- 유효한 세션은 원문 JSON을 그대로, 손상 세션은 원문·실패 이유·메타데이터를 복구 번들 JSON으로 내려받습니다.
+- 실제 동작을 실행하는 신규 회귀 검사 3개를 추가해 QA를 138개에서 141개로 확장했습니다.
+
+## 주요 변경 파일
+
+- `src/ui/feedback-ux.js`: 실제 공개 토스트 API
+- `src/utils/core-utils.js`: 권한 실패를 견디는 클립보드 fallback
+- `src/download/download-service.js`: 진단 복사 결과 검증
+- `src/app.js`: 자막 복사 실패 처리, 편집 선택 캡처·복원, 정규화 seek
+- `src/ui/session-continuity.js`: 유효·손상 자동저장 원문 내보내기
+- `qa/clipboard_fallback_smoke.js`: 클립보드 동작 회귀
+- `qa/session_recovery_export_smoke.js`: 세션 원문·복구 번들 회귀
+- `qa/editor_state_preservation_smoke.js`: 렌더 후 편집 상태 복원 회귀
+
+## 유지 규칙
+
+1. 공개 피드백 API는 no-op이 아니라 실제 UI와 접근성 알림을 수행해야 합니다.
+2. 복사 성공 메시지는 Clipboard API 또는 fallback이 실제 성공한 뒤에만 표시합니다.
+3. 일괄 렌더의 내부 후보 순회는 사용자의 최종 편집 선택을 변경하지 않습니다.
+4. 미디어 세션이 바뀌면 이전 렌더의 선택 스냅샷을 복원하지 않습니다.
+5. seek·미리보기·렌더는 동일한 정규화 범위를 사용합니다.
+6. 자동저장 원문이 존재하면 파싱·스키마 검증 실패와 관계없이 사용자가 삭제하거나 내려받을 수 있어야 합니다.
+7. 손상 기록 내보내기는 원문을 변형하거나 유실하지 않습니다.
+8. 서비스워커는 자신의 캐시 prefix에 속한 이전 캐시만 삭제합니다.
+9. 렌더가 변경한 원본 미디어 상태는 작업 전 값으로 복원합니다.
+10. 서비스워커 등록과 `registration.update()`는 `AIShortsServiceWorkerRegistration`만 소유합니다.
+11. 기존 **모듈형 엔진**과 operation coordinator의 작업 소유권 계약을 유지합니다.
+12. `PATCH_MANIFEST.txt`나 동일 목적의 임시 배포 목록 파일을 만들지 않습니다.
+
+## 검수 결과
+
+- `npm test`: **141/141 통과**
+- Chromium desktop 1366×768: 오류·Promise 거절·콘솔 오류 0, 가로 overflow 0px
+- Chromium mobile 390×844: 오류·Promise 거절·콘솔 오류 0, 가로 overflow 0px
+- 20초 MP3 출력: 1.945초, 411,006바이트, ffprobe 통과
+- 20초 MP4 출력: 1.948초, 223,556바이트, ffprobe 통과
+- 렌더 취소: cancelled 1, 다운로드 0, 활성 operation 0
+- 재생 실패 후 새 작업 재시도: attempts 2, 2.094초, 477,026바이트
+- 10분 MP3 분석: 약 **5.864초**
+- 장시간 분석 예산: 8kHz, 분석 트랙 약 **18.3MB**
+- 예상 decode 메모리 약 **219.7MB**, 위험도 medium
+- 분석 후 decoded AudioBuffer·channelData 미보유
+- 6초 렌더 출력: 약 **5.908초**, **1,559,014바이트**, ffprobe 통과
+- 렌더 중 ETA 약 3초 노출, 완료 후 활성 operation 0
+- 전체 설치 ZIP `unzip -t` 통과, 파일 250개, 금지 항목 0
+- 전체 설치 ZIP을 별도 디렉터리에 풀어 `npm test` **141/141 재통과**
+
+## 배포·검수 순서
+
+1. `npm test`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset`
+4. `python3 qa/run_media_e2e.py --cases longAudio`
+5. `npm run package:full`
+6. 필요 시 `PATCH_BASE_ARCHIVE=/path/to/ai-shorts-studio-v1.3.8-release.zip npm run package:patch`
+7. ZIP `unzip -t`, SHA-256, 금지 항목 확인
+
+## 다음 우선순위
+
+1. localhost/HTTPS에서 서비스워커 설치→대기→활성화→컨트롤 전환 및 localStorage 복구 자동 감사
+2. 렌더·취소·파일 교체 20회 반복 시 MediaStream·AudioContext·ObjectURL 누수 계측
+3. 15분·30분 MP4 분석 시간, decode peak memory, 장시간 렌더 성공률 계측
+4. 모바일 Safari·Samsung Internet 실기기 장시간 렌더 검증
+5. 40개가 넘는 CSS 레이어와 누적 UI 보정 모듈의 소유권 통합
+6. 약 1,600줄의 `src/app.js`를 파일·분석·편집·렌더 controller로 분리
+
+## 알려진 제한
+
+- 현재 Chromium 감사 하네스는 비보안 인라인 환경이라 실제 서비스워커 lifecycle과 localStorage 지속성을 실행하지 않습니다.
+- Web Audio 전체 디코딩 특성상 매우 긴 무압축 오디오의 순간 peak memory는 여전히 클 수 있습니다.
+- 15분·30분 고해상도 MP4와 모바일 Safari·Samsung Internet 장시간 출력은 실기기 검증이 필요합니다.
+- 패치 ZIP은 삭제 파일을 적용할 수 없습니다. 삭제가 생기는 버전은 별도 삭제 절차나 전체 설치본이 필요합니다.
+
+---
+
+## 이전 인수인계 원문 — v1.3.8
+
 # HANDOFF v1.3.8
 
 ## 현재 상태

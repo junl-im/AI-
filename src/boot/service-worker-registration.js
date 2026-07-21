@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.8 - single-owner service worker registration
+// AI Shorts Studio v1.4.0 - single-owner service worker registration
 'use strict';
 
 (function exposeServiceWorkerRegistration(global) {

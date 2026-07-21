@@ -21,6 +21,7 @@
             analyze: [16, 32, 16],
             success: [18, 38, 18],
             warn: [28, 34, 28],
+            warning: [28, 34, 28],
             error: [42, 42, 42],
             export: [14, 24, 14, 24, 18],
             copy: [10, 18, 10],
@@ -63,6 +64,23 @@
         const toast = document.getElementById('toast');
         setToastKind(toast, kind);
         vibrate(kind);
+    }
+
+    function toast(message, explicitKind, options) {
+        const node = document.getElementById('toast');
+        if (!node) return false;
+        const text = String(message || '').trim();
+        if (!text) return false;
+        const opts = Object.assign({ duration: 2600 }, options || {});
+        const kind = explicitKind || classifyText(text);
+        setToastKind(node, kind);
+        node.textContent = text;
+        node.classList.add('toast-visible');
+        global.clearTimeout(node._timer);
+        node._timer = global.setTimeout(() => node.classList.remove('toast-visible'), Math.max(900, Number(opts.duration) || 2600));
+        announce(text, kind);
+        state.lastToastText = text;
+        return true;
     }
 
     function getActionKind(target) {
@@ -127,7 +145,7 @@
         if (signature) signature.title = 'Design by 곰같은여우';
     }
 
-    global.AIShortsFeedbackUX = { vibrate, announce, classifyText, setToastKind };
+    global.AIShortsFeedbackUX = { vibrate, announce, toast, classifyText, setToastKind };
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();

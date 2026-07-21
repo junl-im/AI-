@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.8 - coordinated media operations, adaptive mobile flow, and memory preflight
+// AI Shorts Studio v1.4.0 - coordinated media operations, adaptive mobile flow, and memory preflight
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -24,12 +24,14 @@
     const runtimeHealth = global.AIShortsRuntimeHealth || {};
     const serviceWorkerRegistration = global.AIShortsServiceWorkerRegistration || {};
     const operationCoordinator = global.AIShortsOperationCoordinator || {};
+    const renderWorkflowController = global.AIShortsRenderWorkflowController || {};
 
     const els = {};
     let previewRaf = 0;
     let previewTimer = 0;
     let previewStillRaf = 0;
     let previewOperationToken = null;
+    let renderWorkflow = null;
 
 
     function isAbortError(error) {
@@ -501,166 +503,36 @@
     }
 
 
-    function getRenderQueueSnapshot() {
-        return renderQueue && renderQueue.snapshot ? renderQueue.snapshot() : { running: false, total: 0, done: 0, failed: 0, progress: 0, items: [] };
+    function createRenderWorkflow() {
+        if (!renderWorkflowController.create) throw new Error('렌더 워크플로 컨트롤러를 불러오지 못했습니다.');
+        renderWorkflow = renderWorkflowController.create({
+            state,
+            utils,
+            store,
+            renderer,
+            downloadService,
+            renderQueue,
+            operationCoordinator,
+            elements: els,
+            document,
+            activateFlowTab,
+            stopPreview,
+            getActiveMediaElement,
+            getQualityOptions,
+            getCaptionOptions,
+            getExportFrameRate,
+            getExportBitrate,
+            updateSelectedRangeControls,
+            renderAll,
+            updateButtons,
+            setProgress,
+            toast
+        });
+        return renderWorkflow;
     }
 
-    function formatQueueDuration(seconds) {
-        const value = Math.max(0, Math.round(Number(seconds) || 0));
-        if (value < 60) return `${value}초`;
-        const minutes = Math.floor(value / 60);
-        const remain = value % 60;
-        return remain ? `${minutes}분 ${remain}초` : `${minutes}분`;
-    }
-
-    function renderRenderQueue(snapshot) {
-        const snap = snapshot || getRenderQueueSnapshot();
-        if (document && document.body) document.body.dataset.renderQueue = snap.running ? 'running' : 'idle';
-        if (els.renderQueueStatus) {
-            let queueState = 'done';
-            let queueText = `완료 ${snap.done}/${snap.total}`;
-            if (!snap.total) { queueState = 'idle'; queueText = '대기 중'; }
-            else if (snap.running && snap.current) {
-                queueState = 'running';
-                const eta = Number.isFinite(snap.current.etaSeconds) && snap.current.etaSeconds > 0 ? ` · 남은 약 ${formatQueueDuration(snap.current.etaSeconds)}` : '';
-                queueText = `${snap.current.label} · ${Math.round(snap.current.progress || 0)}%${eta}`;
-            }
-            else if (snap.failed) { queueState = 'failed'; queueText = `완료 ${snap.done}/${snap.total} · 실패 ${snap.failed}`; }
-            else if (snap.cancelled) { queueState = 'cancelled'; queueText = `완료 ${snap.done}/${snap.total} · 취소 ${snap.cancelled}`; }
-            if (els.renderQueueStatus.dataset.state !== queueState) els.renderQueueStatus.dataset.state = queueState;
-            if (els.renderQueueStatus.textContent !== queueText) els.renderQueueStatus.textContent = queueText;
-        }
-        if (els.renderQueueList) {
-            const items = Array.isArray(snap.items) ? snap.items : [];
-            if (!items.length) {
-                els.renderQueueList.innerHTML = '<div class="render-queue-empty">저장 작업을 시작하면 진행 상태가 여기에 표시됩니다.</div>';
-            } else {
-                els.renderQueueList.innerHTML = items.map(item => {
-                    const statusIcon = item.status === 'done' ? 'check' : item.status === 'failed' ? 'close' : item.status === 'cancelled' ? 'stop' : item.status === 'running' ? 'render' : 'retry';
-                    const statusText = item.status === 'done' ? '완료' : item.status === 'failed' ? '실패' : item.status === 'cancelled' ? '취소' : item.status === 'running' ? '렌더링' : '대기';
-                    const error = item.error ? `<div class="render-queue-error">${utils.escapeHtml ? utils.escapeHtml(item.error) : item.error}</div>` : '';
-                    const label = utils.escapeHtml ? utils.escapeHtml(item.label || '렌더 작업') : (item.label || '렌더 작업');
-                    const filename = utils.escapeHtml ? utils.escapeHtml(item.filenameHint || '') : (item.filenameHint || '');
-                    const liveStatus = utils.escapeHtml ? utils.escapeHtml(item.statusText || '') : (item.statusText || '');
-                    const eta = item.status === 'running' && Number.isFinite(item.etaSeconds) && item.etaSeconds > 0 ? `남은 약 ${formatQueueDuration(item.etaSeconds)}` : '';
-                    const elapsed = Number(item.elapsedMs || 0) > 0 ? `경과 ${formatQueueDuration(item.elapsedMs / 1000)}` : '';
-                    const metaParts = [liveStatus, eta, elapsed, item.status === 'queued' ? filename : ''].filter(Boolean);
-                    return `<div class="render-queue-item is-${item.status}">
-                        <div class="render-queue-title"><span class="studio-icon" data-icon="${statusIcon}" aria-hidden="true"></span><b>${label}</b><span class="render-queue-badge">${statusText}</span></div>
-                        <div class="render-queue-meta">${metaParts.join(' · ') || filename || statusText}</div>
-                        <div class="render-queue-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(Number(item.progress || 0))}"><span style="width:${Math.max(0, Math.min(100, Number(item.progress || 0)))}%"></span></div>
-                        ${error}
-                    </div>`;
-                }).join('');
-            }
-        }
-        if (els.renderQueueCancelBtn) els.renderQueueCancelBtn.disabled = !snap.running;
-        if (els.renderQueueRetryBtn) els.renderQueueRetryBtn.disabled = snap.running || !snap.failed;
-        if (els.renderQueueClearBtn) els.renderQueueClearBtn.disabled = snap.running;
-        updateButtons();
-    }
-
-    function buildExportPayload(candidate, index, total) {
-        const base = utils.safeFileBaseName ? utils.safeFileBaseName(state.file && state.file.name) : 'ai-shorts';
-        const extHint = 'webm';
-        const labelPrefix = total > 1 ? `후보 ${index + 1}/${total}` : '선택 구간';
-        return {
-            id: `export-${candidate.id || index}-${Math.round(candidate.start || 0)}`,
-            label: `${labelPrefix} · ${candidate.rangeText || Math.round(candidate.start || 0) + 's'}`,
-            candidateId: candidate.id || null,
-            filenameHint: `${base}-${Math.round(candidate.start || 0)}s.${extHint}`,
-            payload: {
-                candidate,
-                index,
-                total,
-                base
-            }
-        };
-    }
-
-    async function runRenderQueueJobs(jobs) {
-        if (!renderQueue || !renderQueue.runJobs) throw new Error('렌더 큐 모듈을 불러오지 못했습니다.');
-        activateFlowTab('export', { reveal: true });
-        stopPreview({ cancel: true, reason: '렌더 시작' });
-        const media = getActiveMediaElement();
-        if (!media) throw new Error('저장할 원본 미디어가 없습니다.');
-        const capability = renderer.inspectRenderCapability ? renderer.inspectRenderCapability(els.previewCanvas, media) : { ok: true, reasons: [], warnings: [] };
-        if (!capability.ok) throw new Error(capability.reasons.join(' ') || '이 브라우저에서는 렌더를 시작할 수 없습니다.');
-        if (capability.warnings && capability.warnings.length) {
-            const warningText = capability.warnings.join(' ');
-            toast(warningText, 'warning');
-            if (store.addDiagnostic) store.addDiagnostic({ type: 'render-capability-warning', message: warningText });
-        }
-        const token = beginOperation('render', { jobs: Array.isArray(jobs) ? jobs.length : 1, fileName: state.file && state.file.name || '', mimeType: capability.mimeType || '' });
-        try {
-            const result = await renderQueue.runJobs(jobs, async (job, update, signal) => {
-                assertOperation(token);
-                const payload = job.payload || {};
-                const item = payload.candidate;
-                if (!item) throw new Error('렌더할 추천 구간이 없습니다.');
-                state.selectedRecommendationId = item.id;
-                state.selectedRange = { start: item.start, end: item.end, duration: item.duration, score: item.score };
-                updateSelectedRangeControls(item);
-                renderAll();
-                setProgress(2, `${job.label} 준비`);
-                if (els.previewStatus) els.previewStatus.textContent = '렌더 큐 실행 중';
-                const exportResult = await renderer.recordVerticalSegment(els.previewCanvas, media, {
-                    start: item.start,
-                    end: item.end,
-                    cropMode: state.settings.cropMode,
-                    title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
-                    rangeText: item.rangeText,
-                    waveformBins: state.waveformBins,
-                    thumbnailTemplate: state.settings.thumbnailTemplate,
-                    qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: false }),
-                    captions: state.captions,
-                    captionOffset: state.settings.captionOffset,
-                    captionStyle: state.settings.captionStyle,
-                    captionOptions: getCaptionOptions(),
-                    fps: getExportFrameRate(),
-                    videoBitsPerSecond: getExportBitrate(),
-                    signal: signal || token && token.signal || null
-                }, (percent, status) => {
-                    if (signal && signal.aborted) return;
-                    update(percent, status || '렌더링');
-                    setProgress(percent, status || job.label);
-                });
-                assertOperation(token, '원본이 변경되어 이전 렌더 결과를 저장하지 않습니다.');
-                const ext = utils.extensionFromMime ? utils.extensionFromMime(exportResult.mimeType) : 'webm';
-                const filename = `${payload.base || 'ai-shorts'}-${payload.total > 1 ? 'candidate-' + String(payload.index + 1).padStart(2, '0') + '-' : ''}${Math.round(item.start)}s-${Math.round(item.duration)}s-shorts.${ext}`;
-                update(96, filename);
-                state.exportInfo = { filename, size: exportResult.blob.size, mimeType: exportResult.mimeType, range: item.rangeText };
-                downloadService.saveBlob(exportResult.blob, filename);
-                update(100, filename);
-            }, { signal: token && token.signal || null });
-            if (result.cancelled) {
-                setProgress(0, `렌더 취소 · ${result.cancelled}개`);
-                if (els.previewStatus) els.previewStatus.textContent = '렌더 취소';
-                toast('진행 중인 렌더를 안전하게 취소했습니다.', 'warning');
-            } else {
-                setProgress(100, result.failed ? `렌더 큐 완료 · 실패 ${result.failed}` : '렌더 큐 완료');
-                if (els.previewStatus) els.previewStatus.textContent = result.failed ? '일부 저장 실패' : '저장 완료';
-                toast(result.failed ? `렌더 큐 완료 · 실패 ${result.failed}개` : `렌더 큐 저장 완료 · ${result.done}/${result.total}개`, result.failed ? 'warning' : 'export');
-            }
-            finishOperation(token, result.cancelled ? 'render-cancelled' : 'render-complete');
-            updateButtons();
-            return result;
-        } finally {
-            finishOperation(token, 'render-finalized');
-        }
-    }
-
-
-    async function retryFailedRenderJobs() {
-        if (!renderQueue || !renderQueue.retryableJobs) throw new Error('재시도 가능한 렌더 큐를 불러오지 못했습니다.');
-        const jobs = renderQueue.retryableJobs();
-        if (!jobs.length) {
-            toast('재시도할 실패 항목이 없습니다.', 'warning');
-            return null;
-        }
-        setProgress(1, `실패 항목 재시도 · ${jobs.length}개`);
-        if (store.addDiagnostic) store.addDiagnostic({ type: 'render-retry-start', total: jobs.length });
-        return runRenderQueueJobs(jobs);
+    function getRenderWorkflow() {
+        return renderWorkflow || createRenderWorkflow();
     }
 
 
@@ -934,11 +806,11 @@
             }
         });
         if (els.renderQueueRetryBtn) els.renderQueueRetryBtn.addEventListener('click', async () => {
-            try { await retryFailedRenderJobs(); } catch (error) { toast(error.message || '재시도에 실패했습니다.', 'error'); }
+            try { await getRenderWorkflow().retryFailedJobs(); } catch (error) { toast(error.message || '재시도에 실패했습니다.', 'error'); }
         });
         if (els.renderQueueClearBtn) els.renderQueueClearBtn.addEventListener('click', () => {
             if (renderQueue.clear) renderQueue.clear();
-            renderRenderQueue();
+            getRenderWorkflow().renderQueue();
             toast('렌더 큐 목록을 정리했습니다.', 'action');
         });
         if (els.programInfoBtn) els.programInfoBtn.addEventListener('click', () => { if (els.infoDialog) els.infoDialog.hidden = false; });
@@ -1394,7 +1266,7 @@
         const selected = getSelectedRecommendation();
         if (!selected) return;
         try {
-            await runRenderQueueJobs([buildExportPayload(selected, 0, 1)]);
+            await getRenderWorkflow().runJobs([getRenderWorkflow().buildExportPayload(selected, 0, 1)]);
         } catch (error) {
             setProgress(0, '내보내기 실패');
             toast(error.message || '내보내기에 실패했습니다.', 'error');
@@ -1409,10 +1281,10 @@
         const recommendations = Array.isArray(state.recommendations) ? state.recommendations : [];
         if (!recommendations.length || state.isPreviewing) return;
         const limit = Math.max(1, Math.min(recommendations.length, Number(els.batchLimitSelect && els.batchLimitSelect.value) || recommendations.length));
-        const queue = recommendations.slice(0, limit).map((item, index) => buildExportPayload(item, index, limit));
+        const queue = recommendations.slice(0, limit).map((item, index) => getRenderWorkflow().buildExportPayload(item, index, limit));
         try {
             setProgress(1, `렌더 큐 준비 · ${queue.length}개`);
-            await runRenderQueueJobs(queue);
+            await getRenderWorkflow().runJobs(queue);
         } catch (error) {
             setProgress(0, '일괄 내보내기 실패');
             toast(error.message || '일괄 저장에 실패했습니다.', 'error');
@@ -1431,7 +1303,7 @@
         setRecommendationRange(selected, start, Number.isFinite(end) ? end : selected.end, '사용자가 직접 조절한 커스텀 구간');
         const media = getActiveMediaElement();
         if (media) {
-            try { media.currentTime = start; } catch (error) { /* ignored */ }
+            try { media.currentTime = selected.start; } catch (error) { /* ignored */ }
         }
         renderAll();
         toast('선택 구간을 적용했습니다.');
@@ -1575,8 +1447,15 @@
     async function copyCaption() {
         const title = els.titleInput ? els.titleInput.value : '';
         const tags = els.hashtagInput ? els.hashtagInput.value : '';
-        await utils.copyText(`${title}\n${tags}`.trim());
-        toast('제목과 해시태그를 복사했습니다.', 'copy');
+        try {
+            const copied = await utils.copyText(`${title}
+${tags}`.trim());
+            if (!copied) throw new Error('클립보드 복사 실패');
+            toast('제목과 해시태그를 복사했습니다.', 'copy');
+        } catch (error) {
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'caption-copy-error', message: error && error.message || 'clipboard unavailable' });
+            toast('제목과 해시태그를 복사하지 못했습니다. 브라우저 권한과 창 포커스를 확인해주세요.', 'error');
+        }
     }
 
     async function copyDiagnostics() {
@@ -1593,7 +1472,8 @@
         initElements();
         syncSettingsToUI();
         bindEvents();
-        if (renderQueue.subscribe) renderQueue.subscribe(renderRenderQueue);
+        createRenderWorkflow();
+        if (renderQueue.subscribe) renderQueue.subscribe(renderWorkflow.renderQueue);
         if (siteGuards.blockDropNavigation) siteGuards.blockDropNavigation();
         if (siteGuards.installExitGuard) siteGuards.installExitGuard(() => Boolean(state.file && !state.exportInfo));
         renderAll();

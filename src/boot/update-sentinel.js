@@ -1,10 +1,10 @@
-// AI Shorts Studio v1.3.8 - visible update sentinel and cache refresh helper
+// AI Shorts Studio v1.4.0 - visible update sentinel and cache refresh helper
 'use strict';
 
 (function installUpdateSentinel(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const versionSync = global.AIShortsVersionSync || {};
-    const VERSION = versionSync.version || config.APP_VERSION || 'v1.3.8';
+    const VERSION = versionSync.version || config.APP_VERSION || 'v1.4.0';
     const BUILD_KEY = versionSync.buildKey || config.BUILD_KEY || '1.3.0-update-sentinel';
     const STORAGE_KEY = 'ai-shorts-studio-update-sentinel-last-seen';
     let panel;
@@ -19,18 +19,31 @@
         return String(value || fallback || '').trim();
     }
 
-    function copyText(value) {
-        if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(value);
+    async function copyText(value) {
+        const shared = global.AIShortsCoreUtils;
+        if (shared && typeof shared.copyText === 'function') return shared.copyText(value);
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            try {
+                await navigator.clipboard.writeText(String(value || ''));
+                return true;
+            } catch (error) {
+                // Continue with the local fallback for permission and focus failures.
+            }
+        }
+        if (!document.body || typeof document.execCommand !== 'function') return false;
         const textarea = document.createElement('textarea');
-        textarea.value = value;
+        textarea.value = String(value || '');
         textarea.setAttribute('readonly', 'readonly');
+        textarea.setAttribute('aria-hidden', 'true');
         textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
+        textarea.style.left = '-9999px';
         document.body.appendChild(textarea);
+        textarea.focus();
         textarea.select();
-        document.execCommand('copy');
-        textarea.remove();
-        return Promise.resolve();
+        let copied = false;
+        try { copied = Boolean(document.execCommand('copy')); } catch (error) { copied = false; }
+        finally { textarea.remove(); }
+        return copied;
     }
 
     function collectEngineProfile() {
@@ -120,14 +133,21 @@
     }
 
     async function copyDiagnostics() {
-        const snapshot = await collectSnapshot();
-        const payload = {
-            type: 'ai-shorts-update-sentinel',
-            createdAt: new Date().toISOString(),
-            snapshot
-        };
-        await copyText(JSON.stringify(payload, null, 2));
-        showLive('업데이트 진단을 복사했습니다.');
+        try {
+            const snapshot = await collectSnapshot();
+            const payload = {
+                type: 'ai-shorts-update-sentinel',
+                createdAt: new Date().toISOString(),
+                snapshot
+            };
+            const copied = await copyText(JSON.stringify(payload, null, 2));
+            if (!copied) throw new Error('클립보드 복사 실패');
+            showLive('업데이트 진단을 복사했습니다.');
+            return true;
+        } catch (error) {
+            showLive('업데이트 진단을 복사하지 못했습니다. 브라우저 권한을 확인해주세요.');
+            return false;
+        }
     }
 
     function installPanel() {

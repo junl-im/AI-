@@ -71,7 +71,8 @@
 
     async function copyDiagnostics(extra) {
         const snapshot = createDiagnosticsSnapshot(extra);
-        await utils.copyText(JSON.stringify(snapshot, null, 2));
+        const copied = await utils.copyText(JSON.stringify(snapshot, null, 2));
+        if (!copied) throw new Error('클립보드에 복사할 수 없습니다. 브라우저 권한과 포커스를 확인해주세요.');
         return snapshot;
     }
 

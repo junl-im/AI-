@@ -3,14 +3,14 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
-const auditPath = path.join(root, 'qa', 'runtime-media-e2e-v1.3.8.json');
+const auditPath = path.join(root, 'qa', 'runtime-media-e2e-v1.4.0.json');
 function assert(value, message) {
     if (!value) { console.error(`FAIL ${message}`); process.exit(1); }
     console.log(`PASS ${message}`);
 }
 assert(fs.existsSync(auditPath), 'real-media E2E audit artifact exists');
 const report = JSON.parse(fs.readFileSync(auditPath, 'utf8'));
-assert(report.version === '1.3.8', 'real-media E2E audit matches v1.3.8');
+assert(report.version === '1.4.0', 'real-media E2E audit matches v1.4.0');
 for (const key of ['audio', 'video']) {
     const result = report[key];
     assert(result.analysisStatus === '렌더 큐 완료', `${key} reaches render completion`);
@@ -37,4 +37,4 @@ assert(longAudio.duringRender.queue.current.etaSeconds > 0 && /남은 약/.test(
 assert(longAudio.final.queue.done === 1 && longAudio.final.operations.active.length === 0, 'long-media render completes and releases operation state');
 assert(longAudio.final.runtime.runtimeErrors === 0 && longAudio.final.errors.length === 0, 'long-media flow has no runtime errors');
 assert(Number(longAudio.final.outputProbe.duration) >= 5 && Number(longAudio.final.outputProbe.size) > 10000, 'long-media flow produces a playable output');
-console.log('PASS v1.3.8 MP3, MP4, cancel, retry, long-media, and ETA browser E2E audit');
+console.log('PASS v1.4.0 MP3, MP4, cancel, retry, long-media, and ETA browser E2E audit');

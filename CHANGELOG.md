@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## v1.4.0 - Modular Render Workflow & Safe Queue DOM
+
+- 렌더 큐 UI, export payload, 작업 실행, 실패 재시도, 편집 선택 복원을 `src/app/render-workflow-controller.js`로 분리했습니다.
+- `src/app.js`는 렌더 세부 구현을 전용 컨트롤러에 위임하며 파일 크기를 약 11.4% 줄였습니다.
+- 렌더 큐의 사용자·런타임 문자열을 HTML 템플릿 대신 DOM 노드와 `textContent`로 표시합니다.
+- 렌더 operation의 중복 종료 시도를 제거하고 공통 `finally`에서 정확히 한 번 종료합니다.
+- 렌더 성공·부분 실패·취소·예외 후 원래 후보와 수동 범위를 복원합니다.
+- 새 컨트롤러를 앱 로딩 순서와 서비스워커 셸 캐시에 포함했습니다.
+- 가짜 DOM·렌더 큐를 실행하는 전용 회귀 검사를 추가했습니다.
+- 자동 QA **143/143**, PC·모바일 Chromium 오류 0건, MP3·MP4·취소·재시도·10분 미디어 E2E를 통과했습니다.
+
+## v1.3.9 - Recovery Export, Clipboard Resilience & Editor-State Preservation
+
+- 자동저장 피드백이 호출하던 누락된 공개 토스트 API를 구현해 저장·복구·삭제·내보내기 결과가 실제 화면에 표시됩니다.
+- Clipboard API 권한·포커스 실패 시 DOM 기반 fallback을 사용하고, 실제 실패를 성공으로 안내하지 않도록 호출부를 보강했습니다.
+- 일괄 렌더 전 사용자의 후보 선택과 수동 범위를 캡처해 성공·실패·취소 후 복원합니다.
+- 렌더 중 파일이 교체되면 이전 미디어의 편집 스냅샷을 새 파일에 적용하지 않습니다.
+- 수동 구간 미리보기 seek가 공용 정규화 결과를 사용하도록 수정했습니다.
+- 유효한 자동저장 원문 백업과 손상 자동저장 원문·실패 이유 복구 번들 다운로드를 추가했습니다.
+- 클립보드 fallback, 세션 복구 내보내기, 렌더 편집 상태 복원 동작 검사를 추가했습니다.
+- 자동 QA **141/141**, PC·모바일 Chromium 오류 0건, MP3·MP4·취소·재시도·10분 미디어 E2E를 통과했습니다.
+
 ## v1.3.8 - Recoverable Sessions, Scoped Caches & Deterministic Worker Fallback
 
 - 손상·과대 자동저장 세션을 별도 `invalid` 상태로 표시하고 복구 실패 상태에서도 기록 삭제를 항상 허용합니다.

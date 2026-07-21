@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.8 - adaptive mobile workflow menu and next-action guide
+// AI Shorts Studio v1.4.0 - adaptive mobile workflow menu and next-action guide
 'use strict';
 
 (function bootMobileMenuGuide(global) {

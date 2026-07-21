@@ -162,7 +162,7 @@ body[data-render-queue="running"] .bottom-dock-tabs {
     .render-queue-actions { grid-template-columns: 1fr; }
 }
 
-/* v1.3.8 long-media render ETA and lower-frequency progress updates */
+/* v1.4.0 long-media render ETA and lower-frequency progress updates */
 .render-queue-meta {
     max-width: min(48vw, 420px);
     overflow: hidden;

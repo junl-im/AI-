@@ -1,10 +1,11 @@
-// AI Shorts Studio v1.3.8 - recoverable session continuity with visibility-aware autosave
+// AI Shorts Studio v1.4.0 - recoverable session continuity with visibility-aware autosave
 'use strict';
 (function bootSessionContinuity(global) {
     if (global.AIShortsSessionContinuity) return;
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
     const projectService = global.AIShortsProjectService || {};
+    const downloadService = global.AIShortsDownloadService || {};
     const config = global.AIShortsRuntimeConfig || {};
     const STORAGE_KEY = 'ai-shorts-session-continuity-v112';
     const SAVE_DELAY = 900;
@@ -19,6 +20,10 @@
     function byId(id) { return document.getElementById(id); }
     function safeParse(text) { try { return JSON.parse(text); } catch (error) { return null; } }
     function nowIso() { return new Date().toISOString(); }
+    function notify(message, kind, options) {
+        const feedback = global.AIShortsFeedbackUX;
+        return Boolean(feedback && typeof feedback.toast === 'function' && feedback.toast(message, kind, options));
+    }
     function hasWork() {
         return Boolean(state.fileMeta || (state.recommendations && state.recommendations.length) || state.selectedRange || (state.captions && state.captions.length));
     }
@@ -116,6 +121,61 @@
         if (document.body) document.body.dataset.sessionContinuity = 'none';
         updatePanel(null, 'clear');
     }
+    function recoveryFilename(prefix) {
+        const stamp = nowIso().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z').replace('T', '-');
+        return `${prefix || 'ai-shorts-session'}-${stamp}.json`;
+    }
+    function saveRecoveryBlob(blob, filename) {
+        if (downloadService && typeof downloadService.saveBlob === 'function') {
+            downloadService.saveBlob(blob, filename);
+            return true;
+        }
+        if (!global.URL || typeof global.URL.createObjectURL !== 'function') return false;
+        const url = global.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.rel = 'noopener';
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        global.setTimeout(() => global.URL.revokeObjectURL(url), 1000);
+        return true;
+    }
+    function exportStoredSnapshot() {
+        const raw = readStoredSnapshotText();
+        if (!raw) {
+            notify('내보낼 자동 저장 기록이 없습니다.', 'warning');
+            return null;
+        }
+        const parsed = loadSnapshot();
+        const valid = Boolean(parsed);
+        const payloadText = valid ? raw : JSON.stringify({
+            app: 'AI Shorts Studio',
+            exportType: 'damaged-session-recovery',
+            appVersion: config.APP_VERSION || 'dev',
+            exportedAt: nowIso(),
+            storageKey: STORAGE_KEY,
+            reason: invalidSnapshotReason || '저장된 세션을 복구할 수 없습니다.',
+            rawCharacterCount: raw.length,
+            rawSnapshotText: raw
+        }, null, 2);
+        const filename = recoveryFilename(valid ? 'ai-shorts-session-backup' : 'ai-shorts-damaged-session');
+        const saved = saveRecoveryBlob(new Blob([payloadText], { type: 'application/json' }), filename);
+        if (!saved) {
+            notify('이 브라우저에서는 세션 기록을 파일로 저장할 수 없습니다.', 'error');
+            return null;
+        }
+        if (store.addDiagnostic) store.addDiagnostic({
+            type: 'session-snapshot-export',
+            valid,
+            fileName: filename,
+            rawCharacterCount: raw.length,
+            reason: valid ? '' : invalidSnapshotReason
+        });
+        notify(valid ? '자동 저장 기록을 백업했습니다.' : '손상된 자동 저장 원문을 진단 파일로 저장했습니다.', 'export', { duration: 3600 });
+        return Object.freeze({ valid, filename, rawCharacterCount: raw.length });
+    }
     function formatSavedAt(value) {
         if (!value) return '저장 시간 없음';
         const date = new Date(value);
@@ -131,13 +191,15 @@
         panel.id = 'sessionContinuityPanel';
         panel.className = 'session-continuity-panel';
         panel.setAttribute('aria-label', '작업 세션 복구');
-        panel.innerHTML = '<div class="session-continuity-copy"><span class="session-continuity-icon studio-icon" data-icon="retry" aria-hidden="true"></span><div><strong id="sessionContinuityTitle">작업 세션 자동 저장 준비</strong><small id="sessionContinuityMeta">후보와 선택 구간이 생기면 자동으로 가볍게 저장합니다.</small></div></div><div class="session-continuity-actions"><button id="sessionRestoreBtn" class="primary" type="button">이전 작업 복구</button><button id="sessionSaveBtn" type="button">지금 저장</button><button id="sessionClearBtn" type="button">기록 지우기</button></div>';
+        panel.innerHTML = '<div class="session-continuity-copy"><span class="session-continuity-icon studio-icon" data-icon="retry" aria-hidden="true"></span><div><strong id="sessionContinuityTitle">작업 세션 자동 저장 준비</strong><small id="sessionContinuityMeta">후보와 선택 구간이 생기면 자동으로 가볍게 저장합니다.</small></div></div><div class="session-continuity-actions"><button id="sessionRestoreBtn" class="primary" type="button">이전 작업 복구</button><button id="sessionSaveBtn" type="button">지금 저장</button><button id="sessionExportBtn" type="button" data-icon="diagnostics">기록 백업</button><button id="sessionClearBtn" type="button">기록 지우기</button></div>';
         startPanel.insertAdjacentElement('afterend', panel);
         const restore = byId('sessionRestoreBtn');
         const save = byId('sessionSaveBtn');
+        const exportButton = byId('sessionExportBtn');
         const clear = byId('sessionClearBtn');
         if (restore) restore.addEventListener('click', restoreSnapshot);
         if (save) save.addEventListener('click', () => saveSnapshotNow('manual'));
+        if (exportButton) exportButton.addEventListener('click', exportStoredSnapshot);
         if (clear) clear.addEventListener('click', clearSnapshot);
         panelReady = true;
         return panel;
@@ -151,6 +213,7 @@
         const meta = byId('sessionContinuityMeta');
         const restore = byId('sessionRestoreBtn');
         const save = byId('sessionSaveBtn');
+        const exportButton = byId('sessionExportBtn');
         const clear = byId('sessionClearBtn');
         const canRestore = Boolean(stored && stored.app === 'AI Shorts Studio' && Array.isArray(stored.recommendations) && stored.recommendations.length);
         if (document.body) document.body.dataset.sessionContinuity = invalidStoredRecord ? 'invalid' : (canRestore ? 'available' : (hasWork() ? 'saved' : 'none'));
@@ -159,7 +222,7 @@
         }
         if (meta) {
             if (invalidStoredRecord) {
-                meta.textContent = `${invalidSnapshotReason || '저장된 세션이 손상되었습니다.'} 기록을 지운 뒤 새 작업을 저장해주세요.`;
+                meta.textContent = `${invalidSnapshotReason || '저장된 세션이 손상되었습니다.'} 필요하면 원문을 저장한 뒤 기록을 지워주세요.`;
             } else if (canRestore) {
                 const count = stored.recommendations.length;
                 const selected = stored.selectedRecommendationId ? ' · 선택 후보 있음' : '';
@@ -173,10 +236,14 @@
         }
         if (restore) restore.disabled = !canRestore;
         if (save) save.disabled = !hasWork();
+        if (exportButton) {
+            exportButton.disabled = !hasStoredRecord;
+            exportButton.textContent = invalidStoredRecord ? '손상 기록 저장' : '기록 백업';
+        }
         if (clear) clear.disabled = !hasStoredRecord;
-        if (reason && reason !== 'sync' && global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.toast) {
-            if (reason === 'manual') global.AIShortsFeedbackUX.toast('작업 세션을 저장했습니다.', 'save');
-            if (reason === 'clear') global.AIShortsFeedbackUX.toast('작업 세션 기록을 지웠습니다.', 'action');
+        if (reason && reason !== 'sync') {
+            if (reason === 'manual') notify('작업 세션을 저장했습니다.', 'export');
+            if (reason === 'clear') notify('작업 세션 기록을 지웠습니다.', 'action');
         }
     }
     function restoreSnapshot() {
@@ -204,12 +271,12 @@
             if (tabs && tabs.setActiveFlowTab) tabs.setActiveFlowTab(targetTab, { reveal: true, force: true });
             else if (global.AIShortsMotionStability && global.AIShortsMotionStability.reveal) global.AIShortsMotionStability.reveal(targetTab, { force: true });
             document.dispatchEvent(new CustomEvent('ai-shorts-session-restored', { detail: { targetTab, count: state.recommendations.length } }));
-            if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.toast) global.AIShortsFeedbackUX.toast('이전 후보와 선택 구간을 복구했습니다. 원본 파일이 필요하면 다시 열어주세요.', 'action');
+            notify('이전 후보와 선택 구간을 복구했습니다. 원본 파일이 필요하면 다시 열어주세요.', 'action', { duration: 3600 });
             scheduleSave('restore');
             updatePanel(snapshot, 'restore');
         } catch (error) {
             if (store.addDiagnostic) store.addDiagnostic({ type: 'session-restore-error', message: error.message });
-            if (global.AIShortsFeedbackUX && global.AIShortsFeedbackUX.toast) global.AIShortsFeedbackUX.toast('작업 세션 복구에 실패했습니다.', 'error');
+            notify('작업 세션 복구에 실패했습니다.', 'error');
         }
     }
     function scheduleSync() {
@@ -257,7 +324,7 @@
         document.addEventListener('visibilitychange', handleVisibilityChange);
         startHeartbeat();
     }
-    global.AIShortsSessionContinuity = Object.freeze({ saveSnapshotNow, restoreSnapshot, clearSnapshot, loadSnapshot, scheduleSave });
+    global.AIShortsSessionContinuity = Object.freeze({ saveSnapshotNow, restoreSnapshot, clearSnapshot, loadSnapshot, exportStoredSnapshot, scheduleSave });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
     else install();
 })(window);

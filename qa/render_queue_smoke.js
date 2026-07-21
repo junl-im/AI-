@@ -9,6 +9,7 @@ function assert(condition, message) {
 }
 const html = read('index.html');
 const app = read('src/app.js');
+const workflow = read('src/app/render-workflow-controller.js');
 const queue = read('src/render/render-queue.js');
 const css = read('assets/css/render-queue.css');
 const pkg = JSON.parse(read('package.json'));
@@ -18,9 +19,9 @@ assert(html.includes('id="renderQueueStatus"'), 'render queue status exists');
 assert(html.includes('id="renderQueueList"'), 'render queue list exists');
 assert(html.includes('id="renderQueueRetryBtn"'), 'retry button exists');
 assert(queue.includes('runJobs') && queue.includes('retryFailed') && queue.includes('subscribe'), 'queue public API exists');
-assert(app.includes('runRenderQueueJobs'), 'app uses render queue jobs');
-assert(app.includes('buildExportPayload'), 'app builds export payloads');
-assert(app.includes('renderQueue.subscribe(renderRenderQueue)'), 'queue UI subscribes to updates');
+assert(app.includes('AIShortsRenderWorkflowController') && app.includes('getRenderWorkflow().runJobs'), 'app delegates render jobs to the workflow controller');
+assert(workflow.includes('function buildExportPayload') && workflow.includes('async function runJobs'), 'workflow controller owns export payloads and render execution');
+assert(app.includes('renderQueue.subscribe(renderWorkflow.renderQueue)'), 'queue UI subscribes through the workflow controller');
 assert(css.includes('.render-queue-card') && css.includes('body[data-render-queue="running"]'), 'queue css state styles exist');
-assert(pkg.version === '1.3.8', 'package version is 1.2.9');
+assert(pkg.version === '1.4.0', 'package version is 1.4.0');
 console.log('PASS render_queue_smoke');
