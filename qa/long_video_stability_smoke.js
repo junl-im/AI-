@@ -14,7 +14,7 @@ function ok(value, message) {
 ok(fs.existsSync(reportPath), 'long video stability audit artifact exists');
 const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
 ok(report.version === version && report.passed === true, 'long video audit matches the release and passed');
-ok(report.inheritedFrom === '1.5.9' && /CSS ownership/.test(report.inheritanceReason), 'CSS-only release explicitly inherits the v1.5.9 long-video run');
+ok(report.inheritedFrom === '1.5.9' && /CSS (ownership|structure\/responsive priority)/.test(report.inheritanceReason), 'CSS-only release explicitly inherits the v1.5.9 long-video run');
 ok(JSON.stringify(report.sequenceMinutes) === JSON.stringify([15, 30, 15]), 'audit repeats 15m to 30m to 15m replacement in one page');
 ok(report.cycles.length === 3, 'all long-video cycles completed');
 ok(report.cycles.every(cycle => {

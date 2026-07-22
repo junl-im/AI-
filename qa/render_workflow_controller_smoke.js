@@ -50,7 +50,7 @@ vm.runInNewContext(source, { window, console, Object, Array, Number, String, Boo
 assert(window.AIShortsRenderWorkflowController && typeof window.AIShortsRenderWorkflowController.create === 'function', 'render workflow controller exposes a factory');
 assert(!source.includes('.innerHTML'), 'render queue UI does not build user-facing rows with innerHTML');
 assert(html.indexOf('src/app/render-workflow-controller.js') < html.indexOf('src/app.js'), 'render workflow controller loads before the main app');
-assert(sw.includes('./src/app/render-workflow-controller.js?v=1.5.17-important-cascade-reduction'), 'render workflow controller is available offline');
+assert(sw.includes('./src/app/render-workflow-controller.js?v=1.5.20-structure-responsive-priority'), 'render workflow controller is available offline');
 
 const sourceFile = { name: 'source.mp4' };
 const state = {
@@ -137,7 +137,7 @@ assert(findByClass(elements.renderQueueList, 'render-queue-error').textContent =
     assert(saveCount === 1, 'render workflow saves one completed output');
     assert(finishCount === 1, 'render operation finishes exactly once');
     assert(state.selectedRecommendationId === 'first' && state.selectedRange.start === 1, 'editor selection is restored after rendering');
-    console.log('PASS v1.5.17 modular render workflow guardrails');
+    console.log('PASS v1.5.20 modular render workflow guardrails');
 })().catch(error => {
     console.error(error.stack || error.message || error);
     process.exit(1);

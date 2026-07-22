@@ -91,7 +91,7 @@ body.has-media .start-command-panel {
         justify-content: center;
     }
     .bottom-dock.bottom-dock-hyperflow {
-        display: grid !important;
+        display: grid;
         grid-template-columns: minmax(260px, 360px) minmax(760px, 1fr);
         gap: 14px;
         align-items: center;

@@ -1,6 +1,33 @@
-# AI 쇼츠 제작 스튜디오 v1.5.17
+# AI 쇼츠 제작 스튜디오 v1.5.20
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
+
+## v1.5.20 적용 내용
+
+- PC Dock, 데스크톱 prime layout, workspace focus layout, responsive workspace의 구조·반응형 `!important`를 실제 Chromium 상태별로 재검증했습니다.
+- 계산 스타일과 배치가 유지되는 source declaration 73개만 normal cascade로 전환했습니다.
+- `pc-dock-reveal-hotfix.css` 28개, `desktop-prime-layout.css` 31개, `workspace-layout-controls.css` 13개, `responsive-workspace.css` 1개를 감축했습니다.
+- Dock 표시·최소 크기와 preview·waveform 집중 보기 grid처럼 제거 시 배치가 달라지는 우선순위는 유지했습니다.
+- CSS conflicts, same-value duplicates, shadowed declarations 0을 유지하면서 `!important`를 666개에서 593개로 낮췄습니다.
+- 자동 QA 180/180과 4개 viewport, process memory, GPU/media, service worker 감사를 통과했습니다.
+
+## v1.5.19 적용 내용
+
+- hover·focus-visible·disabled·active·enabled 상태의 `!important`를 실제 Chromium 상호작용으로 재검증했습니다.
+- 16개 후보 중 계산 스타일이 완전히 동일한 12개만 normal cascade로 전환했습니다.
+- 버튼 hover 테두리와 Dock hover·enabled 색상처럼 제거 시 상태 표현이 달라지는 4개 priority는 유지했습니다.
+- 데스크톱·모바일에서 17개 상호작용 상태씩 총 34개 상태를 v1.5.18과 동일하게 유지했습니다.
+- CSS conflicts, same-value duplicates, shadowed declarations 0을 유지하면서 `!important`를 678개에서 666개로 낮췄습니다.
+- 자동 QA 179/179와 4개 viewport, process memory, GPU/media, service worker 감사를 통과했습니다.
+
+## v1.5.18 적용 내용
+
+- `ui-refinement.css`와 `foundation-polish.css`의 `!important`를 선언별·breakpoint별 Chromium 계산값으로 재검증했습니다.
+- 색상, 타이포, 테두리, 표면 스킨처럼 구조에 영향을 주지 않는 우선순위 81개를 제거했습니다.
+- 모바일 shell geometry, workspace focus, media-state visibility, performance-lite 안전장치처럼 실제로 필요한 우선순위는 유지했습니다.
+- CSS conflicts, same-value duplicates, shadowed declarations 0을 유지하면서 `!important`를 759개에서 678개로 낮췄습니다.
+- 데스크톱·노트북·태블릿·모바일 레이아웃과 workspace preview·waveform 폭을 v1.5.17과 동일하게 유지했습니다.
+- 자동 QA 177/177과 4개 viewport, process memory, GPU/media, service worker 감사를 통과했습니다.
 
 ## v1.5.17 적용 내용
 
@@ -143,10 +170,11 @@
 
 ## 검수 결과
 
-- 자동 QA: **175/175**
+- 자동 QA: **179/179**
 - 데스크톱·소형 노트북·태블릿·모바일 Chromium 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- CSS: `!important` 801, 실제 충돌 0, same-value duplicate 0, shadowed declaration 0
+- CSS: `!important` 666, 실제 충돌 0, same-value duplicate 0, shadowed declaration 0
+- 상호작용 상태 감사: desktop·mobile 각 17개, v1.5.18 대비 계산 스타일 변화 0
 - source-orphan selector 0, unused active keyframes 0, empty at-rule 0
 - 실제 15분→30분→15분 1080p MP4 안정성 계약은 미디어 실행 경로 미변경으로 v1.5.9 결과 상속
 - Chromium process memory audit 16회, runtime error 0
@@ -194,10 +222,10 @@ node qa/run_service_worker_lifecycle.js
 
 ```bash
 npm run package:full
-PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.14_CSS_Dedup_Full.zip PATCH_FROM_VERSION=1.5.14 npm run package:patch
+PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.18_Refinement_Priority_Full.zip PATCH_FROM_VERSION=1.5.18 npm run package:patch
 ```
 
-전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.14 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
+전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.18 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
 
 ## 알려진 제한
 

@@ -22,49 +22,49 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
         display: block !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
         padding: 12px max(22px, calc((100vw - var(--workspace-max, 1560px)) / 2)) 14px !important;
         border-radius: 26px 26px 0 0 !important;
-        grid-template-columns: none !important;
+        grid-template-columns: none;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status,
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status-sr {
-        display: none !important;
+        display: none;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs {
         margin: 0 auto !important;
-        display: grid !important;
-        align-items: stretch !important;
+        display: grid;
+        align-items: stretch;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab {
         min-width: var(--pc-dock-button-min) !important;
         gap: 5px !important;
-        line-height: 1.1 !important;
+        line-height: 1.1;
         letter-spacing: -0.025em !important;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab span {
-        line-height: 1 !important;
+        line-height: 1;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b {
-        display: block !important;
-        max-width: 100% !important;
+        display: block;
+        max-width: 100%;
         overflow: visible !important;
-        text-overflow: clip !important;
+        text-overflow: clip;
         white-space: nowrap !important;
-        font-weight: 950 !important;
+        font-weight: 950;
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .tab-state-dot {
         top: 8px !important;
-        right: 10px !important;
+        right: 10px;
         width: 8px !important;
         height: 8px !important;
     }
@@ -73,23 +73,23 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
 /* Tablet/small laptop: one compact row keeps the workspace visible. */
 @media (min-width: 721px) and (max-width: 1179px) {
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
-        display: block !important;
-        bottom: 8px !important;
-        min-height: var(--hyperflow-dock-height) !important;
+        display: block;
+        bottom: 8px;
+        min-height: var(--hyperflow-dock-height);
         padding: 8px !important;
         border-radius: 20px !important;
     }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status,
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status-sr {
-        display: none !important;
+        display: none;
     }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs {
-        display: grid !important;
-        grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
         gap: 5px !important;
     }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab {
-        min-width: 0 !important;
+        min-width: 0;
         min-height: 54px !important;
         gap: 3px !important;
         padding: 5px 3px !important;
@@ -98,7 +98,7 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b {
         overflow: hidden !important;
         font-size: 10px !important;
-        text-overflow: ellipsis !important;
+        text-overflow: ellipsis;
         white-space: nowrap !important;
     }
 }
@@ -106,10 +106,10 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
 /* Mobile remains 4+4, but avoid label disappearance. */
 @media (max-width: 720px) {
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b {
-        display: block !important;
-        max-width: 100% !important;
+        display: block;
+        max-width: 100%;
         font-size: 11px !important;
-        line-height: 1.05 !important;
+        line-height: 1.05;
     }
 }
 
@@ -131,8 +131,8 @@ body[data-ui="hyperflow-tabs"] #hyperflowStageMeta {
 
 body[data-ui="hyperflow-tabs"] #flowSelectionTitle,
 body[data-ui="hyperflow-tabs"] #flowSelectionMeta {
-    text-shadow: none !important;
-    will-change: auto !important;
+    text-shadow: none;
+    will-change: auto;
 }
 
 body[data-ui="hyperflow-tabs"] .flow-selection-summary.is-flow-guide-stable {

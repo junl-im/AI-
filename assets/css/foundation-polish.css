@@ -30,8 +30,8 @@ body {
 body[data-ui="hyperflow-tabs"] .hero-compact-note {
     max-width: 780px !important;
     margin-top: 10px !important;
-    font-size: 13.5px !important;
-    line-height: 1.55 !important;
+    font-size: 13.5px;
+    line-height: 1.55;
 }
 
 .brand-signature-pill,
@@ -45,8 +45,8 @@ body[data-ui="hyperflow-tabs"] .hero-compact-note {
     gap: 10px !important;
     margin: 10px auto 12px !important;
     padding: 10px !important;
-    border-radius: 22px !important;
-    background: rgba(7, 13, 27, 0.68) !important;
+    border-radius: 22px;
+    background: rgba(7, 13, 27, 0.68);
 }
 
 .start-command-panel::before {
@@ -60,17 +60,17 @@ body[data-ui="hyperflow-tabs"] .hero-compact-note {
     gap: 7px !important;
     grid-column: auto !important;
     padding: 7px !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    border-radius: 17px !important;
-    background: rgba(255, 255, 255, 0.025) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 17px;
+    background: rgba(255, 255, 255, 0.025);
 }
 
 .start-command-panel .workflow-step {
     min-width: 0;
     min-height: 72px;
     padding: 10px 9px !important;
-    border-radius: 13px !important;
-    background: rgba(255, 255, 255, 0.045) !important;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.045);
 }
 
 .start-command-panel .workflow-step span {
@@ -108,7 +108,7 @@ body[data-active-flow-tab="export"] [data-flow-panel~="export"] {
 .preview-card,
 .waveform-card,
 .copy-card {
-    box-shadow: 0 14px 42px rgba(0, 0, 0, 0.26) !important;
+    box-shadow: 0 14px 42px rgba(0, 0, 0, 0.26);
 }
 
 .console-panel {
@@ -146,8 +146,8 @@ select:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 .bottom-dock-tab:focus-visible {
-    outline: 2px solid rgba(34, 211, 238, 0.78) !important;
-    outline-offset: 3px !important;
+    outline: 2px solid rgba(34, 211, 238, 0.78);
+    outline-offset: 3px;
 }
 
 /* A calmer, smaller dock leaves more room for actual editing. */
@@ -220,7 +220,7 @@ body.performance-lite .bottom-dock {
     }
 
     .brand-signature-pill {
-        font-size: 10px !important;
+        font-size: 10px;
     }
 
     .control-zone,

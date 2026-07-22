@@ -36,7 +36,7 @@ body[data-ui="hyperflow-tabs"] button {
 
 body[data-ui="hyperflow-tabs"] .bottom-dock-tab:active,
 body[data-ui="hyperflow-tabs"] .recommendation-card:active {
-    transform: none !important;
+    transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

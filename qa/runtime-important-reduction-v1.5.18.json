@@ -1,0 +1,581 @@
+{
+  "version": "1.5.18",
+  "baselineVersion": "1.5.17",
+  "baselineImportant": 759,
+  "removedCount": 81,
+  "remainingImportant": 678,
+  "files": [
+    "assets/css/ui-refinement.css",
+    "assets/css/foundation-polish.css"
+  ],
+  "strategy": "Chromium computed-style, geometry, breakpoint, and workspace-state verification; structural priorities retained",
+  "removed": [
+    {
+      "id": 3,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel],\nbody[data-ui=\"hyperflow-tabs\"] .control-zone,\nbody[data-ui=\"hyperflow-tabs\"] .preview-card,\nbody[data-ui=\"hyperflow-tabs\"] .waveform-card,\nbody[data-ui=\"hyperflow-tabs\"] .auto-cut-panel,\nbody[data-ui=\"hyperflow-tabs\"] .edit-tools-card,\nbody[data-ui=\"hyperflow-tabs\"] .export-card,\nbody[data-ui=\"hyperflow-tabs\"] .project-card,\nbody[data-ui=\"hyperflow-tabs\"] .copy-card",
+      "prop": "border-radius",
+      "value": "var(--ui-radius-xl)"
+    },
+    {
+      "id": 10,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".panel-head strong,\n.auto-cut-head strong,\n.caption-pro-head strong,\n.quality-head strong",
+      "prop": "color",
+      "value": "var(--ui-text)"
+    },
+    {
+      "id": 11,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".panel-head strong,\n.auto-cut-head strong,\n.caption-pro-head strong,\n.quality-head strong",
+      "prop": "font-size",
+      "value": "15px"
+    },
+    {
+      "id": 12,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".panel-head strong,\n.auto-cut-head strong,\n.caption-pro-head strong,\n.quality-head strong",
+      "prop": "font-weight",
+      "value": "830"
+    },
+    {
+      "id": 13,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".panel-head strong,\n.auto-cut-head strong,\n.caption-pro-head strong,\n.quality-head strong",
+      "prop": "letter-spacing",
+      "value": "-0.025em"
+    },
+    {
+      "id": 14,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".panel-head small,\n.auto-cut-head small,\n.caption-pro-head small,\n.quality-head small,\n.helper-text,\n.import-status",
+      "prop": "color",
+      "value": "var(--ui-muted)"
+    },
+    {
+      "id": 16,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".field",
+      "prop": "color",
+      "value": "#cbd5e1"
+    },
+    {
+      "id": 17,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".field",
+      "prop": "font-weight",
+      "value": "700"
+    },
+    {
+      "id": 18,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".field > span",
+      "prop": "color",
+      "value": "#aeb9ca"
+    },
+    {
+      "id": 19,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".field > span",
+      "prop": "font-size",
+      "value": "11.5px"
+    },
+    {
+      "id": 21,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "input:not([type=\"range\"]):not([type=\"checkbox\"]):not([type=\"file\"]),\nselect,\ntextarea",
+      "prop": "border",
+      "value": "1px solid rgba(148, 163, 184, 0.16)"
+    },
+    {
+      "id": 22,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "input:not([type=\"range\"]):not([type=\"checkbox\"]):not([type=\"file\"]),\nselect,\ntextarea",
+      "prop": "border-radius",
+      "value": "var(--ui-radius-md)"
+    },
+    {
+      "id": 23,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "input:not([type=\"range\"]):not([type=\"checkbox\"]):not([type=\"file\"]),\nselect,\ntextarea",
+      "prop": "color",
+      "value": "#eef2f7"
+    },
+    {
+      "id": 24,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "input:not([type=\"range\"]):not([type=\"checkbox\"]):not([type=\"file\"]),\nselect,\ntextarea",
+      "prop": "background",
+      "value": "rgba(6, 10, 20, 0.58)"
+    },
+    {
+      "id": 25,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "input:not([type=\"range\"]):not([type=\"checkbox\"]):not([type=\"file\"]),\nselect,\ntextarea",
+      "prop": "box-shadow",
+      "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)"
+    },
+    {
+      "id": 32,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".btn-primary,\n.recommend-generate-btn",
+      "prop": "border",
+      "value": "1px solid rgba(165, 243, 252, 0.24)"
+    },
+    {
+      "id": 33,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".btn-primary,\n.recommend-generate-btn",
+      "prop": "color",
+      "value": "#07111e"
+    },
+    {
+      "id": 34,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".btn-primary,\n.recommend-generate-btn",
+      "prop": "background",
+      "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)"
+    },
+    {
+      "id": 37,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".btn-secondary,\n.mini-action,\nlabel.btn-secondary,\n.file-button",
+      "prop": "color",
+      "value": "#d8e0eb"
+    },
+    {
+      "id": 38,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".btn-secondary,\n.mini-action,\nlabel.btn-secondary,\n.file-button",
+      "prop": "background",
+      "value": "rgba(18, 26, 43, 0.72)"
+    },
+    {
+      "id": 39,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".btn-secondary,\n.mini-action,\nlabel.btn-secondary,\n.file-button",
+      "prop": "box-shadow",
+      "value": "none"
+    },
+    {
+      "id": 44,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".upload-tile",
+      "prop": "border",
+      "value": "1px dashed rgba(148, 163, 184, 0.25)"
+    },
+    {
+      "id": 45,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".upload-tile",
+      "prop": "border-radius",
+      "value": "var(--ui-radius-lg)"
+    },
+    {
+      "id": 46,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".upload-tile",
+      "prop": "background",
+      "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%),\n        rgba(7, 11, 21, 0.42)"
+    },
+    {
+      "id": 50,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".recommendation-card,\n.engine-status-card,\n.handoff-coach",
+      "prop": "border-color",
+      "value": "rgba(148, 163, 184, 0.12)"
+    },
+    {
+      "id": 51,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".recommendation-card,\n.engine-status-card,\n.handoff-coach",
+      "prop": "background",
+      "value": "rgba(10, 16, 29, 0.58)"
+    },
+    {
+      "id": 52,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".recommendation-card,\n.engine-status-card,\n.handoff-coach",
+      "prop": "box-shadow",
+      "value": "none"
+    },
+    {
+      "id": 53,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".recommendation-card.is-selected",
+      "prop": "border-color",
+      "value": "rgba(103, 232, 249, 0.32)"
+    },
+    {
+      "id": 54,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".recommendation-card.is-selected",
+      "prop": "background",
+      "value": "linear-gradient(135deg, rgba(103, 232, 249, 0.075), rgba(167, 139, 250, 0.07))"
+    },
+    {
+      "id": 55,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".waveform-drag-shell,\n.phone-frame,\n.timeline-view,\n.auto-cut-timeline-list",
+      "prop": "border-color",
+      "value": "rgba(148, 163, 184, 0.13)"
+    },
+    {
+      "id": 56,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".waveform-drag-shell,\n.phone-frame,\n.timeline-view,\n.auto-cut-timeline-list",
+      "prop": "box-shadow",
+      "value": "none"
+    },
+    {
+      "id": 79,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock-tab",
+      "prop": "border-radius",
+      "value": "16px"
+    },
+    {
+      "id": 88,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-icon-language=\"studio-glyphs\"] .bottom-dock-tab > span:first-child",
+      "prop": "border",
+      "value": "0"
+    },
+    {
+      "id": 89,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-icon-language=\"studio-glyphs\"] .bottom-dock-tab > span:first-child",
+      "prop": "background",
+      "value": "transparent"
+    },
+    {
+      "id": 90,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-icon-language=\"studio-glyphs\"] .bottom-dock-tab > span:first-child",
+      "prop": "box-shadow",
+      "value": "none"
+    },
+    {
+      "id": 91,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-icon-language=\"studio-glyphs\"] .bottom-dock-tab > span:first-child",
+      "prop": "color",
+      "value": "currentColor"
+    },
+    {
+      "id": 92,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock-tab b",
+      "prop": "font-weight",
+      "value": "760"
+    },
+    {
+      "id": 104,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .brand-panel.cinematic-brand-panel",
+      "prop": "border-radius",
+      "value": "26px"
+    },
+    {
+      "id": 110,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-copy h1.cinematic-title",
+      "prop": "font-size",
+      "value": "var(--responsive-title-wide)"
+    },
+    {
+      "id": 113,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "color",
+      "value": "#9ba7b9"
+    },
+    {
+      "id": 114,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "font-size",
+      "value": "13.5px"
+    },
+    {
+      "id": 115,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "line-height",
+      "value": "1.65"
+    },
+    {
+      "id": 118,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .preview-card .phone-frame",
+      "prop": "background",
+      "value": "#060914"
+    },
+    {
+      "id": 154,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-icon-language=\"studio-glyphs\"] .bottom-dock-tab > span:first-child",
+      "prop": "font-size",
+      "value": "14px"
+    },
+    {
+      "id": 165,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-topline",
+      "prop": "border-bottom-color",
+      "value": "rgba(148, 163, 184, 0.10)"
+    },
+    {
+      "id": 170,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".hero-eyebrow",
+      "prop": "color",
+      "value": "#aa9dc5"
+    },
+    {
+      "id": 171,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-copy h1.cinematic-title,\n    .cinematic-title",
+      "prop": "font-size",
+      "value": "var(--responsive-title-mobile)"
+    },
+    {
+      "id": 178,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .hero-compact-note",
+      "prop": "font-size",
+      "value": "12px"
+    },
+    {
+      "id": 186,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel",
+      "prop": "box-shadow",
+      "value": "0 14px 40px rgba(0, 0, 0, 0.16)"
+    },
+    {
+      "id": 189,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".flow-overview-eyebrow",
+      "prop": "font-size",
+      "value": "10.5px"
+    },
+    {
+      "id": 190,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".flow-overview-eyebrow",
+      "prop": "letter-spacing",
+      "value": "0.11em"
+    },
+    {
+      "id": 191,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".flow-overview-copy strong",
+      "prop": "font-size",
+      "value": "clamp(20px, 6vw, 27px)"
+    },
+    {
+      "id": 192,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".flow-overview-copy strong",
+      "prop": "line-height",
+      "value": "1.24"
+    },
+    {
+      "id": 193,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".flow-overview-copy strong",
+      "prop": "letter-spacing",
+      "value": "-0.052em"
+    },
+    {
+      "id": 194,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".flow-overview-copy small",
+      "prop": "font-size",
+      "value": "12px"
+    },
+    {
+      "id": 195,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".flow-overview-copy small",
+      "prop": "line-height",
+      "value": "1.62"
+    },
+    {
+      "id": 201,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step",
+      "prop": "border",
+      "value": "1px solid rgba(148, 163, 184, 0.11)"
+    },
+    {
+      "id": 204,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step",
+      "prop": "box-shadow",
+      "value": "none"
+    },
+    {
+      "id": 208,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step span",
+      "prop": "border-color",
+      "value": "rgba(148, 163, 184, 0.18)"
+    },
+    {
+      "id": 209,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step span",
+      "prop": "background",
+      "value": "rgba(8, 13, 25, 0.6)"
+    },
+    {
+      "id": 210,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step span",
+      "prop": "font-size",
+      "value": "12px"
+    },
+    {
+      "id": 212,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step.is-active span",
+      "prop": "color",
+      "value": "#e9fcff"
+    },
+    {
+      "id": 214,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step strong",
+      "prop": "font-size",
+      "value": "12.5px"
+    },
+    {
+      "id": 215,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step em",
+      "prop": "color",
+      "value": "#8793a7"
+    },
+    {
+      "id": 216,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".start-command-panel .workflow-step em",
+      "prop": "font-size",
+      "value": "10px"
+    },
+    {
+      "id": 220,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "border-radius",
+      "value": "23px"
+    },
+    {
+      "id": 230,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock-tab b",
+      "prop": "font-size",
+      "value": "11px"
+    },
+    {
+      "id": 233,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-icon-language=\"studio-glyphs\"] .bottom-dock-tab > span:first-child",
+      "prop": "font-size",
+      "value": "15px"
+    },
+    {
+      "id": 239,
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".release-device-compat span:last-child",
+      "prop": "font-size",
+      "value": "6.5px"
+    },
+    {
+      "id": 247,
+      "file": "assets/css/ui-refinement.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hyperflow-stage",
+      "prop": "background",
+      "value": "linear-gradient(135deg, rgba(11, 20, 35, 0.93), rgba(7, 12, 23, 0.90))"
+    },
+    {
+      "id": 257,
+      "file": "assets/css/foundation-polish.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "font-size",
+      "value": "13.5px"
+    },
+    {
+      "id": 258,
+      "file": "assets/css/foundation-polish.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "line-height",
+      "value": "1.55"
+    },
+    {
+      "id": 262,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".start-command-panel",
+      "prop": "border-radius",
+      "value": "22px"
+    },
+    {
+      "id": 263,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".start-command-panel",
+      "prop": "background",
+      "value": "rgba(7, 13, 27, 0.68)"
+    },
+    {
+      "id": 270,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".start-command-panel .workflow-rail-separated",
+      "prop": "border",
+      "value": "1px solid rgba(255, 255, 255, 0.10)"
+    },
+    {
+      "id": 271,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".start-command-panel .workflow-rail-separated",
+      "prop": "border-radius",
+      "value": "17px"
+    },
+    {
+      "id": 272,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".start-command-panel .workflow-rail-separated",
+      "prop": "background",
+      "value": "rgba(255, 255, 255, 0.025)"
+    },
+    {
+      "id": 274,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".start-command-panel .workflow-step",
+      "prop": "border-radius",
+      "value": "13px"
+    },
+    {
+      "id": 275,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".start-command-panel .workflow-step",
+      "prop": "background",
+      "value": "rgba(255, 255, 255, 0.045)"
+    },
+    {
+      "id": 278,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".console-panel,\n.editor-panel > section,\n.control-zone,\n.preview-card,\n.waveform-card,\n.copy-card",
+      "prop": "box-shadow",
+      "value": "0 14px 42px rgba(0, 0, 0, 0.26)"
+    },
+    {
+      "id": 297,
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".brand-signature-pill",
+      "prop": "font-size",
+      "value": "10px"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.17 - bounded state container and persisted-setting recovery
+// AI Shorts Studio v1.5.20 - bounded state container and persisted-setting recovery
 'use strict';
 
 (function exposeState(global) {

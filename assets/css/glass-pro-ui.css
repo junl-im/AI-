@@ -147,10 +147,10 @@ body::before {
 
 .recommendation-card:hover,
 .bottom-dock-tab:hover {
-    border-color: rgba(34, 211, 238, 0.38) !important;
+    border-color: rgba(34, 211, 238, 0.38);
     background:
         linear-gradient(145deg, rgba(34, 211, 238, 0.13), rgba(139, 92, 246, 0.055)),
-        rgba(5, 12, 24, 0.52) !important;
+        rgba(5, 12, 24, 0.52);
 }
 
 .recommendation-card.is-selected {

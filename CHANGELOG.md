@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## v1.5.20 - Structure & Responsive Priority Reduction
+
+- PC Dock, desktop prime layout, workspace focus layout, responsive workspace의 구조 priority를 viewport·flow state별 실제 Chromium 계산값으로 재검증했습니다.
+- source declaration 73개의 `!important`를 제거해 활성 개수를 666→593으로 낮췄습니다.
+- 파일별 감축은 `pc-dock-reveal-hotfix.css` 28개, `desktop-prime-layout.css` 31개, `workspace-layout-controls.css` 13개, `responsive-workspace.css` 1개입니다.
+- 제거 시 계산값이 달라지는 Dock display·minimum size와 preview·waveform focus grid priority는 유지했습니다.
+- conflicts·same-value duplicates·shadowed declarations 0을 유지하고 구조 priority probe·재현 도구·회귀 검사를 추가했습니다.
+- 자동 QA 180/180, 4개 viewport, process memory, GPU/media capability, service worker lifecycle 감사를 통과했습니다.
+- 미디어 분석·렌더·Object URL 경로는 변경되지 않아 v1.5.9 장시간 MP4 감사 결과를 상속합니다.
+
+## v1.5.19 - Interaction State Priority Reduction
+
+- hover·focus-visible·disabled·active·enabled 상태의 priority 후보 16개를 실제 Chromium pointer·keyboard 상호작용으로 재검증했습니다.
+- desktop·mobile 각 17개 상태의 color·background·border·outline·opacity·shadow·transform 계산값이 동일한 12개 `!important`를 제거했습니다.
+- 버튼 hover border와 Dock hover·enabled 색상처럼 기본 important 선언을 이겨야 하는 4개 priority는 유지했습니다.
+- 활성 `!important`를 678→666으로 낮추면서 conflicts·same-value duplicates·shadowed declarations 0을 유지했습니다.
+- 상호작용 상태 감사 도구, 감축 재현 도구, 재유입 방지 smoke test를 추가했습니다.
+- 자동 QA 179/179, 4개 viewport, process memory, GPU/media capability, service worker lifecycle 감사를 통과했습니다.
+- 미디어 분석·렌더·Object URL 경로는 변경되지 않아 v1.5.9 장시간 MP4 감사 결과를 상속합니다.
+
+## v1.5.18 - Refinement & Foundation Priority Reduction
+
+- `ui-refinement.css`와 `foundation-polish.css`의 priority를 declaration·breakpoint·workspace state 단위로 재검증했습니다.
+- 구조·크기·위치·표시 상태는 보존하고 색상·타이포·테두리·표면 스킨의 불필요한 `!important` 81개를 제거했습니다.
+- 활성 `!important`를 759→678로 낮추면서 conflicts·same-value duplicates·shadowed declarations 0을 유지했습니다.
+- 데스크톱·소형 노트북·태블릿·모바일의 dock 높이, utility hub 정렬, preview·waveform focus 폭을 v1.5.17과 동일하게 유지했습니다.
+- 모바일 shell geometry, media-state visibility, performance-lite와 reduced-motion 안전장치 priority는 유지했습니다.
+- 자동 QA 177/177, 4개 viewport, process memory, GPU/media capability, service worker lifecycle 감사를 통과했습니다.
+- 미디어 분석·렌더·Object URL 경로는 변경되지 않아 v1.5.9 장시간 MP4 감사 결과를 상속합니다.
+
 ## v1.5.17 - Safe Important Cascade Reduction
 
 - 실제 Chromium에서 선언별 priority 제거 전후를 비교해 화면 계산값이 유지되는 항목만 선별했습니다.

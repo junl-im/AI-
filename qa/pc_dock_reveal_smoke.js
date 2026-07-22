@@ -16,7 +16,7 @@ const polish = read('src/ui/flow-polish.js');
 const doctor = read('src/ui/flow-doctor.js');
 assert(html.includes('assets/css/pc-dock-reveal-hotfix.css'), 'pc dock hotfix stylesheet loaded');
 assert(comfortCss.includes('grid-template-columns: repeat(8, minmax(0, 1fr))'), 'workspace comfort owns the readable desktop 8-tab grid');
-assert(css.includes('grid-template-columns: none !important'), 'desktop dock removes squeezed status grid columns');
+assert(css.includes('grid-template-columns: none;'), 'desktop dock removes squeezed status grid columns');
 assert(foundationCss.includes('font-size: 12px !important'), 'foundation polish owns the final desktop dock label size');
 assert(css.includes('grid-template-columns: repeat(8, minmax(0, 1fr))'), 'tablet dock uses a compact single-row 8-tab layout');
 assert(css.includes('animation: none !important'), 'candidate guide shimmer disabled');

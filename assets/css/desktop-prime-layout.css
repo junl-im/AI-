@@ -11,7 +11,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
 
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
     grid-row: 1;
-    margin-left: 0 !important;
+    margin-left: 0;
 }
 
 .cinematic-brand-panel .hero-mainline {
@@ -23,12 +23,12 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
 }
 
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
-    margin-right: auto !important;
+    margin-right: auto;
 }
 
 /* The old duplicated import card is replaced by a mobile-only process map. */
 .start-command-panel {
-    display: none !important;
+    display: none;
 }
 
 .flow-overview-copy {
@@ -62,8 +62,8 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     .app-shell {
-        width: min(calc(100% - 24px), var(--prime-workspace-max)) !important;
-        padding-top: 10px !important;
+        width: min(calc(100% - 24px), var(--prime-workspace-max));
+        padding-top: 10px;
     }
 
     body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
@@ -71,16 +71,16 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     .cinematic-brand-panel .hero-mainline {
-        margin-top: 8px !important;
+        margin-top: 8px;
     }
 
     body[data-ui="hyperflow-tabs"] .hero-copy h1,
     .cinematic-title {
-        font-size: clamp(38px, 3.8vw, 54px) !important;
+        font-size: clamp(38px, 3.8vw, 54px);
     }
 
     body[data-ui="hyperflow-tabs"] .hero-compact-note {
-        margin-top: 7px !important;
+        margin-top: 7px;
     }
 
     body[data-ui="hyperflow-tabs"] .hyperflow-stage {
@@ -98,12 +98,12 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     body[data-ui="hyperflow-tabs"] .flow-selection-summary {
-        display: none !important;
+        display: none;
     }
 
     /* Prime workspace: the first five stages remain visible together. */
     body[data-ui="hyperflow-tabs"] .studio-grid {
-        display: grid !important;
+        display: grid;
         align-items: stretch;
         width: 100%;
         margin: 0 !important;
@@ -111,7 +111,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
     body[data-ui="hyperflow-tabs"] .console-panel,
     body[data-ui="hyperflow-tabs"] .editor-panel {
-        display: contents !important;
+        display: contents;
     }
 
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] [data-flow-panel],
@@ -120,7 +120,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] [data-flow-panel]:not(.is-flow-active) {
         display: block !important;
         width: 100%;
-        max-width: none !important;
+        max-width: none;
         min-height: 0 !important;
         margin: 0 !important;
         animation: none !important;
@@ -139,7 +139,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     body[data-ui="hyperflow-tabs"] .copy-card { grid-area: copy; }
 
     body[data-ui="hyperflow-tabs"] .action-dock {
-        display: none !important;
+        display: none;
     }
 
     body[data-ui="hyperflow-tabs"] .control-zone-load,
@@ -153,7 +153,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     body[data-ui="hyperflow-tabs"] .control-zone-load .upload-tile {
-        min-height: 112px !important;
+        min-height: 112px;
     }
 
     body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .settings-grid {
@@ -163,7 +163,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
     body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .engine-status-card p,
     body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .hyperconnect-helper {
-        display: none !important;
+        display: none;
     }
 
     body[data-ui="hyperflow-tabs"] .control-zone[data-flow-panel="recommend"] .engine-status-card {
@@ -176,12 +176,12 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     body[data-ui="hyperflow-tabs"] .candidates-zone .recommendation-list {
-        max-height: 205px !important;
+        max-height: 205px;
         overflow: auto;
     }
 
     body[data-ui="hyperflow-tabs"] .preview-card {
-        display: flex !important;
+        display: flex;
         flex-direction: column;
         align-items: stretch;
         justify-content: flex-start;
@@ -189,8 +189,8 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     body[data-ui="hyperflow-tabs"] .preview-card .phone-frame {
-        width: min(240px, 100%) !important;
-        max-height: none !important;
+        width: min(240px, 100%);
+        max-height: none;
         margin: 0 auto 10px !important;
         border-radius: 30px;
         padding: 8px;
@@ -226,7 +226,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     body[data-ui="hyperflow-tabs"] .waveform-card canvas {
-        height: 112px !important;
+        height: 112px;
     }
 
     body[data-ui="hyperflow-tabs"] .waveform-card .drag-helper-row,
@@ -255,32 +255,32 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
 @media (max-width: 720px) {
     .app-shell {
-        padding-top: var(--responsive-shell-top-mobile) !important;
+        padding-top: var(--responsive-shell-top-mobile);
     }
 
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
         grid-row: 1;
-        margin-left: 0 !important;
+        margin-left: 0;
     }
 
     .cinematic-brand-panel .brand-signature-pill {
-        font-size: 9.5px !important;
+        font-size: 9.5px;
         white-space: nowrap;
     }
 
     .cinematic-brand-panel .hero-mainline {
         padding-inline: 8px !important;
-        margin-top: 12px !important;
+        margin-top: 12px;
     }
 
 
     body[data-ui="hyperflow-tabs"] .hero-compact-note {
         width: min(100%, 34rem);
-        max-width: 34rem !important;
-        margin-top: 8px !important;
+        max-width: 34rem;
+        margin-top: 8px;
         padding-right: 8px;
-        font-size: 12px !important;
-        line-height: 1.5 !important;
+        font-size: 12px;
+        line-height: 1.5;
     }
 
     .start-command-panel {
@@ -289,7 +289,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     .start-command-panel .workflow-rail-separated {
-        display: grid !important;
+        display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         padding: 0 !important;
         border: 0 !important;
@@ -312,13 +312,13 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     .start-command-panel .workflow-step em {
-        display: block !important;
+        display: block;
         align-self: start;
     }
 
     /* Mobile and desktop share one visible import panel; the dock only navigates to it. */
     body:not(.has-media)[data-active-flow-tab="file"] .flow-selection-summary {
-        display: none !important;
+        display: none;
     }
 
     body.has-media .start-command-panel {

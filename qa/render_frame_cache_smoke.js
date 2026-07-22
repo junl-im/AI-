@@ -6,4 +6,4 @@ ok(src.includes('const gradientCache = new WeakMap()'),'gradient cache is contex
 ok(src.includes('const textMeasureCache = new WeakMap()'),'text measurement cache is context scoped');
 ok(src.includes('cache.size >= 512'),'text cache is bounded');
 ok(src.includes('cachedGradient(ctx, `clear:${width}x${height}`'),'base frame gradient is reused');
-console.log('PASS v1.5.17 bounded render-frame paint caches');
+console.log('PASS v1.5.20 bounded render-frame paint caches');

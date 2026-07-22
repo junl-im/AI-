@@ -24,7 +24,7 @@ if (JSON.stringify(report.archivedCssFiles) !== JSON.stringify(['cinematic-hero.
 if (!Array.isArray(report.propertyConflicts) || report.propertyConflicts.length !== report.conflictingPropertyCount) {
     throw new Error('full selector-property conflict inventory is missing');
 }
-if (report.importantCount > 801) throw new Error('CSS !important count exceeded the ownership baseline');
+if (report.importantCount > 593) throw new Error('CSS !important count exceeded the ownership baseline');
 if (report.conflictingPropertyCount !== 0) throw new Error('selector-property conflicts must remain at zero');
 if (report.highRiskConflictCount > 0) throw new Error('high-risk CSS conflicts exceeded the ownership baseline');
 if (report.shadowedDeclarationCount !== 0) throw new Error('shadowed CSS declarations must remain at zero');
@@ -97,7 +97,7 @@ const mobileHeaderTopline = report.criticalOwnership?.mobileHeaderTopline;
 const desktopShell = report.criticalOwnership?.desktopShell;
 const mobileHeroTitle = report.criticalOwnership?.mobileHeroTitle;
 if (!headerTopline || !mobileHeaderTopline || !desktopShell || !mobileHeroTitle) {
-    throw new Error('v1.5.17 responsive ownership snapshots are missing');
+    throw new Error('v1.5.20 responsive ownership snapshots are missing');
 }
 for (const property of ['display', 'grid-template-columns', 'align-items', 'gap']) {
     assertSingleOwner(headerTopline, property, 'header-meta-rail.css');
@@ -217,4 +217,4 @@ const forbiddenConflicts = report.propertyConflicts.filter(item => (
 ));
 if (forbiddenConflicts.length) throw new Error('consolidated CSS ownership conflicts reappeared');
 
-console.log('PASS v1.5.17 zero-conflict CSS cascade ownership ceiling');
+console.log('PASS v1.5.20 zero-conflict CSS cascade ownership ceiling');

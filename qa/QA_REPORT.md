@@ -1,26 +1,27 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.17
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.20
 
 ## 최종 결과
 
-- 자동 검사: **176/176 통과**
+- 자동 검사: **180/180 통과**
 - 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- 서비스워커·process memory·GPU/media 감사 v1.5.17 기준 통과
+- 서비스워커·process memory·GPU/media 감사 v1.5.20 기준 통과
 - 장시간 MP4는 실행 코드 미변경으로 v1.5.9 검증 결과 상속
 
-## CSS 결과
+## CSS·레이아웃 결과
 
 - 실제 selector-property 충돌: **0 유지**
 - same-value duplicate: **0 유지**
 - shadowed declaration: **0 유지**
-- 활성 `!important`: **801 → 759**
-- priority 제거: **42개**
-- v1.5.16 핵심 layout metrics 변화: **0건**
+- 활성 `!important`: **666 → 593**
+- 구조·반응형 priority 제거: **73개**
+- PC Dock, 데스크톱 workspace, laptop·tablet density, preview·waveform focus 계산값은 v1.5.19와 동일
+- 제거 시 계산값이 바뀌는 Dock display·minimum size와 focus grid priority는 유지
 
 ## 런타임 결과
 
-- process memory audit: **8회**, runtime error 0, active operation 0, render queue 0
-- GPU/media comparison: 두 모드 H.264/AAC 디코딩 성공, GPU·media utility process 관측
+- process memory audit: **16회**, runtime error 0, active operation 0, render queue 0
+- GPU/media comparison: 두 모드 미디어 디코딩 성공, GPU·media utility process 관측, runtime error 0
 - service worker: install·activate·old cache cleanup·offline navigation 통과
 
 ## 감사 제한

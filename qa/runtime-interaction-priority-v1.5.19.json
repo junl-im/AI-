@@ -1,0 +1,101 @@
+{
+  "version": "1.5.19",
+  "baselineVersion": "1.5.18",
+  "baselineImportant": 678,
+  "removedCount": 12,
+  "remainingImportant": 666,
+  "strategy": "Real Chromium hover, keyboard focus-visible, disabled, enabled, and pointer-active computed-style equivalence; geometry and runtime regressions remain separately guarded",
+  "files": [
+    "assets/css/foundation-polish.css",
+    "assets/css/glass-pro-ui.css",
+    "assets/css/motion-stability.css",
+    "assets/css/ui-refinement.css"
+  ],
+  "removed": [
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": "button:focus-visible,\nlabel[for]:focus-visible,\nselect:focus-visible,\ninput:focus-visible,\ntextarea:focus-visible,\n.bottom-dock-tab:focus-visible",
+      "prop": "outline",
+      "value": "2px solid rgba(34, 211, 238, 0.78)",
+      "line": 149
+    },
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": "button:focus-visible,\nlabel[for]:focus-visible,\nselect:focus-visible,\ninput:focus-visible,\ntextarea:focus-visible,\n.bottom-dock-tab:focus-visible",
+      "prop": "outline-offset",
+      "value": "3px",
+      "line": 150
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".recommendation-card:hover,\n.bottom-dock-tab:hover",
+      "prop": "border-color",
+      "value": "rgba(34, 211, 238, 0.38)",
+      "line": 150
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".recommendation-card:hover,\n.bottom-dock-tab:hover",
+      "prop": "background",
+      "value": "linear-gradient(145deg, rgba(34, 211, 238, 0.13), rgba(139, 92, 246, 0.055)),\n        rgba(5, 12, 24, 0.52)",
+      "line": 151
+    },
+    {
+      "file": "assets/css/motion-stability.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock-tab:active,\nbody[data-ui=\"hyperflow-tabs\"] .recommendation-card:active",
+      "prop": "transform",
+      "value": "none",
+      "line": 39
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": "input:not([type=\"range\"]):not([type=\"checkbox\"]):focus,\nselect:focus,\ntextarea:focus",
+      "prop": "border-color",
+      "value": "rgba(103, 232, 249, 0.48)",
+      "line": 101
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": "input:not([type=\"range\"]):not([type=\"checkbox\"]):focus,\nselect:focus,\ntextarea:focus",
+      "prop": "outline",
+      "value": "3px solid rgba(103, 232, 249, 0.08)",
+      "line": 102
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": "input:not([type=\"range\"]):not([type=\"checkbox\"]):focus,\nselect:focus,\ntextarea:focus",
+      "prop": "box-shadow",
+      "value": "none",
+      "line": 103
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".btn-secondary:not(:disabled):hover,\n.mini-action:not(:disabled):hover,\nlabel.btn-secondary:hover",
+      "prop": "background",
+      "value": "rgba(25, 36, 58, 0.88)",
+      "line": 135
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": "button:disabled,\n.btn-secondary:disabled,\n.mini-action:disabled",
+      "prop": "opacity",
+      "value": "0.42",
+      "line": 139
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".upload-tile:hover,\n.upload-tile:focus-visible",
+      "prop": "border-color",
+      "value": "rgba(103, 232, 249, 0.46)",
+      "line": 159
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".upload-tile:hover,\n.upload-tile:focus-visible",
+      "prop": "background",
+      "value": "rgba(13, 22, 38, 0.75)",
+      "line": 160
+    }
+  ],
+  "missing": []
+}

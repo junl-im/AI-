@@ -1,34 +1,35 @@
-# HANDOFF v1.5.17
+# HANDOFF v1.5.20
 
 ## 현재 상태
 
-v1.5.17은 v1.5.16의 화면·동작을 유지하면서 불필요한 cascade priority를 줄인 CSS 안정화 릴리스입니다.
+v1.5.20은 v1.5.19의 화면과 동작을 유지하면서 PC Dock, 데스크톱 작업실, 반응형 workspace 소유 파일의 불필요한 구조 우선순위를 실제 Chromium 계산 스타일 기준으로 감축한 릴리스입니다.
 
-- 자동 QA: **176/176 통과**
+- 자동 QA: **180/180 통과**
 - 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow: **0건**
-- CSS 기준: `!important` **801→759**, conflicts 0, same-value duplicates 0, shadowed 0
-- v1.5.16 대비 dock 높이, utility hub 정렬, preview·waveform focus 폭: **동일**
-- process memory 8회: runtime error 0, active operation 0, render queue 0
+- CSS 기준: `!important` **666→593**, conflicts 0, same-value duplicates 0, shadowed 0
+- 구조·반응형 priority 제거: **73개**
+- desktop Dock, utility hub, preview·waveform 집중 보기, laptop·tablet hero 계산값: v1.5.19와 동일
+- process memory 16회: runtime error 0, active operation 0, render queue 0
 - GPU/media 두 모드: 디코딩 성공, GPU·media utility process 관측, runtime error 0
 - 장시간 MP4 실행 경로 미변경으로 v1.5.9 15분→30분→15분 결과 상속
 
 ## 적용 내용
 
-- 작업실 stage display와 workspace hero height의 불필요한 priority 제거
-- 모바일 dock gap·compact tab visibility·grid column·기본 toast 위치의 normal cascade 전환
-- header metadata rail의 grid·alignment·mobile typography priority 감축
-- upload·dock icon 기본 크기와 색상 priority 감축
-- 필요한 mobile shell clearance, workspace hero collapse, focus workspace grid priority는 유지
-- runtime build key `1.5.17-important-cascade-reduction` 적용
+- `pc-dock-reveal-hotfix.css` 28개, `desktop-prime-layout.css` 31개, `workspace-layout-controls.css` 13개, `responsive-workspace.css` 1개의 불필요한 priority를 normal cascade로 전환
+- 제거 후보를 desktop·small laptop·tablet·mobile과 flow/workspace 상태별로 실제 Chromium에서 검증
+- Dock display·button 최소 폭, 태블릿 높이, preview·waveform focus grid처럼 제거 시 계산값이 변하는 priority는 유지
+- 구조 priority probe, 감축 재현 도구, 재유입 방지 smoke test 추가
+- runtime build key `1.5.20-structure-responsive-priority` 적용
 
 ## 검수 순서
 
 1. `node qa/run_css_ownership_audit.js`
-2. `python3 qa/run_browser_audit.py`
-3. `python3 qa/run_process_memory_audit.py --cycles 8`
-4. `python3 qa/run_gpu_media_capability_audit.py`
-5. `node qa/run_service_worker_lifecycle.js`
-6. `npm test`
+2. `python3 qa/run_interaction_state_audit.py`
+3. `python3 qa/run_browser_audit.py`
+4. `python3 qa/run_process_memory_audit.py --cycles 16`
+5. `python3 qa/run_gpu_media_capability_audit.py`
+6. `node qa/run_service_worker_lifecycle.js`
+7. `npm test`
 
 ## 알려진 제한
 
@@ -37,7 +38,7 @@ v1.5.17은 v1.5.16의 화면·동작을 유지하면서 불필요한 cascade pri
 
 ## 다음 작업
 
-1. `ui-refinement.css`와 `foundation-polish.css`의 remaining priority를 상태·breakpoint 단위로 추가 감축
+1. 남은 `ui-refinement.css`·hero command surface의 구조 priority를 상태별로 추가 감축
 2. 실제 하드웨어 가속 Chromium에서 GPU·media decoder memory 재검증
 3. 15분·30분 30fps 고비트레이트 카메라 원본 반복 검증
 4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증

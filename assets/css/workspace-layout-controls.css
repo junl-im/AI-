@@ -18,16 +18,16 @@
             var(--workspace-divider-width)
             minmax(350px, var(--workspace-center-track))
             var(--workspace-divider-width)
-            minmax(300px, var(--workspace-right-track)) !important;
+            minmax(300px, var(--workspace-right-track));
         grid-template-areas:
             "toolbar toolbar toolbar toolbar toolbar"
             "utility utility utility utility utility"
             "load divider-left preview divider-right candidates"
             "recommend divider-left preview divider-right waveform"
-            "cut divider-left edit divider-right export" !important;
-        grid-template-rows: auto auto clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto !important;
-        column-gap: 7px !important;
-        row-gap: var(--prime-gap, 12px) !important;
+            "cut divider-left edit divider-right export";
+        grid-template-rows: auto auto clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto;
+        column-gap: 7px;
+        row-gap: var(--prime-gap, 12px);
     }
 
 
@@ -212,7 +212,7 @@
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .workspace-column-divider,
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .project-copy-hub,
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .project-copy-hub {
-        display: none !important;
+        display: none;
     }
 
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] [data-flow-panel="file"],
@@ -225,12 +225,12 @@
 
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .preview-card {
         grid-area: preview !important;
-        height: min(78vh, 850px) !important;
+        height: min(78vh, 850px);
         min-height: 560px !important;
-        max-height: 850px !important;
-        align-self: start !important;
-        position: sticky !important;
-        top: 70px !important;
+        max-height: 850px;
+        align-self: start;
+        position: sticky;
+        top: 70px;
         overflow: auto !important;
     }
 
@@ -270,7 +270,7 @@
     }
 
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] #waveformCanvas {
-        width: 100% !important;
+        width: 100%;
         min-height: 285px;
     }
 
@@ -290,7 +290,7 @@
 
     .workspace-layout-toolbar,
     .workspace-column-divider {
-        display: none !important;
+        display: none;
     }
 }
 

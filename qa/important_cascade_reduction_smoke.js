@@ -7,11 +7,11 @@ const pkg = require(path.join(root, 'package.json'));
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const report = JSON.parse(read(`qa/runtime-css-ownership-v${pkg.version}.json`));
 const current = JSON.parse(read(`qa/runtime-browser-audit-v${pkg.version}.json`));
-const prior = JSON.parse(read('qa/runtime-browser-audit-v1.5.16.json'));
+const prior = JSON.parse(read('qa/runtime-browser-audit-v1.5.17.json'));
 function ok(value, message) { if (!value) throw new Error(message); console.log(`PASS ${message}`); }
 function metric(report, mode, pathParts) { let value=report[mode]; for (const key of pathParts) value=value[key]; return value; }
-ok(pkg.version === '1.5.17', 'important cascade reduction release version is v1.5.17');
-ok(report.importantCount <= 759, 'important declaration ceiling drops to 759');
+ok(pkg.version === '1.5.20', 'important cascade reduction release version is v1.5.20');
+ok(report.importantCount <= 593, 'important declaration ceiling remains at or below 593');
 ok(report.conflictingPropertyCount === 0 && report.sameValueDuplicateCount === 0 && report.shadowedDeclarationCount === 0, 'cascade remains conflict, duplicate, and shadow free');
 const stage = read('assets/css/studio-experience.css');
 const mobile = read('assets/css/mobile-menu-guide.css');
@@ -28,9 +28,9 @@ const checks = [
   ['desktop',['workspaceTests','preview','width']], ['desktop',['workspaceTests','waveform','width']],
   ['desktop',['uiStructure','utilityHub','project','top']], ['desktop',['uiStructure','utilityHub','copy','top']]
 ];
-for (const [mode, parts] of checks) ok(metric(current,mode,parts) === metric(prior,mode,parts), `${mode} ${parts.join('.')} matches v1.5.16`);
+for (const [mode, parts] of checks) ok(metric(current,mode,parts) === metric(prior,mode,parts), `${mode} ${parts.join('.')} matches v1.5.17`);
 for (const mode of ['desktop','smallLaptop','tablet','mobile']) {
   ok(current[mode].audit.errors.length === 0 && current[mode].audit.consoleErrors.length === 0, `${mode} runtime remains error free`);
   ok(current[mode].bodyScrollWidth <= current[mode].viewport.width, `${mode} keeps horizontal overflow at zero`);
 }
-console.log('PASS v1.5.17 safe important reduction with unchanged responsive layout metrics');
+console.log('PASS v1.5.20 safe important reduction with unchanged responsive layout metrics');

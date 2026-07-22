@@ -1,13 +1,13 @@
 {
   "version": "1.5.17",
-  "generatedAt": "2026-07-22T03:49:40.587Z",
+  "generatedAt": "2026-07-22T05:32:16.237Z",
   "cssFiles": 46,
   "linkedCssFiles": 45,
   "activeCssFiles": 45,
   "archivedCssFiles": [
     "cinematic-hero.css"
   ],
-  "importantCount": 759,
+  "importantCount": 678,
   "duplicateSelectorCount": 192,
   "highConflictSelectorCount": 21,
   "sharedPropertyCount": 0,
@@ -26,13 +26,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "rgba(10, 16, 29, 0.58)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "rgba(10, 16, 29, 0.58)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -43,13 +43,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "rgba(148, 163, 184, 0.12)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "rgba(148, 163, 184, 0.12)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -60,13 +60,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "none",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "none",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -408,13 +408,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "16px",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "16px",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -620,13 +620,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "0 14px 40px rgba(0, 0, 0, 0.16)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "0 14px 40px rgba(0, 0, 0, 0.16)",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -707,13 +707,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "1px solid rgba(148, 163, 184, 0.11)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "1px solid rgba(148, 163, 184, 0.11)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1197,13 +1197,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "var(--responsive-title-mobile)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "var(--responsive-title-mobile)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1496,13 +1496,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1513,13 +1513,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "1px solid rgba(165, 243, 252, 0.24)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "1px solid rgba(165, 243, 252, 0.24)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1547,13 +1547,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "#07111e",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "#07111e",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -1566,13 +1566,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "rgba(18, 26, 43, 0.72)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "rgba(18, 26, 43, 0.72)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1600,13 +1600,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "none",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "none",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1617,13 +1617,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "#d8e0eb",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "#d8e0eb",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -1727,13 +1727,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%), rgba(7, 11, 21, 0.42)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%), rgba(7, 11, 21, 0.42)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1744,13 +1744,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "1px dashed rgba(148, 163, 184, 0.25)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "1px dashed rgba(148, 163, 184, 0.25)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1780,13 +1780,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "rgba(6, 10, 20, 0.58)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "rgba(6, 10, 20, 0.58)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1797,13 +1797,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "1px solid rgba(148, 163, 184, 0.16)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "1px solid rgba(148, 163, 184, 0.16)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1814,13 +1814,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -1833,13 +1833,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "rgba(6, 10, 20, 0.58)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "rgba(6, 10, 20, 0.58)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1850,13 +1850,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "1px solid rgba(148, 163, 184, 0.16)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "1px solid rgba(148, 163, 184, 0.16)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1867,13 +1867,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -2083,13 +2083,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "13.5px",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "13.5px",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -2212,13 +2212,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "#cbd5e1",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "#cbd5e1",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -2229,13 +2229,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "700",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "700",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -2445,13 +2445,13 @@
         "winner": {
           "file": "foundation-polish.css",
           "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "foundation-polish.css",
             "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -2481,13 +2481,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "rgba(10, 16, 29, 0.58)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "rgba(10, 16, 29, 0.58)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -2498,13 +2498,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "none",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "none",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -2517,13 +2517,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -2534,13 +2534,13 @@
         "winner": {
           "file": "ui-refinement.css",
           "value": "1px solid rgba(165, 243, 252, 0.24)",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "ui-refinement.css",
             "value": "1px solid rgba(165, 243, 252, 0.24)",
-            "important": true
+            "important": false
           }
         ]
       },

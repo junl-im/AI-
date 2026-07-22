@@ -1,0 +1,48 @@
+{
+  "removedSelectors": [
+    {
+      "file": "assets/css/flow-quality-gate.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .legacy-mobile-action-bar.flow-quality-hidden-legacy"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".legacy-mobile-action-bar"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".mobile-action"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".mobile-action-bar"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".mobile-action"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".mobile-primary"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".mobile-action:disabled"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".mobile-action-bar"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".mobile-action-bar"
+    }
+  ],
+  "removedRules": 7,
+  "removedDeclarations": 35,
+  "removedImportantDeclarations": 1,
+  "removedKeyframes": [],
+  "removedEmptyAtRules": [],
+  "version": "1.5.18",
+  "inheritedFrom": "1.5.17",
+  "inheritanceReason": "No selector reachability or animation ownership changes in this priority-only release."
+}

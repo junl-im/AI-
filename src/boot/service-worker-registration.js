@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.17 - observable single-owner service worker lifecycle
+// AI Shorts Studio v1.5.20 - observable single-owner service worker lifecycle
 'use strict';
 
 (function exposeServiceWorkerRegistration(global) {

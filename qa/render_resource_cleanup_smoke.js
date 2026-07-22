@@ -103,7 +103,7 @@ function track(name) {
     ok(rendererSource.includes('const originalCurrentTime') && rendererSource.includes('sourceMedia.currentTime = restoredTime'), 'renderer restores the original media position after export');
     ok(rendererSource.includes('const originalPlaybackRate') && rendererSource.includes('sourceMedia.playbackRate = originalPlaybackRate'), 'renderer restores the original playback rate after export');
     ok(rendererSource.includes('normalizeMediaRange') && rendererSource.includes('렌더 구간이 올바르지 않습니다'), 'renderer independently validates export range boundaries');
-    console.log('PASS v1.5.17 render capture preflight, range validation, and media-state cleanup guardrails');
+    console.log('PASS v1.5.20 render capture preflight, range validation, and media-state cleanup guardrails');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

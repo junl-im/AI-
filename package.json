@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-5-17",
-  "version": "1.5.17",
+  "name": "ai-shorts-studio-v1-5-20",
+  "version": "1.5.20",
   "private": true,
-  "description": "AI Shorts Studio v1.5.17 - safe important cascade reduction with unchanged responsive UI",
+  "description": "AI Shorts Studio v1.5.20 - structural and responsive priority reduction with unchanged layout",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -148,6 +148,10 @@
     "node qa/css_ownership_smoke.js",
     "node qa/cascade_ownership_smoke.js",
     "node qa/important_cascade_reduction_smoke.js",
+    "node qa/refinement_priority_reduction_smoke.js",
+    "python3 qa/run_interaction_state_audit.py",
+    "node qa/interaction_state_priority_smoke.js",
+    "node qa/structure_responsive_priority_smoke.js",
     "node qa/same_value_css_smoke.js",
     "node qa/orphan_css_smoke.js",
     "node qa/control_ownership_smoke.js",

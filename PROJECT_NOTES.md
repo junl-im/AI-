@@ -1,25 +1,27 @@
-# PROJECT NOTES v1.5.17
+# PROJECT NOTES v1.5.20
 
-## Important cascade 감축 규칙
+## 구조·반응형 priority 감축 규칙
 
-- `!important`는 선언별 Chromium 계산값 비교에서 제거 전후가 동일한 경우에만 낮춥니다.
-- 같은 shorthand family의 여러 priority를 동시에 제거하면 이전 shorthand가 다시 우승할 수 있으므로 property family 단위로 재검증합니다.
-- mobile shell clearance, workspace focus grid, hero collapse처럼 실제 우승에 필요한 priority는 유지합니다.
-- header metadata, base icon sizing, mobile dock 일부처럼 최종 selector specificity와 source order만으로 우승하는 선언은 normal priority로 전환합니다.
+- 구조 우선순위는 desktop, small laptop, tablet, mobile viewport와 flow·workspace 상태에서 실제 Chromium 계산 스타일로 검증합니다.
+- 선언의 `!important`를 제거했을 때 matched element의 geometry와 주요 computed style이 모두 같을 때만 normal cascade로 전환합니다.
+- shorthand는 CSSOM longhand 확장 때문에 자동 제거하지 않고, 직접 매핑되는 source declaration만 감축합니다.
+- Dock display·minimum size와 preview·waveform focus grid처럼 제거 시 값이 바뀌는 선언은 유지합니다.
+- CSS conflicts, same-value duplicates, shadowed declarations는 계속 0을 유지합니다.
 
 ## QA·배포 기준
 
-- 자동 QA 기준은 **176/176**입니다.
-- CSS 상한은 활성 `!important` **759**이며 conflicts, same-value duplicates, shadowed declarations, source-orphan selectors는 모두 0입니다.
-- `runtime-browser-audit-v1.5.17.json`의 핵심 layout metrics는 v1.5.16과 동일해야 합니다.
+- 자동 QA 기준은 **180/180**입니다.
+- 활성 `!important` 기준은 **593**입니다.
+- `runtime-structure-priority-v1.5.20.json`은 v1.5.19 기준 73개 제거 기록을 보존해야 합니다.
+- `runtime-browser-audit-v1.5.20.json`의 핵심 layout metrics는 v1.5.19와 동일해야 합니다.
 - 4개 viewport runtime error와 horizontal overflow는 0이어야 합니다.
 - process memory audit는 runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
 - long video audit는 미디어 실행 경로 미변경으로 v1.5.9 상속 계약을 사용합니다.
-- 런타임 build key는 `1.5.17-important-cascade-reduction`입니다.
+- 런타임 build key는 `1.5.20-structure-responsive-priority`입니다.
 
 ## 다음 우선순위
 
-1. `ui-refinement.css`와 `foundation-polish.css`의 priority family 추가 감축
+1. `ui-refinement.css`와 hero command surface의 남은 구조 priority 추가 감축
 2. 물리 GPU가 있는 데스크톱 Chromium에서 hardware acceleration 비교
 3. 15분·30분 30fps 카메라형·고비트레이트 원본 반복 검증
 4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증

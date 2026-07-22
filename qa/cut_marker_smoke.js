@@ -19,12 +19,12 @@ function assertIncludes(file, needle) {
 
 assertIncludes('index.html', 'cutMarkerOverlay');
 assertIncludes('index.html', 'snapStartCutBtn');
-assertIncludes('index.html', 'src/ui/cut-marker-overlay.js?v=1.5.17-important-cascade-reduction');
+assertIncludes('index.html', 'src/ui/cut-marker-overlay.js?v=1.5.20-structure-responsive-priority');
 assertIncludes('assets/css/cut-markers.css', '.cut-marker-overlay');
 assertIncludes('src/ui/cut-marker-overlay.js', 'renderCutMarkers');
 assertIncludes('src/ui/cut-marker-overlay.js', 'summarizeFocusedPoint');
 assertIncludes('src/app.js', 'renderCutMarkerLayer');
 assertIncludes('src/app.js', 'snapSelectedBoundaryToNearestCut');
-assertIncludes('sw.js', 'cut-marker-overlay.js?v=1.5.17-important-cascade-reduction');
+assertIncludes('sw.js', 'cut-marker-overlay.js?v=1.5.20-structure-responsive-priority');
 
 console.log('PASS cut marker overlay smoke checks');
