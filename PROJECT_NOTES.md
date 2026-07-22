@@ -1,28 +1,202 @@
-# PROJECT NOTES v1.5.7
+# PROJECT NOTES v1.5.14
 
-## Responsive density 소유권 규칙
+## Duplicate-free CSS 선언 규칙
 
-- 721~1179px tablet dock geometry는 `pc-dock-reveal-hotfix.css`가 소유하고 8개 단일 행을 유지합니다.
-- tablet·small-laptop hero 최종 density와 skin은 `ui-refinement.css`가 소유합니다.
-- 모바일 header의 display/grid/min-height는 `header-meta-rail.css`가 최종 소유합니다.
-- navigation target의 border와 box-shadow는 `active-stage-beacon.css`만 소유합니다.
-- 1180px 이상 workspace grid 구조는 기존대로 `workspace-layout-controls.css`가 소유합니다.
+- exact selector와 동일 at-rule context에서 property·value·`!important`가 모두 같은 cross-file 선언은 최종 owner 한 곳만 유지합니다.
+- selector group 일부만 중복이면 규칙을 selector별로 분리해 비대상 selector의 fallback을 보존합니다.
+- 서로 다른 값의 conflict, same-value duplicate, shadowed declaration은 모두 0을 유지합니다.
+- 자동 정리는 `tools/consolidate-same-value-css.js`로 재현하며 실행 전 CSS ownership report가 필요합니다.
 
 ## QA·배포 기준
 
-- 자동 QA 기준은 **164/164**입니다.
-- CSS 상한은 활성 `!important` 904, 실제 충돌 334, 고위험 충돌 81, shadowed declaration 414입니다.
-- 데스크톱 1366×768, 소형 노트북 1280×720, 태블릿 1024×768, 모바일 390×844 runtime error와 horizontal overflow는 0이어야 합니다.
-- tablet 초기 hero는 320px 이하, dock은 80px 이하이며 8개 메뉴가 한 행에 들어가야 합니다.
-- small-laptop 초기 hero는 290px 이하, dock은 90px 이하여야 합니다.
-- 런타임 build key는 `1.5.7-responsive-density`입니다.
+- 자동 QA 기준은 **173/173**입니다.
+- CSS 상한은 활성 `!important` 824, 실제 충돌 0, same-value duplicate 0, shadowed declaration 0입니다.
+- 4개 viewport runtime error와 horizontal overflow는 0이어야 하며 v1.5.13의 주요 computed style·geometry·screenshot을 유지합니다.
+- process memory audit는 16회 이상, runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
+- GPU/media 비교는 두 모드 디코딩 성공, GPU process·media utility process 관측, runtime error 0을 만족해야 합니다.
+- long video audit는 실행 경로 미변경으로 v1.5.9 상속 계약을 사용합니다.
+- 런타임 build key는 `1.5.14-cascade-dedup`입니다.
 
 ## 다음 우선순위
 
-1. responsive custom property 전환과 `!important` 회수
-2. header/brand/stage surface 고위험 CSS 소유권 추가 통합
-3. Chromium RSS·GPU·미디어 native memory 보조 계측
-4. 장시간 고해상도 MP4 반복 검증
+1. 남은 `!important` owner·breakpoint 단위 안전 감축
+2. 물리 GPU가 있는 데스크톱 Chromium에서 hardware acceleration 비교
+3. 15분·30분 30fps 카메라형·고비트레이트 원본 반복 검증
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.13
+
+## Zero-conflict CSS cascade 규칙
+
+- exact selector와 동일 at-rule context에서 최종 winner가 확정된 경우에만 앞선 loser declaration을 제거합니다.
+- selector group 일부만 대상이면 규칙을 selector별로 분리해 다른 selector의 fallback을 보존합니다.
+- 서로 다른 값을 갖는 selector-property conflict는 0을 유지합니다.
+- 동일 값 중복은 conflict가 아니며 독립 stylesheet fallback 여부를 검토한 뒤 별도 단계에서 제거합니다.
+- token은 최종 `foundation-polish.css` 또는 해당 반응형 소유 파일에서만 다른 값을 선언합니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **172/172**입니다.
+- CSS 상한은 활성 `!important` 833, 실제 충돌 0, medium/high-risk 0, shadowed declaration 0입니다.
+- 4개 viewport runtime error와 horizontal overflow는 0이어야 하며 v1.5.12 전체 DOM targeted computed style을 유지합니다.
+- process memory audit는 16회 이상, runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
+- GPU/media 비교는 두 모드 디코딩 성공, GPU process·media utility process 관측, runtime error 0을 만족해야 합니다.
+- long video audit는 실행 경로 미변경으로 `runtime-long-video-stability-v1.5.13.json`의 v1.5.9 상속 계약을 사용합니다.
+- 런타임 build key는 `1.5.13-cascade-ownership`입니다.
+
+## 다음 우선순위
+
+1. same-value duplicate CSS와 `!important` 안전 감축
+2. 물리 GPU가 있는 데스크톱 Chromium에서 hardware acceleration 비교
+3. 15분·30분 30fps 카메라형·고비트레이트 원본 반복 검증
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.12
+
+## Surface·state CSS 소유권 규칙
+
+- exact selector와 동일 at-rule context에서 뒤쪽 declaration이 완전히 덮는 medium-risk loser만 제거합니다.
+- selector group의 일부만 충돌할 때는 rule을 selector별로 분리해 비충돌 selector의 선언을 보존합니다.
+- `.field` gap/color/font-weight는 `ui-refinement.css`가 소유합니다.
+- disabled opacity는 `ui-refinement.css`, disabled cursor는 각 구조 파일이 소유합니다.
+- auto-cut surface는 `shutter-glass-flow.css`, cinematic brand surface는 `hero-command-deck.css`가 소유합니다.
+- console surface background는 `shutter-glass-flow.css`, shadow/padding은 `foundation-polish.css`가 소유합니다.
+- engine status, recommendation action, status dot의 최종 skin은 CSS audit snapshot으로 고정합니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **171/171**입니다.
+- CSS 상한은 활성 `!important` 833, 실제 충돌 48, medium/high-risk 충돌 0, shadowed declaration 51입니다.
+- 4개 viewport runtime error와 horizontal overflow는 0이어야 하며 v1.5.11 targeted computed style을 유지합니다.
+- process memory audit는 16회 이상, runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
+- GPU/media 비교는 두 모드 디코딩 성공, GPU process·media utility process 관측, runtime error 0을 만족해야 합니다.
+- long video audit는 실행 경로 미변경으로 `runtime-long-video-stability-v1.5.12.json`의 v1.5.9 상속 계약을 사용합니다.
+- 런타임 build key는 `1.5.12-surface-state-ownership`입니다.
+
+## 다음 우선순위
+
+1. 남은 low-risk geometry·token·fallback CSS ownership 통합
+2. 물리 GPU가 있는 데스크톱 Chromium에서 hardware acceleration 비교
+3. 15분·30분 30fps 카메라형·고비트레이트 원본 반복 검증
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.11
+
+## Hero typography·interaction 소유권 규칙
+
+- `.hero-compact-note` generic max-width는 `layout-dock.css`, color는 `glass-pro-ui.css`가 소유합니다.
+- cinematic hero base width/max-width와 base min-height는 `hero-command-deck.css`가 소유합니다.
+- desktop/mobile 최종 hero typography와 height는 `ui-refinement.css`가 소유합니다.
+- workspace reveal animation은 `motion-stability.css`, document scroll behavior는 `shutter-glass-flow.css`가 소유합니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **171/171**입니다.
+- CSS 상한은 `!important` 841, conflicts 197, high-risk 0, shadowed 212입니다.
+- 런타임 build key는 `1.5.11-hero-gpu-ownership`입니다.
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.10
+
+## Command·control CSS 소유권 규칙
+
+- retired `.command-group*`, `.command-button*`, `.command-chip*` selector와 관련 DOM probe는 다시 추가하지 않습니다.
+- control zone·preview card의 surface background는 `shutter-glass-flow.css`, 내부 padding은 `foundation-polish.css`가 소유합니다.
+- `.panel-head` spacing, `.upload-tile`, select·textarea 최종 skin은 `ui-refinement.css`가 소유합니다.
+- HyperFlow stage visibility는 `studio-experience.css`, legacy action dock visibility와 source media containment는 `layout-dock.css`가 소유합니다.
+- 구조·배치 파일은 위 최종 skin·visibility 속성을 다시 선언하지 않습니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **168/168**입니다.
+- CSS 상한은 활성 `!important` 853, 실제 충돌 214, 고위험 충돌 11, shadowed declaration 239입니다.
+- 4개 viewport runtime error와 horizontal overflow는 0이어야 하며 v1.5.9의 계산 스타일을 유지합니다.
+- process memory audit는 16회 이상, runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
+- long video audit는 실행 경로 미변경으로 `runtime-long-video-stability-v1.5.10.json`의 v1.5.9 상속 계약을 사용합니다.
+- 런타임 build key는 `1.5.10-control-ownership`입니다.
+
+## 다음 우선순위
+
+1. hardware-accelerated Chromium에서 GPU·media decoder memory 비교
+2. 15분·30분 30fps 카메라형·고비트레이트 원본 반복 검증
+3. 남은 hero/header typography·interaction 충돌 통합
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.9
+
+## 핵심 UI skin 소유권 규칙
+
+- brand panel, version badge, bottom dock의 최종 background·border·backdrop skin은 `shutter-glass-flow.css`가 소유합니다.
+- brand signature의 최종 glass skin은 `glass-pro-ui.css`가 소유합니다.
+- 일반 primary/secondary button의 최종 visual skin은 `ui-refinement.css`가 소유합니다.
+- 구조·배치·상호작용 파일은 위 skin 속성을 다시 선언하지 않습니다.
+- computed style을 바꾸지 않는 완전 shadowed 선언부터 제거하는 원칙을 유지합니다.
+
+## Long video audit 규칙
+
+- `qa/run_long_video_stability.py`는 같은 Chromium 페이지에서 15분→30분→15분 1920×1080 MP4를 교체합니다.
+- 각 반복은 실제 파일 열기, 자동 분석, 추천, 2초 출력, queue 정리, 강제 GC, Object URL 상태 수집을 포함합니다.
+- 장시간 미디어는 `sequential-safe`, 적응형 분석 샘플레이트, 제한된 motion sample, decoded buffer 비보존 조건을 만족해야 합니다.
+- 각 반복 뒤 operation과 render queue는 0이어야 하고 source URL은 하나만 활성화되며 dispose 뒤 모든 URL은 0이어야 합니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **167/167**입니다.
+- CSS 상한은 활성 `!important` 875, 실제 충돌 271, 고위험 충돌 50, shadowed declaration 314입니다.
+- 4개 viewport runtime error와 horizontal overflow는 0이어야 합니다.
+- process memory audit는 16회 이상, runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
+- long video audit는 15분→30분→15분 전 구간 통과와 최종 Object URL 0을 만족해야 합니다.
+- 런타임 build key는 `1.5.9-long-video-skin`입니다.
+
+## 다음 우선순위
+
+1. hardware-accelerated Chromium에서 GPU·media decoder memory 비교
+2. 15분·30분 30fps 카메라형·고비트레이트 원본 반복 검증
+3. command group·control zone의 남은 CSS ownership 통합
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.8
+
+
+## Responsive token·CSS 소유권 규칙
+
+- 공통 shell gutter, top/bottom clearance, hero title scale은 `theme.css`의 `--responsive-*` token이 소유합니다.
+- header topline의 display, columns, alignment, gap, mobile min-height는 `header-meta-rail.css`만 소유합니다.
+- 1180px 이상 shell width/padding-bottom과 720px 이하 title typography는 `ui-refinement.css`만 소유합니다.
+- 현재 단계 표시는 `active-stage-beacon.css`의 rail/chip을 사용하며 이전 `is-navigation-target::after` 라벨은 다시 만들지 않습니다.
+- tablet dock geometry와 desktop workspace grid 소유권은 v1.5.7 계약을 유지합니다.
+
+## Process memory audit 규칙
+
+- `qa/run_process_memory_audit.py`는 동일 Chromium 세션에서 UI navigation을 반복하며 process tree RSS/USS와 renderer JS heap을 수집합니다.
+- GPU·media utility는 Chromium command line process category 기반 보조 지표이며 decoder buffer의 정확한 귀속으로 해석하지 않습니다.
+- headless GPU와 실제 hardware browser의 차이를 명시하며 long MP4 실미디어 검증을 대체하지 않습니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **166/166**입니다.
+- CSS 상한은 활성 `!important` 879, 실제 충돌 304, 고위험 충돌 69, shadowed declaration 372입니다.
+- 4개 viewport runtime error와 horizontal overflow는 0이어야 하며 v1.5.7의 hero/dock 계산 높이를 유지합니다.
+- process memory audit는 16회 이상, runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
+- 런타임 build key는 `1.5.8-responsive-memory`입니다.
+
+## 다음 우선순위
+
+1. 15분·30분 고해상도 MP4 장시간 분석·렌더·파일 교체 반복 검증
+2. hardware-accelerated Chromium에서 GPU·media decoder memory 비교
+3. brand-panel, bottom-dock, button skin의 남은 고위험 CSS 소유권 통합
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
 
 ---
 

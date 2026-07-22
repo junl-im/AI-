@@ -7,28 +7,9 @@
     --glass-line: rgba(226, 232, 240, 0.18);
     --glass-line-strong: rgba(255, 255, 255, 0.28);
     --glass-highlight: rgba(255, 255, 255, 0.12);
-    --glass-shadow: 0 24px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    --glass-blur: 22px;
     --film-cyan: rgba(34, 211, 238, 0.30);
     --film-violet: rgba(139, 92, 246, 0.28);
     --film-amber: rgba(249, 115, 22, 0.20);
-}
-
-html {
-    background:
-        radial-gradient(circle at 10% -10%, rgba(34, 211, 238, 0.24), transparent 34%),
-        radial-gradient(circle at 90% 4%, rgba(139, 92, 246, 0.22), transparent 36%),
-        #050b16;
-}
-
-body {
-    background:
-        linear-gradient(120deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 86px),
-        radial-gradient(circle at 18% 0%, rgba(34, 211, 238, 0.22), transparent 36%),
-        radial-gradient(circle at 76% 6%, rgba(249, 115, 22, 0.15), transparent 34%),
-        radial-gradient(circle at 50% 60%, rgba(139, 92, 246, 0.18), transparent 46%),
-        linear-gradient(145deg, #050b16 0%, #08111f 46%, #121827 100%);
-    background-attachment: fixed;
 }
 
 body::before {
@@ -40,7 +21,6 @@ body::before {
     background:
         linear-gradient(90deg, transparent 0 47%, rgba(255, 255, 255, 0.028) 49%, transparent 51% 100%),
         repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 12px);
-    opacity: 0.28;
     mask-image: linear-gradient(to bottom, black, transparent 74%);
 }
 
@@ -48,25 +28,41 @@ body::before {
     isolation: isolate;
 }
 
-.brand-panel,
-.console-panel,
-.editor-panel > section,
-.control-zone,
-.preview-card,
-.waveform-card,
-.copy-card,
-.command-group,
+.console-panel {
+    border-color: var(--glass-line) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
+}
+
+.editor-panel > section {
+    border-color: var(--glass-line) !important;
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%),
+        linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft)) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
+}
+
 .render-queue-card,
-.engine-status-card,
 .flow-summary-bar,
 .selected-summary-bar,
-.bottom-dock,
 .modal-card {
     border-color: var(--glass-line) !important;
     background:
         linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%),
         linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft)) !important;
     box-shadow: var(--glass-shadow) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
+}
+
+/* Final surface colors belong to ui-refinement/shutter layers; keep material only. */
+.control-zone,
+.preview-card,
+.waveform-card,
+.copy-card {
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
+}
+.engine-status-card {
     backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
 }
@@ -79,13 +75,6 @@ body::before {
 
 .brand-panel.cinematic-brand-panel {
     min-height: clamp(190px, 19vw, 270px);
-    border: 1px solid rgba(255, 255, 255, 0.20) !important;
-    background:
-        linear-gradient(120deg, rgba(255, 255, 255, 0.13), transparent 28%),
-        radial-gradient(circle at 14% 18%, var(--film-cyan), transparent 35%),
-        radial-gradient(circle at 82% 12%, var(--film-amber), transparent 34%),
-        radial-gradient(circle at 54% 72%, var(--film-violet), transparent 44%),
-        rgba(8, 13, 25, 0.66) !important;
 }
 
 .brand-panel.cinematic-brand-panel::after {
@@ -108,16 +97,11 @@ body::before {
     100% { transform: translateX(62%); opacity: 0.12; }
 }
 
-.cinematic-title {
-    text-shadow: 0 18px 60px rgba(34, 211, 238, 0.20);
-}
-
 .hero-compact-note {
     color: rgba(226, 232, 240, 0.86) !important;
 }
 
 .brand-signature-pill,
-.badge-version,
 .command-chip,
 .tab-state-dot,
 .status-pill,
@@ -146,17 +130,19 @@ body::before {
 }
 
 .console-panel,
-.editor-panel > section,
 .control-zone,
 .preview-card,
 .waveform-card,
-.copy-card,
-.command-group {
+.copy-card {
     position: relative;
     overflow: hidden;
 }
 
-.upload-tile,
+.editor-panel > section {
+    position: relative;
+    overflow: hidden;
+}
+
 .caption-style-card,
 .thumbnail-template-card,
 .render-queue-row,
@@ -180,7 +166,6 @@ body::before {
 }
 
 .recommendation-card.is-selected {
-    border-color: rgba(34, 211, 238, 0.58) !important;
     box-shadow:
         0 0 0 1px rgba(34, 211, 238, 0.12),
         0 20px 60px rgba(34, 211, 238, 0.14),
@@ -195,8 +180,6 @@ body::before {
         inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
 }
 
-.btn-primary,
-.btn-secondary,
 .command-button,
 .small-action,
 .rec-select-btn,
@@ -205,7 +188,6 @@ body::before {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 12px 28px rgba(0, 0, 0, 0.18) !important;
 }
 
-.btn-secondary,
 .command-button.btn-secondary,
 .small-action,
 .rec-select-btn {
@@ -213,17 +195,9 @@ body::before {
     color: rgba(248, 250, 252, 0.94) !important;
 }
 
-.btn-primary,
 .command-button.btn-primary {
     background:
         linear-gradient(135deg, rgba(34, 211, 238, 0.95), rgba(139, 92, 246, 0.92), rgba(249, 115, 22, 0.86)) !important;
-}
-
-.bottom-dock {
-    background:
-        linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent 32%),
-        rgba(7, 12, 24, 0.78) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
 }
 
 .bottom-dock-tab {
@@ -236,22 +210,7 @@ body::before {
     text-shadow: 0 1px 14px rgba(0, 0, 0, 0.34);
 }
 
-select,
-input,
-textarea {
-    background: rgba(0, 0, 0, 0.22) !important;
-    border-color: rgba(255, 255, 255, 0.16) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-select:focus,
-input:focus,
-textarea:focus,
-button:focus-visible,
-label:focus-visible {
-    outline: 2px solid rgba(34, 211, 238, 0.58);
-    outline-offset: 3px;
-}
+/* Form control skin is owned by ui-refinement.css. */
 
 .empty-state {
     background:
@@ -268,7 +227,6 @@ label:focus-visible {
     .preview-card,
     .waveform-card,
     .copy-card,
-    .command-group,
     .bottom-dock {
         background: rgba(10, 18, 34, 0.96) !important;
     }

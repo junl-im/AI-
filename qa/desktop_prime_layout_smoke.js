@@ -19,14 +19,15 @@ const html = read('index.html');
 const css = read('assets/css/desktop-prime-layout.css');
 const workspaceCss = read('assets/css/workspace-layout-controls.css');
 const headerCss = read('assets/css/header-meta-rail.css');
+const heroCss = read('assets/css/hero-command-deck.css');
 const sw = read('sw.js');
 const gate = read('src/ui/flow-quality-gate.js');
 const director = read('src/ui/flow-director-final.js');
 const startPanel = (html.match(/<section class="start-command-panel[\s\S]*?<\/section>/) || [''])[0];
 
-assert(pkg.version === '1.5.7', 'desktop prime release version is v1.5.7');
-assert(html.includes('assets/css/desktop-prime-layout.css?v=1.5.7-responsive-density'), 'desktop prime stylesheet is linked last');
-assert(sw.includes('desktop-prime-layout.css?v=1.5.7-responsive-density'), 'desktop prime stylesheet is cached');
+assert(pkg.version === '1.5.14', 'desktop prime release version is v1.5.14');
+assert(html.includes('assets/css/desktop-prime-layout.css?v=1.5.14-cascade-dedup'), 'desktop prime stylesheet is linked last');
+assert(sw.includes('desktop-prime-layout.css?v=1.5.14-cascade-dedup'), 'desktop prime stylesheet is cached');
 assert(html.includes('data-desktop-layout="prime"'), 'prime desktop layout marker is present');
 assert(workspaceCss.includes('"load divider-left preview divider-right candidates"') && workspaceCss.includes('"recommend divider-left preview divider-right waveform"'), 'desktop first viewport exposes input, preview, candidates, and waveform lanes');
 assert(css.includes('body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] [data-flow-panel]:not(.is-flow-active)') && css.includes('display: block !important'), 'desktop overrides legacy single-panel hiding rules');
@@ -37,5 +38,5 @@ assert(startPanel.includes('flow-overview-copy') && startPanel.includes('메뉴�
 assert(!startPanel.includes('for="fileInput"') && !startPanel.includes('projectFileInput'), 'mobile landing has no duplicated import buttons');
 assert(css.includes('body:not(.has-media)[data-active-flow-tab="file"] .studio-grid'), 'mobile empty file tab hides the redundant import workspace');
 assert(headerCss.includes('grid-template-columns: minmax(0, 1fr) auto !important'), 'version and designer metadata use opposite header edges');
-assert(css.includes('max-width: 720px !important'), 'hero description width is restrained');
-console.log('PASS v1.5.7 desktop prime and mobile flow-only guardrails present');
+assert(heroCss.includes('max-width: 660px !important'), 'hero description width is restrained by the hero owner');
+console.log('PASS v1.5.14 desktop prime and mobile flow-only guardrails present');

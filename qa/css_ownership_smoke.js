@@ -24,18 +24,15 @@ if (JSON.stringify(report.archivedCssFiles) !== JSON.stringify(['cinematic-hero.
 if (!Array.isArray(report.propertyConflicts) || report.propertyConflicts.length !== report.conflictingPropertyCount) {
     throw new Error('full selector-property conflict inventory is missing');
 }
-if (report.importantCount > 904) throw new Error('CSS !important count exceeded the ownership baseline');
-if (report.conflictingPropertyCount > 334) throw new Error('selector-property conflicts exceeded the ownership baseline');
-if (report.highRiskConflictCount > 81) throw new Error('high-risk CSS conflicts exceeded the ownership baseline');
-if (report.shadowedDeclarationCount > 422) throw new Error('shadowed CSS declarations exceeded the ownership baseline');
+if (report.importantCount > 824) throw new Error('CSS !important count exceeded the ownership baseline');
+if (report.conflictingPropertyCount !== 0) throw new Error('selector-property conflicts must remain at zero');
+if (report.highRiskConflictCount > 0) throw new Error('high-risk CSS conflicts exceeded the ownership baseline');
+if (report.shadowedDeclarationCount !== 0) throw new Error('shadowed CSS declarations must remain at zero');
 if (report.highConflictSelectorCount < 1) throw new Error('high-conflict selector inventory is unexpectedly empty');
 
 const categoryTotal = Object.values(report.conflictCategoryCounts || {}).reduce((sum, count) => sum + count, 0);
-if (categoryTotal !== report.conflictingPropertyCount) throw new Error('CSS conflict category totals are inconsistent');
-for (const category of ['layout', 'skin', 'typography', 'interaction']) {
-    if (!Object.hasOwn(report.conflictCategoryCounts, category)) {
-        throw new Error(`CSS conflict category missing: ${category}`);
-    }
+if (categoryTotal !== 0 || Object.keys(report.conflictCategoryCounts || {}).length !== 0) {
+    throw new Error('zero-conflict release must not expose conflict categories');
 }
 
 const recommendation = report.criticalOwnership?.recommendationCardBase;
@@ -95,6 +92,116 @@ for (const key of ['transportButton', 'exportButton', 'exportAllButton']) {
     }
 }
 
+const headerTopline = report.criticalOwnership?.headerTopline;
+const mobileHeaderTopline = report.criticalOwnership?.mobileHeaderTopline;
+const desktopShell = report.criticalOwnership?.desktopShell;
+const mobileHeroTitle = report.criticalOwnership?.mobileHeroTitle;
+if (!headerTopline || !mobileHeaderTopline || !desktopShell || !mobileHeroTitle) {
+    throw new Error('v1.5.14 responsive ownership snapshots are missing');
+}
+for (const property of ['display', 'grid-template-columns', 'align-items', 'gap']) {
+    assertSingleOwner(headerTopline, property, 'header-meta-rail.css');
+}
+for (const property of ['display', 'grid-template-columns', 'gap', 'min-height']) {
+    assertSingleOwner(mobileHeaderTopline, property, 'header-meta-rail.css');
+}
+for (const property of ['width', 'padding-bottom']) {
+    assertSingleOwner(desktopShell, property, 'ui-refinement.css');
+}
+for (const property of ['font-size', 'line-height', 'letter-spacing']) {
+    assertSingleOwner(mobileHeroTitle, property, 'ui-refinement.css');
+}
+
+
+const brandPanelSkin = report.criticalOwnership?.brandPanelSkin;
+const badgeVersionSkin = report.criticalOwnership?.badgeVersionSkin;
+const brandSignatureSkin = report.criticalOwnership?.brandSignatureSkin;
+const bottomDockSkin = report.criticalOwnership?.bottomDockSkin;
+const primaryButtonSkin = report.criticalOwnership?.primaryButtonSkin;
+const secondaryButtonSkin = report.criticalOwnership?.secondaryButtonSkin;
+if (!brandPanelSkin || !badgeVersionSkin || !brandSignatureSkin || !bottomDockSkin || !primaryButtonSkin || !secondaryButtonSkin) {
+    throw new Error('brand, dock, and button skin ownership snapshots are missing');
+}
+for (const property of ['background', 'border', 'box-shadow', 'backdrop-filter']) {
+    assertSingleOwner(brandPanelSkin, property, 'shutter-glass-flow.css');
+}
+for (const property of ['background', 'border', 'color', 'backdrop-filter']) {
+    assertSingleOwner(badgeVersionSkin, property, 'shutter-glass-flow.css');
+}
+for (const property of ['background', 'border-color', 'backdrop-filter']) {
+    assertSingleOwner(brandSignatureSkin, property, 'glass-pro-ui.css');
+}
+for (const property of ['background', 'border-top', 'backdrop-filter']) {
+    assertSingleOwner(bottomDockSkin, property, 'shutter-glass-flow.css');
+}
+for (const snapshot of [primaryButtonSkin, secondaryButtonSkin]) {
+    for (const property of ['background', 'border', 'box-shadow', 'color']) {
+        assertSingleOwner(snapshot, property, 'ui-refinement.css');
+    }
+}
+
+const controlZoneBase = report.criticalOwnership?.controlZoneBase;
+const previewCardBase = report.criticalOwnership?.previewCardBase;
+const panelHeadSpacing = report.criticalOwnership?.panelHeadSpacing;
+const uploadTileSkin = report.criticalOwnership?.uploadTileSkin;
+const selectSkin = report.criticalOwnership?.selectSkin;
+const textareaSkin = report.criticalOwnership?.textareaSkin;
+const hyperflowStageVisibility = report.criticalOwnership?.hyperflowStageVisibility;
+const legacyActionDockVisibility = report.criticalOwnership?.legacyActionDockVisibility;
+const sourceMediaContainment = report.criticalOwnership?.sourceMediaContainment;
+if (!controlZoneBase || !previewCardBase || !panelHeadSpacing || !uploadTileSkin || !selectSkin || !textareaSkin || !hyperflowStageVisibility || !legacyActionDockVisibility || !sourceMediaContainment) {
+    throw new Error('command and control ownership snapshots are missing');
+}
+for (const surface of [controlZoneBase, previewCardBase]) {
+    assertSingleOwner(surface, 'background', 'shutter-glass-flow.css');
+    assertSingleOwner(surface, 'padding', 'foundation-polish.css');
+}
+assertSingleOwner(panelHeadSpacing, 'margin-bottom', 'ui-refinement.css');
+for (const property of ['background', 'border', 'box-shadow']) {
+    assertSingleOwner(uploadTileSkin, property, 'ui-refinement.css');
+    assertSingleOwner(selectSkin, property, 'ui-refinement.css');
+    assertSingleOwner(textareaSkin, property, 'ui-refinement.css');
+}
+assertSingleOwner(textareaSkin, 'min-height', 'ui-refinement.css');
+assertSingleOwner(hyperflowStageVisibility, 'display', 'studio-experience.css');
+assertSingleOwner(legacyActionDockVisibility, 'display', 'layout-dock.css');
+for (const property of ['display', 'width', 'max-height']) {
+    assertSingleOwner(sourceMediaContainment, property, 'layout-dock.css');
+}
+
+
+const mediumConflicts = report.propertyConflicts.filter(item => item.risk === 'medium' || item.risk === 'high');
+if (mediumConflicts.length) throw new Error('medium/high-risk CSS conflicts reappeared');
+
+const fieldRhythm = report.criticalOwnership?.fieldRhythm;
+const disabledButtonState = report.criticalOwnership?.disabledButtonState;
+const disabledMiniActionState = report.criticalOwnership?.disabledMiniActionState;
+const ambientOverlayState = report.criticalOwnership?.ambientOverlayState;
+const autoCutSurface = report.criticalOwnership?.autoCutSurface;
+const cinematicBrandSurface = report.criticalOwnership?.cinematicBrandSurface;
+const consoleSurface = report.criticalOwnership?.consoleSurface;
+const engineStatusSurface = report.criticalOwnership?.engineStatusSurface;
+const recommendationActionSkin = report.criticalOwnership?.recommendationActionSkin;
+const statusDotSkin = report.criticalOwnership?.statusDotSkin;
+if (!fieldRhythm || !disabledButtonState || !disabledMiniActionState || !ambientOverlayState || !autoCutSurface || !cinematicBrandSurface || !consoleSurface || !engineStatusSurface || !recommendationActionSkin || !statusDotSkin) {
+    throw new Error('surface and state ownership snapshots are missing');
+}
+for (const property of ['gap', 'color', 'font-weight']) assertSingleOwner(fieldRhythm, property, 'ui-refinement.css');
+assertSingleOwner(disabledButtonState, 'opacity', 'ui-refinement.css');
+assertSingleOwner(disabledButtonState, 'cursor', 'theme.css');
+assertSingleOwner(disabledMiniActionState, 'opacity', 'ui-refinement.css');
+assertSingleOwner(disabledMiniActionState, 'cursor', 'advanced-editor.css');
+assertSingleOwner(ambientOverlayState, 'opacity', 'ui-refinement.css');
+for (const property of ['background', 'border']) assertSingleOwner(autoCutSurface, property, 'shutter-glass-flow.css');
+for (const property of ['background', 'border', 'box-shadow']) assertSingleOwner(cinematicBrandSurface, property, 'hero-command-deck.css');
+assertSingleOwner(consoleSurface, 'background', 'shutter-glass-flow.css');
+assertSingleOwner(consoleSurface, 'box-shadow', 'foundation-polish.css');
+assertSingleOwner(consoleSurface, 'padding', 'foundation-polish.css');
+for (const property of ['background', 'box-shadow']) assertSingleOwner(engineStatusSurface, property, 'ui-refinement.css');
+for (const property of ['background', 'border', 'box-shadow']) assertSingleOwner(recommendationActionSkin, property, 'ui-refinement.css');
+assertSingleOwner(statusDotSkin, 'background', 'glass-pro-ui.css');
+assertSingleOwner(statusDotSkin, 'box-shadow', 'ui-refinement.css');
+
 const forbiddenConflicts = report.propertyConflicts.filter(item => (
     item.selector === '.recommendation-card'
     && item.context === 'base'
@@ -110,4 +217,4 @@ const forbiddenConflicts = report.propertyConflicts.filter(item => (
 ));
 if (forbiddenConflicts.length) throw new Error('consolidated CSS ownership conflicts reappeared');
 
-console.log('PASS v1.5.7 responsive density CSS ownership and consolidated cascade ceilings');
+console.log('PASS v1.5.14 zero-conflict CSS cascade ownership ceiling');

@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-5-7",
-  "version": "1.5.7",
+  "name": "ai-shorts-studio-v1-5-14",
+  "version": "1.5.14",
   "private": true,
-  "description": "AI Shorts Studio v1.5.7 - compact tablet dock, small-laptop hero density, and responsive CSS ownership cleanup",
+  "description": "AI Shorts Studio v1.5.14 - same-value CSS deduplication and important cleanup",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -146,12 +146,20 @@
     "node qa/responsive_density_smoke.js",
     "node qa/run_css_ownership_audit.js",
     "node qa/css_ownership_smoke.js",
+    "node qa/cascade_ownership_smoke.js",
+    "node qa/same_value_css_smoke.js",
+    "node qa/control_ownership_smoke.js",
+    "node qa/hero_interaction_ownership_smoke.js",
+    "node qa/responsive_tokens_smoke.js",
     "node qa/icon_system_smoke.js",
     "node qa/distribution_packaging_smoke.js",
     "node qa/pc_menu_containment_smoke.js",
     "node qa/stability_audit_smoke.js",
     "node qa/runtime_guard_smoke.js",
     "node qa/runtime_browser_audit_smoke.js",
+    "node qa/process_memory_audit_smoke.js",
+    "python3 qa/run_gpu_media_capability_audit.py",
+    "node qa/gpu_media_capability_smoke.js",
     "node qa/operation_coordinator_smoke.js",
     "node qa/active_stage_beacon_smoke.js",
     "node --check src/ui/workspace-layout-controls.js",
@@ -167,6 +175,7 @@
     "node qa/service_worker_lifecycle_smoke.js",
     "node qa/media_e2e_audit_smoke.js",
     "node qa/long_media_performance_smoke.js",
+    "node qa/long_video_stability_smoke.js",
     "node qa/render_eta_smoke.js",
     "node qa/mobile_menu_guide_smoke.js",
     "node qa/decode_memory_preflight_smoke.js",
@@ -177,5 +186,8 @@
     "node qa/studio_experience_smoke.js",
     "node qa/analysis_cache_safety_smoke.js",
     "node qa/parallel_analysis_smoke.js"
-  ]
+  ],
+  "devDependencies": {
+    "postcss": "^8.5.6"
+  }
 }

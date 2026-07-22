@@ -16,13 +16,7 @@ body[data-ui="brand-feedback"] {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 32px;
     border: 1px solid rgba(245, 158, 11, 0.32);
-    border-radius: 999px;
-    padding: 6px 12px;
-    background:
-        linear-gradient(135deg, rgba(249, 115, 22, 0.16), rgba(124, 58, 237, 0.12)),
-        rgba(15, 23, 42, 0.72);
     color: #ffedd5;
     font-size: 12px;
     font-weight: 900;
@@ -199,7 +193,6 @@ button, label[for], .bottom-dock-btn, .recommendation-card, .caption-preset, .mi
 /* v0.8.2 brand signature must remain visible even after compact header cleanup. */
 .brand-right-actions {
     display: flex !important;
-    align-items: center;
     justify-content: flex-end;
 }
 .brand-signature-pill {

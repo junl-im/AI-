@@ -102,8 +102,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
 .cinematic-brand-panel .brand-topline {
     position: relative;
     z-index: 4;
-    align-items: center;
-    gap: 18px;
     min-height: 49px;
     margin: 0 !important;
     padding: 0 3px !important;
@@ -239,7 +237,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
 
 .cinematic-brand-panel .brand-compat-pill {
     justify-self: center;
-    display: inline-flex;
     align-items: center;
     gap: 8px;
     min-height: 0 !important;
@@ -890,10 +887,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
 @media (max-width: 720px) {
 
-    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
-        grid-template-columns: 1fr auto;
-        gap: 10px;
-    }
 
     .cinematic-brand-panel .brand-compat-pill,
     .release-name {
@@ -922,19 +915,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         letter-spacing: 0.12em;
     }
 
-    .cinematic-brand-panel .badge-version {
-        padding-left: 31px !important;
-        font-size: 9px !important;
-    }
-
-    .cinematic-brand-panel .badge-version::before {
-        font-size: 6.5px;
-    }
-
-    .cinematic-brand-panel .brand-signature-pill strong {
-        font-size: 9px;
-    }
-
     .cinematic-brand-panel .hero-mainline {
         display: block !important;
         padding: 17px 8px 0 !important;
@@ -942,7 +922,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
     .hero-eyebrow {
         gap: 7px;
-        margin-bottom: 10px;
         font-size: 6.5px;
         letter-spacing: 0.13em;
     }
@@ -960,8 +939,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title,
     .cinematic-title {
         gap: 0.12em;
-        font-size: clamp(32px, 10.6vw, 43px) !important;
-        line-height: 0.94 !important;
     }
 
     .cinematic-title .title-ai {
@@ -970,15 +947,10 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         width: min(100%, 31rem) !important;
-        max-width: 31rem !important;
-        margin-top: 14px !important;
         padding-right: 2px !important;
-        font-size: 10.5px !important;
-        line-height: 1.5 !important;
     }
 
     .shorts-timeline {
-        margin-top: 16px;
         padding-top: 10px;
     }
 

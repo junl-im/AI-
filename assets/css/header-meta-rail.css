@@ -18,6 +18,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions,
 .cinematic-brand-panel .brand-right-actions {
     display: flex !important;
     grid-column: 2 !important;
+    align-items: center !important;
     justify-self: end !important;
     min-width: max-content;
 }

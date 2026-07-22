@@ -1,8 +1,5 @@
 /* AI Shorts Studio v1.0.8 - Flow integrity and workspace polish */
 :root { --flow-integrity-radius: 22px; }
-
-html { scroll-behavior: smooth; }
-body[data-ui="hyperflow-tabs"] { scroll-padding-bottom: calc(var(--hyperflow-dock-height, 144px) + 16px); }
 body[data-ui="hyperflow-tabs"] .app-shell { padding-bottom: calc(var(--hyperflow-dock-height, 144px) + 18px); }
 
 /* 상단은 소개만, 중복 액션은 숨긴다. */
@@ -53,9 +50,6 @@ body[data-ui="hyperflow-tabs"] #studioGrid {
     outline: none;
     scroll-margin-top: 10px;
 }
-body[data-ui="hyperflow-tabs"] [data-flow-panel] {
-    scroll-margin-top: 10px;
-}
 body[data-ui="hyperflow-tabs"] .control-zone,
 body[data-ui="hyperflow-tabs"] .preview-card,
 body[data-ui="hyperflow-tabs"] .waveform-card,
@@ -64,7 +58,6 @@ body[data-ui="hyperflow-tabs"] .edit-tools-card,
 body[data-ui="hyperflow-tabs"] .export-card,
 body[data-ui="hyperflow-tabs"] .project-card,
 body[data-ui="hyperflow-tabs"] .copy-card {
-    border-radius: var(--flow-integrity-radius);
     min-height: auto !important;
 }
 body[data-active-flow-tab="candidates"] .candidates-zone {
@@ -73,18 +66,9 @@ body[data-active-flow-tab="candidates"] .candidates-zone {
 }
 
 /* 추천 카드 선택 CTA는 버튼 크기만 유지하고 배너처럼 커지지 않는다. */
-body[data-ui="hyperflow-tabs"] .rec-select-cta,
 body[data-ui="hyperflow-tabs"] .hyperconnect-selection-guide,
 body[data-ui="hyperflow-tabs"] .recommend-flow-guide {
     font-size: 0.84rem;
-}
-body[data-ui="hyperflow-tabs"] .rec-select-cta {
-    min-height: 32px;
-    padding: 0 11px;
-    margin-top: 8px;
-}
-body[data-ui="hyperflow-tabs"] .recommendation-card {
-    cursor: pointer;
 }
 
 /* 액션 버튼 재압축: 편집/미리보기/저장 버튼은 카드형 배너가 아닌 일반 버튼. */

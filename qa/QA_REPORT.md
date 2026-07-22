@@ -1,21 +1,164 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.7
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.14
 
 ## 최종 결과
 
-- 자동 검사: **164/164 통과**
+- 자동 검사: **173/173 통과**
 - 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- 태블릿 8단계 단일 행 dock, 데스크톱·소형 노트북 workspace resize·focus mode 통과
-- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+- 서비스워커·16회 process memory·GPU/media 감사는 v1.5.14 기준으로 재생성·통과
+- 미디어 실행 경로 미변경으로 v1.5.9 장시간 MP4 감사 결과 상속
 
 ## UI·CSS 결과
 
-- 태블릿 초기 hero: **300px**, dock: **73px**
-- 소형 노트북 초기 hero: **275px**, dock: **86px**
-- 실제 selector-property 충돌: **338 → 334**
-- 고위험 충돌: **85 → 81**
-- shadowed declaration: **422 → 414**
-- 활성 `!important`: **904** — 중간 breakpoint custom property 전환 시 회수 예정
+- 실제 selector-property 충돌: **0 유지**
+- same-value duplicate: **57 → 0**
+- shadowed declaration: **0 유지**
+- 활성 `!important`: **833 → 824**
+- source declaration 51개 제거, grouped selector rule 5개 안전 분리
+- 4개 viewport 주요 computed style·geometry와 결정적 screenshot은 v1.5.13 대비 변화 0건
+
+## 감사 제한
+
+- headless process RSS/GPU 분류는 실제 hardware-accelerated browser의 개별 native decoder buffer를 직접 측정하지 않습니다.
+- 30fps 고비트레이트 원본과 모바일 실기기 검증은 별도 환경이 필요합니다.
+
+---
+
+# QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.13
+
+## 최종 결과
+
+- 자동 검사: **172/172 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+- Chromium process memory audit 16회, runtime error 0, active operation·render queue 0
+- GPU/media comparison 두 모드 디코딩 성공, GPU·media utility process 관측
+- 미디어 실행 경로 미변경으로 v1.5.9 장시간 MP4 감사 결과 상속
+
+## UI·CSS 결과
+
+- 실제 selector-property 충돌: **48 → 0**
+- medium/high-risk 충돌: **0 → 0**
+- shadowed declaration: **51 → 0**
+- 활성 `!important`: **833 유지**
+- source declaration 47개 제거, selector group 2개 안전 분리
+- 4개 viewport 전체 DOM targeted computed style과 결정적 screenshot은 v1.5.12 대비 변화 0건
+
+## 감사 제한
+
+- same-value duplicate CSS 57건은 conflict가 아니며 stylesheet fallback 검토 후 별도 정리합니다.
+- headless process RSS/GPU 분류는 실제 hardware-accelerated browser의 개별 native decoder buffer를 직접 측정하지 않습니다.
+- 30fps 고비트레이트 원본과 모바일 실기기 검증은 별도 환경이 필요합니다.
+
+---
+
+# QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.12
+
+## 최종 결과
+
+- 자동 검사: **171/171 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+- Chromium process memory audit 16회, runtime error 0, active operation·render queue 0
+- GPU/media comparison 두 모드 디코딩 성공, GPU·media utility process 관측
+- 미디어 실행 경로 미변경으로 v1.5.9 장시간 MP4 감사 결과 상속
+
+## UI·CSS 결과
+
+- 실제 selector-property 충돌: **197 → 48**
+- medium/high-risk 충돌: **149 → 0**
+- shadowed declaration: **212 → 51**
+- 활성 `!important`: **841 → 833**
+- field·disabled state·ambient overlay·surface·recommendation action·status dot 단일 소유권 smoke 통과
+- 4개 viewport targeted computed style은 v1.5.11과 동일
+
+## 감사 제한
+
+- 남은 48건은 low-risk geometry·token·fallback 충돌입니다.
+- headless process RSS/GPU 분류는 실제 hardware-accelerated browser의 개별 native decoder buffer를 직접 측정하지 않습니다.
+- 30fps 고비트레이트 원본과 모바일 실기기 검증은 별도 환경이 필요합니다.
+
+---
+
+# QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.11
+
+- 자동 검사 **171/171 통과**
+- CSS conflicts 214→197, high-risk 11→0, `!important` 853→841, shadowed 239→212
+- 4개 viewport 오류·가로 overflow 0건
+- process memory·GPU/media·service worker 감사 통과
+
+---
+
+# QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.10
+
+- 자동 검사 **168/168 통과**
+- CSS conflicts 271→214, high-risk 50→11, `!important` 875→853, shadowed 314→239
+- 4개 viewport 오류·가로 overflow 0건
+
+---
+
+# QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.9
+
+## 최종 결과
+
+- 자동 검사: **167/167 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+- Chromium process memory audit 16회, runtime error 0, active operation·render queue 0
+- 실제 15분→30분→15분 1920×1080 MP4 교체·분석·추천·2초 출력·정리 통과
+- 장시간 감사 종료 후 활성 Object URL: **0개**
+
+## UI·CSS 결과
+
+- 실제 selector-property 충돌: **304 → 271**
+- 고위험 충돌: **69 → 50**
+- shadowed declaration: **372 → 314**
+- 활성 `!important`: **879 → 875**
+- brand panel·version badge·brand signature·bottom dock·primary/secondary button skin 단일 소유권 smoke 통과
+
+## Long video 결과
+
+- 15분 최초 분석: **13.042초**, 2초 출력: **3.661초**
+- 30분 분석: **23.596초**, 2초 출력: **2.863초**
+- 15분 재교체 캐시 분석: **0.288초**, 2초 출력: **2.863초**
+- 전 구간 `sequential-safe`, decoded audio/channel buffer 비보존, operation·queue 해제 통과
+- 각 반복 source Object URL 1개·export URL 0개, dispose 뒤 active URL 0개
+
+## 감사 제한
+
+- 장시간 소스는 지속시간과 안정성을 위한 1fps all-keyframe 합성 1080p MP4이며 고프레임·고비트레이트 카메라 원본을 대체하지 않습니다.
+- headless process RSS/GPU 분류는 개별 native decoder buffer를 직접 측정하지 않습니다.
+
+---
+
+# QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.8
+
+
+## 최종 결과
+
+- 자동 검사: **166/166 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- v1.5.7 대비 hero·stage·first panel·dock 계산 geometry 변화: **0px**
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+- Chromium process memory audit 16회, runtime error 0, active operation·render queue 0
+
+## UI·CSS 결과
+
+- 실제 selector-property 충돌: **334 → 304**
+- 고위험 충돌: **81 → 69**
+- shadowed declaration: **414 → 372**
+- 활성 `!important`: **904 → 879**
+- header topline, desktop shell, mobile title 단일 소유권 smoke 통과
+
+## Memory audit 범위
+
+- 직접 측정: Chromium process tree RSS/USS, renderer JS heap, DOM/layout/style counter
+- 보조 분류: GPU process와 media-capable utility process RSS
+- 제한: shared RSS 중복 가능성, decoder buffer 직접 귀속 불가, headless와 hardware GPU 차이
 
 ---
 

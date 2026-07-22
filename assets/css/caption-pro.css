@@ -9,7 +9,10 @@
         linear-gradient(145deg, rgba(15, 23, 42, 0.90), rgba(30, 41, 59, 0.72));
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 18px 42px rgba(2, 6, 23, 0.24);
 }
-.caption-pro-head,
+.caption-pro-head {
+    display: flex;
+    justify-content: space-between;
+}
 .caption-toggle-row {
     display: flex;
     align-items: center;
@@ -18,13 +21,10 @@
 }
 .caption-pro-head strong {
     display: block;
-    font-size: 15px;
-    color: #f8fafc;
 }
 .caption-pro-head small {
     display: block;
     margin-top: 3px;
-    color: rgba(226, 232, 240, 0.66);
 }
 .caption-preset-row {
     display: grid;

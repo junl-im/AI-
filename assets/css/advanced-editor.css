@@ -1,8 +1,6 @@
 /* AI Shorts Studio v0.4.0 - draggable timeline, batch export, thumbnail templates */
 .waveform-drag-shell {
-    position: relative;
     border-radius: var(--radius-md);
-    overflow: hidden;
 }
 .waveform-drag-shell canvas { position: relative; z-index: 1; }
 .range-drag-overlay {
@@ -91,16 +89,12 @@
 .mini-action {
     min-height: 34px;
     padding: 0 12px;
-    border: 1px solid rgba(148, 163, 184, 0.26);
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.72);
-    color: #dbeafe;
     font-size: 12px;
     font-weight: 850;
     cursor: pointer;
     white-space: nowrap;
 }
-.mini-action:disabled { opacity: 0.45; cursor: not-allowed; }
+.mini-action:disabled { cursor: not-allowed; }
 .batch-export-panel {
     display: grid;
     grid-template-columns: minmax(160px, 0.8fr) minmax(180px, 1fr);
@@ -115,7 +109,6 @@
 .batch-export-panel small {
     grid-column: 1 / -1;
     color: var(--muted);
-    font-size: 12px;
     line-height: 1.45;
 }
 .field.compact { margin: 0; }

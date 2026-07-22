@@ -6,9 +6,6 @@
 body[data-ui="hyperflow-tabs"] [data-flow-panel][hidden] {
     display: none !important;
 }
-body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
-    display: block !important;
-}
 body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-standby {
     display: none !important;
 }

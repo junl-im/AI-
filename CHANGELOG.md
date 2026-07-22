@@ -1,5 +1,75 @@
 # CHANGELOG
 
+## v1.5.14 - Same-Value CSS Deduplication
+
+- cross-file same-value selector-property 중복 57개 그룹을 최종 owner 한 곳으로 통합했습니다.
+- grouped selector 일부만 중복인 5개 규칙을 안전하게 분리해 다른 selector의 fallback을 보존했습니다.
+- source declaration 51개와 중복 `!important` 9개를 제거했습니다.
+- CSS 기준을 `!important` 833→824, same-value duplicate 57→0, conflicts 0 유지, shadowed 0 유지로 개선했습니다.
+- 버전 변경 전 4개 viewport 주요 computed style·geometry와 결정적 screenshot은 v1.5.13과 변화 0건이었습니다.
+- same-value duplicate inventory·smoke test와 재현 가능한 consolidation tool을 추가했습니다.
+
+## v1.5.13 - Zero-Conflict Cascade Ownership
+
+- 남아 있던 low-risk geometry·token·fallback 충돌의 비우승 선언을 exact selector·at-rule context 기준으로 제거했습니다.
+- selector group 일부만 충돌한 규칙은 selector별로 분리해 비충돌 fallback과 다른 요소의 선언을 보존했습니다.
+- 47개 source declaration을 정리해 51개 shadowed selector-property occurrence를 제거했습니다.
+- 활성 `!important` 833 유지, selector-property 충돌 48→0, shadowed declaration 51→0으로 낮췄습니다.
+- 버전 변경 전 4개 viewport 전체 DOM targeted computed style과 결정적 screenshot은 v1.5.12와 변화 0건이었습니다.
+- 자동 QA 172/172, 4개 viewport, process memory, GPU/media capability, service worker lifecycle 감사를 통과했습니다.
+
+## v1.5.12 - Surface & State Ownership Consolidation
+
+- exact selector·at-rule context 기준으로 medium-risk loser declaration 149건을 제거했습니다.
+- selector group 일부만 가려진 규칙은 selector별로 분리해 비충돌 fallback을 보존했습니다.
+- field rhythm, disabled button/mini-action, ambient overlay, auto-cut·cinematic brand·console·engine status surface의 최종 소유자를 단일화했습니다.
+- recommendation action과 status dot의 background·border·shadow 소유권을 단일화했습니다.
+- 활성 `!important` 841→833, selector-property 충돌 197→48, medium/high-risk 충돌 149→0, shadowed declaration 212→51로 낮췄습니다.
+- 버전 변경 전 4개 viewport targeted computed style은 v1.5.11과 동일했고 Chromium 오류·가로 overflow는 0건입니다.
+- 자동 QA 171/171, process memory, GPU/media capability, service worker lifecycle 감사를 통과했습니다.
+
+## v1.5.11 - Hero Interaction Ownership & GPU/Media Capability Audit
+
+- hero 설명의 generic·cinematic·desktop·mobile width, color, typography 소유자를 명확히 분리했습니다.
+- hero panel의 기본·데스크톱 min-height와 workspace reveal animation, document scroll behavior를 단일 소유 파일로 통합했습니다.
+- 완전히 가려진 hero/header 선언과 사용되지 않는 `workspaceRevealPulse` keyframes를 제거했습니다.
+- 활성 `!important` 853→841, 실제 selector-property 충돌 214→197, 고위험 충돌 11→0, shadowed declaration 239→212로 낮췄습니다.
+- acceleration-requested와 software-fallback Chromium에서 GPU process·media utility process RSS와 1280×720 30fps H.264/AAC 재생을 비교하는 감사를 추가했습니다.
+- 자동 QA를 171개로 확장하고 4개 viewport·process memory·GPU/media·service worker 감사를 통과했습니다.
+
+## v1.5.10 - Command & Control Ownership Consolidation
+
+- 현재 HTML에 존재하지 않는 retired `command-group` 계열 CSS와 `flow-director-final.js`의 obsolete DOM probe를 제거했습니다.
+- control zone·preview card의 최종 surface/background와 padding 소유자를 각각 `shutter-glass-flow.css`, `foundation-polish.css`로 분리했습니다.
+- panel head spacing, upload tile, select·textarea skin은 `ui-refinement.css`가 단독 소유하도록 정리했습니다.
+- HyperFlow stage visibility는 `studio-experience.css`, legacy action dock과 source media containment는 `layout-dock.css`가 단독 소유합니다.
+- 데스크톱·소형 노트북·태블릿·모바일의 계산 스타일을 v1.5.9와 동일하게 유지하면서 활성 `!important` 875→853, 실제 selector-property 충돌 271→214, 고위험 충돌 50→11, shadowed declaration 314→239로 낮췄습니다.
+- retired command group이 다시 유입되지 않도록 전용 회귀 검사를 추가했습니다.
+- 미디어 분석·렌더·Object URL 경로는 변경되지 않아 v1.5.9 장시간 MP4 감사 결과를 명시적으로 상속합니다.
+
+## v1.5.9 - Long 1080p Stability & Core Skin Ownership
+
+- 동일 Chromium 페이지에서 1920×1080 MP4를 15분→30분→15분 순서로 교체하고 분석·추천·2초 출력·정리를 반복하는 실미디어 감사를 추가했습니다.
+- 15분 분석 13.042초, 30분 분석 23.596초, 재교체 15분 캐시 분석 0.288초로 완료했으며 모든 출력 파일의 재생 가능성을 확인했습니다.
+- 장시간 미디어는 `sequential-safe` 전략, 축소 샘플레이트, 제한된 움직임 샘플 수를 사용하고 디코딩 버퍼를 분석 뒤 보존하지 않습니다.
+- 3회 반복 중 operation·render queue가 모두 해제됐고 파일 교체 시 source Object URL 하나만 유지했으며 종료 후 활성 URL은 0개였습니다.
+- brand panel, version badge, brand signature, bottom dock, primary/secondary button skin의 최종 CSS 소유 파일을 단일화했습니다.
+- 활성 `!important` 879→875, 실제 selector-property 충돌 304→271, 고위험 충돌 69→50, shadowed declaration 372→314로 낮췄습니다.
+- process memory audit의 Chromium profile 종료 정리를 재시도 가능한 방식으로 보강했습니다.
+- 자동 QA 167/167, 4개 viewport 오류·가로 overflow 0, 서비스워커·process memory·장시간 MP4 감사를 통과했습니다.
+
+
+## v1.5.8 - Responsive Tokens & Chromium Process Memory Audit
+
+- 화면별 shell gutter, top/bottom clearance, hero title 크기를 `theme.css`의 공통 responsive geometry token으로 통합했습니다.
+- `header-meta-rail.css`가 header topline의 display, columns, alignment, gap, mobile min-height를 단독 소유하도록 legacy 선언을 제거했습니다.
+- `ui-refinement.css`가 desktop shell width/padding과 mobile title typography를 단독 소유하도록 정리했습니다.
+- neon stage chip으로 대체되어 완전히 가려진 이전 navigation pseudo-label 선언을 제거했습니다.
+- 활성 `!important` 904→879, 실제 selector-property 충돌 334→304, 고위험 충돌 81→69, shadowed declaration 414→372로 낮췄습니다.
+- Chromium process tree의 RSS/USS, renderer JS heap, GPU/utility process category를 반복 수집하는 보조 memory audit를 추가했습니다.
+- 자동 QA 166/166, 4개 viewport 오류·가로 overflow 0, 서비스워커 생명주기와 process memory audit를 통과했습니다.
+
+
 ## v1.5.7 - Tablet & Small-Laptop Responsive Density
 
 - 721~1179px 태블릿 dock을 4+4 두 줄에서 8단계 단일 행으로 변경해 높이를 약 154px에서 73px로 줄였습니다.

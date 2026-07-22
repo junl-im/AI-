@@ -9,10 +9,6 @@
     --radius-lg: 18px;
 }
 
-html {
-    scroll-behavior: smooth;
-}
-
 body {
     background-attachment: scroll !important;
     text-rendering: optimizeLegibility;
@@ -27,20 +23,8 @@ body {
     margin-bottom: 10px;
 }
 
-body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
-    min-height: 164px !important;
-    padding: 16px 20px !important;
-    box-shadow: 0 16px 46px rgba(0, 0, 0, 0.28) !important;
-}
-
 .cinematic-brand-panel .hero-mainline {
     margin-top: 14px !important;
-}
-
-body[data-ui="hyperflow-tabs"] .hero-copy h1,
-.cinematic-title {
-    font-size: clamp(34px, 4.3vw, 58px) !important;
-    line-height: 0.98 !important;
 }
 
 body[data-ui="hyperflow-tabs"] .hero-compact-note {
@@ -48,10 +32,6 @@ body[data-ui="hyperflow-tabs"] .hero-compact-note {
     margin-top: 10px !important;
     font-size: 13.5px !important;
     line-height: 1.55 !important;
-}
-
-.brand-topline {
-    gap: 8px !important;
 }
 
 .brand-compat-pill,
@@ -72,31 +52,6 @@ body[data-ui="hyperflow-tabs"] .hero-compact-note {
 
 .start-command-panel::before {
     content: none !important;
-}
-
-.start-command-panel .command-group-status {
-    display: none !important;
-}
-
-.start-command-panel .command-group-primary {
-    display: grid !important;
-    align-content: center;
-    gap: 10px !important;
-    padding: 10px !important;
-    border: 1px solid rgba(255, 255, 255, 0.10) !important;
-    border-radius: 17px !important;
-    background: rgba(255, 255, 255, 0.035) !important;
-}
-
-.start-command-panel .command-group-primary .command-group-head {
-    border-top: 0 !important;
-    padding: 0 !important;
-}
-
-.start-command-panel .command-group-primary .command-buttons {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
 }
 
 .start-command-panel .command-button {
@@ -177,10 +132,6 @@ body[data-active-flow-tab="export"] [data-flow-panel~="export"] {
     padding: clamp(13px, 1.7vw, 18px) !important;
 }
 
-.panel-head {
-    margin-bottom: 10px !important;
-}
-
 .upload-tile {
     min-height: 128px;
 }
@@ -211,10 +162,6 @@ textarea:focus-visible,
 /* A calmer, smaller dock leaves more room for actual editing. */
 @media (min-width: 1180px) {
     :root { --hyperflow-dock-height: 86px; }
-
-    body[data-ui="hyperflow-tabs"] .app-shell {
-        padding-bottom: calc(var(--hyperflow-dock-height) + 20px) !important;
-    }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
         min-height: var(--hyperflow-dock-height) !important;
@@ -251,7 +198,6 @@ body.performance-lite .preview-card,
 body.performance-lite .waveform-card,
 body.performance-lite .copy-card,
 body.performance-lite .start-command-panel,
-body.performance-lite .command-group,
 body.performance-lite .bottom-dock,
 body.performance-lite .modal-card,
 body.performance-lite .brand-signature-pill,
@@ -284,18 +230,6 @@ body.performance-lite .bottom-dock {
 @media (max-width: 720px) {
     .app-shell {
         width: min(calc(100% - 14px), var(--workspace-max));
-        padding-top: 7px;
-    }
-
-
-    body[data-ui="hyperflow-tabs"] .hero-copy h1,
-    .cinematic-title {
-        font-size: clamp(30px, 10vw, 42px) !important;
-    }
-
-    body[data-ui="hyperflow-tabs"] .hero-compact-note {
-        font-size: 12.5px !important;
-        line-height: 1.45 !important;
     }
 
     .brand-compat-pill {
@@ -304,16 +238,7 @@ body.performance-lite .bottom-dock {
     }
 
     .brand-signature-pill {
-        max-width: 42vw !important;
         font-size: 10px !important;
-    }
-
-    .start-command-panel .command-group-primary .command-buttons {
-        grid-template-columns: 1fr !important;
-    }
-
-    .start-command-panel .workflow-rail-separated {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
     .control-zone,
@@ -328,18 +253,3 @@ body.performance-lite .bottom-dock {
     html { scroll-behavior: auto; }
 }
 
-/* Final mobile header cleanup: keep identity, drop the redundant compatibility row. */
-@media (max-width: 720px) {
-    .cinematic-brand-panel .brand-topline {
-        display: grid !important;
-        grid-template-columns: auto minmax(0, 1fr);
-        align-items: center !important;
-    }
-    .cinematic-brand-panel .brand-compat-pill {
-        display: none !important;
-    }
-    .cinematic-brand-panel .brand-right-actions {
-        justify-self: end;
-        min-width: 0;
-    }
-}

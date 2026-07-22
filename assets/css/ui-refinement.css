@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.5.7 - compact editorial clarity and hierarchy refinement */
+/* AI Shorts Studio v1.5.14 - compact editorial clarity and hierarchy refinement */
 :root {
     --ui-bg-0: #070a12;
     --ui-bg-1: #0b1020;
@@ -51,16 +51,6 @@ body[data-ui="hyperflow-tabs"] .control-zone::before,
 body[data-ui="hyperflow-tabs"] .preview-card::before,
 body[data-ui="hyperflow-tabs"] .waveform-card::before {
     opacity: 0.18 !important;
-}
-
-body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after {
-    top: 13px !important;
-    right: 14px !important;
-    padding: 4px 8px !important;
-    border: 1px solid rgba(103, 232, 249, 0.15);
-    background: rgba(9, 14, 25, 0.88) !important;
-    color: rgba(165, 243, 252, 0.86) !important;
-    letter-spacing: 0.09em !important;
 }
 
 .panel-head,
@@ -168,6 +158,7 @@ button:disabled,
     background:
         radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%),
         rgba(7, 11, 21, 0.42) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 12px 34px rgba(0, 0, 0, 0.20);
 }
 .upload-tile:hover,
 .upload-tile:focus-visible {
@@ -283,8 +274,8 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
 
 @media (min-width: 1180px) {
     body[data-ui="hyperflow-tabs"] .app-shell {
-        width: min(calc(100% - 32px), 1580px) !important;
-        padding-bottom: 104px !important;
+        width: min(calc(100% - var(--responsive-shell-gutter-wide)), 1580px) !important;
+        padding-bottom: var(--responsive-shell-bottom-wide) !important;
     }
     body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
         min-height: 316px !important;
@@ -302,7 +293,7 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
         padding: 18px clamp(18px, 3vw, 42px) 10px !important;
     }
     body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title {
-        font-size: clamp(48px, 4.7vw, 68px) !important;
+        font-size: var(--responsive-title-wide) !important;
         letter-spacing: -0.065em !important;
     }
     body[data-ui="hyperflow-tabs"] .hero-compact-note {
@@ -331,8 +322,8 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
 
 @media (min-width: 1180px) and (max-width: 1399px) {
     body[data-ui="hyperflow-tabs"] .app-shell {
-        width: calc(100% - 24px) !important;
-        padding-bottom: 96px !important;
+        width: calc(100% - var(--responsive-shell-gutter-compact)) !important;
+        padding-bottom: var(--responsive-shell-bottom-laptop) !important;
     }
     body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
         min-height: 264px !important;
@@ -344,7 +335,7 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
         padding: 12px 22px 8px !important;
     }
     body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title {
-        font-size: clamp(43px, 4.05vw, 52px) !important;
+        font-size: var(--responsive-title-laptop) !important;
     }
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         max-width: 620px !important;
@@ -382,9 +373,9 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
         scroll-padding-bottom: 94px;
     }
     body[data-ui="hyperflow-tabs"] .app-shell {
-        width: calc(100% - 24px) !important;
-        padding-top: 10px !important;
-        padding-bottom: 94px !important;
+        width: calc(100% - var(--responsive-shell-gutter-compact)) !important;
+        padding-top: var(--responsive-shell-top-wide) !important;
+        padding-bottom: var(--responsive-shell-bottom-tablet) !important;
     }
     body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
         min-height: 300px !important;
@@ -397,7 +388,7 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
         padding: 16px 6px 8px !important;
     }
     body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title {
-        font-size: clamp(42px, 5.5vw, 54px) !important;
+        font-size: var(--responsive-title-tablet) !important;
     }
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         max-width: 560px !important;
@@ -431,8 +422,8 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
 @media (max-width: 720px) {
     :root { --hyperflow-dock-height: 150px; }
     body[data-ui="hyperflow-tabs"] .app-shell {
-        width: min(calc(100% - 20px), 680px) !important;
-        padding-bottom: calc(var(--hyperflow-dock-height) + 24px) !important;
+        width: min(calc(100% - var(--responsive-shell-gutter-mobile)), 680px) !important;
+        padding-bottom: calc(var(--hyperflow-dock-height) + var(--responsive-shell-bottom-mobile-extra)) !important;
     }
     body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
         min-height: 278px !important;
@@ -456,7 +447,7 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
     .hero-eyebrow { margin-bottom: 10px !important; color: #aa9dc5 !important; }
     body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title,
     .cinematic-title {
-        font-size: clamp(36px, 10.8vw, 48px) !important;
+        font-size: var(--responsive-title-mobile) !important;
         line-height: 0.98 !important;
         letter-spacing: -0.065em !important;
     }
@@ -555,14 +546,14 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
     body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel { min-height: 266px !important; padding-inline: 12px !important; }
     .release-device-compat span:last-child { font-size: 6.5px !important; }
     body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title,
-    .cinematic-title { font-size: clamp(35px, 11.4vw, 45px) !important; }
+    .cinematic-title { font-size: var(--responsive-title-phone) !important; }
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note { font-size: 11.25px !important; }
     .start-command-panel { padding: 14px !important; }
     .start-command-panel .workflow-step { min-height: 56px !important; padding: 9px !important; }
     body[data-ui="hyperflow-tabs"] .bottom-dock-tab { min-height: 58px !important; }
 }
 
-/* v1.5.7 hierarchy pass: clearer panel rhythm without adding another CSS layer. */
+/* v1.5.14 hierarchy pass: clearer panel rhythm without adding another CSS layer. */
 body[data-ui="hyperflow-tabs"] .panel-head,
 body[data-ui="hyperflow-tabs"] .auto-cut-head,
 body[data-ui="hyperflow-tabs"] .caption-pro-head,

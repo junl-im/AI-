@@ -8,7 +8,6 @@
 }
 
 body[data-ui="hyperflow-tabs"] {
-    scroll-padding-top: 10px;
     scroll-padding-bottom: calc(var(--hyperflow-dock-height, 142px) + 18px);
 }
 
@@ -19,11 +18,7 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
 
 /* PC: keep the Dock full-width and readable. Earlier layouts reserved a hidden status column, which made the tabs look crushed. */
 @media (min-width: 1180px) {
-    :root { --hyperflow-dock-height: 98px; }
 
-    body[data-ui="hyperflow-tabs"] .app-shell {
-        padding-bottom: calc(var(--hyperflow-dock-height) + 26px) !important;
-    }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
         display: block !important;
@@ -31,7 +26,6 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
         right: 0 !important;
         bottom: 0 !important;
         width: 100% !important;
-        min-height: var(--hyperflow-dock-height) !important;
         padding: 12px max(22px, calc((100vw - var(--workspace-max, 1560px)) / 2)) 14px !important;
         border-radius: 26px 26px 0 0 !important;
         grid-template-columns: none !important;
@@ -56,7 +50,6 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
     }
 
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab span {
-        font-size: 23px !important;
         line-height: 1 !important;
     }
 
@@ -79,7 +72,6 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
 
 /* Tablet/small laptop: one compact row keeps the workspace visible. */
 @media (min-width: 721px) and (max-width: 1179px) {
-    :root { --hyperflow-dock-height: 72px; }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
         display: block !important;
         bottom: 8px !important;
@@ -113,7 +105,6 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
 
 /* Mobile remains 4+4, but avoid label disappearance. */
 @media (max-width: 720px) {
-    :root { --hyperflow-dock-height: 136px; }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b {
         display: block !important;
         max-width: 100% !important;
@@ -123,7 +114,10 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
 }
 
 /* Candidate guide stability: no shimmer/blinking text caused by competing state messages. */
-body[data-ui="hyperflow-tabs"] .flow-selection-summary,
+body[data-ui="hyperflow-tabs"] .flow-selection-summary {
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease, opacity 160ms ease !important;
+    backface-visibility: hidden;
+}
 body[data-ui="hyperflow-tabs"] .flow-selection-copy,
 body[data-ui="hyperflow-tabs"] #flowSelectionIcon,
 body[data-ui="hyperflow-tabs"] #flowSelectionTitle,

@@ -23,11 +23,9 @@ body[data-ui="hyperflow-tabs"] {
 }
 
 /* Hero: one-line version/signature, then simple cinematic title. */
-.studio-hero {
-    margin-bottom: 14px;
+.cinematic-brand-panel {
+    backdrop-filter: blur(18px) saturate(1.12);
 }
-
-.cinematic-brand-panel,
 .brand-panel {
     position: relative;
     overflow: hidden;
@@ -68,15 +66,14 @@ body[data-ui="hyperflow-tabs"] {
     border: 1px solid rgba(255,255,255,0.16) !important;
     color: rgba(255,255,255,0.9) !important;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px) saturate(1.25);
+    -webkit-backdrop-filter: blur(16px) saturate(1.25);
 }
 
 .brand-signature-pill {
     white-space: nowrap;
     border-radius: 999px;
     padding: 8px 12px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.88);
 }
 
 .hero-mainline {
@@ -85,13 +82,7 @@ body[data-ui="hyperflow-tabs"] {
 }
 
 .cinematic-title {
-    letter-spacing: -0.05em;
     text-wrap: balance;
-}
-
-.hero-compact-note {
-    max-width: 760px;
-    color: rgba(226,232,240,0.78);
 }
 
 /* Social shutter strip: YouTube / Instagram / TikTok inspired, camera shutter flash. */
@@ -183,42 +174,9 @@ body[data-ui="hyperflow-tabs"] {
     backdrop-filter: blur(14px);
 }
 
-.command-group {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-}
-
-.command-group-primary .command-buttons,
-.command-mini-row,
-.workflow-rail {
-    display: none !important;
-}
-
-.command-group-head {
-    display: grid !important;
-    grid-template-columns: 32px 1fr;
-    gap: 10px;
-    align-items: start;
-    padding: 8px 0;
-    border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-.command-group:first-of-type .command-group-head { border-top: 0; }
-.command-group-head > span {
-    width: 30px;
-    height: 30px;
-    display: grid;
-    place-items: center;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.08);
-}
-.command-group-head strong { color: rgba(255,255,255,0.9); }
-.command-group-head small { color: rgba(203,213,225,0.72); }
+/* The current start screen is flow-overview-panel; obsolete command-group skin was removed. */
 
 /* Remove noisy status blocks from the main idle canvas. Dock and active panel are the navigator. */
-.hyperflow-stage,
 .flow-selection-summary {
     display: none !important;
 }
@@ -260,7 +218,6 @@ body[data-ui="hyperflow-tabs"] .finish-center-card {
 body[data-ui="hyperflow-tabs"] [data-flow-panel].is-motion-stable-revealed,
 body[data-ui="hyperflow-tabs"] [data-flow-panel].is-workspace-revealed,
 body[data-ui="hyperflow-tabs"] [data-flow-panel].is-director-revealed {
-    animation: none !important;
     outline: 1px solid rgba(34,211,238,0.20);
     box-shadow: 0 0 0 1px rgba(34,211,238,0.08), 0 22px 60px rgba(0,0,0,0.26) !important;
 }
@@ -326,7 +283,7 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-director-revealed {
     .social-shutter-strip { grid-template-columns: 1fr; }
     .shutter-tile { min-height: 54px; }
     .brand-topline { margin-bottom: 12px; }
-    .brand-signature-pill { padding: 7px 10px; font-size: 0.8rem; }
+    .brand-signature-pill { padding: 7px 10px; }
     .badge-version { min-width: 64px; }
 }
 
@@ -348,7 +305,6 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-director-revealed {
     align-items: center;
     justify-content: center;
     gap: 7px;
-    min-height: 34px;
     padding: 7px 12px;
     border-radius: 999px;
     border: 1px solid rgba(34,211,238,0.20);
@@ -394,6 +350,5 @@ body[data-flow-command-bridge="ready"] [data-flow-panel].is-command-bridge-revea
         grid-column: 1 / -1;
         justify-self: stretch;
         width: 100%;
-        font-size: 0.82rem;
     }
 }

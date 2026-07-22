@@ -1,7 +1,4 @@
 /* AI Shorts Studio v0.9.6 - HyperConnect flow cleanup */
-:root {
-    --hyperflow-dock-height: 154px;
-}
 body[data-ui="hyperconnect-flow"] {
     scroll-padding-bottom: var(--hyperflow-dock-height);
 }
@@ -80,13 +77,9 @@ body[data-ui="hyperconnect-flow"] .action-dock {
 }
 .recommendation-card {
     text-align: left;
-    position: relative;
 }
 .rec-select-cta {
-    display: inline-flex;
-    align-items: center;
     justify-content: center;
-    margin-top: 12px;
     min-height: 36px;
     padding: 0 13px;
     border-radius: 999px;

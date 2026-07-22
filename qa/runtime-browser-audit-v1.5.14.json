@@ -1,0 +1,950 @@
+{
+  "version": "1.5.14",
+  "desktop": {
+    "ready": "complete",
+    "bodyBuild": "1.5.14",
+    "activeFlow": "file",
+    "navigationFocus": "file",
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "runtimeHealth": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "bodyScrollWidth": 1366,
+    "htmlScrollWidth": 1366,
+    "stage": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": false,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "landing": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": true,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "audit": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 31,
+      "mutations": 62
+    },
+    "auditAtFirstSample": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 31,
+      "mutations": 62
+    },
+    "initialDensity": {
+      "heroHeight": 275,
+      "stageHeight": 60,
+      "firstPanelTop": 428,
+      "dockHeight": 86,
+      "viewportWorkArea": 682
+    },
+    "density": {
+      "heroHeight": 275,
+      "stageHeight": 60,
+      "firstPanelTop": -226,
+      "viewportWorkArea": 682
+    },
+    "dock": {
+      "left": 143,
+      "right": 1223,
+      "top": 670,
+      "bottom": 756,
+      "width": 1080,
+      "height": 86
+    },
+    "dockScrollWidth": 1062,
+    "dockClientWidth": 1062,
+    "tabs": [
+      {
+        "tab": "file",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 152,
+          "right": 279.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "recommend",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 285.5,
+          "right": 413,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "candidates",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 419,
+          "right": 546.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "preview",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 552.5,
+          "right": 680,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "waveform",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 686,
+          "right": 813.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "cut",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 819.5,
+          "right": 947,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "edit",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 953,
+          "right": 1080.5,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "export",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 1086.5,
+          "right": 1214,
+          "top": 679,
+          "bottom": 739.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      }
+    ],
+    "expandedTabs": [],
+    "mobileMenu": {
+      "controller": "ready",
+      "mode": "compact",
+      "guide": "현재 파일 열기 · 다음 추천",
+      "toggleVisible": true,
+      "expanded": "false"
+    },
+    "workspace": {
+      "mode": "balanced",
+      "ready": "ready",
+      "toolbarVisible": true,
+      "dividerVisible": [
+        true,
+        true
+      ],
+      "weights": {
+        "left": 0.82,
+        "center": 1.18,
+        "right": 0.9
+      },
+      "toolbar": {
+        "left": 12,
+        "right": 1353.984375,
+        "top": 8,
+        "bottom": 60,
+        "width": 1341.984375,
+        "height": 52
+      }
+    },
+    "workspaceTests": {
+      "keyboardResizeChanged": true,
+      "savedLayoutStorageAccessible": false,
+      "preview": {
+        "mode": "preview",
+        "visible": true,
+        "width": 902.703125,
+        "height": 599.03125
+      },
+      "waveform": {
+        "mode": "waveform",
+        "visible": true,
+        "width": 1342,
+        "height": 390
+      }
+    }
+  },
+  "smallLaptop": {
+    "ready": "complete",
+    "bodyBuild": "1.5.14",
+    "activeFlow": "file",
+    "navigationFocus": "file",
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "runtimeHealth": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "bodyScrollWidth": 1280,
+    "htmlScrollWidth": 1280,
+    "stage": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": false,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "landing": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": true,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "audit": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 31,
+      "mutations": 62
+    },
+    "auditAtFirstSample": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 31,
+      "mutations": 62
+    },
+    "initialDensity": {
+      "heroHeight": 275,
+      "stageHeight": 60,
+      "firstPanelTop": 428,
+      "dockHeight": 86,
+      "viewportWorkArea": 634
+    },
+    "density": {
+      "heroHeight": 275,
+      "stageHeight": 60,
+      "firstPanelTop": -226,
+      "viewportWorkArea": 634
+    },
+    "dock": {
+      "left": 100,
+      "right": 1180,
+      "top": 622,
+      "bottom": 708,
+      "width": 1080,
+      "height": 86
+    },
+    "dockScrollWidth": 1062,
+    "dockClientWidth": 1062,
+    "tabs": [
+      {
+        "tab": "file",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 109,
+          "right": 236.5,
+          "top": 631,
+          "bottom": 691.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "recommend",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 242.5,
+          "right": 370,
+          "top": 631,
+          "bottom": 691.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "candidates",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 376,
+          "right": 503.5,
+          "top": 631,
+          "bottom": 691.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "preview",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 509.5,
+          "right": 637,
+          "top": 631,
+          "bottom": 691.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "waveform",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 643,
+          "right": 770.5,
+          "top": 631,
+          "bottom": 691.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "cut",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 776.5,
+          "right": 904,
+          "top": 631,
+          "bottom": 691.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "edit",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 910,
+          "right": 1037.5,
+          "top": 631,
+          "bottom": 691.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      },
+      {
+        "tab": "export",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 1043.5,
+          "right": 1171,
+          "top": 631,
+          "bottom": 691.1875,
+          "width": 127.5,
+          "height": 60.1875
+        }
+      }
+    ],
+    "expandedTabs": [],
+    "mobileMenu": {
+      "controller": "ready",
+      "mode": "compact",
+      "guide": "현재 파일 열기 · 다음 추천",
+      "toggleVisible": true,
+      "expanded": "false"
+    },
+    "workspace": {
+      "mode": "balanced",
+      "ready": "ready",
+      "toolbarVisible": true,
+      "dividerVisible": [
+        true,
+        true
+      ],
+      "weights": {
+        "left": 0.82,
+        "center": 1.18,
+        "right": 0.9
+      },
+      "toolbar": {
+        "left": 12,
+        "right": 1267.984375,
+        "top": 8,
+        "bottom": 60,
+        "width": 1255.984375,
+        "height": 52
+      }
+    },
+    "workspaceTests": {
+      "keyboardResizeChanged": true,
+      "savedLayoutStorageAccessible": false,
+      "preview": {
+        "mode": "preview",
+        "visible": true,
+        "width": 844.546875,
+        "height": 561.59375
+      },
+      "waveform": {
+        "mode": "waveform",
+        "visible": true,
+        "width": 1255.984375,
+        "height": 390
+      }
+    }
+  },
+  "tablet": {
+    "ready": "complete",
+    "bodyBuild": "1.5.14",
+    "activeFlow": "recommend",
+    "navigationFocus": "recommend",
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "runtimeHealth": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "bodyScrollWidth": 1024,
+    "htmlScrollWidth": 1024,
+    "stage": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": false,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "landing": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": true,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "audit": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 31,
+      "mutations": 62
+    },
+    "auditAtFirstSample": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 31,
+      "mutations": 62
+    },
+    "initialDensity": {
+      "heroHeight": 300,
+      "stageHeight": 68,
+      "firstPanelTop": 404,
+      "dockHeight": 73,
+      "viewportWorkArea": 695
+    },
+    "density": {
+      "heroHeight": 52,
+      "stageHeight": 68,
+      "firstPanelTop": 0,
+      "viewportWorkArea": 695
+    },
+    "dock": {
+      "left": 14,
+      "right": 1010,
+      "top": 683,
+      "bottom": 756,
+      "width": 996,
+      "height": 73
+    },
+    "dockScrollWidth": 978,
+    "dockClientWidth": 978,
+    "tabs": [
+      {
+        "tab": "file",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 23,
+          "right": 140.875,
+          "top": 692,
+          "bottom": 747,
+          "width": 117.875,
+          "height": 55
+        }
+      },
+      {
+        "tab": "recommend",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 145.875,
+          "right": 263.75,
+          "top": 692,
+          "bottom": 747,
+          "width": 117.875,
+          "height": 55
+        }
+      },
+      {
+        "tab": "candidates",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 268.75,
+          "right": 386.625,
+          "top": 692,
+          "bottom": 747,
+          "width": 117.875,
+          "height": 55
+        }
+      },
+      {
+        "tab": "preview",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 391.625,
+          "right": 509.5,
+          "top": 692,
+          "bottom": 747,
+          "width": 117.875,
+          "height": 55
+        }
+      },
+      {
+        "tab": "waveform",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 514.5,
+          "right": 632.375,
+          "top": 692,
+          "bottom": 747,
+          "width": 117.875,
+          "height": 55
+        }
+      },
+      {
+        "tab": "cut",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 637.375,
+          "right": 755.25,
+          "top": 692,
+          "bottom": 747,
+          "width": 117.875,
+          "height": 55
+        }
+      },
+      {
+        "tab": "edit",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 760.25,
+          "right": 878.125,
+          "top": 692,
+          "bottom": 747,
+          "width": 117.875,
+          "height": 55
+        }
+      },
+      {
+        "tab": "export",
+        "visible": true,
+        "priority": "",
+        "rect": {
+          "left": 883.125,
+          "right": 1001,
+          "top": 692,
+          "bottom": 747,
+          "width": 117.875,
+          "height": 55
+        }
+      }
+    ],
+    "expandedTabs": [],
+    "mobileMenu": {
+      "controller": "ready",
+      "mode": "compact",
+      "guide": "현재 파일 열기 · 다음 추천",
+      "toggleVisible": true,
+      "expanded": "false"
+    },
+    "workspace": {
+      "mode": "balanced",
+      "ready": "ready",
+      "toolbarVisible": false,
+      "dividerVisible": [
+        false,
+        false
+      ],
+      "weights": {
+        "left": 0.82,
+        "center": 1.18,
+        "right": 0.9
+      },
+      "toolbar": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "workspaceTests": {
+      "mobileControlsHidden": true
+    }
+  },
+  "mobile": {
+    "ready": "complete",
+    "bodyBuild": "1.5.14",
+    "activeFlow": "recommend",
+    "navigationFocus": "recommend",
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "runtimeHealth": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "bodyScrollWidth": 390,
+    "htmlScrollWidth": 390,
+    "stage": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": false,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "landing": {
+      "panel": "recommend",
+      "stageKey": "recommend",
+      "current": true,
+      "landing": true,
+      "rail": true,
+      "chip": "추천 생성 진행 중"
+    },
+    "audit": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 31,
+      "mutations": 62
+    },
+    "auditAtFirstSample": {
+      "errors": [],
+      "rejections": [],
+      "consoleErrors": [],
+      "raf": 31,
+      "mutations": 62
+    },
+    "initialDensity": {
+      "heroHeight": 266,
+      "stageHeight": 0,
+      "firstPanelTop": 0,
+      "dockHeight": 167,
+      "viewportWorkArea": 677
+    },
+    "density": {
+      "heroHeight": 62,
+      "stageHeight": 157,
+      "firstPanelTop": 0,
+      "viewportWorkArea": 735
+    },
+    "dock": {
+      "left": 14,
+      "right": 376,
+      "top": 727,
+      "bottom": 836,
+      "width": 362,
+      "height": 109
+    },
+    "dockScrollWidth": 346,
+    "dockClientWidth": 346,
+    "tabs": [
+      {
+        "tab": "file",
+        "visible": true,
+        "priority": "true",
+        "rect": {
+          "left": 22,
+          "right": 105.5,
+          "top": 770,
+          "bottom": 828,
+          "width": 83.5,
+          "height": 58
+        }
+      },
+      {
+        "tab": "recommend",
+        "visible": true,
+        "priority": "true",
+        "rect": {
+          "left": 109.5,
+          "right": 193,
+          "top": 770,
+          "bottom": 828,
+          "width": 83.5,
+          "height": 58
+        }
+      },
+      {
+        "tab": "candidates",
+        "visible": true,
+        "priority": "true",
+        "rect": {
+          "left": 197,
+          "right": 280.5,
+          "top": 770,
+          "bottom": 828,
+          "width": 83.5,
+          "height": 58
+        }
+      },
+      {
+        "tab": "preview",
+        "visible": true,
+        "priority": "true",
+        "rect": {
+          "left": 284.5,
+          "right": 368,
+          "top": 770,
+          "bottom": 828,
+          "width": 83.5,
+          "height": 58
+        }
+      },
+      {
+        "tab": "waveform",
+        "visible": false,
+        "priority": "false",
+        "rect": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "tab": "cut",
+        "visible": false,
+        "priority": "false",
+        "rect": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "tab": "edit",
+        "visible": false,
+        "priority": "false",
+        "rect": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        }
+      },
+      {
+        "tab": "export",
+        "visible": false,
+        "priority": "false",
+        "rect": {
+          "left": 0,
+          "right": 0,
+          "top": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
+        }
+      }
+    ],
+    "expandedTabs": [
+      {
+        "tab": "file",
+        "visible": true
+      },
+      {
+        "tab": "recommend",
+        "visible": true
+      },
+      {
+        "tab": "candidates",
+        "visible": true
+      },
+      {
+        "tab": "preview",
+        "visible": true
+      },
+      {
+        "tab": "waveform",
+        "visible": true
+      },
+      {
+        "tab": "cut",
+        "visible": true
+      },
+      {
+        "tab": "edit",
+        "visible": true
+      },
+      {
+        "tab": "export",
+        "visible": true
+      }
+    ],
+    "mobileMenu": {
+      "controller": "ready",
+      "mode": "compact",
+      "guide": "현재 파일 열기 · 다음 추천",
+      "toggleVisible": true,
+      "expanded": "false"
+    },
+    "workspace": {
+      "mode": "balanced",
+      "ready": "ready",
+      "toolbarVisible": false,
+      "dividerVisible": [
+        false,
+        false
+      ],
+      "weights": {
+        "left": 0.82,
+        "center": 1.18,
+        "right": 0.9
+      },
+      "toolbar": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0,
+        "width": 0,
+        "height": 0
+      }
+    },
+    "workspaceTests": {
+      "mobileControlsHidden": true
+    }
+  }
+}

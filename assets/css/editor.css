@@ -1,12 +1,10 @@
 .phone-frame {
     position: relative;
-    width: min(360px, 82vw);
     aspect-ratio: 9 / 16;
     margin: 0 auto 14px;
     border-radius: 38px;
     padding: 10px;
     background: linear-gradient(145deg, rgba(226, 232, 240, 0.24), rgba(15, 23, 42, 0.94));
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 20px 80px rgba(0,0,0,0.42);
 }
 .phone-frame::before {
     content: "";
@@ -38,20 +36,15 @@
     pointer-events: none;
 }
 .source-media {
-    width: 100%;
-    max-height: 220px;
     border-radius: 18px;
     background: rgba(2, 6, 23, 0.74);
     margin-bottom: 12px;
-    display: none;
 }
-.source-media.is-visible { display: block; }
 .transport-row { flex-wrap: wrap; }
 .transport-row button { flex: 1 1 160px; }
 .waveform-card canvas {
     display: block;
     width: 100%;
-    height: 180px;
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
     background: rgba(2, 6, 23, 0.62);
@@ -119,18 +112,14 @@
     line-height: 1;
 }
 
-.edit-tools-card, .project-card {
-    border: 1px solid var(--line);
+.edit-tools-card,
+.project-card {
     border-radius: var(--radius-lg);
-    background: rgba(15, 23, 42, 0.58);
-    padding: 16px;
 }
 .range-editor-grid { margin-bottom: 12px; }
 .caption-drop { margin-top: 12px; }
 .helper-text {
     margin: 0 0 12px;
-    color: var(--muted);
-    font-size: 13px;
     line-height: 1.65;
 }
 .file-button {

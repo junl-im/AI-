@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.7 - bounded local caption parser and cue helper
+// AI Shorts Studio v1.5.14 - bounded local caption parser and cue helper
 'use strict';
 
 (function exposeCaptionService(global) {

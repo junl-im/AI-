@@ -36,9 +36,10 @@ if (!html.includes('assets/css/hyperflow-tabs.css') || !html.includes('src/ui/hy
     process.exit(1);
 }
 const css = fs.readFileSync(path.join(root, 'assets/css/hyperflow-tabs.css'), 'utf8');
+const dockOwnerCss = fs.readFileSync(path.join(root, 'assets/css/flow-hotfix.css'), 'utf8');
 const js = fs.readFileSync(path.join(root, 'src/ui/hyperflow-tabs.js'), 'utf8');
-if (!css.includes('.bottom-dock-tabs') || !css.includes('grid-template-columns: repeat(4') || !css.includes('[data-flow-panel]')) {
-    console.error('FAIL HyperFlow CSS missing two-row dock or panel visibility rules');
+if (!css.includes('.bottom-dock-tabs') || !dockOwnerCss.includes('grid-template-columns: repeat(4') || !css.includes('[data-flow-panel]')) {
+    console.error('FAIL HyperFlow CSS missing dock structure, final grid owner, or panel visibility rules');
     process.exit(1);
 }
 if (!js.includes('setActiveFlowTab') || !js.includes('AIShortsHyperFlowTabs')) {
@@ -49,4 +50,4 @@ if (html.includes('id="flowRecommendBtn"') || js.includes('flowRecommendBtn')) {
     console.error('FAIL top duplicate recommend button bridge should not exist');
     process.exit(1);
 }
-console.log('PASS HyperConnect 8-tab bottom dock anchors present with updated v1.5.7 vector icons');
+console.log('PASS HyperConnect 8-tab bottom dock anchors present with updated v1.5.14 vector icons');

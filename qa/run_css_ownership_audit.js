@@ -382,7 +382,148 @@ const criticalOwnership = {
         'body[data-ui="hyperflow-tabs"] #exportAllBtn',
         'base',
         ['min-width', 'min-height', 'padding', 'border-radius', 'font-size']
-    )
+    ),
+    headerTopline: ownershipSnapshot(
+        '.cinematic-brand-panel .brand-topline',
+        'base',
+        ['display', 'grid-template-columns', 'align-items', 'gap']
+    ),
+    mobileHeaderTopline: ownershipSnapshot(
+        '.cinematic-brand-panel .brand-topline',
+        '@media (max-width: 720px)',
+        ['display', 'grid-template-columns', 'gap', 'min-height']
+    ),
+    desktopShell: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .app-shell',
+        '@media (min-width: 1180px)',
+        ['width', 'padding-bottom']
+    ),
+    mobileHeroTitle: ownershipSnapshot(
+        '.cinematic-title',
+        '@media (max-width: 720px)',
+        ['font-size', 'line-height', 'letter-spacing']
+    ),
+    brandPanelSkin: ownershipSnapshot(
+        '.brand-panel',
+        'base',
+        ['background', 'border', 'box-shadow', 'backdrop-filter']
+    ),
+    badgeVersionSkin: ownershipSnapshot(
+        '.badge-version',
+        'base',
+        ['background', 'border', 'color', 'backdrop-filter']
+    ),
+    brandSignatureSkin: ownershipSnapshot(
+        '.brand-signature-pill',
+        'base',
+        ['background', 'border-color', 'backdrop-filter']
+    ),
+    bottomDockSkin: ownershipSnapshot(
+        '.bottom-dock',
+        'base',
+        ['background', 'border-top', 'backdrop-filter']
+    ),
+    primaryButtonSkin: ownershipSnapshot(
+        '.btn-primary',
+        'base',
+        ['background', 'border', 'box-shadow', 'color']
+    ),
+    secondaryButtonSkin: ownershipSnapshot(
+        '.btn-secondary',
+        'base',
+        ['background', 'border', 'box-shadow', 'color']
+    ),
+    controlZoneBase: ownershipSnapshot(
+        '.control-zone',
+        'base',
+        ['background', 'padding']
+    ),
+    previewCardBase: ownershipSnapshot(
+        '.preview-card',
+        'base',
+        ['background', 'padding']
+    ),
+    panelHeadSpacing: ownershipSnapshot(
+        '.panel-head',
+        'base',
+        ['margin-bottom']
+    ),
+    uploadTileSkin: ownershipSnapshot(
+        '.upload-tile',
+        'base',
+        ['background', 'border', 'box-shadow']
+    ),
+    selectSkin: ownershipSnapshot(
+        'select',
+        'base',
+        ['background', 'border', 'box-shadow']
+    ),
+    textareaSkin: ownershipSnapshot(
+        'textarea',
+        'base',
+        ['background', 'border', 'box-shadow', 'min-height']
+    ),
+    hyperflowStageVisibility: ownershipSnapshot(
+        '.hyperflow-stage',
+        'base',
+        ['display']
+    ),
+    legacyActionDockVisibility: ownershipSnapshot(
+        '.action-dock',
+        'base',
+        ['display']
+    ),
+    sourceMediaContainment: ownershipSnapshot(
+        '.source-media',
+        'base',
+        ['display', 'width', 'max-height']
+    ),
+    heroNoteBase: ownershipSnapshot(
+        '.hero-compact-note',
+        'base',
+        ['max-width', 'color']
+    ),
+    cinematicHeroNoteBase: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note',
+        'base',
+        ['width', 'max-width']
+    ),
+    desktopHeroNote: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .hero-compact-note',
+        '@media (min-width: 1180px)',
+        ['max-width', 'font-size']
+    ),
+    mobileCinematicHeroNote: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note',
+        '@media (max-width: 720px)',
+        ['max-width', 'margin-top']
+    ),
+    heroPanelBaseHeight: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel',
+        'base',
+        ['min-height']
+    ),
+    desktopHeroPanelHeight: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel',
+        '@media (min-width: 1180px)',
+        ['min-height']
+    ),
+    workspaceRevealMotion: ownershipSnapshot(
+        'body[data-ui="hyperflow-tabs"] [data-flow-panel].is-workspace-revealed',
+        'base',
+        ['animation']
+    ),
+    fieldRhythm: ownershipSnapshot('.field', 'base', ['gap', 'color', 'font-weight']),
+    disabledButtonState: ownershipSnapshot('button:disabled', 'base', ['opacity', 'cursor']),
+    disabledMiniActionState: ownershipSnapshot('.mini-action:disabled', 'base', ['opacity', 'cursor']),
+    ambientOverlayState: ownershipSnapshot('body::before', 'base', ['opacity']),
+    autoCutSurface: ownershipSnapshot('.auto-cut-panel', 'base', ['background', 'border']),
+    cinematicBrandSurface: ownershipSnapshot('.cinematic-brand-panel', 'base', ['background', 'border', 'box-shadow']),
+    consoleSurface: ownershipSnapshot('.console-panel', 'base', ['background', 'box-shadow', 'padding']),
+    engineStatusSurface: ownershipSnapshot('.engine-status-card', 'base', ['background', 'box-shadow']),
+    recommendationActionSkin: ownershipSnapshot('.recommend-generate-btn', 'base', ['background', 'border', 'box-shadow']),
+    statusDotSkin: ownershipSnapshot('.tab-state-dot', 'base', ['background', 'box-shadow']),
+    documentScrollBehavior: ownershipSnapshot('html', 'base', ['scroll-behavior'])
 };
 
 const report = {
@@ -406,6 +547,7 @@ const report = {
     topConflicts: selectorConflicts.slice(0, 30),
     topPropertyConflicts: propertyConflicts.slice(0, 60),
     propertyConflicts,
+    sameValueDuplicates,
     ignoredAtRules: Array.from(state.ignoredAtRules).sort()
 };
 

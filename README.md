@@ -1,7 +1,67 @@
-# AI 쇼츠 제작 스튜디오 v1.5.7
+# AI 쇼츠 제작 스튜디오 v1.5.14
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
 
+
+## v1.5.14 적용 내용
+
+- cross-file same-value selector-property 중복 57개 그룹을 모두 제거했습니다.
+- grouped selector 일부만 중복인 규칙은 selector별로 분리해 다른 요소의 fallback을 유지했습니다.
+- CSS source declaration 51개와 중복 `!important` 9개를 제거했습니다.
+- CSS 기준을 conflicts 0, same-value duplicates 0, shadowed declaration 0, `!important` 824로 강화했습니다.
+- 데스크톱·소형 노트북·태블릿·모바일의 주요 computed style·geometry와 결정적 screenshot이 v1.5.13과 동일함을 확인했습니다.
+- same-value 중복 재유입 방지 검사와 재현 가능한 consolidation tool을 추가했습니다.
+- 자동 QA 173/173, 4개 viewport, process memory, GPU/media, service worker 감사를 통과했습니다.
+
+## v1.5.13 적용 내용
+
+- 남아 있던 low-risk geometry·token·fallback selector-property 충돌을 모두 제거했습니다.
+- selector 묶음의 다른 요소에 필요한 선언은 유지하고, 해당 selector에서 완전히 가려지는 속성만 안전하게 분리·삭제했습니다.
+- 47개 CSS source declaration을 정리해 51개 shadowed selector-property occurrence를 제거했습니다.
+- 실제 CSS 충돌을 48→0, shadowed declaration을 51→0으로 낮췄고 `!important`는 833을 유지했습니다.
+- 데스크톱·소형 노트북·태블릿·모바일의 전체 DOM targeted computed style과 결정적 스크린샷이 v1.5.12와 동일함을 확인했습니다.
+- 자동 QA 172/172, 4개 viewport, process memory, GPU/media, service worker 감사를 통과했습니다.
+
+## v1.5.12 적용 내용
+
+- 같은 selector·media 조건에서 뒤쪽 선언에 완전히 가려지던 medium-risk CSS 선언을 제거했습니다.
+- selector group 일부만 충돌하는 규칙은 안전하게 분리해 다른 selector의 fallback을 유지했습니다.
+- field rhythm, disabled state, ambient overlay, auto-cut·cinematic brand·console·engine status surface, recommendation action, status dot의 최종 소유자를 단일화했습니다.
+- CSS 충돌을 197→48, medium-risk 충돌을 149→0, `!important`를 841→833, shadowed declaration을 212→51로 낮췄습니다.
+- 데스크톱·소형 노트북·태블릿·모바일 targeted computed style을 v1.5.11과 동일하게 유지했습니다.
+- 자동 QA 171/171, 4개 viewport, process memory, GPU/media, service worker 감사를 통과했습니다.
+
+## v1.5.11 적용 내용
+
+- 헤더 설명문의 폭·색상·화면별 글자 크기를 최종 소유 파일로 통합하고, hero panel의 기본·데스크톱 높이 소유권을 분리했습니다.
+- 숨겨진 workspace reveal pulse와 중복 scroll behavior 선언을 제거해 상호작용 모션 소유자를 단일화했습니다.
+- CSS 충돌을 214→197, 고위험 충돌을 11→0, `!important`를 853→841, shadowed declaration을 239→212로 낮췄습니다.
+- acceleration-requested와 software-fallback Chromium 모드에서 GPU process·media utility process RSS와 1280×720 30fps H.264/AAC 디코딩을 비교하는 감사를 추가했습니다.
+
+## v1.5.10 적용 내용
+
+- 현재 화면에 존재하지 않는 retired command group CSS와 obsolete DOM 조회 코드를 제거했습니다.
+- control·preview surface, panel head, upload tile, form control, stage visibility, source media containment의 최종 CSS 소유 파일을 단일화했습니다.
+- 4개 viewport 계산 스타일을 v1.5.9와 동일하게 유지하면서 CSS 충돌 214개, 고위험 충돌 11개, `!important` 853개, shadowed declaration 239개로 기준을 낮췄습니다.
+- retired command group 재유입을 막는 전용 회귀 검사를 추가했습니다.
+- 미디어 실행 경로는 변경되지 않아 v1.5.9의 장시간 MP4 안정성 결과를 상속합니다.
+
+## v1.5.9 적용 내용
+
+- 실제 1920×1080 MP4를 15분→30분→15분 순서로 같은 페이지에서 교체하고 분석·추천·2초 출력·정리하는 장시간 감사를 추가했습니다.
+- 15분 분석 13.042초, 30분 분석 23.596초로 완료했고 재교체 분석, 출력 재생, operation·queue 해제, Object URL 전량 해제를 확인했습니다.
+- brand panel, version badge, brand signature, bottom dock, primary/secondary button skin의 최종 CSS 소유자를 단일화했습니다.
+- CSS 충돌 271개, 고위험 충돌 50개, `!important` 875개, shadowed declaration 314개로 기준을 낮췄습니다.
+- 자동 QA 167/167, 4개 viewport 오류·가로 overflow 0, 서비스워커·process memory·장시간 MP4 감사를 통과했습니다.
+
+## v1.5.8 적용 내용
+
+- 반응형 shell 여백·하단 확보 공간·hero 제목 크기를 공통 CSS token으로 통합했습니다.
+- header topline과 mobile title, desktop shell의 최종 CSS 소유 파일을 단일화했습니다.
+- 현재 단계 neon chip 뒤에 완전히 가려진 이전 pseudo-label 스타일을 제거했습니다.
+- CSS 충돌 304개, 고위험 충돌 69개, `!important` 879개로 기준을 낮췄습니다.
+- Chromium RSS/USS, renderer JS heap, GPU·utility process category를 기록하는 보조 memory audit를 추가했습니다.
+- 자동 QA 166/166, 4개 viewport 오류·가로 overflow 0, 서비스워커 생명주기를 통과했습니다.
 
 ## v1.5.7 적용 내용
 
@@ -59,13 +119,15 @@
 
 ## 검수 결과
 
-- 자동 QA: **164/164**
+- 자동 QA: **172/172**
 - 데스크톱·소형 노트북·태블릿·모바일 Chromium 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- 데스크톱 작업 그리드·키보드 리사이즈·미리보기/웨이브폼 집중 모드 통과
-- 모바일 핵심 메뉴 4개·전체 메뉴 8개와 데스크톱 전용 컨트롤 비노출 통과
-- 서비스워커 install·activate·이전 캐시 정리·offline navigation 통과
-- v1.5.3 실미디어 MP3·MP4·취소·재시도·10분 미디어 및 20회 힙 감사 계약 유지
+- CSS: `!important` 833, 실제 충돌 0, 고위험 충돌 0, shadowed declaration 0
+- 실제 15분→30분→15분 1080p MP4 안정성 계약은 v1.5.9 결과 상속
+- 각 장시간 반복 뒤 active operation·render queue 0, 종료 후 Object URL 0
+- Chromium process memory audit 16회, runtime error 0
+- GPU/media capability 비교: 두 모드 H.264/AAC 디코딩 통과, GPU·media utility process 관측
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
 
 ## 실행
 
@@ -83,6 +145,8 @@ python3 qa/run_browser_audit.py
 python3 qa/run_media_e2e.py --cases audio,video,cancel,retry --reset
 python3 qa/run_media_e2e.py --cases longAudio
 python3 qa/run_heap_stability.py --cycles 20
+python3 qa/run_process_memory_audit.py --cycles 16
+python3 qa/run_gpu_media_capability_audit.py
 node qa/run_service_worker_lifecycle.js
 ```
 
@@ -106,14 +170,14 @@ node qa/run_service_worker_lifecycle.js
 
 ```bash
 npm run package:full
-PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.4_CSS_Ownership_Full.zip PATCH_FROM_VERSION=1.5.4 npm run package:patch
+PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.10_Control_Ownership_Full.zip PATCH_FROM_VERSION=1.5.10 npm run package:patch
 ```
 
-전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.4 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
+전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.10 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
 
 ## 알려진 제한
 
-- 반복 힙 감사는 V8 JS 힙과 Object URL을 직접 측정하며 GPU 메모리, Chromium 전체 RSS, OS 미디어 디코더 네이티브 할당은 별도 실기기 계측이 필요합니다.
+- headless 컨테이너에서는 물리 GPU/WebGL context가 노출되지 않아 GPU process와 media utility RSS·디코딩 성공만 보조 확인했습니다. 실제 하드웨어 가속 메모리와 decoder surface는 데스크톱 실기기 계측이 필요합니다.
 
 실제 Chromium 감사 기기는 4GB 메모리로 보고돼 실미디어 영상은 안전 순차 전략을 사용했습니다. 병렬 분기는 모의 시간·부분 실패 검사로 통과했으며 8코어·8GB 이상 실기기 계측이 추가로 필요합니다. 모바일 Safari·Samsung Internet과 15분·30분 고해상도 MP4 장시간 출력도 별도 검증 대상입니다.
 

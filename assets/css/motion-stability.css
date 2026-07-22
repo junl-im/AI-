@@ -4,13 +4,8 @@
     --motion-stable-ring: rgba(34, 211, 238, 0.34);
 }
 
-html {
-    scroll-behavior: auto !important;
-}
-
 body[data-ui="hyperflow-tabs"] [data-flow-panel] {
     transform: none !important;
-    animation-name: none;
     contain: layout paint;
 }
 
@@ -20,12 +15,7 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-workspace-revealed {
 }
 
 body[data-ui="hyperflow-tabs"] [data-flow-panel].is-motion-stable-revealed {
-    outline: 1px solid var(--motion-stable-ring);
     outline-offset: 0;
-    box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.08),
-        0 0 0 1px rgba(34,211,238,0.14),
-        var(--glass-shadow, 0 24px 80px rgba(0,0,0,.42));
 }
 
 body[data-ui="hyperflow-tabs"] .hyperflow-stage,

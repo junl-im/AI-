@@ -249,25 +249,16 @@
         strip.innerHTML = '<div class="shutter-tile youtube"><span class="shutter-icon"><i class="studio-icon" data-icon="preview"></i>YouTube</span><small>하이라이트 컷</small></div><div class="shutter-tile instagram"><span class="shutter-icon"><i class="studio-icon" data-icon="candidates"></i>Reels</span><small>세로 프레임</small></div><div class="shutter-tile tiktok"><span class="shutter-icon"><i class="studio-icon" data-icon="waveform"></i>TikTok</span><small>빠른 템포</small></div>';
         hero.appendChild(strip);
     }
-    function simplifyHomeCopy() {
-        const importGroup = document.querySelector('.command-group-primary .command-group-head small');
-        const analyzeGroup = document.querySelector('.command-group-status[aria-label="자동 분석 안내"] .command-group-head small');
-        const editGroup = document.querySelector('.command-group-status[aria-label="편집 흐름 안내"] .command-group-head small');
-        if (importGroup && importGroup.textContent !== '하단 메뉴바의 파일 열기로 원본을 선택합니다.') importGroup.textContent = '하단 메뉴바의 파일 열기로 원본을 선택합니다.';
-        if (analyzeGroup && analyzeGroup.textContent !== '파일을 열면 분석 화면으로 이동하고 완료 후 추천 단계로 연결됩니다.') analyzeGroup.textContent = '파일을 열면 분석 화면으로 이동하고 완료 후 추천 단계로 연결됩니다.';
-        if (editGroup && editGroup.textContent !== '추천 → 후보 → 미리보기 → 저장 순서로 화면이 따라갑니다.') editGroup.textContent = '추천 → 후보 → 미리보기 → 저장 순서로 화면이 따라갑니다.';
-    }
     function sync() {
         patchGlobals();
         relabelMenu();
         installHeroSocial();
-        simplifyHomeCopy();
         setVisible(activeTab());
         spotlight(panelFor(activeTab()), activeTab(), { forcePulse: false });
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.5.7') document.body.dataset.build = '1.5.7';
+            if (document.body.dataset.build !== '1.5.14') document.body.dataset.build = '1.5.14';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
             document.body.dataset.iconLanguage = 'studio-vectors';
         }

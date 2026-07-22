@@ -1,19 +1,6 @@
 
 /* AI Shorts Studio v0.9.7 - HyperFlow tabbed workflow */
-:root {
-    --hyperflow-dock-height: 146px;
-}
-body[data-ui="hyperflow-tabs"] {
-    scroll-padding-bottom: var(--hyperflow-dock-height);
-}
-body[data-ui="hyperflow-tabs"] .app-shell {
-    padding-bottom: calc(var(--hyperflow-dock-height) + 18px);
-}
 .hyperflow-stage {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
     margin: 12px 0 14px;
     padding: 12px;
     border: 1px solid rgba(148, 163, 184, 0.20);
@@ -26,7 +13,6 @@ body[data-ui="hyperflow-tabs"] .app-shell {
     contain: layout paint;
 }
 .hyperflow-stage-main {
-    min-width: 0;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -55,14 +41,10 @@ body[data-ui="hyperflow-tabs"] .app-shell {
 .hyperflow-recommend-btn,
 .recommend-generate-btn {
     min-height: 48px;
-    border: 0;
     border-radius: 17px;
     padding: 0 18px;
-    color: #fff;
     font-weight: 950;
     letter-spacing: -0.035em;
-    background: linear-gradient(135deg, #22d3ee, #7c3aed 62%, #f97316);
-    box-shadow: 0 16px 36px rgba(124, 58, 237, 0.30);
     cursor: pointer;
 }
 .hyperflow-recommend-btn:disabled,
@@ -89,9 +71,6 @@ body[data-active-flow-tab="candidates"] [data-flow-panel~="candidates"],
 body[data-active-flow-tab="preview"] [data-flow-panel~="preview"],
 body[data-active-flow-tab="waveform"] [data-flow-panel~="waveform"],
 body[data-active-flow-tab="cut"] [data-flow-panel~="cut"],
-body[data-active-flow-tab="edit"] [data-flow-panel~="edit"],
-body[data-active-flow-tab="caption"] [data-flow-panel~="caption"],
-body[data-active-flow-tab="quality"] [data-flow-panel~="quality"],
 body[data-active-flow-tab="export"] [data-flow-panel~="export"],
 body[data-active-flow-tab="project"] [data-flow-panel~="project"] {
     display: block !important;
@@ -120,16 +99,7 @@ body[data-ui="hyperflow-tabs"] .console-panel {
 body[data-ui="hyperflow-tabs"] .recommendation-list {
     max-height: min(62vh, 680px);
 }
-body[data-ui="hyperflow-tabs"] .preview-card,
-body[data-ui="hyperflow-tabs"] .waveform-card,
-body[data-ui="hyperflow-tabs"] .auto-cut-panel,
-body[data-ui="hyperflow-tabs"] .edit-tools-card,
-body[data-ui="hyperflow-tabs"] .project-card,
-body[data-ui="hyperflow-tabs"] .copy-card,
-body[data-ui="hyperflow-tabs"] .control-zone,
-body[data-ui="hyperflow-tabs"] .export-card {
-    min-height: min(72vh, 760px);
-}
+/* Panel minimum height is owned by flow-integrity.css and active-stage layouts. */
 .hyperflow-export-panel {
     padding: 18px;
     border: 1px solid rgba(148, 163, 184, 0.20);
@@ -169,7 +139,6 @@ body[data-ui="hyperflow-tabs"] .export-card {
 }
 .bottom-dock-tabs {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 .bottom-dock-tab {
     min-width: 0;
@@ -186,9 +155,6 @@ body[data-ui="hyperflow-tabs"] .export-card {
     user-select: none;
     -webkit-tap-highlight-color: transparent;
     transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, filter 160ms ease;
-}
-.bottom-dock-tab span {
-    line-height: 1;
 }
 .bottom-dock-tab b {
     max-width: 100%;
@@ -214,7 +180,6 @@ body[data-ui="hyperflow-tabs"] .export-card {
     to { opacity: 1; transform: translateY(0); }
 }
 @media (max-width: 720px) {
-    :root { --hyperflow-dock-height: 134px; }
     .hyperflow-stage {
         align-items: stretch;
         display: grid;

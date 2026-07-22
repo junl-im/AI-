@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, '..');
 const pkg = require(path.join(root, 'package.json'));
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+const config = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
 const engine = fs.readFileSync(path.join(root, 'src/engine/engine-boost-profile.js'), 'utf8');
 function ok(condition, message) {
   if (!condition) {
@@ -14,8 +15,9 @@ function ok(condition, message) {
   }
 }
 const version = pkg.version;
-ok(html.includes(`src/engine/engine-boost-profile.js?v=${version}-responsive-density`), 'engine boost profile script linked');
-ok(sw.includes(`./src/engine/engine-boost-profile.js?v=${version}-responsive-density`), 'engine boost profile script cached');
+const buildKey = (config.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
+ok(html.includes(`src/engine/engine-boost-profile.js?v=${buildKey}`), 'engine boost profile script linked');
+ok(sw.includes(`./src/engine/engine-boost-profile.js?v=${buildKey}`), 'engine boost profile script cached');
 ok(engine.includes('AIShortsEngineBoostProfile'), 'engine boost profile exports API');
 ok(engine.includes('MAX-STABLE'), 'engine boost profile includes MAX-STABLE mode');
 ok(engine.includes('recommendedParallelism'), 'engine boost profile computes parallelism');

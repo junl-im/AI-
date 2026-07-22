@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, '..');
 const pkg = require(path.join(root, 'package.json'));
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+const config = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
 const sentinel = fs.readFileSync(path.join(root, 'src/boot/update-sentinel.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/update-sentinel.css'), 'utf8');
 const handoff = fs.readFileSync(path.join(root, 'HANDOFF.md'), 'utf8');
@@ -16,10 +17,11 @@ function ok(condition, message) {
   }
 }
 const version = pkg.version;
-ok(html.includes(`assets/css/update-sentinel.css?v=${version}-responsive-density`), 'update sentinel css linked');
-ok(html.includes(`src/boot/update-sentinel.js?v=${version}-responsive-density`), 'update sentinel script linked');
-ok(sw.includes(`./assets/css/update-sentinel.css?v=${version}-responsive-density`), 'update sentinel css cached');
-ok(sw.includes(`./src/boot/update-sentinel.js?v=${version}-responsive-density`), 'update sentinel script cached');
+const buildKey = (config.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
+ok(html.includes(`assets/css/update-sentinel.css?v=${buildKey}`), 'update sentinel css linked');
+ok(html.includes(`src/boot/update-sentinel.js?v=${buildKey}`), 'update sentinel script linked');
+ok(sw.includes(`./assets/css/update-sentinel.css?v=${buildKey}`), 'update sentinel css cached');
+ok(sw.includes(`./src/boot/update-sentinel.js?v=${buildKey}`), 'update sentinel script cached');
 ok(sentinel.includes('AIShortsUpdateSentinel'), 'sentinel exports global API');
 ok(sentinel.includes('clearOldShellCaches'), 'sentinel can clear previous shell caches');
 ok(sentinel.includes('copyDiagnostics'), 'sentinel can copy update diagnostics');

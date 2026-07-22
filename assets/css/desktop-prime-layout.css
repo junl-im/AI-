@@ -6,9 +6,7 @@
 
 /* Brand metadata always sits on one clean line: version left, signature right. */
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
-    align-items: center !important;
     width: 100%;
-    gap: 12px !important;
 }
 
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-kicker {
@@ -26,26 +24,19 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-compat-pill {
 }
 
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
-    grid-column: 2;
     grid-row: 1;
-    justify-self: end;
-    min-width: 0;
     margin-left: 0 !important;
 }
 
 .cinematic-brand-panel .hero-mainline {
-    width: 100%;
     padding-inline: clamp(10px, 2.5vw, 38px);
 }
 
 .cinematic-brand-panel .hero-copy {
     width: 100%;
-    min-width: 0;
 }
 
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
-    width: min(100%, 720px);
-    max-width: 720px !important;
     margin-right: auto !important;
 }
 
@@ -90,9 +81,7 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     body[data-ui="hyperflow-tabs"] .brand-panel.cinematic-brand-panel {
-        min-height: 128px !important;
         padding: 13px 18px 15px !important;
-        border-radius: 22px !important;
     }
 
     .cinematic-brand-panel .hero-mainline {
@@ -106,8 +95,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
     body[data-ui="hyperflow-tabs"] .hero-compact-note {
         margin-top: 7px !important;
-        font-size: 13px !important;
-        line-height: 1.5 !important;
     }
 
     body[data-ui="hyperflow-tabs"] .hyperflow-stage {
@@ -282,13 +269,9 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
 
 @media (max-width: 720px) {
     .app-shell {
-        padding-top: 6px !important;
+        padding-top: var(--responsive-shell-top-mobile) !important;
     }
 
-
-    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
-        gap: 7px !important;
-    }
 
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-compat-pill {
         display: none !important;
@@ -301,15 +284,11 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     }
 
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
-        grid-column: 2;
         grid-row: 1;
-        justify-self: end;
         margin-left: 0 !important;
     }
 
     .cinematic-brand-panel .brand-signature-pill {
-        max-width: none !important;
-        padding-inline: 8px !important;
         font-size: 9.5px !important;
         white-space: nowrap;
     }
@@ -319,10 +298,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         margin-top: 12px !important;
     }
 
-    body[data-ui="hyperflow-tabs"] .hero-copy h1,
-    .cinematic-title {
-        font-size: clamp(29px, 9.4vw, 40px) !important;
-    }
 
     body[data-ui="hyperflow-tabs"] .hero-compact-note {
         width: min(100%, 34rem);
@@ -341,7 +316,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
     .start-command-panel .workflow-rail-separated {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
         padding: 0 !important;
         border: 0 !important;
         background: transparent !important;
@@ -396,10 +370,7 @@ body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child {
     height: 27px;
     place-items: center;
     margin-inline: auto;
-    border: 1px solid rgba(148, 163, 184, 0.14);
     border-radius: 9px;
-    background: rgba(148, 163, 184, 0.055);
-    color: rgba(203, 213, 225, 0.72);
     font-size: 15px !important;
     font-weight: 800;
     line-height: 1;
@@ -415,34 +386,9 @@ body[data-icon-language="studio-glyphs"] .bottom-dock-tab[aria-current="step"] >
     transform: translateY(-1px);
 }
 
-body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target {
-    position: relative;
-    z-index: 3;
-}
-
-body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after {
-    content: attr(data-navigation-label);
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    z-index: 7;
-    padding: 3px 7px;
-    border-radius: 999px;
-    background: rgba(8, 12, 22, 0.82);
-    color: rgba(165, 243, 252, 0.9);
-    font-size: 8px;
-    font-weight: 900;
-    letter-spacing: 0.06em;
-    pointer-events: none;
-}
-
 @keyframes navigationFocusPulse {
     0% { box-shadow: 0 0 0 0 rgba(103, 232, 249, 0.30), 0 22px 56px rgba(3, 7, 18, 0.26); }
     100% { box-shadow: 0 0 0 10px rgba(103, 232, 249, 0), 0 22px 56px rgba(3, 7, 18, 0.26); }
-}
-
-body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-pulse {
-    animation: navigationFocusPulse 620ms ease-out 1;
 }
 
 @media (min-width: 1180px) {
@@ -455,15 +401,12 @@ body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-pulse {
 }
 
 @media (max-width: 720px) {
-    body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-target::after { display: none; }
     body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child {
         border-radius: 8px;
-        font-size: 14px !important;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    body[data-ui="hyperflow-tabs"] [data-flow-panel].is-navigation-pulse { animation: none !important; }
     body[data-desktop-layout="prime"] [data-flow-panel],
     body[data-icon-language="studio-glyphs"] .bottom-dock-tab > span:first-child { transition: none !important; }
 }

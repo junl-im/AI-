@@ -1,32 +1,32 @@
 {
   "version": "1.5.7",
-  "generatedAt": "2026-07-21T09:49:48.795Z",
+  "generatedAt": "2026-07-21T15:38:39.165Z",
   "cssFiles": 46,
   "linkedCssFiles": 45,
   "activeCssFiles": 45,
   "archivedCssFiles": [
     "cinematic-hero.css"
   ],
-  "importantCount": 904,
-  "duplicateSelectorCount": 230,
-  "highConflictSelectorCount": 33,
-  "sharedPropertyCount": 397,
-  "conflictingPropertyCount": 334,
-  "highRiskConflictCount": 81,
-  "sameValueDuplicateCount": 63,
-  "shadowedDeclarationCount": 414,
+  "importantCount": 879,
+  "duplicateSelectorCount": 228,
+  "highConflictSelectorCount": 32,
+  "sharedPropertyCount": 365,
+  "conflictingPropertyCount": 304,
+  "highRiskConflictCount": 69,
+  "sameValueDuplicateCount": 61,
+  "shadowedDeclarationCount": 372,
   "conflictCategoryCounts": {
-    "layout": 96,
-    "skin": 151,
-    "typography": 41,
+    "layout": 83,
+    "skin": 149,
+    "typography": 33,
     "interaction": 8,
-    "other": 29,
+    "other": 22,
     "token": 9
   },
   "highRiskCategoryCounts": {
-    "layout": 45,
+    "layout": 34,
     "skin": 32,
-    "typography": 3,
+    "typography": 2,
     "interaction": 1
   },
   "criticalOwnership": {
@@ -1103,19 +1103,6 @@
       "ownerCount": 8
     },
     {
-      "selector": ".brand-signature-pill",
-      "owners": [
-        "feedback-ux.css",
-        "flow-polish.css",
-        "responsive-workspace.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css",
-        "foundation-polish.css",
-        "studio-experience.css"
-      ],
-      "ownerCount": 7
-    },
-    {
       "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-selection-summary",
       "owners": [
         "flow-integrity.css",
@@ -1166,26 +1153,14 @@
       "ownerCount": 6
     },
     {
-      "selector": ".brand-topline",
+      "selector": ".brand-signature-pill",
       "owners": [
-        "studio.css",
-        "layout-dock.css",
+        "feedback-ux.css",
         "flow-polish.css",
-        "flow-hotfix.css",
-        "shutter-glass-flow.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 6
-    },
-    {
-      "selector": ".cinematic-title",
-      "owners": [
         "glass-pro-ui.css",
         "shutter-glass-flow.css",
         "foundation-polish.css",
-        "desktop-prime-layout.css",
-        "hero-command-deck.css",
-        "ui-refinement.css"
+        "studio-experience.css"
       ],
       "ownerCount": 6
     },
@@ -1220,18 +1195,6 @@
         "layout-dock.css",
         "responsive-workspace.css",
         "glass-pro-ui.css",
-        "foundation-polish.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 6
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .app-shell",
-      "owners": [
-        "hyperflow-tabs.css",
-        "flow-integrity.css",
-        "responsive-workspace.css",
-        "pc-dock-reveal-hotfix.css",
         "foundation-polish.css",
         "ui-refinement.css"
       ],
@@ -1319,6 +1282,28 @@
       "ownerCount": 5
     },
     {
+      "selector": ".brand-topline",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "flow-polish.css",
+        "flow-hotfix.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".cinematic-title",
+      "owners": [
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "desktop-prime-layout.css",
+        "hero-command-deck.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 5
+    },
+    {
       "selector": ".console-panel",
       "owners": [
         "studio.css",
@@ -1397,6 +1382,17 @@
     },
     {
       "selector": "body[data-ui=\"hyperflow-tabs\"] .preview-card",
+      "owners": [
+        "hyperflow-tabs.css",
+        "flow-integrity.css",
+        "flow-doctor.css",
+        "desktop-prime-layout.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .waveform-card",
       "owners": [
         "hyperflow-tabs.css",
         "flow-integrity.css",
@@ -1500,55 +1496,6 @@
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .app-shell",
-      "context": "@media (min-width: 1180px)",
-      "property": "padding-bottom",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "pc-dock-reveal-hotfix.css",
-        "foundation-polish.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 4,
-      "distinctValueCount": 4,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 15,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "104px",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "calc(var(--desktop-dock-height) + 24px)",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "pc-dock-reveal-hotfix.css",
-          "value": "calc(var(--hyperflow-dock-height) + 26px)",
-          "important": true,
-          "loadIndex": 22
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "calc(var(--hyperflow-dock-height) + 20px)",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "104px",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
       "selector": ".bottom-dock",
       "context": "base",
       "property": "background",
@@ -1645,48 +1592,6 @@
       ]
     },
     {
-      "selector": ".cinematic-brand-panel .brand-topline",
-      "context": "@media (max-width: 720px)",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "foundation-polish.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 15,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "grid",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "flex",
-          "important": true,
-          "loadIndex": 20
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "grid",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "grid",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
       "selector": ".hero-compact-note",
       "context": "base",
       "property": "max-width",
@@ -1725,97 +1630,6 @@
           "value": "760px",
           "important": false,
           "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-title",
-      "context": "@media (max-width: 720px)",
-      "property": "font-size",
-      "category": "typography",
-      "owners": [
-        "foundation-polish.css",
-        "desktop-prime-layout.css",
-        "hero-command-deck.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 4,
-      "distinctValueCount": 4,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "clamp(36px, 10.8vw, 48px)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "foundation-polish.css",
-          "value": "clamp(30px, 10vw, 42px)",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "clamp(29px, 9.4vw, 40px)",
-          "important": true,
-          "loadIndex": 36
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "clamp(32px, 10.6vw, 43px)",
-          "important": true,
-          "loadIndex": 37
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "clamp(36px, 10.8vw, 48px)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".app-shell",
-      "context": "@media (max-width: 720px)",
-      "property": "padding-top",
-      "category": "layout",
-      "owners": [
-        "layout-dock.css",
-        "foundation-polish.css",
-        "desktop-prime-layout.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "desktop-prime-layout.css",
-        "value": "6px",
-        "important": true,
-        "loadIndex": 36
-      },
-      "occurrences": [
-        {
-          "file": "layout-dock.css",
-          "value": "10px",
-          "important": false,
-          "loadIndex": 5
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "7px",
-          "important": false,
-          "loadIndex": 35
-        },
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "6px",
-          "important": true,
-          "loadIndex": 36
         }
       ]
     },
@@ -3409,41 +3223,6 @@
       ]
     },
     {
-      "selector": ".brand-signature-pill",
-      "context": "@media (max-width: 720px)",
-      "property": "max-width",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "42vw",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "50vw",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "42vw",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
       "selector": ".cinematic-brand-panel .brand-compat-pill",
       "context": "base",
       "property": "display",
@@ -3473,2533 +3252,6 @@
         {
           "file": "header-meta-rail.css",
           "value": "none",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-brand-panel .brand-topline",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "grid",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "flex",
-          "important": true,
-          "loadIndex": 20
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "grid",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-brand-panel .brand-topline",
-      "context": "@media (max-width: 720px)",
-      "property": "grid-template-columns",
-      "category": "layout",
-      "owners": [
-        "foundation-polish.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "minmax(0, 1fr) auto",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "foundation-polish.css",
-          "value": "auto minmax(0, 1fr)",
-          "important": false,
-          "loadIndex": 35
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "minmax(0, 1fr) auto",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": ".command-group-head",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "grid",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "flex",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "grid",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".command-mini-row",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "flex",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".designer-mini",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "studio.css",
-        "layout-dock.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "layout-dock.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 5
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "grid",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 5
-        }
-      ]
-    },
-    {
-      "selector": ".flow-selection-summary",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "flow-polish.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "flow-polish.css",
-          "value": "grid",
-          "important": false,
-          "loadIndex": 16
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".hero-meter",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "studio.css",
-        "layout-dock.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "layout-dock.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 5
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "flex",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 5
-        }
-      ]
-    },
-    {
-      "selector": ".source-media",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "editor.css",
-        "layout-dock.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "layout-dock.css",
-        "value": "block",
-        "important": true,
-        "loadIndex": 5
-      },
-      "occurrences": [
-        {
-          "file": "editor.css",
-          "value": "none",
-          "important": false,
-          "loadIndex": 2
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "block",
-          "important": true,
-          "loadIndex": 5
-        }
-      ]
-    },
-    {
-      "selector": ".source-media",
-      "context": "base",
-      "property": "max-height",
-      "category": "layout",
-      "owners": [
-        "editor.css",
-        "layout-dock.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "layout-dock.css",
-        "value": "1px",
-        "important": true,
-        "loadIndex": 5
-      },
-      "occurrences": [
-        {
-          "file": "editor.css",
-          "value": "220px",
-          "important": false,
-          "loadIndex": 2
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "1px",
-          "important": true,
-          "loadIndex": 5
-        }
-      ]
-    },
-    {
-      "selector": ".source-media",
-      "context": "base",
-      "property": "width",
-      "category": "layout",
-      "owners": [
-        "editor.css",
-        "layout-dock.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "layout-dock.css",
-        "value": "1px",
-        "important": true,
-        "loadIndex": 5
-      },
-      "occurrences": [
-        {
-          "file": "editor.css",
-          "value": "100%",
-          "important": false,
-          "loadIndex": 2
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "1px",
-          "important": true,
-          "loadIndex": 5
-        }
-      ]
-    },
-    {
-      "selector": ".source-media.is-visible",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "editor.css",
-        "layout-dock.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "layout-dock.css",
-        "value": "block",
-        "important": true,
-        "loadIndex": 5
-      },
-      "occurrences": [
-        {
-          "file": "editor.css",
-          "value": "block",
-          "important": false,
-          "loadIndex": 2
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "block",
-          "important": true,
-          "loadIndex": 5
-        }
-      ]
-    }
-  ],
-  "propertyConflicts": [
-    {
-      "selector": ".hyperflow-stage",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "hyperflow-tabs.css",
-        "shutter-glass-flow.css",
-        "studio-experience.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 16,
-      "winner": {
-        "file": "studio-experience.css",
-        "value": "flex",
-        "important": true,
-        "loadIndex": 44
-      },
-      "occurrences": [
-        {
-          "file": "hyperflow-tabs.css",
-          "value": "flex",
-          "important": false,
-          "loadIndex": 13
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 33
-        },
-        {
-          "file": "studio-experience.css",
-          "value": "flex",
-          "important": true,
-          "loadIndex": 44
-        }
-      ]
-    },
-    {
-      "selector": ".brand-panel",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "ux.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 4,
-      "distinctValueCount": 4,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 15,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "linear-gradient(135deg, rgba(10, 15, 32, 0.84), rgba(12, 16, 34, 0.66)), radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 46%)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.58))",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "ux.css",
-          "value": "linear-gradient(145deg, rgba(15, 23, 42, 0.91), rgba(15, 23, 42, 0.62)), radial-gradient(circle at 18% 18%, rgba(34, 211, 238, 0.14), transparent 34%), radial-gradient(circle at 82% 18%, rgba(249, 115, 22, 0.12), transparent 32%)",
-          "important": false,
-          "loadIndex": 3
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "linear-gradient(135deg, rgba(10, 15, 32, 0.84), rgba(12, 16, 34, 0.66)), radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 46%)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .app-shell",
-      "context": "@media (min-width: 1180px)",
-      "property": "padding-bottom",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "pc-dock-reveal-hotfix.css",
-        "foundation-polish.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 4,
-      "distinctValueCount": 4,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 15,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "104px",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "calc(var(--desktop-dock-height) + 24px)",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "pc-dock-reveal-hotfix.css",
-          "value": "calc(var(--hyperflow-dock-height) + 26px)",
-          "important": true,
-          "loadIndex": 22
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "calc(var(--hyperflow-dock-height) + 20px)",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "104px",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".bottom-dock",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "layout-dock.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 4,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 15,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "rgba(8, 12, 28, 0.80)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "layout-dock.css",
-          "value": "linear-gradient(135deg, rgba(15, 23, 42, 0.93), rgba(2, 6, 23, 0.90)), radial-gradient(circle at 8% 30%, rgba(34, 211, 238, 0.16), transparent 30%), radial-gradient(circle at 95% 40%, rgba(249, 115, 22, 0.14), transparent 28%)",
-          "important": false,
-          "loadIndex": 5
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent 32%), rgba(7, 12, 24, 0.78)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "rgba(8, 12, 28, 0.80)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".btn-secondary",
-      "context": "base",
-      "property": "border",
-      "category": "skin",
-      "owners": [
-        "theme.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 4,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 15,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "1px solid rgba(148, 163, 184, 0.16)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "theme.css",
-          "value": "0",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "theme.css",
-          "value": "1px solid var(--line)",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "1px solid rgba(255, 255, 255, 0.18)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "1px solid rgba(148, 163, 184, 0.16)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-brand-panel .brand-topline",
-      "context": "@media (max-width: 720px)",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "foundation-polish.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 15,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "grid",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "flex",
-          "important": true,
-          "loadIndex": 20
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "grid",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "grid",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": ".hero-compact-note",
-      "context": "base",
-      "property": "max-width",
-      "category": "layout",
-      "owners": [
-        "layout-dock.css",
-        "flow-polish.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 15,
-      "winner": {
-        "file": "layout-dock.css",
-        "value": "560px",
-        "important": true,
-        "loadIndex": 5
-      },
-      "occurrences": [
-        {
-          "file": "layout-dock.css",
-          "value": "560px",
-          "important": true,
-          "loadIndex": 5
-        },
-        {
-          "file": "flow-polish.css",
-          "value": "760px",
-          "important": false,
-          "loadIndex": 16
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "760px",
-          "important": false,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-title",
-      "context": "@media (max-width: 720px)",
-      "property": "font-size",
-      "category": "typography",
-      "owners": [
-        "foundation-polish.css",
-        "desktop-prime-layout.css",
-        "hero-command-deck.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 4,
-      "distinctValueCount": 4,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "clamp(36px, 10.8vw, 48px)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "foundation-polish.css",
-          "value": "clamp(30px, 10vw, 42px)",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "clamp(29px, 9.4vw, 40px)",
-          "important": true,
-          "loadIndex": 36
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "clamp(32px, 10.6vw, 43px)",
-          "important": true,
-          "loadIndex": 37
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "clamp(36px, 10.8vw, 48px)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".app-shell",
-      "context": "@media (max-width: 720px)",
-      "property": "padding-top",
-      "category": "layout",
-      "owners": [
-        "layout-dock.css",
-        "foundation-polish.css",
-        "desktop-prime-layout.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "desktop-prime-layout.css",
-        "value": "6px",
-        "important": true,
-        "loadIndex": 36
-      },
-      "occurrences": [
-        {
-          "file": "layout-dock.css",
-          "value": "10px",
-          "important": false,
-          "loadIndex": 5
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "7px",
-          "important": false,
-          "loadIndex": 35
-        },
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "6px",
-          "important": true,
-          "loadIndex": 36
-        }
-      ]
-    },
-    {
-      "selector": ".badge-version",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "theme.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "rgba(255,255,255,0.08)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "theme.css",
-          "value": "rgba(124, 58, 237, 0.22)",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "rgba(255, 255, 255, 0.10)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "rgba(255,255,255,0.08)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".brand-panel",
-      "context": "base",
-      "property": "box-shadow",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "0 22px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.09)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "var(--shadow)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "var(--glass-shadow)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "0 22px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.09)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".brand-signature-pill",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "feedback-ux.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "glass-pro-ui.css",
-        "value": "rgba(255, 255, 255, 0.10)",
-        "important": true,
-        "loadIndex": 23
-      },
-      "occurrences": [
-        {
-          "file": "feedback-ux.css",
-          "value": "linear-gradient(135deg, rgba(249, 115, 22, 0.16), rgba(124, 58, 237, 0.12)), rgba(15, 23, 42, 0.72)",
-          "important": false,
-          "loadIndex": 10
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "rgba(255, 255, 255, 0.10)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "rgba(255,255,255,0.07)",
-          "important": false,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".btn-primary",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "theme.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "theme.css",
-          "value": "linear-gradient(135deg, var(--accent-2), var(--accent), var(--accent-3))",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(135deg, rgba(34, 211, 238, 0.95), rgba(139, 92, 246, 0.92), rgba(249, 115, 22, 0.86))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".btn-primary",
-      "context": "base",
-      "property": "border",
-      "category": "skin",
-      "owners": [
-        "theme.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "1px solid rgba(165, 243, 252, 0.24)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "theme.css",
-          "value": "0",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "1px solid rgba(255, 255, 255, 0.18)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "1px solid rgba(165, 243, 252, 0.24)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".btn-primary",
-      "context": "base",
-      "property": "box-shadow",
-      "category": "skin",
-      "owners": [
-        "theme.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "0 10px 24px rgba(103, 232, 249, 0.12)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "theme.css",
-          "value": "0 16px 40px rgba(124, 58, 237, 0.28)",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 12px 28px rgba(0, 0, 0, 0.18)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "0 10px 24px rgba(103, 232, 249, 0.12)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".btn-secondary",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "theme.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "rgba(18, 26, 43, 0.72)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "theme.css",
-          "value": "rgba(15, 23, 42, 0.74)",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "rgba(255, 255, 255, 0.08)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "rgba(18, 26, 43, 0.72)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".command-group",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "responsive-workspace.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "transparent",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "linear-gradient(135deg, rgba(15, 23, 42, 0.76), rgba(2, 6, 23, 0.58)), radial-gradient(circle at 14% 0%, rgba(34, 211, 238, 0.12), transparent 35%), radial-gradient(circle at 92% 50%, rgba(124, 58, 237, 0.13), transparent 34%)",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "transparent",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".command-group",
-      "context": "base",
-      "property": "box-shadow",
-      "category": "skin",
-      "owners": [
-        "responsive-workspace.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "0 14px 42px rgba(0,0,0,0.20)",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "var(--glass-shadow)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".console-panel",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "var(--flow-glass-bg)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.58))",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "var(--flow-glass-bg)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".console-panel",
-      "context": "base",
-      "property": "box-shadow",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "var(--shadow)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "var(--glass-shadow)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": ".control-zone",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "var(--flow-glass-bg)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "rgba(15, 23, 42, 0.58)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "var(--flow-glass-bg)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".control-zone",
-      "context": "base",
-      "property": "padding",
-      "category": "layout",
-      "owners": [
-        "studio.css",
-        "layout-dock.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "clamp(13px, 1.7vw, 18px)",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "16px",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "14px",
-          "important": false,
-          "loadIndex": 5
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "clamp(13px, 1.7vw, 18px)",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": ".copy-card",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "var(--flow-glass-bg)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "rgba(15, 23, 42, 0.58)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "var(--flow-glass-bg)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".copy-card",
-      "context": "base",
-      "property": "padding",
-      "category": "layout",
-      "owners": [
-        "studio.css",
-        "layout-dock.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "clamp(13px, 1.7vw, 18px)",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "16px",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "14px",
-          "important": false,
-          "loadIndex": 5
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "clamp(13px, 1.7vw, 18px)",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": ".editor-panel > section",
-      "context": "base",
-      "property": "box-shadow",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "var(--shadow)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "var(--glass-shadow)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": ".engine-status-card",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "engine-panel.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "rgba(10, 16, 29, 0.58)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "engine-panel.css",
-          "value": "linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(14, 165, 233, 0.08))",
-          "important": false,
-          "loadIndex": 11
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "rgba(10, 16, 29, 0.58)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".engine-status-card",
-      "context": "base",
-      "property": "box-shadow",
-      "category": "skin",
-      "owners": [
-        "engine-panel.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "engine-panel.css",
-          "value": "0 12px 28px rgba(15, 23, 42, 0.08)",
-          "important": false,
-          "loadIndex": 11
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "var(--glass-shadow)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".panel-head",
-      "context": "base",
-      "property": "margin-bottom",
-      "category": "layout",
-      "owners": [
-        "studio.css",
-        "foundation-polish.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "14px",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "12px",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "10px",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "14px",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".preview-card",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "var(--flow-glass-bg)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "rgba(15, 23, 42, 0.58)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "var(--flow-glass-bg)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".preview-card",
-      "context": "base",
-      "property": "padding",
-      "category": "layout",
-      "owners": [
-        "studio.css",
-        "layout-dock.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "clamp(13px, 1.7vw, 18px)",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "16px",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "14px",
-          "important": false,
-          "loadIndex": 5
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "clamp(13px, 1.7vw, 18px)",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": ".recommendation-card.is-selected",
-      "context": "base",
-      "property": "border-color",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "rgba(103, 232, 249, 0.32)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "rgba(34, 211, 238, 0.78)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "rgba(34, 211, 238, 0.58)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "rgba(103, 232, 249, 0.32)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".upload-tile",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%), rgba(7, 11, 21, 0.42)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "radial-gradient(circle at top, rgba(34, 211, 238, 0.12), rgba(15, 23, 42, 0.4))",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.025)), rgba(3, 8, 18, 0.42)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%), rgba(7, 11, 21, 0.42)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".waveform-card",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "var(--flow-glass-bg)",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "rgba(15, 23, 42, 0.58)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "var(--flow-glass-bg)",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".waveform-card",
-      "context": "base",
-      "property": "padding",
-      "category": "layout",
-      "owners": [
-        "studio.css",
-        "layout-dock.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "clamp(13px, 1.7vw, 18px)",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "16px",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "14px",
-          "important": false,
-          "loadIndex": 5
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "clamp(13px, 1.7vw, 18px)",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": "body",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "theme.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "radial-gradient(circle at 6% -8%, rgba(103, 232, 249, 0.10), transparent 28rem), radial-gradient(circle at 92% 4%, rgba(167, 139, 250, 0.10), transparent 30rem), linear-gradient(180deg, #090d18 0%, #070a12 52%, #060810 100%)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "theme.css",
-          "value": "radial-gradient(circle at 15% 0%, rgba(34, 211, 238, 0.22), transparent 38%), radial-gradient(circle at 85% 5%, rgba(249, 115, 22, 0.17), transparent 30%), radial-gradient(circle at 50% 55%, rgba(139, 92, 246, 0.18), transparent 44%), linear-gradient(145deg, #06101d, #0b1020 46%, #111827)",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "linear-gradient(120deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 86px), radial-gradient(circle at 18% 0%, rgba(34, 211, 238, 0.22), transparent 36%), radial-gradient(circle at 76% 6%, rgba(249, 115, 22, 0.15), transparent 34%), radial-gradient(circle at 50% 60%, rgba(139, 92, 246, 0.18), transparent 46%), linear-gradient(145deg, #050b16 0%, #08111f 46%, #121827 100%)",
-          "important": false,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "radial-gradient(circle at 6% -8%, rgba(103, 232, 249, 0.10), transparent 28rem), radial-gradient(circle at 92% 4%, rgba(167, 139, 250, 0.10), transparent 30rem), linear-gradient(180deg, #090d18 0%, #070a12 52%, #060810 100%)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "button:focus-visible",
-      "context": "base",
-      "property": "outline",
-      "category": "skin",
-      "owners": [
-        "ux.css",
-        "glass-pro-ui.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "2px solid rgba(34, 211, 238, 0.78)",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "ux.css",
-          "value": "2px solid rgba(34, 211, 238, 0.72)",
-          "important": false,
-          "loadIndex": 3
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "2px solid rgba(34, 211, 238, 0.58)",
-          "important": false,
-          "loadIndex": 23
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "2px solid rgba(34, 211, 238, 0.78)",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": "button:focus-visible",
-      "context": "base",
-      "property": "outline-offset",
-      "category": "skin",
-      "owners": [
-        "ux.css",
-        "glass-pro-ui.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "3px",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "ux.css",
-          "value": "2px",
-          "important": false,
-          "loadIndex": 3
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "3px",
-          "important": false,
-          "loadIndex": 23
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "3px",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": "select",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "rgba(6, 10, 20, 0.58)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "rgba(2, 6, 23, 0.56)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "rgba(0, 0, 0, 0.22)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "rgba(6, 10, 20, 0.58)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "select:focus",
-      "context": "base",
-      "property": "outline",
-      "category": "skin",
-      "owners": [
-        "ux.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "3px solid rgba(103, 232, 249, 0.08)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "ux.css",
-          "value": "2px solid rgba(34, 211, 238, 0.72)",
-          "important": false,
-          "loadIndex": 3
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "2px solid rgba(34, 211, 238, 0.58)",
-          "important": false,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "3px solid rgba(103, 232, 249, 0.08)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "textarea",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "studio.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "rgba(6, 10, 20, 0.58)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "rgba(2, 6, 23, 0.56)",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "rgba(0, 0, 0, 0.22)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "rgba(6, 10, 20, 0.58)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "textarea:focus",
-      "context": "base",
-      "property": "outline",
-      "category": "skin",
-      "owners": [
-        "ux.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 14,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "3px solid rgba(103, 232, 249, 0.08)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "ux.css",
-          "value": "2px solid rgba(34, 211, 238, 0.72)",
-          "important": false,
-          "loadIndex": 3
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "2px solid rgba(34, 211, 238, 0.58)",
-          "important": false,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "3px solid rgba(103, 232, 249, 0.08)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".brand-signature-pill",
-      "context": "@media (max-width: 720px)",
-      "property": "font-size",
-      "category": "typography",
-      "owners": [
-        "flow-polish.css",
-        "shutter-glass-flow.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "10px",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "flow-polish.css",
-          "value": "0.78rem",
-          "important": false,
-          "loadIndex": 16
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "0.8rem",
-          "important": false,
-          "loadIndex": 33
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "10px",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": ".btn-secondary",
-      "context": "base",
-      "property": "color",
-      "category": "skin",
-      "owners": [
-        "theme.css",
-        "glass-pro-ui.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "#d8e0eb",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "theme.css",
-          "value": "#fff",
-          "important": false,
-          "loadIndex": 0
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "rgba(248, 250, 252, 0.94)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "#d8e0eb",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".hero-compact-note",
-      "context": "base",
-      "property": "color",
-      "category": "skin",
-      "owners": [
-        "layout-dock.css",
-        "glass-pro-ui.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "glass-pro-ui.css",
-        "value": "rgba(226, 232, 240, 0.86)",
-        "important": true,
-        "loadIndex": 23
-      },
-      "occurrences": [
-        {
-          "file": "layout-dock.css",
-          "value": "#aab7ca",
-          "important": true,
-          "loadIndex": 5
-        },
-        {
-          "file": "glass-pro-ui.css",
-          "value": "rgba(226, 232, 240, 0.86)",
-          "important": true,
-          "loadIndex": 23
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "rgba(226,232,240,0.78)",
-          "important": false,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
-      "context": "@media (min-width: 1180px)",
-      "property": "font-size",
-      "category": "typography",
-      "owners": [
-        "responsive-workspace.css",
-        "desktop-prime-layout.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "13.5px",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "14px",
-          "important": true,
-          "loadIndex": 20
-        },
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "13px",
-          "important": true,
-          "loadIndex": 36
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "13.5px",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-workspace-revealed",
-      "context": "base",
-      "property": "animation",
-      "category": "interaction",
-      "owners": [
-        "workspace-comfort.css",
-        "motion-stability.css",
-        "shutter-glass-flow.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "shutter-glass-flow.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 33
-      },
-      "occurrences": [
-        {
-          "file": "workspace-comfort.css",
-          "value": "workspaceRevealPulse 1.05s ease-out 1",
-          "important": false,
-          "loadIndex": 24
-        },
-        {
-          "file": "motion-stability.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 25
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".action-dock",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "ux.css",
-        "layout-dock.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "layout-dock.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 5
-      },
-      "occurrences": [
-        {
-          "file": "ux.css",
-          "value": "flex",
-          "important": false,
-          "loadIndex": 3
-        },
-        {
-          "file": "layout-dock.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 5
-        }
-      ]
-    },
-    {
-      "selector": ".brand-signature-pill",
-      "context": "@media (max-width: 720px)",
-      "property": "max-width",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "42vw",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "50vw",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "42vw",
-          "important": true,
-          "loadIndex": 35
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-brand-panel .brand-compat-pill",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "hero-command-deck.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "hero-command-deck.css",
-          "value": "inline-flex",
-          "important": false,
-          "loadIndex": 37
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-brand-panel .brand-topline",
-      "context": "base",
-      "property": "display",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "grid",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "flex",
-          "important": true,
-          "loadIndex": 20
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "grid",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-brand-panel .brand-topline",
-      "context": "@media (max-width: 720px)",
-      "property": "grid-template-columns",
-      "category": "layout",
-      "owners": [
-        "foundation-polish.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "minmax(0, 1fr) auto",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "foundation-polish.css",
-          "value": "auto minmax(0, 1fr)",
-          "important": false,
-          "loadIndex": 35
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "minmax(0, 1fr) auto",
           "important": true,
           "loadIndex": 40
         }
@@ -6356,41 +3608,6 @@
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .app-shell",
-      "context": "@media (min-width: 1180px)",
-      "property": "width",
-      "category": "layout",
-      "owners": [
-        "responsive-workspace.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "min(calc(100% - 32px), 1580px)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "min(calc(100% - 40px), var(--workspace-max))",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "min(calc(100% - 32px), 1580px)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
       "selector": "body[data-ui=\"hyperflow-tabs\"] .auto-cut-panel",
       "context": "base",
       "property": "min-height",
@@ -6496,13 +3713,13 @@
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-right-actions",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .hero-compact-note",
       "context": "base",
-      "property": "grid-column",
+      "property": "max-width",
       "category": "layout",
       "owners": [
         "desktop-prime-layout.css",
-        "header-meta-rail.css"
+        "hero-command-deck.css"
       ],
       "ownerCount": 2,
       "distinctValueCount": 2,
@@ -6510,30 +3727,1920 @@
       "risk": "high",
       "riskScore": 13,
       "winner": {
-        "file": "header-meta-rail.css",
-        "value": "2",
+        "file": "hero-command-deck.css",
+        "value": "660px",
         "important": true,
-        "loadIndex": 40
+        "loadIndex": 37
       },
       "occurrences": [
         {
           "file": "desktop-prime-layout.css",
-          "value": "2",
-          "important": false,
+          "value": "720px",
+          "important": true,
           "loadIndex": 36
         },
         {
-          "file": "header-meta-rail.css",
-          "value": "2",
+          "file": "hero-command-deck.css",
+          "value": "660px",
           "important": true,
-          "loadIndex": 40
+          "loadIndex": 37
         }
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-topline",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .hero-compact-note",
       "context": "@media (max-width: 720px)",
-      "property": "grid-template-columns",
+      "property": "max-width",
+      "category": "layout",
+      "owners": [
+        "hero-command-deck.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "32rem",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "hero-command-deck.css",
+          "value": "31rem",
+          "important": true,
+          "loadIndex": 37
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "32rem",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .hero-compact-note",
+      "context": "base",
+      "property": "width",
+      "category": "layout",
+      "owners": [
+        "desktop-prime-layout.css",
+        "hero-command-deck.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "hero-command-deck.css",
+        "value": "min(100%, 660px)",
+        "important": true,
+        "loadIndex": 37
+      },
+      "occurrences": [
+        {
+          "file": "desktop-prime-layout.css",
+          "value": "min(100%, 720px)",
+          "important": false,
+          "loadIndex": 36
+        },
+        {
+          "file": "hero-command-deck.css",
+          "value": "min(100%, 660px)",
+          "important": true,
+          "loadIndex": 37
+        }
+      ]
+    }
+  ],
+  "propertyConflicts": [
+    {
+      "selector": ".hyperflow-stage",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "hyperflow-tabs.css",
+        "shutter-glass-flow.css",
+        "studio-experience.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 16,
+      "winner": {
+        "file": "studio-experience.css",
+        "value": "flex",
+        "important": true,
+        "loadIndex": 44
+      },
+      "occurrences": [
+        {
+          "file": "hyperflow-tabs.css",
+          "value": "flex",
+          "important": false,
+          "loadIndex": 13
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 33
+        },
+        {
+          "file": "studio-experience.css",
+          "value": "flex",
+          "important": true,
+          "loadIndex": 44
+        }
+      ]
+    },
+    {
+      "selector": ".brand-panel",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "ux.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 4,
+      "distinctValueCount": 4,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 15,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "linear-gradient(135deg, rgba(10, 15, 32, 0.84), rgba(12, 16, 34, 0.66)), radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 46%)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.58))",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "ux.css",
+          "value": "linear-gradient(145deg, rgba(15, 23, 42, 0.91), rgba(15, 23, 42, 0.62)), radial-gradient(circle at 18% 18%, rgba(34, 211, 238, 0.14), transparent 34%), radial-gradient(circle at 82% 18%, rgba(249, 115, 22, 0.12), transparent 32%)",
+          "important": false,
+          "loadIndex": 3
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "linear-gradient(135deg, rgba(10, 15, 32, 0.84), rgba(12, 16, 34, 0.66)), radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 46%)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".bottom-dock",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "layout-dock.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 4,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 15,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "rgba(8, 12, 28, 0.80)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "layout-dock.css",
+          "value": "linear-gradient(135deg, rgba(15, 23, 42, 0.93), rgba(2, 6, 23, 0.90)), radial-gradient(circle at 8% 30%, rgba(34, 211, 238, 0.16), transparent 30%), radial-gradient(circle at 95% 40%, rgba(249, 115, 22, 0.14), transparent 28%)",
+          "important": false,
+          "loadIndex": 5
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.12), transparent 32%), rgba(7, 12, 24, 0.78)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "rgba(8, 12, 28, 0.80)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".btn-secondary",
+      "context": "base",
+      "property": "border",
+      "category": "skin",
+      "owners": [
+        "theme.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 4,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 15,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "1px solid rgba(148, 163, 184, 0.16)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "theme.css",
+          "value": "0",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "theme.css",
+          "value": "1px solid var(--line)",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "1px solid rgba(255, 255, 255, 0.18)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(148, 163, 184, 0.16)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".hero-compact-note",
+      "context": "base",
+      "property": "max-width",
+      "category": "layout",
+      "owners": [
+        "layout-dock.css",
+        "flow-polish.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 15,
+      "winner": {
+        "file": "layout-dock.css",
+        "value": "560px",
+        "important": true,
+        "loadIndex": 5
+      },
+      "occurrences": [
+        {
+          "file": "layout-dock.css",
+          "value": "560px",
+          "important": true,
+          "loadIndex": 5
+        },
+        {
+          "file": "flow-polish.css",
+          "value": "760px",
+          "important": false,
+          "loadIndex": 16
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "760px",
+          "important": false,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".badge-version",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "theme.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "rgba(255,255,255,0.08)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "theme.css",
+          "value": "rgba(124, 58, 237, 0.22)",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(255, 255, 255, 0.10)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "rgba(255,255,255,0.08)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".brand-panel",
+      "context": "base",
+      "property": "box-shadow",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "0 22px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.09)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "var(--shadow)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "var(--glass-shadow)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "0 22px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.09)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".brand-signature-pill",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "feedback-ux.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "glass-pro-ui.css",
+        "value": "rgba(255, 255, 255, 0.10)",
+        "important": true,
+        "loadIndex": 23
+      },
+      "occurrences": [
+        {
+          "file": "feedback-ux.css",
+          "value": "linear-gradient(135deg, rgba(249, 115, 22, 0.16), rgba(124, 58, 237, 0.12)), rgba(15, 23, 42, 0.72)",
+          "important": false,
+          "loadIndex": 10
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(255, 255, 255, 0.10)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "rgba(255,255,255,0.07)",
+          "important": false,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".btn-primary",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "theme.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "theme.css",
+          "value": "linear-gradient(135deg, var(--accent-2), var(--accent), var(--accent-3))",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(135deg, rgba(34, 211, 238, 0.95), rgba(139, 92, 246, 0.92), rgba(249, 115, 22, 0.86))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".btn-primary",
+      "context": "base",
+      "property": "border",
+      "category": "skin",
+      "owners": [
+        "theme.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "1px solid rgba(165, 243, 252, 0.24)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "theme.css",
+          "value": "0",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "1px solid rgba(255, 255, 255, 0.18)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(165, 243, 252, 0.24)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".btn-primary",
+      "context": "base",
+      "property": "box-shadow",
+      "category": "skin",
+      "owners": [
+        "theme.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "0 10px 24px rgba(103, 232, 249, 0.12)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "theme.css",
+          "value": "0 16px 40px rgba(124, 58, 237, 0.28)",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 12px 28px rgba(0, 0, 0, 0.18)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "0 10px 24px rgba(103, 232, 249, 0.12)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".btn-secondary",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "theme.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "rgba(18, 26, 43, 0.72)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "theme.css",
+          "value": "rgba(15, 23, 42, 0.74)",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(255, 255, 255, 0.08)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "rgba(18, 26, 43, 0.72)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".command-group",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "responsive-workspace.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "transparent",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "responsive-workspace.css",
+          "value": "linear-gradient(135deg, rgba(15, 23, 42, 0.76), rgba(2, 6, 23, 0.58)), radial-gradient(circle at 14% 0%, rgba(34, 211, 238, 0.12), transparent 35%), radial-gradient(circle at 92% 50%, rgba(124, 58, 237, 0.13), transparent 34%)",
+          "important": false,
+          "loadIndex": 20
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "transparent",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".command-group",
+      "context": "base",
+      "property": "box-shadow",
+      "category": "skin",
+      "owners": [
+        "responsive-workspace.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "responsive-workspace.css",
+          "value": "0 14px 42px rgba(0,0,0,0.20)",
+          "important": false,
+          "loadIndex": 20
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "var(--glass-shadow)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".console-panel",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "var(--flow-glass-bg)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(15, 23, 42, 0.58))",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".console-panel",
+      "context": "base",
+      "property": "box-shadow",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "var(--shadow)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "var(--glass-shadow)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": ".control-zone",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "var(--flow-glass-bg)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "rgba(15, 23, 42, 0.58)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".control-zone",
+      "context": "base",
+      "property": "padding",
+      "category": "layout",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "clamp(13px, 1.7vw, 18px)",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "16px",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "14px",
+          "important": false,
+          "loadIndex": 5
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "clamp(13px, 1.7vw, 18px)",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": ".copy-card",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "var(--flow-glass-bg)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "rgba(15, 23, 42, 0.58)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".copy-card",
+      "context": "base",
+      "property": "padding",
+      "category": "layout",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "clamp(13px, 1.7vw, 18px)",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "16px",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "14px",
+          "important": false,
+          "loadIndex": 5
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "clamp(13px, 1.7vw, 18px)",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": ".editor-panel > section",
+      "context": "base",
+      "property": "box-shadow",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "var(--shadow)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "var(--glass-shadow)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": ".engine-status-card",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "engine-panel.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "rgba(10, 16, 29, 0.58)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "engine-panel.css",
+          "value": "linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(14, 165, 233, 0.08))",
+          "important": false,
+          "loadIndex": 11
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "rgba(10, 16, 29, 0.58)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".engine-status-card",
+      "context": "base",
+      "property": "box-shadow",
+      "category": "skin",
+      "owners": [
+        "engine-panel.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "engine-panel.css",
+          "value": "0 12px 28px rgba(15, 23, 42, 0.08)",
+          "important": false,
+          "loadIndex": 11
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "var(--glass-shadow)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".panel-head",
+      "context": "base",
+      "property": "margin-bottom",
+      "category": "layout",
+      "owners": [
+        "studio.css",
+        "foundation-polish.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "14px",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "12px",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "10px",
+          "important": true,
+          "loadIndex": 35
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "14px",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".preview-card",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "var(--flow-glass-bg)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "rgba(15, 23, 42, 0.58)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".preview-card",
+      "context": "base",
+      "property": "padding",
+      "category": "layout",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "clamp(13px, 1.7vw, 18px)",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "16px",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "14px",
+          "important": false,
+          "loadIndex": 5
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "clamp(13px, 1.7vw, 18px)",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": ".recommendation-card.is-selected",
+      "context": "base",
+      "property": "border-color",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "rgba(103, 232, 249, 0.32)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "rgba(34, 211, 238, 0.78)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(34, 211, 238, 0.58)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "rgba(103, 232, 249, 0.32)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".upload-tile",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%), rgba(7, 11, 21, 0.42)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "radial-gradient(circle at top, rgba(34, 211, 238, 0.12), rgba(15, 23, 42, 0.4))",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.025)), rgba(3, 8, 18, 0.42)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%), rgba(7, 11, 21, 0.42)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".waveform-card",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "var(--flow-glass-bg)",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "rgba(15, 23, 42, 0.58)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%), linear-gradient(145deg, var(--glass-surface-strong), var(--glass-surface-soft))",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".waveform-card",
+      "context": "base",
+      "property": "padding",
+      "category": "layout",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "clamp(13px, 1.7vw, 18px)",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "16px",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "14px",
+          "important": false,
+          "loadIndex": 5
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "clamp(13px, 1.7vw, 18px)",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": "body",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "theme.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "radial-gradient(circle at 6% -8%, rgba(103, 232, 249, 0.10), transparent 28rem), radial-gradient(circle at 92% 4%, rgba(167, 139, 250, 0.10), transparent 30rem), linear-gradient(180deg, #090d18 0%, #070a12 52%, #060810 100%)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "theme.css",
+          "value": "radial-gradient(circle at 15% 0%, rgba(34, 211, 238, 0.22), transparent 38%), radial-gradient(circle at 85% 5%, rgba(249, 115, 22, 0.17), transparent 30%), radial-gradient(circle at 50% 55%, rgba(139, 92, 246, 0.18), transparent 44%), linear-gradient(145deg, #06101d, #0b1020 46%, #111827)",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "linear-gradient(120deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 86px), radial-gradient(circle at 18% 0%, rgba(34, 211, 238, 0.22), transparent 36%), radial-gradient(circle at 76% 6%, rgba(249, 115, 22, 0.15), transparent 34%), radial-gradient(circle at 50% 60%, rgba(139, 92, 246, 0.18), transparent 46%), linear-gradient(145deg, #050b16 0%, #08111f 46%, #121827 100%)",
+          "important": false,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "radial-gradient(circle at 6% -8%, rgba(103, 232, 249, 0.10), transparent 28rem), radial-gradient(circle at 92% 4%, rgba(167, 139, 250, 0.10), transparent 30rem), linear-gradient(180deg, #090d18 0%, #070a12 52%, #060810 100%)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": "button:focus-visible",
+      "context": "base",
+      "property": "outline",
+      "category": "skin",
+      "owners": [
+        "ux.css",
+        "glass-pro-ui.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "2px solid rgba(34, 211, 238, 0.78)",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "ux.css",
+          "value": "2px solid rgba(34, 211, 238, 0.72)",
+          "important": false,
+          "loadIndex": 3
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "2px solid rgba(34, 211, 238, 0.58)",
+          "important": false,
+          "loadIndex": 23
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "2px solid rgba(34, 211, 238, 0.78)",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": "button:focus-visible",
+      "context": "base",
+      "property": "outline-offset",
+      "category": "skin",
+      "owners": [
+        "ux.css",
+        "glass-pro-ui.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "3px",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "ux.css",
+          "value": "2px",
+          "important": false,
+          "loadIndex": 3
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "3px",
+          "important": false,
+          "loadIndex": 23
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "3px",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": "select",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "rgba(6, 10, 20, 0.58)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "rgba(2, 6, 23, 0.56)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(0, 0, 0, 0.22)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "rgba(6, 10, 20, 0.58)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": "select:focus",
+      "context": "base",
+      "property": "outline",
+      "category": "skin",
+      "owners": [
+        "ux.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "3px solid rgba(103, 232, 249, 0.08)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "ux.css",
+          "value": "2px solid rgba(34, 211, 238, 0.72)",
+          "important": false,
+          "loadIndex": 3
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "2px solid rgba(34, 211, 238, 0.58)",
+          "important": false,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "3px solid rgba(103, 232, 249, 0.08)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": "textarea",
+      "context": "base",
+      "property": "background",
+      "category": "skin",
+      "owners": [
+        "studio.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "rgba(6, 10, 20, 0.58)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "rgba(2, 6, 23, 0.56)",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(0, 0, 0, 0.22)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "rgba(6, 10, 20, 0.58)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": "textarea:focus",
+      "context": "base",
+      "property": "outline",
+      "category": "skin",
+      "owners": [
+        "ux.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 14,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "3px solid rgba(103, 232, 249, 0.08)",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "ux.css",
+          "value": "2px solid rgba(34, 211, 238, 0.72)",
+          "important": false,
+          "loadIndex": 3
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "2px solid rgba(34, 211, 238, 0.58)",
+          "important": false,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "3px solid rgba(103, 232, 249, 0.08)",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".brand-signature-pill",
+      "context": "@media (max-width: 720px)",
+      "property": "font-size",
+      "category": "typography",
+      "owners": [
+        "flow-polish.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "foundation-polish.css",
+        "value": "10px",
+        "important": true,
+        "loadIndex": 35
+      },
+      "occurrences": [
+        {
+          "file": "flow-polish.css",
+          "value": "0.78rem",
+          "important": false,
+          "loadIndex": 16
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "0.8rem",
+          "important": false,
+          "loadIndex": 33
+        },
+        {
+          "file": "foundation-polish.css",
+          "value": "10px",
+          "important": true,
+          "loadIndex": 35
+        }
+      ]
+    },
+    {
+      "selector": ".btn-secondary",
+      "context": "base",
+      "property": "color",
+      "category": "skin",
+      "owners": [
+        "theme.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "#d8e0eb",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "theme.css",
+          "value": "#fff",
+          "important": false,
+          "loadIndex": 0
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(248, 250, 252, 0.94)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "#d8e0eb",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": ".hero-compact-note",
+      "context": "base",
+      "property": "color",
+      "category": "skin",
+      "owners": [
+        "layout-dock.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "glass-pro-ui.css",
+        "value": "rgba(226, 232, 240, 0.86)",
+        "important": true,
+        "loadIndex": 23
+      },
+      "occurrences": [
+        {
+          "file": "layout-dock.css",
+          "value": "#aab7ca",
+          "important": true,
+          "loadIndex": 5
+        },
+        {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(226, 232, 240, 0.86)",
+          "important": true,
+          "loadIndex": 23
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "rgba(226,232,240,0.78)",
+          "important": false,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "context": "@media (min-width: 1180px)",
+      "property": "font-size",
+      "category": "typography",
+      "owners": [
+        "responsive-workspace.css",
+        "desktop-prime-layout.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 3,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "13.5px",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "responsive-workspace.css",
+          "value": "14px",
+          "important": true,
+          "loadIndex": 20
+        },
+        {
+          "file": "desktop-prime-layout.css",
+          "value": "13px",
+          "important": true,
+          "loadIndex": 36
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "13.5px",
+          "important": true,
+          "loadIndex": 38
+        }
+      ]
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-workspace-revealed",
+      "context": "base",
+      "property": "animation",
+      "category": "interaction",
+      "owners": [
+        "workspace-comfort.css",
+        "motion-stability.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 3,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "workspace-comfort.css",
+          "value": "workspaceRevealPulse 1.05s ease-out 1",
+          "important": false,
+          "loadIndex": 24
+        },
+        {
+          "file": "motion-stability.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 25
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".action-dock",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "ux.css",
+        "layout-dock.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "layout-dock.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 5
+      },
+      "occurrences": [
+        {
+          "file": "ux.css",
+          "value": "flex",
+          "important": false,
+          "loadIndex": 3
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 5
+        }
+      ]
+    },
+    {
+      "selector": ".cinematic-brand-panel .brand-compat-pill",
+      "context": "base",
+      "property": "display",
       "category": "layout",
       "owners": [
         "hero-command-deck.css",
@@ -6546,22 +5653,477 @@
       "riskScore": 13,
       "winner": {
         "file": "header-meta-rail.css",
-        "value": "minmax(0, 1fr) auto",
+        "value": "none",
         "important": true,
         "loadIndex": 40
       },
       "occurrences": [
         {
           "file": "hero-command-deck.css",
-          "value": "1fr auto",
+          "value": "inline-flex",
           "important": false,
           "loadIndex": 37
         },
         {
           "file": "header-meta-rail.css",
-          "value": "minmax(0, 1fr) auto",
+          "value": "none",
           "important": true,
           "loadIndex": 40
+        }
+      ]
+    },
+    {
+      "selector": ".command-group-head",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "responsive-workspace.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "grid",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "responsive-workspace.css",
+          "value": "flex",
+          "important": false,
+          "loadIndex": 20
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "grid",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".command-mini-row",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "responsive-workspace.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "responsive-workspace.css",
+          "value": "flex",
+          "important": false,
+          "loadIndex": 20
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".designer-mini",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "studio.css",
+        "layout-dock.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "layout-dock.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 5
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "grid",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 5
+        }
+      ]
+    },
+    {
+      "selector": ".flow-selection-summary",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "flow-polish.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "flow-polish.css",
+          "value": "grid",
+          "important": false,
+          "loadIndex": 16
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": ".hero-meter",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "studio.css",
+        "layout-dock.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "layout-dock.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 5
+      },
+      "occurrences": [
+        {
+          "file": "studio.css",
+          "value": "flex",
+          "important": false,
+          "loadIndex": 1
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 5
+        }
+      ]
+    },
+    {
+      "selector": ".source-media",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "editor.css",
+        "layout-dock.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "layout-dock.css",
+        "value": "block",
+        "important": true,
+        "loadIndex": 5
+      },
+      "occurrences": [
+        {
+          "file": "editor.css",
+          "value": "none",
+          "important": false,
+          "loadIndex": 2
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "block",
+          "important": true,
+          "loadIndex": 5
+        }
+      ]
+    },
+    {
+      "selector": ".source-media",
+      "context": "base",
+      "property": "max-height",
+      "category": "layout",
+      "owners": [
+        "editor.css",
+        "layout-dock.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "layout-dock.css",
+        "value": "1px",
+        "important": true,
+        "loadIndex": 5
+      },
+      "occurrences": [
+        {
+          "file": "editor.css",
+          "value": "220px",
+          "important": false,
+          "loadIndex": 2
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "1px",
+          "important": true,
+          "loadIndex": 5
+        }
+      ]
+    },
+    {
+      "selector": ".source-media",
+      "context": "base",
+      "property": "width",
+      "category": "layout",
+      "owners": [
+        "editor.css",
+        "layout-dock.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "layout-dock.css",
+        "value": "1px",
+        "important": true,
+        "loadIndex": 5
+      },
+      "occurrences": [
+        {
+          "file": "editor.css",
+          "value": "100%",
+          "important": false,
+          "loadIndex": 2
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "1px",
+          "important": true,
+          "loadIndex": 5
+        }
+      ]
+    },
+    {
+      "selector": ".source-media.is-visible",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "editor.css",
+        "layout-dock.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "layout-dock.css",
+        "value": "block",
+        "important": true,
+        "loadIndex": 5
+      },
+      "occurrences": [
+        {
+          "file": "editor.css",
+          "value": "block",
+          "important": false,
+          "loadIndex": 2
+        },
+        {
+          "file": "layout-dock.css",
+          "value": "block",
+          "important": true,
+          "loadIndex": 5
+        }
+      ]
+    },
+    {
+      "selector": ".workflow-rail",
+      "context": "base",
+      "property": "display",
+      "category": "layout",
+      "owners": [
+        "ux.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "shutter-glass-flow.css",
+        "value": "none",
+        "important": true,
+        "loadIndex": 33
+      },
+      "occurrences": [
+        {
+          "file": "ux.css",
+          "value": "grid",
+          "important": false,
+          "loadIndex": 3
+        },
+        {
+          "file": "shutter-glass-flow.css",
+          "value": "none",
+          "important": true,
+          "loadIndex": 33
+        }
+      ]
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .auto-cut-panel",
+      "context": "base",
+      "property": "min-height",
+      "category": "layout",
+      "owners": [
+        "hyperflow-tabs.css",
+        "flow-integrity.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "flow-integrity.css",
+        "value": "auto",
+        "important": true,
+        "loadIndex": 18
+      },
+      "occurrences": [
+        {
+          "file": "hyperflow-tabs.css",
+          "value": "min(72vh, 760px)",
+          "important": false,
+          "loadIndex": 13
+        },
+        {
+          "file": "flow-integrity.css",
+          "value": "auto",
+          "important": true,
+          "loadIndex": 18
+        }
+      ]
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .brand-panel.cinematic-brand-panel",
+      "context": "base",
+      "property": "min-height",
+      "category": "layout",
+      "owners": [
+        "foundation-polish.css",
+        "hero-command-deck.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "hero-command-deck.css",
+        "value": "286px",
+        "important": true,
+        "loadIndex": 37
+      },
+      "occurrences": [
+        {
+          "file": "foundation-polish.css",
+          "value": "164px",
+          "important": true,
+          "loadIndex": 35
+        },
+        {
+          "file": "hero-command-deck.css",
+          "value": "286px",
+          "important": true,
+          "loadIndex": 37
+        }
+      ]
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .brand-panel.cinematic-brand-panel",
+      "context": "@media (min-width: 1180px)",
+      "property": "min-height",
+      "category": "layout",
+      "owners": [
+        "desktop-prime-layout.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 2,
+      "distinctValueCount": 2,
+      "conflicting": true,
+      "risk": "high",
+      "riskScore": 13,
+      "winner": {
+        "file": "ui-refinement.css",
+        "value": "316px",
+        "important": true,
+        "loadIndex": 38
+      },
+      "occurrences": [
+        {
+          "file": "desktop-prime-layout.css",
+          "value": "128px",
+          "important": true,
+          "loadIndex": 36
+        },
+        {
+          "file": "ui-refinement.css",
+          "value": "316px",
+          "important": true,
+          "loadIndex": 38
         }
       ]
     },
@@ -6951,76 +6513,6 @@
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-navigation-target::after",
-      "context": "base",
-      "property": "right",
-      "category": "layout",
-      "owners": [
-        "desktop-prime-layout.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "14px",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "12px",
-          "important": false,
-          "loadIndex": 36
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "14px",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-navigation-target::after",
-      "context": "base",
-      "property": "top",
-      "category": "layout",
-      "owners": [
-        "desktop-prime-layout.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "high",
-      "riskScore": 13,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "13px",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "10px",
-          "important": false,
-          "loadIndex": 36
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "13px",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
       "selector": "textarea",
       "context": "base",
       "property": "min-height",
@@ -7052,62 +6544,6 @@
           "value": "43px",
           "important": true,
           "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": ".brand-topline",
-      "context": "base",
-      "property": "gap",
-      "category": "other",
-      "owners": [
-        "studio.css",
-        "flow-polish.css",
-        "flow-hotfix.css",
-        "shutter-glass-flow.css",
-        "foundation-polish.css"
-      ],
-      "ownerCount": 5,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 12,
-      "winner": {
-        "file": "foundation-polish.css",
-        "value": "8px",
-        "important": true,
-        "loadIndex": 35
-      },
-      "occurrences": [
-        {
-          "file": "studio.css",
-          "value": "14px",
-          "important": false,
-          "loadIndex": 1
-        },
-        {
-          "file": "flow-polish.css",
-          "value": "12px",
-          "important": false,
-          "loadIndex": 16
-        },
-        {
-          "file": "flow-hotfix.css",
-          "value": "12px",
-          "important": false,
-          "loadIndex": 17
-        },
-        {
-          "file": "shutter-glass-flow.css",
-          "value": "12px",
-          "important": false,
-          "loadIndex": 33
-        },
-        {
-          "file": "foundation-polish.css",
-          "value": "8px",
-          "important": true,
-          "loadIndex": 35
         }
       ]
     },
@@ -7161,48 +6597,6 @@
       ]
     },
     {
-      "selector": ".cinematic-brand-panel .brand-topline",
-      "context": "base",
-      "property": "gap",
-      "category": "other",
-      "owners": [
-        "responsive-workspace.css",
-        "hero-command-deck.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 12,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "clamp(10px, 2vw, 24px)",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "12px",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "18px",
-          "important": false,
-          "loadIndex": 37
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "clamp(10px, 2vw, 24px)",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
       "selector": ".field",
       "context": "base",
       "property": "gap",
@@ -7241,90 +6635,6 @@
           "value": "7px",
           "important": true,
           "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-topline",
-      "context": "base",
-      "property": "gap",
-      "category": "other",
-      "owners": [
-        "desktop-prime-layout.css",
-        "hero-command-deck.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 12,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "clamp(10px, 2vw, 24px)",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "12px",
-          "important": true,
-          "loadIndex": 36
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "18px",
-          "important": false,
-          "loadIndex": 37
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "clamp(10px, 2vw, 24px)",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-topline",
-      "context": "@media (max-width: 720px)",
-      "property": "gap",
-      "category": "other",
-      "owners": [
-        "desktop-prime-layout.css",
-        "hero-command-deck.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 3,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 12,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "8px",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "7px",
-          "important": true,
-          "loadIndex": 36
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "10px",
-          "important": false,
-          "loadIndex": 37
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "8px",
-          "important": true,
-          "loadIndex": 40
         }
       ]
     },
@@ -7612,90 +6922,6 @@
           "value": "space-between",
           "important": true,
           "loadIndex": 33
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-brand-panel .brand-topline",
-      "context": "base",
-      "property": "align-items",
-      "category": "other",
-      "owners": [
-        "responsive-workspace.css",
-        "hero-command-deck.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 11,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "center",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "responsive-workspace.css",
-          "value": "center",
-          "important": false,
-          "loadIndex": 20
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "center",
-          "important": false,
-          "loadIndex": 37
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "center",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-topline",
-      "context": "base",
-      "property": "align-items",
-      "category": "other",
-      "owners": [
-        "desktop-prime-layout.css",
-        "hero-command-deck.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 3,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 11,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "center",
-        "important": true,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "center",
-          "important": true,
-          "loadIndex": 36
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "center",
-          "important": false,
-          "loadIndex": 37
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "center",
-          "important": true,
-          "loadIndex": 40
         }
       ]
     },
@@ -10472,76 +9698,6 @@
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-navigation-target::after",
-      "context": "base",
-      "property": "background",
-      "category": "skin",
-      "owners": [
-        "desktop-prime-layout.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 11,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "rgba(9, 14, 25, 0.88)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "rgba(8, 12, 22, 0.82)",
-          "important": false,
-          "loadIndex": 36
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "rgba(9, 14, 25, 0.88)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-navigation-target::after",
-      "context": "base",
-      "property": "padding",
-      "category": "layout",
-      "owners": [
-        "desktop-prime-layout.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 11,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "4px 8px",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "3px 7px",
-          "important": false,
-          "loadIndex": 36
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "4px 8px",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
       "selector": "input",
       "context": "base",
       "property": "background",
@@ -11385,111 +10541,6 @@
           "value": "9px",
           "important": true,
           "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-title",
-      "context": "base",
-      "property": "font-size",
-      "category": "typography",
-      "owners": [
-        "foundation-polish.css",
-        "hero-command-deck.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 10,
-      "winner": {
-        "file": "hero-command-deck.css",
-        "value": "clamp(50px, 5.3vw, 76px)",
-        "important": true,
-        "loadIndex": 37
-      },
-      "occurrences": [
-        {
-          "file": "foundation-polish.css",
-          "value": "clamp(34px, 4.3vw, 58px)",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "clamp(50px, 5.3vw, 76px)",
-          "important": true,
-          "loadIndex": 37
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-title",
-      "context": "base",
-      "property": "line-height",
-      "category": "typography",
-      "owners": [
-        "foundation-polish.css",
-        "hero-command-deck.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 10,
-      "winner": {
-        "file": "hero-command-deck.css",
-        "value": "0.91",
-        "important": true,
-        "loadIndex": 37
-      },
-      "occurrences": [
-        {
-          "file": "foundation-polish.css",
-          "value": "0.98",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "hero-command-deck.css",
-          "value": "0.91",
-          "important": true,
-          "loadIndex": 37
-        }
-      ]
-    },
-    {
-      "selector": ".cinematic-title",
-      "context": "@media (max-width: 720px)",
-      "property": "line-height",
-      "category": "typography",
-      "owners": [
-        "hero-command-deck.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 10,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "0.98",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "hero-command-deck.css",
-          "value": "0.94",
-          "important": true,
-          "loadIndex": 37
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "0.98",
-          "important": true,
-          "loadIndex": 38
         }
       ]
     },
@@ -12509,41 +11560,6 @@
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-right-actions",
-      "context": "base",
-      "property": "min-width",
-      "category": "layout",
-      "owners": [
-        "desktop-prime-layout.css",
-        "header-meta-rail.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 10,
-      "winner": {
-        "file": "header-meta-rail.css",
-        "value": "max-content",
-        "important": false,
-        "loadIndex": 40
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "0",
-          "important": false,
-          "loadIndex": 36
-        },
-        {
-          "file": "header-meta-rail.css",
-          "value": "max-content",
-          "important": false,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
       "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .hero-compact-note",
       "context": "@media (max-width: 720px)",
       "property": "font-size",
@@ -12754,111 +11770,6 @@
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-copy h1",
-      "context": "@media (max-width: 720px)",
-      "property": "font-size",
-      "category": "typography",
-      "owners": [
-        "foundation-polish.css",
-        "desktop-prime-layout.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 10,
-      "winner": {
-        "file": "desktop-prime-layout.css",
-        "value": "clamp(29px, 9.4vw, 40px)",
-        "important": true,
-        "loadIndex": 36
-      },
-      "occurrences": [
-        {
-          "file": "foundation-polish.css",
-          "value": "clamp(30px, 10vw, 42px)",
-          "important": true,
-          "loadIndex": 35
-        },
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "clamp(29px, 9.4vw, 40px)",
-          "important": true,
-          "loadIndex": 36
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-copy h1.cinematic-title",
-      "context": "@media (max-width: 720px)",
-      "property": "font-size",
-      "category": "typography",
-      "owners": [
-        "hero-command-deck.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 10,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "clamp(36px, 10.8vw, 48px)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "hero-command-deck.css",
-          "value": "clamp(32px, 10.6vw, 43px)",
-          "important": true,
-          "loadIndex": 37
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "clamp(36px, 10.8vw, 48px)",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-copy h1.cinematic-title",
-      "context": "@media (max-width: 720px)",
-      "property": "line-height",
-      "category": "typography",
-      "owners": [
-        "hero-command-deck.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 10,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "0.98",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "hero-command-deck.css",
-          "value": "0.94",
-          "important": true,
-          "loadIndex": 37
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "0.98",
-          "important": true,
-          "loadIndex": 38
-        }
-      ]
-    },
-    {
       "selector": "body[data-ui=\"hyperflow-tabs\"] .hyperflow-export-grid",
       "context": "base",
       "property": "grid-template-columns",
@@ -12960,41 +11871,6 @@
           "value": "4",
           "important": false,
           "loadIndex": 41
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-navigation-target::after",
-      "context": "base",
-      "property": "color",
-      "category": "skin",
-      "owners": [
-        "desktop-prime-layout.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 10,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "rgba(165, 243, 252, 0.86)",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "rgba(165, 243, 252, 0.9)",
-          "important": false,
-          "loadIndex": 36
-        },
-        {
-          "file": "ui-refinement.css",
-          "value": "rgba(165, 243, 252, 0.86)",
-          "important": true,
-          "loadIndex": 38
         }
       ]
     },
@@ -14006,107 +12882,51 @@
       ]
     },
     {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-right-actions",
+      "selector": ".brand-topline",
       "context": "base",
-      "property": "justify-self",
+      "property": "gap",
       "category": "other",
       "owners": [
-        "desktop-prime-layout.css",
-        "header-meta-rail.css"
+        "studio.css",
+        "flow-polish.css",
+        "flow-hotfix.css",
+        "shutter-glass-flow.css"
       ],
-      "ownerCount": 2,
+      "ownerCount": 4,
       "distinctValueCount": 2,
       "conflicting": true,
-      "risk": "medium",
-      "riskScore": 9,
+      "risk": "low",
+      "riskScore": 8,
       "winner": {
-        "file": "header-meta-rail.css",
-        "value": "end",
-        "important": true,
-        "loadIndex": 40
+        "file": "shutter-glass-flow.css",
+        "value": "12px",
+        "important": false,
+        "loadIndex": 33
       },
       "occurrences": [
         {
-          "file": "desktop-prime-layout.css",
-          "value": "end",
+          "file": "studio.css",
+          "value": "14px",
           "important": false,
-          "loadIndex": 36
+          "loadIndex": 1
         },
         {
-          "file": "header-meta-rail.css",
-          "value": "end",
-          "important": true,
-          "loadIndex": 40
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-navigation-target::after",
-      "context": "base",
-      "property": "content",
-      "category": "other",
-      "owners": [
-        "desktop-prime-layout.css",
-        "active-stage-beacon.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 9,
-      "winner": {
-        "file": "active-stage-beacon.css",
-        "value": "none",
-        "important": true,
-        "loadIndex": 41
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "attr(data-navigation-label)",
+          "file": "flow-polish.css",
+          "value": "12px",
           "important": false,
-          "loadIndex": 36
+          "loadIndex": 16
         },
         {
-          "file": "active-stage-beacon.css",
-          "value": "none",
-          "important": true,
-          "loadIndex": 41
-        }
-      ]
-    },
-    {
-      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-navigation-target::after",
-      "context": "base",
-      "property": "letter-spacing",
-      "category": "typography",
-      "owners": [
-        "desktop-prime-layout.css",
-        "ui-refinement.css"
-      ],
-      "ownerCount": 2,
-      "distinctValueCount": 2,
-      "conflicting": true,
-      "risk": "medium",
-      "riskScore": 9,
-      "winner": {
-        "file": "ui-refinement.css",
-        "value": "0.09em",
-        "important": true,
-        "loadIndex": 38
-      },
-      "occurrences": [
-        {
-          "file": "desktop-prime-layout.css",
-          "value": "0.06em",
+          "file": "flow-hotfix.css",
+          "value": "12px",
           "important": false,
-          "loadIndex": 36
+          "loadIndex": 17
         },
         {
-          "file": "ui-refinement.css",
-          "value": "0.09em",
-          "important": true,
-          "loadIndex": 38
+          "file": "shutter-glass-flow.css",
+          "value": "12px",
+          "important": false,
+          "loadIndex": 33
         }
       ]
     },

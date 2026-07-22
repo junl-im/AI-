@@ -1,45 +1,303 @@
-# HANDOFF v1.5.7
+# HANDOFF v1.5.14
 
 ## 현재 상태
 
-v1.5.7은 v1.5.6 기능 경로를 유지하면서 태블릿·소형 노트북의 첫 화면 밀도와 dock 점유 높이를 정리한 responsive UI 릴리스입니다.
+v1.5.14는 v1.5.13의 화면과 미디어 실행 경로를 유지하면서 cross-file same-value selector-property 선언을 모두 제거하고 중복 `!important`를 회수한 CSS deduplication 릴리스입니다.
 
-- 자동 QA: **164/164 통과**
-- 데스크톱·소형 노트북·태블릿·모바일 Chromium 오류·Promise 거절·콘솔 오류: **0건**
-- 4개 viewport 가로 overflow: **0px**
-- 태블릿 1024px: 초기 hero 300px, dock 73px, 8개 메뉴 단일 행
-- 소형 노트북 1280px: 초기 hero 275px, dock 86px
-- 서비스워커 생명주기: install·activate·old cache cleanup·offline navigation 통과
-- CSS 기준: `!important` 904, conflicts 334, high-risk 81, shadowed 414
+- 자동 QA: **173/173 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 주요 computed style·geometry: v1.5.13 대비 **변화 0건**
+- 결정적 screenshot 비교: 4개 viewport **픽셀 변화 0건**
+- CSS 기준: `!important` 824, conflicts 0, same-value duplicates 0, shadowed 0
+- 장시간 MP4 안정성: 미디어 실행 경로 미변경으로 v1.5.9의 15분→30분→15분 결과 상속
+- process memory·GPU/media·service worker 감사는 v1.5.14 기준으로 재생성
 
 ## 적용 내용
 
-- 721~1179px 구간에서 하단 메뉴를 4+4 두 줄에서 8단계 단일 행으로 변경
-- 태블릿 hero, title, 설명, timeline, 세로 frame을 전용 밀도로 압축
-- 1180~1399px 구간에서 hero를 275px 수준으로 줄이고 작업 배치·카드를 첫 화면으로 당김
-- `header-meta-rail.css`가 모바일 topline 높이를, `active-stage-beacon.css`가 navigation target border/shadow를 최종 소유
-- Chromium runtime 감사를 2개 viewport에서 4개 viewport로 확장하고 초기 화면 density를 기록
-- runtime build key `1.5.7-responsive-density` 적용
+- 동일 selector·at-rule context·property·value·importance를 여러 CSS 파일이 반복 선언하던 57개 그룹 제거
+- grouped selector의 일부에만 중복이 있는 규칙 5개를 selector별로 분리해 다른 fallback 보존
+- source declaration 51개 제거
+- 중복 `!important` 9개 회수
+- same-value duplicate inventory를 CSS 감사 JSON과 전용 smoke test에 추가
+- 재현 가능한 `tools/consolidate-same-value-css.js` 포함
+- runtime build key `1.5.14-cascade-dedup` 적용
 
 ## 검수 순서
 
 1. `node qa/run_css_ownership_audit.js`
 2. `python3 qa/run_browser_audit.py`
-3. `node qa/run_service_worker_lifecycle.js`
-4. `npm test`
+3. `python3 qa/run_process_memory_audit.py --cycles 16`
+4. `python3 qa/run_gpu_media_capability_audit.py`
+5. `node qa/run_service_worker_lifecycle.js`
+6. `npm test`
 
 ## 알려진 제한
 
-- 중간 breakpoint의 기존 다중 CSS cascade를 안전하게 덮기 위해 전용 `!important`가 증가했습니다. 다음 CSS 패치에서 custom property와 소유 파일 이동으로 다시 줄여야 합니다.
-- 실미디어·20회 힙 경로는 JS 미디어 코드가 동일한 CSS/UI 릴리스이므로 v1.5.3 검증 결과를 상속합니다.
-- Safari·Samsung Internet 실기기와 GPU·미디어 디코더 네이티브 메모리는 이번 Chromium layout 감사 범위 밖입니다.
+- 현재 headless 컨테이너는 물리 GPU/WebGL context를 제공하지 않아 hardware acceleration 여부를 직접 확정할 수 없습니다.
+- 15분·30분 30fps 고비트레이트 카메라 원본과 모바일 Safari·Samsung Internet 실기기 검증은 별도 환경이 필요합니다.
+- 남은 `!important`는 반응형·상태·접근성 override가 섞여 있어 화면별 회귀를 동반한 단계적 감축이 필요합니다.
 
 ## 다음 작업
 
-1. 중간 breakpoint responsive 값을 custom property로 전환해 `!important` 증가분 정리
-2. 남은 header/brand/stage surface 고위험 CSS 충돌 통합
-3. Chromium process RSS와 GPU·미디어 native memory 보조 계측
-4. 15분·30분 고해상도 MP4 장시간 반복 분석·출력
+1. 남은 `!important`를 owner·breakpoint 단위로 안전 감축
+2. 실제 하드웨어 가속 데스크톱 Chromium에서 GPU·media decoder memory 재검증
+3. 15분·30분 30fps 고비트레이트 카메라 원본 반복 검증
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.13
+
+## 현재 상태
+
+v1.5.13은 v1.5.12의 계산 스타일과 미디어 실행 경로를 유지하면서 남아 있던 low-risk geometry·token·fallback CSS 충돌을 모두 제거한 zero-conflict cascade 릴리스입니다.
+
+- 자동 QA: **172/172 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 전체 DOM targeted computed style: v1.5.12 대비 **변화 0건**
+- 결정적 screenshot 비교: 4개 viewport **픽셀 변화 0건**
+- 4개 viewport 런타임 오류·Promise 거절·콘솔 오류·가로 overflow: **0건**
+- CSS 기준: `!important` 833, conflicts 0, medium/high-risk 0, shadowed 0
+- 장시간 MP4 안정성: 미디어 실행 경로 미변경으로 v1.5.9의 15분→30분→15분 결과 상속
+- process memory audit: 16회, runtime error 0, active operation 0, render queue 0
+- GPU/media 비교: acceleration-requested·software-fallback 모두 H.264/AAC 디코딩 통과, GPU·media utility process 관측
+- 서비스워커 생명주기: install·activate·old cache cleanup·offline navigation 통과
+
+## 적용 내용
+
+- low-risk conflict의 비우승 source declaration 47개를 exact selector·at-rule context 기준으로 제거
+- selector group 일부만 충돌한 2개 규칙은 selector별로 분리해 비충돌 fallback 보존
+- geometry, typography, glass fallback, responsive token의 최종 cascade owner 단일화
+- shadowed selector-property occurrence 51건 제거
+- zero-conflict 재유입 방지 smoke test 추가
+- runtime build key `1.5.13-cascade-ownership` 적용
+
+## 검수 순서
+
+1. `node qa/run_css_ownership_audit.js`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_process_memory_audit.py --cycles 16`
+4. `python3 qa/run_gpu_media_capability_audit.py`
+5. `node qa/run_service_worker_lifecycle.js`
+6. `npm test`
+
+## 알려진 제한
+
+- conflict는 0이지만 동일 값을 여러 파일이 선언하는 same-value duplicate 57건은 동작 fallback과 파일별 독립성을 고려해 별도 정리 대상으로 남겼습니다.
+- 현재 headless 컨테이너는 물리 GPU/WebGL context를 제공하지 않아 hardware acceleration 여부를 직접 확정할 수 없습니다.
+- 15분·30분 30fps 고비트레이트 카메라 원본과 모바일 Safari·Samsung Internet 실기기 검증은 별도 환경이 필요합니다.
+
+## 다음 작업
+
+1. same-value duplicate CSS와 `!important` 안전 감축
+2. 실제 하드웨어 가속 데스크톱 Chromium에서 GPU·media decoder memory 재검증
+3. 15분·30분 30fps 고비트레이트 카메라 원본 반복 검증
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.12
+
+## 현재 상태
+
+v1.5.12는 v1.5.11의 계산 스타일과 미디어 실행 경로를 유지하면서 같은 selector·media 조건에서 뒤쪽 선언에 완전히 가려지던 medium-risk surface·state·control CSS를 제거한 릴리스입니다.
+
+- 자동 QA: **171/171 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 targeted computed style: v1.5.11 대비 **변화 0건**
+- 버전 문구 변경 전 4개 viewport screenshot 비교: desktop/laptop 픽셀 차이 0, tablet/mobile은 애니메이션 샘플 영역의 미세 차이만 확인
+- 4개 viewport 런타임 오류·Promise 거절·콘솔 오류·가로 overflow: **0건**
+- CSS 기준: `!important` 833, conflicts 48, medium/high-risk 0, shadowed 51
+- 장시간 MP4 안정성: 미디어 실행 경로 미변경으로 v1.5.9의 15분→30분→15분 결과 상속
+- process memory audit: 16회, runtime error 0, active operation 0, render queue 0
+- GPU/media 비교: acceleration-requested·software-fallback 모두 H.264/AAC 디코딩 통과, GPU·media utility process 관측
+- 서비스워커 생명주기: install·activate·old cache cleanup·offline navigation 통과
+
+## 적용 내용
+
+- medium-risk conflict 149건의 loser declaration을 exact selector·at-rule context 기준으로 제거
+- selector 묶음에서 일부 selector만 가려진 경우 rule을 안전하게 분리해 다른 selector의 fallback 선언을 보존
+- `.field` rhythm과 disabled button/mini-action opacity를 `ui-refinement.css` 중심으로 통합
+- ambient overlay opacity, auto-cut surface, cinematic brand surface, console/engine status surface의 최종 소유권을 단일화
+- 추천 생성 버튼과 상태 dot의 background·border·shadow 소유권을 단일화
+- runtime build key `1.5.12-surface-state-ownership` 적용
+
+## 검수 순서
+
+1. `node qa/run_css_ownership_audit.js`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_process_memory_audit.py --cycles 16`
+4. `python3 qa/run_gpu_media_capability_audit.py`
+5. `node qa/run_service_worker_lifecycle.js`
+6. `npm test`
+
+## 알려진 제한
+
+- 남은 48건은 low-risk geometry·token·fallback 충돌이며 현재 계산 결과에는 영향을 주지 않습니다.
+- 현재 headless 컨테이너는 물리 GPU/WebGL context를 제공하지 않아 hardware acceleration 여부를 직접 확정할 수 없습니다.
+- 15분·30분 30fps 고비트레이트 카메라 원본과 모바일 Safari·Samsung Internet 실기기 검증은 별도 환경이 필요합니다.
+
+## 다음 작업
+
+1. 남은 low-risk geometry·token·fallback CSS 충돌 통합
+2. 실제 하드웨어 가속 데스크톱 Chromium에서 GPU·media decoder memory 재검증
+3. 15분·30분 30fps 고비트레이트 카메라 원본 반복 검증
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.11
+
+## 현재 상태
+
+v1.5.11은 v1.5.10의 화면과 미디어 실행 경로를 유지하면서 hero typography·interaction CSS 소유권을 통합하고 GPU/media process 비교 감사를 추가한 릴리스입니다.
+
+- 자동 QA: **171/171 통과**
+- 4개 viewport 런타임 오류·Promise 거절·콘솔 오류·가로 overflow: **0건**
+- CSS 기준: `!important` 841, conflicts 197, high-risk 0, shadowed 212
+- process memory audit 16회와 GPU/media 비교 감사 통과
+- runtime build key `1.5.11-hero-gpu-ownership`
+
+---
+
+# HANDOFF HISTORY — v1.5.10
+
+## 현재 상태
+
+v1.5.10은 v1.5.9의 4개 viewport 계산 스타일과 미디어 실행 경로를 유지하면서 retired command group 잔여물과 control surface의 중복 CSS 소유권을 정리한 릴리스입니다.
+
+- 자동 QA: **168/168 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 Chromium 오류·Promise 거절·콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- CSS 기준: `!important` 853, conflicts 214, high-risk 11, shadowed 239
+- 장시간 MP4 안정성: 실행 경로 미변경으로 v1.5.9의 15분→30분→15분 결과 상속
+- process memory audit: 16회, runtime error 0, active operation 0, render queue 0
+- 서비스워커 생명주기: install·activate·old cache cleanup·offline navigation 통과
+
+## 적용 내용
+
+- 존재하지 않는 `.command-group*`, `.command-button*`, `.command-chip*` CSS와 DOM probe 제거
+- control/preview surface background는 `shutter-glass-flow.css`, padding은 `foundation-polish.css`가 소유
+- panel head spacing, upload tile, select·textarea skin은 `ui-refinement.css`가 소유
+- HyperFlow stage visibility는 `studio-experience.css`가 소유
+- legacy action dock visibility와 source media offscreen containment는 `layout-dock.css`가 소유
+- runtime build key `1.5.10-control-ownership` 적용
+
+## 검수 순서
+
+1. `node qa/run_css_ownership_audit.js`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_process_memory_audit.py --cycles 16`
+4. `node qa/run_service_worker_lifecycle.js`
+5. `npm test`
+
+## 알려진 제한
+
+- headless Chromium의 GPU·media utility 분류는 hardware acceleration이 활성화된 실제 데스크톱 브라우저와 다를 수 있습니다.
+- process RSS 합계는 shared allocation을 포함할 수 있고 개별 decoder buffer를 직접 귀속하지 않습니다.
+- 30fps 고비트레이트 카메라 원본과 모바일 Safari·Samsung Internet 실기기 검증은 별도 환경이 필요합니다.
+
+## 다음 작업
+
+1. hardware-accelerated Chromium GPU·media decoder memory 비교
+2. 15분·30분 30fps 고비트레이트 원본 반복 검증
+3. 남은 hero/header typography·interaction 충돌 통합
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.9
+
+## 현재 상태
+
+v1.5.9는 v1.5.8의 반응형 계산 결과를 유지하면서 핵심 UI 스킨의 CSS 소유권을 통합하고, 실제 15분·30분 1080p MP4의 같은 페이지 반복 분석·출력·정리를 검증한 릴리스입니다.
+
+- 자동 QA: **167/167 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 Chromium 오류·Promise 거절·콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- 서비스워커 생명주기: install·activate·old cache cleanup·offline navigation 통과
+- CSS 기준: `!important` 875, conflicts 271, high-risk 50, shadowed 314
+- 장시간 MP4: 15분→30분→15분 파일 교체·분석·2초 출력·정리 통과
+- Object URL: 각 반복 source 1개, export 0개 유지, 최종 active 0개
+- process memory audit: 16회, runtime error 0, active operation 0, render queue 0
+
+## 적용 내용
+
+- `shutter-glass-flow.css`가 brand panel, version badge, bottom dock의 최종 skin을 소유
+- `glass-pro-ui.css`가 brand signature의 glass skin을 소유
+- `ui-refinement.css`가 primary/secondary button의 최종 skin을 소유
+- 완전히 가려진 legacy skin·focus·surface 선언 제거
+- 실제 1920×1080 장시간 MP4 same-page 안정성 감사와 smoke test 추가
+- process memory audit profile cleanup 재시도·강제 정리 보강
+- runtime build key `1.5.9-long-video-skin` 적용
+
+## 검수 순서
+
+1. `node qa/run_css_ownership_audit.js`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_process_memory_audit.py --cycles 16`
+4. `python3 qa/run_long_video_stability.py`
+5. `node qa/run_service_worker_lifecycle.js`
+6. `npm test`
+
+## 알려진 제한
+
+- 장시간 감사 소스는 지속시간·seek·메모리 경로를 결정적으로 검증하기 위한 1920×1080, 1fps, all-keyframe, 저샘플레이트 mono 합성 MP4입니다. 고프레임 카메라 원본이나 고비트레이트 촬영물 검증을 대체하지 않습니다.
+- process RSS 합계는 shared allocation을 포함할 수 있고 개별 GPU·decoder buffer를 직접 귀속하지 않습니다.
+- headless Chromium GPU 동작은 hardware acceleration이 활성화된 데스크톱 브라우저와 다를 수 있습니다.
+- 모바일 Safari·Samsung Internet 실기기 검증은 별도 환경이 필요합니다.
+
+## 다음 작업
+
+1. hardware-accelerated Chromium GPU·media decoder memory 비교
+2. 15분·30분 30fps 카메라형·고비트레이트 원본 반복 검증
+3. command group·control zone의 남은 CSS 소유권 통합
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.8
+
+
+## 현재 상태
+
+v1.5.8은 v1.5.7의 반응형 계산 결과를 유지하면서 공통 geometry token, header/stage CSS 단일 소유권, Chromium process memory 보조 계측을 추가한 릴리스입니다.
+
+- 자동 QA: **166/166 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 Chromium 오류·Promise 거절·콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- v1.5.7 대비 hero, stage, first panel, dock 계산 높이 변화: **0px**
+- 서비스워커 생명주기: install·activate·old cache cleanup·offline navigation 통과
+- CSS 기준: `!important` 879, conflicts 304, high-risk 69, shadowed 372
+- process memory audit: 16회, runtime error 0, active operation 0, render queue 0
+
+## 적용 내용
+
+- `theme.css`에 화면별 shell gutter, clearance, hero title 공통 token 도입
+- `header-meta-rail.css`가 header topline의 display/grid/alignment/gap/mobile height 단독 소유
+- `ui-refinement.css`가 desktop shell과 mobile title 최종 geometry 단독 소유
+- neon stage rail/chip에 가려진 이전 navigation pseudo-label 선언 제거
+- Chromium process tree RSS/USS, renderer JS heap, GPU/utility category 보조 audit 추가
+- runtime build key `1.5.8-responsive-memory` 적용
+
+## 검수 순서
+
+1. `node qa/run_css_ownership_audit.js`
+2. `python3 qa/run_browser_audit.py`
+3. `python3 qa/run_process_memory_audit.py --cycles 16`
+4. `node qa/run_service_worker_lifecycle.js`
+5. `npm test`
+
+## 알려진 제한
+
+- process RSS 합계는 shared allocation을 포함할 수 있어 OS 전체 unique memory와 동일하지 않습니다.
+- GPU·media utility 분류는 process command line 기반 보조 지표이며 개별 decoder buffer를 직접 측정하지 않습니다.
+- headless Chromium 결과는 hardware acceleration이 활성화된 desktop browser와 다를 수 있습니다.
+- 실미디어·20회 힙 경로는 미디어 실행 코드가 동일하므로 v1.5.3 검증 결과를 상속합니다.
+
+## 다음 작업
+
+1. 15분·30분 고해상도 MP4 장시간 반복 분석·렌더·파일 교체
+2. hardware-accelerated Chromium GPU·media decoder memory 비교
+3. brand-panel·bottom-dock·button skin 고위험 CSS 소유권 추가 통합
+4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
 
 ---
 

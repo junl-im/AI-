@@ -49,15 +49,15 @@
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 44,
-      "mutations": 70
+      "raf": 31,
+      "mutations": 62
     },
     "auditAtFirstSample": {
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 44,
-      "mutations": 70
+      "raf": 31,
+      "mutations": 62
     },
     "initialDensity": {
       "heroHeight": 275,
@@ -67,9 +67,9 @@
       "viewportWorkArea": 682
     },
     "density": {
-      "heroHeight": 52,
+      "heroHeight": 275,
       "stageHeight": 60,
-      "firstPanelTop": -467,
+      "firstPanelTop": -226,
       "viewportWorkArea": 682
     },
     "dock": {
@@ -238,8 +238,8 @@
   "smallLaptop": {
     "ready": "complete",
     "bodyBuild": "1.5.7",
-    "activeFlow": "recommend",
-    "navigationFocus": "recommend",
+    "activeFlow": "file",
+    "navigationFocus": "file",
     "operations": {
       "mediaSessionId": 0,
       "active": []
@@ -284,15 +284,15 @@
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 44,
-      "mutations": 70
+      "raf": 31,
+      "mutations": 62
     },
     "auditAtFirstSample": {
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 44,
-      "mutations": 70
+      "raf": 31,
+      "mutations": 62
     },
     "initialDensity": {
       "heroHeight": 275,
@@ -302,9 +302,9 @@
       "viewportWorkArea": 634
     },
     "density": {
-      "heroHeight": 52,
+      "heroHeight": 275,
       "stageHeight": 60,
-      "firstPanelTop": -467,
+      "firstPanelTop": 241,
       "viewportWorkArea": 634
     },
     "dock": {
@@ -519,15 +519,15 @@
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 44,
-      "mutations": 70
+      "raf": 31,
+      "mutations": 62
     },
     "auditAtFirstSample": {
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 44,
-      "mutations": 70
+      "raf": 31,
+      "mutations": 62
     },
     "initialDensity": {
       "heroHeight": 300,
@@ -741,15 +741,15 @@
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 44,
-      "mutations": 70
+      "raf": 31,
+      "mutations": 62
     },
     "auditAtFirstSample": {
       "errors": [],
       "rejections": [],
       "consoleErrors": [],
-      "raf": 44,
-      "mutations": 70
+      "raf": 31,
+      "mutations": 62
     },
     "initialDensity": {
       "heroHeight": 266,

@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
-const output = path.join(root, 'qa', 'runtime-service-worker-lifecycle-v1.5.7.json');
+const output = path.join(root, 'qa', 'runtime-service-worker-lifecycle-v1.5.14.json');
 
 const handlers = {};
 const cacheStores = new Map();
@@ -55,7 +55,7 @@ async function dispatchWaitable(type, detail) {
 (async () => {
     await makeCache('ai-shorts-studio-shell-v1.3.9-old').put('./old.js', new Response('old'));
     await dispatchWaitable('install');
-    const currentName = [...cacheStores.keys()].find(name => name.includes('v1.5.7-responsive-density'));
+    const currentName = [...cacheStores.keys()].find(name => name.includes('v1.5.14-cascade-dedup'));
     const currentCache = currentName && cacheStores.get(currentName);
     const shellCached = Boolean(currentCache && currentCache.has('./index.html'));
     await dispatchWaitable('activate');
@@ -67,7 +67,7 @@ async function dispatchWaitable(type, detail) {
     const offlineBody = await response.text();
 
     const report = {
-        version: '1.5.7',
+        version: '1.5.14',
         auditMode: 'isolated-service-worker-runtime',
         handlers: Object.keys(handlers).sort(),
         install: { skipWaitingCalls, shellCached, currentCache: currentName || '' },
