@@ -4,7 +4,7 @@
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
     const PANEL_LABELS = {
-        file: '파일 열기',
+        file: '불러오기',
         recommend: '추천 생성',
         candidates: '후보 선택',
         preview: '미리보기',

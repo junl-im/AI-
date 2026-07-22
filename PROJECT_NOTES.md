@@ -1,21 +1,22 @@
-# PROJECT NOTES v1.5.14
+# PROJECT NOTES v1.5.16
 
-## Duplicate-free CSS 선언 규칙
+## Unified import UI 규칙
 
-- exact selector와 동일 at-rule context에서 property·value·`!important`가 모두 같은 cross-file 선언은 최종 owner 한 곳만 유지합니다.
-- selector group 일부만 중복이면 규칙을 selector별로 분리해 비대상 selector의 fallback을 보존합니다.
-- 서로 다른 값의 conflict, same-value duplicate, shadowed declaration은 모두 0을 유지합니다.
-- 자동 정리는 `tools/consolidate-same-value-css.js`로 재현하며 실행 전 CSS ownership report가 필요합니다.
+- 원본 미디어 picker는 `#fileDrop > #fileInput` 한 곳만 소유합니다.
+- hero `#heroWorkspaceStartBtn`, dock `#bottomFileBtn`, no-file next action은 picker를 직접 click하지 않고 `focusImportPanel()`로 원본 카드에 이동합니다.
+- 프로젝트 JSON과 자막 SRT/VTT는 원본 미디어 input과 별개이며 UI에 용도를 명시합니다.
+- PC의 project/copy utility는 `.project-copy-hub` 한 행에서 같은 높이로 정렬하고, 1179px 이하에서는 active media flow에서 숨깁니다.
+- legacy mobile action bar는 markup, JS anchor, CSS selector 모두 금지합니다.
 
 ## QA·배포 기준
 
-- 자동 QA 기준은 **173/173**입니다.
-- CSS 상한은 활성 `!important` 824, 실제 충돌 0, same-value duplicate 0, shadowed declaration 0입니다.
-- 4개 viewport runtime error와 horizontal overflow는 0이어야 하며 v1.5.13의 주요 computed style·geometry·screenshot을 유지합니다.
-- process memory audit는 16회 이상, runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
-- GPU/media 비교는 두 모드 디코딩 성공, GPU process·media utility process 관측, runtime error 0을 만족해야 합니다.
-- long video audit는 실행 경로 미변경으로 v1.5.9 상속 계약을 사용합니다.
-- 런타임 build key는 `1.5.14-cascade-dedup`입니다.
+- 자동 QA 기준은 **175/175**입니다.
+- CSS 상한은 활성 `!important` 801이며 conflicts, same-value duplicates, shadowed declarations, source-orphan selectors는 모두 0입니다.
+- 4개 viewport에서 media input 1개, hero/dock BUTTON navigation, desktop utility alignment, mobile primary import visibility를 확인합니다.
+- 4개 viewport runtime error와 horizontal overflow는 0이어야 합니다.
+- process memory audit는 runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
+- long video audit는 미디어 실행 경로 미변경으로 v1.5.9 상속 계약을 사용합니다.
+- 런타임 build key는 `1.5.16-unified-import-ui`입니다.
 
 ## 다음 우선순위
 

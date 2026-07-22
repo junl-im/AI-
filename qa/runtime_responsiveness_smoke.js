@@ -23,7 +23,7 @@ const pins = read('src/ui/candidate-pin-board.js');
 const director = read('src/ui/flow-director-final.js');
 const qualityGate = read('src/ui/flow-quality-gate.js');
 
-ok(html.includes('아래 메뉴바에서 파일을 열고'), 'mobile guide uses the public menu bar term');
+ok(html.includes('불러오기 메뉴에서 원본 하나를 선택'), 'mobile guide explains the single import path');
 ok(html.includes('aria-label="하단 고정 제작 메뉴바"'), 'bottom navigation has a plain Korean aria label');
 ok(!html.includes('Dock에서 원본 선택') && !qualityGate.includes('하단 Dock'), 'visible guidance no longer uses Dock jargon');
 ok(integrity.includes('setTextIfChanged(recCount') && !integrity.includes('recCount.textContent ='), 'recommendation count avoids same-value observer writes');
@@ -34,4 +34,4 @@ ok(comfort.includes("observer.observe(list, { childList: true, subtree: true })"
 ok(pins.includes("observer.observe(node, { childList: true, subtree: true, characterData: true })"), 'pin board observer ignores self-authored attributes');
 ok(director.includes("document.body.dataset.activeFlowTab !== key"), 'flow director avoids rewriting the active tab with the same value');
 
-console.log('PASS v1.5.14 menu terminology and observer feedback-loop guardrails present');
+console.log('PASS v1.5.16 menu terminology and observer feedback-loop guardrails present');

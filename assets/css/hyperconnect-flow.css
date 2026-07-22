@@ -16,18 +16,10 @@ body[data-ui="hyperconnect-flow"] .brand-topline {
     gap: 12px;
     min-height: 36px;
 }
-body[data-ui="hyperconnect-flow"] .brand-kicker {
-    display: flex !important;
-    flex: 0 0 auto;
-}
 body[data-ui="hyperconnect-flow"] .brand-right-actions {
     display: flex !important;
     flex: 0 0 auto;
     justify-content: flex-end;
-}
-body[data-ui="hyperconnect-flow"] .badge-device,
-body[data-ui="hyperconnect-flow"] .badge-free {
-    display: none !important;
 }
 body[data-ui="hyperconnect-flow"] .brand-signature-pill {
     display: inline-flex !important;
@@ -46,7 +38,6 @@ body[data-ui="hyperconnect-flow"] .hyperflow-stage {
     justify-content: flex-start;
     padding: 12px 14px;
 }
-body[data-ui="hyperconnect-flow"] .hyperflow-recommend-btn,
 body[data-ui="hyperconnect-flow"] #flowRecommendBtn {
     display: none !important;
 }

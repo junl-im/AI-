@@ -94,7 +94,7 @@
             if (previewButton) previewButton.disabled = true;
             if (recommendButton) recommendButton.disabled = false;
         } else {
-            if (title) title.textContent = '파일을 열면 자동 분석합니다';
+            if (title) title.textContent = '원본을 불러오면 자동 분석합니다';
             if (meta) meta.textContent = '분석 후 추천 생성 → 후보 선택 → 미리보기 순서로 연결됩니다.';
             if (previewButton) previewButton.disabled = true;
             if (recommendButton) recommendButton.disabled = true;

@@ -6,7 +6,7 @@
     const state = store.state || {};
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
-        file: ['upload', '파일 열기', '파일을 열면 자동 분석이 시작됩니다.'],
+        file: ['upload', '불러오기', '원본을 불러오면 자동 분석이 시작됩니다.'],
         recommend: ['spark', '추천 생성', '분석 결과로 쇼츠 후보를 생성합니다.'],
         candidates: ['candidates', '후보 선택', '마음에 드는 구간을 고르면 미리보기로 연결됩니다.'],
         preview: ['preview', '미리보기', '선택한 후보의 세로 화면을 확인합니다.'],
@@ -73,7 +73,7 @@
             setTextIfChanged(title, titleText);
         }
         if (small) {
-            const smallText = !state.file ? '하단 메뉴바의 파일 열기에서 원본을 선택해주세요.'
+            const smallText = !state.file ? '불러오기 메뉴에서 원본을 한 번 선택해주세요.'
                 : state.isAnalyzing ? '파일을 읽고 오디오·영상·컷 엔진을 자동으로 돌리는 중입니다.'
                     : tab === 'recommend' && hasAnalysis() && !hasRecommendations() ? '추천 메뉴의 추천 생성 버튼을 누르면 됩니다.'
                         : tab === 'candidates' && hasRecommendations() && !hasSelection() ? '카드를 누르면 선택 즉시 미리보기로 이동합니다.' : meta[2];

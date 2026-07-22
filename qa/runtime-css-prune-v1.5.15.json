@@ -1,0 +1,621 @@
+{
+  "removedSelectors": [
+    {
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-kicker"
+    },
+    {
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-compat-pill"
+    },
+    {
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-compat-pill"
+    },
+    {
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-kicker"
+    },
+    {
+      "file": "assets/css/engine-panel.css",
+      "selector": ".rec-card .engine-badges"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".brand-signature-pill .brand-mark"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".brand-signature-card"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".brand-signature-card span"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".brand-signature-card strong"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".feedback-hint"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".bottom-dock.bottom-dock-lean"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-file"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-primary"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".feedback-badge"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": ".brand-signature-card"
+    },
+    {
+      "file": "assets/css/feedback-ux.css",
+      "selector": "body.has-media .brand-signature-card"
+    },
+    {
+      "file": "assets/css/flow-integrity.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .brand-version-left"
+    },
+    {
+      "file": "assets/css/flow-integrity.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-cta-row"
+    },
+    {
+      "file": "assets/css/flow-integrity.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-file-btn"
+    },
+    {
+      "file": "assets/css/flow-polish.css",
+      "selector": ".brand-version-left .badge-version"
+    },
+    {
+      "file": "assets/css/flow-quality-gate.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-quality-inline-error"
+    },
+    {
+      "file": "assets/css/flow-quality-gate.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-quality-inline-error strong"
+    },
+    {
+      "file": "assets/css/flow-quality-gate.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-quality-inline-error button"
+    },
+    {
+      "file": "assets/css/flow-quality-gate.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-quality-inline-error"
+    },
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".brand-compat-pill"
+    },
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".start-command-panel .command-button"
+    },
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": "body.performance-lite .modal-card"
+    },
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": "body.performance-lite .film-strip"
+    },
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": "body.performance-lite .camera-frame-sweep"
+    },
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": "body.performance-lite .cinema-gradient-orb"
+    },
+    {
+      "file": "assets/css/foundation-polish.css",
+      "selector": ".brand-compat-pill"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".flow-summary-bar"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".selected-summary-bar"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".modal-card"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".command-chip"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".status-pill"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".rec-engine-badge"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".caption-style-card"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".thumbnail-template-card"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".cut-chip"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".marker-chip"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".thumbnail-template-card:hover"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".caption-style-card:hover"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".command-button"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".small-action"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".rec-select-btn"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".export-action-btn"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".command-button.btn-secondary"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".small-action"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".rec-select-btn"
+    },
+    {
+      "file": "assets/css/glass-pro-ui.css",
+      "selector": ".command-button.btn-primary"
+    },
+    {
+      "file": "assets/css/header-meta-rail.css",
+      "selector": ".cinematic-brand-panel .brand-compat-pill"
+    },
+    {
+      "file": "assets/css/hero-command-deck.css",
+      "selector": ".cinematic-brand-panel .brand-compat-pill"
+    },
+    {
+      "file": "assets/css/hero-command-deck.css",
+      "selector": ".compat-pulse"
+    },
+    {
+      "file": "assets/css/hero-command-deck.css",
+      "selector": ".cinematic-brand-panel .brand-compat-pill"
+    },
+    {
+      "file": "assets/css/hyperconnect-flow.css",
+      "selector": "body[data-ui=\"hyperconnect-flow\"] .brand-kicker"
+    },
+    {
+      "file": "assets/css/hyperconnect-flow.css",
+      "selector": "body[data-ui=\"hyperconnect-flow\"] .badge-device"
+    },
+    {
+      "file": "assets/css/hyperconnect-flow.css",
+      "selector": "body[data-ui=\"hyperconnect-flow\"] .badge-free"
+    },
+    {
+      "file": "assets/css/hyperconnect-flow.css",
+      "selector": "body[data-ui=\"hyperconnect-flow\"] .hyperflow-recommend-btn"
+    },
+    {
+      "file": "assets/css/hyperflow-tabs.css",
+      "selector": ".hyperflow-recommend-btn"
+    },
+    {
+      "file": "assets/css/hyperflow-tabs.css",
+      "selector": ".hyperflow-recommend-btn:disabled"
+    },
+    {
+      "file": "assets/css/hyperflow-tabs.css",
+      "selector": ".hyperflow-recommend-btn"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".designer-mini"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".badge-device"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".badge-free"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".hero-meter"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".hero-cta-row"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".hero-cta-row .btn-primary"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".hero-cta-row .btn-secondary"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-btn:not(:disabled):hover"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-btn:disabled"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-primary"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions::-webkit-scrollbar"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".brand-kicker .badge-version"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".hero-cta-row"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".quality-tools-panel"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock.bottom-dock-lean"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions.bottom-dock-actions-lean"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn .dock-emoji"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-file"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-primary"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn:not(:disabled):active"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn:focus-visible"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": "body.is-analyzing .bottom-dock-actions-lean .bottom-dock-primary"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock.bottom-dock-lean"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions.bottom-dock-actions-lean"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn .dock-emoji"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "selector": ".bottom-dock-actions-lean .bottom-dock-btn .dock-emoji"
+    },
+    {
+      "file": "assets/css/motion-stability.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .command-button"
+    },
+    {
+      "file": "assets/css/responsive-workspace.css",
+      "selector": ".cinematic-brand-panel .hero-cta-row"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": ".brand-version-left"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .save-ready-card"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .finish-center-card"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": ".film-strip"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": ".camera-frame-sweep"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": ".cinema-gradient-orb"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": ".brand-compat-pill"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": ".brand-version-left"
+    },
+    {
+      "file": "assets/css/shutter-glass-flow.css",
+      "selector": ".brand-compat-pill"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".brand-kicker"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".designer-mini"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".designer-mini strong"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(1)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(2)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(3)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(4)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(5)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(6)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(7)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(8)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter i:nth-child(9)"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".hero-meter"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "selector": ".designer-mini"
+    },
+    {
+      "file": "assets/css/theme.css",
+      "selector": ".badge-device"
+    },
+    {
+      "file": "assets/css/theme.css",
+      "selector": ".badge-free"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".batch-export-head"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".export-head"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".project-head"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".batch-export-head strong"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".hyperflow-recommend-btn"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".quality-preset"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".candidate-card"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".save-readiness-card"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".render-quality-card"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".export-finish-card"
+    },
+    {
+      "file": "assets/css/ui-refinement.css",
+      "selector": ".candidate-card.is-selected"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".hero-cta-row"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".hero-file-btn"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".hero-file-btn"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".hero-file-btn:focus-visible"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".hero-cta-row .btn-primary"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".hero-cta-row .btn-secondary"
+    },
+    {
+      "file": "assets/css/ux.css",
+      "selector": ".hero-cta-row"
+    }
+  ],
+  "removedRules": 92,
+  "removedDeclarations": 290,
+  "removedImportantDeclarations": 21,
+  "removedKeyframes": [
+    {
+      "file": "assets/css/desktop-prime-layout.css",
+      "name": "navigationFocusPulse"
+    },
+    {
+      "file": "assets/css/studio.css",
+      "name": "meter"
+    }
+  ],
+  "removedEmptyAtRules": [
+    {
+      "file": "assets/css/flow-quality-gate.css",
+      "name": "media",
+      "params": "(max-width: 720px)"
+    },
+    {
+      "file": "assets/css/layout-dock.css",
+      "name": "media",
+      "params": "(max-width: 360px)"
+    }
+  ]
+}

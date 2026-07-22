@@ -24,9 +24,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions,
 }
 
 /* The center readiness slogan was intentionally removed in v1.3.1. */
-.cinematic-brand-panel .brand-compat-pill {
-    display: none !important;
-}
 
 @media (max-width: 920px) {
     .cinematic-brand-panel .release-name {

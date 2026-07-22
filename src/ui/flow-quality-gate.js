@@ -5,7 +5,7 @@
     const state = store.state || {};
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const PANEL_LABELS = {
-        file: 'file-open',
+        file: 'import',
         recommend: 'recommend',
         candidates: 'candidates',
         preview: 'preview',
@@ -98,8 +98,8 @@
         const meta = byId('hyperflowStageMeta');
         if (!title || !meta) return;
         if (!hasFile()) {
-            title.textContent = '파일을 열면 자동 분석합니다';
-            meta.textContent = isDesktopPrime() ? '왼쪽 불러오기 카드 또는 하단 메뉴바에서 원본을 여세요.' : '하단 메뉴바의 파일 열기를 사용하세요.';
+            title.textContent = '원본을 불러오면 자동 분석합니다';
+            meta.textContent = isDesktopPrime() ? '작업실의 원본 불러오기 카드에서 파일을 선택하세요.' : '불러오기 메뉴로 이동해 원본을 선택하세요.';
             return;
         }
         if (state.isAnalyzing) {
@@ -125,14 +125,14 @@
         meta.textContent = '현재 작업: ' + labelFor(active);
     }
     function normalizeLegacyUi() {
-        document.querySelectorAll('.action-dock, .legacy-mobile-action-bar').forEach(node => {
+        document.querySelectorAll('.action-dock').forEach(node => {
             node.classList.add('flow-quality-hidden-legacy');
             node.setAttribute('aria-hidden', 'true');
         });
         const dockLabel = byId('bottomFileBtn');
         if (dockLabel) {
             const text = dockLabel.querySelector('b');
-            if (text) text.textContent = '파일 열기';
+            if (text) text.textContent = '불러오기';
         }
     }
     function heal(options) {

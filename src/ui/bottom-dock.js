@@ -52,12 +52,12 @@
 
 
         if (els.title) {
-            if (!hasFile) els.title.textContent = '파일을 열어주세요';
+            if (!hasFile) els.title.textContent = '원본을 불러와주세요';
             else els.title.textContent = compactName(state.file && state.file.name, 44) || '파일 준비됨';
         }
 
         if (els.meta) {
-            if (!hasFile) els.meta.textContent = '파일을 열면 자동 분석이 시작됩니다.';
+            if (!hasFile) els.meta.textContent = '불러오기 카드에서 원본을 선택하면 자동 분석이 시작됩니다.';
             else if (state.isAnalyzing) els.meta.textContent = '자동 분석 중 · 완료되면 추천 화면으로 이동합니다.';
             else if (selected) els.meta.textContent = `선택 구간 ${selected.rangeText || ''} · 미리보기 연결됨`;
             else if (hasRecommendations) els.meta.textContent = '후보를 선택하면 미리보기로 이동합니다.';

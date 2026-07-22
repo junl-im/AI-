@@ -30,7 +30,6 @@ body[data-ui="hyperflow-tabs"] .hyperconnect-selection-guide {
 
 body[data-ui="hyperflow-tabs"] .bottom-dock-tab,
 body[data-ui="hyperflow-tabs"] .recommendation-card,
-body[data-ui="hyperflow-tabs"] .command-button,
 body[data-ui="hyperflow-tabs"] button {
     backface-visibility: hidden;
 }

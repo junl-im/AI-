@@ -81,4 +81,4 @@ assert(mediaImport.includes('state.mediaSessionId !== mediaSessionId || state.fi
 assert(mediaImport.includes("if (elements.fileInput) elements.fileInput.value = '';"), 'the same media file can be selected again');
 assert(session.includes('projectService.parseProjectText') && session.includes('MAX_SNAPSHOT_CHARS'), 'session restore reuses bounded project validation');
 
-console.log('PASS v1.5.14 project import, session restore, and file-size exception guardrails');
+console.log('PASS v1.5.16 project import, session restore, and file-size exception guardrails');

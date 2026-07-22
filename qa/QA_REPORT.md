@@ -1,26 +1,33 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.14
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.16
 
 ## 최종 결과
 
-- 자동 검사: **173/173 통과**
+- 자동 검사: **175/175 통과**
 - 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- 서비스워커·16회 process memory·GPU/media 감사는 v1.5.14 기준으로 재생성·통과
-- 미디어 실행 경로 미변경으로 v1.5.9 장시간 MP4 감사 결과 상속
+- 서비스워커·process memory·GPU/media 감사 v1.5.16 기준 통과
+- 장시간 MP4는 실행 코드 미변경으로 v1.5.9 검증 결과 상속
 
-## UI·CSS 결과
+## UI·동선 결과
+
+- 원본 media input: **1개**
+- hero·dock direct file-label entry: **0개**
+- PC project/copy utility hub: 같은 top/bottom 정렬, import workspace와 overlap **0건**
+- 모바일 초기 file stage: primary import card 표시
+- retired mobile action bar: markup·selector **0건**
+
+## CSS 결과
 
 - 실제 selector-property 충돌: **0 유지**
-- same-value duplicate: **57 → 0**
+- same-value duplicate: **0 유지**
 - shadowed declaration: **0 유지**
-- 활성 `!important`: **833 → 824**
-- source declaration 51개 제거, grouped selector rule 5개 안전 분리
-- 4개 viewport 주요 computed style·geometry와 결정적 screenshot은 v1.5.13 대비 변화 0건
+- 활성 `!important`: **803 → 801**
+- 이번 릴리스 제거: selector 9개, rule 7개, declaration 35개
 
 ## 감사 제한
 
 - headless process RSS/GPU 분류는 실제 hardware-accelerated browser의 개별 native decoder buffer를 직접 측정하지 않습니다.
-- 30fps 고비트레이트 원본과 모바일 실기기 검증은 별도 환경이 필요합니다.
+- 30fps 고비트레이트 카메라 원본과 모바일 실기기 검증은 별도 환경이 필요합니다.
 
 ---
 

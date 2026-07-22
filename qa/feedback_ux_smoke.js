@@ -11,8 +11,8 @@ const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
 
 const requiredHtml = [
     'class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>',
-    'feedback-ux.css?v=1.5.14-cascade-dedup',
-    'feedback-ux.js?v=1.5.14-cascade-dedup'
+    'feedback-ux.css?v=1.5.16-unified-import-ui',
+    'feedback-ux.js?v=1.5.16-unified-import-ui'
 ];
 const missingHtml = requiredHtml.filter(token => !html.includes(token));
 if (missingHtml.length) {
@@ -20,7 +20,7 @@ if (missingHtml.length) {
     process.exit(1);
 }
 
-const requiredCss = ['brand-signature-pill', 'fx-ripple', 'toast-kind-success', 'toast-kind-error', 'bottom-dock-file'];
+const requiredCss = ['brand-signature-pill', 'fx-ripple', 'toast-kind-success', 'toast-kind-error'];
 const missingCss = requiredCss.filter(token => !css.includes(token));
 if (missingCss.length) {
     console.error('FAIL feedback UX CSS anchors missing: ' + missingCss.join(', '));

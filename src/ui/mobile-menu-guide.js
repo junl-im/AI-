@@ -1,10 +1,10 @@
-// AI Shorts Studio v1.5.14 - adaptive mobile workflow menu and next-action guide
+// AI Shorts Studio v1.5.16 - adaptive mobile workflow menu and next-action guide
 'use strict';
 
 (function bootMobileMenuGuide(global) {
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const LABELS = {
-        file: '파일 열기',
+        file: '불러오기',
         recommend: '추천',
         candidates: '후보',
         preview: '미리보기',

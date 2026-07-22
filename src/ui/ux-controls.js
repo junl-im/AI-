@@ -11,9 +11,6 @@
         analyzeBtn: 'analyzeBtn',
         exportBtn: 'exportBtn',
         previewBtn: 'previewBtn',
-        mobileAnalyzeBtn: 'mobileAnalyzeBtn',
-        mobilePreviewBtn: 'mobilePreviewBtn',
-        mobileExportBtn: 'mobileExportBtn',
         dockPreviewBtn: 'dockPreviewBtn',
         dockExportBtn: 'dockExportBtn',
         dockTitle: 'dockTitle',
@@ -81,8 +78,8 @@
         const selected = uxSelectedRecommendation();
         const hasExport = Boolean(state.exportInfo);
         if (!hasFile) {
-            uxSetText(els.dockTitle, '원본 파일을 열어주세요');
-            uxSetText(els.dockMeta, '파일 열기 버튼으로 노래 또는 영상을 선택하세요.');
+            uxSetText(els.dockTitle, '원본을 불러와주세요');
+            uxSetText(els.dockMeta, '불러오기 메뉴에서 노래 또는 영상을 한 번 선택하세요.');
         } else if (!selected) {
             uxSetText(els.dockTitle, state.file && state.file.name ? state.file.name : '분석 준비 완료');
             uxSetText(els.dockMeta, '분석이 끝나면 추천 탭에서 후보를 생성하세요.');
@@ -108,9 +105,6 @@
     }
 
     function uxSyncMirrors() {
-        uxSetButtonMirror(els.mobileAnalyzeBtn, els.analyzeBtn);
-        uxSetButtonMirror(els.mobilePreviewBtn, els.previewBtn);
-        uxSetButtonMirror(els.mobileExportBtn, els.exportBtn);
         uxSetButtonMirror(els.dockPreviewBtn, els.previewBtn);
         uxSetButtonMirror(els.dockExportBtn, els.exportBtn);
     }
@@ -143,9 +137,6 @@
     }
 
     function uxInstallMirrorButtons() {
-        if (els.mobileAnalyzeBtn) els.mobileAnalyzeBtn.addEventListener('click', () => uxClickWhenEnabled(els.analyzeBtn));
-        if (els.mobilePreviewBtn) els.mobilePreviewBtn.addEventListener('click', () => uxClickWhenEnabled(els.previewBtn));
-        if (els.mobileExportBtn) els.mobileExportBtn.addEventListener('click', () => uxClickWhenEnabled(els.exportBtn));
         if (els.dockPreviewBtn) els.dockPreviewBtn.addEventListener('click', () => uxClickWhenEnabled(els.previewBtn));
         if (els.dockExportBtn) els.dockExportBtn.addEventListener('click', () => uxClickWhenEnabled(els.exportBtn));
     }

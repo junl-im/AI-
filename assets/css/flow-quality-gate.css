@@ -16,36 +16,8 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] {
 body[data-ui="hyperflow-tabs"][data-flow-healed="true"] .hyperflow-stage {
     border-color: rgba(34, 211, 238, 0.30);
 }
-body[data-ui="hyperflow-tabs"] .flow-quality-inline-error {
-    display: grid;
-    gap: 6px;
-    margin-top: 10px;
-    padding: 10px 12px;
-    border: 1px solid rgba(251, 113, 133, 0.34);
-    border-radius: 14px;
-    background: rgba(127, 29, 29, 0.22);
-    color: #fecdd3;
-    font-size: 12px;
-    line-height: 1.45;
-}
-body[data-ui="hyperflow-tabs"] .flow-quality-inline-error strong {
-    color: #fff;
-    font-size: 13px;
-}
-body[data-ui="hyperflow-tabs"] .flow-quality-inline-error button {
-    justify-self: start;
-    min-height: 30px;
-    border-radius: 10px;
-    padding: 0 10px;
-    border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.08);
-    color: #fff;
-    font-weight: 850;
-    cursor: pointer;
-}
 body[data-ui="hyperflow-tabs"] .flow-quality-hidden-legacy,
-body[data-ui="hyperflow-tabs"] .action-dock.flow-quality-hidden-legacy,
-body[data-ui="hyperflow-tabs"] .legacy-mobile-action-bar.flow-quality-hidden-legacy {
+body[data-ui="hyperflow-tabs"] .action-dock.flow-quality-hidden-legacy {
     display: none !important;
 }
 body[data-ui="hyperflow-tabs"] .recommendation-list.empty-state {
@@ -65,11 +37,5 @@ body[data-ui="hyperflow-tabs"] .recommendation-card button {
     }
     body[data-ui="hyperflow-tabs"] [data-flow-panel].is-flow-active {
         scroll-margin-top: 14px;
-    }
-}
-@media (max-width: 720px) {
-    body[data-ui="hyperflow-tabs"] .flow-quality-inline-error {
-        margin-top: 8px;
-        padding: 9px 10px;
     }
 }

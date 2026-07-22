@@ -9,7 +9,7 @@ const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
 const hyper = fs.readFileSync(path.join(root, 'src/ui/hyperflow-tabs.js'), 'utf8');
 const mediaImport = fs.readFileSync(path.join(root, 'src/app/media-import-controller.js'), 'utf8');
 
-if (!html.includes('파일을 열면 자동 분석') || !html.includes('data-icon="spark"') || !html.includes('>추천 생성</button>')) {
+if (!html.includes('원본을 불러오면 자동 분석') || !html.includes('data-icon="spark"') || !html.includes('>추천 생성</button>')) {
     console.error('FAIL UI copy should explain auto analysis and recommendation generation');
     process.exit(1);
 }

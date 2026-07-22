@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-5-14",
-  "version": "1.5.14",
+  "name": "ai-shorts-studio-v1-5-16",
+  "version": "1.5.16",
   "private": true,
-  "description": "AI Shorts Studio v1.5.14 - same-value CSS deduplication and important cleanup",
+  "description": "AI Shorts Studio v1.5.16 - unified import flow and desktop utility hub redesign",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -148,6 +148,7 @@
     "node qa/css_ownership_smoke.js",
     "node qa/cascade_ownership_smoke.js",
     "node qa/same_value_css_smoke.js",
+    "node qa/orphan_css_smoke.js",
     "node qa/control_ownership_smoke.js",
     "node qa/hero_interaction_ownership_smoke.js",
     "node qa/responsive_tokens_smoke.js",
@@ -184,6 +185,7 @@
     "node qa/service_worker_cache_scope_smoke.js",
     "node --check src/ui/studio-experience-controller.js",
     "node qa/studio_experience_smoke.js",
+    "node qa/unified_import_ui_smoke.js",
     "node qa/analysis_cache_safety_smoke.js",
     "node qa/parallel_analysis_smoke.js"
   ],

@@ -1,25 +1,25 @@
-# HANDOFF v1.5.14
+# HANDOFF v1.5.16
 
 ## 현재 상태
 
-v1.5.14는 v1.5.13의 화면과 미디어 실행 경로를 유지하면서 cross-file same-value selector-property 선언을 모두 제거하고 중복 `!important`를 회수한 CSS deduplication 릴리스입니다.
+v1.5.16은 PC utility 카드 배치, hero 시작 화면, 원본 불러오기 동선을 함께 정리한 UI 흐름 통합 릴리스입니다.
 
-- 자동 QA: **173/173 통과**
-- 데스크톱·소형 노트북·태블릿·모바일 주요 computed style·geometry: v1.5.13 대비 **변화 0건**
-- 결정적 screenshot 비교: 4개 viewport **픽셀 변화 0건**
-- CSS 기준: `!important` 824, conflicts 0, same-value duplicates 0, shadowed 0
-- 장시간 MP4 안정성: 미디어 실행 경로 미변경으로 v1.5.9의 15분→30분→15분 결과 상속
-- process memory·GPU/media·service worker 감사는 v1.5.14 기준으로 재생성
+- 자동 QA: **175/175 통과**
+- 데스크톱·소형 노트북·태블릿·모바일 오류·Promise 거절·콘솔 오류·가로 overflow: **0건**
+- 미디어 input: `#fileInput` **1개**, owner: `#fileDrop` 원본 불러오기 카드
+- hero와 하단 불러오기: picker 직접 실행 없이 `#fileDrop`으로 이동
+- PC utility hub: 프로젝트·쇼츠 카피 카드 상단과 하단 정렬 일치, 원본 카드와 겹침 없음
+- CSS 기준: `!important` 801, conflicts 0, same-value duplicates 0, shadowed 0
+- 장시간 MP4 실행 경로는 변경되지 않아 v1.5.9 15분→30분→15분 결과 상속
 
 ## 적용 내용
 
-- 동일 selector·at-rule context·property·value·importance를 여러 CSS 파일이 반복 선언하던 57개 그룹 제거
-- grouped selector의 일부에만 중복이 있는 규칙 5개를 selector별로 분리해 다른 fallback 보존
-- source declaration 51개 제거
-- 중복 `!important` 9개 회수
-- same-value duplicate inventory를 CSS 감사 JSON과 전용 smoke test에 추가
-- 재현 가능한 `tools/consolidate-same-value-css.js` 포함
-- runtime build key `1.5.14-cascade-dedup` 적용
+- `프로젝트`와 `쇼츠 카피 초안`을 `.project-copy-hub` 하나로 묶고 desktop grid의 utility row에 배치
+- 상단 hero를 vertical frame + 메시지 + 단일 `작업실 시작` CTA 구조로 재디자인
+- hero·dock·다음 작업 버튼을 `focusImportPanel()` 한 경로로 통합
+- mobile empty file stage에서 원본 불러오기 카드를 실제로 표시
+- legacy mobile action bar markup·DOM probe·CSS 9 selector/7 rule/35 declaration 제거
+- `!important` 2개 추가 회수, runtime build key `1.5.16-unified-import-ui` 적용
 
 ## 검수 순서
 
@@ -32,9 +32,9 @@ v1.5.14는 v1.5.13의 화면과 미디어 실행 경로를 유지하면서 cross
 
 ## 알려진 제한
 
-- 현재 headless 컨테이너는 물리 GPU/WebGL context를 제공하지 않아 hardware acceleration 여부를 직접 확정할 수 없습니다.
+- headless 컨테이너는 물리 GPU/WebGL context를 제공하지 않아 실제 hardware acceleration 메모리를 확정할 수 없습니다.
 - 15분·30분 30fps 고비트레이트 카메라 원본과 모바일 Safari·Samsung Internet 실기기 검증은 별도 환경이 필요합니다.
-- 남은 `!important`는 반응형·상태·접근성 override가 섞여 있어 화면별 회귀를 동반한 단계적 감축이 필요합니다.
+- 프로젝트 JSON과 자막 파일 input은 원본 미디어 picker가 아니라 각 기능 전용 import입니다.
 
 ## 다음 작업
 

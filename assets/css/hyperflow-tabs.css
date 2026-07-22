@@ -38,7 +38,6 @@
     color: var(--muted);
     font-size: 12px;
 }
-.hyperflow-recommend-btn,
 .recommend-generate-btn {
     min-height: 48px;
     border-radius: 17px;
@@ -47,7 +46,6 @@
     letter-spacing: -0.035em;
     cursor: pointer;
 }
-.hyperflow-recommend-btn:disabled,
 .recommend-generate-btn:disabled {
     cursor: not-allowed;
     opacity: 0.45;
@@ -188,7 +186,6 @@ body[data-ui="hyperflow-tabs"] .recommendation-list {
         padding: 10px;
         border-radius: 18px;
     }
-    .hyperflow-recommend-btn { width: 100%; }
     .bottom-dock.bottom-dock-hyperflow {
         padding: 8px;
         border-radius: 22px 22px 0 0;

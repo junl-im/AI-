@@ -12,7 +12,7 @@ const css = read('assets/css/glass-pro-ui.css');
 const refinement = read('assets/css/ui-refinement.css');
 const foundation = read('assets/css/foundation-polish.css');
 const sw = read('sw.js');
-assert(html.includes('assets/css/glass-pro-ui.css?v=1.5.14-cascade-dedup'), 'glass pro stylesheet is loaded after layout fixes');
+assert(html.includes('assets/css/glass-pro-ui.css?v=1.5.16-unified-import-ui'), 'glass pro stylesheet is loaded after layout fixes');
 assert(css.includes('--glass-surface') && css.includes('--glass-blur'), 'glass design tokens are defined');
 assert(css.includes('backdrop-filter: blur(var(--glass-blur)) saturate(1.28)'), 'glass surfaces use backdrop blur');
 assert(css.includes('.brand-panel.cinematic-brand-panel'), 'cinematic hero receives glass skin');
@@ -21,4 +21,4 @@ assert(css.includes('.bottom-dock-tab') && css.includes('backdrop-filter'), 'gla
 assert(refinement.includes('min-height: 60px') && foundation.includes('min-height: 58px'), 'dock geometry remains readable in final ownership layers');
 assert(css.includes('@supports not ((backdrop-filter: blur(1px))'), 'non-backdrop-filter fallback is included');
 assert(css.includes('@media (prefers-reduced-motion: reduce)'), 'reduced motion fallback is included');
-assert(sw.includes('./assets/css/glass-pro-ui.css?v=1.5.14-cascade-dedup'), 'service worker caches glass stylesheet');
+assert(sw.includes('./assets/css/glass-pro-ui.css?v=1.5.16-unified-import-ui'), 'service worker caches glass stylesheet');

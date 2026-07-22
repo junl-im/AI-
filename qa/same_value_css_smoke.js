@@ -12,12 +12,12 @@ function assert(condition, message) {
     console.log(`PASS ${message}`);
 }
 
-assert(pkg.version === '1.5.14', 'same-value CSS cleanup release version is v1.5.14');
+assert(pkg.version === '1.5.16', 'same-value CSS cleanup release version is v1.5.16');
 assert(report.version === pkg.version, 'same-value CSS report matches the release');
 assert(report.sameValueDuplicateCount === 0, 'cross-file same-value selector-property duplicates remain at zero');
 assert(report.sharedPropertyCount === 0, 'cross-file shared selector-property declarations remain at zero');
 assert(Array.isArray(report.sameValueDuplicates) && report.sameValueDuplicates.length === 0, 'same-value duplicate inventory is empty');
 assert(report.conflictingPropertyCount === 0 && report.shadowedDeclarationCount === 0, 'zero-conflict cascade remains intact');
-assert(report.importantCount <= 824, 'important declaration ceiling is reduced to 824');
+assert(report.importantCount <= 801, 'important declaration ceiling is reduced to 801');
 assert(fs.existsSync(path.join(root, 'tools', 'consolidate-same-value-css.js')), 'reproducible same-value consolidation tool is included');
-console.log('PASS v1.5.14 duplicate-free CSS declaration ownership guardrails');
+console.log('PASS v1.5.16 duplicate-free CSS declaration ownership guardrails');

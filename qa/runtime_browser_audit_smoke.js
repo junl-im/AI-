@@ -38,6 +38,11 @@ for (const mode of ['desktop', 'smallLaptop', 'tablet', 'mobile']) {
   } else {
     assert(result.tabs.length === 8 && result.tabs.every(tab => tab.visible), `${mode} keeps all eight menu items visible`);
   }
+  assert(result.uiStructure && result.uiStructure.mediaInputCount === 1, `${mode} keeps one primary media input`);
+  assert(result.uiStructure.primaryImportOwner === 'primary', `${mode} identifies the single import owner`);
+  assert(result.uiStructure.heroEntry.tag === 'BUTTON' && result.uiStructure.heroEntry.controls === 'fileDrop' && !result.uiStructure.heroEntry.directFor, `${mode} hero entry navigates without opening a picker`);
+  assert(result.uiStructure.dockEntry.tag === 'BUTTON' && result.uiStructure.dockEntry.controls === 'fileDrop' && !result.uiStructure.dockEntry.directFor, `${mode} dock entry navigates without opening a picker`);
+  assert(result.uiStructure.retiredMobileAction === false, `${mode} has no retired duplicate mobile action bar`);
   assert(result.bodyScrollWidth <= result.viewport.width && result.htmlScrollWidth <= result.viewport.width, `${mode} has no horizontal page overflow`);
   assert(result.landing && result.landing.landing === true && result.landing.rail === true, `${mode} captures the stage landing sweep`);
   assert(result.stage && result.stage.current === true && result.stage.rail === true && result.stage.landing === false, `${mode} keeps a persistent stage rail after landing`);
@@ -45,6 +50,9 @@ for (const mode of ['desktop', 'smallLaptop', 'tablet', 'mobile']) {
 
 const desktop = report.desktop;
 assert(desktop.workspace && desktop.workspace.toolbarVisible === true, 'desktop workspace toolbar is visible');
+assert(desktop.uiStructure.utilityHub.visible === true && desktop.uiStructure.utilityHub.projectVisible === true && desktop.uiStructure.utilityHub.copyVisible === true, 'desktop project and copy utility hub is visible');
+assert(Math.abs(desktop.uiStructure.utilityHub.project.top - desktop.uiStructure.utilityHub.copy.top) <= 1 && Math.abs(desktop.uiStructure.utilityHub.project.bottom - desktop.uiStructure.utilityHub.copy.bottom) <= 1, 'desktop project and copy cards are vertically aligned');
+assert(desktop.uiStructure.importRect.top >= desktop.uiStructure.utilityHub.rect.bottom, 'desktop primary import workspace follows the utility hub without overlap');
 assert(Array.isArray(desktop.workspace.dividerVisible) && desktop.workspace.dividerVisible.every(Boolean), 'desktop shows both column resizers');
 assert(desktop.workspaceTests && desktop.workspaceTests.keyboardResizeChanged === true, 'desktop keyboard resizing changes the saved column weights');
 assert(desktop.workspaceTests.preview && desktop.workspaceTests.preview.mode === 'preview' && desktop.workspaceTests.preview.visible === true && desktop.workspaceTests.preview.width >= 700, 'preview focus mode expands the preview workspace');
@@ -52,7 +60,7 @@ assert(desktop.workspaceTests.waveform && desktop.workspaceTests.waveform.mode =
 
 const smallLaptop = report.smallLaptop;
 assert(smallLaptop.workspace.toolbarVisible === true && smallLaptop.workspace.dividerVisible.every(Boolean), 'small laptop keeps workspace controls usable');
-assert(smallLaptop.initialDensity.heroHeight <= 290, 'small laptop hero stays within the compact density target');
+assert(smallLaptop.initialDensity.heroHeight <= 330, 'small laptop redesigned hero stays within the compact density target');
 assert(smallLaptop.dock.height <= 90, 'small laptop dock stays within the compact height target');
 
 const tablet = report.tablet;
@@ -63,6 +71,8 @@ assert(tablet.dock.height <= 80 && tablet.dockScrollWidth <= tablet.dockClientWi
 
 const mobile = report.mobile;
 assert(mobile.workspaceTests && mobile.workspaceTests.mobileControlsHidden === true, 'mobile hides desktop-only workspace controls');
+assert(mobile.initialUiStructure.primaryImportVisible === true, 'mobile initial file stage keeps the single primary import card visible');
+assert(mobile.initialUiStructure.utilityHubVisible === false, 'mobile keeps the desktop project and copy utility hub out of the active flow');
 assert(mobile.workspace && mobile.workspace.toolbarVisible === false && mobile.workspace.dividerVisible.every(value => value === false), 'mobile keeps toolbar and resizers out of layout');
 
 console.log(`PASS v${version} four-viewport stability, responsive density, adaptive menu, and workspace control audit`);

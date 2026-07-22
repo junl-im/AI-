@@ -56,10 +56,7 @@ body[data-ui="hyperflow-tabs"] .waveform-card::before {
 .panel-head,
 .auto-cut-head,
 .caption-pro-head,
-.quality-head,
-.batch-export-head,
-.export-head,
-.project-head {
+.quality-head {
     align-items: flex-start !important;
     gap: 10px !important;
     margin-bottom: 14px !important;
@@ -69,8 +66,7 @@ body[data-ui="hyperflow-tabs"] .waveform-card::before {
 .panel-head strong,
 .auto-cut-head strong,
 .caption-pro-head strong,
-.quality-head strong,
-.batch-export-head strong {
+.quality-head strong {
     color: var(--ui-text) !important;
     font-size: 15px !important;
     font-weight: 830 !important;
@@ -117,8 +113,7 @@ label.btn-secondary,
     letter-spacing: -0.02em !important;
 }
 .btn-primary,
-.recommend-generate-btn,
-.hyperflow-recommend-btn {
+.recommend-generate-btn {
     border: 1px solid rgba(165, 243, 252, 0.24) !important;
     color: #07111e !important;
     background: linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%) !important;
@@ -147,7 +142,6 @@ button:disabled,
 .engine-pill,
 .auto-cut-summary,
 .caption-preset,
-.quality-preset,
 .tab-state-dot {
     box-shadow: none !important;
 }
@@ -165,6 +159,11 @@ button:disabled,
     border-color: rgba(103, 232, 249, 0.46) !important;
     background: rgba(13, 22, 38, 0.75) !important;
 }
+body[data-ui="hyperflow-tabs"] .upload-tile.is-import-focus {
+    border-color: rgba(103, 232, 249, 0.62);
+    background: rgba(13, 27, 45, 0.86);
+    box-shadow: 0 0 0 4px rgba(103, 232, 249, 0.08), 0 18px 42px rgba(0, 0, 0, 0.24);
+}
 .upload-icon {
     display: grid;
     width: 38px;
@@ -179,18 +178,13 @@ button:disabled,
 
 /* Candidate and timeline contents use spacing instead of more frames. */
 .recommendation-card,
-.candidate-card,
 .engine-status-card,
-.handoff-coach,
-.save-readiness-card,
-.render-quality-card,
-.export-finish-card {
+.handoff-coach {
     border-color: rgba(148, 163, 184, 0.12) !important;
     background: rgba(10, 16, 29, 0.58) !important;
     box-shadow: none !important;
 }
-.recommendation-card.is-selected,
-.candidate-card.is-selected {
+.recommendation-card.is-selected {
     border-color: rgba(103, 232, 249, 0.32) !important;
     background: linear-gradient(135deg, rgba(103, 232, 249, 0.075), rgba(167, 139, 250, 0.07)) !important;
 }
@@ -288,8 +282,8 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
         box-shadow: 0 24px 70px rgba(0, 0, 0, 0.23) !important;
     }
     .cinematic-brand-panel .hero-mainline {
-        grid-template-columns: minmax(0, 1.48fr) minmax(330px, 0.68fr) !important;
-        gap: clamp(28px, 4vw, 62px) !important;
+        grid-template-columns: minmax(0, 1.08fr) minmax(440px, 0.92fr) !important;
+        gap: clamp(24px, 3vw, 48px) !important;
         padding: 18px clamp(18px, 3vw, 42px) 10px !important;
     }
     body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title {
@@ -330,8 +324,8 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
         border-radius: 24px !important;
     }
     .cinematic-brand-panel .hero-mainline {
-        grid-template-columns: minmax(0, 1.52fr) minmax(300px, 0.62fr) !important;
-        gap: 24px !important;
+        grid-template-columns: minmax(0, 1.04fr) minmax(390px, 0.96fr) !important;
+        gap: 18px !important;
         padding: 12px 22px 8px !important;
     }
     body[data-ui="hyperflow-tabs"] .hero-copy h1.cinematic-title {
@@ -346,17 +340,22 @@ body[data-ui="hyperflow-tabs"] .bottom-dock-tab[aria-current="step"] .tab-state-
     .hero-eyebrow { margin-bottom: 10px !important; }
     .shorts-timeline { margin-top: 15px !important; padding-top: 11px; }
     .hero-command-deck {
-        grid-template-columns: minmax(138px, 0.68fr) minmax(132px, 0.54fr);
-        gap: 8px 12px;
-        min-height: 166px;
-        padding-left: 22px;
+        min-height: 196px;
+        padding: 10px 12px 12px;
+    }
+    .hero-launch-layout {
+        grid-template-columns: 142px minmax(0, 1fr);
+        gap: 10px;
     }
     .shorts-frame-stack {
-        width: 124px;
-        height: 164px;
-        transform: scale(0.86);
+        width: 150px;
+        height: 190px;
+        transform: scale(0.84);
         transform-origin: center;
     }
+    .command-deck-title { font-size: 18px; }
+    .command-deck-note { font-size: 8px; }
+    .hero-start-button { min-height: 42px; }
     .social-shutter-strip { display: none !important; }
     body[data-ui="hyperflow-tabs"] .hyperflow-stage {
         min-height: 54px;

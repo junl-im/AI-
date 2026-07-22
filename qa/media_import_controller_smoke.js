@@ -56,5 +56,5 @@ const controller = context.AIShortsMediaImportController.createMediaImportContro
     controller.dispose();
     assert(revoked.length === 20 && revoked[19] === 'blob:20', 'latest URL revoked on dispose');
     assert(diagnostics.filter(item => item.type === 'import').length === 20, 'all imports recorded');
-    console.log('PASS v1.5.14 20-cycle media import, stale timer, and single-owner Object URL cleanup');
+    console.log('PASS v1.5.16 20-cycle media import, stale timer, and single-owner Object URL cleanup');
 })().catch(error => { console.error(error); process.exit(1); });

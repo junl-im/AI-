@@ -40,7 +40,7 @@
             if (!list.classList.contains('empty-state')) list.classList.add('empty-state');
             const text = hasAnalysis()
                 ? '분석은 완료되었습니다. 추천 메뉴에서 후보를 생성하면 여기에 표시됩니다.'
-                : '파일을 열면 자동 분석됩니다. 분석 후 추천을 생성하세요.';
+                : '원본을 불러오면 자동 분석됩니다. 분석 후 추천을 생성하세요.';
             if (!list.querySelector('.recommendation-card') && list.textContent.trim() !== text) {
                 list.textContent = '';
                 const p = document.createElement('p');
@@ -51,8 +51,8 @@
     }
     function updateGuideText() {
         if (!state.file) {
-            setText('flowSelectionTitle', '파일을 열면 자동 분석합니다');
-            setText('flowSelectionMeta', '하단 메뉴바의 파일 열기에서 원본을 선택해주세요.');
+            setText('flowSelectionTitle', '원본을 불러오면 자동 분석합니다');
+            setText('flowSelectionMeta', '불러오기 메뉴에서 원본을 한 번 선택해주세요.');
             return;
         }
         if (state.isAnalyzing) {

@@ -14,12 +14,6 @@ body {
     height: 180px;
     inset: -72px -46px auto auto;
 }
-.designer-mini,
-.badge-device,
-.badge-free,
-.hero-meter {
-    display: none !important;
-}
 .hero-mainline {
     align-items: center;
 }
@@ -32,16 +26,6 @@ body {
     margin-top: 8px !important;
     font-size: 13px !important;
     line-height: 1.45 !important;
-}
-.hero-cta-row {
-    margin-top: 10px;
-}
-.hero-cta-row .btn-primary,
-.hero-cta-row .btn-secondary {
-    min-height: 40px;
-    border-radius: 13px;
-    padding: 0 14px;
-    font-size: 13px;
 }
 .workflow-rail {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -147,9 +131,6 @@ textarea {
     min-height: 42px;
     border-radius: 13px;
 }
-.legacy-mobile-action-bar {
-    display: none !important;
-}
 .bottom-dock {
     position: fixed;
     left: max(12px, calc((100vw - 1480px) / 2));
@@ -207,45 +188,6 @@ textarea {
     color: var(--muted);
     font-size: 12px;
 }
-.bottom-dock-actions {
-    display: grid;
-    grid-template-columns: repeat(7, minmax(74px, 1fr));
-    gap: 7px;
-    min-width: 0;
-}
-.bottom-dock-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 46px;
-    border: 1px solid rgba(148, 163, 184, 0.24);
-    border-radius: 16px;
-    padding: 0 10px;
-    background: rgba(15, 23, 42, 0.70);
-    color: #e2e8f0;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    text-decoration: none;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 160ms ease, filter 160ms ease, border-color 160ms ease, opacity 160ms ease;
-}
-.bottom-dock-btn:not(:disabled):hover {
-    transform: translateY(-1px);
-    border-color: rgba(34, 211, 238, 0.55);
-    filter: brightness(1.08);
-}
-.bottom-dock-btn:disabled {
-    opacity: 0.46;
-    cursor: not-allowed;
-}
-.bottom-dock-primary {
-    border: 0;
-    color: #fff;
-    background: linear-gradient(135deg, var(--accent-2), var(--accent), var(--accent-3));
-    box-shadow: 0 14px 34px rgba(124, 58, 237, 0.30);
-}
 body.has-media .brand-panel {
     padding-top: 12px;
     padding-bottom: 12px;
@@ -277,14 +219,6 @@ body.has-media .studio-grid {
     .bottom-dock {
         grid-template-columns: 1fr;
     }
-    .bottom-dock-actions {
-        overflow-x: auto;
-        grid-template-columns: repeat(7, minmax(86px, 1fr));
-        scrollbar-width: none;
-    }
-    .bottom-dock-actions::-webkit-scrollbar {
-        display: none;
-    }
 }
 @media (max-width: 720px) {
     .app-shell {
@@ -294,18 +228,11 @@ body.has-media .studio-grid {
         padding: 12px;
         border-radius: 18px;
     }
-    .brand-kicker .badge-version {
-        min-height: 28px;
-        font-size: 11px;
-    }
     .hero-mainline {
         display: block;
     }
     .hero-copy h1 {
         font-size: clamp(26px, 8vw, 34px);
-    }
-    .hero-cta-row {
-        display: none;
     }
     .workflow-rail {
         display: flex;
@@ -351,25 +278,10 @@ body.has-media .studio-grid {
     .bottom-dock-copy small {
         display: none;
     }
-    .bottom-dock-actions {
-        grid-template-columns: repeat(7, minmax(76px, 1fr));
-        gap: 6px;
-    }
-    .bottom-dock-btn {
-        min-height: 44px;
-        border-radius: 15px;
-        font-size: 11px;
-    }
 }
 @media (max-width: 420px) {
     .workflow-step {
         min-width: 106px;
-    }
-    .bottom-dock-actions {
-        grid-template-columns: repeat(7, minmax(70px, 1fr));
-    }
-    .bottom-dock-btn {
-        padding: 0 7px;
     }
 }
 
@@ -387,7 +299,6 @@ body.has-media .studio-grid {
 .project-card,
 .recommendation-card,
 .caption-pro-panel,
-.quality-tools-panel,
 .auto-cut-panel {
     contain: layout paint;
 }
@@ -406,15 +317,6 @@ body.has-media .studio-grid {
     content-visibility: auto;
     contain-intrinsic-size: 520px;
 }
-.bottom-dock.bottom-dock-lean {
-    display: block;
-    left: max(14px, calc((100vw - 1180px) / 2));
-    right: max(14px, calc((100vw - 1180px) / 2));
-    bottom: 14px;
-    padding: 10px;
-    border-radius: 28px;
-    contain: layout paint;
-}
 .bottom-dock-status-sr {
     position: absolute !important;
     width: 1px !important;
@@ -426,51 +328,11 @@ body.has-media .studio-grid {
     white-space: nowrap !important;
     border: 0 !important;
 }
-.bottom-dock-actions.bottom-dock-actions-lean {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    min-width: 0;
-    overflow: visible;
-}
-.bottom-dock-actions-lean .bottom-dock-btn {
-    min-height: 66px;
-    border-radius: 22px;
-    padding: 0 18px;
-    font-size: clamp(15px, 2vw, 19px);
-    font-weight: 950;
-    letter-spacing: -0.035em;
-    gap: 10px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-}
-.bottom-dock-actions-lean .bottom-dock-btn .dock-emoji {
-    font-size: clamp(22px, 3vw, 28px);
-    line-height: 1;
-}
-.bottom-dock-file {
-    background:
-        linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.72));
-    border-color: rgba(148, 163, 184, 0.34);
-}
-.bottom-dock-actions-lean .bottom-dock-primary {
-    box-shadow: 0 16px 42px rgba(124, 58, 237, 0.32);
-}
-.bottom-dock-actions-lean .bottom-dock-btn:not(:disabled):active {
-    transform: translateY(1px) scale(0.995);
-}
-.bottom-dock-actions-lean .bottom-dock-btn:focus-visible {
-    outline: 3px solid rgba(34, 211, 238, 0.42);
-    outline-offset: 3px;
-}
 .bottom-dock-dot.is-analyzing {
     background: var(--accent-2);
     box-shadow: 0 0 0 6px rgba(34, 211, 238, 0.15);
 }
-body.is-analyzing .bottom-dock-actions-lean .bottom-dock-primary {
-    filter: brightness(1.1) saturate(1.15);
-}
 @media (prefers-reduced-motion: reduce) {
-    .bottom-dock-btn,
     .recommendation-card,
     .workflow-step {
         transition: none !important;
@@ -482,35 +344,5 @@ body.is-analyzing .bottom-dock-actions-lean .bottom-dock-primary {
     }
     .app-shell {
         padding-bottom: 104px;
-    }
-    .bottom-dock.bottom-dock-lean {
-        left: 8px;
-        right: 8px;
-        bottom: 8px;
-        padding: 8px;
-        border-radius: 24px;
-    }
-    .bottom-dock-actions.bottom-dock-actions-lean {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        overflow: visible;
-    }
-    .bottom-dock-actions-lean .bottom-dock-btn {
-        min-height: 60px;
-        border-radius: 20px;
-        padding: 0 10px;
-        font-size: 15px;
-    }
-    .bottom-dock-actions-lean .bottom-dock-btn .dock-emoji {
-        font-size: 23px;
-    }
-}
-@media (max-width: 360px) {
-    .bottom-dock-actions-lean .bottom-dock-btn {
-        gap: 6px;
-        font-size: 14px;
-    }
-    .bottom-dock-actions-lean .bottom-dock-btn .dock-emoji {
-        font-size: 20px;
     }
 }

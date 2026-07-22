@@ -6,7 +6,6 @@
 }
 
 .studio-hero .brand-panel { padding-bottom: clamp(14px, 2vw, 20px); }
-.brand-version-left .badge-version { min-width: 78px; justify-content: center; }
 .hero-mainline { margin-top: 8px; }
 .hero-copy h1 { letter-spacing: -0.06em; }
 

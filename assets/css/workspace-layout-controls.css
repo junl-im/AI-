@@ -21,14 +21,54 @@
             minmax(300px, var(--workspace-right-track)) !important;
         grid-template-areas:
             "toolbar toolbar toolbar toolbar toolbar"
+            "utility utility utility utility utility"
             "load divider-left preview divider-right candidates"
             "recommend divider-left preview divider-right waveform"
-            "cut divider-left edit divider-right export"
-            "project divider-left edit divider-right copy" !important;
-        grid-template-rows: auto clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto auto !important;
+            "cut divider-left edit divider-right export" !important;
+        grid-template-rows: auto auto clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto !important;
         column-gap: 7px !important;
         row-gap: var(--prime-gap, 12px) !important;
     }
+
+
+
+    .project-copy-hub {
+        grid-area: utility;
+        display: grid;
+        grid-template-columns: minmax(300px, 0.72fr) minmax(520px, 1.28fr);
+        grid-template-areas: "project copy";
+        align-items: stretch;
+        gap: var(--prime-gap, 12px);
+        min-width: 0;
+    }
+
+    .project-copy-hub .project-card,
+    .project-copy-hub .copy-card {
+        min-width: 0;
+        height: 100%;
+        align-self: stretch;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] .project-copy-hub .project-card {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+    }
+
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"] .project-copy-hub .copy-card {
+        display: grid;
+        grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+        grid-template-areas:
+            "copy-head copy-head"
+            "copy-title copy-tags"
+            "copy-actions copy-actions";
+        gap: 10px 12px;
+    }
+
+    .project-copy-hub .copy-card .panel-head { grid-area: copy-head; }
+    .project-copy-hub .copy-title-field { grid-area: copy-title; }
+    .project-copy-hub .copy-hashtag-field { grid-area: copy-tags; }
+    .project-copy-hub .copy-card .transport-row { grid-area: copy-actions; }
+    .project-copy-hub .copy-card textarea { resize: vertical; }
 
     .workspace-layout-toolbar {
         grid-area: toolbar;
@@ -169,7 +209,9 @@
     }
 
     body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .workspace-column-divider,
-    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .workspace-column-divider {
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .workspace-column-divider,
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="preview"] .project-copy-hub,
+    body[data-desktop-layout="prime"][data-ui="hyperflow-tabs"][data-workspace-view="waveform"] .project-copy-hub {
         display: none !important;
     }
 
@@ -244,6 +286,8 @@
 }
 
 @media (max-width: 1179px) {
+    .project-copy-hub { display: none; }
+
     .workspace-layout-toolbar,
     .workspace-column-divider {
         display: none !important;

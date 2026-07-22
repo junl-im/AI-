@@ -4,7 +4,7 @@
 (function bootFlowDirectorFinal(global) {
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
-        file: ['upload', '파일 열기'], recommend: ['spark', '추천 생성'], candidates: ['candidates', '후보 선택'],
+        file: ['upload', '불러오기'], recommend: ['spark', '추천 생성'], candidates: ['candidates', '후보 선택'],
         preview: ['preview', '미리보기'], waveform: ['waveform', '파형'], cut: ['cut', '컷 편집'],
         edit: ['edit', '편집'], export: ['export', '저장']
     };
@@ -258,7 +258,7 @@
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.5.14') document.body.dataset.build = '1.5.14';
+            if (document.body.dataset.build !== '1.5.16') document.body.dataset.build = '1.5.16';
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
             document.body.dataset.iconLanguage = 'studio-vectors';
         }

@@ -1,7 +1,23 @@
-# AI 쇼츠 제작 스튜디오 v1.5.14
+# AI 쇼츠 제작 스튜디오 v1.5.16
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
 
+## v1.5.16 적용 내용
+
+- PC 작업실 상단에 `프로젝트`와 `쇼츠 카피 초안`을 하나의 utility hub로 정렬해 다른 작업 카드와 같은 흐름으로 배치했습니다.
+- 세로 쇼츠 프레임과 단일 시작 CTA를 중심으로 상단 hero를 재디자인했습니다.
+- 원본 미디어 선택은 `원본 불러오기` 카드 한 곳으로 통합했습니다. 상단 `작업실 시작`과 하단 `불러오기` 메뉴는 picker를 직접 열지 않고 해당 카드로 이동합니다.
+- 프로젝트 JSON과 자막 SRT/VTT 불러오기는 별도 목적을 명확히 표시해 원본 미디어 선택과 구분했습니다.
+- legacy mobile action bar CSS selector 9개와 rule 7개, declaration 35개를 제거했습니다.
+- CSS conflicts, same-value duplicates, shadowed declarations는 0을 유지하고 `!important`는 801개로 낮췄습니다.
+- 자동 QA 175/175와 4개 viewport, process memory, GPU/media, service worker 감사를 통과했습니다.
+
+## v1.5.15 적용 내용
+
+- source에서 도달할 수 없는 레거시 CSS selector 148개, rule 92개, declaration 290개를 제거했습니다.
+- 불필요한 `!important` 21개, 사용되지 않는 keyframes 2개, 빈 at-rule 2개를 정리했습니다.
+- CSS conflicts, same-value duplicates, shadowed declarations 0과 source-orphan selector 0을 달성했습니다.
+- 자동 QA 174/174와 4개 viewport, process memory, GPU/media, service worker 감사를 통과했습니다.
 
 ## v1.5.14 적용 내용
 
@@ -119,12 +135,12 @@
 
 ## 검수 결과
 
-- 자동 QA: **172/172**
+- 자동 QA: **175/175**
 - 데스크톱·소형 노트북·태블릿·모바일 Chromium 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- CSS: `!important` 833, 실제 충돌 0, 고위험 충돌 0, shadowed declaration 0
-- 실제 15분→30분→15분 1080p MP4 안정성 계약은 v1.5.9 결과 상속
-- 각 장시간 반복 뒤 active operation·render queue 0, 종료 후 Object URL 0
+- CSS: `!important` 801, 실제 충돌 0, same-value duplicate 0, shadowed declaration 0
+- source-orphan selector 0, unused active keyframes 0, empty at-rule 0
+- 실제 15분→30분→15분 1080p MP4 안정성 계약은 미디어 실행 경로 미변경으로 v1.5.9 결과 상속
 - Chromium process memory audit 16회, runtime error 0
 - GPU/media capability 비교: 두 모드 H.264/AAC 디코딩 통과, GPU·media utility process 관측
 - 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
@@ -170,14 +186,15 @@ node qa/run_service_worker_lifecycle.js
 
 ```bash
 npm run package:full
-PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.10_Control_Ownership_Full.zip PATCH_FROM_VERSION=1.5.10 npm run package:patch
+PATCH_BASE_ARCHIVE=/path/to/AI_Shorts_Studio_v1.5.14_CSS_Dedup_Full.zip PATCH_FROM_VERSION=1.5.14 npm run package:patch
 ```
 
-전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.10 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
+전체 ZIP은 모든 실행·문서·QA 파일을 포함합니다. 패치 ZIP은 v1.5.14 설치 폴더 위에 같은 경로로 덮어쓸 변경·신규 파일만 포함합니다.
 
 ## 알려진 제한
 
 - headless 컨테이너에서는 물리 GPU/WebGL context가 노출되지 않아 GPU process와 media utility RSS·디코딩 성공만 보조 확인했습니다. 실제 하드웨어 가속 메모리와 decoder surface는 데스크톱 실기기 계측이 필요합니다.
+- orphan selector 판정은 정적 HTML·JavaScript 참조와 명시적 동적 클래스 prefix allowlist를 사용합니다. 새로운 동적 클래스 생성 규칙을 추가할 때 allowlist와 회귀 검사도 함께 갱신해야 합니다.
 
 실제 Chromium 감사 기기는 4GB 메모리로 보고돼 실미디어 영상은 안전 순차 전략을 사용했습니다. 병렬 분기는 모의 시간·부분 실패 검사로 통과했으며 8코어·8GB 이상 실기기 계측이 추가로 필요합니다. 모바일 Safari·Samsung Internet과 15분·30분 고해상도 MP4 장시간 출력도 별도 검증 대상입니다.
 

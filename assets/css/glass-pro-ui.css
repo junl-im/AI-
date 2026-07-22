@@ -42,10 +42,7 @@ body::before {
     -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.28);
 }
 
-.render-queue-card,
-.flow-summary-bar,
-.selected-summary-bar,
-.modal-card {
+.render-queue-card {
     border-color: var(--glass-line) !important;
     background:
         linear-gradient(145deg, rgba(255, 255, 255, 0.09), transparent 30%),
@@ -102,10 +99,7 @@ body::before {
 }
 
 .brand-signature-pill,
-.command-chip,
 .tab-state-dot,
-.status-pill,
-.rec-engine-badge,
 .engine-badge {
     background: rgba(255, 255, 255, 0.10) !important;
     border-color: rgba(255, 255, 255, 0.18) !important;
@@ -143,11 +137,7 @@ body::before {
     overflow: hidden;
 }
 
-.caption-style-card,
-.thumbnail-template-card,
-.render-queue-row,
-.cut-chip,
-.marker-chip {
+.render-queue-row {
     background:
         linear-gradient(145deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.025)),
         rgba(3, 8, 18, 0.42) !important;
@@ -156,8 +146,6 @@ body::before {
 }
 
 .recommendation-card:hover,
-.thumbnail-template-card:hover,
-.caption-style-card:hover,
 .bottom-dock-tab:hover {
     border-color: rgba(34, 211, 238, 0.38) !important;
     background:
@@ -178,26 +166,6 @@ body::before {
         0 0 0 1px rgba(34, 211, 238, 0.12),
         0 20px 60px rgba(34, 211, 238, 0.14),
         inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
-}
-
-.command-button,
-.small-action,
-.rec-select-btn,
-.export-action-btn {
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 12px 28px rgba(0, 0, 0, 0.18) !important;
-}
-
-.command-button.btn-secondary,
-.small-action,
-.rec-select-btn {
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: rgba(248, 250, 252, 0.94) !important;
-}
-
-.command-button.btn-primary {
-    background:
-        linear-gradient(135deg, rgba(34, 211, 238, 0.95), rgba(139, 92, 246, 0.92), rgba(249, 115, 22, 0.86)) !important;
 }
 
 .bottom-dock-tab {

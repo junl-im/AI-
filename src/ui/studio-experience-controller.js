@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.14 - workspace focus and actionable next-step controller
+// AI Shorts Studio v1.5.16 - workspace focus and actionable next-step controller
 'use strict';
 
 (function exposeStudioExperience(global) {
@@ -34,7 +34,7 @@
     }
 
     function resolveNextAction(current) {
-        if (!current.file) return { key: 'open-file', label: '파일 열기', progress: 0, stage: '1/4 원본 선택' };
+        if (!current.file) return { key: 'go-import', label: '불러오기 위치로', progress: 0, stage: '1/4 원본 선택' };
         if (current.isAnalyzing) return { key: 'cancel-analysis', label: '분석 취소', progress: 34, stage: '2/4 자동 분석 중' };
         if (!hasAnalysis(current)) return { key: 'retry-analysis', label: '분석 다시 시도', progress: 25, stage: '2/4 분석 필요' };
         if (!hasRecommendations(current)) return { key: 'generate', label: '추천 생성', progress: 50, stage: '2/4 분석 완료' };
@@ -47,11 +47,24 @@
         return { key: 'go-preview', label: '미리보기 확인', progress: 78, stage: '3/4 후보 선택 완료' };
     }
 
+    function focusImportPanel(source) {
+        navigate('file');
+        const schedule = global.requestAnimationFrame || (callback => global.setTimeout(callback, 0));
+        schedule(() => {
+            const target = byId('fileDrop') || doc.querySelector('[data-flow-panel~="file"]');
+            if (!target) return;
+            if (target.scrollIntoView) target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            try { target.focus({ preventScroll: true }); } catch (_) { /* ignore */ }
+            target.classList.add('is-import-focus');
+            global.setTimeout(() => target.classList.remove('is-import-focus'), 900);
+            if (doc.body) doc.body.dataset.importEntrySource = source || 'next-action';
+        });
+    }
+
     function runAction(key) {
         const current = state();
-        if (key === 'open-file') {
-            const input = byId('fileInput');
-            if (input) input.click();
+        if (key === 'go-import') {
+            focusImportPanel('next-action');
             return;
         }
         if (key === 'cancel-analysis') {
@@ -78,7 +91,7 @@
             else navigate('export');
             return;
         }
-        if (!current.file) navigate('file');
+        if (!current.file) focusImportPanel('fallback');
     }
 
     function applyFocus(mode, reason) {
@@ -149,7 +162,10 @@
         });
 
         const next = byId('hyperflowNextBtn');
-        if (next) next.addEventListener('click', () => runAction(next.dataset.action || 'open-file'));
+        if (next) next.addEventListener('click', () => runAction(next.dataset.action || 'go-import'));
+
+        const heroStart = byId('heroWorkspaceStartBtn');
+        if (heroStart) heroStart.addEventListener('click', () => focusImportPanel('hero'));
 
         ['ai-shorts-flow-sync', 'ai-shorts-experience-sync', 'ai-shorts-session-restored'].forEach(eventName => {
             doc.addEventListener(eventName, scheduleSync);
@@ -163,7 +179,7 @@
         sync();
     }
 
-    global.AIShortsStudioExperience = Object.freeze({ sync: scheduleSync, resolveNextAction, applyFocus });
+    global.AIShortsStudioExperience = Object.freeze({ sync: scheduleSync, resolveNextAction, applyFocus, focusImportPanel });
     if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', install, { once: true });
     else install();
 })(window);

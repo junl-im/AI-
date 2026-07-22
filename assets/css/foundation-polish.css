@@ -34,7 +34,6 @@ body[data-ui="hyperflow-tabs"] .hero-compact-note {
     line-height: 1.55 !important;
 }
 
-.brand-compat-pill,
 .brand-signature-pill,
 .badge-version {
     min-height: 32px;
@@ -52,14 +51,6 @@ body[data-ui="hyperflow-tabs"] .hero-compact-note {
 
 .start-command-panel::before {
     content: none !important;
-}
-
-.start-command-panel .command-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px !important;
-    border-radius: 13px !important;
 }
 
 .start-command-panel .workflow-rail-separated {
@@ -199,7 +190,6 @@ body.performance-lite .waveform-card,
 body.performance-lite .copy-card,
 body.performance-lite .start-command-panel,
 body.performance-lite .bottom-dock,
-body.performance-lite .modal-card,
 body.performance-lite .brand-signature-pill,
 body.performance-lite .badge-version,
 body.performance-lite .bottom-dock-tab {
@@ -208,9 +198,6 @@ body.performance-lite .bottom-dock-tab {
 }
 
 body.performance-lite .brand-panel.cinematic-brand-panel::after,
-body.performance-lite .film-strip,
-body.performance-lite .camera-frame-sweep,
-body.performance-lite .cinema-gradient-orb,
 body.performance-lite .shutter-tile::before,
 body.is-page-hidden * {
     animation: none !important;
@@ -230,11 +217,6 @@ body.performance-lite .bottom-dock {
 @media (max-width: 720px) {
     .app-shell {
         width: min(calc(100% - 14px), var(--workspace-max));
-    }
-
-    .brand-compat-pill {
-        font-size: 10px;
-        padding-inline: 8px;
     }
 
     .brand-signature-pill {

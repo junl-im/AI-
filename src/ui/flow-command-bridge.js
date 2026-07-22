@@ -4,7 +4,7 @@
 (function bootFlowCommandBridge(global) {
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
-        file: ['upload', '파일 열기'],
+        file: ['upload', '불러오기'],
         recommend: ['spark', '추천'],
         candidates: ['candidates', '후보'],
         preview: ['preview', '미리보기'],

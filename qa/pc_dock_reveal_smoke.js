@@ -20,7 +20,7 @@ assert(css.includes('grid-template-columns: none !important'), 'desktop dock rem
 assert(foundationCss.includes('font-size: 12px !important'), 'foundation polish owns the final desktop dock label size');
 assert(css.includes('grid-template-columns: repeat(8, minmax(0, 1fr))'), 'tablet dock uses a compact single-row 8-tab layout');
 assert(css.includes('animation: none !important'), 'candidate guide shimmer disabled');
-assert(html.includes('<b>파일 열기</b>'), 'dock file tab label is 파일 열기');
+assert(html.includes('<b>불러오기</b>'), 'dock file tab label is 불러오기');
 assert(tabs.includes('force: true'), 'dock tab navigation forces workspace reveal');
 assert(tabs.includes('if (alreadyComfortable && !opts.force) return;'), 'reveal logic can bypass already-visible guard');
 const targetTitle = '후보 카드를 선택하세요';

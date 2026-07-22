@@ -36,8 +36,7 @@
     font-weight: 800;
     white-space: nowrap;
 }
-.recommendation-card .engine-badges,
-.rec-card .engine-badges {
+.recommendation-card .engine-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;

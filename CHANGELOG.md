@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## v1.5.16 - Unified Import Flow & Desktop Utility Hub
+
+- PC 작업실에서 `프로젝트`와 `쇼츠 카피 초안`을 하나의 정렬된 utility hub로 묶어 같은 행·같은 높이로 배치했습니다.
+- 상단 쇼츠 hero를 세로 프레임, 제작 메시지, 단일 `작업실 시작` CTA, 로컬 처리 메타 정보가 한 카드에 보이도록 재디자인했습니다.
+- 실제 미디어 picker는 `원본 불러오기` 카드 하나만 소유하고, hero와 하단 `불러오기` 메뉴는 해당 카드로 이동·강조하도록 통합했습니다.
+- 프로젝트 JSON과 자막 SRT/VTT 입력은 원본 미디어 선택과 혼동되지 않도록 목적을 명확히 표기했습니다.
+- 더 이상 사용하는 화면이 없는 legacy mobile action bar selector 9개, CSS rule 7개, declaration 35개를 제거했습니다.
+- CSS conflicts·same-value duplicates·shadowed declarations 0을 유지하고 활성 `!important`를 803→801로 낮췄습니다.
+- 4개 viewport에서 단일 import owner, utility hub 정렬, 오류·가로 overflow 0을 검증하는 회귀 검사를 추가했습니다.
+- 자동 QA 175/175, process memory, GPU/media capability, service worker lifecycle 감사를 통과했습니다.
+
+## v1.5.15 - Orphan CSS & Unused Animation Cleanup
+
+- HTML·JavaScript source reachability와 동적 클래스 prefix allowlist를 기준으로 레거시 selector 148개를 제거했습니다.
+- CSS rule 92개, declaration 290개, `!important` 21개를 정리했습니다.
+- 사용되지 않는 `navigationFocusPulse`, `meter` keyframes와 빈 at-rule 2개를 제거했습니다.
+- conflicts 0, same-value duplicates 0, shadowed 0을 유지하면서 활성 `!important`를 824→803으로 낮췄습니다.
+- source-orphan selector·unused keyframe·empty at-rule 재유입 방지 smoke test와 `tools/prune-orphan-css.js`를 추가했습니다.
+- 자동 QA 174/174, 4개 viewport, process memory, GPU/media capability, service worker lifecycle 감사를 통과했습니다.
+
 ## v1.5.14 - Same-Value CSS Deduplication
 
 - cross-file same-value selector-property 중복 57개 그룹을 최종 owner 한 곳으로 통합했습니다.

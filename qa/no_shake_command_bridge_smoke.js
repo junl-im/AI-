@@ -16,12 +16,12 @@ function assert(condition, message) {
 }
 assert(!html.includes('brand-compat-pill') && !html.includes('LOCAL · PRIVATE · 9:16'), 'topline omits the redundant center readiness slogan');
 assert(html.includes('src/ui/flow-command-bridge.js'), 'command bridge is loaded');
-assert(metaCss.includes('.brand-compat-pill') && metaCss.includes('display: none !important'), 'removed status remains defensively hidden');
+assert(!metaCss.includes('.brand-compat-pill'), 'removed status CSS is fully retired');
 assert(css.includes('data-flow-command-bridge="ready"'), 'command bridge motion guard styles exist');
 assert(js.includes('stopImmediatePropagation'), 'tab click propagation is stopped before legacy handlers');
 assert(js.includes('AIShortsFlowCommandBridge'), 'command bridge exports API');
 assert(!js.includes('brand-compat-pill') && !js.includes('LOCAL · PRIVATE · 9:16'), 'command bridge cannot restore removed status markup');
 assert(js.includes('AIShortsHyperFlowTabs') && js.includes('AIShortsMotionStability'), 'legacy navigation APIs are bridged');
-assert(finalJs.includes("document.body.dataset.build = '1.5.14'"), 'final director build is v1.5.14');
+assert(finalJs.includes("document.body.dataset.build = '1.5.16'"), 'final director build is v1.5.16');
 console.log('PASS no_shake_command_bridge_smoke');
 

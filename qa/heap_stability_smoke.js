@@ -4,7 +4,7 @@ const fs = require('fs');
 const releaseVersion = require('../package.json').version;
 const artifactVersion = '1.5.3';
 const path = `qa/runtime-heap-stability-v${artifactVersion}.json`;
-if (releaseVersion !== '1.5.14') throw new Error('heap stability inheritance contract must be reviewed for this release');
+if (releaseVersion !== '1.5.16') throw new Error('heap stability inheritance contract must be reviewed for this release');
 if (!fs.existsSync(path)) throw new Error('real-media heap stability audit artifact is missing');
 const report = JSON.parse(fs.readFileSync(path, 'utf8'));
 if (report.version !== artifactVersion) throw new Error('heap stability audit artifact version mismatch');
@@ -35,4 +35,4 @@ if (!report.disposed || !report.disposed.urls || report.disposed.urls.active !==
 if (report.samples.some(sample => !sample.operations || sample.operations.active.length !== 0)) {
     throw new Error('an operation remains active after a repeat cycle');
 }
-console.log('PASS v1.5.14 inherits the unchanged v1.5.3 20-cycle heap and Object URL stability audit');
+console.log('PASS v1.5.16 inherits the unchanged v1.5.3 20-cycle heap and Object URL stability audit');

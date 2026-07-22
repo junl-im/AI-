@@ -83,8 +83,8 @@
         } else {
             if (candidatesBtn) candidatesBtn.disabled = true;
             if (icon) { icon.textContent = ''; icon.classList.add('studio-icon'); icon.dataset.icon = 'upload'; }
-            if (title) title.textContent = '파일을 열면 자동 분석합니다';
-            if (meta) meta.textContent = '파일 열기 → 자동 분석 → 추천 생성 → 후보 선택 → 미리보기';
+            if (title) title.textContent = '원본을 불러오면 자동 분석합니다';
+            if (meta) meta.textContent = '원본 불러오기 → 자동 분석 → 추천 생성 → 후보 선택 → 미리보기';
             if (previewBtn) previewBtn.disabled = true;
             if (exportBtn) exportBtn.disabled = true;
         }

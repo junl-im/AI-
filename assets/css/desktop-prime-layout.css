@@ -9,20 +9,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline {
     width: 100%;
 }
 
-body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-kicker {
-    grid-column: 1;
-    grid-row: 1;
-    justify-self: start;
-    margin: 0 !important;
-}
-
-body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-compat-pill {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: center;
-    margin: 0 !important;
-}
-
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
     grid-row: 1;
     margin-left: 0 !important;
@@ -272,17 +258,6 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         padding-top: var(--responsive-shell-top-mobile) !important;
     }
 
-
-    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-compat-pill {
-        display: none !important;
-    }
-
-    body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-kicker {
-        grid-column: 1;
-        grid-row: 1;
-        justify-self: start;
-    }
-
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions {
         grid-row: 1;
         margin-left: 0 !important;
@@ -341,10 +316,8 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .hero-compact-note {
         align-self: start;
     }
 
-    /* On mobile the file tab already opens the picker, so no duplicate import screen is rendered. */
-    body:not(.has-media)[data-active-flow-tab="file"] .hyperflow-stage,
-    body:not(.has-media)[data-active-flow-tab="file"] .flow-selection-summary,
-    body:not(.has-media)[data-active-flow-tab="file"] .studio-grid {
+    /* Mobile and desktop share one visible import panel; the dock only navigates to it. */
+    body:not(.has-media)[data-active-flow-tab="file"] .flow-selection-summary {
         display: none !important;
     }
 
@@ -384,11 +357,6 @@ body[data-icon-language="studio-glyphs"] .bottom-dock-tab[aria-current="step"] >
     color: #f8fafc;
     box-shadow: 0 0 18px rgba(103, 232, 249, 0.12);
     transform: translateY(-1px);
-}
-
-@keyframes navigationFocusPulse {
-    0% { box-shadow: 0 0 0 0 rgba(103, 232, 249, 0.30), 0 22px 56px rgba(3, 7, 18, 0.26); }
-    100% { box-shadow: 0 0 0 10px rgba(103, 232, 249, 0), 0 22px 56px rgba(3, 7, 18, 0.26); }
 }
 
 @media (min-width: 1180px) {

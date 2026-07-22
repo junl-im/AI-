@@ -59,8 +59,6 @@ a { color: inherit; }
     font-weight: 700;
     letter-spacing: -0.01em;
 }
-.badge-device { color: #cffafe; background: rgba(8, 145, 178, 0.18); }
-.badge-free { color: #ffedd5; background: rgba(249, 115, 22, 0.14); }
 .btn-primary, .btn-secondary {
     min-height: 48px;
     padding: 0 18px;

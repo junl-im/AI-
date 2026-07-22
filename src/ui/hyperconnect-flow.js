@@ -14,7 +14,7 @@
         const stageMeta = byId('hyperflowStageMeta');
         if (!stageTitle || !stageMeta) return;
         if (!state.file) {
-            stageTitle.textContent = '파일을 열면 자동 분석합니다';
+            stageTitle.textContent = '원본을 불러오면 자동 분석합니다';
             stageMeta.textContent = '분석 버튼은 없습니다. 파일 선택 후 추천 탭으로 연결됩니다.';
         } else if (state.isAnalyzing) {
             stageTitle.textContent = '자동 분석 중입니다';

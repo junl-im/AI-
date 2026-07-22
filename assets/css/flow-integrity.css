@@ -5,8 +5,7 @@ body[data-ui="hyperflow-tabs"] .app-shell { padding-bottom: calc(var(--hyperflow
 /* 상단은 소개만, 중복 액션은 숨긴다. */
 body[data-ui="hyperflow-tabs"] .action-dock,
 body[data-ui="hyperflow-tabs"] .flow-selection-actions,
-body[data-ui="hyperflow-tabs"] #flowRecommendBtn,
-body[data-ui="hyperflow-tabs"] .mobile-action-bar.legacy-mobile-action-bar {
+body[data-ui="hyperflow-tabs"] #flowRecommendBtn {
     display: none !important;
 }
 body[data-ui="hyperflow-tabs"] .brand-topline {
@@ -16,7 +15,6 @@ body[data-ui="hyperflow-tabs"] .brand-topline {
     gap: 12px !important;
     min-height: 34px;
 }
-body[data-ui="hyperflow-tabs"] .brand-version-left { flex: 0 0 auto; }
 body[data-ui="hyperflow-tabs"] .brand-right-actions {
     flex: 0 1 auto;
     margin-left: auto;
@@ -85,8 +83,6 @@ body[data-ui="hyperflow-tabs"] .hyperflow-export-grid {
 @media (max-width: 720px) {
     body[data-ui="hyperflow-tabs"] #studioGrid { width: min(100% - 18px, 1180px); }
     body[data-ui="hyperflow-tabs"] .brand-signature-pill { max-width: 58vw; }
-    body[data-ui="hyperflow-tabs"] .hero-cta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    body[data-ui="hyperflow-tabs"] .hero-file-btn { min-height: 42px; padding-inline: 10px; }
     body[data-ui="hyperflow-tabs"] .flow-selection-copy strong,
     body[data-ui="hyperflow-tabs"] .flow-selection-copy small { white-space: normal; }
 }

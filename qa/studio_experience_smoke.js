@@ -17,7 +17,9 @@ const checks = [
     ['experience stylesheet loads last', html.indexOf('studio-experience.css') > html.indexOf('mobile-menu-guide.css')],
     ['experience controller is staged', fs.readFileSync(path.join(root, 'src/boot/staged-ui-loader.js'), 'utf8').includes('src/ui/studio-experience-controller.js')],
     ['workspace mode collapses introduction', css.includes('body[data-studio-focus="workspace"] .flow-overview-panel')],
+    ['next action resolves import navigation', controller.includes("key: 'go-import'") && controller.includes('focusImportPanel')],
     ['next action resolves retry state', controller.includes("key: 'retry-analysis'")],
+    ['hero start navigates without opening the picker directly', controller.includes("focusImportPanel('hero')") && !controller.includes('fileInput.click()')],
     ['next action resolves cancellation state', controller.includes("key: 'cancel-analysis'")],
     ['app exposes external analysis request', app.includes("'ai-shorts-analysis-request'")],
     ['app cancels through operation owner', app.includes("operationCoordinator.cancel && operationCoordinator.cancel('analysis'")],
@@ -28,4 +30,4 @@ for (const [name, ok] of checks) {
     if (!ok) throw new Error(name);
     console.log('PASS ' + name);
 }
-console.log('PASS v1.5.14 workspace-first UI/UX and cancellable analysis guardrails');
+console.log('PASS v1.5.16 workspace-first UI/UX and cancellable analysis guardrails');

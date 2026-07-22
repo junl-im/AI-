@@ -6,7 +6,6 @@
 body {
     --desktop-dock-height: 104px;
 }
-.cinematic-brand-panel .hero-cta-row,
 .cinematic-brand-panel .workflow-rail {
     display: none !important;
 }

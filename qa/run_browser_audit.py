@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chromium responsive/runtime audit for AI Shorts Studio v1.5.14."""
+"""Chromium responsive/runtime audit for AI Shorts Studio v1.5.16."""
 import asyncio
 import json
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.5.14.json'
+OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.5.16.json'
 
 INSTRUMENT = r'''<script>
 window.__aiAudit={errors:[],rejections:[],consoleErrors:[],raf:0,mutations:0};
@@ -117,6 +117,13 @@ async def audit_mode(browser, mode, viewport):
         viewportWorkArea: Math.max(0, innerHeight - (dock ? dock.height : 0))
       };
     }""")
+    initial_ui_structure = await page.evaluate("""() => {
+      const visible = el => { if (!el) return false; const r=el.getBoundingClientRect(); const cs=getComputedStyle(el); return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0; };
+      return {
+        primaryImportVisible:visible(document.querySelector('#fileDrop')),
+        utilityHubVisible:visible(document.querySelector('.project-copy-hub'))
+      };
+    }""")
     initial_stage = await collect_stage(page)
     await page.evaluate("() => AIShortsFlowDirectorFinal.setActive('recommend',{force:true,source:'runtime-audit'})")
     await page.wait_for_timeout(80)
@@ -166,6 +173,27 @@ async def audit_mode(browser, mode, viewport):
         viewportWorkArea: Math.max(0, innerHeight - (document.querySelector('#bottomDock')?.getBoundingClientRect().height || 0))
       };
     }""")
+    ui_structure = await page.evaluate("""() => {
+      const visible = el => { if (!el) return false; const r=el.getBoundingClientRect(); const cs=getComputedStyle(el); return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0; };
+      const box = el => { if (!el) return null; const r=el.getBoundingClientRect(); return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height}; };
+      const hub=document.querySelector('.project-copy-hub');
+      const project=document.querySelector('.project-copy-hub .project-card');
+      const copy=document.querySelector('.project-copy-hub .copy-card');
+      const importer=document.querySelector('#fileDrop');
+      const hero=document.querySelector('#heroWorkspaceStartBtn');
+      const dock=document.querySelector('#bottomFileBtn');
+      return {
+        mediaInputCount:document.querySelectorAll('#fileInput').length,
+        primaryImportOwner:importer?.dataset.importOwner||'',
+        primaryImportVisible:visible(importer),
+        heroEntry:{tag:hero?.tagName||'',controls:hero?.getAttribute('aria-controls')||'',directFor:hero?.getAttribute('for')||''},
+        dockEntry:{tag:dock?.tagName||'',controls:dock?.getAttribute('aria-controls')||'',directFor:dock?.getAttribute('for')||''},
+        retiredMobileAction:Boolean(document.querySelector('#mobileActionBar')),
+        utilityHub:{visible:visible(hub),rect:box(hub),project:box(project),copy:box(copy),projectVisible:visible(project),copyVisible:visible(copy)},
+        importRect:box(importer)
+      };
+    }""")
+
     result.update({
         'stage': stage or initial_stage,
         'landing': landing,
@@ -181,6 +209,8 @@ async def audit_mode(browser, mode, viewport):
         'mobileMenu': mobile_menu,
         'workspace': workspace,
         'workspaceTests': workspace_tests,
+        'uiStructure': ui_structure,
+        'initialUiStructure': initial_ui_structure,
     })
     await context.close()
     return result
@@ -196,7 +226,7 @@ async def main():
             audit_mode(browser, 'mobile', {'width': 390, 'height': 844}),
         )
         report = {
-            'version': '1.5.14',
+            'version': '1.5.16',
             'desktop': desktop,
             'smallLaptop': small_laptop,
             'tablet': tablet,
