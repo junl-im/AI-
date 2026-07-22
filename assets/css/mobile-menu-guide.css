@@ -14,7 +14,7 @@
     }
     body[data-ui="hyperflow-tabs"] .bottom-dock.bottom-dock-hyperflow {
         display: grid !important;
-        gap: 6px !important;
+        gap: 6px;
     }
     .mobile-dock-guide {
         display: flex;
@@ -76,19 +76,19 @@
         background: rgba(103, 232, 249, 0.08);
     }
     body[data-mobile-menu-mode="compact"] .bottom-dock-tab[data-mobile-priority="false"] {
-        display: none !important;
+        display: none;
     }
     body[data-mobile-menu-mode="compact"] .bottom-dock-tabs,
     body[data-mobile-menu-mode="expanded"] .bottom-dock-tabs {
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
     body[data-mobile-menu-mode="compact"] .bottom-dock-tab {
-        min-height: 58px !important;
+        min-height: 58px;
     }
     body[data-mobile-menu-mode="expanded"] .bottom-dock-tab {
         min-height: 56px !important;
     }
-    .toast { bottom: 144px !important; }
+    .toast { bottom: 144px; }
     body[data-mobile-menu-mode="compact"] .toast { bottom: 120px !important; }
     body[data-mobile-menu-mode="expanded"] .toast { bottom: 186px !important; }
 }

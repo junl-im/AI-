@@ -32,7 +32,7 @@
 
 
 .hyperflow-stage {
-    display: flex !important;
+    display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
@@ -135,7 +135,7 @@ body[data-studio-focus="workspace"] .studio-hero {
 
 body[data-studio-focus="workspace"] .brand-panel.cinematic-brand-panel {
     min-height: 52px !important;
-    height: auto !important;
+    height: auto;
     padding: 8px 18px !important;
     border-radius: 18px !important;
 }
@@ -177,7 +177,7 @@ body[data-studio-focus="intro"] .studio-focus-toggle::before {
 
 @media (max-width: 900px) {
     .brand-signature-pill {
-        display: none !important;
+        display: none;
     }
 
     .studio-focus-toggle {

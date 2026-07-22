@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-5-16",
-  "version": "1.5.16",
+  "name": "ai-shorts-studio-v1-5-17",
+  "version": "1.5.17",
   "private": true,
-  "description": "AI Shorts Studio v1.5.16 - unified import flow and desktop utility hub redesign",
+  "description": "AI Shorts Studio v1.5.17 - safe important cascade reduction with unchanged responsive UI",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -147,6 +147,7 @@
     "node qa/run_css_ownership_audit.js",
     "node qa/css_ownership_smoke.js",
     "node qa/cascade_ownership_smoke.js",
+    "node qa/important_cascade_reduction_smoke.js",
     "node qa/same_value_css_smoke.js",
     "node qa/orphan_css_smoke.js",
     "node qa/control_ownership_smoke.js",

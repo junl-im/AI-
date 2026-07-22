@@ -87,8 +87,8 @@ label[data-icon]::before,
 }
 
 .upload-icon.studio-icon {
-    width: 42px !important;
-    height: 42px !important;
+    width: 42px;
+    height: 42px;
     margin-bottom: 8px;
     color: #bff7ff;
     filter: drop-shadow(0 8px 20px rgba(103, 232, 249, 0.18));
@@ -101,10 +101,10 @@ label[data-icon]::before,
 }
 
 .bottom-dock-tab > .studio-icon:first-child {
-    width: 26px !important;
-    height: 26px !important;
-    color: rgba(203, 213, 225, 0.68) !important;
-    background-color: currentColor !important;
+    width: 26px;
+    height: 26px;
+    color: rgba(203, 213, 225, 0.68);
+    background-color: currentColor;
     filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.20));
 }
 

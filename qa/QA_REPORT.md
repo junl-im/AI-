@@ -1,28 +1,27 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.16
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.17
 
 ## 최종 결과
 
-- 자동 검사: **175/175 통과**
+- 자동 검사: **176/176 통과**
 - 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- 서비스워커·process memory·GPU/media 감사 v1.5.16 기준 통과
+- 서비스워커·process memory·GPU/media 감사 v1.5.17 기준 통과
 - 장시간 MP4는 실행 코드 미변경으로 v1.5.9 검증 결과 상속
-
-## UI·동선 결과
-
-- 원본 media input: **1개**
-- hero·dock direct file-label entry: **0개**
-- PC project/copy utility hub: 같은 top/bottom 정렬, import workspace와 overlap **0건**
-- 모바일 초기 file stage: primary import card 표시
-- retired mobile action bar: markup·selector **0건**
 
 ## CSS 결과
 
 - 실제 selector-property 충돌: **0 유지**
 - same-value duplicate: **0 유지**
 - shadowed declaration: **0 유지**
-- 활성 `!important`: **803 → 801**
-- 이번 릴리스 제거: selector 9개, rule 7개, declaration 35개
+- 활성 `!important`: **801 → 759**
+- priority 제거: **42개**
+- v1.5.16 핵심 layout metrics 변화: **0건**
+
+## 런타임 결과
+
+- process memory audit: **8회**, runtime error 0, active operation 0, render queue 0
+- GPU/media comparison: 두 모드 H.264/AAC 디코딩 성공, GPU·media utility process 관측
+- service worker: install·activate·old cache cleanup·offline navigation 통과
 
 ## 감사 제한
 

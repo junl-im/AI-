@@ -3,23 +3,23 @@
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
 .cinematic-brand-panel .brand-topline {
     display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    align-items: center !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
     gap: clamp(10px, 2vw, 24px) !important;
 }
 
 .cinematic-brand-panel .brand-release {
-    grid-column: 1 !important;
+    grid-column: 1;
     min-width: 0;
     overflow: hidden;
 }
 
 body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions,
 .cinematic-brand-panel .brand-right-actions {
-    display: flex !important;
-    grid-column: 2 !important;
-    align-items: center !important;
-    justify-self: end !important;
+    display: flex;
+    grid-column: 2;
+    align-items: center;
+    justify-self: end;
     min-width: max-content;
 }
 
@@ -27,28 +27,28 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions,
 
 @media (max-width: 920px) {
     .cinematic-brand-panel .release-name {
-        display: none !important;
+        display: none;
     }
 }
 
 @media (max-width: 720px) {
     body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-topline,
     .cinematic-brand-panel .brand-topline {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) auto !important;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
         gap: 8px !important;
         min-height: 46px !important;
     }
 
     .cinematic-brand-panel .brand-release {
-        display: flex !important;
-        gap: 7px !important;
+        display: flex;
+        gap: 7px;
         white-space: nowrap;
     }
 
     .cinematic-brand-panel .badge-version {
-        padding-left: 31px !important;
-        font-size: 9px !important;
+        padding-left: 31px;
+        font-size: 9px;
     }
 
     .cinematic-brand-panel .badge-version::before {
@@ -57,33 +57,33 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions,
     }
 
     .cinematic-brand-panel .release-device-compat {
-        display: inline-flex !important;
-        gap: 4px !important;
-        font-size: 6.8px !important;
+        display: inline-flex;
+        gap: 4px;
+        font-size: 6.8px;
     }
 
     .cinematic-brand-panel .brand-right-actions {
-        align-self: center !important;
+        align-self: center;
     }
 
     .cinematic-brand-panel .brand-signature-pill {
-        display: inline-flex !important;
-        align-items: center !important;
+        display: inline-flex;
+        align-items: center;
         max-width: none !important;
-        margin: 0 !important;
-        gap: 6px !important;
+        margin: 0;
+        gap: 6px;
         overflow: visible !important;
         text-overflow: clip !important;
     }
 
     .cinematic-brand-panel .brand-signature-pill .signature-label {
         display: inline !important;
-        font-size: 6px !important;
-        letter-spacing: 0.11em !important;
+        font-size: 6px;
+        letter-spacing: 0.11em;
     }
 
     .cinematic-brand-panel .brand-signature-pill strong {
-        font-size: 9px !important;
+        font-size: 9px;
     }
 }
 
@@ -107,9 +107,9 @@ body[data-ui="hyperflow-tabs"] .cinematic-brand-panel .brand-right-actions,
     }
 
     .cinematic-brand-panel .device-pair-glyph {
-        width: 17px !important;
-        transform: scale(0.82) !important;
-        margin-right: -3px !important;
+        width: 17px;
+        transform: scale(0.82);
+        margin-right: -3px;
     }
 
     .cinematic-brand-panel .brand-signature-pill {

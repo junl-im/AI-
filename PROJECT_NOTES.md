@@ -1,26 +1,25 @@
-# PROJECT NOTES v1.5.16
+# PROJECT NOTES v1.5.17
 
-## Unified import UI 규칙
+## Important cascade 감축 규칙
 
-- 원본 미디어 picker는 `#fileDrop > #fileInput` 한 곳만 소유합니다.
-- hero `#heroWorkspaceStartBtn`, dock `#bottomFileBtn`, no-file next action은 picker를 직접 click하지 않고 `focusImportPanel()`로 원본 카드에 이동합니다.
-- 프로젝트 JSON과 자막 SRT/VTT는 원본 미디어 input과 별개이며 UI에 용도를 명시합니다.
-- PC의 project/copy utility는 `.project-copy-hub` 한 행에서 같은 높이로 정렬하고, 1179px 이하에서는 active media flow에서 숨깁니다.
-- legacy mobile action bar는 markup, JS anchor, CSS selector 모두 금지합니다.
+- `!important`는 선언별 Chromium 계산값 비교에서 제거 전후가 동일한 경우에만 낮춥니다.
+- 같은 shorthand family의 여러 priority를 동시에 제거하면 이전 shorthand가 다시 우승할 수 있으므로 property family 단위로 재검증합니다.
+- mobile shell clearance, workspace focus grid, hero collapse처럼 실제 우승에 필요한 priority는 유지합니다.
+- header metadata, base icon sizing, mobile dock 일부처럼 최종 selector specificity와 source order만으로 우승하는 선언은 normal priority로 전환합니다.
 
 ## QA·배포 기준
 
-- 자동 QA 기준은 **175/175**입니다.
-- CSS 상한은 활성 `!important` 801이며 conflicts, same-value duplicates, shadowed declarations, source-orphan selectors는 모두 0입니다.
-- 4개 viewport에서 media input 1개, hero/dock BUTTON navigation, desktop utility alignment, mobile primary import visibility를 확인합니다.
+- 자동 QA 기준은 **176/176**입니다.
+- CSS 상한은 활성 `!important` **759**이며 conflicts, same-value duplicates, shadowed declarations, source-orphan selectors는 모두 0입니다.
+- `runtime-browser-audit-v1.5.17.json`의 핵심 layout metrics는 v1.5.16과 동일해야 합니다.
 - 4개 viewport runtime error와 horizontal overflow는 0이어야 합니다.
 - process memory audit는 runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
 - long video audit는 미디어 실행 경로 미변경으로 v1.5.9 상속 계약을 사용합니다.
-- 런타임 build key는 `1.5.16-unified-import-ui`입니다.
+- 런타임 build key는 `1.5.17-important-cascade-reduction`입니다.
 
 ## 다음 우선순위
 
-1. 남은 `!important` owner·breakpoint 단위 안전 감축
+1. `ui-refinement.css`와 `foundation-polish.css`의 priority family 추가 감축
 2. 물리 GPU가 있는 데스크톱 Chromium에서 hardware acceleration 비교
 3. 15분·30분 30fps 카메라형·고비트레이트 원본 반복 검증
 4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증

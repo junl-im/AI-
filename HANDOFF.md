@@ -1,45 +1,44 @@
-# HANDOFF v1.5.16
+# HANDOFF v1.5.17
 
 ## 현재 상태
 
-v1.5.16은 PC utility 카드 배치, hero 시작 화면, 원본 불러오기 동선을 함께 정리한 UI 흐름 통합 릴리스입니다.
+v1.5.17은 v1.5.16의 화면·동작을 유지하면서 불필요한 cascade priority를 줄인 CSS 안정화 릴리스입니다.
 
-- 자동 QA: **175/175 통과**
-- 데스크톱·소형 노트북·태블릿·모바일 오류·Promise 거절·콘솔 오류·가로 overflow: **0건**
-- 미디어 input: `#fileInput` **1개**, owner: `#fileDrop` 원본 불러오기 카드
-- hero와 하단 불러오기: picker 직접 실행 없이 `#fileDrop`으로 이동
-- PC utility hub: 프로젝트·쇼츠 카피 카드 상단과 하단 정렬 일치, 원본 카드와 겹침 없음
-- CSS 기준: `!important` 801, conflicts 0, same-value duplicates 0, shadowed 0
-- 장시간 MP4 실행 경로는 변경되지 않아 v1.5.9 15분→30분→15분 결과 상속
+- 자동 QA: **176/176 통과**
+- 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow: **0건**
+- CSS 기준: `!important` **801→759**, conflicts 0, same-value duplicates 0, shadowed 0
+- v1.5.16 대비 dock 높이, utility hub 정렬, preview·waveform focus 폭: **동일**
+- process memory 8회: runtime error 0, active operation 0, render queue 0
+- GPU/media 두 모드: 디코딩 성공, GPU·media utility process 관측, runtime error 0
+- 장시간 MP4 실행 경로 미변경으로 v1.5.9 15분→30분→15분 결과 상속
 
 ## 적용 내용
 
-- `프로젝트`와 `쇼츠 카피 초안`을 `.project-copy-hub` 하나로 묶고 desktop grid의 utility row에 배치
-- 상단 hero를 vertical frame + 메시지 + 단일 `작업실 시작` CTA 구조로 재디자인
-- hero·dock·다음 작업 버튼을 `focusImportPanel()` 한 경로로 통합
-- mobile empty file stage에서 원본 불러오기 카드를 실제로 표시
-- legacy mobile action bar markup·DOM probe·CSS 9 selector/7 rule/35 declaration 제거
-- `!important` 2개 추가 회수, runtime build key `1.5.16-unified-import-ui` 적용
+- 작업실 stage display와 workspace hero height의 불필요한 priority 제거
+- 모바일 dock gap·compact tab visibility·grid column·기본 toast 위치의 normal cascade 전환
+- header metadata rail의 grid·alignment·mobile typography priority 감축
+- upload·dock icon 기본 크기와 색상 priority 감축
+- 필요한 mobile shell clearance, workspace hero collapse, focus workspace grid priority는 유지
+- runtime build key `1.5.17-important-cascade-reduction` 적용
 
 ## 검수 순서
 
 1. `node qa/run_css_ownership_audit.js`
 2. `python3 qa/run_browser_audit.py`
-3. `python3 qa/run_process_memory_audit.py --cycles 16`
+3. `python3 qa/run_process_memory_audit.py --cycles 8`
 4. `python3 qa/run_gpu_media_capability_audit.py`
 5. `node qa/run_service_worker_lifecycle.js`
 6. `npm test`
 
 ## 알려진 제한
 
-- headless 컨테이너는 물리 GPU/WebGL context를 제공하지 않아 실제 hardware acceleration 메모리를 확정할 수 없습니다.
+- headless 환경은 물리 GPU/WebGL context를 제공하지 않아 실제 hardware acceleration 메모리를 확정할 수 없습니다.
 - 15분·30분 30fps 고비트레이트 카메라 원본과 모바일 Safari·Samsung Internet 실기기 검증은 별도 환경이 필요합니다.
-- 프로젝트 JSON과 자막 파일 input은 원본 미디어 picker가 아니라 각 기능 전용 import입니다.
 
 ## 다음 작업
 
-1. 남은 `!important`를 owner·breakpoint 단위로 안전 감축
-2. 실제 하드웨어 가속 데스크톱 Chromium에서 GPU·media decoder memory 재검증
+1. `ui-refinement.css`와 `foundation-polish.css`의 remaining priority를 상태·breakpoint 단위로 추가 감축
+2. 실제 하드웨어 가속 Chromium에서 GPU·media decoder memory 재검증
 3. 15분·30분 30fps 고비트레이트 카메라 원본 반복 검증
 4. 모바일 Safari·Samsung Internet 실기기 반복 안정성 검증
 

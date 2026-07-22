@@ -1,13 +1,13 @@
 {
-  "version": "1.5.16",
-  "generatedAt": "2026-07-22T03:44:22.251Z",
+  "version": "1.5.17",
+  "generatedAt": "2026-07-22T03:49:40.587Z",
   "cssFiles": 46,
   "linkedCssFiles": 45,
   "activeCssFiles": 45,
   "archivedCssFiles": [
     "cinematic-hero.css"
   ],
-  "importantCount": 801,
+  "importantCount": 759,
   "duplicateSelectorCount": 192,
   "highConflictSelectorCount": 21,
   "sharedPropertyCount": 0,
@@ -372,13 +372,13 @@
         "winner": {
           "file": "mobile-menu-guide.css",
           "value": "144px",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "mobile-menu-guide.css",
             "value": "144px",
-            "important": true
+            "important": false
           }
         ]
       }
@@ -1038,13 +1038,13 @@
         "winner": {
           "file": "header-meta-rail.css",
           "value": "minmax(0, 1fr) auto",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "header-meta-rail.css",
             "value": "minmax(0, 1fr) auto",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1055,13 +1055,13 @@
         "winner": {
           "file": "header-meta-rail.css",
           "value": "center",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "header-meta-rail.css",
             "value": "center",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1091,13 +1091,13 @@
         "winner": {
           "file": "header-meta-rail.css",
           "value": "grid",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "header-meta-rail.css",
             "value": "grid",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1108,13 +1108,13 @@
         "winner": {
           "file": "header-meta-rail.css",
           "value": "minmax(0, 1fr) auto",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "header-meta-rail.css",
             "value": "minmax(0, 1fr) auto",
-            "important": true
+            "important": false
           }
         ]
       },
@@ -1903,13 +1903,13 @@
         "winner": {
           "file": "studio-experience.css",
           "value": "flex",
-          "important": true
+          "important": false
         },
         "occurrences": [
           {
             "file": "studio-experience.css",
             "value": "flex",
-            "important": true
+            "important": false
           }
         ]
       }

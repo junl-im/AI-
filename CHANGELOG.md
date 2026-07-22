@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v1.5.17 - Safe Important Cascade Reduction
+
+- 실제 Chromium에서 선언별 priority 제거 전후를 비교해 화면 계산값이 유지되는 항목만 선별했습니다.
+- `studio-experience.css`, `mobile-menu-guide.css`, `header-meta-rail.css`, `icon-system.css`의 불필요한 `!important` 42개를 제거했습니다.
+- 활성 `!important`를 801→759로 낮추면서 conflicts·same-value duplicates·shadowed declarations 0을 유지했습니다.
+- 데스크톱·소형 노트북·태블릿·모바일의 dock 높이, utility hub 정렬, preview·waveform focus 폭을 v1.5.16과 동일하게 유지했습니다.
+- 과도한 priority를 다시 추가하지 못하도록 전용 회귀 검사와 759개 상한을 추가했습니다.
+- 자동 QA 176/176, 4개 viewport, process memory, GPU/media capability, service worker lifecycle 감사를 통과했습니다.
+- 미디어 분석·렌더·Object URL 경로는 변경되지 않아 v1.5.9 장시간 MP4 감사 결과를 상속합니다.
+
 ## v1.5.16 - Unified Import Flow & Desktop Utility Hub
 
 - PC 작업실에서 `프로젝트`와 `쇼츠 카피 초안`을 하나의 정렬된 utility hub로 묶어 같은 행·같은 높이로 배치했습니다.
