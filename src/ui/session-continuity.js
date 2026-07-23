@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.24 - compressed adaptive session backups with recovery history
+// AI Shorts Studio v1.5.25 - selectable compressed session recovery with bounded history
 'use strict';
 (function bootSessionContinuity(global) {
     if (global.AIShortsSessionContinuity) return;
@@ -30,6 +30,7 @@
     let quotaNoticeAt = 0;
     let lastRecoveryEventKey = '';
     let lastRecoveryEventAt = 0;
+    let selectedRestoreSource = STORAGE_KEY;
     const MAX_SNAPSHOT_CHARS = Math.max(1024, Number(config.MAX_PROJECT_TEXT_CHARS || 2500000));
 
     function byId(id) { return document.getElementById(id); }
@@ -106,6 +107,36 @@
         emit('ai-shorts-session-recovery-history', { entry, count: history.length });
         return entry;
     }
+    function listAvailableSnapshots() {
+        const sources = [{ key: STORAGE_KEY, kind: 'primary' }, ...BACKUP_KEYS.map((key, index) => ({ key, kind: 'backup', index: index + 1 }))];
+        return sources.map(source => {
+            const raw = readKey(source.key);
+            if (!raw) return null;
+            try {
+                const result = parseSnapshotText(raw, source.key);
+                const snapshot = result.snapshot;
+                return Object.freeze({
+                    key: source.key,
+                    kind: source.kind,
+                    index: source.index || 0,
+                    valid: true,
+                    savedAt: snapshot.savedAt || snapshot.createdAt || '',
+                    fileName: snapshot.fileName || snapshot.fileMeta && snapshot.fileMeta.name || '',
+                    recommendationCount: Array.isArray(snapshot.recommendations) ? snapshot.recommendations.length : 0,
+                    selectedRecommendationId: snapshot.selectedRecommendationId || '',
+                    compressed: Boolean(result.compressed),
+                    storedChars: Number(result.storedChars) || raw.length,
+                    rawChars: Number(result.rawChars) || raw.length,
+                    savingsRatio: Number(result.savingsRatio) || 0,
+                    schemaVersion: Number(snapshot.schemaVersion) || CURRENT_SCHEMA_VERSION,
+                    error: ''
+                });
+            } catch (error) {
+                return Object.freeze({ key: source.key, kind: source.kind, index: source.index || 0, valid: false, savedAt: '', fileName: '', recommendationCount: 0, selectedRecommendationId: '', compressed: raw.startsWith('AISSB1:'), storedChars: raw.length, rawChars: 0, savingsRatio: 0, schemaVersion: 0, error: error && error.message || '손상된 백업' });
+            }
+        }).filter(Boolean);
+    }
+
     function backupMetadata() {
         let storedChars = 0;
         let rawChars = 0;
@@ -300,6 +331,7 @@
         lastLoadedSource = '';
         lastMigrationFrom = 0;
         lastSavedAt = '';
+        selectedRestoreSource = STORAGE_KEY;
         if (document.body) document.body.dataset.sessionContinuity = 'none';
         updatePanel(null, 'clear');
         emit('ai-shorts-session-cleared', { backupCount: BACKUP_MAX_COUNT });
@@ -393,24 +425,55 @@
         panel.id = 'sessionContinuityPanel';
         panel.className = 'session-continuity-panel';
         panel.setAttribute('aria-label', '작업 세션 복구');
-        panel.innerHTML = '<div class="session-continuity-copy"><span class="session-continuity-icon studio-icon" data-icon="retry" aria-hidden="true"></span><div><strong id="sessionContinuityTitle">작업 세션 자동 저장 준비</strong><small id="sessionContinuityMeta">후보와 선택 구간이 생기면 자동으로 가볍게 저장합니다.</small></div></div><div class="session-continuity-actions"><button id="sessionRestoreBtn" class="primary" type="button">이전 작업 복구</button><button id="sessionSaveBtn" type="button">지금 저장</button><button id="sessionExportBtn" type="button" data-icon="diagnostics">기록 백업</button><button id="sessionDiagnosticsBtn" type="button" data-icon="diagnostics">복구 진단</button><button id="sessionClearBtn" type="button">기록 지우기</button></div>';
+        panel.innerHTML = '<div class="session-continuity-copy"><span class="session-continuity-icon studio-icon" data-icon="retry" aria-hidden="true"></span><div><strong id="sessionContinuityTitle">작업 세션 자동 저장 준비</strong><small id="sessionContinuityMeta">후보와 선택 구간이 생기면 자동으로 가볍게 저장합니다.</small></div></div><div class="session-continuity-actions"><label id="sessionBackupPicker" class="session-backup-picker" hidden><span>복구 시점</span><select id="sessionBackupSelect" aria-label="복구할 세션 시점 선택"></select></label><button id="sessionRestoreBtn" class="primary" type="button">선택 기록 복구</button><button id="sessionSaveBtn" type="button">지금 저장</button><button id="sessionExportBtn" type="button" data-icon="diagnostics">기록 백업</button><button id="sessionDiagnosticsBtn" type="button" data-icon="diagnostics">복구 진단</button><button id="sessionClearBtn" type="button">기록 지우기</button></div>';
         startPanel.insertAdjacentElement('afterend', panel);
         const restore = byId('sessionRestoreBtn');
         const save = byId('sessionSaveBtn');
         const exportButton = byId('sessionExportBtn');
         const diagnosticsButton = byId('sessionDiagnosticsBtn');
+        const select = byId('sessionBackupSelect');
         const clear = byId('sessionClearBtn');
-        if (restore) restore.addEventListener('click', restoreSnapshot);
+        if (select) select.addEventListener('change', () => { selectedRestoreSource = select.value || STORAGE_KEY; updatePanel(null, 'sync'); });
+        if (restore) restore.addEventListener('click', () => restoreSnapshot(selectedRestoreSource));
         if (save) save.addEventListener('click', () => saveSnapshotNow('manual'));
         if (exportButton) exportButton.addEventListener('click', exportStoredSnapshot);
         if (diagnosticsButton) diagnosticsButton.addEventListener('click', exportRecoveryDiagnostics);
         if (clear) clear.addEventListener('click', clearSnapshot);
         return panel;
     }
+    function snapshotOptionLabel(item) {
+        const source = item.kind === 'primary' ? '최신 기본 기록' : `백업 ${item.index}`;
+        if (!item.valid) return `${source} · 손상됨`;
+        const time = formatSavedAt(item.savedAt);
+        const count = `후보 ${item.recommendationCount || 0}개`;
+        const compression = item.compressed ? ` · 압축 ${Math.round((item.savingsRatio || 0) * 100)}%` : '';
+        return `${source} · ${time} · ${count}${compression}`;
+    }
+    function updateBackupSelector(items) {
+        const picker = byId('sessionBackupPicker');
+        const select = byId('sessionBackupSelect');
+        if (!picker || !select) return;
+        const validItems = items.filter(item => item.valid && item.recommendationCount > 0);
+        if (!validItems.some(item => item.key === selectedRestoreSource)) selectedRestoreSource = validItems[0] && validItems[0].key || STORAGE_KEY;
+        select.replaceChildren(...items.map(item => {
+            const option = document.createElement('option');
+            option.value = item.key;
+            option.textContent = snapshotOptionLabel(item);
+            option.disabled = !item.valid || item.recommendationCount <= 0;
+            option.selected = item.key === selectedRestoreSource;
+            return option;
+        }));
+        picker.hidden = items.length < 2;
+        select.disabled = validItems.length < 2;
+    }
+
     function updatePanel(snapshot, reason) {
         ensurePanel();
         const stored = snapshot || loadSnapshot();
-        const hasStoredRecord = Boolean(snapshot || readStoredSnapshotText());
+        const availableSnapshots = listAvailableSnapshots();
+        updateBackupSelector(availableSnapshots);
+        const selectedItem = availableSnapshots.find(item => item.key === selectedRestoreSource && item.valid) || availableSnapshots.find(item => item.valid) || null;
+        const hasStoredRecord = Boolean(snapshot || availableSnapshots.length || readStoredSnapshotText());
         const invalidStoredRecord = hasStoredRecord && !stored;
         const title = byId('sessionContinuityTitle');
         const meta = byId('sessionContinuityMeta');
@@ -418,7 +481,7 @@
         const save = byId('sessionSaveBtn');
         const exportButton = byId('sessionExportBtn');
         const clear = byId('sessionClearBtn');
-        const canRestore = Boolean(stored && stored.app === 'AI Shorts Studio' && Array.isArray(stored.recommendations) && stored.recommendations.length);
+        const canRestore = Boolean(selectedItem && selectedItem.recommendationCount > 0) || Boolean(stored && stored.app === 'AI Shorts Studio' && Array.isArray(stored.recommendations) && stored.recommendations.length);
         if (document.body) document.body.dataset.sessionContinuity = invalidStoredRecord ? 'invalid' : (canRestore ? 'available' : (hasWork() ? 'saved' : 'none'));
         if (title) title.textContent = invalidStoredRecord ? '자동 저장 기록을 복구할 수 없습니다' : (canRestore ? '이전 작업 세션이 있습니다' : '작업 세션 자동 저장');
         if (meta) {
@@ -427,7 +490,7 @@
             } else if (canRestore) {
                 const count = stored.recommendations.length;
                 const selected = stored.selectedRecommendationId ? ' · 선택 후보 있음' : '';
-                const backupCount = BACKUP_KEYS.filter(key => Boolean(readKey(key))).length;
+                const backupCount = availableSnapshots.filter(item => item.kind === 'backup').length;
                 const timestamp = document.createElement('span');
                 timestamp.className = 'session-continuity-timestamp';
                 timestamp.textContent = formatSavedAt(stored.savedAt || stored.createdAt);
@@ -448,9 +511,29 @@
             if (reason === 'clear') notify('작업 세션 기록을 지웠습니다.', 'action');
         }
     }
-    function restoreSnapshot() {
-        const snapshot = loadSnapshot();
-        if (!snapshot || !Array.isArray(snapshot.recommendations) || !snapshot.recommendations.length) return;
+    function restoreSnapshot(sourceKey) {
+        const requestedSource = String(sourceKey || selectedRestoreSource || STORAGE_KEY);
+        let snapshot = null;
+        let restoredSource = requestedSource;
+        try {
+            if (requestedSource === STORAGE_KEY) {
+                snapshot = loadSnapshot();
+                restoredSource = lastLoadedSource || STORAGE_KEY;
+            } else {
+                const raw = readKey(requestedSource);
+                if (!raw) throw new Error('선택한 백업 기록이 없습니다.');
+                const parsed = parseSnapshotText(raw, requestedSource);
+                snapshot = parsed.snapshot;
+                lastLoadedSource = requestedSource;
+                lastMigrationFrom = parsed.fromVersion < CURRENT_SCHEMA_VERSION ? parsed.fromVersion : lastMigrationFrom;
+            }
+        } catch (error) {
+            appendRecoveryHistory('selected-backup-load-failed', { source: requestedSource, reason: error && error.message || 'unknown' });
+            notify(error && error.message || '선택한 세션 기록을 읽지 못했습니다.', 'error');
+            updatePanel(null, 'sync');
+            return false;
+        }
+        if (!snapshot || !Array.isArray(snapshot.recommendations) || !snapshot.recommendations.length) return false;
         try {
             if (projectService.applyProjectSnapshot) projectService.applyProjectSnapshot(state, snapshot);
             else {
@@ -473,19 +556,23 @@
             if (tabs && tabs.setActiveFlowTab) tabs.setActiveFlowTab(targetTab, { reveal: true, force: true });
             else if (global.AIShortsMotionStability && global.AIShortsMotionStability.reveal) global.AIShortsMotionStability.reveal(targetTab, { force: true });
             document.dispatchEvent(new CustomEvent('ai-shorts-session-restored', { detail: { targetTab, count: state.recommendations.length } }));
-            appendRecoveryHistory('session-restored', { source: lastLoadedSource || STORAGE_KEY, recommendationCount: state.recommendations.length });
+            appendRecoveryHistory('session-restored', { source: restoredSource, recommendationCount: state.recommendations.length, selectedBackup: restoredSource !== STORAGE_KEY });
             notify('이전 후보와 선택 구간을 복구했습니다. 원본 파일이 필요하면 다시 열어주세요.', 'action', { duration: 3600 });
             scheduleSave('restore');
+            selectedRestoreSource = restoredSource;
             updatePanel(snapshot, 'restore');
+            return true;
         } catch (error) {
             if (store.addDiagnostic) store.addDiagnostic({ type: 'session-restore-error', message: error.message });
             appendRecoveryHistory('session-restore-failed', { reason: error && error.message || 'unknown' });
             notify('작업 세션 복구에 실패했습니다.', 'error');
+            return false;
         }
     }
     function getStatus() {
         const backups = backupMetadata();
         const history = readRecoveryHistory();
+        const availableSnapshots = listAvailableSnapshots();
         return Object.freeze({
             storageKey: STORAGE_KEY,
             schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -503,7 +590,10 @@
             lastMigrationFrom,
             lastSavedAt,
             recoveryHistoryCount: history.length,
-            lastRecovery: history[0] || null
+            lastRecovery: history[0] || null,
+            selectableSnapshotCount: availableSnapshots.filter(item => item.valid && item.recommendationCount > 0).length,
+            selectedRestoreSource,
+            availableSnapshots
         });
     }
     function scheduleSync() {
@@ -551,7 +641,7 @@
         document.addEventListener('visibilitychange', handleVisibilityChange);
         startHeartbeat();
     }
-    global.AIShortsSessionContinuity = Object.freeze({ saveSnapshotNow, restoreSnapshot, clearSnapshot, loadSnapshot, exportStoredSnapshot, exportRecoveryDiagnostics, readRecoveryHistory, scheduleSave, getStatus, CURRENT_SCHEMA_VERSION, BACKUP_KEYS, RECOVERY_HISTORY_KEY });
+    global.AIShortsSessionContinuity = Object.freeze({ saveSnapshotNow, restoreSnapshot, clearSnapshot, loadSnapshot, listAvailableSnapshots, exportStoredSnapshot, exportRecoveryDiagnostics, readRecoveryHistory, scheduleSave, getStatus, CURRENT_SCHEMA_VERSION, BACKUP_KEYS, RECOVERY_HISTORY_KEY });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
     else install();
 })(window);

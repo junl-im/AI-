@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.24 - storage, compressed recovery, content integrity, and rollback diagnostics panel
+// AI Shorts Studio v1.5.25 - storage, layered analysis cache, recovery, and scheduled integrity diagnostics
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;
@@ -44,7 +44,9 @@
             '</div>',
             '<div class="storage-health-actions">',
             '  <button id="storageHealthRefreshBtn" type="button" data-icon="retry">다시 확인</button>',
+            '  <button id="analysisCacheDiagnosticsBtn" type="button" data-icon="diagnostics">분석 진단 저장</button>',
             '  <button id="analysisCacheCleanupBtn" type="button" data-icon="close">분석 캐시 정리</button>',
+            '  <button id="storageIntegrityAuditBtn" type="button" data-icon="diagnostics">셸 표본 검사</button>',
             '  <button id="storageHealthRepairBtn" type="button" data-icon="retry">오프라인 셸 복구</button>',
             '  <button id="storageHealthCleanupBtn" type="button" data-icon="close">오래된 저장소 정리</button>',
             '</div>'
@@ -52,11 +54,15 @@
         anchor.insertAdjacentElement('afterend', root);
         const refreshButton = byId('storageHealthRefreshBtn');
         const cleanupButton = byId('storageHealthCleanupBtn');
+        const analysisDiagnosticsButton = byId('analysisCacheDiagnosticsBtn');
         const analysisCleanupButton = byId('analysisCacheCleanupBtn');
+        const integrityAuditButton = byId('storageIntegrityAuditBtn');
         const repairButton = byId('storageHealthRepairBtn');
         if (refreshButton) refreshButton.addEventListener('click', () => refresh({ force: true, source: 'manual' }));
         if (cleanupButton) cleanupButton.addEventListener('click', cleanup);
+        if (analysisDiagnosticsButton) analysisDiagnosticsButton.addEventListener('click', exportAnalysisDiagnostics);
         if (analysisCleanupButton) analysisCleanupButton.addEventListener('click', cleanupAnalysisCache);
+        if (integrityAuditButton) integrityAuditButton.addEventListener('click', runIntegrityAudit);
         if (repairButton) repairButton.addEventListener('click', repairOfflineShell);
         return root;
     }
@@ -71,8 +77,10 @@
         const currentProblems = (integrity.missing && integrity.missing.length || 0) + (integrity.invalid && integrity.invalid.length || 0) + (integrity.corrupted && integrity.corrupted.length || 0);
         if (report.rollbackPreserved && report.rollbackPreserved.length) return `롤백 보존 ${report.rollbackPreserved.length}개`;
         if (currentProblems) return `무결성 문제 ${currentProblems}${repaired ? ` · 복구 ${repaired}` : ''}`;
-        if (report.contentVerified) return `SHA-256 ${integrity.hashVerified || integrity.healthy || 0}개${repaired ? ` · 복구 ${repaired}` : ''}`;
-        if (report.verified) return `${integrity.healthy || report.cacheEntries || 0}개 상태 검증${repaired ? ` · 복구 ${repaired}` : ''}`;
+        const audit = status.integrityAudit || {};
+        const auditText = audit.completedAt ? ` · 표본 ${audit.checked || 0}개` : '';
+        if (report.contentVerified) return `SHA-256 ${integrity.hashVerified || integrity.healthy || 0}개${repaired ? ` · 복구 ${repaired}` : ''}${auditText}`;
+        if (report.verified) return `${integrity.healthy || report.cacheEntries || 0}개 상태 검증${repaired ? ` · 복구 ${repaired}` : ''}${auditText}`;
         return `${report.cached || report.cacheEntries || 0}개 캐시${report.failed ? ` · 초기 실패 ${report.failed}` : ''}`;
     }
     function sessionText(status) {
@@ -85,7 +93,9 @@
         if (!status) return '엔진 대기';
         const fingerprint = status.fingerprint || {};
         const mode = fingerprint.lastMode === 'full' ? '전체' : fingerprint.lastMode === 'sampled' ? '표본' : '대기';
-        return `${status.size || 0}/${status.limit || 0} · 적중 ${status.hitRate || 0}% · ${mode} ${fingerprint.lastMs || 0}ms`;
+        const persistent = status.persistent || {};
+        const persistentText = persistent.enabled ? ` · 영구 ${persistent.size || 0}/${persistent.maxItems || 0}` : (persistent.supported === false ? ' · 영구 미지원' : '');
+        return `${status.size || 0}/${status.limit || 0} · 적중 ${status.hitRate || 0}% · ${mode} ${fingerprint.lastMs || 0}ms${persistentText}`;
     }
     function render(storageStatus) {
         build();
@@ -113,6 +123,7 @@
             else if (level === 'warning') summary.textContent = '저장 공간 사용량이 높습니다. 내보내기 전에 여유 공간을 확인하세요.';
             else if (sw && sw.update && sw.update.state === 'error') summary.textContent = `오프라인 업데이트 확인 실패 · ${sw.update.lastError || '네트워크를 확인하세요.'}`;
             else if (sw && sw.repair && sw.repair.state === 'error') summary.textContent = sw.repair.lastError || '오프라인 셸 일부를 복구하지 못했습니다.';
+            else if (sw && sw.integrityAudit && sw.integrityAudit.state === 'error') summary.textContent = sw.integrityAudit.lastError || '오프라인 셸 표본 무결성 검사에 실패했습니다.';
             else if (sw && sw.installReport && sw.installReport.rollbackPreserved && sw.installReport.rollbackPreserved.length) summary.textContent = '새 오프라인 셸 검증이 실패해 이전 정상 캐시를 보존했습니다.';
             else if (sw && sw.installReport && sw.installReport.integrity && (sw.installReport.integrity.missing.length || sw.installReport.integrity.invalid.length || sw.installReport.integrity.corrupted.length)) summary.textContent = `오프라인 셸 무결성 문제 ${sw.installReport.integrity.missing.length + sw.installReport.integrity.invalid.length + sw.installReport.integrity.corrupted.length}개를 감지했습니다.`;
             else if (sw && sw.installReport && sw.installReport.failed) summary.textContent = `오프라인 셸 일부 ${sw.installReport.failed}개를 캐시하지 못했지만 핵심 기능은 유지됩니다.`;
@@ -135,13 +146,50 @@
         }).finally(() => { refreshPromise = null; });
         return refreshPromise;
     }
+    function exportAnalysisDiagnostics() {
+        const button = byId('analysisCacheDiagnosticsBtn');
+        if (button) button.disabled = true;
+        try {
+            const engine = global.AIShortsEngineKernel || {};
+            if (!engine.exportAnalysisCacheDiagnostics) throw new Error('분석 캐시 진단 내보내기를 지원하지 않습니다.');
+            const result = engine.exportAnalysisCacheDiagnostics();
+            if (!result || !result.saved) throw new Error('분석 캐시 진단 파일을 저장하지 못했습니다.');
+            feedback(`분석 캐시 진단 ${result.eventCount || 0}개 이벤트를 저장했습니다.`, 'export');
+            return result;
+        } catch (error) {
+            feedback(error && error.message || '분석 캐시 진단 저장에 실패했습니다.', 'error');
+            return null;
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+    async function runIntegrityAudit() {
+        const button = byId('storageIntegrityAuditBtn');
+        if (button) button.disabled = true;
+        try {
+            if (!serviceWorker.requestIntegrityAudit) throw new Error('이 브라우저에서는 셸 표본 검사를 지원하지 않습니다.');
+            const result = await serviceWorker.requestIntegrityAudit({ sampleSize: Number(config.SW_INTEGRITY_AUDIT_SAMPLE_SIZE) || 12, timeoutMs: 15000 });
+            render();
+            const audit = result && result.report && result.report.periodicIntegrity;
+            if (!audit) throw new Error('셸 표본 검사 결과를 받지 못했습니다.');
+            if (audit.failed) throw new Error(`표본 ${audit.checked || 0}개 중 ${audit.failed}개를 복구하지 못했습니다.`);
+            feedback(audit.repaired ? `표본 ${audit.checked}개를 검사하고 ${audit.repaired}개를 복구했습니다.` : `오프라인 셸 표본 ${audit.checked}개가 정상입니다.`, 'action');
+            return result;
+        } catch (error) {
+            feedback(error && error.message || '셸 표본 검사에 실패했습니다.', 'error');
+            return null;
+        } finally {
+            if (button) button.disabled = false;
+        }
+    }
+
     async function cleanupAnalysisCache() {
         const button = byId('analysisCacheCleanupBtn');
         if (button) button.disabled = true;
         try {
             const engine = global.AIShortsEngineKernel || {};
             const before = engine.getHealthReport ? engine.getHealthReport().cache : null;
-            const after = engine.clearAnalysisCache ? engine.clearAnalysisCache() : null;
+            const after = engine.clearAnalysisCache ? await engine.clearAnalysisCache() : null;
             render();
             feedback(before && before.size ? `분석 캐시 ${before.size}개를 정리했습니다.` : '정리할 분석 캐시가 없습니다.', 'action');
             return after;
@@ -195,7 +243,7 @@
             document.addEventListener(name, event => render(name === 'ai-shorts-storage-status' && event.detail || null));
         });
     }
-    global.AIShortsStorageHealthPanel = Object.freeze({ build, render, refresh, cleanup, cleanupAnalysisCache, repairOfflineShell, formatBytes });
+    global.AIShortsStorageHealthPanel = Object.freeze({ build, render, refresh, cleanup, exportAnalysisDiagnostics, cleanupAnalysisCache, runIntegrityAudit, repairOfflineShell, formatBytes });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
     else install();
 })(window);

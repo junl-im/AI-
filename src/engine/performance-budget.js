@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.24 - adaptive decode, concurrency, and responsiveness budget
+// AI Shorts Studio v1.5.25 - adaptive decode, concurrency, and responsiveness budget
 'use strict';
 
 (function exposePerformanceBudget(global) {
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.24').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.25').replace(/^v/i, '');
     function now() {
         return global.performance && global.performance.now ? global.performance.now() : Date.now();
     }

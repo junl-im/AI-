@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.5.24 storage and offline health panel */
+/* AI Shorts Studio v1.5.25 storage and offline health panel */
 .storage-health-panel {
     display: grid;
     grid-template-columns: minmax(220px, .8fr) minmax(560px, 1.8fr) auto;

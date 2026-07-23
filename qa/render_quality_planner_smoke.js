@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.24 - Render quality planner smoke test
+// AI Shorts Studio v1.5.25 - Render quality planner smoke test
 'use strict';
 
 const fs = require('fs');

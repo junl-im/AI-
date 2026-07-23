@@ -1,0 +1,26 @@
+{
+  "version": "1.5.25",
+  "auditMode": "isolated-service-worker-runtime",
+  "handlers": [
+    "activate",
+    "fetch",
+    "install",
+    "message"
+  ],
+  "install": {
+    "skipWaitingCalls": 1,
+    "shellCached": true,
+    "currentCache": "ai-shorts-studio-shell-v1.5.25-persistent-analysis-selective-recovery-integrity-audit"
+  },
+  "activate": {
+    "claimCalls": 1,
+    "deletedCaches": [
+      "ai-shorts-studio-shell-v1.3.9-old"
+    ]
+  },
+  "offlineNavigation": {
+    "status": 200,
+    "ok": true,
+    "bodyPrefix": "cached:./index.html"
+  }
+}

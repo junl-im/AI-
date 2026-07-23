@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.24 - session continuity smoke test
+// AI Shorts Studio v1.5.25 - session continuity smoke test
 'use strict';
 const fs = require('fs');
 const path = require('path');

@@ -1,59 +1,59 @@
-// AI Shorts Studio v1.5.24 service worker - version-aware cache guard with content-hash verification and rollback-safe activation
+// AI Shorts Studio v1.5.25 service worker - version-aware cache guard with rotating partial integrity audits and rollback-safe activation
 'use strict';
 
 const CACHE_PREFIX = 'ai-shorts-studio-shell-';
-const CACHE_NAME = 'ai-shorts-studio-shell-v1.5.24-compressed-session-integrity-rollback';
+const CACHE_NAME = 'ai-shorts-studio-shell-v1.5.25-persistent-analysis-selective-recovery-integrity-audit';
 const SHELL_FILES = [
     './',
     './index.html',
     './manifest.webmanifest',
     './asset-integrity.json',
-    './assets/css/theme.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/studio.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/editor.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/ux.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/advanced-editor.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/layout-dock.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/caption-pro.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/quality-tools.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/auto-cut.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/cut-markers.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/feedback-ux.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/engine-panel.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/pro-engine.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/hyperflow-tabs.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/render-queue.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/hyperconnect-flow.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/flow-polish.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/flow-hotfix.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/flow-integrity.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/flow-doctor.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/responsive-workspace.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/flow-quality-gate.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/pc-dock-reveal-hotfix.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/glass-pro-ui.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/workspace-comfort.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/motion-stability.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/handoff-coach.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/save-readiness.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/render-quality-planner.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/candidate-preview-pro.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/candidate-pin-board.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/session-continuity.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/storage-health-panel.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/export-finish-center.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/shutter-glass-flow.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/update-sentinel.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/foundation-polish.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/desktop-prime-layout.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/hero-command-deck.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/ui-refinement.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/icon-system.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/header-meta-rail.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/active-stage-beacon.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/workspace-layout-controls.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/mobile-menu-guide.css?v=1.5.24-compressed-session-integrity-rollback',
-    './assets/css/studio-experience.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/theme.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/studio.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/editor.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/ux.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/advanced-editor.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/layout-dock.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/caption-pro.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/quality-tools.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/auto-cut.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/cut-markers.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/feedback-ux.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/engine-panel.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/pro-engine.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/hyperflow-tabs.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/render-queue.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/hyperconnect-flow.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/flow-polish.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/flow-hotfix.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/flow-integrity.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/flow-doctor.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/responsive-workspace.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/flow-quality-gate.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/pc-dock-reveal-hotfix.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/glass-pro-ui.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/workspace-comfort.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/motion-stability.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/handoff-coach.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/save-readiness.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/render-quality-planner.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/candidate-preview-pro.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/candidate-pin-board.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/session-continuity.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/storage-health-panel.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/export-finish-center.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/shutter-glass-flow.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/update-sentinel.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/foundation-polish.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/desktop-prime-layout.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/hero-command-deck.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/ui-refinement.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/icon-system.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/header-meta-rail.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/active-stage-beacon.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/workspace-layout-controls.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/mobile-menu-guide.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './assets/css/studio-experience.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
     './assets/icons/ai-shorts.svg',
     './assets/icons/studio/candidates.svg',
     './assets/icons/studio/caption.svg',
@@ -75,55 +75,55 @@ const SHELL_FILES = [
     './assets/icons/studio/thumbnail.svg',
     './assets/icons/studio/upload.svg',
     './assets/icons/studio/waveform.svg',
-    './src/config/app-runtime-config.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/boot/app-version-sync.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/boot/update-sentinel.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/boot/staged-ui-loader.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/utils/core-utils.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/storage/storage-manager.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/storage/session-backup-codec.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/state/app-state.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/operation-coordinator.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/analysis/audio-analysis-core.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/analysis/audio-feature-extractor.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/analysis/video-motion-analyzer.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/analysis/auto-cut-detector.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/recommendation/shorts-recommendation-engine.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/module-registry.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/module-contracts.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/analysis-cache.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/performance-budget.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/analysis-pipeline.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/scoring-pipeline.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/pro-engine-tuner.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/stability-auditor.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/engine-boost-profile.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/engine/engine-kernel.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/caption/caption-service.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/project/project-service.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/render/quality-effects.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/render/vertical-renderer.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/download/download-service.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/waveform-view.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/cut-marker-overlay.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/timeline-view.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/bottom-dock.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/mobile-menu-guide.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/feedback-ux.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/render/render-queue.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/hyperflow-tabs.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/motion-stability.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/flow-director-final.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/flow-command-bridge.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/workspace-layout-controls.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/ui/startup-performance.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/security/site-guards.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/boot/service-worker-registration.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/boot/runtime-health.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/app/render-workflow-controller.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/app/settings-controller.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/app/media-import-controller.js?v=1.5.24-compressed-session-integrity-rollback',
-    './src/app.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/config/app-runtime-config.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/boot/app-version-sync.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/boot/update-sentinel.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/boot/staged-ui-loader.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/utils/core-utils.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/storage/storage-manager.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/storage/session-backup-codec.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/state/app-state.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/operation-coordinator.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/analysis/audio-analysis-core.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/analysis/audio-feature-extractor.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/analysis/video-motion-analyzer.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/analysis/auto-cut-detector.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/recommendation/shorts-recommendation-engine.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/module-registry.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/module-contracts.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/analysis-cache.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/performance-budget.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/analysis-pipeline.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/scoring-pipeline.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/pro-engine-tuner.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/stability-auditor.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/engine-boost-profile.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/engine/engine-kernel.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/caption/caption-service.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/project/project-service.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/render/quality-effects.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/render/vertical-renderer.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/download/download-service.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/waveform-view.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/cut-marker-overlay.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/timeline-view.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/bottom-dock.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/mobile-menu-guide.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/feedback-ux.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/render/render-queue.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/hyperflow-tabs.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/motion-stability.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/flow-director-final.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/flow-command-bridge.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/workspace-layout-controls.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/ui/startup-performance.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/security/site-guards.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/boot/service-worker-registration.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/boot/runtime-health.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/app/render-workflow-controller.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/app/settings-controller.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/app/media-import-controller.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    './src/app.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
     './src/workers/highlight-analysis.worker.js'
 ];
 
@@ -131,13 +131,14 @@ const REQUIRED_SHELL_FILES = Object.freeze([
     './index.html',
     './manifest.webmanifest',
     './asset-integrity.json',
-    './src/config/app-runtime-config.js?v=1.5.24-compressed-session-integrity-rollback'
+    './src/config/app-runtime-config.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit'
 ]);
 const INSTALL_REPORT_KEY = './__ai_shorts_sw_install_report__';
 const PRECACHE_BATCH_SIZE = 8;
 const CACHE_REPAIR_ATTEMPTS = 2;
+let integritySampleCursor = 0;
 const INTEGRITY_MANIFEST_URL = './asset-integrity.json';
-const INTEGRITY_MANIFEST_SHA256 = 'e1a50d29624f45d4e5933cbe74f0fb83e0db8188489de268741eaa45d766f2a7';
+const INTEGRITY_MANIFEST_SHA256 = '78726e6661a17b2e2dd5eeb7066575c1a01df5a6cc303f3af70cdc0a84f1fc93';
 let integrityManifestPromise = null;
 
 function errorMessage(error) {
@@ -301,7 +302,9 @@ async function inspectShellCache(cache, files, options) {
 
 async function repairShellCache(cache, options) {
     const settings = options || {};
-    const targets = settings.includeOptional === false ? REQUIRED_SHELL_FILES : SHELL_FILES;
+    const targets = Array.isArray(settings.files) && settings.files.length
+        ? Array.from(new Set(settings.files.filter(file => SHELL_FILES.includes(file))))
+        : (settings.includeOptional === false ? REQUIRED_SHELL_FILES : SHELL_FILES);
     const manifest = await loadIntegrityManifest(cache, { force: Boolean(settings.forceManifest) });
     const before = await inspectShellCache(cache, targets, { manifest });
     const repairTargets = Array.from(new Set(before.missing.concat(before.invalid, before.corrupted || [])));
@@ -314,7 +317,7 @@ async function repairShellCache(cache, options) {
         else failed.push(result);
     }
     const after = await inspectShellCache(cache, targets, { manifest });
-    const requiredMissing = REQUIRED_SHELL_FILES.filter(file => after.missing.includes(file) || after.invalid.includes(file) || (after.corrupted || []).includes(file));
+    const requiredMissing = REQUIRED_SHELL_FILES.filter(file => targets.includes(file) && (after.missing.includes(file) || after.invalid.includes(file) || (after.corrupted || []).includes(file)));
     return {
         repaired,
         failed,
@@ -326,7 +329,8 @@ async function repairShellCache(cache, options) {
     };
 }
 
-async function readInstallReport(cache, repairResult) {
+async function readInstallReport(cache, repairResult, options) {
+    const settings = options || {};
     let report = null;
     try {
         const response = await cache.match(INSTALL_REPORT_KEY);
@@ -337,7 +341,7 @@ async function readInstallReport(cache, repairResult) {
         if (cache && typeof cache.keys === 'function') cacheEntries = (await cache.keys()).length;
     } catch (_) { /* optional */ }
     const repair = repairResult || {};
-    const integrity = repair.integrity || await inspectShellCache(cache, SHELL_FILES);
+    const integrity = repair.integrity || settings.integrity || (settings.skipInspection && report && report.integrity) || await inspectShellCache(cache, SHELL_FILES);
     return Object.assign({}, report || {}, {
         repaired: repair.repaired || [],
         repairFailed: repair.failed || [],
@@ -350,6 +354,46 @@ async function readInstallReport(cache, repairResult) {
         cacheEntries,
         cacheName: CACHE_NAME
     });
+}
+
+async function runPeriodicIntegrityAudit(cache, requestedSampleSize) {
+    const candidates = SHELL_FILES.filter(file => file !== INTEGRITY_MANIFEST_URL);
+    const sampleSize = Math.max(4, Math.min(32, Number(requestedSampleSize) || 12, candidates.length));
+    const cursor = candidates.length ? integritySampleCursor % candidates.length : 0;
+    const selected = [];
+    for (let index = 0; index < sampleSize; index += 1) selected.push(candidates[(cursor + index) % candidates.length]);
+    const nextCursor = candidates.length ? (cursor + sampleSize) % candidates.length : 0;
+    integritySampleCursor = nextCursor;
+    const manifest = await loadIntegrityManifest(cache);
+    const before = await inspectShellCache(cache, selected, { manifest });
+    const problemCount = before.missing.length + before.invalid.length + (before.corrupted || []).length;
+    const repair = problemCount
+        ? await repairShellCache(cache, { files: selected, reason: 'periodic-integrity' })
+        : { repaired: [], failed: [], requiredMissing: [], integrity: before, repairAttempts: 0, lastRepairedAt: new Date().toISOString(), repairReason: 'periodic-integrity' };
+    const after = repair.integrity || before;
+    const remainingProblems = after.missing.length + after.invalid.length + (after.corrupted || []).length;
+    const periodicIntegrity = {
+        checkedAt: new Date().toISOString(),
+        checked: after.checked,
+        healthy: after.healthy,
+        repaired: repair.repaired.length,
+        failed: repair.failed.length + remainingProblems,
+        cursor,
+        nextCursor,
+        sampleSize: selected.length,
+        missing: after.missing,
+        invalid: after.invalid,
+        corrupted: after.corrupted || [],
+        repairFailed: repair.failed.map(item => item && item.file || '').filter(Boolean)
+    };
+    const report = await readInstallReport(cache, null, { skipInspection: true });
+    const updated = Object.assign({}, report, {
+        periodicIntegrity,
+        lastRepairedAt: repair.repaired.length ? repair.lastRepairedAt : report.lastRepairedAt || '',
+        cacheName: CACHE_NAME
+    });
+    await writeInstallReport(cache, updated);
+    return updated;
 }
 
 async function broadcastInstallReport(cache, repaired) {
@@ -366,16 +410,21 @@ async function broadcastInstallReport(cache, repaired) {
 
 self.addEventListener('message', event => {
     const data = event && event.data || {};
-    if (data.type !== 'ai-shorts-service-worker-status-request' && data.type !== 'ai-shorts-service-worker-repair-request') return;
+    const supportedTypes = new Set(['ai-shorts-service-worker-status-request', 'ai-shorts-service-worker-repair-request', 'ai-shorts-service-worker-integrity-sample-request']);
+    if (!supportedTypes.has(data.type)) return;
     event.waitUntil((async () => {
         const cache = await caches.open(CACHE_NAME);
         let repair = null;
+        let report = null;
         if (data.type === 'ai-shorts-service-worker-repair-request') {
             repair = await repairShellCache(cache, { includeOptional: true, reason: 'manual' });
-            const current = await readInstallReport(cache, repair);
-            await writeInstallReport(cache, current);
+            report = await readInstallReport(cache, repair);
+            await writeInstallReport(cache, report);
+        } else if (data.type === 'ai-shorts-service-worker-integrity-sample-request') {
+            report = await runPeriodicIntegrityAudit(cache, data.sampleSize);
+        } else {
+            report = await readInstallReport(cache, null);
         }
-        const report = await readInstallReport(cache, repair);
         const target = event.source;
         if (target && typeof target.postMessage === 'function') target.postMessage({
             type: 'ai-shorts-service-worker-install-report',

@@ -91,7 +91,7 @@ function loadBrowserModule(rel, windowOverrides) {
     ok(pinBoard.includes("card.dataset.id === targetId") && !pinBoard.includes('querySelector(`.recommendation-card[data-id='), 'candidate pin board does not interpolate imported IDs into CSS selectors');
     ok(finish.includes('document.createTextNode(clampText(item.label') && !finish.includes('${clampText(item.label'), 'render job labels render as text');
 
-    console.log('PASS v1.5.24 runtime registration, media intake, and user-text safety guardrails');
+    console.log('PASS v1.5.25 runtime registration, media intake, and user-text safety guardrails');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

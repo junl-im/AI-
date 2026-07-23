@@ -1,16 +1,18 @@
-// AI Shorts Studio v1.5.24 - adaptive fingerprint diagnostics and bounded in-session analysis cache
+// AI Shorts Studio v1.5.25 - privacy-safe cache diagnostics and bounded IndexedDB persistence
 'use strict';
 
 (function exposeAnalysisCache(global) {
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.24').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.25').replace(/^v/i, '');
     const BASE_SAMPLE_BYTES = Math.max(4096, Math.min(128 * 1024, Number(config.ANALYSIS_CACHE_FINGERPRINT_SAMPLE_BYTES) || 16 * 1024));
     const MAX_SAMPLE_BYTES = Math.max(BASE_SAMPLE_BYTES, Math.min(256 * 1024, Number(config.ANALYSIS_CACHE_MAX_SAMPLE_BYTES) || 128 * 1024));
     const FULL_HASH_MAX_BYTES = Math.max(BASE_SAMPLE_BYTES, Number(config.ANALYSIS_CACHE_FULL_HASH_MAX_BYTES) || 2 * 1024 * 1024);
     const METADATA_HISTORY_LIMIT = Math.max(16, Math.min(256, Number(config.ANALYSIS_CACHE_METADATA_HISTORY_LIMIT) || 64));
+    const DIAGNOSTIC_EVENT_LIMIT = Math.max(20, Math.min(200, Number(config.ANALYSIS_CACHE_DIAGNOSTIC_EVENT_LIMIT) || 80));
     const fingerprintPromises = typeof WeakMap === 'function' ? new WeakMap() : null;
     const objectIds = typeof WeakMap === 'function' ? new WeakMap() : null;
     const metadataFingerprints = new Map();
+    const diagnosticEvents = [];
     let objectIdSequence = 0;
     let fingerprintComputations = 0;
     let fingerprintPromiseHits = 0;
@@ -35,6 +37,42 @@
         return global.performance && typeof global.performance.now === 'function' ? global.performance.now() : Date.now();
     }
 
+    function nowIso() {
+        return new Date().toISOString();
+    }
+
+    function textToken(value) {
+        const text = String(value || '');
+        let hash = 0x811c9dc5;
+        for (let index = 0; index < text.length; index += 1) {
+            hash ^= text.charCodeAt(index) & 0xff;
+            hash = Math.imul(hash, 0x01000193) >>> 0;
+            hash ^= text.charCodeAt(index) >>> 8;
+            hash = Math.imul(hash, 0x01000193) >>> 0;
+        }
+        return hash.toString(16).padStart(8, '0');
+    }
+
+    function recordEvent(type, detail) {
+        const source = detail || {};
+        const safe = { type: String(type || 'unknown'), at: nowIso() };
+        ['layer', 'reason', 'mode', 'algorithm', 'state'].forEach(key => {
+            if (source[key] != null) safe[key] = String(source[key]).slice(0, 80);
+        });
+        ['size', 'bytes', 'elapsedMs', 'count', 'limit', 'ageMs'].forEach(key => {
+            if (Number.isFinite(Number(source[key]))) safe[key] = Math.max(0, Number(source[key]));
+        });
+        if (source.key) safe.keyToken = textToken(source.key);
+        diagnosticEvents.unshift(Object.freeze(safe));
+        if (diagnosticEvents.length > DIAGNOSTIC_EVENT_LIMIT) diagnosticEvents.length = DIAGNOSTIC_EVENT_LIMIT;
+        return safe;
+    }
+
+    function getDiagnosticEvents(limit) {
+        const max = Math.max(1, Math.min(DIAGNOSTIC_EVENT_LIMIT, Number(limit) || DIAGNOSTIC_EVENT_LIMIT));
+        return diagnosticEvents.slice(0, max).map(event => Object.assign({}, event));
+    }
+
     function objectIdentity(file) {
         if (!file || (typeof file !== 'object' && typeof file !== 'function') || !objectIds) return '';
         if (!objectIds.has(file)) objectIds.set(file, `object-${++objectIdSequence}`);
@@ -50,7 +88,10 @@
         const signature = metadataSignature(file);
         if (!signature || !fingerprint) return;
         const previous = metadataFingerprints.get(signature);
-        if (previous && previous !== fingerprint) collisionAvoidanceCount += 1;
+        if (previous && previous !== fingerprint) {
+            collisionAvoidanceCount += 1;
+            recordEvent('fingerprint-collision-avoided', { reason: 'same-metadata-different-content', count: collisionAvoidanceCount });
+        }
         if (metadataFingerprints.has(signature)) metadataFingerprints.delete(signature);
         metadataFingerprints.set(signature, fingerprint);
         while (metadataFingerprints.size > METADATA_HISTORY_LIMIT) metadataFingerprints.delete(metadataFingerprints.keys().next().value);
@@ -149,12 +190,14 @@
         lastFingerprintAlgorithm = algorithm;
         if (plan.mode === 'full') fullFileHashes += 1;
         else sampledHashes += 1;
+        recordEvent('fingerprint-computed', { mode: plan.mode, algorithm, bytes, elapsedMs: Math.round(elapsed * 10) / 10, count: plan.starts.length });
     }
 
     async function computeFileFingerprint(file) {
         if (!file || typeof file.slice !== 'function' || !Number.isFinite(Number(file.size)) || Number(file.size) <= 0) return '';
         if (fingerprintPromises && fingerprintPromises.has(file)) {
             fingerprintPromiseHits += 1;
+            recordEvent('fingerprint-promise-hit', { count: fingerprintPromiseHits });
             return fingerprintPromises.get(file);
         }
         const task = (async () => {
@@ -179,8 +222,9 @@
             recordFingerprintMetric(startedAt, total, plan, digest.algorithm);
             rememberMetadataFingerprint(file, fingerprint);
             return fingerprint;
-        })().catch(() => {
+        })().catch(error => {
             fingerprintFailures += 1;
+            recordEvent('fingerprint-failed', { reason: error && error.message || 'unknown', count: fingerprintFailures });
             return '';
         });
         if (fingerprintPromises) fingerprintPromises.set(file, task);
@@ -249,6 +293,7 @@
                 if (now - entry.createdAt <= maxAgeMs) continue;
                 store.delete(key);
                 expired += 1;
+                recordEvent('memory-cache-expired', { layer: 'memory', key, ageMs: now - entry.createdAt, size: store.size });
             }
         }
 
@@ -257,6 +302,7 @@
             removeExpired(now);
             if (!key || !store.has(key)) {
                 misses += 1;
+                recordEvent('memory-cache-miss', { layer: 'memory', key, size: store.size });
                 return null;
             }
             const entry = store.get(key);
@@ -265,6 +311,7 @@
             store.set(key, entry);
             hits += 1;
             lastHitAgeMs = Math.max(0, now - entry.createdAt);
+            recordEvent('memory-cache-hit', { layer: 'memory', key, ageMs: lastHitAgeMs, size: store.size });
             return cloneValue(entry.value);
         }
 
@@ -274,9 +321,12 @@
             removeExpired(now);
             if (store.has(key)) store.delete(key);
             store.set(key, { createdAt: now, lastAccessAt: now, value: cloneValue(value) });
+            recordEvent('memory-cache-write', { layer: 'memory', key, size: store.size, limit: maxItems });
             while (store.size > maxItems) {
-                store.delete(store.keys().next().value);
+                const oldestKey = store.keys().next().value;
+                store.delete(oldestKey);
                 evictions += 1;
+                recordEvent('memory-cache-evicted', { layer: 'memory', key: oldestKey, reason: 'lru-limit', size: store.size, limit: maxItems });
             }
         }
 
@@ -290,17 +340,21 @@
                     if (now - (entry.lastAccessAt || entry.createdAt) <= maxIdleMs) continue;
                     store.delete(key);
                     manualPruned += 1;
+                    recordEvent('memory-cache-pruned', { layer: 'memory', key, reason: 'idle-limit', size: store.size });
                 }
             }
             const targetItems = Math.max(0, Number.isFinite(Number(settings.maxItems)) ? Number(settings.maxItems) : maxItems);
             while (store.size > targetItems) {
-                store.delete(store.keys().next().value);
+                const oldestKey = store.keys().next().value;
+                store.delete(oldestKey);
                 manualPruned += 1;
+                recordEvent('memory-cache-pruned', { layer: 'memory', key: oldestKey, reason: 'manual-limit', size: store.size, limit: targetItems });
             }
             return stats();
         }
 
         function clear() {
+            const removed = store.size;
             store.clear();
             hits = 0;
             misses = 0;
@@ -308,6 +362,7 @@
             expired = 0;
             manualPruned = 0;
             lastHitAgeMs = 0;
+            recordEvent('memory-cache-cleared', { layer: 'memory', count: removed });
         }
 
         function stats() {
@@ -331,20 +386,301 @@
                 adaptiveFingerprinting: true,
                 fingerprintSampleBytes: BASE_SAMPLE_BYTES,
                 hitRate: total ? Math.round((hits / total) * 100) : 0,
+                diagnosticEventCount: diagnosticEvents.length,
                 fingerprint: fingerprintStats()
             });
         }
 
-        return Object.freeze({ get, set, prune, clear, stats, makeFileKey, makeFileKeyAsync });
+        function diagnostics() {
+            return Object.freeze({ stats: stats(), recentEvents: getDiagnosticEvents() });
+        }
+
+        return Object.freeze({ get, set, prune, clear, stats, diagnostics, makeFileKey, makeFileKeyAsync });
+    }
+
+    function estimateValueBytes(value) {
+        try {
+            const text = JSON.stringify(value);
+            return text ? text.length * 2 : 0;
+        } catch (_) { return 0; }
+    }
+
+    function createPersistentAnalysisCache(options) {
+        const opts = options || {};
+        const indexedDB = global.indexedDB;
+        const supported = Boolean(indexedDB && typeof indexedDB.open === 'function');
+        const enabled = opts.enabled !== false && supported;
+        const databaseName = String(opts.databaseName || `ai-shorts-analysis-cache-v${ENGINE_VERSION.replace(/[^0-9.]/g, '') || '1'}`);
+        const storeName = String(opts.storeName || 'analysis-results');
+        const maxItems = Math.max(1, Math.min(32, Number(opts.maxItems) || 8));
+        const maxBytes = Math.max(1024 * 1024, Number(opts.maxBytes) || 16 * 1024 * 1024);
+        const maxAgeMs = Math.max(60_000, Number(opts.maxAgeMs) || 7 * 24 * 60 * 60 * 1000);
+        const namespace = String(opts.namespace || `engine-v${ENGINE_VERSION}`);
+        let databasePromise = null;
+        let hits = 0;
+        let misses = 0;
+        let writes = 0;
+        let writeFailures = 0;
+        let evictions = 0;
+        let expired = 0;
+        let clears = 0;
+        let size = 0;
+        let totalBytes = 0;
+        let lastError = '';
+        let lastOperationAt = '';
+        let state = enabled ? 'idle' : (supported ? 'disabled' : 'unsupported');
+
+        function persistentStats() {
+            const total = hits + misses;
+            return Object.freeze({
+                supported,
+                enabled,
+                state,
+                databaseName,
+                namespace,
+                size,
+                totalBytes,
+                maxItems,
+                maxBytes,
+                maxAgeMs,
+                hits,
+                misses,
+                hitRate: total ? Math.round((hits / total) * 100) : 0,
+                writes,
+                writeFailures,
+                evictions,
+                expired,
+                clears,
+                lastError,
+                lastOperationAt
+            });
+        }
+
+        function requestResult(request) {
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error || new Error('IndexedDB request failed'));
+            });
+        }
+
+        function transactionDone(transaction) {
+            return new Promise((resolve, reject) => {
+                transaction.oncomplete = () => resolve(true);
+                transaction.onerror = () => reject(transaction.error || new Error('IndexedDB transaction failed'));
+                transaction.onabort = () => reject(transaction.error || new Error('IndexedDB transaction aborted'));
+            });
+        }
+
+        function openDatabase() {
+            if (!enabled) return Promise.resolve(null);
+            if (databasePromise) return databasePromise;
+            state = 'opening';
+            databasePromise = new Promise((resolve, reject) => {
+                const request = indexedDB.open(databaseName, 1);
+                request.onupgradeneeded = () => {
+                    const database = request.result;
+                    if (!database.objectStoreNames.contains(storeName)) {
+                        const objectStore = database.createObjectStore(storeName, { keyPath: 'key' });
+                        objectStore.createIndex('lastAccessAt', 'lastAccessAt', { unique: false });
+                        objectStore.createIndex('createdAt', 'createdAt', { unique: false });
+                    }
+                };
+                request.onsuccess = () => {
+                    const database = request.result;
+                    database.onversionchange = () => { try { database.close(); } catch (_) { /* no-op */ } databasePromise = null; };
+                    state = 'ready';
+                    lastError = '';
+                    resolve(database);
+                };
+                request.onerror = () => reject(request.error || new Error('IndexedDB open failed'));
+                request.onblocked = () => reject(new Error('IndexedDB upgrade blocked'));
+            }).catch(error => {
+                state = 'error';
+                lastError = error && error.message || 'IndexedDB open failed';
+                databasePromise = null;
+                recordEvent('persistent-cache-error', { layer: 'persistent', state, reason: lastError });
+                return null;
+            });
+            return databasePromise;
+        }
+
+        async function readAll(database) {
+            if (!database) return [];
+            const transaction = database.transaction(storeName, 'readonly');
+            const store = transaction.objectStore(storeName);
+            if (typeof store.getAll === 'function') return requestResult(store.getAll());
+            return new Promise((resolve, reject) => {
+                const rows = [];
+                const request = store.openCursor();
+                request.onsuccess = () => {
+                    const cursor = request.result;
+                    if (!cursor) { resolve(rows); return; }
+                    rows.push(cursor.value);
+                    cursor.continue();
+                };
+                request.onerror = () => reject(request.error || new Error('IndexedDB cursor failed'));
+            });
+        }
+
+        async function removeKeys(database, keys) {
+            if (!database || !keys.length) return;
+            const transaction = database.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+            keys.forEach(key => store.delete(key));
+            await transactionDone(transaction);
+        }
+
+        async function refreshStats(database) {
+            const rows = await readAll(database);
+            size = rows.length;
+            totalBytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row && row.bytes) || 0), 0);
+            lastOperationAt = nowIso();
+            return rows;
+        }
+
+        async function prunePersistent() {
+            const database = await openDatabase();
+            if (!database) return persistentStats();
+            try {
+                state = 'pruning';
+                const now = Date.now();
+                const rows = await readAll(database);
+                const deleteKeys = [];
+                const active = [];
+                rows.forEach(row => {
+                    if (!row || row.namespace !== namespace || now - Number(row.createdAt || 0) > maxAgeMs) {
+                        if (row && row.key) deleteKeys.push(row.key);
+                        expired += 1;
+                    } else active.push(row);
+                });
+                active.sort((a, b) => Number(b.lastAccessAt || b.createdAt || 0) - Number(a.lastAccessAt || a.createdAt || 0));
+                let bytes = 0;
+                active.forEach((row, index) => {
+                    const rowBytes = Math.max(0, Number(row.bytes) || 0);
+                    if (index >= maxItems || bytes + rowBytes > maxBytes) {
+                        deleteKeys.push(row.key);
+                        evictions += 1;
+                    } else bytes += rowBytes;
+                });
+                await removeKeys(database, Array.from(new Set(deleteKeys)));
+                await refreshStats(database);
+                state = 'ready';
+                lastError = '';
+                if (deleteKeys.length) recordEvent('persistent-cache-pruned', { layer: 'persistent', count: deleteKeys.length, size, bytes: totalBytes });
+            } catch (error) {
+                state = 'error';
+                lastError = error && error.message || 'Persistent cache prune failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
+            }
+            return persistentStats();
+        }
+
+        async function getPersistent(key) {
+            if (!key || !enabled) return null;
+            const database = await openDatabase();
+            if (!database) return null;
+            try {
+                const transaction = database.transaction(storeName, 'readonly');
+                const row = await requestResult(transaction.objectStore(storeName).get(key));
+                const now = Date.now();
+                if (!row || row.namespace !== namespace) {
+                    misses += 1;
+                    recordEvent('persistent-cache-miss', { layer: 'persistent', key, size });
+                    return null;
+                }
+                if (now - Number(row.createdAt || 0) > maxAgeMs) {
+                    expired += 1;
+                    await removeKeys(database, [key]);
+                    misses += 1;
+                    await refreshStats(database);
+                    recordEvent('persistent-cache-expired', { layer: 'persistent', key, ageMs: now - Number(row.createdAt || 0), size });
+                    return null;
+                }
+                hits += 1;
+                lastOperationAt = nowIso();
+                const update = Object.assign({}, row, { lastAccessAt: now });
+                try {
+                    const writeTransaction = database.transaction(storeName, 'readwrite');
+                    writeTransaction.objectStore(storeName).put(update);
+                    await transactionDone(writeTransaction);
+                } catch (_) { /* access timestamp is best-effort */ }
+                recordEvent('persistent-cache-hit', { layer: 'persistent', key, ageMs: now - Number(row.createdAt || 0), bytes: row.bytes, size });
+                return cloneValue(row.value);
+            } catch (error) {
+                misses += 1;
+                state = 'error';
+                lastError = error && error.message || 'Persistent cache read failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', key, reason: lastError });
+                return null;
+            }
+        }
+
+        async function setPersistent(key, value) {
+            if (!key || !value || !enabled) return false;
+            const database = await openDatabase();
+            if (!database) return false;
+            const bytes = estimateValueBytes(value);
+            if (!bytes || bytes > maxBytes) {
+                writeFailures += 1;
+                recordEvent('persistent-cache-write-skipped', { layer: 'persistent', key, reason: bytes ? 'entry-too-large' : 'size-unknown', bytes });
+                return false;
+            }
+            try {
+                state = 'writing';
+                const now = Date.now();
+                const transaction = database.transaction(storeName, 'readwrite');
+                transaction.objectStore(storeName).put({ key, namespace, createdAt: now, lastAccessAt: now, bytes, value: cloneValue(value) });
+                await transactionDone(transaction);
+                writes += 1;
+                lastOperationAt = nowIso();
+                lastError = '';
+                recordEvent('persistent-cache-write', { layer: 'persistent', key, bytes, size: size + 1 });
+                await prunePersistent();
+                return true;
+            } catch (error) {
+                writeFailures += 1;
+                state = 'error';
+                lastError = error && error.message || 'Persistent cache write failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', key, reason: lastError });
+                return false;
+            }
+        }
+
+        async function clearPersistent() {
+            const database = await openDatabase();
+            if (!database) return persistentStats();
+            try {
+                const transaction = database.transaction(storeName, 'readwrite');
+                transaction.objectStore(storeName).clear();
+                await transactionDone(transaction);
+                clears += 1;
+                size = 0;
+                totalBytes = 0;
+                state = 'ready';
+                lastOperationAt = nowIso();
+                lastError = '';
+                recordEvent('persistent-cache-cleared', { layer: 'persistent', count: 1 });
+            } catch (error) {
+                state = 'error';
+                lastError = error && error.message || 'Persistent cache clear failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
+            }
+            return persistentStats();
+        }
+
+        if (enabled) prunePersistent().catch(() => {});
+        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats });
     }
 
     global.AIShortsAnalysisCache = Object.freeze({
         createAnalysisCache,
+        createPersistentAnalysisCache,
         makeFileKey,
         makeFileKeyAsync,
         computeFileFingerprint,
         fingerprintPlan,
         fingerprintStats,
+        getDiagnosticEvents,
         cloneValue
     });
 })(window);

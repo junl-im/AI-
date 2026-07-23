@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.24 - adaptive fingerprint cache diagnostics and parallel analysis kernel facade
+// AI Shorts Studio v1.5.25 - layered analysis cache, private diagnostics export, and parallel engine facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -11,13 +11,21 @@
     const tuner = global.AIShortsProEngineTuner || {};
     const stability = global.AIShortsStabilityAuditor || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.24').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.25').replace(/^v/i, '');
 
     const registry = registryFactory.createRegistry ? registryFactory.createRegistry('ai-shorts-studio-pro-engine') : null;
     const analysisCache = cacheFactory.createAnalysisCache ? cacheFactory.createAnalysisCache(
         Math.max(1, Number(config.ANALYSIS_CACHE_MAX_ITEMS) || 4),
         { maxAgeMs: Math.max(30_000, Number(config.ANALYSIS_CACHE_MAX_AGE_MS) || 30 * 60 * 1000) }
     ) : null;
+    const persistentAnalysisCache = cacheFactory.createPersistentAnalysisCache ? cacheFactory.createPersistentAnalysisCache({
+        enabled: config.ANALYSIS_PERSISTENT_CACHE_ENABLED !== false,
+        databaseName: String(config.ANALYSIS_PERSISTENT_CACHE_DB_NAME || 'ai-shorts-analysis-cache-v1'),
+        namespace: `engine-v${ENGINE_VERSION}`,
+        maxItems: Math.max(1, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_ITEMS) || 8),
+        maxBytes: Math.max(1024 * 1024, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_BYTES) || 16 * 1024 * 1024),
+        maxAgeMs: Math.max(60_000, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_AGE_MS) || 7 * 24 * 60 * 60 * 1000)
+    }) : null;
     let lastContractReport = null;
     let lastStabilityReport = null;
 
@@ -37,7 +45,7 @@
         { id: 'recommendation.scoring.pipeline', stage: 'recommendation', priority: 40, capabilities: ['quality-gate', 'engine-badge', 'rerank'] },
         { id: 'pro.engine.tuner', stage: 'recommendation', priority: 45, capabilities: ['confidence', 'grade', 'score-depth'] },
         { id: 'render.quality.effects', stage: 'render', priority: 50, capabilities: ['caption', 'quality', 'watermark'] },
-        { id: 'analysis.cache', stage: 'utility', priority: 60, capabilities: ['session-cache', 'repeat-open-boost', 'adaptive-fingerprint', 'cache-diagnostics'] },
+        { id: 'analysis.cache', stage: 'utility', priority: 60, capabilities: ['session-cache', 'indexeddb-cache', 'repeat-open-boost', 'adaptive-fingerprint', 'cache-diagnostics'] },
         { id: 'stability.auditor', stage: 'stability', priority: 70, capabilities: ['health-score', 'contract-report'] }
     ].forEach(registerModule);
 
@@ -47,7 +55,10 @@
     }
 
     function cacheStats() {
-        return analysisCache && analysisCache.stats ? analysisCache.stats() : null;
+        const memory = analysisCache && analysisCache.stats ? analysisCache.stats() : null;
+        const persistent = persistentAnalysisCache && persistentAnalysisCache.stats ? persistentAnalysisCache.stats() : null;
+        if (!memory) return persistent ? { persistent } : null;
+        return Object.freeze(Object.assign({}, memory, { persistent }));
     }
 
     function annotateEngine(result, budget, profile, extra) {
@@ -79,16 +90,23 @@
                 ? analysisCache.makeFileKey(input && input.file, input && input.fileMeta, budget)
                 : '';
         if (profiler) profiler.mark('fingerprint-complete', cacheStats() && cacheStats().fingerprint || null);
-        const cached = analysisCache && analysisCache.get ? analysisCache.get(cacheKey) : null;
-        if (cached) {
-            if (profiler) profiler.mark('cache-hit');
-            return annotateEngine(cached, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: true });
+        const memoryCached = analysisCache && analysisCache.get ? analysisCache.get(cacheKey) : null;
+        if (memoryCached) {
+            if (profiler) profiler.mark('cache-hit-memory');
+            return annotateEngine(memoryCached, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: true, cacheLayer: 'memory' });
+        }
+        const persistentCached = persistentAnalysisCache && persistentAnalysisCache.get ? await persistentAnalysisCache.get(cacheKey) : null;
+        if (persistentCached) {
+            if (analysisCache && analysisCache.set) analysisCache.set(cacheKey, persistentCached);
+            if (profiler) profiler.mark('cache-hit-persistent');
+            return annotateEngine(persistentCached, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: true, cacheLayer: 'persistent' });
         }
         let result = await analysis.analyzeMedia(Object.assign({}, input || {}, { budget }));
         if (contracts.normalizeAnalysisResult) result = contracts.normalizeAnalysisResult(result);
         if (profiler) profiler.mark('analysis-complete');
         if (analysisCache && analysisCache.set) analysisCache.set(cacheKey, result);
-        return annotateEngine(result, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: false });
+        if (persistentAnalysisCache && persistentAnalysisCache.set) persistentAnalysisCache.set(cacheKey, result).catch(() => {});
+        return annotateEngine(result, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: false, cacheLayer: 'none' });
     }
 
     function createRecommendations(input) {
@@ -113,13 +131,61 @@
         return lastStabilityReport;
     }
 
-    function clearAnalysisCache() {
+    async function clearAnalysisCache() {
         if (analysisCache && analysisCache.clear) analysisCache.clear();
+        if (persistentAnalysisCache && persistentAnalysisCache.clear) await persistentAnalysisCache.clear();
         return cacheStats();
     }
 
-    function pruneAnalysisCache(options) {
-        return analysisCache && analysisCache.prune ? analysisCache.prune(options || {}) : cacheStats();
+    async function pruneAnalysisCache(options) {
+        if (analysisCache && analysisCache.prune) analysisCache.prune(options || {});
+        if (persistentAnalysisCache && persistentAnalysisCache.prune) await persistentAnalysisCache.prune(options || {});
+        return cacheStats();
+    }
+
+    function getAnalysisCacheDiagnostics() {
+        const memoryDiagnostics = analysisCache && analysisCache.diagnostics ? analysisCache.diagnostics() : { stats: cacheStats(), recentEvents: [] };
+        return Object.freeze({
+            app: 'AI Shorts Studio',
+            exportType: 'analysis-cache-diagnostics',
+            appVersion: config.APP_VERSION || 'dev',
+            buildKey: config.BUILD_KEY || '',
+            generatedAt: new Date().toISOString(),
+            privacy: Object.freeze({ includesFileNames: false, includesPaths: false, keyRepresentation: 'fnv1a-token' }),
+            cache: cacheStats(),
+            recentEvents: Array.isArray(memoryDiagnostics.recentEvents) ? memoryDiagnostics.recentEvents.slice(0, 80) : []
+        });
+    }
+
+    function diagnosticsFilename() {
+        const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z').replace('T', '-');
+        return `ai-shorts-analysis-cache-diagnostics-${stamp}.json`;
+    }
+
+    function saveDiagnosticsBlob(blob, filename) {
+        const downloadService = global.AIShortsDownloadService || {};
+        if (typeof downloadService.saveBlob === 'function') {
+            downloadService.saveBlob(blob, filename);
+            return true;
+        }
+        if (!global.URL || typeof global.URL.createObjectURL !== 'function' || !global.document) return false;
+        const url = global.URL.createObjectURL(blob);
+        const anchor = global.document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.rel = 'noopener';
+        global.document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        global.setTimeout(() => { try { global.URL.revokeObjectURL(url); } catch (_) { /* no-op */ } }, Math.max(10000, Number(config.DOWNLOAD_URL_REVOKE_DELAY_MS) || 45000));
+        return true;
+    }
+
+    function exportAnalysisCacheDiagnostics() {
+        const payload = getAnalysisCacheDiagnostics();
+        const filename = diagnosticsFilename();
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        return Object.freeze({ saved: saveDiagnosticsBlob(blob, filename), filename, eventCount: payload.recentEvents.length, payload });
     }
 
     function getHealthReport() {
@@ -140,6 +206,8 @@
         createRecommendations,
         auditRuntime,
         getHealthReport,
+        getAnalysisCacheDiagnostics,
+        exportAnalysisCacheDiagnostics,
         clearAnalysisCache,
         pruneAnalysisCache
     });

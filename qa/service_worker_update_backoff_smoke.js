@@ -17,7 +17,7 @@ const serviceWorker = { register: async () => registration, addEventListener() {
 const window = {
     window: null, location: { protocol: 'https:', hostname: 'studio.test' }, isSecureContext: true,
     navigator: { serviceWorker },
-    AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.24', SW_UPDATE_MAX_ATTEMPTS: 3, SW_UPDATE_BACKOFF_BASE_MS: 250 },
+    AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.25', SW_UPDATE_MAX_ATTEMPTS: 3, SW_UPDATE_BACKOFF_BASE_MS: 250 },
     AIShortsAppState: { addDiagnostic(item) { diagnostics.push(item); } },
     setTimeout(callback, ms) { waits.push(ms); callback(); return 1; }
 };

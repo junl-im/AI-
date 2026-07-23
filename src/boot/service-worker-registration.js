@@ -1,21 +1,30 @@
-// AI Shorts Studio v1.5.24 - observable service worker lifecycle with content integrity and rollback reports
+// AI Shorts Studio v1.5.25 - observable lifecycle with scheduled partial integrity audits
 'use strict';
 
 (function exposeServiceWorkerRegistration(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const MAX_UPDATE_ATTEMPTS = Math.max(1, Math.min(4, Number(config.SW_UPDATE_MAX_ATTEMPTS) || 3));
     const UPDATE_BACKOFF_BASE_MS = Math.max(100, Math.min(10000, Number(config.SW_UPDATE_BACKOFF_BASE_MS) || 500));
+    const INTEGRITY_AUDIT_INTERVAL_MS = Math.max(60_000, Number(config.SW_INTEGRITY_AUDIT_INTERVAL_MS) || 15 * 60 * 1000);
+    const INTEGRITY_AUDIT_INITIAL_DELAY_MS = Math.max(5000, Number(config.SW_INTEGRITY_AUDIT_INITIAL_DELAY_MS) || 30 * 1000);
+    const INTEGRITY_AUDIT_SAMPLE_SIZE = Math.max(4, Math.min(32, Number(config.SW_INTEGRITY_AUDIT_SAMPLE_SIZE) || 12));
     let registrationPromise = null;
     let registrationRef = null;
     let updatePromise = null;
     let repairPromise = null;
+    let integrityAuditPromise = null;
+    let integrityAuditTimer = 0;
     let repairSequence = 0;
+    let integrityAuditSequence = 0;
     const repairWaiters = new Map();
+    const integrityAuditWaiters = new Map();
     let listenersBound = false;
+    let visibilityBound = false;
     let controllerChangeCount = 0;
     let lastInstallReport = null;
     let updateStatus = Object.freeze({ state: 'idle', attempts: 0, lastCheckedAt: '', lastSuccessAt: '', lastError: '', nextRetryAt: '' });
     let repairStatus = Object.freeze({ state: 'idle', requestedAt: '', completedAt: '', repaired: 0, failed: 0, lastError: '' });
+    let integrityAuditStatus = Object.freeze({ state: 'idle', requestedAt: '', completedAt: '', checked: 0, healthy: 0, repaired: 0, failed: 0, cursor: 0, nextCursor: 0, lastError: '', nextAuditAt: '' });
 
     function getStore() { return global.AIShortsAppState || {}; }
     function resolveVersion() {
@@ -48,12 +57,31 @@
             version: resolveVersion(),
             installReport: lastInstallReport,
             update: updateStatus,
-            repair: repairStatus
+            repair: repairStatus,
+            integrityAudit: integrityAuditStatus
         });
     }
     function emitStatus() {
         if (!global.document || typeof global.document.dispatchEvent !== 'function' || typeof global.CustomEvent !== 'function') return;
         try { global.document.dispatchEvent(new global.CustomEvent('ai-shorts-service-worker-status', { detail: getStatus() })); } catch (_) { /* optional */ }
+    }
+    function normalizePeriodicIntegrity(value) {
+        const audit = value && typeof value === 'object' ? value : null;
+        if (!audit) return null;
+        return Object.freeze({
+            checkedAt: String(audit.checkedAt || ''),
+            checked: Number(audit.checked) || 0,
+            healthy: Number(audit.healthy) || 0,
+            repaired: Number(audit.repaired) || 0,
+            failed: Number(audit.failed) || 0,
+            cursor: Number(audit.cursor) || 0,
+            nextCursor: Number(audit.nextCursor) || 0,
+            sampleSize: Number(audit.sampleSize) || 0,
+            missing: Array.isArray(audit.missing) ? audit.missing.slice(0, 24) : [],
+            invalid: Array.isArray(audit.invalid) ? audit.invalid.slice(0, 24) : [],
+            corrupted: Array.isArray(audit.corrupted) ? audit.corrupted.slice(0, 24) : [],
+            repairFailed: Array.isArray(audit.repairFailed) ? audit.repairFailed.slice(0, 24) : []
+        });
     }
     function normalizeInstallReport(report) {
         const value = report || {};
@@ -87,6 +115,7 @@
                 invalid: Array.isArray(value.integrity.invalid) ? value.integrity.invalid.slice(0, 24) : [],
                 corrupted: Array.isArray(value.integrity.corrupted) ? value.integrity.corrupted.slice(0, 24) : []
             }) : null,
+            periodicIntegrity: normalizePeriodicIntegrity(value.periodicIntegrity),
             installedAt: String(value.installedAt || ''),
             reportedAt: new Date().toISOString()
         });
@@ -117,6 +146,22 @@
                 lastError: lastInstallReport.repairFailed.length || lastInstallReport.requiredMissing.length ? '일부 오프라인 자산을 복구하지 못했습니다.' : ''
             });
         }
+        if (lastInstallReport.periodicIntegrity) {
+            const audit = lastInstallReport.periodicIntegrity;
+            integrityAuditStatus = Object.freeze({
+                state: audit.failed ? 'error' : 'ready',
+                requestedAt: integrityAuditStatus.requestedAt || audit.checkedAt,
+                completedAt: audit.checkedAt,
+                checked: audit.checked,
+                healthy: audit.healthy,
+                repaired: audit.repaired,
+                failed: audit.failed,
+                cursor: audit.cursor,
+                nextCursor: audit.nextCursor,
+                lastError: audit.failed ? '일부 오프라인 자산의 주기 검증 또는 복구에 실패했습니다.' : '',
+                nextAuditAt: integrityAuditStatus.nextAuditAt || ''
+            });
+        }
         emitStatus();
         return lastInstallReport;
     }
@@ -128,6 +173,7 @@
             controllerChangeCount += 1;
             addDiagnostic({ type: 'service-worker-controller-change', count: controllerChangeCount, controlled: Boolean(serviceWorker.controller), version: resolveVersion() });
             requestInstallReport();
+            scheduleIntegrityAudit(INTEGRITY_AUDIT_INITIAL_DELAY_MS);
             emitStatus();
         });
         serviceWorker.addEventListener('message', event => {
@@ -135,12 +181,30 @@
             if (data.type !== 'ai-shorts-service-worker-install-report') return;
             const report = acceptInstallReport(data.report || {});
             const requestId = String(data.requestId || '');
-            const waiter = requestId && repairWaiters.get(requestId);
-            if (waiter) {
+            const repairWaiter = requestId && repairWaiters.get(requestId);
+            if (repairWaiter) {
                 repairWaiters.delete(requestId);
-                waiter.resolve(report);
+                repairWaiter.resolve(report);
+            }
+            const auditWaiter = requestId && integrityAuditWaiters.get(requestId);
+            if (auditWaiter) {
+                integrityAuditWaiters.delete(requestId);
+                auditWaiter.resolve(report);
             }
         });
+    }
+    function bindVisibilityListeners() {
+        if (visibilityBound || !global.document || typeof global.document.addEventListener !== 'function') return;
+        visibilityBound = true;
+        global.document.addEventListener('visibilitychange', () => {
+            if (global.document.hidden) {
+                if (integrityAuditTimer && global.clearTimeout) global.clearTimeout(integrityAuditTimer);
+                integrityAuditTimer = 0;
+                return;
+            }
+            scheduleIntegrityAudit(5000);
+        });
+        if (global.addEventListener) global.addEventListener('online', () => scheduleIntegrityAudit(5000));
     }
     function watchRegistration(registration) {
         if (!registration || typeof registration.addEventListener !== 'function') return;
@@ -159,9 +223,12 @@
         if (typeof global.setTimeout !== 'function') return Promise.resolve();
         return new Promise(resolve => global.setTimeout(resolve, Math.max(0, Number(ms) || 0)));
     }
-    function requestInstallReport() {
+    function requestTarget() {
         const serviceWorker = global.navigator && global.navigator.serviceWorker;
-        const target = serviceWorker && serviceWorker.controller || registrationRef && (registrationRef.active || registrationRef.waiting || registrationRef.installing);
+        return serviceWorker && serviceWorker.controller || registrationRef && (registrationRef.active || registrationRef.waiting || registrationRef.installing) || null;
+    }
+    function requestInstallReport() {
+        const target = requestTarget();
         if (!target || typeof target.postMessage !== 'function') return false;
         try { target.postMessage({ type: 'ai-shorts-service-worker-status-request', version: resolveVersion() }); return true; }
         catch (_) { return false; }
@@ -169,8 +236,7 @@
     function repairCache(options) {
         if (repairPromise) return repairPromise;
         const opts = options || {};
-        const serviceWorker = global.navigator && global.navigator.serviceWorker;
-        const target = serviceWorker && serviceWorker.controller || registrationRef && (registrationRef.active || registrationRef.waiting || registrationRef.installing);
+        const target = requestTarget();
         if (!target || typeof target.postMessage !== 'function') return Promise.resolve({ status: 'unsupported', report: lastInstallReport });
         const requestId = `repair-${Date.now()}-${++repairSequence}`;
         const requestedAt = new Date().toISOString();
@@ -211,6 +277,77 @@
             }
         }).finally(() => { repairPromise = null; });
         return repairPromise;
+    }
+    function requestIntegrityAudit(options) {
+        if (integrityAuditPromise) return integrityAuditPromise;
+        const opts = options || {};
+        const target = requestTarget();
+        if (!target || typeof target.postMessage !== 'function') return Promise.resolve({ status: 'unsupported', report: lastInstallReport });
+        const requestId = `integrity-${Date.now()}-${++integrityAuditSequence}`;
+        const requestedAt = new Date().toISOString();
+        const sampleSize = Math.max(4, Math.min(32, Number(opts.sampleSize) || INTEGRITY_AUDIT_SAMPLE_SIZE));
+        integrityAuditStatus = Object.freeze(Object.assign({}, integrityAuditStatus, { state: 'checking', requestedAt, completedAt: '', checked: 0, healthy: 0, repaired: 0, failed: 0, lastError: '' }));
+        emitStatus();
+        integrityAuditPromise = new Promise(resolve => {
+            const timeoutMs = Math.max(3000, Math.min(30000, Number(opts.timeoutMs) || 15000));
+            const timeoutId = global.setTimeout ? global.setTimeout(() => {
+                integrityAuditWaiters.delete(requestId);
+                integrityAuditStatus = Object.freeze(Object.assign({}, integrityAuditStatus, { state: 'error', completedAt: new Date().toISOString(), failed: 1, lastError: '오프라인 셸 표본 검증 응답 시간이 초과되었습니다.' }));
+                addDiagnostic({ type: 'service-worker-integrity-audit-timeout', requestId, timeoutMs, sampleSize });
+                emitStatus();
+                resolve({ status: 'timeout', report: lastInstallReport });
+            }, timeoutMs) : null;
+            integrityAuditWaiters.set(requestId, {
+                resolve(report) {
+                    if (timeoutId && global.clearTimeout) global.clearTimeout(timeoutId);
+                    const audit = report && report.periodicIntegrity || {};
+                    integrityAuditStatus = Object.freeze({
+                        state: audit.failed ? 'error' : 'ready',
+                        requestedAt,
+                        completedAt: audit.checkedAt || new Date().toISOString(),
+                        checked: Number(audit.checked) || 0,
+                        healthy: Number(audit.healthy) || 0,
+                        repaired: Number(audit.repaired) || 0,
+                        failed: Number(audit.failed) || 0,
+                        cursor: Number(audit.cursor) || 0,
+                        nextCursor: Number(audit.nextCursor) || 0,
+                        lastError: audit.failed ? '일부 오프라인 자산의 검증 또는 복구에 실패했습니다.' : '',
+                        nextAuditAt: new Date(Date.now() + INTEGRITY_AUDIT_INTERVAL_MS).toISOString()
+                    });
+                    addDiagnostic({ type: 'service-worker-integrity-audit-complete', requestId, checked: integrityAuditStatus.checked, repaired: integrityAuditStatus.repaired, failed: integrityAuditStatus.failed, cursor: integrityAuditStatus.cursor, nextCursor: integrityAuditStatus.nextCursor });
+                    emitStatus();
+                    resolve({ status: integrityAuditStatus.state, report });
+                }
+            });
+            try { target.postMessage({ type: 'ai-shorts-service-worker-integrity-sample-request', requestId, version: resolveVersion(), sampleSize }); }
+            catch (error) {
+                if (timeoutId && global.clearTimeout) global.clearTimeout(timeoutId);
+                integrityAuditWaiters.delete(requestId);
+                integrityAuditStatus = Object.freeze(Object.assign({}, integrityAuditStatus, { state: 'error', completedAt: new Date().toISOString(), failed: 1, lastError: error && error.message || '표본 검증 요청 전송 실패' }));
+                emitStatus();
+                resolve({ status: 'error', report: lastInstallReport, error });
+            }
+        }).finally(() => { integrityAuditPromise = null; });
+        return integrityAuditPromise;
+    }
+    function scheduleIntegrityAudit(delayMs) {
+        if (!global.document || typeof global.setTimeout !== 'function' || !canRegister()) return false;
+        if (integrityAuditTimer && global.clearTimeout) global.clearTimeout(integrityAuditTimer);
+        const waitMs = Math.max(1000, Number(delayMs) || INTEGRITY_AUDIT_INTERVAL_MS);
+        const nextAuditAt = new Date(Date.now() + waitMs).toISOString();
+        integrityAuditStatus = Object.freeze(Object.assign({}, integrityAuditStatus, { nextAuditAt }));
+        integrityAuditTimer = global.setTimeout(() => {
+            integrityAuditTimer = 0;
+            if (global.document.hidden || global.navigator && global.navigator.onLine === false) {
+                scheduleIntegrityAudit(Math.min(INTEGRITY_AUDIT_INTERVAL_MS, 60_000));
+                return;
+            }
+            const run = () => requestIntegrityAudit({ sampleSize: INTEGRITY_AUDIT_SAMPLE_SIZE }).finally(() => scheduleIntegrityAudit(INTEGRITY_AUDIT_INTERVAL_MS));
+            if (typeof global.requestIdleCallback === 'function') global.requestIdleCallback(run, { timeout: 5000 });
+            else run();
+        }, waitMs);
+        emitStatus();
+        return true;
     }
     function requestUpdate(registration, source) {
         if (!registration || typeof registration.update !== 'function') return Promise.resolve(false);
@@ -253,11 +390,13 @@
         if (!canRegister()) return Promise.resolve({ status: 'unsupported', registration: null, version: resolveVersion(), lifecycle: getStatus() });
         if (registrationPromise) return registrationPromise;
         bindLifecycleListeners();
+        bindVisibilityListeners();
         registrationPromise = global.navigator.serviceWorker.register(opts.scriptUrl).then(async registration => {
             registrationRef = registration || null;
             watchRegistration(registrationRef);
             await requestUpdate(registrationRef, 'register');
             requestInstallReport();
+            scheduleIntegrityAudit(INTEGRITY_AUDIT_INITIAL_DELAY_MS);
             const version = resolveVersion();
             const lifecycle = getStatus();
             addDiagnostic({ type: 'service-worker-ready', version, scope: lifecycle.scope, active: lifecycle.active, controlled: lifecycle.controlled });
@@ -280,10 +419,7 @@
         if (!result || result.status !== 'ready' || !serviceWorker) return Object.assign({}, result, { controlled: false });
         if (serviceWorker.controller) return Object.assign({}, result, { controlled: true, lifecycle: getStatus() });
         if (!serviceWorker.ready || typeof serviceWorker.ready.then !== 'function') return Object.assign({}, result, { controlled: false, lifecycle: getStatus() });
-        await Promise.race([
-            serviceWorker.ready,
-            delay(Math.max(0, Number(opts.timeoutMs) || 0))
-        ]);
+        await Promise.race([serviceWorker.ready, delay(Math.max(0, Number(opts.timeoutMs) || 0))]);
         return Object.assign({}, result, { controlled: Boolean(serviceWorker.controller), lifecycle: getStatus() });
     }
     async function checkForUpdate(options) {
@@ -294,5 +430,5 @@
         return Object.assign({}, result, { updateChecked: checked, lifecycle: getStatus() });
     }
 
-    global.AIShortsServiceWorkerRegistration = Object.freeze({ register, checkForUpdate, waitUntilControlled, getStatus, canRegister, resolveVersion, requestInstallReport, repairCache });
+    global.AIShortsServiceWorkerRegistration = Object.freeze({ register, checkForUpdate, waitUntilControlled, getStatus, canRegister, resolveVersion, requestInstallReport, repairCache, requestIntegrityAudit, scheduleIntegrityAudit });
 })(window);

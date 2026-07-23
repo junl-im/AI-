@@ -24,4 +24,4 @@ assert(refinement.includes('max-width: 100% !important;') && refinement.includes
 assert(comfort.includes('grid-template-columns: repeat(8, minmax(0, 1fr)) !important'), 'desktop comfort layer no longer forces 112px minimum columns');
 assert(!comfort.includes('--comfort-dock-max') && !comfort.includes('minmax(112px, 1fr)'), 'obsolete 1180px-plus inner rail constraint is removed');
 assert(pcHotfix.includes('@media (min-width: 721px) and (max-width: 1179px)') && pcHotfix.includes('repeat(8, minmax(0, 1fr))'), 'small PC and tablet widths use a compact single-row eight-tab layout');
-console.log('PASS v1.5.24 PC menu containment guardrails present');
+console.log('PASS v1.5.25 PC menu containment guardrails present');
