@@ -1,44 +1,44 @@
-# HANDOFF v1.5.25 Persistent Analysis & Selective Recovery Patch
+# HANDOFF v1.5.26 Adaptive Cache & Protected Recovery Patch
 
 ## 현재 상태
 
-v1.5.24 전체본을 기준으로 분석 결과의 제한적 브라우저 영구 보관, 개인정보 비노출 진단, 선택 백업 복원, 서비스워커 순환 무결성 감사를 추가했습니다.
+v1.5.25 전체본을 기준으로 영구 분석 캐시 quota 적응, 항목별 삭제, 서비스워커 감사 이력·백오프·진단 내보내기, 중요 세션 백업·복원 미리보기를 추가했습니다.
 
-- 자동 QA: **204/204 통과**
+- 자동 QA: **208/208 통과**
 - Chromium desktop·small laptop·tablet·mobile: 오류·Promise 거절·콘솔 오류·가로 overflow **0건**
-- 분석 캐시: memory-first + 선택적 IndexedDB, 7일 TTL, 최대 8개·16MiB, 앱 버전 namespace, LRU 정리
-- 분석 진단: 적중·미적중·만료·퇴출·지문 비용 집계, 원시 키·파일명·경로 없는 JSON 내보내기
-- 세션 복구: 기본 기록·백업 목록, 저장 시각·압축률·검증 상태 표시, 정상 백업 직접 선택 복원
-- 서비스워커: 유휴 시간 12개 순환 표본 SHA-256 검사, 손상 표본만 재다운로드·재검증, 숨김·오프라인 일시 중지
-- runtime build key: `1.5.25-persistent-analysis-selective-recovery-integrity-audit`
+- 분석 캐시: 정상 8개·16MiB, 경고 60%, 위험 2개·4MiB, quota 정리·재시도, 비식별 항목별 삭제
+- 세션 복구: 비회전 중요 백업, 자동 복구 우선순위, 프로젝트 요약 미리보기
+- 서비스워커: 감사 이력 40개, 자산별 5분~6시간 백오프, 온라인 복귀 자동 재개, 진단 JSON
+- CSS: conflict·same-value duplicate·shadowed declaration 0, `!important` 593개
+- runtime build key: `1.5.26-adaptive-cache-audit-protected-recovery`
 
 ## 검수 순서
 
-1. `node qa/analysis_persistent_cache_export_smoke.js`
-2. `node qa/session_backup_selection_smoke.js`
-3. `node qa/service_worker_periodic_integrity_smoke.js`
-4. `node qa/service_worker_integrity_registration_smoke.js`
-5. `node qa/service_worker_content_integrity_smoke.js`
+1. `node qa/analysis_persistent_quota_selective_smoke.js`
+2. `node qa/session_protected_backup_preview_smoke.js`
+3. `node qa/service_worker_integrity_history_backoff_smoke.js`
+4. `node qa/service_worker_integrity_export_smoke.js`
+5. `node qa/run_service_worker_lifecycle.js`
 6. `python3 qa/run_browser_audit.py`
 7. `python3 qa/run_process_memory_audit.py`
 8. `npm test`
 
 ## 알려진 제한
 
-- IndexedDB 영구 분석 캐시는 브라우저 지원 시에만 활성화되며 저장 공간 확보를 보장하지 않습니다. 실패 시 메모리 캐시와 정상 분석 흐름으로 자동 폴백합니다.
-- 영구 캐시는 브라우저 로컬 저장소에만 머물지만 분석 결과 일부를 포함합니다. 진단 JSON에는 결과 본문·파일명·경로·원시 캐시 키를 포함하지 않습니다.
-- 주기 무결성 검사는 전력·네트워크 부담을 줄이기 위해 한 번에 12개 파일만 검사하므로 전체 앱 셸 검증은 여러 주기에 걸쳐 완료됩니다.
-- 백업 선택 복원은 검증된 정상 스냅샷만 허용하며 손상 항목은 진단용으로만 표시합니다.
+- 저장소 사용량은 브라우저 추정치이며 미지원 환경에서는 기본 영구 캐시 한도를 유지합니다.
+- 선택 삭제 목록의 바이트 수는 직렬화 예상치로 IndexedDB 실제 디스크 점유량과 다를 수 있습니다.
+- 백오프·감사 이력은 앱 셸 캐시와 함께 저장되므로 브라우저 캐시 삭제 시 초기화됩니다.
+- 중요 백업은 자동 회전에서 제외되지만 사용자의 명시적 삭제 동작에서는 제거될 수 있습니다.
 - 미디어 디코더·렌더러·Object URL 소유 경로는 변경하지 않아 검증된 v1.5.24 장시간 영상 근거를 상속했습니다.
 - 모바일 Safari·Samsung Internet과 물리 GPU는 실기기 검증이 필요합니다.
 
 ## 다음 작업
 
-1. 영구 분석 캐시의 quota pressure 연동과 항목별 용량 상세 진단
-2. 서비스워커 주기 감사 이력·복구 실패 백오프·진단 내보내기
-3. 세션 백업 보존 개수 사용자 설정과 복원 전 미리보기
-4. 모바일 Safari·Samsung Internet 다운로드·백그라운드 복귀 검증
-5. 물리 GPU 장시간 decoder·renderer 자원 반환 검증
+1. 분석 옵션·엔진 계약 단위 캐시 무효화와 이전 namespace 정리
+2. 다중 캐시 항목 선택 삭제와 quota 추세 진단
+3. 서비스워커 실패 자산 즉시 재시도·감사 이력 관리 UI
+4. 중요 백업 내보내기·가져오기와 보존 정책 설정
+5. 모바일 Safari·Samsung Internet 및 물리 GPU 장시간 검증
 
 ---
 

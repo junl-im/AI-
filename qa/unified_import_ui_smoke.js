@@ -26,4 +26,4 @@ assert(workspaceCss.includes('grid-area: utility') && workspaceCss.includes('gri
 assert(heroCss.includes('.hero-launch-layout') && heroCss.includes('.command-deck-kicker') && heroCss.includes('.hero-start-meta'), 'hero launch card uses the redesigned visual hierarchy');
 assert(controller.includes('function focusImportPanel') && controller.includes("focusImportPanel('hero')") && !controller.includes('fileInput.click()'), 'all navigation entries converge on the import card without direct picker duplication');
 assert(html.includes('자막 SRT/VTT 불러오기') && html.includes('작업 JSON 불러오기'), 'non-media file inputs are explicitly labeled by purpose');
-console.log('PASS v1.5.25 unified media import and desktop utility hub guardrails');
+console.log('PASS v1.5.26 unified media import and desktop utility hub guardrails');

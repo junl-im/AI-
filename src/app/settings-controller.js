@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.25 - centralized caption, quality, and auto-cut settings ownership
+// AI Shorts Studio v1.5.26 - centralized caption, quality, and auto-cut settings ownership
 'use strict';
 
 (function exposeSettingsController(global) {

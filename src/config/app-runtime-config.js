@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.25 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.5.26 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.5.25',
-    BUILD_KEY: '1.5.25-persistent-analysis-selective-recovery-integrity-audit',
+    APP_VERSION: 'v1.5.26',
+    BUILD_KEY: '1.5.26-adaptive-cache-audit-protected-recovery',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -22,7 +22,9 @@ window.AIShortsRuntimeConfig = Object.freeze({
     ANALYSIS_PERSISTENT_CACHE_ENABLED: true,
     ANALYSIS_PERSISTENT_CACHE_DB_NAME: 'ai-shorts-analysis-cache-v1',
     ANALYSIS_PERSISTENT_CACHE_MAX_ITEMS: 8,
+    ANALYSIS_PERSISTENT_CACHE_MIN_ITEMS: 2,
     ANALYSIS_PERSISTENT_CACHE_MAX_BYTES: 16 * 1024 * 1024,
+    ANALYSIS_PERSISTENT_CACHE_MIN_BYTES: 4 * 1024 * 1024,
     ANALYSIS_PERSISTENT_CACHE_MAX_AGE_MS: 7 * 24 * 60 * 60 * 1000,
     MAX_PINNED_CANDIDATES: 12,
     DOWNLOAD_URL_REVOKE_DELAY_MS: 45 * 1000,
@@ -42,6 +44,9 @@ window.AIShortsRuntimeConfig = Object.freeze({
     SW_INTEGRITY_AUDIT_INTERVAL_MS: 15 * 60 * 1000,
     SW_INTEGRITY_AUDIT_INITIAL_DELAY_MS: 30 * 1000,
     SW_INTEGRITY_AUDIT_SAMPLE_SIZE: 12,
+    SW_INTEGRITY_AUDIT_HISTORY_LIMIT: 40,
+    SW_INTEGRITY_BACKOFF_BASE_MS: 5 * 60 * 1000,
+    SW_INTEGRITY_BACKOFF_MAX_MS: 6 * 60 * 60 * 1000,
     MEDIA_METADATA_WAIT_MS: 5000,
     MAX_VIDEO_MOTION_SAMPLES: 160,
     DEFAULT_DURATIONS: [15, 30, 45, 60, 90],

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.25 - layered analysis cache, private diagnostics export, and parallel engine facade
+// AI Shorts Studio v1.5.26 - layered analysis cache, private diagnostics export, and parallel engine facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -11,7 +11,7 @@
     const tuner = global.AIShortsProEngineTuner || {};
     const stability = global.AIShortsStabilityAuditor || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.25').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.26').replace(/^v/i, '');
 
     const registry = registryFactory.createRegistry ? registryFactory.createRegistry('ai-shorts-studio-pro-engine') : null;
     const analysisCache = cacheFactory.createAnalysisCache ? cacheFactory.createAnalysisCache(
@@ -24,7 +24,11 @@
         namespace: `engine-v${ENGINE_VERSION}`,
         maxItems: Math.max(1, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_ITEMS) || 8),
         maxBytes: Math.max(1024 * 1024, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_BYTES) || 16 * 1024 * 1024),
-        maxAgeMs: Math.max(60_000, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_AGE_MS) || 7 * 24 * 60 * 60 * 1000)
+        maxAgeMs: Math.max(60_000, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_AGE_MS) || 7 * 24 * 60 * 60 * 1000),
+        minItems: Math.max(1, Number(config.ANALYSIS_PERSISTENT_CACHE_MIN_ITEMS) || 2),
+        minBytes: Math.max(512 * 1024, Number(config.ANALYSIS_PERSISTENT_CACHE_MIN_BYTES) || 4 * 1024 * 1024),
+        warningRatio: Math.max(0.5, Number(config.STORAGE_WARNING_RATIO) || 0.8),
+        criticalRatio: Math.max(0.5, Number(config.STORAGE_CRITICAL_RATIO) || 0.92)
     }) : null;
     let lastContractReport = null;
     let lastStabilityReport = null;
@@ -143,6 +147,23 @@
         return cacheStats();
     }
 
+    async function listPersistentAnalysisCacheEntries() {
+        if (!persistentAnalysisCache || !persistentAnalysisCache.list) return [];
+        return persistentAnalysisCache.list();
+    }
+
+    async function deletePersistentAnalysisCacheEntry(token) {
+        if (!persistentAnalysisCache || !persistentAnalysisCache.deleteByToken) return Object.freeze({ removed: false, token: String(token || ''), stats: cacheStats() });
+        const result = await persistentAnalysisCache.deleteByToken(token);
+        return Object.freeze(Object.assign({}, result, { cache: cacheStats() }));
+    }
+
+    async function refreshPersistentAnalysisCachePolicy() {
+        if (persistentAnalysisCache && persistentAnalysisCache.refreshQuotaPolicy) await persistentAnalysisCache.refreshQuotaPolicy(true);
+        if (persistentAnalysisCache && persistentAnalysisCache.prune) await persistentAnalysisCache.prune({ forceQuota: true });
+        return cacheStats();
+    }
+
     function getAnalysisCacheDiagnostics() {
         const memoryDiagnostics = analysisCache && analysisCache.diagnostics ? analysisCache.diagnostics() : { stats: cacheStats(), recentEvents: [] };
         return Object.freeze({
@@ -209,6 +230,9 @@
         getAnalysisCacheDiagnostics,
         exportAnalysisCacheDiagnostics,
         clearAnalysisCache,
-        pruneAnalysisCache
+        pruneAnalysisCache,
+        listPersistentAnalysisCacheEntries,
+        deletePersistentAnalysisCacheEntry,
+        refreshPersistentAnalysisCachePolicy
     });
 })(window);

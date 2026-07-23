@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.25 - selectable compressed session recovery with bounded history
+// AI Shorts Studio v1.5.26 - selectable compressed session recovery with bounded history
 'use strict';
 (function bootSessionContinuity(global) {
     if (global.AIShortsSessionContinuity) return;
@@ -17,6 +17,7 @@
     const BACKUP_MAX_CHARS = Math.max(4096, Number(config.SESSION_BACKUP_MAX_CHARS) || 750000);
     const BACKUP_KEYS = Object.freeze(Array.from({ length: BACKUP_MAX_COUNT }, (_, index) => `${STORAGE_KEY}-backup-${index + 1}`));
     const RECOVERY_HISTORY_KEY = `${STORAGE_KEY}-recovery-history`;
+    const PROTECTED_BACKUP_KEY = `${STORAGE_KEY}-protected`;
     const RECOVERY_HISTORY_LIMIT = Math.max(5, Math.min(50, Number(config.SESSION_RECOVERY_HISTORY_LIMIT) || 20));
     const SAVE_DELAY = 900;
     let saveTimer = 0;
@@ -108,7 +109,7 @@
         return entry;
     }
     function listAvailableSnapshots() {
-        const sources = [{ key: STORAGE_KEY, kind: 'primary' }, ...BACKUP_KEYS.map((key, index) => ({ key, kind: 'backup', index: index + 1 }))];
+        const sources = [{ key: STORAGE_KEY, kind: 'primary' }, { key: PROTECTED_BACKUP_KEY, kind: 'protected' }, ...BACKUP_KEYS.map((key, index) => ({ key, kind: 'backup', index: index + 1 }))];
         return sources.map(source => {
             const raw = readKey(source.key);
             if (!raw) return null;
@@ -123,7 +124,10 @@
                     savedAt: snapshot.savedAt || snapshot.createdAt || '',
                     fileName: snapshot.fileName || snapshot.fileMeta && snapshot.fileMeta.name || '',
                     recommendationCount: Array.isArray(snapshot.recommendations) ? snapshot.recommendations.length : 0,
+                    captionCount: Array.isArray(snapshot.captions) ? snapshot.captions.length : 0,
+                    hasSelectedRange: Boolean(snapshot.selectedRange),
                     selectedRecommendationId: snapshot.selectedRecommendationId || '',
+                    protected: source.kind === 'protected',
                     compressed: Boolean(result.compressed),
                     storedChars: Number(result.storedChars) || raw.length,
                     rawChars: Number(result.rawChars) || raw.length,
@@ -132,7 +136,7 @@
                     error: ''
                 });
             } catch (error) {
-                return Object.freeze({ key: source.key, kind: source.kind, index: source.index || 0, valid: false, savedAt: '', fileName: '', recommendationCount: 0, selectedRecommendationId: '', compressed: raw.startsWith('AISSB1:'), storedChars: raw.length, rawChars: 0, savingsRatio: 0, schemaVersion: 0, error: error && error.message || '손상된 백업' });
+                return Object.freeze({ key: source.key, kind: source.kind, index: source.index || 0, valid: false, savedAt: '', fileName: '', recommendationCount: 0, captionCount: 0, hasSelectedRange: false, selectedRecommendationId: '', protected: source.kind === 'protected', compressed: raw.startsWith('AISSB1:'), storedChars: raw.length, rawChars: 0, savingsRatio: 0, schemaVersion: 0, error: error && error.message || '손상된 백업' });
             }
         }).filter(Boolean);
     }
@@ -242,7 +246,7 @@
     }
     function readStoredSnapshotText() { return readKey(STORAGE_KEY); }
     function findValidBackup() {
-        for (const key of BACKUP_KEYS) {
+        for (const key of [PROTECTED_BACKUP_KEY, ...BACKUP_KEYS]) {
             const raw = readKey(key);
             if (!raw) continue;
             try { return Object.assign({ raw }, parseSnapshotText(raw, key)); }
@@ -324,7 +328,7 @@
         saveTimer = setTimeout(() => saveSnapshotNow(reason), SAVE_DELAY);
     }
     function clearSnapshot() {
-        [STORAGE_KEY, ...BACKUP_KEYS].forEach(removeKey);
+        [STORAGE_KEY, PROTECTED_BACKUP_KEY, ...BACKUP_KEYS].forEach(removeKey);
         appendRecoveryHistory('session-records-cleared', { backupCapacity: BACKUP_MAX_COUNT });
         invalidSnapshotReason = '';
         invalidSnapshotReported = false;
@@ -336,6 +340,30 @@
         updatePanel(null, 'clear');
         emit('ai-shorts-session-cleared', { backupCount: BACKUP_MAX_COUNT });
     }
+    function protectSelectedSnapshot() {
+        const sourceKey = String(selectedRestoreSource || STORAGE_KEY);
+        if (sourceKey === PROTECTED_BACKUP_KEY) {
+            removeKey(PROTECTED_BACKUP_KEY);
+            appendRecoveryHistory('protected-backup-removed', { source: PROTECTED_BACKUP_KEY });
+            selectedRestoreSource = STORAGE_KEY;
+            notify('중요 백업 보호를 해제했습니다.', 'action');
+            updatePanel(null, 'sync');
+            return Object.freeze({ protected: false, source: PROTECTED_BACKUP_KEY });
+        }
+        const raw = readKey(sourceKey);
+        if (!raw) { notify('보호할 세션 기록이 없습니다.', 'warning'); return Object.freeze({ protected: false, source: sourceKey }); }
+        try { parseSnapshotText(raw, sourceKey); }
+        catch (error) { notify('손상된 세션 기록은 보호할 수 없습니다.', 'error'); return Object.freeze({ protected: false, source: sourceKey, error: error && error.message || 'invalid' }); }
+        const result = writeKey(PROTECTED_BACKUP_KEY, raw, { cleanup: false, preserveKeys: [STORAGE_KEY, PROTECTED_BACKUP_KEY, ...BACKUP_KEYS] });
+        if (!result.ok) { notify('중요 백업을 저장하지 못했습니다.', result.quota ? 'warning' : 'error'); return Object.freeze({ protected: false, source: sourceKey }); }
+        selectedRestoreSource = PROTECTED_BACKUP_KEY;
+        appendRecoveryHistory('protected-backup-created', { source: sourceKey, protectedSource: PROTECTED_BACKUP_KEY });
+        emit('ai-shorts-session-protected-backup', { source: sourceKey });
+        notify('선택한 시점을 중요 백업으로 보호했습니다.', 'export');
+        updatePanel(null, 'sync');
+        return Object.freeze({ protected: true, source: sourceKey });
+    }
+
     function recoveryFilename(prefix) {
         const stamp = nowIso().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z').replace('T', '-');
         return `${prefix || 'ai-shorts-session'}-${stamp}.json`;
@@ -425,9 +453,10 @@
         panel.id = 'sessionContinuityPanel';
         panel.className = 'session-continuity-panel';
         panel.setAttribute('aria-label', '작업 세션 복구');
-        panel.innerHTML = '<div class="session-continuity-copy"><span class="session-continuity-icon studio-icon" data-icon="retry" aria-hidden="true"></span><div><strong id="sessionContinuityTitle">작업 세션 자동 저장 준비</strong><small id="sessionContinuityMeta">후보와 선택 구간이 생기면 자동으로 가볍게 저장합니다.</small></div></div><div class="session-continuity-actions"><label id="sessionBackupPicker" class="session-backup-picker" hidden><span>복구 시점</span><select id="sessionBackupSelect" aria-label="복구할 세션 시점 선택"></select></label><button id="sessionRestoreBtn" class="primary" type="button">선택 기록 복구</button><button id="sessionSaveBtn" type="button">지금 저장</button><button id="sessionExportBtn" type="button" data-icon="diagnostics">기록 백업</button><button id="sessionDiagnosticsBtn" type="button" data-icon="diagnostics">복구 진단</button><button id="sessionClearBtn" type="button">기록 지우기</button></div>';
+        panel.innerHTML = '<div class="session-continuity-copy"><span class="session-continuity-icon studio-icon" data-icon="retry" aria-hidden="true"></span><div><strong id="sessionContinuityTitle">작업 세션 자동 저장 준비</strong><small id="sessionContinuityMeta">후보와 선택 구간이 생기면 자동으로 가볍게 저장합니다.</small><small id="sessionBackupPreview" class="session-backup-preview" hidden></small></div></div><div class="session-continuity-actions"><label id="sessionBackupPicker" class="session-backup-picker" hidden><span>복구 시점</span><select id="sessionBackupSelect" aria-label="복구할 세션 시점 선택"></select></label><button id="sessionRestoreBtn" class="primary" type="button">선택 기록 복구</button><button id="sessionProtectBtn" type="button" data-icon="pin">중요 백업 보호</button><button id="sessionSaveBtn" type="button">지금 저장</button><button id="sessionExportBtn" type="button" data-icon="diagnostics">기록 백업</button><button id="sessionDiagnosticsBtn" type="button" data-icon="diagnostics">복구 진단</button><button id="sessionClearBtn" type="button">기록 지우기</button></div>';
         startPanel.insertAdjacentElement('afterend', panel);
         const restore = byId('sessionRestoreBtn');
+        const protect = byId('sessionProtectBtn');
         const save = byId('sessionSaveBtn');
         const exportButton = byId('sessionExportBtn');
         const diagnosticsButton = byId('sessionDiagnosticsBtn');
@@ -435,6 +464,7 @@
         const clear = byId('sessionClearBtn');
         if (select) select.addEventListener('change', () => { selectedRestoreSource = select.value || STORAGE_KEY; updatePanel(null, 'sync'); });
         if (restore) restore.addEventListener('click', () => restoreSnapshot(selectedRestoreSource));
+        if (protect) protect.addEventListener('click', protectSelectedSnapshot);
         if (save) save.addEventListener('click', () => saveSnapshotNow('manual'));
         if (exportButton) exportButton.addEventListener('click', exportStoredSnapshot);
         if (diagnosticsButton) diagnosticsButton.addEventListener('click', exportRecoveryDiagnostics);
@@ -442,7 +472,7 @@
         return panel;
     }
     function snapshotOptionLabel(item) {
-        const source = item.kind === 'primary' ? '최신 기본 기록' : `백업 ${item.index}`;
+        const source = item.kind === 'primary' ? '최신 기본 기록' : item.kind === 'protected' ? '중요 보호 백업' : `백업 ${item.index}`;
         if (!item.valid) return `${source} · 손상됨`;
         const time = formatSavedAt(item.savedAt);
         const count = `후보 ${item.recommendationCount || 0}개`;
@@ -477,7 +507,9 @@
         const invalidStoredRecord = hasStoredRecord && !stored;
         const title = byId('sessionContinuityTitle');
         const meta = byId('sessionContinuityMeta');
+        const preview = byId('sessionBackupPreview');
         const restore = byId('sessionRestoreBtn');
+        const protect = byId('sessionProtectBtn');
         const save = byId('sessionSaveBtn');
         const exportButton = byId('sessionExportBtn');
         const clear = byId('sessionClearBtn');
@@ -488,18 +520,30 @@
             if (invalidStoredRecord) {
                 meta.textContent = `${invalidSnapshotReason || '저장된 세션이 손상되었습니다.'} 필요하면 원문을 저장한 뒤 기록을 지워주세요.`;
             } else if (canRestore) {
-                const count = stored.recommendations.length;
-                const selected = stored.selectedRecommendationId ? ' · 선택 후보 있음' : '';
+                const selectedSnapshot = selectedItem || {};
+                const count = selectedSnapshot.recommendationCount || stored && stored.recommendations && stored.recommendations.length || 0;
+                const selected = selectedSnapshot.selectedRecommendationId || stored && stored.selectedRecommendationId ? ' · 선택 후보 있음' : '';
                 const backupCount = availableSnapshots.filter(item => item.kind === 'backup').length;
                 const timestamp = document.createElement('span');
                 timestamp.className = 'session-continuity-timestamp';
-                timestamp.textContent = formatSavedAt(stored.savedAt || stored.createdAt);
-                meta.replaceChildren(document.createTextNode(`${stored.fileName || '이전 파일'} · 후보 ${count}개${selected} · 스키마 v${CURRENT_SCHEMA_VERSION} · 백업 ${backupCount}개 · `), timestamp);
+                timestamp.textContent = formatSavedAt(selectedSnapshot.savedAt || stored && (stored.savedAt || stored.createdAt));
+                meta.replaceChildren(document.createTextNode(`${selectedSnapshot.fileName || stored && stored.fileName || '이전 파일'} · 후보 ${count}개${selected} · 스키마 v${selectedSnapshot.schemaVersion || CURRENT_SCHEMA_VERSION} · 백업 ${backupCount}개 · `), timestamp);
             } else {
                 meta.textContent = hasWork() ? '현재 작업 상태를 로컬에 보존하고 있습니다.' : '파일을 열고 후보를 만들면 자동으로 가볍게 저장합니다.';
             }
         }
+        if (preview) {
+            if (selectedItem && selectedItem.valid) {
+                const sourceLabel = selectedItem.kind === 'protected' ? '보호됨' : selectedItem.kind === 'primary' ? '기본 기록' : `순환 백업 ${selectedItem.index}`;
+                preview.textContent = `${sourceLabel} · 후보 ${selectedItem.recommendationCount || 0}개 · 자막 ${selectedItem.captionCount || 0}개${selectedItem.hasSelectedRange ? ' · 선택 구간 있음' : ''} · ${selectedItem.compressed ? `압축 ${Math.round((selectedItem.savingsRatio || 0) * 100)}%` : '평문 저장'}`;
+                preview.hidden = false;
+            } else preview.hidden = true;
+        }
         if (restore) restore.disabled = !canRestore;
+        if (protect) {
+            protect.disabled = !selectedItem || !selectedItem.valid;
+            protect.textContent = selectedItem && selectedItem.kind === 'protected' ? '중요 보호 해제' : '중요 백업 보호';
+        }
         if (save) save.disabled = !hasWork();
         if (exportButton) {
             exportButton.disabled = !hasStoredRecord;
@@ -593,6 +637,8 @@
             lastRecovery: history[0] || null,
             selectableSnapshotCount: availableSnapshots.filter(item => item.valid && item.recommendationCount > 0).length,
             selectedRestoreSource,
+            protectedBackup: availableSnapshots.find(item => item.kind === 'protected') || null,
+            protectedBackupCount: availableSnapshots.some(item => item.kind === 'protected' && item.valid) ? 1 : 0,
             availableSnapshots
         });
     }
@@ -641,7 +687,7 @@
         document.addEventListener('visibilitychange', handleVisibilityChange);
         startHeartbeat();
     }
-    global.AIShortsSessionContinuity = Object.freeze({ saveSnapshotNow, restoreSnapshot, clearSnapshot, loadSnapshot, listAvailableSnapshots, exportStoredSnapshot, exportRecoveryDiagnostics, readRecoveryHistory, scheduleSave, getStatus, CURRENT_SCHEMA_VERSION, BACKUP_KEYS, RECOVERY_HISTORY_KEY });
+    global.AIShortsSessionContinuity = Object.freeze({ saveSnapshotNow, restoreSnapshot, clearSnapshot, loadSnapshot, listAvailableSnapshots, exportStoredSnapshot, exportRecoveryDiagnostics, readRecoveryHistory, protectSelectedSnapshot, scheduleSave, getStatus, CURRENT_SCHEMA_VERSION, BACKUP_KEYS, PROTECTED_BACKUP_KEY, RECOVERY_HISTORY_KEY });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
     else install();
 })(window);

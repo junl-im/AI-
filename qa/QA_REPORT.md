@@ -1,44 +1,47 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.25
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.26
 
 ## 최종 결과
 
-- 자동 검사: **204/204 통과**
-- 신규 회귀 검사: 영구 분석 캐시·개인정보 비노출 진단, 선택 백업 복원, 서비스워커 순환 표본 무결성 검사·등록 모두 통과
+- 자동 검사: **208/208 통과**
+- 신규 회귀 검사: quota 적응형 영구 캐시·항목별 삭제, 중요 백업·복원 미리보기, 서비스워커 감사 이력·백오프·진단 내보내기 모두 통과
 - 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- 서비스워커 install·activate·이전 캐시 보존/정리·offline navigation·전체/표본 콘텐츠 무결성 복구 통과
+- 서비스워커 install·activate·이전 캐시 보존/정리·offline navigation·전체/표본 콘텐츠 무결성·온라인 복귀 재개 통과
 
 ## 분석 캐시 결과
 
-- 메모리 우선 + 선택적 IndexedDB 영구 계층
-- 영구 캐시: 7일 TTL, 최대 8개, 최대 16MiB, 엔진 버전 namespace
-- 진단 이벤트: 최대 80개, 파일명·경로·원시 키·분석 본문 제외
-- 내보내기: 적중·미적중·만료·퇴출·정리, 지문 시간·읽은 바이트 집계
+- 저장소 정상: 최대 8개·16MiB
+- 저장소 경고: 기본 한도의 60%
+- 저장소 위험: 최소 2개·4MiB
+- quota 오류 정리·재시도와 선택 항목 삭제 통과
+- 목록·진단에서 파일명·경로·원시 키·분석 본문 비노출 통과
 
 ## 세션 복구 결과
 
-- 기본 세션과 순환 백업을 개별 검증해 복원 시점 목록 제공
-- 정상 백업 직접 선택 복원 통과
-- 손상 백업 disabled 처리 및 기존 복구 이력 연동 통과
+- 회전 정리되지 않는 중요 백업 생성·해제 통과
+- 중요 백업 자동 복구 우선순위 통과
+- 프로젝트 제목·추천·자막·선택 구간·압축 상태 미리보기 통과
+- 중요 백업 복원 성공·실패 이력 기록 통과
 
-## 서비스워커 주기 무결성
+## 서비스워커 감사 결과
 
-- 초기 30초, 이후 15분 간격의 유휴 검사 등록
-- 주기당 12개 파일 순환 표본, cursor 이어받기
-- 누락·HTTP 비정상·SHA-256 손상 표본만 재다운로드·재검증
-- 숨김·오프라인 상태 일시 중지와 수동 표본 검사 통과
+- 감사 이력 최대 40개 순환 보관
+- 반복 실패 자산 5분~6시간 지수 백오프
+- 정상·복구 성공 자산 백오프 해제
+- 온라인 복귀 후 감사 자동 재개
+- 감사·복구·백오프·롤백 진단 JSON 내보내기 통과
 
 ## 런타임 감사
 
 - Chromium 4개 viewport runtime error·Promise rejection·console error·horizontal overflow: **0건**
-- process memory audit: runtime error **0건**, RSS slope **14.4056 MiB/cycle**, JS heap slope **0.0049 MiB/cycle**
-- CSS ownership: 연결 CSS **46개**, `!important` **593개**, 실제 충돌·same-value duplicate·shadowed declaration **0건**
+- process memory audit: runtime error **0건**, RSS slope **13.8827MiB/cycle**, JS heap slope **0.0049MiB/cycle**
+- CSS ownership: 연결 CSS **47개**, `!important` **593개**, 실제 충돌·same-value duplicate·shadowed declaration **0건**
 - 장시간 15→30→15분 미디어 계약은 미디어 소유 경로가 동일해 검증된 v1.5.24 근거를 명시적으로 상속
 
 ## 감사 제한
 
-- IndexedDB 저장 가능 용량은 브라우저 정책에 따라 달라지며 quota 실패 시 영구 캐시 없이 정상 동작합니다.
-- 순환 표본 검사는 한 주기에 앱 셸 전체를 검사하지 않습니다.
+- 저장소 usage·quota는 브라우저 추정치이며 실제 IndexedDB 디스크 오버헤드와 차이가 있을 수 있습니다.
+- 감사 이력·백오프는 앱 셸 캐시 삭제 시 함께 초기화됩니다.
 - 실제 모바일 Safari·Samsung Internet 다운로드 관리자와 물리 GPU 가속은 실기기 검증이 필요합니다.
 
 ---

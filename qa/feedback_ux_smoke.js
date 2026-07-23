@@ -11,8 +11,8 @@ const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
 
 const requiredHtml = [
     'class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>',
-    'feedback-ux.css?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit',
-    'feedback-ux.js?v=1.5.25-persistent-analysis-selective-recovery-integrity-audit'
+    'feedback-ux.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
+    'feedback-ux.js?v=1.5.26-adaptive-cache-audit-protected-recovery'
 ];
 const missingHtml = requiredHtml.filter(token => !html.includes(token));
 if (missingHtml.length) {

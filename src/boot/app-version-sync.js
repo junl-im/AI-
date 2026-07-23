@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.25 - single source version sync and delegated update guard
+// AI Shorts Studio v1.5.26 - single source version sync and delegated update guard
 'use strict';
 
 (function installAppVersionSync(global) {
-    const FALLBACK_VERSION = 'v1.5.25';
-    const FALLBACK_BUILD_KEY = '1.5.25-persistent-analysis-selective-recovery-integrity-audit';
+    const FALLBACK_VERSION = 'v1.5.26';
+    const FALLBACK_BUILD_KEY = '1.5.26-adaptive-cache-audit-protected-recovery';
     const config = global.AIShortsRuntimeConfig || {};
     const normalizeVersion = value => {
         const text = String(value || FALLBACK_VERSION).trim();

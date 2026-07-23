@@ -34,4 +34,4 @@ ok(comfort.includes("observer.observe(list, { childList: true, subtree: true })"
 ok(pins.includes("observer.observe(node, { childList: true, subtree: true, characterData: true })"), 'pin board observer ignores self-authored attributes');
 ok(director.includes("document.body.dataset.activeFlowTab !== key"), 'flow director avoids rewriting the active tab with the same value');
 
-console.log('PASS v1.5.25 menu terminology and observer feedback-loop guardrails present');
+console.log('PASS v1.5.26 menu terminology and observer feedback-loop guardrails present');

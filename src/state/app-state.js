@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.25 - quota-aware state container and persisted-setting recovery
+// AI Shorts Studio v1.5.26 - quota-aware state container and persisted-setting recovery
 'use strict';
 
 (function exposeState(global) {

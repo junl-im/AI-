@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.25 - storage, layered analysis cache, recovery, and scheduled integrity diagnostics
+// AI Shorts Studio v1.5.26 - storage, layered analysis cache, recovery, and scheduled integrity diagnostics
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;
@@ -45,8 +45,11 @@
             '<div class="storage-health-actions">',
             '  <button id="storageHealthRefreshBtn" type="button" data-icon="retry">다시 확인</button>',
             '  <button id="analysisCacheDiagnosticsBtn" type="button" data-icon="diagnostics">분석 진단 저장</button>',
-            '  <button id="analysisCacheCleanupBtn" type="button" data-icon="close">분석 캐시 정리</button>',
+            '  <label class="storage-cache-entry-picker"><span>영구 캐시 항목</span><select id="analysisCacheEntrySelect" aria-label="삭제할 영구 분석 캐시 항목"><option value="">항목 없음</option></select></label>',
+            '  <button id="analysisCacheEntryDeleteBtn" type="button" data-icon="close">선택 캐시 삭제</button>',
+            '  <button id="analysisCacheCleanupBtn" type="button" data-icon="close">분석 캐시 전체 정리</button>',
             '  <button id="storageIntegrityAuditBtn" type="button" data-icon="diagnostics">셸 표본 검사</button>',
+            '  <button id="storageIntegrityDiagnosticsBtn" type="button" data-icon="diagnostics">셸 감사 진단</button>',
             '  <button id="storageHealthRepairBtn" type="button" data-icon="retry">오프라인 셸 복구</button>',
             '  <button id="storageHealthCleanupBtn" type="button" data-icon="close">오래된 저장소 정리</button>',
             '</div>'
@@ -56,12 +59,16 @@
         const cleanupButton = byId('storageHealthCleanupBtn');
         const analysisDiagnosticsButton = byId('analysisCacheDiagnosticsBtn');
         const analysisCleanupButton = byId('analysisCacheCleanupBtn');
+        const analysisEntryDeleteButton = byId('analysisCacheEntryDeleteBtn');
+        const integrityDiagnosticsButton = byId('storageIntegrityDiagnosticsBtn');
         const integrityAuditButton = byId('storageIntegrityAuditBtn');
         const repairButton = byId('storageHealthRepairBtn');
         if (refreshButton) refreshButton.addEventListener('click', () => refresh({ force: true, source: 'manual' }));
         if (cleanupButton) cleanupButton.addEventListener('click', cleanup);
         if (analysisDiagnosticsButton) analysisDiagnosticsButton.addEventListener('click', exportAnalysisDiagnostics);
         if (analysisCleanupButton) analysisCleanupButton.addEventListener('click', cleanupAnalysisCache);
+        if (analysisEntryDeleteButton) analysisEntryDeleteButton.addEventListener('click', deleteSelectedAnalysisCacheEntry);
+        if (integrityDiagnosticsButton) integrityDiagnosticsButton.addEventListener('click', exportIntegrityDiagnostics);
         if (integrityAuditButton) integrityAuditButton.addEventListener('click', runIntegrityAudit);
         if (repairButton) repairButton.addEventListener('click', repairOfflineShell);
         return root;
@@ -94,7 +101,8 @@
         const fingerprint = status.fingerprint || {};
         const mode = fingerprint.lastMode === 'full' ? '전체' : fingerprint.lastMode === 'sampled' ? '표본' : '대기';
         const persistent = status.persistent || {};
-        const persistentText = persistent.enabled ? ` · 영구 ${persistent.size || 0}/${persistent.maxItems || 0}` : (persistent.supported === false ? ' · 영구 미지원' : '');
+        const policy = persistent.quotaLevel && persistent.quotaLevel !== 'unknown' ? ` · ${persistent.quotaLevel}` : '';
+        const persistentText = persistent.enabled ? ` · 영구 ${persistent.size || 0}/${persistent.effectiveMaxItems || persistent.maxItems || 0}${policy}` : (persistent.supported === false ? ' · 영구 미지원' : '');
         return `${status.size || 0}/${status.limit || 0} · 적중 ${status.hitRate || 0}% · ${mode} ${fingerprint.lastMs || 0}ms${persistentText}`;
     }
     function render(storageStatus) {
@@ -135,7 +143,10 @@
         if (refreshPromise) return refreshPromise;
         const opts = options || {};
         build();
-        refreshPromise = Promise.resolve(storage.estimate ? storage.estimate({ force: Boolean(opts.force) }) : storage.status && storage.status() || {}).then(snapshot => {
+        refreshPromise = Promise.resolve(storage.estimate ? storage.estimate({ force: Boolean(opts.force) }) : storage.status && storage.status() || {}).then(async snapshot => {
+            const engine = global.AIShortsEngineKernel || {};
+            if (engine.refreshPersistentAnalysisCachePolicy) await engine.refreshPersistentAnalysisCachePolicy();
+            await refreshAnalysisCacheEntries();
             if (serviceWorker.requestInstallReport) serviceWorker.requestInstallReport();
             render(snapshot);
             return snapshot;
@@ -146,6 +157,56 @@
         }).finally(() => { refreshPromise = null; });
         return refreshPromise;
     }
+    async function refreshAnalysisCacheEntries() {
+        const select = byId('analysisCacheEntrySelect');
+        const button = byId('analysisCacheEntryDeleteBtn');
+        if (!select) return [];
+        const engine = global.AIShortsEngineKernel || {};
+        const entries = engine.listPersistentAnalysisCacheEntries ? await engine.listPersistentAnalysisCacheEntries() : [];
+        select.replaceChildren(...(entries.length ? entries : [{ token: '', bytes: 0, lastAccessAt: '' }]).map((entry, index) => {
+            const option = document.createElement('option');
+            option.value = entry.token || '';
+            option.textContent = entry.token ? `${index + 1}. ${formatBytes(entry.bytes)} · ${entry.lastAccessAt ? new Date(entry.lastAccessAt).toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '사용 시각 없음'}` : '항목 없음';
+            option.disabled = !entry.token;
+            return option;
+        }));
+        if (button) button.disabled = !entries.length;
+        return entries;
+    }
+    async function deleteSelectedAnalysisCacheEntry() {
+        const select = byId('analysisCacheEntrySelect');
+        const button = byId('analysisCacheEntryDeleteBtn');
+        const token = select && select.value || '';
+        if (!token) { feedback('삭제할 영구 분석 캐시 항목이 없습니다.', 'warning'); return null; }
+        if (button) button.disabled = true;
+        try {
+            const engine = global.AIShortsEngineKernel || {};
+            const result = engine.deletePersistentAnalysisCacheEntry ? await engine.deletePersistentAnalysisCacheEntry(token) : null;
+            await refreshAnalysisCacheEntries();
+            render();
+            if (!result || !result.removed) throw new Error('선택한 캐시 항목을 찾지 못했습니다.');
+            feedback(`영구 분석 캐시 ${formatBytes(result.bytes || 0)}를 삭제했습니다.`, 'action');
+            return result;
+        } catch (error) {
+            feedback(error && error.message || '선택 캐시 삭제에 실패했습니다.', 'error');
+            return null;
+        } finally { if (button) button.disabled = false; }
+    }
+    function exportIntegrityDiagnostics() {
+        const button = byId('storageIntegrityDiagnosticsBtn');
+        if (button) button.disabled = true;
+        try {
+            if (!serviceWorker.exportIntegrityDiagnostics) throw new Error('셸 감사 진단 내보내기를 지원하지 않습니다.');
+            const result = serviceWorker.exportIntegrityDiagnostics();
+            if (!result || !result.saved) throw new Error('셸 감사 진단 파일을 저장하지 못했습니다.');
+            feedback(`셸 감사 이력 ${result.historyCount || 0}건을 저장했습니다.`, 'export');
+            return result;
+        } catch (error) {
+            feedback(error && error.message || '셸 감사 진단 저장에 실패했습니다.', 'error');
+            return null;
+        } finally { if (button) button.disabled = false; }
+    }
+
     function exportAnalysisDiagnostics() {
         const button = byId('analysisCacheDiagnosticsBtn');
         if (button) button.disabled = true;
@@ -243,7 +304,7 @@
             document.addEventListener(name, event => render(name === 'ai-shorts-storage-status' && event.detail || null));
         });
     }
-    global.AIShortsStorageHealthPanel = Object.freeze({ build, render, refresh, cleanup, exportAnalysisDiagnostics, cleanupAnalysisCache, runIntegrityAudit, repairOfflineShell, formatBytes });
+    global.AIShortsStorageHealthPanel = Object.freeze({ build, render, refresh, cleanup, exportAnalysisDiagnostics, exportIntegrityDiagnostics, refreshAnalysisCacheEntries, deleteSelectedAnalysisCacheEntry, cleanupAnalysisCache, runIntegrityAudit, repairOfflineShell, formatBytes });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
     else install();
 })(window);

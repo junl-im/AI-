@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.25 - privacy-safe cache diagnostics and bounded IndexedDB persistence
+// AI Shorts Studio v1.5.26 - privacy-safe cache diagnostics and bounded IndexedDB persistence
 'use strict';
 
 (function exposeAnalysisCache(global) {
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.25').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.26').replace(/^v/i, '');
     const BASE_SAMPLE_BYTES = Math.max(4096, Math.min(128 * 1024, Number(config.ANALYSIS_CACHE_FINGERPRINT_SAMPLE_BYTES) || 16 * 1024));
     const MAX_SAMPLE_BYTES = Math.max(BASE_SAMPLE_BYTES, Math.min(256 * 1024, Number(config.ANALYSIS_CACHE_MAX_SAMPLE_BYTES) || 128 * 1024));
     const FULL_HASH_MAX_BYTES = Math.max(BASE_SAMPLE_BYTES, Number(config.ANALYSIS_CACHE_FULL_HASH_MAX_BYTES) || 2 * 1024 * 1024);
@@ -412,10 +412,16 @@
         const enabled = opts.enabled !== false && supported;
         const databaseName = String(opts.databaseName || `ai-shorts-analysis-cache-v${ENGINE_VERSION.replace(/[^0-9.]/g, '') || '1'}`);
         const storeName = String(opts.storeName || 'analysis-results');
-        const maxItems = Math.max(1, Math.min(32, Number(opts.maxItems) || 8));
-        const maxBytes = Math.max(1024 * 1024, Number(opts.maxBytes) || 16 * 1024 * 1024);
+        const baseMaxItems = Math.max(1, Math.min(32, Number(opts.maxItems) || 8));
+        const baseMaxBytes = Math.max(1024 * 1024, Number(opts.maxBytes) || 16 * 1024 * 1024);
+        const minItems = Math.max(1, Math.min(baseMaxItems, Number(opts.minItems) || 2));
+        const minBytes = Math.max(512 * 1024, Math.min(baseMaxBytes, Number(opts.minBytes) || 4 * 1024 * 1024));
+        const warningRatio = Math.max(0.5, Math.min(0.95, Number(opts.warningRatio) || 0.8));
+        const criticalRatio = Math.max(warningRatio, Math.min(0.99, Number(opts.criticalRatio) || 0.92));
         const maxAgeMs = Math.max(60_000, Number(opts.maxAgeMs) || 7 * 24 * 60 * 60 * 1000);
         const namespace = String(opts.namespace || `engine-v${ENGINE_VERSION}`);
+        let effectiveMaxItems = baseMaxItems;
+        let effectiveMaxBytes = baseMaxBytes;
         let databasePromise = null;
         let hits = 0;
         let misses = 0;
@@ -424,10 +430,19 @@
         let evictions = 0;
         let expired = 0;
         let clears = 0;
+        let selectiveDeletes = 0;
         let size = 0;
         let totalBytes = 0;
         let lastError = '';
         let lastOperationAt = '';
+        let quotaLevel = 'unknown';
+        let quotaRatio = 0;
+        let quotaUsage = 0;
+        let quotaLimit = 0;
+        let quotaChecks = 0;
+        let quotaErrors = 0;
+        let quotaCleanups = 0;
+        let lastQuotaAt = '';
         let state = enabled ? 'idle' : (supported ? 'disabled' : 'unsupported');
 
         function persistentStats() {
@@ -440,8 +455,12 @@
                 namespace,
                 size,
                 totalBytes,
-                maxItems,
-                maxBytes,
+                maxItems: baseMaxItems,
+                maxBytes: baseMaxBytes,
+                effectiveMaxItems,
+                effectiveMaxBytes,
+                minItems,
+                minBytes,
                 maxAgeMs,
                 hits,
                 misses,
@@ -451,6 +470,15 @@
                 evictions,
                 expired,
                 clears,
+                selectiveDeletes,
+                quotaLevel,
+                quotaRatio,
+                quotaUsage,
+                quotaLimit,
+                quotaChecks,
+                quotaErrors,
+                quotaCleanups,
+                lastQuotaAt,
                 lastError,
                 lastOperationAt
             });
@@ -469,6 +497,53 @@
                 transaction.onerror = () => reject(transaction.error || new Error('IndexedDB transaction failed'));
                 transaction.onabort = () => reject(transaction.error || new Error('IndexedDB transaction aborted'));
             });
+        }
+
+        function isQuotaError(error) {
+            const name = String(error && error.name || '');
+            const message = String(error && error.message || '');
+            return /QuotaExceededError/i.test(name) || /quota|storage.*full|disk.*full/i.test(message);
+        }
+
+        async function refreshQuotaPolicy(force) {
+            const storage = global.navigator && global.navigator.storage;
+            if (!enabled || !storage || typeof storage.estimate !== 'function') return persistentStats();
+            if (!force && lastQuotaAt && Date.now() - Date.parse(lastQuotaAt) < 60_000) return persistentStats();
+            try {
+                const estimate = await storage.estimate();
+                quotaUsage = Math.max(0, Number(estimate && estimate.usage) || 0);
+                quotaLimit = Math.max(0, Number(estimate && estimate.quota) || 0);
+                quotaRatio = quotaLimit ? Math.max(0, Math.min(1, quotaUsage / quotaLimit)) : 0;
+                quotaChecks += 1;
+                lastQuotaAt = nowIso();
+                const previousLevel = quotaLevel;
+                const previousItems = effectiveMaxItems;
+                const previousBytes = effectiveMaxBytes;
+                if (!quotaLimit) {
+                    quotaLevel = 'unknown';
+                    effectiveMaxItems = baseMaxItems;
+                    effectiveMaxBytes = baseMaxBytes;
+                } else if (quotaRatio >= criticalRatio) {
+                    quotaLevel = 'critical';
+                    effectiveMaxItems = minItems;
+                    effectiveMaxBytes = minBytes;
+                } else if (quotaRatio >= warningRatio) {
+                    quotaLevel = 'warning';
+                    effectiveMaxItems = Math.max(minItems, Math.floor(baseMaxItems * 0.6));
+                    effectiveMaxBytes = Math.max(minBytes, Math.floor(baseMaxBytes * 0.6));
+                } else {
+                    quotaLevel = 'normal';
+                    effectiveMaxItems = baseMaxItems;
+                    effectiveMaxBytes = baseMaxBytes;
+                }
+                if (previousLevel !== quotaLevel || previousItems !== effectiveMaxItems || previousBytes !== effectiveMaxBytes) {
+                    recordEvent('persistent-cache-quota-policy', { layer: 'persistent', state: quotaLevel, bytes: effectiveMaxBytes, count: effectiveMaxItems, size: Math.round(quotaRatio * 100) });
+                }
+            } catch (error) {
+                lastQuotaAt = nowIso();
+                recordEvent('persistent-cache-quota-estimate-error', { layer: 'persistent', reason: error && error.message || 'estimate-failed' });
+            }
+            return persistentStats();
         }
 
         function openDatabase() {
@@ -532,13 +607,56 @@
 
         async function refreshStats(database) {
             const rows = await readAll(database);
-            size = rows.length;
-            totalBytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row && row.bytes) || 0), 0);
+            const active = rows.filter(row => row && row.namespace === namespace);
+            size = active.length;
+            totalBytes = active.reduce((sum, row) => sum + Math.max(0, Number(row && row.bytes) || 0), 0);
             lastOperationAt = nowIso();
             return rows;
         }
 
-        async function prunePersistent() {
+        async function listEntries() {
+            const database = await openDatabase();
+            if (!database) return [];
+            try {
+                const rows = await refreshStats(database);
+                return rows.filter(row => row && row.namespace === namespace).sort((a, b) => Number(b.lastAccessAt || b.createdAt || 0) - Number(a.lastAccessAt || a.createdAt || 0)).map(row => Object.freeze({
+                    token: textToken(row.key),
+                    bytes: Math.max(0, Number(row.bytes) || 0),
+                    createdAt: new Date(Number(row.createdAt) || 0).toISOString(),
+                    lastAccessAt: new Date(Number(row.lastAccessAt || row.createdAt) || 0).toISOString(),
+                    ageMs: Math.max(0, Date.now() - Number(row.createdAt || 0))
+                }));
+            } catch (error) {
+                lastError = error && error.message || 'Persistent cache listing failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
+                return [];
+            }
+        }
+
+        async function deleteByToken(token) {
+            const normalized = String(token || '').trim();
+            if (!normalized) return Object.freeze({ removed: false, token: normalized, stats: persistentStats() });
+            const database = await openDatabase();
+            if (!database) return Object.freeze({ removed: false, token: normalized, stats: persistentStats() });
+            try {
+                const rows = await readAll(database);
+                const row = rows.find(item => item && item.namespace === namespace && textToken(item.key) === normalized);
+                if (!row) return Object.freeze({ removed: false, token: normalized, stats: persistentStats() });
+                await removeKeys(database, [row.key]);
+                selectiveDeletes += 1;
+                await refreshStats(database);
+                recordEvent('persistent-cache-entry-deleted', { layer: 'persistent', key: row.key, bytes: row.bytes, size });
+                return Object.freeze({ removed: true, token: normalized, bytes: Math.max(0, Number(row.bytes) || 0), stats: persistentStats() });
+            } catch (error) {
+                lastError = error && error.message || 'Persistent cache delete failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
+                return Object.freeze({ removed: false, token: normalized, stats: persistentStats(), error: lastError });
+            }
+        }
+
+        async function prunePersistent(options) {
+            const settings = options || {};
+            await refreshQuotaPolicy(Boolean(settings.forceQuota));
             const database = await openDatabase();
             if (!database) return persistentStats();
             try {
@@ -547,6 +665,8 @@
                 const rows = await readAll(database);
                 const deleteKeys = [];
                 const active = [];
+                const itemLimit = Math.max(1, Math.min(effectiveMaxItems, Number(settings.maxItems) || effectiveMaxItems));
+                const byteLimit = Math.max(minBytes, Math.min(effectiveMaxBytes, Number(settings.maxBytes) || effectiveMaxBytes));
                 rows.forEach(row => {
                     if (!row || row.namespace !== namespace || now - Number(row.createdAt || 0) > maxAgeMs) {
                         if (row && row.key) deleteKeys.push(row.key);
@@ -557,7 +677,7 @@
                 let bytes = 0;
                 active.forEach((row, index) => {
                     const rowBytes = Math.max(0, Number(row.bytes) || 0);
-                    if (index >= maxItems || bytes + rowBytes > maxBytes) {
+                    if (index >= itemLimit || bytes + rowBytes > byteLimit) {
                         deleteKeys.push(row.key);
                         evictions += 1;
                     } else bytes += rowBytes;
@@ -566,7 +686,7 @@
                 await refreshStats(database);
                 state = 'ready';
                 lastError = '';
-                if (deleteKeys.length) recordEvent('persistent-cache-pruned', { layer: 'persistent', count: deleteKeys.length, size, bytes: totalBytes });
+                if (deleteKeys.length) recordEvent('persistent-cache-pruned', { layer: 'persistent', count: deleteKeys.length, size, bytes: totalBytes, limit: itemLimit });
             } catch (error) {
                 state = 'error';
                 lastError = error && error.message || 'Persistent cache prune failed';
@@ -615,22 +735,28 @@
             }
         }
 
+        async function writeRow(database, row) {
+            const transaction = database.transaction(storeName, 'readwrite');
+            transaction.objectStore(storeName).put(row);
+            await transactionDone(transaction);
+        }
+
         async function setPersistent(key, value) {
             if (!key || !value || !enabled) return false;
+            await refreshQuotaPolicy(false);
             const database = await openDatabase();
             if (!database) return false;
             const bytes = estimateValueBytes(value);
-            if (!bytes || bytes > maxBytes) {
+            if (!bytes || bytes > effectiveMaxBytes) {
                 writeFailures += 1;
-                recordEvent('persistent-cache-write-skipped', { layer: 'persistent', key, reason: bytes ? 'entry-too-large' : 'size-unknown', bytes });
+                recordEvent('persistent-cache-write-skipped', { layer: 'persistent', key, reason: bytes ? 'entry-too-large' : 'size-unknown', bytes, limit: effectiveMaxBytes });
                 return false;
             }
+            const now = Date.now();
+            const row = { key, namespace, createdAt: now, lastAccessAt: now, bytes, value: cloneValue(value) };
             try {
                 state = 'writing';
-                const now = Date.now();
-                const transaction = database.transaction(storeName, 'readwrite');
-                transaction.objectStore(storeName).put({ key, namespace, createdAt: now, lastAccessAt: now, bytes, value: cloneValue(value) });
-                await transactionDone(transaction);
+                await writeRow(database, row);
                 writes += 1;
                 lastOperationAt = nowIso();
                 lastError = '';
@@ -638,6 +764,24 @@
                 await prunePersistent();
                 return true;
             } catch (error) {
+                if (isQuotaError(error)) {
+                    quotaErrors += 1;
+                    quotaCleanups += 1;
+                    recordEvent('persistent-cache-quota-error', { layer: 'persistent', key, bytes, count: quotaErrors });
+                    await refreshQuotaPolicy(true);
+                    await prunePersistent({ maxItems: minItems, maxBytes: minBytes, forceQuota: true });
+                    try {
+                        await writeRow(database, row);
+                        writes += 1;
+                        lastOperationAt = nowIso();
+                        lastError = '';
+                        recordEvent('persistent-cache-quota-retry-success', { layer: 'persistent', key, bytes, count: quotaCleanups });
+                        await prunePersistent();
+                        return true;
+                    } catch (retryError) {
+                        error = retryError;
+                    }
+                }
                 writeFailures += 1;
                 state = 'error';
                 lastError = error && error.message || 'Persistent cache write failed';
@@ -650,16 +794,16 @@
             const database = await openDatabase();
             if (!database) return persistentStats();
             try {
-                const transaction = database.transaction(storeName, 'readwrite');
-                transaction.objectStore(storeName).clear();
-                await transactionDone(transaction);
+                const rows = await readAll(database);
+                const keys = rows.filter(row => row && row.namespace === namespace).map(row => row.key);
+                await removeKeys(database, keys);
                 clears += 1;
                 size = 0;
                 totalBytes = 0;
                 state = 'ready';
                 lastOperationAt = nowIso();
                 lastError = '';
-                recordEvent('persistent-cache-cleared', { layer: 'persistent', count: 1 });
+                recordEvent('persistent-cache-cleared', { layer: 'persistent', count: keys.length });
             } catch (error) {
                 state = 'error';
                 lastError = error && error.message || 'Persistent cache clear failed';
@@ -668,8 +812,8 @@
             return persistentStats();
         }
 
-        if (enabled) prunePersistent().catch(() => {});
-        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats });
+        if (enabled) prunePersistent({ forceQuota: true }).catch(() => {});
+        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats, list: listEntries, deleteByToken, refreshQuotaPolicy });
     }
 
     global.AIShortsAnalysisCache = Object.freeze({

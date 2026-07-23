@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.25 - observable lifecycle with scheduled partial integrity audits
+// AI Shorts Studio v1.5.26 - observable lifecycle with scheduled partial integrity audits
 'use strict';
 
 (function exposeServiceWorkerRegistration(global) {
@@ -80,7 +80,9 @@
             missing: Array.isArray(audit.missing) ? audit.missing.slice(0, 24) : [],
             invalid: Array.isArray(audit.invalid) ? audit.invalid.slice(0, 24) : [],
             corrupted: Array.isArray(audit.corrupted) ? audit.corrupted.slice(0, 24) : [],
-            repairFailed: Array.isArray(audit.repairFailed) ? audit.repairFailed.slice(0, 24) : []
+            repairFailed: Array.isArray(audit.repairFailed) ? audit.repairFailed.slice(0, 24) : [],
+            source: String(audit.source || ''),
+            skippedBackoff: Number(audit.skippedBackoff) || 0
         });
     }
     function normalizeInstallReport(report) {
@@ -116,6 +118,8 @@
                 corrupted: Array.isArray(value.integrity.corrupted) ? value.integrity.corrupted.slice(0, 24) : []
             }) : null,
             periodicIntegrity: normalizePeriodicIntegrity(value.periodicIntegrity),
+            integrityHistory: Array.isArray(value.integrityHistory) ? value.integrityHistory.slice(0, 40).map(item => Object.freeze({ checkedAt: String(item && item.checkedAt || ''), source: String(item && item.source || ''), checked: Number(item && item.checked) || 0, healthy: Number(item && item.healthy) || 0, repaired: Number(item && item.repaired) || 0, failed: Number(item && item.failed) || 0, skippedBackoff: Number(item && item.skippedBackoff) || 0, cursor: Number(item && item.cursor) || 0, nextCursor: Number(item && item.nextCursor) || 0 })) : [],
+            integrityBackoff: value.integrityBackoff && typeof value.integrityBackoff === 'object' ? Object.freeze(Object.fromEntries(Object.entries(value.integrityBackoff).slice(0, 64).map(([file, item]) => [String(file), Object.freeze({ failures: Number(item && item.failures) || 0, lastFailedAt: String(item && item.lastFailedAt || ''), nextRetryAt: String(item && item.nextRetryAt || '') })]))): Object.freeze({}),
             installedAt: String(value.installedAt || ''),
             reportedAt: new Date().toISOString()
         });
@@ -204,7 +208,7 @@
             }
             scheduleIntegrityAudit(5000);
         });
-        if (global.addEventListener) global.addEventListener('online', () => scheduleIntegrityAudit(5000));
+        if (global.addEventListener) global.addEventListener('online', () => { addDiagnostic({ type: 'service-worker-online-integrity-resume', version: resolveVersion() }); scheduleIntegrityAudit(1000); });
     }
     function watchRegistration(registration) {
         if (!registration || typeof registration.addEventListener !== 'function') return;
@@ -319,7 +323,7 @@
                     resolve({ status: integrityAuditStatus.state, report });
                 }
             });
-            try { target.postMessage({ type: 'ai-shorts-service-worker-integrity-sample-request', requestId, version: resolveVersion(), sampleSize }); }
+            try { target.postMessage({ type: 'ai-shorts-service-worker-integrity-sample-request', requestId, version: resolveVersion(), sampleSize, source: String(opts.source || 'manual') }); }
             catch (error) {
                 if (timeoutId && global.clearTimeout) global.clearTimeout(timeoutId);
                 integrityAuditWaiters.delete(requestId);
@@ -342,13 +346,53 @@
                 scheduleIntegrityAudit(Math.min(INTEGRITY_AUDIT_INTERVAL_MS, 60_000));
                 return;
             }
-            const run = () => requestIntegrityAudit({ sampleSize: INTEGRITY_AUDIT_SAMPLE_SIZE }).finally(() => scheduleIntegrityAudit(INTEGRITY_AUDIT_INTERVAL_MS));
+            const run = () => requestIntegrityAudit({ sampleSize: INTEGRITY_AUDIT_SAMPLE_SIZE, source: 'scheduled' }).finally(() => scheduleIntegrityAudit(INTEGRITY_AUDIT_INTERVAL_MS));
             if (typeof global.requestIdleCallback === 'function') global.requestIdleCallback(run, { timeout: 5000 });
             else run();
         }, waitMs);
         emitStatus();
         return true;
     }
+    function integrityDiagnosticsFilename() {
+        const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z').replace('T', '-');
+        return `ai-shorts-service-worker-integrity-${stamp}.json`;
+    }
+    function exportIntegrityDiagnostics() {
+        const report = lastInstallReport || {};
+        const payload = {
+            app: 'AI Shorts Studio',
+            exportType: 'service-worker-integrity-diagnostics',
+            appVersion: resolveVersion(),
+            exportedAt: new Date().toISOString(),
+            cacheName: report.cacheName || '',
+            contentVerified: Boolean(report.contentVerified),
+            activationVerified: Boolean(report.activationVerified),
+            integrityManifest: report.integrityManifest || null,
+            latestAudit: report.periodicIntegrity || null,
+            auditHistory: Array.isArray(report.integrityHistory) ? report.integrityHistory : [],
+            assetBackoff: report.integrityBackoff || {},
+            rollbackPreserved: Array.isArray(report.rollbackPreserved) ? report.rollbackPreserved : []
+        };
+        const filename = integrityDiagnosticsFilename();
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const downloadService = global.AIShortsDownloadService || {};
+        if (typeof downloadService.saveBlob === 'function') {
+            downloadService.saveBlob(blob, filename);
+            return Object.freeze({ saved: true, filename, historyCount: payload.auditHistory.length, backoffCount: Object.keys(payload.assetBackoff).length, payload });
+        }
+        if (!global.URL || typeof global.URL.createObjectURL !== 'function' || !global.document) return Object.freeze({ saved: false, filename, historyCount: payload.auditHistory.length, backoffCount: Object.keys(payload.assetBackoff).length, payload });
+        const url = global.URL.createObjectURL(blob);
+        const anchor = global.document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.rel = 'noopener';
+        global.document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        global.setTimeout(() => { try { global.URL.revokeObjectURL(url); } catch (_) { /* no-op */ } }, Math.max(10000, Number(config.DOWNLOAD_URL_REVOKE_DELAY_MS) || 45000));
+        return Object.freeze({ saved: true, filename, historyCount: payload.auditHistory.length, backoffCount: Object.keys(payload.assetBackoff).length, payload });
+    }
+
     function requestUpdate(registration, source) {
         if (!registration || typeof registration.update !== 'function') return Promise.resolve(false);
         if (updatePromise) return updatePromise;
@@ -430,5 +474,5 @@
         return Object.assign({}, result, { updateChecked: checked, lifecycle: getStatus() });
     }
 
-    global.AIShortsServiceWorkerRegistration = Object.freeze({ register, checkForUpdate, waitUntilControlled, getStatus, canRegister, resolveVersion, requestInstallReport, repairCache, requestIntegrityAudit, scheduleIntegrityAudit });
+    global.AIShortsServiceWorkerRegistration = Object.freeze({ register, checkForUpdate, waitUntilControlled, getStatus, canRegister, resolveVersion, requestInstallReport, repairCache, requestIntegrityAudit, scheduleIntegrityAudit, exportIntegrityDiagnostics });
 })(window);
