@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+const root = path.resolve(__dirname, '..');
+const codecSource = fs.readFileSync(path.join(root, 'src/storage/session-backup-codec.js'), 'utf8');
+const storageSource = fs.readFileSync(path.join(root, 'src/storage/storage-manager.js'), 'utf8');
+const sessionSource = fs.readFileSync(path.join(root, 'src/ui/session-continuity.js'), 'utf8');
+function ok(condition, message) { if (!condition) throw new Error(message); console.log(`PASS ${message}`); }
+const values = new Map();
+const primary = 'ai-shorts-session-continuity-v112';
+const repeated = Array.from({ length: 1200 }, (_, index) => ({ id: `candidate-${index}`, start: index, end: index + 15, duration: 15, score: 90, reason: '반복 가능한 추천 근거와 캡션 데이터' }));
+values.set(primary, JSON.stringify({ app: 'AI Shorts Studio', schemaVersion: 4, savedAt: '2026-01-01T00:00:00.000Z', recommendations: repeated, selectedRecommendationId: 'candidate-0', captions: [], settings: {}, copy: {} }));
+const localStorage = { get length() { return values.size; }, key(i) { return [...values.keys()][i] || null; }, getItem(k) { return values.has(k) ? values.get(k) : null; }, setItem(k, v) { values.set(k, String(v)); }, removeItem(k) { values.delete(k); } };
+const state = { fileMeta: { name: 'new.mp4', size: 500, duration: 60 }, recommendations: repeated.slice(0, 1000), selectedRecommendationId: 'candidate-1', selectedRange: { start: 1, end: 16 }, captions: [], settings: {} };
+const document = { readyState: 'loading', hidden: false, body: { dataset: {} }, getElementById() { return null; }, querySelector() { return null; }, addEventListener() {}, dispatchEvent() {} };
+const window = { window: null, document, localStorage, navigator: {}, caches: { async keys() { return []; } }, CustomEvent: function CustomEvent() {}, btoa: value => Buffer.from(value, 'binary').toString('base64'), atob: value => Buffer.from(value, 'base64').toString('binary'), AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.24', BUILD_KEY: '1.5.24-compressed-session-integrity-rollback', SESSION_SCHEMA_VERSION: 4, SESSION_BACKUP_MIN_COUNT: 1, SESSION_BACKUP_COUNT: 2, SESSION_BACKUP_MAX_COUNT: 3, SESSION_RECOVERY_HISTORY_LIMIT: 20, SESSION_BACKUP_MAX_CHARS: 750000 }, AIShortsProjectService: { CURRENT_SCHEMA_VERSION: 4, parseProjectText(text) { return JSON.parse(text); }, createProjectSnapshot(current) { return { app: 'AI Shorts Studio', schemaVersion: 4, fileMeta: current.fileMeta, fileName: current.fileMeta.name, recommendations: current.recommendations, selectedRecommendationId: current.selectedRecommendationId, selectedRange: current.selectedRange, captions: [], settings: {}, copy: {} }; } }, AIShortsAppState: { state, addDiagnostic() {}, saveSettings() {} }, setTimeout, clearTimeout, setInterval() { return 1; }, clearInterval() {}, addEventListener() {} };
+window.window = window;
+const context = vm.createContext({ window, document, localStorage, navigator: window.navigator, caches: window.caches, CustomEvent: window.CustomEvent, TextEncoder, TextDecoder, Uint8Array, Uint16Array, Buffer, console, Object, String, Number, Math, Date, Set, Map, Promise, JSON, Blob, encodeURIComponent, decodeURIComponent, escape, unescape, setTimeout, clearTimeout });
+vm.runInContext(codecSource, context, { filename: 'session-backup-codec.js' });
+vm.runInContext(storageSource, context, { filename: 'storage-manager.js' });
+vm.runInContext(sessionSource, context, { filename: 'session-continuity.js' });
+const api = window.AIShortsSessionContinuity;
+ok(api.saveSnapshotNow('compression-test'), 'session save succeeds with backup compression enabled');
+const backup = values.get(api.BACKUP_KEYS[0]);
+ok(backup && backup.startsWith(window.AIShortsSessionBackupCodec.PREFIX), 'rotating backup uses the compressed envelope when it saves space');
+const decoded = window.AIShortsSessionBackupCodec.decode(backup);
+ok(decoded.text.includes('AI Shorts Studio') && decoded.compressed, 'compressed backup decodes to a restorable project snapshot');
+const status = api.getStatus();
+ok(status.compressedBackupCount === 1 && status.backupSavingsPercent > 20, 'session diagnostics expose compressed backup count and meaningful savings');
+values.set(primary, '{broken');
+const restored = api.loadSnapshot();
+ok(restored && restored.recommendations.length === repeated.length, 'damaged primary recovers from a checksum-verified compressed backup');
+const history = api.readRecoveryHistory();
+ok(history.some(item => item.type === 'backup-recovered'), 'compressed recovery is recorded in bounded recovery history');
+console.log('PASS adaptive compressed session backup and recovery guardrails');

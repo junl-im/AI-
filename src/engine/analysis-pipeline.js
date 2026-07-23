@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.20 - resilient adaptive parallel media analysis pipeline
+// AI Shorts Studio v1.5.24 - resilient adaptive parallel media analysis pipeline
 'use strict';
 
 (function exposeAnalysisPipeline(global) {
@@ -6,6 +6,8 @@
     const motionAnalyzer = global.AIShortsVideoMotionAnalyzer || {};
     const autoCutDetector = global.AIShortsAutoCutDetector || {};
     const utils = global.AIShortsCoreUtils || {};
+    const config = global.AIShortsRuntimeConfig || {};
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.24').replace(/^v/i, '');
 
     function clamp(value, min, max) {
         if (utils.clamp) return utils.clamp(value, min, max);
@@ -31,7 +33,7 @@
                 silent: false
             });
         }
-        return { duration: total, frames, summary: { fallback: true, engine: 'v1.5.20' } };
+        return { duration: total, frames, summary: { fallback: true, engine: `v${ENGINE_VERSION}` } };
     }
 
     function createFallbackWaveform() {
@@ -76,7 +78,7 @@
             fileMeta,
             warnings: [],
             engine: {
-                version: '1.5.20',
+                version: ENGINE_VERSION,
                 mode: budget.label || '모듈형 엔진',
                 analysisStrategy: 'sequential',
                 budget,

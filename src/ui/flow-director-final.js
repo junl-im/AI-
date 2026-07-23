@@ -2,6 +2,8 @@
 // Owns menu state, progression reveal, panel spotlight and scroll positioning.
 'use strict';
 (function bootFlowDirectorFinal(global) {
+    const config = global.AIShortsRuntimeConfig || {};
+    const BUILD_VERSION = String(config.APP_VERSION || 'v1.5.24').replace(/^v/i, '');
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
         file: ['upload', '불러오기'], recommend: ['spark', '추천 생성'], candidates: ['candidates', '후보 선택'],
@@ -258,7 +260,7 @@
     }
     function install() {
         if (document.body) {
-            if (document.body.dataset.build !== '1.5.20') document.body.dataset.build = '1.5.20';
+            if (document.body.dataset.build !== BUILD_VERSION) document.body.dataset.build = BUILD_VERSION;
             if (document.body.dataset.flowDirector !== 'final') document.body.dataset.flowDirector = 'final';
             document.body.dataset.iconLanguage = 'studio-vectors';
         }

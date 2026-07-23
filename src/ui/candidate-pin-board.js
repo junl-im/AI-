@@ -1,9 +1,13 @@
-// AI Shorts Studio v1.2.1 - loop-safe pinned candidates and save estimate comparison
+// AI Shorts Studio v1.5.24 - quota-aware self-healing pinned candidates and save estimate comparison
 'use strict';
 (function bootCandidatePinBoard(global) {
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
+    const config = global.AIShortsRuntimeConfig || {};
+    const storageManager = global.AIShortsStorageManager || {};
     const STORAGE_KEY = 'ai-shorts-pinned-candidates-v1';
+    const MAX_PINNED_CANDIDATES = Math.max(1, Math.min(24, Number(config.MAX_PINNED_CANDIDATES) || 12));
+    const MAX_PIN_ID_CHARS = 160;
     let pinnedIds = loadPins();
     let showPinnedOnly = false;
     let raf = 0;
@@ -47,17 +51,61 @@
         if (planner && planner.estimateTime) return planner.estimateTime(candidate, activePresetKey());
         return fmtSeconds(Math.max(4, durationOf(candidate) || 30));
     }
+    function normalizePinId(value) {
+        const id = String(value == null ? '' : value).trim();
+        return id && id.length <= MAX_PIN_ID_CHARS ? id : '';
+    }
+    function sanitizePinValues(values, limit) {
+        const maxItems = Math.max(MAX_PINNED_CANDIDATES, Number(limit) || MAX_PINNED_CANDIDATES);
+        const clean = [];
+        const seen = new Set();
+        (Array.isArray(values) ? values : []).forEach(value => {
+            const id = normalizePinId(value);
+            if (!id || seen.has(id) || clean.length >= maxItems) return;
+            seen.add(id);
+            clean.push(id);
+        });
+        return clean;
+    }
     function loadPins() {
         try {
-            const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            return new Set(Array.isArray(parsed) ? parsed.filter(Boolean) : []);
+            const raw = storageManager.safeGet ? storageManager.safeGet(STORAGE_KEY, '[]') : global.localStorage && global.localStorage.getItem(STORAGE_KEY) || '[]';
+            return new Set(sanitizePinValues(JSON.parse(raw), MAX_PINNED_CANDIDATES * 8));
         } catch (error) {
+            try { if (storageManager.safeRemove) storageManager.safeRemove(STORAGE_KEY); else if (global.localStorage) global.localStorage.removeItem(STORAGE_KEY); } catch (_) { /* ignored */ }
             return new Set();
         }
     }
     function savePins() {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(pinnedIds))); } catch (error) { /* ignored */ }
+        const values = sanitizePinValues(Array.from(pinnedIds));
+        pinnedIds = new Set(values);
+        try {
+            const text = JSON.stringify(values);
+            if (storageManager.safeSet) storageManager.safeSet(STORAGE_KEY, text, { maxCleanupRemovals: 1 });
+            else if (global.localStorage) global.localStorage.setItem(STORAGE_KEY, text);
+        } catch (error) { /* ignored */ }
         if (document.body && document.body.dataset.pinnedCandidates !== String(pinnedIds.size)) document.body.dataset.pinnedCandidates = String(pinnedIds.size);
+    }
+    function emitPinChange(detail) {
+        try { document.dispatchEvent(new CustomEvent('ai-shorts-pinned-candidates-change', { detail: Object.assign({ count: pinnedIds.size }, detail || {}) })); } catch (error) { /* ignored */ }
+    }
+    function reconcilePins() {
+        const available = candidates().map(item => normalizePinId(item && item.id)).filter(Boolean);
+        if (!available.length) {
+            savePins();
+            return Object.freeze({ changed: false, removed: 0, count: pinnedIds.size });
+        }
+        const valid = new Set(available);
+        const next = sanitizePinValues(Array.from(pinnedIds).filter(id => valid.has(id)));
+        const before = Array.from(pinnedIds);
+        const changed = next.length !== before.length || next.some((id, index) => id !== before[index]);
+        const removed = Math.max(0, before.length - next.length);
+        if (changed) {
+            pinnedIds = new Set(next);
+            savePins();
+            emitPinChange({ reason: 'reconcile', removed });
+        }
+        return Object.freeze({ changed, removed, count: pinnedIds.size });
     }
     function goTab(tab) {
         const api = global.AIShortsHyperFlowTabs;
@@ -70,12 +118,17 @@
         if (tab) window.setTimeout(() => goTab(tab), 80);
     }
     function togglePin(id) {
-        if (!id) return;
-        if (pinnedIds.has(id)) pinnedIds.delete(id);
-        else pinnedIds.add(id);
+        const normalizedId = normalizePinId(id);
+        if (!normalizedId || !candidates().some(item => normalizePinId(item && item.id) === normalizedId)) return false;
+        if (pinnedIds.has(normalizedId)) pinnedIds.delete(normalizedId);
+        else {
+            while (pinnedIds.size >= MAX_PINNED_CANDIDATES) pinnedIds.delete(pinnedIds.values().next().value);
+            pinnedIds.add(normalizedId);
+        }
         savePins();
-        try { document.dispatchEvent(new CustomEvent('ai-shorts-pinned-candidates-change', { detail: { count: pinnedIds.size } })); } catch (error) { /* ignored */ }
+        emitPinChange({ reason: 'toggle', id: normalizedId });
         schedule();
+        return true;
     }
     function ensurePinBoard() {
         let board = byId('candidatePinBoard');
@@ -237,6 +290,7 @@
     }
     function sync() {
         raf = 0;
+        reconcilePins();
         decorateCards();
         renderPinnedBoard();
         renderSaveCompare();
@@ -264,7 +318,7 @@
         document.addEventListener('ai-shorts-pinned-candidates-change', schedule);
         schedule();
     }
-    global.AIShortsCandidatePinBoard = Object.freeze({ schedule, togglePin, pinnedCandidates, selectCandidate });
+    global.AIShortsCandidatePinBoard = Object.freeze({ schedule, togglePin, pinnedCandidates, selectCandidate, reconcilePins, getPinnedIds: () => Array.from(pinnedIds), maxPins: MAX_PINNED_CANDIDATES });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
     else install();
 })(window);

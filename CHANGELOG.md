@@ -1,5 +1,44 @@
 # CHANGELOG
 
+## v1.5.24 - Compressed Session Recovery & Content-Integrity Rollback
+
+- 세션 순환 백업에 체크섬이 포함된 LZW16 압축 봉투 형식을 추가했습니다. 압축 이득이 4% 미만이면 기존 JSON 원문 형식을 유지해 호환성을 보존합니다.
+- 저장소 상태가 정상일 때 최대 3개, 경고 시 2개, 위험 시 1개로 백업 보존 개수를 자동 조정합니다.
+- 기본 세션 로딩 실패, 백업 복원 성공·실패, 실제 작업 복원 결과를 최대 20개 복구 이력으로 기록합니다.
+- 백업별 압축 여부·원문/저장 문자 수·절감률·체크섬과 복구 이력을 원본 프로젝트 내용 없이 진단 JSON으로 내보낼 수 있습니다.
+- 서비스워커 앱 셸 119개 자산의 SHA-256 manifest를 생성하고 설치·상태 확인·수동 복구·활성화 단계에서 실제 캐시 내용을 검증합니다.
+- 변조·손상된 캐시 자산은 네트워크에서 다시 받아 해시를 재검증하며, 핵심 자산 복구에 실패하면 새 워커 활성화를 중단하고 이전 정상 캐시를 보존합니다.
+- 압축·복구 이력·진단 내보내기·콘텐츠 무결성·롤백 전용 회귀 검사 3개를 추가해 자동 QA **200/200**을 통과했습니다.
+
+---
+
+## v1.5.22 - Storage Quota, Session Schema Recovery, Service Worker Diagnostics
+
+- `AIShortsStorageManager`를 추가해 설정·핀·레이아웃·세션 저장을 공통 보호하고 localStorage quota 오류 시 오래된 백업·레거시 세션을 정리한 뒤 한 번 자동 재시도합니다.
+- `navigator.storage.estimate()`와 Cache Storage 목록을 사용해 저장소 사용량·비율·localStorage 추정 바이트·앱 캐시 수를 진단합니다.
+- 사용률 80% 이상은 경고, 92% 이상은 위험으로 구분하고 화면의 저장소 상태 패널에서 새로고침과 안전 정리를 실행할 수 있습니다.
+- 세션 연속성 스키마를 v4로 갱신하고 구버전 자동 마이그레이션, 2개 순환 백업, 손상된 기본 데이터의 백업 복원과 기본 키 자동 수리를 추가했습니다.
+- 서비스워커 업데이트 확인을 최대 3회, 500ms 기준 지수 백오프로 재시도하고 마지막 설치 보고서·캐시 항목 수·업데이트 상태를 앱 진단에 노출합니다.
+- 저장소 관리·세션 마이그레이션/백업·서비스워커 백오프·진단 패널 전용 회귀 검사 4개를 추가했습니다.
+- 자동 QA **192/192**, Chromium 4개 viewport 런타임 오류·Promise 거절·콘솔 오류·가로 overflow **0건**을 통과했습니다.
+
+---
+
+## v1.5.21 - Persistence Recovery, Fingerprinted Cache, Resilient Service Worker
+
+- 후보 핀 localStorage를 최대 12개로 제한하고, 중복·비정상 ID·현재 후보에 없는 오래된 ID를 자동 정리합니다.
+- 알 수 없는 후보 ID는 새 핀으로 저장하지 않으며, 상한 도달 시 가장 오래된 핀부터 교체합니다.
+- 분석 캐시가 파일 메타데이터뿐 아니라 앞·중간·끝 16KB 표본 지문을 키에 포함하도록 강화했습니다.
+- Web Crypto SHA-256을 우선 사용하고, 지원되지 않는 환경에서는 경량 FNV-1a와 객체 세션 식별자로 안전하게 폴백합니다.
+- 서비스워커 사전 캐시를 8개 단위 파일별 처리로 변경해 선택 자산 하나의 실패가 전체 설치를 무효화하지 않도록 했습니다.
+- index, manifest, runtime config 핵심 셸 실패 시 새 캐시를 삭제하고 skipWaiting 전에 설치를 중단합니다.
+- 설치 결과와 활성화 중 복구 파일 수를 앱 진단 이벤트로 전달합니다.
+- 다운로드 Object URL 해제 시간을 45초로 늘리고 활성 URL 추적·상한·수동/페이지 종료 정리를 추가했습니다.
+- 전용 회귀 검사 4개를 추가해 자동 QA **186/186**을 통과했습니다.
+
+---
+
+
 ## v1.5.20 - Structure & Responsive Priority Reduction
 
 - PC Dock, desktop prime layout, workspace focus layout, responsive workspace의 구조 priority를 viewport·flow state별 실제 Chromium 계산값으로 재검증했습니다.

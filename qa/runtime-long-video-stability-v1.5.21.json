@@ -1,0 +1,1408 @@
+{
+  "version": "1.5.21",
+  "generatedAt": "2026-07-22T05:45:00.000Z",
+  "harness": "same-page Chromium 15m→30m→15m 1920x1080 MP4 replacement, adaptive analysis, 2s render, forced GC, and Object URL tracking",
+  "sequenceMinutes": [
+    15,
+    30,
+    15
+  ],
+  "baseline": {
+    "urls": {
+      "created": 0,
+      "revoked": 0,
+      "active": 0,
+      "sourceActive": 0,
+      "exportActive": 0
+    },
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "queue": {
+      "running": false,
+      "total": 0,
+      "done": 0,
+      "failed": 0,
+      "cancelled": 0,
+      "queued": 0,
+      "progress": 0,
+      "current": null,
+      "items": []
+    },
+    "runtime": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "mediaSessionId": 0,
+    "fileMeta": null,
+    "retainedAudioBuffer": false,
+    "retainedChannelData": false,
+    "heap": {
+      "usedSize": 2385384,
+      "totalSize": 4100096,
+      "embedderHeapUsedSize": 7382048,
+      "backingStorageSize": 1435602
+    },
+    "heapMiB": {
+      "used": 2.275,
+      "total": 3.91,
+      "embedderUsed": 7.04,
+      "backingStorage": 1.369
+    }
+  },
+  "cycles": [
+    {
+      "cycle": 1,
+      "minutes": 15,
+      "source": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_type": "video",
+            "width": 1920,
+            "height": 1080,
+            "r_frame_rate": "1/1"
+          },
+          {
+            "index": 1,
+            "codec_type": "audio",
+            "sample_rate": "8000",
+            "channels": 1,
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+          "duration": "900.000000",
+          "size": "46711105"
+        }
+      },
+      "analysisSeconds": 13.042,
+      "renderSeconds": 3.661,
+      "analysis": {
+        "status": "분석 완료 · 추천 탭으로 이동",
+        "fileMeta": {
+          "name": "long-15m-1080p.mp4",
+          "size": 46711105,
+          "type": "video/mp4",
+          "duration": 900
+        },
+        "engineMeta": {
+          "version": "1.5.9",
+          "normalized": true,
+          "mode": "adaptive-parallel-engine",
+          "analysisStrategy": "sequential-safe",
+          "budget": {
+            "tier": "balanced",
+            "sizeMb": 44.5,
+            "duration": 900,
+            "cores": 56,
+            "memory": 4,
+            "longMedia": true,
+            "audioMaxSeconds": 900,
+            "analysisSampleRate": 8000,
+            "motionSamples": 88,
+            "estimatedAnalysisMemoryMb": 27.5,
+            "estimatedDecodeMemoryMb": 329.6,
+            "memoryRisk": "medium",
+            "memoryRiskLabel": "메모리 확인",
+            "hardBlock": false,
+            "isUncompressedAudio": false,
+            "rawBufferCopyAvoided": true,
+            "retainDecoded": false,
+            "retainChannelData": false,
+            "parallelAnalysis": false,
+            "parallelReason": "장시간 미디어 메모리 안정 우선",
+            "responsivenessSliceMs": 10,
+            "cacheNamespace": "engine-v1.5.9",
+            "recommendationCount": 7,
+            "uiThrottleMs": 110,
+            "label": "장시간 균형 모드",
+            "engineClass": "pro-balanced",
+            "analysisWindow": "adaptive",
+            "cutSensitivity": 0.58,
+            "scoreDepth": "balanced",
+            "renderHint": "균형 우선",
+            "cacheLimit": 4
+          },
+          "timings": {
+            "totalMs": 12796,
+            "audioMs": 7387,
+            "motionMs": 5407,
+            "finalizeMs": 2
+          },
+          "audioPreparation": {
+            "sourceDuration": 900,
+            "analyzedDuration": 900,
+            "sampleRate": 8000,
+            "sampleCount": 7200000,
+            "approximateBytes": 28800000,
+            "truncated": false
+          },
+          "parallelGainEligible": false,
+          "registry": {
+            "namespace": "ai-shorts-studio-pro-engine",
+            "count": 8,
+            "modules": [
+              {
+                "id": "audio.feature.extractor",
+                "version": "0.9.6",
+                "stage": "analysis",
+                "priority": 10,
+                "capabilities": [
+                  "decode",
+                  "waveform",
+                  "rms",
+                  "transient",
+                  "local-only"
+                ]
+              },
+              {
+                "id": "video.motion.sampler",
+                "version": "0.9.6",
+                "stage": "analysis",
+                "priority": 20,
+                "capabilities": [
+                  "motion",
+                  "scene-hint",
+                  "adaptive-sampling"
+                ]
+              },
+              {
+                "id": "auto.cut.detector",
+                "version": "0.9.6",
+                "stage": "cut",
+                "priority": 30,
+                "capabilities": [
+                  "silence",
+                  "beat",
+                  "motion-cut",
+                  "snap-range"
+                ]
+              },
+              {
+                "id": "recommendation.scoring.pipeline",
+                "version": "0.9.6",
+                "stage": "recommendation",
+                "priority": 40,
+                "capabilities": [
+                  "quality-gate",
+                  "engine-badge",
+                  "rerank"
+                ]
+              },
+              {
+                "id": "pro.engine.tuner",
+                "version": "0.9.6",
+                "stage": "recommendation",
+                "priority": 45,
+                "capabilities": [
+                  "confidence",
+                  "grade",
+                  "score-depth"
+                ]
+              },
+              {
+                "id": "render.quality.effects",
+                "version": "0.9.6",
+                "stage": "render",
+                "priority": 50,
+                "capabilities": [
+                  "caption",
+                  "quality",
+                  "watermark"
+                ]
+              },
+              {
+                "id": "analysis.cache",
+                "version": "0.9.6",
+                "stage": "utility",
+                "priority": 60,
+                "capabilities": [
+                  "session-cache",
+                  "repeat-open-boost"
+                ]
+              },
+              {
+                "id": "stability.auditor",
+                "version": "0.9.6",
+                "stage": "stability",
+                "priority": 70,
+                "capabilities": [
+                  "health-score",
+                  "contract-report"
+                ]
+              }
+            ],
+            "events": [
+              {
+                "type": "register",
+                "id": "stability.auditor",
+                "stage": "stability",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "analysis.cache",
+                "stage": "utility",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "render.quality.effects",
+                "stage": "render",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "pro.engine.tuner",
+                "stage": "recommendation",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "recommendation.scoring.pipeline",
+                "stage": "recommendation",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "auto.cut.detector",
+                "stage": "cut",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "video.motion.sampler",
+                "stage": "analysis",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "audio.feature.extractor",
+                "stage": "analysis",
+                "at": "2026-07-21T15:58:54.018Z"
+              }
+            ]
+          },
+          "profile": {
+            "label": "analysis",
+            "totalMs": 12809,
+            "marks": [
+              {
+                "name": "budget",
+                "t": 0,
+                "meta": {
+                  "tier": "balanced",
+                  "sizeMb": 44.5,
+                  "duration": 900,
+                  "cores": 56,
+                  "memory": 4,
+                  "longMedia": true,
+                  "audioMaxSeconds": 900,
+                  "analysisSampleRate": 8000,
+                  "motionSamples": 88,
+                  "estimatedAnalysisMemoryMb": 27.5,
+                  "estimatedDecodeMemoryMb": 329.6,
+                  "memoryRisk": "medium",
+                  "memoryRiskLabel": "메모리 확인",
+                  "hardBlock": false,
+                  "isUncompressedAudio": false,
+                  "rawBufferCopyAvoided": true,
+                  "retainDecoded": false,
+                  "retainChannelData": false,
+                  "parallelAnalysis": false,
+                  "parallelReason": "장시간 미디어 메모리 안정 우선",
+                  "responsivenessSliceMs": 10,
+                  "cacheNamespace": "engine-v1.5.9",
+                  "recommendationCount": 7,
+                  "uiThrottleMs": 110,
+                  "label": "장시간 균형 모드",
+                  "engineClass": "pro-balanced",
+                  "analysisWindow": "adaptive",
+                  "cutSensitivity": 0.58,
+                  "scoreDepth": "balanced",
+                  "renderHint": "균형 우선",
+                  "cacheLimit": 4
+                }
+              },
+              {
+                "name": "analysis-complete",
+                "t": 12798,
+                "meta": null
+              }
+            ]
+          },
+          "summary": {
+            "version": "0.9.6",
+            "class": "pro-balanced",
+            "frames": 3597,
+            "silenceRatio": 0,
+            "cutPoints": 387,
+            "renderHint": "균형 우선"
+          },
+          "cache": {
+            "size": 1,
+            "limit": 4,
+            "maxAgeMs": 1800000,
+            "hits": 0,
+            "misses": 1,
+            "evictions": 0,
+            "expired": 0,
+            "lastHitAgeMs": 0,
+            "cloneSafe": true,
+            "hitRate": 0
+          },
+          "cacheHit": false,
+          "contract": {
+            "version": "0.9.6",
+            "ok": true,
+            "moduleCount": 8,
+            "failedRecommendations": 0,
+            "warnings": [],
+            "score": 88
+          },
+          "stability": {
+            "version": "0.9.6",
+            "ok": true,
+            "score": 100,
+            "findings": [],
+            "checkedAt": "2026-07-21T15:59:08.175Z"
+          }
+        },
+        "audioSummary": {
+          "avgRms": 0.08812915257851914,
+          "peak": 0.14073596894741058,
+          "loudnessDensity": 0.23158187378370865,
+          "silenceRatio": 0,
+          "dynamicRangeProxy": 0.000552821736164319,
+          "transientDensity": 0.29997219905476785,
+          "sourceDuration": 900,
+          "analyzedDuration": 900,
+          "analysisSampleRate": 8000,
+          "truncated": false
+        },
+        "motionSummary": {
+          "motionDensity": 0.5,
+          "maxMotion": 1,
+          "samples": 88,
+          "adaptive": true
+        },
+        "retainedAudioBuffer": false,
+        "retainedChannelData": false,
+        "longMediaDiagnostics": [
+          {
+            "at": "2026-07-21T15:58:55.365Z",
+            "type": "long-media-budget",
+            "duration": 900,
+            "sizeMb": 44.5,
+            "sampleRate": 8000,
+            "estimatedMemoryMb": 27.5,
+            "estimatedDecodeMemoryMb": 329.6,
+            "memoryRisk": "medium"
+          }
+        ]
+      },
+      "outputProbe": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "1.844542",
+        "size": "165327"
+      },
+      "after": {
+        "urls": {
+          "created": 2,
+          "revoked": 1,
+          "active": 1,
+          "sourceActive": 1,
+          "exportActive": 0
+        },
+        "operations": {
+          "mediaSessionId": 1,
+          "active": []
+        },
+        "queue": {
+          "running": false,
+          "total": 0,
+          "done": 0,
+          "failed": 0,
+          "cancelled": 0,
+          "queued": 0,
+          "progress": 0,
+          "current": null,
+          "items": []
+        },
+        "runtime": {
+          "webAudio": true,
+          "worker": true,
+          "mediaRecorder": true,
+          "canvasCaptureStream": true,
+          "mediaCaptureStream": true,
+          "serviceWorker": false,
+          "serviceWorkerControlled": false,
+          "secureContext": false,
+          "crossOriginIsolated": false,
+          "hydrationReady": "core",
+          "hydrationError": "",
+          "runtimeErrors": 0
+        },
+        "mediaSessionId": 1,
+        "fileMeta": {
+          "name": "long-15m-1080p.mp4",
+          "size": 46711105,
+          "type": "video/mp4",
+          "duration": 900
+        },
+        "retainedAudioBuffer": false,
+        "retainedChannelData": false,
+        "heap": {
+          "usedSize": 4720104,
+          "totalSize": 5849088,
+          "embedderHeapUsedSize": 12679264,
+          "backingStorageSize": 570495
+        },
+        "heapMiB": {
+          "used": 4.501,
+          "total": 5.578,
+          "embedderUsed": 12.092,
+          "backingStorage": 0.544
+        }
+      }
+    },
+    {
+      "cycle": 2,
+      "minutes": 30,
+      "source": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_type": "video",
+            "width": 1920,
+            "height": 1080,
+            "r_frame_rate": "1/1"
+          },
+          {
+            "index": 1,
+            "codec_type": "audio",
+            "sample_rate": "8000",
+            "channels": 1,
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+          "duration": "1800.000000",
+          "size": "93491653"
+        }
+      },
+      "analysisSeconds": 23.596,
+      "renderSeconds": 2.863,
+      "analysis": {
+        "status": "분석 완료 · 추천 탭으로 이동",
+        "fileMeta": {
+          "name": "long-30m-1080p.mp4",
+          "size": 93491653,
+          "type": "video/mp4",
+          "duration": 1800
+        },
+        "engineMeta": {
+          "version": "1.5.9",
+          "normalized": true,
+          "mode": "adaptive-parallel-engine",
+          "analysisStrategy": "sequential-safe",
+          "budget": {
+            "tier": "safe",
+            "sizeMb": 89.2,
+            "duration": 1800,
+            "cores": 56,
+            "memory": 4,
+            "longMedia": true,
+            "audioMaxSeconds": 1800,
+            "analysisSampleRate": 6000,
+            "motionSamples": 64,
+            "estimatedAnalysisMemoryMb": 41.2,
+            "estimatedDecodeMemoryMb": 659.2,
+            "memoryRisk": "high",
+            "memoryRiskLabel": "메모리 주의",
+            "hardBlock": false,
+            "isUncompressedAudio": false,
+            "rawBufferCopyAvoided": true,
+            "retainDecoded": false,
+            "retainChannelData": false,
+            "parallelAnalysis": false,
+            "parallelReason": "장시간 미디어 메모리 안정 우선",
+            "responsivenessSliceMs": 8,
+            "cacheNamespace": "engine-v1.5.9",
+            "recommendationCount": 5,
+            "uiThrottleMs": 180,
+            "label": "장시간 안전 모드",
+            "engineClass": "pro-safe",
+            "analysisWindow": "light",
+            "cutSensitivity": 0.46,
+            "scoreDepth": "stable",
+            "renderHint": "안정 우선",
+            "cacheLimit": 2
+          },
+          "timings": {
+            "totalMs": 23301,
+            "audioMs": 18385,
+            "motionMs": 4913,
+            "finalizeMs": 3
+          },
+          "audioPreparation": {
+            "sourceDuration": 1800,
+            "analyzedDuration": 1800,
+            "sampleRate": 6000,
+            "sampleCount": 10800000,
+            "approximateBytes": 43200000,
+            "truncated": false
+          },
+          "parallelGainEligible": false,
+          "registry": {
+            "namespace": "ai-shorts-studio-pro-engine",
+            "count": 8,
+            "modules": [
+              {
+                "id": "audio.feature.extractor",
+                "version": "0.9.6",
+                "stage": "analysis",
+                "priority": 10,
+                "capabilities": [
+                  "decode",
+                  "waveform",
+                  "rms",
+                  "transient",
+                  "local-only"
+                ]
+              },
+              {
+                "id": "video.motion.sampler",
+                "version": "0.9.6",
+                "stage": "analysis",
+                "priority": 20,
+                "capabilities": [
+                  "motion",
+                  "scene-hint",
+                  "adaptive-sampling"
+                ]
+              },
+              {
+                "id": "auto.cut.detector",
+                "version": "0.9.6",
+                "stage": "cut",
+                "priority": 30,
+                "capabilities": [
+                  "silence",
+                  "beat",
+                  "motion-cut",
+                  "snap-range"
+                ]
+              },
+              {
+                "id": "recommendation.scoring.pipeline",
+                "version": "0.9.6",
+                "stage": "recommendation",
+                "priority": 40,
+                "capabilities": [
+                  "quality-gate",
+                  "engine-badge",
+                  "rerank"
+                ]
+              },
+              {
+                "id": "pro.engine.tuner",
+                "version": "0.9.6",
+                "stage": "recommendation",
+                "priority": 45,
+                "capabilities": [
+                  "confidence",
+                  "grade",
+                  "score-depth"
+                ]
+              },
+              {
+                "id": "render.quality.effects",
+                "version": "0.9.6",
+                "stage": "render",
+                "priority": 50,
+                "capabilities": [
+                  "caption",
+                  "quality",
+                  "watermark"
+                ]
+              },
+              {
+                "id": "analysis.cache",
+                "version": "0.9.6",
+                "stage": "utility",
+                "priority": 60,
+                "capabilities": [
+                  "session-cache",
+                  "repeat-open-boost"
+                ]
+              },
+              {
+                "id": "stability.auditor",
+                "version": "0.9.6",
+                "stage": "stability",
+                "priority": 70,
+                "capabilities": [
+                  "health-score",
+                  "contract-report"
+                ]
+              }
+            ],
+            "events": [
+              {
+                "type": "register",
+                "id": "stability.auditor",
+                "stage": "stability",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "analysis.cache",
+                "stage": "utility",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "render.quality.effects",
+                "stage": "render",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "pro.engine.tuner",
+                "stage": "recommendation",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "recommendation.scoring.pipeline",
+                "stage": "recommendation",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "auto.cut.detector",
+                "stage": "cut",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "video.motion.sampler",
+                "stage": "analysis",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "audio.feature.extractor",
+                "stage": "analysis",
+                "at": "2026-07-21T15:58:54.018Z"
+              }
+            ]
+          },
+          "profile": {
+            "label": "analysis",
+            "totalMs": 23318,
+            "marks": [
+              {
+                "name": "budget",
+                "t": 0,
+                "meta": {
+                  "tier": "safe",
+                  "sizeMb": 89.2,
+                  "duration": 1800,
+                  "cores": 56,
+                  "memory": 4,
+                  "longMedia": true,
+                  "audioMaxSeconds": 1800,
+                  "analysisSampleRate": 6000,
+                  "motionSamples": 64,
+                  "estimatedAnalysisMemoryMb": 41.2,
+                  "estimatedDecodeMemoryMb": 659.2,
+                  "memoryRisk": "high",
+                  "memoryRiskLabel": "메모리 주의",
+                  "hardBlock": false,
+                  "isUncompressedAudio": false,
+                  "rawBufferCopyAvoided": true,
+                  "retainDecoded": false,
+                  "retainChannelData": false,
+                  "parallelAnalysis": false,
+                  "parallelReason": "장시간 미디어 메모리 안정 우선",
+                  "responsivenessSliceMs": 8,
+                  "cacheNamespace": "engine-v1.5.9",
+                  "recommendationCount": 5,
+                  "uiThrottleMs": 180,
+                  "label": "장시간 안전 모드",
+                  "engineClass": "pro-safe",
+                  "analysisWindow": "light",
+                  "cutSensitivity": 0.46,
+                  "scoreDepth": "stable",
+                  "renderHint": "안정 우선",
+                  "cacheLimit": 2
+                }
+              },
+              {
+                "name": "analysis-complete",
+                "t": 23302,
+                "meta": null
+              }
+            ]
+          },
+          "summary": {
+            "version": "0.9.6",
+            "class": "pro-safe",
+            "frames": 7197,
+            "silenceRatio": 0,
+            "cutPoints": 610,
+            "renderHint": "안정 우선"
+          },
+          "cache": {
+            "size": 2,
+            "limit": 4,
+            "maxAgeMs": 1800000,
+            "hits": 0,
+            "misses": 2,
+            "evictions": 0,
+            "expired": 0,
+            "lastHitAgeMs": 0,
+            "cloneSafe": true,
+            "hitRate": 0
+          },
+          "cacheHit": false,
+          "contract": {
+            "version": "0.9.6",
+            "ok": true,
+            "moduleCount": 8,
+            "failedRecommendations": 0,
+            "warnings": [],
+            "score": 88
+          },
+          "stability": {
+            "version": "0.9.6",
+            "ok": true,
+            "score": 100,
+            "findings": [],
+            "checkedAt": "2026-07-21T15:59:38.116Z"
+          }
+        },
+        "audioSummary": {
+          "avgRms": 0.08832785196806336,
+          "peak": 0.1480470895767212,
+          "loudnessDensity": 0.204807558705016,
+          "silenceRatio": 0,
+          "dynamicRangeProxy": 6.784147124033746e-05,
+          "transientDensity": 0.2999861053216618,
+          "sourceDuration": 1800,
+          "analyzedDuration": 1800,
+          "analysisSampleRate": 6000,
+          "truncated": false
+        },
+        "motionSummary": {
+          "motionDensity": 0.53125,
+          "maxMotion": 1,
+          "samples": 64,
+          "adaptive": true
+        },
+        "retainedAudioBuffer": false,
+        "retainedChannelData": false,
+        "longMediaDiagnostics": [
+          {
+            "at": "2026-07-21T15:59:14.797Z",
+            "type": "long-media-budget",
+            "duration": 1800,
+            "sizeMb": 89.2,
+            "sampleRate": 6000,
+            "estimatedMemoryMb": 41.2,
+            "estimatedDecodeMemoryMb": 659.2,
+            "memoryRisk": "high"
+          }
+        ]
+      },
+      "outputProbe": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "1.652354",
+        "size": "128667"
+      },
+      "after": {
+        "urls": {
+          "created": 4,
+          "revoked": 3,
+          "active": 1,
+          "sourceActive": 1,
+          "exportActive": 0
+        },
+        "operations": {
+          "mediaSessionId": 2,
+          "active": []
+        },
+        "queue": {
+          "running": false,
+          "total": 0,
+          "done": 0,
+          "failed": 0,
+          "cancelled": 0,
+          "queued": 0,
+          "progress": 0,
+          "current": null,
+          "items": []
+        },
+        "runtime": {
+          "webAudio": true,
+          "worker": true,
+          "mediaRecorder": true,
+          "canvasCaptureStream": true,
+          "mediaCaptureStream": true,
+          "serviceWorker": false,
+          "serviceWorkerControlled": false,
+          "secureContext": false,
+          "crossOriginIsolated": false,
+          "hydrationReady": "core",
+          "hydrationError": "",
+          "runtimeErrors": 0
+        },
+        "mediaSessionId": 2,
+        "fileMeta": {
+          "name": "long-30m-1080p.mp4",
+          "size": 93491653,
+          "type": "video/mp4",
+          "duration": 1800
+        },
+        "retainedAudioBuffer": false,
+        "retainedChannelData": false,
+        "heap": {
+          "usedSize": 6712792,
+          "totalSize": 8994816,
+          "embedderHeapUsedSize": 16848544,
+          "backingStorageSize": 566515
+        },
+        "heapMiB": {
+          "used": 6.402,
+          "total": 8.578,
+          "embedderUsed": 16.068,
+          "backingStorage": 0.54
+        }
+      }
+    },
+    {
+      "cycle": 3,
+      "minutes": 15,
+      "source": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_type": "video",
+            "width": 1920,
+            "height": 1080,
+            "r_frame_rate": "1/1"
+          },
+          {
+            "index": 1,
+            "codec_type": "audio",
+            "sample_rate": "8000",
+            "channels": 1,
+            "r_frame_rate": "0/0"
+          }
+        ],
+        "format": {
+          "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+          "duration": "900.000000",
+          "size": "46711105"
+        }
+      },
+      "analysisSeconds": 0.288,
+      "renderSeconds": 2.863,
+      "analysis": {
+        "status": "분석 완료 · 추천 탭으로 이동",
+        "fileMeta": {
+          "name": "long-15m-1080p.mp4",
+          "size": 46711105,
+          "type": "video/mp4",
+          "duration": 900
+        },
+        "engineMeta": {
+          "version": "1.5.9",
+          "normalized": true,
+          "mode": "adaptive-parallel-engine",
+          "analysisStrategy": "sequential-safe",
+          "budget": {
+            "tier": "balanced",
+            "sizeMb": 44.5,
+            "duration": 900,
+            "cores": 56,
+            "memory": 4,
+            "longMedia": true,
+            "audioMaxSeconds": 900,
+            "analysisSampleRate": 8000,
+            "motionSamples": 88,
+            "estimatedAnalysisMemoryMb": 27.5,
+            "estimatedDecodeMemoryMb": 329.6,
+            "memoryRisk": "medium",
+            "memoryRiskLabel": "메모리 확인",
+            "hardBlock": false,
+            "isUncompressedAudio": false,
+            "rawBufferCopyAvoided": true,
+            "retainDecoded": false,
+            "retainChannelData": false,
+            "parallelAnalysis": false,
+            "parallelReason": "장시간 미디어 메모리 안정 우선",
+            "responsivenessSliceMs": 10,
+            "cacheNamespace": "engine-v1.5.9",
+            "recommendationCount": 7,
+            "uiThrottleMs": 110,
+            "label": "장시간 균형 모드",
+            "engineClass": "pro-balanced",
+            "analysisWindow": "adaptive",
+            "cutSensitivity": 0.58,
+            "scoreDepth": "balanced",
+            "renderHint": "균형 우선",
+            "cacheLimit": 4
+          },
+          "timings": {
+            "totalMs": 12796,
+            "audioMs": 7387,
+            "motionMs": 5407,
+            "finalizeMs": 2
+          },
+          "audioPreparation": {
+            "sourceDuration": 900,
+            "analyzedDuration": 900,
+            "sampleRate": 8000,
+            "sampleCount": 7200000,
+            "approximateBytes": 28800000,
+            "truncated": false
+          },
+          "parallelGainEligible": false,
+          "registry": {
+            "namespace": "ai-shorts-studio-pro-engine",
+            "count": 8,
+            "modules": [
+              {
+                "id": "audio.feature.extractor",
+                "version": "0.9.6",
+                "stage": "analysis",
+                "priority": 10,
+                "capabilities": [
+                  "decode",
+                  "waveform",
+                  "rms",
+                  "transient",
+                  "local-only"
+                ]
+              },
+              {
+                "id": "video.motion.sampler",
+                "version": "0.9.6",
+                "stage": "analysis",
+                "priority": 20,
+                "capabilities": [
+                  "motion",
+                  "scene-hint",
+                  "adaptive-sampling"
+                ]
+              },
+              {
+                "id": "auto.cut.detector",
+                "version": "0.9.6",
+                "stage": "cut",
+                "priority": 30,
+                "capabilities": [
+                  "silence",
+                  "beat",
+                  "motion-cut",
+                  "snap-range"
+                ]
+              },
+              {
+                "id": "recommendation.scoring.pipeline",
+                "version": "0.9.6",
+                "stage": "recommendation",
+                "priority": 40,
+                "capabilities": [
+                  "quality-gate",
+                  "engine-badge",
+                  "rerank"
+                ]
+              },
+              {
+                "id": "pro.engine.tuner",
+                "version": "0.9.6",
+                "stage": "recommendation",
+                "priority": 45,
+                "capabilities": [
+                  "confidence",
+                  "grade",
+                  "score-depth"
+                ]
+              },
+              {
+                "id": "render.quality.effects",
+                "version": "0.9.6",
+                "stage": "render",
+                "priority": 50,
+                "capabilities": [
+                  "caption",
+                  "quality",
+                  "watermark"
+                ]
+              },
+              {
+                "id": "analysis.cache",
+                "version": "0.9.6",
+                "stage": "utility",
+                "priority": 60,
+                "capabilities": [
+                  "session-cache",
+                  "repeat-open-boost"
+                ]
+              },
+              {
+                "id": "stability.auditor",
+                "version": "0.9.6",
+                "stage": "stability",
+                "priority": 70,
+                "capabilities": [
+                  "health-score",
+                  "contract-report"
+                ]
+              }
+            ],
+            "events": [
+              {
+                "type": "register",
+                "id": "stability.auditor",
+                "stage": "stability",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "analysis.cache",
+                "stage": "utility",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "render.quality.effects",
+                "stage": "render",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "pro.engine.tuner",
+                "stage": "recommendation",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "recommendation.scoring.pipeline",
+                "stage": "recommendation",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "auto.cut.detector",
+                "stage": "cut",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "video.motion.sampler",
+                "stage": "analysis",
+                "at": "2026-07-21T15:58:54.019Z"
+              },
+              {
+                "type": "register",
+                "id": "audio.feature.extractor",
+                "stage": "analysis",
+                "at": "2026-07-21T15:58:54.018Z"
+              }
+            ]
+          },
+          "profile": {
+            "label": "analysis",
+            "totalMs": 10,
+            "marks": [
+              {
+                "name": "budget",
+                "t": 0,
+                "meta": {
+                  "tier": "balanced",
+                  "sizeMb": 44.5,
+                  "duration": 900,
+                  "cores": 56,
+                  "memory": 4,
+                  "longMedia": true,
+                  "audioMaxSeconds": 900,
+                  "analysisSampleRate": 8000,
+                  "motionSamples": 88,
+                  "estimatedAnalysisMemoryMb": 27.5,
+                  "estimatedDecodeMemoryMb": 329.6,
+                  "memoryRisk": "medium",
+                  "memoryRiskLabel": "메모리 확인",
+                  "hardBlock": false,
+                  "isUncompressedAudio": false,
+                  "rawBufferCopyAvoided": true,
+                  "retainDecoded": false,
+                  "retainChannelData": false,
+                  "parallelAnalysis": false,
+                  "parallelReason": "장시간 미디어 메모리 안정 우선",
+                  "responsivenessSliceMs": 10,
+                  "cacheNamespace": "engine-v1.5.9",
+                  "recommendationCount": 7,
+                  "uiThrottleMs": 110,
+                  "label": "장시간 균형 모드",
+                  "engineClass": "pro-balanced",
+                  "analysisWindow": "adaptive",
+                  "cutSensitivity": 0.58,
+                  "scoreDepth": "balanced",
+                  "renderHint": "균형 우선",
+                  "cacheLimit": 4
+                }
+              },
+              {
+                "name": "cache-hit",
+                "t": 10,
+                "meta": null
+              }
+            ]
+          },
+          "summary": {
+            "version": "0.9.6",
+            "class": "pro-balanced",
+            "frames": 3597,
+            "silenceRatio": 0,
+            "cutPoints": 387,
+            "renderHint": "균형 우선"
+          },
+          "cache": {
+            "size": 2,
+            "limit": 4,
+            "maxAgeMs": 1800000,
+            "hits": 1,
+            "misses": 2,
+            "evictions": 0,
+            "expired": 0,
+            "lastHitAgeMs": 35973,
+            "cloneSafe": true,
+            "hitRate": 33
+          },
+          "cacheHit": true,
+          "contract": {
+            "version": "0.9.6",
+            "ok": true,
+            "moduleCount": 8,
+            "failedRecommendations": 0,
+            "warnings": [],
+            "score": 88
+          },
+          "stability": {
+            "version": "0.9.6",
+            "ok": true,
+            "score": 100,
+            "findings": [],
+            "checkedAt": "2026-07-21T15:59:44.146Z"
+          }
+        },
+        "audioSummary": {
+          "avgRms": 0.08812915257851914,
+          "peak": 0.14073596894741058,
+          "loudnessDensity": 0.23158187378370865,
+          "silenceRatio": 0,
+          "dynamicRangeProxy": 0.000552821736164319,
+          "transientDensity": 0.29997219905476785,
+          "sourceDuration": 900,
+          "analyzedDuration": 900,
+          "analysisSampleRate": 8000,
+          "truncated": false
+        },
+        "motionSummary": {
+          "motionDensity": 0.5,
+          "maxMotion": 1,
+          "samples": 88,
+          "adaptive": true
+        },
+        "retainedAudioBuffer": false,
+        "retainedChannelData": false,
+        "longMediaDiagnostics": [
+          {
+            "at": "2026-07-21T15:59:44.136Z",
+            "type": "long-media-budget",
+            "duration": 900,
+            "sizeMb": 44.5,
+            "sampleRate": 8000,
+            "estimatedMemoryMb": 27.5,
+            "estimatedDecodeMemoryMb": 329.6,
+            "memoryRisk": "medium"
+          }
+        ]
+      },
+      "outputProbe": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "1.796867",
+        "size": "185452"
+      },
+      "after": {
+        "urls": {
+          "created": 6,
+          "revoked": 5,
+          "active": 1,
+          "sourceActive": 1,
+          "exportActive": 0
+        },
+        "operations": {
+          "mediaSessionId": 3,
+          "active": []
+        },
+        "queue": {
+          "running": false,
+          "total": 0,
+          "done": 0,
+          "failed": 0,
+          "cancelled": 0,
+          "queued": 0,
+          "progress": 0,
+          "current": null,
+          "items": []
+        },
+        "runtime": {
+          "webAudio": true,
+          "worker": true,
+          "mediaRecorder": true,
+          "canvasCaptureStream": true,
+          "mediaCaptureStream": true,
+          "serviceWorker": false,
+          "serviceWorkerControlled": false,
+          "secureContext": false,
+          "crossOriginIsolated": false,
+          "hydrationReady": "core",
+          "hydrationError": "",
+          "runtimeErrors": 0
+        },
+        "mediaSessionId": 3,
+        "fileMeta": {
+          "name": "long-15m-1080p.mp4",
+          "size": 46711105,
+          "type": "video/mp4",
+          "duration": 900
+        },
+        "retainedAudioBuffer": false,
+        "retainedChannelData": false,
+        "heap": {
+          "usedSize": 6269568,
+          "totalSize": 8470528,
+          "embedderHeapUsedSize": 10347096,
+          "backingStorageSize": 566660
+        },
+        "heapMiB": {
+          "used": 5.979,
+          "total": 8.078,
+          "embedderUsed": 9.868,
+          "backingStorage": 0.54
+        }
+      }
+    }
+  ],
+  "disposed": {
+    "urls": {
+      "created": 6,
+      "revoked": 6,
+      "active": 0,
+      "sourceActive": 0,
+      "exportActive": 0
+    },
+    "operations": {
+      "mediaSessionId": 3,
+      "active": []
+    },
+    "queue": {
+      "running": false,
+      "total": 0,
+      "done": 0,
+      "failed": 0,
+      "cancelled": 0,
+      "queued": 0,
+      "progress": 0,
+      "current": null,
+      "items": []
+    },
+    "runtime": {
+      "webAudio": true,
+      "worker": true,
+      "mediaRecorder": true,
+      "canvasCaptureStream": true,
+      "mediaCaptureStream": true,
+      "serviceWorker": false,
+      "serviceWorkerControlled": false,
+      "secureContext": false,
+      "crossOriginIsolated": false,
+      "hydrationReady": "core",
+      "hydrationError": "",
+      "runtimeErrors": 0
+    },
+    "mediaSessionId": 3,
+    "fileMeta": {
+      "name": "long-15m-1080p.mp4",
+      "size": 46711105,
+      "type": "video/mp4",
+      "duration": 900
+    },
+    "retainedAudioBuffer": false,
+    "retainedChannelData": false,
+    "heap": {
+      "usedSize": 6336084,
+      "totalSize": 8470528,
+      "embedderHeapUsedSize": 10739368,
+      "backingStorageSize": 566638
+    },
+    "heapMiB": {
+      "used": 6.043,
+      "total": 8.078,
+      "embedderUsed": 10.242,
+      "backingStorage": 0.54
+    }
+  },
+  "checks": {
+    "completedReplacementSequence": true,
+    "noPageErrors": true,
+    "noConsoleErrors": true,
+    "noRuntimeErrors": true,
+    "sourceIs1080p": true,
+    "sourceDurationsMatch": true,
+    "analysisWithinBudget": true,
+    "longMediaBudgetSelected": true,
+    "safeSequentialStrategy": true,
+    "adaptiveSampleRates": true,
+    "boundedMotionSamples": true,
+    "decodedBuffersReleased": true,
+    "playableOutputs": true,
+    "operationsReleased": true,
+    "renderQueueReleased": true,
+    "singleSourceObjectUrl": true,
+    "boundedExportObjectUrls": true,
+    "objectUrlsReleasedOnDispose": true,
+    "mediaSessionsAdvanced": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": [],
+  "inheritedFrom": "1.5.9",
+  "inheritanceReason": "CSS structure/responsive priority-only release; media analysis, rendering, queue, and Object URL execution paths are unchanged from the validated v1.5.9 run."
+}

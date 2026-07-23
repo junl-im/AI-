@@ -1,7 +1,9 @@
-// AI Shorts Studio v1.5.20 - adaptive decode, concurrency, and responsiveness budget
+// AI Shorts Studio v1.5.24 - adaptive decode, concurrency, and responsiveness budget
 'use strict';
 
 (function exposePerformanceBudget(global) {
+    const config = global.AIShortsRuntimeConfig || {};
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.24').replace(/^v/i, '');
     function now() {
         return global.performance && global.performance.now ? global.performance.now() : Date.now();
     }
@@ -81,7 +83,7 @@
             parallelAnalysis,
             parallelReason,
             responsivenessSliceMs,
-            cacheNamespace: 'engine-v1.5.20',
+            cacheNamespace: `engine-v${ENGINE_VERSION}`,
             recommendationCount: tier === 'safe' ? 5 : tier === 'max' ? 9 : 7,
             uiThrottleMs: tier === 'safe' ? 180 : tier === 'max' ? 70 : 110,
             label: longMedia ? (tier === 'safe' ? '장시간 안전 모드' : '장시간 균형 모드') : tier === 'safe' ? '안전 모드' : tier === 'max' ? '최대 성능' : '균형 성능'

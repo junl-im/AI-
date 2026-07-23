@@ -30,4 +30,4 @@ for (const [name, ok] of checks) {
     if (!ok) throw new Error(name);
     console.log('PASS ' + name);
 }
-console.log('PASS v1.5.20 workspace-first UI/UX and cancellable analysis guardrails');
+console.log('PASS v1.5.24 workspace-first UI/UX and cancellable analysis guardrails');

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chromium responsive/runtime audit for AI Shorts Studio v1.5.20."""
+"""Chromium responsive/runtime audit for AI Shorts Studio v1.5.24."""
 import asyncio
 import json
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.5.20.json'
+OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.5.24.json'
 
 INSTRUMENT = r'''<script>
 window.__aiAudit={errors:[],rejections:[],consoleErrors:[],raf:0,mutations:0};
@@ -226,7 +226,7 @@ async def main():
             audit_mode(browser, 'mobile', {'width': 390, 'height': 844}),
         )
         report = {
-            'version': '1.5.20',
+            'version': '1.5.24',
             'desktop': desktop,
             'smallLaptop': small_laptop,
             'tablet': tablet,

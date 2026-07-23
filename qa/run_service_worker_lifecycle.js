@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
-const output = path.join(root, 'qa', 'runtime-service-worker-lifecycle-v1.5.20.json');
+const output = path.join(root, 'qa', 'runtime-service-worker-lifecycle-v1.5.24.json');
 
 const handlers = {};
 const cacheStores = new Map();
@@ -20,6 +20,7 @@ function makeCache(name) {
     if (!cacheStores.has(name)) cacheStores.set(name, new Map());
     const store = cacheStores.get(name);
     return {
+        async add(item) { store.set(keyOf(item), new Response(`cached:${keyOf(item)}`, { status: 200 })); },
         async addAll(items) { for (const item of items) store.set(keyOf(item), new Response(`cached:${item}`, { status: 200 })); },
         async put(request, response) { store.set(keyOf(request), response); },
         async match(request) { return store.get(keyOf(request)) || null; }
@@ -55,7 +56,7 @@ async function dispatchWaitable(type, detail) {
 (async () => {
     await makeCache('ai-shorts-studio-shell-v1.3.9-old').put('./old.js', new Response('old'));
     await dispatchWaitable('install');
-    const currentName = [...cacheStores.keys()].find(name => name.includes('v1.5.20-structure-responsive-priority'));
+    const currentName = [...cacheStores.keys()].find(name => name.includes('v1.5.24-compressed-session-integrity-rollback'));
     const currentCache = currentName && cacheStores.get(currentName);
     const shellCached = Boolean(currentCache && currentCache.has('./index.html'));
     await dispatchWaitable('activate');
@@ -67,7 +68,7 @@ async function dispatchWaitable(type, detail) {
     const offlineBody = await response.text();
 
     const report = {
-        version: '1.5.20',
+        version: '1.5.24',
         auditMode: 'isolated-service-worker-runtime',
         handlers: Object.keys(handlers).sort(),
         install: { skipWaitingCalls, shellCached, currentCache: currentName || '' },

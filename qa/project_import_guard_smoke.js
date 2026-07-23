@@ -24,7 +24,7 @@ window.window = window;
 const context = vm.createContext({ window, console });
 vm.runInContext(fs.readFileSync(path.join(root, 'src/project/project-service.js'), 'utf8'), context);
 const service = window.AIShortsProjectService;
-assert(service && service.CURRENT_SCHEMA_VERSION === 3, 'project schema guard is exposed at version 3');
+assert(service && service.CURRENT_SCHEMA_VERSION === 4, 'project schema guard is exposed at version 4');
 
 const payload = JSON.stringify({
   app: 'AI Shorts Studio',
@@ -81,4 +81,4 @@ assert(mediaImport.includes('state.mediaSessionId !== mediaSessionId || state.fi
 assert(mediaImport.includes("if (elements.fileInput) elements.fileInput.value = '';"), 'the same media file can be selected again');
 assert(session.includes('projectService.parseProjectText') && session.includes('MAX_SNAPSHOT_CHARS'), 'session restore reuses bounded project validation');
 
-console.log('PASS v1.5.20 project import, session restore, and file-size exception guardrails');
+console.log('PASS v1.5.24 project import, session restore, and file-size exception guardrails');

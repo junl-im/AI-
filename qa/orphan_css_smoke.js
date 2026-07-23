@@ -78,7 +78,7 @@ const unusedKeyframes = [...keyframes.entries()].filter(([name]) => {
 const reportPath = path.join(root, 'qa', 'runtime-css-prune-v1.5.19.json');
 const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
 
-assert(pkg.version === '1.5.20', 'orphan CSS cleanup release version is v1.5.20');
+assert(pkg.version === '1.5.24', 'orphan CSS cleanup release version is v1.5.24');
 assert(orphanSelectors.length === 0, `active CSS has no source-orphan selectors (${orphanSelectors.slice(0, 3).join(' | ')})`);
 assert(unusedKeyframes.length === 0, `active CSS has no unreferenced keyframes (${unusedKeyframes.slice(0, 3).map(item => item.join(' ')).join(' | ')})`);
 assert(emptyAtRules.length === 0, `active CSS has no empty at-rules (${emptyAtRules.slice(0, 3).join(' | ')})`);
@@ -88,4 +88,4 @@ assert(report.removedImportantDeclarations === 1, 'one retired !important declar
 assert(report.removedKeyframes.length === 0, 'no active keyframe removal was required');
 assert(report.removedEmptyAtRules.length === 0, 'no empty responsive at-rule remains');
 assert(fs.existsSync(path.join(root, 'tools', 'prune-orphan-css.js')), 'reproducible orphan CSS pruning tool is included');
-console.log('PASS v1.5.20 unified-import CSS pruning and source-reachable guardrails');
+console.log('PASS v1.5.24 unified-import CSS pruning and source-reachable guardrails');

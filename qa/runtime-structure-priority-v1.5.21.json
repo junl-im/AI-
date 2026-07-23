@@ -1,0 +1,955 @@
+{
+  "baselineVersion": "1.5.19",
+  "targetVersion": "1.5.21",
+  "baselineImportant": 666,
+  "removedCount": 73,
+  "remainingImportant": 593,
+  "files": [
+    "assets/css/pc-dock-reveal-hotfix.css",
+    "assets/css/desktop-prime-layout.css",
+    "assets/css/workspace-layout-controls.css",
+    "assets/css/responsive-workspace.css"
+  ],
+  "removed": [
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.0|left",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "left",
+      "value": "0",
+      "line": 25
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.0|right",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "right",
+      "value": "0",
+      "line": 26
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.0|bottom",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "bottom",
+      "value": "0",
+      "line": 27
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.0|width",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "width",
+      "value": "100%",
+      "line": 28
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.0|grid-template-columns",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "grid-template-columns",
+      "value": "none",
+      "line": 31
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.1|display",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status,\n    body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status-sr",
+      "prop": "display",
+      "value": "none",
+      "line": 36
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.2|display",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs",
+      "prop": "display",
+      "value": "grid",
+      "line": 41
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.2|align-items",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs",
+      "prop": "align-items",
+      "value": "stretch",
+      "line": 42
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.3|line-height",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab",
+      "prop": "line-height",
+      "value": "1.1",
+      "line": 48
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.4|line-height",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab span",
+      "prop": "line-height",
+      "value": "1",
+      "line": 53
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.5|display",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "display",
+      "value": "block",
+      "line": 57
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.5|max-width",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "max-width",
+      "value": "100%",
+      "line": 58
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.5|text-overflow",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "text-overflow",
+      "value": "clip",
+      "line": 60
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.5|font-weight",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "font-weight",
+      "value": "950",
+      "line": 62
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.6|right",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .tab-state-dot",
+      "prop": "right",
+      "value": "10px",
+      "line": 67
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.0|display",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "display",
+      "value": "block",
+      "line": 76
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.0|bottom",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "bottom",
+      "value": "8px",
+      "line": 77
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.0|min-height",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "min-height",
+      "value": "var(--hyperflow-dock-height)",
+      "line": 78
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.1|display",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status,\n    body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-status-sr",
+      "prop": "display",
+      "value": "none",
+      "line": 84
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.2|display",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs",
+      "prop": "display",
+      "value": "grid",
+      "line": 87
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.2|grid-template-columns",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs",
+      "prop": "grid-template-columns",
+      "value": "repeat(8, minmax(0, 1fr))",
+      "line": 88
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.3|min-width",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab",
+      "prop": "min-width",
+      "value": "0",
+      "line": 92
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.4|text-overflow",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "text-overflow",
+      "value": "ellipsis",
+      "line": 101
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|5.0|display",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "display",
+      "value": "block",
+      "line": 109
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|5.0|max-width",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "max-width",
+      "value": "100%",
+      "line": 110
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|5.0|line-height",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "line-height",
+      "value": "1.05",
+      "line": 112
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|8|text-shadow",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] #flowSelectionTitle,\nbody[data-ui=\"hyperflow-tabs\"] #flowSelectionMeta",
+      "prop": "text-shadow",
+      "value": "none",
+      "line": 134
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|8|will-change",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] #flowSelectionTitle,\nbody[data-ui=\"hyperflow-tabs\"] #flowSelectionMeta",
+      "prop": "will-change",
+      "value": "auto",
+      "line": 135
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|2|margin-left",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-right-actions",
+      "prop": "margin-left",
+      "value": "0",
+      "line": 14
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|5|margin-right",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .hero-compact-note",
+      "prop": "margin-right",
+      "value": "auto",
+      "line": 26
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|6|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".start-command-panel",
+      "prop": "display",
+      "value": "none",
+      "line": 31
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.1|width",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".app-shell",
+      "prop": "width",
+      "value": "min(calc(100% - 24px), var(--prime-workspace-max))",
+      "line": 65
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.1|padding-top",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".app-shell",
+      "prop": "padding-top",
+      "value": "10px",
+      "line": 66
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.3|margin-top",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".cinematic-brand-panel .hero-mainline",
+      "prop": "margin-top",
+      "value": "8px",
+      "line": 74
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.4|font-size",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-copy h1,\n    .cinematic-title",
+      "prop": "font-size",
+      "value": "clamp(38px, 3.8vw, 54px)",
+      "line": 79
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.5|margin-top",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "margin-top",
+      "value": "7px",
+      "line": 83
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.8|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-selection-summary",
+      "prop": "display",
+      "value": "none",
+      "line": 101
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.9|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .studio-grid",
+      "prop": "display",
+      "value": "grid",
+      "line": 106
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.10|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .console-panel,\n    body[data-ui=\"hyperflow-tabs\"] .editor-panel",
+      "prop": "display",
+      "value": "contents",
+      "line": 114
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.11|max-width",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel],\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel][hidden],\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-flow-standby,\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel]:not(.is-flow-active)",
+      "prop": "max-width",
+      "value": "none",
+      "line": 123
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.22|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .action-dock",
+      "prop": "display",
+      "value": "none",
+      "line": 142
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.24|min-height",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .control-zone-load .upload-tile",
+      "prop": "min-height",
+      "value": "112px",
+      "line": 156
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.26|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .control-zone[data-flow-panel=\"recommend\"] .engine-status-card p,\n    body[data-ui=\"hyperflow-tabs\"] .control-zone[data-flow-panel=\"recommend\"] .hyperconnect-helper",
+      "prop": "display",
+      "value": "none",
+      "line": 166
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.29|max-height",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .candidates-zone .recommendation-list",
+      "prop": "max-height",
+      "value": "205px",
+      "line": 179
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.30|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .preview-card",
+      "prop": "display",
+      "value": "flex",
+      "line": 184
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.31|width",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .preview-card .phone-frame",
+      "prop": "width",
+      "value": "min(240px, 100%)",
+      "line": 192
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.31|max-height",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .preview-card .phone-frame",
+      "prop": "max-height",
+      "value": "none",
+      "line": 193
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.37|height",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .waveform-card canvas",
+      "prop": "height",
+      "value": "112px",
+      "line": 229
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.0|padding-top",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".app-shell",
+      "prop": "padding-top",
+      "value": "var(--responsive-shell-top-mobile)",
+      "line": 258
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.1|margin-left",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-right-actions",
+      "prop": "margin-left",
+      "value": "0",
+      "line": 263
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.2|font-size",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".cinematic-brand-panel .brand-signature-pill",
+      "prop": "font-size",
+      "value": "9.5px",
+      "line": 267
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.3|margin-top",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".cinematic-brand-panel .hero-mainline",
+      "prop": "margin-top",
+      "value": "12px",
+      "line": 273
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.4|max-width",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "max-width",
+      "value": "34rem",
+      "line": 279
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.4|margin-top",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "margin-top",
+      "value": "8px",
+      "line": 280
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.4|font-size",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "font-size",
+      "value": "12px",
+      "line": 282
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.4|line-height",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hero-compact-note",
+      "prop": "line-height",
+      "value": "1.5",
+      "line": 283
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.6|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".start-command-panel .workflow-rail-separated",
+      "prop": "display",
+      "value": "grid",
+      "line": 292
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.10|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".start-command-panel .workflow-step em",
+      "prop": "display",
+      "value": "block",
+      "line": 315
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.11|display",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body:not(.has-media)[data-active-flow-tab=\"file\"] .flow-selection-summary",
+      "prop": "display",
+      "value": "none",
+      "line": 321
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.0|grid-template-columns",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .studio-grid",
+      "prop": "grid-template-columns",
+      "value": "minmax(260px, var(--workspace-left-track))\n            var(--workspace-divider-width)\n            minmax(350px, var(--workspace-center-track))\n            var(--workspace-divider-width)\n            minmax(300px, var(--workspace-right-track))",
+      "line": 16
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.0|grid-template-areas",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .studio-grid",
+      "prop": "grid-template-areas",
+      "value": "\"toolbar toolbar toolbar toolbar toolbar\"\n            \"utility utility utility utility utility\"\n            \"load divider-left preview divider-right candidates\"\n            \"recommend divider-left preview divider-right waveform\"\n            \"cut divider-left edit divider-right export\"",
+      "line": 22
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.0|grid-template-rows",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .studio-grid",
+      "prop": "grid-template-rows",
+      "value": "auto auto clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto",
+      "line": 28
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.0|column-gap",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .studio-grid",
+      "prop": "column-gap",
+      "value": "7px",
+      "line": 29
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.0|row-gap",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .studio-grid",
+      "prop": "row-gap",
+      "value": "var(--prime-gap, 12px)",
+      "line": 30
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.27|display",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .workspace-column-divider,\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] .workspace-column-divider,\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .project-copy-hub,\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] .project-copy-hub",
+      "prop": "display",
+      "value": "none",
+      "line": 215
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.29|height",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .preview-card",
+      "prop": "height",
+      "value": "min(78vh, 850px)",
+      "line": 228
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.29|max-height",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .preview-card",
+      "prop": "max-height",
+      "value": "850px",
+      "line": 230
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.29|align-self",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .preview-card",
+      "prop": "align-self",
+      "value": "start",
+      "line": 231
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.29|position",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .preview-card",
+      "prop": "position",
+      "value": "sticky",
+      "line": 232
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.29|top",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .preview-card",
+      "prop": "top",
+      "value": "70px",
+      "line": 233
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.38|width",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] #waveformCanvas",
+      "prop": "width",
+      "value": "100%",
+      "line": 273
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|3.1|display",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": ".workspace-layout-toolbar,\n    .workspace-column-divider",
+      "prop": "display",
+      "value": "none",
+      "line": 293
+    },
+    {
+      "id": "assets/css/responsive-workspace.css|8.10|display",
+      "file": "assets/css/responsive-workspace.css",
+      "selector": ".bottom-dock.bottom-dock-hyperflow",
+      "prop": "display",
+      "value": "grid",
+      "line": 94
+    }
+  ],
+  "skippedCount": 34,
+  "unmappedSourceDeclarationCount": 44,
+  "unmappedSourceDeclarations": [
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.0|padding",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "padding",
+      "value": "12px max(22px, calc((100vw - var(--workspace-max, 1560px)) / 2)) 14px",
+      "line": 29
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.0|border-radius",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "border-radius",
+      "value": "26px 26px 0 0",
+      "line": 30
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.2|margin",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs",
+      "prop": "margin",
+      "value": "0 auto",
+      "line": 40
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.3|gap",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab",
+      "prop": "gap",
+      "value": "5px",
+      "line": 47
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.5|overflow",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "overflow",
+      "value": "visible",
+      "line": 59
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|3.5|white-space",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "white-space",
+      "value": "nowrap",
+      "line": 61
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.0|padding",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "padding",
+      "value": "8px",
+      "line": 79
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.0|border-radius",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "border-radius",
+      "value": "20px",
+      "line": 80
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.2|gap",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tabs",
+      "prop": "gap",
+      "value": "5px",
+      "line": 89
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.3|gap",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab",
+      "prop": "gap",
+      "value": "3px",
+      "line": 94
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.3|padding",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab",
+      "prop": "padding",
+      "value": "5px 3px",
+      "line": 95
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.3|border-radius",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab",
+      "prop": "border-radius",
+      "value": "13px",
+      "line": 96
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.4|overflow",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "overflow",
+      "value": "hidden",
+      "line": 99
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|4.4|white-space",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow .bottom-dock-tab b",
+      "prop": "white-space",
+      "value": "nowrap",
+      "line": 102
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|6|transition",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-selection-summary",
+      "prop": "transition",
+      "value": "border-color 160ms ease, box-shadow 160ms ease, background 160ms ease, opacity 160ms ease",
+      "line": 118
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|7|animation",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-selection-copy,\nbody[data-ui=\"hyperflow-tabs\"] #flowSelectionIcon,\nbody[data-ui=\"hyperflow-tabs\"] #flowSelectionTitle,\nbody[data-ui=\"hyperflow-tabs\"] #flowSelectionMeta,\nbody[data-ui=\"hyperflow-tabs\"] #hyperflowStageTitle,\nbody[data-ui=\"hyperflow-tabs\"] #hyperflowStageMeta",
+      "prop": "animation",
+      "value": "none",
+      "line": 127
+    },
+    {
+      "id": "assets/css/pc-dock-reveal-hotfix.css|7|transition",
+      "file": "assets/css/pc-dock-reveal-hotfix.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-selection-copy,\nbody[data-ui=\"hyperflow-tabs\"] #flowSelectionIcon,\nbody[data-ui=\"hyperflow-tabs\"] #flowSelectionTitle,\nbody[data-ui=\"hyperflow-tabs\"] #flowSelectionMeta,\nbody[data-ui=\"hyperflow-tabs\"] #hyperflowStageTitle,\nbody[data-ui=\"hyperflow-tabs\"] #hyperflowStageMeta",
+      "prop": "transition",
+      "value": "border-color 160ms ease, box-shadow 160ms ease, background 160ms ease, opacity 160ms ease",
+      "line": 128
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.2|padding",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .brand-panel.cinematic-brand-panel",
+      "prop": "padding",
+      "value": "13px 18px 15px",
+      "line": 70
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.6|margin",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hyperflow-stage",
+      "prop": "margin",
+      "value": "8px 0 10px",
+      "line": 88
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.6|padding",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hyperflow-stage",
+      "prop": "padding",
+      "value": "8px 12px",
+      "line": 89
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.6|border-radius",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hyperflow-stage",
+      "prop": "border-radius",
+      "value": "18px",
+      "line": 90
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.9|margin",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .studio-grid",
+      "prop": "margin",
+      "value": "0",
+      "line": 109
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.11|margin",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel],\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel][hidden],\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-flow-standby,\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel]:not(.is-flow-active)",
+      "prop": "margin",
+      "value": "0",
+      "line": 125
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.11|animation",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel],\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel][hidden],\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-flow-standby,\n    body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"] [data-flow-panel]:not(.is-flow-active)",
+      "prop": "animation",
+      "value": "none",
+      "line": 126
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.31|margin",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .preview-card .phone-frame",
+      "prop": "margin",
+      "value": "0 auto 10px",
+      "line": 194
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|11.41|padding-inline",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "prop": "padding-inline",
+      "value": "max(14px, calc((100vw - var(--prime-workspace-max)) / 2))",
+      "line": 252
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.3|padding-inline",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".cinematic-brand-panel .hero-mainline",
+      "prop": "padding-inline",
+      "value": "8px",
+      "line": 272
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.5|margin",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".start-command-panel",
+      "prop": "margin",
+      "value": "8px 0 10px",
+      "line": 288
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.6|padding",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".start-command-panel .workflow-rail-separated",
+      "prop": "padding",
+      "value": "0",
+      "line": 294
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.6|border",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".start-command-panel .workflow-rail-separated",
+      "prop": "border",
+      "value": "0",
+      "line": 295
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|12.6|background",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": ".start-command-panel .workflow-rail-separated",
+      "prop": "background",
+      "value": "transparent",
+      "line": 296
+    },
+    {
+      "id": "assets/css/desktop-prime-layout.css|18.0|transition",
+      "file": "assets/css/desktop-prime-layout.css",
+      "selector": "body[data-desktop-layout=\"prime\"] [data-flow-panel],\n    body[data-icon-language=\"studio-glyphs\"] .bottom-dock-tab > span:first-child",
+      "prop": "transition",
+      "value": "none",
+      "line": 379
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.29|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .preview-card",
+      "prop": "grid-area",
+      "value": "preview",
+      "line": 227
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.29|overflow",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .preview-card",
+      "prop": "overflow",
+      "value": "auto",
+      "line": 234
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.31|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .candidates-zone",
+      "prop": "grid-area",
+      "value": "candidates",
+      "line": 241
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.32|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .edit-tools-card",
+      "prop": "grid-area",
+      "value": "edit",
+      "line": 242
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.33|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"preview\"] .export-card",
+      "prop": "grid-area",
+      "value": "export",
+      "line": 243
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.36|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] .waveform-card",
+      "prop": "grid-area",
+      "value": "waveform",
+      "line": 263
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.36|overflow",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] .waveform-card",
+      "prop": "overflow",
+      "value": "visible",
+      "line": 265
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.39|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] .auto-cut-panel",
+      "prop": "grid-area",
+      "value": "cut",
+      "line": 277
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.40|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] .edit-tools-card",
+      "prop": "grid-area",
+      "value": "edit",
+      "line": 278
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.41|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] .preview-card",
+      "prop": "grid-area",
+      "value": "preview",
+      "line": 279
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|2.42|grid-area",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": "body[data-desktop-layout=\"prime\"][data-ui=\"hyperflow-tabs\"][data-workspace-view=\"waveform\"] .export-card",
+      "prop": "grid-area",
+      "value": "export",
+      "line": 280
+    },
+    {
+      "id": "assets/css/workspace-layout-controls.css|4.0|transition",
+      "file": "assets/css/workspace-layout-controls.css",
+      "selector": ".workspace-layout-button,\n    .workspace-column-divider::before",
+      "prop": "transition",
+      "value": "none",
+      "line": 300
+    }
+  ]
+}

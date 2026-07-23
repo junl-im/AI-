@@ -1,8 +1,19 @@
-# AI 쇼츠 제작 스튜디오 v1.5.20
+# AI 쇼츠 제작 스튜디오 v1.5.24
+
+## Compressed Session Recovery · SHA-256 Offline Integrity · Safe Rollback
+
+- 세션 순환 백업을 체크섬 포함 LZW16 형식으로 압축하고, 압축 효과가 낮으면 기존 JSON 평문을 유지합니다.
+- 저장소 사용 압력에 따라 백업 보존 개수를 1~3개로 자동 조정합니다.
+- 복구 성공·실패 이력을 최대 20개 기록하고, 프로젝트 원문을 제외한 복구 진단 JSON을 내려받을 수 있습니다.
+- 서비스워커는 앱 셸 119개 파일을 SHA-256 manifest와 비교해 누락·HTTP 오류·본문 변조를 구분합니다.
+- 손상 캐시는 다시 내려받아 검증하며 핵심 파일 복구 실패 시 새 버전 활성화를 중단하고 이전 정상 캐시를 보존합니다.
+- build key는 `1.5.24-compressed-session-integrity-rollback`입니다.
+- 자동 QA **200/200**, Chromium 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow **0건**을 통과했습니다.
+- 상세 변경과 다음 패치 라인업은 `PATCH_REPORT.md`를 참고하세요.
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다.
 
-## v1.5.20 적용 내용
+## v1.5.20 이전 UI·CSS 기준
 
 - PC Dock, 데스크톱 prime layout, workspace focus layout, responsive workspace의 구조·반응형 `!important`를 실제 Chromium 상태별로 재검증했습니다.
 - 계산 스타일과 배치가 유지되는 source declaration 73개만 normal cascade로 전환했습니다.

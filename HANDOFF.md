@@ -1,8 +1,172 @@
-# HANDOFF v1.5.20
+# HANDOFF v1.5.24 Compressed Recovery & Integrity Rollback Patch
 
 ## 현재 상태
 
-v1.5.20은 v1.5.19의 화면과 동작을 유지하면서 PC Dock, 데스크톱 작업실, 반응형 workspace 소유 파일의 불필요한 구조 우선순위를 실제 Chromium 계산 스타일 기준으로 감축한 릴리스입니다.
+v1.5.23 전체본을 기준으로 세션 백업 저장 효율·복구 추적성과 서비스워커 캐시 콘텐츠 무결성을 강화했습니다.
+
+- 자동 QA: **200/200 통과**
+- Chromium desktop·small laptop·tablet·mobile: 오류·Promise 거절·콘솔 오류·가로 overflow **0건**
+- 세션 백업: LZW16 압축/평문 호환, FNV-1a 체크섬, 저장소 압력별 1~3개 동적 보존
+- 복구 진단: 최대 20개 성공·실패 이력, 백업 압축 메타데이터, 개인정보를 제외한 JSON 내보내기
+- 서비스워커: 119개 앱 셸 SHA-256 manifest, 변조 탐지·재다운로드·재검증, 핵심 실패 시 이전 정상 캐시 보존
+- runtime build key: `1.5.24-compressed-session-integrity-rollback`
+
+## 검수 순서
+
+1. `node qa/session_backup_compression_smoke.js`
+2. `node qa/session_recovery_diagnostics_smoke.js`
+3. `node qa/service_worker_content_integrity_smoke.js`
+4. `node qa/service_worker_cache_repair_smoke.js`
+5. `python3 qa/run_browser_audit.py`
+6. `python3 qa/run_process_memory_audit.py`
+7. `npm test`
+
+## 알려진 제한
+
+- 압축은 localStorage의 동기 저장 흐름을 유지하기 위한 내장 LZW16 방식이며 Brotli·gzip 수준의 압축률을 목표로 하지 않습니다.
+- 백업 체크섬은 손상 탐지용 FNV-1a이며 보안 서명이나 인증 수단이 아닙니다.
+- 서비스워커 SHA-256 검증은 Web Crypto가 있는 환경에서 활성화됩니다. 미지원 테스트·레거시 환경에서는 기존 존재/HTTP 상태 검사로 폴백합니다.
+- 미디어 디코더·렌더러·Object URL 소유 경로는 변경하지 않아 검증된 v1.5.23 장시간 영상 근거를 상속했습니다.
+- 모바일 Safari·Samsung Internet과 물리 GPU는 실기기 검증이 필요합니다.
+
+## 다음 작업
+
+1. 분석 캐시 진단 JSON 내보내기와 IndexedDB 영구 캐시의 quota-aware 실험
+2. 서비스워커 유휴 시간 주기 무결성 검사와 실패 자산 백오프 재검증
+3. 세션 복구 이력 UI 상세 보기·선택 백업 복원·백업 정책 사용자 설정
+4. 모바일 Safari·Samsung Internet 다운로드·백그라운드 복귀 검증
+5. 물리 GPU 장시간 decoder·renderer 자원 반환 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.22 Storage & Session Recovery Patch
+
+
+## 현재 상태
+
+v1.5.21 전체본을 기준으로 브라우저 저장 공간 부족 복구, 세션 스키마 마이그레이션·백업 복원, 서비스워커 업데이트 진단을 강화했습니다.
+
+- 자동 QA: **192/192 통과**
+- Chromium desktop·small laptop·tablet·mobile: 오류·Promise 거절·콘솔 오류·가로 overflow **0건**
+- 저장소 관리자: quota 감지, 오래된 백업·레거시 세션 정리, 저장 1회 재시도
+- 저장소 진단: 사용량·quota·비율·localStorage 바이트·앱 캐시 수, 수동 새로고침·안전 정리
+- 세션 연속성: 스키마 v4, 순환 백업 2개, 구버전 자동 마이그레이션, 손상 기본 데이터 자동 복구·수리
+- 서비스워커: 업데이트 최대 3회 지수 백오프, 설치 보고서·캐시 항목·실패 상태 노출
+- runtime build key: `1.5.22-storage-quota-session-recovery`
+
+## 검수 순서
+
+1. `node qa/storage_manager_quota_smoke.js`
+2. `node qa/session_schema_backup_smoke.js`
+3. `node qa/service_worker_update_backoff_smoke.js`
+4. `node qa/storage_health_panel_smoke.js`
+5. `node qa/run_service_worker_lifecycle.js`
+6. `python3 qa/run_browser_audit.py`
+7. `python3 qa/run_process_memory_audit.py`
+8. `npm test`
+
+## 알려진 제한
+
+- `navigator.storage.estimate()`의 usage·quota 값은 브라우저가 제공하는 추정치이며, 일부 비보안·제한 환경에서는 지원되지 않습니다.
+- 자동 정리는 앱이 만든 오래된 세션 백업·레거시 세션·이전 앱 셸 캐시만 대상으로 하며 다른 사이트 데이터는 삭제하지 않습니다.
+- headless Chromium 감사에서는 실제 모바일 다운로드 관리자, 모바일 Safari·Samsung Internet, 물리 GPU 하드웨어 가속을 완전히 재현하지 못합니다.
+- 분석 파일 지문은 v1.5.21의 고정 3구간 표본 정책을 유지하며 작은 파일 전체 해시·대형 파일 적응형 표본은 다음 작업입니다.
+
+## 다음 작업
+
+1. 작은 파일 전체 해시와 대형 파일 크기별 적응형 표본 지문
+2. 지문 생성 시간·분석 캐시 적중률 진단
+3. 서비스워커 실패 자산 개별 재시도와 캐시 무결성 복구 UI
+4. 모바일 Safari·Samsung Internet 및 물리 GPU 장시간 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.21 Persistence & Recovery Patch
+
+## 현재 상태
+
+v1.5.20 전체본을 기준으로 후보 핀 지속 데이터, 분석 캐시 파일 식별, 서비스워커 설치 복구, 다운로드 Object URL 수명주기를 강화했습니다.
+
+- 자동 QA: **186/186 통과**
+- Chromium desktop·small laptop·tablet·mobile: 오류·Promise 거절·콘솔 오류·가로 overflow **0건**
+- 후보 핀: 현재 후보 자동 대조, 최대 12개, 비정상·오래된 ID 제거
+- 분석 캐시: 3구간 표본 SHA-256/FNV 지문, 동일 메타데이터 파일 충돌 방지
+- 서비스워커: 선택 자산 실패 허용, 핵심 셸 실패 롤백, 설치 보고서 진단 전달
+- 다운로드 URL: 기본 45초 지연 해제, 활성 URL 추적 및 페이지 종료 정리
+- runtime build key: `1.5.21-persistence-recovery-cache-download`
+
+## 검수 순서
+
+1. `node qa/candidate_pin_persistence_safety_smoke.js`
+2. `node qa/analysis_cache_identity_smoke.js`
+3. `node qa/service_worker_install_recovery_smoke.js`
+4. `node qa/download_object_url_lifecycle_smoke.js`
+5. `node qa/run_service_worker_lifecycle.js`
+6. `python3 qa/run_browser_audit.py`
+7. `npm test`
+
+## 알려진 제한
+
+- 표본 지문은 충돌 가능성을 크게 낮추지만 파일 전체 암호학적 해시는 아닙니다.
+- headless Chromium 감사에서는 보안 origin 서비스워커 제어와 실제 모바일 다운로드 앱 연동을 완전히 재현하지 못합니다.
+- 모바일 Safari·Samsung Internet 및 물리 GPU 검증은 실제 기기 환경이 필요합니다.
+
+## 다음 작업
+
+1. 저장소 사용량·서비스워커 설치 보고서 UI 노출
+2. localStorage·Cache Storage quota 초과 자동 복구
+3. 파일 크기별 적응형 지문과 작은 파일 전체 해시
+4. 실제 모바일 브라우저 및 하드웨어 가속 반복 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.20 Runtime Safety Patch
+
+## 현재 상태
+
+기존 v1.5.21 UI와 미디어 실행 경로는 유지하면서 서비스워커 캐시 범위와 런타임 버전 메타데이터를 보강했습니다.
+
+- 자동 QA: **182/182 통과**
+- 서비스워커 runtime cache: `assets/`, `src/` 정적 자산만 허용
+- video·audio·JSON·API형 GET: Cache Storage 우회
+- navigation 판정: `request.mode === navigate` 또는 `destination === document`
+- 버전 메타데이터: `AIShortsRuntimeConfig.APP_VERSION` 단일 소스
+- runtime build key: `1.5.21-persistence-recovery-cache-download`
+
+## 적용 내용
+
+- 대용량 same-origin 미디어가 캐시에 중복 저장될 수 있던 경로 차단
+- 슬래시 종료 일반 URL의 navigation 오분류 제거
+- 세션/진단의 `1.1.3`, 엔진 fallback의 `1.0.8` 하드코딩 제거
+- 엔진 cache namespace와 UI build marker의 runtime config 연동
+- 서비스워커 캐시 admission 및 버전 일관성 전용 smoke test 추가
+
+## 검수 순서
+
+1. `node qa/runtime_version_consistency_smoke.js`
+2. `node qa/service_worker_runtime_cache_smoke.js`
+3. `node qa/run_service_worker_lifecycle.js`
+4. `npm test`
+
+## 알려진 제한
+
+- 물리 GPU/WebGL acceleration과 모바일 Safari·Samsung Internet 실기기 검증은 현재 컨테이너 밖의 환경이 필요합니다.
+- 분석 캐시 fingerprint는 파일 메타데이터 기반이라 동일 이름·크기·수정시각 파일의 이론적 충돌 가능성이 남아 있습니다.
+
+## 다음 작업
+
+1. 후보 핀 저장 데이터의 상한·정리 정책
+2. 분석 캐시 fingerprint 강화
+3. 다운로드 Object URL 모바일 호환성 검증
+4. 물리 GPU와 모바일 실기기 반복 안정성 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.20 Structure Priority
+
+## 현재 상태
+
+v1.5.21은 v1.5.19의 화면과 동작을 유지하면서 PC Dock, 데스크톱 작업실, 반응형 workspace 소유 파일의 불필요한 구조 우선순위를 실제 Chromium 계산 스타일 기준으로 감축한 릴리스입니다.
 
 - 자동 QA: **180/180 통과**
 - 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow: **0건**
@@ -19,7 +183,7 @@ v1.5.20은 v1.5.19의 화면과 동작을 유지하면서 PC Dock, 데스크톱 
 - 제거 후보를 desktop·small laptop·tablet·mobile과 flow/workspace 상태별로 실제 Chromium에서 검증
 - Dock display·button 최소 폭, 태블릿 높이, preview·waveform focus grid처럼 제거 시 계산값이 변하는 priority는 유지
 - 구조 priority probe, 감축 재현 도구, 재유입 방지 smoke test 추가
-- runtime build key `1.5.20-structure-responsive-priority` 적용
+- runtime build key `1.5.21-structure-responsive-priority` 적용
 
 ## 검수 순서
 

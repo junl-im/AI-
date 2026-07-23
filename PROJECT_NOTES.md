@@ -1,4 +1,135 @@
-# PROJECT NOTES v1.5.20
+# PROJECT NOTES v1.5.24
+
+## 세션 백업 압축 규칙
+
+- 기본 세션 키는 직접 가져올 수 있는 JSON 원문을 유지하고 순환 백업만 압축 대상으로 합니다.
+- 압축 봉투 prefix는 `AISSB1:`이며 codec, UTF-8 원본 바이트·문자 수, FNV-1a 체크섬, Base64 LZW16 데이터를 포함합니다.
+- 저장 문자 수가 원문보다 최소 4% 작을 때만 압축 봉투를 사용하고 그렇지 않으면 평문 JSON을 저장합니다.
+- 복원 시 원본 바이트 수·문자 수·체크섬을 모두 확인한 뒤 프로젝트 스키마 검증을 수행합니다.
+- 저장소 상태가 `ok`이면 최대 3개, `warning`이면 최대 2개, `critical`이면 1개, 상태 미확인이면 기본 2개를 보존합니다.
+
+## 복구 이력·진단 규칙
+
+- 기본 세션 로딩 실패, 백업 복원 성공·실패, 사용자 복원 성공·실패, 기록 삭제를 최대 20개 이력으로 저장합니다.
+- 반복 렌더링으로 같은 실패가 5초 안에 중복 기록되지 않도록 이벤트 signature를 제한합니다.
+- 진단 JSON은 백업 key·압축 방식·크기·절감률·체크섬·복구 이력만 포함하고 프로젝트 원문과 미디어 내용은 포함하지 않습니다.
+
+## 서비스워커 콘텐츠 무결성 규칙
+
+- `asset-integrity.json`은 설치 대상 앱 셸 119개 파일의 SHA-256을 보유하며 manifest 자체 해시는 `sw.js`에 고정합니다.
+- 설치·수동 복구·활성화 시 캐시 응답 본문을 SHA-256으로 비교하고 missing, invalid HTTP, corrupted content를 구분합니다.
+- 손상 항목은 삭제 후 최대 2회 재다운로드하며, 핵심 자산이 끝내 검증되지 않으면 활성화를 거부합니다.
+- 이전 앱 셸 캐시는 새 캐시의 존재·HTTP·콘텐츠 해시 검증이 모두 성공한 뒤에만 삭제합니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **200/200**입니다.
+- 4개 viewport runtime error, Promise rejection, console error, horizontal overflow는 0이어야 합니다.
+- CSS 실제 conflict·same-value duplicate·shadowed declaration은 0, `!important`는 593개를 유지해야 합니다.
+- 런타임 build key는 `1.5.24-compressed-session-integrity-rollback`입니다.
+- 배포 전 `node tools/generate-integrity-manifest.js`를 실행한 뒤 전체 QA를 다시 통과해야 합니다.
+
+## 다음 우선순위
+
+1. 분석 캐시 진단 내보내기와 quota-aware IndexedDB 실험
+2. 서비스워커 주기 무결성 검사·백오프·복구 이력 고도화
+3. 선택 백업 복원과 복구 이력 상세 UI
+4. 실제 모바일 브라우저와 물리 GPU 장시간 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.22
+
+
+## 저장소 관리 규칙
+
+- 앱의 localStorage 쓰기는 `AIShortsStorageManager.safeSet()`을 사용해 quota 및 비정상 저장소 오류를 공통 처리합니다.
+- quota 오류 시 현재 쓰는 키를 보존하고 오래된 세션 백업·레거시 세션을 최대 3개 정리한 뒤 한 번만 재시도합니다.
+- 수동 정리는 현재 세션과 현재 앱 셸 캐시를 보존하며 다른 사이트·다른 앱의 저장 데이터는 삭제하지 않습니다.
+- 저장소 사용률은 80% 이상 `warning`, 92% 이상 `critical`로 분류합니다.
+
+## 세션 연속성 규칙
+
+- 현재 세션 스키마는 **v4**, 순환 백업은 **2개**, 백업 한도는 항목당 **750,000자**입니다.
+- 구버전 세션은 읽은 즉시 v4로 마이그레이션하고 정상 저장이 가능하면 기본 키에 다시 기록합니다.
+- 기본 세션이 손상되면 최신 정상 백업을 순서대로 검사해 복원하고, 복원 성공 시 기본 키를 자동 수리합니다.
+- 원본 세션 내보내기는 정상 데이터의 원문을 보존하고, 손상 데이터 내보내기는 원문과 오류 이유를 함께 보존합니다.
+
+## 서비스워커 진단 규칙
+
+- 업데이트 확인은 최대 3회 수행하며 재시도 간격은 500ms, 1,000ms의 지수 백오프입니다.
+- 상태에는 마지막 검사·성공·오류·다음 재시도 시각과 설치 보고서의 성공/실패/복구/캐시 항목 수를 포함합니다.
+- 활성 서비스워커에 상태 요청 메시지를 보내 마지막 설치 보고서를 다시 받을 수 있어야 합니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **192/192**입니다.
+- 4개 viewport runtime error, Promise rejection, console error, horizontal overflow는 0이어야 합니다.
+- CSS 실제 충돌·same-value duplicate·shadowed declaration은 0을 유지해야 합니다.
+- 런타임 build key는 `1.5.22-storage-quota-session-recovery`입니다.
+
+## 다음 우선순위
+
+1. 작은 파일 전체 해시·대형 파일 적응형 표본을 사용하는 분석 지문 정책
+2. 지문 생성 비용과 분석 캐시 적중/실패 진단
+3. 서비스워커 실패 자산 재시도·캐시 무결성 검사·복구 동작 고도화
+4. 실제 모바일 브라우저와 물리 GPU 장시간 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.21 Persistence & Recovery Patch
+
+## 지속 데이터 규칙
+
+- 후보 핀 ID는 공백 제거, 길이 160자 제한, 중복 제거 후 최대 12개만 저장합니다.
+- 현재 추천 후보가 준비된 시점에만 오래된 핀을 제거해 초기 로딩 중 정상 데이터를 잃지 않습니다.
+- 외부 또는 오래된 UI가 전달한 알 수 없는 후보 ID는 저장하지 않습니다.
+
+## 분석 캐시 식별 규칙
+
+- 캐시 키는 이름, MIME, 상대 경로, 크기, 수정 시각, 길이, 분석 품질 설정과 콘텐츠 표본 지문을 포함합니다.
+- 콘텐츠 지문은 파일 앞·중간·끝에서 각각 최대 16KB를 읽어 생성합니다.
+- 동일 콘텐츠 재선택은 재사용 가능하며, 동일 메타데이터의 다른 콘텐츠는 별도 키가 되어야 합니다.
+
+## 서비스워커·다운로드 규칙
+
+- 선택 셸 자산 실패는 설치 보고서에 기록하되 핵심 셸이 정상이면 활성화를 허용합니다.
+- 핵심 셸 실패는 새 캐시를 삭제하고 설치를 거부해 이전 정상 워커를 보존합니다.
+- Object URL은 최소 10초 이상 유지하고 기본 45초 후 해제하며, 페이지 종료 시 남은 URL을 정리합니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **186/186**입니다.
+- 4개 viewport runtime error, Promise rejection, console error, horizontal overflow는 0이어야 합니다.
+- 런타임 build key는 `1.5.21-persistence-recovery-cache-download`입니다.
+
+## 다음 우선순위
+
+1. 서비스워커 설치 보고서와 저장소 사용량을 사용자 진단 화면에서 직접 확인
+2. localStorage·Cache Storage 용량 초과 시 자동 정리와 사용자 안내
+3. 작은 파일 전체 해시·대형 파일 가변 표본을 사용하는 분석 지문 정책 고도화
+4. 모바일 Safari·Samsung Internet과 물리 GPU 환경 반복 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.20 Runtime Safety Patch
+
+## 런타임 캐시 규칙
+
+- 서비스워커는 navigation, manifest, worker control asset을 별도 network-first 경로로 처리합니다.
+- runtime cache-first는 `assets/`, `src/` 아래 style·script·worker·image·font에만 적용합니다.
+- media, JSON, 프로젝트 데이터, API형 요청은 Cache Storage에 넣지 않습니다.
+- URL pathname이 `/`로 끝나는지만으로 navigation을 판정하지 않습니다.
+
+## 버전 규칙
+
+- 사용자·진단·엔진 메타데이터는 `AIShortsRuntimeConfig.APP_VERSION`을 기준으로 합니다.
+- build key는 `1.5.21-persistence-recovery-cache-download`입니다.
+- 자동 QA 기준은 **182/182**입니다.
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.20 Structure Priority
 
 ## 구조·반응형 priority 감축 규칙
 
@@ -12,12 +143,12 @@
 
 - 자동 QA 기준은 **180/180**입니다.
 - 활성 `!important` 기준은 **593**입니다.
-- `runtime-structure-priority-v1.5.20.json`은 v1.5.19 기준 73개 제거 기록을 보존해야 합니다.
-- `runtime-browser-audit-v1.5.20.json`의 핵심 layout metrics는 v1.5.19와 동일해야 합니다.
+- `runtime-structure-priority-v1.5.21.json`은 v1.5.19 기준 73개 제거 기록을 보존해야 합니다.
+- `runtime-browser-audit-v1.5.21.json`의 핵심 layout metrics는 v1.5.19와 동일해야 합니다.
 - 4개 viewport runtime error와 horizontal overflow는 0이어야 합니다.
 - process memory audit는 runtime error 0, active operation 0, render queue 0을 만족해야 합니다.
 - long video audit는 미디어 실행 경로 미변경으로 v1.5.9 상속 계약을 사용합니다.
-- 런타임 build key는 `1.5.20-structure-responsive-priority`입니다.
+- 런타임 build key는 `1.5.21-structure-responsive-priority`입니다.
 
 ## 다음 우선순위
 

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.20 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
+// AI Shorts Studio v1.5.24 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -975,9 +975,9 @@
                 state.autoCuts = result.autoCuts;
                 state.waveformBins = result.waveformBins || [];
                 state.fileMeta = Object.assign({}, state.fileMeta || {}, result.fileMeta || {});
-                state.engineMeta = result.engine || { version: '1.0.8' };
+                state.engineMeta = result.engine || { version: String(config.APP_VERSION || 'dev').replace(/^v/i, '') };
                 if (engineKernel.auditRuntime) state.engineMeta.stability = engineKernel.auditRuntime(state);
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: '1.0.8', mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: state.engineMeta.version, mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
             } else {
                 let audioResult = null;
                 try {

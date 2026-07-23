@@ -1,35 +1,45 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.20
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.24
 
 ## 최종 결과
 
-- 자동 검사: **180/180 통과**
+- 자동 검사: **200/200 통과**
+- 신규 회귀 검사: 세션 백업 압축·체크섬 복원, 복구 이력·진단 내보내기, 서비스워커 SHA-256 변조 탐지·롤백 모두 통과
 - 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
 - 4개 viewport 가로 overflow: **0px**
-- 서비스워커·process memory·GPU/media 감사 v1.5.20 기준 통과
-- 장시간 MP4는 실행 코드 미변경으로 v1.5.9 검증 결과 상속
+- 서비스워커 install·activate·이전 캐시 보존/정리·offline navigation·콘텐츠 무결성 복구 통과
 
-## CSS·레이아웃 결과
+## 세션 복구 결과
 
-- 실제 selector-property 충돌: **0 유지**
-- same-value duplicate: **0 유지**
-- shadowed declaration: **0 유지**
-- 활성 `!important`: **666 → 593**
-- 구조·반응형 priority 제거: **73개**
-- PC Dock, 데스크톱 workspace, laptop·tablet density, preview·waveform focus 계산값은 v1.5.19와 동일
-- 제거 시 계산값이 바뀌는 Dock display·minimum size와 focus grid priority는 유지
+- 순환 백업: 저장소 상태별 **1~3개** 동적 보존
+- 압축: 최소 4% 절감 시 LZW16 봉투, 그 외 평문 JSON 유지
+- 검증: UTF-8 원본 바이트 수·문자 수·FNV-1a 체크섬 확인
+- 복구 이력: 최대 **20개**, 반복 실패 5초 중복 억제
+- 진단 내보내기: 프로젝트 원문 제외, 백업 메타데이터와 복구 이력만 포함
 
-## 런타임 결과
+## 서비스워커 콘텐츠 무결성
 
-- process memory audit: **16회**, runtime error 0, active operation 0, render queue 0
-- GPU/media comparison: 두 모드 미디어 디코딩 성공, GPU·media utility process 관측, runtime error 0
-- service worker: install·activate·old cache cleanup·offline navigation 통과
+- 앱 셸 SHA-256 대상: **119개 파일**
+- missing·invalid HTTP·corrupted content 분리 감지
+- 손상 자산 최대 2회 재다운로드·해시 재검증
+- 핵심 자산 복구 실패 시 새 활성화 거부 및 이전 정상 캐시 보존
+
+## 런타임 감사
+
+- Chromium 4개 viewport runtime error·Promise rejection·console error·horizontal overflow: **0건**
+- process memory audit: runtime error **0건**, JS heap slope **0.0049 MiB/cycle**
+- GPU/media capability audit: 두 모드 미디어 디코딩 성공, runtime error **0건**
+- CSS ownership: 활성 CSS **47개**, `!important` **593개**, 실제 충돌·same-value duplicate·shadowed declaration **0건**
+- 장시간 15→30→15분 미디어 계약은 미디어 소유 경로가 동일해 검증된 v1.5.23 근거를 명시적으로 상속
 
 ## 감사 제한
 
-- headless process RSS/GPU 분류는 실제 hardware-accelerated browser의 개별 native decoder buffer를 직접 측정하지 않습니다.
-- 30fps 고비트레이트 카메라 원본과 모바일 실기기 검증은 별도 환경이 필요합니다.
+- LZW16과 FNV-1a는 저장 효율·우발 손상 탐지 목적이며 암호학적 인증 수단이 아닙니다.
+- Web Crypto 미지원 환경의 서비스워커는 존재·HTTP 상태 검사로 폴백합니다.
+- 실제 모바일 Safari·Samsung Internet 다운로드 관리자와 물리 GPU 가속은 실기기 검증이 필요합니다.
 
 ---
+
+# QA REPORT HISTORY
 
 # QA REPORT HISTORY — AI 쇼츠 스튜디오 v1.5.13
 

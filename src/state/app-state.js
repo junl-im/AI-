@@ -1,8 +1,9 @@
-// AI Shorts Studio v1.5.20 - bounded state container and persisted-setting recovery
+// AI Shorts Studio v1.5.24 - quota-aware state container and persisted-setting recovery
 'use strict';
 
 (function exposeState(global) {
     const config = global.AIShortsRuntimeConfig || {};
+    const storageManager = global.AIShortsStorageManager || {};
     const SETTINGS_DEFAULTS = Object.freeze({
         duration: 'auto',
         style: 'balanced',
@@ -120,7 +121,8 @@
 
     function loadSettings() {
         try {
-            const raw = global.localStorage && global.localStorage.getItem(config.LOCAL_STORAGE_KEY || 'ai-shorts-settings');
+            const key = config.LOCAL_STORAGE_KEY || 'ai-shorts-settings';
+            const raw = storageManager.safeGet ? storageManager.safeGet(key, '') : global.localStorage && global.localStorage.getItem(key);
             return sanitizeSettings(raw ? JSON.parse(raw) : null);
         } catch (error) {
             return sanitizeSettings(null);
@@ -155,7 +157,10 @@
     function saveSettings() {
         try {
             state.settings = sanitizeSettings(state.settings);
-            if (global.localStorage) global.localStorage.setItem(config.LOCAL_STORAGE_KEY || 'ai-shorts-settings', JSON.stringify(state.settings));
+            const key = config.LOCAL_STORAGE_KEY || 'ai-shorts-settings';
+            const text = JSON.stringify(state.settings);
+            const result = storageManager.safeSet ? storageManager.safeSet(key, text, { maxCleanupRemovals: 2 }) : (global.localStorage && global.localStorage.setItem(key, text), { ok: true });
+            if (result && result.ok === false) addDiagnostic({ type: result.quota ? 'settings-storage-quota' : 'settings-storage-error', message: result.error && result.error.message || '설정을 저장할 수 없습니다.' });
         } catch (error) {
             // localStorage can be blocked in some in-app browsers.
         }

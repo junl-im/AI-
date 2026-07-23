@@ -1,7 +1,8 @@
-// AI Shorts Studio v1.3.1 - desktop workspace resizing and focus view controller
+// AI Shorts Studio v1.5.24 - quota-aware desktop workspace resizing and focus view controller
 'use strict';
 (function bootWorkspaceLayoutControls(global) {
     const STORAGE_KEY = 'ai-shorts-workspace-layout-v1';
+    const storageManager = global.AIShortsStorageManager || {};
     const DEFAULT_WEIGHTS = Object.freeze({ left: 0.82, center: 1.18, right: 0.9 });
     const MIN_PIXELS = Object.freeze({ left: 260, center: 350, right: 300 });
     const MODES = Object.freeze(['balanced', 'preview', 'waveform']);
@@ -45,7 +46,8 @@
 
     function readSaved() {
         try {
-            const parsed = JSON.parse(global.localStorage.getItem(STORAGE_KEY) || 'null');
+            const raw = storageManager.safeGet ? storageManager.safeGet(STORAGE_KEY, 'null') : global.localStorage.getItem(STORAGE_KEY) || 'null';
+            const parsed = JSON.parse(raw);
             if (!parsed || typeof parsed !== 'object') return;
             weights = normalize(parsed.weights);
             mode = 'balanced';
@@ -57,7 +59,9 @@
 
     function save() {
         try {
-            global.localStorage.setItem(STORAGE_KEY, JSON.stringify({ weights }));
+            const text = JSON.stringify({ weights });
+            if (storageManager.safeSet) storageManager.safeSet(STORAGE_KEY, text, { maxCleanupRemovals: 1 });
+            else global.localStorage.setItem(STORAGE_KEY, text);
         } catch (_) { /* storage is optional */ }
     }
 

@@ -5,6 +5,7 @@
     const store = global.AIShortsAppState || {};
     const state = store.state || {};
     const renderQueue = global.AIShortsRenderQueue || null;
+    const config = global.AIShortsRuntimeConfig || {};
     let root = null;
     let lastSnapshot = null;
 
@@ -47,7 +48,7 @@
             return;
         }
         const payload = JSON.stringify({
-            version: '1.1.3',
+            version: config.APP_VERSION || 'dev',
             renderQueue: lastSnapshot,
             selectedRange: summarizeRange(),
             userAgent: navigator.userAgent,

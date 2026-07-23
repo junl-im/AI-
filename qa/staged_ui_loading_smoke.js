@@ -29,16 +29,16 @@ const stagedOnly = [
     'src/ui/studio-experience-controller.js'
 ];
 
-assert(pkg.version === '1.5.20', 'staged hydration release version is v1.5.20');
-assert(html.includes('src/boot/staged-ui-loader.js?v=1.5.20-structure-responsive-priority'), 'staged UI loader is on the critical path');
-assert(directScripts <= 48, `direct startup scripts are reduced to ${directScripts}`);
+assert(pkg.version === '1.5.24', 'staged hydration release version is v1.5.24');
+assert(html.includes('src/boot/staged-ui-loader.js?v=1.5.24-compressed-session-integrity-rollback'), 'staged UI loader is on the critical path');
+assert(directScripts <= 49, `direct startup scripts are reduced to ${directScripts}`);
 stagedOnly.forEach(file => assert(!html.includes(`<script defer src="${file}`), `${file} is removed from blocking startup execution`));
 assert(loader.includes('shell: [') && loader.includes('editing: [') && loader.includes('export: ['), 'loader separates shell, editing and export phases');
 assert(loader.includes("dependencies = Object.freeze({ editing: ['shell'], export: ['shell', 'editing'] })"), 'phase dependency order is explicit');
 assert(loader.includes("requestIdleCallback") && loader.includes("pointerover") && loader.includes("ai-shorts-navigation-request"), 'idle warmup and intent-based preloading are installed');
 assert(loader.includes("data") || loader.includes('dataset.hydrationMode'), 'hydration state is exposed to runtime diagnostics');
-assert(sw.includes('staged-ui-loader.js?v=1.5.20-structure-responsive-priority'), 'service worker caches the staged loader');
+assert(sw.includes('staged-ui-loader.js?v=1.5.24-compressed-session-integrity-rollback'), 'service worker caches the staged loader');
 assert(!sw.includes('./src/ui/candidate-preview-pro.js') && !sw.includes('./src/ui/export-finish-center.js'), 'staged feature scripts are not fetched during service-worker install');
 assert(sw.includes('async function cacheFirst'), 'staged feature scripts are cached when first requested');
 assert(html.indexOf('startup-performance.js') < html.indexOf('src/app.js'), 'adaptive performance profile starts before the main app');
-console.log('PASS v1.5.20 staged UI hydration guardrails present');
+console.log('PASS v1.5.24 staged UI hydration guardrails present');

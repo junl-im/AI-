@@ -31,7 +31,7 @@ const state = {
     captions: [{ start: 10, end: 12, text: 'hello' }]
 };
 const snapshot = svc.createProjectSnapshot(state, 'title', '#tag');
-if (snapshot.schemaVersion !== 3) throw new Error('snapshot schema version mismatch');
+if (snapshot.schemaVersion !== 4) throw new Error('snapshot schema version mismatch');
 const parsed = svc.parseProjectText(JSON.stringify(snapshot));
 const target = { settings: {}, recommendations: [], captions: [] };
 svc.applyProjectSnapshot(target, parsed);

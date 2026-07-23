@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.20 - parallel analysis and clone-safe cache kernel facade
+// AI Shorts Studio v1.5.24 - adaptive fingerprint cache diagnostics and parallel analysis kernel facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -10,9 +10,14 @@
     const cacheFactory = global.AIShortsAnalysisCache || {};
     const tuner = global.AIShortsProEngineTuner || {};
     const stability = global.AIShortsStabilityAuditor || {};
+    const config = global.AIShortsRuntimeConfig || {};
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.24').replace(/^v/i, '');
 
     const registry = registryFactory.createRegistry ? registryFactory.createRegistry('ai-shorts-studio-pro-engine') : null;
-    const analysisCache = cacheFactory.createAnalysisCache ? cacheFactory.createAnalysisCache(4, { maxAgeMs: 30 * 60 * 1000 }) : null;
+    const analysisCache = cacheFactory.createAnalysisCache ? cacheFactory.createAnalysisCache(
+        Math.max(1, Number(config.ANALYSIS_CACHE_MAX_ITEMS) || 4),
+        { maxAgeMs: Math.max(30_000, Number(config.ANALYSIS_CACHE_MAX_AGE_MS) || 30 * 60 * 1000) }
+    ) : null;
     let lastContractReport = null;
     let lastStabilityReport = null;
 
@@ -32,26 +37,30 @@
         { id: 'recommendation.scoring.pipeline', stage: 'recommendation', priority: 40, capabilities: ['quality-gate', 'engine-badge', 'rerank'] },
         { id: 'pro.engine.tuner', stage: 'recommendation', priority: 45, capabilities: ['confidence', 'grade', 'score-depth'] },
         { id: 'render.quality.effects', stage: 'render', priority: 50, capabilities: ['caption', 'quality', 'watermark'] },
-        { id: 'analysis.cache', stage: 'utility', priority: 60, capabilities: ['session-cache', 'repeat-open-boost'] },
+        { id: 'analysis.cache', stage: 'utility', priority: 60, capabilities: ['session-cache', 'repeat-open-boost', 'adaptive-fingerprint', 'cache-diagnostics'] },
         { id: 'stability.auditor', stage: 'stability', priority: 70, capabilities: ['health-score', 'contract-report'] }
     ].forEach(registerModule);
 
-    function createBudget(fileMeta, config) {
-        const base = perf.createBudget ? perf.createBudget(fileMeta, config) : { tier: 'balanced', label: '균형 성능' };
-        return tuner.enhanceBudget ? tuner.enhanceBudget(base, fileMeta, config) : base;
+    function createBudget(fileMeta, configOverride) {
+        const base = perf.createBudget ? perf.createBudget(fileMeta, configOverride) : { tier: 'balanced', label: '균형 성능' };
+        return tuner.enhanceBudget ? tuner.enhanceBudget(base, fileMeta, configOverride) : base;
+    }
+
+    function cacheStats() {
+        return analysisCache && analysisCache.stats ? analysisCache.stats() : null;
     }
 
     function annotateEngine(result, budget, profile, extra) {
         const registrySnapshot = registry && registry.snapshot ? registry.snapshot() : null;
         const summary = tuner.summarizeAnalysis ? tuner.summarizeAnalysis(result, budget) : null;
         result.engine = Object.assign({}, result.engine || {}, {
-            version: '1.5.20',
+            version: ENGINE_VERSION,
             mode: 'adaptive-parallel-engine',
             budget,
             registry: registrySnapshot,
             profile,
             summary,
-            cache: analysisCache && analysisCache.stats ? analysisCache.stats() : null
+            cache: cacheStats()
         }, extra || {});
         if (contracts.createContractReport) {
             lastContractReport = contracts.createContractReport(registrySnapshot, result, []);
@@ -64,7 +73,12 @@
         const profiler = perf.createProfiler ? perf.createProfiler('analysis') : null;
         const budget = input && input.budget || createBudget(input && input.fileMeta, input && input.config);
         if (profiler) profiler.mark('budget', budget);
-        const cacheKey = analysisCache && analysisCache.makeFileKey ? analysisCache.makeFileKey(input && input.file, input && input.fileMeta, budget) : '';
+        const cacheKey = analysisCache && analysisCache.makeFileKeyAsync
+            ? await analysisCache.makeFileKeyAsync(input && input.file, input && input.fileMeta, budget)
+            : analysisCache && analysisCache.makeFileKey
+                ? analysisCache.makeFileKey(input && input.file, input && input.fileMeta, budget)
+                : '';
+        if (profiler) profiler.mark('fingerprint-complete', cacheStats() && cacheStats().fingerprint || null);
         const cached = analysisCache && analysisCache.get ? analysisCache.get(cacheKey) : null;
         if (cached) {
             if (profiler) profiler.mark('cache-hit');
@@ -99,17 +113,34 @@
         return lastStabilityReport;
     }
 
+    function clearAnalysisCache() {
+        if (analysisCache && analysisCache.clear) analysisCache.clear();
+        return cacheStats();
+    }
+
+    function pruneAnalysisCache(options) {
+        return analysisCache && analysisCache.prune ? analysisCache.prune(options || {}) : cacheStats();
+    }
+
     function getHealthReport() {
         return {
-            version: '1.5.20',
+            version: ENGINE_VERSION,
             mode: 'adaptive-parallel-engine',
             registry: registry && registry.snapshot ? registry.snapshot() : null,
             modules: registry && registry.list ? registry.list().length : 0,
-            cache: analysisCache && analysisCache.stats ? analysisCache.stats() : null,
+            cache: cacheStats(),
             contract: lastContractReport,
             stability: lastStabilityReport
         };
     }
 
-    global.AIShortsEngineKernel = Object.freeze({ createBudget, analyzeMedia, createRecommendations, auditRuntime, getHealthReport });
+    global.AIShortsEngineKernel = Object.freeze({
+        createBudget,
+        analyzeMedia,
+        createRecommendations,
+        auditRuntime,
+        getHealthReport,
+        clearAnalysisCache,
+        pruneAnalysisCache
+    });
 })(window);

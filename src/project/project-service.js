@@ -1,11 +1,11 @@
-// AI Shorts Studio v1.5.20 - bounded, schema-safe, and compatibility-preserving project helpers
+// AI Shorts Studio v1.5.24 - schema-v4 bounded and compatibility-preserving project helpers
 'use strict';
 
 (function exposeProjectService(global) {
     const captionService = global.AIShortsCaptionService || {};
     const utils = global.AIShortsCoreUtils || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const CURRENT_SCHEMA_VERSION = 3;
+    const CURRENT_SCHEMA_VERSION = Math.max(4, Number(config.SESSION_SCHEMA_VERSION || 4));
     const MAX_PROJECT_TEXT_CHARS = Math.max(1024, Number(config.MAX_PROJECT_TEXT_CHARS || 2_500_000));
     const MAX_RECOMMENDATIONS = Math.max(1, Number(config.MAX_PROJECT_RECOMMENDATIONS || 24));
     const MAX_CAPTIONS = Math.max(1, Number(config.MAX_PROJECT_CAPTIONS || 5000));
@@ -208,6 +208,9 @@
             copy: { title: safeText(copy.title, 500), hashtags: safeText(copy.hashtags, 3000) },
             session: {
                 version: safeText(session.version, 40),
+                schemaVersion: CURRENT_SCHEMA_VERSION,
+                sourceSchemaVersion: Math.round(finiteNumber(session.sourceSchemaVersion || schemaVersion, schemaVersion, 1, CURRENT_SCHEMA_VERSION)),
+                migratedAt: safeText(session.migratedAt, 80),
                 fileKey: safeText(session.fileKey, 700),
                 hasMediaInMemory: safeBoolean(session.hasMediaInMemory, false),
                 recommendationCount: recommendations.length,

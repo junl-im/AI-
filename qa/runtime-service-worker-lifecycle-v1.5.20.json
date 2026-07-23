@@ -9,7 +9,7 @@
   "install": {
     "skipWaitingCalls": 1,
     "shellCached": true,
-    "currentCache": "ai-shorts-studio-shell-v1.5.20-structure-responsive-priority"
+    "currentCache": "ai-shorts-studio-shell-v1.5.20-runtime-cache-version-consistency"
   },
   "activate": {
     "claimCalls": 1,

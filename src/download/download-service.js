@@ -1,23 +1,80 @@
-// AI Shorts Studio v0.3.0 - download/share/diagnostics service
+// AI Shorts Studio v1.5.24 - download diagnostics with storage and offline lifecycle state
 'use strict';
 
 (function exposeDownloadService(global) {
     const utils = global.AIShortsCoreUtils || {};
     const appState = global.AIShortsAppState || {};
     const state = appState.state || { diagnostics: [] };
+    const config = global.AIShortsRuntimeConfig || {};
+    const REVOKE_DELAY_MS = Math.max(10000, Math.min(5 * 60 * 1000, Number(config.DOWNLOAD_URL_REVOKE_DELAY_MS) || 45000));
+    const MAX_ACTIVE_URLS = Math.max(2, Math.min(32, Number(config.MAX_ACTIVE_DOWNLOAD_URLS) || 12));
+    const MIN_URL_AGE_MS = Math.max(3000, Math.min(REVOKE_DELAY_MS, Number(config.MIN_DOWNLOAD_URL_AGE_MS) || 10000));
+    const activeUrls = new Map();
+
+    function revokeUrl(url, reason) {
+        const entry = activeUrls.get(url);
+        if (!entry) return false;
+        activeUrls.delete(url);
+        if (entry.timer) global.clearTimeout(entry.timer);
+        try { global.URL.revokeObjectURL(url); } catch (_) { /* no-op */ }
+        if (appState.addDiagnostic) appState.addDiagnostic({ type: 'download-url-release', reason: reason || 'scheduled', ageMs: Math.max(0, Date.now() - entry.createdAt), activeUrls: activeUrls.size });
+        return true;
+    }
+
+    function trimActiveUrls() {
+        if (activeUrls.size <= MAX_ACTIVE_URLS) return;
+        const now = Date.now();
+        for (const [url, entry] of activeUrls.entries()) {
+            if (activeUrls.size <= MAX_ACTIVE_URLS) break;
+            if (now - entry.createdAt < MIN_URL_AGE_MS) continue;
+            revokeUrl(url, 'capacity');
+        }
+    }
+
+    function scheduleUrlRelease(url) {
+        const entry = {
+            createdAt: Date.now(),
+            timer: global.setTimeout(() => revokeUrl(url, 'scheduled'), REVOKE_DELAY_MS)
+        };
+        activeUrls.set(url, entry);
+        trimActiveUrls();
+        return url;
+    }
+
+    function releaseAllDownloadUrls(reason) {
+        Array.from(activeUrls.keys()).forEach(url => revokeUrl(url, reason || 'manual'));
+        return true;
+    }
+
+    function getObjectUrlStats() {
+        const now = Date.now();
+        const ages = Array.from(activeUrls.values()).map(entry => Math.max(0, now - entry.createdAt));
+        return Object.freeze({
+            active: activeUrls.size,
+            limit: MAX_ACTIVE_URLS,
+            revokeDelayMs: REVOKE_DELAY_MS,
+            oldestAgeMs: ages.length ? Math.max(...ages) : 0
+        });
+    }
 
     function saveBlob(blob, filename) {
         if (!blob) throw new Error('저장할 파일이 없습니다.');
-        const url = URL.createObjectURL(blob);
+        if (!global.URL || typeof global.URL.createObjectURL !== 'function') throw new Error('이 브라우저에서는 파일 저장 URL을 만들 수 없습니다.');
+        const url = scheduleUrlRelease(global.URL.createObjectURL(blob));
         const anchor = document.createElement('a');
         anchor.href = url;
         anchor.download = filename || 'ai-shorts-export.webm';
         anchor.rel = 'noopener';
         document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        if (appState.addDiagnostic) appState.addDiagnostic({ type: 'download', filename, size: blob.size, mimeType: blob.type });
+        try {
+            anchor.click();
+        } catch (error) {
+            revokeUrl(url, 'click-error');
+            throw error;
+        } finally {
+            anchor.remove();
+        }
+        if (appState.addDiagnostic) appState.addDiagnostic({ type: 'download', filename, size: blob.size, mimeType: blob.type, objectUrlReleaseMs: REVOKE_DELAY_MS });
         return true;
     }
 
@@ -54,6 +111,10 @@
                 canShare: Boolean(navigator.canShare),
                 fileSystemAccess: Boolean(global.showSaveFilePicker)
             },
+            objectUrls: getObjectUrlStats(),
+            storage: global.AIShortsStorageManager && global.AIShortsStorageManager.status ? global.AIShortsStorageManager.status() : null,
+            serviceWorker: global.AIShortsServiceWorkerRegistration && global.AIShortsServiceWorkerRegistration.getStatus ? global.AIShortsServiceWorkerRegistration.getStatus() : null,
+            sessionContinuity: global.AIShortsSessionContinuity && global.AIShortsSessionContinuity.getStatus ? global.AIShortsSessionContinuity.getStatus() : null,
             mediaRecorderTypes,
             currentFile: state.file ? {
                 name: state.file.name,
@@ -76,10 +137,14 @@
         return snapshot;
     }
 
+    if (typeof global.addEventListener === 'function') global.addEventListener('pagehide', () => releaseAllDownloadUrls('pagehide'));
+
     global.AIShortsDownloadService = Object.freeze({
         saveBlob,
         shareBlob,
         createDiagnosticsSnapshot,
-        copyDiagnostics
+        copyDiagnostics,
+        releaseAllDownloadUrls,
+        getObjectUrlStats
     });
 })(window);

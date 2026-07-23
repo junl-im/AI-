@@ -1,57 +1,59 @@
-// AI Shorts Studio v1.5.20 service worker - namespace-safe version-aware cache guard
+// AI Shorts Studio v1.5.24 service worker - version-aware cache guard with content-hash verification and rollback-safe activation
 'use strict';
 
 const CACHE_PREFIX = 'ai-shorts-studio-shell-';
-const CACHE_NAME = 'ai-shorts-studio-shell-v1.5.20-structure-responsive-priority';
+const CACHE_NAME = 'ai-shorts-studio-shell-v1.5.24-compressed-session-integrity-rollback';
 const SHELL_FILES = [
     './',
     './index.html',
     './manifest.webmanifest',
-    './assets/css/theme.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/studio.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/editor.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/ux.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/advanced-editor.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/layout-dock.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/caption-pro.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/quality-tools.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/auto-cut.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/cut-markers.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/feedback-ux.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/engine-panel.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/pro-engine.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/hyperflow-tabs.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/render-queue.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/hyperconnect-flow.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/flow-polish.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/flow-hotfix.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/flow-integrity.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/flow-doctor.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/responsive-workspace.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/flow-quality-gate.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/pc-dock-reveal-hotfix.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/glass-pro-ui.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/workspace-comfort.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/motion-stability.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/handoff-coach.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/save-readiness.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/render-quality-planner.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/candidate-preview-pro.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/candidate-pin-board.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/session-continuity.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/export-finish-center.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/shutter-glass-flow.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/update-sentinel.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/foundation-polish.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/desktop-prime-layout.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/hero-command-deck.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/ui-refinement.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/icon-system.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/header-meta-rail.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/active-stage-beacon.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/workspace-layout-controls.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/mobile-menu-guide.css?v=1.5.20-structure-responsive-priority',
-    './assets/css/studio-experience.css?v=1.5.20-structure-responsive-priority',
+    './asset-integrity.json',
+    './assets/css/theme.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/studio.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/editor.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/ux.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/advanced-editor.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/layout-dock.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/caption-pro.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/quality-tools.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/auto-cut.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/cut-markers.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/feedback-ux.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/engine-panel.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/pro-engine.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/hyperflow-tabs.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/render-queue.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/hyperconnect-flow.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/flow-polish.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/flow-hotfix.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/flow-integrity.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/flow-doctor.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/responsive-workspace.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/flow-quality-gate.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/pc-dock-reveal-hotfix.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/glass-pro-ui.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/workspace-comfort.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/motion-stability.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/handoff-coach.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/save-readiness.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/render-quality-planner.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/candidate-preview-pro.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/candidate-pin-board.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/session-continuity.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/storage-health-panel.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/export-finish-center.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/shutter-glass-flow.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/update-sentinel.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/foundation-polish.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/desktop-prime-layout.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/hero-command-deck.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/ui-refinement.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/icon-system.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/header-meta-rail.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/active-stage-beacon.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/workspace-layout-controls.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/mobile-menu-guide.css?v=1.5.24-compressed-session-integrity-rollback',
+    './assets/css/studio-experience.css?v=1.5.24-compressed-session-integrity-rollback',
     './assets/icons/ai-shorts.svg',
     './assets/icons/studio/candidates.svg',
     './assets/icons/studio/caption.svg',
@@ -73,70 +75,353 @@ const SHELL_FILES = [
     './assets/icons/studio/thumbnail.svg',
     './assets/icons/studio/upload.svg',
     './assets/icons/studio/waveform.svg',
-    './src/config/app-runtime-config.js?v=1.5.20-structure-responsive-priority',
-    './src/boot/app-version-sync.js?v=1.5.20-structure-responsive-priority',
-    './src/boot/update-sentinel.js?v=1.5.20-structure-responsive-priority',
-    './src/boot/staged-ui-loader.js?v=1.5.20-structure-responsive-priority',
-    './src/utils/core-utils.js?v=1.5.20-structure-responsive-priority',
-    './src/state/app-state.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/operation-coordinator.js?v=1.5.20-structure-responsive-priority',
-    './src/analysis/audio-analysis-core.js?v=1.5.20-structure-responsive-priority',
-    './src/analysis/audio-feature-extractor.js?v=1.5.20-structure-responsive-priority',
-    './src/analysis/video-motion-analyzer.js?v=1.5.20-structure-responsive-priority',
-    './src/analysis/auto-cut-detector.js?v=1.5.20-structure-responsive-priority',
-    './src/recommendation/shorts-recommendation-engine.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/module-registry.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/module-contracts.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/analysis-cache.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/performance-budget.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/analysis-pipeline.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/scoring-pipeline.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/pro-engine-tuner.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/stability-auditor.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/engine-boost-profile.js?v=1.5.20-structure-responsive-priority',
-    './src/engine/engine-kernel.js?v=1.5.20-structure-responsive-priority',
-    './src/caption/caption-service.js?v=1.5.20-structure-responsive-priority',
-    './src/project/project-service.js?v=1.5.20-structure-responsive-priority',
-    './src/render/quality-effects.js?v=1.5.20-structure-responsive-priority',
-    './src/render/vertical-renderer.js?v=1.5.20-structure-responsive-priority',
-    './src/download/download-service.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/waveform-view.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/cut-marker-overlay.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/timeline-view.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/bottom-dock.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/mobile-menu-guide.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/feedback-ux.js?v=1.5.20-structure-responsive-priority',
-    './src/render/render-queue.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/hyperflow-tabs.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/motion-stability.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/flow-director-final.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/flow-command-bridge.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/workspace-layout-controls.js?v=1.5.20-structure-responsive-priority',
-    './src/ui/startup-performance.js?v=1.5.20-structure-responsive-priority',
-    './src/security/site-guards.js?v=1.5.20-structure-responsive-priority',
-    './src/boot/service-worker-registration.js?v=1.5.20-structure-responsive-priority',
-    './src/boot/runtime-health.js?v=1.5.20-structure-responsive-priority',
-    './src/app/render-workflow-controller.js?v=1.5.20-structure-responsive-priority',
-    './src/app/settings-controller.js?v=1.5.20-structure-responsive-priority',
-    './src/app/media-import-controller.js?v=1.5.20-structure-responsive-priority',
-    './src/app.js?v=1.5.20-structure-responsive-priority',
+    './src/config/app-runtime-config.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/boot/app-version-sync.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/boot/update-sentinel.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/boot/staged-ui-loader.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/utils/core-utils.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/storage/storage-manager.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/storage/session-backup-codec.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/state/app-state.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/operation-coordinator.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/analysis/audio-analysis-core.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/analysis/audio-feature-extractor.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/analysis/video-motion-analyzer.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/analysis/auto-cut-detector.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/recommendation/shorts-recommendation-engine.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/module-registry.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/module-contracts.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/analysis-cache.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/performance-budget.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/analysis-pipeline.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/scoring-pipeline.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/pro-engine-tuner.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/stability-auditor.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/engine-boost-profile.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/engine/engine-kernel.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/caption/caption-service.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/project/project-service.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/render/quality-effects.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/render/vertical-renderer.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/download/download-service.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/waveform-view.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/cut-marker-overlay.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/timeline-view.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/bottom-dock.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/mobile-menu-guide.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/feedback-ux.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/render/render-queue.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/hyperflow-tabs.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/motion-stability.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/flow-director-final.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/flow-command-bridge.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/workspace-layout-controls.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/ui/startup-performance.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/security/site-guards.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/boot/service-worker-registration.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/boot/runtime-health.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/app/render-workflow-controller.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/app/settings-controller.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/app/media-import-controller.js?v=1.5.24-compressed-session-integrity-rollback',
+    './src/app.js?v=1.5.24-compressed-session-integrity-rollback',
     './src/workers/highlight-analysis.worker.js'
 ];
 
+const REQUIRED_SHELL_FILES = Object.freeze([
+    './index.html',
+    './manifest.webmanifest',
+    './asset-integrity.json',
+    './src/config/app-runtime-config.js?v=1.5.24-compressed-session-integrity-rollback'
+]);
+const INSTALL_REPORT_KEY = './__ai_shorts_sw_install_report__';
+const PRECACHE_BATCH_SIZE = 8;
+const CACHE_REPAIR_ATTEMPTS = 2;
+const INTEGRITY_MANIFEST_URL = './asset-integrity.json';
+const INTEGRITY_MANIFEST_SHA256 = 'e1a50d29624f45d4e5933cbe74f0fb83e0db8188489de268741eaa45d766f2a7';
+let integrityManifestPromise = null;
+
+function errorMessage(error) {
+    return error && error.message ? error.message : String(error || 'unknown cache error');
+}
+
+function normalizeAssetKey(file) {
+    try {
+        const url = new URL(typeof file === 'string' ? file : file && file.url || '', self.location.origin);
+        let path = url.pathname.replace(/^\/+/, '');
+        if (!path) path = 'index.html';
+        return path;
+    } catch (_) {
+        return String(file || '').replace(/^\.\//, '').split('?')[0] || 'index.html';
+    }
+}
+
+function cryptoSupported() {
+    return Boolean(self.crypto && self.crypto.subtle && typeof self.crypto.subtle.digest === 'function');
+}
+
+async function responseSha256(response) {
+    if (!cryptoSupported() || !response || typeof response.arrayBuffer !== 'function') return '';
+    const buffer = await response.arrayBuffer();
+    const digest = await self.crypto.subtle.digest('SHA-256', buffer);
+    return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function verifyResponseContent(response, expectedHash) {
+    if (!expectedHash) return { supported: cryptoSupported(), verified: false, skipped: true, actualHash: '' };
+    if (!cryptoSupported() || !response || typeof response.clone !== 'function' || typeof response.arrayBuffer !== 'function') return { supported: false, verified: false, skipped: true, actualHash: '' };
+    const actualHash = await responseSha256(response.clone());
+    return { supported: true, verified: actualHash === expectedHash, skipped: false, actualHash };
+}
+
+async function loadIntegrityManifest(cache, options) {
+    const force = Boolean(options && options.force);
+    if (!force && integrityManifestPromise) return integrityManifestPromise;
+    integrityManifestPromise = (async () => {
+        if (!cryptoSupported()) return { supported: false, verified: false, source: 'unsupported', assets: {}, manifestHash: '' };
+        let response = null;
+        let source = 'network';
+        try {
+            response = await fetch(INTEGRITY_MANIFEST_URL, { cache: 'reload' });
+            if (!response || !response.ok) throw new Error(`HTTP ${response && response.status || 0}`);
+        } catch (error) {
+            source = 'cache';
+            response = cache && typeof cache.match === 'function' ? await cache.match(INTEGRITY_MANIFEST_URL) : null;
+            if (!response) throw error;
+        }
+        const verification = await verifyResponseContent(response.clone(), INTEGRITY_MANIFEST_SHA256);
+        if (!verification.supported || !verification.verified) throw new Error('Integrity manifest checksum mismatch');
+        const manifest = await response.clone().json();
+        if (!manifest || manifest.algorithm !== 'sha256' || !manifest.assets || typeof manifest.assets !== 'object') throw new Error('Invalid integrity manifest');
+        if (cache && typeof cache.put === 'function' && source === 'network') await cache.put(INTEGRITY_MANIFEST_URL, response.clone());
+        return { supported: true, verified: true, source, assets: manifest.assets, manifestHash: verification.actualHash, generatedAt: manifest.generatedAt || '' };
+    })().catch(error => ({ supported: true, verified: false, source: 'error', assets: {}, manifestHash: '', error: errorMessage(error) }));
+    return integrityManifestPromise;
+}
+
+async function cacheShellFile(cache, file, options) {
+    const settings = options || {};
+    const attempts = Math.max(1, Math.min(3, Number(settings.attempts) || 1));
+    const manifest = settings.manifest || { supported: false, verified: false, assets: {} };
+    const expectedHash = manifest.assets && manifest.assets[normalizeAssetKey(file)] || '';
+    let lastError = null;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+        try {
+            if (manifest.supported && manifest.verified && expectedHash && typeof cache.put === 'function') {
+                const response = await fetch(file, { cache: 'reload' });
+                if (!response || !response.ok) throw new Error(`HTTP ${response && response.status || 0}`);
+                const verification = await verifyResponseContent(response.clone(), expectedHash);
+                if (!verification.verified) throw new Error(`Content checksum mismatch: ${file}`);
+                await cache.put(file, response.clone());
+                return { file, ok: true, message: '', attempts: attempt, contentVerified: true, expectedHash, actualHash: verification.actualHash };
+            }
+            if (typeof cache.add === 'function') await cache.add(file);
+            else {
+                const response = await fetch(file, { cache: 'reload' });
+                if (!response || !response.ok) throw new Error(`HTTP ${response && response.status || 0}`);
+                await cache.put(file, response.clone());
+            }
+            return { file, ok: true, message: '', attempts: attempt, contentVerified: false, integrityUnsupported: !manifest.supported || !manifest.verified };
+        } catch (error) {
+            lastError = error;
+        }
+    }
+    return { file, ok: false, message: errorMessage(lastError), attempts, contentVerified: false };
+}
+
+async function writeInstallReport(cache, report) {
+    try {
+        await cache.put(INSTALL_REPORT_KEY, new Response(JSON.stringify(report), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json; charset=utf-8' }
+        }));
+    } catch (_) { /* report persistence is best-effort */ }
+}
+
+async function precacheShell() {
+    const cache = await caches.open(CACHE_NAME);
+    const previousCaches = (await caches.keys()).filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME);
+    const manifest = await loadIntegrityManifest(cache, { force: true });
+    if (manifest.supported && !manifest.verified) {
+        await caches.delete(CACHE_NAME);
+        throw new Error(`Integrity manifest failed: ${manifest.error || 'checksum mismatch'}`);
+    }
+    const results = [];
+    for (let offset = 0; offset < SHELL_FILES.length; offset += PRECACHE_BATCH_SIZE) {
+        const batch = SHELL_FILES.slice(offset, offset + PRECACHE_BATCH_SIZE);
+        results.push(...await Promise.all(batch.map(file => file === INTEGRITY_MANIFEST_URL ? Promise.resolve({ file, ok: true, attempts: 1, contentVerified: Boolean(manifest.verified) }) : cacheShellFile(cache, file, { manifest }))));
+    }
+    const failed = results.filter(item => !item.ok);
+    const failedFiles = new Set(failed.map(item => item.file));
+    const requiredMissing = REQUIRED_SHELL_FILES.filter(file => failedFiles.has(file) || !results.some(item => item.file === file && item.ok));
+    const contentVerified = results.filter(item => item.contentVerified).length;
+    const report = {
+        cacheName: CACHE_NAME,
+        attempted: results.length,
+        cached: results.length - failed.length,
+        failed: failed.length,
+        contentVerified,
+        integrityManifest: { supported: manifest.supported, verified: manifest.verified, source: manifest.source, hash: manifest.manifestHash, generatedAt: manifest.generatedAt || '', error: manifest.error || '' },
+        rollbackCandidates: previousCaches,
+        requiredMissing,
+        failures: failed.slice(0, 20),
+        installedAt: new Date().toISOString()
+    };
+    await writeInstallReport(cache, report);
+    if (requiredMissing.length) {
+        await caches.delete(CACHE_NAME);
+        throw new Error(`Required shell cache failed: ${requiredMissing.join(', ')}`);
+    }
+    return report;
+}
+
+async function inspectShellCache(cache, files, options) {
+    const targets = Array.isArray(files) ? files : SHELL_FILES;
+    if (!cache || typeof cache.match !== 'function') return { checked: targets.length, missing: [], invalid: [], corrupted: [], healthy: targets.length, inspectionSupported: false, hashVerified: 0, hashUnsupported: targets.length };
+    const manifest = options && options.manifest || await loadIntegrityManifest(cache);
+    const missing = [];
+    const invalid = [];
+    const corrupted = [];
+    let hashVerified = 0;
+    let hashUnsupported = 0;
+    for (const file of targets) {
+        let response = null;
+        try { response = await cache.match(file); } catch (_) { /* classified as missing below */ }
+        if (!response) { missing.push(file); continue; }
+        if (response.ok === false) { invalid.push(file); continue; }
+        if (file === INTEGRITY_MANIFEST_URL) { if (manifest.verified) hashVerified += 1; else hashUnsupported += 1; continue; }
+        const expectedHash = manifest.assets && manifest.assets[normalizeAssetKey(file)] || '';
+        const verification = await verifyResponseContent(response.clone ? response.clone() : response, expectedHash);
+        if (verification.supported && !verification.skipped) {
+            if (verification.verified) hashVerified += 1;
+            else corrupted.push(file);
+        } else hashUnsupported += 1;
+    }
+    return { checked: targets.length, missing, invalid, corrupted, healthy: targets.length - missing.length - invalid.length - corrupted.length, inspectionSupported: true, hashVerified, hashUnsupported, manifestVerified: Boolean(manifest.verified), manifestError: manifest.error || '' };
+}
+
+async function repairShellCache(cache, options) {
+    const settings = options || {};
+    const targets = settings.includeOptional === false ? REQUIRED_SHELL_FILES : SHELL_FILES;
+    const manifest = await loadIntegrityManifest(cache, { force: Boolean(settings.forceManifest) });
+    const before = await inspectShellCache(cache, targets, { manifest });
+    const repairTargets = Array.from(new Set(before.missing.concat(before.invalid, before.corrupted || [])));
+    const repaired = [];
+    const failed = [];
+    for (const file of repairTargets) {
+        try { if (typeof cache.delete === 'function') await cache.delete(file); } catch (_) { /* overwrite below */ }
+        const result = await cacheShellFile(cache, file, { attempts: CACHE_REPAIR_ATTEMPTS, manifest });
+        if (result.ok) repaired.push(file);
+        else failed.push(result);
+    }
+    const after = await inspectShellCache(cache, targets, { manifest });
+    const requiredMissing = REQUIRED_SHELL_FILES.filter(file => after.missing.includes(file) || after.invalid.includes(file) || (after.corrupted || []).includes(file));
+    return {
+        repaired,
+        failed,
+        requiredMissing,
+        integrity: after,
+        repairAttempts: repairTargets.length,
+        lastRepairedAt: new Date().toISOString(),
+        repairReason: String(settings.reason || 'activation')
+    };
+}
+
+async function readInstallReport(cache, repairResult) {
+    let report = null;
+    try {
+        const response = await cache.match(INSTALL_REPORT_KEY);
+        if (response) report = await response.json();
+    } catch (_) { /* no-op */ }
+    let cacheEntries = 0;
+    try {
+        if (cache && typeof cache.keys === 'function') cacheEntries = (await cache.keys()).length;
+    } catch (_) { /* optional */ }
+    const repair = repairResult || {};
+    const integrity = repair.integrity || await inspectShellCache(cache, SHELL_FILES);
+    return Object.assign({}, report || {}, {
+        repaired: repair.repaired || [],
+        repairFailed: repair.failed || [],
+        repairAttempts: Number(repair.repairAttempts) || 0,
+        repairReason: String(repair.repairReason || ''),
+        lastRepairedAt: String(repair.lastRepairedAt || ''),
+        integrity,
+        verified: integrity.missing.length === 0 && integrity.invalid.length === 0 && !(integrity.corrupted && integrity.corrupted.length),
+        contentVerified: integrity.missing.length === 0 && integrity.invalid.length === 0 && !(integrity.corrupted && integrity.corrupted.length) && Boolean(integrity.manifestVerified) && Number(integrity.hashUnsupported || 0) === 0,
+        cacheEntries,
+        cacheName: CACHE_NAME
+    });
+}
+
+async function broadcastInstallReport(cache, repaired) {
+    if (!self.clients || typeof self.clients.matchAll !== 'function') return;
+    const report = await readInstallReport(cache, repaired);
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    clients.forEach(client => {
+        if (client && typeof client.postMessage === 'function') client.postMessage({
+            type: 'ai-shorts-service-worker-install-report',
+            report
+        });
+    });
+}
+
+self.addEventListener('message', event => {
+    const data = event && event.data || {};
+    if (data.type !== 'ai-shorts-service-worker-status-request' && data.type !== 'ai-shorts-service-worker-repair-request') return;
+    event.waitUntil((async () => {
+        const cache = await caches.open(CACHE_NAME);
+        let repair = null;
+        if (data.type === 'ai-shorts-service-worker-repair-request') {
+            repair = await repairShellCache(cache, { includeOptional: true, reason: 'manual' });
+            const current = await readInstallReport(cache, repair);
+            await writeInstallReport(cache, current);
+        }
+        const report = await readInstallReport(cache, repair);
+        const target = event.source;
+        if (target && typeof target.postMessage === 'function') target.postMessage({
+            type: 'ai-shorts-service-worker-install-report',
+            requestId: String(data.requestId || ''),
+            report
+        });
+        if (repair) await broadcastInstallReport(cache, repair);
+    })());
+});
+
 self.addEventListener('install', event => {
-    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL_FILES)).then(() => self.skipWaiting()));
+    event.waitUntil(precacheShell().then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', event => {
-    event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+    event.waitUntil((async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const repair = await repairShellCache(cache, { includeOptional: true, reason: 'activation' });
+        if (repair.requiredMissing.length) throw new Error(`Service worker cache repair failed: ${repair.requiredMissing.join(', ')}`);
+        const report = await readInstallReport(cache, repair);
+        const keys = await caches.keys();
+        const rollbackCaches = keys.filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME);
+        const activationVerified = report.verified && (!cryptoSupported() || report.contentVerified);
+        const finalReport = Object.assign({}, report, { activationVerified, rollbackPreserved: activationVerified ? [] : rollbackCaches });
+        await writeInstallReport(cache, finalReport);
+        if (!activationVerified) throw new Error('Service worker content integrity verification failed; previous cache preserved');
+        await Promise.all(rollbackCaches.map(key => caches.delete(key)));
+        await self.clients.claim();
+        await broadcastInstallReport(cache, repair);
+    })());
 });
 
-function isNavigationRequest(request, url) {
-    return request.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('/index.html');
+function isNavigationRequest(request) {
+    return request.mode === 'navigate' || request.destination === 'document';
 }
 
 function isControlAsset(url) {
     return url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/sw.js');
+}
+
+const RUNTIME_CACHE_DESTINATIONS = new Set(['style', 'script', 'worker', 'image', 'font']);
+
+function isRuntimeCacheable(request, url) {
+    if (!request || !url || !RUNTIME_CACHE_DESTINATIONS.has(request.destination || '')) return false;
+    if (request.destination === 'audio' || request.destination === 'video') return false;
+    return url.pathname.includes('/assets/') || url.pathname.includes('/src/');
 }
 
 async function networkFirst(request, options) {
@@ -163,12 +448,11 @@ async function networkFirst(request, options) {
 
 async function cacheFirst(request) {
     const cached = await caches.match(request);
-    if (cached) return cached;
+    if (cached && cached.ok !== false) return cached;
+    const cache = await caches.open(CACHE_NAME);
+    if (cached && cached.ok === false && typeof cache.delete === 'function') await cache.delete(request).catch(() => {});
     const response = await fetch(request);
-    if (response && response.ok) {
-        const cache = await caches.open(CACHE_NAME);
-        cache.put(request, response.clone()).catch(() => {});
-    }
+    if (response && response.ok) cache.put(request, response.clone()).catch(() => {});
     return response;
 }
 
@@ -177,7 +461,7 @@ self.addEventListener('fetch', event => {
     if (request.method !== 'GET') return;
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
-    if (isNavigationRequest(request, url)) {
+    if (isNavigationRequest(request)) {
         event.respondWith(networkFirst(request, { navigationFallback: true }));
         return;
     }
@@ -185,5 +469,7 @@ self.addEventListener('fetch', event => {
         event.respondWith(networkFirst(request, { navigationFallback: false }));
         return;
     }
-    event.respondWith(cacheFirst(request));
+    if (isRuntimeCacheable(request, url)) {
+        event.respondWith(cacheFirst(request));
+    }
 });
