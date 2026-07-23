@@ -10,7 +10,7 @@ if (count('id="analyzeBtn"') !== 1) fail('there must be exactly one recommendati
 if (!html.includes('[📂 파일]') && !html.includes('data-flow-tab="file"')) fail('bottom tab dock missing file tab');
 if (!html.includes('data-flow-tab="candidates"')) fail('bottom tab dock missing candidates tab');
 if (!html.includes('data-flow-tab="export"')) fail('bottom tab dock missing export tab');
-if (!html.includes('v1.5.26</button>')) fail('version badge missing simple v1.5.26');
+if (!html.includes('v1.5.27</button>')) fail('version badge missing simple v1.5.27');
 if (!html.includes('class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>')) fail('designer signature missing');
 const hyper = fs.readFileSync('src/ui/hyperflow-tabs.js', 'utf8') + fs.readFileSync('src/ui/flow-polish.js', 'utf8');
 if (!hyper.includes('추천 생성은 추천 탭 안의 단일 버튼') && !html.includes('추천 탭 안에 하나만')) fail('single recommendation guidance missing');

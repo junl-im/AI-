@@ -26,7 +26,7 @@ const projectService = {
 const diagnostics = [];
 const window = {
     window: null, document, localStorage, navigator: {}, caches: { async keys() { return []; } }, CustomEvent: function CustomEvent() {},
-    AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.26', BUILD_KEY: '1.5.26-adaptive-cache-audit-protected-recovery', SESSION_SCHEMA_VERSION: 4, SESSION_BACKUP_COUNT: 2, SESSION_BACKUP_MAX_CHARS: 750000 },
+    AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.27', BUILD_KEY: '1.5.27-selective-cache-integrity-retry-portable-backup', SESSION_SCHEMA_VERSION: 4, SESSION_BACKUP_COUNT: 2, SESSION_BACKUP_MAX_CHARS: 750000 },
     AIShortsProjectService: projectService,
     AIShortsAppState: { state, addDiagnostic(item) { diagnostics.push(item); }, saveSettings() {} },
     setTimeout, clearTimeout, setInterval() { return 1; }, clearInterval() {}, addEventListener() {}

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.26 - layered analysis cache, private diagnostics export, and parallel engine facade
+// AI Shorts Studio v1.5.27 - contract-aware layered analysis cache and selective invalidation facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -11,7 +11,9 @@
     const tuner = global.AIShortsProEngineTuner || {};
     const stability = global.AIShortsStabilityAuditor || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.26').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.27').replace(/^v/i, '');
+    const ANALYSIS_CONTRACT_VERSION = String(config.ANALYSIS_CACHE_CONTRACT_VERSION || '2');
+    const ANALYSIS_CACHE_NAMESPACE = `analysis-contract-v${ANALYSIS_CONTRACT_VERSION}`;
 
     const registry = registryFactory.createRegistry ? registryFactory.createRegistry('ai-shorts-studio-pro-engine') : null;
     const analysisCache = cacheFactory.createAnalysisCache ? cacheFactory.createAnalysisCache(
@@ -21,7 +23,9 @@
     const persistentAnalysisCache = cacheFactory.createPersistentAnalysisCache ? cacheFactory.createPersistentAnalysisCache({
         enabled: config.ANALYSIS_PERSISTENT_CACHE_ENABLED !== false,
         databaseName: String(config.ANALYSIS_PERSISTENT_CACHE_DB_NAME || 'ai-shorts-analysis-cache-v1'),
-        namespace: `engine-v${ENGINE_VERSION}`,
+        namespace: ANALYSIS_CACHE_NAMESPACE,
+        appVersion: ENGINE_VERSION,
+        contractVersion: ANALYSIS_CONTRACT_VERSION,
         maxItems: Math.max(1, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_ITEMS) || 8),
         maxBytes: Math.max(1024 * 1024, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_BYTES) || 16 * 1024 * 1024),
         maxAgeMs: Math.max(60_000, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_AGE_MS) || 7 * 24 * 60 * 60 * 1000),
@@ -88,10 +92,11 @@
         const profiler = perf.createProfiler ? perf.createProfiler('analysis') : null;
         const budget = input && input.budget || createBudget(input && input.fileMeta, input && input.config);
         if (profiler) profiler.mark('budget', budget);
+        const cacheBudget = Object.assign({}, budget, { cacheNamespace: ANALYSIS_CACHE_NAMESPACE });
         const cacheKey = analysisCache && analysisCache.makeFileKeyAsync
-            ? await analysisCache.makeFileKeyAsync(input && input.file, input && input.fileMeta, budget)
+            ? await analysisCache.makeFileKeyAsync(input && input.file, input && input.fileMeta, cacheBudget)
             : analysisCache && analysisCache.makeFileKey
-                ? analysisCache.makeFileKey(input && input.file, input && input.fileMeta, budget)
+                ? analysisCache.makeFileKey(input && input.file, input && input.fileMeta, cacheBudget)
                 : '';
         if (profiler) profiler.mark('fingerprint-complete', cacheStats() && cacheStats().fingerprint || null);
         const memoryCached = analysisCache && analysisCache.get ? analysisCache.get(cacheKey) : null;
@@ -109,7 +114,15 @@
         if (contracts.normalizeAnalysisResult) result = contracts.normalizeAnalysisResult(result);
         if (profiler) profiler.mark('analysis-complete');
         if (analysisCache && analysisCache.set) analysisCache.set(cacheKey, result);
-        if (persistentAnalysisCache && persistentAnalysisCache.set) persistentAnalysisCache.set(cacheKey, result).catch(() => {});
+        if (persistentAnalysisCache && persistentAnalysisCache.set) persistentAnalysisCache.set(cacheKey, result, {
+            appVersion: ENGINE_VERSION,
+            contractVersion: ANALYSIS_CONTRACT_VERSION,
+            tier: budget && budget.tier || 'balanced',
+            analysisSampleRate: budget && budget.analysisSampleRate || 0,
+            motionSamples: budget && budget.motionSamples || 0,
+            optionSignature: input && input.config && input.config.analysisOptionSignature || '',
+            cacheNamespace: ANALYSIS_CACHE_NAMESPACE
+        }).catch(() => {});
         return annotateEngine(result, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: false, cacheLayer: 'none' });
     }
 
@@ -155,6 +168,20 @@
     async function deletePersistentAnalysisCacheEntry(token) {
         if (!persistentAnalysisCache || !persistentAnalysisCache.deleteByToken) return Object.freeze({ removed: false, token: String(token || ''), stats: cacheStats() });
         const result = await persistentAnalysisCache.deleteByToken(token);
+        return Object.freeze(Object.assign({}, result, { cache: cacheStats() }));
+    }
+
+    async function deletePersistentAnalysisCacheEntries(tokens) {
+        if (!persistentAnalysisCache || !persistentAnalysisCache.deleteByTokens) return Object.freeze({ removed: 0, tokens: [], bytes: 0, cache: cacheStats() });
+        const result = await persistentAnalysisCache.deleteByTokens(tokens);
+        if (analysisCache && analysisCache.clear) analysisCache.clear();
+        return Object.freeze(Object.assign({}, result, { cache: cacheStats() }));
+    }
+
+    async function invalidateAnalysisCache(criteria) {
+        if (analysisCache && analysisCache.clear) analysisCache.clear();
+        if (!persistentAnalysisCache || !persistentAnalysisCache.invalidate) return Object.freeze({ removed: 0, bytes: 0, cache: cacheStats() });
+        const result = await persistentAnalysisCache.invalidate(criteria || {});
         return Object.freeze(Object.assign({}, result, { cache: cacheStats() }));
     }
 
@@ -215,6 +242,8 @@
             mode: 'adaptive-parallel-engine',
             registry: registry && registry.snapshot ? registry.snapshot() : null,
             modules: registry && registry.list ? registry.list().length : 0,
+            analysisContractVersion: ANALYSIS_CONTRACT_VERSION,
+            analysisCacheNamespace: ANALYSIS_CACHE_NAMESPACE,
             cache: cacheStats(),
             contract: lastContractReport,
             stability: lastStabilityReport
@@ -233,6 +262,8 @@
         pruneAnalysisCache,
         listPersistentAnalysisCacheEntries,
         deletePersistentAnalysisCacheEntry,
+        deletePersistentAnalysisCacheEntries,
+        invalidateAnalysisCache,
         refreshPersistentAnalysisCachePolicy
     });
 })(window);

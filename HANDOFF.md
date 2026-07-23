@@ -1,45 +1,42 @@
-# HANDOFF v1.5.26 Adaptive Cache & Protected Recovery Patch
+# HANDOFF v1.5.27 Selective Cache & Portable Recovery Patch
 
 ## 현재 상태
 
-v1.5.25 전체본을 기준으로 영구 분석 캐시 quota 적응, 항목별 삭제, 서비스워커 감사 이력·백오프·진단 내보내기, 중요 세션 백업·복원 미리보기를 추가했습니다.
+v1.5.26 전체본을 기준으로 분석 캐시 계약별 선택 무효화·다중 삭제, 서비스워커 실패 자산 즉시 복구·감사 초기화, 중요 세션 백업 파일 이동·이름·메모 기능을 추가했습니다.
 
-- 자동 QA: **208/208 통과**
+- 자동 QA: **211/211 통과**
 - Chromium desktop·small laptop·tablet·mobile: 오류·Promise 거절·콘솔 오류·가로 overflow **0건**
-- 분석 캐시: 정상 8개·16MiB, 경고 60%, 위험 2개·4MiB, quota 정리·재시도, 비식별 항목별 삭제
-- 세션 복구: 비회전 중요 백업, 자동 복구 우선순위, 프로젝트 요약 미리보기
-- 서비스워커: 감사 이력 40개, 자산별 5분~6시간 백오프, 온라인 복귀 자동 재개, 진단 JSON
+- 분석 캐시: 계약 namespace v2, 옵션 프로필 저장, 다중 선택 삭제, 조건별 무효화, 이전 namespace 정리
+- 세션 복구: 중요 백업 JSON 내보내기·가져오기, 60자 이름·240자 메모, 가져오기 전 스키마·체크섬 검증
+- 서비스워커: 실패 자산 즉시 재시도, 감사 이력·백오프 초기화, 요청별 결과 연결
 - CSS: conflict·same-value duplicate·shadowed declaration 0, `!important` 593개
-- runtime build key: `1.5.26-adaptive-cache-audit-protected-recovery`
+- runtime build key: `1.5.27-selective-cache-integrity-retry-portable-backup`
 
 ## 검수 순서
 
-1. `node qa/analysis_persistent_quota_selective_smoke.js`
-2. `node qa/session_protected_backup_preview_smoke.js`
-3. `node qa/service_worker_integrity_history_backoff_smoke.js`
-4. `node qa/service_worker_integrity_export_smoke.js`
-5. `node qa/run_service_worker_lifecycle.js`
-6. `python3 qa/run_browser_audit.py`
-7. `python3 qa/run_process_memory_audit.py`
-8. `npm test`
+1. `node qa/analysis_cache_selective_invalidation_smoke.js`
+2. `node qa/service_worker_integrity_retry_history_smoke.js`
+3. `node qa/session_protected_backup_portability_smoke.js`
+4. `node qa/run_service_worker_lifecycle.js`
+5. `python3 qa/run_browser_audit.py`
+6. `python3 qa/run_process_memory_audit.py`
+7. `npm test`
 
 ## 알려진 제한
 
-- 저장소 사용량은 브라우저 추정치이며 미지원 환경에서는 기본 영구 캐시 한도를 유지합니다.
-- 선택 삭제 목록의 바이트 수는 직렬화 예상치로 IndexedDB 실제 디스크 점유량과 다를 수 있습니다.
-- 백오프·감사 이력은 앱 셸 캐시와 함께 저장되므로 브라우저 캐시 삭제 시 초기화됩니다.
-- 중요 백업은 자동 회전에서 제외되지만 사용자의 명시적 삭제 동작에서는 제거될 수 있습니다.
+- 선택 무효화는 영구 분석 캐시 레코드에 저장된 계약·옵션 프로필을 기준으로 하며, 이전 형식 레코드는 이전 계약 항목으로 안전하게 분류됩니다.
+- 실패 자산 즉시 재시도에는 네트워크 연결이 필요하며, 복구 실패 시 이전 정상 캐시 보존 정책이 유지됩니다.
+- 감사 이력 초기화는 진단 이력과 백오프 상태를 지우지만 캐시 콘텐츠 자체는 삭제하지 않습니다.
+- 중요 백업 파일은 프로젝트 데이터를 포함하므로 사용자가 직접 보관·전송해야 하며 가져오기 시 로컬 검증 후 저장됩니다.
 - 미디어 디코더·렌더러·Object URL 소유 경로는 변경하지 않아 검증된 v1.5.24 장시간 영상 근거를 상속했습니다.
 - 모바일 Safari·Samsung Internet과 물리 GPU는 실기기 검증이 필요합니다.
 
 ## 다음 작업
 
-1. 분석 옵션·엔진 계약 단위 캐시 무효화와 이전 namespace 정리
-2. 다중 캐시 항목 선택 삭제와 quota 추세 진단
-3. 서비스워커 실패 자산 즉시 재시도·감사 이력 관리 UI
-4. 중요 백업 내보내기·가져오기와 보존 정책 설정
-5. 모바일 Safari·Samsung Internet 및 물리 GPU 장시간 검증
-
+1. 영구 분석 캐시 namespace 마이그레이션·정리 내역 UI
+2. 서비스워커 실패 자산별 상세 상태·수동 롤백
+3. 중요 백업 보존 개수·복구 이력 관리
+4. 모바일 Safari·Samsung Internet 및 물리 GPU 장시간 검증
 ---
 
 # HANDOFF HISTORY — v1.5.22 Storage & Session Recovery Patch

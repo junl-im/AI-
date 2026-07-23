@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.26 - observable lifecycle with scheduled partial integrity audits
+// AI Shorts Studio v1.5.27 - observable lifecycle with targeted retry and audit history controls
 'use strict';
 
 (function exposeServiceWorkerRegistration(global) {
@@ -16,8 +16,10 @@
     let integrityAuditTimer = 0;
     let repairSequence = 0;
     let integrityAuditSequence = 0;
+    let integrityCommandSequence = 0;
     const repairWaiters = new Map();
     const integrityAuditWaiters = new Map();
+    const integrityCommandWaiters = new Map();
     let listenersBound = false;
     let visibilityBound = false;
     let controllerChangeCount = 0;
@@ -195,6 +197,11 @@
                 integrityAuditWaiters.delete(requestId);
                 auditWaiter.resolve(report);
             }
+            const commandWaiter = requestId && integrityCommandWaiters.get(requestId);
+            if (commandWaiter) {
+                integrityCommandWaiters.delete(requestId);
+                commandWaiter.resolve({ report, commandResult: data.commandResult || null });
+            }
         });
     }
     function bindVisibilityListeners() {
@@ -334,6 +341,56 @@
         }).finally(() => { integrityAuditPromise = null; });
         return integrityAuditPromise;
     }
+    function requestIntegrityCommand(type, payload, options) {
+        const target = requestTarget();
+        if (!target || typeof target.postMessage !== 'function') return Promise.resolve({ status: 'unsupported', report: lastInstallReport, commandResult: null });
+        const opts = options || {};
+        const requestId = `integrity-command-${Date.now()}-${++integrityCommandSequence}`;
+        return new Promise(resolve => {
+            const timeoutMs = Math.max(3000, Math.min(30000, Number(opts.timeoutMs) || 15000));
+            const timeoutId = global.setTimeout ? global.setTimeout(() => {
+                integrityCommandWaiters.delete(requestId);
+                addDiagnostic({ type: 'service-worker-integrity-command-timeout', requestId, command: type, timeoutMs });
+                resolve({ status: 'timeout', report: lastInstallReport, commandResult: null });
+            }, timeoutMs) : null;
+            integrityCommandWaiters.set(requestId, {
+                resolve(value) {
+                    if (timeoutId && global.clearTimeout) global.clearTimeout(timeoutId);
+                    resolve({ status: 'ready', report: value.report, commandResult: value.commandResult || null });
+                }
+            });
+            try { target.postMessage(Object.assign({ type, requestId, version: resolveVersion() }, payload || {})); }
+            catch (error) {
+                if (timeoutId && global.clearTimeout) global.clearTimeout(timeoutId);
+                integrityCommandWaiters.delete(requestId);
+                resolve({ status: 'error', report: lastInstallReport, commandResult: null, error });
+            }
+        });
+    }
+
+    async function retryFailedIntegrityAssets(options) {
+        const opts = options || {};
+        const report = lastInstallReport || {};
+        const periodic = report.periodicIntegrity || {};
+        const files = Array.from(new Set((Array.isArray(opts.files) ? opts.files : [])
+            .concat(periodic.repairFailed || [], periodic.missing || [], periodic.invalid || [], periodic.corrupted || [], Object.keys(report.integrityBackoff || {}))
+            .map(value => String(value || '')).filter(Boolean))).slice(0, 64);
+        const outcome = await requestIntegrityCommand('ai-shorts-service-worker-integrity-retry-request', { files }, opts);
+        const result = outcome.commandResult || {};
+        addDiagnostic({ type: 'service-worker-integrity-retry-complete', requested: Number(result.requested) || 0, repaired: Number(result.repaired) || 0, failed: Number(result.failed) || 0 });
+        emitStatus();
+        return Object.freeze({ status: outcome.status, requested: Number(result.requested) || 0, repaired: Number(result.repaired) || 0, failed: Number(result.failed) || 0, files: Array.isArray(result.files) ? result.files.slice(0, 64) : [], report: outcome.report });
+    }
+
+    async function clearIntegrityAuditHistory(options) {
+        const opts = options || {};
+        const outcome = await requestIntegrityCommand('ai-shorts-service-worker-integrity-clear-request', { clearBackoff: Boolean(opts.clearBackoff), clearLatest: Boolean(opts.clearLatest) }, opts);
+        const result = outcome.commandResult || {};
+        addDiagnostic({ type: 'service-worker-integrity-history-cleared', clearedHistory: Number(result.clearedHistory) || 0, clearedBackoff: Number(result.clearedBackoff) || 0 });
+        emitStatus();
+        return Object.freeze({ status: outcome.status, clearedHistory: Number(result.clearedHistory) || 0, clearedBackoff: Number(result.clearedBackoff) || 0, report: outcome.report });
+    }
+
     function scheduleIntegrityAudit(delayMs) {
         if (!global.document || typeof global.setTimeout !== 'function' || !canRegister()) return false;
         if (integrityAuditTimer && global.clearTimeout) global.clearTimeout(integrityAuditTimer);
@@ -474,5 +531,5 @@
         return Object.assign({}, result, { updateChecked: checked, lifecycle: getStatus() });
     }
 
-    global.AIShortsServiceWorkerRegistration = Object.freeze({ register, checkForUpdate, waitUntilControlled, getStatus, canRegister, resolveVersion, requestInstallReport, repairCache, requestIntegrityAudit, scheduleIntegrityAudit, exportIntegrityDiagnostics });
+    global.AIShortsServiceWorkerRegistration = Object.freeze({ register, checkForUpdate, waitUntilControlled, getStatus, canRegister, resolveVersion, requestInstallReport, repairCache, requestIntegrityAudit, retryFailedIntegrityAssets, clearIntegrityAuditHistory, scheduleIntegrityAudit, exportIntegrityDiagnostics });
 })(window);

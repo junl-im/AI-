@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.26 - privacy-safe cache diagnostics and bounded IndexedDB persistence
+// AI Shorts Studio v1.5.27 - contract-aware persistent cache invalidation and bounded diagnostics
 'use strict';
 
 (function exposeAnalysisCache(global) {
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.26').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.27').replace(/^v/i, '');
     const BASE_SAMPLE_BYTES = Math.max(4096, Math.min(128 * 1024, Number(config.ANALYSIS_CACHE_FINGERPRINT_SAMPLE_BYTES) || 16 * 1024));
     const MAX_SAMPLE_BYTES = Math.max(BASE_SAMPLE_BYTES, Math.min(256 * 1024, Number(config.ANALYSIS_CACHE_MAX_SAMPLE_BYTES) || 128 * 1024));
     const FULL_HASH_MAX_BYTES = Math.max(BASE_SAMPLE_BYTES, Number(config.ANALYSIS_CACHE_FULL_HASH_MAX_BYTES) || 2 * 1024 * 1024);
@@ -405,6 +405,20 @@
         } catch (_) { return 0; }
     }
 
+    function cacheProfileFromKey(key, metadata) {
+        const source = metadata && typeof metadata === 'object' ? metadata : {};
+        const parts = String(key || '').split('::');
+        return Object.freeze({
+            appVersion: String(source.appVersion || ENGINE_VERSION),
+            contractVersion: String(source.contractVersion || source.analysisContract || '1'),
+            tier: String(source.tier || source.budgetTier || parts[7] || 'balanced'),
+            analysisSampleRate: Math.max(0, Number(source.analysisSampleRate != null ? source.analysisSampleRate : parts[8]) || 0),
+            motionSamples: Math.max(0, Number(source.motionSamples != null ? source.motionSamples : parts[9]) || 0),
+            optionSignature: String(source.optionSignature || source.optionsToken || ''),
+            cacheNamespace: String(source.cacheNamespace || parts[10] || '')
+        });
+    }
+
     function createPersistentAnalysisCache(options) {
         const opts = options || {};
         const indexedDB = global.indexedDB;
@@ -419,7 +433,9 @@
         const warningRatio = Math.max(0.5, Math.min(0.95, Number(opts.warningRatio) || 0.8));
         const criticalRatio = Math.max(warningRatio, Math.min(0.99, Number(opts.criticalRatio) || 0.92));
         const maxAgeMs = Math.max(60_000, Number(opts.maxAgeMs) || 7 * 24 * 60 * 60 * 1000);
-        const namespace = String(opts.namespace || `engine-v${ENGINE_VERSION}`);
+        const namespace = String(opts.namespace || `analysis-contract-v1`);
+        const appVersion = String(opts.appVersion || ENGINE_VERSION);
+        const contractVersion = String(opts.contractVersion || '1');
         let effectiveMaxItems = baseMaxItems;
         let effectiveMaxBytes = baseMaxBytes;
         let databasePromise = null;
@@ -431,6 +447,9 @@
         let expired = 0;
         let clears = 0;
         let selectiveDeletes = 0;
+        let bulkDeletes = 0;
+        let invalidations = 0;
+        let oldNamespaceDeletes = 0;
         let size = 0;
         let totalBytes = 0;
         let lastError = '';
@@ -453,6 +472,8 @@
                 state,
                 databaseName,
                 namespace,
+                appVersion,
+                contractVersion,
                 size,
                 totalBytes,
                 maxItems: baseMaxItems,
@@ -471,6 +492,9 @@
                 expired,
                 clears,
                 selectiveDeletes,
+                bulkDeletes,
+                invalidations,
+                oldNamespaceDeletes,
                 quotaLevel,
                 quotaRatio,
                 quotaUsage,
@@ -624,7 +648,13 @@
                     bytes: Math.max(0, Number(row.bytes) || 0),
                     createdAt: new Date(Number(row.createdAt) || 0).toISOString(),
                     lastAccessAt: new Date(Number(row.lastAccessAt || row.createdAt) || 0).toISOString(),
-                    ageMs: Math.max(0, Date.now() - Number(row.createdAt || 0))
+                    ageMs: Math.max(0, Date.now() - Number(row.createdAt || 0)),
+                    appVersion: String(row.profile && row.profile.appVersion || ''),
+                    contractVersion: String(row.profile && row.profile.contractVersion || ''),
+                    tier: String(row.profile && row.profile.tier || 'balanced'),
+                    analysisSampleRate: Math.max(0, Number(row.profile && row.profile.analysisSampleRate) || 0),
+                    motionSamples: Math.max(0, Number(row.profile && row.profile.motionSamples) || 0),
+                    optionSignature: String(row.profile && row.profile.optionSignature || '')
                 }));
             } catch (error) {
                 lastError = error && error.message || 'Persistent cache listing failed';
@@ -654,6 +684,62 @@
             }
         }
 
+        async function deleteByTokens(tokens) {
+            const normalized = Array.from(new Set((Array.isArray(tokens) ? tokens : [tokens]).map(value => String(value || '').trim()).filter(Boolean))).slice(0, baseMaxItems);
+            if (!normalized.length) return Object.freeze({ removed: 0, tokens: [], bytes: 0, stats: persistentStats() });
+            const database = await openDatabase();
+            if (!database) return Object.freeze({ removed: 0, tokens: normalized, bytes: 0, stats: persistentStats() });
+            try {
+                const tokenSet = new Set(normalized);
+                const rows = (await readAll(database)).filter(row => row && row.namespace === namespace && tokenSet.has(textToken(row.key)));
+                await removeKeys(database, rows.map(row => row.key));
+                selectiveDeletes += rows.length;
+                bulkDeletes += rows.length ? 1 : 0;
+                await refreshStats(database);
+                const bytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
+                rows.forEach(row => recordEvent('persistent-cache-entry-deleted', { layer: 'persistent', key: row.key, bytes: row.bytes, size }));
+                return Object.freeze({ removed: rows.length, tokens: rows.map(row => textToken(row.key)), bytes, stats: persistentStats() });
+            } catch (error) {
+                lastError = error && error.message || 'Persistent cache bulk delete failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
+                return Object.freeze({ removed: 0, tokens: normalized, bytes: 0, stats: persistentStats(), error: lastError });
+            }
+        }
+
+        function matchesInvalidation(row, criteria) {
+            const profile = row && row.profile || {};
+            const rule = criteria || {};
+            if (Array.isArray(rule.tokens) && rule.tokens.length && rule.tokens.includes(textToken(row.key))) return true;
+            if (rule.tier && String(profile.tier || '') === String(rule.tier)) return true;
+            if (rule.optionSignature && String(profile.optionSignature || '') === String(rule.optionSignature)) return true;
+            if (rule.contractVersion && String(profile.contractVersion || '') !== String(rule.contractVersion)) return true;
+            if (rule.appVersion && String(profile.appVersion || '') !== String(rule.appVersion)) return true;
+            if (Number.isFinite(Number(rule.analysisSampleRate)) && Number(profile.analysisSampleRate || 0) === Number(rule.analysisSampleRate)) return true;
+            if (Number.isFinite(Number(rule.motionSamples)) && Number(profile.motionSamples || 0) === Number(rule.motionSamples)) return true;
+            if (Number.isFinite(Number(rule.olderThanMs)) && Date.now() - Number(row.createdAt || 0) > Math.max(0, Number(rule.olderThanMs))) return true;
+            return false;
+        }
+
+        async function invalidate(criteria) {
+            const rule = criteria && typeof criteria === 'object' ? criteria : {};
+            const database = await openDatabase();
+            if (!database) return Object.freeze({ removed: 0, bytes: 0, criteria: Object.freeze({}), stats: persistentStats() });
+            try {
+                const rows = (await readAll(database)).filter(row => row && row.namespace === namespace && matchesInvalidation(row, rule));
+                await removeKeys(database, rows.map(row => row.key));
+                invalidations += rows.length ? 1 : 0;
+                selectiveDeletes += rows.length;
+                await refreshStats(database);
+                const bytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
+                recordEvent('persistent-cache-invalidated', { layer: 'persistent', reason: String(rule.reason || 'criteria'), count: rows.length, bytes, size });
+                return Object.freeze({ removed: rows.length, bytes, criteria: Object.freeze({ reason: String(rule.reason || 'criteria'), tier: String(rule.tier || ''), contractVersion: String(rule.contractVersion || ''), appVersion: String(rule.appVersion || '') }), stats: persistentStats() });
+            } catch (error) {
+                lastError = error && error.message || 'Persistent cache invalidation failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
+                return Object.freeze({ removed: 0, bytes: 0, criteria: Object.freeze({}), stats: persistentStats(), error: lastError });
+            }
+        }
+
         async function prunePersistent(options) {
             const settings = options || {};
             await refreshQuotaPolicy(Boolean(settings.forceQuota));
@@ -668,8 +754,10 @@
                 const itemLimit = Math.max(1, Math.min(effectiveMaxItems, Number(settings.maxItems) || effectiveMaxItems));
                 const byteLimit = Math.max(minBytes, Math.min(effectiveMaxBytes, Number(settings.maxBytes) || effectiveMaxBytes));
                 rows.forEach(row => {
-                    if (!row || row.namespace !== namespace || now - Number(row.createdAt || 0) > maxAgeMs) {
-                        if (row && row.key) deleteKeys.push(row.key);
+                    if (!row || row.namespace !== namespace) {
+                        if (row && row.key) { deleteKeys.push(row.key); oldNamespaceDeletes += 1; }
+                    } else if (now - Number(row.createdAt || 0) > maxAgeMs) {
+                        if (row.key) deleteKeys.push(row.key);
                         expired += 1;
                     } else active.push(row);
                 });
@@ -741,7 +829,7 @@
             await transactionDone(transaction);
         }
 
-        async function setPersistent(key, value) {
+        async function setPersistent(key, value, metadata) {
             if (!key || !value || !enabled) return false;
             await refreshQuotaPolicy(false);
             const database = await openDatabase();
@@ -753,7 +841,8 @@
                 return false;
             }
             const now = Date.now();
-            const row = { key, namespace, createdAt: now, lastAccessAt: now, bytes, value: cloneValue(value) };
+            const profile = cacheProfileFromKey(key, Object.assign({ appVersion, contractVersion }, metadata || {}));
+            const row = { key, namespace, createdAt: now, lastAccessAt: now, bytes, profile, value: cloneValue(value) };
             try {
                 state = 'writing';
                 await writeRow(database, row);
@@ -813,7 +902,7 @@
         }
 
         if (enabled) prunePersistent({ forceQuota: true }).catch(() => {});
-        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats, list: listEntries, deleteByToken, refreshQuotaPolicy });
+        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats, list: listEntries, deleteByToken, deleteByTokens, invalidate, refreshQuotaPolicy });
     }
 
     global.AIShortsAnalysisCache = Object.freeze({
@@ -825,6 +914,7 @@
         fingerprintPlan,
         fingerprintStats,
         getDiagnosticEvents,
-        cloneValue
+        cloneValue,
+        cacheProfileFromKey
     });
 })(window);

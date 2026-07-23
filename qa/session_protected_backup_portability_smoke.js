@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+const root = path.resolve(__dirname, '..');
+const source = fs.readFileSync(path.join(root, 'src/ui/session-continuity.js'), 'utf8');
+const values = new Map(); const downloads = []; const prompts = ['촬영본 최종안', '고객 승인 전 보존'];
+const primary = 'ai-shorts-session-continuity-v112';
+values.set(primary, JSON.stringify({ app: 'AI Shorts Studio', schemaVersion: 4, savedAt: '2026-07-23T01:00:00.000Z', fileName: 'portable.mp4', recommendations: [{ id: 'r1' }], selectedRecommendationId: 'r1', captions: [{ text: 'caption' }], selectedRange: { start: 1, end: 16 }, settings: {}, copy: {} }));
+const localStorage = { get length() { return values.size; }, key(i) { return [...values.keys()][i] || null; }, getItem(key) { return values.has(key) ? values.get(key) : null; }, setItem(key, value) { values.set(key, String(value)); }, removeItem(key) { values.delete(key); } };
+const state = { recommendations: [], selectedRecommendationId: '', settings: {}, captions: [] };
+const document = { readyState: 'loading', hidden: false, body: { dataset: {} }, getElementById() { return null; }, querySelector() { return null; }, addEventListener() {}, dispatchEvent() {}, createElement() { return { click() {}, remove() {}, set href(v) {}, set download(v) {}, set rel(v) {} }; } };
+const window = { window: null, document, localStorage, navigator: {}, CustomEvent: function CustomEvent() {}, prompt() { return prompts.shift(); }, AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.27', SESSION_SCHEMA_VERSION: 4, SESSION_BACKUP_MIN_COUNT: 1, SESSION_BACKUP_COUNT: 2, SESSION_BACKUP_MAX_COUNT: 3 }, AIShortsProjectService: { CURRENT_SCHEMA_VERSION: 4, parseProjectText: JSON.parse, applyProjectSnapshot(current, snapshot) { Object.assign(current, { recommendations: snapshot.recommendations, selectedRecommendationId: snapshot.selectedRecommendationId, captions: snapshot.captions || [], settings: snapshot.settings || {} }); } }, AIShortsDownloadService: { saveBlob(blob, filename) { downloads.push({ blob, filename }); } }, AIShortsAppState: { state, addDiagnostic() {}, saveSettings() {} }, setTimeout, clearTimeout, setInterval() { return 1; }, clearInterval() {}, addEventListener() {} };
+window.window = window;
+vm.runInContext(source, vm.createContext({ window, document, localStorage, navigator: window.navigator, CustomEvent: window.CustomEvent, Object, String, Number, Math, Date, Set, Map, Promise, JSON, Blob, setTimeout, clearTimeout, console }), { filename: 'session-continuity.js' });
+(async () => {
+    const api = window.AIShortsSessionContinuity;
+    const protectedResult = api.protectSelectedSnapshot();
+    if (!protectedResult.protected) throw new Error('primary session must be protectable before portable export');
+    const meta = api.editProtectedBackupNote();
+    if (!meta || meta.name !== '촬영본 최종안' || meta.note !== '고객 승인 전 보존') throw new Error('protected backup name and note must be bounded and persisted');
+    const exported = api.exportProtectedBackup();
+    if (!exported || downloads.length !== 1 || !/important-backup/.test(downloads[0].filename)) throw new Error('protected backup must export through the shared download owner');
+    const payloadText = await downloads[0].blob.text();
+    const payload = JSON.parse(payloadText);
+    if (payload.exportType !== 'protected-session-backup' || payload.meta.name !== meta.name || typeof payload.storedSnapshot !== 'string') throw new Error('portable protected backup envelope must include validated stored data and user metadata');
+    values.delete(api.PROTECTED_BACKUP_KEY); values.delete(api.PROTECTED_BACKUP_META_KEY);
+    const imported = await api.importProtectedBackupFile({ name: 'important.json', size: payloadText.length, async text() { return payloadText; } });
+    if (!imported.imported || !values.has(api.PROTECTED_BACKUP_KEY)) throw new Error('portable protected backup must import into the non-rotating protected slot');
+    const status = api.getStatus();
+    if (status.protectedBackupCount !== 1 || status.protectedBackupMeta.name !== '촬영본 최종안') throw new Error('imported protected backup metadata must remain visible in recovery status');
+    console.log('PASS portable protected session backup export, import, and note metadata');
+})().catch(error => { console.error(error.stack || error); process.exit(1); });

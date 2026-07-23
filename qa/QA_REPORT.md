@@ -1,4 +1,4 @@
-# QA REPORT — AI 쇼츠 스튜디오 v1.5.26
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.27
 
 ## 최종 결과
 

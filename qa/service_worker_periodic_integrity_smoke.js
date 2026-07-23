@@ -31,7 +31,7 @@ function harness() {
 (async () => {
     const h = harness();
     await h.dispatch('install');
-    const cacheName = [...h.stores.keys()].find(name => name.includes('v1.5.26'));
+    const cacheName = [...h.stores.keys()].find(name => name.includes('v1.5.27'));
     const store = h.stores.get(cacheName);
     const target = [...store.keys()].find(key => key.includes('assets/css/theme.css'));
     if (!target) throw new Error('expected first rotating sample target is missing');

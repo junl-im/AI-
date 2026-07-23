@@ -33,10 +33,10 @@ function createHarness() {
     const h = createHarness();
     h.stores.set('ai-shorts-studio-shell-v1.5.23-old-known-good', new Map([['./index.html', new Response('old')]]));
     await h.dispatch('install');
-    const currentName = [...h.stores.keys()].find(name => name.includes('v1.5.26'));
+    const currentName = [...h.stores.keys()].find(name => name.includes('v1.5.27'));
     const store = h.stores.get(currentName);
     if (!store) throw new Error('current integrity cache missing');
-    const target = './assets/css/theme.css?v=1.5.26-adaptive-cache-audit-protected-recovery';
+    const target = './assets/css/theme.css?v=1.5.27-selective-cache-integrity-retry-portable-backup';
     store.set(target, new Response('tampered-content', { status: 200 }));
     const statusMessages = await h.dispatch('message', { data: { type: 'ai-shorts-service-worker-status-request', requestId: 'status' } });
     const status = statusMessages.find(item => item.requestId === 'status').report;

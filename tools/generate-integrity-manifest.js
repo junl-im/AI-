@@ -23,7 +23,7 @@ const runtime = require(path.join(root, 'package.json'));
 const manifest = {
     app: 'AI Shorts Studio',
     version: runtime.version,
-    buildKey: '1.5.26-adaptive-cache-audit-protected-recovery',
+    buildKey: '1.5.27-selective-cache-integrity-retry-portable-backup',
     algorithm: 'sha256',
     generatedAt: new Date().toISOString(),
     assetCount: Object.keys(assets).length,

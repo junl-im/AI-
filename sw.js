@@ -1,59 +1,59 @@
-// AI Shorts Studio v1.5.26 service worker - version-aware cache guard with rotating partial integrity audits and rollback-safe activation
+// AI Shorts Studio v1.5.27 service worker - version-aware cache guard, targeted integrity retry, audit history control, and rollback-safe activation
 'use strict';
 
 const CACHE_PREFIX = 'ai-shorts-studio-shell-';
-const CACHE_NAME = 'ai-shorts-studio-shell-v1.5.26-adaptive-cache-audit-protected-recovery';
+const CACHE_NAME = 'ai-shorts-studio-shell-v1.5.27-selective-cache-integrity-retry-portable-backup';
 const SHELL_FILES = [
     './',
     './index.html',
     './manifest.webmanifest',
     './asset-integrity.json',
-    './assets/css/theme.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/studio.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/editor.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/ux.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/advanced-editor.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/layout-dock.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/caption-pro.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/quality-tools.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/auto-cut.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/cut-markers.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/feedback-ux.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/engine-panel.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/pro-engine.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/hyperflow-tabs.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/render-queue.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/hyperconnect-flow.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/flow-polish.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/flow-hotfix.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/flow-integrity.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/flow-doctor.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/responsive-workspace.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/flow-quality-gate.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/pc-dock-reveal-hotfix.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/glass-pro-ui.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/workspace-comfort.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/motion-stability.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/handoff-coach.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/save-readiness.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/render-quality-planner.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/candidate-preview-pro.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/candidate-pin-board.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/session-continuity.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/storage-health-panel.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/export-finish-center.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/shutter-glass-flow.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/update-sentinel.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/foundation-polish.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/desktop-prime-layout.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/hero-command-deck.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/ui-refinement.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/icon-system.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/header-meta-rail.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/active-stage-beacon.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/workspace-layout-controls.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/mobile-menu-guide.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './assets/css/studio-experience.css?v=1.5.26-adaptive-cache-audit-protected-recovery',
+    './assets/css/theme.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/studio.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/editor.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/ux.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/advanced-editor.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/layout-dock.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/caption-pro.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/quality-tools.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/auto-cut.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/cut-markers.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/feedback-ux.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/engine-panel.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/pro-engine.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/hyperflow-tabs.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/render-queue.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/hyperconnect-flow.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/flow-polish.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/flow-hotfix.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/flow-integrity.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/flow-doctor.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/responsive-workspace.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/flow-quality-gate.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/pc-dock-reveal-hotfix.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/glass-pro-ui.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/workspace-comfort.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/motion-stability.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/handoff-coach.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/save-readiness.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/render-quality-planner.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/candidate-preview-pro.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/candidate-pin-board.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/session-continuity.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/storage-health-panel.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/export-finish-center.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/shutter-glass-flow.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/update-sentinel.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/foundation-polish.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/desktop-prime-layout.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/hero-command-deck.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/ui-refinement.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/icon-system.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/header-meta-rail.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/active-stage-beacon.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/workspace-layout-controls.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/mobile-menu-guide.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './assets/css/studio-experience.css?v=1.5.27-selective-cache-integrity-retry-portable-backup',
     './assets/icons/ai-shorts.svg',
     './assets/icons/studio/candidates.svg',
     './assets/icons/studio/caption.svg',
@@ -75,55 +75,55 @@ const SHELL_FILES = [
     './assets/icons/studio/thumbnail.svg',
     './assets/icons/studio/upload.svg',
     './assets/icons/studio/waveform.svg',
-    './src/config/app-runtime-config.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/boot/app-version-sync.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/boot/update-sentinel.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/boot/staged-ui-loader.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/utils/core-utils.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/storage/storage-manager.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/storage/session-backup-codec.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/state/app-state.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/operation-coordinator.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/analysis/audio-analysis-core.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/analysis/audio-feature-extractor.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/analysis/video-motion-analyzer.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/analysis/auto-cut-detector.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/recommendation/shorts-recommendation-engine.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/module-registry.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/module-contracts.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/analysis-cache.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/performance-budget.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/analysis-pipeline.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/scoring-pipeline.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/pro-engine-tuner.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/stability-auditor.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/engine-boost-profile.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/engine/engine-kernel.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/caption/caption-service.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/project/project-service.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/render/quality-effects.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/render/vertical-renderer.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/download/download-service.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/waveform-view.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/cut-marker-overlay.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/timeline-view.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/bottom-dock.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/mobile-menu-guide.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/feedback-ux.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/render/render-queue.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/hyperflow-tabs.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/motion-stability.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/flow-director-final.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/flow-command-bridge.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/workspace-layout-controls.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/ui/startup-performance.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/security/site-guards.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/boot/service-worker-registration.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/boot/runtime-health.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/app/render-workflow-controller.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/app/settings-controller.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/app/media-import-controller.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
-    './src/app.js?v=1.5.26-adaptive-cache-audit-protected-recovery',
+    './src/config/app-runtime-config.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/boot/app-version-sync.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/boot/update-sentinel.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/boot/staged-ui-loader.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/utils/core-utils.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/storage/storage-manager.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/storage/session-backup-codec.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/state/app-state.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/operation-coordinator.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/analysis/audio-analysis-core.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/analysis/audio-feature-extractor.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/analysis/video-motion-analyzer.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/analysis/auto-cut-detector.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/recommendation/shorts-recommendation-engine.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/module-registry.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/module-contracts.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/analysis-cache.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/performance-budget.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/analysis-pipeline.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/scoring-pipeline.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/pro-engine-tuner.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/stability-auditor.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/engine-boost-profile.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/engine/engine-kernel.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/caption/caption-service.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/project/project-service.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/render/quality-effects.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/render/vertical-renderer.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/download/download-service.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/waveform-view.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/cut-marker-overlay.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/timeline-view.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/bottom-dock.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/mobile-menu-guide.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/feedback-ux.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/render/render-queue.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/hyperflow-tabs.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/motion-stability.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/flow-director-final.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/flow-command-bridge.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/workspace-layout-controls.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/ui/startup-performance.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/security/site-guards.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/boot/service-worker-registration.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/boot/runtime-health.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/app/render-workflow-controller.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/app/settings-controller.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/app/media-import-controller.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
+    './src/app.js?v=1.5.27-selective-cache-integrity-retry-portable-backup',
     './src/workers/highlight-analysis.worker.js'
 ];
 
@@ -131,7 +131,7 @@ const REQUIRED_SHELL_FILES = Object.freeze([
     './index.html',
     './manifest.webmanifest',
     './asset-integrity.json',
-    './src/config/app-runtime-config.js?v=1.5.26-adaptive-cache-audit-protected-recovery'
+    './src/config/app-runtime-config.js?v=1.5.27-selective-cache-integrity-retry-portable-backup'
 ]);
 const INSTALL_REPORT_KEY = './__ai_shorts_sw_install_report__';
 const PRECACHE_BATCH_SIZE = 8;
@@ -141,7 +141,7 @@ const INTEGRITY_AUDIT_HISTORY_LIMIT = 40;
 const INTEGRITY_BACKOFF_BASE_MS = 5 * 60 * 1000;
 const INTEGRITY_BACKOFF_MAX_MS = 6 * 60 * 60 * 1000;
 const INTEGRITY_MANIFEST_URL = './asset-integrity.json';
-const INTEGRITY_MANIFEST_SHA256 = '49a3a4f357d6fe70d3aabb4be88ec4c9baf217e9a640058dfa2b768e1307772f';
+const INTEGRITY_MANIFEST_SHA256 = '0562a8fa272b19305ab48aafe9528c6f0dd312d90689ad339814ad492507c15f';
 let integrityManifestPromise = null;
 
 function errorMessage(error) {
@@ -177,6 +177,38 @@ async function verifyResponseContent(response, expectedHash) {
     return { supported: true, verified: actualHash === expectedHash, skipped: false, actualHash };
 }
 
+async function putStableCacheResponse(cache, key, response) {
+    if (!cache || typeof cache.put !== 'function') return;
+    if (!response || typeof response.arrayBuffer !== 'function') {
+        await cache.put(key, response);
+        return;
+    }
+    const body = await response.arrayBuffer();
+    const init = {
+        status: Number(response.status) || 200,
+        statusText: String(response.statusText || ''),
+        headers: response.headers
+    };
+    const createResponse = () => new Response(body.slice(0), init);
+    // Cache API implementations own their response body. Lightweight QA/cache adapters
+    // can otherwise retain an entangled Response clone whose body is later consumed.
+    if (typeof cache.add !== 'function') {
+        const createAdapter = () => ({
+            ok: init.status >= 200 && init.status < 300,
+            status: init.status,
+            statusText: init.statusText,
+            headers: init.headers,
+            clone: createAdapter,
+            arrayBuffer: async () => body.slice(0),
+            json: async () => createResponse().json(),
+            text: async () => createResponse().text()
+        });
+        await cache.put(key, createAdapter());
+        return;
+    }
+    await cache.put(key, createResponse());
+}
+
 async function loadIntegrityManifest(cache, options) {
     const force = Boolean(options && options.force);
     if (!force && integrityManifestPromise) return integrityManifestPromise;
@@ -196,7 +228,7 @@ async function loadIntegrityManifest(cache, options) {
         if (!verification.supported || !verification.verified) throw new Error('Integrity manifest checksum mismatch');
         const manifest = await response.clone().json();
         if (!manifest || manifest.algorithm !== 'sha256' || !manifest.assets || typeof manifest.assets !== 'object') throw new Error('Invalid integrity manifest');
-        if (cache && typeof cache.put === 'function' && source === 'network') await cache.put(INTEGRITY_MANIFEST_URL, response.clone());
+        if (cache && typeof cache.put === 'function' && source === 'network') await putStableCacheResponse(cache, INTEGRITY_MANIFEST_URL, response.clone());
         return { supported: true, verified: true, source, assets: manifest.assets, manifestHash: verification.actualHash, generatedAt: manifest.generatedAt || '' };
     })().catch(error => ({ supported: true, verified: false, source: 'error', assets: {}, manifestHash: '', error: errorMessage(error) }));
     return integrityManifestPromise;
@@ -215,14 +247,14 @@ async function cacheShellFile(cache, file, options) {
                 if (!response || !response.ok) throw new Error(`HTTP ${response && response.status || 0}`);
                 const verification = await verifyResponseContent(response.clone(), expectedHash);
                 if (!verification.verified) throw new Error(`Content checksum mismatch: ${file}`);
-                await cache.put(file, response.clone());
+                await putStableCacheResponse(cache, file, response)
                 return { file, ok: true, message: '', attempts: attempt, contentVerified: true, expectedHash, actualHash: verification.actualHash };
             }
             if (typeof cache.add === 'function') await cache.add(file);
             else {
                 const response = await fetch(file, { cache: 'reload' });
                 if (!response || !response.ok) throw new Error(`HTTP ${response && response.status || 0}`);
-                await cache.put(file, response.clone());
+                await putStableCacheResponse(cache, file, response)
             }
             return { file, ok: true, message: '', attempts: attempt, contentVerified: false, integrityUnsupported: !manifest.supported || !manifest.verified };
         } catch (error) {
@@ -234,7 +266,7 @@ async function cacheShellFile(cache, file, options) {
 
 async function writeInstallReport(cache, report) {
     try {
-        await cache.put(INSTALL_REPORT_KEY, new Response(JSON.stringify(report), {
+        await putStableCacheResponse(cache, INSTALL_REPORT_KEY, new Response(JSON.stringify(report), {
             status: 200,
             headers: { 'Content-Type': 'application/json; charset=utf-8' }
         }));
@@ -252,7 +284,12 @@ async function precacheShell() {
     const results = [];
     for (let offset = 0; offset < SHELL_FILES.length; offset += PRECACHE_BATCH_SIZE) {
         const batch = SHELL_FILES.slice(offset, offset + PRECACHE_BATCH_SIZE);
-        results.push(...await Promise.all(batch.map(file => file === INTEGRITY_MANIFEST_URL ? Promise.resolve({ file, ok: true, attempts: 1, contentVerified: Boolean(manifest.verified) }) : cacheShellFile(cache, file, { manifest }))));
+        for (const file of batch) {
+            const result = file === INTEGRITY_MANIFEST_URL
+                ? { file, ok: true, attempts: 1, contentVerified: Boolean(manifest.verified) }
+                : await cacheShellFile(cache, file, { manifest });
+            results.push(result);
+        }
     }
     const failed = results.filter(item => !item.ok);
     const failedFiles = new Set(failed.map(item => item.file));
@@ -289,7 +326,9 @@ async function inspectShellCache(cache, files, options) {
     let hashUnsupported = 0;
     for (const file of targets) {
         let response = null;
-        try { response = await cache.match(file); } catch (_) { /* classified as missing below */ }
+        for (let attempt = 0; attempt < 3 && !response; attempt += 1) {
+            try { response = await cache.match(file); } catch (_) { if (attempt < 2) await Promise.resolve(); }
+        }
         if (!response) { missing.push(file); continue; }
         if (response.ok === false) { invalid.push(file); continue; }
         if (file === INTEGRITY_MANIFEST_URL) { if (manifest.verified) hashVerified += 1; else hashUnsupported += 1; continue; }
@@ -435,6 +474,55 @@ async function runPeriodicIntegrityAudit(cache, requestedSampleSize, options) {
     return updated;
 }
 
+async function retryFailedIntegrityAssets(cache, requestedFiles) {
+    const previous = await readInstallReport(cache, null, { skipInspection: true });
+    const periodic = previous.periodicIntegrity || {};
+    const candidates = Array.from(new Set((Array.isArray(requestedFiles) ? requestedFiles : [])
+        .concat(periodic.repairFailed || [], periodic.missing || [], periodic.invalid || [], periodic.corrupted || [], Object.keys(previous.integrityBackoff || {}))
+        .filter(file => SHELL_FILES.includes(file))));
+    if (!candidates.length) return { report: previous, result: { requested: 0, repaired: 0, failed: 0, files: [] } };
+    const repair = await repairShellCache(cache, { files: candidates, reason: 'manual-failed-asset-retry', forceManifest: true });
+    const report = await readInstallReport(cache, repair);
+    const remaining = Array.from(new Set((repair.integrity && [] || []).concat(
+        repair.integrity && repair.integrity.missing || [],
+        repair.integrity && repair.integrity.invalid || [],
+        repair.integrity && repair.integrity.corrupted || [],
+        (repair.failed || []).map(item => item && item.file || '').filter(Boolean)
+    )));
+    const now = Date.now();
+    const integrityBackoff = Object.assign({}, previous.integrityBackoff || {});
+    candidates.forEach(file => {
+        if (!remaining.includes(file)) { delete integrityBackoff[file]; return; }
+        const prior = integrityBackoff[file] || {};
+        const failures = Math.max(0, Number(prior.failures) || 0) + 1;
+        const waitMs = Math.min(INTEGRITY_BACKOFF_MAX_MS, INTEGRITY_BACKOFF_BASE_MS * (2 ** Math.min(8, failures - 1)));
+        integrityBackoff[file] = { failures, lastFailedAt: new Date(now).toISOString(), nextRetryAt: new Date(now + waitMs).toISOString(), nextRetryAtMs: now + waitMs };
+    });
+    const historyEntry = { checkedAt: new Date().toISOString(), source: 'manual-failed-asset-retry', checked: candidates.length, healthy: Math.max(0, candidates.length - remaining.length), repaired: repair.repaired.length, failed: remaining.length, skippedBackoff: 0, cursor: integritySampleCursor, nextCursor: integritySampleCursor };
+    const updated = Object.assign({}, report, {
+        integrityBackoff,
+        integrityHistory: [historyEntry, ...(Array.isArray(previous.integrityHistory) ? previous.integrityHistory : [])].slice(0, INTEGRITY_AUDIT_HISTORY_LIMIT),
+        cacheName: CACHE_NAME
+    });
+    await writeInstallReport(cache, updated);
+    return { report: updated, result: { requested: candidates.length, repaired: repair.repaired.length, failed: remaining.length, files: candidates, remaining } };
+}
+
+async function clearIntegrityAuditState(cache, options) {
+    const settings = options || {};
+    const previous = await readInstallReport(cache, null, { skipInspection: true });
+    const clearedHistory = Array.isArray(previous.integrityHistory) ? previous.integrityHistory.length : 0;
+    const clearedBackoff = settings.clearBackoff && previous.integrityBackoff ? Object.keys(previous.integrityBackoff).length : 0;
+    const updated = Object.assign({}, previous, {
+        integrityHistory: [],
+        integrityBackoff: settings.clearBackoff ? {} : previous.integrityBackoff || {},
+        periodicIntegrity: settings.clearLatest ? null : previous.periodicIntegrity || null,
+        cacheName: CACHE_NAME
+    });
+    await writeInstallReport(cache, updated);
+    return { report: updated, result: { clearedHistory, clearedBackoff, clearLatest: Boolean(settings.clearLatest) } };
+}
+
 async function broadcastInstallReport(cache, repaired) {
     if (!self.clients || typeof self.clients.matchAll !== 'function') return;
     const report = await readInstallReport(cache, repaired);
@@ -449,18 +537,27 @@ async function broadcastInstallReport(cache, repaired) {
 
 self.addEventListener('message', event => {
     const data = event && event.data || {};
-    const supportedTypes = new Set(['ai-shorts-service-worker-status-request', 'ai-shorts-service-worker-repair-request', 'ai-shorts-service-worker-integrity-sample-request']);
+    const supportedTypes = new Set(['ai-shorts-service-worker-status-request', 'ai-shorts-service-worker-repair-request', 'ai-shorts-service-worker-integrity-sample-request', 'ai-shorts-service-worker-integrity-retry-request', 'ai-shorts-service-worker-integrity-clear-request']);
     if (!supportedTypes.has(data.type)) return;
     event.waitUntil((async () => {
         const cache = await caches.open(CACHE_NAME);
         let repair = null;
         let report = null;
+        let commandResult = null;
         if (data.type === 'ai-shorts-service-worker-repair-request') {
             repair = await repairShellCache(cache, { includeOptional: true, reason: 'manual' });
             report = await readInstallReport(cache, repair);
             await writeInstallReport(cache, report);
         } else if (data.type === 'ai-shorts-service-worker-integrity-sample-request') {
             report = await runPeriodicIntegrityAudit(cache, data.sampleSize, { source: data.source || 'manual' });
+        } else if (data.type === 'ai-shorts-service-worker-integrity-retry-request') {
+            const outcome = await retryFailedIntegrityAssets(cache, data.files);
+            report = outcome.report;
+            commandResult = outcome.result;
+        } else if (data.type === 'ai-shorts-service-worker-integrity-clear-request') {
+            const outcome = await clearIntegrityAuditState(cache, { clearBackoff: Boolean(data.clearBackoff), clearLatest: Boolean(data.clearLatest) });
+            report = outcome.report;
+            commandResult = outcome.result;
         } else {
             report = await readInstallReport(cache, null);
         }
@@ -468,7 +565,8 @@ self.addEventListener('message', event => {
         if (target && typeof target.postMessage === 'function') target.postMessage({
             type: 'ai-shorts-service-worker-install-report',
             requestId: String(data.requestId || ''),
-            report
+            report,
+            commandResult
         });
         if (repair) await broadcastInstallReport(cache, repair);
     })());

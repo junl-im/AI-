@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.5.26 storage and offline health panel */
+/* AI Shorts Studio v1.5.27 storage and offline health panel */
 .storage-health-panel {
     display: grid;
     grid-template-columns: minmax(220px, .8fr) minmax(560px, 1.8fr) auto;
@@ -36,7 +36,7 @@
     .storage-health-actions button { flex: 1 1 150px; }
 }
 
-/* v1.5.26 quota-aware persistent cache controls */
+/* v1.5.27 quota-aware persistent cache controls */
 .storage-cache-entry-picker {
     display: grid;
     gap: 3px;
@@ -59,3 +59,15 @@
     .storage-cache-entry-picker { width: 100%; min-width: 0; }
     .storage-cache-entry-picker select { width: 100%; max-width: none; }
 }
+
+/* v1.5.27 multi-select cache and audit controls */
+.storage-cache-entry-picker select[multiple] {
+    min-height: 88px;
+    padding: 6px 8px;
+    overflow: auto;
+}
+.storage-cache-entry-picker select[multiple] option {
+    padding: 5px 7px;
+    border-radius: 6px;
+}
+.storage-cache-filter-picker { min-width: 160px; }
