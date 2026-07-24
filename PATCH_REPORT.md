@@ -1,68 +1,100 @@
-# AI Shorts Studio v1.5.27 패치 보고서
+# PATCH REPORT — AI 쇼츠 제작 스튜디오 v1.5.28
 
-## 1. 진행 내용
+## 목표
 
-### 분석 캐시 선택 무효화·다중 삭제
+v1.5.27에서 영구 분석 캐시의 이전 namespace가 일반 상태 조회·새 기록·정리 과정에서 자동 삭제되어, 사용자가 용량과 계약 정보를 확인하거나 필요한 namespace만 선택 정리할 수 없던 문제를 해결했습니다.
 
-- 분석 캐시 계약 버전 `v2`와 계약 namespace를 도입했습니다.
-- 영구 캐시 레코드에 앱 버전·계약 버전·분석 tier·sample rate·motion sample·옵션 signature를 저장합니다.
-- 캐시 목록에서 여러 비식별 항목을 선택해 한 번에 삭제할 수 있습니다.
-- 균형·속도·품질 프로필 또는 이전 계약 레코드만 선택적으로 무효화할 수 있습니다.
-- 이전 namespace 정리, 일괄 삭제, 조건 무효화 횟수를 진단 통계에 추가했습니다.
-- 파일명·파일 경로·원시 캐시 키는 화면과 진단 정보에 노출하지 않습니다.
+## 원인 분석
 
-### 서비스워커 실패 자산 즉시 복구·감사 초기화
+`src/engine/analysis-cache.js`의 영구 캐시 정리 경로가 현재 namespace TTL/LRU 정리와 이전 namespace 제거를 한 동작으로 처리했습니다. 이 함수가 초기 상태 갱신과 새 캐시 쓰기에도 호출되어, 진단 UI가 이전 namespace 정보를 읽기 전에 레코드가 사라졌습니다. 또한 namespace 단위 상태·삭제 API와 유지보수 이력 모델이 없어 사용자 선택을 연결할 수 없었습니다.
 
-- 최근 무결성 검사에서 실패한 자산만 백오프를 우회해 즉시 다시 검사합니다.
-- 누락·HTTP 오류·SHA-256 불일치 자산을 재다운로드하고 콘텐츠 해시를 다시 검증합니다.
-- 복구 성공 자산의 백오프 상태를 제거하고 결과를 감사 이력에 기록합니다.
-- 감사 이력·백오프·최근 검사 상태를 초기화하는 명령을 추가했습니다.
-- 서비스워커 등록 계층은 요청별 ID와 제한 시간으로 재시도·초기화 결과를 정확히 연결합니다.
-- 저장소 진단 화면에 `실패 자산 재시도`, `감사 이력 초기화` 버튼을 추가했습니다.
+## 적용 내용
 
-### 중요 세션 백업 파일 이동·이름·메모
+### 1. 이전 namespace 보존
 
-- 중요 백업을 formatVersion 1 JSON 봉투로 내보낼 수 있습니다.
-- 내보낸 중요 백업을 다시 가져오기 전에 파일 크기·형식·압축 봉투·체크섬·프로젝트 스키마를 검증합니다.
-- 중요 백업에 최대 60자 이름과 240자 메모를 저장할 수 있습니다.
-- 복원 목록과 미리보기에 중요 백업 이름·메모를 함께 표시합니다.
-- 보호 해제 또는 세션 전체 삭제 시 메타데이터도 함께 정리합니다.
+- 일반 정리에서는 현재 namespace의 만료·LRU·바이트 한도만 처리합니다.
+- 이전 namespace 전체 제거는 명시적 `cleanupLegacyNamespaces` 경로에만 남겼습니다.
+- 새 캐시 기록과 상태 갱신이 이전 namespace를 자동 파괴하지 않습니다.
 
-### 회귀 검사 확장
+### 2. 개인정보 비노출 namespace 상태
 
-- `analysis_cache_selective_invalidation_smoke.js`
-- `service_worker_integrity_retry_history_smoke.js`
-- `session_protected_backup_portability_smoke.js`
+- 현재·이전 namespace별 항목 수, 추정 바이트, 마지막 접근 시각, 계약·앱 버전, 분석 tier를 집계합니다.
+- 현재 namespace만 원문을 반환하고 이전 namespace는 이중 FNV 기반 16자리 토큰으로만 식별합니다.
+- 파일명·경로·원시 캐시 키·분석 결과·이전 namespace 원문은 UI와 이력에 포함하지 않습니다.
 
-## 2. 검증 결과
+### 3. 선택 namespace 정리
 
-- 자동 QA: **211/211 통과**
-- Chromium desktop·small laptop·tablet·mobile 통과
-- JavaScript 오류: **0건**
-- Promise 미처리 오류: **0건**
-- 콘솔 오류: **0건**
-- 가로 화면 넘침: **0건**
-- CSS conflict·same-value duplicate·shadowed declaration: **0건**
-- `!important`: **593개 유지**
-- 서비스워커 실패 자산 복구·감사 초기화 검사 통과
-- 프로세스 메모리 runtime error: **0건**
-- JS heap 변화량: **0.0048MiB/cycle**
-- 장시간 15→30→15분 영상 경로는 미디어 소유 구조가 변경되지 않아 검증된 v1.5.24 근거를 명시적으로 상속했습니다.
+- 여러 이전 namespace 토큰을 한 번에 전달해 해당 레코드만 삭제합니다.
+- 현재 namespace 토큰, 알 수 없는 토큰, 중복 토큰은 안전하게 제외합니다.
+- 삭제된 namespace·항목 수·추정 바이트를 결과와 통계에 반영합니다.
 
-## 3. 패키징 결과
+### 4. 유지보수 이력
 
-- v1.5.26 대비 기존 파일 변경: **138개**
-- 신규 파일: **12개**
-- 삭제 파일: **0개**
-- 덮어쓰기 패치 포함 파일: **150개**
-- 전체 프로젝트 파일: **515개**
-- 패치 적용 결과와 전체본 파일별 SHA-256 비교: **완전 일치**
+- 단일/다중 항목 삭제, 조건별 무효화, 선택 namespace 삭제, 현재 캐시 비우기, 자동 TTL/LRU/quota 정리를 기록합니다.
+- 데이터베이스별 localStorage 키에 최대 20개를 최신순으로 보존합니다.
+- 저장소 오류는 best-effort로 처리해 분석 캐시 본 기능을 중단하지 않습니다.
 
-## 4. 다음 패치 예정 라인업
+### 5. 저장소 진단 화면
 
-1. 이전 분석 namespace 상태·정리 이력 시각화
-2. 분석 캐시 옵션 signature 상세 필터와 저장 비용 추세
-3. 서비스워커 실패 자산별 상세 상태와 이전 정상 캐시 수동 롤백
-4. 중요 백업 보존 개수 설정·복구 이력 개별 관리
-5. 모바일 Safari·Samsung Internet 실기기 검증
-6. 물리 GPU 장시간 분석·렌더링 안정성 검증
+- 현재 namespace 보호 상태와 이전 namespace 목록을 카드로 표시합니다.
+- 이전 namespace 다중 선택과 `선택 namespace 정리` 작업을 추가했습니다.
+- 최근 정리 이력을 작업 유형·시각·삭제량 중심으로 표시합니다.
+- 정리 후 기존 캐시 통계·namespace 상태·이력을 동시에 새로고침합니다.
+
+## 주요 변경 파일
+
+- `src/engine/analysis-cache.js`
+- `src/engine/engine-kernel.js`
+- `src/config/app-runtime-config.js`
+- `src/ui/storage-health-panel.js`
+- `assets/css/storage-health-panel.css`
+- `qa/analysis_cache_namespace_history_smoke.js`
+- `qa/storage_health_panel_smoke.js`
+- `package.json`, `index.html`, `sw.js`, `asset-integrity.json`
+
+## 검증 결과
+
+- 자동 QA: **212/212 통과**
+  - 검사 0~180: 181개 연속 통과
+  - 검사 181~211: 31개 연속 통과
+  - 실패: 0개
+- 신규 namespace/history 회귀 검사 통과
+- 기존 선택 무효화·quota·항목 삭제 회귀 검사 통과
+- 저장소 진단 패널 DOM·상호작용 회귀 검사 통과
+- Chromium 4개 viewport: JavaScript 오류·Promise 거절·콘솔 오류 **0건**, 가로 overflow **0px**
+- CSS ownership: conflict 0, same-value duplicate 0, shadowed declaration 0, `!important` 593
+- 서비스워커 install·activate·이전 캐시 정리·offline navigation 통과
+- GPU/media 두 모드 1280×720 H.264/AAC 디코딩, 62프레임·drop 0 통과
+
+## 감사 자료
+
+### v1.5.28 신규 실행
+
+- `qa/runtime-browser-audit-v1.5.28.json`
+- `qa/runtime-css-ownership-v1.5.28.json`
+- `qa/runtime-service-worker-lifecycle-v1.5.28.json`
+- `qa/runtime-gpu-media-capability-v1.5.28.json`
+
+### 변경 범위 밖이라 명시적으로 상속
+
+- `qa/runtime-interaction-state-v1.5.28.json` ← v1.5.27
+- `qa/runtime-process-memory-v1.5.28.json` ← v1.5.27
+- `qa/runtime-structure-priority-v1.5.28.json` ← v1.5.27
+- `qa/runtime-structure-priority-probe-v1.5.28.json` ← v1.5.27
+- `qa/runtime-long-video-stability-v1.5.28.json` ← v1.5.27, 실제 장시간 실행 근거 v1.5.24
+
+상속 자료에는 `inheritedArtifactFrom`과 이유를 기록했습니다. structure priority probe는 현재 환경에서 재실행을 시도했으나 실행 제한을 넘겨 완료되지 않았고, 이번 패치가 해당 4개 구조 owner stylesheet를 변경하지 않아 기존 근거를 사용했습니다.
+
+## 알려진 제한
+
+- 이전 namespace는 사용자가 정리하기 전까지 IndexedDB 공간을 차지합니다.
+- localStorage 유지보수 이력은 사이트 데이터 삭제·저장 차단·quota 상황에서 보존되지 않을 수 있습니다.
+- namespace 토큰은 표시·선택용 비식별 값이며 원문 복구 기능이 아닙니다.
+- headless Chromium은 실제 모바일 브라우저 다운로드 관리자와 물리 GPU 가속을 완전히 대체하지 않습니다.
+
+## 다음 패치 제안
+
+1. 옵션 signature별 캐시 필터와 namespace 저장 비용 추세
+2. 서비스워커 실패 자산별 상세 원인·수동 롤백
+3. 중요 백업 보존 개수와 복구 이력 편집
+4. 모바일 Safari·Samsung Internet·물리 GPU 장시간 반복 검증

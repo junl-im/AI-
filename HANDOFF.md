@@ -1,4 +1,63 @@
-# HANDOFF v1.5.27 Selective Cache & Portable Recovery Patch
+# HANDOFF v1.5.28 Analysis Namespace Maintenance Patch
+
+## 현재 상태
+
+v1.5.27 전체본을 기준으로 이전 분석 namespace 상태 표시, 다중 선택 정리, 개인정보 비노출 유지보수 이력을 추가했습니다.
+
+- 자동 QA: **212/212 통과** — 단일 실행 제한 때문에 0~180번과 181~211번의 연속 두 구간으로 검증했으며 실패는 0건입니다.
+- Chromium desktop·small laptop·tablet·mobile: 오류·Promise 거절·콘솔 오류·가로 overflow **0건**
+- 분석 namespace: 일반 정리 시 이전 namespace 보존, 현재·이전 상태 요약, 이전 namespace 비식별 토큰 표시
+- 선택 정리: 여러 이전 namespace를 동시에 삭제, 현재 namespace 삭제 차단, 알 수 없는 토큰 무시
+- 유지보수 이력: 항목 삭제·조건 무효화·namespace 삭제·현재 캐시 비우기·자동 TTL/LRU 정리 결과 최대 20개
+- 개인정보 보호: 파일명·경로·원시 캐시 키·이전 namespace 원문을 상태·UI·이력에 비노출
+- CSS: conflict·same-value duplicate·shadowed declaration 0, `!important` 593개
+- runtime build key: `1.5.28-analysis-namespace-maintenance-history`
+
+## 핵심 변경 파일
+
+- `src/engine/analysis-cache.js`: namespace 상태 요약, 선택 삭제, 유지보수 이력, 이전 namespace 자동 삭제 중단
+- `src/engine/engine-kernel.js`: namespace 상태·삭제·이력 API와 diagnostics 연결
+- `src/ui/storage-health-panel.js`: 상태 목록, 다중 선택 정리, 최근 이력 UI
+- `assets/css/storage-health-panel.css`: namespace·이력 카드 반응형 배치
+- `src/config/app-runtime-config.js`: 유지보수 이력 한도 20
+- `qa/analysis_cache_namespace_history_smoke.js`: 보존·선택 삭제·현재 보호·비식별·이력 회귀 검사
+
+## 검수 순서
+
+1. `node qa/analysis_cache_namespace_history_smoke.js`
+2. `node qa/analysis_cache_selective_invalidation_smoke.js`
+3. `node qa/storage_health_panel_smoke.js`
+4. `node qa/app_version_sync_smoke.js`
+5. `node qa/service_worker_content_integrity_smoke.js`
+6. `node qa/runtime_browser_audit_smoke.js`
+7. `node qa/css_ownership_smoke.js`
+8. `npm test`
+
+## 감사 근거 구분
+
+- v1.5.28에서 새로 실행: 4개 viewport 브라우저 감사, CSS ownership, 서비스워커 lifecycle, GPU/media capability
+- v1.5.27 근거 상속: interaction-state, process-memory, structure-priority, structure-priority probe
+- 장시간 15→30→15분 MP4: v1.5.27 파일을 상속하며 그 내부의 실제 실행 근거는 v1.5.24입니다.
+- 상속한 JSON에는 `inheritedArtifactFrom`과 v1.5.28 상속 이유를 명시했습니다. 새 패치는 미디어 분석·렌더·Object URL·구조 priority 대상 파일을 변경하지 않습니다.
+- structure priority probe는 v1.5.28에서 재실행을 시도했으나 컨테이너 실행 제한을 넘겨 완료되지 않아, 변경 대상이 아닌 4개 owner stylesheet의 기존 근거를 상속했습니다.
+
+## 알려진 제한
+
+- 이전 namespace를 자동 삭제하지 않으므로 사용자가 선택 정리하기 전까지 IndexedDB 사용량이 유지됩니다. quota 기반 현재 namespace TTL/LRU 정리는 계속 동작합니다.
+- 유지보수 이력은 best-effort localStorage이며 사이트 데이터 삭제, 저장소 차단, quota 오류 시 사라지거나 기록되지 않을 수 있습니다.
+- namespace 토큰은 화면 구분용 비식별 식별자이며 원래 namespace로 복원할 수 없습니다.
+- 실제 모바일 Safari·Samsung Internet과 물리 GPU 장시간 검증은 실기기 환경이 필요합니다.
+
+## 다음 작업
+
+1. 옵션 signature별 필터와 namespace 저장 비용 추세 표시
+2. 서비스워커 실패 자산별 상세 상태·수동 롤백
+3. 중요 백업 보존 개수·복구 이력 관리
+4. 모바일 Safari·Samsung Internet 및 물리 GPU 장시간 검증
+
+---
+
+# HANDOFF HISTORY — v1.5.27 Selective Cache & Portable Recovery Patch
 
 ## 현재 상태
 

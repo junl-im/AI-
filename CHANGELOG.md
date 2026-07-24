@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.5.28 - Analysis Namespace Visibility & Selective Cleanup History
+
+- 일반 TTL/LRU 정리, 시작 상태 확인, 새 영구 캐시 쓰기에서 이전 분석 namespace를 즉시 삭제하던 동작을 제거해 사용자가 먼저 상태를 확인할 수 있도록 했습니다.
+- 현재·이전 namespace의 항목 수, 추정 바이트, 마지막 접근 시각, 계약·앱 버전, 분석 tier를 개인정보 비노출 요약으로 제공하는 엔진 API와 진단 상태를 추가했습니다.
+- 이전 namespace 원문은 노출하지 않고 이중 FNV 기반 16자리 비식별 토큰으로 표시하며, 저장소 진단 화면에서 여러 이전 namespace를 선택해 정리할 수 있습니다.
+- 현재 namespace는 선택 정리 대상에서 제외하고, 알 수 없는 토큰이나 중복 선택은 안전하게 무시합니다.
+- 항목 삭제·조건별 무효화·선택 namespace 삭제·현재 캐시 비우기·자동 정리 결과를 최대 20개까지 localStorage에 보존하는 유지보수 이력을 추가했습니다.
+- namespace 상태·정리 이력 전용 회귀 검사를 추가해 자동 QA **212/212**, Chromium 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow **0건**을 통과했습니다.
+
+---
+
 ## v1.5.27 - Selective Analysis Cache, Integrity Retry & Portable Protected Backup
 
 - 분석 캐시 계약 버전 `v2`와 옵션 프로필을 영구 캐시 레코드에 저장해 앱 전체 캐시를 비우지 않고 균형·속도·품질 프로필 또는 이전 계약 항목만 선택적으로 무효화할 수 있도록 했습니다.

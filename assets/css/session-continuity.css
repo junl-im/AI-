@@ -119,7 +119,7 @@ body[data-session-continuity="invalid"] .session-continuity-icon {
     }
 }
 
-/* v1.5.27 selectable recovery point */
+/* v1.5.28 selectable recovery point */
 .session-backup-picker {
     display: grid;
     gap: 3px;
@@ -145,7 +145,7 @@ body[data-session-continuity="invalid"] .session-continuity-icon {
     .session-backup-picker { width: 100%; min-width: 0; }
 }
 
-/* v1.5.27 protected recovery point preview */
+/* v1.5.28 protected recovery point preview */
 .session-backup-preview {
     margin-top: 6px;
     padding: 6px 8px;

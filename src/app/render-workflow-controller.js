@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.27 - render workflow ownership, safe queue UI, and editor-state restoration
+// AI Shorts Studio v1.5.28 - render workflow ownership, safe queue UI, and editor-state restoration
 'use strict';
 
 (function exposeRenderWorkflowController(global) {

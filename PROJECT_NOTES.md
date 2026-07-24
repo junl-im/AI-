@@ -1,4 +1,47 @@
-# PROJECT NOTES v1.5.27
+# PROJECT NOTES v1.5.28
+
+## 분석 namespace 보존·표시 규칙
+
+- 일반 `prunePersistent()`는 현재 namespace의 TTL·LRU·용량 한도만 정리하고 이전 namespace를 자동 삭제하지 않습니다.
+- 이전 namespace 전체 삭제는 `cleanupLegacyNamespaces: true`를 명시한 내부 작업 또는 사용자가 선택한 namespace 정리에서만 수행합니다.
+- 상태 요약은 현재 namespace에만 원문을 허용하고, 이전 namespace는 이중 FNV 기반 16자리 `namespaceToken`만 외부에 제공합니다.
+- namespace 상태에는 항목 수, 추정 바이트, 마지막 접근, 계약·앱 버전, tier 집합을 포함하되 파일명·경로·원시 키·분석 결과는 포함하지 않습니다.
+- 현재 namespace는 선택 삭제 API에서 항상 제외하며 중복·알 수 없는 토큰은 삭제하지 않습니다.
+
+## 유지보수 이력 규칙
+
+- 이력 한도는 `ANALYSIS_CACHE_MAINTENANCE_HISTORY_LIMIT=20`입니다.
+- 기록 대상은 단일/다중 항목 삭제, 조건별 무효화, 선택 namespace 삭제, 현재 cache clear, 자동 TTL/LRU/quota 정리입니다.
+- 이력은 데이터베이스 토큰별 localStorage에 best-effort로 저장하고 최신 항목부터 제한 개수만 유지합니다.
+- 이력에는 작업 유형·시각·삭제 개수·바이트·조건·비식별 토큰만 저장하며 원시 캐시 키와 이전 namespace 원문을 저장하지 않습니다.
+- localStorage가 비활성·손상·quota 상태여도 캐시 핵심 동작은 실패하지 않아야 합니다.
+
+## 저장소 진단 UI 규칙
+
+- 상태 새로고침 시 현재·이전 namespace와 유지보수 이력을 함께 갱신합니다.
+- 이전 namespace만 checkbox를 제공하고 현재 namespace는 보호 상태로 표시합니다.
+- 선택 정리 완료 뒤 캐시 통계, namespace 목록, 이력을 한 번에 다시 읽습니다.
+- 기존 캐시 항목 선택 삭제·조건별 무효화 UI와 namespace 선택 상태를 섞지 않습니다.
+
+## QA·배포 기준
+
+- 자동 QA 기준은 **212/212**입니다.
+- 4개 viewport runtime error, Promise rejection, console error, horizontal overflow는 0이어야 합니다.
+- CSS 실제 conflict·same-value duplicate·shadowed declaration은 0, `!important`는 593개를 유지해야 합니다.
+- 런타임 build key는 `1.5.28-analysis-namespace-maintenance-history`입니다.
+- 새 배포 전 integrity manifest를 다시 생성하고 version sync·서비스워커 콘텐츠 무결성·배포 패키지 검사를 통과해야 합니다.
+- 상속 감사 파일에는 근거 버전과 상속 이유를 JSON 필드로 명시합니다.
+
+## 다음 우선순위
+
+1. 옵션 signature별 캐시 상태 필터·저장 비용 추세
+2. 서비스워커 자산별 실패 상세·수동 롤백 UI
+3. 중요 백업 보존 정책·복구 이력 편집
+4. 실제 모바일 브라우저와 물리 GPU 장시간 검증
+
+---
+
+# PROJECT NOTES HISTORY — v1.5.27
 
 ## 분석 캐시 계약·선택 무효화 규칙
 

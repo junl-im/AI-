@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.27 - quota-aware self-healing pinned candidates and save estimate comparison
+// AI Shorts Studio v1.5.28 - quota-aware self-healing pinned candidates and save estimate comparison
 'use strict';
 (function bootCandidatePinBoard(global) {
     const store = global.AIShortsAppState || {};

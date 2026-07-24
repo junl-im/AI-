@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.27 - selective cache, recovery, and service worker audit controls
+// AI Shorts Studio v1.5.28 - selective cache, recovery, and service worker audit controls
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;
@@ -56,7 +56,15 @@
             '  <button id="storageIntegrityClearBtn" type="button" data-icon="close">감사 이력 초기화</button>',
             '  <button id="storageHealthRepairBtn" type="button" data-icon="retry">오프라인 셸 복구</button>',
             '  <button id="storageHealthCleanupBtn" type="button" data-icon="close">오래된 저장소 정리</button>',
-            '</div>'
+            '</div>',
+            '<section class="analysis-cache-maintenance" aria-label="분석 캐시 namespace와 정리 이력">',
+            '  <div class="analysis-cache-namespace-card">',
+            '    <div><strong>분석 namespace 상태</strong><small id="analysisCacheNamespaceSummary">현재·이전 계약 캐시를 확인하고 있습니다.</small></div>',
+            '    <label class="storage-cache-entry-picker"><span>정리할 이전 namespace</span><select id="analysisCacheNamespaceSelect" multiple size="3" aria-label="정리할 이전 분석 캐시 namespace 복수 선택"><option value="">이전 namespace 없음</option></select></label>',
+            '    <button id="analysisCacheNamespaceDeleteBtn" type="button" data-icon="close">선택 namespace 정리</button>',
+            '  </div>',
+            '  <div class="analysis-cache-history-card"><strong>최근 캐시 정리 이력</strong><ol id="analysisCacheMaintenanceHistory"><li>정리 이력이 없습니다.</li></ol></div>',
+            '</section>'
         ].join('');
         anchor.insertAdjacentElement('afterend', root);
         const refreshButton = byId('storageHealthRefreshBtn');
@@ -65,6 +73,7 @@
         const analysisCleanupButton = byId('analysisCacheCleanupBtn');
         const analysisEntryDeleteButton = byId('analysisCacheEntryDeleteBtn');
         const analysisInvalidateButton = byId('analysisCacheInvalidateBtn');
+        const analysisNamespaceDeleteButton = byId('analysisCacheNamespaceDeleteBtn');
         const integrityDiagnosticsButton = byId('storageIntegrityDiagnosticsBtn');
         const integrityAuditButton = byId('storageIntegrityAuditBtn');
         const integrityRetryButton = byId('storageIntegrityRetryBtn');
@@ -76,6 +85,7 @@
         if (analysisCleanupButton) analysisCleanupButton.addEventListener('click', cleanupAnalysisCache);
         if (analysisEntryDeleteButton) analysisEntryDeleteButton.addEventListener('click', deleteSelectedAnalysisCacheEntry);
         if (analysisInvalidateButton) analysisInvalidateButton.addEventListener('click', invalidateSelectedAnalysisCache);
+        if (analysisNamespaceDeleteButton) analysisNamespaceDeleteButton.addEventListener('click', deleteSelectedAnalysisCacheNamespaces);
         if (integrityDiagnosticsButton) integrityDiagnosticsButton.addEventListener('click', exportIntegrityDiagnostics);
         if (integrityAuditButton) integrityAuditButton.addEventListener('click', runIntegrityAudit);
         if (integrityRetryButton) integrityRetryButton.addEventListener('click', retryFailedIntegrityAssets);
@@ -112,7 +122,8 @@
         const mode = fingerprint.lastMode === 'full' ? '전체' : fingerprint.lastMode === 'sampled' ? '표본' : '대기';
         const persistent = status.persistent || {};
         const policy = persistent.quotaLevel && persistent.quotaLevel !== 'unknown' ? ` · ${persistent.quotaLevel}` : '';
-        const persistentText = persistent.enabled ? ` · 영구 ${persistent.size || 0}/${persistent.effectiveMaxItems || persistent.maxItems || 0}${policy}` : (persistent.supported === false ? ' · 영구 미지원' : '');
+        const legacy = persistent.legacyNamespaceCount ? ` · 이전 ${persistent.legacyNamespaceCount}종/${persistent.legacyItems || 0}개` : '';
+        const persistentText = persistent.enabled ? ` · 영구 ${persistent.size || 0}/${persistent.effectiveMaxItems || persistent.maxItems || 0}${policy}${legacy}` : (persistent.supported === false ? ' · 영구 미지원' : '');
         return `${status.size || 0}/${status.limit || 0} · 적중 ${status.hitRate || 0}% · ${mode} ${fingerprint.lastMs || 0}ms${persistentText}`;
     }
     function render(storageStatus) {
@@ -157,6 +168,7 @@
             const engine = global.AIShortsEngineKernel || {};
             if (engine.refreshPersistentAnalysisCachePolicy) await engine.refreshPersistentAnalysisCachePolicy();
             await refreshAnalysisCacheEntries();
+            await refreshAnalysisCacheMaintenance();
             if (serviceWorker.requestInstallReport) serviceWorker.requestInstallReport();
             render(snapshot);
             return snapshot;
@@ -185,6 +197,86 @@
         if (button) button.disabled = !entries.length;
         return entries;
     }
+
+    function formatCacheDate(value) {
+        if (!value) return '시각 없음';
+        const date = new Date(value);
+        if (!Number.isFinite(date.getTime())) return '시각 없음';
+        return date.toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function maintenanceOperationLabel(operation) {
+        const labels = {
+            'entry-delete': '선택 항목 삭제',
+            'criteria-invalidate': '조건 캐시 정리',
+            'namespace-delete': '이전 namespace 정리',
+            'current-clear': '현재 캐시 전체 정리',
+            'automatic-prune': '자동 만료·용량 정리'
+        };
+        return labels[String(operation || '')] || '캐시 정리';
+    }
+
+    async function refreshAnalysisCacheMaintenance() {
+        const engine = global.AIShortsEngineKernel || {};
+        const summary = byId('analysisCacheNamespaceSummary');
+        const select = byId('analysisCacheNamespaceSelect');
+        const button = byId('analysisCacheNamespaceDeleteBtn');
+        const historyRoot = byId('analysisCacheMaintenanceHistory');
+        const status = engine.getPersistentAnalysisCacheNamespaceStatus ? await engine.getPersistentAnalysisCacheNamespaceStatus() : null;
+        const history = engine.getAnalysisCacheMaintenanceHistory ? engine.getAnalysisCacheMaintenanceHistory(8) : [];
+        const current = status && status.current || {};
+        const legacy = status && Array.isArray(status.legacy) ? status.legacy : [];
+        if (summary) {
+            summary.textContent = legacy.length
+                ? `현재 ${current.count || 0}개 · ${formatBytes(current.bytes || 0)} / 이전 ${status.legacyNamespaceCount || legacy.length}종 · ${status.legacyItems || 0}개 · ${formatBytes(status.legacyBytes || 0)}`
+                : `현재 ${current.count || 0}개 · ${formatBytes(current.bytes || 0)} · 이전 namespace 없음`;
+        }
+        if (select) {
+            const source = legacy.length ? legacy : [{ token: '', count: 0, bytes: 0 }];
+            select.replaceChildren(...source.map((item, index) => {
+                const option = document.createElement('option');
+                option.value = item.token || '';
+                const contracts = Array.isArray(item.contractVersions) && item.contractVersions.length ? ` · 계약 ${item.contractVersions.join(', ')}` : '';
+                option.textContent = item.token ? `${index + 1}. ${item.count || 0}개 · ${formatBytes(item.bytes || 0)}${contracts} · ${formatCacheDate(item.lastAccessAt)}` : '이전 namespace 없음';
+                option.disabled = !item.token;
+                return option;
+            }));
+        }
+        if (button) button.disabled = !legacy.length;
+        if (historyRoot) {
+            const source = Array.isArray(history) && history.length ? history : [{ operation: '', at: '', removed: 0, bytes: 0 }];
+            historyRoot.replaceChildren(...source.map(item => {
+                const row = document.createElement('li');
+                row.textContent = item.operation
+                    ? `${maintenanceOperationLabel(item.operation)} · ${item.removed || 0}개 · ${formatBytes(item.bytes || 0)} · ${formatCacheDate(item.at)}`
+                    : '정리 이력이 없습니다.';
+                return row;
+            }));
+        }
+        return Object.freeze({ status, history });
+    }
+
+    async function deleteSelectedAnalysisCacheNamespaces() {
+        const select = byId('analysisCacheNamespaceSelect');
+        const button = byId('analysisCacheNamespaceDeleteBtn');
+        const tokens = select ? Array.from(select.selectedOptions || [], option => option.value).filter(Boolean) : [];
+        if (!tokens.length) { feedback('정리할 이전 분석 namespace를 선택하세요.', 'warning'); return null; }
+        if (button) button.disabled = true;
+        try {
+            const engine = global.AIShortsEngineKernel || {};
+            if (!engine.deletePersistentAnalysisCacheNamespaces) throw new Error('이전 분석 namespace 정리를 지원하지 않습니다.');
+            const result = await engine.deletePersistentAnalysisCacheNamespaces(tokens);
+            await refreshAnalysisCacheEntries();
+            await refreshAnalysisCacheMaintenance();
+            render();
+            if (!result || !result.removed) throw new Error('선택한 이전 namespace에서 정리할 캐시를 찾지 못했습니다.');
+            feedback(`이전 namespace ${result.removedNamespaces || 0}종 · 캐시 ${result.removed}개 · ${formatBytes(result.bytes || 0)}를 정리했습니다.`, 'action');
+            return result;
+        } catch (error) {
+            feedback(error && error.message || '이전 namespace 정리에 실패했습니다.', 'error');
+            return null;
+        } finally { if (button) button.disabled = false; }
+    }
     async function deleteSelectedAnalysisCacheEntry() {
         const select = byId('analysisCacheEntrySelect');
         const button = byId('analysisCacheEntryDeleteBtn');
@@ -195,6 +287,7 @@
             const engine = global.AIShortsEngineKernel || {};
             const result = engine.deletePersistentAnalysisCacheEntries ? await engine.deletePersistentAnalysisCacheEntries(tokens) : (tokens.length === 1 && engine.deletePersistentAnalysisCacheEntry ? await engine.deletePersistentAnalysisCacheEntry(tokens[0]) : null);
             await refreshAnalysisCacheEntries();
+            await refreshAnalysisCacheMaintenance();
             render();
             const removed = Number(result && (result.removed === true ? 1 : result.removed)) || 0;
             if (!removed) throw new Error('선택한 캐시 항목을 찾지 못했습니다.');
@@ -220,6 +313,7 @@
                 : { tier: value, reason: `tier-${value}` };
             const result = await engine.invalidateAnalysisCache(criteria);
             await refreshAnalysisCacheEntries();
+            await refreshAnalysisCacheMaintenance();
             render();
             feedback(result && result.removed ? `조건에 맞는 분석 캐시 ${result.removed}개를 정리했습니다.` : '조건에 맞는 분석 캐시가 없습니다.', 'action');
             return result;
@@ -321,6 +415,8 @@
             const engine = global.AIShortsEngineKernel || {};
             const before = engine.getHealthReport ? engine.getHealthReport().cache : null;
             const after = engine.clearAnalysisCache ? await engine.clearAnalysisCache() : null;
+            await refreshAnalysisCacheEntries();
+            await refreshAnalysisCacheMaintenance();
             render();
             feedback(before && before.size ? `분석 캐시 ${before.size}개를 정리했습니다.` : '정리할 분석 캐시가 없습니다.', 'action');
             return after;
@@ -374,7 +470,7 @@
             document.addEventListener(name, event => render(name === 'ai-shorts-storage-status' && event.detail || null));
         });
     }
-    global.AIShortsStorageHealthPanel = Object.freeze({ build, render, refresh, cleanup, exportAnalysisDiagnostics, exportIntegrityDiagnostics, refreshAnalysisCacheEntries, deleteSelectedAnalysisCacheEntry, invalidateSelectedAnalysisCache, cleanupAnalysisCache, runIntegrityAudit, retryFailedIntegrityAssets, clearIntegrityAuditHistory, repairOfflineShell, formatBytes });
+    global.AIShortsStorageHealthPanel = Object.freeze({ build, render, refresh, cleanup, exportAnalysisDiagnostics, exportIntegrityDiagnostics, refreshAnalysisCacheEntries, refreshAnalysisCacheMaintenance, deleteSelectedAnalysisCacheEntry, deleteSelectedAnalysisCacheNamespaces, invalidateSelectedAnalysisCache, cleanupAnalysisCache, runIntegrityAudit, retryFailedIntegrityAssets, clearIntegrityAuditHistory, repairOfflineShell, formatBytes });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
     else install();
 })(window);

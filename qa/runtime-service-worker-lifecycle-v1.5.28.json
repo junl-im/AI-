@@ -1,0 +1,26 @@
+{
+  "version": "1.5.28",
+  "auditMode": "isolated-service-worker-runtime",
+  "handlers": [
+    "activate",
+    "fetch",
+    "install",
+    "message"
+  ],
+  "install": {
+    "skipWaitingCalls": 1,
+    "shellCached": true,
+    "currentCache": "ai-shorts-studio-shell-v1.5.28-analysis-namespace-maintenance-history"
+  },
+  "activate": {
+    "claimCalls": 1,
+    "deletedCaches": [
+      "ai-shorts-studio-shell-v1.3.9-old"
+    ]
+  },
+  "offlineNavigation": {
+    "status": 200,
+    "ok": true,
+    "bodyPrefix": "cached:./index.html"
+  }
+}

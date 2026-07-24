@@ -37,4 +37,4 @@ assert(longAudio.duringRender.queue.current.etaSeconds > 0 && /남은 약/.test(
 assert(longAudio.final.queue.done === 1 && longAudio.final.operations.active.length === 0, 'long-media render completes and releases operation state');
 assert(longAudio.final.runtime.runtimeErrors === 0 && longAudio.final.errors.length === 0, 'long-media flow has no runtime errors');
 assert(Number(longAudio.final.outputProbe.duration) >= 5 && Number(longAudio.final.outputProbe.size) > 10000, 'long-media flow produces a playable output');
-console.log('PASS v1.5.27 inherits the unchanged v1.5.3 MP3, MP4, cancel, retry, long-media, and ETA audit');
+console.log('PASS v1.5.28 inherits the unchanged v1.5.3 MP3, MP4, cancel, retry, long-media, and ETA audit');

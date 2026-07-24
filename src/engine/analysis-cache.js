@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.27 - contract-aware persistent cache invalidation and bounded diagnostics
+// AI Shorts Studio v1.5.28 - contract-aware persistent cache invalidation and bounded diagnostics
 'use strict';
 
 (function exposeAnalysisCache(global) {
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.27').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.28').replace(/^v/i, '');
     const BASE_SAMPLE_BYTES = Math.max(4096, Math.min(128 * 1024, Number(config.ANALYSIS_CACHE_FINGERPRINT_SAMPLE_BYTES) || 16 * 1024));
     const MAX_SAMPLE_BYTES = Math.max(BASE_SAMPLE_BYTES, Math.min(256 * 1024, Number(config.ANALYSIS_CACHE_MAX_SAMPLE_BYTES) || 128 * 1024));
     const FULL_HASH_MAX_BYTES = Math.max(BASE_SAMPLE_BYTES, Number(config.ANALYSIS_CACHE_FULL_HASH_MAX_BYTES) || 2 * 1024 * 1024);
@@ -436,6 +436,9 @@
         const namespace = String(opts.namespace || `analysis-contract-v1`);
         const appVersion = String(opts.appVersion || ENGINE_VERSION);
         const contractVersion = String(opts.contractVersion || '1');
+        const maintenanceHistoryLimit = Math.max(5, Math.min(80, Number(opts.maintenanceHistoryLimit || config.ANALYSIS_CACHE_MAINTENANCE_HISTORY_LIMIT) || 20));
+        const maintenanceStorageKey = `ai-shorts-analysis-cache-maintenance-v1-${textToken(databaseName)}`;
+        const namespaceToken = value => `${textToken(value)}${textToken(`namespace:${String(value || '')}`)}`;
         let effectiveMaxItems = baseMaxItems;
         let effectiveMaxBytes = baseMaxBytes;
         let databasePromise = null;
@@ -452,6 +455,16 @@
         let oldNamespaceDeletes = 0;
         let size = 0;
         let totalBytes = 0;
+        let namespaceSnapshot = Object.freeze({
+            current: Object.freeze({ token: namespaceToken(namespace), namespace, count: 0, bytes: 0, lastAccessAt: '', contractVersions: [], appVersions: [], tiers: [] }),
+            legacy: Object.freeze([]),
+            namespaceCount: 1,
+            legacyNamespaceCount: 0,
+            legacyItems: 0,
+            legacyBytes: 0,
+            generatedAt: ''
+        });
+        let maintenanceHistory = null;
         let lastError = '';
         let lastOperationAt = '';
         let quotaLevel = 'unknown';
@@ -463,6 +476,97 @@
         let quotaCleanups = 0;
         let lastQuotaAt = '';
         let state = enabled ? 'idle' : (supported ? 'disabled' : 'unsupported');
+
+        function loadMaintenanceHistory() {
+            if (maintenanceHistory) return maintenanceHistory;
+            maintenanceHistory = [];
+            try {
+                const storage = global.localStorage;
+                if (!storage || typeof storage.getItem !== 'function') return maintenanceHistory;
+                const parsed = JSON.parse(storage.getItem(maintenanceStorageKey) || '[]');
+                if (Array.isArray(parsed)) {
+                    maintenanceHistory = parsed.filter(item => item && typeof item === 'object').slice(0, maintenanceHistoryLimit).map(item => Object.freeze({
+                        operation: String(item.operation || 'cleanup').slice(0, 40),
+                        reason: String(item.reason || '').slice(0, 80),
+                        at: String(item.at || ''),
+                        removed: Math.max(0, Number(item.removed) || 0),
+                        bytes: Math.max(0, Number(item.bytes) || 0),
+                        namespaceTokens: Object.freeze((Array.isArray(item.namespaceTokens) ? item.namespaceTokens : []).map(value => String(value || '').slice(0, 24)).filter(Boolean).slice(0, 12))
+                    }));
+                }
+            } catch (_) { maintenanceHistory = []; }
+            return maintenanceHistory;
+        }
+
+        function saveMaintenanceHistory() {
+            try {
+                const storage = global.localStorage;
+                if (storage && typeof storage.setItem === 'function') storage.setItem(maintenanceStorageKey, JSON.stringify(loadMaintenanceHistory()));
+            } catch (_) { /* best effort */ }
+        }
+
+        function recordMaintenance(operation, detail) {
+            const source = detail || {};
+            const entry = Object.freeze({
+                operation: String(operation || 'cleanup').slice(0, 40),
+                reason: String(source.reason || '').slice(0, 80),
+                at: nowIso(),
+                removed: Math.max(0, Number(source.removed) || 0),
+                bytes: Math.max(0, Number(source.bytes) || 0),
+                namespaceTokens: Object.freeze(Array.from(new Set((Array.isArray(source.namespaceTokens) ? source.namespaceTokens : []).map(value => String(value || '').slice(0, 24)).filter(Boolean))).slice(0, 12))
+            });
+            const history = loadMaintenanceHistory();
+            history.unshift(entry);
+            if (history.length > maintenanceHistoryLimit) history.length = maintenanceHistoryLimit;
+            saveMaintenanceHistory();
+            return entry;
+        }
+
+        function getMaintenanceHistory(limit) {
+            const max = Math.max(1, Math.min(maintenanceHistoryLimit, Number(limit) || maintenanceHistoryLimit));
+            return loadMaintenanceHistory().slice(0, max).map(item => Object.freeze(Object.assign({}, item, { namespaceTokens: Object.freeze(Array.from(item.namespaceTokens || [])) })));
+        }
+
+        function summarizeNamespaces(rows) {
+            const grouped = new Map();
+            (Array.isArray(rows) ? rows : []).forEach(row => {
+                if (!row || !row.key) return;
+                const rowNamespace = String(row.namespace || 'legacy-unknown');
+                if (!grouped.has(rowNamespace)) grouped.set(rowNamespace, []);
+                grouped.get(rowNamespace).push(row);
+            });
+            const summaries = Array.from(grouped.entries()).map(([rowNamespace, items]) => {
+                const profiles = items.map(item => item && item.profile || {});
+                const lastAccessMs = items.reduce((max, item) => Math.max(max, Number(item && (item.lastAccessAt || item.createdAt)) || 0), 0);
+                return Object.freeze({
+                    token: namespaceToken(rowNamespace),
+                    namespace: rowNamespace === namespace ? namespace : '',
+                    isCurrent: rowNamespace === namespace,
+                    count: items.length,
+                    bytes: items.reduce((sum, item) => sum + Math.max(0, Number(item && item.bytes) || 0), 0),
+                    lastAccessAt: lastAccessMs ? new Date(lastAccessMs).toISOString() : '',
+                    contractVersions: Object.freeze(Array.from(new Set(profiles.map(profile => String(profile.contractVersion || '')).filter(Boolean))).slice(0, 8)),
+                    appVersions: Object.freeze(Array.from(new Set(profiles.map(profile => String(profile.appVersion || '')).filter(Boolean))).slice(0, 8)),
+                    tiers: Object.freeze(Array.from(new Set(profiles.map(profile => String(profile.tier || '')).filter(Boolean))).slice(0, 8))
+                });
+            });
+            const current = summaries.find(item => item.isCurrent) || Object.freeze({ token: namespaceToken(namespace), namespace, isCurrent: true, count: 0, bytes: 0, lastAccessAt: '', contractVersions: Object.freeze([]), appVersions: Object.freeze([]), tiers: Object.freeze([]) });
+            const legacy = summaries.filter(item => !item.isCurrent).sort((a, b) => String(b.lastAccessAt || '').localeCompare(String(a.lastAccessAt || '')));
+            namespaceSnapshot = Object.freeze({
+                current,
+                legacy: Object.freeze(legacy),
+                namespaceCount: summaries.length || 1,
+                legacyNamespaceCount: legacy.length,
+                legacyItems: legacy.reduce((sum, item) => sum + item.count, 0),
+                legacyBytes: legacy.reduce((sum, item) => sum + item.bytes, 0),
+                generatedAt: nowIso()
+            });
+            return namespaceSnapshot;
+        }
+
+        function getNamespaceSnapshot() {
+            return namespaceSnapshot;
+        }
 
         function persistentStats() {
             const total = hits + misses;
@@ -495,6 +599,10 @@
                 bulkDeletes,
                 invalidations,
                 oldNamespaceDeletes,
+                legacyNamespaceCount: namespaceSnapshot.legacyNamespaceCount,
+                legacyItems: namespaceSnapshot.legacyItems,
+                legacyBytes: namespaceSnapshot.legacyBytes,
+                maintenanceHistoryCount: loadMaintenanceHistory().length,
                 quotaLevel,
                 quotaRatio,
                 quotaUsage,
@@ -631,11 +739,25 @@
 
         async function refreshStats(database) {
             const rows = await readAll(database);
+            summarizeNamespaces(rows);
             const active = rows.filter(row => row && row.namespace === namespace);
             size = active.length;
             totalBytes = active.reduce((sum, row) => sum + Math.max(0, Number(row && row.bytes) || 0), 0);
             lastOperationAt = nowIso();
             return rows;
+        }
+
+        async function refreshNamespaceStatus() {
+            const database = await openDatabase();
+            if (!database) return getNamespaceSnapshot();
+            try {
+                const rows = await refreshStats(database);
+                return summarizeNamespaces(rows);
+            } catch (error) {
+                lastError = error && error.message || 'Persistent cache namespace status failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
+                return getNamespaceSnapshot();
+            }
         }
 
         async function listEntries() {
@@ -676,6 +798,7 @@
                 selectiveDeletes += 1;
                 await refreshStats(database);
                 recordEvent('persistent-cache-entry-deleted', { layer: 'persistent', key: row.key, bytes: row.bytes, size });
+                recordMaintenance('entry-delete', { reason: 'selected-entry', removed: 1, bytes: row.bytes, namespaceTokens: [namespaceToken(namespace)] });
                 return Object.freeze({ removed: true, token: normalized, bytes: Math.max(0, Number(row.bytes) || 0), stats: persistentStats() });
             } catch (error) {
                 lastError = error && error.message || 'Persistent cache delete failed';
@@ -698,6 +821,7 @@
                 await refreshStats(database);
                 const bytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
                 rows.forEach(row => recordEvent('persistent-cache-entry-deleted', { layer: 'persistent', key: row.key, bytes: row.bytes, size }));
+                if (rows.length) recordMaintenance('entry-delete', { reason: 'selected-entries', removed: rows.length, bytes, namespaceTokens: [namespaceToken(namespace)] });
                 return Object.freeze({ removed: rows.length, tokens: rows.map(row => textToken(row.key)), bytes, stats: persistentStats() });
             } catch (error) {
                 lastError = error && error.message || 'Persistent cache bulk delete failed';
@@ -732,6 +856,7 @@
                 await refreshStats(database);
                 const bytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
                 recordEvent('persistent-cache-invalidated', { layer: 'persistent', reason: String(rule.reason || 'criteria'), count: rows.length, bytes, size });
+                if (rows.length) recordMaintenance('criteria-invalidate', { reason: String(rule.reason || 'criteria'), removed: rows.length, bytes, namespaceTokens: [namespaceToken(namespace)] });
                 return Object.freeze({ removed: rows.length, bytes, criteria: Object.freeze({ reason: String(rule.reason || 'criteria'), tier: String(rule.tier || ''), contractVersion: String(rule.contractVersion || ''), appVersion: String(rule.appVersion || '') }), stats: persistentStats() });
             } catch (error) {
                 lastError = error && error.message || 'Persistent cache invalidation failed';
@@ -750,14 +875,20 @@
                 const now = Date.now();
                 const rows = await readAll(database);
                 const deleteKeys = [];
+                const deletedRows = [];
                 const active = [];
+                const cleanupLegacyNamespaces = settings.cleanupLegacyNamespaces === true;
                 const itemLimit = Math.max(1, Math.min(effectiveMaxItems, Number(settings.maxItems) || effectiveMaxItems));
                 const byteLimit = Math.max(minBytes, Math.min(effectiveMaxBytes, Number(settings.maxBytes) || effectiveMaxBytes));
                 rows.forEach(row => {
                     if (!row || row.namespace !== namespace) {
-                        if (row && row.key) { deleteKeys.push(row.key); oldNamespaceDeletes += 1; }
+                        if (cleanupLegacyNamespaces && row && row.key) {
+                            deleteKeys.push(row.key);
+                            deletedRows.push(row);
+                            oldNamespaceDeletes += 1;
+                        }
                     } else if (now - Number(row.createdAt || 0) > maxAgeMs) {
-                        if (row.key) deleteKeys.push(row.key);
+                        if (row.key) { deleteKeys.push(row.key); deletedRows.push(row); }
                         expired += 1;
                     } else active.push(row);
                 });
@@ -767,6 +898,7 @@
                     const rowBytes = Math.max(0, Number(row.bytes) || 0);
                     if (index >= itemLimit || bytes + rowBytes > byteLimit) {
                         deleteKeys.push(row.key);
+                        deletedRows.push(row);
                         evictions += 1;
                     } else bytes += rowBytes;
                 });
@@ -774,13 +906,45 @@
                 await refreshStats(database);
                 state = 'ready';
                 lastError = '';
-                if (deleteKeys.length) recordEvent('persistent-cache-pruned', { layer: 'persistent', count: deleteKeys.length, size, bytes: totalBytes, limit: itemLimit });
+                if (deleteKeys.length) {
+                    const removedRows = Array.from(new Map(deletedRows.filter(row => row && row.key).map(row => [row.key, row])).values());
+                    const removedBytes = removedRows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
+                    const namespaceTokens = Array.from(new Set(removedRows.map(row => namespaceToken(String(row.namespace || 'legacy-unknown')))));
+                    recordEvent('persistent-cache-pruned', { layer: 'persistent', count: deleteKeys.length, size, bytes: totalBytes, limit: itemLimit });
+                    recordMaintenance('automatic-prune', { reason: cleanupLegacyNamespaces ? 'legacy-and-limits' : 'expiry-or-limits', removed: deleteKeys.length, bytes: removedBytes, namespaceTokens });
+                }
             } catch (error) {
                 state = 'error';
                 lastError = error && error.message || 'Persistent cache prune failed';
                 recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
             }
             return persistentStats();
+        }
+
+        async function deleteNamespaces(tokens) {
+            const normalized = Array.from(new Set((Array.isArray(tokens) ? tokens : [tokens]).map(value => String(value || '').trim()).filter(Boolean))).slice(0, 24);
+            if (!normalized.length) return Object.freeze({ removedNamespaces: 0, removed: 0, bytes: 0, tokens: [], stats: persistentStats(), namespaceStatus: getNamespaceSnapshot(), history: getMaintenanceHistory() });
+            const database = await openDatabase();
+            if (!database) return Object.freeze({ removedNamespaces: 0, removed: 0, bytes: 0, tokens: normalized, stats: persistentStats(), namespaceStatus: getNamespaceSnapshot(), history: getMaintenanceHistory() });
+            try {
+                const tokenSet = new Set(normalized);
+                const rows = (await readAll(database)).filter(row => row && row.namespace !== namespace && tokenSet.has(namespaceToken(String(row.namespace || 'legacy-unknown'))));
+                const removedTokens = Array.from(new Set(rows.map(row => namespaceToken(String(row.namespace || 'legacy-unknown')))));
+                await removeKeys(database, rows.map(row => row.key));
+                oldNamespaceDeletes += rows.length;
+                selectiveDeletes += rows.length;
+                const bytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
+                await refreshStats(database);
+                if (rows.length) {
+                    recordEvent('persistent-cache-namespace-deleted', { layer: 'persistent', reason: 'selected-namespace', count: rows.length, bytes, size });
+                    recordMaintenance('namespace-delete', { reason: 'selected-namespace', removed: rows.length, bytes, namespaceTokens: removedTokens });
+                }
+                return Object.freeze({ removedNamespaces: removedTokens.length, removed: rows.length, bytes, tokens: Object.freeze(removedTokens), stats: persistentStats(), namespaceStatus: getNamespaceSnapshot(), history: Object.freeze(getMaintenanceHistory()) });
+            } catch (error) {
+                lastError = error && error.message || 'Persistent cache namespace delete failed';
+                recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
+                return Object.freeze({ removedNamespaces: 0, removed: 0, bytes: 0, tokens: normalized, stats: persistentStats(), namespaceStatus: getNamespaceSnapshot(), history: Object.freeze(getMaintenanceHistory()), error: lastError });
+            }
         }
 
         async function getPersistent(key) {
@@ -885,14 +1049,15 @@
             try {
                 const rows = await readAll(database);
                 const keys = rows.filter(row => row && row.namespace === namespace).map(row => row.key);
+                const bytes = rows.filter(row => row && row.namespace === namespace).reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
                 await removeKeys(database, keys);
                 clears += 1;
-                size = 0;
-                totalBytes = 0;
+                await refreshStats(database);
                 state = 'ready';
                 lastOperationAt = nowIso();
                 lastError = '';
                 recordEvent('persistent-cache-cleared', { layer: 'persistent', count: keys.length });
+                if (keys.length) recordMaintenance('current-clear', { reason: 'full-current-namespace', removed: keys.length, bytes, namespaceTokens: [namespaceToken(namespace)] });
             } catch (error) {
                 state = 'error';
                 lastError = error && error.message || 'Persistent cache clear failed';
@@ -902,7 +1067,7 @@
         }
 
         if (enabled) prunePersistent({ forceQuota: true }).catch(() => {});
-        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats, list: listEntries, deleteByToken, deleteByTokens, invalidate, refreshQuotaPolicy });
+        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats, list: listEntries, deleteByToken, deleteByTokens, invalidate, refreshQuotaPolicy, getNamespaceStatus: refreshNamespaceStatus, namespaceStatus: getNamespaceSnapshot, deleteNamespaces, maintenanceHistory: getMaintenanceHistory });
     }
 
     global.AIShortsAnalysisCache = Object.freeze({

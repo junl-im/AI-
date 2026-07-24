@@ -20,7 +20,7 @@ function fail(message) { console.error('FAIL ' + message); process.exit(1); }
 ['enhanceBudget', 'tuneRecommendations', 'proConfidence', 'proGrade', 'summarizeAnalysis'].forEach(token => {
     if (!tuner.includes(token)) fail(`pro tuner missing ${token}`);
 });
-['module-contracts.js?v=1.5.27-selective-cache-integrity-retry-portable-backup', 'analysis-cache.js?v=1.5.27-selective-cache-integrity-retry-portable-backup', 'pro-engine-tuner.js?v=1.5.27-selective-cache-integrity-retry-portable-backup', 'stability-auditor.js?v=1.5.27-selective-cache-integrity-retry-portable-backup'].forEach(token => {
+['module-contracts.js?v=1.5.28-analysis-namespace-maintenance-history', 'analysis-cache.js?v=1.5.28-analysis-namespace-maintenance-history', 'pro-engine-tuner.js?v=1.5.28-analysis-namespace-maintenance-history', 'stability-auditor.js?v=1.5.28-analysis-namespace-maintenance-history'].forEach(token => {
     if (!sw.includes(token)) fail(`service worker missing ${token}`);
 });
 

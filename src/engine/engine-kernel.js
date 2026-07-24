@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.27 - contract-aware layered analysis cache and selective invalidation facade
+// AI Shorts Studio v1.5.28 - contract-aware layered analysis cache and selective invalidation facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -11,7 +11,7 @@
     const tuner = global.AIShortsProEngineTuner || {};
     const stability = global.AIShortsStabilityAuditor || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.27').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.28').replace(/^v/i, '');
     const ANALYSIS_CONTRACT_VERSION = String(config.ANALYSIS_CACHE_CONTRACT_VERSION || '2');
     const ANALYSIS_CACHE_NAMESPACE = `analysis-contract-v${ANALYSIS_CONTRACT_VERSION}`;
 
@@ -31,6 +31,7 @@
         maxAgeMs: Math.max(60_000, Number(config.ANALYSIS_PERSISTENT_CACHE_MAX_AGE_MS) || 7 * 24 * 60 * 60 * 1000),
         minItems: Math.max(1, Number(config.ANALYSIS_PERSISTENT_CACHE_MIN_ITEMS) || 2),
         minBytes: Math.max(512 * 1024, Number(config.ANALYSIS_PERSISTENT_CACHE_MIN_BYTES) || 4 * 1024 * 1024),
+        maintenanceHistoryLimit: Math.max(5, Number(config.ANALYSIS_CACHE_MAINTENANCE_HISTORY_LIMIT) || 20),
         warningRatio: Math.max(0.5, Number(config.STORAGE_WARNING_RATIO) || 0.8),
         criticalRatio: Math.max(0.5, Number(config.STORAGE_CRITICAL_RATIO) || 0.92)
     }) : null;
@@ -185,6 +186,24 @@
         return Object.freeze(Object.assign({}, result, { cache: cacheStats() }));
     }
 
+    async function getPersistentAnalysisCacheNamespaceStatus() {
+        if (!persistentAnalysisCache) return Object.freeze({ current: null, legacy: Object.freeze([]), namespaceCount: 0, legacyNamespaceCount: 0, legacyItems: 0, legacyBytes: 0, generatedAt: '' });
+        if (persistentAnalysisCache.getNamespaceStatus) return persistentAnalysisCache.getNamespaceStatus();
+        return persistentAnalysisCache.namespaceStatus ? persistentAnalysisCache.namespaceStatus() : Object.freeze({ current: null, legacy: Object.freeze([]), namespaceCount: 0, legacyNamespaceCount: 0, legacyItems: 0, legacyBytes: 0, generatedAt: '' });
+    }
+
+    async function deletePersistentAnalysisCacheNamespaces(tokens) {
+        if (!persistentAnalysisCache || !persistentAnalysisCache.deleteNamespaces) return Object.freeze({ removedNamespaces: 0, removed: 0, bytes: 0, tokens: Object.freeze([]), cache: cacheStats() });
+        const result = await persistentAnalysisCache.deleteNamespaces(tokens);
+        if (analysisCache && analysisCache.clear) analysisCache.clear();
+        return Object.freeze(Object.assign({}, result, { cache: cacheStats() }));
+    }
+
+    function getAnalysisCacheMaintenanceHistory(limit) {
+        if (!persistentAnalysisCache || !persistentAnalysisCache.maintenanceHistory) return [];
+        return persistentAnalysisCache.maintenanceHistory(limit);
+    }
+
     async function refreshPersistentAnalysisCachePolicy() {
         if (persistentAnalysisCache && persistentAnalysisCache.refreshQuotaPolicy) await persistentAnalysisCache.refreshQuotaPolicy(true);
         if (persistentAnalysisCache && persistentAnalysisCache.prune) await persistentAnalysisCache.prune({ forceQuota: true });
@@ -201,6 +220,8 @@
             generatedAt: new Date().toISOString(),
             privacy: Object.freeze({ includesFileNames: false, includesPaths: false, keyRepresentation: 'fnv1a-token' }),
             cache: cacheStats(),
+            namespaceStatus: persistentAnalysisCache && persistentAnalysisCache.namespaceStatus ? persistentAnalysisCache.namespaceStatus() : null,
+            maintenanceHistory: getAnalysisCacheMaintenanceHistory(40),
             recentEvents: Array.isArray(memoryDiagnostics.recentEvents) ? memoryDiagnostics.recentEvents.slice(0, 80) : []
         });
     }
@@ -264,6 +285,9 @@
         deletePersistentAnalysisCacheEntry,
         deletePersistentAnalysisCacheEntries,
         invalidateAnalysisCache,
+        getPersistentAnalysisCacheNamespaceStatus,
+        deletePersistentAnalysisCacheNamespaces,
+        getAnalysisCacheMaintenanceHistory,
         refreshPersistentAnalysisCachePolicy
     });
 })(window);

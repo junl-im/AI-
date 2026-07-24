@@ -1,13 +1,14 @@
-# AI 쇼츠 제작 스튜디오 v1.5.27
+# AI 쇼츠 제작 스튜디오 v1.5.28
 
-## Selective Analysis Cache · Integrity Retry · Portable Protected Backup
+## Analysis Namespace Visibility · Selective Cleanup History
 
-- 영구 분석 캐시는 계약 버전과 분석 옵션 프로필을 함께 저장해 균형·속도·품질 또는 이전 계약 항목만 선택적으로 무효화할 수 있습니다.
-- 캐시 목록에서 여러 비식별 항목을 동시에 선택 삭제할 수 있으며 파일명·경로·원시 캐시 키는 표시하지 않습니다.
-- 서비스워커 진단에서 실패 자산만 즉시 재검증·복구하고 감사 이력과 백오프 상태를 초기화할 수 있습니다.
-- 중요 세션 백업을 독립 JSON 파일로 내보내거나 가져올 수 있으며, 이름·메모를 붙이고 가져오기 전 스키마·체크섬을 검증합니다.
-- build key는 `1.5.27-selective-cache-integrity-retry-portable-backup`입니다.
-- 자동 QA **211/211**, Chromium 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow **0건**을 통과했습니다.
+- 일반 캐시 정리·상태 새로고침·새 분석 기록 시 이전 분석 namespace를 자동 삭제하지 않고 사용자가 상태를 확인할 때까지 보존합니다.
+- 저장소 진단 화면에서 현재·이전 namespace의 항목 수, 추정 바이트, 마지막 사용 시각, 계약·앱 버전, 분석 tier를 확인할 수 있습니다.
+- 이전 namespace는 원문 대신 되돌릴 수 없는 16자리 비식별 토큰으로 표시하며 여러 namespace를 선택해 정리할 수 있습니다. 현재 namespace는 선택 삭제 대상에서 제외됩니다.
+- 항목 삭제·조건별 무효화·namespace 정리·현재 캐시 비우기·자동 TTL/LRU 정리 이력을 최대 20개까지 로컬에 보존합니다.
+- 진단 상태와 내보내기에는 파일명·경로·원시 캐시 키·이전 namespace 원문을 포함하지 않습니다.
+- build key는 `1.5.28-analysis-namespace-maintenance-history`입니다.
+- 자동 QA **212/212**, Chromium 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow **0건**을 통과했습니다.
 - 상세 변경과 다음 패치 라인업은 `PATCH_REPORT.md`를 참고하세요.
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다. 영구 분석 캐시는 사용 브라우저의 IndexedDB 안에서만 제한적으로 보관됩니다.

@@ -1,3 +1,49 @@
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.28
+
+## 최종 결과
+
+- 자동 검사: **212/212 통과**
+- 실행 방식: 컨테이너 단일 명령 제한으로 검사 0~180의 181개와 181~211의 31개를 연속 두 구간으로 실행, 실패 **0건**
+- 신규 회귀 검사: 이전 namespace 보존, 비식별 상태 요약, 다중 선택 정리, 현재 namespace 보호, bounded 유지보수 이력 모두 통과
+- 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- 서비스워커 install·activate·이전 cache 정리·offline navigation 통과
+
+## 분석 namespace 결과
+
+- 일반 상태 조회·새 캐시 쓰기·TTL/LRU 정리 후 이전 namespace 보존 통과
+- 현재·이전 namespace 항목 수·바이트·마지막 접근·계약·앱 버전·tier 집계 통과
+- 이전 namespace 16자리 비식별 토큰 표시와 원문 비노출 통과
+- 여러 이전 namespace 선택 삭제, 현재 namespace 보호, 알 수 없는 토큰 무시 통과
+- 항목 삭제·조건 무효화·namespace 삭제·clear·자동 정리 이력 최대 20개 순환 보관 통과
+- 파일명·경로·원시 캐시 키·이전 namespace 원문 비노출 통과
+
+## UI·CSS 결과
+
+- 저장소 패널 namespace 상태·다중 선택·최근 이력 렌더링 및 갱신 통과
+- Chromium 4개 viewport에서 새 패널 포함 body/html scroll width가 viewport와 동일
+- CSS ownership: 연결 CSS 46개, 전체 CSS 47개, `!important` 593개
+- 실제 conflict·same-value duplicate·shadowed declaration: **0건**
+
+## 런타임 감사
+
+- browser audit: 4개 viewport 오류·거절·console error 0, horizontal overflow 0
+- service worker lifecycle: 새 cache `ai-shorts-studio-shell-v1.5.28-analysis-namespace-maintenance-history`, install·activate·offline navigation 통과
+- GPU/media capability: acceleration-requested·software-forced 모두 1280×720 30fps H.264/AAC 62프레임, dropped frame 0
+- interaction-state·process-memory·structure-priority 자료는 대상 코드가 변경되지 않아 v1.5.27 근거를 명시적으로 상속
+- 15→30→15분 장시간 MP4 자료는 v1.5.27 파일을 상속하며 실제 장시간 실행 근거는 v1.5.24
+
+## 감사 제한
+
+- structure priority probe는 v1.5.28 재실행이 환경 실행 제한을 넘겨 완료되지 않아, 변경하지 않은 4개 owner stylesheet의 v1.5.27 근거를 상속했습니다.
+- 유지보수 이력은 best-effort localStorage이므로 사이트 데이터 삭제·저장 차단·quota 오류에서 손실될 수 있습니다.
+- 이전 namespace는 사용자가 선택 정리하기 전까지 IndexedDB 사용량에 남습니다.
+- 실제 모바일 Safari·Samsung Internet 다운로드 관리자와 물리 GPU 가속은 실기기 검증이 필요합니다.
+
+---
+
+# QA REPORT HISTORY — v1.5.27 source document
+
 # QA REPORT — AI 쇼츠 스튜디오 v1.5.27
 
 ## 최종 결과
