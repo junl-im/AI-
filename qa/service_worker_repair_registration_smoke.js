@@ -35,7 +35,7 @@ const window = {
     location: { protocol: 'https:', hostname: 'studio.test' },
     isSecureContext: true,
     navigator: { serviceWorker },
-    AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.2', SW_UPDATE_MAX_ATTEMPTS: 1 },
+    AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.3', SW_UPDATE_MAX_ATTEMPTS: 1 },
     AIShortsAppState: { addDiagnostic(item) { diagnostics.push(item); } },
     setTimeout() { return 9; },
     clearTimeout(id) { if (id === 9) timeoutCleared = true; }

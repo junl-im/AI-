@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.2 - footer storage health with issue-driven navigation and gated diagnostics
+// AI Shorts Studio v1.6.3 - footer storage health with issue-driven navigation and gated diagnostics
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;

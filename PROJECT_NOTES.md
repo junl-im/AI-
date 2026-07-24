@@ -1,53 +1,28 @@
-# PROJECT NOTES v1.6.2
+# PROJECT NOTES v1.6.3
 
-## 변하지 않는 프로젝트 원칙
+## 릴리스 성격
 
-- 정적 호스팅으로 기본 분석·편집·렌더 기능이 동작해야 합니다.
-- 외부 CDN, 원격 런타임 코드, 추적 스크립트를 추가하지 않습니다.
-- 사용자가 선택한 Local AI 기능 외에는 미디어와 프로젝트 내용을 네트워크로 보내지 않습니다.
-- 서비스워커 앱 셸 변경 시 `asset-integrity.json`을 재생성합니다.
-- 현재 namespace, 중요 세션 백업, 프로젝트 원본을 자동 파괴하지 않습니다.
+Stage Focus & Progressive Disclosure UI/UX 패치입니다. 분석·렌더·프로젝트·캐시 데이터 계약은 변경하지 않습니다.
 
-## 저장소 UI 계약
+## 주요 소유권
 
-- 일반 저장소 요약은 전체 작업실 뒤 페이지 최하단에 둡니다.
-- 정상 상태에서는 낮은 시각 우선순위를 유지합니다.
-- cleanup·repair action이 새로 발생할 때만 한 번 자동 이동·강조합니다.
-- namespace, signature, 캐시 계약, 셸 감사 용어는 일반 화면에 노출하지 않습니다.
-- 상세 캐시 조회는 고급 진단을 열기 전에는 실행하지 않습니다.
-- 위험 작업은 공통 확인 계층을 통과해야 합니다.
+- 단계 집중 상태·동적 inline 복원: `src/ui/workflow-focus-layout.js`
+- 집중 레이아웃 시각 규칙: `assets/css/workflow-focus-layout.css`
+- 실제 앱 상태 → workflow phase: `src/ui/ux-controls.js`
+- shell 지연 적재: `src/boot/staged-ui-loader.js`
+- 앱 셸 오프라인 자산: `sw.js`, `asset-integrity.json`
 
-## Local AI 배치 계약
+## 성능 계약
 
-- Local AI는 프로젝트·카피와 핵심 제작 단계 사이의 전체 폭 `ai` grid row를 소유합니다.
-- 기본 상태는 접힘이며 명시적 사용자 동작으로만 workbench를 펼칩니다.
-- 미리보기·파형 집중 모드에서는 숨겨 핵심 편집 공간을 보존합니다.
-- endpoint 검증은 `local-ai-provider-registry.js`가 소유합니다.
-- 자동 probe 금지. 연결·생성·전사는 사용자 gesture 뒤에 실행합니다.
-- AI 모듈은 staged loader의 `localAI` phase에서만 적재합니다.
+- 직접 실행 스크립트 49개
+- 단계 집중 컨트롤러는 shell phase에서 적재
+- 동일 상태의 레이아웃 inline 재적용 방지
+- CSS `!important` 593개 유지
+- 하단 메뉴는 ResizeObserver 기반 실측, polling 없음
 
-## 버전 동기화 대상
+## 패키징 기준
 
-- `package.json`
-- `src/config/app-runtime-config.js`
-- `src/boot/app-version-sync.js`
-- `src/boot/update-sentinel.js`
-- `sw.js`, `index.html`, `asset-integrity.json`
-- 버전별 QA JSON과 문서
-
-## 릴리스 전 필수 점검
-
-- 무결성 manifest 재생성
-- storage footer·auto-navigation browser audit
-- Local AI layout harmony browser audit
-- staged loading 직접 스크립트 예산
-- 일반 4개 viewport browser audit
-- CSS ownership, interaction, structure priority
-- service worker lifecycle, process memory, GPU/media
-- 전체 221개 `qaChecks`
-- `git diff --check`
-- release/patch ZIP 무결성 및 v1.6.1 기준 덮어쓰기 SHA-256 동일성
-
-## 다음 확장 규칙
-
-상시 상태·전문 진단·선택형 AI는 핵심 제작 단계보다 높은 시각 우선순위를 갖지 않습니다. MediaPipe, 브라우저 WASM 모델, ffmpeg.wasm은 초기 번들에 넣지 않고 optional provider 또는 model pack으로 격리합니다.
+- 기준 커밋: v1.6.2 `66e5b42`
+- 전체본: `ai-shorts-studio-v1.6.3-release.zip`
+- 패치본: `ai-shorts-studio-v1.6.3-patch-from-v1.6.2.zip`
+- 패치 적용 결과는 전체본과 파일별 SHA-256 비교

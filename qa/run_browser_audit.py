@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chromium responsive/runtime audit for AI Shorts Studio v1.6.2."""
+"""Chromium responsive/runtime audit for the current AI Shorts Studio release."""
 import asyncio
 import json
 import re
@@ -7,7 +7,8 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.6.2.json'
+VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))['version']
+OUTPUT = ROOT / 'qa' / f'runtime-browser-audit-v{VERSION}.json'
 
 INSTRUMENT = r'''<script>
 window.__aiAudit={errors:[],rejections:[],consoleErrors:[],raf:0,mutations:0};
@@ -41,7 +42,7 @@ def build_inline_html():
     html = re.sub(r'<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"[^>]*/?>', inline_css, html)
     html = re.sub(r'<script[^>]+src="([^"]+)"[^>]*></script>', inline_js, html)
     staged = [
-        'src/ui/ux-controls.js', 'src/ui/hyperconnect-flow.js', 'src/ui/flow-polish.js',
+        'src/ui/ux-controls.js', 'src/ui/workflow-focus-layout.js', 'src/ui/hyperconnect-flow.js', 'src/ui/flow-polish.js',
         'src/ui/flow-hotfix.js', 'src/ui/flow-integrity.js', 'src/ui/flow-doctor.js',
         'src/ui/flow-quality-gate.js', 'src/ui/workspace-comfort.js', 'src/ui/session-continuity.js',
         'src/ui/range-drag-controls.js', 'src/ui/handoff-coach.js', 'src/ui/save-readiness.js',
@@ -140,6 +141,16 @@ async def audit_mode(browser, mode, viewport):
 
     dock_rect = await rect(page, '#bottomDock')
     dock_sizes = await page.evaluate("() => {const el=document.querySelector('.bottom-dock-tabs');return {scrollWidth:el.scrollWidth,clientWidth:el.clientWidth}}")
+    workflow_focus_initial = await page.evaluate("""() => ({
+      enabled:Boolean(window.AIShortsWorkflowFocusLayout?.isEnabled?.()),
+      effective:document.body.dataset.workflowFocusEffective||'off',
+      active:document.body.dataset.activeFlowTab||'',
+      visiblePanels:[...document.querySelectorAll('[data-flow-panel]')].filter(el=>getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().height>0).length,
+      utilityVisible:(()=>{const el=document.querySelector('.project-copy-hub');return Boolean(el&&getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().height>0);})()
+    })""")
+    if mode == 'desktop' and workflow_focus_initial['effective'] == 'on':
+        await page.evaluate("() => AIShortsWorkflowFocusLayout.setEnabled(false,{persist:false})")
+        await page.wait_for_timeout(80)
     workspace = await page.evaluate("""() => {
       const t=document.querySelector('#workspaceLayoutToolbar'); const ds=[...document.querySelectorAll('[data-workspace-divider]')];
       const cs=t?getComputedStyle(t):null;
@@ -215,6 +226,7 @@ async def audit_mode(browser, mode, viewport):
         'expandedTabs': expanded_tabs,
         'mobileMenu': mobile_menu,
         'workspace': workspace,
+        'workflowFocusInitial': workflow_focus_initial,
         'workspaceTests': workspace_tests,
         'uiStructure': ui_structure,
         'initialUiStructure': initial_ui_structure,
@@ -233,7 +245,7 @@ async def main():
             audit_mode(browser, 'mobile', {'width': 390, 'height': 844}),
         )
         report = {
-            'version': '1.6.2',
+            'version': VERSION,
             'desktop': desktop,
             'smallLaptop': small_laptop,
             'tablet': tablet,

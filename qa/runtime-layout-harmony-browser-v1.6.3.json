@@ -1,0 +1,206 @@
+{
+  "version": "1.6.3",
+  "desktop": {
+    "name": "desktop",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "grid": {
+      "left": 16,
+      "right": 1396,
+      "top": 455,
+      "bottom": 3312.109375,
+      "width": 1380,
+      "height": 2857.109375,
+      "display": "grid",
+      "visibility": "visible",
+      "visible": true
+    },
+    "utility": {
+      "left": 16,
+      "right": 1395.984375,
+      "top": 521,
+      "bottom": 744,
+      "width": 1379.984375,
+      "height": 223,
+      "display": "grid",
+      "visibility": "visible",
+      "visible": true
+    },
+    "importPanel": {
+      "left": 16,
+      "right": 393.75,
+      "top": 846.109375,
+      "bottom": 1116.109375,
+      "width": 377.75,
+      "height": 270,
+      "display": "block",
+      "visibility": "visible",
+      "visible": true
+    },
+    "aiClosed": {
+      "left": 16,
+      "right": 1395.984375,
+      "top": 756,
+      "bottom": 834.109375,
+      "width": 1379.984375,
+      "height": 78.109375,
+      "display": "block",
+      "visibility": "visible",
+      "visible": true
+    },
+    "aiOpen": {
+      "left": 16,
+      "right": 1395.984375,
+      "top": 756,
+      "bottom": 1522.25,
+      "width": 1379.984375,
+      "height": 766.25,
+      "display": "block",
+      "visibility": "visible",
+      "visible": true
+    },
+    "workbench": {
+      "left": 17,
+      "right": 1394.984375,
+      "top": 833.109375,
+      "bottom": 1521.25,
+      "width": 1377.984375,
+      "height": 688.140625,
+      "display": "grid",
+      "visibility": "visible",
+      "visible": true
+    },
+    "storage": {
+      "left": 32,
+      "right": 1408,
+      "top": 3340.109375,
+      "bottom": 3396.015625,
+      "width": 1376,
+      "height": 55.90625,
+      "display": "grid",
+      "visibility": "visible",
+      "visible": true
+    },
+    "footerRelation": {
+      "afterMain": true,
+      "previousTag": "MAIN",
+      "parentClass": "app-shell"
+    },
+    "collapsed": {
+      "open": false,
+      "overflow": 0,
+      "summaryText": "선택형 AI 보조 도구\n로컬 AI 카피 · 음성 전사\n프로젝트·카피·자막 작업과 연결해 필요할 때만 펼쳐 사용합니다.\nLOCALHOST ONLY\nOllama · llama.cpp · whisper.cpp"
+    },
+    "opened": {
+      "open": true,
+      "overflow": 0
+    },
+    "focusVisibility": {
+      "preview": false,
+      "waveform": false
+    },
+    "errors": []
+  },
+  "mobile": {
+    "name": "mobile",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "grid": {
+      "left": 16,
+      "right": 374,
+      "top": 774.90625,
+      "bottom": 898.359375,
+      "width": 358,
+      "height": 123.453125,
+      "display": "block",
+      "visibility": "visible",
+      "visible": true
+    },
+    "utility": {
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0,
+      "display": "none",
+      "visibility": "visible",
+      "visible": false
+    },
+    "importPanel": {
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "bottom": 0,
+      "width": 0,
+      "height": 0,
+      "display": "none",
+      "visibility": "visible",
+      "visible": false
+    },
+    "aiClosed": {
+      "left": 16,
+      "right": 374,
+      "top": 774.90625,
+      "bottom": 898.359375,
+      "width": 358,
+      "height": 123.453125,
+      "display": "block",
+      "visibility": "visible",
+      "visible": true
+    },
+    "aiOpen": {
+      "left": 16,
+      "right": 374,
+      "top": 420.90625,
+      "bottom": 2082.46875,
+      "width": 358,
+      "height": 1661.5625,
+      "display": "block",
+      "visibility": "visible",
+      "visible": true
+    },
+    "workbench": {
+      "left": 17,
+      "right": 373,
+      "top": 543.359375,
+      "bottom": 2081.46875,
+      "width": 356,
+      "height": 1538.109375,
+      "display": "grid",
+      "visibility": "visible",
+      "visible": true
+    },
+    "storage": {
+      "left": 17,
+      "right": 373,
+      "top": 920.359375,
+      "bottom": 1016.265625,
+      "width": 356,
+      "height": 95.90625,
+      "display": "grid",
+      "visibility": "visible",
+      "visible": true
+    },
+    "footerRelation": {
+      "afterMain": true,
+      "previousTag": "MAIN",
+      "parentClass": "app-shell"
+    },
+    "collapsed": {
+      "open": false,
+      "overflow": 0,
+      "summaryText": "선택형 AI 보조 도구\n로컬 AI 카피 · 음성 전사\n프로젝트·카피·자막 작업과 연결해 필요할 때만 펼쳐 사용합니다."
+    },
+    "opened": {
+      "open": true,
+      "overflow": 0
+    },
+    "focusVisibility": null,
+    "errors": []
+  }
+}

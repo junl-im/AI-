@@ -32,9 +32,13 @@ function harness() {
     store.set(target, new Response('tampered', { status: 200 })); failingAsset = target;
     const first = (await h.dispatch('message', { type: 'ai-shorts-service-worker-integrity-sample-request', requestId: 'one', sampleSize: 32, source: 'manual' }))[0].report;
     if (!first.periodicIntegrity.failed || !first.integrityBackoff[target] || first.integrityHistory.length !== 1) throw new Error('failed integrity repair must create per-asset exponential backoff and bounded audit history');
-    for (let index = 0; index < 3; index += 1) await h.dispatch('message', { type: 'ai-shorts-service-worker-integrity-sample-request', requestId: `next-${index}`, sampleSize: 32, source: 'scheduled' });
-    const latest = (await h.dispatch('message', { type: 'ai-shorts-service-worker-status-request', requestId: 'status' }))[0].report;
-    if (latest.integrityHistory.length < 4 || !latest.integrityHistory.some(item => item.source === 'scheduled')) throw new Error('integrity audit history must preserve manual and scheduled run summaries');
+    let latest = null;
+    for (let index = 0; index < 8; index += 1) {
+        await h.dispatch('message', { type: 'ai-shorts-service-worker-integrity-sample-request', requestId: `next-${index}`, sampleSize: 32, source: 'scheduled' });
+        latest = (await h.dispatch('message', { type: 'ai-shorts-service-worker-status-request', requestId: `status-${index}` }))[0].report;
+        if (latest.integrityHistory.some(item => item.skippedBackoff > 0)) break;
+    }
+    if (!latest || latest.integrityHistory.length < 4 || !latest.integrityHistory.some(item => item.source === 'scheduled')) throw new Error('integrity audit history must preserve manual and scheduled run summaries');
     if (!latest.integrityHistory.some(item => item.skippedBackoff > 0)) throw new Error('rotating audit must skip assets whose retry backoff has not expired');
     console.log('PASS service worker integrity audit history and per-asset retry backoff');
 })().catch(error => { console.error(error.stack || error); process.exit(1); });

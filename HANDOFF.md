@@ -1,90 +1,90 @@
-# HANDOFF v1.6.2 Layout Harmony & Footer Health
+# HANDOFF v1.6.3 Stage Focus & Progressive Disclosure
 
 ## 현재 상태
 
-- 앱 버전: `1.6.2`
-- runtime version: `v1.6.2`
-- build key: `1.6.2-layout-harmony-footer-health`
-- 서비스워커 캐시: `ai-shorts-studio-shell-v1.6.2-layout-harmony-footer-health`
+- 앱 버전: `1.6.3`
+- runtime version: `v1.6.3`
+- build key: `1.6.3-stage-focus-progressive-disclosure`
+- 서비스워커 캐시: `ai-shorts-studio-shell-v1.6.3-stage-focus-progressive-disclosure`
 - 분석 캐시 계약: `v3`
-- 기준 릴리스: v1.6.1 `e7c9016`
-- 최종 릴리스 커밋: 이 문서와 배포물을 고정한 `git log -1` 참조
+- 기준 릴리스: v1.6.2 `66e5b42`
+- 등록 자동 검사: `224개`
 
-v1.6.1의 고급 진단 격리를 유지하면서 저장소 상태를 페이지 최하단 지원 영역으로 이동하고, Local AI를 제작 흐름에 맞는 접이식 행으로 통합했습니다.
+v1.6.2의 하단 저장소 상태와 작업 흐름형 Local AI 배치를 유지하면서, 데스크톱 균형 작업실에 단계별 점진 공개를 추가했습니다.
 
 ## 이번 패치의 핵심
 
-### 1. 페이지 최하단 저장소 상태
+### 1. 단계 집중 레이아웃
 
-`src/ui/storage-health-panel.js`, `assets/css/storage-health-panel.css`
+`src/ui/workflow-focus-layout.js`, `assets/css/workflow-focus-layout.css`
 
-- 저장소·오프라인 요약을 전체 작업실 뒤 `.app-shell` 최하단에 배치
-- 정상 상태에서는 낮은 대비와 compact 높이로 제작 흐름 방해 최소화
-- 정리 또는 복구 action이 새로 발생할 때만 한 번 자동 스크롤·포커스·강조
-- 동일 문제의 반복 렌더에서는 자동 이동을 반복하지 않음
-- 고급 진단·확인 창이 열린 동안에는 자동 이동하지 않음
+- 현재 탭과 같은 패널을 주 작업으로 확장
+- 명시적 다음 단계만 86px 지원 카드로 유지
+- 이후 단계와 선택형 보조 도구는 현재 흐름에서 제외
+- 지원 카드 버튼으로 다음 단계를 즉시 주 작업으로 승격
+- 전체 보기 토글로 기존 8개 패널과 유틸리티를 복원
+- 미리보기·파형 전용 모드에서는 단계 집중을 자동 일시 중지
+- 모바일은 기존 단일 탭 흐름을 그대로 유지
 
-### 2. Local AI 작업 흐름 통합
+### 2. 실제 상태 기반 단계 표시
 
-`index.html`, `assets/css/local-ai-studio.css`, `assets/css/workspace-layout-controls.css`
+`src/ui/ux-controls.js`
 
-- 독립 대형 section을 기본 닫힘 `<details>` 작업대로 전환
-- 프로젝트·카피 유틸리티와 핵심 제작 단계 사이의 전체 폭 `ai` grid row에 배치
-- summary에서 로컬 AI 카피·전사 역할과 localhost 정책만 간단히 표시
-- 사용자가 펼칠 때 기존 연결·모델·생성·전사 UI를 그대로 제공
-- 미리보기·파형 집중 모드에서는 선택형 AI 영역을 숨김
-- 모바일에서는 compact summary와 단일 열 workbench로 정렬
+- 파일 없음: 불러오기
+- 파일 있음·추천 없음: 자동 분석
+- 추천 있음: 편집
+- 내보내기 결과 있음: 내보내기
+- 동일 상태 쓰기는 microtask로 합쳐 불필요한 observer 왕복을 줄임
 
-### 3. 성능·안전 계약 유지
+### 3. 하단 메뉴 안전 여백
 
-- Local AI는 staged loader를 통한 첫 사용 시 적재를 유지
-- 저장소 상세 목록은 고급 진단을 열기 전에는 조회하지 않음
-- 자동 이동은 정리·복구가 필요한 actionable 상태에만 실행
-- 새 외부 네트워크 요청, 원격 코드, 데이터 계약 변경 없음
-- Update Sentinel과 기존 **모듈형 엔진** 소유권 유지
+- `ResizeObserver`로 실제 하단 메뉴 높이를 측정
+- `--hyperflow-dock-height`, `--workflow-dock-clearance` 갱신
+- 콘텐츠와 스크롤 대상의 하단 겹침 방지
+
+### 4. CSS 소유권 유지
+
+- 새 스타일시트의 추가 `!important` 0개
+- 전체 활성 `!important` 593개 유지
+- selector-property 충돌·동일값 중복·shadow 선언 0
+- 필요한 동적 강제 우선순위는 컨트롤러가 상태 변경 시에만 소유하고 원래 inline 값을 복원
 
 ## 검수 순서
 
 1. `node tools/generate-integrity-manifest.js`
-2. `node qa/storage_health_visibility_smoke.js`
-3. `python3 qa/run_storage_health_browser_audit.py`
-4. `python3 qa/run_layout_harmony_browser_audit.py`
-5. `python3 qa/run_browser_audit.py`
-6. `node qa/run_css_ownership_audit.js`
-7. `python3 qa/run_interaction_state_audit.py`
-8. `python3 qa/run_structure_priority_probe.py`
-9. `node qa/run_service_worker_lifecycle.js`
-10. 전체 221개 `qaChecks`
+2. `node qa/workflow_focus_layout_smoke.js`
+3. `python3 qa/run_workflow_focus_layout_audit.py`
+4. `python3 qa/run_browser_audit.py`
+5. `node qa/run_css_ownership_audit.js`
+6. `python3 qa/run_interaction_state_audit.py`
+7. `node qa/run_service_worker_lifecycle.js`
+8. `python3 qa/run_process_memory_audit.py --cycles 4`
+9. `python3 qa/run_gpu_media_capability_audit.py`
+10. 전체 224개 `qaChecks`
 11. `git diff --check`
 12. 전체·패치 ZIP `unzip -t`와 패치 적용 SHA-256 비교
 
 ## QA 근거
 
-- 등록 자동 검사: **221개**
+- 등록 자동 검사: **224/224 통과**
 - 일반 Chromium 4개 viewport: 오류·Promise 거절·console error·가로 overflow 0
-- 저장소 전용 감사: 페이지 최하단 배치, actionable 상태 1회 자동 이동·강조, 정상 상태 비개입 통과
-- Layout Harmony 감사: 데스크톱·모바일 Local AI 기본 접힘, 명시적 펼침, 전체 폭 정렬, 집중 모드 숨김, overflow 0
-- CSS ownership: 48개 파일, 충돌·동일값 중복·shadowed declaration 0, `!important` 593
-- 구조 우선순위 probe: safe 166, unsafe 27, unproven 13, 오류 0
-- 서비스워커 install·activate·offline navigation과 앱 셸 123개 SHA-256 검증
-- GPU/media 두 모드 디코딩 성공, 런타임 오류 0
-- 프로세스 메모리: JS heap slope 약 0.0061MiB/cycle, peak RSS 약 857.2MiB; RSS는 Chromium warmup 포함 보조 지표
-- 장시간 15→30→15분 1080p 경로는 미디어 코드가 변경되지 않아 검증된 실측 자료를 명시적으로 상속
+- 단계 집중 전용 감사: 기본 집중, 지원 카드 승격, 전체 보기 복구, 전용 모드 양보, 모바일 비개입 통과
+- 초기 직접 실행 스크립트: 49개 유지
+- CSS ownership: 49개 파일, 활성 48개, 충돌·동일값 중복·shadow 0, `!important` 593
+- 앱 셸 SHA-256 무결성 자산: 125개
+- 서비스워커 install·activate·offline navigation 통과
+- GPU/media 비교: 두 모드 H.264/AAC 디코딩 및 런타임 오류 0
+- 프로세스 메모리: JS heap slope 약 0.0056MiB/cycle, peak RSS 약 835.1MiB. RSS는 Chromium warmup을 포함한 보조 지표
+- 15→30→15분 1080p 장시간 영상은 미디어 경로가 변경되지 않아 v1.6.2의 검증된 실측 자료를 상속
 
 ## 알려진 제한
 
-- 실제 모바일 Safari·Samsung Internet의 보조기술 조합은 별도 실기기 확인이 필요합니다.
-- headless Chromium의 GPU·프로세스 메모리 결과는 실제 물리 장치와 동일하지 않습니다.
-- 저장소 자동 이동은 브라우저의 스크롤·포커스 정책에 따라 애니메이션 표현이 달라질 수 있습니다.
-- Local AI 처리 품질과 속도는 설치 모델·하드웨어에 따라 달라집니다.
-
-## 운영 시 주의
-
-- 정상 사용자는 페이지 하단 상태 영역을 별도로 조작할 필요가 없습니다.
-- 저장 공간 정리나 오프라인 복구가 필요할 때 앱이 해당 영역으로 한 번 안내합니다.
-- 고급 진단은 장애 분석·선택 정리가 필요한 경우에만 엽니다.
-- Local AI 서버는 loopback bind와 명시적 CORS로 운영하십시오.
+- 단계 집중은 1180px 이상 데스크톱의 균형 보기에서만 활성화됩니다.
+- 사용자가 전체 보기를 선택하면 모든 작업 패널이 다시 표시됩니다.
+- 실제 모바일 Safari·Samsung Internet과 물리 GPU/NPU는 별도 실기기 검증이 필요합니다.
+- headless Chromium의 프로세스 RSS는 실제 사용자 장치의 절대 메모리 수치와 동일하지 않습니다.
+- Local AI 품질과 속도는 설치 모델과 하드웨어에 따라 달라집니다.
 
 ## 다음 우선순위
 
-MediaPipe 기반 주 화자 스마트 리프레임, 위험 작업 영향·확보 용량 미리보기, 브라우저 WASM/WebGPU 모델 팩 관리가 다음 독립 패치 후보입니다.
+MediaPipe 기반 주 화자 스마트 리프레임, 정리 작업 영향·확보 용량 미리보기, 브라우저 WASM/WebGPU 모델 팩 관리가 다음 독립 패치 후보입니다.

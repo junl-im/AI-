@@ -10,7 +10,7 @@ const current = JSON.parse(read(`qa/runtime-browser-audit-v${pkg.version}.json`)
 const prior = JSON.parse(read('qa/runtime-browser-audit-v1.5.17.json'));
 function ok(value, message) { if (!value) throw new Error(message); console.log(`PASS ${message}`); }
 function metric(report, mode, pathParts) { let value=report[mode]; for (const key of pathParts) value=value[key]; return value; }
-ok(pkg.version === '1.6.2', 'important cascade reduction release version is v1.6.2');
+ok(pkg.version === '1.6.3', 'important cascade reduction release version is v1.6.3');
 ok(report.importantCount <= 593, 'important declaration ceiling remains at or below 593');
 ok(report.conflictingPropertyCount === 0 && report.sameValueDuplicateCount === 0 && report.shadowedDeclarationCount === 0, 'cascade remains conflict, duplicate, and shadow free');
 const stage = read('assets/css/studio-experience.css');
@@ -34,4 +34,4 @@ for (const mode of ['desktop','smallLaptop','tablet','mobile']) {
   ok(current[mode].audit.errors.length === 0 && current[mode].audit.consoleErrors.length === 0, `${mode} runtime remains error free`);
   ok(current[mode].bodyScrollWidth <= current[mode].viewport.width, `${mode} keeps horizontal overflow at zero`);
 }
-console.log('PASS v1.6.2 safe important reduction with unchanged responsive layout metrics');
+console.log('PASS v1.6.3 safe important reduction with unchanged responsive layout metrics');

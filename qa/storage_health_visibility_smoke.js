@@ -24,7 +24,7 @@ const advancedStart = panel.indexOf("advancedDialog.innerHTML = [");
 const advancedEnd = panel.indexOf("document.body.appendChild(advancedDialog)");
 const advancedMarkup = panel.slice(advancedStart, advancedEnd);
 
-assert(pkg.version === '1.6.2', 'user-safe diagnostics release version is v1.6.2');
+assert(pkg.version === '1.6.3', 'user-safe diagnostics release version is v1.6.3');
 assert(summaryStart >= 0 && summaryEnd > summaryStart, 'general-user summary markup is isolated from advanced markup');
 assert(summaryMarkup.includes('오프라인 사용 준비 완료') || panel.includes("title: '오프라인 사용 준비 완료'"), 'general-user copy uses plain-language offline readiness');
 assert(summaryMarkup.includes('storageHealthAutoRepairBtn') && summaryMarkup.includes('storageAdvancedOpenBtn'), 'general-user summary exposes only contextual repair and an explicit advanced entry');
@@ -44,4 +44,4 @@ assert(css.includes('.storage-diagnostics-modal[hidden]') && css.includes('displ
 assert(css.includes('min-height: 100dvh') && css.includes('.storage-diagnostics-panel'), 'mobile advanced diagnostics use a dedicated full-screen surface');
 assert(css.includes('width: min(1480px, calc(100% - 32px))') && css.includes('.storage-health-panel[data-attention="true"]'), 'footer summary aligns to the workspace and highlights issue-driven navigation');
 assert(!html.includes('<script defer src="src/ai/ai-job-coordinator.js') && !html.includes('<script defer src="src/ai/local-ai-provider-registry.js') && !html.includes('<script defer src="src/ui/local-ai-studio.js'), 'Local AI remains staged instead of returning to blocking startup');
-console.log('PASS v1.6.2 general-user storage summary, advanced diagnostics gate, confirmation safety, and lazy inspection guardrails');
+console.log('PASS v1.6.3 general-user storage summary, advanced diagnostics gate, confirmation safety, and lazy inspection guardrails');

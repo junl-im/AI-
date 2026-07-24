@@ -1,8 +1,8 @@
 {
   "name": "ai-shorts-studio-v1-6-2",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "private": true,
-  "description": "AI Shorts Studio v1.6.2 - footer health navigation, workflow-aligned Local AI, responsive layout harmony, and gated diagnostics",
+  "description": "AI Shorts Studio v1.6.3 - footer health navigation, workflow-aligned Local AI, responsive layout harmony, and gated diagnostics",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -233,7 +233,10 @@
     "node qa/parallel_analysis_smoke.js",
     "node qa/local_ai_provider_registry_smoke.js",
     "node qa/ai_job_coordinator_smoke.js",
-    "node qa/local_ai_studio_smoke.js"
+    "node qa/local_ai_studio_smoke.js",
+    "node qa/workflow_focus_layout_smoke.js",
+    "python3 qa/run_workflow_focus_layout_audit.py",
+    "node qa/workflow_focus_layout_browser_audit_smoke.js"
   ],
   "devDependencies": {
     "postcss": "^8.5.6"

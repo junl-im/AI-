@@ -28,7 +28,8 @@
         previewStatus: 'previewStatus'
     };
     const els = {};
-    let syncRaf = 0;
+    let syncScheduled = false;
+    let lastWorkflowPhase = '';
 
     function uxById(id) {
         return document.getElementById(id);
@@ -102,6 +103,12 @@
         uxSetWorkflowClass(els.stepAnalyze, hasFile && !hasRecommendations, hasRecommendations);
         uxSetWorkflowClass(els.stepEdit, hasRecommendations && !hasExport, hasSelected && hasExport);
         uxSetWorkflowClass(els.stepExport, hasExport, false);
+        const phase = hasExport ? 'export' : (hasRecommendations ? 'edit' : (hasFile ? 'analyze' : 'import'));
+        if (document.body && document.body.dataset.workflowPhase !== phase) document.body.dataset.workflowPhase = phase;
+        if (phase !== lastWorkflowPhase) {
+            lastWorkflowPhase = phase;
+            document.dispatchEvent(new CustomEvent('ai-shorts-workflow-phase', { detail: { phase, hasFile, hasRecommendations, hasSelected, hasExport } }));
+        }
     }
 
     function uxSyncMirrors() {
@@ -117,12 +124,14 @@
     }
 
     function uxScheduleSync() {
-        if (syncRaf) return;
-        const schedule = global.requestAnimationFrame || (callback => global.setTimeout(callback, 16));
-        syncRaf = schedule(() => {
-            syncRaf = 0;
+        if (syncScheduled) return;
+        syncScheduled = true;
+        const run = () => {
+            syncScheduled = false;
             uxSyncAll();
-        });
+        };
+        if (typeof global.queueMicrotask === 'function') global.queueMicrotask(run);
+        else Promise.resolve().then(run).catch(() => { syncScheduled = false; });
     }
 
     function uxInstallQuickDurations() {

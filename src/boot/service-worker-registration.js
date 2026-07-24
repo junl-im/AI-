@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.2 - observable lifecycle with targeted retry and audit history controls
+// AI Shorts Studio v1.6.3 - observable lifecycle with targeted retry and audit history controls
 'use strict';
 
 (function exposeServiceWorkerRegistration(global) {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dedicated browser audit for the v1.6.2 user-safe storage diagnostics gate."""
+"""Dedicated browser audit for the v1.6.3 user-safe storage diagnostics gate."""
 import asyncio
 import json
 from pathlib import Path

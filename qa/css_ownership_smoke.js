@@ -15,7 +15,7 @@ function assertSingleOwner(snapshot, property, expectedFile) {
     }
 }
 
-if (report.version !== version || report.cssFiles !== 48 || report.activeCssFiles !== 47) {
+if (report.version !== version || report.cssFiles !== 49 || report.activeCssFiles !== 48) {
     throw new Error('CSS ownership report does not match the release');
 }
 if (JSON.stringify(report.archivedCssFiles) !== JSON.stringify(['cinematic-hero.css'])) {
@@ -97,7 +97,7 @@ const mobileHeaderTopline = report.criticalOwnership?.mobileHeaderTopline;
 const desktopShell = report.criticalOwnership?.desktopShell;
 const mobileHeroTitle = report.criticalOwnership?.mobileHeroTitle;
 if (!headerTopline || !mobileHeaderTopline || !desktopShell || !mobileHeroTitle) {
-    throw new Error('v1.6.2 responsive ownership snapshots are missing');
+    throw new Error('v1.6.3 responsive ownership snapshots are missing');
 }
 for (const property of ['display', 'grid-template-columns', 'align-items', 'gap']) {
     assertSingleOwner(headerTopline, property, 'header-meta-rail.css');
@@ -217,4 +217,4 @@ const forbiddenConflicts = report.propertyConflicts.filter(item => (
 ));
 if (forbiddenConflicts.length) throw new Error('consolidated CSS ownership conflicts reappeared');
 
-console.log('PASS v1.6.2 zero-conflict CSS cascade ownership ceiling');
+console.log('PASS v1.6.3 zero-conflict CSS cascade ownership ceiling');

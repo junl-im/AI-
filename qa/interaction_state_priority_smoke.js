@@ -12,7 +12,7 @@ const reduction = JSON.parse(read('qa/runtime-interaction-priority-v1.5.19.json'
 const cascade = JSON.parse(read(`qa/runtime-css-ownership-v${pkg.version}.json`));
 function ok(value, message) { if (!value) throw new Error(message); console.log(`PASS ${message}`); }
 
-ok(pkg.version === '1.6.2', 'interaction-state priority release version is v1.6.2');
+ok(pkg.version === '1.6.3', 'interaction-state priority release version is v1.6.3');
 ok(reduction.baselineVersion === '1.5.18' && reduction.removedCount === 12, '12 interaction-state priorities are removed from the v1.5.18 baseline');
 ok(reduction.baselineImportant === 678 && reduction.remainingImportant === 666 && cascade.importantCount === 593, 'interaction priority contract is inherited and active important count is reduced to 593');
 ok(reduction.missing.length === 0, 'all planned interaction declarations were found and reduced');
@@ -29,4 +29,4 @@ ok(/\.btn-secondary:not\(:disabled\):hover,[\s\S]*?border-color:\s*rgba\(103, 23
 ok(/bottom-dock-tab:not\(\.is-disabled\):hover\s*\{[\s\S]*?color:\s*#dbe4ef\s*!important;[\s\S]*?background:\s*rgba\(148, 163, 184, 0\.055\)\s*!important/.test(ui), 'dock hover color and surface keep the priorities proven necessary');
 ok(/bottom-dock-tab:not\(\.is-disabled\)\s*\{\s*color:\s*#9ba7b8\s*!important/.test(ui), 'enabled dock color keeps the priority proven necessary at compact breakpoints');
 ok(!/button:disabled,[\s\S]*?opacity:\s*0\.42\s*!important/.test(ui), 'disabled opacity now uses normal cascade priority');
-console.log('PASS v1.6.2 interaction-state priority reduction with unchanged computed states');
+console.log('PASS v1.6.3 interaction-state priority reduction with unchanged computed states');

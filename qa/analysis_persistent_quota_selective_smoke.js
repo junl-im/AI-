@@ -53,7 +53,7 @@ function fakeIndexedDB() {
     const window = {
         indexedDB: idb,
         navigator: { storage: { async estimate() { return { usage: 950, quota: 1000 }; } } },
-        AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.2' },
+        AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.3' },
         structuredClone: global.structuredClone
     };
     vm.runInContext(source, vm.createContext({ window, Date, Object, Array, Map, Set, WeakMap, Promise, JSON, Math, Number, String, Uint8Array, DataView, setTimeout, clearTimeout, console }), { filename: 'analysis-cache.js' });
