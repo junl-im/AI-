@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v1.6.2 - Layout Harmony & Footer Health
+
+- 저장 공간·오프라인 상태 요약을 전체 제작 작업실 뒤 페이지 최하단 지원 영역으로 이동했습니다.
+- 정상 상태는 낮은 대비와 compact 높이로 표시하고, 정리·복구가 필요한 actionable 상태가 새로 발생할 때만 한 번 자동 이동·포커스·강조합니다.
+- 동일 문제 반복 렌더와 고급 진단·확인 modal 활성 상태에서는 자동 이동을 억제합니다.
+- 독립 대형 Local AI section을 기본 닫힘 `<details>` 작업대로 전환하고 프로젝트·카피와 핵심 제작 단계 사이의 전체 폭 `ai` grid row에 배치했습니다.
+- 미리보기·파형 집중 모드에서 선택형 Local AI를 숨기고 모바일 summary·workbench 정렬을 개선했습니다.
+- 저장소·Local AI 전용 브라우저 감사를 추가해 자동 QA를 **221개**로 확장했습니다.
+
+---
 ## v1.6.1 - Advanced Diagnostics Gate
 
 - 일반 화면의 저장소·오프라인 진단을 상태·사용량·조건부 자동 정리만 보이는 compact summary로 축소했습니다.

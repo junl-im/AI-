@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-6-1",
-  "version": "1.6.1",
+  "name": "ai-shorts-studio-v1-6-2",
+  "version": "1.6.2",
   "private": true,
-  "description": "AI Shorts Studio v1.6.1 - user-safe storage summary, gated advanced diagnostics, confirmation guardrails, and lazy cache inspection",
+  "description": "AI Shorts Studio v1.6.2 - footer health navigation, workflow-aligned Local AI, responsive layout harmony, and gated diagnostics",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -166,6 +166,8 @@
     "node qa/storage_health_visibility_smoke.js",
     "python3 qa/run_storage_health_browser_audit.py",
     "node qa/storage_health_browser_audit_smoke.js",
+    "python3 qa/run_layout_harmony_browser_audit.py",
+    "node qa/layout_harmony_browser_audit_smoke.js",
     "node qa/session_recovery_export_smoke.js",
     "node --check src/ui/export-finish-center.js",
     "node qa/export_finish_center_smoke.js",

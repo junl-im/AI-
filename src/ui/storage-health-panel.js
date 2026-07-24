@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.1 - user-safe storage summary with gated advanced diagnostics
+// AI Shorts Studio v1.6.2 - footer storage health with issue-driven navigation and gated diagnostics
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;
@@ -15,6 +15,8 @@
     let lastHealthModel = null;
     let advancedReturnFocus = null;
     let pendingConfirmation = null;
+    let lastAutoNavigationKey = '';
+    let autoNavigationTimer = 0;
 
     function byId(id) { return document.getElementById(id); }
     function formatBytes(value) {
@@ -31,6 +33,20 @@
     function scheduleFrame(callback) {
         if (typeof global.requestAnimationFrame === 'function') global.requestAnimationFrame(callback);
         else global.setTimeout(callback, 0);
+    }
+    function prefersReducedMotion() {
+        return Boolean(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+    function mountAtPageEnd(node) {
+        const appShell = document.querySelector('.app-shell');
+        if (appShell) {
+            appShell.appendChild(node);
+            return true;
+        }
+        const fallback = document.querySelector('.start-command-panel') || document.querySelector('.studio-hero');
+        if (!fallback) return false;
+        fallback.insertAdjacentElement('afterend', node);
+        return true;
     }
     function focusableElements(container) {
         if (!container) return [];
@@ -162,15 +178,14 @@
     }
     function build() {
         if (root) return root;
-        const sessionPanel = byId('sessionContinuityPanel');
-        const anchor = sessionPanel || document.querySelector('.start-command-panel') || document.querySelector('.studio-hero');
-        if (!anchor) return null;
         root = document.createElement('section');
         root.id = 'storageHealthPanel';
         root.className = 'storage-health-panel';
         root.dataset.level = 'unknown';
         root.dataset.issue = 'checking';
-        root.setAttribute('aria-label', '저장 공간과 오프라인 사용 상태');
+        root.dataset.location = 'footer';
+        root.tabIndex = -1;
+        root.setAttribute('aria-label', '페이지 하단 저장 공간과 오프라인 사용 상태');
         root.innerHTML = [
             '<div class="storage-health-copy">',
             '  <span class="storage-health-icon studio-icon" data-icon="check" aria-hidden="true"></span>',
@@ -185,7 +200,7 @@
             '  <button id="storageAdvancedOpenBtn" class="storage-advanced-open" type="button">고급 진단</button>',
             '</div>'
         ].join('');
-        anchor.insertAdjacentElement('afterend', root);
+        if (!mountAtPageEnd(root)) { root = null; return null; }
         buildAdvancedDialog();
         buildConfirmationDialog();
         bindActions();
@@ -278,6 +293,27 @@
         if (advancedReturnFocus && advancedReturnFocus.isConnected && typeof advancedReturnFocus.focus === 'function') advancedReturnFocus.focus();
         advancedReturnFocus = null;
     }
+    function navigateToHealthPanel(model, options) {
+        const current = model || lastHealthModel;
+        const opts = options || {};
+        if (!root || !current || !current.action || advancedDialog && !advancedDialog.hidden || confirmationDialog && !confirmationDialog.hidden) return false;
+        const key = `${current.issue || 'unknown'}:${current.state || 'unknown'}:${current.action}`;
+        if (!opts.force && lastAutoNavigationKey === key) return false;
+        lastAutoNavigationKey = key;
+        global.clearTimeout(autoNavigationTimer);
+        autoNavigationTimer = global.setTimeout(() => {
+            if (!root || !root.isConnected || !lastHealthModel || !lastHealthModel.action) return;
+            root.dataset.attention = 'true';
+            root.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center', inline: 'nearest' });
+            scheduleFrame(() => {
+                try { root.focus({ preventScroll: true }); } catch (_) { root.focus(); }
+            });
+            feedback(lastHealthModel.action === 'cleanup' ? '저장 공간 정리가 필요해 하단 상태 영역으로 이동했습니다.' : '오프라인 기능 확인이 필요해 하단 상태 영역으로 이동했습니다.', 'action');
+            document.dispatchEvent(new CustomEvent('ai-shorts-storage-attention', { detail: { issue: lastHealthModel.issue, action: lastHealthModel.action } }));
+            global.setTimeout(() => { if (root) delete root.dataset.attention; }, 4600);
+        }, Number(opts.delayMs) >= 0 ? Number(opts.delayMs) : 180);
+        return true;
+    }
     function serviceWorkerProblemCount(status) {
         const report = status && status.installReport;
         const integrity = report && report.integrity || {};
@@ -350,6 +386,7 @@
         const engine = global.AIShortsEngineKernel && global.AIShortsEngineKernel.getHealthReport ? global.AIShortsEngineKernel.getHealthReport() : null;
         const ratioPercent = snapshot.quota ? Math.round((snapshot.ratio || 0) * 100) : 0;
         const usageText = snapshot.quota ? `${formatBytes(snapshot.usage)} / ${formatBytes(snapshot.quota)} · ${ratioPercent}%` : formatBytes(snapshot.usage || snapshot.localStorageBytes || 0);
+        const previousModel = lastHealthModel;
         const model = deriveHealthModel(snapshot, sw);
         lastHealthModel = model;
         root.dataset.level = model.level;
@@ -386,6 +423,14 @@
             advancedStatus.textContent = `${model.title} · ${model.summary}`;
         }
         if (document.body) document.body.dataset.storageHealth = model.level;
+        if (model.action) {
+            const changed = !previousModel || previousModel.action !== model.action || previousModel.issue !== model.issue || previousModel.state !== model.state;
+            if (changed) navigateToHealthPanel(model);
+        } else {
+            lastAutoNavigationKey = '';
+            global.clearTimeout(autoNavigationTimer);
+            delete root.dataset.attention;
+        }
         return model;
     }
     async function refresh(options) {
@@ -800,6 +845,7 @@
         runAutomaticRepair,
         openAdvancedDiagnostics,
         closeAdvancedDiagnostics,
+        navigateToHealthPanel,
         confirmDestructive,
         exportAnalysisDiagnostics,
         exportIntegrityDiagnostics,

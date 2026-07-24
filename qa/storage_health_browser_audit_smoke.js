@@ -16,6 +16,7 @@ for (const mode of ['desktop', 'mobile']) {
   const result = report[mode];
   assert(result.errors.length === 0, `${mode} storage diagnostics has no page errors`);
   assert(result.initial.advancedHidden === true, `${mode} advanced diagnostics are hidden on first paint`);
+  assert(result.initial.atPageEnd === true, `${mode} storage summary is mounted after the workspace at the page footer`);
   assert(!/namespace|signature|셸 표본|분석 캐시 전체/.test(result.initial.text), `${mode} normal summary contains no technical maintenance terms`);
   assert(result.initial.autoRepairHidden === true, `${mode} healthy state hides automatic repair`);
   assert(result.initial.overflow <= 0 && result.advanced.overflow <= 0, `${mode} summary and advanced diagnostics have no horizontal overflow`);
@@ -28,7 +29,8 @@ for (const mode of ['desktop', 'mobile']) {
   assert(result.confirmationAfterCancel.hidden === true && result.confirmationAfterCancel.clearCalls === 0, `${mode} cancellation leaves the analysis cache untouched`);
   assert(result.confirmationAfterAccept.hidden === true && result.confirmationAfterAccept.clearCalls === 1, `${mode} confirmed cleanup executes exactly once`);
   assert(result.warning.hidden === false && result.warning.label.includes('저장 공간 정리') && result.warning.title.includes('정리가 필요'), `${mode} automatic repair appears only for an actionable storage problem`);
+  assert(result.navigation.scrollY > 0 && result.navigation.attention === 'true' && result.navigation.events === 1, `${mode} actionable storage issue automatically navigates once to the footer summary`);
   assert(result.closed.advancedHidden === true && result.closed.bodyLocked === false, `${mode} Escape closes advanced diagnostics and restores page scrolling`);
 }
 assert(report.mobile.advanced.width === report.mobile.viewport.width && report.mobile.advanced.height === report.mobile.viewport.height, 'mobile advanced diagnostics use the full viewport instead of expanding the normal page');
-console.log(`PASS v${version} storage summary visibility, advanced modal, mobile containment, and destructive-action confirmation browser audit`);
+console.log(`PASS v${version} footer storage navigation, advanced modal, mobile containment, and destructive-action confirmation browser audit`);

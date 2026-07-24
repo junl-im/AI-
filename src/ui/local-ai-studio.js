@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.1 - local AI connection, creative copy, transcription, and model integrity UI
+// AI Shorts Studio v1.6.2 - local AI connection, creative copy, transcription, and model integrity UI
 'use strict';
 
 (function exposeLocalAIStudio(global) {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dedicated browser audit for the v1.6.1 user-safe storage diagnostics gate."""
+"""Dedicated browser audit for the v1.6.2 user-safe storage diagnostics gate."""
 import asyncio
 import json
 from pathlib import Path
@@ -17,6 +17,8 @@ window.__storageSnapshot={usage:8.5*1024*1024,quota:10*1024*1024,ratio:.85,level
 window.__clearCalls=0;
 window.__cleanupCalls=0;
 window.__policyRefreshCalls=0;
+window.__attentionEvents=0;
+document.addEventListener('ai-shorts-storage-attention',()=>{window.__attentionEvents+=1;});
 window.AIShortsRuntimeConfig={SESSION_SCHEMA_VERSION:4,ANALYSIS_CACHE_CONTRACT_VERSION:3,SW_INTEGRITY_AUDIT_SAMPLE_SIZE:12};
 window.AIShortsFeedbackUX={toast(){}};
 window.AIShortsStorageManager={
@@ -59,12 +61,12 @@ window.AIShortsEngineKernel={
 
 BASE_STYLE = r'''
 :root{--line:#334155;--panel:#111827;--panel-strong:#111827;--surface:#0f172a;--text:#e2e8f0;--muted:#94a3b8;--accent-2:#60a5fa;color-scheme:dark}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#090b12;color:var(--text);font-family:system-ui,sans-serif}.start-command-panel{height:80px;margin:20px;border:1px solid var(--line);border-radius:18px}button,select{font:inherit}button{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#182235;color:var(--text)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#090b12;color:var(--text);font-family:system-ui,sans-serif}.start-command-panel{height:80px;margin:20px;border:1px solid var(--line);border-radius:18px}.studio-grid{min-height:1400px;margin:20px;border:1px solid rgba(51,65,85,.35);border-radius:18px}button,select{font:inherit}button{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#182235;color:var(--text)}
 '''
 
 
 def build_html():
-    return f'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>{BASE_STYLE}\n{CSS}</style></head><body><div class="start-command-panel"></div><script>{MOCKS}</script><script>{PANEL}</script></body></html>'''
+    return f'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>{BASE_STYLE}\n{CSS}</style></head><body><div class="app-shell"><div class="start-command-panel"></div><main id="studioGrid" class="studio-grid"></main></div><script>{MOCKS}</script><script>{PANEL}</script></body></html>'''
 
 
 async def run_mode(browser, name, viewport):
@@ -79,7 +81,7 @@ async def run_mode(browser, name, viewport):
       const advanced=document.querySelector('#storageAdvancedDialog');
       const auto=document.querySelector('#storageHealthAutoRepairBtn');
       const r=root.getBoundingClientRect();
-      return {text:root.innerText,height:r.height,width:r.width,advancedHidden:advanced.hidden,autoRepairHidden:auto.hidden,overflow:document.documentElement.scrollWidth-innerWidth};
+      return {text:root.innerText,height:r.height,width:r.width,top:r.top,advancedHidden:advanced.hidden,autoRepairHidden:auto.hidden,atPageEnd:root.parentElement.classList.contains('app-shell')&&root.previousElementSibling&&root.previousElementSibling.id==='studioGrid',overflow:document.documentElement.scrollWidth-innerWidth};
     }''')
 
     await page.click('#storageAdvancedOpenBtn')
@@ -105,10 +107,13 @@ async def run_mode(browser, name, viewport):
     await page.wait_for_function('window.__clearCalls === 1', timeout=10000)
     confirmation_after_accept = await page.evaluate('''() => ({hidden:document.querySelector('#storageConfirmDialog').hidden,clearCalls:window.__clearCalls})''')
 
-    warning = await page.evaluate('''() => { window.__storageSnapshot={usage:9.5*1024*1024,quota:10*1024*1024,ratio:.95,level:'critical',localStorageBytes:190*1024,cacheCount:1}; AIShortsStorageHealthPanel.render(window.__storageSnapshot); const b=document.querySelector('#storageHealthAutoRepairBtn'); return {hidden:b.hidden,label:b.textContent,title:document.querySelector('#storageHealthTitle').textContent}; }''')
-
     await page.keyboard.press('Escape')
     closed = await page.evaluate('''() => ({advancedHidden:document.querySelector('#storageAdvancedDialog').hidden,bodyLocked:document.body.classList.contains('storage-diagnostics-open')})''')
+
+    await page.evaluate('window.scrollTo(0,0)')
+    warning = await page.evaluate('''() => { window.__storageSnapshot={usage:9.5*1024*1024,quota:10*1024*1024,ratio:.95,level:'critical',localStorageBytes:190*1024,cacheCount:1}; AIShortsStorageHealthPanel.render(window.__storageSnapshot); const b=document.querySelector('#storageHealthAutoRepairBtn'); return {hidden:b.hidden,label:b.textContent,title:document.querySelector('#storageHealthTitle').textContent}; }''')
+    await page.wait_for_function("document.querySelector('#storageHealthPanel').dataset.attention === 'true' && window.__attentionEvents === 1 && window.scrollY > 0", timeout=10000)
+    navigation = await page.evaluate('''() => ({scrollY:window.scrollY,attention:document.querySelector('#storageHealthPanel').dataset.attention,events:window.__attentionEvents,focused:document.activeElement&&document.activeElement.id==='storageHealthPanel'})''')
     await context.close()
     return {
         'name': name,
@@ -119,6 +124,7 @@ async def run_mode(browser, name, viewport):
         'confirmationAfterCancel': confirmation_after_cancel,
         'confirmationAfterAccept': confirmation_after_accept,
         'warning': warning,
+        'navigation': navigation,
         'closed': closed,
         'errors': errors,
     }

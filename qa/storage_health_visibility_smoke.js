@@ -18,16 +18,18 @@ const panel = read('src/ui/storage-health-panel.js');
 const css = read('assets/css/storage-health-panel.css');
 const html = read('index.html');
 const summaryStart = panel.indexOf("root.innerHTML = [");
-const summaryEnd = panel.indexOf("anchor.insertAdjacentElement('afterend', root)");
+const summaryEnd = panel.indexOf("if (!mountAtPageEnd(root))");
 const summaryMarkup = panel.slice(summaryStart, summaryEnd);
 const advancedStart = panel.indexOf("advancedDialog.innerHTML = [");
 const advancedEnd = panel.indexOf("document.body.appendChild(advancedDialog)");
 const advancedMarkup = panel.slice(advancedStart, advancedEnd);
 
-assert(pkg.version === '1.6.1', 'user-safe diagnostics release version is v1.6.1');
+assert(pkg.version === '1.6.2', 'user-safe diagnostics release version is v1.6.2');
 assert(summaryStart >= 0 && summaryEnd > summaryStart, 'general-user summary markup is isolated from advanced markup');
 assert(summaryMarkup.includes('오프라인 사용 준비 완료') || panel.includes("title: '오프라인 사용 준비 완료'"), 'general-user copy uses plain-language offline readiness');
 assert(summaryMarkup.includes('storageHealthAutoRepairBtn') && summaryMarkup.includes('storageAdvancedOpenBtn'), 'general-user summary exposes only contextual repair and an explicit advanced entry');
+assert(panel.includes("const appShell = document.querySelector('.app-shell')") && panel.includes('appShell.appendChild(node)'), 'storage summary mounts at the page footer instead of the startup area');
+assert(panel.includes('function navigateToHealthPanel') && panel.includes('root.scrollIntoView') && panel.includes("document.dispatchEvent(new CustomEvent('ai-shorts-storage-attention'"), 'actionable storage issues navigate to the footer summary once');
 assert(!summaryMarkup.includes('namespace') && !summaryMarkup.includes('signature') && !summaryMarkup.includes('셸 표본') && !summaryMarkup.includes('분석 캐시 전체 정리'), 'technical cache and shell controls are absent from the normal page summary');
 assert(advancedStart >= 0 && advancedEnd > advancedStart, 'advanced diagnostics markup is built in a separate modal');
 assert(advancedMarkup.includes('analysisCacheNamespaceSelect') && advancedMarkup.includes('analysisCacheSignatureSelect') && advancedMarkup.includes('storageIntegrityAuditBtn'), 'technical controls remain available inside advanced diagnostics');
@@ -40,5 +42,6 @@ assert((panel.match(/confirmDestructive\(\{/g) || []).length >= 7, 'destructive 
 assert(panel.includes('현재 프로젝트의 원본 파일과 편집 내용은 삭제되지 않습니다.'), 'confirmation dialog explicitly protects current project expectations');
 assert(css.includes('.storage-diagnostics-modal[hidden]') && css.includes('display: none'), 'hidden diagnostics do not occupy the visual layout');
 assert(css.includes('min-height: 100dvh') && css.includes('.storage-diagnostics-panel'), 'mobile advanced diagnostics use a dedicated full-screen surface');
+assert(css.includes('width: min(1480px, calc(100% - 32px))') && css.includes('.storage-health-panel[data-attention="true"]'), 'footer summary aligns to the workspace and highlights issue-driven navigation');
 assert(!html.includes('<script defer src="src/ai/ai-job-coordinator.js') && !html.includes('<script defer src="src/ai/local-ai-provider-registry.js') && !html.includes('<script defer src="src/ui/local-ai-studio.js'), 'Local AI remains staged instead of returning to blocking startup');
-console.log('PASS v1.6.1 general-user storage summary, advanced diagnostics gate, confirmation safety, and lazy inspection guardrails');
+console.log('PASS v1.6.2 general-user storage summary, advanced diagnostics gate, confirmation safety, and lazy inspection guardrails');
