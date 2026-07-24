@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.29 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.6.0 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.5.29',
-    BUILD_KEY: '1.5.29-analysis-signature-storage-trend',
+    APP_VERSION: 'v1.6.0',
+    BUILD_KEY: '1.6.0-local-ai-provider-foundation',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -62,6 +62,17 @@ window.AIShortsRuntimeConfig = Object.freeze({
         'video/webm;codecs=vp8,opus',
         'video/webm'
     ],
+    LOCAL_AI_SETTINGS_KEY: 'ai-shorts-local-ai-v1',
+    LOCAL_AI_ALLOW_REMOTE_ENDPOINTS: false,
+    LOCAL_AI_QUEUE_LIMIT: 6,
+    LOCAL_AI_JOB_HISTORY_LIMIT: 20,
+    LOCAL_AI_HISTORY_LIMIT: 20,
+    LOCAL_AI_PROBE_TIMEOUT_MS: 5000,
+    LOCAL_AI_REQUEST_TIMEOUT_MS: 120000,
+    LOCAL_AI_MAX_RESPONSE_BYTES: 2 * 1024 * 1024,
+    LOCAL_AI_MAX_PROMPT_CHARS: 24000,
+    LOCAL_AI_MAX_SCHEMA_CHARS: 12000,
+    LOCAL_AI_MAX_TRANSCRIPTION_BYTES: 512 * 1024 * 1024,
     LOCAL_STORAGE_KEY: 'ai-shorts-studio-v109-settings',
     DIAGNOSTIC_HISTORY_LIMIT: 20,
     RENDER_QUEUE_LIMIT: 12,

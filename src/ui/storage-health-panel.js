@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.29 - selective cache, recovery, and service worker audit controls
+// AI Shorts Studio v1.6.0 - selective cache, recovery, and service worker audit controls
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;

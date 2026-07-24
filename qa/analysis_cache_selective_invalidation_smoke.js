@@ -20,12 +20,12 @@ function fakeIndexedDB() {
 }
 (async () => {
     const indexedDB = fakeIndexedDB();
-    const window = { indexedDB, navigator: { storage: { async estimate() { return { usage: 100, quota: 1000 }; } } }, AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.29' }, structuredClone: global.structuredClone };
+    const window = { indexedDB, navigator: { storage: { async estimate() { return { usage: 100, quota: 1000 }; } } }, AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.0' }, structuredClone: global.structuredClone };
     vm.runInContext(source, vm.createContext({ window, Date, Object, Array, Map, Set, WeakMap, Promise, JSON, Math, Number, String, Uint8Array, DataView, setTimeout, clearTimeout, console }), { filename: 'analysis-cache.js' });
-    const cache = window.AIShortsAnalysisCache.createPersistentAnalysisCache({ namespace: 'analysis-contract-v2', contractVersion: '2', appVersion: '1.5.29', maxItems: 8, maxBytes: 8 * 1024 * 1024 });
-    await cache.set('a::video/mp4::::100::1::10::fp-a::balanced::16000::40::analysis-contract-v2', { score: 1 }, { tier: 'balanced', contractVersion: '2', appVersion: '1.5.29' });
-    await cache.set('b::video/mp4::::100::1::10::fp-b::quality::48000::80::analysis-contract-v2', { score: 2 }, { tier: 'quality', contractVersion: '2', appVersion: '1.5.29' });
-    await cache.set('c::video/mp4::::100::1::10::fp-c::balanced::16000::40::analysis-contract-v2', { score: 3 }, { tier: 'balanced', contractVersion: '1', appVersion: '1.5.29' });
+    const cache = window.AIShortsAnalysisCache.createPersistentAnalysisCache({ namespace: 'analysis-contract-v2', contractVersion: '2', appVersion: '1.6.0', maxItems: 8, maxBytes: 8 * 1024 * 1024 });
+    await cache.set('a::video/mp4::::100::1::10::fp-a::balanced::16000::40::analysis-contract-v2', { score: 1 }, { tier: 'balanced', contractVersion: '2', appVersion: '1.6.0' });
+    await cache.set('b::video/mp4::::100::1::10::fp-b::quality::48000::80::analysis-contract-v2', { score: 2 }, { tier: 'quality', contractVersion: '2', appVersion: '1.6.0' });
+    await cache.set('c::video/mp4::::100::1::10::fp-c::balanced::16000::40::analysis-contract-v2', { score: 3 }, { tier: 'balanced', contractVersion: '1', appVersion: '1.6.0' });
     let entries = await cache.list();
     if (entries.length !== 3 || entries.some(item => !item.token || !item.tier || !item.contractVersion || 'key' in item)) throw new Error('persistent cache list must expose profile metadata through privacy-safe tokens only');
     const selected = await cache.deleteByTokens(entries.filter(item => item.tier === 'quality').map(item => item.token));

@@ -23,5 +23,5 @@ assert(app.includes('AIShortsRenderWorkflowController') && app.includes('getRend
 assert(workflow.includes('function buildExportPayload') && workflow.includes('async function runJobs'), 'workflow controller owns export payloads and render execution');
 assert(app.includes('renderQueue.subscribe(renderWorkflow.renderQueue)'), 'queue UI subscribes through the workflow controller');
 assert(css.includes('.render-queue-card') && css.includes('body[data-render-queue="running"]'), 'queue css state styles exist');
-assert(pkg.version === '1.5.29', 'package version is 1.4.1');
+assert(pkg.version === '1.6.0', 'package version is 1.4.1');
 console.log('PASS render_queue_smoke');

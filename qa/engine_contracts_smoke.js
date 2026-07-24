@@ -20,7 +20,7 @@ function fail(message) { console.error('FAIL ' + message); process.exit(1); }
 ['enhanceBudget', 'tuneRecommendations', 'proConfidence', 'proGrade', 'summarizeAnalysis'].forEach(token => {
     if (!tuner.includes(token)) fail(`pro tuner missing ${token}`);
 });
-['module-contracts.js?v=1.5.29-analysis-signature-storage-trend', 'analysis-cache.js?v=1.5.29-analysis-signature-storage-trend', 'pro-engine-tuner.js?v=1.5.29-analysis-signature-storage-trend', 'stability-auditor.js?v=1.5.29-analysis-signature-storage-trend'].forEach(token => {
+['module-contracts.js?v=1.6.0-local-ai-provider-foundation', 'analysis-cache.js?v=1.6.0-local-ai-provider-foundation', 'pro-engine-tuner.js?v=1.6.0-local-ai-provider-foundation', 'stability-auditor.js?v=1.6.0-local-ai-provider-foundation'].forEach(token => {
     if (!sw.includes(token)) fail(`service worker missing ${token}`);
 });
 

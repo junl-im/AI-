@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## v1.6.0 - Local AI Provider Foundation
+
+- Ollama, llama.cpp server, whisper.cpp server, Local OpenAI-compatible을 하나의 localhost 전용 provider registry로 연결했습니다.
+- 페이지 load 시 무통신, 명시적 사용자 동작, loopback-only endpoint, URL 인증 정보 차단, credential·referrer·cache 미사용을 적용했습니다.
+- Ollama 모델 목록·digest 고정·변경 차단과 JSON Schema 구조화 쇼츠 제목·후킹·설명·해시태그 생성을 추가했습니다.
+- llama.cpp native response schema와 OpenAI 호환 구조화 채팅을 지원합니다.
+- whisper.cpp `/inference` 및 OpenAI 호환 전사 fallback, 구간 자막·SRT 생성·기존 자막 적용을 추가했습니다.
+- 로컬 모델 메모리 경쟁을 줄이는 동시 실행 1개 직렬 큐, 사용자 취소, timeout 실패 구분, 진행률, 비식별 이력을 추가했습니다.
+- Local AI 모듈을 첫 포커스·클릭 때만 적재해 직접 실행 스크립트 49개 초기 예산을 유지했습니다.
+- CSP, 서비스워커 앱 셸, SHA-256 무결성 manifest, runtime health, 4개 viewport·CSS·서비스워커·GPU/media·메모리 감사를 v1.6.0으로 갱신했습니다.
+- 신규 전용 회귀 3개를 포함해 자동 QA **216/216**을 통과했습니다.
+
+---
 ## v1.5.29 - Option-Aware Analysis Cache & Storage Cost Trend
 
 - 자동 컷 설정을 안정적 16자리 option signature로 정규화해 메모리·IndexedDB 분석 캐시 키에 포함하고, 설정 변경 뒤 이전 자동 컷 결과가 재사용되던 stale cache 가능성을 차단했습니다.

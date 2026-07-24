@@ -15,7 +15,7 @@ const queue = read('src/render/render-queue.js');
 const workflow = read('src/app/render-workflow-controller.js');
 const renderer = read('src/render/vertical-renderer.js');
 const css = read('assets/css/render-queue.css');
-assert(pkg.version === '1.5.29', 'render recovery release version is v1.5.29');
+assert(pkg.version === '1.6.0', 'render recovery release version is v1.6.0');
 assert(html.includes('id="renderQueueCancelBtn"') && html.includes('data-icon="stop"'), 'render queue exposes an explicit cancel action');
 assert(app.includes("renderQueue.cancel('사용자가 렌더 작업을 취소했습니다.')") && app.includes("type: 'render-cancel-request'"), 'cancel action reaches the queue and diagnostics');
 assert(app.includes('getRenderWorkflow().retryFailedJobs()') && workflow.includes('renderQueue.retryableJobs()') && workflow.includes('return runJobs(jobs);'), 'failed items restart through a fresh render operation');
@@ -23,4 +23,4 @@ assert(queue.includes('function retryableJobs()') && queue.includes("status: 'qu
 assert(renderer.includes('function inspectRenderCapability') && renderer.includes('capability.reasons.join'), 'renderer performs a capability preflight');
 assert(renderer.includes('await sourceMedia.play()') && renderer.includes('원본 미디어 재생을 시작할 수 없어 렌더를 중단했습니다'), 'playback failure stops recording before a blank export');
 assert(css.includes('.render-cancel-btn:not(:disabled)') && css.includes('[data-state="cancelled"]'), 'cancel control and cancelled state have dedicated styling');
-console.log('PASS v1.5.29 render cancel, retry, and playback failure guardrails');
+console.log('PASS v1.6.0 render cancel, retry, and playback failure guardrails');

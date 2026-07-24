@@ -3,7 +3,7 @@
 'use strict';
 (function bootFlowDirectorFinal(global) {
     const config = global.AIShortsRuntimeConfig || {};
-    const BUILD_VERSION = String(config.APP_VERSION || 'v1.5.29').replace(/^v/i, '');
+    const BUILD_VERSION = String(config.APP_VERSION || 'v1.6.0').replace(/^v/i, '');
     const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export'];
     const META = {
         file: ['upload', '불러오기'], recommend: ['spark', '추천 생성'], candidates: ['candidates', '후보 선택'],

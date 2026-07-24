@@ -24,7 +24,7 @@ const serviceWorker = { controller: target, async register() { return registrati
 const window = {
     window: null, location: { protocol: 'https:', hostname: 'studio.test' }, isSecureContext: true,
     navigator: { serviceWorker },
-    AIShortsRuntimeConfig: { APP_VERSION: 'v1.5.29', SW_UPDATE_MAX_ATTEMPTS: 1, SW_INTEGRITY_AUDIT_SAMPLE_SIZE: 12 },
+    AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.0', SW_UPDATE_MAX_ATTEMPTS: 1, SW_INTEGRITY_AUDIT_SAMPLE_SIZE: 12 },
     AIShortsAppState: { addDiagnostic(item) { diagnostics.push(item); } },
     setTimeout() { return 7; }, clearTimeout(id) { if (id === 7) timeoutCleared = true; }
 };

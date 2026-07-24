@@ -1,0 +1,241 @@
+/* AI Shorts Studio v1.6.0 - localhost AI provider, copy, transcription, and job controls */
+.local-ai-studio {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 20px;
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(17, 24, 39, 0.86));
+    box-shadow: 0 22px 60px rgba(2, 6, 23, 0.22);
+}
+
+.local-ai-studio .local-ai-head,
+.local-ai-studio .local-ai-section-head,
+.local-ai-studio .local-ai-job-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.local-ai-studio .local-ai-head strong,
+.local-ai-studio .local-ai-section-head strong {
+    display: block;
+    font-size: 1rem;
+}
+
+.local-ai-studio .local-ai-head small,
+.local-ai-studio .local-ai-section-head small,
+.local-ai-policy-note {
+    color: var(--muted, #94a3b8);
+    line-height: 1.55;
+}
+
+.local-ai-policy-badge {
+    flex: 0 0 auto;
+    padding: 7px 10px;
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    border-radius: 999px;
+    color: #a7f3d0;
+    background: rgba(6, 78, 59, 0.28);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.local-ai-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+}
+
+.local-ai-card,
+.local-ai-job-card {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    background: rgba(2, 6, 23, 0.34);
+}
+
+.local-ai-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.35fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.local-ai-fields .field.full,
+.local-ai-result,
+.local-ai-actions,
+.local-ai-model-row,
+.local-ai-toggle-row {
+    grid-column: 1 / -1;
+}
+
+.local-ai-studio input,
+.local-ai-studio select,
+.local-ai-studio textarea {
+    width: 100%;
+}
+
+.local-ai-status,
+.local-ai-pin-status,
+.local-ai-job-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(30, 41, 59, 0.72);
+    color: #cbd5e1;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.local-ai-status[data-state="ready"],
+.local-ai-pin-status[data-state="verified"] {
+    color: #a7f3d0;
+    background: rgba(6, 78, 59, 0.34);
+}
+
+.local-ai-status[data-state="error"],
+.local-ai-pin-status[data-state="mismatch"] {
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.32);
+}
+
+.local-ai-pin-status[data-state="unpinned"],
+.local-ai-pin-status[data-state="unverified"] {
+    color: #fde68a;
+    background: rgba(120, 53, 15, 0.32);
+}
+
+.local-ai-actions,
+.local-ai-model-row,
+.local-ai-toggle-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.local-ai-model-row select {
+    flex: 1 1 220px;
+}
+
+.local-ai-toggle-row label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #cbd5e1;
+    font-size: 0.8rem;
+}
+
+.local-ai-toggle-row input {
+    width: auto;
+}
+
+.local-ai-result {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 14px;
+    background: rgba(14, 116, 144, 0.1);
+}
+
+.local-ai-result[hidden] {
+    display: none;
+}
+
+.local-ai-result-row {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+}
+
+.local-ai-result-row b {
+    color: #67e8f9;
+    font-size: 0.78rem;
+}
+
+.local-ai-result-row span,
+.local-ai-result-row p {
+    margin: 0;
+    color: #e2e8f0;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+.local-ai-transcript-preview,
+.local-ai-copy-memo {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.local-ai-job-progress {
+    height: 7px;
+    margin: 12px 0;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(51, 65, 85, 0.72);
+}
+
+.local-ai-job-progress > span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #22d3ee, #a78bfa);
+    transition: width 180ms ease;
+}
+
+.local-ai-job-history {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+    color: #94a3b8;
+    font-size: 0.76rem;
+}
+
+@media (max-width: 900px) {
+    .local-ai-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 620px) {
+    .local-ai-studio {
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .local-ai-studio .local-ai-head,
+    .local-ai-studio .local-ai-section-head,
+    .local-ai-studio .local-ai-job-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .local-ai-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .local-ai-fields > *,
+    .local-ai-fields .field.full,
+    .local-ai-result,
+    .local-ai-actions,
+    .local-ai-model-row,
+    .local-ai-toggle-row {
+        grid-column: 1;
+    }
+
+    .local-ai-result-row {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+}

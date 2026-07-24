@@ -4,110 +4,111 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="AI 쇼츠 제작 스튜디오 - 음악과 영상을 쇼츠 후보로 자동 추천하는 로컬 웹 스튜디오" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self'; manifest-src 'self';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; form-action 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'none'; style-src 'self'; style-src-elem 'self'; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; worker-src 'self'; connect-src 'self' http://127.0.0.1:* http://localhost:* http://[::1]:* https://127.0.0.1:* https://localhost:* https://[::1]:*; manifest-src 'self';" />
 <meta name="theme-color" content="#090b12" />
-<meta name="ai-shorts-version" content="v1.5.29" />
-<meta name="ai-shorts-build-key" content="1.5.29-analysis-signature-storage-trend" />
-<title>AI 쇼츠 제작 스튜디오 v1.5.29</title>
+<meta name="ai-shorts-version" content="v1.6.0" />
+<meta name="ai-shorts-build-key" content="1.6.0-local-ai-provider-foundation" />
+<title>AI 쇼츠 제작 스튜디오 v1.6.0</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" href="assets/icons/ai-shorts.svg" type="image/svg+xml" />
-<link rel="stylesheet" href="assets/css/theme.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/studio.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/editor.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/ux.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/advanced-editor.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/layout-dock.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/caption-pro.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/quality-tools.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/auto-cut.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/cut-markers.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/feedback-ux.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/engine-panel.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/pro-engine.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/hyperflow-tabs.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/render-queue.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/hyperconnect-flow.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/flow-polish.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/flow-hotfix.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/flow-integrity.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/flow-doctor.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/responsive-workspace.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/flow-quality-gate.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/pc-dock-reveal-hotfix.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/glass-pro-ui.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/workspace-comfort.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/motion-stability.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/handoff-coach.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/save-readiness.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/render-quality-planner.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/candidate-preview-pro.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/candidate-pin-board.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/session-continuity.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/storage-health-panel.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/export-finish-center.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/shutter-glass-flow.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/update-sentinel.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/foundation-polish.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/desktop-prime-layout.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/hero-command-deck.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/ui-refinement.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/icon-system.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/header-meta-rail.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/active-stage-beacon.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/workspace-layout-controls.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/mobile-menu-guide.css?v=1.5.29-analysis-signature-storage-trend" />
-<link rel="stylesheet" href="assets/css/studio-experience.css?v=1.5.29-analysis-signature-storage-trend" />
-<script defer src="src/config/app-runtime-config.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/boot/app-version-sync.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/startup-performance.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/boot/update-sentinel.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/utils/core-utils.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/storage/storage-manager.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/state/app-state.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/operation-coordinator.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/analysis/audio-analysis-core.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/analysis/audio-feature-extractor.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/analysis/video-motion-analyzer.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/analysis/auto-cut-detector.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/recommendation/shorts-recommendation-engine.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/module-registry.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/module-contracts.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/analysis-cache.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/performance-budget.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/analysis-pipeline.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/scoring-pipeline.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/pro-engine-tuner.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/stability-auditor.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/engine-boost-profile.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/engine/engine-kernel.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/caption/caption-service.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/project/project-service.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/app/media-import-controller.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/app/project-io-controller.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/render/quality-effects.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/render/vertical-renderer.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/download/download-service.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/render/render-queue.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/waveform-view.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/cut-marker-overlay.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/timeline-view.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/security/site-guards.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/boot/service-worker-registration.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/boot/runtime-health.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/app/render-workflow-controller.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/app/settings-controller.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/app.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/feedback-ux.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/bottom-dock.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/mobile-menu-guide.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/motion-stability.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/hyperflow-tabs.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/flow-director-final.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/flow-command-bridge.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/ui/workspace-layout-controls.js?v=1.5.29-analysis-signature-storage-trend"></script>
-<script defer src="src/boot/staged-ui-loader.js?v=1.5.29-analysis-signature-storage-trend"></script>
+<link rel="stylesheet" href="assets/css/theme.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/studio.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/editor.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/ux.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/advanced-editor.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/layout-dock.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/caption-pro.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/quality-tools.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/auto-cut.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/cut-markers.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/feedback-ux.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/engine-panel.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/pro-engine.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/hyperflow-tabs.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/render-queue.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/hyperconnect-flow.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/flow-polish.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/flow-hotfix.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/flow-integrity.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/flow-doctor.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/responsive-workspace.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/flow-quality-gate.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/pc-dock-reveal-hotfix.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/glass-pro-ui.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/workspace-comfort.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/motion-stability.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/handoff-coach.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/save-readiness.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/render-quality-planner.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/candidate-preview-pro.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/candidate-pin-board.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/session-continuity.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/storage-health-panel.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/local-ai-studio.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/export-finish-center.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/shutter-glass-flow.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/update-sentinel.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/foundation-polish.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/desktop-prime-layout.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/hero-command-deck.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/ui-refinement.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/icon-system.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/header-meta-rail.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/active-stage-beacon.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/workspace-layout-controls.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/mobile-menu-guide.css?v=1.6.0-local-ai-provider-foundation" />
+<link rel="stylesheet" href="assets/css/studio-experience.css?v=1.6.0-local-ai-provider-foundation" />
+<script defer src="src/config/app-runtime-config.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/boot/app-version-sync.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/startup-performance.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/boot/update-sentinel.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/utils/core-utils.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/storage/storage-manager.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/state/app-state.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/operation-coordinator.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/analysis/audio-analysis-core.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/analysis/audio-feature-extractor.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/analysis/video-motion-analyzer.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/analysis/auto-cut-detector.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/recommendation/shorts-recommendation-engine.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/module-registry.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/module-contracts.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/analysis-cache.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/performance-budget.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/analysis-pipeline.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/scoring-pipeline.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/pro-engine-tuner.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/stability-auditor.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/engine-boost-profile.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/engine/engine-kernel.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/caption/caption-service.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/project/project-service.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/app/media-import-controller.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/app/project-io-controller.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/render/quality-effects.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/render/vertical-renderer.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/download/download-service.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/render/render-queue.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/waveform-view.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/cut-marker-overlay.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/timeline-view.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/security/site-guards.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/boot/service-worker-registration.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/boot/runtime-health.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/app/render-workflow-controller.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/app/settings-controller.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/app.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/feedback-ux.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/bottom-dock.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/mobile-menu-guide.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/motion-stability.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/hyperflow-tabs.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/flow-director-final.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/flow-command-bridge.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/ui/workspace-layout-controls.js?v=1.6.0-local-ai-provider-foundation"></script>
+<script defer src="src/boot/staged-ui-loader.js?v=1.6.0-local-ai-provider-foundation"></script>
 </head>
-<body data-build="1.5.29" data-build-key="1.5.29-analysis-signature-storage-trend" data-ui="hyperflow-tabs" data-active-flow-tab="file" data-desktop-layout="prime">
+<body data-build="1.6.0" data-build-key="1.6.0-local-ai-provider-foundation" data-ui="hyperflow-tabs" data-active-flow-tab="file" data-desktop-layout="prime">
 <div class="app-shell">
     <header class="studio-hero">
         <section class="brand-panel cinematic-brand-panel" aria-label="AI 쇼츠 스튜디오 소개">
@@ -118,7 +119,7 @@
             </div>
             <div class="brand-topline">
                 <div class="brand-release">
-                    <button id="programInfoBtn" class="badge badge-version" type="button" aria-label="프로그램 정보 열기">v1.5.29</button>
+                    <button id="programInfoBtn" class="badge badge-version" type="button" aria-label="프로그램 정보 열기">v1.6.0</button>
                     <span class="release-device-compat" aria-label="모바일과 PC 호환">
                         <span class="device-pair-glyph" aria-hidden="true"><i></i><b></b></span>
                         <span>모바일 · PC 호환</span>
@@ -770,6 +771,133 @@
                     </div>
                 </section>
             </section>
+
+            <section id="localAIStudio" class="local-ai-studio" aria-label="로컬 오픈소스 AI 스튜디오">
+                <div class="local-ai-head">
+                    <div>
+                        <strong>로컬 오픈소스 AI 스튜디오</strong>
+                        <small>Ollama · llama.cpp · whisper.cpp · OpenAI 호환 로컬 서버</small>
+                    </div>
+                    <span class="local-ai-policy-badge">localhost 전용 · 원격 전송 차단</span>
+                </div>
+                <p class="local-ai-policy-note">연결 버튼을 누르기 전에는 네트워크 요청을 만들지 않습니다. 주소는 localhost, 127.0.0.1, ::1만 허용하며 인증 정보는 저장하거나 전송하지 않습니다.</p>
+                <div class="local-ai-grid">
+                    <section class="local-ai-card" aria-label="로컬 AI 카피 생성">
+                        <div class="local-ai-section-head">
+                            <div>
+                                <strong>Creative Director</strong>
+                                <small>구조화 JSON 제목 · 후킹 · 설명 · 해시태그</small>
+                            </div>
+                            <span id="creativeProviderStatus" class="local-ai-status" data-state="idle" aria-live="polite">연결 확인 전</span>
+                        </div>
+                        <div class="local-ai-fields">
+                            <label class="field">
+                                <span>제공자</span>
+                                <select id="creativeProviderSelect" aria-label="카피 생성 제공자"></select>
+                            </label>
+                            <label class="field">
+                                <span>localhost 주소</span>
+                                <input id="creativeEndpointInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="http://127.0.0.1:11434" />
+                            </label>
+                            <div class="local-ai-actions">
+                                <button id="creativeProbeBtn" class="btn-secondary" type="button">연결·모델 확인</button>
+                            </div>
+                            <div class="local-ai-model-row">
+                                <label class="field full">
+                                    <span>생성 모델</span>
+                                    <select id="creativeModelSelect" disabled><option value="">연결 후 모델 선택</option></select>
+                                </label>
+                                <button id="modelPinBtn" class="btn-secondary" type="button" disabled>모델 digest 고정</button>
+                                <span id="modelPinStatus" class="local-ai-pin-status" data-state="unsupported">모델 무결성 확인 전</span>
+                            </div>
+                            <div class="local-ai-toggle-row">
+                                <label><input id="includeCaptionsToggle" type="checkbox" checked /> 선택 구간 자막을 카피 문맥에 포함</label>
+                            </div>
+                            <div class="local-ai-actions">
+                                <button id="generateCreativeBtn" class="btn-primary" type="button">AI 카피 생성</button>
+                                <button id="applyCreativeBtn" class="btn-secondary" type="button" disabled>제목·해시태그 적용</button>
+                            </div>
+                            <div id="creativeResult" class="local-ai-result" hidden>
+                                <div class="local-ai-result-row"><b>제목</b><span id="aiTitleResult"></span></div>
+                                <div class="local-ai-result-row"><b>후킹</b><span id="aiHookResult"></span></div>
+                                <div class="local-ai-result-row"><b>설명</b><p id="aiDescriptionResult"></p></div>
+                                <div class="local-ai-result-row"><b>태그</b><span id="aiHashtagResult"></span></div>
+                                <div class="local-ai-result-row"><b>근거</b><p id="aiReasonResult"></p></div>
+                                <label class="field full">
+                                    <span>후킹·설명 메모</span>
+                                    <textarea id="aiCopyMemo" class="local-ai-copy-memo" rows="4" readonly></textarea>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="local-ai-card" aria-label="로컬 음성 전사">
+                        <div class="local-ai-section-head">
+                            <div>
+                                <strong>Speech Intelligence</strong>
+                                <small>whisper.cpp 전사 · 구간 자막 · SRT 적용</small>
+                            </div>
+                            <span id="speechProviderStatus" class="local-ai-status" data-state="idle" aria-live="polite">연결 확인 전</span>
+                        </div>
+                        <div class="local-ai-fields">
+                            <label class="field">
+                                <span>제공자</span>
+                                <select id="speechProviderSelect" aria-label="음성 전사 제공자"></select>
+                            </label>
+                            <label class="field">
+                                <span>localhost 주소</span>
+                                <input id="speechEndpointInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="http://127.0.0.1:8081" />
+                            </label>
+                            <label class="field">
+                                <span>전사 모델 이름</span>
+                                <input id="speechModelInput" type="text" maxlength="160" value="whisper" autocomplete="off" />
+                            </label>
+                            <label class="field">
+                                <span>언어</span>
+                                <select id="speechLanguageSelect">
+                                    <option value="auto">자동 감지</option>
+                                    <option value="ko">한국어</option>
+                                    <option value="en">영어</option>
+                                    <option value="ja">일본어</option>
+                                    <option value="zh">중국어</option>
+                                </select>
+                            </label>
+                            <div class="local-ai-actions">
+                                <button id="speechProbeBtn" class="btn-secondary" type="button">전사 서버 확인</button>
+                                <button id="transcribeBtn" class="btn-primary" type="button">현재 미디어 전사</button>
+                            </div>
+                            <div class="local-ai-toggle-row">
+                                <label><input id="autoApplyTranscriptToggle" type="checkbox" /> 완료 후 자막 트랙에 자동 적용</label>
+                            </div>
+                            <div id="transcriptResult" class="local-ai-result" hidden>
+                                <div class="local-ai-result-row"><b>결과</b><span id="transcriptMeta"></span></div>
+                                <label class="field full">
+                                    <span>SRT 또는 전사 텍스트</span>
+                                    <textarea id="transcriptPreview" class="local-ai-transcript-preview" rows="8" readonly></textarea>
+                                </label>
+                                <div class="local-ai-actions">
+                                    <button id="applyTranscriptBtn" class="btn-secondary" type="button" disabled>자막 트랙에 적용</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="local-ai-job-card" aria-label="로컬 AI 작업 큐">
+                    <div class="local-ai-job-head">
+                        <div>
+                            <strong>AI 작업 큐</strong>
+                            <small>동시 실행 1개 · 제한 시간 · 안전 취소 · 비식별 이력</small>
+                        </div>
+                        <span id="aiJobStatus" class="local-ai-job-status" data-state="idle" aria-live="polite">대기 중</span>
+                    </div>
+                    <div class="local-ai-job-progress" aria-hidden="true"><span id="aiJobProgress"></span></div>
+                    <div class="local-ai-actions">
+                        <button id="aiJobCancelBtn" class="btn-secondary" type="button" disabled>현재 AI 작업 취소</button>
+                    </div>
+                    <ul id="aiJobHistory" class="local-ai-job-history"><li>로컬 AI 작업 이력이 없습니다.</li></ul>
+                </section>
+            </section>
         </section>
     </main>
 </div>
@@ -806,7 +934,7 @@
 <div id="infoDialog" class="modal" hidden>
     <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
         <button id="infoCloseBtn" class="modal-close" type="button" aria-label="닫기">×</button>
-        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v1.5.29</h2>
+        <h2 id="infoTitle">AI 쇼츠 제작 스튜디오 v1.6.0</h2>
         <p>긴 음악이나 영상을 열면 브라우저 안에서 자동 분석하고, 쇼츠로 쓰기 좋은 구간을 추천해 세로 미리보기와 저장까지 도와주는 제작 스튜디오입니다.</p>
         <ul>
             <li>원본을 불러오면 자동으로 오디오 에너지, 피크, 무음, 움직임을 분석합니다.</li>

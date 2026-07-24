@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.29 - staged UI hydration with storage health shell
+// AI Shorts Studio v1.6.0 - staged UI hydration with storage health shell
 'use strict';
 
 (function installStagedUiLoader(global) {
@@ -6,7 +6,7 @@
     if (!doc) return;
 
     const config = global.AIShortsRuntimeConfig || {};
-    const VERSION = String(config.APP_VERSION || 'v1.5.29').replace(/^v/i, '');
+    const VERSION = String(config.APP_VERSION || 'v1.6.0').replace(/^v/i, '');
     const BUILD_KEY = String(config.BUILD_KEY || `${VERSION}-staged-ui`);
     const versioned = (path, label) => `${path}?v=${encodeURIComponent(BUILD_KEY)}-${label}`;
     const phases = Object.freeze({
@@ -34,14 +34,20 @@
         ],
         export: [
             versioned('src/ui/export-finish-center.js', 'export')
+        ],
+        localAI: [
+            versioned('src/ai/ai-job-coordinator.js', 'local-ai'),
+            versioned('src/ai/local-ai-provider-registry.js', 'local-ai'),
+            versioned('src/ui/local-ai-studio.js', 'local-ai')
         ]
     });
 
-    const dependencies = Object.freeze({ editing: ['shell'], export: ['shell', 'editing'] });
+    const dependencies = Object.freeze({ editing: ['shell'], export: ['shell', 'editing'], localAI: [] });
     const loadedScripts = new Set();
     const phasePromises = new Map();
     const phaseReady = new Set();
     let interactionArmed = false;
+    let replayingLocalAIAction = false;
 
     function normalizedPath(url) {
         try { return new URL(url, doc.baseURI).href; } catch (_) { return String(url || ''); }
@@ -121,6 +127,7 @@
 
     function phaseForTarget(target) {
         if (!target || !target.closest) return '';
+        if (target.closest('#localAIStudio')) return 'localAI';
         const flow = target.closest('[data-flow-tab]');
         const tab = flow && flow.getAttribute('data-flow-tab');
         if (tab === 'export') return 'export';
@@ -150,6 +157,21 @@
         doc.addEventListener('focusin', event => prewarmFromTarget(event.target), { capture: true });
         doc.addEventListener('pointerdown', event => prewarmFromTarget(event.target), { capture: true, passive: true });
         doc.addEventListener('change', event => prewarmFromTarget(event.target), { capture: true });
+        doc.addEventListener('click', event => {
+            const target = event.target && event.target.closest
+                ? event.target.closest('#localAIStudio button')
+                : null;
+            if (!target || phaseReady.has('localAI') || replayingLocalAIAction) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            ensure('localAI').then(() => {
+                if (!target.isConnected || target.disabled) return;
+                replayingLocalAIAction = true;
+                target.click();
+            }).catch(() => {}).finally(() => {
+                replayingLocalAIAction = false;
+            });
+        }, { capture: true });
         doc.addEventListener('ai-shorts-flow-sync', inspectWorkflowState);
         doc.addEventListener('ai-shorts-navigation-request', event => {
             const tab = event && event.detail && event.detail.tab;

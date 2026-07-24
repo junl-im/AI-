@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-5-29",
-  "version": "1.5.29",
+  "name": "ai-shorts-studio-v1-6-0",
+  "version": "1.6.0",
   "private": true,
-  "description": "AI Shorts Studio v1.5.29 - option-aware analysis cache, signature cleanup, storage trend, and cached diagnostics",
+  "description": "AI Shorts Studio v1.6.0 - localhost-only open-source AI providers, structured creative copy, local transcription, model integrity, and cancellable staged jobs",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -225,7 +225,10 @@
     "node qa/studio_experience_smoke.js",
     "node qa/unified_import_ui_smoke.js",
     "node qa/analysis_cache_safety_smoke.js",
-    "node qa/parallel_analysis_smoke.js"
+    "node qa/parallel_analysis_smoke.js",
+    "node qa/local_ai_provider_registry_smoke.js",
+    "node qa/ai_job_coordinator_smoke.js",
+    "node qa/local_ai_studio_smoke.js"
   ],
   "devDependencies": {
     "postcss": "^8.5.6"

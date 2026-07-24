@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chromium responsive/runtime audit for AI Shorts Studio v1.5.29."""
+"""Chromium responsive/runtime audit for AI Shorts Studio v1.6.0."""
 import asyncio
 import json
 import re
@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.5.29.json'
+OUTPUT = ROOT / 'qa' / 'runtime-browser-audit-v1.6.0.json'
 
 INSTRUMENT = r'''<script>
 window.__aiAudit={errors:[],rejections:[],consoleErrors:[],raf:0,mutations:0};
@@ -47,7 +47,8 @@ def build_inline_html():
         'src/ui/range-drag-controls.js', 'src/ui/handoff-coach.js', 'src/ui/save-readiness.js',
         'src/ui/render-quality-planner.js', 'src/ui/candidate-preview-pro.js',
         'src/ui/candidate-pin-board.js', 'src/ui/export-finish-center.js',
-        'src/ui/studio-experience-controller.js'
+        'src/ui/studio-experience-controller.js', 'src/ai/ai-job-coordinator.js',
+        'src/ai/local-ai-provider-registry.js', 'src/ui/local-ai-studio.js'
     ]
     scripts = ''.join(
         '<script data-source="{0}">{1}</script>'.format(
@@ -128,7 +129,13 @@ async def audit_mode(browser, mode, viewport):
     await page.evaluate("() => AIShortsFlowDirectorFinal.setActive('recommend',{force:true,source:'runtime-audit'})")
     await page.wait_for_timeout(80)
     landing = await collect_stage(page)
-    await page.wait_for_timeout(1000)
+    try:
+        await page.wait_for_function(
+            "() => !document.querySelector('[data-flow-panel].is-stage-current')?.classList.contains('is-stage-landing')",
+            timeout=3200,
+        )
+    except Exception:
+        pass
     stage = await collect_stage(page)
 
     dock_rect = await rect(page, '#bottomDock')
@@ -226,7 +233,7 @@ async def main():
             audit_mode(browser, 'mobile', {'width': 390, 'height': 844}),
         )
         report = {
-            'version': '1.5.29',
+            'version': '1.6.0',
             'desktop': desktop,
             'smallLaptop': small_laptop,
             'tablet': tablet,

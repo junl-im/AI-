@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.29 - runtime, analysis cache, storage, and service worker health monitor
+// AI Shorts Studio v1.6.0 - runtime, analysis cache, storage, and service worker health monitor
 'use strict';
 
 (function exposeRuntimeHealth(global) {
@@ -73,7 +73,9 @@
             storage: global.AIShortsStorageManager && global.AIShortsStorageManager.status ? global.AIShortsStorageManager.status() : null,
             serviceWorkerLifecycle: global.AIShortsServiceWorkerRegistration && global.AIShortsServiceWorkerRegistration.getStatus ? global.AIShortsServiceWorkerRegistration.getStatus() : null,
             sessionContinuity: global.AIShortsSessionContinuity && global.AIShortsSessionContinuity.getStatus ? global.AIShortsSessionContinuity.getStatus() : null,
-            analysisCache: global.AIShortsEngineKernel && global.AIShortsEngineKernel.getHealthReport ? global.AIShortsEngineKernel.getHealthReport().cache : null
+            analysisCache: global.AIShortsEngineKernel && global.AIShortsEngineKernel.getHealthReport ? global.AIShortsEngineKernel.getHealthReport().cache : null,
+            localAI: global.AIShortsLocalAIProviders && global.AIShortsLocalAIProviders.snapshot ? global.AIShortsLocalAIProviders.snapshot() : null,
+            localAIJobs: global.AIShortsAIJobCoordinator && global.AIShortsAIJobCoordinator.snapshot ? global.AIShortsAIJobCoordinator.snapshot() : null
         };
     }
 

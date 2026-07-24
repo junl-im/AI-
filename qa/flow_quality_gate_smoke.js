@@ -18,9 +18,9 @@ function assert(condition, message) {
     console.log(`PASS ${message}`);
 }
 
-assert(html.includes('assets/css/flow-quality-gate.css?v=1.5.29-analysis-signature-storage-trend'), 'flow quality gate stylesheet is linked');
+assert(html.includes('assets/css/flow-quality-gate.css?v=1.6.0-local-ai-provider-foundation'), 'flow quality gate stylesheet is linked');
 assert(loader.includes("versioned('src/ui/flow-quality-gate.js', 'shell')"), 'flow quality gate script is staged');
-assert(sw.includes('./assets/css/flow-quality-gate.css?v=1.5.29-analysis-signature-storage-trend'), 'flow quality gate stylesheet is cached');
+assert(sw.includes('./assets/css/flow-quality-gate.css?v=1.6.0-local-ai-provider-foundation'), 'flow quality gate stylesheet is cached');
 assert(sw.includes('async function cacheFirst') && sw.includes('cache.put(request, response.clone())'), 'staged scripts are cached on first use');
 assert(js.includes("const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export']"), 'canonical 8-step flow order is guarded');
 assert(js.includes('bestTabForState'), 'state-aware fallback tab resolver exists');
@@ -29,4 +29,4 @@ assert(js.includes('window-error') || js.includes('unhandledrejection'), 'runtim
 assert(js.includes('flow-quality-hidden-legacy'), 'legacy duplicate UI is hidden by runtime guard');
 assert(css.includes('[data-flow-panel][hidden]'), 'hidden panels are force-hidden');
 assert(css.includes('.is-flow-active'), 'active panel class is styled');
-assert(html.includes('data-build="1.5.29"'), 'build marker is v1.5.29');
+assert(html.includes('data-build="1.6.0"'), 'build marker is v1.6.0');
