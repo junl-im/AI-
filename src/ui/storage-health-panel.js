@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.3 - footer storage health with issue-driven navigation and gated diagnostics
+// AI Shorts Studio v1.6.4 - closed-loop storage recovery navigation and cleanup impact preview
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;
@@ -17,6 +17,8 @@
     let pendingConfirmation = null;
     let lastAutoNavigationKey = '';
     let autoNavigationTimer = 0;
+    let returnNavigationTimer = 0;
+    let recoveryJourney = null;
 
     function byId(id) { return document.getElementById(id); }
     function formatBytes(value) {
@@ -163,6 +165,7 @@
             '  <h3 id="storageConfirmTitle">정리 작업 확인</h3>',
             '  <p id="storageConfirmMessage">이 작업을 실행할지 확인해주세요.</p>',
             '  <div class="storage-confirm-safety"><strong>안전 안내</strong><span>현재 프로젝트의 원본 파일과 편집 내용은 삭제되지 않습니다.</span></div>',
+            '  <div id="storageConfirmImpact" class="storage-confirm-impact" hidden><strong>실행 전 영향</strong><ul id="storageConfirmImpactList"></ul></div>',
             '  <div class="storage-confirm-actions"><button id="storageConfirmCancelBtn" type="button">취소</button><button id="storageConfirmAcceptBtn" class="storage-danger-action" type="button">정리 실행</button></div>',
             '</section>'
         ].join('');
@@ -250,7 +253,23 @@
         if (pending.trigger && pending.trigger.isConnected && typeof pending.trigger.focus === 'function') pending.trigger.focus();
         pending.resolve(Boolean(accepted));
     }
-    function confirmDestructive(options) {
+    function normalizeImpactItems(value) {
+        const source = Array.isArray(value) ? value : [];
+        return source.map(item => String(item || '').trim()).filter(Boolean).slice(0, 6);
+    }
+    function renderConfirmationImpact(items) {
+        const impact = byId('storageConfirmImpact');
+        const list = byId('storageConfirmImpactList');
+        if (!impact || !list) return;
+        const normalized = normalizeImpactItems(items);
+        impact.hidden = !normalized.length;
+        list.replaceChildren(...normalized.map(text => {
+            const row = document.createElement('li');
+            row.textContent = text;
+            return row;
+        }));
+    }
+    async function confirmDestructive(options) {
         build();
         const opts = options || {};
         if (pendingConfirmation) completeConfirmation(false);
@@ -260,6 +279,12 @@
         if (title) title.textContent = opts.title || '정리 작업 확인';
         if (message) message.textContent = opts.message || '선택한 데이터를 정리합니다. 계속할까요?';
         if (accept) accept.textContent = opts.confirmLabel || '정리 실행';
+        let impactItems = opts.impactItems;
+        if (typeof opts.getImpactItems === 'function') {
+            try { impactItems = await opts.getImpactItems(); }
+            catch (_) { impactItems = ['영향 범위를 계산하지 못했습니다. 실행 후 실제 정리 결과를 안내합니다.']; }
+        }
+        renderConfirmationImpact(impactItems);
         confirmationDialog.hidden = false;
         confirmationDialog.setAttribute('aria-hidden', 'false');
         if (document.body) document.body.classList.add('storage-confirm-open');
@@ -293,25 +318,58 @@
         if (advancedReturnFocus && advancedReturnFocus.isConnected && typeof advancedReturnFocus.focus === 'function') advancedReturnFocus.focus();
         advancedReturnFocus = null;
     }
+    function healthActionKey(model) {
+        const current = model || {};
+        return `${current.issue || 'unknown'}:${current.state || 'unknown'}:${current.action || 'none'}`;
+    }
     function navigateToHealthPanel(model, options) {
         const current = model || lastHealthModel;
         const opts = options || {};
         if (!root || !current || !current.action || advancedDialog && !advancedDialog.hidden || confirmationDialog && !confirmationDialog.hidden) return false;
-        const key = `${current.issue || 'unknown'}:${current.state || 'unknown'}:${current.action}`;
+        const key = healthActionKey(current);
         if (!opts.force && lastAutoNavigationKey === key) return false;
         lastAutoNavigationKey = key;
         global.clearTimeout(autoNavigationTimer);
         autoNavigationTimer = global.setTimeout(() => {
             if (!root || !root.isConnected || !lastHealthModel || !lastHealthModel.action) return;
+            recoveryJourney = Object.freeze({ key, issue: lastHealthModel.issue, action: lastHealthModel.action, navigatedAt: Date.now() });
             root.dataset.attention = 'true';
             root.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'center', inline: 'nearest' });
             scheduleFrame(() => {
                 try { root.focus({ preventScroll: true }); } catch (_) { root.focus(); }
             });
             feedback(lastHealthModel.action === 'cleanup' ? '저장 공간 정리가 필요해 하단 상태 영역으로 이동했습니다.' : '오프라인 기능 확인이 필요해 하단 상태 영역으로 이동했습니다.', 'action');
-            document.dispatchEvent(new CustomEvent('ai-shorts-storage-attention', { detail: { issue: lastHealthModel.issue, action: lastHealthModel.action } }));
+            document.dispatchEvent(new CustomEvent('ai-shorts-storage-attention', { detail: { issue: lastHealthModel.issue, action: lastHealthModel.action, key } }));
             global.setTimeout(() => { if (root) delete root.dataset.attention; }, 4600);
         }, Number(opts.delayMs) >= 0 ? Number(opts.delayMs) : 180);
+        return true;
+    }
+    function returnToWorkspaceTop(options) {
+        const opts = options || {};
+        const journey = recoveryJourney;
+        if (!opts.force && !journey) return false;
+        if (!opts.force && lastHealthModel && lastHealthModel.action) return false;
+        if (advancedDialog && !advancedDialog.hidden || confirmationDialog && !confirmationDialog.hidden) return false;
+        const focusTarget = byId('heroWorkspaceStartBtn') || document.querySelector('.studio-hero') || document.querySelector('.start-command-panel');
+        global.clearTimeout(returnNavigationTimer);
+        returnNavigationTimer = global.setTimeout(() => {
+            if (document.body) document.body.dataset.storageRecovery = 'complete';
+            if (root) delete root.dataset.attention;
+            try { global.scrollTo({ top: 0, left: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth' }); }
+            catch (_) { global.scrollTo(0, 0); }
+            scheduleFrame(() => {
+                if (!focusTarget || typeof focusTarget.focus !== 'function') return;
+                const naturallyFocusable = focusTarget.matches && focusTarget.matches('button, input, select, textarea, a[href], [tabindex]');
+                const temporaryTabIndex = !naturallyFocusable;
+                if (temporaryTabIndex) focusTarget.setAttribute('tabindex', '-1');
+                try { focusTarget.focus({ preventScroll: true }); } catch (_) { focusTarget.focus(); }
+                if (temporaryTabIndex) focusTarget.addEventListener('blur', () => focusTarget.removeAttribute('tabindex'), { once: true });
+            });
+            feedback('문제 해결을 완료해 작업실 맨 위로 돌아왔습니다.', 'action');
+            document.dispatchEvent(new CustomEvent('ai-shorts-storage-recovery-complete', { detail: { issue: journey && journey.issue || '', action: journey && journey.action || '', returnedToTop: true } }));
+            global.setTimeout(() => { if (document.body) delete document.body.dataset.storageRecovery; }, 3600);
+        }, Number(opts.delayMs) >= 0 ? Number(opts.delayMs) : 180);
+        recoveryJourney = null;
         return true;
     }
     function serviceWorkerProblemCount(status) {
@@ -800,17 +858,26 @@
     async function cleanup() {
         const button = byId('storageHealthCleanupBtn');
         const autoButton = byId('storageHealthAutoRepairBtn');
-        if (!await confirmDestructive({ title: '오래된 저장소 정리', message: '오래된 세션 백업과 임시 캐시를 최대 2개 정리합니다. 현재 프로젝트, 원본 파일, 최신 복구 데이터는 유지됩니다.', confirmLabel: '안전하게 정리', trigger: button || autoButton })) return null;
+        const session = global.AIShortsSessionContinuity && global.AIShortsSessionContinuity.getStatus ? global.AIShortsSessionContinuity.getStatus() : {};
+        const cleanupOptions = {
+            reason: 'storage-health-panel',
+            currentSessionKey: session.storageKey,
+            preserveKeys: session.storageKey ? [session.storageKey] : [],
+            maxRemovals: 2
+        };
+        let preview = null;
+        try { preview = storage.previewCleanup ? await storage.previewCleanup(cleanupOptions) : null; } catch (_) { preview = null; }
+        const impactItems = preview ? [
+            preview.local && preview.local.selectedCount ? `오래된 세션·백업 최대 ${preview.local.selectedCount}개 (${formatBytes(preview.local.bytes || 0)})` : '정리 가능한 오래된 세션·백업 없음',
+            preview.caches && preview.caches.staleCount ? `이전 오프라인 캐시 ${preview.caches.staleCount}개` : '정리 가능한 이전 오프라인 캐시 없음',
+            '현재 프로젝트·최신 복구 데이터·현재 오프라인 셸은 유지'
+        ] : ['오래된 세션 백업과 이전 오프라인 캐시만 확인', '현재 프로젝트·최신 복구 데이터·현재 오프라인 셸은 유지'];
+        const activeTrigger = document.activeElement === autoButton || document.activeElement === button ? document.activeElement : button || autoButton;
+        if (!await confirmDestructive({ title: '오래된 저장소 정리', message: '실행 전에 정리 범위를 확인했습니다. 현재 프로젝트, 원본 파일, 최신 복구 데이터는 유지됩니다.', confirmLabel: '안전하게 정리', trigger: activeTrigger, impactItems })) return null;
         if (button) button.disabled = true;
         if (autoButton) autoButton.disabled = true;
         try {
-            const session = global.AIShortsSessionContinuity && global.AIShortsSessionContinuity.getStatus ? global.AIShortsSessionContinuity.getStatus() : {};
-            const result = storage.cleanup ? await storage.cleanup({
-                reason: 'storage-health-panel',
-                currentSessionKey: session.storageKey,
-                preserveKeys: session.storageKey ? [session.storageKey] : [],
-                maxRemovals: 2
-            }) : null;
+            const result = storage.cleanup ? await storage.cleanup(cleanupOptions) : null;
             await refresh({ force: true, source: 'cleanup', includeDiagnostics: advancedDialog && !advancedDialog.hidden });
             const removed = (result && result.local && result.local.removedCount || 0) + (result && result.caches && result.caches.removedCount || 0);
             feedback(removed ? `오래된 저장소 ${removed}개를 정리했습니다.` : '정리할 오래된 저장소가 없습니다.', 'action');
@@ -825,10 +892,22 @@
     }
     async function runAutomaticRepair() {
         const model = lastHealthModel || deriveHealthModel(lastStorageSnapshot || {}, serviceWorker.getStatus ? serviceWorker.getStatus() : null);
-        if (model.action === 'cleanup') return cleanup();
-        if (model.action === 'repair') return repairOfflineShell();
-        feedback('현재 자동으로 해결할 문제가 없습니다.', 'action');
-        return null;
+        const journey = recoveryJourney;
+        let result = null;
+        if (model.action === 'cleanup') result = await cleanup();
+        else if (model.action === 'repair') result = await repairOfflineShell();
+        else {
+            feedback('현재 자동으로 해결할 문제가 없습니다.', 'action');
+            return null;
+        }
+        if (result && journey && journey.key === healthActionKey(model) && lastHealthModel && !lastHealthModel.action) {
+            recoveryJourney = journey;
+            returnToWorkspaceTop({ delayMs: 220 });
+        } else if (result && lastHealthModel && lastHealthModel.action && root) {
+            root.dataset.attention = 'true';
+            feedback('일부 처리는 완료됐지만 추가 확인이 필요합니다.', 'warning');
+        }
+        return result;
     }
     function install() {
         build();
@@ -846,6 +925,7 @@
         openAdvancedDiagnostics,
         closeAdvancedDiagnostics,
         navigateToHealthPanel,
+        returnToWorkspaceTop,
         confirmDestructive,
         exportAnalysisDiagnostics,
         exportIntegrityDiagnostics,

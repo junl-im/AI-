@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser layout audit for v1.6.3 footer health placement and Local AI workflow alignment."""
+"""Browser layout audit for v1.6.4 footer health placement and Local AI workflow alignment."""
 import asyncio
 import json
 import re

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.3 - resilient adaptive parallel media analysis pipeline
+// AI Shorts Studio v1.6.4 - resilient adaptive parallel media analysis pipeline
 'use strict';
 
 (function exposeAnalysisPipeline(global) {
@@ -7,7 +7,7 @@
     const autoCutDetector = global.AIShortsAutoCutDetector || {};
     const utils = global.AIShortsCoreUtils || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.6.3').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.6.4').replace(/^v/i, '');
 
     function clamp(value, min, max) {
         if (utils.clamp) return utils.clamp(value, min, max);

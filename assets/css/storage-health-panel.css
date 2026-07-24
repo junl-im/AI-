@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.6.3 footer storage summary, issue navigation, and gated diagnostics */
+/* AI Shorts Studio v1.6.4 footer storage summary, issue navigation, and gated diagnostics */
 .storage-health-panel {
     display: grid;
     grid-template-columns: minmax(260px, 1fr) auto auto;
@@ -481,6 +481,30 @@ body.storage-confirm-open {
 }
 .storage-confirm-safety {
     width: 100%;
+}
+.storage-confirm-impact {
+    display: grid;
+    gap: 7px;
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid color-mix(in srgb, var(--accent-2, #60a5fa) 32%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--accent-2, #60a5fa) 7%, transparent);
+}
+.storage-confirm-impact[hidden] {
+    display: none;
+}
+.storage-confirm-impact strong {
+    font-size: .75rem;
+}
+.storage-confirm-impact ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
+    color: var(--muted, #94a3b8);
+    font-size: .72rem;
+    line-height: 1.45;
 }
 .storage-confirm-actions {
     display: flex;

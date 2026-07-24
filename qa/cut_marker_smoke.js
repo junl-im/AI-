@@ -19,12 +19,12 @@ function assertIncludes(file, needle) {
 
 assertIncludes('index.html', 'cutMarkerOverlay');
 assertIncludes('index.html', 'snapStartCutBtn');
-assertIncludes('index.html', 'src/ui/cut-marker-overlay.js?v=1.6.3-stage-focus-progressive-disclosure');
+assertIncludes('index.html', 'src/ui/cut-marker-overlay.js?v=1.6.4-recovery-loop-impact-preview');
 assertIncludes('assets/css/cut-markers.css', '.cut-marker-overlay');
 assertIncludes('src/ui/cut-marker-overlay.js', 'renderCutMarkers');
 assertIncludes('src/ui/cut-marker-overlay.js', 'summarizeFocusedPoint');
 assertIncludes('src/app.js', 'renderCutMarkerLayer');
 assertIncludes('src/app.js', 'snapSelectedBoundaryToNearestCut');
-assertIncludes('sw.js', 'cut-marker-overlay.js?v=1.6.3-stage-focus-progressive-disclosure');
+assertIncludes('sw.js', 'cut-marker-overlay.js?v=1.6.4-recovery-loop-impact-preview');
 
 console.log('PASS cut marker overlay smoke checks');

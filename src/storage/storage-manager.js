@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.3 - quota-aware local and cache storage coordinator
+// AI Shorts Studio v1.6.4 - quota-aware storage coordinator with cleanup impact preview
 'use strict';
 
 (function exposeStorageManager(global) {
@@ -69,7 +69,12 @@
         return bytes;
     }
 
-    function cleanupLocal(options) {
+    function localEntryBytes(key) {
+        const value = safeGet(key, '') || '';
+        return Math.max(0, (String(key).length + String(value).length) * 2);
+    }
+
+    function cleanupLocalPlan(options) {
         const opts = options || {};
         const preserve = new Set((opts.preserveKeys || []).map(String));
         const candidates = listLocalKeys().filter(key => key.startsWith(LOCAL_PREFIX) && !preserve.has(key));
@@ -77,12 +82,24 @@
         const legacySessionKeys = candidates.filter(key => /session-continuity-v\d+/i.test(key) && !/backup/i.test(key) && key !== String(opts.currentSessionKey || ''));
         const removable = [...backupKeys, ...legacySessionKeys];
         const maxRemovals = Math.max(0, Number(opts.maxRemovals == null ? removable.length : opts.maxRemovals));
+        const selected = removable.slice(0, maxRemovals);
+        return Object.freeze({
+            selected: Object.freeze(selected),
+            removableCount: removable.length,
+            selectedCount: selected.length,
+            bytes: selected.reduce((sum, key) => sum + localEntryBytes(key), 0)
+        });
+    }
+
+    function cleanupLocal(options) {
+        const opts = options || {};
+        const plan = cleanupLocalPlan(opts);
         const removed = [];
-        removable.slice(0, maxRemovals).forEach(key => {
+        plan.selected.forEach(key => {
             if (safeRemove(key)) removed.push(key);
         });
         if (removed.length) addDiagnostic({ type: 'storage-local-cleanup', reason: opts.reason || 'manual', removed: removed.slice(0, 12), removedCount: removed.length });
-        return Object.freeze({ removed, removedCount: removed.length });
+        return Object.freeze({ removed, removedCount: removed.length, plannedCount: plan.selectedCount, plannedBytes: plan.bytes });
     }
 
     function safeSet(key, value, options) {
@@ -182,19 +199,37 @@
         return `${CACHE_PREFIX}v${String(config.BUILD_KEY || '').replace(/^v/i, '')}`;
     }
 
-    async function cleanupCaches(options) {
+    async function cleanupCachePlan(options) {
         const opts = options || {};
         const keep = new Set([String(opts.keepCacheName || currentCacheName())]);
         const names = await cacheNames();
         const stale = names.filter(name => String(name).startsWith(CACHE_PREFIX) && !keep.has(String(name)));
+        return Object.freeze({ stale: Object.freeze(stale), staleCount: stale.length, currentCachePreserved: true });
+    }
+
+    async function cleanupCaches(options) {
+        const opts = options || {};
+        const plan = await cleanupCachePlan(opts);
         const removed = [];
-        for (const name of stale) {
+        for (const name of plan.stale) {
             try {
                 if (await global.caches.delete(name)) removed.push(name);
             } catch (_) { /* best effort */ }
         }
         if (removed.length) addDiagnostic({ type: 'storage-cache-cleanup', reason: opts.reason || 'manual', removedCount: removed.length, removed: removed.slice(0, 8) });
-        return Object.freeze({ removed, removedCount: removed.length });
+        return Object.freeze({ removed, removedCount: removed.length, plannedCount: plan.staleCount });
+    }
+
+    async function previewCleanup(options) {
+        const opts = options || {};
+        const local = cleanupLocalPlan(opts);
+        const cachesResult = await cleanupCachePlan(opts);
+        return Object.freeze({
+            local: Object.freeze({ removableCount: local.removableCount, selectedCount: local.selectedCount, bytes: local.bytes }),
+            caches: Object.freeze({ staleCount: cachesResult.staleCount, currentCachePreserved: true }),
+            preservesCurrentSession: Boolean(opts.currentSessionKey || (opts.preserveKeys && opts.preserveKeys.length)),
+            generatedAt: new Date().toISOString()
+        });
     }
 
     async function cleanup(options) {
@@ -222,6 +257,7 @@
         localStorageBytes,
         cleanupLocal,
         cleanupCaches,
+        previewCleanup,
         cleanup,
         estimate,
         status,

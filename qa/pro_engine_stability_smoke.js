@@ -17,11 +17,11 @@ function fail(message) { console.error('FAIL ' + message); process.exit(1); }
 
 const html = read('index.html');
 [
-    'src/engine/module-contracts.js?v=1.6.3-stage-focus-progressive-disclosure',
-    'src/engine/analysis-cache.js?v=1.6.3-stage-focus-progressive-disclosure',
-    'src/engine/pro-engine-tuner.js?v=1.6.3-stage-focus-progressive-disclosure',
-    'src/engine/stability-auditor.js?v=1.6.3-stage-focus-progressive-disclosure',
-    'assets/css/pro-engine.css?v=1.6.3-stage-focus-progressive-disclosure'
+    'src/engine/module-contracts.js?v=1.6.4-recovery-loop-impact-preview',
+    'src/engine/analysis-cache.js?v=1.6.4-recovery-loop-impact-preview',
+    'src/engine/pro-engine-tuner.js?v=1.6.4-recovery-loop-impact-preview',
+    'src/engine/stability-auditor.js?v=1.6.4-recovery-loop-impact-preview',
+    'assets/css/pro-engine.css?v=1.6.4-recovery-loop-impact-preview'
 ].forEach(token => { if (!html.includes(token)) fail(`index missing ${token}`); });
 
 const kernel = read('src/engine/engine-kernel.js');

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.3 - contract-aware layered analysis cache and selective invalidation facade
+// AI Shorts Studio v1.6.4 - contract-aware layered analysis cache and selective invalidation facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -11,7 +11,7 @@
     const tuner = global.AIShortsProEngineTuner || {};
     const stability = global.AIShortsStabilityAuditor || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.6.3').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.6.4').replace(/^v/i, '');
     const ANALYSIS_CONTRACT_VERSION = String(config.ANALYSIS_CACHE_CONTRACT_VERSION || '3');
     const ANALYSIS_CACHE_NAMESPACE = `analysis-contract-v${ANALYSIS_CONTRACT_VERSION}`;
 

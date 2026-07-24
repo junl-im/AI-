@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.3 - staged UI hydration with storage health shell
+// AI Shorts Studio v1.6.4 - staged UI hydration with storage health shell
 'use strict';
 
 (function installStagedUiLoader(global) {
@@ -6,7 +6,7 @@
     if (!doc) return;
 
     const config = global.AIShortsRuntimeConfig || {};
-    const VERSION = String(config.APP_VERSION || 'v1.6.3').replace(/^v/i, '');
+    const VERSION = String(config.APP_VERSION || 'v1.6.4').replace(/^v/i, '');
     const BUILD_KEY = String(config.BUILD_KEY || `${VERSION}-staged-ui`);
     const versioned = (path, label) => `${path}?v=${encodeURIComponent(BUILD_KEY)}-${label}`;
     const phases = Object.freeze({

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser audit for v1.6.3 stage-aware workspace focus and measured dock clearance."""
+"""Browser audit for v1.6.4 stage-aware workspace focus and measured dock clearance."""
 import asyncio
 import importlib.util
 import json

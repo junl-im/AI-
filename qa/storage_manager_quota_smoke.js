@@ -24,13 +24,13 @@ const localStorage = {
         values.set(key, String(value));
     }
 };
-const cacheNames = new Set(['ai-shorts-studio-shell-v1.5.21-old', 'ai-shorts-studio-shell-v1.6.3-stage-focus-progressive-disclosure', 'other-cache']);
+const cacheNames = new Set(['ai-shorts-studio-shell-v1.5.21-old', 'ai-shorts-studio-shell-v1.6.4-recovery-loop-impact-preview', 'other-cache']);
 const window = {
     window: null,
     localStorage,
     navigator: { storage: { async estimate() { return { usage: 80, quota: 100 }; } } },
     caches: { async keys() { return [...cacheNames]; }, async delete(name) { return cacheNames.delete(name); } },
-    AIShortsRuntimeConfig: { BUILD_KEY: '1.6.3-stage-focus-progressive-disclosure', STORAGE_WARNING_RATIO: 0.8, STORAGE_CRITICAL_RATIO: 0.92 },
+    AIShortsRuntimeConfig: { BUILD_KEY: '1.6.4-recovery-loop-impact-preview', STORAGE_WARNING_RATIO: 0.8, STORAGE_CRITICAL_RATIO: 0.92 },
     document: { dispatchEvent() {} },
     CustomEvent: function CustomEvent() {}
 };
@@ -38,13 +38,16 @@ window.window = window;
 vm.runInContext(source, vm.createContext({ window, console, Object, String, Number, Math, Date, Set, Map, Promise }));
 const manager = window.AIShortsStorageManager;
 if (!manager) throw new Error('storage manager API missing');
-const result = manager.safeSet('ai-shorts-target', 'saved', { maxCleanupRemovals: 2 });
-if (!result.ok || !result.cleaned || !result.quota) throw new Error('quota write must clean stale backups and retry once');
-if (localStorage.getItem('ai-shorts-target') !== 'saved') throw new Error('quota retry did not persist the target value');
 (async () => {
+    const preview = await manager.previewCleanup({ maxRemovals: 2 });
+    if (preview.local.selectedCount !== 2 || preview.local.bytes <= 0 || preview.caches.staleCount !== 1 || preview.caches.currentCachePreserved !== true) throw new Error('cleanup impact preview must report selected backups and stale shell caches without mutating them');
+    if (values.size !== 3 || cacheNames.size !== 3) throw new Error('cleanup impact preview must be read-only');
+    const result = manager.safeSet('ai-shorts-target', 'saved', { maxCleanupRemovals: 2 });
+    if (!result.ok || !result.cleaned || !result.quota) throw new Error('quota write must clean stale backups and retry once');
+    if (localStorage.getItem('ai-shorts-target') !== 'saved') throw new Error('quota retry did not persist the target value');
     const estimate = await manager.estimate({ force: true });
     if (estimate.level !== 'warning' || estimate.ratio !== 0.8) throw new Error('storage pressure level was not calculated');
     const cleanup = await manager.cleanupCaches();
     if (cleanup.removedCount !== 1 || !cacheNames.has(manager.currentCacheName())) throw new Error('cache cleanup must remove only stale app caches');
-    console.log('PASS quota-aware storage cleanup, retry, estimate, and cache retention');
+    console.log('PASS read-only cleanup impact preview, quota-aware retry, estimate, and current-cache retention');
 })().catch(error => { console.error(error.stack || error); process.exit(1); });

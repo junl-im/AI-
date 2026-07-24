@@ -1,28 +1,10 @@
-# PROJECT NOTES v1.6.3
+# Project Notes v1.6.4
 
-## 릴리스 성격
-
-Stage Focus & Progressive Disclosure UI/UX 패치입니다. 분석·렌더·프로젝트·캐시 데이터 계약은 변경하지 않습니다.
-
-## 주요 소유권
-
-- 단계 집중 상태·동적 inline 복원: `src/ui/workflow-focus-layout.js`
-- 집중 레이아웃 시각 규칙: `assets/css/workflow-focus-layout.css`
-- 실제 앱 상태 → workflow phase: `src/ui/ux-controls.js`
-- shell 지연 적재: `src/boot/staged-ui-loader.js`
-- 앱 셸 오프라인 자산: `sw.js`, `asset-integrity.json`
-
-## 성능 계약
-
-- 직접 실행 스크립트 49개
-- 단계 집중 컨트롤러는 shell phase에서 적재
-- 동일 상태의 레이아웃 inline 재적용 방지
-- CSS `!important` 593개 유지
-- 하단 메뉴는 ResizeObserver 기반 실측, polling 없음
-
-## 패키징 기준
-
-- 기준 커밋: v1.6.2 `66e5b42`
-- 전체본: `ai-shorts-studio-v1.6.3-release.zip`
-- 패치본: `ai-shorts-studio-v1.6.3-patch-from-v1.6.2.zip`
-- 패치 적용 결과는 전체본과 파일별 SHA-256 비교
+- 저장소 건강 패널은 `.app-shell`의 마지막 자식으로 유지합니다.
+- 자동 하단 이동은 동일 문제 키마다 한 번만 수행합니다.
+- 상단 복귀는 자동 하단 이동 기록이 있고, 자동 해결 결과가 성공이며, 최종 건강 모델에 action이 없을 때만 수행합니다.
+- 확인 취소, 작업 실패, 문제 지속 상태에서는 상단 복귀를 호출하지 않습니다.
+- `previewCleanup()`은 삭제 후보를 계산만 하며 localStorage와 Cache Storage를 변경하지 않습니다.
+- Cache Storage는 표준 API로 정확한 전체 바이트를 빠르게 얻을 수 없어 미리보기에서는 이전 캐시 수만 표시합니다.
+- 파괴적 고급 캐시 도구는 기존 2단계 확인을 계속 사용합니다.
+- 다음 확장 시 분석 캐시 entry·signature·namespace에도 동일한 영향 미리보기 모델을 적용합니다.

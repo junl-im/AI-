@@ -30,7 +30,11 @@ for (const mode of ['desktop', 'mobile']) {
   assert(result.confirmationAfterAccept.hidden === true && result.confirmationAfterAccept.clearCalls === 1, `${mode} confirmed cleanup executes exactly once`);
   assert(result.warning.hidden === false && result.warning.label.includes('저장 공간 정리') && result.warning.title.includes('정리가 필요'), `${mode} automatic repair appears only for an actionable storage problem`);
   assert(result.navigation.scrollY > 0 && result.navigation.attention === 'true' && result.navigation.events === 1, `${mode} actionable storage issue automatically navigates once to the footer summary`);
+  assert(result.impactBeforeCancel.visible === true && result.impactBeforeCancel.impactHidden === false && /세션|백업/.test(result.impactBeforeCancel.impact) && /오프라인 캐시/.test(result.impactBeforeCancel.impact), `${mode} automatic cleanup previews affected backup and offline-cache scope before execution`);
+  assert(result.recoveryAfterCancel.cleanupCalls === 0 && result.recoveryAfterCancel.returnEvents === 0 && result.recoveryAfterCancel.scrollY > 0, `${mode} cancelling cleanup keeps the user at the footer and performs no mutation`);
+  assert(result.recoveryAfterAccept.cleanupCalls === 1 && result.recoveryAfterAccept.returnEvents === 1 && result.recoveryAfterAccept.scrollY <= 2, `${mode} successful automatic cleanup closes the navigation loop and returns to the page top exactly once`);
+  assert(result.recoveryAfterAccept.autoRepairHidden === true && result.recoveryAfterAccept.healthTitle.includes('준비 완료'), `${mode} top return occurs only after the actionable health state is resolved`);
   assert(result.closed.advancedHidden === true && result.closed.bodyLocked === false, `${mode} Escape closes advanced diagnostics and restores page scrolling`);
 }
 assert(report.mobile.advanced.width === report.mobile.viewport.width && report.mobile.advanced.height === report.mobile.viewport.height, 'mobile advanced diagnostics use the full viewport instead of expanding the normal page');
-console.log(`PASS v${version} footer storage navigation, advanced modal, mobile containment, and destructive-action confirmation browser audit`);
+console.log(`PASS v${version} closed-loop footer recovery navigation, impact preview, advanced modal, mobile containment, and destructive-action confirmation browser audit`);

@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-6-2",
-  "version": "1.6.3",
+  "name": "ai-shorts-studio-v1-6-4",
+  "version": "1.6.4",
   "private": true,
-  "description": "AI Shorts Studio v1.6.3 - footer health navigation, workflow-aligned Local AI, responsive layout harmony, and gated diagnostics",
+  "description": "AI Shorts Studio v1.6.4 - closed-loop storage recovery navigation and cleanup impact preview",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",

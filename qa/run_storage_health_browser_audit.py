@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dedicated browser audit for the v1.6.3 user-safe storage diagnostics gate."""
+"""Dedicated browser audit for closed-loop storage recovery navigation and impact preview."""
 import asyncio
 import json
 from pathlib import Path
@@ -18,13 +18,16 @@ window.__clearCalls=0;
 window.__cleanupCalls=0;
 window.__policyRefreshCalls=0;
 window.__attentionEvents=0;
+window.__recoveryCompleteEvents=0;
 document.addEventListener('ai-shorts-storage-attention',()=>{window.__attentionEvents+=1;});
+document.addEventListener('ai-shorts-storage-recovery-complete',()=>{window.__recoveryCompleteEvents+=1;});
 window.AIShortsRuntimeConfig={SESSION_SCHEMA_VERSION:4,ANALYSIS_CACHE_CONTRACT_VERSION:3,SW_INTEGRITY_AUDIT_SAMPLE_SIZE:12};
 window.AIShortsFeedbackUX={toast(){}};
 window.AIShortsStorageManager={
   estimate:async()=>{await new Promise(resolve=>setTimeout(resolve,120));return {...window.__storageSnapshot};},
   status:()=>({...window.__storageSnapshot}),
-  cleanup:async()=>{window.__cleanupCalls+=1;return {snapshot:{...window.__storageSnapshot},local:{removedCount:1},caches:{removedCount:0}};}
+  previewCleanup:async()=>({local:{removableCount:2,selectedCount:2,bytes:4096},caches:{staleCount:1,currentCachePreserved:true},preservesCurrentSession:true}),
+  cleanup:async()=>{window.__cleanupCalls+=1;window.__storageSnapshot={usage:2*1024*1024,quota:10*1024*1024,ratio:.2,level:'ok',localStorageBytes:90*1024,cacheCount:1};return {snapshot:{...window.__storageSnapshot},local:{removedCount:1},caches:{removedCount:1}};}
 };
 window.AIShortsSessionContinuity={getStatus:()=>({schemaVersion:4,backupCount:2,backupLimit:3,storageKey:'current-session',compressedBackupCount:1,backupSavingsPercent:40})};
 const normalReport={requiredMissing:[],repaired:[],repairFailed:[],rollbackPreserved:[],failed:0,contentVerified:true,integrity:{missing:[],invalid:[],corrupted:[],hashVerified:123,healthy:123}};
@@ -114,6 +117,17 @@ async def run_mode(browser, name, viewport):
     warning = await page.evaluate('''() => { window.__storageSnapshot={usage:9.5*1024*1024,quota:10*1024*1024,ratio:.95,level:'critical',localStorageBytes:190*1024,cacheCount:1}; AIShortsStorageHealthPanel.render(window.__storageSnapshot); const b=document.querySelector('#storageHealthAutoRepairBtn'); return {hidden:b.hidden,label:b.textContent,title:document.querySelector('#storageHealthTitle').textContent}; }''')
     await page.wait_for_function("document.querySelector('#storageHealthPanel').dataset.attention === 'true' && window.__attentionEvents === 1 && window.scrollY > 0", timeout=10000)
     navigation = await page.evaluate('''() => ({scrollY:window.scrollY,attention:document.querySelector('#storageHealthPanel').dataset.attention,events:window.__attentionEvents,focused:document.activeElement&&document.activeElement.id==='storageHealthPanel'})''')
+
+    await page.click('#storageHealthAutoRepairBtn')
+    impact_before_cancel = await page.evaluate('''() => ({visible:!document.querySelector('#storageConfirmDialog').hidden,impactHidden:document.querySelector('#storageConfirmImpact').hidden,impact:document.querySelector('#storageConfirmImpactList').innerText,cleanupCalls:window.__cleanupCalls})''')
+    await page.click('#storageConfirmCancelBtn')
+    await page.wait_for_timeout(260)
+    recovery_after_cancel = await page.evaluate('''() => ({scrollY:window.scrollY,cleanupCalls:window.__cleanupCalls,returnEvents:window.__recoveryCompleteEvents})''')
+
+    await page.click('#storageHealthAutoRepairBtn')
+    await page.click('#storageConfirmAcceptBtn')
+    await page.wait_for_function("window.__cleanupCalls === 1 && window.__recoveryCompleteEvents === 1 && window.scrollY <= 2", timeout=10000)
+    recovery_after_accept = await page.evaluate('''() => ({scrollY:window.scrollY,cleanupCalls:window.__cleanupCalls,returnEvents:window.__recoveryCompleteEvents,autoRepairHidden:document.querySelector('#storageHealthAutoRepairBtn').hidden,healthTitle:document.querySelector('#storageHealthTitle').textContent,focusId:document.activeElement&&document.activeElement.id})''')
     await context.close()
     return {
         'name': name,
@@ -125,6 +139,9 @@ async def run_mode(browser, name, viewport):
         'confirmationAfterAccept': confirmation_after_accept,
         'warning': warning,
         'navigation': navigation,
+        'impactBeforeCancel': impact_before_cancel,
+        'recoveryAfterCancel': recovery_after_cancel,
+        'recoveryAfterAccept': recovery_after_accept,
         'closed': closed,
         'errors': errors,
     }
