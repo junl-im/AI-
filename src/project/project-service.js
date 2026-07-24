@@ -1,11 +1,11 @@
-// AI Shorts Studio v1.6.5 - schema-v4 smart-reframe compatible project helpers
+// AI Shorts Studio v1.6.9 - schema-v5 speaker-directed smart-reframe project helpers
 'use strict';
 
 (function exposeProjectService(global) {
     const captionService = global.AIShortsCaptionService || {};
     const utils = global.AIShortsCoreUtils || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const CURRENT_SCHEMA_VERSION = Math.max(4, Number(config.SESSION_SCHEMA_VERSION || 4));
+    const CURRENT_SCHEMA_VERSION = Math.max(5, Number(config.SESSION_SCHEMA_VERSION || 5));
     const MAX_PROJECT_TEXT_CHARS = Math.max(1024, Number(config.MAX_PROJECT_TEXT_CHARS || 2_500_000));
     const MAX_RECOMMENDATIONS = Math.max(1, Number(config.MAX_PROJECT_RECOMMENDATIONS || 24));
     const MAX_CAPTIONS = Math.max(1, Number(config.MAX_PROJECT_CAPTIONS || 5000));
@@ -132,11 +132,42 @@
         if (Number.isFinite(Number(input.captionOffset))) output.captionOffset = finiteNumber(input.captionOffset, 0, -3600, 3600);
         if (isPlainObject(input.captionOptions)) output.captionOptions = sanitizeNestedOptions(input.captionOptions, ['preset', 'position', 'size', 'color', 'accent', 'maxLines', 'boxOpacity', 'shadow', 'highlightWords', 'uppercase', 'autoBreak']);
         if (isPlainObject(input.qualityOptions)) output.qualityOptions = sanitizeNestedOptions(input.qualityOptions, ['brightness', 'contrast', 'saturation', 'vignette', 'fadeIn', 'fadeOut', 'introText', 'outroText', 'introDuration', 'outroDuration', 'watermarkText', 'watermarkPosition', 'safeGuide']);
-        if (isPlainObject(input.smartReframeOptions)) output.smartReframeOptions = sanitizeNestedOptions(input.smartReframeOptions, ['captionAvoidance', 'smoothing', 'zoom']);
+        if (isPlainObject(input.smartReframeOptions)) output.smartReframeOptions = sanitizeNestedOptions(input.smartReframeOptions, ['captionAvoidance', 'smoothing', 'zoom', 'sceneCutProtection', 'speakerPriority']);
         if (isPlainObject(input.autoCutOptions)) output.autoCutOptions = sanitizeNestedOptions(input.autoCutOptions, ['silenceThreshold', 'beatSensitivity', 'motionSensitivity', 'handlePadding', 'maxSnapDistance']);
         if (isPlainObject(input.feedbackOptions)) output.feedbackOptions = sanitizeNestedOptions(input.feedbackOptions, ['haptics', 'toastKinds']);
         if (isPlainObject(input.engineOptions)) output.engineOptions = sanitizeNestedOptions(input.engineOptions, ['modular', 'performanceMode', 'qualityGate']);
         return output;
+    }
+
+    function sanitizeSmartReframeEdits(value) {
+        const input = isPlainObject(value) ? value : {};
+        const requestedSubject = safeText(input.subjectId, 24);
+        const subjectId = requestedSubject === 'auto' || /^subject-[1-9][0-9]{0,2}$/.test(requestedSubject) ? requestedSubject : 'auto';
+        const keyframes = (Array.isArray(input.keyframes) ? input.keyframes : []).slice(0, 120).map(item => {
+            if (!isPlainObject(item)) return null;
+            return {
+                time: Number(finiteNumber(item.time, 0, 0, MAX_MEDIA_SECONDS).toFixed(3)),
+                x: Number(finiteNumber(item.x, 0.5, 0, 1).toFixed(5)),
+                y: Number(finiteNumber(item.y, 0.46, 0, 1).toFixed(5)),
+                zoom: Number(finiteNumber(item.zoom, 1.08, 1, 1.35).toFixed(4))
+            };
+        }).filter(Boolean).sort((a, b) => a.time - b.time);
+        const speakerCues = (Array.isArray(input.speakerCues) ? input.speakerCues : []).slice(0, 2000).map(item => {
+            if (!isPlainObject(item)) return null;
+            const start = finiteNumber(item.start, 0, 0, MAX_MEDIA_SECONDS);
+            const end = finiteNumber(item.end, start + 0.05, start + 0.05, MAX_MEDIA_SECONDS);
+            const requested = safeText(item.subjectId, 24);
+            return {
+                start: Number(start.toFixed(3)),
+                end: Number(end.toFixed(3)),
+                speaker: safeText(item.speaker, 40),
+                subjectId: /^subject-[1-9][0-9]{0,2}$/.test(requested) ? requested : 'auto',
+                confidence: Number(finiteNumber(item.confidence, 0, 0, 1).toFixed(4)),
+                source: safeText(item.source, 32) || 'face-activity',
+                segmentCount: Math.max(1, Math.round(finiteNumber(item.segmentCount, 1, 1, 5000)))
+            };
+        }).filter(Boolean).sort((a, b) => a.start - b.start || a.end - b.end);
+        return { subjectId, keyframes, speakerPriority: input.speakerPriority !== false, speakerCues };
     }
 
     function sanitizeFileMeta(value) {
@@ -201,6 +232,7 @@
             fileName: safeText(project.fileName, 500),
             fileKind: safeText(project.fileKind, 32),
             settings: sanitizeSettings(project.settings),
+            smartReframeEdits: sanitizeSmartReframeEdits(project.smartReframeEdits),
             selectedRecommendationId,
             selectedRange: selected ? { start: selected.start, end: selected.end, duration: selected.duration, score: selected.score } : sanitizeSelectedRange(project.selectedRange),
             recommendations,
@@ -232,6 +264,7 @@
             fileName: state && state.file ? state.file.name : fileMeta && fileMeta.name || '',
             fileKind: state && state.fileKind || '',
             settings: Object.assign({}, state && state.settings || {}),
+            smartReframeEdits: state && state.smartReframeEdits ? state.smartReframeEdits : { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerCues: [] },
             selectedRecommendationId: state && state.selectedRecommendationId || '',
             selectedRange: state && state.selectedRange ? Object.assign({}, state.selectedRange) : null,
             recommendations: (state && state.recommendations || []).map(item => Object.assign({}, item)),
@@ -256,7 +289,8 @@
         const currentSettings = isPlainObject(state.settings) ? state.settings : {};
         const importedSettings = isPlainObject(safe.settings) ? safe.settings : {};
         state.settings = Object.assign({}, currentSettings, importedSettings);
-        ['captionOptions', 'qualityOptions', 'autoCutOptions', 'feedbackOptions', 'engineOptions'].forEach(key => {
+        state.smartReframeEdits = sanitizeSmartReframeEdits(safe.smartReframeEdits);
+        ['captionOptions', 'qualityOptions', 'smartReframeOptions', 'autoCutOptions', 'feedbackOptions', 'engineOptions'].forEach(key => {
             if (!isPlainObject(importedSettings[key])) return;
             state.settings[key] = Object.assign({}, isPlainObject(currentSettings[key]) ? currentSettings[key] : {}, importedSettings[key]);
         });

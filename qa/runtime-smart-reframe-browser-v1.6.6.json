@@ -1,0 +1,51 @@
+{
+  "version": "1.6.6",
+  "generatedAt": "2026-07-24T06:56:17.120707+00:00",
+  "harness": "real 20-second MP4 import, motion fallback, explicit two-face detector, manual subject pin, crop-keyframe create/delete, and operation cleanup",
+  "motion": {
+    "cropMode": "smart",
+    "source": "motion",
+    "points": 24,
+    "sceneCuts": 2,
+    "panelHidden": false,
+    "status": "모션 추적 준비 완료",
+    "detail": "24개 지점 · 신뢰도 17% · 장면 전환 2곳"
+  },
+  "edited": {
+    "source": "face",
+    "points": 30,
+    "faceCoverage": 1,
+    "subjectCount": 6,
+    "activeSubjectId": "subject-6",
+    "keyframes": 1,
+    "focusX": 0.72,
+    "focusY": 0.31,
+    "focusZoom": 1.18,
+    "manualDataset": "true",
+    "status": "인물 2 추적 준비 완료",
+    "progress": "스마트 리프레임 준비 완료",
+    "operationActive": false
+  },
+  "deleted": {
+    "keyframes": 0,
+    "persistedKeyframes": 0,
+    "activeSubjectId": "subject-6"
+  },
+  "checks": {
+    "motionTrackAutoCreated": true,
+    "panelVisibleForSmartVideo": true,
+    "motionStatusVisible": true,
+    "faceDetectorPromotesTrack": true,
+    "multipleSubjectsDetected": true,
+    "manualSubjectPinWorks": true,
+    "keyframeCreateDeleteWorks": true,
+    "manualStateVisible": true,
+    "progressCompletes": true,
+    "operationReleased": true,
+    "noPageErrors": true,
+    "noConsoleErrors": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": []
+}

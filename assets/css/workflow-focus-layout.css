@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.6.5 - stage-aware progressive disclosure and measured dock clearance */
+/* AI Shorts Studio v1.6.9 - stage-aware progressive disclosure and measured dock clearance */
 :root {
     --workflow-dock-clearance: calc(var(--hyperflow-dock-height, 144px) + 22px);
 }

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - staged UI hydration with storage health shell
+// AI Shorts Studio v1.6.9 - staged UI hydration with storage health shell
 'use strict';
 
 (function installStagedUiLoader(global) {
@@ -6,7 +6,7 @@
     if (!doc) return;
 
     const config = global.AIShortsRuntimeConfig || {};
-    const VERSION = String(config.APP_VERSION || 'v1.6.5').replace(/^v/i, '');
+    const VERSION = String(config.APP_VERSION || 'v1.6.9').replace(/^v/i, '');
     const BUILD_KEY = String(config.BUILD_KEY || `${VERSION}-staged-ui`);
     const versioned = (path, label) => `${path}?v=${encodeURIComponent(BUILD_KEY)}-${label}`;
     const phases = Object.freeze({
@@ -26,7 +26,11 @@
             versioned('src/ui/studio-experience-controller.js', 'shell')
         ],
         editing: [
+            versioned('src/vision/vision-model-pack-manager.js', 'editing'),
             versioned('src/vision/smart-reframe-engine.js', 'editing'),
+            versioned('src/vision/speaker-face-linker.js', 'editing'),
+            versioned('src/ui/vision-model-pack-panel.js', 'editing'),
+            versioned('src/ui/direct-crop-editor.js', 'editing'),
             versioned('src/ui/range-drag-controls.js', 'editing'),
             versioned('src/ui/handoff-coach.js', 'editing'),
             versioned('src/ui/save-readiness.js', 'editing'),

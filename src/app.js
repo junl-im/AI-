@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - smart-reframe analysis, actionable workflow sync, and adaptive engine coordination
+// AI Shorts Studio v1.6.9 - transcript-aware speaker direction and adaptive smart-reframe coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -9,6 +9,7 @@
     const audioExtractor = global.AIShortsAudioFeatureExtractor || {};
     const motionAnalyzer = global.AIShortsVideoMotionAnalyzer || {};
     function getSmartReframeEngine() { return global.AIShortsSmartReframe || {}; }
+    function getSpeakerFaceLinker() { return global.AIShortsSpeakerFaceLinker || {}; }
     const autoCutDetector = global.AIShortsAutoCutDetector || {};
     const recEngine = global.AIShortsRecommendationEngine || {};
     const engineKernel = global.AIShortsEngineKernel || {};
@@ -39,6 +40,10 @@
     let settingsController = null;
     let projectIOController = null;
     let mediaImportController = null;
+    let smartReframeEditorDraft = null;
+    let lastSpeakerFaceLinkResult = null;
+    let speakerLinkPromise = null;
+    let directCropController = null;
 
 
     function isAbortError(error) {
@@ -145,8 +150,14 @@
             'programInfoBtn', 'selectedBadge', 'dropZone', 'fileDrop', 'fileInput', 'importStatus',
             'durationSelect', 'styleSelect', 'cropModeSelect', 'platformSelect', 'analyzeBtn', 'analysisCancelBtn',
             'smartReframePanel', 'smartReframeStatus', 'smartReframeDetail', 'smartReframeAnalyzeBtn', 'smartReframeCaptionAvoidanceToggle',
+            'smartReframeSpeakerPriorityToggle', 'smartReframeSpeakerLinkBtn', 'smartReframeSpeakerStatus',
+            'smartReframeEditor', 'smartReframeSubjectSelect', 'smartReframeXInput', 'smartReframeYInput', 'smartReframeZoomInput',
+            'smartReframeXValue', 'smartReframeYValue', 'smartReframeZoomValue', 'smartReframeKeyframeDetail',
+            'smartReframeKeyframeSetBtn', 'smartReframeKeyframeDeleteBtn', 'smartReframeKeyframeResetBtn',
             'analysisStatus', 'progressBar', 'recommendationList', 'recommendationCount', 'previewStatus',
             'previewCanvas', 'sourceVideo', 'sourceAudio', 'previewBtn', 'stopPreviewBtn', 'exportBtn',
+            'directCropPanel', 'directCropOverlay', 'directCropPathOverlay', 'directCropPathLine', 'directCropPathDots', 'directCropCurrentDot',
+            'directCropGestureHint', 'directCropStatus', 'directCropDetail', 'directCropToggleBtn', 'directCropSaveBtn', 'directCropUndoBtn',
             'waveformCanvas', 'timelineView', 'selectedRangeText', 'titleInput', 'hashtagInput',
             'copyCaptionBtn', 'diagnosticsBtn', 'infoDialog', 'infoCloseBtn', 'toast',
             'rangeStartInput', 'rangeEndInput', 'applyRangeBtn', 'thumbnailBtn',
@@ -243,6 +254,7 @@
         if (els.styleSelect) els.styleSelect.value = state.settings.style || 'balanced';
         if (els.cropModeSelect) els.cropModeSelect.value = state.settings.cropMode || 'center';
         if (els.smartReframeCaptionAvoidanceToggle) els.smartReframeCaptionAvoidanceToggle.checked = !(state.settings.smartReframeOptions && state.settings.smartReframeOptions.captionAvoidance === false);
+        if (els.smartReframeSpeakerPriorityToggle) els.smartReframeSpeakerPriorityToggle.checked = !(state.settings.smartReframeOptions && state.settings.smartReframeOptions.speakerPriority === false);
         updateSmartReframeUI();
         if (els.platformSelect) els.platformSelect.value = state.settings.platform || 'youtube';
         if (els.captionStyleSelect) els.captionStyleSelect.value = state.settings.captionStyle || 'bold';
@@ -254,7 +266,204 @@
     }
 
     function getSmartReframeOptions() {
-        return Object.assign({ captionAvoidance: true, smoothing: 0.30, zoom: 1.08 }, state.settings && state.settings.smartReframeOptions || {});
+        return Object.assign({ captionAvoidance: true, smoothing: 0.30, zoom: 1.08, sceneCutProtection: true, speakerPriority: true }, state.settings && state.settings.smartReframeOptions || {});
+    }
+
+    function getSmartReframeEdits() {
+        const edits = state.smartReframeEdits && typeof state.smartReframeEdits === 'object' ? state.smartReframeEdits : {};
+        return {
+            subjectId: String(edits.subjectId || 'auto'),
+            keyframes: Array.isArray(edits.keyframes) ? edits.keyframes.map(item => Object.assign({}, item)) : [],
+            speakerPriority: typeof edits.speakerPriority === 'boolean' ? edits.speakerPriority : getSmartReframeOptions().speakerPriority !== false,
+            speakerCues: Array.isArray(edits.speakerCues) ? edits.speakerCues.map(item => Object.assign({}, item)) : []
+        };
+    }
+
+    function persistSmartReframeEdits(track) {
+        const engine = getSmartReframeEngine();
+        if (engine.extractEdits) state.smartReframeEdits = engine.extractEdits(track);
+        else state.smartReframeEdits = { subjectId: track && track.activeSubjectId || 'auto', keyframes: Array.isArray(track && track.keyframes) ? track.keyframes.slice() : [], speakerPriority: track && track.speakerPriority !== false, speakerCues: Array.isArray(track && track.speakerCues) ? track.speakerCues.slice() : [] };
+        return state.smartReframeEdits;
+    }
+
+    function applyPendingSmartReframeEdits(track) {
+        const engine = getSmartReframeEngine();
+        if (!track || !engine.applyEdits) return track;
+        return engine.applyEdits(track, getSmartReframeEdits()) || track;
+    }
+
+    function setSmartReframeTrack(track) {
+        state.smartReframe = applyPendingSmartReframeEdits(track);
+        persistSmartReframeEdits(state.smartReframe);
+        return state.smartReframe;
+    }
+
+    function reconcileSmartReframeEdits() {
+        const engine = getSmartReframeEngine();
+        if (!state.smartReframe || !engine.applyEdits || !engine.extractEdits) return state.smartReframe;
+        const current = engine.extractEdits(state.smartReframe);
+        const desired = getSmartReframeEdits();
+        if (current.subjectId !== desired.subjectId
+            || current.speakerPriority !== desired.speakerPriority
+            || JSON.stringify(current.keyframes || []) !== JSON.stringify(desired.keyframes || [])
+            || JSON.stringify(current.speakerCues || []) !== JSON.stringify(desired.speakerCues || [])) {
+            state.smartReframe = engine.applyEdits(state.smartReframe, desired) || state.smartReframe;
+        }
+        return state.smartReframe;
+    }
+
+    function getSmartReframeTime() {
+        const videoTime = els.sourceVideo && Number(els.sourceVideo.currentTime);
+        if (Number.isFinite(videoTime) && videoTime >= 0) return videoTime;
+        const rangeStart = Number(state.selectedRange && state.selectedRange.start);
+        return Number.isFinite(rangeStart) && rangeStart >= 0 ? rangeStart : 0;
+    }
+
+    function formatSmartReframeTime(value) {
+        const total = Math.max(0, Number(value) || 0);
+        const minutes = Math.floor(total / 60);
+        const seconds = total - minutes * 60;
+        return `${String(minutes).padStart(2, '0')}:${seconds.toFixed(1).padStart(4, '0')}`;
+    }
+
+    function clearSmartReframeEditorDraft() {
+        smartReframeEditorDraft = null;
+    }
+
+    function readSmartReframeEditorDraft(timeOverride) {
+        return {
+            time: Number.isFinite(Number(timeOverride)) ? Math.max(0, Number(timeOverride)) : getSmartReframeTime(),
+            x: (Number(els.smartReframeXInput && els.smartReframeXInput.value) || 50) / 100,
+            y: (Number(els.smartReframeYInput && els.smartReframeYInput.value) || 46) / 100,
+            zoom: (Number(els.smartReframeZoomInput && els.smartReframeZoomInput.value) || 108) / 100
+        };
+    }
+
+    function beginSmartReframeEditorDraft() {
+        if (!state.smartReframe) return null;
+        if (els.sourceVideo && !els.sourceVideo.paused) els.sourceVideo.pause();
+        smartReframeEditorDraft = readSmartReframeEditorDraft(getSmartReframeTime());
+        return smartReframeEditorDraft;
+    }
+
+    function applySmartReframeEditorDraft(input, source) {
+        if (!state.smartReframe) return null;
+        const draft = {
+            time: Number.isFinite(Number(input && input.time)) ? Math.max(0, Number(input.time)) : getSmartReframeTime(),
+            x: Math.max(0, Math.min(1, Number(input && input.x) || 0.5)),
+            y: Math.max(0, Math.min(1, Number(input && input.y) || 0.46)),
+            zoom: Math.max(1, Math.min(1.35, Number(input && input.zoom) || 1.08))
+        };
+        smartReframeEditorDraft = draft;
+        if (els.smartReframeXInput) els.smartReframeXInput.value = String(Math.round(draft.x * 100));
+        if (els.smartReframeYInput) els.smartReframeYInput.value = String(Math.round(draft.y * 100));
+        if (els.smartReframeZoomInput) els.smartReframeZoomInput.value = String(Math.round(draft.zoom * 100));
+        if (els.smartReframeXValue) els.smartReframeXValue.textContent = `${Math.round(draft.x * 100)}%`;
+        if (els.smartReframeYValue) els.smartReframeYValue.textContent = `${Math.round(draft.y * 100)}%`;
+        if (els.smartReframeZoomValue) els.smartReframeZoomValue.textContent = `${Math.round(draft.zoom * 100)}%`;
+        if (els.smartReframeKeyframeDetail) els.smartReframeKeyframeDetail.textContent = `${formatSmartReframeTime(draft.time)} · 저장되지 않은 크롭 조정${source === 'pointer' ? ' · 화면 드래그' : source === 'wheel' ? ' · 화면 확대' : ''}`;
+        renderPreviewStill();
+        return draft;
+    }
+
+    function getDirectCropController() {
+        if (directCropController) return directCropController;
+        const factory = global.AIShortsDirectCropEditor;
+        if (!factory || !factory.createController || !els.previewCanvas) return null;
+        directCropController = factory.createController({
+            elements: {
+                canvas: els.previewCanvas,
+                frame: els.previewCanvas.closest('.phone-frame'),
+                overlay: els.directCropOverlay,
+                panel: els.directCropPanel,
+                toggleButton: els.directCropToggleBtn,
+                saveButton: els.directCropSaveBtn,
+                undoButton: els.directCropUndoBtn,
+                status: els.directCropStatus,
+                detail: els.directCropDetail,
+                pathSvg: els.directCropPathOverlay,
+                pathLine: els.directCropPathLine,
+                pathDots: els.directCropPathDots,
+                currentDot: els.directCropCurrentDot,
+                hint: els.directCropGestureHint
+            },
+            isReady: () => Boolean(state.fileKind === 'video' && state.settings.cropMode === 'smart' && state.smartReframe && getSmartReframeEngine().getFocusAt),
+            getTrack: () => state.smartReframe,
+            getTime: getSmartReframeTime,
+            getDraft: () => smartReframeEditorDraft || readSmartReframeEditorDraft(getSmartReframeTime()),
+            setDraft: applySmartReframeEditorDraft,
+            commit: (source, quiet) => setSmartReframeKeyframe({ source, quiet }),
+            render: renderPreviewStill,
+            pause: () => { if (els.sourceVideo && !els.sourceVideo.paused) els.sourceVideo.pause(); },
+            getMedia: () => els.sourceVideo,
+            getReframeOptions: () => Object.assign({}, getSmartReframeOptions(), { captionOptions: getCaptionOptions() }),
+            notify: toast
+        });
+        return directCropController;
+    }
+
+    function syncDirectCropEditor() {
+        const controller = getDirectCropController();
+        if (controller && controller.sync) controller.sync();
+    }
+
+    function setRangeControl(input, output, value, suffix) {
+        if (!input) return;
+        const next = Math.round(Number(value) || 0);
+        if (document.activeElement !== input) input.value = String(next);
+        if (output) output.textContent = `${next}${suffix || '%'}`;
+    }
+
+    function syncSmartReframeEditor() {
+        const track = state.smartReframe;
+        const engine = getSmartReframeEngine();
+        const ready = Boolean(track && engine.getFocusAt);
+        const subjects = ready && Array.isArray(track.subjects) ? track.subjects : [];
+        if (els.smartReframeSubjectSelect) {
+            const signature = subjects.map(item => `${item.id}:${item.label}`).join('|');
+            if (els.smartReframeSubjectSelect.dataset.signature !== signature) {
+                els.smartReframeSubjectSelect.textContent = '';
+                const automatic = document.createElement('option');
+                automatic.value = 'auto';
+                automatic.textContent = '자동 선택';
+                els.smartReframeSubjectSelect.appendChild(automatic);
+                subjects.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = `${item.label} · ${Math.round((Number(item.coverage) || 0) * 100)}%`;
+                    els.smartReframeSubjectSelect.appendChild(option);
+                });
+                els.smartReframeSubjectSelect.dataset.signature = signature;
+            }
+            els.smartReframeSubjectSelect.disabled = !ready || !subjects.length;
+            els.smartReframeSubjectSelect.value = ready && subjects.some(item => item.id === track.activeSubjectId) ? track.activeSubjectId : 'auto';
+        }
+        const time = getSmartReframeTime();
+        if (smartReframeEditorDraft && Math.abs(smartReframeEditorDraft.time - time) > 0.35) clearSmartReframeEditorDraft();
+        const draft = smartReframeEditorDraft;
+        const focus = ready ? engine.getFocusAt(track, time) : null;
+        const nearest = ready && engine.getNearestKeyframe ? engine.getNearestKeyframe(track, time, 0.35) : null;
+        const x = (draft ? draft.x : nearest ? nearest.x : focus && focus.x != null ? focus.x : 0.5) * 100;
+        const y = (draft ? draft.y : nearest ? nearest.y : focus && focus.y != null ? focus.y : 0.46) * 100;
+        const zoom = (draft ? draft.zoom : nearest ? nearest.zoom : focus && focus.zoom > 1 ? focus.zoom : getSmartReframeOptions().zoom) * 100;
+        setRangeControl(els.smartReframeXInput, els.smartReframeXValue, x, '%');
+        setRangeControl(els.smartReframeYInput, els.smartReframeYValue, y, '%');
+        setRangeControl(els.smartReframeZoomInput, els.smartReframeZoomValue, zoom, '%');
+        [els.smartReframeXInput, els.smartReframeYInput, els.smartReframeZoomInput, els.smartReframeKeyframeSetBtn].forEach(control => { if (control) control.disabled = !ready; });
+        if (els.smartReframeKeyframeDeleteBtn) els.smartReframeKeyframeDeleteBtn.disabled = !nearest;
+        if (els.smartReframeKeyframeResetBtn) els.smartReframeKeyframeResetBtn.disabled = !ready || !(track.keyframes && track.keyframes.length);
+        if (els.smartReframeKeyframeDetail) {
+            const count = ready && track.keyframes ? track.keyframes.length : 0;
+            els.smartReframeKeyframeDetail.textContent = !ready
+                ? '피사체 추적 후 크롭 위치를 조정할 수 있습니다.'
+                : draft
+                    ? `${formatSmartReframeTime(draft.time)} · 저장되지 않은 크롭 조정 · 전체 ${count}개`
+                    : nearest
+                        ? `${formatSmartReframeTime(time)} · 이 위치에 키프레임 있음 · 전체 ${count}개`
+                        : `${formatSmartReframeTime(time)} · 현재 위치를 조정해 고정 · 전체 ${count}개`;
+        }
+        if (els.smartReframePanel) els.smartReframePanel.dataset.manual = ready && (track.activeSubjectId !== 'auto' || Boolean(track.keyframes && track.keyframes.length)) ? 'true' : 'false';
+        syncDirectCropEditor();
     }
 
     function ensureMotionSmartReframe() {
@@ -265,7 +474,7 @@
                 loader.ensure('editing').then(() => {
                     if (!state.motionAnalysis || !getSmartReframeEngine().createTrackFromMotion) return;
                     if (!state.smartReframe || state.smartReframe.source === 'motion') {
-                        state.smartReframe = getSmartReframeEngine().createTrackFromMotion(state.motionAnalysis, getSmartReframeOptions());
+                        setSmartReframeTrack(getSmartReframeEngine().createTrackFromMotion(state.motionAnalysis, Object.assign({}, getSmartReframeOptions(), getSmartReframeEdits())));
                         updateSmartReframeUI();
                         renderPreviewStill();
                     }
@@ -275,12 +484,13 @@
         }
         if (!state.motionAnalysis) return state.smartReframe;
         if (!state.smartReframe || state.smartReframe.source === 'motion') {
-            state.smartReframe = engine.createTrackFromMotion(state.motionAnalysis, getSmartReframeOptions());
+            setSmartReframeTrack(engine.createTrackFromMotion(state.motionAnalysis, Object.assign({}, getSmartReframeOptions(), getSmartReframeEdits())));
         }
         return state.smartReframe;
     }
 
     function updateSmartReframeUI(statusOverride, detailOverride, statusKind) {
+        reconcileSmartReframeEdits();
         const isVideo = state.fileKind === 'video';
         const selected = state.settings && state.settings.cropMode === 'smart';
         if (els.smartReframePanel) {
@@ -294,6 +504,144 @@
             els.smartReframeAnalyzeBtn.disabled = !isVideo || !state.fileUrl || state.isAnalyzing || state.isReframing;
             els.smartReframeAnalyzeBtn.textContent = state.isReframing ? '추적 중' : state.smartReframe && state.smartReframe.summary && state.smartReframe.summary.faceCoverage > 0 ? '피사체 다시 추적' : '얼굴 추적 시도';
         }
+        syncSmartReframeEditor();
+        updateSpeakerFaceUI();
+    }
+
+    function getSpeakerSegments() {
+        if (Array.isArray(state.transcriptSegments) && state.transcriptSegments.length) return state.transcriptSegments.map(item => Object.assign({}, item));
+        return Array.isArray(state.captions) ? state.captions.map(item => Object.assign({}, item)) : [];
+    }
+
+    function updateSpeakerFaceUI() {
+        const enabled = getSmartReframeOptions().speakerPriority !== false;
+        const track = state.smartReframe;
+        const cues = Array.isArray(track && track.speakerCues) ? track.speakerCues : [];
+        const subjects = Array.isArray(track && track.subjects) ? track.subjects : [];
+        const segments = getSpeakerSegments();
+        if (els.smartReframeSpeakerPriorityToggle) {
+            els.smartReframeSpeakerPriorityToggle.checked = enabled;
+            els.smartReframeSpeakerPriorityToggle.disabled = !track;
+        }
+        if (els.smartReframeSpeakerLinkBtn) {
+            els.smartReframeSpeakerLinkBtn.disabled = !track || !subjects.length || !segments.length || Boolean(speakerLinkPromise);
+            els.smartReframeSpeakerLinkBtn.textContent = speakerLinkPromise ? '화자 연결 중' : cues.length ? '화자 다시 연결' : '화자 연결';
+        }
+        if (!els.smartReframeSpeakerStatus) return;
+        if (!enabled) els.smartReframeSpeakerStatus.textContent = '말하는 사람 우선 추적이 꺼져 있습니다.';
+        else if (track && track.activeSubjectId !== 'auto') els.smartReframeSpeakerStatus.textContent = '수동 주 피사체 고정이 화자 자동 전환보다 우선합니다.';
+        else if (cues.length) {
+            const linked = cues.filter(cue => cue.subjectId !== 'auto').length;
+            const switches = cues.reduce((count, cue, index) => index && cues[index - 1].subjectId !== cue.subjectId ? count + 1 : count, 0);
+            els.smartReframeSpeakerStatus.textContent = `발화 ${cues.length}구간 · 얼굴 연결 ${linked}구간 · 전환 ${switches}회`;
+        } else if (!segments.length) els.smartReframeSpeakerStatus.textContent = '로컬 전사 또는 자막을 적용하면 말하는 사람을 우선 추적합니다.';
+        else if (!subjects.length) els.smartReframeSpeakerStatus.textContent = '얼굴 감지 후 발화 구간과 인물을 연결할 수 있습니다.';
+        else els.smartReframeSpeakerStatus.textContent = '발화 구간과 얼굴 움직임을 연결할 준비가 됐습니다.';
+    }
+
+    async function linkSpeakerFaces(inputSegments, source) {
+        const segments = Array.isArray(inputSegments) && inputSegments.length ? inputSegments.map(item => Object.assign({}, item)) : getSpeakerSegments();
+        if (!segments.length || !state.smartReframe) { updateSpeakerFaceUI(); return null; }
+        if (speakerLinkPromise) return speakerLinkPromise;
+        speakerLinkPromise = (async () => {
+            if ((!getSpeakerFaceLinker().linkSegmentsToFaces || !getSmartReframeEngine().applySpeakerCues) && global.AIShortsStagedUiLoader && global.AIShortsStagedUiLoader.ensure) {
+                await global.AIShortsStagedUiLoader.ensure('editing');
+            }
+            const linker = getSpeakerFaceLinker();
+            const engine = getSmartReframeEngine();
+            if (!linker.linkSegmentsToFaces || !engine.applySpeakerCues) return null;
+            const result = linker.linkSegmentsToFaces(segments, state.smartReframe, { source: source || 'captions' });
+            lastSpeakerFaceLinkResult = result;
+            state.smartReframe = engine.applySpeakerCues(state.smartReframe, result.cues, getSmartReframeOptions().speakerPriority !== false) || state.smartReframe;
+            persistSmartReframeEdits(state.smartReframe);
+            if (store.addDiagnostic) store.addDiagnostic({
+                type: 'speaker-face-link',
+                source: source || 'captions',
+                segments: result.summary && result.summary.segments || 0,
+                subjects: result.summary && result.summary.subjects || 0,
+                linked: result.summary && result.summary.linked || 0,
+                switches: result.summary && result.summary.switches || 0
+            });
+            renderPreviewStill();
+            const status = linker.status ? linker.status(result) : null;
+            if (status && status.ready) toast(status.label, 'success');
+            return result;
+        })().catch(error => {
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'speaker-face-link-error', message: error && error.message || 'speaker link failed' });
+            toast(error && error.message || '화자와 얼굴을 연결하지 못했습니다.', 'warning');
+            return null;
+        }).finally(() => {
+            speakerLinkPromise = null;
+            updateSmartReframeUI();
+        });
+        updateSpeakerFaceUI();
+        return speakerLinkPromise;
+    }
+
+    function toggleSpeakerPriority() {
+        const enabled = Boolean(els.smartReframeSpeakerPriorityToggle && els.smartReframeSpeakerPriorityToggle.checked);
+        const next = Object.assign({}, getSmartReframeOptions(), { speakerPriority: enabled });
+        store.setSetting('smartReframeOptions', next);
+        const engine = getSmartReframeEngine();
+        if (state.smartReframe && engine.setSpeakerPriority) {
+            state.smartReframe = engine.setSpeakerPriority(state.smartReframe, enabled) || state.smartReframe;
+            persistSmartReframeEdits(state.smartReframe);
+        }
+        if (enabled && state.smartReframe && !(state.smartReframe.speakerCues && state.smartReframe.speakerCues.length)) linkSpeakerFaces(null, 'toggle');
+        updateSmartReframeUI();
+        renderPreviewStill();
+        toast(enabled ? '말하는 사람 우선 추적을 켰습니다.' : '말하는 사람 자동 전환을 껐습니다.', 'action');
+    }
+
+    function applySmartReframeSubjectSelection() {
+        clearSmartReframeEditorDraft();
+        const engine = getSmartReframeEngine();
+        if (!state.smartReframe || !engine.selectSubject || !els.smartReframeSubjectSelect) return;
+        state.smartReframe = engine.selectSubject(state.smartReframe, els.smartReframeSubjectSelect.value) || state.smartReframe;
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        const selected = (state.smartReframe.subjects || []).find(item => item.id === state.smartReframe.activeSubjectId);
+        toast(selected ? `${selected.label}을 주 피사체로 고정했습니다.` : '주 피사체 자동 선택으로 돌아왔습니다.', 'action');
+    }
+
+    function setSmartReframeKeyframe(command) {
+        const engine = getSmartReframeEngine();
+        if (!state.smartReframe || !engine.upsertKeyframe) return;
+        const draft = smartReframeEditorDraft || readSmartReframeEditorDraft();
+        const time = draft.time;
+        state.smartReframe = engine.upsertKeyframe(state.smartReframe, draft) || state.smartReframe;
+        clearSmartReframeEditorDraft();
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        const options = command && typeof command === 'object' ? command : {};
+        if (!options.quiet) toast(`${formatSmartReframeTime(time)} 위치에 크롭 키프레임을 저장했습니다.`, 'success');
+        syncDirectCropEditor();
+    }
+
+    function deleteSmartReframeKeyframe() {
+        clearSmartReframeEditorDraft();
+        const engine = getSmartReframeEngine();
+        if (!state.smartReframe || !engine.removeKeyframe) return;
+        const time = getSmartReframeTime();
+        const before = state.smartReframe.keyframes ? state.smartReframe.keyframes.length : 0;
+        state.smartReframe = engine.removeKeyframe(state.smartReframe, time, 0.35) || state.smartReframe;
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        toast((state.smartReframe.keyframes || []).length < before ? '현재 위치의 크롭 키프레임을 삭제했습니다.' : '현재 위치에는 삭제할 키프레임이 없습니다.', 'action');
+    }
+
+    function resetSmartReframeKeyframes() {
+        clearSmartReframeEditorDraft();
+        const engine = getSmartReframeEngine();
+        if (!state.smartReframe || !engine.clearKeyframes) return;
+        state.smartReframe = engine.clearKeyframes(state.smartReframe) || state.smartReframe;
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        toast('수동 크롭 키프레임을 모두 초기화했습니다.', 'action');
     }
 
     async function analyzeSmartReframe() {
@@ -308,22 +656,24 @@
         const inputFile = state.file;
         const token = beginOperation('smart-reframe', { source: 'manual', fileName: inputFile && inputFile.name || '' });
         state.isReframing = true;
-        updateSmartReframeUI('피사체 추적 중', '영상 프레임에서 얼굴과 움직임 중심을 확인합니다.', 'tracking');
+        updateSmartReframeUI('피사체 추적 중', '영상 프레임에서 여러 인물과 움직임 중심을 확인합니다.', 'tracking');
         try {
             const track = await getSmartReframeEngine().analyzeVideoSubjects(state.fileUrl, (percent, message) => {
                 if (token && operationCoordinator.isCurrent && !operationCoordinator.isCurrent(token)) return;
                 updateSmartReframeUI('피사체 추적 중', message, 'tracking');
                 setProgress(Math.max(0, Math.min(100, percent)), message);
-            }, token && token.signal || null, Object.assign({}, getSmartReframeOptions(), { motionAnalysis: state.motionAnalysis }));
+            }, token && token.signal || null, Object.assign({}, getSmartReframeOptions(), getSmartReframeEdits(), { motionAnalysis: state.motionAnalysis }));
             assertOperation(token, '원본이 변경되어 이전 피사체 추적 결과를 폐기했습니다.');
             if (state.file !== inputFile) return;
-            state.smartReframe = track;
-            const status = getSmartReframeEngine().getStatus ? getSmartReframeEngine().getStatus(track) : null;
+            setSmartReframeTrack(track);
+            if (getSmartReframeOptions().speakerPriority !== false && getSpeakerSegments().length) await linkSpeakerFaces(null, 'smart-reframe-analysis');
+            const status = getSmartReframeEngine().getStatus ? getSmartReframeEngine().getStatus(state.smartReframe) : null;
             updateSmartReframeUI(status && status.label, status && status.detail, 'ready');
             setProgress(100, '스마트 리프레임 준비 완료');
             renderPreviewStill();
-            toast(track && track.summary && track.summary.faceCoverage > 0 ? '얼굴 중심 스마트 리프레임을 준비했습니다.' : '얼굴 감지를 지원하지 않아 모션 중심 추적을 적용했습니다.', 'success');
-            if (store.addDiagnostic) store.addDiagnostic({ type: 'smart-reframe-analysis', source: track && track.source || 'motion', samples: track && track.summary && track.summary.samples || 0, faceCoverage: track && track.summary && track.summary.faceCoverage || 0 });
+            const subjectCount = state.smartReframe && state.smartReframe.summary && state.smartReframe.summary.subjectCount || 0;
+            toast(subjectCount > 1 ? `${subjectCount}명의 피사체를 구분했습니다. 주 피사체를 선택할 수 있습니다.` : state.smartReframe && state.smartReframe.summary && state.smartReframe.summary.faceCoverage > 0 ? '얼굴 중심 스마트 리프레임을 준비했습니다.' : '얼굴 감지를 지원하지 않아 모션 중심 추적을 적용했습니다.', 'success');
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'smart-reframe-analysis', source: state.smartReframe && state.smartReframe.source || 'motion', samples: state.smartReframe && state.smartReframe.summary && state.smartReframe.summary.samples || 0, faceCoverage: state.smartReframe && state.smartReframe.summary && state.smartReframe.summary.faceCoverage || 0, subjects: subjectCount, sceneCuts: state.smartReframe && state.smartReframe.summary && state.smartReframe.summary.sceneCuts || 0 });
             finishOperation(token, 'smart-reframe-complete');
         } catch (error) {
             if (!isAbortError(error)) {
@@ -856,6 +1206,21 @@
             if (!state.file || state.isAnalyzing) return;
             analyzeCurrentFile({ autoGenerate: false, source: event && event.detail && event.detail.source || 'external-request' });
         });
+        document.addEventListener('ai-shorts-transcript-ready', event => {
+            const segments = event && event.detail && Array.isArray(event.detail.segments) ? event.detail.segments : [];
+            state.transcriptSegments = segments.slice(0, Number(config.SPEAKER_FACE_MAX_CUES || 2000)).map(item => ({
+                start: Number(item.start) || 0,
+                end: Number(item.end) || 0,
+                text: String(item.text || '').slice(0, 1000),
+                speaker: String(item.speaker || '').slice(0, 40)
+            }));
+            if (getSmartReframeOptions().speakerPriority !== false && state.smartReframe) linkSpeakerFaces(state.transcriptSegments, 'local-transcript');
+            else updateSpeakerFaceUI();
+        });
+        document.addEventListener('ai-shorts-transcript-applied', event => {
+            const segments = event && event.detail && Array.isArray(event.detail.segments) ? event.detail.segments : state.transcriptSegments;
+            if (getSmartReframeOptions().speakerPriority !== false && state.smartReframe) linkSpeakerFaces(segments, 'applied-transcript');
+        });
         if (els.previewBtn) els.previewBtn.addEventListener('click', previewSelectedRange);
         if (els.stopPreviewBtn) els.stopPreviewBtn.addEventListener('click', stopPreview);
         if (els.exportBtn) els.exportBtn.addEventListener('click', exportSelectedRange);
@@ -921,11 +1286,45 @@
         if (els.safeGuideToggle) els.safeGuideToggle.addEventListener('change', readQualityOptionsFromUI);
         if (els.qualityResetBtn) els.qualityResetBtn.addEventListener('click', resetQualityOptions);
         if (els.smartReframeAnalyzeBtn) els.smartReframeAnalyzeBtn.addEventListener('click', analyzeSmartReframe);
+        if (els.smartReframeSpeakerPriorityToggle) els.smartReframeSpeakerPriorityToggle.addEventListener('change', toggleSpeakerPriority);
+        if (els.smartReframeSpeakerLinkBtn) els.smartReframeSpeakerLinkBtn.addEventListener('click', () => linkSpeakerFaces(null, 'manual'));
+        if (els.smartReframeSubjectSelect) els.smartReframeSubjectSelect.addEventListener('change', applySmartReframeSubjectSelection);
+        if (els.smartReframeKeyframeSetBtn) els.smartReframeKeyframeSetBtn.addEventListener('click', setSmartReframeKeyframe);
+        if (els.smartReframeKeyframeDeleteBtn) els.smartReframeKeyframeDeleteBtn.addEventListener('click', deleteSmartReframeKeyframe);
+        if (els.smartReframeKeyframeResetBtn) els.smartReframeKeyframeResetBtn.addEventListener('click', resetSmartReframeKeyframes);
+        ['smartReframeXInput', 'smartReframeYInput', 'smartReframeZoomInput'].forEach(id => {
+            if (!els[id]) return;
+            els[id].addEventListener('input', () => {
+                beginSmartReframeEditorDraft();
+                if (id === 'smartReframeXInput' && els.smartReframeXValue) els.smartReframeXValue.textContent = `${els[id].value}%`;
+                if (id === 'smartReframeYInput' && els.smartReframeYValue) els.smartReframeYValue.textContent = `${els[id].value}%`;
+                if (id === 'smartReframeZoomInput' && els.smartReframeZoomValue) els.smartReframeZoomValue.textContent = `${els[id].value}%`;
+                if (els.smartReframeKeyframeDetail && smartReframeEditorDraft) els.smartReframeKeyframeDetail.textContent = `${formatSmartReframeTime(smartReframeEditorDraft.time)} · 저장되지 않은 크롭 조정`;
+                renderPreviewStill();
+                syncDirectCropEditor();
+            });
+        });
+        document.addEventListener('ai-shorts-direct-crop-module-ready', () => {
+            directCropController = null;
+            syncDirectCropEditor();
+        });
+        if (els.sourceVideo) {
+            let smartReframeTimeSyncPending = false;
+            els.sourceVideo.addEventListener('timeupdate', () => {
+                if (smartReframeTimeSyncPending || !state.smartReframe) return;
+                smartReframeTimeSyncPending = true;
+                requestAnimationFrame(() => { smartReframeTimeSyncPending = false; syncSmartReframeEditor(); });
+            });
+            els.sourceVideo.addEventListener('seeked', () => {
+                if (smartReframeEditorDraft && Math.abs(smartReframeEditorDraft.time - getSmartReframeTime()) > 0.35) clearSmartReframeEditorDraft();
+                syncSmartReframeEditor();
+            });
+        }
         if (els.smartReframeCaptionAvoidanceToggle) els.smartReframeCaptionAvoidanceToggle.addEventListener('change', () => {
             const next = Object.assign({}, getSmartReframeOptions(), { captionAvoidance: els.smartReframeCaptionAvoidanceToggle.checked });
             store.setSetting('smartReframeOptions', next);
             const engine = getSmartReframeEngine();
-            if (state.motionAnalysis && engine.createTrackFromMotion && (!state.smartReframe || state.smartReframe.source === 'motion')) state.smartReframe = engine.createTrackFromMotion(state.motionAnalysis, next);
+            if (state.motionAnalysis && engine.createTrackFromMotion && (!state.smartReframe || state.smartReframe.source === 'motion')) setSmartReframeTrack(engine.createTrackFromMotion(state.motionAnalysis, Object.assign({}, next, getSmartReframeEdits())));
             else if (state.motionAnalysis && !engine.createTrackFromMotion) ensureMotionSmartReframe();
             renderPreviewStill();
             updateSmartReframeUI();
@@ -1419,6 +1818,8 @@
             updateCaptionStatus();
             renderAutoCutSummary(getSelectedRecommendation());
             renderPreviewStill();
+            if (state.captions.length && state.smartReframe && getSmartReframeOptions().speakerPriority !== false && !(state.transcriptSegments && state.transcriptSegments.length)) linkSpeakerFaces(state.captions, 'captions');
+            else updateSpeakerFaceUI();
             toast(state.captions.length ? `${state.captions.length}개 자막을 적용했습니다.` : '적용할 자막을 찾지 못했습니다.');
         } catch (error) {
             if (store.addDiagnostic) store.addDiagnostic({ type: 'caption-parse-error', message: error.message });
@@ -1428,11 +1829,19 @@
 
     function clearCaptions() {
         state.captions = [];
+        state.transcriptSegments = [];
+        const engine = getSmartReframeEngine();
+        if (state.smartReframe && engine.clearSpeakerCues) {
+            state.smartReframe = engine.clearSpeakerCues(state.smartReframe) || state.smartReframe;
+            persistSmartReframeEdits(state.smartReframe);
+        }
+        lastSpeakerFaceLinkResult = null;
         if (els.captionTextInput) els.captionTextInput.value = '';
         updateCaptionStatus();
         renderAutoCutSummary(getSelectedRecommendation());
+        updateSpeakerFaceUI();
         renderPreviewStill();
-        toast('자막을 비웠습니다.');
+        toast('자막과 화자 연결을 비웠습니다.');
     }
 
     function handleCaptionFile(event) {
@@ -1510,7 +1919,8 @@ ${tags}`.trim());
         exportSelectedRange,
         exportAllCandidates,
         saveThumbnail,
-        snapSelectedBoundaryToNearestCut
+        snapSelectedBoundaryToNearestCut,
+        linkSpeakerFaces
     });
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

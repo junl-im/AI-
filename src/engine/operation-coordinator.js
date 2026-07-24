@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - smart-reframe aware async operation ownership and cancellation coordinator
+// AI Shorts Studio v1.6.9 - smart-reframe aware async operation ownership and cancellation coordinator
 'use strict';
 
 (function exposeOperationCoordinator(global) {

@@ -1,0 +1,119 @@
+{
+  "version": "1.6.7",
+  "desktop": {
+    "initial": {
+      "state": {
+        "enabled": true,
+        "effective": true,
+        "tab": "file",
+        "phase": "import",
+        "viewStage": "import"
+      },
+      "active": "file",
+      "visible": [
+        {
+          "panel": "file",
+          "priority": "primary",
+          "height": 330
+        },
+        {
+          "panel": "recommend",
+          "priority": "support",
+          "height": 86
+        }
+      ],
+      "badge": "불러오기 단계 · 원본 불러오기 집중 · 6개 정리",
+      "status": "단계 집중 · 원본 불러오기",
+      "dockHeight": 86,
+      "dockVariable": 86,
+      "clearance": 108,
+      "overflow": 0,
+      "auxiliary": {
+        "utility": "none",
+        "ai": "none"
+      }
+    },
+    "preview": {
+      "active": "preview",
+      "areas": "\"toolbar toolbar\" \"preview candidates\" \"preview edit\"",
+      "visible": [
+        {
+          "panel": "candidates",
+          "priority": "support",
+          "height": 86,
+          "supportButton": "flex"
+        },
+        {
+          "panel": "preview",
+          "priority": "primary",
+          "height": 929,
+          "supportButton": "none"
+        },
+        {
+          "panel": "edit caption quality",
+          "priority": "support",
+          "height": 86,
+          "supportButton": "flex"
+        }
+      ],
+      "overflow": 0
+    },
+    "supportNavigation": {
+      "active": "candidates",
+      "primary": "candidates"
+    },
+    "full": {
+      "state": {
+        "enabled": false,
+        "effective": false,
+        "tab": "preview",
+        "phase": "edit",
+        "viewStage": "edit"
+      },
+      "effective": "off",
+      "visibleCount": 8,
+      "status": "3열 28 · 41 · 31%",
+      "utility": "grid",
+      "ai": "block"
+    },
+    "explicitMode": {
+      "state": {
+        "enabled": true,
+        "effective": false,
+        "tab": "preview",
+        "phase": "edit",
+        "viewStage": "edit"
+      },
+      "effective": "off",
+      "togglePaused": true
+    },
+    "phases": [
+      "analyze",
+      "edit",
+      "export"
+    ],
+    "errors": []
+  },
+  "mobile": {
+    "result": {
+      "state": {
+        "enabled": true,
+        "effective": false,
+        "tab": "file",
+        "phase": "import",
+        "viewStage": "import"
+      },
+      "effective": "off",
+      "toggleDisplay": "none",
+      "badgeDisplay": "none",
+      "active": "file",
+      "visible": [
+        "file"
+      ],
+      "overflow": 0,
+      "dockHeight": 109,
+      "dockVariable": 109
+    },
+    "errors": []
+  }
+}

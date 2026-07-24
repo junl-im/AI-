@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - smart-reframe, cancellable vertical renderer with media-state restoration
+// AI Shorts Studio v1.6.9 - smart-reframe, cancellable vertical renderer with media-state restoration
 'use strict';
 
 (function exposeVerticalRenderer(global) {

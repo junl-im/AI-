@@ -1,0 +1,54 @@
+{
+  "version": "1.6.9",
+  "generatedAt": "2026-07-24T09:12:56.674012+00:00",
+  "harness": "real MP4 import, smart crop, pointer drag, wheel zoom, keyboard nudge, automatic keyframe save, path visualization, undo, and escape exit",
+  "before": {
+    "x": 0.53963,
+    "y": 0.53079,
+    "zoom": 1,
+    "count": 0
+  },
+  "afterDrag": {
+    "x": 0.59859,
+    "y": 0.46931,
+    "zoom": 1.08,
+    "active": "true",
+    "line": "59.86,46.93"
+  },
+  "afterWheel": {
+    "x": 0.6,
+    "y": 0.47,
+    "zoom": 1.095
+  },
+  "afterKeyboard": {
+    "x": 0.61,
+    "y": 0.47,
+    "zoom": 1.1,
+    "detail": "크롭 경로 1개 · 현재 61%, 47% · 110%"
+  },
+  "afterUndo": {
+    "x": 0.54,
+    "y": 0.53,
+    "zoom": 1.08,
+    "persisted": 1
+  },
+  "ended": {
+    "active": "false",
+    "pressed": "false",
+    "panelOverflow": 0,
+    "bodyOverflow": 0
+  },
+  "checks": {
+    "dragCreatesKeyframe": true,
+    "wheelUpdatesZoom": true,
+    "keyboardNudgeWorks": true,
+    "pathVisible": true,
+    "undoWorks": true,
+    "escapeClosesEditor": true,
+    "noHorizontalOverflow": true,
+    "noRuntimeErrors": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": []
+}

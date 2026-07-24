@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - smart-reframe aware state container and persisted-setting recovery
+// AI Shorts Studio v1.6.9 - director-grade smart-reframe state and persisted-setting recovery
 'use strict';
 
 (function exposeState(global) {
@@ -8,7 +8,7 @@
         duration: 'auto',
         style: 'balanced',
         cropMode: 'center',
-        smartReframeOptions: Object.freeze({ captionAvoidance: true, smoothing: 0.30, zoom: 1.08 }),
+        smartReframeOptions: Object.freeze({ captionAvoidance: true, smoothing: 0.30, zoom: 1.08, sceneCutProtection: true, speakerPriority: true }),
         platform: 'youtube',
         captionStyle: 'bold',
         captionOffset: 0,
@@ -72,7 +72,9 @@
             smartReframeOptions: {
                 captionAvoidance: typeof smartReframe.captionAvoidance === 'boolean' ? smartReframe.captionAvoidance : SETTINGS_DEFAULTS.smartReframeOptions.captionAvoidance,
                 smoothing: finite(smartReframe.smoothing, SETTINGS_DEFAULTS.smartReframeOptions.smoothing, 0.08, 0.82),
-                zoom: finite(smartReframe.zoom, SETTINGS_DEFAULTS.smartReframeOptions.zoom, 1, 1.25)
+                zoom: finite(smartReframe.zoom, SETTINGS_DEFAULTS.smartReframeOptions.zoom, 1, 1.35),
+                sceneCutProtection: typeof smartReframe.sceneCutProtection === 'boolean' ? smartReframe.sceneCutProtection : SETTINGS_DEFAULTS.smartReframeOptions.sceneCutProtection,
+                speakerPriority: typeof smartReframe.speakerPriority === 'boolean' ? smartReframe.speakerPriority : SETTINGS_DEFAULTS.smartReframeOptions.speakerPriority
             },
             platform: enumValue(input.platform, ['youtube', 'reels', 'tiktok'], SETTINGS_DEFAULTS.platform),
             captionStyle: enumValue(input.captionStyle, ['bold', 'box', 'clean'], SETTINGS_DEFAULTS.captionStyle),
@@ -147,6 +149,8 @@
         audioAnalysis: null,
         motionAnalysis: null,
         smartReframe: null,
+        smartReframeEdits: { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerCues: [] },
+        transcriptSegments: [],
         isReframing: false,
         autoCuts: null,
         engineMeta: null,
@@ -204,6 +208,8 @@
         state.audioAnalysis = null;
         state.motionAnalysis = null;
         state.smartReframe = null;
+        state.smartReframeEdits = { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerCues: [] };
+        state.transcriptSegments = [];
         state.isReframing = false;
         state.autoCuts = null;
         state.engineMeta = null;

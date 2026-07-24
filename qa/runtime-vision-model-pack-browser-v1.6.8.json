@@ -1,0 +1,116 @@
+{
+  "version": "1.6.8",
+  "generatedAt": "2026-07-24T08:46:20.742535+00:00",
+  "harness": "secure-origin route harness with Cache Storage, synthetic runtime module, install/verify/activate/corrupt/remove lifecycle; service-worker bridge is independently VM-audited",
+  "initial": {
+    "controlled": true,
+    "packs": 0,
+    "active": false,
+    "panelOpen": false,
+    "status": "미설치 · 모션 추적 사용"
+  },
+  "installed": {
+    "pack": {
+      "id": "vision-dab890b634de7908",
+      "label": "감사 얼굴 감지",
+      "provider": "mediapipe-tasks-vision",
+      "runtimeVersion": "audit-1.0.0",
+      "installedAt": "2026-07-24T08:46:20.097Z",
+      "verifiedAt": "2026-07-24T08:46:20.097Z",
+      "verification": "verified",
+      "totalBytes": 218,
+      "sizeLabel": "218B",
+      "fileCount": 9,
+      "modelDigest": "45fd5c418bfdee7a"
+    },
+    "packs": 1,
+    "selectValue": "vision-dab890b634de7908",
+    "status": "설치 완료 · 사용 전 무결성 확인",
+    "policy": {
+      "localFilesOnly": true,
+      "remoteDownload": false,
+      "integrity": "sha256",
+      "cacheName": "ai-shorts-vision-model-packs-v1",
+      "maxFiles": 16
+    }
+  },
+  "verified": {
+    "verification": {
+      "ok": true,
+      "packId": "vision-dab890b634de7908",
+      "failures": []
+    },
+    "pack": {
+      "id": "vision-dab890b634de7908",
+      "label": "감사 얼굴 감지",
+      "provider": "mediapipe-tasks-vision",
+      "runtimeVersion": "audit-1.0.0",
+      "installedAt": "2026-07-24T08:46:20.097Z",
+      "verifiedAt": "2026-07-24T08:46:20.176Z",
+      "verification": "verified",
+      "totalBytes": 218,
+      "sizeLabel": "218B",
+      "fileCount": 9,
+      "modelDigest": "45fd5c418bfdee7a"
+    }
+  },
+  "activated": {
+    "runtime": {
+      "active": true,
+      "packId": "vision-dab890b634de7908",
+      "backend": "cpu",
+      "lastError": ""
+    },
+    "detections": 1,
+    "delegate": "CPU",
+    "modelPath": "https://studio.test/__ai_shorts_vision_pack__/vision-dab890b634de7908/models/blaze_face_short_range.tflite",
+    "wasmRoot": "https://studio.test/__ai_shorts_vision_pack__/vision-dab890b634de7908/wasm/",
+    "status": "브라우저 얼굴 추적 사용 중 · WASM",
+    "activateHidden": true,
+    "deactivateHidden": false
+  },
+  "corrupted": {
+    "verification": {
+      "ok": false,
+      "packId": "vision-dab890b634de7908",
+      "failures": [
+        {
+          "role": "model",
+          "reason": "checksum"
+        }
+      ]
+    },
+    "active": false,
+    "packVerification": "failed",
+    "status": "모델 팩 손상 감지",
+    "closed": 1
+  },
+  "removed": {
+    "result": {
+      "removed": true,
+      "files": 9
+    },
+    "packs": 0,
+    "status": "미설치 · 모션 추적 사용",
+    "selection": ""
+  },
+  "checks": {
+    "serviceWorkerControlContractPresent": true,
+    "startsWithoutPackOrActivation": true,
+    "packInstallsAndRenders": true,
+    "localOnlyPolicyVisible": true,
+    "sha256VerificationPasses": true,
+    "cachedModuleActivatesCpuDetector": true,
+    "syntheticModelAndWasmUrlsUsed": true,
+    "activeUiStateUpdates": true,
+    "corruptionBlocksAndDeactivates": true,
+    "localRemovalClearsPack": true,
+    "noExternalRequests": true,
+    "noPageErrors": true,
+    "noConsoleErrors": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": []
+}

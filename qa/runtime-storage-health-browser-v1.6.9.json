@@ -1,0 +1,151 @@
+{
+  "version": "1.6.9",
+  "desktop": {
+    "name": "desktop",
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "initial": {
+      "text": "오프라인 사용 준비 완료\n저장 공간과 자동 백업이 정상 범위입니다.\n정상\n저장 공간\n8.5MB / 10MB · 85%\n고급 진단",
+      "height": 55.90625,
+      "width": 1334,
+      "top": 1548,
+      "advancedHidden": true,
+      "autoRepairHidden": true,
+      "atPageEnd": true,
+      "overflow": 0
+    },
+    "advanced": {
+      "hidden": false,
+      "width": 1120,
+      "height": 534.8125,
+      "bodyLocked": true,
+      "technical": true,
+      "policyRefreshCalls": 1,
+      "overflow": 0
+    },
+    "confirmationBeforeCancel": {
+      "visible": true,
+      "clearCalls": 0,
+      "safety": "안전 안내\n현재 프로젝트의 원본 파일과 편집 내용은 삭제되지 않습니다."
+    },
+    "confirmationAfterCancel": {
+      "hidden": true,
+      "clearCalls": 0
+    },
+    "confirmationAfterAccept": {
+      "hidden": true,
+      "clearCalls": 1
+    },
+    "warning": {
+      "hidden": false,
+      "label": "저장 공간 정리",
+      "title": "저장 공간 정리가 필요합니다"
+    },
+    "navigation": {
+      "scrollY": 2,
+      "attention": "true",
+      "events": 1,
+      "focused": true
+    },
+    "impactBeforeCancel": {
+      "visible": true,
+      "impactHidden": false,
+      "impact": "오래된 세션·백업 최대 2개 (4.0KB)\n이전 오프라인 캐시 1개\n현재 프로젝트·최신 복구 데이터·현재 오프라인 셸은 유지",
+      "cleanupCalls": 0
+    },
+    "recoveryAfterCancel": {
+      "scrollY": 831,
+      "cleanupCalls": 0,
+      "returnEvents": 0
+    },
+    "recoveryAfterAccept": {
+      "scrollY": 1,
+      "cleanupCalls": 1,
+      "returnEvents": 1,
+      "autoRepairHidden": true,
+      "healthTitle": "오프라인 사용 준비 완료",
+      "focusId": ""
+    },
+    "closed": {
+      "advancedHidden": true,
+      "bodyLocked": false
+    },
+    "errors": []
+  },
+  "mobile": {
+    "name": "mobile",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "initial": {
+      "text": "오프라인 사용 준비 완료\n저장 공간과 자동 백업이 정상 범위입니다.\n정상\n저장 공간\n8.5MB / 10MB · 85%\n고급 진단",
+      "height": 96.90625,
+      "width": 370,
+      "top": 1542,
+      "advancedHidden": true,
+      "autoRepairHidden": true,
+      "atPageEnd": true,
+      "overflow": 0
+    },
+    "advanced": {
+      "hidden": false,
+      "width": 390,
+      "height": 844,
+      "bodyLocked": true,
+      "technical": true,
+      "policyRefreshCalls": 1,
+      "overflow": 0
+    },
+    "confirmationBeforeCancel": {
+      "visible": true,
+      "clearCalls": 0,
+      "safety": "안전 안내\n현재 프로젝트의 원본 파일과 편집 내용은 삭제되지 않습니다."
+    },
+    "confirmationAfterCancel": {
+      "hidden": true,
+      "clearCalls": 0
+    },
+    "confirmationAfterAccept": {
+      "hidden": true,
+      "clearCalls": 1
+    },
+    "warning": {
+      "hidden": false,
+      "label": "저장 공간 정리",
+      "title": "저장 공간 정리가 필요합니다"
+    },
+    "navigation": {
+      "scrollY": 2,
+      "attention": "true",
+      "events": 1,
+      "focused": true
+    },
+    "impactBeforeCancel": {
+      "visible": true,
+      "impactHidden": false,
+      "impact": "오래된 세션·백업 최대 2개 (4.0KB)\n이전 오프라인 캐시 1개\n현재 프로젝트·최신 복구 데이터·현재 오프라인 셸은 유지",
+      "cleanupCalls": 0
+    },
+    "recoveryAfterCancel": {
+      "scrollY": 802,
+      "cleanupCalls": 0,
+      "returnEvents": 0
+    },
+    "recoveryAfterAccept": {
+      "scrollY": 2,
+      "cleanupCalls": 1,
+      "returnEvents": 1,
+      "autoRepairHidden": true,
+      "healthTitle": "오프라인 사용 준비 완료",
+      "focusId": ""
+    },
+    "closed": {
+      "advancedHidden": true,
+      "bodyLocked": false
+    },
+    "errors": []
+  }
+}

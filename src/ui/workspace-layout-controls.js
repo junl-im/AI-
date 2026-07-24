@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - quota-aware desktop workspace resizing and focus view controller
+// AI Shorts Studio v1.6.9 - quota-aware desktop workspace resizing and focus view controller
 'use strict';
 (function bootWorkspaceLayoutControls(global) {
     const STORAGE_KEY = 'ai-shorts-workspace-layout-v1';

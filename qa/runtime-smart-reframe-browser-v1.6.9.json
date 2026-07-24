@@ -1,0 +1,67 @@
+{
+  "version": "1.6.9",
+  "generatedAt": "2026-07-24T09:02:50.030247+00:00",
+  "harness": "real 20-second MP4 import, motion fallback, explicit two-face detector, manual subject pin, crop-keyframe create/delete, local transcript speaker-face switching, and operation cleanup",
+  "motion": {
+    "cropMode": "smart",
+    "source": "motion",
+    "points": 24,
+    "sceneCuts": 2,
+    "panelHidden": false,
+    "status": "모션 추적 준비 완료",
+    "detail": "24개 지점 · 신뢰도 18% · 장면 전환 2곳"
+  },
+  "edited": {
+    "source": "face",
+    "points": 30,
+    "faceCoverage": 1,
+    "subjectCount": 6,
+    "activeSubjectId": "subject-6",
+    "keyframes": 1,
+    "focusX": 0.72,
+    "focusY": 0.31,
+    "focusZoom": 1.18,
+    "manualDataset": "true",
+    "status": "인물 2 추적 준비 완료",
+    "progress": "스마트 리프레임 준비 완료",
+    "operationActive": false
+  },
+  "deleted": {
+    "keyframes": 0,
+    "persistedKeyframes": 0,
+    "activeSubjectId": "subject-6"
+  },
+  "speaker": {
+    "cueCount": 2,
+    "linkedCount": 2,
+    "distinctSubjects": 2,
+    "firstSource": "speaker-face",
+    "secondSource": "speaker-face",
+    "firstSubjectId": "subject-3",
+    "secondSubjectId": "subject-1",
+    "status": "발화 2구간 · 얼굴 연결 2구간 · 전환 1회",
+    "persistedCueCount": 2,
+    "priorityEnabled": true
+  },
+  "checks": {
+    "motionTrackAutoCreated": true,
+    "panelVisibleForSmartVideo": true,
+    "motionStatusVisible": true,
+    "faceDetectorPromotesTrack": true,
+    "multipleSubjectsDetected": true,
+    "manualSubjectPinWorks": true,
+    "keyframeCreateDeleteWorks": true,
+    "manualStateVisible": true,
+    "speakerFacesLinked": true,
+    "speakerDirectionChangesCrop": true,
+    "speakerDirectionPersists": true,
+    "speakerStatusVisible": true,
+    "progressCompletes": true,
+    "operationReleased": true,
+    "noPageErrors": true,
+    "noConsoleErrors": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": []
+}

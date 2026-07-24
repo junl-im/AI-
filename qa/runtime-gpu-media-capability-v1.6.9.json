@@ -1,0 +1,901 @@
+{
+  "version": "1.6.9",
+  "generatedAt": "2026-07-24T09:08:11Z",
+  "fixture": {
+    "format": "MP4/H.264/AAC",
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "durationSeconds": 3
+  },
+  "modes": [
+    {
+      "mode": "acceleration-requested",
+      "requestedArgs": [
+        "--ignore-gpu-blocklist",
+        "--enable-gpu-rasterization",
+        "--enable-zero-copy",
+        "--enable-unsafe-swiftshader"
+      ],
+      "webgl": {
+        "available": false,
+        "hardwareAccelerated": false
+      },
+      "media": {
+        "readyState": 4,
+        "width": 1280,
+        "height": 720,
+        "currentTime": 2.163219,
+        "paused": false,
+        "totalFrames": 62,
+        "droppedFrames": 0
+      },
+      "memory": {
+        "baseline": {
+          "totalProcessCount": 8,
+          "totalRssMiB": 768.626,
+          "totalUssMiB": 241.617,
+          "categories": {
+            "browser": {
+              "processCount": 1,
+              "rssMiB": 197.309,
+              "ussMiB": 105.289
+            },
+            "other": {
+              "processCount": 2,
+              "rssMiB": 124.516,
+              "ussMiB": 1.07
+            },
+            "networkUtility": {
+              "processCount": 1,
+              "rssMiB": 84.113,
+              "ussMiB": 18.414
+            },
+            "utility": {
+              "processCount": 1,
+              "rssMiB": 38.688,
+              "ussMiB": 2.176
+            },
+            "renderer": {
+              "processCount": 2,
+              "rssMiB": 255.609,
+              "ussMiB": 107.973
+            },
+            "gpu": {
+              "processCount": 1,
+              "rssMiB": 68.391,
+              "ussMiB": 6.695
+            }
+          },
+          "processes": [
+            {
+              "pid": 55492,
+              "category": "browser",
+              "rssMiB": 197.309,
+              "ussMiB": 105.289,
+              "commandHint": "/usr/lib/chromium/chromium --show-component-extension-options --enable-gpu-rasterization --no-default-browser-check --disable-pings --media-router=0 --disable-dev-shm-usage --enable-remote-extensions --load-extension= about:blank --ignore-gpu-blocklist --enable-gpu-rasterization "
+            },
+            {
+              "pid": 55510,
+              "category": "other",
+              "rssMiB": 62.207,
+              "ussMiB": 0.547,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-zygote-sandbox --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --change-stack-guard-"
+            },
+            {
+              "pid": 55512,
+              "category": "other",
+              "rssMiB": 62.309,
+              "ussMiB": 0.523,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --change-stack-guard-on-fork=enable --no-"
+            },
+            {
+              "pid": 55537,
+              "category": "networkUtility",
+              "rssMiB": 84.113,
+              "ussMiB": 18.414,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (tr"
+            },
+            {
+              "pid": 55542,
+              "category": "utility",
+              "rssMiB": 38.688,
+              "ussMiB": 2.176,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 "
+            },
+            {
+              "pid": 55579,
+              "category": "renderer",
+              "rssMiB": 60.855,
+              "ussMiB": 5.766,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --disable-print-preview --change-stack-guard-on-fork=enable --no-sa"
+            },
+            {
+              "pid": 55580,
+              "category": "renderer",
+              "rssMiB": 194.754,
+              "ussMiB": 102.207,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --disable-print-preview --change-stack-guard-on-fork=enable --no-sa"
+            },
+            {
+              "pid": 55611,
+              "category": "gpu",
+              "rssMiB": 68.391,
+              "ussMiB": 6.695,
+              "commandHint": "/usr/lib/chromium/chromium --type=gpu-process --no-sandbox --disable-dev-shm-usage --enable-gpu-rasterization --headless=new --ozone-platform=headless --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/L"
+            }
+          ]
+        },
+        "afterWebgl": {
+          "totalProcessCount": 8,
+          "totalRssMiB": 768.899,
+          "totalUssMiB": 241.715,
+          "categories": {
+            "browser": {
+              "processCount": 1,
+              "rssMiB": 197.309,
+              "ussMiB": 105.207
+            },
+            "other": {
+              "processCount": 2,
+              "rssMiB": 124.516,
+              "ussMiB": 1.07
+            },
+            "networkUtility": {
+              "processCount": 1,
+              "rssMiB": 84.113,
+              "ussMiB": 18.414
+            },
+            "utility": {
+              "processCount": 1,
+              "rssMiB": 38.688,
+              "ussMiB": 2.133
+            },
+            "renderer": {
+              "processCount": 2,
+              "rssMiB": 255.883,
+              "ussMiB": 108.195
+            },
+            "gpu": {
+              "processCount": 1,
+              "rssMiB": 68.391,
+              "ussMiB": 6.695
+            }
+          },
+          "processes": [
+            {
+              "pid": 55492,
+              "category": "browser",
+              "rssMiB": 197.309,
+              "ussMiB": 105.207,
+              "commandHint": "/usr/lib/chromium/chromium --show-component-extension-options --enable-gpu-rasterization --no-default-browser-check --disable-pings --media-router=0 --disable-dev-shm-usage --enable-remote-extensions --load-extension= about:blank --ignore-gpu-blocklist --enable-gpu-rasterization "
+            },
+            {
+              "pid": 55510,
+              "category": "other",
+              "rssMiB": 62.207,
+              "ussMiB": 0.547,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-zygote-sandbox --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --change-stack-guard-"
+            },
+            {
+              "pid": 55512,
+              "category": "other",
+              "rssMiB": 62.309,
+              "ussMiB": 0.523,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --change-stack-guard-on-fork=enable --no-"
+            },
+            {
+              "pid": 55537,
+              "category": "networkUtility",
+              "rssMiB": 84.113,
+              "ussMiB": 18.414,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (tr"
+            },
+            {
+              "pid": 55542,
+              "category": "utility",
+              "rssMiB": 38.688,
+              "ussMiB": 2.133,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 "
+            },
+            {
+              "pid": 55579,
+              "category": "renderer",
+              "rssMiB": 60.855,
+              "ussMiB": 5.766,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --disable-print-preview --change-stack-guard-on-fork=enable --no-sa"
+            },
+            {
+              "pid": 55580,
+              "category": "renderer",
+              "rssMiB": 195.027,
+              "ussMiB": 102.43,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --disable-print-preview --change-stack-guard-on-fork=enable --no-sa"
+            },
+            {
+              "pid": 55611,
+              "category": "gpu",
+              "rssMiB": 68.391,
+              "ussMiB": 6.695,
+              "commandHint": "/usr/lib/chromium/chromium --type=gpu-process --no-sandbox --disable-dev-shm-usage --enable-gpu-rasterization --headless=new --ozone-platform=headless --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/L"
+            }
+          ]
+        },
+        "duringMedia": {
+          "totalProcessCount": 9,
+          "totalRssMiB": 883.618,
+          "totalUssMiB": 290.973,
+          "categories": {
+            "browser": {
+              "processCount": 1,
+              "rssMiB": 199.301,
+              "ussMiB": 104.199
+            },
+            "other": {
+              "processCount": 2,
+              "rssMiB": 124.516,
+              "ussMiB": 1.07
+            },
+            "networkUtility": {
+              "processCount": 1,
+              "rssMiB": 84.379,
+              "ussMiB": 18.266
+            },
+            "mediaUtility": {
+              "processCount": 1,
+              "rssMiB": 71.129,
+              "ussMiB": 14.938
+            },
+            "utility": {
+              "processCount": 1,
+              "rssMiB": 38.688,
+              "ussMiB": 2.133
+            },
+            "renderer": {
+              "processCount": 2,
+              "rssMiB": 297.043,
+              "ussMiB": 143.496
+            },
+            "gpu": {
+              "processCount": 1,
+              "rssMiB": 68.562,
+              "ussMiB": 6.871
+            }
+          },
+          "processes": [
+            {
+              "pid": 55492,
+              "category": "browser",
+              "rssMiB": 199.301,
+              "ussMiB": 104.199,
+              "commandHint": "/usr/lib/chromium/chromium --show-component-extension-options --enable-gpu-rasterization --no-default-browser-check --disable-pings --media-router=0 --disable-dev-shm-usage --enable-remote-extensions --load-extension= about:blank --ignore-gpu-blocklist --enable-gpu-rasterization "
+            },
+            {
+              "pid": 55510,
+              "category": "other",
+              "rssMiB": 62.207,
+              "ussMiB": 0.547,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-zygote-sandbox --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --change-stack-guard-"
+            },
+            {
+              "pid": 55512,
+              "category": "other",
+              "rssMiB": 62.309,
+              "ussMiB": 0.523,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --change-stack-guard-on-fork=enable --no-"
+            },
+            {
+              "pid": 55537,
+              "category": "networkUtility",
+              "rssMiB": 84.379,
+              "ussMiB": 18.266,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (tr"
+            },
+            {
+              "pid": 55626,
+              "category": "mediaUtility",
+              "rssMiB": 71.129,
+              "ussMiB": 14.938,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=audio.mojom.AudioService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie"
+            },
+            {
+              "pid": 55542,
+              "category": "utility",
+              "rssMiB": 38.688,
+              "ussMiB": 2.133,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 "
+            },
+            {
+              "pid": 55579,
+              "category": "renderer",
+              "rssMiB": 60.855,
+              "ussMiB": 5.766,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --disable-print-preview --change-stack-guard-on-fork=enable --no-sa"
+            },
+            {
+              "pid": 55580,
+              "category": "renderer",
+              "rssMiB": 236.188,
+              "ussMiB": 137.73,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --disable-print-preview --change-stack-guard-on-fork=enable --no-sa"
+            },
+            {
+              "pid": 55611,
+              "category": "gpu",
+              "rssMiB": 68.562,
+              "ussMiB": 6.871,
+              "commandHint": "/usr/lib/chromium/chromium --type=gpu-process --no-sandbox --disable-dev-shm-usage --enable-gpu-rasterization --headless=new --ozone-platform=headless --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/L"
+            }
+          ]
+        },
+        "afterCleanup": {
+          "totalProcessCount": 9,
+          "totalRssMiB": 880.337,
+          "totalUssMiB": 287.867,
+          "categories": {
+            "browser": {
+              "processCount": 1,
+              "rssMiB": 199.301,
+              "ussMiB": 103.949
+            },
+            "other": {
+              "processCount": 2,
+              "rssMiB": 124.516,
+              "ussMiB": 1.07
+            },
+            "networkUtility": {
+              "processCount": 1,
+              "rssMiB": 84.379,
+              "ussMiB": 18.266
+            },
+            "mediaUtility": {
+              "processCount": 1,
+              "rssMiB": 71.129,
+              "ussMiB": 14.938
+            },
+            "utility": {
+              "processCount": 1,
+              "rssMiB": 38.688,
+              "ussMiB": 2.133
+            },
+            "renderer": {
+              "processCount": 2,
+              "rssMiB": 293.953,
+              "ussMiB": 140.859
+            },
+            "gpu": {
+              "processCount": 1,
+              "rssMiB": 68.371,
+              "ussMiB": 6.652
+            }
+          },
+          "processes": [
+            {
+              "pid": 55492,
+              "category": "browser",
+              "rssMiB": 199.301,
+              "ussMiB": 103.949,
+              "commandHint": "/usr/lib/chromium/chromium --show-component-extension-options --enable-gpu-rasterization --no-default-browser-check --disable-pings --media-router=0 --disable-dev-shm-usage --enable-remote-extensions --load-extension= about:blank --ignore-gpu-blocklist --enable-gpu-rasterization "
+            },
+            {
+              "pid": 55510,
+              "category": "other",
+              "rssMiB": 62.207,
+              "ussMiB": 0.547,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-zygote-sandbox --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --change-stack-guard-"
+            },
+            {
+              "pid": 55512,
+              "category": "other",
+              "rssMiB": 62.309,
+              "ussMiB": 0.523,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --change-stack-guard-on-fork=enable --no-"
+            },
+            {
+              "pid": 55537,
+              "category": "networkUtility",
+              "rssMiB": 84.379,
+              "ussMiB": 18.266,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (tr"
+            },
+            {
+              "pid": 55626,
+              "category": "mediaUtility",
+              "rssMiB": 71.129,
+              "ussMiB": 14.938,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=audio.mojom.AudioService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie"
+            },
+            {
+              "pid": 55542,
+              "category": "utility",
+              "rssMiB": 38.688,
+              "ussMiB": 2.133,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 "
+            },
+            {
+              "pid": 55579,
+              "category": "renderer",
+              "rssMiB": 60.855,
+              "ussMiB": 5.703,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --disable-print-preview --change-stack-guard-on-fork=enable --no-sa"
+            },
+            {
+              "pid": 55580,
+              "category": "renderer",
+              "rssMiB": 233.098,
+              "ussMiB": 135.156,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-acceleration-requested-rptbzkf5 --disable-print-preview --change-stack-guard-on-fork=enable --no-sa"
+            },
+            {
+              "pid": 55611,
+              "category": "gpu",
+              "rssMiB": 68.371,
+              "ussMiB": 6.652,
+              "commandHint": "/usr/lib/chromium/chromium --type=gpu-process --no-sandbox --disable-dev-shm-usage --enable-gpu-rasterization --headless=new --ozone-platform=headless --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/L"
+            }
+          ]
+        }
+      },
+      "runtime": {
+        "build": "1.6.9",
+        "operations": {
+          "mediaSessionId": 0,
+          "active": []
+        },
+        "queue": 0
+      },
+      "errors": []
+    },
+    {
+      "mode": "software-forced",
+      "requestedArgs": [
+        "--use-gl=angle",
+        "--use-angle=swiftshader",
+        "--enable-unsafe-swiftshader"
+      ],
+      "webgl": {
+        "available": false,
+        "hardwareAccelerated": false
+      },
+      "media": {
+        "readyState": 4,
+        "width": 1280,
+        "height": 720,
+        "currentTime": 2.160353,
+        "paused": false,
+        "totalFrames": 62,
+        "droppedFrames": 0
+      },
+      "memory": {
+        "baseline": {
+          "totalProcessCount": 8,
+          "totalRssMiB": 772.02,
+          "totalUssMiB": 241.425,
+          "categories": {
+            "browser": {
+              "processCount": 1,
+              "rssMiB": 197.801,
+              "ussMiB": 103.785
+            },
+            "other": {
+              "processCount": 2,
+              "rssMiB": 125.199,
+              "ussMiB": 1.301
+            },
+            "networkUtility": {
+              "processCount": 1,
+              "rssMiB": 84.715,
+              "ussMiB": 18.523
+            },
+            "utility": {
+              "processCount": 1,
+              "rssMiB": 39.727,
+              "ussMiB": 2.25
+            },
+            "renderer": {
+              "processCount": 2,
+              "rssMiB": 256.453,
+              "ussMiB": 108.418
+            },
+            "gpu": {
+              "processCount": 1,
+              "rssMiB": 68.125,
+              "ussMiB": 7.148
+            }
+          },
+          "processes": [
+            {
+              "pid": 55636,
+              "category": "browser",
+              "rssMiB": 197.801,
+              "ussMiB": 103.785,
+              "commandHint": "/usr/lib/chromium/chromium --show-component-extension-options --enable-gpu-rasterization --no-default-browser-check --disable-pings --media-router=0 --disable-dev-shm-usage --enable-remote-extensions --load-extension= about:blank --use-gl=angle --use-angle=swiftshader --enable-un"
+            },
+            {
+              "pid": 55654,
+              "category": "other",
+              "rssMiB": 62.414,
+              "ussMiB": 0.672,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-zygote-sandbox --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --change-stack-guard-on-fork"
+            },
+            {
+              "pid": 55656,
+              "category": "other",
+              "rssMiB": 62.785,
+              "ussMiB": 0.629,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --change-stack-guard-on-fork=enable --no-first-r"
+            },
+            {
+              "pid": 55683,
+              "category": "networkUtility",
+              "rssMiB": 84.715,
+              "ussMiB": 18.523,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Lin"
+            },
+            {
+              "pid": 55688,
+              "category": "utility",
+              "rssMiB": 39.727,
+              "ussMiB": 2.25,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/"
+            },
+            {
+              "pid": 55723,
+              "category": "renderer",
+              "rssMiB": 61.578,
+              "ussMiB": 5.809,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --disable-print-preview --change-stack-guard-on-fork=enable --no-sandbox -"
+            },
+            {
+              "pid": 55724,
+              "category": "renderer",
+              "rssMiB": 194.875,
+              "ussMiB": 102.609,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --disable-print-preview --change-stack-guard-on-fork=enable --no-sandbox -"
+            },
+            {
+              "pid": 55754,
+              "category": "gpu",
+              "rssMiB": 68.125,
+              "ussMiB": 7.148,
+              "commandHint": "/usr/lib/chromium/chromium --type=gpu-process --no-sandbox --disable-dev-shm-usage --enable-gpu-rasterization --headless=new --ozone-platform=headless --use-angle=swiftshader --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 1"
+            }
+          ]
+        },
+        "afterWebgl": {
+          "totalProcessCount": 8,
+          "totalRssMiB": 772.293,
+          "totalUssMiB": 241.489,
+          "categories": {
+            "browser": {
+              "processCount": 1,
+              "rssMiB": 197.801,
+              "ussMiB": 103.758
+            },
+            "other": {
+              "processCount": 2,
+              "rssMiB": 125.199,
+              "ussMiB": 1.301
+            },
+            "networkUtility": {
+              "processCount": 1,
+              "rssMiB": 84.715,
+              "ussMiB": 18.523
+            },
+            "utility": {
+              "processCount": 1,
+              "rssMiB": 39.727,
+              "ussMiB": 2.188
+            },
+            "renderer": {
+              "processCount": 2,
+              "rssMiB": 256.727,
+              "ussMiB": 108.57
+            },
+            "gpu": {
+              "processCount": 1,
+              "rssMiB": 68.125,
+              "ussMiB": 7.148
+            }
+          },
+          "processes": [
+            {
+              "pid": 55636,
+              "category": "browser",
+              "rssMiB": 197.801,
+              "ussMiB": 103.758,
+              "commandHint": "/usr/lib/chromium/chromium --show-component-extension-options --enable-gpu-rasterization --no-default-browser-check --disable-pings --media-router=0 --disable-dev-shm-usage --enable-remote-extensions --load-extension= about:blank --use-gl=angle --use-angle=swiftshader --enable-un"
+            },
+            {
+              "pid": 55654,
+              "category": "other",
+              "rssMiB": 62.414,
+              "ussMiB": 0.672,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-zygote-sandbox --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --change-stack-guard-on-fork"
+            },
+            {
+              "pid": 55656,
+              "category": "other",
+              "rssMiB": 62.785,
+              "ussMiB": 0.629,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --change-stack-guard-on-fork=enable --no-first-r"
+            },
+            {
+              "pid": 55683,
+              "category": "networkUtility",
+              "rssMiB": 84.715,
+              "ussMiB": 18.523,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Lin"
+            },
+            {
+              "pid": 55688,
+              "category": "utility",
+              "rssMiB": 39.727,
+              "ussMiB": 2.188,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/"
+            },
+            {
+              "pid": 55723,
+              "category": "renderer",
+              "rssMiB": 61.578,
+              "ussMiB": 5.809,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --disable-print-preview --change-stack-guard-on-fork=enable --no-sandbox -"
+            },
+            {
+              "pid": 55724,
+              "category": "renderer",
+              "rssMiB": 195.148,
+              "ussMiB": 102.762,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --disable-print-preview --change-stack-guard-on-fork=enable --no-sandbox -"
+            },
+            {
+              "pid": 55754,
+              "category": "gpu",
+              "rssMiB": 68.125,
+              "ussMiB": 7.148,
+              "commandHint": "/usr/lib/chromium/chromium --type=gpu-process --no-sandbox --disable-dev-shm-usage --enable-gpu-rasterization --headless=new --ozone-platform=headless --use-angle=swiftshader --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 1"
+            }
+          ]
+        },
+        "duringMedia": {
+          "totalProcessCount": 9,
+          "totalRssMiB": 891.343,
+          "totalUssMiB": 291.254,
+          "categories": {
+            "browser": {
+              "processCount": 1,
+              "rssMiB": 199.895,
+              "ussMiB": 103.688
+            },
+            "other": {
+              "processCount": 2,
+              "rssMiB": 125.199,
+              "ussMiB": 1.285
+            },
+            "networkUtility": {
+              "processCount": 1,
+              "rssMiB": 85.148,
+              "ussMiB": 18.387
+            },
+            "mediaUtility": {
+              "processCount": 1,
+              "rssMiB": 71.273,
+              "ussMiB": 14.922
+            },
+            "utility": {
+              "processCount": 1,
+              "rssMiB": 39.727,
+              "ussMiB": 2.113
+            },
+            "renderer": {
+              "processCount": 2,
+              "rssMiB": 301.977,
+              "ussMiB": 143.625
+            },
+            "gpu": {
+              "processCount": 1,
+              "rssMiB": 68.125,
+              "ussMiB": 7.234
+            }
+          },
+          "processes": [
+            {
+              "pid": 55636,
+              "category": "browser",
+              "rssMiB": 199.895,
+              "ussMiB": 103.688,
+              "commandHint": "/usr/lib/chromium/chromium --show-component-extension-options --enable-gpu-rasterization --no-default-browser-check --disable-pings --media-router=0 --disable-dev-shm-usage --enable-remote-extensions --load-extension= about:blank --use-gl=angle --use-angle=swiftshader --enable-un"
+            },
+            {
+              "pid": 55654,
+              "category": "other",
+              "rssMiB": 62.414,
+              "ussMiB": 0.672,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-zygote-sandbox --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --change-stack-guard-on-fork"
+            },
+            {
+              "pid": 55656,
+              "category": "other",
+              "rssMiB": 62.785,
+              "ussMiB": 0.613,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --change-stack-guard-on-fork=enable --no-first-r"
+            },
+            {
+              "pid": 55683,
+              "category": "networkUtility",
+              "rssMiB": 85.148,
+              "ussMiB": 18.387,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Lin"
+            },
+            {
+              "pid": 55769,
+              "category": "mediaUtility",
+              "rssMiB": 71.273,
+              "ussMiB": 14.922,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=audio.mojom.AudioService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 1"
+            },
+            {
+              "pid": 55688,
+              "category": "utility",
+              "rssMiB": 39.727,
+              "ussMiB": 2.113,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/"
+            },
+            {
+              "pid": 55723,
+              "category": "renderer",
+              "rssMiB": 61.578,
+              "ussMiB": 5.809,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --disable-print-preview --change-stack-guard-on-fork=enable --no-sandbox -"
+            },
+            {
+              "pid": 55724,
+              "category": "renderer",
+              "rssMiB": 240.398,
+              "ussMiB": 137.816,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --disable-print-preview --change-stack-guard-on-fork=enable --no-sandbox -"
+            },
+            {
+              "pid": 55754,
+              "category": "gpu",
+              "rssMiB": 68.125,
+              "ussMiB": 7.234,
+              "commandHint": "/usr/lib/chromium/chromium --type=gpu-process --no-sandbox --disable-dev-shm-usage --enable-gpu-rasterization --headless=new --ozone-platform=headless --use-angle=swiftshader --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 1"
+            }
+          ]
+        },
+        "afterCleanup": {
+          "totalProcessCount": 9,
+          "totalRssMiB": 883.074,
+          "totalUssMiB": 287.933,
+          "categories": {
+            "browser": {
+              "processCount": 1,
+              "rssMiB": 199.895,
+              "ussMiB": 103.41
+            },
+            "other": {
+              "processCount": 2,
+              "rssMiB": 125.199,
+              "ussMiB": 1.285
+            },
+            "networkUtility": {
+              "processCount": 1,
+              "rssMiB": 85.148,
+              "ussMiB": 18.387
+            },
+            "mediaUtility": {
+              "processCount": 1,
+              "rssMiB": 71.273,
+              "ussMiB": 14.922
+            },
+            "utility": {
+              "processCount": 1,
+              "rssMiB": 39.727,
+              "ussMiB": 2.113
+            },
+            "renderer": {
+              "processCount": 2,
+              "rssMiB": 293.965,
+              "ussMiB": 140.871
+            },
+            "gpu": {
+              "processCount": 1,
+              "rssMiB": 67.867,
+              "ussMiB": 6.945
+            }
+          },
+          "processes": [
+            {
+              "pid": 55636,
+              "category": "browser",
+              "rssMiB": 199.895,
+              "ussMiB": 103.41,
+              "commandHint": "/usr/lib/chromium/chromium --show-component-extension-options --enable-gpu-rasterization --no-default-browser-check --disable-pings --media-router=0 --disable-dev-shm-usage --enable-remote-extensions --load-extension= about:blank --use-gl=angle --use-angle=swiftshader --enable-un"
+            },
+            {
+              "pid": 55654,
+              "category": "other",
+              "rssMiB": 62.414,
+              "ussMiB": 0.672,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-zygote-sandbox --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --change-stack-guard-on-fork"
+            },
+            {
+              "pid": 55656,
+              "category": "other",
+              "rssMiB": 62.785,
+              "ussMiB": 0.613,
+              "commandHint": "/usr/lib/chromium/chromium --type=zygote --no-sandbox --headless=new --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --change-stack-guard-on-fork=enable --no-first-r"
+            },
+            {
+              "pid": 55683,
+              "category": "networkUtility",
+              "rssMiB": 85.148,
+              "ussMiB": 18.387,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Lin"
+            },
+            {
+              "pid": 55769,
+              "category": "mediaUtility",
+              "rssMiB": 71.273,
+              "ussMiB": 14.922,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=audio.mojom.AudioService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 1"
+            },
+            {
+              "pid": 55688,
+              "category": "utility",
+              "rssMiB": 39.727,
+              "ussMiB": 2.113,
+              "commandHint": "/usr/lib/chromium/chromium --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader --use-gl=angle --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/"
+            },
+            {
+              "pid": 55723,
+              "category": "renderer",
+              "rssMiB": 61.578,
+              "ussMiB": 5.809,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --disable-print-preview --change-stack-guard-on-fork=enable --no-sandbox -"
+            },
+            {
+              "pid": 55724,
+              "category": "renderer",
+              "rssMiB": 232.387,
+              "ussMiB": 135.062,
+              "commandHint": "/usr/lib/chromium/chromium --type=renderer --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 13 (trixie) --noerrdialogs --user-data-dir=/tmp/ai-shorts-gpu-software-forced-y769eola --disable-print-preview --change-stack-guard-on-fork=enable --no-sandbox -"
+            },
+            {
+              "pid": 55754,
+              "category": "gpu",
+              "rssMiB": 67.867,
+              "ussMiB": 6.945,
+              "commandHint": "/usr/lib/chromium/chromium --type=gpu-process --no-sandbox --disable-dev-shm-usage --enable-gpu-rasterization --headless=new --ozone-platform=headless --use-angle=swiftshader --enable-unsafe-swiftshader --crashpad-handler-pid=0 --enable-crash-reporter=,built on Debian GNU/Linux 1"
+            }
+          ]
+        }
+      },
+      "runtime": {
+        "build": "1.6.9",
+        "operations": {
+          "mediaSessionId": 0,
+          "active": []
+        },
+        "queue": 0
+      },
+      "errors": []
+    }
+  ],
+  "summary": {
+    "acceleratedRequestWebglAvailable": false,
+    "acceleratedRequestHardwareAvailable": false,
+    "acceleratedRenderer": "",
+    "softwareRenderer": "",
+    "gpuProcessObservedInBothModes": true,
+    "mediaUtilityObservedInBothModes": true,
+    "bothMediaDecoded": true,
+    "runtimeErrorCount": 0
+  },
+  "limitations": [
+    "The container may expose SwiftShader instead of a physical GPU even when acceleration is requested.",
+    "Process RSS is auxiliary and cannot attribute individual native decoder surfaces precisely.",
+    "Real mobile Safari and Samsung Internet hardware paths require physical-device testing."
+  ]
+}

@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.6.5 smart reframe controls */
+/* AI Shorts Studio v1.6.9 speaker-directed smart reframe controls */
 .smart-reframe-panel {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -9,6 +9,7 @@
     border: 1px solid rgba(34, 211, 238, 0.2);
     border-radius: 16px;
     background: linear-gradient(135deg, rgba(8, 47, 73, 0.42), rgba(30, 27, 75, 0.32));
+    min-width: 0;
 }
 
 .smart-reframe-panel[hidden] {
@@ -93,5 +94,419 @@
     .smart-reframe-copy strong,
     .smart-reframe-copy small {
         white-space: normal;
+    }
+}
+
+.smart-reframe-editor {
+    grid-column: 1 / -1;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+    padding-top: 8px;
+}
+
+.smart-reframe-editor > summary {
+    width: max-content;
+    max-width: 100%;
+    cursor: pointer;
+    color: #bae6fd;
+    font-size: 0.84rem;
+    font-weight: 750;
+    list-style-position: inside;
+}
+
+.smart-reframe-editor[open] > summary {
+    margin-bottom: 12px;
+}
+
+.smart-reframe-editor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.smart-reframe-field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    color: #dbeafe;
+    font-size: 0.78rem;
+}
+
+.smart-reframe-field > span {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.smart-reframe-field select,
+.smart-reframe-field input[type="range"] {
+    width: 100%;
+}
+
+.smart-reframe-field select {
+    min-height: 36px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 10px;
+    padding: 0 9px;
+    background: rgba(15, 23, 42, 0.76);
+    color: #f8fafc;
+}
+
+.smart-reframe-range-field output {
+    color: #67e8f9;
+    font-variant-numeric: tabular-nums;
+}
+
+.smart-reframe-keyframe-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+    min-width: 0;
+}
+
+.smart-reframe-keyframe-actions .mini-action {
+    flex: 0 0 auto;
+}
+
+.smart-reframe-keyframe-actions > span {
+    margin-right: auto;
+    color: var(--muted, #9ca3af);
+    font-size: 0.78rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.smart-reframe-panel[data-manual="true"] {
+    border-color: rgba(167, 139, 250, 0.46);
+    background: linear-gradient(135deg, rgba(49, 46, 129, 0.4), rgba(76, 29, 149, 0.3));
+}
+
+
+@media (max-width: 760px) {
+    .smart-reframe-editor-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .smart-reframe-keyframe-actions {
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+
+    .smart-reframe-keyframe-actions > span {
+        flex: 1 0 100%;
+        white-space: normal;
+    }
+
+    .smart-reframe-keyframe-actions .mini-action {
+        flex: 1 1 120px;
+    }
+}
+
+.vision-model-pack-panel {
+    grid-column: 1 / -1;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+    padding-top: 8px;
+    min-width: 0;
+}
+
+.vision-model-pack-panel > summary {
+    width: max-content;
+    max-width: 100%;
+    cursor: pointer;
+    color: #a7f3d0;
+    font-size: 0.82rem;
+    font-weight: 750;
+    list-style-position: inside;
+}
+
+.vision-model-pack-panel[open] > summary {
+    margin-bottom: 12px;
+}
+
+.vision-model-pack-body,
+.vision-model-pack-status {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.vision-model-pack-status small,
+.vision-model-pack-policy {
+    color: var(--muted, #9ca3af);
+    font-size: 0.76rem;
+    line-height: 1.5;
+}
+
+.vision-model-pack-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(150px, 0.6fr);
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.vision-model-pack-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.vision-model-pack-progress {
+    width: 100%;
+    height: 6px;
+    accent-color: #34d399;
+}
+
+.vision-model-pack-progress[hidden] {
+    display: none;
+}
+
+.vision-model-pack-policy {
+    margin: 0;
+}
+
+.vision-model-pack-panel[data-state="active"] > summary,
+.vision-model-pack-panel[data-state="installed"] > summary {
+    color: #6ee7b7;
+}
+
+.vision-model-pack-panel[data-state="error"] > summary {
+    color: #fca5a5;
+}
+
+@media (max-width: 760px) {
+    .vision-model-pack-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .vision-model-pack-actions .mini-action {
+        flex: 1 1 132px;
+    }
+}
+
+.smart-reframe-speaker-status {
+    grid-column: 1 / -1;
+    display: block;
+    min-width: 0;
+    color: #a5f3fc;
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.smart-reframe-speaker-toggle input:checked + span {
+    color: #f0fdfa;
+}
+
+.smart-reframe-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+    .smart-reframe-speaker-status {
+        white-space: normal;
+    }
+
+    .smart-reframe-actions .mini-action,
+    .smart-reframe-actions .smart-reframe-toggle {
+        flex: 1 1 142px;
+        justify-content: center;
+    }
+}
+
+/* v1.6.9 direct crop editing on the preview surface */
+.direct-crop-overlay {
+    position: absolute;
+    inset: 10px;
+    z-index: 4;
+    border-radius: 30px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 160ms ease;
+}
+
+.direct-crop-overlay[data-active="true"] {
+    opacity: 1;
+}
+
+.phone-frame[data-direct-crop="true"] #previewCanvas {
+    cursor: grab;
+    touch-action: none;
+    outline: 2px solid rgba(34, 211, 238, 0.62);
+    outline-offset: -2px;
+}
+
+.phone-frame[data-direct-crop="true"] #previewCanvas:active {
+    cursor: grabbing;
+}
+
+.direct-crop-gesture-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 16px;
+    max-width: calc(100% - 28px);
+    transform: translateX(-50%);
+    padding: 7px 10px;
+    border: 1px solid rgba(103, 232, 249, 0.38);
+    border-radius: 999px;
+    background: rgba(2, 6, 23, 0.78);
+    color: #ecfeff;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+
+.direct-crop-path-overlay {
+    position: absolute;
+    top: 38px;
+    right: 10px;
+    width: 90px;
+    height: 90px;
+    overflow: visible;
+    border: 1px solid rgba(148, 163, 184, 0.32);
+    border-radius: 14px;
+    background: rgba(2, 6, 23, 0.62);
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.28);
+}
+
+.direct-crop-path-overlay polyline {
+    fill: none;
+    stroke: rgba(103, 232, 249, 0.78);
+    stroke-width: 1.6;
+    vector-effect: non-scaling-stroke;
+}
+
+.direct-crop-path-overlay g circle {
+    fill: #c4b5fd;
+    stroke: rgba(15, 23, 42, 0.9);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+#directCropCurrentDot {
+    fill: #22d3ee;
+    stroke: #ecfeff;
+    stroke-width: 1.4;
+    vector-effect: non-scaling-stroke;
+}
+
+.direct-crop-path-overlay[data-empty="true"] polyline,
+.direct-crop-path-overlay[data-empty="true"] g {
+    opacity: 0.24;
+}
+
+.direct-crop-panel {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(8, 47, 73, 0.34), rgba(30, 27, 75, 0.28));
+}
+
+.direct-crop-panel[hidden] {
+    display: none;
+}
+
+.direct-crop-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.direct-crop-head > div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.direct-crop-head strong {
+    color: #ecfeff;
+}
+
+.direct-crop-head small,
+.direct-crop-panel > p,
+.direct-crop-help {
+    color: var(--muted, #9ca3af);
+    line-height: 1.5;
+}
+
+.direct-crop-panel > p {
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+.direct-crop-shortcut {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(34, 211, 238, 0.1);
+    color: #a5f3fc;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.direct-crop-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.direct-crop-actions button {
+    flex: 1 1 132px;
+}
+
+.direct-crop-actions button[aria-pressed="true"] {
+    border-color: rgba(34, 211, 238, 0.72);
+    background: rgba(8, 145, 178, 0.24);
+    color: #ecfeff;
+}
+
+.direct-crop-help {
+    font-size: 0.72rem;
+}
+
+@media (min-width: 1181px) {
+    body[data-active-flow-tab="preview"] .preview-card .direct-crop-panel {
+        grid-column: 2;
+        grid-row: 2;
+        min-height: 190px;
+    }
+}
+
+@media (max-width: 760px) {
+    .direct-crop-overlay {
+        inset: 10px;
+    }
+
+    .direct-crop-path-overlay {
+        top: 34px;
+        width: 76px;
+        height: 76px;
+    }
+
+    .direct-crop-gesture-hint {
+        bottom: 12px;
+        font-size: 0.62rem;
+    }
+
+    .direct-crop-head {
+        align-items: center;
+    }
+
+    .direct-crop-actions button {
+        flex-basis: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .direct-crop-overlay {
+        transition: none;
     }
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser audit for v1.6.5 stage-aware workspace focus and measured dock clearance."""
+"""Browser audit for v1.6.9 stage-aware workspace focus and measured dock clearance."""
 import asyncio
 import importlib.util
 import json
@@ -46,8 +46,15 @@ async def desktop_audit(browser):
       };
     }''')
 
-    await page.evaluate("AIShortsFlowDirectorFinal.setActive('preview',{force:true,source:'workflow-focus-audit'})")
-    await page.wait_for_timeout(60)
+    await page.evaluate('''() => {
+      const state = AIShortsAppState.state;
+      state.file = {name:'workflow-focus-preview.mp4'};
+      state.recommendations = [{id:'preview-candidate'}];
+      state.selectedRecommendationId = 'preview-candidate';
+      if (AIShortsUxControls?.sync) AIShortsUxControls.sync();
+      AIShortsFlowDirectorFinal.setActive('preview',{force:true,source:'workflow-focus-audit'});
+    }''')
+    await page.wait_for_function("() => document.body.dataset.activeFlowTab === 'preview' && document.querySelectorAll('[data-flow-panel].is-workflow-support').length >= 2", timeout=5000)
     preview = await page.evaluate('''() => ({
       active: document.body.dataset.activeFlowTab,
       areas: getComputedStyle(document.querySelector('#studioGrid')).gridTemplateAreas,

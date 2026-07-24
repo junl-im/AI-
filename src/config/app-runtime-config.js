@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.5 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.6.9 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.5',
-    BUILD_KEY: '1.6.5-smart-reframe-caption-safe',
+    APP_VERSION: 'v1.6.9',
+    BUILD_KEY: '1.6.9-direct-crop-editor',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -33,7 +33,7 @@ window.AIShortsRuntimeConfig = Object.freeze({
     DOWNLOAD_URL_REVOKE_DELAY_MS: 45 * 1000,
     MIN_DOWNLOAD_URL_AGE_MS: 10 * 1000,
     MAX_ACTIVE_DOWNLOAD_URLS: 12,
-    SESSION_SCHEMA_VERSION: 4,
+    SESSION_SCHEMA_VERSION: 5,
     SESSION_BACKUP_MIN_COUNT: 1,
     SESSION_BACKUP_COUNT: 2,
     SESSION_BACKUP_MAX_COUNT: 3,
@@ -55,6 +55,14 @@ window.AIShortsRuntimeConfig = Object.freeze({
     SMART_REFRAME_SAMPLE_COUNT: 36,
     SMART_REFRAME_MIN_CONFIDENCE: 0.45,
     SMART_REFRAME_MAX_STEP: 0.12,
+    SPEAKER_FACE_MAX_CUES: 2000,
+    VISION_MODEL_PACK_CACHE_NAME: 'ai-shorts-vision-model-packs-v1',
+    VISION_MODEL_PACK_STORE_KEY: 'ai-shorts-vision-model-packs-v1',
+    VISION_MODEL_PACK_ACTIVE_KEY: 'ai-shorts-vision-model-pack-active-v1',
+    VISION_MODEL_PACK_MAX_PACKS: 3,
+    VISION_MODEL_PACK_MAX_FILES: 16,
+    VISION_MODEL_PACK_MAX_BYTES: 64 * 1024 * 1024,
+    VISION_MODEL_PACK_MAX_FILE_BYTES: 48 * 1024 * 1024,
     DEFAULT_DURATIONS: [15, 30, 45, 60, 90],
     LONG_FORM_DURATIONS: [15, 30, 45, 60, 90, 180],
     MEDIA_ACCEPT: 'audio/*,video/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.mp4,.mov,.m4v,.webm',

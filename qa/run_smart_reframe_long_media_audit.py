@@ -2,7 +2,7 @@
 """Focused 30-minute 1080p smart-reframe motion audit.
 
 The full 15→30→15 media replacement/render audit remains expensive and is
-tracked separately. This focused audit validates the v1.6.5 spatial-motion and
+tracked separately. This focused audit validates the v1.6.9 spatial-motion and
 caption-safe crop path against a real 30-minute source with a bounded sample
 budget.
 """

@@ -9,14 +9,14 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 function ok(value, message) { if (!value) throw new Error(message); console.log(`PASS ${message}`); }
 function metric(report, mode, parts) { let value=report[mode]; for (const part of parts) value=value[part]; return value; }
 
-const reduction = readJson('qa/runtime-structure-priority-v1.6.5.json');
-const probe = readJson('qa/runtime-structure-priority-probe-v1.6.5.json');
+const reduction = readJson('qa/runtime-structure-priority-v1.6.9.json');
+const probe = readJson('qa/runtime-structure-priority-probe-v1.6.9.json');
 const cascade = readJson(`qa/runtime-css-ownership-v${pkg.version}.json`);
 const current = readJson(`qa/runtime-browser-audit-v${pkg.version}.json`);
 const baseline = readJson('qa/runtime-browser-audit-v1.5.19.json');
 
-ok(pkg.version === '1.6.5', 'structure and responsive priority release version is v1.6.5');
-ok(reduction.baselineVersion === '1.5.19' && reduction.targetVersion === '1.6.5', 'reduction is anchored to the v1.5.19 baseline');
+ok(pkg.version === '1.6.9', 'structure and responsive priority release version is v1.6.9');
+ok(reduction.baselineVersion === '1.5.19' && reduction.targetVersion === '1.6.9', 'reduction is anchored to the v1.5.19 baseline');
 ok(reduction.baselineImportant === 666 && reduction.removedCount === 73 && reduction.remainingImportant === 593, '73 verified priorities reduce the active total from 666 to 593');
 ok(probe.safeCount >= 160 && probe.unsafeCount > 0 && probe.errors.length === 0, 'Chromium probe distinguishes safe and required structural priorities without runtime errors');
 ok(cascade.importantCount === 593, 'active important count is fixed at 593');
@@ -42,4 +42,4 @@ for (const mode of ['desktop','smallLaptop','tablet','mobile']) {
   ok(current[mode].audit.errors.length === 0 && current[mode].audit.consoleErrors.length === 0, `${mode} runtime remains error free`);
   ok(current[mode].bodyScrollWidth <= current[mode].viewport.width, `${mode} keeps horizontal overflow at zero`);
 }
-console.log('PASS v1.6.5 structural and responsive priority reduction with unchanged layout metrics');
+console.log('PASS v1.6.9 structural and responsive priority reduction with unchanged layout metrics');

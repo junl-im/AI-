@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - local AI connection, creative copy, transcription, and model integrity UI
+// AI Shorts Studio v1.6.9 - local AI connection, creative copy, transcription, and model integrity UI
 'use strict';
 
 (function exposeLocalAIStudio(global) {
@@ -329,7 +329,8 @@
             if (els.applyTranscriptBtn) els.applyTranscriptBtn.disabled = true;
             return;
         }
-        if (els.transcriptMeta) els.transcriptMeta.textContent = `${result.segments.length ? `${result.segments.length}구간` : '일반 텍스트'} · 언어 ${result.language || 'auto'} · ${formatElapsed(result.elapsedMs)}`;
+        const speakerCount = new Set((result.segments || []).map(segment => segment.speaker).filter(Boolean)).size;
+        if (els.transcriptMeta) els.transcriptMeta.textContent = `${result.segments.length ? `${result.segments.length}구간` : '일반 텍스트'}${speakerCount ? ` · 화자 ${speakerCount}명` : ''} · 언어 ${result.language || 'auto'} · ${formatElapsed(result.elapsedMs)}`;
         if (els.transcriptPreview) els.transcriptPreview.value = (result.srt || result.text || '').slice(0, 1000000);
         els.transcriptResult.hidden = false;
         if (els.applyTranscriptBtn) els.applyTranscriptBtn.disabled = !(result.srt || result.text);
@@ -358,6 +359,11 @@
             }, { timeoutMs: 16 * 60 * 1000, meta: { providerId, capability: 'speech', modelToken: providers.hashToken(settings.speechModel), fileBytes: state.file.size, language: settings.language, source: 'local-ai-studio' } });
             lastTranscriptResult = result;
             renderTranscriptResult(result);
+            document.dispatchEvent(new CustomEvent('ai-shorts-transcript-ready', { detail: {
+                segments: (result.segments || []).map(segment => ({ start: segment.start, end: segment.end, text: segment.text, speaker: segment.speaker || '' })),
+                language: result.language || 'auto',
+                providerId: result.providerId || providerId
+            } }));
             if (settings.autoApplyTranscript) applyTranscriptResult();
             toast(`로컬 음성 전사를 완료했습니다 · ${formatElapsed(result.elapsedMs)}`, 'success');
             if (store.addDiagnostic) store.addDiagnostic({ type: 'local-ai-transcription-complete', providerId, modelToken: result.modelToken, segments: result.segments.length, elapsedMs: result.elapsedMs });
@@ -376,6 +382,11 @@
         target.value = lastTranscriptResult.srt || lastTranscriptResult.text || '';
         target.dispatchEvent(new Event('input', { bubbles: true }));
         if (apply) apply.click();
+        document.dispatchEvent(new CustomEvent('ai-shorts-transcript-applied', { detail: {
+            segments: (lastTranscriptResult.segments || []).map(segment => ({ start: segment.start, end: segment.end, text: segment.text, speaker: segment.speaker || '' })),
+            language: lastTranscriptResult.language || 'auto',
+            providerId: lastTranscriptResult.providerId || ''
+        } }));
         toast('전사 결과를 자막 트랙에 적용했습니다.', 'action');
         return true;
     }

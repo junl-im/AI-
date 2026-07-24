@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - stage-aware workspace focus, progressive disclosure, and dock clearance
+// AI Shorts Studio v1.6.9 - stage-aware workspace focus, progressive disclosure, and dock clearance
 'use strict';
 (function bootWorkflowFocusLayout(global) {
     const STORAGE_KEY = 'ai-shorts-workflow-focus-v1';

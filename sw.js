@@ -1,62 +1,64 @@
-// AI Shorts Studio v1.6.5 service worker - version-aware cache guard, targeted integrity retry, audit history control, and rollback-safe activation
+// AI Shorts Studio v1.6.9 service worker - version-aware cache guard, targeted integrity retry, audit history control, and rollback-safe activation
 'use strict';
 
 const CACHE_PREFIX = 'ai-shorts-studio-shell-';
-const CACHE_NAME = 'ai-shorts-studio-shell-v1.6.5-smart-reframe-caption-safe';
+const CACHE_NAME = 'ai-shorts-studio-shell-v1.6.9-direct-crop-editor';
+const VISION_MODEL_CACHE_NAME = 'ai-shorts-vision-model-packs-v1';
+const VISION_MODEL_PATH_SEGMENT = '/__ai_shorts_vision_pack__/';
 const SHELL_FILES = [
     './',
     './index.html',
     './manifest.webmanifest',
     './asset-integrity.json',
-    './assets/css/theme.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/studio.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/editor.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/ux.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/advanced-editor.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/layout-dock.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/caption-pro.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/quality-tools.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/auto-cut.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/cut-markers.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/feedback-ux.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/engine-panel.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/pro-engine.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/hyperflow-tabs.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/render-queue.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/hyperconnect-flow.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/flow-polish.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/flow-hotfix.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/flow-integrity.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/flow-doctor.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/responsive-workspace.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/flow-quality-gate.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/pc-dock-reveal-hotfix.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/glass-pro-ui.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/workspace-comfort.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/motion-stability.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/handoff-coach.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/save-readiness.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/render-quality-planner.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/candidate-preview-pro.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/candidate-pin-board.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/session-continuity.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/storage-health-panel.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/local-ai-studio.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/export-finish-center.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/shutter-glass-flow.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/update-sentinel.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/foundation-polish.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/desktop-prime-layout.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/hero-command-deck.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/ui-refinement.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/icon-system.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/header-meta-rail.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/active-stage-beacon.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/workspace-layout-controls.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/workflow-focus-layout.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/smart-reframe.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/mobile-menu-guide.css?v=1.6.5-smart-reframe-caption-safe',
-    './assets/css/studio-experience.css?v=1.6.5-smart-reframe-caption-safe',
+    './assets/css/theme.css?v=1.6.9-direct-crop-editor',
+    './assets/css/studio.css?v=1.6.9-direct-crop-editor',
+    './assets/css/editor.css?v=1.6.9-direct-crop-editor',
+    './assets/css/ux.css?v=1.6.9-direct-crop-editor',
+    './assets/css/advanced-editor.css?v=1.6.9-direct-crop-editor',
+    './assets/css/layout-dock.css?v=1.6.9-direct-crop-editor',
+    './assets/css/caption-pro.css?v=1.6.9-direct-crop-editor',
+    './assets/css/quality-tools.css?v=1.6.9-direct-crop-editor',
+    './assets/css/auto-cut.css?v=1.6.9-direct-crop-editor',
+    './assets/css/cut-markers.css?v=1.6.9-direct-crop-editor',
+    './assets/css/feedback-ux.css?v=1.6.9-direct-crop-editor',
+    './assets/css/engine-panel.css?v=1.6.9-direct-crop-editor',
+    './assets/css/pro-engine.css?v=1.6.9-direct-crop-editor',
+    './assets/css/hyperflow-tabs.css?v=1.6.9-direct-crop-editor',
+    './assets/css/render-queue.css?v=1.6.9-direct-crop-editor',
+    './assets/css/hyperconnect-flow.css?v=1.6.9-direct-crop-editor',
+    './assets/css/flow-polish.css?v=1.6.9-direct-crop-editor',
+    './assets/css/flow-hotfix.css?v=1.6.9-direct-crop-editor',
+    './assets/css/flow-integrity.css?v=1.6.9-direct-crop-editor',
+    './assets/css/flow-doctor.css?v=1.6.9-direct-crop-editor',
+    './assets/css/responsive-workspace.css?v=1.6.9-direct-crop-editor',
+    './assets/css/flow-quality-gate.css?v=1.6.9-direct-crop-editor',
+    './assets/css/pc-dock-reveal-hotfix.css?v=1.6.9-direct-crop-editor',
+    './assets/css/glass-pro-ui.css?v=1.6.9-direct-crop-editor',
+    './assets/css/workspace-comfort.css?v=1.6.9-direct-crop-editor',
+    './assets/css/motion-stability.css?v=1.6.9-direct-crop-editor',
+    './assets/css/handoff-coach.css?v=1.6.9-direct-crop-editor',
+    './assets/css/save-readiness.css?v=1.6.9-direct-crop-editor',
+    './assets/css/render-quality-planner.css?v=1.6.9-direct-crop-editor',
+    './assets/css/candidate-preview-pro.css?v=1.6.9-direct-crop-editor',
+    './assets/css/candidate-pin-board.css?v=1.6.9-direct-crop-editor',
+    './assets/css/session-continuity.css?v=1.6.9-direct-crop-editor',
+    './assets/css/storage-health-panel.css?v=1.6.9-direct-crop-editor',
+    './assets/css/local-ai-studio.css?v=1.6.9-direct-crop-editor',
+    './assets/css/export-finish-center.css?v=1.6.9-direct-crop-editor',
+    './assets/css/shutter-glass-flow.css?v=1.6.9-direct-crop-editor',
+    './assets/css/update-sentinel.css?v=1.6.9-direct-crop-editor',
+    './assets/css/foundation-polish.css?v=1.6.9-direct-crop-editor',
+    './assets/css/desktop-prime-layout.css?v=1.6.9-direct-crop-editor',
+    './assets/css/hero-command-deck.css?v=1.6.9-direct-crop-editor',
+    './assets/css/ui-refinement.css?v=1.6.9-direct-crop-editor',
+    './assets/css/icon-system.css?v=1.6.9-direct-crop-editor',
+    './assets/css/header-meta-rail.css?v=1.6.9-direct-crop-editor',
+    './assets/css/active-stage-beacon.css?v=1.6.9-direct-crop-editor',
+    './assets/css/workspace-layout-controls.css?v=1.6.9-direct-crop-editor',
+    './assets/css/workflow-focus-layout.css?v=1.6.9-direct-crop-editor',
+    './assets/css/smart-reframe.css?v=1.6.9-direct-crop-editor',
+    './assets/css/mobile-menu-guide.css?v=1.6.9-direct-crop-editor',
+    './assets/css/studio-experience.css?v=1.6.9-direct-crop-editor',
     './assets/icons/ai-shorts.svg',
     './assets/icons/studio/candidates.svg',
     './assets/icons/studio/caption.svg',
@@ -78,59 +80,64 @@ const SHELL_FILES = [
     './assets/icons/studio/thumbnail.svg',
     './assets/icons/studio/upload.svg',
     './assets/icons/studio/waveform.svg',
-    './src/config/app-runtime-config.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/boot/app-version-sync.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/boot/update-sentinel.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/boot/staged-ui-loader.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/utils/core-utils.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/storage/storage-manager.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/storage/session-backup-codec.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/state/app-state.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/operation-coordinator.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ai/ai-job-coordinator.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ai/local-ai-provider-registry.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/analysis/audio-analysis-core.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/analysis/audio-feature-extractor.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/analysis/video-motion-analyzer.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/analysis/auto-cut-detector.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/recommendation/shorts-recommendation-engine.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/module-registry.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/module-contracts.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/analysis-cache.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/performance-budget.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/analysis-pipeline.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/scoring-pipeline.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/pro-engine-tuner.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/stability-auditor.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/engine-boost-profile.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/engine/engine-kernel.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/caption/caption-service.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/project/project-service.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/render/quality-effects.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/render/vertical-renderer.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/download/download-service.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/waveform-view.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/cut-marker-overlay.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/timeline-view.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/bottom-dock.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/mobile-menu-guide.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/feedback-ux.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/render/render-queue.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/hyperflow-tabs.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/motion-stability.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/flow-director-final.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/flow-command-bridge.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/workspace-layout-controls.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/workflow-focus-layout.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/startup-performance.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/security/site-guards.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/boot/service-worker-registration.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/boot/runtime-health.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/app/render-workflow-controller.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/app/settings-controller.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/app/media-import-controller.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/app.js?v=1.6.5-smart-reframe-caption-safe',
-    './src/ui/local-ai-studio.js?v=1.6.5-smart-reframe-caption-safe',
+    './src/config/app-runtime-config.js?v=1.6.9-direct-crop-editor',
+    './src/boot/app-version-sync.js?v=1.6.9-direct-crop-editor',
+    './src/boot/update-sentinel.js?v=1.6.9-direct-crop-editor',
+    './src/boot/staged-ui-loader.js?v=1.6.9-direct-crop-editor',
+    './src/vision/vision-model-pack-manager.js?v=1.6.9-direct-crop-editor',
+    './src/vision/smart-reframe-engine.js?v=1.6.9-direct-crop-editor',
+    './src/vision/speaker-face-linker.js?v=1.6.9-direct-crop-editor',
+    './src/ui/vision-model-pack-panel.js?v=1.6.9-direct-crop-editor',
+    './src/ui/direct-crop-editor.js?v=1.6.9-direct-crop-editor',
+    './src/utils/core-utils.js?v=1.6.9-direct-crop-editor',
+    './src/storage/storage-manager.js?v=1.6.9-direct-crop-editor',
+    './src/storage/session-backup-codec.js?v=1.6.9-direct-crop-editor',
+    './src/state/app-state.js?v=1.6.9-direct-crop-editor',
+    './src/engine/operation-coordinator.js?v=1.6.9-direct-crop-editor',
+    './src/ai/ai-job-coordinator.js?v=1.6.9-direct-crop-editor',
+    './src/ai/local-ai-provider-registry.js?v=1.6.9-direct-crop-editor',
+    './src/analysis/audio-analysis-core.js?v=1.6.9-direct-crop-editor',
+    './src/analysis/audio-feature-extractor.js?v=1.6.9-direct-crop-editor',
+    './src/analysis/video-motion-analyzer.js?v=1.6.9-direct-crop-editor',
+    './src/analysis/auto-cut-detector.js?v=1.6.9-direct-crop-editor',
+    './src/recommendation/shorts-recommendation-engine.js?v=1.6.9-direct-crop-editor',
+    './src/engine/module-registry.js?v=1.6.9-direct-crop-editor',
+    './src/engine/module-contracts.js?v=1.6.9-direct-crop-editor',
+    './src/engine/analysis-cache.js?v=1.6.9-direct-crop-editor',
+    './src/engine/performance-budget.js?v=1.6.9-direct-crop-editor',
+    './src/engine/analysis-pipeline.js?v=1.6.9-direct-crop-editor',
+    './src/engine/scoring-pipeline.js?v=1.6.9-direct-crop-editor',
+    './src/engine/pro-engine-tuner.js?v=1.6.9-direct-crop-editor',
+    './src/engine/stability-auditor.js?v=1.6.9-direct-crop-editor',
+    './src/engine/engine-boost-profile.js?v=1.6.9-direct-crop-editor',
+    './src/engine/engine-kernel.js?v=1.6.9-direct-crop-editor',
+    './src/caption/caption-service.js?v=1.6.9-direct-crop-editor',
+    './src/project/project-service.js?v=1.6.9-direct-crop-editor',
+    './src/render/quality-effects.js?v=1.6.9-direct-crop-editor',
+    './src/render/vertical-renderer.js?v=1.6.9-direct-crop-editor',
+    './src/download/download-service.js?v=1.6.9-direct-crop-editor',
+    './src/ui/waveform-view.js?v=1.6.9-direct-crop-editor',
+    './src/ui/cut-marker-overlay.js?v=1.6.9-direct-crop-editor',
+    './src/ui/timeline-view.js?v=1.6.9-direct-crop-editor',
+    './src/ui/bottom-dock.js?v=1.6.9-direct-crop-editor',
+    './src/ui/mobile-menu-guide.js?v=1.6.9-direct-crop-editor',
+    './src/ui/feedback-ux.js?v=1.6.9-direct-crop-editor',
+    './src/render/render-queue.js?v=1.6.9-direct-crop-editor',
+    './src/ui/hyperflow-tabs.js?v=1.6.9-direct-crop-editor',
+    './src/ui/motion-stability.js?v=1.6.9-direct-crop-editor',
+    './src/ui/flow-director-final.js?v=1.6.9-direct-crop-editor',
+    './src/ui/flow-command-bridge.js?v=1.6.9-direct-crop-editor',
+    './src/ui/workspace-layout-controls.js?v=1.6.9-direct-crop-editor',
+    './src/ui/workflow-focus-layout.js?v=1.6.9-direct-crop-editor',
+    './src/ui/startup-performance.js?v=1.6.9-direct-crop-editor',
+    './src/security/site-guards.js?v=1.6.9-direct-crop-editor',
+    './src/boot/service-worker-registration.js?v=1.6.9-direct-crop-editor',
+    './src/boot/runtime-health.js?v=1.6.9-direct-crop-editor',
+    './src/app/render-workflow-controller.js?v=1.6.9-direct-crop-editor',
+    './src/app/settings-controller.js?v=1.6.9-direct-crop-editor',
+    './src/app/media-import-controller.js?v=1.6.9-direct-crop-editor',
+    './src/app.js?v=1.6.9-direct-crop-editor',
+    './src/ui/local-ai-studio.js?v=1.6.9-direct-crop-editor',
     './src/workers/highlight-analysis.worker.js'
 ];
 
@@ -138,7 +145,7 @@ const REQUIRED_SHELL_FILES = Object.freeze([
     './index.html',
     './manifest.webmanifest',
     './asset-integrity.json',
-    './src/config/app-runtime-config.js?v=1.6.5-smart-reframe-caption-safe'
+    './src/config/app-runtime-config.js?v=1.6.9-direct-crop-editor'
 ]);
 const INSTALL_REPORT_KEY = './__ai_shorts_sw_install_report__';
 const PRECACHE_BATCH_SIZE = 8;
@@ -148,7 +155,7 @@ const INTEGRITY_AUDIT_HISTORY_LIMIT = 40;
 const INTEGRITY_BACKOFF_BASE_MS = 5 * 60 * 1000;
 const INTEGRITY_BACKOFF_MAX_MS = 6 * 60 * 60 * 1000;
 const INTEGRITY_MANIFEST_URL = './asset-integrity.json';
-const INTEGRITY_MANIFEST_SHA256 = '05282e4e29ea1ef878ba34b5c7f67f7bdf0c36d4e91f8daa7756e635ba743b2b';
+const INTEGRITY_MANIFEST_SHA256 = '6b384ed1435d2b2009b3890e0fa896e0407172d4fd9857acece52a4a80a0c82c';
 let integrityManifestPromise = null;
 
 function errorMessage(error) {
@@ -609,6 +616,26 @@ function isControlAsset(url) {
     return url.pathname.endsWith('/manifest.webmanifest') || url.pathname.endsWith('/sw.js');
 }
 
+function isVisionModelAsset(url) {
+    return Boolean(url && url.pathname && url.pathname.includes(VISION_MODEL_PATH_SEGMENT));
+}
+
+async function serveVisionModelAsset(url) {
+    const cache = await caches.open(VISION_MODEL_CACHE_NAME);
+    const key = `${url.origin}${url.pathname}`;
+    const cached = await cache.match(key, { ignoreSearch: true });
+    if (cached) return cached;
+    return new Response('Vision model asset not installed', {
+        status: 404,
+        statusText: 'Not Found',
+        headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'no-store',
+            'X-Content-Type-Options': 'nosniff'
+        }
+    });
+}
+
 const RUNTIME_CACHE_DESTINATIONS = new Set(['style', 'script', 'worker', 'image', 'font']);
 
 function isRuntimeCacheable(request, url) {
@@ -654,6 +681,10 @@ self.addEventListener('fetch', event => {
     if (request.method !== 'GET') return;
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
+    if (isVisionModelAsset(url)) {
+        event.respondWith(serveVisionModelAsset(url));
+        return;
+    }
     if (isNavigationRequest(request)) {
         event.respondWith(networkFirst(request, { navigationFallback: true }));
         return;

@@ -76,7 +76,7 @@ function assert(value, message) {
         indexedDB,
         localStorage,
         navigator: { storage: { async estimate() { return { usage: 100, quota: 1000 }; } } },
-        AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.5', ANALYSIS_CACHE_MAINTENANCE_HISTORY_LIMIT: 20 },
+        AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.9', ANALYSIS_CACHE_MAINTENANCE_HISTORY_LIMIT: 20 },
         structuredClone: global.structuredClone
     };
     const context = vm.createContext({ window, Date, Object, Array, Map, Set, WeakMap, Promise, JSON, Math, Number, String, Uint8Array, DataView, setTimeout, clearTimeout, console });
@@ -86,21 +86,21 @@ function assert(value, message) {
         databaseName: 'namespace-history-test',
         namespace: 'analysis-contract-v1',
         contractVersion: '1',
-        appVersion: '1.6.5',
+        appVersion: '1.6.9',
         maxItems: 8,
         maxBytes: 8 * 1024 * 1024
     });
-    await legacy.set('legacy-private-name.mp4::video/mp4::::100::1::10::legacy-fingerprint::balanced::16000::40::analysis-contract-v1', { score: 1 }, { tier: 'balanced', contractVersion: '1', appVersion: '1.6.5' });
+    await legacy.set('legacy-private-name.mp4::video/mp4::::100::1::10::legacy-fingerprint::balanced::16000::40::analysis-contract-v1', { score: 1 }, { tier: 'balanced', contractVersion: '1', appVersion: '1.6.9' });
 
     const current = window.AIShortsAnalysisCache.createPersistentAnalysisCache({
         databaseName: 'namespace-history-test',
         namespace: 'analysis-contract-v2',
         contractVersion: '2',
-        appVersion: '1.6.5',
+        appVersion: '1.6.9',
         maxItems: 8,
         maxBytes: 8 * 1024 * 1024
     });
-    await current.set('current-private-name.mp4::video/mp4::::100::1::10::current-fingerprint::quality::48000::80::analysis-contract-v2', { score: 2 }, { tier: 'quality', contractVersion: '2', appVersion: '1.6.5' });
+    await current.set('current-private-name.mp4::video/mp4::::100::1::10::current-fingerprint::quality::48000::80::analysis-contract-v2', { score: 2 }, { tier: 'quality', contractVersion: '2', appVersion: '1.6.9' });
 
     const before = await current.getNamespaceStatus();
     assert(before.current && before.current.count === 1, 'current analysis namespace remains visible');
@@ -124,7 +124,7 @@ function assert(value, message) {
         databaseName: 'namespace-history-test',
         namespace: 'analysis-contract-v2',
         contractVersion: '2',
-        appVersion: '1.6.5',
+        appVersion: '1.6.9',
         maxItems: 8,
         maxBytes: 8 * 1024 * 1024
     });

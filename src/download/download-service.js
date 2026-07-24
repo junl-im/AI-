@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - download diagnostics with storage and offline lifecycle state
+// AI Shorts Studio v1.6.9 - download diagnostics with storage and offline lifecycle state
 'use strict';
 
 (function exposeDownloadService(global) {

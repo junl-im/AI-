@@ -1,0 +1,177 @@
+{
+  "version": "1.6.8",
+  "generatedAt": "2026-07-24T08:41:39.003996+00:00",
+  "harness": "real 30-minute 1920x1080 MP4, 24 bounded spatial-motion samples, motion-track creation, midpoint interpolation, and caption-safe 9:16 crop",
+  "elapsedSeconds": 13.608,
+  "source": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "1/1"
+      },
+      {
+        "index": 1,
+        "codec_type": "audio",
+        "sample_rate": "8000",
+        "channels": 1,
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "duration": "1800.000000",
+      "size": "91417554"
+    }
+  },
+  "result": {
+    "motion": {
+      "summary": {
+        "motionDensity": 0.16666666666666666,
+        "maxMotion": 1,
+        "samples": 24,
+        "spatialSamples": 1,
+        "averageSpatialConfidence": 0.0427,
+        "adaptive": true
+      },
+      "frameCount": 24,
+      "first": {
+        "time": 0,
+        "diff": 0,
+        "diffNorm": 0,
+        "motionX": 0.5,
+        "motionY": 0.46,
+        "spatialConfidence": 0,
+        "motionSpread": 1,
+        "motionBox": null
+      },
+      "middle": {
+        "time": 939.13,
+        "diff": 0.017864363395106976,
+        "diffNorm": 0.7692,
+        "motionX": 0.4982,
+        "motionY": 0.2506,
+        "spatialConfidence": 0.1043,
+        "motionSpread": 0.679,
+        "motionBox": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 0.679
+        }
+      },
+      "last": {
+        "time": 1800,
+        "diff": 0.01724282076799749,
+        "diffNorm": 0.5073,
+        "motionX": 0.5094,
+        "motionY": 0.5258,
+        "spatialConfidence": 0.0368,
+        "motionSpread": 1,
+        "motionBox": {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      }
+    },
+    "track": {
+      "id": "reframe-78c12932",
+      "source": "motion",
+      "pointCount": 24,
+      "summary": {
+        "detector": "motion-saliency",
+        "source": "motion",
+        "samples": 24,
+        "averageConfidence": 0.0427,
+        "faceCoverage": 0,
+        "captionSafe": true,
+        "subjectCount": 0,
+        "activeSubjectId": "auto",
+        "sceneCuts": 2,
+        "keyframes": 0,
+        "speakerCues": 0,
+        "speakerPriority": true
+      },
+      "status": {
+        "ready": true,
+        "label": "모션 추적 준비 완료",
+        "detail": "24개 지점 · 신뢰도 4% · 장면 전환 2곳"
+      }
+    },
+    "focus": {
+      "time": 900,
+      "x": 0.50464,
+      "y": 0.44684999999999997,
+      "confidence": 0.07039999999999999,
+      "source": "motion",
+      "subjectId": "auto",
+      "zoom": 1,
+      "scene": 2,
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 1,
+        "height": 0.679
+      }
+    },
+    "crop": {
+      "sx": 687.6588,
+      "sy": 80,
+      "sw": 562.5,
+      "sh": 1000,
+      "focusX": 0.50464,
+      "focusY": 0.44684999999999997,
+      "confidence": 0.07039999999999999,
+      "source": "motion",
+      "zoom": 1.08
+    },
+    "score": {
+      "confidence": 0.0427,
+      "edgeRisk": 0,
+      "faceCoverage": 0,
+      "samples": 24,
+      "sceneCuts": 2
+    },
+    "progress": [
+      {
+        "percent": 78,
+        "message": "영상 움직임 샘플링 중 · 1/24"
+      },
+      {
+        "percent": 81,
+        "message": "영상 움직임 샘플링 중 · 7/24"
+      },
+      {
+        "percent": 84,
+        "message": "영상 움직임 샘플링 중 · 13/24"
+      },
+      {
+        "percent": 87,
+        "message": "영상 움직임 샘플링 중 · 19/24"
+      }
+    ]
+  },
+  "checks": {
+    "realThirtyMinuteSource": true,
+    "sourceIs1080p": true,
+    "boundedSpatialSamples": true,
+    "spatialFieldsPresent": true,
+    "trackMatchesSamples": true,
+    "motionFallbackReady": true,
+    "captionSafeTrack": true,
+    "cropWithinSource": true,
+    "verticalCropRatio": true,
+    "completedWithinBudget": true,
+    "noPageErrors": true,
+    "noConsoleErrors": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": []
+}

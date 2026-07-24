@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.5 - localhost-only open-source AI provider gateway with model pinning
+// AI Shorts Studio v1.6.9 - localhost-only open-source AI provider gateway with model pinning
 'use strict';
 
 (function exposeLocalAIProviderRegistry(global) {
@@ -451,7 +451,7 @@
             if (!start && Number.isFinite(Number(offsets.from))) start = Math.max(0, Number(offsets.from) / 1000);
             if (!end && Number.isFinite(Number(offsets.to))) end = Math.max(start, Number(offsets.to) / 1000);
             if (end <= start) end = start + 2.5;
-            return Object.freeze({ index: index + 1, start, end, text: safeText(segment && segment.text, 1000) });
+            return Object.freeze({ index: index + 1, start, end, text: safeText(segment && segment.text, 1000), speaker: safeText(segment && (segment.speaker || segment.speaker_id || segment.speakerLabel), 40) });
         }).filter(segment => segment.text);
     }
 
