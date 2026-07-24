@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.28 - contract-aware layered analysis cache and selective invalidation facade
+// AI Shorts Studio v1.5.29 - contract-aware layered analysis cache and selective invalidation facade
 'use strict';
 
 (function exposeEngineKernel(global) {
@@ -11,8 +11,8 @@
     const tuner = global.AIShortsProEngineTuner || {};
     const stability = global.AIShortsStabilityAuditor || {};
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.28').replace(/^v/i, '');
-    const ANALYSIS_CONTRACT_VERSION = String(config.ANALYSIS_CACHE_CONTRACT_VERSION || '2');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.29').replace(/^v/i, '');
+    const ANALYSIS_CONTRACT_VERSION = String(config.ANALYSIS_CACHE_CONTRACT_VERSION || '3');
     const ANALYSIS_CACHE_NAMESPACE = `analysis-contract-v${ANALYSIS_CONTRACT_VERSION}`;
 
     const registry = registryFactory.createRegistry ? registryFactory.createRegistry('ai-shorts-studio-pro-engine') : null;
@@ -32,6 +32,7 @@
         minItems: Math.max(1, Number(config.ANALYSIS_PERSISTENT_CACHE_MIN_ITEMS) || 2),
         minBytes: Math.max(512 * 1024, Number(config.ANALYSIS_PERSISTENT_CACHE_MIN_BYTES) || 4 * 1024 * 1024),
         maintenanceHistoryLimit: Math.max(5, Number(config.ANALYSIS_CACHE_MAINTENANCE_HISTORY_LIMIT) || 20),
+        storageTrendLimit: Math.max(8, Number(config.ANALYSIS_CACHE_STORAGE_TREND_LIMIT) || 48),
         warningRatio: Math.max(0.5, Number(config.STORAGE_WARNING_RATIO) || 0.8),
         criticalRatio: Math.max(0.5, Number(config.STORAGE_CRITICAL_RATIO) || 0.92)
     }) : null;
@@ -92,8 +93,13 @@
     async function analyzeMedia(input) {
         const profiler = perf.createProfiler ? perf.createProfiler('analysis') : null;
         const budget = input && input.budget || createBudget(input && input.fileMeta, input && input.config);
+        const autoCutOptions = input && typeof input.getAutoCutOptions === 'function' ? input.getAutoCutOptions() : {};
+        const optionSignature = cacheFactory.makeOptionSignature ? cacheFactory.makeOptionSignature({
+            autoCut: autoCutOptions,
+            explicit: input && input.config && input.config.analysisOptionSignature || ''
+        }) : String(input && input.config && input.config.analysisOptionSignature || '');
         if (profiler) profiler.mark('budget', budget);
-        const cacheBudget = Object.assign({}, budget, { cacheNamespace: ANALYSIS_CACHE_NAMESPACE });
+        const cacheBudget = Object.assign({}, budget, { cacheNamespace: ANALYSIS_CACHE_NAMESPACE, optionSignature });
         const cacheKey = analysisCache && analysisCache.makeFileKeyAsync
             ? await analysisCache.makeFileKeyAsync(input && input.file, input && input.fileMeta, cacheBudget)
             : analysisCache && analysisCache.makeFileKey
@@ -111,7 +117,7 @@
             if (profiler) profiler.mark('cache-hit-persistent');
             return annotateEngine(persistentCached, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: true, cacheLayer: 'persistent' });
         }
-        let result = await analysis.analyzeMedia(Object.assign({}, input || {}, { budget }));
+        let result = await analysis.analyzeMedia(Object.assign({}, input || {}, { budget, getAutoCutOptions: () => autoCutOptions }));
         if (contracts.normalizeAnalysisResult) result = contracts.normalizeAnalysisResult(result);
         if (profiler) profiler.mark('analysis-complete');
         if (analysisCache && analysisCache.set) analysisCache.set(cacheKey, result);
@@ -121,7 +127,7 @@
             tier: budget && budget.tier || 'balanced',
             analysisSampleRate: budget && budget.analysisSampleRate || 0,
             motionSamples: budget && budget.motionSamples || 0,
-            optionSignature: input && input.config && input.config.analysisOptionSignature || '',
+            optionSignature,
             cacheNamespace: ANALYSIS_CACHE_NAMESPACE
         }).catch(() => {});
         return annotateEngine(result, budget, profiler && profiler.summary ? profiler.summary() : null, { cacheHit: false, cacheLayer: 'none' });
@@ -204,10 +210,16 @@
         return persistentAnalysisCache.maintenanceHistory(limit);
     }
 
+    async function getPersistentAnalysisCacheMaintenanceSnapshot(options) {
+        if (!persistentAnalysisCache || !persistentAnalysisCache.maintenanceSnapshot) return Object.freeze({ entries: Object.freeze([]), namespaceStatus: null, optionSignatures: Object.freeze({ groups: Object.freeze([]), unprofiledCount: 0, unprofiledBytes: 0 }), storageTrend: Object.freeze([]), maintenanceHistory: Object.freeze([]), stats: cacheStats(), generatedAt: '' });
+        return persistentAnalysisCache.maintenanceSnapshot(options || {});
+    }
+
     async function refreshPersistentAnalysisCachePolicy() {
-        if (persistentAnalysisCache && persistentAnalysisCache.refreshQuotaPolicy) await persistentAnalysisCache.refreshQuotaPolicy(true);
         if (persistentAnalysisCache && persistentAnalysisCache.prune) await persistentAnalysisCache.prune({ forceQuota: true });
-        return cacheStats();
+        else if (persistentAnalysisCache && persistentAnalysisCache.refreshQuotaPolicy) await persistentAnalysisCache.refreshQuotaPolicy(true);
+        if (persistentAnalysisCache && persistentAnalysisCache.maintenanceSnapshot) return persistentAnalysisCache.maintenanceSnapshot({ refresh: false, trendLimit: 12, historyLimit: 8 });
+        return Object.freeze({ stats: cacheStats() });
     }
 
     function getAnalysisCacheDiagnostics() {
@@ -221,6 +233,8 @@
             privacy: Object.freeze({ includesFileNames: false, includesPaths: false, keyRepresentation: 'fnv1a-token' }),
             cache: cacheStats(),
             namespaceStatus: persistentAnalysisCache && persistentAnalysisCache.namespaceStatus ? persistentAnalysisCache.namespaceStatus() : null,
+            optionSignatures: persistentAnalysisCache && persistentAnalysisCache.optionSignatures ? persistentAnalysisCache.optionSignatures() : null,
+            storageTrend: persistentAnalysisCache && persistentAnalysisCache.storageTrend ? persistentAnalysisCache.storageTrend(24) : [],
             maintenanceHistory: getAnalysisCacheMaintenanceHistory(40),
             recentEvents: Array.isArray(memoryDiagnostics.recentEvents) ? memoryDiagnostics.recentEvents.slice(0, 80) : []
         });
@@ -288,6 +302,7 @@
         getPersistentAnalysisCacheNamespaceStatus,
         deletePersistentAnalysisCacheNamespaces,
         getAnalysisCacheMaintenanceHistory,
+        getPersistentAnalysisCacheMaintenanceSnapshot,
         refreshPersistentAnalysisCachePolicy
     });
 })(window);

@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.5.28 storage and offline health panel */
+/* AI Shorts Studio v1.5.29 storage and offline health panel */
 .storage-health-panel {
     display: grid;
     grid-template-columns: minmax(220px, .8fr) minmax(560px, 1.8fr) auto;
@@ -36,7 +36,7 @@
     .storage-health-actions button { flex: 1 1 150px; }
 }
 
-/* v1.5.28 quota-aware persistent cache controls */
+/* v1.5.29 quota-aware persistent cache controls */
 .storage-cache-entry-picker {
     display: grid;
     gap: 3px;
@@ -60,7 +60,7 @@
     .storage-cache-entry-picker select { width: 100%; max-width: none; }
 }
 
-/* v1.5.28 multi-select cache and audit controls */
+/* v1.5.29 multi-select cache and audit controls */
 .storage-cache-entry-picker select[multiple] {
     min-height: 88px;
     padding: 6px 8px;
@@ -72,7 +72,7 @@
 }
 .storage-cache-filter-picker { min-width: 160px; }
 
-/* v1.5.28 analysis namespace status and bounded maintenance history */
+/* v1.5.29 analysis namespace status and bounded maintenance history */
 .analysis-cache-maintenance {
     grid-column: 1 / -1;
     display: grid;
@@ -81,6 +81,7 @@
     align-items: stretch;
 }
 .analysis-cache-namespace-card,
+.analysis-cache-trend-card,
 .analysis-cache-history-card {
     min-width: 0;
     border: 1px solid color-mix(in srgb, var(--line, #334155) 62%, transparent);
@@ -89,15 +90,20 @@
     background: color-mix(in srgb, var(--surface, #0f172a) 72%, transparent);
 }
 .analysis-cache-namespace-card {
+    grid-column: 1 / -1;
     display: grid;
     grid-template-columns: minmax(200px, 1fr) minmax(220px, .8fr) auto;
     gap: 10px;
     align-items: end;
 }
 .analysis-cache-namespace-card > div,
+.analysis-cache-trend-card,
 .analysis-cache-history-card { display: grid; gap: 5px; }
 .analysis-cache-namespace-card small,
+.analysis-cache-trend-card small,
+.analysis-cache-trend-card li,
 .analysis-cache-history-card li { color: var(--muted, #94a3b8); }
+.analysis-cache-trend-card ol,
 .analysis-cache-history-card ol {
     display: grid;
     gap: 4px;
@@ -106,6 +112,7 @@
     font-size: .72rem;
     line-height: 1.45;
 }
+.analysis-cache-trend-card li,
 .analysis-cache-history-card li { overflow-wrap: anywhere; }
 @media (max-width: 1080px) {
     .analysis-cache-maintenance { grid-template-columns: 1fr; }

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.28 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
+// AI Shorts Studio v1.5.29 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {

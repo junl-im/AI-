@@ -1,15 +1,17 @@
-# AI 쇼츠 제작 스튜디오 v1.5.28
+# AI 쇼츠 제작 스튜디오 v1.5.29
 
-## Analysis Namespace Visibility · Selective Cleanup History
+## Option-Aware Analysis Cache · Storage Cost Trend
 
-- 일반 캐시 정리·상태 새로고침·새 분석 기록 시 이전 분석 namespace를 자동 삭제하지 않고 사용자가 상태를 확인할 때까지 보존합니다.
-- 저장소 진단 화면에서 현재·이전 namespace의 항목 수, 추정 바이트, 마지막 사용 시각, 계약·앱 버전, 분석 tier를 확인할 수 있습니다.
-- 이전 namespace는 원문 대신 되돌릴 수 없는 16자리 비식별 토큰으로 표시하며 여러 namespace를 선택해 정리할 수 있습니다. 현재 namespace는 선택 삭제 대상에서 제외됩니다.
-- 항목 삭제·조건별 무효화·namespace 정리·현재 캐시 비우기·자동 TTL/LRU 정리 이력을 최대 20개까지 로컬에 보존합니다.
-- 진단 상태와 내보내기에는 파일명·경로·원시 캐시 키·이전 namespace 원문을 포함하지 않습니다.
-- build key는 `1.5.28-analysis-namespace-maintenance-history`입니다.
-- 자동 QA **212/212**, Chromium 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow **0건**을 통과했습니다.
-- 상세 변경과 다음 패치 라인업은 `PATCH_REPORT.md`를 참고하세요.
+- 자동 컷 분석 옵션을 키 순서에 무관한 안정적 16자리 signature로 만들고 분석 캐시 키에 포함해, 설정 변경 뒤 이전 자동 컷 결과가 잘못 재사용되는 문제를 차단했습니다.
+- 분석 옵션은 키 생성 직전에 한 번만 스냅샷하고 같은 값을 실제 분석 파이프라인에도 전달해 signature와 결과가 어긋나지 않도록 했습니다.
+- 분석 캐시 계약을 `v3`로 올렸으며, 기존 `v2` 자료는 자동 삭제하지 않고 이전 namespace로 보존해 사용자가 상태를 확인한 뒤 선택 정리할 수 있습니다.
+- 저장소 진단 화면에서 옵션 signature별 항목 수·추정 바이트·마지막 사용 시각을 확인하고 원하는 signature 그룹만 정리할 수 있습니다.
+- 현재·이전 namespace의 저장 비용 변화를 최대 48개 시점으로 기록해 증가·감소·현재 사용량을 개인정보 비노출 요약으로 표시합니다.
+- 캐시 정책 갱신 뒤 entries·namespace·signature·추세·이력을 하나의 유지보수 스냅샷으로 재사용해, 진단 화면 새로고침의 IndexedDB 전체 스캔을 기존 최대 3회에서 1회로 줄였습니다.
+- 파일명·경로·원시 캐시 키·분석 옵션 원문은 진단 상태와 UI에 노출하지 않습니다.
+- build key는 `1.5.29-analysis-signature-storage-trend`입니다.
+- 자동 QA **213/213**, Chromium 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow **0건**을 통과했습니다.
+- 상세 원인, 성능 근거, 운영 계약과 다음 패치 제안은 `PATCH_REPORT.md`를 참고하세요.
 
 음악이나 영상을 브라우저 안에서 분석하고 하이라이트 추천, 9:16 미리보기, 편집, MP4 저장까지 이어주는 로컬 웹 스튜디오입니다. 미디어 파일과 분석 결과는 서버로 전송하지 않습니다. 영구 분석 캐시는 사용 브라우저의 IndexedDB 안에서만 제한적으로 보관됩니다.
 

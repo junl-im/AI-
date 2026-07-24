@@ -550,3 +550,29 @@ Media source Object URLs belong only to `media-import-controller.js`. Other modu
 - JS 힙은 강제 GC 뒤 기록하고 워밍업 구간 중앙값과 마지막 구간 중앙값, 선형 기울기를 함께 판정합니다.
 - `runtime-heap-stability-v*.json`은 재현 가능한 실브라우저 감사 산출물이며 `heap_stability_smoke.js`가 릴리스 계약을 확인합니다.
 - 이 감사는 V8 힙 누적을 감시하지만 GPU·브라우저 전체 RSS·OS 디코더 네이티브 메모리의 완전한 누수 증명으로 해석하지 않습니다.
+
+---
+
+# PROJECT NOTES v1.5.29
+
+## 분석 캐시 계약
+
+- 현재 영구 분석 캐시 계약은 v3입니다.
+- 자동 컷 옵션은 stable serialization 후 16자리 signature로 캐시 키에 포함합니다.
+- 캐시 키와 분석 결과는 동일한 단일 옵션 스냅샷을 사용해야 합니다.
+- 새 분석 옵션이 결과에 영향을 주면 signature 입력도 함께 갱신해야 합니다.
+- 이전 계약 namespace는 자동 삭제하지 않고 비식별 상태 확인과 선택 정리 흐름을 유지합니다.
+
+## 진단·성능 계약
+
+- 전체 레코드 스캔 한 번에서 entries, namespace, option signature snapshot을 함께 생성합니다.
+- 정책 정리 뒤 UI는 캐시된 maintenance snapshot을 사용하며 불필요한 `readAll()`을 추가하지 않습니다.
+- 저장 비용 추세는 최대 48개, 유지보수 이력은 최대 20개로 제한합니다.
+- 추세·진단·UI에는 파일명, 경로, 원시 키, 옵션 원문, 분석 본문을 넣지 않습니다.
+
+## 현재 QA·배포 기준
+
+- 자동 QA 기준은 **213/213**입니다.
+- build key: `1.5.29-analysis-signature-storage-trend`
+- 서비스워커 cache: `ai-shorts-studio-shell-v1.5.29-analysis-signature-storage-trend`
+- 전체 설치 ZIP과 v1.5.28 기준 덮어쓰기 패치 ZIP을 함께 배포합니다.

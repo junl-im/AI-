@@ -71,4 +71,4 @@ const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 ok(app.includes('utils.normalizeMediaRange') && app.includes("type: 'caption-text-too-large'"), 'app uses bounded manual ranges and caption input diagnostics');
 ok(html.includes('id="captionTextInput"') && html.includes('maxlength="1000000"'), 'caption textarea exposes the input ceiling to the browser');
-console.log('PASS v1.5.28 manual range, caption size, and candidate identity guardrails');
+console.log('PASS v1.5.29 manual range, caption size, and candidate identity guardrails');

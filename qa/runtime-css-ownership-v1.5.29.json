@@ -1,0 +1,2976 @@
+{
+  "version": "1.5.29",
+  "generatedAt": "2026-07-24T01:52:08.153Z",
+  "cssFiles": 47,
+  "linkedCssFiles": 46,
+  "activeCssFiles": 46,
+  "archivedCssFiles": [
+    "cinematic-hero.css"
+  ],
+  "importantCount": 593,
+  "duplicateSelectorCount": 192,
+  "highConflictSelectorCount": 21,
+  "sharedPropertyCount": 0,
+  "conflictingPropertyCount": 0,
+  "highRiskConflictCount": 0,
+  "sameValueDuplicateCount": 0,
+  "shadowedDeclarationCount": 0,
+  "conflictCategoryCounts": {},
+  "highRiskCategoryCounts": {},
+  "criticalOwnership": {
+    "recommendationCardBase": {
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "rgba(10, 16, 29, 0.58)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "rgba(10, 16, 29, 0.58)",
+            "important": false
+          }
+        ]
+      },
+      "border-color": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "rgba(148, 163, 184, 0.12)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "rgba(148, 163, 184, 0.12)",
+            "important": false
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "none",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "none",
+            "important": false
+          }
+        ]
+      },
+      "backdrop-filter": {
+        "owners": [
+          "glass-pro-ui.css"
+        ],
+        "winner": {
+          "file": "glass-pro-ui.css",
+          "value": "blur(var(--glass-blur)) saturate(1.28)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "glass-pro-ui.css",
+            "value": "blur(var(--glass-blur)) saturate(1.28)",
+            "important": false
+          }
+        ]
+      },
+      "-webkit-backdrop-filter": {
+        "owners": [
+          "glass-pro-ui.css"
+        ],
+        "winner": {
+          "file": "glass-pro-ui.css",
+          "value": "blur(var(--glass-blur)) saturate(1.28)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "glass-pro-ui.css",
+            "value": "blur(var(--glass-blur)) saturate(1.28)",
+            "important": false
+          }
+        ]
+      },
+      "cursor": {
+        "owners": [
+          "ux.css"
+        ],
+        "winner": {
+          "file": "ux.css",
+          "value": "pointer",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ux.css",
+            "value": "pointer",
+            "important": false
+          }
+        ]
+      },
+      "transition": {
+        "owners": [
+          "ux.css"
+        ],
+        "winner": {
+          "file": "ux.css",
+          "value": "transform 160ms ease, border-color 160ms ease, background 160ms ease",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ux.css",
+            "value": "transform 160ms ease, border-color 160ms ease, background 160ms ease",
+            "important": false
+          }
+        ]
+      }
+    },
+    "mobileCinematicHero": {
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "278px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "278px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0 15px 14px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0 15px 14px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "24px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "24px",
+            "important": true
+          }
+        ]
+      },
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "radial-gradient(circle at 22% 6%, rgba(103, 232, 249, 0.08), transparent 18rem), linear-gradient(155deg, rgba(15, 20, 35, 0.98), rgba(8, 11, 22, 0.99))",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "radial-gradient(circle at 22% 6%, rgba(103, 232, 249, 0.08), transparent 18rem), linear-gradient(155deg, rgba(15, 20, 35, 0.98), rgba(8, 11, 22, 0.99))",
+            "important": true
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0 18px 50px rgba(0, 0, 0, 0.20)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0 18px 50px rgba(0, 0, 0, 0.20)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "desktopStudioGrid": {
+      "display": {
+        "owners": [
+          "desktop-prime-layout.css"
+        ],
+        "winner": {
+          "file": "desktop-prime-layout.css",
+          "value": "grid",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "desktop-prime-layout.css",
+            "value": "grid",
+            "important": false
+          }
+        ]
+      },
+      "width": {
+        "owners": [
+          "desktop-prime-layout.css"
+        ],
+        "winner": {
+          "file": "desktop-prime-layout.css",
+          "value": "100%",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "desktop-prime-layout.css",
+            "value": "100%",
+            "important": false
+          }
+        ]
+      },
+      "margin": {
+        "owners": [
+          "desktop-prime-layout.css"
+        ],
+        "winner": {
+          "file": "desktop-prime-layout.css",
+          "value": "0",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "desktop-prime-layout.css",
+            "value": "0",
+            "important": true
+          }
+        ]
+      },
+      "grid-template-columns": {
+        "owners": [
+          "workspace-layout-controls.css"
+        ],
+        "winner": {
+          "file": "workspace-layout-controls.css",
+          "value": "minmax(260px, var(--workspace-left-track)) var(--workspace-divider-width) minmax(350px, var(--workspace-center-track)) var(--workspace-divider-width) minmax(300px, var(--workspace-right-track))",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "workspace-layout-controls.css",
+            "value": "minmax(260px, var(--workspace-left-track)) var(--workspace-divider-width) minmax(350px, var(--workspace-center-track)) var(--workspace-divider-width) minmax(300px, var(--workspace-right-track))",
+            "important": false
+          }
+        ]
+      },
+      "grid-template-areas": {
+        "owners": [
+          "workspace-layout-controls.css"
+        ],
+        "winner": {
+          "file": "workspace-layout-controls.css",
+          "value": "\"toolbar toolbar toolbar toolbar toolbar\" \"utility utility utility utility utility\" \"load divider-left preview divider-right candidates\" \"recommend divider-left preview divider-right waveform\" \"cut divider-left edit divider-right export\"",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "workspace-layout-controls.css",
+            "value": "\"toolbar toolbar toolbar toolbar toolbar\" \"utility utility utility utility utility\" \"load divider-left preview divider-right candidates\" \"recommend divider-left preview divider-right waveform\" \"cut divider-left edit divider-right export\"",
+            "important": false
+          }
+        ]
+      },
+      "grid-template-rows": {
+        "owners": [
+          "workspace-layout-controls.css"
+        ],
+        "winner": {
+          "file": "workspace-layout-controls.css",
+          "value": "auto auto clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "workspace-layout-controls.css",
+            "value": "auto auto clamp(250px, 27vh, 300px) clamp(290px, 32vh, 340px) auto",
+            "important": false
+          }
+        ]
+      },
+      "column-gap": {
+        "owners": [
+          "workspace-layout-controls.css"
+        ],
+        "winner": {
+          "file": "workspace-layout-controls.css",
+          "value": "7px",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "workspace-layout-controls.css",
+            "value": "7px",
+            "important": false
+          }
+        ]
+      },
+      "row-gap": {
+        "owners": [
+          "workspace-layout-controls.css"
+        ],
+        "winner": {
+          "file": "workspace-layout-controls.css",
+          "value": "var(--prime-gap, 12px)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "workspace-layout-controls.css",
+            "value": "var(--prime-gap, 12px)",
+            "important": false
+          }
+        ]
+      }
+    },
+    "mobileToast": {
+      "bottom": {
+        "owners": [
+          "mobile-menu-guide.css"
+        ],
+        "winner": {
+          "file": "mobile-menu-guide.css",
+          "value": "144px",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "mobile-menu-guide.css",
+            "value": "144px",
+            "important": false
+          }
+        ]
+      }
+    },
+    "dockBase": {
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "58px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "58px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "16px",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "16px",
+            "important": false
+          }
+        ]
+      }
+    },
+    "mobileDockTab": {
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "60px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "60px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "6px 3px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "6px 3px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "14px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "14px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "desktopDockTab": {
+      "min-height": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "58px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "58px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "7px 9px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "7px 9px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "15px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "15px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "startPanelVisibility": {
+      "display": {
+        "owners": [
+          "desktop-prime-layout.css"
+        ],
+        "winner": {
+          "file": "desktop-prime-layout.css",
+          "value": "none",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "desktop-prime-layout.css",
+            "value": "none",
+            "important": false
+          }
+        ]
+      }
+    },
+    "mobileStartPanel": {
+      "padding": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "16px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "16px",
+            "important": true
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(148, 163, 184, 0.12)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(148, 163, 184, 0.12)",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "23px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "23px",
+            "important": true
+          }
+        ]
+      },
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "linear-gradient(155deg, rgba(14, 21, 37, 0.94), rgba(8, 13, 25, 0.97))",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "linear-gradient(155deg, rgba(14, 21, 37, 0.94), rgba(8, 13, 25, 0.97))",
+            "important": true
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0 14px 40px rgba(0, 0, 0, 0.16)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0 14px 40px rgba(0, 0, 0, 0.16)",
+            "important": false
+          }
+        ]
+      }
+    },
+    "mobileStartStep": {
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "60px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "60px",
+            "important": true
+          }
+        ]
+      },
+      "grid-template-columns": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "31px minmax(0, 1fr)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "31px minmax(0, 1fr)",
+            "important": true
+          }
+        ]
+      },
+      "column-gap": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "10px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "10px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "10px 11px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "10px 11px",
+            "important": true
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(148, 163, 184, 0.11)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(148, 163, 184, 0.11)",
+            "important": false
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "15px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "15px",
+            "important": true
+          }
+        ]
+      },
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "rgba(255, 255, 255, 0.022)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "rgba(255, 255, 255, 0.022)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "transportButton": {
+      "min-width": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "96px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "96px",
+            "important": true
+          }
+        ]
+      },
+      "min-height": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "36px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "36px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0 13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0 13px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "13px",
+            "important": true
+          }
+        ]
+      },
+      "font-size": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0.86rem",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0.86rem",
+            "important": true
+          }
+        ]
+      }
+    },
+    "exportButton": {
+      "min-width": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "96px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "96px",
+            "important": true
+          }
+        ]
+      },
+      "min-height": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "36px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "36px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0 13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0 13px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "13px",
+            "important": true
+          }
+        ]
+      },
+      "font-size": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0.86rem",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0.86rem",
+            "important": true
+          }
+        ]
+      }
+    },
+    "exportAllButton": {
+      "min-width": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "96px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "96px",
+            "important": true
+          }
+        ]
+      },
+      "min-height": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "36px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "36px",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0 13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0 13px",
+            "important": true
+          }
+        ]
+      },
+      "border-radius": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "13px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "13px",
+            "important": true
+          }
+        ]
+      },
+      "font-size": {
+        "owners": [
+          "flow-doctor.css"
+        ],
+        "winner": {
+          "file": "flow-doctor.css",
+          "value": "0.86rem",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "flow-doctor.css",
+            "value": "0.86rem",
+            "important": true
+          }
+        ]
+      }
+    },
+    "headerTopline": {
+      "display": {
+        "owners": [
+          "header-meta-rail.css"
+        ],
+        "winner": {
+          "file": "header-meta-rail.css",
+          "value": "grid",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "header-meta-rail.css",
+            "value": "grid",
+            "important": true
+          }
+        ]
+      },
+      "grid-template-columns": {
+        "owners": [
+          "header-meta-rail.css"
+        ],
+        "winner": {
+          "file": "header-meta-rail.css",
+          "value": "minmax(0, 1fr) auto",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "header-meta-rail.css",
+            "value": "minmax(0, 1fr) auto",
+            "important": false
+          }
+        ]
+      },
+      "align-items": {
+        "owners": [
+          "header-meta-rail.css"
+        ],
+        "winner": {
+          "file": "header-meta-rail.css",
+          "value": "center",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "header-meta-rail.css",
+            "value": "center",
+            "important": false
+          }
+        ]
+      },
+      "gap": {
+        "owners": [
+          "header-meta-rail.css"
+        ],
+        "winner": {
+          "file": "header-meta-rail.css",
+          "value": "clamp(10px, 2vw, 24px)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "header-meta-rail.css",
+            "value": "clamp(10px, 2vw, 24px)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "mobileHeaderTopline": {
+      "display": {
+        "owners": [
+          "header-meta-rail.css"
+        ],
+        "winner": {
+          "file": "header-meta-rail.css",
+          "value": "grid",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "header-meta-rail.css",
+            "value": "grid",
+            "important": false
+          }
+        ]
+      },
+      "grid-template-columns": {
+        "owners": [
+          "header-meta-rail.css"
+        ],
+        "winner": {
+          "file": "header-meta-rail.css",
+          "value": "minmax(0, 1fr) auto",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "header-meta-rail.css",
+            "value": "minmax(0, 1fr) auto",
+            "important": false
+          }
+        ]
+      },
+      "gap": {
+        "owners": [
+          "header-meta-rail.css"
+        ],
+        "winner": {
+          "file": "header-meta-rail.css",
+          "value": "8px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "header-meta-rail.css",
+            "value": "8px",
+            "important": true
+          }
+        ]
+      },
+      "min-height": {
+        "owners": [
+          "header-meta-rail.css"
+        ],
+        "winner": {
+          "file": "header-meta-rail.css",
+          "value": "46px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "header-meta-rail.css",
+            "value": "46px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "desktopShell": {
+      "width": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "min(calc(100% - var(--responsive-shell-gutter-wide)), 1580px)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "min(calc(100% - var(--responsive-shell-gutter-wide)), 1580px)",
+            "important": true
+          }
+        ]
+      },
+      "padding-bottom": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "var(--responsive-shell-bottom-wide)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "var(--responsive-shell-bottom-wide)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "mobileHeroTitle": {
+      "font-size": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "var(--responsive-title-mobile)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "var(--responsive-title-mobile)",
+            "important": false
+          }
+        ]
+      },
+      "line-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0.98",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0.98",
+            "important": true
+          }
+        ]
+      },
+      "letter-spacing": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "-0.065em",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "-0.065em",
+            "important": true
+          }
+        ]
+      }
+    },
+    "brandPanelSkin": {
+      "background": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "linear-gradient(135deg, rgba(10, 15, 32, 0.84), rgba(12, 16, 34, 0.66)), radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 46%)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "linear-gradient(135deg, rgba(10, 15, 32, 0.84), rgba(12, 16, 34, 0.66)), radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.18), transparent 46%)",
+            "important": true
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "1px solid rgba(255,255,255,0.12)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "1px solid rgba(255,255,255,0.12)",
+            "important": true
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "0 22px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.09)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "0 22px 80px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.09)",
+            "important": true
+          }
+        ]
+      },
+      "backdrop-filter": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "blur(18px) saturate(1.12)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "blur(18px) saturate(1.12)",
+            "important": false
+          }
+        ]
+      }
+    },
+    "badgeVersionSkin": {
+      "background": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "rgba(255,255,255,0.08)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "rgba(255,255,255,0.08)",
+            "important": true
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "1px solid rgba(255,255,255,0.16)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "1px solid rgba(255,255,255,0.16)",
+            "important": true
+          }
+        ]
+      },
+      "color": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "rgba(255,255,255,0.9)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "rgba(255,255,255,0.9)",
+            "important": true
+          }
+        ]
+      },
+      "backdrop-filter": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "blur(16px) saturate(1.25)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "blur(16px) saturate(1.25)",
+            "important": false
+          }
+        ]
+      }
+    },
+    "brandSignatureSkin": {
+      "background": {
+        "owners": [
+          "glass-pro-ui.css"
+        ],
+        "winner": {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(255, 255, 255, 0.10)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "glass-pro-ui.css",
+            "value": "rgba(255, 255, 255, 0.10)",
+            "important": true
+          }
+        ]
+      },
+      "border-color": {
+        "owners": [
+          "glass-pro-ui.css"
+        ],
+        "winner": {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(255, 255, 255, 0.18)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "glass-pro-ui.css",
+            "value": "rgba(255, 255, 255, 0.18)",
+            "important": true
+          }
+        ]
+      },
+      "backdrop-filter": {
+        "owners": [
+          "glass-pro-ui.css"
+        ],
+        "winner": {
+          "file": "glass-pro-ui.css",
+          "value": "blur(16px) saturate(1.25)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "glass-pro-ui.css",
+            "value": "blur(16px) saturate(1.25)",
+            "important": false
+          }
+        ]
+      }
+    },
+    "bottomDockSkin": {
+      "background": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "rgba(8, 12, 28, 0.80)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "rgba(8, 12, 28, 0.80)",
+            "important": true
+          }
+        ]
+      },
+      "border-top": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "1px solid rgba(255,255,255,0.13)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "1px solid rgba(255,255,255,0.13)",
+            "important": true
+          }
+        ]
+      },
+      "backdrop-filter": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "blur(22px) saturate(1.2)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "blur(22px) saturate(1.2)",
+            "important": false
+          }
+        ]
+      }
+    },
+    "primaryButtonSkin": {
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
+            "important": false
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(165, 243, 252, 0.24)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(165, 243, 252, 0.24)",
+            "important": false
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0 10px 24px rgba(103, 232, 249, 0.12)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0 10px 24px rgba(103, 232, 249, 0.12)",
+            "important": true
+          }
+        ]
+      },
+      "color": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "#07111e",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "#07111e",
+            "important": false
+          }
+        ]
+      }
+    },
+    "secondaryButtonSkin": {
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "rgba(18, 26, 43, 0.72)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "rgba(18, 26, 43, 0.72)",
+            "important": false
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(148, 163, 184, 0.16)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(148, 163, 184, 0.16)",
+            "important": true
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "none",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "none",
+            "important": false
+          }
+        ]
+      },
+      "color": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "#d8e0eb",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "#d8e0eb",
+            "important": false
+          }
+        ]
+      }
+    },
+    "controlZoneBase": {
+      "background": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "var(--flow-glass-bg)",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "clamp(13px, 1.7vw, 18px)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "clamp(13px, 1.7vw, 18px)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "previewCardBase": {
+      "background": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "var(--flow-glass-bg)",
+            "important": true
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "clamp(13px, 1.7vw, 18px)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "clamp(13px, 1.7vw, 18px)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "panelHeadSpacing": {
+      "margin-bottom": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "14px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "14px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "uploadTileSkin": {
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%), rgba(7, 11, 21, 0.42)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "radial-gradient(circle at 50% 0%, rgba(103, 232, 249, 0.08), transparent 58%), rgba(7, 11, 21, 0.42)",
+            "important": false
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px dashed rgba(148, 163, 184, 0.25)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px dashed rgba(148, 163, 184, 0.25)",
+            "important": false
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 12px 34px rgba(0, 0, 0, 0.20)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 12px 34px rgba(0, 0, 0, 0.20)",
+            "important": false
+          }
+        ]
+      }
+    },
+    "selectSkin": {
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "rgba(6, 10, 20, 0.58)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "rgba(6, 10, 20, 0.58)",
+            "important": false
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(148, 163, 184, 0.16)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(148, 163, 184, 0.16)",
+            "important": false
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
+            "important": false
+          }
+        ]
+      }
+    },
+    "textareaSkin": {
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "rgba(6, 10, 20, 0.58)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "rgba(6, 10, 20, 0.58)",
+            "important": false
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(148, 163, 184, 0.16)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(148, 163, 184, 0.16)",
+            "important": false
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "inset 0 1px 0 rgba(255, 255, 255, 0.025)",
+            "important": false
+          }
+        ]
+      },
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "43px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "43px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "hyperflowStageVisibility": {
+      "display": {
+        "owners": [
+          "studio-experience.css"
+        ],
+        "winner": {
+          "file": "studio-experience.css",
+          "value": "flex",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "studio-experience.css",
+            "value": "flex",
+            "important": false
+          }
+        ]
+      }
+    },
+    "legacyActionDockVisibility": {
+      "display": {
+        "owners": [
+          "layout-dock.css"
+        ],
+        "winner": {
+          "file": "layout-dock.css",
+          "value": "none",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "layout-dock.css",
+            "value": "none",
+            "important": true
+          }
+        ]
+      }
+    },
+    "sourceMediaContainment": {
+      "display": {
+        "owners": [
+          "layout-dock.css"
+        ],
+        "winner": {
+          "file": "layout-dock.css",
+          "value": "block",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "layout-dock.css",
+            "value": "block",
+            "important": true
+          }
+        ]
+      },
+      "width": {
+        "owners": [
+          "layout-dock.css"
+        ],
+        "winner": {
+          "file": "layout-dock.css",
+          "value": "1px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "layout-dock.css",
+            "value": "1px",
+            "important": true
+          }
+        ]
+      },
+      "max-height": {
+        "owners": [
+          "layout-dock.css"
+        ],
+        "winner": {
+          "file": "layout-dock.css",
+          "value": "1px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "layout-dock.css",
+            "value": "1px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "heroNoteBase": {
+      "max-width": {
+        "owners": [
+          "layout-dock.css"
+        ],
+        "winner": {
+          "file": "layout-dock.css",
+          "value": "560px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "layout-dock.css",
+            "value": "560px",
+            "important": true
+          }
+        ]
+      },
+      "color": {
+        "owners": [
+          "glass-pro-ui.css"
+        ],
+        "winner": {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(226, 232, 240, 0.86)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "glass-pro-ui.css",
+            "value": "rgba(226, 232, 240, 0.86)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "cinematicHeroNoteBase": {
+      "width": {
+        "owners": [
+          "hero-command-deck.css"
+        ],
+        "winner": {
+          "file": "hero-command-deck.css",
+          "value": "min(100%, 660px)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "hero-command-deck.css",
+            "value": "min(100%, 660px)",
+            "important": true
+          }
+        ]
+      },
+      "max-width": {
+        "owners": [
+          "hero-command-deck.css"
+        ],
+        "winner": {
+          "file": "hero-command-deck.css",
+          "value": "660px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "hero-command-deck.css",
+            "value": "660px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "desktopHeroNote": {
+      "max-width": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "660px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "660px",
+            "important": true
+          }
+        ]
+      },
+      "font-size": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "13.5px",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "13.5px",
+            "important": false
+          }
+        ]
+      }
+    },
+    "mobileCinematicHeroNote": {
+      "max-width": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "32rem",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "32rem",
+            "important": true
+          }
+        ]
+      },
+      "margin-top": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "12px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "12px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "heroPanelBaseHeight": {
+      "min-height": {
+        "owners": [
+          "hero-command-deck.css"
+        ],
+        "winner": {
+          "file": "hero-command-deck.css",
+          "value": "286px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "hero-command-deck.css",
+            "value": "286px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "desktopHeroPanelHeight": {
+      "min-height": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "316px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "316px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "workspaceRevealMotion": {
+      "animation": {
+        "owners": [
+          "motion-stability.css"
+        ],
+        "winner": {
+          "file": "motion-stability.css",
+          "value": "none",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "motion-stability.css",
+            "value": "none",
+            "important": true
+          }
+        ]
+      }
+    },
+    "fieldRhythm": {
+      "gap": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "7px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "7px",
+            "important": true
+          }
+        ]
+      },
+      "color": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "#cbd5e1",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "#cbd5e1",
+            "important": false
+          }
+        ]
+      },
+      "font-weight": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "700",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "700",
+            "important": false
+          }
+        ]
+      }
+    },
+    "disabledButtonState": {
+      "opacity": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0.42",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0.42",
+            "important": false
+          }
+        ]
+      },
+      "cursor": {
+        "owners": [
+          "theme.css"
+        ],
+        "winner": {
+          "file": "theme.css",
+          "value": "not-allowed",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "theme.css",
+            "value": "not-allowed",
+            "important": false
+          }
+        ]
+      }
+    },
+    "disabledMiniActionState": {
+      "opacity": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0.42",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0.42",
+            "important": false
+          }
+        ]
+      },
+      "cursor": {
+        "owners": [
+          "advanced-editor.css"
+        ],
+        "winner": {
+          "file": "advanced-editor.css",
+          "value": "not-allowed",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "advanced-editor.css",
+            "value": "not-allowed",
+            "important": false
+          }
+        ]
+      }
+    },
+    "ambientOverlayState": {
+      "opacity": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0.42",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0.42",
+            "important": true
+          }
+        ]
+      }
+    },
+    "autoCutSurface": {
+      "background": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "var(--flow-glass-bg)",
+            "important": true
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "1px solid var(--flow-glass-line)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "1px solid var(--flow-glass-line)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "cinematicBrandSurface": {
+      "background": {
+        "owners": [
+          "hero-command-deck.css"
+        ],
+        "winner": {
+          "file": "hero-command-deck.css",
+          "value": "linear-gradient(115deg, rgba(8, 9, 16, 0.99) 0%, rgba(11, 13, 24, 0.97) 54%, rgba(18, 13, 32, 0.94) 100%)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "hero-command-deck.css",
+            "value": "linear-gradient(115deg, rgba(8, 9, 16, 0.99) 0%, rgba(11, 13, 24, 0.97) 54%, rgba(18, 13, 32, 0.94) 100%)",
+            "important": true
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "hero-command-deck.css"
+        ],
+        "winner": {
+          "file": "hero-command-deck.css",
+          "value": "1px solid rgba(255, 255, 255, 0.075)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "hero-command-deck.css",
+            "value": "1px solid rgba(255, 255, 255, 0.075)",
+            "important": true
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "hero-command-deck.css"
+        ],
+        "winner": {
+          "file": "hero-command-deck.css",
+          "value": "0 30px 90px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.045)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "hero-command-deck.css",
+            "value": "0 30px 90px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.045)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "consoleSurface": {
+      "background": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "var(--flow-glass-bg)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "var(--flow-glass-bg)",
+            "important": true
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "0 14px 42px rgba(0, 0, 0, 0.26)",
+            "important": false
+          }
+        ]
+      },
+      "padding": {
+        "owners": [
+          "foundation-polish.css"
+        ],
+        "winner": {
+          "file": "foundation-polish.css",
+          "value": "12px",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "foundation-polish.css",
+            "value": "12px",
+            "important": true
+          }
+        ]
+      }
+    },
+    "engineStatusSurface": {
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "rgba(10, 16, 29, 0.58)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "rgba(10, 16, 29, 0.58)",
+            "important": false
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "none",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "none",
+            "important": false
+          }
+        ]
+      }
+    },
+    "recommendationActionSkin": {
+      "background": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "linear-gradient(135deg, #a5f3fc 0%, #c4b5fd 58%, #f0abfc 100%)",
+            "important": false
+          }
+        ]
+      },
+      "border": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "1px solid rgba(165, 243, 252, 0.24)",
+          "important": false
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "1px solid rgba(165, 243, 252, 0.24)",
+            "important": false
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "0 10px 24px rgba(103, 232, 249, 0.12)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "0 10px 24px rgba(103, 232, 249, 0.12)",
+            "important": true
+          }
+        ]
+      }
+    },
+    "statusDotSkin": {
+      "background": {
+        "owners": [
+          "glass-pro-ui.css"
+        ],
+        "winner": {
+          "file": "glass-pro-ui.css",
+          "value": "rgba(255, 255, 255, 0.10)",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "glass-pro-ui.css",
+            "value": "rgba(255, 255, 255, 0.10)",
+            "important": true
+          }
+        ]
+      },
+      "box-shadow": {
+        "owners": [
+          "ui-refinement.css"
+        ],
+        "winner": {
+          "file": "ui-refinement.css",
+          "value": "none",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "ui-refinement.css",
+            "value": "none",
+            "important": true
+          }
+        ]
+      }
+    },
+    "documentScrollBehavior": {
+      "scroll-behavior": {
+        "owners": [
+          "shutter-glass-flow.css"
+        ],
+        "winner": {
+          "file": "shutter-glass-flow.css",
+          "value": "auto",
+          "important": true
+        },
+        "occurrences": [
+          {
+            "file": "shutter-glass-flow.css",
+            "value": "auto",
+            "important": true
+          }
+        ]
+      }
+    }
+  },
+  "topConflicts": [
+    {
+      "selector": ":root",
+      "owners": [
+        "theme.css",
+        "layout-dock.css",
+        "feedback-ux.css",
+        "hyperconnect-flow.css",
+        "flow-polish.css",
+        "flow-integrity.css",
+        "flow-doctor.css",
+        "responsive-workspace.css",
+        "flow-quality-gate.css",
+        "pc-dock-reveal-hotfix.css",
+        "glass-pro-ui.css",
+        "workspace-comfort.css",
+        "motion-stability.css",
+        "handoff-coach.css",
+        "candidate-preview-pro.css",
+        "candidate-pin-board.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css",
+        "desktop-prime-layout.css",
+        "hero-command-deck.css",
+        "ui-refinement.css",
+        "icon-system.css",
+        "active-stage-beacon.css",
+        "workspace-layout-controls.css"
+      ],
+      "ownerCount": 24
+    },
+    {
+      "selector": ".recommendation-card",
+      "owners": [
+        "studio.css",
+        "ux.css",
+        "layout-dock.css",
+        "feedback-ux.css",
+        "hyperconnect-flow.css",
+        "flow-polish.css",
+        "glass-pro-ui.css",
+        "handoff-coach.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 9
+    },
+    {
+      "selector": ".copy-card",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css",
+        "hero-command-deck.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": ".start-command-panel",
+      "owners": [
+        "responsive-workspace.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css",
+        "desktop-prime-layout.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"]",
+      "owners": [
+        "flow-doctor.css",
+        "pc-dock-reveal-hotfix.css",
+        "workspace-comfort.css",
+        "shutter-glass-flow.css",
+        "ui-refinement.css",
+        "mobile-menu-guide.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .flow-selection-summary",
+      "owners": [
+        "flow-integrity.css",
+        "flow-doctor.css",
+        "responsive-workspace.css",
+        "pc-dock-reveal-hotfix.css",
+        "motion-stability.css",
+        "desktop-prime-layout.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel]",
+      "owners": [
+        "hyperflow-tabs.css",
+        "flow-doctor.css",
+        "responsive-workspace.css",
+        "motion-stability.css",
+        "shutter-glass-flow.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 6
+    },
+    {
+      "selector": ".app-shell",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "glass-pro-ui.css",
+        "foundation-polish.css",
+        "desktop-prime-layout.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".bottom-dock-tab",
+      "owners": [
+        "hyperflow-tabs.css",
+        "flow-polish.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".brand-right-actions",
+      "owners": [
+        "feedback-ux.css",
+        "flow-hotfix.css",
+        "shutter-glass-flow.css",
+        "hero-command-deck.css",
+        "studio-experience.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".brand-signature-pill",
+      "owners": [
+        "feedback-ux.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css",
+        "studio-experience.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".console-panel",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".control-zone",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".preview-card",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".waveform-card",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "glass-pro-ui.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": "body",
+      "owners": [
+        "theme.css",
+        "layout-dock.css",
+        "responsive-workspace.css",
+        "foundation-polish.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .bottom-dock.bottom-dock-hyperflow",
+      "owners": [
+        "pc-dock-reveal-hotfix.css",
+        "foundation-polish.css",
+        "desktop-prime-layout.css",
+        "ui-refinement.css",
+        "mobile-menu-guide.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .hyperflow-stage",
+      "owners": [
+        "flow-doctor.css",
+        "responsive-workspace.css",
+        "motion-stability.css",
+        "desktop-prime-layout.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] [data-flow-panel].is-flow-active",
+      "owners": [
+        "flow-quality-gate.css",
+        "pc-dock-reveal-hotfix.css",
+        "workspace-comfort.css",
+        "shutter-glass-flow.css",
+        "foundation-polish.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": "select",
+      "owners": [
+        "theme.css",
+        "studio.css",
+        "layout-dock.css",
+        "foundation-polish.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": "textarea",
+      "owners": [
+        "theme.css",
+        "studio.css",
+        "layout-dock.css",
+        "foundation-polish.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 5
+    },
+    {
+      "selector": ".cinematic-brand-panel .brand-signature-pill",
+      "owners": [
+        "desktop-prime-layout.css",
+        "hero-command-deck.css",
+        "ui-refinement.css",
+        "header-meta-rail.css"
+      ],
+      "ownerCount": 4
+    },
+    {
+      "selector": ".cinematic-brand-panel .hero-mainline",
+      "owners": [
+        "foundation-polish.css",
+        "desktop-prime-layout.css",
+        "hero-command-deck.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 4
+    },
+    {
+      "selector": ".cinematic-title",
+      "owners": [
+        "shutter-glass-flow.css",
+        "desktop-prime-layout.css",
+        "hero-command-deck.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 4
+    },
+    {
+      "selector": ".engine-status-card",
+      "owners": [
+        "engine-panel.css",
+        "pro-engine.css",
+        "glass-pro-ui.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 4
+    },
+    {
+      "selector": ".hero-mainline",
+      "owners": [
+        "studio.css",
+        "layout-dock.css",
+        "flow-polish.css",
+        "shutter-glass-flow.css"
+      ],
+      "ownerCount": 4
+    },
+    {
+      "selector": ".phone-frame",
+      "owners": [
+        "editor.css",
+        "ux.css",
+        "layout-dock.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 4
+    },
+    {
+      "selector": ".project-card",
+      "owners": [
+        "editor.css",
+        "layout-dock.css",
+        "shutter-glass-flow.css",
+        "hero-command-deck.css"
+      ],
+      "ownerCount": 4
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .auto-cut-panel",
+      "owners": [
+        "flow-integrity.css",
+        "flow-doctor.css",
+        "desktop-prime-layout.css",
+        "ui-refinement.css"
+      ],
+      "ownerCount": 4
+    },
+    {
+      "selector": "body[data-ui=\"hyperflow-tabs\"] .cinematic-brand-panel .brand-topline",
+      "owners": [
+        "desktop-prime-layout.css",
+        "hero-command-deck.css",
+        "ui-refinement.css",
+        "header-meta-rail.css"
+      ],
+      "ownerCount": 4
+    }
+  ],
+  "topPropertyConflicts": [],
+  "propertyConflicts": [],
+  "sameValueDuplicates": [],
+  "ignoredAtRules": []
+}

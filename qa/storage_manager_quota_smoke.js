@@ -24,13 +24,13 @@ const localStorage = {
         values.set(key, String(value));
     }
 };
-const cacheNames = new Set(['ai-shorts-studio-shell-v1.5.21-old', 'ai-shorts-studio-shell-v1.5.28-analysis-namespace-maintenance-history', 'other-cache']);
+const cacheNames = new Set(['ai-shorts-studio-shell-v1.5.21-old', 'ai-shorts-studio-shell-v1.5.29-analysis-signature-storage-trend', 'other-cache']);
 const window = {
     window: null,
     localStorage,
     navigator: { storage: { async estimate() { return { usage: 80, quota: 100 }; } } },
     caches: { async keys() { return [...cacheNames]; }, async delete(name) { return cacheNames.delete(name); } },
-    AIShortsRuntimeConfig: { BUILD_KEY: '1.5.28-analysis-namespace-maintenance-history', STORAGE_WARNING_RATIO: 0.8, STORAGE_CRITICAL_RATIO: 0.92 },
+    AIShortsRuntimeConfig: { BUILD_KEY: '1.5.29-analysis-signature-storage-trend', STORAGE_WARNING_RATIO: 0.8, STORAGE_CRITICAL_RATIO: 0.92 },
     document: { dispatchEvent() {} },
     CustomEvent: function CustomEvent() {}
 };

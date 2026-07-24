@@ -23,7 +23,7 @@ const runtime = require(path.join(root, 'package.json'));
 const manifest = {
     app: 'AI Shorts Studio',
     version: runtime.version,
-    buildKey: '1.5.28-analysis-namespace-maintenance-history',
+    buildKey: '1.5.29-analysis-signature-storage-trend',
     algorithm: 'sha256',
     generatedAt: new Date().toISOString(),
     assetCount: Object.keys(assets).length,

@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v1.5.29 - Option-Aware Analysis Cache & Storage Cost Trend
+
+- 자동 컷 설정을 안정적 16자리 option signature로 정규화해 메모리·IndexedDB 분석 캐시 키에 포함하고, 설정 변경 뒤 이전 자동 컷 결과가 재사용되던 stale cache 가능성을 차단했습니다.
+- 옵션 스냅샷을 키 생성과 실제 분석 파이프라인이 공유하도록 해 signature와 결과의 원자성을 보장했습니다.
+- 분석 캐시 계약을 `v3`로 갱신하고 기존 `v2` 자료는 이전 namespace로 보존해 자동 파괴 없이 선택 정리할 수 있도록 했습니다.
+- signature별 항목 수·추정 바이트·마지막 사용 시각을 비식별 요약하고, 저장소 진단 화면에서 원하는 signature 그룹만 삭제할 수 있습니다.
+- 현재·이전 namespace 저장 비용 추세를 최대 48개 시점으로 기록하며, 의미 있는 용량 상태 변화가 있을 때만 새 표본을 추가합니다.
+- entries·namespace·signature·추세·이력을 결합한 유지보수 스냅샷을 추가해 진단 갱신 중 중복 IndexedDB 전체 스캔을 제거했습니다.
+- 전용 회귀 검사를 추가해 자동 QA **213/213**, Chromium 4개 viewport 오류·Promise 거절·콘솔 오류·가로 overflow **0건**을 통과했습니다.
+
+---
+
 ## v1.5.28 - Analysis Namespace Visibility & Selective Cleanup History
 
 - 일반 TTL/LRU 정리, 시작 상태 확인, 새 영구 캐시 쓰기에서 이전 분석 namespace를 즉시 삭제하던 동작을 제거해 사용자가 먼저 상태를 확인할 수 있도록 했습니다.

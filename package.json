@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-5-28",
-  "version": "1.5.28",
+  "name": "ai-shorts-studio-v1-5-29",
+  "version": "1.5.29",
   "private": true,
-  "description": "AI Shorts Studio v1.5.28 - analysis namespace visibility, selective cleanup, and privacy-safe maintenance history",
+  "description": "AI Shorts Studio v1.5.29 - option-aware analysis cache, signature cleanup, storage trend, and cached diagnostics",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -156,6 +156,7 @@
     "node qa/analysis_persistent_quota_selective_smoke.js",
     "node qa/analysis_cache_selective_invalidation_smoke.js",
     "node qa/analysis_cache_namespace_history_smoke.js",
+    "node qa/analysis_cache_signature_trend_smoke.js",
     "node qa/candidate_pin_persistence_safety_smoke.js",
     "node --check src/ui/session-continuity.js",
     "node qa/session_schema_backup_smoke.js",

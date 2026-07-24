@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.28 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.5.29 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.5.28',
-    BUILD_KEY: '1.5.28-analysis-namespace-maintenance-history',
+    APP_VERSION: 'v1.5.29',
+    BUILD_KEY: '1.5.29-analysis-signature-storage-trend',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -20,7 +20,8 @@ window.AIShortsRuntimeConfig = Object.freeze({
     ANALYSIS_CACHE_MAX_AGE_MS: 30 * 60 * 1000,
     ANALYSIS_CACHE_DIAGNOSTIC_EVENT_LIMIT: 80,
     ANALYSIS_CACHE_MAINTENANCE_HISTORY_LIMIT: 20,
-    ANALYSIS_CACHE_CONTRACT_VERSION: 2,
+    ANALYSIS_CACHE_STORAGE_TREND_LIMIT: 48,
+    ANALYSIS_CACHE_CONTRACT_VERSION: 3,
     ANALYSIS_PERSISTENT_CACHE_ENABLED: true,
     ANALYSIS_PERSISTENT_CACHE_DB_NAME: 'ai-shorts-analysis-cache-v1',
     ANALYSIS_PERSISTENT_CACHE_MAX_ITEMS: 8,

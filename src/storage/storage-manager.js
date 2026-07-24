@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.28 - quota-aware local and cache storage coordinator
+// AI Shorts Studio v1.5.29 - quota-aware local and cache storage coordinator
 'use strict';
 
 (function exposeStorageManager(global) {

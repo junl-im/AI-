@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.5.28 - selective cache, recovery, and service worker audit controls
+// AI Shorts Studio v1.5.29 - selective cache, recovery, and service worker audit controls
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;
@@ -49,6 +49,8 @@
             '  <button id="analysisCacheEntryDeleteBtn" type="button" data-icon="close">선택 캐시 삭제</button>',
             '  <label class="storage-cache-entry-picker storage-cache-filter-picker"><span>조건별 캐시 정리</span><select id="analysisCacheInvalidationSelect" aria-label="무효화할 분석 캐시 조건"><option value="balanced">균형 분석</option><option value="performance">속도 우선</option><option value="quality">품질 우선</option><option value="legacy-contract">이전 분석 계약</option></select></label>',
             '  <button id="analysisCacheInvalidateBtn" type="button" data-icon="close">조건 캐시 정리</button>',
+            '  <label class="storage-cache-entry-picker storage-cache-filter-picker"><span>옵션 signature 정리</span><select id="analysisCacheSignatureSelect" aria-label="정리할 분석 옵션 signature"><option value="">signature 없음</option></select></label>',
+            '  <button id="analysisCacheSignatureDeleteBtn" type="button" data-icon="close">signature 캐시 정리</button>',
             '  <button id="analysisCacheCleanupBtn" type="button" data-icon="close">분석 캐시 전체 정리</button>',
             '  <button id="storageIntegrityAuditBtn" type="button" data-icon="diagnostics">셸 표본 검사</button>',
             '  <button id="storageIntegrityDiagnosticsBtn" type="button" data-icon="diagnostics">셸 감사 진단</button>',
@@ -63,6 +65,7 @@
             '    <label class="storage-cache-entry-picker"><span>정리할 이전 namespace</span><select id="analysisCacheNamespaceSelect" multiple size="3" aria-label="정리할 이전 분석 캐시 namespace 복수 선택"><option value="">이전 namespace 없음</option></select></label>',
             '    <button id="analysisCacheNamespaceDeleteBtn" type="button" data-icon="close">선택 namespace 정리</button>',
             '  </div>',
+            '  <div class="analysis-cache-trend-card"><strong>namespace 저장 비용 추세</strong><small id="analysisCacheTrendSummary">저장 비용 변화를 확인하고 있습니다.</small><ol id="analysisCacheStorageTrend"><li>추세 기록이 없습니다.</li></ol></div>',
             '  <div class="analysis-cache-history-card"><strong>최근 캐시 정리 이력</strong><ol id="analysisCacheMaintenanceHistory"><li>정리 이력이 없습니다.</li></ol></div>',
             '</section>'
         ].join('');
@@ -73,6 +76,7 @@
         const analysisCleanupButton = byId('analysisCacheCleanupBtn');
         const analysisEntryDeleteButton = byId('analysisCacheEntryDeleteBtn');
         const analysisInvalidateButton = byId('analysisCacheInvalidateBtn');
+        const analysisSignatureDeleteButton = byId('analysisCacheSignatureDeleteBtn');
         const analysisNamespaceDeleteButton = byId('analysisCacheNamespaceDeleteBtn');
         const integrityDiagnosticsButton = byId('storageIntegrityDiagnosticsBtn');
         const integrityAuditButton = byId('storageIntegrityAuditBtn');
@@ -85,6 +89,7 @@
         if (analysisCleanupButton) analysisCleanupButton.addEventListener('click', cleanupAnalysisCache);
         if (analysisEntryDeleteButton) analysisEntryDeleteButton.addEventListener('click', deleteSelectedAnalysisCacheEntry);
         if (analysisInvalidateButton) analysisInvalidateButton.addEventListener('click', invalidateSelectedAnalysisCache);
+        if (analysisSignatureDeleteButton) analysisSignatureDeleteButton.addEventListener('click', invalidateSelectedAnalysisCacheSignature);
         if (analysisNamespaceDeleteButton) analysisNamespaceDeleteButton.addEventListener('click', deleteSelectedAnalysisCacheNamespaces);
         if (integrityDiagnosticsButton) integrityDiagnosticsButton.addEventListener('click', exportIntegrityDiagnostics);
         if (integrityAuditButton) integrityAuditButton.addEventListener('click', runIntegrityAudit);
@@ -166,9 +171,9 @@
         build();
         refreshPromise = Promise.resolve(storage.estimate ? storage.estimate({ force: Boolean(opts.force) }) : storage.status && storage.status() || {}).then(async snapshot => {
             const engine = global.AIShortsEngineKernel || {};
-            if (engine.refreshPersistentAnalysisCachePolicy) await engine.refreshPersistentAnalysisCachePolicy();
-            await refreshAnalysisCacheEntries();
-            await refreshAnalysisCacheMaintenance();
+            const cacheSnapshot = engine.refreshPersistentAnalysisCachePolicy ? await engine.refreshPersistentAnalysisCachePolicy() : null;
+            await refreshAnalysisCacheEntries(cacheSnapshot);
+            await refreshAnalysisCacheMaintenance(cacheSnapshot);
             if (serviceWorker.requestInstallReport) serviceWorker.requestInstallReport();
             render(snapshot);
             return snapshot;
@@ -179,12 +184,12 @@
         }).finally(() => { refreshPromise = null; });
         return refreshPromise;
     }
-    async function refreshAnalysisCacheEntries() {
+    async function refreshAnalysisCacheEntries(snapshot) {
         const select = byId('analysisCacheEntrySelect');
         const button = byId('analysisCacheEntryDeleteBtn');
         if (!select) return [];
         const engine = global.AIShortsEngineKernel || {};
-        const entries = engine.listPersistentAnalysisCacheEntries ? await engine.listPersistentAnalysisCacheEntries() : [];
+        const entries = snapshot && Array.isArray(snapshot.entries) ? snapshot.entries : (engine.listPersistentAnalysisCacheEntries ? await engine.listPersistentAnalysisCacheEntries() : []);
         select.replaceChildren(...(entries.length ? entries : [{ token: '', bytes: 0, lastAccessAt: '' }]).map((entry, index) => {
             const option = document.createElement('option');
             option.value = entry.token || '';
@@ -216,14 +221,20 @@
         return labels[String(operation || '')] || '캐시 정리';
     }
 
-    async function refreshAnalysisCacheMaintenance() {
+    async function refreshAnalysisCacheMaintenance(snapshot) {
         const engine = global.AIShortsEngineKernel || {};
         const summary = byId('analysisCacheNamespaceSummary');
         const select = byId('analysisCacheNamespaceSelect');
         const button = byId('analysisCacheNamespaceDeleteBtn');
         const historyRoot = byId('analysisCacheMaintenanceHistory');
-        const status = engine.getPersistentAnalysisCacheNamespaceStatus ? await engine.getPersistentAnalysisCacheNamespaceStatus() : null;
-        const history = engine.getAnalysisCacheMaintenanceHistory ? engine.getAnalysisCacheMaintenanceHistory(8) : [];
+        const signatureSelect = byId('analysisCacheSignatureSelect');
+        const signatureButton = byId('analysisCacheSignatureDeleteBtn');
+        const trendSummary = byId('analysisCacheTrendSummary');
+        const trendRoot = byId('analysisCacheStorageTrend');
+        const status = snapshot && snapshot.namespaceStatus || (engine.getPersistentAnalysisCacheNamespaceStatus ? await engine.getPersistentAnalysisCacheNamespaceStatus() : null);
+        const history = snapshot && Array.isArray(snapshot.maintenanceHistory) ? snapshot.maintenanceHistory : (engine.getAnalysisCacheMaintenanceHistory ? engine.getAnalysisCacheMaintenanceHistory(8) : []);
+        const signatureGroups = snapshot && snapshot.optionSignatures && Array.isArray(snapshot.optionSignatures.groups) ? snapshot.optionSignatures.groups : [];
+        const trend = snapshot && Array.isArray(snapshot.storageTrend) ? snapshot.storageTrend : [];
         const current = status && status.current || {};
         const legacy = status && Array.isArray(status.legacy) ? status.legacy : [];
         if (summary) {
@@ -243,6 +254,31 @@
             }));
         }
         if (button) button.disabled = !legacy.length;
+        if (signatureSelect) {
+            const source = signatureGroups.length ? signatureGroups : [{ token: '', count: 0, bytes: 0 }];
+            signatureSelect.replaceChildren(...source.map((item, index) => {
+                const option = document.createElement('option');
+                option.value = item.token || '';
+                option.textContent = item.token ? `${index + 1}. ${item.token.slice(0, 8)}… · ${item.count || 0}개 · ${formatBytes(item.bytes || 0)}` : 'signature 없음';
+                option.disabled = !item.token;
+                return option;
+            }));
+        }
+        if (signatureButton) signatureButton.disabled = !signatureGroups.length;
+        if (trendSummary) {
+            const latest = trend[0] || null;
+            const previous = trend[1] || null;
+            const delta = latest && previous ? Number(latest.totalBytes || 0) - Number(previous.totalBytes || 0) : 0;
+            trendSummary.textContent = latest ? `전체 ${formatBytes(latest.totalBytes || 0)} · 현재 ${formatBytes(latest.currentBytes || 0)} · 이전 ${formatBytes(latest.legacyBytes || 0)}${previous ? ` · 직전 대비 ${delta >= 0 ? '+' : '-'}${formatBytes(Math.abs(delta))}` : ''}` : '추세 기록이 없습니다.';
+        }
+        if (trendRoot) {
+            const source = trend.length ? trend.slice(0, 8) : [{ at: '', totalBytes: 0, totalItems: 0 }];
+            trendRoot.replaceChildren(...source.map(item => {
+                const row = document.createElement('li');
+                row.textContent = item.at ? `${formatCacheDate(item.at)} · ${item.totalItems || 0}개 · ${formatBytes(item.totalBytes || 0)}` : '추세 기록이 없습니다.';
+                return row;
+            }));
+        }
         if (historyRoot) {
             const source = Array.isArray(history) && history.length ? history : [{ operation: '', at: '', removed: 0, bytes: 0 }];
             historyRoot.replaceChildren(...source.map(item => {
@@ -256,6 +292,34 @@
         return Object.freeze({ status, history });
     }
 
+    async function refreshAnalysisCacheDashboard() {
+        const engine = global.AIShortsEngineKernel || {};
+        const snapshot = engine.getPersistentAnalysisCacheMaintenanceSnapshot ? await engine.getPersistentAnalysisCacheMaintenanceSnapshot({ refresh: false, trendLimit: 12, historyLimit: 8 }) : null;
+        await refreshAnalysisCacheEntries(snapshot);
+        await refreshAnalysisCacheMaintenance(snapshot);
+        return snapshot;
+    }
+
+    async function invalidateSelectedAnalysisCacheSignature() {
+        const select = byId('analysisCacheSignatureSelect');
+        const button = byId('analysisCacheSignatureDeleteBtn');
+        const token = select && select.value || '';
+        if (!token) { feedback('정리할 옵션 signature를 선택하세요.', 'warning'); return null; }
+        if (button) button.disabled = true;
+        try {
+            const engine = global.AIShortsEngineKernel || {};
+            if (!engine.invalidateAnalysisCache) throw new Error('옵션 signature 캐시 정리를 지원하지 않습니다.');
+            const result = await engine.invalidateAnalysisCache({ optionSignatureToken: token, reason: 'option-signature' });
+            await refreshAnalysisCacheDashboard();
+            render();
+            feedback(result && result.removed ? `옵션 signature 캐시 ${result.removed}개 · ${formatBytes(result.bytes || 0)}를 정리했습니다.` : '선택한 signature 캐시가 없습니다.', 'action');
+            return result;
+        } catch (error) {
+            feedback(error && error.message || '옵션 signature 캐시 정리에 실패했습니다.', 'error');
+            return null;
+        } finally { if (button) button.disabled = false; }
+    }
+
     async function deleteSelectedAnalysisCacheNamespaces() {
         const select = byId('analysisCacheNamespaceSelect');
         const button = byId('analysisCacheNamespaceDeleteBtn');
@@ -266,8 +330,7 @@
             const engine = global.AIShortsEngineKernel || {};
             if (!engine.deletePersistentAnalysisCacheNamespaces) throw new Error('이전 분석 namespace 정리를 지원하지 않습니다.');
             const result = await engine.deletePersistentAnalysisCacheNamespaces(tokens);
-            await refreshAnalysisCacheEntries();
-            await refreshAnalysisCacheMaintenance();
+            await refreshAnalysisCacheDashboard();
             render();
             if (!result || !result.removed) throw new Error('선택한 이전 namespace에서 정리할 캐시를 찾지 못했습니다.');
             feedback(`이전 namespace ${result.removedNamespaces || 0}종 · 캐시 ${result.removed}개 · ${formatBytes(result.bytes || 0)}를 정리했습니다.`, 'action');
@@ -286,8 +349,7 @@
         try {
             const engine = global.AIShortsEngineKernel || {};
             const result = engine.deletePersistentAnalysisCacheEntries ? await engine.deletePersistentAnalysisCacheEntries(tokens) : (tokens.length === 1 && engine.deletePersistentAnalysisCacheEntry ? await engine.deletePersistentAnalysisCacheEntry(tokens[0]) : null);
-            await refreshAnalysisCacheEntries();
-            await refreshAnalysisCacheMaintenance();
+            await refreshAnalysisCacheDashboard();
             render();
             const removed = Number(result && (result.removed === true ? 1 : result.removed)) || 0;
             if (!removed) throw new Error('선택한 캐시 항목을 찾지 못했습니다.');
@@ -309,11 +371,10 @@
             const engine = global.AIShortsEngineKernel || {};
             if (!engine.invalidateAnalysisCache) throw new Error('조건별 분석 캐시 정리를 지원하지 않습니다.');
             const criteria = value === 'legacy-contract'
-                ? { contractVersion: String(config.ANALYSIS_CACHE_CONTRACT_VERSION || '2'), reason: 'legacy-contract' }
+                ? { contractVersion: String(config.ANALYSIS_CACHE_CONTRACT_VERSION || '3'), reason: 'legacy-contract' }
                 : { tier: value, reason: `tier-${value}` };
             const result = await engine.invalidateAnalysisCache(criteria);
-            await refreshAnalysisCacheEntries();
-            await refreshAnalysisCacheMaintenance();
+            await refreshAnalysisCacheDashboard();
             render();
             feedback(result && result.removed ? `조건에 맞는 분석 캐시 ${result.removed}개를 정리했습니다.` : '조건에 맞는 분석 캐시가 없습니다.', 'action');
             return result;
@@ -415,8 +476,7 @@
             const engine = global.AIShortsEngineKernel || {};
             const before = engine.getHealthReport ? engine.getHealthReport().cache : null;
             const after = engine.clearAnalysisCache ? await engine.clearAnalysisCache() : null;
-            await refreshAnalysisCacheEntries();
-            await refreshAnalysisCacheMaintenance();
+            await refreshAnalysisCacheDashboard();
             render();
             feedback(before && before.size ? `분석 캐시 ${before.size}개를 정리했습니다.` : '정리할 분석 캐시가 없습니다.', 'action');
             return after;
@@ -470,7 +530,7 @@
             document.addEventListener(name, event => render(name === 'ai-shorts-storage-status' && event.detail || null));
         });
     }
-    global.AIShortsStorageHealthPanel = Object.freeze({ build, render, refresh, cleanup, exportAnalysisDiagnostics, exportIntegrityDiagnostics, refreshAnalysisCacheEntries, refreshAnalysisCacheMaintenance, deleteSelectedAnalysisCacheEntry, deleteSelectedAnalysisCacheNamespaces, invalidateSelectedAnalysisCache, cleanupAnalysisCache, runIntegrityAudit, retryFailedIntegrityAssets, clearIntegrityAuditHistory, repairOfflineShell, formatBytes });
+    global.AIShortsStorageHealthPanel = Object.freeze({ build, render, refresh, cleanup, exportAnalysisDiagnostics, exportIntegrityDiagnostics, refreshAnalysisCacheEntries, refreshAnalysisCacheMaintenance, refreshAnalysisCacheDashboard, deleteSelectedAnalysisCacheEntry, deleteSelectedAnalysisCacheNamespaces, invalidateSelectedAnalysisCache, invalidateSelectedAnalysisCacheSignature, cleanupAnalysisCache, runIntegrityAudit, retryFailedIntegrityAssets, clearIntegrityAuditHistory, repairOfflineShell, formatBytes });
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
     else install();
 })(window);

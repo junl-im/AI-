@@ -1,3 +1,55 @@
+# QA REPORT — AI 쇼츠 스튜디오 v1.5.29
+
+## 최종 결과
+
+- 자동 검사: **213/213 통과**
+- 실행 방식: 단일 실행이 환경 제한 전에 0~171까지 통과한 뒤 종료되어 0~171, 172~190, 191~212 세 구간으로 완주, 실패 **0건**
+- 신규 회귀: stable option signature, 설정 변경 cache key 분리, 단일 옵션 스냅샷, signature별 선택 정리, 저장 비용 추세, 캐시된 유지보수 스냅샷 모두 통과
+- 데스크톱·소형 노트북·태블릿·모바일 JavaScript 오류, Promise 거절, 콘솔 오류: **0건**
+- 4개 viewport 가로 overflow: **0px**
+- 서비스워커 install·activate·이전 앱 셸 cache 정리·offline navigation 통과
+
+## 기능·기술 결과
+
+- 자동 컷 옵션 변경 시 메모리·영구 캐시 키가 분리되어 stale 결과가 적중하지 않음
+- 객체 키 순서가 다른 동일 옵션은 같은 16자리 signature를 생성
+- 키 생성과 분석 파이프라인이 동일한 단일 옵션 스냅샷을 사용
+- 분석 캐시 계약 v3, 기존 v2는 이전 namespace로 보존
+- signature별 항목 수·추정 바이트·마지막 사용 요약과 선택 삭제 통과
+- 파일명·경로·원시 키·옵션 원문·분석 본문 비노출 통과
+
+## 성능 결과
+
+- 정책 갱신 한 번의 전체 읽기로 entries·namespace·signature snapshot 생성
+- 후속 `maintenanceSnapshot({ refresh: false })` 호출에서 `readAllScans` 증가 0
+- 저장소 진단 새로고침 전체 스캔 경로를 기존 최대 3회에서 1회로 감축
+- namespace 저장 비용 추세 최대 48개, 동일 상태 중복 기록 방지, signature 삭제 뒤 감소 표본 기록 통과
+
+## UI·CSS 결과
+
+- signature 선택 정리와 namespace 저장 비용 추세 렌더링·상태 갱신 통과
+- Chromium 4개 viewport에서 새 패널 포함 body/html scroll width가 viewport와 동일
+- CSS ownership: 연결 CSS 46개, 전체 CSS 47개, `!important` 593개
+- conflict·same-value duplicate·shadowed declaration: **0건**
+
+## 런타임 감사
+
+- browser audit: 4개 viewport 오류·거절·console error 0, horizontal overflow 0
+- service worker lifecycle: `ai-shorts-studio-shell-v1.5.29-analysis-signature-storage-trend`, install·activate·offline navigation 통과
+- GPU/media capability: acceleration-requested·software-forced 모두 1280×720 30fps H.264/AAC 62프레임, dropped frame 0
+- interaction-state audit는 v1.5.29로 신규 실행
+- process-memory·structure-priority·long-video 자료는 대상 소유 경로가 변경되지 않아 v1.5.28 근거를 명시적으로 상속
+
+## 감사 제한
+
+- IndexedDB 저장 비용은 직렬화 기반 추정치이며 실제 브라우저 디스크 사용량과 차이가 있을 수 있습니다.
+- 추세와 유지보수 이력은 best-effort localStorage이므로 사이트 데이터 삭제·저장 차단·quota 오류에서 손실될 수 있습니다.
+- 실제 모바일 Safari·Samsung Internet 다운로드 관리자와 물리 GPU 장시간 동작은 실기기 검증이 필요합니다.
+
+---
+
+# QA REPORT HISTORY — v1.5.28 source document
+
 # QA REPORT — AI 쇼츠 스튜디오 v1.5.28
 
 ## 최종 결과

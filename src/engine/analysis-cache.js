@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.5.28 - contract-aware persistent cache invalidation and bounded diagnostics
+// AI Shorts Studio v1.5.29 - contract-aware persistent cache invalidation and bounded diagnostics
 'use strict';
 
 (function exposeAnalysisCache(global) {
     const config = global.AIShortsRuntimeConfig || {};
-    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.28').replace(/^v/i, '');
+    const ENGINE_VERSION = String(config.APP_VERSION || 'v1.5.29').replace(/^v/i, '');
     const BASE_SAMPLE_BYTES = Math.max(4096, Math.min(128 * 1024, Number(config.ANALYSIS_CACHE_FINGERPRINT_SAMPLE_BYTES) || 16 * 1024));
     const MAX_SAMPLE_BYTES = Math.max(BASE_SAMPLE_BYTES, Math.min(256 * 1024, Number(config.ANALYSIS_CACHE_MAX_SAMPLE_BYTES) || 128 * 1024));
     const FULL_HASH_MAX_BYTES = Math.max(BASE_SAMPLE_BYTES, Number(config.ANALYSIS_CACHE_FULL_HASH_MAX_BYTES) || 2 * 1024 * 1024);
@@ -51,6 +51,27 @@
             hash = Math.imul(hash, 0x01000193) >>> 0;
         }
         return hash.toString(16).padStart(8, '0');
+    }
+
+    function stableSerialize(value, depth) {
+        const level = Number(depth) || 0;
+        if (level > 6) return '"[depth-limit]"';
+        if (value == null) return 'null';
+        if (typeof value === 'number') return Number.isFinite(value) ? String(value) : 'null';
+        if (typeof value === 'boolean') return value ? 'true' : 'false';
+        if (typeof value === 'string') return JSON.stringify(value.slice(0, 240));
+        if (Array.isArray(value)) return `[${value.slice(0, 64).map(item => stableSerialize(item, level + 1)).join(',')}]`;
+        if (typeof value === 'object') {
+            return `{${Object.keys(value).sort().slice(0, 64).map(key => `${JSON.stringify(key)}:${stableSerialize(value[key], level + 1)}`).join(',')}}`;
+        }
+        return JSON.stringify(String(value).slice(0, 240));
+    }
+
+    function makeOptionSignature(value) {
+        if (value == null || value === '') return '';
+        if (typeof value === 'string' && /^[0-9a-f]{16}$/i.test(value.trim())) return value.trim().toLowerCase();
+        const serialized = stableSerialize(value, 0);
+        return `${textToken(serialized)}${textToken(`option:${serialized}`)}`;
     }
 
     function recordEvent(type, detail) {
@@ -111,6 +132,7 @@
             budget && budget.tier || 'balanced',
             budget && budget.analysisSampleRate || 0,
             budget && budget.motionSamples || 0,
+            budget && budget.optionSignature || '',
             budget && budget.cacheNamespace || `engine-v${ENGINE_VERSION}`
         ];
         return parts.map(safePart).join('::');
@@ -408,14 +430,15 @@
     function cacheProfileFromKey(key, metadata) {
         const source = metadata && typeof metadata === 'object' ? metadata : {};
         const parts = String(key || '').split('::');
+        const hasOptionSignaturePart = parts.length > 11;
         return Object.freeze({
             appVersion: String(source.appVersion || ENGINE_VERSION),
             contractVersion: String(source.contractVersion || source.analysisContract || '1'),
             tier: String(source.tier || source.budgetTier || parts[7] || 'balanced'),
             analysisSampleRate: Math.max(0, Number(source.analysisSampleRate != null ? source.analysisSampleRate : parts[8]) || 0),
             motionSamples: Math.max(0, Number(source.motionSamples != null ? source.motionSamples : parts[9]) || 0),
-            optionSignature: String(source.optionSignature || source.optionsToken || ''),
-            cacheNamespace: String(source.cacheNamespace || parts[10] || '')
+            optionSignature: makeOptionSignature(source.optionSignature || source.optionsToken || (hasOptionSignaturePart ? parts[10] : '')),
+            cacheNamespace: String(source.cacheNamespace || (hasOptionSignaturePart ? parts[11] : parts[10]) || '')
         });
     }
 
@@ -437,7 +460,9 @@
         const appVersion = String(opts.appVersion || ENGINE_VERSION);
         const contractVersion = String(opts.contractVersion || '1');
         const maintenanceHistoryLimit = Math.max(5, Math.min(80, Number(opts.maintenanceHistoryLimit || config.ANALYSIS_CACHE_MAINTENANCE_HISTORY_LIMIT) || 20));
+        const storageTrendLimit = Math.max(8, Math.min(120, Number(opts.storageTrendLimit || config.ANALYSIS_CACHE_STORAGE_TREND_LIMIT) || 48));
         const maintenanceStorageKey = `ai-shorts-analysis-cache-maintenance-v1-${textToken(databaseName)}`;
+        const storageTrendKey = `ai-shorts-analysis-cache-storage-trend-v1-${textToken(databaseName)}`;
         const namespaceToken = value => `${textToken(value)}${textToken(`namespace:${String(value || '')}`)}`;
         let effectiveMaxItems = baseMaxItems;
         let effectiveMaxBytes = baseMaxBytes;
@@ -455,6 +480,8 @@
         let oldNamespaceDeletes = 0;
         let size = 0;
         let totalBytes = 0;
+        let entrySnapshot = Object.freeze([]);
+        let optionSignatureSnapshot = Object.freeze({ groups: Object.freeze([]), unprofiledCount: 0, unprofiledBytes: 0, generatedAt: '' });
         let namespaceSnapshot = Object.freeze({
             current: Object.freeze({ token: namespaceToken(namespace), namespace, count: 0, bytes: 0, lastAccessAt: '', contractVersions: [], appVersions: [], tiers: [] }),
             legacy: Object.freeze([]),
@@ -465,6 +492,12 @@
             generatedAt: ''
         });
         let maintenanceHistory = null;
+        let storageTrend = null;
+        let readAllScans = 0;
+        let readAllRows = 0;
+        let lastReadAllRows = 0;
+        let lastReadAllMs = 0;
+        let maxReadAllMs = 0;
         let lastError = '';
         let lastOperationAt = '';
         let quotaLevel = 'unknown';
@@ -525,6 +558,116 @@
         function getMaintenanceHistory(limit) {
             const max = Math.max(1, Math.min(maintenanceHistoryLimit, Number(limit) || maintenanceHistoryLimit));
             return loadMaintenanceHistory().slice(0, max).map(item => Object.freeze(Object.assign({}, item, { namespaceTokens: Object.freeze(Array.from(item.namespaceTokens || [])) })));
+        }
+
+        function loadStorageTrend() {
+            if (storageTrend) return storageTrend;
+            storageTrend = [];
+            try {
+                const storage = global.localStorage;
+                if (!storage || typeof storage.getItem !== 'function') return storageTrend;
+                const parsed = JSON.parse(storage.getItem(storageTrendKey) || '[]');
+                if (Array.isArray(parsed)) {
+                    storageTrend = parsed.filter(item => item && typeof item === 'object').slice(0, storageTrendLimit).map(item => Object.freeze({
+                        at: String(item.at || ''),
+                        reason: String(item.reason || 'refresh').slice(0, 40),
+                        currentItems: Math.max(0, Number(item.currentItems) || 0),
+                        currentBytes: Math.max(0, Number(item.currentBytes) || 0),
+                        legacyItems: Math.max(0, Number(item.legacyItems) || 0),
+                        legacyBytes: Math.max(0, Number(item.legacyBytes) || 0),
+                        totalItems: Math.max(0, Number(item.totalItems) || 0),
+                        totalBytes: Math.max(0, Number(item.totalBytes) || 0),
+                        namespaceCount: Math.max(0, Number(item.namespaceCount) || 0)
+                    }));
+                }
+            } catch (_) { storageTrend = []; }
+            return storageTrend;
+        }
+
+        function saveStorageTrend() {
+            try {
+                const storage = global.localStorage;
+                if (storage && typeof storage.setItem === 'function') storage.setItem(storageTrendKey, JSON.stringify(loadStorageTrend()));
+            } catch (_) { /* best effort */ }
+        }
+
+        function recordStorageTrend(reason) {
+            const current = namespaceSnapshot.current || {};
+            const next = Object.freeze({
+                at: nowIso(),
+                reason: String(reason || 'refresh').slice(0, 40),
+                currentItems: Math.max(0, Number(current.count) || 0),
+                currentBytes: Math.max(0, Number(current.bytes) || 0),
+                legacyItems: Math.max(0, Number(namespaceSnapshot.legacyItems) || 0),
+                legacyBytes: Math.max(0, Number(namespaceSnapshot.legacyBytes) || 0),
+                totalItems: Math.max(0, (Number(current.count) || 0) + (Number(namespaceSnapshot.legacyItems) || 0)),
+                totalBytes: Math.max(0, (Number(current.bytes) || 0) + (Number(namespaceSnapshot.legacyBytes) || 0)),
+                namespaceCount: Math.max(1, Number(namespaceSnapshot.namespaceCount) || 1)
+            });
+            const history = loadStorageTrend();
+            const previous = history[0];
+            if (previous && previous.currentItems === next.currentItems && previous.currentBytes === next.currentBytes && previous.legacyItems === next.legacyItems && previous.legacyBytes === next.legacyBytes && previous.namespaceCount === next.namespaceCount) return previous;
+            history.unshift(next);
+            if (history.length > storageTrendLimit) history.length = storageTrendLimit;
+            saveStorageTrend();
+            return next;
+        }
+
+        function getStorageTrend(limit) {
+            const max = Math.max(1, Math.min(storageTrendLimit, Number(limit) || storageTrendLimit));
+            return loadStorageTrend().slice(0, max).map(item => Object.freeze(Object.assign({}, item)));
+        }
+
+        function summarizeOptionSignatures(rows) {
+            const grouped = new Map();
+            let unprofiledCount = 0;
+            let unprofiledBytes = 0;
+            (Array.isArray(rows) ? rows : []).filter(row => row && row.namespace === namespace).forEach(row => {
+                const signature = makeOptionSignature(row.profile && row.profile.optionSignature || '');
+                const bytes = Math.max(0, Number(row.bytes) || 0);
+                if (!signature) {
+                    unprofiledCount += 1;
+                    unprofiledBytes += bytes;
+                    return;
+                }
+                if (!grouped.has(signature)) grouped.set(signature, { token: signature, count: 0, bytes: 0, lastAccessAt: 0, tiers: new Set() });
+                const item = grouped.get(signature);
+                item.count += 1;
+                item.bytes += bytes;
+                item.lastAccessAt = Math.max(item.lastAccessAt, Number(row.lastAccessAt || row.createdAt) || 0);
+                if (row.profile && row.profile.tier) item.tiers.add(String(row.profile.tier));
+            });
+            optionSignatureSnapshot = Object.freeze({
+                groups: Object.freeze(Array.from(grouped.values()).sort((a, b) => b.bytes - a.bytes || b.count - a.count).map(item => Object.freeze({
+                    token: item.token,
+                    count: item.count,
+                    bytes: item.bytes,
+                    lastAccessAt: item.lastAccessAt ? new Date(item.lastAccessAt).toISOString() : '',
+                    tiers: Object.freeze(Array.from(item.tiers).slice(0, 8))
+                }))),
+                unprofiledCount,
+                unprofiledBytes,
+                generatedAt: nowIso()
+            });
+            return optionSignatureSnapshot;
+        }
+
+        function mapEntry(row) {
+            const optionSignature = makeOptionSignature(row && row.profile && row.profile.optionSignature || '');
+            return Object.freeze({
+                token: textToken(row.key),
+                bytes: Math.max(0, Number(row.bytes) || 0),
+                createdAt: new Date(Number(row.createdAt) || 0).toISOString(),
+                lastAccessAt: new Date(Number(row.lastAccessAt || row.createdAt) || 0).toISOString(),
+                ageMs: Math.max(0, Date.now() - Number(row.createdAt || 0)),
+                appVersion: String(row.profile && row.profile.appVersion || ''),
+                contractVersion: String(row.profile && row.profile.contractVersion || ''),
+                tier: String(row.profile && row.profile.tier || 'balanced'),
+                analysisSampleRate: Math.max(0, Number(row.profile && row.profile.analysisSampleRate) || 0),
+                motionSamples: Math.max(0, Number(row.profile && row.profile.motionSamples) || 0),
+                optionSignature,
+                optionSignatureToken: optionSignature
+            });
         }
 
         function summarizeNamespaces(rows) {
@@ -602,7 +745,15 @@
                 legacyNamespaceCount: namespaceSnapshot.legacyNamespaceCount,
                 legacyItems: namespaceSnapshot.legacyItems,
                 legacyBytes: namespaceSnapshot.legacyBytes,
+                optionSignatureGroups: optionSignatureSnapshot.groups.length,
+                unprofiledOptionEntries: optionSignatureSnapshot.unprofiledCount,
                 maintenanceHistoryCount: loadMaintenanceHistory().length,
+                storageTrendCount: loadStorageTrend().length,
+                readAllScans,
+                readAllRows,
+                lastReadAllRows,
+                lastReadAllMs,
+                maxReadAllMs,
                 quotaLevel,
                 quotaRatio,
                 quotaUsage,
@@ -713,10 +864,12 @@
 
         async function readAll(database) {
             if (!database) return [];
+            const startedAt = nowMs();
             const transaction = database.transaction(storeName, 'readonly');
             const store = transaction.objectStore(storeName);
-            if (typeof store.getAll === 'function') return requestResult(store.getAll());
-            return new Promise((resolve, reject) => {
+            let rows;
+            if (typeof store.getAll === 'function') rows = await requestResult(store.getAll());
+            else rows = await new Promise((resolve, reject) => {
                 const rows = [];
                 const request = store.openCursor();
                 request.onsuccess = () => {
@@ -727,6 +880,13 @@
                 };
                 request.onerror = () => reject(request.error || new Error('IndexedDB cursor failed'));
             });
+            const elapsed = Math.max(0, nowMs() - startedAt);
+            readAllScans += 1;
+            lastReadAllRows = Array.isArray(rows) ? rows.length : 0;
+            readAllRows += lastReadAllRows;
+            lastReadAllMs = Math.round(elapsed * 10) / 10;
+            maxReadAllMs = Math.max(maxReadAllMs, lastReadAllMs);
+            return Array.isArray(rows) ? rows : [];
         }
 
         async function removeKeys(database, keys) {
@@ -737,22 +897,29 @@
             await transactionDone(transaction);
         }
 
-        async function refreshStats(database) {
-            const rows = await readAll(database);
-            summarizeNamespaces(rows);
-            const active = rows.filter(row => row && row.namespace === namespace);
+        function refreshStatsFromRows(rows, reason) {
+            const source = Array.isArray(rows) ? rows : [];
+            summarizeNamespaces(source);
+            const active = source.filter(row => row && row.namespace === namespace);
             size = active.length;
             totalBytes = active.reduce((sum, row) => sum + Math.max(0, Number(row && row.bytes) || 0), 0);
+            entrySnapshot = Object.freeze(active.sort((a, b) => Number(b.lastAccessAt || b.createdAt || 0) - Number(a.lastAccessAt || a.createdAt || 0)).map(mapEntry));
+            summarizeOptionSignatures(source);
+            recordStorageTrend(reason || 'refresh');
             lastOperationAt = nowIso();
-            return rows;
+            return source;
+        }
+
+        async function refreshStats(database, reason) {
+            return refreshStatsFromRows(await readAll(database), reason);
         }
 
         async function refreshNamespaceStatus() {
             const database = await openDatabase();
             if (!database) return getNamespaceSnapshot();
             try {
-                const rows = await refreshStats(database);
-                return summarizeNamespaces(rows);
+                await refreshStats(database, 'namespace-status');
+                return getNamespaceSnapshot();
             } catch (error) {
                 lastError = error && error.message || 'Persistent cache namespace status failed';
                 recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
@@ -764,20 +931,8 @@
             const database = await openDatabase();
             if (!database) return [];
             try {
-                const rows = await refreshStats(database);
-                return rows.filter(row => row && row.namespace === namespace).sort((a, b) => Number(b.lastAccessAt || b.createdAt || 0) - Number(a.lastAccessAt || a.createdAt || 0)).map(row => Object.freeze({
-                    token: textToken(row.key),
-                    bytes: Math.max(0, Number(row.bytes) || 0),
-                    createdAt: new Date(Number(row.createdAt) || 0).toISOString(),
-                    lastAccessAt: new Date(Number(row.lastAccessAt || row.createdAt) || 0).toISOString(),
-                    ageMs: Math.max(0, Date.now() - Number(row.createdAt || 0)),
-                    appVersion: String(row.profile && row.profile.appVersion || ''),
-                    contractVersion: String(row.profile && row.profile.contractVersion || ''),
-                    tier: String(row.profile && row.profile.tier || 'balanced'),
-                    analysisSampleRate: Math.max(0, Number(row.profile && row.profile.analysisSampleRate) || 0),
-                    motionSamples: Math.max(0, Number(row.profile && row.profile.motionSamples) || 0),
-                    optionSignature: String(row.profile && row.profile.optionSignature || '')
-                }));
+                await refreshStats(database, 'entry-list');
+                return Array.from(entrySnapshot);
             } catch (error) {
                 lastError = error && error.message || 'Persistent cache listing failed';
                 recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
@@ -796,7 +951,7 @@
                 if (!row) return Object.freeze({ removed: false, token: normalized, stats: persistentStats() });
                 await removeKeys(database, [row.key]);
                 selectiveDeletes += 1;
-                await refreshStats(database);
+                await refreshStats(database, 'entry-delete');
                 recordEvent('persistent-cache-entry-deleted', { layer: 'persistent', key: row.key, bytes: row.bytes, size });
                 recordMaintenance('entry-delete', { reason: 'selected-entry', removed: 1, bytes: row.bytes, namespaceTokens: [namespaceToken(namespace)] });
                 return Object.freeze({ removed: true, token: normalized, bytes: Math.max(0, Number(row.bytes) || 0), stats: persistentStats() });
@@ -818,7 +973,7 @@
                 await removeKeys(database, rows.map(row => row.key));
                 selectiveDeletes += rows.length;
                 bulkDeletes += rows.length ? 1 : 0;
-                await refreshStats(database);
+                await refreshStats(database, 'entry-delete');
                 const bytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
                 rows.forEach(row => recordEvent('persistent-cache-entry-deleted', { layer: 'persistent', key: row.key, bytes: row.bytes, size }));
                 if (rows.length) recordMaintenance('entry-delete', { reason: 'selected-entries', removed: rows.length, bytes, namespaceTokens: [namespaceToken(namespace)] });
@@ -835,7 +990,8 @@
             const rule = criteria || {};
             if (Array.isArray(rule.tokens) && rule.tokens.length && rule.tokens.includes(textToken(row.key))) return true;
             if (rule.tier && String(profile.tier || '') === String(rule.tier)) return true;
-            if (rule.optionSignature && String(profile.optionSignature || '') === String(rule.optionSignature)) return true;
+            if (rule.optionSignature && makeOptionSignature(profile.optionSignature || '') === makeOptionSignature(rule.optionSignature)) return true;
+            if (rule.optionSignatureToken && makeOptionSignature(profile.optionSignature || '') === String(rule.optionSignatureToken)) return true;
             if (rule.contractVersion && String(profile.contractVersion || '') !== String(rule.contractVersion)) return true;
             if (rule.appVersion && String(profile.appVersion || '') !== String(rule.appVersion)) return true;
             if (Number.isFinite(Number(rule.analysisSampleRate)) && Number(profile.analysisSampleRate || 0) === Number(rule.analysisSampleRate)) return true;
@@ -853,11 +1009,11 @@
                 await removeKeys(database, rows.map(row => row.key));
                 invalidations += rows.length ? 1 : 0;
                 selectiveDeletes += rows.length;
-                await refreshStats(database);
+                await refreshStats(database, 'criteria-invalidate');
                 const bytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
                 recordEvent('persistent-cache-invalidated', { layer: 'persistent', reason: String(rule.reason || 'criteria'), count: rows.length, bytes, size });
                 if (rows.length) recordMaintenance('criteria-invalidate', { reason: String(rule.reason || 'criteria'), removed: rows.length, bytes, namespaceTokens: [namespaceToken(namespace)] });
-                return Object.freeze({ removed: rows.length, bytes, criteria: Object.freeze({ reason: String(rule.reason || 'criteria'), tier: String(rule.tier || ''), contractVersion: String(rule.contractVersion || ''), appVersion: String(rule.appVersion || '') }), stats: persistentStats() });
+                return Object.freeze({ removed: rows.length, bytes, criteria: Object.freeze({ reason: String(rule.reason || 'criteria'), tier: String(rule.tier || ''), optionSignatureToken: String(rule.optionSignatureToken || ''), contractVersion: String(rule.contractVersion || ''), appVersion: String(rule.appVersion || '') }), stats: persistentStats() });
             } catch (error) {
                 lastError = error && error.message || 'Persistent cache invalidation failed';
                 recordEvent('persistent-cache-error', { layer: 'persistent', reason: lastError });
@@ -902,8 +1058,10 @@
                         evictions += 1;
                     } else bytes += rowBytes;
                 });
-                await removeKeys(database, Array.from(new Set(deleteKeys)));
-                await refreshStats(database);
+                const uniqueDeleteKeys = Array.from(new Set(deleteKeys));
+                await removeKeys(database, uniqueDeleteKeys);
+                const deletedKeySet = new Set(uniqueDeleteKeys);
+                refreshStatsFromRows(deletedKeySet.size ? rows.filter(row => row && !deletedKeySet.has(row.key)) : rows, deletedKeySet.size ? 'automatic-prune' : 'policy-refresh');
                 state = 'ready';
                 lastError = '';
                 if (deleteKeys.length) {
@@ -934,7 +1092,7 @@
                 oldNamespaceDeletes += rows.length;
                 selectiveDeletes += rows.length;
                 const bytes = rows.reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
-                await refreshStats(database);
+                await refreshStats(database, 'namespace-delete');
                 if (rows.length) {
                     recordEvent('persistent-cache-namespace-deleted', { layer: 'persistent', reason: 'selected-namespace', count: rows.length, bytes, size });
                     recordMaintenance('namespace-delete', { reason: 'selected-namespace', removed: rows.length, bytes, namespaceTokens: removedTokens });
@@ -964,7 +1122,7 @@
                     expired += 1;
                     await removeKeys(database, [key]);
                     misses += 1;
-                    await refreshStats(database);
+                    await refreshStats(database, 'expired-read');
                     recordEvent('persistent-cache-expired', { layer: 'persistent', key, ageMs: now - Number(row.createdAt || 0), size });
                     return null;
                 }
@@ -1052,7 +1210,7 @@
                 const bytes = rows.filter(row => row && row.namespace === namespace).reduce((sum, row) => sum + Math.max(0, Number(row.bytes) || 0), 0);
                 await removeKeys(database, keys);
                 clears += 1;
-                await refreshStats(database);
+                await refreshStats(database, 'current-clear');
                 state = 'ready';
                 lastOperationAt = nowIso();
                 lastError = '';
@@ -1066,8 +1224,26 @@
             return persistentStats();
         }
 
+        async function getMaintenanceSnapshot(options) {
+            const settings = options || {};
+            const database = await openDatabase();
+            if (database && (settings.refresh !== false || !lastOperationAt)) {
+                try { await refreshStats(database, 'maintenance-snapshot'); }
+                catch (error) { lastError = error && error.message || 'Persistent cache snapshot failed'; }
+            }
+            return Object.freeze({
+                entries: Object.freeze(Array.from(entrySnapshot)),
+                namespaceStatus: getNamespaceSnapshot(),
+                optionSignatures: optionSignatureSnapshot,
+                storageTrend: Object.freeze(getStorageTrend(Number(settings.trendLimit) || 12)),
+                maintenanceHistory: Object.freeze(getMaintenanceHistory(Number(settings.historyLimit) || 8)),
+                stats: persistentStats(),
+                generatedAt: nowIso()
+            });
+        }
+
         if (enabled) prunePersistent({ forceQuota: true }).catch(() => {});
-        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats, list: listEntries, deleteByToken, deleteByTokens, invalidate, refreshQuotaPolicy, getNamespaceStatus: refreshNamespaceStatus, namespaceStatus: getNamespaceSnapshot, deleteNamespaces, maintenanceHistory: getMaintenanceHistory });
+        return Object.freeze({ get: getPersistent, set: setPersistent, prune: prunePersistent, clear: clearPersistent, stats: persistentStats, list: listEntries, deleteByToken, deleteByTokens, invalidate, refreshQuotaPolicy, getNamespaceStatus: refreshNamespaceStatus, namespaceStatus: getNamespaceSnapshot, deleteNamespaces, maintenanceHistory: getMaintenanceHistory, storageTrend: getStorageTrend, optionSignatures: () => optionSignatureSnapshot, maintenanceSnapshot: getMaintenanceSnapshot });
     }
 
     global.AIShortsAnalysisCache = Object.freeze({
@@ -1080,6 +1256,7 @@
         fingerprintStats,
         getDiagnosticEvents,
         cloneValue,
-        cacheProfileFromKey
+        cacheProfileFromKey,
+        makeOptionSignature
     });
 })(window);
