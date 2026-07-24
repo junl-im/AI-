@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.6.1 - Advanced Diagnostics Gate
+
+- 일반 화면의 저장소·오프라인 진단을 상태·사용량·조건부 자동 정리만 보이는 compact summary로 축소했습니다.
+- namespace, signature, 셸 감사, 분석 캐시 선택·전체 정리 도구를 명시적으로 여는 고급 진단 modal로 이동했습니다.
+- 고급 진단을 열기 전에는 분석 캐시 상세 목록과 유지보수 스냅샷을 조회하지 않도록 지연 진단을 적용했습니다.
+- 캐시·namespace·signature·오래된 저장소·감사 이력 정리에 공통 2단계 확인과 프로젝트 데이터 비삭제 안내를 추가했습니다.
+- 모바일 고급 진단을 viewport 전체 화면으로 격리하고 Escape, 포커스 trap·복귀, 배경 스크롤 잠금을 추가했습니다.
+- 작업 트리에 재삽입된 Local AI 직접 스크립트 3개를 제거해 staged loading과 초기 직접 실행 스크립트 49개 예산을 복구했습니다.
+- 일반 4개 viewport와 전용 데스크톱·모바일 저장소 감사를 통과했으며, 자동 QA를 **219개**로 확장했습니다.
+
+---
 ## v1.6.0 - Local AI Provider Foundation
 
 - Ollama, llama.cpp server, whisper.cpp server, Local OpenAI-compatible을 하나의 localhost 전용 provider registry로 연결했습니다.

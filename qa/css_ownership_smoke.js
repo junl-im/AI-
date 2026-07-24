@@ -97,7 +97,7 @@ const mobileHeaderTopline = report.criticalOwnership?.mobileHeaderTopline;
 const desktopShell = report.criticalOwnership?.desktopShell;
 const mobileHeroTitle = report.criticalOwnership?.mobileHeroTitle;
 if (!headerTopline || !mobileHeaderTopline || !desktopShell || !mobileHeroTitle) {
-    throw new Error('v1.6.0 responsive ownership snapshots are missing');
+    throw new Error('v1.6.1 responsive ownership snapshots are missing');
 }
 for (const property of ['display', 'grid-template-columns', 'align-items', 'gap']) {
     assertSingleOwner(headerTopline, property, 'header-meta-rail.css');
@@ -217,4 +217,4 @@ const forbiddenConflicts = report.propertyConflicts.filter(item => (
 ));
 if (forbiddenConflicts.length) throw new Error('consolidated CSS ownership conflicts reappeared');
 
-console.log('PASS v1.6.0 zero-conflict CSS cascade ownership ceiling');
+console.log('PASS v1.6.1 zero-conflict CSS cascade ownership ceiling');

@@ -10,8 +10,8 @@ const downloads = [];
 const window = {
     structuredClone: global.structuredClone,
     AIShortsRuntimeConfig: {
-        APP_VERSION: 'v1.6.0',
-        BUILD_KEY: '1.6.0-local-ai-provider-foundation',
+        APP_VERSION: 'v1.6.1',
+        BUILD_KEY: '1.6.1-advanced-diagnostics-gate',
         ANALYSIS_PERSISTENT_CACHE_ENABLED: true
     },
     AIShortsDownloadService: { saveBlob(blob, filename) { downloads.push({ blob, filename }); } }

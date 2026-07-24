@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.0 - runtime, analysis cache, storage, and service worker health monitor
+// AI Shorts Studio v1.6.1 - runtime, analysis cache, storage, and service worker health monitor
 'use strict';
 
 (function exposeRuntimeHealth(global) {

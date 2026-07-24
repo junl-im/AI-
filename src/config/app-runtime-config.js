@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.0 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.6.1 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.0',
-    BUILD_KEY: '1.6.0-local-ai-provider-foundation',
+    APP_VERSION: 'v1.6.1',
+    BUILD_KEY: '1.6.1-advanced-diagnostics-gate',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,

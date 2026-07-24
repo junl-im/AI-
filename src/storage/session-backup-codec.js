@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.0 - bounded LZW backup compression with checksum verification
+// AI Shorts Studio v1.6.1 - bounded LZW backup compression with checksum verification
 'use strict';
 (function exposeSessionBackupCodec(global) {
     if (global.AIShortsSessionBackupCodec) return;
