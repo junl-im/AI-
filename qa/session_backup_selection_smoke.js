@@ -16,7 +16,7 @@ const document = { readyState: 'loading', hidden: false, body: { dataset: {} }, 
 const history = [];
 const window = {
     window: null, document, localStorage, navigator: {}, CustomEvent: function CustomEvent() {},
-    AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.4', SESSION_SCHEMA_VERSION: 4, SESSION_BACKUP_MIN_COUNT: 1, SESSION_BACKUP_COUNT: 2, SESSION_BACKUP_MAX_COUNT: 3 },
+    AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.5', SESSION_SCHEMA_VERSION: 4, SESSION_BACKUP_MIN_COUNT: 1, SESSION_BACKUP_COUNT: 2, SESSION_BACKUP_MAX_COUNT: 3 },
     AIShortsProjectService: {
         CURRENT_SCHEMA_VERSION: 4,
         parseProjectText(text) { return JSON.parse(text); },

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - portable protected backups, notes, and selectable recovery
+// AI Shorts Studio v1.6.5 - portable protected backups, notes, and selectable recovery
 'use strict';
 (function bootSessionContinuity(global) {
     if (global.AIShortsSessionContinuity) return;

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - quota-aware state container and persisted-setting recovery
+// AI Shorts Studio v1.6.5 - smart-reframe aware state container and persisted-setting recovery
 'use strict';
 
 (function exposeState(global) {
@@ -8,6 +8,7 @@
         duration: 'auto',
         style: 'balanced',
         cropMode: 'center',
+        smartReframeOptions: Object.freeze({ captionAvoidance: true, smoothing: 0.30, zoom: 1.08 }),
         platform: 'youtube',
         captionStyle: 'bold',
         captionOffset: 0,
@@ -60,13 +61,19 @@
         const input = isPlainObject(value) ? value : {};
         const caption = isPlainObject(input.captionOptions) ? input.captionOptions : {};
         const quality = isPlainObject(input.qualityOptions) ? input.qualityOptions : {};
+        const smartReframe = isPlainObject(input.smartReframeOptions) ? input.smartReframeOptions : {};
         const autoCut = isPlainObject(input.autoCutOptions) ? input.autoCutOptions : {};
         const feedback = isPlainObject(input.feedbackOptions) ? input.feedbackOptions : {};
         const engine = isPlainObject(input.engineOptions) ? input.engineOptions : {};
         return {
             duration: enumValue(input.duration, ['auto', '15', '30', '45', '60', '90', '180'], SETTINGS_DEFAULTS.duration),
             style: enumValue(input.style, ['balanced', 'impact', 'emotional', 'motion'], SETTINGS_DEFAULTS.style),
-            cropMode: enumValue(input.cropMode, ['center', 'top', 'bottom', 'blur-fit'], SETTINGS_DEFAULTS.cropMode),
+            cropMode: enumValue(input.cropMode, ['center', 'top', 'bottom', 'blur-fit', 'smart'], SETTINGS_DEFAULTS.cropMode),
+            smartReframeOptions: {
+                captionAvoidance: typeof smartReframe.captionAvoidance === 'boolean' ? smartReframe.captionAvoidance : SETTINGS_DEFAULTS.smartReframeOptions.captionAvoidance,
+                smoothing: finite(smartReframe.smoothing, SETTINGS_DEFAULTS.smartReframeOptions.smoothing, 0.08, 0.82),
+                zoom: finite(smartReframe.zoom, SETTINGS_DEFAULTS.smartReframeOptions.zoom, 1, 1.25)
+            },
             platform: enumValue(input.platform, ['youtube', 'reels', 'tiktok'], SETTINGS_DEFAULTS.platform),
             captionStyle: enumValue(input.captionStyle, ['bold', 'box', 'clean'], SETTINGS_DEFAULTS.captionStyle),
             captionOffset: finite(input.captionOffset, SETTINGS_DEFAULTS.captionOffset, -3600, 3600),
@@ -139,6 +146,8 @@
         channelData: null,
         audioAnalysis: null,
         motionAnalysis: null,
+        smartReframe: null,
+        isReframing: false,
         autoCuts: null,
         engineMeta: null,
         proEngine: { stabilityScore: 100, cacheEnabled: true },
@@ -194,6 +203,8 @@
         state.channelData = null;
         state.audioAnalysis = null;
         state.motionAnalysis = null;
+        state.smartReframe = null;
+        state.isReframing = false;
         state.autoCuts = null;
         state.engineMeta = null;
         state.waveformBins = [];

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.3.1 - async operation ownership and cancellation coordinator
+// AI Shorts Studio v1.6.5 - smart-reframe aware async operation ownership and cancellation coordinator
 'use strict';
 
 (function exposeOperationCoordinator(global) {
@@ -91,7 +91,7 @@
 
     function startMediaSession(meta) {
         mediaSessionId += 1;
-        ['analysis', 'preview', 'render'].forEach(channel => cancel(channel, '원본 미디어 변경'));
+        ['analysis', 'smart-reframe', 'preview', 'render'].forEach(channel => cancel(channel, '원본 미디어 변경'));
         diagnostic({ type: 'media-session-start', mediaSessionId, fileName: meta && meta.fileName || '' });
         emit();
         return mediaSessionId;

@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.4 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.6.5 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.4',
-    BUILD_KEY: '1.6.4-recovery-loop-impact-preview',
+    APP_VERSION: 'v1.6.5',
+    BUILD_KEY: '1.6.5-smart-reframe-caption-safe',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -52,6 +52,9 @@ window.AIShortsRuntimeConfig = Object.freeze({
     SW_INTEGRITY_BACKOFF_MAX_MS: 6 * 60 * 60 * 1000,
     MEDIA_METADATA_WAIT_MS: 5000,
     MAX_VIDEO_MOTION_SAMPLES: 160,
+    SMART_REFRAME_SAMPLE_COUNT: 36,
+    SMART_REFRAME_MIN_CONFIDENCE: 0.45,
+    SMART_REFRAME_MAX_STEP: 0.12,
     DEFAULT_DURATIONS: [15, 30, 45, 60, 90],
     LONG_FORM_DURATIONS: [15, 30, 45, 60, 90, 180],
     MEDIA_ACCEPT: 'audio/*,video/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.mp4,.mov,.m4v,.webm',

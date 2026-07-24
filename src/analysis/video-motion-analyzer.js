@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - cancellable adaptive video motion analyzer
+// AI Shorts Studio v1.6.5 - cancellable spatial motion and subject-saliency analyzer
 'use strict';
 
 (function exposeVideoMotionAnalyzer(global) {
@@ -52,16 +52,61 @@
         throwIfAborted(signal);
     }
 
-    function frameDiff(current, previous) {
-        if (!current || !previous || current.length !== previous.length) return 0;
-        let sum = 0;
-        const step = 4;
-        for (let i = 0; i < current.length; i += step) {
-            sum += Math.abs(current[i] - previous[i]);
-            sum += Math.abs(current[i + 1] - previous[i + 1]);
-            sum += Math.abs(current[i + 2] - previous[i + 2]);
+    function frameDiffMetrics(current, previous, width, height) {
+        if (!current || !previous || current.length !== previous.length) {
+            return { diff: 0, motionX: 0.5, motionY: 0.46, spatialConfidence: 0, motionSpread: 1, motionBox: null };
         }
-        return sum / (current.length / step * 3 * 255);
+        let sum = 0;
+        let weightSum = 0;
+        let weightedX = 0;
+        let weightedY = 0;
+        let active = 0;
+        let minX = width;
+        let minY = height;
+        let maxX = 0;
+        let maxY = 0;
+        const pixels = Math.max(1, width * height);
+        for (let pixel = 0, i = 0; i < current.length; i += 4, pixel += 1) {
+            const delta = (Math.abs(current[i] - previous[i]) + Math.abs(current[i + 1] - previous[i + 1]) + Math.abs(current[i + 2] - previous[i + 2])) / (3 * 255);
+            sum += delta;
+            const weight = Math.max(0, delta - 0.055);
+            if (weight <= 0) continue;
+            const x = pixel % width;
+            const y = Math.floor(pixel / width);
+            weightSum += weight;
+            weightedX += x * weight;
+            weightedY += y * weight;
+            if (delta > 0.13) {
+                active += 1;
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+            }
+        }
+        const diff = sum / pixels;
+        const motionX = weightSum > 0 ? weightedX / weightSum / Math.max(1, width - 1) : 0.5;
+        const motionY = weightSum > 0 ? weightedY / weightSum / Math.max(1, height - 1) : 0.46;
+        const activeRatio = active / pixels;
+        const spread = active ? ((maxX - minX + 1) * (maxY - minY + 1)) / pixels : 1;
+        const energy = Math.min(1, weightSum / (pixels * 0.12));
+        const globalPenalty = activeRatio > 0.42 ? Math.max(0.12, 1 - (activeRatio - 0.42) * 1.7) : 1;
+        const spreadPenalty = spread > 0.72 ? Math.max(0.18, 1 - (spread - 0.72) * 2.2) : 1;
+        const spatialConfidence = Math.max(0, Math.min(1, energy * globalPenalty * spreadPenalty));
+        const motionBox = active ? {
+            x: Number((minX / width).toFixed(4)),
+            y: Number((minY / height).toFixed(4)),
+            width: Number(((maxX - minX + 1) / width).toFixed(4)),
+            height: Number(((maxY - minY + 1) / height).toFixed(4))
+        } : null;
+        return {
+            diff,
+            motionX: Number(motionX.toFixed(4)),
+            motionY: Number(motionY.toFixed(4)),
+            spatialConfidence: Number(spatialConfidence.toFixed(4)),
+            motionSpread: Number(spread.toFixed(4)),
+            motionBox
+        };
     }
 
     async function analyzeVideoMotion(fileUrl, onProgress, signal, options) {
@@ -80,8 +125,12 @@
             const configuredMax = Math.max(18, Number(opts.maxSamples || config.MAX_VIDEO_MOTION_SAMPLES || 160));
             const naturalSamples = Math.max(18, Math.floor(duration * 1.2));
             const samples = Math.min(configuredMax, naturalSamples);
-            const width = 96;
-            const height = 170;
+            const sourceWidth = Math.max(1, Number(video.videoWidth) || 1920);
+            const sourceHeight = Math.max(1, Number(video.videoHeight) || 1080);
+            const sampleMaxDimension = 144;
+            const sampleScale = Math.min(1, sampleMaxDimension / Math.max(sourceWidth, sourceHeight));
+            const width = Math.max(48, Math.round(sourceWidth * sampleScale));
+            const height = Math.max(48, Math.round(sourceHeight * sampleScale));
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
@@ -96,16 +145,25 @@
                 try {
                     ctx.drawImage(video, 0, 0, width, height);
                     const image = ctx.getImageData(0, 0, width, height).data;
-                    const diff = previous ? frameDiff(image, previous) : 0;
+                    const metrics = previous ? frameDiffMetrics(image, previous, width, height) : { diff: 0, motionX: 0.5, motionY: 0.46, spatialConfidence: 0, motionSpread: 1, motionBox: null };
                     previous = new Uint8ClampedArray(image);
-                    raw.push({ time, diff });
+                    raw.push(Object.assign({ time }, metrics));
                 } catch (error) {
-                    raw.push({ time, diff: 0 });
+                    raw.push({ time, diff: 0, motionX: 0.5, motionY: 0.46, spatialConfidence: 0, motionSpread: 1, motionBox: null });
                 }
             }
             throwIfAborted(signal);
             const normalized = utils.normalizeList ? utils.normalizeList(raw.map(item => item.diff)) : raw.map(item => item.diff);
-            const frames = raw.map((item, index) => ({ time: Number(item.time.toFixed(3)), diff: item.diff, diffNorm: Number((normalized[index] || 0).toFixed(4)) }));
+            const frames = raw.map((item, index) => ({
+                time: Number(item.time.toFixed(3)),
+                diff: item.diff,
+                diffNorm: Number((normalized[index] || 0).toFixed(4)),
+                motionX: Number((item.motionX == null ? 0.5 : item.motionX).toFixed(4)),
+                motionY: Number((item.motionY == null ? 0.46 : item.motionY).toFixed(4)),
+                spatialConfidence: Number((item.spatialConfidence || 0).toFixed(4)),
+                motionSpread: Number((item.motionSpread == null ? 1 : item.motionSpread).toFixed(4)),
+                motionBox: item.motionBox || null
+            }));
             const active = frames.filter(frame => frame.diffNorm > 0.58).length;
             return {
                 duration,
@@ -114,6 +172,8 @@
                     motionDensity: active / Math.max(1, frames.length),
                     maxMotion: Math.max.apply(null, frames.map(frame => frame.diffNorm).concat([0])),
                     samples: frames.length,
+                    spatialSamples: frames.filter(frame => frame.spatialConfidence > 0.08).length,
+                    averageSpatialConfidence: Number((frames.reduce((sum, frame) => sum + frame.spatialConfidence, 0) / Math.max(1, frames.length)).toFixed(4)),
                     adaptive: true
                 }
             };
@@ -126,5 +186,5 @@
         }
     }
 
-    global.AIShortsVideoMotionAnalyzer = Object.freeze({ analyzeVideoMotion });
+    global.AIShortsVideoMotionAnalyzer = Object.freeze({ analyzeVideoMotion, _test: Object.freeze({ frameDiffMetrics }) });
 })(window);

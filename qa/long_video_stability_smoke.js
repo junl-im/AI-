@@ -30,4 +30,12 @@ ok(report.cycles.every(cycle => cycle.after.operations.active.length === 0 && cy
 ok(report.cycles.every(cycle => cycle.after.urls.sourceActive === 1 && cycle.after.urls.exportActive === 0), 'file replacement keeps only one source Object URL');
 ok(report.disposed.urls.active === 0, 'all Object URLs are released on dispose');
 ok(report.pageErrors.length === 0 && report.consoleErrors.length === 0, 'long video audit has no page or console errors');
+ok(report.currentSmartReframeAudit === `qa/runtime-smart-reframe-long-media-v${version}.json`, 'changed smart-reframe motion path has a current focused long-media audit');
+const focusedPath = path.join(root, report.currentSmartReframeAudit);
+ok(fs.existsSync(focusedPath), 'focused smart-reframe long-media audit artifact exists');
+const focused = JSON.parse(fs.readFileSync(focusedPath, 'utf8'));
+ok(focused.version === version && focused.passed === true, 'focused smart-reframe long-media audit matches the release and passed');
+ok(focused.checks.realThirtyMinuteSource && focused.checks.sourceIs1080p && focused.checks.boundedSpatialSamples, 'focused audit uses a real 30-minute 1080p source with bounded samples');
+ok(focused.checks.trackMatchesSamples && focused.checks.captionSafeTrack && focused.checks.cropWithinSource && focused.checks.verticalCropRatio, 'focused audit validates the caption-safe smart crop geometry');
+ok(focused.pageErrors.length === 0 && focused.consoleErrors.length === 0, 'focused smart-reframe audit has no browser errors');
 console.log(`PASS v${version} 15m/30m 1080p replacement, analysis, render, and cleanup audit`);

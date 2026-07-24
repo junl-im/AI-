@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - staged UI hydration with storage health shell
+// AI Shorts Studio v1.6.5 - staged UI hydration with storage health shell
 'use strict';
 
 (function installStagedUiLoader(global) {
@@ -6,7 +6,7 @@
     if (!doc) return;
 
     const config = global.AIShortsRuntimeConfig || {};
-    const VERSION = String(config.APP_VERSION || 'v1.6.4').replace(/^v/i, '');
+    const VERSION = String(config.APP_VERSION || 'v1.6.5').replace(/^v/i, '');
     const BUILD_KEY = String(config.BUILD_KEY || `${VERSION}-staged-ui`);
     const versioned = (path, label) => `${path}?v=${encodeURIComponent(BUILD_KEY)}-${label}`;
     const phases = Object.freeze({
@@ -26,6 +26,7 @@
             versioned('src/ui/studio-experience-controller.js', 'shell')
         ],
         editing: [
+            versioned('src/vision/smart-reframe-engine.js', 'editing'),
             versioned('src/ui/range-drag-controls.js', 'editing'),
             versioned('src/ui/handoff-coach.js', 'editing'),
             versioned('src/ui/save-readiness.js', 'editing'),
@@ -134,7 +135,7 @@
         if (tab === 'export') return 'export';
         if (['candidates', 'preview', 'waveform', 'cut', 'edit'].includes(tab)) return 'editing';
         if (target.closest('#exportBtn, #exportAllBtn, #flowExportBtn, #flowExportAllBtn, #thumbnailBtn')) return 'export';
-        if (target.closest('#analyzeBtn, #recommendationList, .recommendation-card, #previewBtn, #applyRangeBtn, #captionTextInput, #saveProjectBtn')) return 'editing';
+        if (target.closest('#analyzeBtn, #recommendationList, .recommendation-card, #previewBtn, #applyRangeBtn, #captionTextInput, #saveProjectBtn, #cropModeSelect, #smartReframePanel')) return 'editing';
         if (target.closest('#fileInput, #bottomFileBtn, #dropZone, #programInfoBtn')) return 'shell';
         return '';
     }

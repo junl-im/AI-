@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - cancellable analysis, actionable workflow sync, and adaptive engine coordination
+// AI Shorts Studio v1.6.5 - smart-reframe analysis, actionable workflow sync, and adaptive engine coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -8,6 +8,7 @@
     const state = store.state;
     const audioExtractor = global.AIShortsAudioFeatureExtractor || {};
     const motionAnalyzer = global.AIShortsVideoMotionAnalyzer || {};
+    function getSmartReframeEngine() { return global.AIShortsSmartReframe || {}; }
     const autoCutDetector = global.AIShortsAutoCutDetector || {};
     const recEngine = global.AIShortsRecommendationEngine || {};
     const engineKernel = global.AIShortsEngineKernel || {};
@@ -143,6 +144,7 @@
         [
             'programInfoBtn', 'selectedBadge', 'dropZone', 'fileDrop', 'fileInput', 'importStatus',
             'durationSelect', 'styleSelect', 'cropModeSelect', 'platformSelect', 'analyzeBtn', 'analysisCancelBtn',
+            'smartReframePanel', 'smartReframeStatus', 'smartReframeDetail', 'smartReframeAnalyzeBtn', 'smartReframeCaptionAvoidanceToggle',
             'analysisStatus', 'progressBar', 'recommendationList', 'recommendationCount', 'previewStatus',
             'previewCanvas', 'sourceVideo', 'sourceAudio', 'previewBtn', 'stopPreviewBtn', 'exportBtn',
             'waveformCanvas', 'timelineView', 'selectedRangeText', 'titleInput', 'hashtagInput',
@@ -240,6 +242,8 @@
         if (els.durationSelect) els.durationSelect.value = state.settings.duration || 'auto';
         if (els.styleSelect) els.styleSelect.value = state.settings.style || 'balanced';
         if (els.cropModeSelect) els.cropModeSelect.value = state.settings.cropMode || 'center';
+        if (els.smartReframeCaptionAvoidanceToggle) els.smartReframeCaptionAvoidanceToggle.checked = !(state.settings.smartReframeOptions && state.settings.smartReframeOptions.captionAvoidance === false);
+        updateSmartReframeUI();
         if (els.platformSelect) els.platformSelect.value = state.settings.platform || 'youtube';
         if (els.captionStyleSelect) els.captionStyleSelect.value = state.settings.captionStyle || 'bold';
         if (els.captionOffsetInput) els.captionOffsetInput.value = Number(state.settings.captionOffset || 0);
@@ -247,6 +251,94 @@
         syncCaptionOptionsToUI();
         syncQualityOptionsToUI();
         syncAutoCutOptionsToUI();
+    }
+
+    function getSmartReframeOptions() {
+        return Object.assign({ captionAvoidance: true, smoothing: 0.30, zoom: 1.08 }, state.settings && state.settings.smartReframeOptions || {});
+    }
+
+    function ensureMotionSmartReframe() {
+        const engine = getSmartReframeEngine();
+        if (!engine.createTrackFromMotion) {
+            const loader = global.AIShortsStagedUiLoader;
+            if (state.motionAnalysis && loader && loader.ensure) {
+                loader.ensure('editing').then(() => {
+                    if (!state.motionAnalysis || !getSmartReframeEngine().createTrackFromMotion) return;
+                    if (!state.smartReframe || state.smartReframe.source === 'motion') {
+                        state.smartReframe = getSmartReframeEngine().createTrackFromMotion(state.motionAnalysis, getSmartReframeOptions());
+                        updateSmartReframeUI();
+                        renderPreviewStill();
+                    }
+                }).catch(() => {});
+            }
+            return state.smartReframe;
+        }
+        if (!state.motionAnalysis) return state.smartReframe;
+        if (!state.smartReframe || state.smartReframe.source === 'motion') {
+            state.smartReframe = engine.createTrackFromMotion(state.motionAnalysis, getSmartReframeOptions());
+        }
+        return state.smartReframe;
+    }
+
+    function updateSmartReframeUI(statusOverride, detailOverride, statusKind) {
+        const isVideo = state.fileKind === 'video';
+        const selected = state.settings && state.settings.cropMode === 'smart';
+        if (els.smartReframePanel) {
+            els.smartReframePanel.hidden = !(isVideo && selected);
+            els.smartReframePanel.dataset.status = statusKind || (state.isReframing ? 'tracking' : state.smartReframe ? 'ready' : 'idle');
+        }
+        const status = getSmartReframeEngine().getStatus ? getSmartReframeEngine().getStatus(state.smartReframe) : null;
+        if (els.smartReframeStatus) els.smartReframeStatus.textContent = statusOverride || status && status.label || '피사체 추적 대기';
+        if (els.smartReframeDetail) els.smartReframeDetail.textContent = detailOverride || status && status.detail || '영상 분석 후 세로 화면이 피사체를 따라갑니다.';
+        if (els.smartReframeAnalyzeBtn) {
+            els.smartReframeAnalyzeBtn.disabled = !isVideo || !state.fileUrl || state.isAnalyzing || state.isReframing;
+            els.smartReframeAnalyzeBtn.textContent = state.isReframing ? '추적 중' : state.smartReframe && state.smartReframe.summary && state.smartReframe.summary.faceCoverage > 0 ? '피사체 다시 추적' : '얼굴 추적 시도';
+        }
+    }
+
+    async function analyzeSmartReframe() {
+        if (state.fileKind !== 'video' || !state.fileUrl || state.isReframing) return;
+        if (!getSmartReframeEngine().analyzeVideoSubjects && global.AIShortsStagedUiLoader && global.AIShortsStagedUiLoader.ensure) {
+            try { await global.AIShortsStagedUiLoader.ensure('editing'); } catch (error) { /* fallback UI handles unavailable module */ }
+        }
+        if (!getSmartReframeEngine().analyzeVideoSubjects) {
+            updateSmartReframeUI('추적 모듈을 열 수 없음', '기본 중앙 크롭을 계속 사용할 수 있습니다.', 'error');
+            return;
+        }
+        const inputFile = state.file;
+        const token = beginOperation('smart-reframe', { source: 'manual', fileName: inputFile && inputFile.name || '' });
+        state.isReframing = true;
+        updateSmartReframeUI('피사체 추적 중', '영상 프레임에서 얼굴과 움직임 중심을 확인합니다.', 'tracking');
+        try {
+            const track = await getSmartReframeEngine().analyzeVideoSubjects(state.fileUrl, (percent, message) => {
+                if (token && operationCoordinator.isCurrent && !operationCoordinator.isCurrent(token)) return;
+                updateSmartReframeUI('피사체 추적 중', message, 'tracking');
+                setProgress(Math.max(0, Math.min(100, percent)), message);
+            }, token && token.signal || null, Object.assign({}, getSmartReframeOptions(), { motionAnalysis: state.motionAnalysis }));
+            assertOperation(token, '원본이 변경되어 이전 피사체 추적 결과를 폐기했습니다.');
+            if (state.file !== inputFile) return;
+            state.smartReframe = track;
+            const status = getSmartReframeEngine().getStatus ? getSmartReframeEngine().getStatus(track) : null;
+            updateSmartReframeUI(status && status.label, status && status.detail, 'ready');
+            setProgress(100, '스마트 리프레임 준비 완료');
+            renderPreviewStill();
+            toast(track && track.summary && track.summary.faceCoverage > 0 ? '얼굴 중심 스마트 리프레임을 준비했습니다.' : '얼굴 감지를 지원하지 않아 모션 중심 추적을 적용했습니다.', 'success');
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'smart-reframe-analysis', source: track && track.source || 'motion', samples: track && track.summary && track.summary.samples || 0, faceCoverage: track && track.summary && track.summary.faceCoverage || 0 });
+            finishOperation(token, 'smart-reframe-complete');
+        } catch (error) {
+            if (!isAbortError(error)) {
+                ensureMotionSmartReframe();
+                updateSmartReframeUI('모션 추적으로 전환', error.message || '얼굴 추적을 사용할 수 없습니다.', 'error');
+                toast('얼굴 추적을 사용할 수 없어 모션 중심으로 전환했습니다.', 'warning');
+                if (store.addDiagnostic) store.addDiagnostic({ type: 'smart-reframe-fallback', message: error.message });
+            }
+        } finally {
+            const current = !token || !operationCoordinator.isCurrent || operationCoordinator.isCurrent(token);
+            if (current) finishOperation(token, 'smart-reframe-finalized');
+            if (state.file === inputFile) state.isReframing = false;
+            updateSmartReframeUI();
+            updateButtons();
+        }
     }
 
     function getCaptionOptions() {
@@ -518,6 +610,7 @@
         if (els.flowThumbnailBtn) els.flowThumbnailBtn.disabled = !hasRecs;
         if (els.flowExportBtn) els.flowExportBtn.disabled = !hasRecs || state.isPreviewing || queueBusy;
         if (els.flowExportAllBtn) els.flowExportAllBtn.disabled = !hasRecs || state.isPreviewing || queueBusy;
+        updateSmartReframeUI();
         syncHyperFlow();
         document.dispatchEvent(new CustomEvent('ai-shorts-experience-sync'));
     }
@@ -674,6 +767,7 @@
         renderPreviewStill();
         updateButtons();
         updateEngineStatus();
+        updateSmartReframeUI();
         if (global.AIShortsFlowPolish && global.AIShortsFlowPolish.scheduleSync) global.AIShortsFlowPolish.scheduleSync();
     }
 
@@ -685,6 +779,8 @@
         const qualityOptions = getQualityOptions();
         renderer.renderStill(els.previewCanvas, media, {
             cropMode: state.settings.cropMode,
+            smartReframe: state.smartReframe,
+            smartReframeOptions: getSmartReframeOptions(),
             title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
             rangeText: selected ? selected.rangeText : 'AI 추천 대기',
             waveformBins: state.waveformBins,
@@ -798,6 +894,8 @@
             if (!els[id]) return;
             els[id].addEventListener('change', () => {
                 store.setSetting(key, els[id].value);
+                if (id === 'cropModeSelect' && els[id].value === 'smart') ensureMotionSmartReframe();
+                updateSmartReframeUI();
                 renderPreviewStill();
                 if ((id === 'durationSelect' || id === 'styleSelect') && state.audioAnalysis) createRecommendations();
             });
@@ -822,6 +920,16 @@
         });
         if (els.safeGuideToggle) els.safeGuideToggle.addEventListener('change', readQualityOptionsFromUI);
         if (els.qualityResetBtn) els.qualityResetBtn.addEventListener('click', resetQualityOptions);
+        if (els.smartReframeAnalyzeBtn) els.smartReframeAnalyzeBtn.addEventListener('click', analyzeSmartReframe);
+        if (els.smartReframeCaptionAvoidanceToggle) els.smartReframeCaptionAvoidanceToggle.addEventListener('change', () => {
+            const next = Object.assign({}, getSmartReframeOptions(), { captionAvoidance: els.smartReframeCaptionAvoidanceToggle.checked });
+            store.setSetting('smartReframeOptions', next);
+            const engine = getSmartReframeEngine();
+            if (state.motionAnalysis && engine.createTrackFromMotion && (!state.smartReframe || state.smartReframe.source === 'motion')) state.smartReframe = engine.createTrackFromMotion(state.motionAnalysis, next);
+            else if (state.motionAnalysis && !engine.createTrackFromMotion) ensureMotionSmartReframe();
+            renderPreviewStill();
+            updateSmartReframeUI();
+        });
         if (els.copyBoostBtn) els.copyBoostBtn.addEventListener('click', createBoostedCopy);
         ['silenceThresholdInput', 'beatSensitivityInput', 'motionSensitivityInput', 'handlePaddingSelect'].forEach(id => {
             if (!els[id]) return;
@@ -972,6 +1080,7 @@
                 state.channelData = result.channelData;
                 state.audioAnalysis = result.audioAnalysis;
                 state.motionAnalysis = result.motionAnalysis;
+                ensureMotionSmartReframe();
                 state.autoCuts = result.autoCuts;
                 state.waveformBins = result.waveformBins || [];
                 state.fileMeta = Object.assign({}, state.fileMeta || {}, result.fileMeta || {});
@@ -1006,6 +1115,7 @@
                 }
                 if (inputKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
                     state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(inputUrl, reportProgress, token && token.signal || null, { maxSamples: 120 });
+                    ensureMotionSmartReframe();
                     assertOperation(token);
                     state.fileMeta.duration = state.fileMeta.duration || state.motionAnalysis.duration;
                 }
@@ -1183,6 +1293,8 @@
             const isVideo = state.fileKind === 'video' && media.videoWidth;
             renderer.renderStill(els.previewCanvas, isVideo ? media : null, {
                 cropMode: state.settings.cropMode,
+                smartReframe: state.smartReframe,
+                smartReframeOptions: getSmartReframeOptions(),
                 title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
                 rangeText: selected.rangeText,
                 waveformBins: state.waveformBins,
@@ -1261,6 +1373,8 @@
         const media = state.fileKind === 'video' && els.sourceVideo.videoWidth ? els.sourceVideo : null;
         renderer.renderStill(els.previewCanvas, media, {
             cropMode: state.settings.cropMode,
+            smartReframe: state.smartReframe,
+            smartReframeOptions: getSmartReframeOptions(),
             title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
             rangeText: selected ? selected.rangeText : 'AI 추천 대기',
             waveformBins: state.waveformBins,

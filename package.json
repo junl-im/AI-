@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-6-4",
-  "version": "1.6.4",
+  "name": "ai-shorts-studio-v1-6-5",
+  "version": "1.6.5",
   "private": true,
-  "description": "AI Shorts Studio v1.6.4 - closed-loop storage recovery navigation and cleanup impact preview",
+  "description": "AI Shorts Studio v1.6.5 - caption-safe local smart reframe with motion fallback",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -30,6 +30,10 @@
     "node --check src/analysis/audio-analysis-core.js",
     "node --check src/analysis/audio-feature-extractor.js",
     "node --check src/analysis/video-motion-analyzer.js",
+    "node --check src/vision/smart-reframe-engine.js",
+    "node qa/smart_reframe_engine_smoke.js",
+    "node qa/smart_reframe_render_smoke.js",
+    "node qa/smart_reframe_ui_smoke.js",
     "node --check src/analysis/auto-cut-detector.js",
     "node --check src/recommendation/shorts-recommendation-engine.js",
     "node --check src/engine/operation-coordinator.js",

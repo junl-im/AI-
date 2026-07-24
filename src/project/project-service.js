@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - schema-v4 bounded and compatibility-preserving project helpers
+// AI Shorts Studio v1.6.5 - schema-v4 smart-reframe compatible project helpers
 'use strict';
 
 (function exposeProjectService(global) {
@@ -119,7 +119,7 @@
         const enums = {
             duration: ['auto', '15', '30', '45', '60', '90', '180'],
             style: ['balanced', 'impact', 'emotional', 'motion'],
-            cropMode: ['center', 'top', 'bottom', 'blur-fit'],
+            cropMode: ['center', 'top', 'bottom', 'blur-fit', 'smart'],
             platform: ['youtube', 'reels', 'tiktok'],
             captionStyle: ['bold', 'box', 'clean'],
             thumbnailTemplate: ['neon', 'clean', 'cinematic', 'headline'],
@@ -132,6 +132,7 @@
         if (Number.isFinite(Number(input.captionOffset))) output.captionOffset = finiteNumber(input.captionOffset, 0, -3600, 3600);
         if (isPlainObject(input.captionOptions)) output.captionOptions = sanitizeNestedOptions(input.captionOptions, ['preset', 'position', 'size', 'color', 'accent', 'maxLines', 'boxOpacity', 'shadow', 'highlightWords', 'uppercase', 'autoBreak']);
         if (isPlainObject(input.qualityOptions)) output.qualityOptions = sanitizeNestedOptions(input.qualityOptions, ['brightness', 'contrast', 'saturation', 'vignette', 'fadeIn', 'fadeOut', 'introText', 'outroText', 'introDuration', 'outroDuration', 'watermarkText', 'watermarkPosition', 'safeGuide']);
+        if (isPlainObject(input.smartReframeOptions)) output.smartReframeOptions = sanitizeNestedOptions(input.smartReframeOptions, ['captionAvoidance', 'smoothing', 'zoom']);
         if (isPlainObject(input.autoCutOptions)) output.autoCutOptions = sanitizeNestedOptions(input.autoCutOptions, ['silenceThreshold', 'beatSensitivity', 'motionSensitivity', 'handlePadding', 'maxSnapDistance']);
         if (isPlainObject(input.feedbackOptions)) output.feedbackOptions = sanitizeNestedOptions(input.feedbackOptions, ['haptics', 'toastKinds']);
         if (isPlainObject(input.engineOptions)) output.engineOptions = sanitizeNestedOptions(input.engineOptions, ['modular', 'performanceMode', 'qualityGate']);

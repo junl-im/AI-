@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - quota-aware storage coordinator with cleanup impact preview
+// AI Shorts Studio v1.6.5 - quota-aware storage coordinator with cleanup impact preview
 'use strict';
 
 (function exposeStorageManager(global) {

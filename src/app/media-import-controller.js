@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - media import and Object URL lifecycle owner
+// AI Shorts Studio v1.6.5 - media import and Object URL lifecycle owner
 'use strict';
 
 (function exposeMediaImportController(global) {

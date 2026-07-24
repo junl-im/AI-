@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.4 - render workflow ownership, safe queue UI, and editor-state restoration
+// AI Shorts Studio v1.6.5 - render workflow ownership, safe queue UI, and editor-state restoration
 'use strict';
 
 (function exposeRenderWorkflowController(global) {
@@ -221,6 +221,8 @@
                         start: item.start,
                         end: item.end,
                         cropMode: state.settings.cropMode,
+                        smartReframe: state.smartReframe,
+                        smartReframeOptions: state.settings.smartReframeOptions || {},
                         title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
                         rangeText: item.rangeText,
                         waveformBins: state.waveformBins,

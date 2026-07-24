@@ -1,10 +1,11 @@
-// AI Shorts Studio v1.6.4 - cancellable, range-safe vertical renderer with media-state restoration
+// AI Shorts Studio v1.6.5 - smart-reframe, cancellable vertical renderer with media-state restoration
 'use strict';
 
 (function exposeVerticalRenderer(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const utils = global.AIShortsCoreUtils || {};
     const qualityEffects = global.AIShortsQualityEffects || {};
+    function getSmartReframeEngine() { return global.AIShortsSmartReframe || {}; }
     const gradientCache = new WeakMap();
     const textMeasureCache = new WeakMap();
 
@@ -48,7 +49,7 @@
         ctx.fillRect(0, 0, width, height);
     }
 
-    function drawCoverImage(ctx, source, width, height, cropMode, qualityOptions) {
+    function drawCoverImage(ctx, source, width, height, cropMode, qualityOptions, smartOptions) {
         const sourceWidth = source.videoWidth || source.naturalWidth || width;
         const sourceHeight = source.videoHeight || source.naturalHeight || height;
         if (!sourceWidth || !sourceHeight) return;
@@ -76,7 +77,26 @@
         let sy = 0;
         let sw = sourceWidth;
         let sh = sourceHeight;
-        if (sourceRatio > targetRatio) {
+        const smart = smartOptions || {};
+        const smartEngine = getSmartReframeEngine();
+        if (cropMode === 'smart' && smartEngine.getFocusAt && smartEngine.resolveCropRect) {
+            const focus = smartEngine.getFocusAt(smart.track || smart.smartReframe, Number(smart.time) || 0);
+            if (focus) {
+                const rect = smartEngine.resolveCropRect(sourceWidth, sourceHeight, width, height, focus, Object.assign({}, smart.options || {}, {
+                    captionOptions: smart.captionOptions || null
+                }));
+                sx = rect.sx;
+                sy = rect.sy;
+                sw = rect.sw;
+                sh = rect.sh;
+            } else if (sourceRatio > targetRatio) {
+                sw = sourceHeight * targetRatio;
+                sx = (sourceWidth - sw) / 2;
+            } else {
+                sh = sourceWidth / targetRatio;
+                sy = (sourceHeight - sh) / 2;
+            }
+        } else if (sourceRatio > targetRatio) {
             sw = sourceHeight * targetRatio;
             sx = (sourceWidth - sw) / 2;
         } else {
@@ -429,7 +449,7 @@
         const width = canvas.width || Number(config.EXPORT_WIDTH || 1080);
         const height = canvas.height || Number(config.EXPORT_HEIGHT || 1920);
         const qualityOptions = options && options.qualityOptions || null;
-        if (source && (source.videoWidth || source.naturalWidth)) drawCoverImage(ctx, source, width, height, options && options.cropMode || 'center', qualityOptions);
+        if (source && (source.videoWidth || source.naturalWidth)) drawCoverImage(ctx, source, width, height, options && options.cropMode || 'center', qualityOptions, { track: options && options.smartReframe, time: options && options.time, captionOptions: options && options.captionOptions, options: options && options.smartReframeOptions });
         else drawAudioVisual(ctx, width, height, options || {});
         if (qualityEffects.drawQualityOverlay) qualityEffects.drawQualityOverlay(ctx, width, height, qualityOptions);
         drawOverlay(ctx, width, height, options || {});
@@ -489,7 +509,8 @@
     function prepareRenderPlan(options) {
         const input = options || {};
         const rangeKey = `${Number(input.start) || 0}:${Number(input.end) || 0}`;
-        const key = [rangeKey, input.cropMode || 'center', input.captionStyle || 'bold', input.thumbnailTemplate || 'neon', JSON.stringify(input.captionOptions || {}), JSON.stringify(input.qualityOptions || {})].join('|');
+        const reframeKey = input.smartReframe && input.smartReframe.id || 'none';
+        const key = [rangeKey, input.cropMode || 'center', reframeKey, input.captionStyle || 'bold', input.thumbnailTemplate || 'neon', JSON.stringify(input.captionOptions || {}), JSON.stringify(input.qualityOptions || {}), JSON.stringify(input.smartReframeOptions || {})].join('|');
         if (renderPlanCache.has(key)) {
             const cached = renderPlanCache.get(key);
             renderPlanCache.delete(key);
@@ -498,6 +519,8 @@
         }
         const plan = Object.freeze({
             cropMode: input.cropMode || 'center',
+            smartReframe: input.smartReframe || null,
+            smartReframeOptions: Object.freeze(Object.assign({}, input.smartReframeOptions || {})),
             captionStyle: input.captionStyle || 'bold',
             captionOptions: Object.freeze(normalizeCaptionOptions(input.captionOptions || {})),
             qualityOptions: Object.freeze(Object.assign({}, input.qualityOptions || {})),
@@ -559,6 +582,8 @@
         }
         const renderPlan = prepareRenderPlan(options);
         const cropMode = renderPlan.cropMode;
+        const smartReframe = renderPlan.smartReframe;
+        const smartReframeOptions = renderPlan.smartReframeOptions;
         const title = options && options.title || 'AI Shorts Studio';
         const rangeText = options && options.rangeText || '';
         const waveformBins = options && options.waveformBins || [];
@@ -582,7 +607,7 @@
                 sourceMedia.volume = qualityEffects.calculateFadeVolume(relativeTime, duration, qualityOptions);
             }
             if (sourceMedia && sourceMedia.videoWidth) {
-                drawCoverImage(ctx, sourceMedia, canvas.width, canvas.height, cropMode, qualityOptions);
+                drawCoverImage(ctx, sourceMedia, canvas.width, canvas.height, cropMode, qualityOptions, { track: smartReframe, time: current, captionOptions, options: smartReframeOptions });
             } else {
                 drawAudioVisual(ctx, canvas.width, canvas.height, { time: current, title, waveformBins });
             }

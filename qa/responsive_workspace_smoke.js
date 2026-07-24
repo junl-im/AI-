@@ -20,8 +20,8 @@ const heroStart = html.indexOf('<section class="brand-panel cinematic-brand-pane
 const heroEnd = html.indexOf('</section>\n    </header>', heroStart);
 const hero = html.slice(heroStart, heroEnd);
 
-assert(html.includes('assets/css/responsive-workspace.css?v=1.6.4-recovery-loop-impact-preview'), 'responsive workspace stylesheet is linked');
-assert(sw.includes('responsive-workspace.css?v=1.6.4-recovery-loop-impact-preview'), 'responsive workspace stylesheet is cached');
+assert(html.includes('assets/css/responsive-workspace.css?v=1.6.5-smart-reframe-caption-safe'), 'responsive workspace stylesheet is linked');
+assert(sw.includes('responsive-workspace.css?v=1.6.5-smart-reframe-caption-safe'), 'responsive workspace stylesheet is cached');
 assert(html.includes('class="start-command-panel flow-overview-panel"'), 'mobile flow overview exists below hero');
 assert(!hero.includes('hero-cta-row'), 'hero title panel does not contain quick action buttons');
 assert(!hero.includes('workflow-rail'), 'hero title panel does not contain workflow rail');

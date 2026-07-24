@@ -1,0 +1,35 @@
+{
+  "version": "1.6.5",
+  "generatedAt": "2026-07-24T06:29:47.437125+00:00",
+  "harness": "real 20-second MP4 import, motion fallback selection, explicit local face detector registration, face-track promotion, and operation cleanup",
+  "motion": {
+    "cropMode": "smart",
+    "source": "motion",
+    "points": 24,
+    "panelHidden": false,
+    "status": "모션 추적 준비 완료",
+    "detail": "24개 지점 · 신뢰도 18%"
+  },
+  "face": {
+    "source": "face",
+    "points": 30,
+    "faceCoverage": 1,
+    "status": "얼굴 추적 준비 완료",
+    "progress": "스마트 리프레임 준비 완료",
+    "operationActive": false
+  },
+  "checks": {
+    "motionTrackAutoCreated": true,
+    "panelVisibleForSmartVideo": true,
+    "motionStatusVisible": true,
+    "faceDetectorPromotesTrack": true,
+    "faceStatusVisible": true,
+    "progressCompletes": true,
+    "operationReleased": true,
+    "noPageErrors": true,
+    "noConsoleErrors": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": []
+}

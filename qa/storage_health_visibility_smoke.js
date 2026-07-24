@@ -24,7 +24,7 @@ const advancedStart = panel.indexOf("advancedDialog.innerHTML = [");
 const advancedEnd = panel.indexOf("document.body.appendChild(advancedDialog)");
 const advancedMarkup = panel.slice(advancedStart, advancedEnd);
 
-assert(pkg.version === '1.6.4', 'user-safe diagnostics release version is v1.6.4');
+assert(pkg.version === '1.6.5', 'user-safe diagnostics release version is v1.6.5');
 assert(summaryStart >= 0 && summaryEnd > summaryStart, 'general-user summary markup is isolated from advanced markup');
 assert(summaryMarkup.includes('오프라인 사용 준비 완료') || panel.includes("title: '오프라인 사용 준비 완료'"), 'general-user copy uses plain-language offline readiness');
 assert(summaryMarkup.includes('storageHealthAutoRepairBtn') && summaryMarkup.includes('storageAdvancedOpenBtn'), 'general-user summary exposes only contextual repair and an explicit advanced entry');

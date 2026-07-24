@@ -72,7 +72,7 @@ function assert(value, message) {
         indexedDB,
         localStorage: fakeLocalStorage(),
         navigator: { storage: { async estimate() { return { usage: 100, quota: 1000 }; } } },
-        AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.4', ANALYSIS_CACHE_STORAGE_TREND_LIMIT: 12 },
+        AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.5', ANALYSIS_CACHE_STORAGE_TREND_LIMIT: 12 },
         structuredClone: global.structuredClone
     };
     vm.runInContext(source, vm.createContext({ window, Date, Object, Array, Map, Set, WeakMap, Promise, JSON, Math, Number, String, Uint8Array, DataView, setTimeout, clearTimeout, console }), { filename: 'analysis-cache.js' });
@@ -92,7 +92,7 @@ function assert(value, message) {
     assert(keyA !== keyB, 'persistent and memory cache keys isolate different analysis option signatures');
     assert(kernelSource.includes('getAutoCutOptions()') && kernelSource.includes('optionSignature })') && kernelSource.includes('getAutoCutOptions: () => autoCutOptions'), 'engine snapshots auto-cut options once and reuses the same signature for cache lookup and analysis');
 
-    const cache = api.createPersistentAnalysisCache({ databaseName: 'signature-trend-test', namespace: 'analysis-contract-v3', contractVersion: '3', appVersion: '1.6.4', maxItems: 8, maxBytes: 8 * 1024 * 1024, storageTrendLimit: 12 });
+    const cache = api.createPersistentAnalysisCache({ databaseName: 'signature-trend-test', namespace: 'analysis-contract-v3', contractVersion: '3', appVersion: '1.6.5', maxItems: 8, maxBytes: 8 * 1024 * 1024, storageTrendLimit: 12 });
     await cache.set(keyA, { score: 1 }, { tier: 'balanced', contractVersion: '3', optionSignature: signatureA });
     await cache.set(keyB, { score: 2 }, { tier: 'balanced', contractVersion: '3', optionSignature: signatureB });
 

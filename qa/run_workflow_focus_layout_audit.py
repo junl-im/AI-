@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Browser audit for v1.6.4 stage-aware workspace focus and measured dock clearance."""
+"""Browser audit for v1.6.5 stage-aware workspace focus and measured dock clearance."""
 import asyncio
 import importlib.util
 import json
@@ -23,7 +23,7 @@ async def desktop_audit(browser):
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     await page.set_content(build_html(), wait_until='load', timeout=30000)
-    await page.wait_for_timeout(1200)
+    await page.wait_for_timeout(2200)
 
     initial = await page.evaluate('''() => {
       const visible = [...document.querySelectorAll('[data-flow-panel]')].filter(el => getComputedStyle(el).display !== 'none' && el.getBoundingClientRect().height > 0);
@@ -113,7 +113,7 @@ async def mobile_audit(browser):
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     await page.set_content(build_html(), wait_until='load', timeout=30000)
-    await page.wait_for_timeout(1200)
+    await page.wait_for_timeout(2200)
     result = await page.evaluate('''() => ({
       state:AIShortsWorkflowFocusLayout.getState(),
       effective:document.body.dataset.workflowFocusEffective,

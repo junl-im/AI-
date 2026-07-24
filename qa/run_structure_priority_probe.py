@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-structure-priority-probe-v1.6.4.json'
+OUTPUT = ROOT / 'qa' / 'runtime-structure-priority-probe-v1.6.5.json'
 TARGET_FILES = [
     'assets/css/pc-dock-reveal-hotfix.css',
     'assets/css/desktop-prime-layout.css',
@@ -51,6 +51,7 @@ def build_inline_html():
     html = re.sub(r'<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"[^>]*/?>', inline_css, html)
     html = re.sub(r'<script[^>]+src="([^"]+)"[^>]*></script>', inline_js, html)
     staged = [
+        'src/vision/smart-reframe-engine.js',
         'src/ui/ux-controls.js', 'src/ui/hyperconnect-flow.js', 'src/ui/flow-polish.js',
         'src/ui/flow-hotfix.js', 'src/ui/flow-integrity.js', 'src/ui/flow-doctor.js',
         'src/ui/flow-quality-gate.js', 'src/ui/workspace-comfort.js', 'src/ui/session-continuity.js',
@@ -215,7 +216,7 @@ async def main():
     unproven = [c for c in candidates if not c['tested']]
     report = {
         'baselineVersion':'1.5.19',
-        'targetVersion':'1.6.4',
+        'targetVersion':'1.6.5',
         'targetFiles':TARGET_FILES,
         'viewports':VIEWPORTS,
         'candidateCount':len(candidates),
