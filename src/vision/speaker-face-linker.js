@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.9 - local transcript-to-face speaker direction without remote inference
+// AI Shorts Studio v1.6.12 - local transcript-to-face speaker direction without remote inference
 'use strict';
 
 (function exposeSpeakerFaceLinker(global) {
@@ -155,6 +155,36 @@
         return output;
     }
 
+    function cueOverlap(left, right) {
+        const start = Math.max(finite(left && left.start, 0), finite(right && right.start, 0));
+        const end = Math.min(finite(left && left.end, 0), finite(right && right.end, 0));
+        return Math.max(0, end - start);
+    }
+
+    function preserveLockedCues(cues, existing) {
+        const locked = (Array.isArray(existing) ? existing : []).filter(cue => cue && cue.locked === true && safeSubjectId(cue.subjectId) !== 'auto');
+        if (!locked.length) return cues;
+        return cues.map(cue => {
+            let selected = null;
+            let best = 0;
+            locked.forEach(item => {
+                const overlap = cueOverlap(cue, item);
+                const speakerMatch = cue.speaker && item.speaker && cue.speaker === item.speaker;
+                const centerGap = Math.abs(((cue.start + cue.end) / 2) - ((finite(item.start, 0) + finite(item.end, 0)) / 2));
+                const score = overlap + (speakerMatch ? 2 : 0) + (centerGap <= 0.35 ? 1 : 0);
+                if (score > best) { best = score; selected = item; }
+            });
+            if (!selected || best <= 0) return cue;
+            return Object.assign({}, cue, {
+                subjectId: safeSubjectId(selected.subjectId),
+                confidence: Number(clamp(Math.max(cue.confidence, finite(selected.confidence, 1)), 0, 1).toFixed(4)),
+                source: 'manual-override',
+                locked: true,
+                mode: 'manual'
+            });
+        });
+    }
+
     function linkSegmentsToFaces(segmentInput, track, options) {
         const opts = Object.assign({}, DEFAULTS, options || {});
         const segments = normalizeSegments(segmentInput);
@@ -190,7 +220,7 @@
                 segmentCount: 1
             };
         });
-        const merged = mergeCues(cues, opts);
+        const merged = preserveLockedCues(mergeCues(cues, opts), opts.existingCues || track && track.speakerCues);
         const linked = merged.filter(cue => cue.subjectId !== 'auto');
         let switches = 0;
         linked.forEach((cue, index) => { if (index && linked[index - 1].subjectId !== cue.subjectId) switches += 1; });
@@ -227,6 +257,6 @@
         subjectActivity,
         linkSegmentsToFaces,
         status,
-        _test: Object.freeze({ scoreMatrix, mapDiarizedSpeakers, chooseSubject, mergeCues })
+        _test: Object.freeze({ scoreMatrix, mapDiarizedSpeakers, chooseSubject, mergeCues, preserveLockedCues })
     });
 })(window);

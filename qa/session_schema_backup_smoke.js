@@ -26,7 +26,7 @@ const projectService = {
 const diagnostics = [];
 const window = {
     window: null, document, localStorage, navigator: {}, caches: { async keys() { return []; } }, CustomEvent: function CustomEvent() {},
-    AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.9', BUILD_KEY: '1.6.9-direct-crop-editor', SESSION_SCHEMA_VERSION: 5, SESSION_BACKUP_COUNT: 2, SESSION_BACKUP_MAX_CHARS: 750000 },
+    AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.12', BUILD_KEY: '1.6.12-model-pack-benchmark-rollback', SESSION_SCHEMA_VERSION: 5, SESSION_BACKUP_COUNT: 2, SESSION_BACKUP_MAX_CHARS: 750000 },
     AIShortsProjectService: projectService,
     AIShortsAppState: { state, addDiagnostic(item) { diagnostics.push(item); }, saveSettings() {} },
     setTimeout, clearTimeout, setInterval() { return 1; }, clearInterval() {}, addEventListener() {}

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.9 - transcript-aware speaker direction and adaptive smart-reframe coordination
+// AI Shorts Studio v1.6.12 - timeline-aware crop editing and collision-safe smart-reframe coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -44,6 +44,8 @@
     let lastSpeakerFaceLinkResult = null;
     let speakerLinkPromise = null;
     let directCropController = null;
+    let cropKeyframeTimelineController = null;
+    let speakerTuneIndex = -1;
 
 
     function isAbortError(error) {
@@ -151,6 +153,9 @@
             'durationSelect', 'styleSelect', 'cropModeSelect', 'platformSelect', 'analyzeBtn', 'analysisCancelBtn',
             'smartReframePanel', 'smartReframeStatus', 'smartReframeDetail', 'smartReframeAnalyzeBtn', 'smartReframeCaptionAvoidanceToggle',
             'smartReframeSpeakerPriorityToggle', 'smartReframeSpeakerLinkBtn', 'smartReframeSpeakerStatus',
+            'speakerFaceTuningPanel', 'speakerFaceTuningCount', 'speakerFacePrevBtn', 'speakerFaceNextBtn', 'speakerFaceCueRange',
+            'speakerFaceCueMeta', 'speakerFaceSubjectSelect', 'speakerFaceConfidenceValue', 'speakerFaceConfidenceMeter',
+            'speakerFaceLockToggle', 'speakerFaceApplyBtn', 'speakerFaceAutoBtn',
             'smartReframeEditor', 'smartReframeSubjectSelect', 'smartReframeXInput', 'smartReframeYInput', 'smartReframeZoomInput',
             'smartReframeXValue', 'smartReframeYValue', 'smartReframeZoomValue', 'smartReframeKeyframeDetail',
             'smartReframeKeyframeSetBtn', 'smartReframeKeyframeDeleteBtn', 'smartReframeKeyframeResetBtn',
@@ -158,6 +163,8 @@
             'previewCanvas', 'sourceVideo', 'sourceAudio', 'previewBtn', 'stopPreviewBtn', 'exportBtn',
             'directCropPanel', 'directCropOverlay', 'directCropPathOverlay', 'directCropPathLine', 'directCropPathDots', 'directCropCurrentDot',
             'directCropGestureHint', 'directCropStatus', 'directCropDetail', 'directCropToggleBtn', 'directCropSaveBtn', 'directCropUndoBtn',
+            'cropKeyframeTimelinePanel', 'cropKeyframeTimeline', 'cropKeyframeSceneLayer', 'cropKeyframeMarkerLayer', 'cropKeyframePlayhead',
+            'cropKeyframeTimelineStatus', 'cropKeyframeCount', 'cropKeyframeCopyBtn', 'cropKeyframePasteBtn', 'cropKeyframeRangeBtn', 'cropKeyframeDeleteBtn',
             'waveformCanvas', 'timelineView', 'selectedRangeText', 'titleInput', 'hashtagInput',
             'copyCaptionBtn', 'diagnosticsBtn', 'infoDialog', 'infoCloseBtn', 'toast',
             'rangeStartInput', 'rangeEndInput', 'applyRangeBtn', 'thumbnailBtn',
@@ -402,9 +409,95 @@
         return directCropController;
     }
 
+    function getSmartReframeDuration() {
+        const mediaDuration = Number(els.sourceVideo && els.sourceVideo.duration);
+        const metaDuration = Number(state.fileMeta && state.fileMeta.duration);
+        const rangeEnd = Number(state.selectedRange && state.selectedRange.end);
+        const track = state.smartReframe;
+        const lastPoint = track && track.points && track.points.length ? Number(track.points[track.points.length - 1].time) : 0;
+        return Math.max(0.1, Number.isFinite(mediaDuration) ? mediaDuration : 0, Number.isFinite(metaDuration) ? metaDuration : 0, Number.isFinite(rangeEnd) ? rangeEnd : 0, Number(lastPoint) || 0);
+    }
+
+    function getSmartReframeSelectedRange() {
+        const range = state.selectedRange;
+        if (!range) return null;
+        const start = Math.max(0, Number(range.start) || 0);
+        const end = Math.max(start, Number(range.end) || start);
+        return end > start ? { start, end } : null;
+    }
+
+    function commitSmartReframeTimelineTrack(nextTrack) {
+        if (!nextTrack) return state.smartReframe;
+        clearSmartReframeEditorDraft();
+        state.smartReframe = nextTrack;
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        return state.smartReframe;
+    }
+
+    function getCropKeyframeTimelineController() {
+        if (cropKeyframeTimelineController) return cropKeyframeTimelineController;
+        const factory = global.AIShortsCropKeyframeTimeline;
+        if (!factory || !factory.createController || !els.cropKeyframeTimeline) return null;
+        cropKeyframeTimelineController = factory.createController({
+            elements: {
+                panel: els.cropKeyframeTimelinePanel,
+                track: els.cropKeyframeTimeline,
+                markerLayer: els.cropKeyframeMarkerLayer,
+                sceneLayer: els.cropKeyframeSceneLayer,
+                playhead: els.cropKeyframePlayhead,
+                status: els.cropKeyframeTimelineStatus,
+                count: els.cropKeyframeCount,
+                copyButton: els.cropKeyframeCopyBtn,
+                pasteButton: els.cropKeyframePasteBtn,
+                rangeButton: els.cropKeyframeRangeBtn,
+                deleteButton: els.cropKeyframeDeleteBtn
+            },
+            getTrack: () => state.smartReframe,
+            getTime: getSmartReframeTime,
+            getDuration: getSmartReframeDuration,
+            getRange: getSmartReframeSelectedRange,
+            seek: time => {
+                clearSmartReframeEditorDraft();
+                if (els.sourceVideo && Number.isFinite(Number(els.sourceVideo.duration))) els.sourceVideo.currentTime = Math.max(0, Math.min(Number(els.sourceVideo.duration) || time, Number(time) || 0));
+                renderPreviewStill();
+                syncSmartReframeEditor();
+            },
+            move: (fromTime, toTime) => {
+                const engine = getSmartReframeEngine();
+                if (!state.smartReframe || !engine.moveKeyframe) return;
+                const before = (state.smartReframe.keyframes || []).length;
+                const next = engine.moveKeyframe(state.smartReframe, fromTime, Math.max(0, Math.min(getSmartReframeDuration(), Number(toTime) || 0)), 0.12);
+                commitSmartReframeTimelineTrack(next);
+                const after = (state.smartReframe.keyframes || []).length;
+                toast(after < before ? '겹치는 키프레임을 정리하고 새 위치로 이동했습니다.' : `${formatSmartReframeTime(toTime)}로 키프레임을 이동했습니다.`, 'action');
+            },
+            paste: (keyframe, time) => {
+                const engine = getSmartReframeEngine();
+                if (!state.smartReframe || !engine.pasteKeyframe) return;
+                commitSmartReframeTimelineTrack(engine.pasteKeyframe(state.smartReframe, keyframe, time));
+            },
+            applyRange: (keyframe, start, end) => {
+                const engine = getSmartReframeEngine();
+                if (!state.smartReframe || !engine.applyKeyframeToRange) return;
+                commitSmartReframeTimelineTrack(engine.applyKeyframeToRange(state.smartReframe, keyframe, start, end));
+            },
+            remove: time => {
+                const engine = getSmartReframeEngine();
+                if (!state.smartReframe || !engine.removeKeyframe) return;
+                commitSmartReframeTimelineTrack(engine.removeKeyframe(state.smartReframe, time, 0.12));
+            },
+            notify: toast
+        });
+        return cropKeyframeTimelineController;
+    }
+
     function syncDirectCropEditor() {
         const controller = getDirectCropController();
         if (controller && controller.sync) controller.sync();
+        const timeline = getCropKeyframeTimelineController();
+        if (timeline && timeline.sync) timeline.sync();
     }
 
     function setRangeControl(input, output, value, suffix) {
@@ -513,6 +606,118 @@
         return Array.isArray(state.captions) ? state.captions.map(item => Object.assign({}, item)) : [];
     }
 
+    function formatSpeakerCueTime(value) {
+        const total = Math.max(0, Number(value) || 0);
+        const minutes = Math.floor(total / 60);
+        const seconds = total - minutes * 60;
+        return `${String(minutes).padStart(2, '0')}:${seconds.toFixed(1).padStart(4, '0')}`;
+    }
+
+    function getSpeakerTuneIndex(cues) {
+        const list = Array.isArray(cues) ? cues : [];
+        if (!list.length) return -1;
+        if (speakerTuneIndex >= 0 && speakerTuneIndex < list.length) return speakerTuneIndex;
+        const time = getSmartReframeTime();
+        const inside = list.findIndex(cue => time >= cue.start && time <= cue.end);
+        if (inside >= 0) return inside;
+        let nearest = 0;
+        let distance = Infinity;
+        list.forEach((cue, index) => {
+            const next = Math.abs(((cue.start + cue.end) / 2) - time);
+            if (next < distance) { nearest = index; distance = next; }
+        });
+        return nearest;
+    }
+
+    function syncSpeakerFaceTuningUI() {
+        const track = state.smartReframe;
+        const cues = Array.isArray(track && track.speakerCues) ? track.speakerCues : [];
+        const subjects = Array.isArray(track && track.subjects) ? track.subjects : [];
+        const index = getSpeakerTuneIndex(cues);
+        speakerTuneIndex = index;
+        const cue = index >= 0 ? cues[index] : null;
+        if (els.speakerFaceTuningCount) els.speakerFaceTuningCount.textContent = `${cues.length}구간`;
+        if (els.speakerFaceTuningPanel) els.speakerFaceTuningPanel.dataset.state = cue ? (cue.locked ? 'manual' : 'auto') : 'empty';
+        if (els.speakerFaceSubjectSelect) {
+            const signature = subjects.map(subject => `${subject.id}:${subject.label}`).join('|');
+            if (els.speakerFaceSubjectSelect.dataset.signature !== signature) {
+                els.speakerFaceSubjectSelect.textContent = '';
+                const automatic = document.createElement('option');
+                automatic.value = 'auto';
+                automatic.textContent = '자동 추적 유지';
+                els.speakerFaceSubjectSelect.appendChild(automatic);
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.id;
+                    option.textContent = `${subject.label} · 화면 ${Math.round((Number(subject.coverage) || 0) * 100)}%`;
+                    els.speakerFaceSubjectSelect.appendChild(option);
+                });
+                els.speakerFaceSubjectSelect.dataset.signature = signature;
+            }
+            els.speakerFaceSubjectSelect.disabled = !cue || !subjects.length;
+            els.speakerFaceSubjectSelect.value = cue && subjects.some(subject => subject.id === cue.subjectId) ? cue.subjectId : 'auto';
+        }
+        if (els.speakerFacePrevBtn) els.speakerFacePrevBtn.disabled = index <= 0;
+        if (els.speakerFaceNextBtn) els.speakerFaceNextBtn.disabled = index < 0 || index >= cues.length - 1;
+        if (els.speakerFaceApplyBtn) els.speakerFaceApplyBtn.disabled = !cue || !subjects.length;
+        if (els.speakerFaceAutoBtn) els.speakerFaceAutoBtn.disabled = !cue;
+        if (els.speakerFaceLockToggle) {
+            els.speakerFaceLockToggle.disabled = !cue;
+            els.speakerFaceLockToggle.checked = Boolean(cue && cue.locked);
+        }
+        const confidence = cue ? Math.max(0, Math.min(1, Number(cue.confidence) || 0)) : 0;
+        if (els.speakerFaceConfidenceValue) els.speakerFaceConfidenceValue.textContent = `${Math.round(confidence * 100)}%`;
+        if (els.speakerFaceConfidenceMeter) els.speakerFaceConfidenceMeter.value = confidence;
+        if (els.speakerFaceCueRange) els.speakerFaceCueRange.textContent = cue ? `${formatSpeakerCueTime(cue.start)}–${formatSpeakerCueTime(cue.end)} · ${cue.speaker || `발화 ${index + 1}`}` : '발화 구간 없음';
+        if (els.speakerFaceCueMeta) {
+            const subject = cue && subjects.find(item => item.id === cue.subjectId);
+            els.speakerFaceCueMeta.textContent = !cue
+                ? '전사 또는 자막을 연결하면 구간별 얼굴을 조정할 수 있습니다.'
+                : `${subject ? subject.label : '자동 추적'} · ${cue.locked ? '수동 고정' : '자동 연결'} · ${cue.source === 'diarization-face' ? '화자 라벨 기반' : cue.source === 'face-activity' ? '얼굴 활동 기반' : cue.source === 'manual-override' ? '사용자 지정' : '자동 대체'}`;
+        }
+    }
+
+    function selectSpeakerTuneCue(direction) {
+        const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+        if (!cues.length) return;
+        speakerTuneIndex = Math.max(0, Math.min(cues.length - 1, getSpeakerTuneIndex(cues) + Number(direction || 0)));
+        const cue = cues[speakerTuneIndex];
+        if (els.sourceVideo && Number.isFinite(Number(els.sourceVideo.duration))) els.sourceVideo.currentTime = Math.max(0, Math.min(Number(els.sourceVideo.duration) || cue.start, cue.start + 0.02));
+        syncSpeakerFaceTuningUI();
+        renderPreviewStill();
+    }
+
+    function applySpeakerTuneCue() {
+        const engine = getSmartReframeEngine();
+        const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+        const index = getSpeakerTuneIndex(cues);
+        const cue = index >= 0 ? cues[index] : null;
+        if (!cue || !engine.updateSpeakerCue || !engine.speakerCueKey) return;
+        const subjectId = els.speakerFaceSubjectSelect ? els.speakerFaceSubjectSelect.value : 'auto';
+        const locked = Boolean(els.speakerFaceLockToggle && els.speakerFaceLockToggle.checked && subjectId !== 'auto');
+        state.smartReframe = engine.updateSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), {
+            subjectId,
+            locked,
+            source: locked ? 'manual-override' : cue.source
+        }) || state.smartReframe;
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        toast(locked ? '이 발화 구간의 얼굴 연결을 고정했습니다.' : subjectId === 'auto' ? '이 발화 구간을 자동 추적으로 전환했습니다.' : '이 발화 구간의 얼굴 연결을 변경했습니다.', 'success');
+    }
+
+    async function resetSpeakerTuneCue() {
+        const engine = getSmartReframeEngine();
+        const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+        const index = getSpeakerTuneIndex(cues);
+        const cue = index >= 0 ? cues[index] : null;
+        if (!cue || !engine.updateSpeakerCue || !engine.speakerCueKey) return;
+        state.smartReframe = engine.updateSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), { subjectId: 'auto', locked: false, mode: 'auto', source: 'face-activity' }) || state.smartReframe;
+        persistSmartReframeEdits(state.smartReframe);
+        await linkSpeakerFaces(null, 'speaker-tuning-auto');
+        toast('선택 구간을 자동 화자 연결로 되돌렸습니다.', 'action');
+    }
+
     function updateSpeakerFaceUI() {
         const enabled = getSmartReframeOptions().speakerPriority !== false;
         const track = state.smartReframe;
@@ -527,6 +732,7 @@
             els.smartReframeSpeakerLinkBtn.disabled = !track || !subjects.length || !segments.length || Boolean(speakerLinkPromise);
             els.smartReframeSpeakerLinkBtn.textContent = speakerLinkPromise ? '화자 연결 중' : cues.length ? '화자 다시 연결' : '화자 연결';
         }
+        syncSpeakerFaceTuningUI();
         if (!els.smartReframeSpeakerStatus) return;
         if (!enabled) els.smartReframeSpeakerStatus.textContent = '말하는 사람 우선 추적이 꺼져 있습니다.';
         else if (track && track.activeSubjectId !== 'auto') els.smartReframeSpeakerStatus.textContent = '수동 주 피사체 고정이 화자 자동 전환보다 우선합니다.';
@@ -550,7 +756,7 @@
             const linker = getSpeakerFaceLinker();
             const engine = getSmartReframeEngine();
             if (!linker.linkSegmentsToFaces || !engine.applySpeakerCues) return null;
-            const result = linker.linkSegmentsToFaces(segments, state.smartReframe, { source: source || 'captions' });
+            const result = linker.linkSegmentsToFaces(segments, state.smartReframe, { source: source || 'captions', existingCues: state.smartReframe.speakerCues || [] });
             lastSpeakerFaceLinkResult = result;
             state.smartReframe = engine.applySpeakerCues(state.smartReframe, result.cues, getSmartReframeOptions().speakerPriority !== false) || state.smartReframe;
             persistSmartReframeEdits(state.smartReframe);
@@ -1288,6 +1494,10 @@
         if (els.smartReframeAnalyzeBtn) els.smartReframeAnalyzeBtn.addEventListener('click', analyzeSmartReframe);
         if (els.smartReframeSpeakerPriorityToggle) els.smartReframeSpeakerPriorityToggle.addEventListener('change', toggleSpeakerPriority);
         if (els.smartReframeSpeakerLinkBtn) els.smartReframeSpeakerLinkBtn.addEventListener('click', () => linkSpeakerFaces(null, 'manual'));
+        if (els.speakerFacePrevBtn) els.speakerFacePrevBtn.addEventListener('click', () => selectSpeakerTuneCue(-1));
+        if (els.speakerFaceNextBtn) els.speakerFaceNextBtn.addEventListener('click', () => selectSpeakerTuneCue(1));
+        if (els.speakerFaceApplyBtn) els.speakerFaceApplyBtn.addEventListener('click', applySpeakerTuneCue);
+        if (els.speakerFaceAutoBtn) els.speakerFaceAutoBtn.addEventListener('click', resetSpeakerTuneCue);
         if (els.smartReframeSubjectSelect) els.smartReframeSubjectSelect.addEventListener('change', applySmartReframeSubjectSelection);
         if (els.smartReframeKeyframeSetBtn) els.smartReframeKeyframeSetBtn.addEventListener('click', setSmartReframeKeyframe);
         if (els.smartReframeKeyframeDeleteBtn) els.smartReframeKeyframeDeleteBtn.addEventListener('click', deleteSmartReframeKeyframe);
@@ -1306,6 +1516,10 @@
         });
         document.addEventListener('ai-shorts-direct-crop-module-ready', () => {
             directCropController = null;
+            syncDirectCropEditor();
+        });
+        document.addEventListener('ai-shorts-crop-keyframe-timeline-ready', () => {
+            cropKeyframeTimelineController = null;
             syncDirectCropEditor();
         });
         if (els.sourceVideo) {
@@ -1920,7 +2134,9 @@ ${tags}`.trim());
         exportAllCandidates,
         saveThumbnail,
         snapSelectedBoundaryToNearestCut,
-        linkSpeakerFaces
+        linkSpeakerFaces,
+        applySpeakerTuneCue,
+        resetSpeakerTuneCue
     });
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

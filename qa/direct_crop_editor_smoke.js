@@ -26,7 +26,7 @@ vm.createContext(context);
 vm.runInContext(source, context);
 const api = context.window.AIShortsDirectCropEditor;
 
-ok(pkg.version === '1.6.9', 'direct crop release version is v1.6.9');
+ok(pkg.version === '1.6.12', 'direct crop release version is v1.6.12');
 ['directCropPanel', 'directCropOverlay', 'directCropPathOverlay', 'directCropToggleBtn', 'directCropSaveBtn', 'directCropUndoBtn'].forEach(id => ok(html.includes(`id="${id}"`), `${id} anchor exists`));
 ok(html.includes('tabindex="0" aria-label="세로 쇼츠 미리보기 캔버스"'), 'preview canvas is keyboard focusable');
 ok(loader.includes("versioned('src/ui/direct-crop-editor.js', 'editing')"), 'direct crop editor stays on editing-stage lazy load');
@@ -43,4 +43,4 @@ const report = JSON.parse(fs.readFileSync(audit, 'utf8'));
 ok(report.version === pkg.version && report.passed === true, 'direct crop browser audit matches the release and passed');
 ok(report.checks.dragCreatesKeyframe && report.checks.wheelUpdatesZoom && report.checks.keyboardNudgeWorks, 'drag, wheel, and keyboard editing paths passed');
 ok(report.checks.pathVisible && report.checks.undoWorks && report.checks.noRuntimeErrors, 'path visualization, undo, and runtime safety passed');
-console.log('PASS v1.6.9 direct preview crop editor contracts present');
+console.log('PASS v1.6.12 direct preview crop editor contracts present');

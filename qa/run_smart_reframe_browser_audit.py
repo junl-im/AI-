@@ -133,6 +133,44 @@ async def run_audit(media: Path) -> dict:
                 priorityEnabled: AIShortsAppState.state.smartReframeEdits?.speakerPriority !== false
             };
         }""")
+        await page.locator('#speakerFaceTuningPanel').evaluate('(node) => { node.open = true; }')
+        await page.click('#speakerFacePrevBtn')
+        tuning_target = await page.evaluate("""() => {
+            const cues = AIShortsAppState.state.smartReframe?.speakerCues || [];
+            const subjects = AIShortsAppState.state.smartReframe?.subjects || [];
+            const first = cues[0];
+            const alternate = subjects.find(subject => subject.id !== first?.subjectId) || subjects[0];
+            return { before: first?.subjectId || '', alternate: alternate?.id || '' };
+        }""")
+        await page.select_option('#speakerFaceSubjectSelect', tuning_target['alternate'])
+        await page.check('#speakerFaceLockToggle')
+        await page.click('#speakerFaceApplyBtn')
+        await page.wait_for_function("(id) => AIShortsAppState.state.smartReframe?.speakerCues?.[0]?.locked === true && AIShortsAppState.state.smartReframe?.speakerCues?.[0]?.subjectId === id", arg=tuning_target['alternate'], timeout=10000)
+        await page.evaluate("""async () => {
+            await AIShortsStudioApp.linkSpeakerFaces([
+                { start: 0.2, end: 1.25, text: '첫 번째 화자', speaker: 'SPEAKER_00' },
+                { start: 1.6, end: 2.8, text: '두 번째 화자', speaker: 'SPEAKER_01' }
+            ], 'browser-audit-relink');
+        }""")
+        tuning_locked = await page.evaluate("""() => {
+            const cue = AIShortsAppState.state.smartReframe?.speakerCues?.[0];
+            const focus = AIShortsSmartReframe.getFocusAt(AIShortsAppState.state.smartReframe, 0.7);
+            return {
+                subjectId: cue?.subjectId || '',
+                locked: cue?.locked === true,
+                mode: cue?.mode || '',
+                source: cue?.source || '',
+                focusSubjectId: focus?.subjectId || '',
+                panelState: document.querySelector('#speakerFaceTuningPanel')?.dataset?.state || '',
+                confidence: document.querySelector('#speakerFaceConfidenceValue')?.textContent?.trim() || ''
+            };
+        }""")
+        await page.click('#speakerFaceAutoBtn')
+        await page.wait_for_function("() => AIShortsAppState.state.smartReframe?.speakerCues?.[0]?.locked === false", timeout=10000)
+        tuning_auto = await page.evaluate("""() => {
+            const cue = AIShortsAppState.state.smartReframe?.speakerCues?.[0];
+            return { locked: cue?.locked === true, mode: cue?.mode || '', source: cue?.source || '', persistedLocked: AIShortsAppState.state.smartReframeEdits?.speakerCues?.[0]?.locked === true };
+        }""")
         await browser.close()
 
     checks = {
@@ -148,6 +186,10 @@ async def run_audit(media: Path) -> dict:
         'speakerDirectionChangesCrop': speaker['firstSource'] == 'speaker-face' and speaker['secondSource'] == 'speaker-face' and speaker['firstSubjectId'] != speaker['secondSubjectId'],
         'speakerDirectionPersists': speaker['persistedCueCount'] == 2 and speaker['priorityEnabled'] is True,
         'speakerStatusVisible': '발화 2구간' in speaker['status'] and '전환' in speaker['status'],
+        'speakerCueManualOverrideWorks': tuning_target['alternate'] != tuning_target['before'] and tuning_locked['subjectId'] == tuning_target['alternate'] and tuning_locked['focusSubjectId'] == tuning_target['alternate'],
+        'speakerCueLockSurvivesRelink': tuning_locked['locked'] is True and tuning_locked['mode'] == 'manual' and tuning_locked['source'] == 'manual-override' and tuning_locked['panelState'] == 'manual',
+        'speakerCueConfidenceVisible': tuning_locked['confidence'].endswith('%'),
+        'speakerCueReturnsToAuto': tuning_auto['locked'] is False and tuning_auto['mode'] == 'auto' and tuning_auto['source'] != 'manual-override' and tuning_auto['persistedLocked'] is False,
         'progressCompletes': '스마트 리프레임 준비 완료' in edited['progress'],
         'operationReleased': edited['operationActive'] is False,
         'noPageErrors': not errors,
@@ -156,11 +198,12 @@ async def run_audit(media: Path) -> dict:
     return {
         'version': VERSION,
         'generatedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
-        'harness': 'real 20-second MP4 import, motion fallback, explicit two-face detector, manual subject pin, crop-keyframe create/delete, local transcript speaker-face switching, and operation cleanup',
+        'harness': 'real 20-second MP4 import, motion fallback, explicit two-face detector, manual subject pin, crop-keyframe create/delete, local transcript speaker-face switching, per-segment manual lock/auto restore, and operation cleanup',
         'motion': motion,
         'edited': edited,
         'deleted': deleted,
         'speaker': speaker,
+        'speakerTuning': { 'target': tuning_target, 'locked': tuning_locked, 'auto': tuning_auto },
         'checks': checks,
         'passed': all(checks.values()),
         'pageErrors': errors,

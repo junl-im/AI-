@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.9 - speaker-directed, multi-subject and scene-cut-safe smart reframe engine
+// AI Shorts Studio v1.6.12 - keyframe timeline editing, range application, and collision-safe smart reframe engine
 'use strict';
 
 (function exposeSmartReframeEngine(global) {
@@ -136,12 +136,19 @@
             subjectId: safeSubjectId(cue.subjectId),
             confidence: Number(clamp(cue.confidence, 0, 1).toFixed(4)),
             source: String(cue.source || 'face-activity').slice(0, 32),
-            segmentCount: Math.max(1, Math.round(finite(cue.segmentCount, 1)))
+            segmentCount: Math.max(1, Math.round(finite(cue.segmentCount, 1))),
+            locked: cue.locked === true,
+            mode: cue.locked === true || cue.mode === 'manual' ? 'manual' : 'auto'
         };
     }
 
     function normalizeSpeakerCues(items) {
         return (Array.isArray(items) ? items : []).slice(0, MAX_SPEAKER_CUES).map(safeSpeakerCue).filter(cue => cue.end > cue.start).sort((a, b) => a.start - b.start || a.end - b.end);
+    }
+
+    function speakerCueKey(cue) {
+        const safe = safeSpeakerCue(cue);
+        return `${safe.start.toFixed(3)}:${safe.end.toFixed(3)}:${safe.speaker}`;
     }
 
     function getSpeakerCueAt(cues, time) {
@@ -650,6 +657,29 @@
         return track ? rebuildTrack(track, { speakerCues: [] }) : null;
     }
 
+    function updateSpeakerCue(track, cueKey, patch) {
+        if (!track) return null;
+        const key = String(cueKey || '');
+        let changed = false;
+        const speakerCues = normalizeSpeakerCues(track.speakerCues).map(cue => {
+            if (speakerCueKey(cue) !== key) return cue;
+            changed = true;
+            const next = Object.assign({}, cue, patch || {});
+            if (Object.prototype.hasOwnProperty.call(patch || {}, 'subjectId')) next.subjectId = safeSubjectId(patch.subjectId);
+            if (patch && patch.locked === true) {
+                next.locked = true;
+                next.mode = 'manual';
+                next.source = String(patch.source || 'manual-override').slice(0, 32);
+            } else if (patch && patch.locked === false) {
+                next.locked = false;
+                next.mode = 'auto';
+                if (next.source === 'manual-override') next.source = 'face-activity';
+            }
+            return safeSpeakerCue(next);
+        });
+        return changed ? rebuildTrack(track, { speakerCues }) : track;
+    }
+
     function setSpeakerPriority(track, enabled) {
         return track ? rebuildTrack(track, { speakerPriority: enabled !== false }) : null;
     }
@@ -659,6 +689,44 @@
         const next = safeKeyframe(keyframe);
         const keyframes = normalizeKeyframes((track.keyframes || []).filter(item => Math.abs(item.time - next.time) > 0.12).concat(next));
         return rebuildTrack(track, { keyframes });
+    }
+
+    function replaceKeyframes(track, keyframes) {
+        return track ? rebuildTrack(track, { keyframes: normalizeKeyframes(keyframes) }) : null;
+    }
+
+    function moveKeyframe(track, fromTime, toTime, tolerance) {
+        if (!track) return null;
+        const source = getNearestKeyframe(track, fromTime, tolerance == null ? 0.08 : tolerance);
+        if (!source) return track;
+        const target = Math.max(0, finite(toTime, source.time));
+        const collisionRadius = 0.04;
+        const keyframes = (track.keyframes || []).filter(item => Math.abs(item.time - source.time) > 0.001 && Math.abs(item.time - target) > collisionRadius);
+        keyframes.push(Object.assign({}, source, { time: target }));
+        return rebuildTrack(track, { keyframes: normalizeKeyframes(keyframes) });
+    }
+
+    function pasteKeyframe(track, keyframe, time) {
+        if (!track) return null;
+        const source = safeKeyframe(Object.assign({}, keyframe || {}, { time: Math.max(0, finite(time, keyframe && keyframe.time || 0)) }));
+        const keyframes = (track.keyframes || []).filter(item => Math.abs(item.time - source.time) > 0.04);
+        keyframes.push(source);
+        return rebuildTrack(track, { keyframes: normalizeKeyframes(keyframes) });
+    }
+
+    function applyKeyframeToRange(track, keyframe, start, end) {
+        if (!track) return null;
+        const from = Math.max(0, Math.min(finite(start, 0), finite(end, 0)));
+        const to = Math.max(from, Math.max(finite(start, from), finite(end, from)));
+        if (to - from < 0.04) return pasteKeyframe(track, keyframe, from);
+        const template = safeKeyframe(keyframe || {});
+        const retained = (track.keyframes || []).filter(item => item.time < from - 0.02 || item.time > to + 0.02);
+        const anchors = [from]
+            .concat((track.sceneCuts || []).filter(time => time > from + 0.02 && time < to - 0.02))
+            .concat(to)
+            .slice(0, MAX_KEYFRAMES)
+            .map(time => Object.assign({}, template, { time }));
+        return rebuildTrack(track, { keyframes: normalizeKeyframes(retained.concat(anchors)) });
     }
 
     function removeKeyframe(track, time, tolerance) {
@@ -851,9 +919,15 @@
         selectSubject,
         applySpeakerCues,
         clearSpeakerCues,
-        setSpeakerPriority,
+        updateSpeakerCue,
         getSpeakerCueAt,
+        speakerCueKey,
+        setSpeakerPriority,
         upsertKeyframe,
+        replaceKeyframes,
+        moveKeyframe,
+        pasteKeyframe,
+        applyKeyframeToRange,
         removeKeyframe,
         clearKeyframes,
         getNearestKeyframe,
@@ -863,6 +937,6 @@
         resolveCropRect,
         scoreRange,
         getStatus,
-        _test: Object.freeze({ smoothPoints, normalizeDetection, choosePrimary, buildTrack, assignSubjects, composeSubjectPoints, getPointAtArray, sceneIndexAt, normalizeSpeakerCues })
+        _test: Object.freeze({ smoothPoints, normalizeDetection, choosePrimary, buildTrack, assignSubjects, composeSubjectPoints, getPointAtArray, sceneIndexAt, normalizeSpeakerCues, normalizeKeyframes, safeKeyframe })
     });
 })(window);

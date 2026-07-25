@@ -7,7 +7,7 @@ from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-structure-priority-probe-v1.6.9.json'
+OUTPUT = ROOT / 'qa' / 'runtime-structure-priority-probe-v1.6.12.json'
 TARGET_FILES = [
     'assets/css/pc-dock-reveal-hotfix.css',
     'assets/css/desktop-prime-layout.css',
@@ -216,7 +216,7 @@ async def main():
     unproven = [c for c in candidates if not c['tested']]
     report = {
         'baselineVersion':'1.5.19',
-        'targetVersion':'1.6.9',
+        'targetVersion':'1.6.12',
         'targetFiles':TARGET_FILES,
         'viewports':VIEWPORTS,
         'candidateCount':len(candidates),

@@ -20,14 +20,14 @@ const workflow = read('src/app/render-workflow-controller.js');
 const loader = read('src/boot/staged-ui-loader.js');
 const css = read('assets/css/smart-reframe.css');
 
-assert(pkg.version === '1.6.9', 'smart reframe director release version is v1.6.9');
+assert(pkg.version === '1.6.12', 'smart reframe director release version is v1.6.12');
 assert(html.includes('<option value="smart">스마트 피사체 추적</option>'), 'vertical-frame selector exposes smart subject tracking');
 [
     'smartReframePanel', 'smartReframeStatus', 'smartReframeDetail', 'smartReframeCaptionAvoidanceToggle', 'smartReframeAnalyzeBtn',
     'smartReframeEditor', 'smartReframeSubjectSelect', 'smartReframeXInput', 'smartReframeYInput', 'smartReframeZoomInput',
     'smartReframeKeyframeSetBtn', 'smartReframeKeyframeDeleteBtn', 'smartReframeKeyframeResetBtn'
 ].forEach(id => assert(html.includes(`id="${id}"`), `${id} UI anchor exists`));
-assert(html.includes('assets/css/smart-reframe.css?v=1.6.9-direct-crop-editor'), 'smart-reframe director stylesheet is versioned');
+assert(html.includes('assets/css/smart-reframe.css?v=1.6.12-model-pack-benchmark-rollback'), 'smart-reframe director stylesheet is versioned');
 assert(!html.includes('<script defer src="src/vision/smart-reframe-engine.js'), 'smart-reframe engine does not increase blocking startup scripts');
 assert(loader.includes("versioned('src/vision/smart-reframe-engine.js', 'editing')"), 'smart-reframe engine hydrates with the editing phase');
 assert(loader.includes('#cropModeSelect, #smartReframePanel'), 'smart-reframe intent prewarms its lazy engine');
@@ -48,4 +48,4 @@ assert(browserAudit.checks.keyframeCreateDeleteWorks && browserAudit.checks.oper
 assert(browserAudit.checks.speakerFacesLinked && browserAudit.checks.speakerDirectionChangesCrop, 'browser flow links two local transcript speakers to distinct tracked faces');
 assert(browserAudit.checks.speakerDirectionPersists && browserAudit.checks.speakerStatusVisible, 'speaker-directed crop state persists and is visible in the editor');
 assert(browserAudit.checks.noPageErrors && browserAudit.checks.noConsoleErrors, 'smart-reframe director flow has no runtime errors');
-console.log('PASS v1.6.9 smart reframe director UI contracts present');
+console.log('PASS v1.6.12 smart reframe director UI contracts present');

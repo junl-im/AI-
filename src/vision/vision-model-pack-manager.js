@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.9 - local browser vision model-pack installer, integrity verifier, and runtime activator
+// AI Shorts Studio v1.6.12 - local vision model-pack benchmarks, device recommendations, and safe rollback
 'use strict';
 
 (function exposeVisionModelPackManager(global) {
@@ -7,6 +7,10 @@
     const CACHE_NAME = String(config.VISION_MODEL_PACK_CACHE_NAME || 'ai-shorts-vision-model-packs-v1');
     const STORE_KEY = String(config.VISION_MODEL_PACK_STORE_KEY || 'ai-shorts-vision-model-packs-v1');
     const ACTIVE_KEY = String(config.VISION_MODEL_PACK_ACTIVE_KEY || 'ai-shorts-vision-model-pack-active-v1');
+    const BENCHMARK_KEY = String(config.VISION_MODEL_PACK_BENCHMARK_KEY || 'ai-shorts-vision-model-pack-benchmarks-v1');
+    const ROLLBACK_KEY = String(config.VISION_MODEL_PACK_ROLLBACK_KEY || 'ai-shorts-vision-model-pack-rollback-v1');
+    const BENCHMARK_LIMIT = Math.max(4, Math.min(40, Number(config.VISION_MODEL_PACK_BENCHMARK_LIMIT || 16)));
+    const BENCHMARK_ITERATIONS = Math.max(3, Math.min(30, Number(config.VISION_MODEL_PACK_BENCHMARK_ITERATIONS || 8)));
     const MAX_PACKS = Math.max(1, Math.min(8, Number(config.VISION_MODEL_PACK_MAX_PACKS || 3)));
     const MAX_FILES = Math.max(8, Math.min(32, Number(config.VISION_MODEL_PACK_MAX_FILES || 16)));
     const MAX_TOTAL_BYTES = Math.max(8 * 1024 * 1024, Math.min(256 * 1024 * 1024, Number(config.VISION_MODEL_PACK_MAX_BYTES || 64 * 1024 * 1024)));
@@ -29,7 +33,8 @@
         provider: null,
         module: null,
         activating: null,
-        lastError: ''
+        lastError: '',
+        lastRecovery: null
     };
 
     function nowIso() { return new Date().toISOString(); }
@@ -120,6 +125,92 @@
     function normalizeBackend(value) {
         const key = String(value || 'auto').toLowerCase();
         return ['auto', 'gpu', 'cpu'].includes(key) ? key : 'auto';
+    }
+
+    function safeBenchmark(value) {
+        const input = value && typeof value === 'object' ? value : {};
+        const backend = normalizeBackend(input.backend);
+        return {
+            id: /^bench-[a-f0-9]{16}$/i.test(String(input.id || '')) ? String(input.id).toLowerCase() : '',
+            packId: /^vision-[a-f0-9]{16}$/i.test(String(input.packId || '')) ? String(input.packId).toLowerCase() : '',
+            backend: backend === 'auto' ? 'cpu' : backend,
+            createdAt: safeText(input.createdAt || '', 40),
+            iterations: Math.max(1, Math.min(100, Math.round(Number(input.iterations) || 1))),
+            medianMs: Math.max(0, Number(input.medianMs) || 0),
+            p95Ms: Math.max(0, Number(input.p95Ms) || 0),
+            fps: Math.max(0, Number(input.fps) || 0),
+            status: input.status === 'failed' ? 'failed' : 'passed',
+            error: safeText(input.error || '', 180)
+        };
+    }
+
+    function readBenchmarks() {
+        const raw = readJson(BENCHMARK_KEY, { history: [] });
+        return (raw && Array.isArray(raw.history) ? raw.history : []).map(safeBenchmark).filter(item => item.id && item.packId).slice(0, BENCHMARK_LIMIT);
+    }
+
+    function saveBenchmark(record) {
+        const safe = safeBenchmark(record);
+        if (!safe.id || !safe.packId) return null;
+        const history = [safe].concat(readBenchmarks().filter(item => item.id !== safe.id)).slice(0, BENCHMARK_LIMIT);
+        writeJson(BENCHMARK_KEY, { version: 1, history });
+        return safe;
+    }
+
+    function readRollback() {
+        const raw = readJson(ROLLBACK_KEY, null);
+        if (!raw || !/^vision-[a-f0-9]{16}$/i.test(String(raw.packId || ''))) return null;
+        return {
+            packId: String(raw.packId).toLowerCase(),
+            backend: normalizeBackend(raw.backend),
+            createdAt: safeText(raw.createdAt || '', 40),
+            reason: safeText(raw.reason || 'model-switch', 60)
+        };
+    }
+
+    function saveRollback(packId, backend, reason) {
+        const id = String(packId || '').toLowerCase();
+        if (!/^vision-[a-f0-9]{16}$/.test(id) || !findPack(id)) return null;
+        const next = { packId: id, backend: normalizeBackend(backend), createdAt: nowIso(), reason: safeText(reason || 'model-switch', 60) };
+        writeJson(ROLLBACK_KEY, next);
+        return next;
+    }
+
+    function clearRollback() {
+        try { if (global.localStorage) global.localStorage.removeItem(ROLLBACK_KEY); } catch (_) { writeJson(ROLLBACK_KEY, null); }
+    }
+
+    function percentile(values, ratio) {
+        const list = (Array.isArray(values) ? values : []).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+        if (!list.length) return 0;
+        const index = Math.min(list.length - 1, Math.max(0, Math.ceil((list.length - 1) * ratio)));
+        return list[index];
+    }
+
+    function benchmarkRecommendation(results) {
+        const passed = (Array.isArray(results) ? results : []).filter(item => item && item.status === 'passed' && item.medianMs > 0);
+        const cpu = passed.find(item => item.backend === 'cpu');
+        const gpu = passed.find(item => item.backend === 'gpu');
+        if (gpu && !cpu) return { backend: 'gpu', reason: 'GPU 경로만 정상 완료됨', confidence: 'high' };
+        if (cpu && !gpu) return { backend: 'cpu', reason: 'WASM CPU 경로만 정상 완료됨', confidence: 'high' };
+        if (!cpu && !gpu) return { backend: 'auto', reason: '완료된 성능 측정이 없음', confidence: 'low' };
+        const improvement = (cpu.medianMs - gpu.medianMs) / Math.max(0.001, cpu.medianMs);
+        if (improvement >= 0.08) return { backend: 'gpu', reason: `GPU 중앙 처리 시간이 ${Math.round(improvement * 100)}% 짧음`, confidence: improvement >= 0.2 ? 'high' : 'medium' };
+        if (improvement <= -0.08) return { backend: 'cpu', reason: `WASM CPU 중앙 처리 시간이 ${Math.round(Math.abs(improvement) * 100)}% 짧음`, confidence: improvement <= -0.2 ? 'high' : 'medium' };
+        return { backend: 'cpu', reason: '성능 차이가 작아 호환성이 높은 WASM CPU 권장', confidence: 'medium' };
+    }
+
+    function performanceSummary(packId) {
+        const id = String(packId || '').toLowerCase();
+        const history = readBenchmarks().filter(item => item.packId === id);
+        const latest = {};
+        history.forEach(item => { if (!latest[item.backend]) latest[item.backend] = item; });
+        const results = Object.values(latest);
+        return Object.freeze({
+            history: Object.freeze(history.map(item => Object.freeze(clone(item)))),
+            latest: Object.freeze(results.map(item => Object.freeze(clone(item)))),
+            recommendation: Object.freeze(benchmarkRecommendation(results))
+        });
     }
 
     function baseUrl() {
@@ -401,6 +492,128 @@
         throw lastError || new Error('얼굴 감지 런타임을 시작하지 못했습니다.');
     }
 
+    function benchmarkFrame(options) {
+        const opts = options || {};
+        if (opts.frame) return opts.frame;
+        if (!doc || typeof doc.createElement !== 'function') throw new Error('성능 측정용 프레임을 만들 수 없습니다.');
+        const canvas = doc.createElement('canvas');
+        canvas.width = Math.max(160, Math.min(640, Number(opts.width) || 320));
+        canvas.height = Math.max(90, Math.min(360, Number(opts.height) || 180));
+        const context = canvas.getContext && canvas.getContext('2d');
+        if (context) {
+            context.fillStyle = '#101827';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.fillStyle = '#dce8ff';
+            context.fillRect(canvas.width * 0.34, canvas.height * 0.18, canvas.width * 0.32, canvas.height * 0.64);
+        }
+        return canvas;
+    }
+
+    async function benchmarkBackend(pack, backend, options) {
+        const opts = options || {};
+        const selected = normalizeBackend(backend);
+        if (selected === 'auto') throw new Error('성능 측정 실행 방식은 GPU 또는 CPU여야 합니다.');
+        const created = await createDetector(pack, selected, opts);
+        const detector = created.detector;
+        const frame = benchmarkFrame(opts);
+        const iterations = Math.max(3, Math.min(30, Number(opts.iterations) || BENCHMARK_ITERATIONS));
+        const warmup = Math.max(1, Math.min(6, Number(opts.warmup) || 2));
+        const now = typeof opts.now === 'function' ? opts.now : () => global.performance && global.performance.now ? global.performance.now() : Date.now();
+        const samples = [];
+        try {
+            for (let index = 0; index < warmup + iterations; index += 1) {
+                const started = now();
+                await Promise.resolve(detector.detectForVideo(frame, 1000 + index * 33));
+                const elapsed = Math.max(0.001, Number(now()) - Number(started));
+                if (index >= warmup) samples.push(elapsed);
+                if (typeof opts.onProgress === 'function') opts.onProgress(Math.round(((index + 1) / (warmup + iterations)) * 100), `${selected === 'gpu' ? 'GPU' : 'WASM CPU'} 측정 중 · ${index + 1}/${warmup + iterations}`);
+            }
+        } finally {
+            if (detector && typeof detector.close === 'function') {
+                try { detector.close(); } catch (_) { /* ignored */ }
+            }
+        }
+        const medianMs = percentile(samples, 0.5);
+        const p95Ms = percentile(samples, 0.95);
+        const seed = `${pack.id}:${selected}:${nowIso()}:${medianMs.toFixed(4)}`;
+        const digest = await sha256(new TextEncoder().encode(seed));
+        return saveBenchmark({
+            id: `bench-${digest.slice(0, 16)}`,
+            packId: pack.id,
+            backend: selected,
+            createdAt: nowIso(),
+            iterations,
+            medianMs: Number(medianMs.toFixed(3)),
+            p95Ms: Number(p95Ms.toFixed(3)),
+            fps: Number((1000 / Math.max(0.001, medianMs)).toFixed(2)),
+            status: 'passed'
+        });
+    }
+
+    async function benchmarkPack(packId, options) {
+        const opts = options || {};
+        const pack = findPack(packId);
+        if (!pack) throw new Error('성능을 측정할 모델 팩이 설치되어 있지 않습니다.');
+        const verification = await verifyPack(pack.id, opts);
+        if (!verification.ok) throw new Error('손상된 모델 팩은 성능을 측정할 수 없습니다.');
+        const requested = Array.isArray(opts.backends) ? opts.backends : ['gpu', 'cpu'];
+        const capabilities = probeCapabilities();
+        const backends = requested.map(normalizeBackend).filter((item, index, list) => item !== 'auto' && list.indexOf(item) === index).filter(item => item !== 'gpu' || capabilities.gpuDelegate || opts.runtimeModule);
+        const results = [];
+        for (const backend of backends) {
+            try {
+                results.push(await benchmarkBackend(pack, backend, opts));
+            } catch (error) {
+                const digest = await sha256(new TextEncoder().encode(`${pack.id}:${backend}:${nowIso()}:failed`));
+                results.push(saveBenchmark({ id: `bench-${digest.slice(0, 16)}`, packId: pack.id, backend, createdAt: nowIso(), status: 'failed', error: error && error.message || error, iterations: 1 }));
+            }
+        }
+        const recommendation = benchmarkRecommendation(results);
+        dispatchChange({ type: 'benchmark-complete', packId: pack.id, results: clone(results), recommendation });
+        return Object.freeze({ packId: pack.id, results: Object.freeze(results.map(item => Object.freeze(clone(item)))), recommendation: Object.freeze(recommendation) });
+    }
+
+    function commitRuntime(pack, created, requestedBackend) {
+        runtimeState.packId = pack.id;
+        runtimeState.backend = created.backend;
+        runtimeState.detector = created.detector;
+        runtimeState.module = created.runtime;
+        runtimeState.provider = providerFromDetector(created.detector, pack.id, created.backend);
+        runtimeState.lastError = '';
+        const engine = global.AIShortsSmartReframe;
+        if (engine && typeof engine.registerDetectorProvider === 'function') engine.registerDetectorProvider(runtimeState.provider);
+        saveActive(pack.id, requestedBackend);
+        return publicRuntimeState();
+    }
+
+    async function restoreRollbackCandidate(candidate, options) {
+        const opts = options || {};
+        const rollback = candidate || readRollback();
+        if (!rollback) throw new Error('복구할 이전 모델 팩이 없습니다.');
+        const pack = findPack(rollback.packId);
+        if (!pack) { clearRollback(); throw new Error('이전 모델 팩이 삭제되어 복구할 수 없습니다.'); }
+        const verification = await verifyPack(pack.id, opts);
+        if (!verification.ok) throw new Error('이전 모델 팩도 손상되어 복구하지 않았습니다.');
+        await deactivate({ preserveSelection: true });
+        const created = await createDetector(pack, rollback.backend, opts);
+        const state = commitRuntime(pack, created, rollback.backend);
+        runtimeState.lastRecovery = { packId: pack.id, backend: state.backend, recoveredAt: nowIso(), reason: rollback.reason };
+        dispatchChange({ type: 'rollback-complete', runtime: state, rollback: clone(runtimeState.lastRecovery) });
+        return Object.freeze(Object.assign({}, state, { recovered: true, rollback: clone(runtimeState.lastRecovery) }));
+    }
+
+    async function rollbackToPrevious(options) {
+        const opts = options || {};
+        const candidate = readRollback();
+        if (!candidate) throw new Error('복구할 이전 모델 팩이 없습니다.');
+        const current = runtimeState.packId || readActive().packId;
+        const currentBackend = runtimeState.backend || readActive().backend;
+        const result = await restoreRollbackCandidate(candidate, opts);
+        if (current && current !== result.packId && findPack(current)) saveRollback(current, currentBackend, 'rollback-undo');
+        else clearRollback();
+        return result;
+    }
+
     function providerFromDetector(detector, packId, backend) {
         return {
             name: `mediapipe-face-detector-${backend}`,
@@ -431,26 +644,36 @@
             const pack = findPack(id);
             if (!pack) throw new Error('활성화할 모델 팩이 설치되어 있지 않습니다.');
             if (serviceWorkerRequired(opts)) throw new Error('모델 팩 설치 후 앱을 한 번 새로고침해야 사용할 수 있습니다.');
-            const verification = await verifyPack(pack.id, opts);
-            if (!verification.ok) throw new Error('모델 팩 무결성이 손상되어 활성화하지 않았습니다. 다시 설치해 주세요.');
-            await deactivate({ preserveSelection: true });
-            const created = await createDetector(pack, backend, opts);
-            runtimeState.packId = pack.id;
-            runtimeState.backend = created.backend;
-            runtimeState.detector = created.detector;
-            runtimeState.module = created.runtime;
-            runtimeState.provider = providerFromDetector(created.detector, pack.id, created.backend);
-            runtimeState.lastError = '';
-            const engine = global.AIShortsSmartReframe;
-            if (engine && typeof engine.registerDetectorProvider === 'function') engine.registerDetectorProvider(runtimeState.provider);
-            saveActive(pack.id, backend);
-            dispatchChange({ type: 'activated', runtime: publicRuntimeState() });
-            return publicRuntimeState();
-        })().catch(error => {
-            runtimeState.lastError = safeText(error && error.message || error, 240);
-            dispatchChange({ type: 'activation-failed', packId: id, message: runtimeState.lastError });
-            throw error;
-        }).finally(() => { runtimeState.activating = null; });
+            const previous = readActive();
+            const rollbackCandidate = previous.packId && previous.packId !== pack.id && findPack(previous.packId)
+                ? saveRollback(previous.packId, runtimeState.backend || previous.backend, 'model-switch')
+                : readRollback();
+            try {
+                const verification = await verifyPack(pack.id, opts);
+                if (!verification.ok) throw new Error('모델 팩 무결성이 손상되어 활성화하지 않았습니다. 다시 설치해 주세요.');
+                await deactivate({ preserveSelection: true });
+                const created = await createDetector(pack, backend, opts);
+                runtimeState.lastRecovery = null;
+                const state = commitRuntime(pack, created, backend);
+                dispatchChange({ type: 'activated', runtime: state });
+                return state;
+            } catch (error) {
+                const message = safeText(error && error.message || error, 240);
+                runtimeState.lastError = message;
+                if (opts.autoRollback !== false && rollbackCandidate) {
+                    try {
+                        const recovered = await restoreRollbackCandidate(rollbackCandidate, Object.assign({}, opts, { autoRollback: false }));
+                        runtimeState.lastError = `새 모델 시작 실패 · 이전 모델로 자동 복구됨: ${message}`;
+                        dispatchChange({ type: 'activation-rolled-back', failedPackId: id, message, runtime: recovered });
+                        return Object.freeze(Object.assign({}, recovered, { activationError: message }));
+                    } catch (rollbackError) {
+                        runtimeState.lastError = `${message} · 이전 모델 복구도 실패: ${safeText(rollbackError && rollbackError.message || rollbackError, 180)}`;
+                    }
+                }
+                dispatchChange({ type: 'activation-failed', packId: id, message: runtimeState.lastError });
+                throw new Error(runtimeState.lastError);
+            }
+        })().finally(() => { runtimeState.activating = null; });
         return runtimeState.activating;
     }
 
@@ -493,6 +716,7 @@
         const store = readStore();
         store.packs = store.packs.filter(item => item.id !== id);
         saveStore(store);
+        if (readRollback() && readRollback().packId === id) clearRollback();
         dispatchChange({ type: 'removed', packId: id, files });
         return { removed: true, files };
     }
@@ -523,7 +747,8 @@
             active: Boolean(runtimeState.provider && runtimeState.packId),
             packId: runtimeState.packId,
             backend: runtimeState.backend,
-            lastError: runtimeState.lastError
+            lastError: runtimeState.lastError,
+            lastRecovery: runtimeState.lastRecovery ? clone(runtimeState.lastRecovery) : null
         });
     }
 
@@ -534,6 +759,8 @@
             selected: Object.freeze(selected),
             runtime: publicRuntimeState(),
             capabilities: probeCapabilities(),
+            rollback: Object.freeze(readRollback() || { packId: '', backend: 'auto', createdAt: '', reason: '' }),
+            performance: Object.freeze(readStore().packs.reduce((output, pack) => { output[pack.id] = performanceSummary(pack.id); return output; }, {})),
             policy: Object.freeze({ localFilesOnly: true, remoteDownload: false, integrity: 'sha256', cacheName: CACHE_NAME, maxFiles: MAX_FILES })
         });
     }
@@ -542,6 +769,9 @@
         installFromFiles,
         verifyPack,
         activatePack,
+        benchmarkPack,
+        performanceSummary,
+        rollbackToPrevious,
         ensureActiveProvider,
         deactivate,
         removePack,
@@ -550,6 +780,6 @@
         probeCapabilities,
         snapshot,
         assetUrl,
-        _test: Object.freeze({ selectInputFiles, normalizeBackend, contentTypeFor, storedPath, sha256, PATH_SEGMENT, CACHE_NAME, REQUIRED_RUNTIME_FILES })
+        _test: Object.freeze({ selectInputFiles, normalizeBackend, contentTypeFor, storedPath, sha256, safeBenchmark, benchmarkRecommendation, percentile, readRollback, saveRollback, PATH_SEGMENT, CACHE_NAME, REQUIRED_RUNTIME_FILES, BENCHMARK_KEY, ROLLBACK_KEY })
     });
 })(window);

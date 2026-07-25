@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.9 - schema-v5 speaker-directed smart-reframe project helpers
+// AI Shorts Studio v1.6.12 - schema-v5 speaker-directed smart-reframe project helpers
 'use strict';
 
 (function exposeProjectService(global) {
@@ -164,7 +164,9 @@
                 subjectId: /^subject-[1-9][0-9]{0,2}$/.test(requested) ? requested : 'auto',
                 confidence: Number(finiteNumber(item.confidence, 0, 0, 1).toFixed(4)),
                 source: safeText(item.source, 32) || 'face-activity',
-                segmentCount: Math.max(1, Math.round(finiteNumber(item.segmentCount, 1, 1, 5000)))
+                segmentCount: Math.max(1, Math.round(finiteNumber(item.segmentCount, 1, 1, 5000))),
+                locked: item.locked === true,
+                mode: item.locked === true || item.mode === 'manual' ? 'manual' : 'auto'
             };
         }).filter(Boolean).sort((a, b) => a.start - b.start || a.end - b.end);
         return { subjectId, keyframes, speakerPriority: input.speakerPriority !== false, speakerCues };

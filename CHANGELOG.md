@@ -1,4 +1,29 @@
-# v1.6.9
+# Changelog
+
+## v1.6.12 - Model Pack Benchmark & Safe Rollback
+
+- GPU·WASM CPU 로컬 성능 측정
+- 장치별 권장 실행 방식
+- 모델 교체 실패 자동 롤백
+- 수동 롤백 및 양방향 복구
+- 로컬 전용 성능 기록
+
+## v1.6.11
+
+- 발화 구간별 얼굴 연결 미세 조정
+- 연결 신뢰도 및 연결 근거 표시
+- 수동 연결 고정, 자동 재연결, 고정값 보존
+- 프로젝트 cue lock 메타데이터 저장·복원
+
+## v1.6.11 - Crop Keyframe Timeline
+
+- Added a draggable crop-keyframe timeline with scene-cut markers.
+- Added crop keyframe copy, playhead paste, and selected-range application.
+- Added collision-safe keyframe movement and automatic duplicate cleanup.
+- Preserved project schema v5 and the shared preview, thumbnail, and export crop contract.
+- Added dedicated engine and Chromium regression coverage.
+
+# v1.6.11
 
 - 미리보기 화면에서 세로 크롭 위치를 직접 드래그해 조정할 수 있습니다.
 - 마우스 휠·트랙패드·두 손가락 핀치로 확대 비율을 조절합니다.

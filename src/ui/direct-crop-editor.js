@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.9 - direct preview crop gestures and keyframe path editing
+// AI Shorts Studio v1.6.12 - direct preview crop gestures and keyframe path editing
 'use strict';
 
 (function exposeDirectCropEditor(global) {

@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.9 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.6.12 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.9',
-    BUILD_KEY: '1.6.9-direct-crop-editor',
+    APP_VERSION: 'v1.6.12',
+    BUILD_KEY: '1.6.12-model-pack-benchmark-rollback',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -59,6 +59,10 @@ window.AIShortsRuntimeConfig = Object.freeze({
     VISION_MODEL_PACK_CACHE_NAME: 'ai-shorts-vision-model-packs-v1',
     VISION_MODEL_PACK_STORE_KEY: 'ai-shorts-vision-model-packs-v1',
     VISION_MODEL_PACK_ACTIVE_KEY: 'ai-shorts-vision-model-pack-active-v1',
+    VISION_MODEL_PACK_BENCHMARK_KEY: 'ai-shorts-vision-model-pack-benchmarks-v1',
+    VISION_MODEL_PACK_ROLLBACK_KEY: 'ai-shorts-vision-model-pack-rollback-v1',
+    VISION_MODEL_PACK_BENCHMARK_LIMIT: 16,
+    VISION_MODEL_PACK_BENCHMARK_ITERATIONS: 8,
     VISION_MODEL_PACK_MAX_PACKS: 3,
     VISION_MODEL_PACK_MAX_FILES: 16,
     VISION_MODEL_PACK_MAX_BYTES: 64 * 1024 * 1024,

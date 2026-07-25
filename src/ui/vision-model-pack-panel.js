@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.9 - compact local MediaPipe vision model-pack controls
+// AI Shorts Studio v1.6.12 - compact model performance diagnostics and safe rollback controls
 'use strict';
 
 (function installVisionModelPackPanel(global) {
@@ -18,7 +18,7 @@
 
     function setBusy(next, label) {
         busy = Boolean(next);
-        ['visionPackSelect', 'visionPackBackend', 'visionPackInstallBtn', 'visionPackActivateBtn', 'visionPackVerifyBtn', 'visionPackRemoveBtn', 'visionPackDeactivateBtn'].forEach(id => {
+        ['visionPackSelect', 'visionPackBackend', 'visionPackInstallBtn', 'visionPackActivateBtn', 'visionPackVerifyBtn', 'visionPackRemoveBtn', 'visionPackDeactivateBtn', 'visionPackBenchmarkBtn', 'visionPackRollbackBtn'].forEach(id => {
             const control = els[id];
             if (control) control.disabled = busy || control.dataset.noPack === 'true';
         });
@@ -67,12 +67,15 @@
         const active = snapshot.runtime.active && snapshot.runtime.packId === selected;
         const ready = Boolean(pack);
         const capabilities = snapshot.capabilities || {};
+        const performance = pack && snapshot.performance && snapshot.performance[pack.id] || { latest: [], recommendation: { backend: 'auto', reason: '측정 전', confidence: 'low' } };
+        const recommendation = performance.recommendation || { backend: 'auto', reason: '측정 전', confidence: 'low' };
+        const rollback = snapshot.rollback && snapshot.rollback.packId ? snapshot.packs.find(item => item.id === snapshot.rollback.packId) : null;
         if (els.visionPackBackend) {
             els.visionPackBackend.value = snapshot.selected.packId === selected ? snapshot.selected.backend : 'auto';
             els.visionPackBackend.disabled = busy || !ready;
             els.visionPackBackend.dataset.noPack = ready ? 'false' : 'true';
         }
-        [els.visionPackActivateBtn, els.visionPackVerifyBtn, els.visionPackRemoveBtn].forEach(control => {
+        [els.visionPackActivateBtn, els.visionPackVerifyBtn, els.visionPackRemoveBtn, els.visionPackBenchmarkBtn].forEach(control => {
             if (!control) return;
             control.dataset.noPack = ready ? 'false' : 'true';
             control.disabled = busy || !ready;
@@ -86,6 +89,26 @@
             els.visionPackActivateBtn.hidden = active;
             els.visionPackActivateBtn.textContent = '얼굴 추적 사용';
         }
+        if (els.visionPackRollbackBtn) {
+            els.visionPackRollbackBtn.hidden = !rollback;
+            els.visionPackRollbackBtn.disabled = busy || !rollback;
+            els.visionPackRollbackBtn.dataset.noPack = rollback ? 'false' : 'true';
+            els.visionPackRollbackBtn.textContent = rollback ? `이전 모델로 복구` : '이전 모델 없음';
+        }
+        if (els.visionPackRecommendation) {
+            const label = recommendation.backend === 'gpu' ? 'GPU 권장' : recommendation.backend === 'cpu' ? 'WASM CPU 권장' : '성능 측정 필요';
+            els.visionPackRecommendation.textContent = label;
+            els.visionPackRecommendation.dataset.backend = recommendation.backend || 'auto';
+        }
+        if (els.visionPackBenchmarkDetail) {
+            const latest = Array.from(performance.latest || []);
+            if (latest.length) {
+                const summary = latest.map(item => item.status === 'passed'
+                    ? `${item.backend === 'gpu' ? 'GPU' : 'CPU'} ${item.medianMs.toFixed(1)}ms · ${item.fps.toFixed(1)}fps`
+                    : `${item.backend === 'gpu' ? 'GPU' : 'CPU'} 실패`).join(' / ');
+                els.visionPackBenchmarkDetail.textContent = `${summary} · ${recommendation.reason}`;
+            } else els.visionPackBenchmarkDetail.textContent = '이 장치에서 CPU·GPU 얼굴 감지 속도를 측정해 실행 방식을 추천합니다.';
+        }
         if (els.visionPackStatus) {
             els.visionPackStatus.textContent = active
                 ? `브라우저 얼굴 추적 사용 중 · ${snapshot.runtime.backend === 'gpu' ? 'GPU' : 'WASM'}`
@@ -96,7 +119,8 @@
                         : '미설치 · 모션 추적 사용';
         }
         if (!busy && els.visionPackDetail) {
-            if (snapshot.runtime.lastError) els.visionPackDetail.textContent = snapshot.runtime.lastError;
+            if (snapshot.runtime.lastRecovery) els.visionPackDetail.textContent = `이전 모델로 안전 복구됨 · ${snapshot.runtime.lastRecovery.backend === 'gpu' ? 'GPU' : 'WASM CPU'}`;
+            else if (snapshot.runtime.lastError) els.visionPackDetail.textContent = snapshot.runtime.lastError;
             else if (active) els.visionPackDetail.textContent = `${pack ? pack.sizeLabel : ''} · 로컬 파일만 사용 · 외부 전송 없음`;
             else if (pack) els.visionPackDetail.textContent = `${pack.fileCount}개 파일 · SHA-256 ${pack.verification === 'verified' ? '확인됨' : '재검사 필요'} · 모델 ${pack.modelDigest}`;
             else if (!capabilities.cacheStorage || !capabilities.sha256 || !capabilities.webAssembly) els.visionPackDetail.textContent = '이 브라우저에서는 모델 팩 저장 또는 실행을 지원하지 않습니다.';
@@ -150,9 +174,48 @@
         try {
             const backend = els.visionPackBackend && els.visionPackBackend.value || 'auto';
             const runtime = await manager.activatePack(id, { backend, onProgress: updateProgress });
-            toast(`브라우저 얼굴 추적을 ${runtime.backend === 'gpu' ? 'GPU' : 'WASM'} 모드로 시작했습니다.`, 'success');
+            if (runtime.recovered) toast('새 모델을 시작하지 못해 이전 모델로 안전 복구했습니다.', 'action');
+            else toast(`브라우저 얼굴 추적을 ${runtime.backend === 'gpu' ? 'GPU' : 'WASM'} 모드로 시작했습니다.`, 'success');
         } catch (error) {
             toast(error && error.message || '모델 팩을 시작하지 못했습니다.', 'error');
+        } finally {
+            setBusy(false);
+            render();
+        }
+    }
+
+    async function benchmarkSelected() {
+        const id = selectedPackId();
+        if (!id || busy) return;
+        setBusy(true, 'CPU·GPU 얼굴 감지 속도를 측정하고 있습니다.');
+        try {
+            const result = await manager.benchmarkPack(id, { onProgress: updateProgress });
+            const recommended = result.recommendation.backend === 'gpu' ? 'GPU' : result.recommendation.backend === 'cpu' ? 'WASM CPU' : '자동';
+            if (els.visionPackBackend && result.recommendation.backend !== 'auto') els.visionPackBackend.value = result.recommendation.backend;
+            toast(`성능 측정 완료 · ${recommended} 실행을 권장합니다.`, 'success');
+        } catch (error) {
+            toast(error && error.message || '모델 성능을 측정하지 못했습니다.', 'error');
+        } finally {
+            setBusy(false);
+            render();
+        }
+    }
+
+    async function rollbackSelected() {
+        if (busy) return;
+        const snapshot = manager.snapshot();
+        const rollback = snapshot.rollback && snapshot.rollback.packId ? snapshot.packs.find(item => item.id === snapshot.rollback.packId) : null;
+        if (!rollback) return;
+        const confirmed = typeof global.confirm !== 'function' || global.confirm(`${rollback.label} 모델로 복구할까요?
+현재 프로젝트와 원본 파일은 변경되지 않습니다.`);
+        if (!confirmed) return;
+        setBusy(true, '이전 모델 팩을 확인하고 복구하고 있습니다.');
+        try {
+            const runtime = await manager.rollbackToPrevious({ onProgress: updateProgress });
+            if (els.visionPackSelect) els.visionPackSelect.value = runtime.packId;
+            toast('이전 얼굴 감지 모델로 안전하게 복구했습니다.', 'success');
+        } catch (error) {
+            toast(error && error.message || '이전 모델로 복구하지 못했습니다.', 'error');
         } finally {
             setBusy(false);
             render();
@@ -193,7 +256,8 @@
         [
             'visionModelPackPanel', 'visionPackStatus', 'visionPackDetail', 'visionPackSelect', 'visionPackBackend',
             'visionPackInstallBtn', 'visionPackFolderInput', 'visionPackActivateBtn', 'visionPackDeactivateBtn',
-            'visionPackVerifyBtn', 'visionPackRemoveBtn', 'visionPackProgress'
+            'visionPackVerifyBtn', 'visionPackRemoveBtn', 'visionPackBenchmarkBtn', 'visionPackRollbackBtn',
+            'visionPackRecommendation', 'visionPackBenchmarkDetail', 'visionPackProgress'
         ].forEach(id => { els[id] = byId(id); });
         if (!els.visionModelPackPanel) return;
         els.visionPackInstallBtn && els.visionPackInstallBtn.addEventListener('click', () => els.visionPackFolderInput && els.visionPackFolderInput.click());
@@ -201,11 +265,13 @@
         els.visionPackSelect && els.visionPackSelect.addEventListener('change', render);
         els.visionPackActivateBtn && els.visionPackActivateBtn.addEventListener('click', activateSelected);
         els.visionPackDeactivateBtn && els.visionPackDeactivateBtn.addEventListener('click', deactivateSelected);
+        els.visionPackBenchmarkBtn && els.visionPackBenchmarkBtn.addEventListener('click', benchmarkSelected);
+        els.visionPackRollbackBtn && els.visionPackRollbackBtn.addEventListener('click', rollbackSelected);
         els.visionPackVerifyBtn && els.visionPackVerifyBtn.addEventListener('click', verifySelected);
         els.visionPackRemoveBtn && els.visionPackRemoveBtn.addEventListener('click', removeSelected);
         doc.addEventListener('ai-shorts-vision-pack-change', render);
         render();
-        global.AIShortsVisionModelPackPanel = Object.freeze({ render, installFiles, verifySelected, activateSelected, deactivateSelected, removeSelected });
+        global.AIShortsVisionModelPackPanel = Object.freeze({ render, installFiles, verifySelected, activateSelected, benchmarkSelected, rollbackSelected, deactivateSelected, removeSelected });
     }
 
     if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init, { once: true });

@@ -17,11 +17,11 @@ function fail(message) { console.error('FAIL ' + message); process.exit(1); }
 
 const html = read('index.html');
 [
-    'src/engine/module-contracts.js?v=1.6.9-direct-crop-editor',
-    'src/engine/analysis-cache.js?v=1.6.9-direct-crop-editor',
-    'src/engine/pro-engine-tuner.js?v=1.6.9-direct-crop-editor',
-    'src/engine/stability-auditor.js?v=1.6.9-direct-crop-editor',
-    'assets/css/pro-engine.css?v=1.6.9-direct-crop-editor'
+    'src/engine/module-contracts.js?v=1.6.12-model-pack-benchmark-rollback',
+    'src/engine/analysis-cache.js?v=1.6.12-model-pack-benchmark-rollback',
+    'src/engine/pro-engine-tuner.js?v=1.6.12-model-pack-benchmark-rollback',
+    'src/engine/stability-auditor.js?v=1.6.12-model-pack-benchmark-rollback',
+    'assets/css/pro-engine.css?v=1.6.12-model-pack-benchmark-rollback'
 ].forEach(token => { if (!html.includes(token)) fail(`index missing ${token}`); });
 
 const kernel = read('src/engine/engine-kernel.js');

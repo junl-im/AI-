@@ -10,8 +10,8 @@ const downloads = [];
 const window = {
     structuredClone: global.structuredClone,
     AIShortsRuntimeConfig: {
-        APP_VERSION: 'v1.6.9',
-        BUILD_KEY: '1.6.9-direct-crop-editor',
+        APP_VERSION: 'v1.6.12',
+        BUILD_KEY: '1.6.12-model-pack-benchmark-rollback',
         ANALYSIS_PERSISTENT_CACHE_ENABLED: true
     },
     AIShortsDownloadService: { saveBlob(blob, filename) { downloads.push({ blob, filename }); } }

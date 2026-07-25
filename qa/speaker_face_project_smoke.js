@@ -20,7 +20,7 @@ vm.runInContext(`
     settings: { cropMode: 'smart', smartReframeOptions: { speakerPriority: true } },
     smartReframeEdits: {
       subjectId: 'auto', keyframes: [], speakerPriority: true,
-      speakerCues: [{ start: 1, end: 3, speaker: 'SPEAKER_00', subjectId: 'subject-2', confidence: .87, source: 'diarization-face', segmentCount: 1 }]
+      speakerCues: [{ start: 1, end: 3, speaker: 'SPEAKER_00', subjectId: 'subject-2', confidence: .87, source: 'manual-override', segmentCount: 1, locked: true, mode: 'manual' }]
     },
     recommendations: [], captions: [], selectedRecommendationId: '', selectedRange: null, fileMeta: null, fileKind: 'video'
   };
@@ -28,9 +28,10 @@ vm.runInContext(`
   ok(snapshot.schemaVersion === 5, 'project schema is upgraded to v5');
   ok(snapshot.smartReframeEdits.speakerCues.length === 1, 'speaker cue is serialized');
   ok(snapshot.smartReframeEdits.speakerCues[0].speaker === 'SPEAKER_00', 'speaker token is preserved');
+  ok(snapshot.smartReframeEdits.speakerCues[0].locked === true && snapshot.smartReframeEdits.speakerCues[0].mode === 'manual', 'manual speaker lock metadata is preserved');
   const target = { settings: {}, recommendations: [], captions: [], smartReframeEdits: null };
   service.applyProjectSnapshot(target, snapshot);
-  ok(target.smartReframeEdits.speakerPriority === true && target.smartReframeEdits.speakerCues[0].subjectId === 'subject-2', 'speaker direction restores on project import');
+  ok(target.smartReframeEdits.speakerPriority === true && target.smartReframeEdits.speakerCues[0].subjectId === 'subject-2' && target.smartReframeEdits.speakerCues[0].locked === true, 'speaker direction restores on project import');
   const oldProject = service.parseProjectText(JSON.stringify({ app: 'AI Shorts Studio', schemaVersion: 4, settings: {}, recommendations: [], captions: [], copy: {} }));
   ok(oldProject.schemaVersion === 5 && oldProject.smartReframeEdits.speakerCues.length === 0, 'schema v4 projects migrate safely to v5');
 })();
