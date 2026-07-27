@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.13 - draggable crop-keyframe timeline, clipboard, and range application
+// AI Shorts Studio v1.6.15 - draggable crop-keyframe timeline, clipboard, and range application
 'use strict';
 
 (function exposeCropKeyframeTimeline(global) {

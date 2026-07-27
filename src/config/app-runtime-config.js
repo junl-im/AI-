@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.13 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.6.15 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.13',
-    BUILD_KEY: '1.6.13-transactional-model-pack-qa-controls',
+    APP_VERSION: 'v1.6.15',
+    BUILD_KEY: '1.6.15-preview-cache-diagnostics',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,
@@ -67,6 +67,10 @@ window.AIShortsRuntimeConfig = Object.freeze({
     VISION_MODEL_PACK_MAX_FILES: 16,
     VISION_MODEL_PACK_MAX_BYTES: 64 * 1024 * 1024,
     VISION_MODEL_PACK_MAX_FILE_BYTES: 48 * 1024 * 1024,
+    VISION_MODEL_PACK_STORAGE_RESERVE_BYTES: 8 * 1024 * 1024,
+    VISION_MODEL_PACK_STORAGE_WRITE_OVERHEAD_RATIO: 1.15,
+    VISION_MODEL_PACK_BENCHMARK_MAX_AGE_MS: 14 * 24 * 60 * 60 * 1000,
+    VISION_MODEL_PACK_BENCHMARK_REFRESH_DELAY_MS: 3000,
     DEFAULT_DURATIONS: [15, 30, 45, 60, 90],
     LONG_FORM_DURATIONS: [15, 30, 45, 60, 90, 180],
     MEDIA_ACCEPT: 'audio/*,video/*,.mp3,.wav,.m4a,.aac,.flac,.ogg,.opus,.mp4,.mov,.m4v,.webm',

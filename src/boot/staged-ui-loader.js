@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.13 - staged UI hydration with storage health shell
+// AI Shorts Studio v1.6.15 - staged UI hydration with storage health shell
 'use strict';
 
 (function installStagedUiLoader(global) {
@@ -6,11 +6,12 @@
     if (!doc) return;
 
     const config = global.AIShortsRuntimeConfig || {};
-    const VERSION = String(config.APP_VERSION || 'v1.6.13').replace(/^v/i, '');
+    const VERSION = String(config.APP_VERSION || 'v1.6.15').replace(/^v/i, '');
     const BUILD_KEY = String(config.BUILD_KEY || `${VERSION}-staged-ui`);
     const versioned = (path, label) => `${path}?v=${encodeURIComponent(BUILD_KEY)}-${label}`;
     const phases = Object.freeze({
         shell: [
+            versioned('src/ui/feedback-ux.js', 'shell'),
             versioned('src/ui/ux-controls.js', 'shell'),
             versioned('src/ui/workflow-focus-layout.js', 'shell'),
             versioned('src/ui/hyperconnect-flow.js', 'shell'),

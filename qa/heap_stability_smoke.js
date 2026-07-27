@@ -3,7 +3,7 @@
 const fs = require('fs');
 const releaseVersion = require('../package.json').version;
 const path = `qa/runtime-heap-stability-v${releaseVersion}.json`;
-if (releaseVersion !== '1.6.13') throw new Error('heap stability contract must be reviewed for this release');
+if (releaseVersion !== '1.6.15') throw new Error('heap stability contract must be reviewed for this release');
 if (!fs.existsSync(path)) throw new Error('current-release real-media heap stability audit artifact is missing');
 const report = JSON.parse(fs.readFileSync(path, 'utf8'));
 if (report.version !== releaseVersion) throw new Error('heap stability audit artifact version mismatch');

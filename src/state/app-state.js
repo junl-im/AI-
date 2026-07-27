@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.13 - director-grade smart-reframe state and persisted-setting recovery
+// AI Shorts Studio v1.6.15 - director-grade smart-reframe state and persisted-setting recovery
 'use strict';
 
 (function exposeState(global) {

@@ -122,7 +122,7 @@ function assert(condition, message) {
         { backend: 'cpu', status: 'passed', medianMs: 10 }
     ]);
     assert(recommendation.backend === 'cpu', 'failed GPU measurements safely recommend the CPU path');
-    console.log('PASS v1.6.13 model-pack performance diagnostics, backend recovery, and safe rollback contract');
+    console.log('PASS v1.6.15 model-pack performance diagnostics, backend recovery, and safe rollback contract');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

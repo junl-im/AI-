@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.13 - schema-v5 speaker-directed smart-reframe project helpers
+// AI Shorts Studio v1.6.15 - schema-v5 speaker-directed smart-reframe project helpers
 'use strict';
 
 (function exposeProjectService(global) {

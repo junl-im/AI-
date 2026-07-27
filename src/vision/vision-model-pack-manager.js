@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.13 - local vision model-pack benchmarks, device recommendations, and safe rollback
+// AI Shorts Studio v1.6.15 - local model storage diagnostics, benchmarks, and safe rollback
 'use strict';
 
 (function exposeVisionModelPackManager(global) {
@@ -15,6 +15,10 @@
     const MAX_FILES = Math.max(8, Math.min(32, Number(config.VISION_MODEL_PACK_MAX_FILES || 16)));
     const MAX_TOTAL_BYTES = Math.max(8 * 1024 * 1024, Math.min(256 * 1024 * 1024, Number(config.VISION_MODEL_PACK_MAX_BYTES || 64 * 1024 * 1024)));
     const MAX_FILE_BYTES = Math.max(4 * 1024 * 1024, Math.min(128 * 1024 * 1024, Number(config.VISION_MODEL_PACK_MAX_FILE_BYTES || 48 * 1024 * 1024)));
+    const STORAGE_RESERVE_BYTES = Math.max(0, Math.min(64 * 1024 * 1024, Number(config.VISION_MODEL_PACK_STORAGE_RESERVE_BYTES || 8 * 1024 * 1024)));
+    const STORAGE_WRITE_OVERHEAD_RATIO = Math.max(1, Math.min(2, Number(config.VISION_MODEL_PACK_STORAGE_WRITE_OVERHEAD_RATIO || 1.15)));
+    const BENCHMARK_MAX_AGE_MS = Math.max(60 * 60 * 1000, Math.min(90 * 24 * 60 * 60 * 1000, Number(config.VISION_MODEL_PACK_BENCHMARK_MAX_AGE_MS || 14 * 24 * 60 * 60 * 1000)));
+    const BENCHMARK_REFRESH_DELAY_MS = Math.max(500, Math.min(60 * 1000, Number(config.VISION_MODEL_PACK_BENCHMARK_REFRESH_DELAY_MS || 3000)));
     const PATH_SEGMENT = '__ai_shorts_vision_pack__';
     const REQUIRED_RUNTIME_FILES = Object.freeze([
         'vision_bundle.mjs',
@@ -33,6 +37,13 @@
         provider: null,
         module: null,
         activating: null,
+        installing: false,
+        cleaningCache: null,
+        inspectingCache: null,
+        benchmarking: null,
+        benchmarkPackId: '',
+        benchmarkRefreshTimer: null,
+        benchmarkRefreshPackId: '',
         lastError: '',
         lastRecovery: null
     };
@@ -140,7 +151,8 @@
             p95Ms: Math.max(0, Number(input.p95Ms) || 0),
             fps: Math.max(0, Number(input.fps) || 0),
             status: input.status === 'failed' ? 'failed' : 'passed',
-            error: safeText(input.error || '', 180)
+            error: safeText(input.error || '', 180),
+            environmentKey: safeText(input.environmentKey || '', 180)
         };
     }
 
@@ -155,6 +167,67 @@
         const history = [safe].concat(readBenchmarks().filter(item => item.id !== safe.id)).slice(0, BENCHMARK_LIMIT);
         writeJson(BENCHMARK_KEY, { version: 1, history });
         return safe;
+    }
+
+    function benchmarkEnvironmentKey() {
+        const nav = global.navigator || {};
+        const platform = nav.userAgentData && nav.userAgentData.platform || nav.platform || '';
+        const cores = Math.max(0, Math.round(Number(nav.hardwareConcurrency) || 0));
+        const memory = Math.max(0, Number(nav.deviceMemory) || 0);
+        const gpu = webgl2Available() ? 'webgl2' : 'no-webgl2';
+        const isolation = global.crossOriginIsolated ? 'isolated' : 'standard';
+        return safeText([platform || 'unknown', cores || 'unknown', memory || 'unknown', gpu, isolation].join('|'), 180);
+    }
+
+    function benchmarkTrend(history) {
+        const list = Array.isArray(history) ? history : [];
+        const output = {};
+        ['gpu', 'cpu'].forEach(backend => {
+            const passed = list.filter(item => item.backend === backend && item.status === 'passed' && item.medianMs > 0);
+            const latest = passed[0] || null;
+            const previous = passed[1] || null;
+            let deltaPercent = 0;
+            let direction = 'unknown';
+            if (latest && previous && previous.medianMs > 0) {
+                deltaPercent = ((latest.medianMs - previous.medianMs) / previous.medianMs) * 100;
+                direction = deltaPercent >= 5 ? 'regressed' : deltaPercent <= -5 ? 'improved' : 'stable';
+            }
+            output[backend] = Object.freeze({
+                samples: passed.length,
+                latestMedianMs: latest ? latest.medianMs : 0,
+                previousMedianMs: previous ? previous.medianMs : 0,
+                deltaPercent: Number(deltaPercent.toFixed(1)),
+                direction
+            });
+        });
+        return Object.freeze(output);
+    }
+
+    function benchmarkFreshness(packId, options) {
+        const opts = options || {};
+        const id = String(packId || '').toLowerCase();
+        const history = (Array.isArray(opts.history) ? opts.history : readBenchmarks()).filter(item => item.packId === id);
+        const capabilities = opts.capabilities || probeCapabilities();
+        const expected = capabilities.gpuDelegate ? ['gpu', 'cpu'] : ['cpu'];
+        const environmentKey = safeText(opts.environmentKey || benchmarkEnvironmentKey(), 180);
+        const nowMs = Number.isFinite(Number(opts.nowMs)) ? Number(opts.nowMs) : Date.now();
+        const latest = {};
+        history.forEach(item => { if (!latest[item.backend]) latest[item.backend] = item; });
+        for (const backend of expected) {
+            const record = latest[backend];
+            if (!record) return Object.freeze({ due: true, reason: `${backend === 'gpu' ? 'GPU' : 'CPU'} 측정 기록 없음`, code: 'missing', latestAt: '', nextDueAt: '', environmentKey });
+            if (record.status !== 'passed') return Object.freeze({ due: true, reason: `${backend === 'gpu' ? 'GPU' : 'CPU'} 측정 실패`, code: 'failed', latestAt: record.createdAt || '', nextDueAt: '', environmentKey });
+            if (!record.environmentKey) return Object.freeze({ due: true, reason: '이전 버전 측정 기록 갱신 필요', code: 'legacy-environment', latestAt: record.createdAt || '', nextDueAt: '', environmentKey });
+            if (record.environmentKey !== environmentKey) return Object.freeze({ due: true, reason: '장치 실행 환경 변경 감지', code: 'environment-changed', latestAt: record.createdAt || '', nextDueAt: '', environmentKey });
+            const createdMs = Date.parse(record.createdAt || '');
+            if (!Number.isFinite(createdMs)) return Object.freeze({ due: true, reason: '측정 시각 확인 불가', code: 'invalid-date', latestAt: record.createdAt || '', nextDueAt: '', environmentKey });
+            if (nowMs - createdMs >= BENCHMARK_MAX_AGE_MS) {
+                return Object.freeze({ due: true, reason: '성능 측정 유효기간 만료', code: 'stale', latestAt: record.createdAt, nextDueAt: new Date(createdMs + BENCHMARK_MAX_AGE_MS).toISOString(), environmentKey });
+            }
+        }
+        const timestamps = expected.map(backend => Date.parse(latest[backend].createdAt)).filter(Number.isFinite);
+        const oldest = Math.min.apply(Math, timestamps);
+        return Object.freeze({ due: false, reason: '최근 장치 성능 측정 유효', code: 'fresh', latestAt: new Date(Math.max.apply(Math, timestamps)).toISOString(), nextDueAt: new Date(oldest + BENCHMARK_MAX_AGE_MS).toISOString(), environmentKey });
     }
 
     function readRollback() {
@@ -209,7 +282,9 @@
         return Object.freeze({
             history: Object.freeze(history.map(item => Object.freeze(clone(item)))),
             latest: Object.freeze(results.map(item => Object.freeze(clone(item)))),
-            recommendation: Object.freeze(benchmarkRecommendation(results))
+            recommendation: Object.freeze(benchmarkRecommendation(results)),
+            freshness: benchmarkFreshness(id, { history }),
+            trend: benchmarkTrend(history)
         });
     }
 
@@ -236,6 +311,53 @@
 
     function cacheReady() {
         return Boolean(global.caches && typeof global.caches.open === 'function');
+    }
+
+    function storageEstimateReady() {
+        return Boolean(global.navigator && global.navigator.storage && typeof global.navigator.storage.estimate === 'function');
+    }
+
+    function isQuotaError(error) {
+        const name = safeText(error && error.name || '', 80);
+        const message = safeText(error && error.message || error || '', 240);
+        return /QuotaExceededError/i.test(name) || /quota|storage.*full|disk.*full|space.*(full|insufficient)/i.test(message);
+    }
+
+    async function readStorageEstimate() {
+        if (!storageEstimateReady()) return Object.freeze({ supported: false, usage: 0, quota: 0, available: 0 });
+        try {
+            const estimate = await global.navigator.storage.estimate();
+            const usage = Math.max(0, Number(estimate && estimate.usage) || 0);
+            const quota = Math.max(0, Number(estimate && estimate.quota) || 0);
+            return Object.freeze({ supported: quota > 0, usage, quota, available: quota > 0 ? Math.max(0, quota - usage) : 0 });
+        } catch (error) {
+            return Object.freeze({ supported: false, usage: 0, quota: 0, available: 0, error: safeText(error && error.message || error, 180) });
+        }
+    }
+
+    function capacityFromEstimate(totalBytes, estimate) {
+        const bytes = Math.max(0, Number(totalBytes) || 0);
+        const writeBytes = Math.ceil(bytes * STORAGE_WRITE_OVERHEAD_RATIO);
+        const requiredBytes = writeBytes + STORAGE_RESERVE_BYTES;
+        const value = estimate || { supported: false, usage: 0, quota: 0, available: 0 };
+        const status = value.supported ? (value.available >= requiredBytes ? 'ok' : 'insufficient') : 'unknown';
+        return Object.freeze({
+            supported: Boolean(value.supported),
+            status,
+            usage: Math.max(0, Number(value.usage) || 0),
+            quota: Math.max(0, Number(value.quota) || 0),
+            available: Math.max(0, Number(value.available) || 0),
+            packBytes: bytes,
+            writeBytes,
+            reserveBytes: STORAGE_RESERVE_BYTES,
+            requiredBytes,
+            availableAfterWrite: value.supported ? Math.max(0, value.available - writeBytes) : 0,
+            error: safeText(value.error || '', 180)
+        });
+    }
+
+    async function estimateInstallCapacity(totalBytes) {
+        return capacityFromEstimate(totalBytes, await readStorageEstimate());
     }
 
     async function sha256(buffer) {
@@ -349,7 +471,119 @@
         return removed;
     }
 
-    async function installFromFiles(fileList, options) {
+    async function scanOrphanedCache(options) {
+        const opts = options || {};
+        const remove = Boolean(opts.remove);
+        if (!cacheReady()) return Object.freeze({ supported: false, inspectedCount: 0, registeredCount: 0, orphanCount: 0, orphanBytes: 0, removedCount: 0, reclaimedBytes: 0, estimatedBytes: 0, skipped: 'cache-unavailable' });
+        const cache = await global.caches.open(CACHE_NAME);
+        if (!cache || typeof cache.keys !== 'function') return Object.freeze({ supported: false, inspectedCount: 0, registeredCount: 0, orphanCount: 0, orphanBytes: 0, removedCount: 0, reclaimedBytes: 0, estimatedBytes: 0, skipped: 'keys-unavailable' });
+        const expected = new Set();
+        readStore().packs.forEach(pack => pack.files.forEach(file => expected.add(assetUrl(pack.id, file.path))));
+        const prefix = baseUrl().toString();
+        const keys = await cache.keys();
+        let inspectedCount = 0;
+        let registeredCount = 0;
+        let orphanCount = 0;
+        let orphanBytes = 0;
+        let removedCount = 0;
+        let reclaimedBytes = 0;
+        for (const request of keys || []) {
+            const url = String(request && request.url || request || '');
+            if (!url.startsWith(prefix)) continue;
+            inspectedCount += 1;
+            if (expected.has(url)) {
+                registeredCount += 1;
+                continue;
+            }
+            orphanCount += 1;
+            let length = 0;
+            try {
+                const response = typeof cache.match === 'function' ? await cache.match(url) : null;
+                length = Math.max(0, Number(response && response.headers && response.headers.get('Content-Length')) || 0);
+            } catch (_) { /* size is best-effort */ }
+            orphanBytes += length;
+            if (!remove) continue;
+            try {
+                if (await cache.delete(url)) {
+                    removedCount += 1;
+                    reclaimedBytes += length;
+                }
+            } catch (_) { /* one corrupt cache entry must not block the remaining cleanup */ }
+        }
+        const result = Object.freeze({
+            supported: true,
+            inspectedCount,
+            registeredCount,
+            orphanCount,
+            orphanBytes,
+            removedCount,
+            reclaimedBytes,
+            estimatedBytes: remove ? reclaimedBytes : orphanBytes,
+            reason: safeText(opts.reason || (remove ? 'manual' : 'inspect'), 60)
+        });
+        if (remove && removedCount) dispatchChange({ type: 'orphan-cache-cleaned', cleanup: result });
+        return result;
+    }
+
+    async function inspectOrphanedCache(options) {
+        const opts = options || {};
+        if (runtimeState.installing && !opts.allowDuringInstall) return Object.freeze({ supported: true, inspectedCount: 0, registeredCount: 0, orphanCount: 0, orphanBytes: 0, removedCount: 0, reclaimedBytes: 0, estimatedBytes: 0, skipped: 'installing' });
+        if (runtimeState.cleaningCache) return runtimeState.cleaningCache.then(() => inspectOrphanedCache(opts));
+        if (runtimeState.inspectingCache) return runtimeState.inspectingCache;
+        runtimeState.inspectingCache = scanOrphanedCache({ remove: false, reason: opts.reason || 'inspect' })
+            .finally(() => { runtimeState.inspectingCache = null; });
+        return runtimeState.inspectingCache;
+    }
+
+    async function cleanupOrphanedCache(options) {
+        const opts = options || {};
+        if (!cacheReady()) return Object.freeze({ supported: false, inspectedCount: 0, registeredCount: 0, orphanCount: 0, orphanBytes: 0, removedCount: 0, reclaimedBytes: 0, estimatedBytes: 0, skipped: 'cache-unavailable' });
+        if (runtimeState.installing && !opts.allowDuringInstall) return Object.freeze({ supported: true, inspectedCount: 0, registeredCount: 0, orphanCount: 0, orphanBytes: 0, removedCount: 0, reclaimedBytes: 0, estimatedBytes: 0, skipped: 'installing' });
+        if (runtimeState.cleaningCache) return runtimeState.cleaningCache;
+        if (runtimeState.inspectingCache) {
+            try { await runtimeState.inspectingCache; } catch (_) { /* inspection failure must not block cleanup */ }
+        }
+        runtimeState.cleaningCache = scanOrphanedCache({ remove: true, reason: opts.reason || 'manual' })
+            .finally(() => { runtimeState.cleaningCache = null; });
+        return runtimeState.cleaningCache;
+    }
+
+    async function storageDiagnostics(options) {
+        const opts = options || {};
+        const estimate = await readStorageEstimate();
+        const cache = await inspectOrphanedCache({ allowDuringInstall: Boolean(opts.allowDuringInstall), reason: opts.reason || 'diagnostics' });
+        const packs = readStore().packs;
+        const installedBytes = packs.reduce((sum, pack) => sum + Math.max(0, Number(pack.totalBytes) || 0), 0);
+        return Object.freeze({
+            estimate,
+            cache,
+            packCount: packs.length,
+            installedBytes,
+            installedSizeLabel: formatBytes(installedBytes),
+            generatedAt: nowIso()
+        });
+    }
+
+    async function ensureInstallCapacity(totalBytes, options) {
+        const opts = options || {};
+        let capacity = await estimateInstallCapacity(totalBytes);
+        let cleanup = Object.freeze({ supported: cacheReady(), inspectedCount: 0, removedCount: 0, estimatedBytes: 0, skipped: 'not-needed' });
+        if (capacity.status === 'insufficient' && opts.reclaim !== false) {
+            cleanup = await cleanupOrphanedCache({ allowDuringInstall: true, reason: 'install-preflight' });
+            if (cleanup.removedCount) capacity = await estimateInstallCapacity(totalBytes);
+        }
+        if (capacity.status === 'insufficient') {
+            const error = new Error(`브라우저 저장 공간이 부족합니다. 모델 팩 설치에는 최소 ${formatBytes(capacity.requiredBytes)}의 여유 공간이 필요하지만 현재 ${formatBytes(capacity.available)}만 사용할 수 있습니다. 저장 공간 진단에서 불필요한 캐시를 정리해 주세요.`);
+            error.name = 'QuotaExceededError';
+            error.code = 'VISION_MODEL_PACK_QUOTA';
+            error.capacity = capacity;
+            error.cleanup = cleanup;
+            throw error;
+        }
+        return Object.freeze({ capacity, cleanup });
+    }
+
+    async function installFromFilesInternal(fileList, options) {
         if (!cacheReady()) throw new Error('이 브라우저는 모델 팩 저장소를 지원하지 않습니다.');
         const opts = options || {};
         const progress = typeof opts.onProgress === 'function' ? opts.onProgress : null;
@@ -376,6 +610,8 @@
         const packId = `vision-${identity.slice(0, 16)}`;
         const plan = planRoomForPack(packId);
         const existing = plan.store.packs.find(pack => pack.id === packId);
+        if (progress) progress(59, '브라우저 저장 공간 확인 중');
+        const storagePreflight = await ensureInstallCapacity(selection.totalBytes, { reclaim: true });
         const cache = await global.caches.open(CACHE_NAME);
         const written = [];
         try {
@@ -398,7 +634,8 @@
         } catch (error) {
             if (!existing) await deleteCachedFiles(packId, written);
             const reason = safeText(error && error.message || error, 180);
-            throw new Error(`모델 팩 저장에 실패했습니다. 기존 모델 팩은 유지됩니다.${reason ? ` (${reason})` : ''}`);
+            const prefix = isQuotaError(error) ? '브라우저 저장 공간이 부족하거나 quota가 변경되었습니다. ' : '';
+            throw new Error(`${prefix}모델 팩 저장에 실패했습니다. 기존 모델 팩은 유지됩니다.${reason ? ` (${reason})` : ''}`);
         }
         const packageFile = selection.files.find(item => item.name === 'package.json');
         const pack = sanitizePack({
@@ -421,11 +658,20 @@
             throw new Error('모델 팩 파일은 저장했지만 설치 정보를 보존하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.');
         }
         if (plan.evictionCandidate) {
-            try { await cacheDeletePack(plan.evictionCandidate); } catch (_) { /* orphaned cache is harmless and can be reclaimed later */ }
+            try { await cacheDeletePack(plan.evictionCandidate); } catch (_) { /* orphan cleanup below retries best-effort deletion */ }
         }
+        let orphanCleanup = null;
+        try { orphanCleanup = await cleanupOrphanedCache({ allowDuringInstall: true, reason: 'post-install' }); } catch (_) { /* cleanup must not invalidate a committed install */ }
         if (progress) progress(100, '모델 팩 설치 완료');
-        dispatchChange({ type: 'installed', pack: publicPack(pack), ignoredCount: selection.ignoredCount });
+        dispatchChange({ type: 'installed', pack: publicPack(pack), ignoredCount: selection.ignoredCount, storagePreflight, orphanCleanup });
         return publicPack(pack);
+    }
+
+    async function installFromFiles(fileList, options) {
+        if (runtimeState.installing) throw new Error('다른 모델 팩 설치가 진행 중입니다. 완료 후 다시 시도해 주세요.');
+        runtimeState.installing = true;
+        try { return await installFromFilesInternal(fileList, options); }
+        finally { runtimeState.installing = false; }
     }
 
     async function verifyPack(packId, options) {
@@ -481,6 +727,7 @@
             serviceWorkerControlled: Boolean(global.navigator && global.navigator.serviceWorker && global.navigator.serviceWorker.controller),
             gpuDelegate: webgl2Available(),
             webGPU: Boolean(global.navigator && global.navigator.gpu),
+            storageEstimate: storageEstimateReady(),
             maxPackBytes: MAX_TOTAL_BYTES,
             maxPacks: MAX_PACKS
         });
@@ -571,11 +818,12 @@
             medianMs: Number(medianMs.toFixed(3)),
             p95Ms: Number(p95Ms.toFixed(3)),
             fps: Number((1000 / Math.max(0.001, medianMs)).toFixed(2)),
-            status: 'passed'
+            status: 'passed',
+            environmentKey: benchmarkEnvironmentKey()
         });
     }
 
-    async function benchmarkPack(packId, options) {
+    async function benchmarkPackInternal(packId, options) {
         const opts = options || {};
         const pack = findPack(packId);
         if (!pack) throw new Error('성능을 측정할 모델 팩이 설치되어 있지 않습니다.');
@@ -590,12 +838,55 @@
                 results.push(await benchmarkBackend(pack, backend, opts));
             } catch (error) {
                 const digest = await sha256(new TextEncoder().encode(`${pack.id}:${backend}:${nowIso()}:failed`));
-                results.push(saveBenchmark({ id: `bench-${digest.slice(0, 16)}`, packId: pack.id, backend, createdAt: nowIso(), status: 'failed', error: error && error.message || error, iterations: 1 }));
+                results.push(saveBenchmark({ id: `bench-${digest.slice(0, 16)}`, packId: pack.id, backend, createdAt: nowIso(), status: 'failed', error: error && error.message || error, iterations: 1, environmentKey: benchmarkEnvironmentKey() }));
             }
         }
         const recommendation = benchmarkRecommendation(results);
         dispatchChange({ type: 'benchmark-complete', packId: pack.id, results: clone(results), recommendation });
         return Object.freeze({ packId: pack.id, results: Object.freeze(results.map(item => Object.freeze(clone(item)))), recommendation: Object.freeze(recommendation) });
+    }
+
+    async function benchmarkPack(packId, options) {
+        const id = String(packId || '').toLowerCase();
+        if (runtimeState.benchmarking) {
+            if (runtimeState.benchmarkPackId === id) return runtimeState.benchmarking;
+            throw new Error('다른 모델 팩의 성능 측정이 진행 중입니다.');
+        }
+        if (runtimeState.benchmarkRefreshTimer && runtimeState.benchmarkRefreshPackId === id) {
+            try { global.clearTimeout(runtimeState.benchmarkRefreshTimer); } catch (_) { /* ignored */ }
+            runtimeState.benchmarkRefreshTimer = null;
+            runtimeState.benchmarkRefreshPackId = '';
+        }
+        runtimeState.benchmarkPackId = id;
+        runtimeState.benchmarking = benchmarkPackInternal(id, options).finally(() => {
+            runtimeState.benchmarking = null;
+            runtimeState.benchmarkPackId = '';
+        });
+        return runtimeState.benchmarking;
+    }
+
+    function scheduleBenchmarkRefresh(packId, options) {
+        const opts = options || {};
+        const id = String(packId || '').toLowerCase();
+        const freshness = benchmarkFreshness(id);
+        if (!findPack(id) || !freshness.due) return Object.freeze({ scheduled: false, packId: id, reason: freshness.reason, code: freshness.code });
+        if (doc && doc.visibilityState === 'hidden') return Object.freeze({ scheduled: false, packId: id, reason: '백그라운드 탭에서는 자동 측정을 보류합니다.', code: 'hidden' });
+        if (runtimeState.benchmarkRefreshTimer) {
+            if (runtimeState.benchmarkRefreshPackId === id) return Object.freeze({ scheduled: true, packId: id, reason: freshness.reason, code: freshness.code });
+            try { global.clearTimeout(runtimeState.benchmarkRefreshTimer); } catch (_) { /* ignored */ }
+        }
+        runtimeState.benchmarkRefreshPackId = id;
+        const delay = Math.max(0, Number(opts.delayMs) || BENCHMARK_REFRESH_DELAY_MS);
+        runtimeState.benchmarkRefreshTimer = global.setTimeout(async () => {
+            runtimeState.benchmarkRefreshTimer = null;
+            runtimeState.benchmarkRefreshPackId = '';
+            if (runtimeState.packId !== id || runtimeState.benchmarking || !benchmarkFreshness(id).due) return;
+            dispatchChange({ type: 'benchmark-refresh-started', packId: id, reason: freshness.reason });
+            try { await benchmarkPack(id, { background: true }); }
+            catch (error) { dispatchChange({ type: 'benchmark-refresh-failed', packId: id, message: safeText(error && error.message || error, 180) }); }
+        }, delay);
+        dispatchChange({ type: 'benchmark-refresh-scheduled', packId: id, reason: freshness.reason, delayMs: delay });
+        return Object.freeze({ scheduled: true, packId: id, reason: freshness.reason, code: freshness.code, delayMs: delay });
     }
 
     function commitRuntime(pack, created, requestedBackend) {
@@ -754,6 +1045,11 @@
         const id = String(packId || '').toLowerCase();
         const pack = findPack(id);
         if (!pack) return { removed: false, files: 0 };
+        if (runtimeState.benchmarkRefreshTimer && runtimeState.benchmarkRefreshPackId === id) {
+            try { global.clearTimeout(runtimeState.benchmarkRefreshTimer); } catch (_) { /* ignored */ }
+            runtimeState.benchmarkRefreshTimer = null;
+            runtimeState.benchmarkRefreshPackId = '';
+        }
         if (runtimeState.packId === id || readActive().packId === id) await deactivate();
         const files = await cacheDeletePack(pack);
         const store = readStore();
@@ -804,7 +1100,7 @@
             capabilities: probeCapabilities(),
             rollback: Object.freeze(readRollback() || { packId: '', backend: 'auto', createdAt: '', reason: '' }),
             performance: Object.freeze(readStore().packs.reduce((output, pack) => { output[pack.id] = performanceSummary(pack.id); return output; }, {})),
-            policy: Object.freeze({ localFilesOnly: true, remoteDownload: false, integrity: 'sha256', cacheName: CACHE_NAME, maxFiles: MAX_FILES })
+            policy: Object.freeze({ localFilesOnly: true, remoteDownload: false, integrity: 'sha256', cacheName: CACHE_NAME, maxFiles: MAX_FILES, storageReserveBytes: STORAGE_RESERVE_BYTES, benchmarkMaxAgeMs: BENCHMARK_MAX_AGE_MS })
         });
     }
 
@@ -814,6 +1110,11 @@
         activatePack,
         benchmarkPack,
         performanceSummary,
+        scheduleBenchmarkRefresh,
+        estimateInstallCapacity,
+        inspectOrphanedCache,
+        cleanupOrphanedCache,
+        storageDiagnostics,
         rollbackToPrevious,
         ensureActiveProvider,
         deactivate,
@@ -823,6 +1124,6 @@
         probeCapabilities,
         snapshot,
         assetUrl,
-        _test: Object.freeze({ selectInputFiles, normalizeBackend, contentTypeFor, storedPath, sha256, safeBenchmark, benchmarkRecommendation, percentile, readRollback, saveRollback, activationRollbackCandidate, planRoomForPack, PATH_SEGMENT, CACHE_NAME, REQUIRED_RUNTIME_FILES, BENCHMARK_KEY, ROLLBACK_KEY })
+        _test: Object.freeze({ selectInputFiles, normalizeBackend, contentTypeFor, storedPath, sha256, safeBenchmark, benchmarkRecommendation, benchmarkTrend, benchmarkFreshness, benchmarkEnvironmentKey, percentile, readRollback, saveRollback, activationRollbackCandidate, planRoomForPack, capacityFromEstimate, isQuotaError, scanOrphanedCache, PATH_SEGMENT, CACHE_NAME, REQUIRED_RUNTIME_FILES, BENCHMARK_KEY, ROLLBACK_KEY, BENCHMARK_MAX_AGE_MS })
     });
 })(window);

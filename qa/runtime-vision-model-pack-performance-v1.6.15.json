@@ -1,0 +1,335 @@
+{
+  "version": "1.6.15",
+  "generatedAt": "2026-07-27T03:29:07.782757+00:00",
+  "passed": true,
+  "checks": {
+    "gpuAndCpuBenchmarked": true,
+    "gpuRecommended": true,
+    "recommendationRendered": true,
+    "automaticRollback": true,
+    "rollbackButtonVisible": true,
+    "manualRollback": true,
+    "undoTargetPreserved": true,
+    "detectorsClosed": true,
+    "noExternalRequests": true,
+    "noPageErrors": true,
+    "noConsoleErrors": true
+  },
+  "result": {
+    "oldPack": {
+      "id": "vision-65f398e04650b733",
+      "label": "이전 모델",
+      "provider": "mediapipe-tasks-vision",
+      "runtimeVersion": "",
+      "installedAt": "2026-07-27T03:29:07.444Z",
+      "verifiedAt": "2026-07-27T03:29:07.444Z",
+      "verification": "verified",
+      "totalBytes": 227,
+      "sizeLabel": "227B",
+      "fileCount": 8,
+      "modelDigest": "6bbefcb6b870bb28"
+    },
+    "newPack": {
+      "id": "vision-5610f5cfd24c0254",
+      "label": "새 모델",
+      "provider": "mediapipe-tasks-vision",
+      "runtimeVersion": "",
+      "installedAt": "2026-07-27T03:29:07.575Z",
+      "verifiedAt": "2026-07-27T03:29:07.575Z",
+      "verification": "verified",
+      "totalBytes": 224,
+      "sizeLabel": "224B",
+      "fileCount": 8,
+      "modelDigest": "1f6e06a0e352ccae"
+    },
+    "bench": {
+      "packId": "vision-65f398e04650b733",
+      "results": [
+        {
+          "id": "bench-03951ca57a3a5816",
+          "packId": "vision-65f398e04650b733",
+          "backend": "gpu",
+          "createdAt": "2026-07-27T03:29:07.469Z",
+          "iterations": 4,
+          "medianMs": 2,
+          "p95Ms": 2.1,
+          "fps": 500,
+          "status": "passed",
+          "error": "",
+          "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+        },
+        {
+          "id": "bench-0deefe902a1a85da",
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "createdAt": "2026-07-27T03:29:07.505Z",
+          "iterations": 4,
+          "medianMs": 7,
+          "p95Ms": 7,
+          "fps": 142.86,
+          "status": "passed",
+          "error": "",
+          "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+        }
+      ],
+      "recommendation": {
+        "backend": "gpu",
+        "reason": "GPU 중앙 처리 시간이 71% 짧음",
+        "confidence": "high"
+      }
+    },
+    "uiAfterBench": {
+      "recommendation": "GPU 권장",
+      "backend": "gpu",
+      "detail": "CPU 7.0ms · 142.9fps / GPU 2.0ms · 500.0fps · GPU 중앙 처리 시간이 71% 짧음"
+    },
+    "afterAuto": {
+      "recovered": {
+        "active": true,
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "lastError": "",
+        "lastRecovery": null,
+        "recovered": true,
+        "rollback": {
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "recoveredAt": "2026-07-27T03:29:07.592Z",
+          "reason": "model-switch"
+        },
+        "activationError": "synthetic delegate startup failure"
+      },
+      "active": {
+        "active": true,
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "lastError": "새 모델 시작 실패 · 이전 모델로 자동 복구됨: synthetic delegate startup failure",
+        "lastRecovery": {
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "recoveredAt": "2026-07-27T03:29:07.592Z",
+          "reason": "model-switch"
+        }
+      },
+      "rollback": {
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "createdAt": "2026-07-27T03:29:07.576Z",
+        "reason": "model-switch"
+      },
+      "buttonHidden": false
+    },
+    "manual": {
+      "active": true,
+      "packId": "vision-65f398e04650b733",
+      "backend": "cpu",
+      "lastError": "",
+      "lastRecovery": null,
+      "recovered": true,
+      "rollback": {
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "recoveredAt": "2026-07-27T03:29:07.662Z",
+        "reason": "model-switch"
+      }
+    },
+    "final": {
+      "packs": [
+        {
+          "id": "vision-5610f5cfd24c0254",
+          "label": "새 모델",
+          "provider": "mediapipe-tasks-vision",
+          "runtimeVersion": "",
+          "installedAt": "2026-07-27T03:29:07.575Z",
+          "verifiedAt": "2026-07-27T03:29:07.650Z",
+          "verification": "verified",
+          "totalBytes": 224,
+          "sizeLabel": "224B",
+          "fileCount": 8,
+          "modelDigest": "1f6e06a0e352ccae"
+        },
+        {
+          "id": "vision-65f398e04650b733",
+          "label": "이전 모델",
+          "provider": "mediapipe-tasks-vision",
+          "runtimeVersion": "",
+          "installedAt": "2026-07-27T03:29:07.444Z",
+          "verifiedAt": "2026-07-27T03:29:07.659Z",
+          "verification": "verified",
+          "totalBytes": 227,
+          "sizeLabel": "227B",
+          "fileCount": 8,
+          "modelDigest": "6bbefcb6b870bb28"
+        }
+      ],
+      "selected": {
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu"
+      },
+      "runtime": {
+        "active": true,
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "lastError": "",
+        "lastRecovery": {
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "recoveredAt": "2026-07-27T03:29:07.662Z",
+          "reason": "model-switch"
+        }
+      },
+      "capabilities": {
+        "cacheStorage": true,
+        "sha256": true,
+        "webAssembly": true,
+        "serviceWorkerControlled": true,
+        "gpuDelegate": false,
+        "webGPU": false,
+        "storageEstimate": false,
+        "maxPackBytes": 67108864,
+        "maxPacks": 3
+      },
+      "rollback": {
+        "packId": "vision-5610f5cfd24c0254",
+        "backend": "gpu",
+        "createdAt": "2026-07-27T03:29:07.664Z",
+        "reason": "rollback-undo"
+      },
+      "performance": {
+        "vision-5610f5cfd24c0254": {
+          "history": [],
+          "latest": [],
+          "recommendation": {
+            "backend": "auto",
+            "reason": "완료된 성능 측정이 없음",
+            "confidence": "low"
+          },
+          "freshness": {
+            "due": true,
+            "reason": "CPU 측정 기록 없음",
+            "code": "missing",
+            "latestAt": "",
+            "nextDueAt": "",
+            "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+          },
+          "trend": {
+            "gpu": {
+              "samples": 0,
+              "latestMedianMs": 0,
+              "previousMedianMs": 0,
+              "deltaPercent": 0,
+              "direction": "unknown"
+            },
+            "cpu": {
+              "samples": 0,
+              "latestMedianMs": 0,
+              "previousMedianMs": 0,
+              "deltaPercent": 0,
+              "direction": "unknown"
+            }
+          }
+        },
+        "vision-65f398e04650b733": {
+          "history": [
+            {
+              "id": "bench-0deefe902a1a85da",
+              "packId": "vision-65f398e04650b733",
+              "backend": "cpu",
+              "createdAt": "2026-07-27T03:29:07.505Z",
+              "iterations": 4,
+              "medianMs": 7,
+              "p95Ms": 7,
+              "fps": 142.86,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+            },
+            {
+              "id": "bench-03951ca57a3a5816",
+              "packId": "vision-65f398e04650b733",
+              "backend": "gpu",
+              "createdAt": "2026-07-27T03:29:07.469Z",
+              "iterations": 4,
+              "medianMs": 2,
+              "p95Ms": 2.1,
+              "fps": 500,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+            }
+          ],
+          "latest": [
+            {
+              "id": "bench-0deefe902a1a85da",
+              "packId": "vision-65f398e04650b733",
+              "backend": "cpu",
+              "createdAt": "2026-07-27T03:29:07.505Z",
+              "iterations": 4,
+              "medianMs": 7,
+              "p95Ms": 7,
+              "fps": 142.86,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+            },
+            {
+              "id": "bench-03951ca57a3a5816",
+              "packId": "vision-65f398e04650b733",
+              "backend": "gpu",
+              "createdAt": "2026-07-27T03:29:07.469Z",
+              "iterations": 4,
+              "medianMs": 2,
+              "p95Ms": 2.1,
+              "fps": 500,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+            }
+          ],
+          "recommendation": {
+            "backend": "gpu",
+            "reason": "GPU 중앙 처리 시간이 71% 짧음",
+            "confidence": "high"
+          },
+          "freshness": {
+            "due": false,
+            "reason": "최근 장치 성능 측정 유효",
+            "code": "fresh",
+            "latestAt": "2026-07-27T03:29:07.505Z",
+            "nextDueAt": "2026-08-10T03:29:07.505Z",
+            "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+          },
+          "trend": {
+            "gpu": {
+              "samples": 1,
+              "latestMedianMs": 2,
+              "previousMedianMs": 0,
+              "deltaPercent": 0,
+              "direction": "unknown"
+            },
+            "cpu": {
+              "samples": 1,
+              "latestMedianMs": 7,
+              "previousMedianMs": 0,
+              "deltaPercent": 0,
+              "direction": "unknown"
+            }
+          }
+        }
+      },
+      "policy": {
+        "localFilesOnly": true,
+        "remoteDownload": false,
+        "integrity": "sha256",
+        "cacheName": "ai-shorts-vision-model-packs-v1",
+        "maxFiles": 16,
+        "storageReserveBytes": 8388608,
+        "benchmarkMaxAgeMs": 1209600000
+      }
+    },
+    "closed": 5
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": []
+}

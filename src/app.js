@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.13 - timeline-aware crop editing and collision-safe smart-reframe coordination
+// AI Shorts Studio v1.6.15 - modular preview ownership and collision-safe smart-reframe coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -30,12 +30,10 @@
     const operationCoordinator = global.AIShortsOperationCoordinator || {};
     const renderWorkflowController = global.AIShortsRenderWorkflowController || {};
     const settingsControllerFactory = global.AIShortsSettingsController || {};
+    const previewControllerFactory = global.AIShortsPreviewController || {};
 
     const els = {};
-    let previewRaf = 0;
-    let previewTimer = 0;
-    let previewStillRaf = 0;
-    let previewOperationToken = null;
+    let previewController = null;
     let renderWorkflow = null;
     let settingsController = null;
     let projectIOController = null;
@@ -143,6 +141,18 @@
             qualityDefaults: QUALITY_DEFAULTS, autoCutDefaults: AUTO_CUT_DEFAULTS, qualityEffects, autoCutDetector
         });
         return settingsController;
+    }
+
+    function getPreviewController() {
+        if (previewController) return previewController;
+        if (!previewControllerFactory.createPreviewController) return null;
+        previewController = previewControllerFactory.createPreviewController({
+            state, store, elements: els, renderer, qualityEffects, operationCoordinator,
+            getSelectedRecommendation, getActiveMediaElement, getSmartReframeOptions, getCaptionOptions,
+            getQualityOptions, getActiveCaptionText, activateFlowTab, updateButtons, toast,
+            beginOperation, assertOperation, finishOperation, isAbortError
+        });
+        return previewController;
     }
 
     function $(id) { return document.getElementById(id); }
@@ -1328,32 +1338,13 @@
     }
 
     function renderPreviewStillNow() {
-        previewStillRaf = 0;
-        if (!els.previewCanvas || !renderer.renderStill) return;
-        const selected = getSelectedRecommendation();
-        const media = state.fileKind === 'video' && els.sourceVideo.videoWidth ? els.sourceVideo : null;
-        const qualityOptions = getQualityOptions();
-        renderer.renderStill(els.previewCanvas, media, {
-            cropMode: state.settings.cropMode,
-            smartReframe: state.smartReframe,
-            smartReframeOptions: getSmartReframeOptions(),
-            title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
-            rangeText: selected ? selected.rangeText : 'AI 추천 대기',
-            waveformBins: state.waveformBins,
-            time: media ? media.currentTime : 0,
-            captionText: getActiveCaptionText(media ? media.currentTime : (selected ? selected.start : 0)),
-            captionStyle: state.settings.captionStyle,
-            captionOptions: getCaptionOptions(),
-            thumbnailTemplate: state.settings.thumbnailTemplate,
-            qualityOptions: Object.assign({}, qualityOptions, { safeGuide: qualityOptions.safeGuide }),
-            relativeTime: 0,
-            segmentDuration: selected ? selected.duration : 0
-        });
+        const controller = getPreviewController();
+        return controller ? controller.renderStillNow() : false;
     }
 
     function renderPreviewStill() {
-        if (previewStillRaf) return;
-        previewStillRaf = requestAnimationFrame(renderPreviewStillNow);
+        const controller = getPreviewController();
+        return controller ? controller.renderStill() : false;
     }
 
     function selectRecommendation(id) {
@@ -1558,7 +1549,12 @@
         if (els.sourceAudio) els.sourceAudio.addEventListener('timeupdate', renderPreviewStill);
         if (els.sourceVideo) els.sourceVideo.addEventListener('timeupdate', renderPreviewStill);
         if (els.titleInput) els.titleInput.addEventListener('input', renderPreviewStill);
-        global.addEventListener('beforeunload', () => { const controller = getMediaImportController(); if (controller) controller.dispose(); }, { once: true });
+        global.addEventListener('beforeunload', () => {
+            const importController = getMediaImportController();
+            if (importController) importController.dispose();
+            const playbackController = getPreviewController();
+            if (playbackController) playbackController.dispose();
+        }, { once: true });
     }
 
     async function handleFiles(fileList) {
@@ -1851,85 +1847,13 @@
     }
 
     function stopPreview(options) {
-        const opts = options || {};
-        const media = getActiveMediaElement();
-        if (media) {
-            media.pause();
-            media.volume = 1;
-        }
-        if (previewRaf) cancelAnimationFrame(previewRaf);
-        if (previewTimer) clearInterval(previewTimer);
-        previewRaf = 0;
-        previewTimer = 0;
-        state.isPreviewing = false;
-        if (previewOperationToken) {
-            if (opts.cancel && operationCoordinator.cancel) operationCoordinator.cancel('preview', opts.reason || '미리보기 중단');
-            else finishOperation(previewOperationToken, opts.result || 'preview-stopped');
-            previewOperationToken = null;
-        }
-        if (els.previewStatus) els.previewStatus.textContent = '정지';
-        renderPreviewStill();
-        updateButtons();
+        const controller = getPreviewController();
+        return controller ? controller.stop(options) : false;
     }
 
-
     async function previewSelectedRange() {
-        const selected = getSelectedRecommendation();
-        const media = getActiveMediaElement();
-        if (!selected || !media) return;
-        activateFlowTab('preview', { reveal: true });
-        stopPreview({ cancel: true, reason: '새 미리보기 시작' });
-        const token = beginOperation('preview', { candidateId: selected.id, start: selected.start, end: selected.end });
-        previewOperationToken = token;
-        state.isPreviewing = true;
-        updateButtons();
-        if (els.previewStatus) els.previewStatus.textContent = '미리보기 재생 중';
-        try {
-            media.currentTime = selected.start;
-            media.muted = false;
-            await media.play();
-            assertOperation(token);
-        } catch (error) {
-            stopPreview({ cancel: true, reason: '미리보기 재생 실패' });
-            if (!isAbortError(error)) {
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'preview-playback-error', message: error.message });
-                toast('브라우저가 재생을 막았습니다. 미리보기 버튼을 다시 눌러주세요.', 'warning');
-            }
-            return;
-        }
-        function draw() {
-            if (!state.isPreviewing) return;
-            if (token && operationCoordinator.isCurrent && !operationCoordinator.isCurrent(token)) {
-                stopPreview({ cancel: true, reason: '원본 또는 미리보기 변경' });
-                return;
-            }
-            const isVideo = state.fileKind === 'video' && media.videoWidth;
-            renderer.renderStill(els.previewCanvas, isVideo ? media : null, {
-                cropMode: state.settings.cropMode,
-                smartReframe: state.smartReframe,
-                smartReframeOptions: getSmartReframeOptions(),
-                title: els.titleInput ? els.titleInput.value : 'AI Shorts Studio',
-                rangeText: selected.rangeText,
-                waveformBins: state.waveformBins,
-                time: media.currentTime,
-                captionText: getActiveCaptionText(media.currentTime),
-                captionStyle: state.settings.captionStyle,
-                captionOptions: getCaptionOptions(),
-                thumbnailTemplate: state.settings.thumbnailTemplate,
-                qualityOptions: Object.assign({}, getQualityOptions(), { safeGuide: getQualityOptions().safeGuide }),
-                relativeTime: Math.max(0, media.currentTime - selected.start),
-                segmentDuration: selected.duration
-            });
-            if (qualityEffects.calculateFadeVolume) {
-                const relativeTime = Math.max(0, media.currentTime - selected.start);
-                media.volume = qualityEffects.calculateFadeVolume(relativeTime, selected.duration, getQualityOptions());
-            }
-            previewRaf = requestAnimationFrame(draw);
-        }
-        draw();
-        previewTimer = setInterval(() => {
-            if (!media || media.currentTime >= selected.end || media.ended) stopPreview({ result: 'preview-complete' });
-        }, 80);
+        const controller = getPreviewController();
+        return controller ? controller.playSelectedRange() : false;
     }
 
 

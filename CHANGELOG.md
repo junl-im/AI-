@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.6.15 - Preview Ownership & Model Cache Diagnostics
+
+- 미리보기 RAF, 완료 감시 timer, operation token을 `src/app/preview-controller.js`로 분리했습니다.
+- 재생 거절, stale operation, 수동 정지, 페이지 종료가 하나의 teardown 경로를 사용합니다.
+- `src/app.js`에는 기존 preview 함수의 호환 브리지만 유지합니다.
+- 모델 팩 전용 Cache Storage를 삭제 없이 검사하는 `inspectOrphanedCache()`를 추가했습니다.
+- origin 저장소 사용량, 설치 모델 용량, 고아 캐시 개수·추정 용량을 결합한 진단 API를 추가했습니다.
+- 비전 모델 패널에 저장소 요약과 사용자 명시 수동 고아 캐시 정리 버튼을 추가했습니다.
+- 신규 preview controller와 storage diagnostics 회귀를 포함해 QA를 259개로 확장했습니다.
+- feedback UX를 shell 단계 지연 적재로 이동해 직접 시작 스크립트를 49개로 유지했습니다.
+- 최종 소스 기준 서비스워커 SHA-256 매니페스트를 재생성하고 변조 감지·수동 복구·known-good 보존을 검증했습니다.
+- 결정적 4개 샤드에서 259/259 검사를 통과했습니다.
+
+## v1.6.14 - Vision Storage & Benchmark Refresh
+
+- 비전 모델 팩 설치 전에 origin quota와 사용 가능 공간을 점검합니다.
+- 모델 크기의 115%와 8MiB 안전 여유를 포함해 필요한 저장 공간을 계산합니다.
+- 공간이 부족하면 설치 메타데이터와 연결되지 않은 모델 팩 전용 고아 캐시만 자동 회수하고 다시 판정합니다.
+- 회수 후에도 부족하면 새 캐시 쓰기 전에 `VISION_MODEL_PACK_QUOTA`로 안전하게 중단합니다.
+- 모델 팩 설치와 벤치마크의 중복 실행을 보호합니다.
+- CPU/GPU 벤치마크에 장치 환경 키, 14일 유효기간, 실패·환경 변경·만료 사유를 추가했습니다.
+- 최근 두 측정의 중앙값을 비교해 5% 이상 개선·저하 추세를 표시합니다.
+- 활성 모델은 보이는 탭의 유휴 시점에 오래된 벤치마크를 자동 갱신합니다.
+- 자동 QA를 257개로 확장했고 4개 결정적 샤드에서 257/257 통과했습니다.
+
 ## v1.6.13 - Transactional Model Pack Safety & QA Controls
 
 - 모델 팩 설치를 신규 파일 완전 저장, 메타데이터 확인, 기존 팩 정리 순서의 트랜잭션 경로로 변경
