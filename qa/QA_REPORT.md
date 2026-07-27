@@ -1,29 +1,34 @@
-# QA Report v1.6.12
+# QA Report v1.6.13
 
-## 결과
+## 등록 품질 게이트
 
-- 등록 품질 게이트: 253/253 통과
-- 실행 구간: 100/100 + 102/102 + 51/51
-- Chromium 데스크톱·소형 노트북·태블릿·모바일 런타임 오류: 0
-- 콘솔 오류: 0
-- 가로 overflow: 0
+- 총 검사: 255개
+- 신규 검사: QA runner controls, 모델 팩 transactional install
+- 현재 릴리스 실미디어 감사: 반복 렌더·다운로드 Object URL/힙 안정성
+- 실행 방식: 결정적 4개 샤드
+- 검사별 기본 timeout: 180초
+
+## 신규 회귀 범위
+
+- Cache Storage 중간 실패 시 기존 모델 팩 3개 inventory 유지
+- 부분 저장 신규 캐시 파일 제거
+- 활성 모델 선택 유지
+- 동일 모델 backend 전환 실패 시 마지막 정상 backend 복구
+- backend 복구 후 이전 모델 롤백 대상 유지
+- QA range/match/shard/list/report/timeout 제어
+- 반복 내보내기 중 활성 export Object URL 1개 이하
+- pagehide/beforeunload dispose 후 Object URL 0개
+- 현재 릴리스 실미디어 5회 완주: 생성 URL 10개/해제 10개, dispose 활성 0개
+- 20회 확장 시도: 5분 실행 한도에서 10회까지 오류·누적 없이 진행, 완주 아티팩트에는 미사용
+
+## 전체 시스템 기준
+
+- Chromium 데스크톱·소형 노트북·태블릿·모바일 런타임 오류: 0 목표
+- 콘솔 오류: 0 목표
+- 가로 overflow: 0 목표
 - CSS selector-property 충돌: 0
 - 동일값 중복: 0
 - shadow 선언: 0
-- `!important`: 593 유지
-- 앱 셸 SHA-256 무결성 자산: 132개
+- `!important`: 593 ceiling 유지
 
-## 신규 기능 검증
-
-- GPU·WASM CPU 모델 팩 성능 측정
-- 중앙 처리 시간·p95·추정 FPS 기록
-- 장치별 backend 추천
-- 새 모델 시작 실패 시 이전 검증 모델 자동 롤백
-- 수동 롤백 후 교체 모델을 되돌리기 대상으로 유지
-- 모델 팩 벤치마크 과정 외부 요청 0건
-
-## 기존 경로 검증
-
-분석, 추천, 화자·얼굴 연결, 스마트 리프레임, 직접 크롭, 키프레임 타임라인, 프로젝트 저장, 렌더, 서비스워커, 오프라인 경로가 모두 통과했습니다.
-
-프로세스 메모리 감사에서 런타임 오류는 없었으나 Chromium RSS는 warmup과 프로세스 캐시 영향을 포함하므로 누수 부재의 단독 근거로 해석하지 않습니다.
+전체 결정적 4개 샤드 결과는 **255/255 통과, 실패 0건**입니다. 상세 결과는 `qa/qa-run-final-summary.json`과 `qa/qa-run-shard-1.json`~`4.json`에 기록했습니다. 패키지 SHA-256은 최종 전달 내역에서 제공합니다.

@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.12 - layered analysis persistence, selectable recovery, and periodic integrity policy
+// AI Shorts Studio v1.6.13 - layered analysis persistence, selectable recovery, and periodic integrity policy
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.12',
-    BUILD_KEY: '1.6.12-model-pack-benchmark-rollback',
+    APP_VERSION: 'v1.6.13',
+    BUILD_KEY: '1.6.13-transactional-model-pack-qa-controls',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     EXPORT_WIDTH: 1080,
     EXPORT_HEIGHT: 1920,

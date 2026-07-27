@@ -109,12 +109,20 @@ function assert(condition, message) {
     assert(rolledBack.packId === oldPack.id && rolledBack.recovered === true, 'manual rollback restores the previous verified model');
     assert(api.snapshot().rollback.packId === newPack.id, 'manual rollback keeps the replaced model as a reversible undo target');
 
+    const activeNewGpu = await api.activatePack(newPack.id, { runtimeModule, backend: 'gpu' });
+    assert(activeNewGpu.packId === newPack.id && activeNewGpu.backend === 'gpu', 'replacement model can be reactivated on the GPU backend');
+    runtimeModule.failNewCpu = true;
+    const backendRecovered = await api.activatePack(newPack.id, { runtimeModule, backend: 'cpu' });
+    assert(backendRecovered.recovered === true && backendRecovered.packId === newPack.id && backendRecovered.backend === 'gpu', 'failed backend switch restores the current model and last known-good backend');
+    assert(api.snapshot().rollback.packId === oldPack.id, 'backend recovery preserves the previous-model rollback target');
+    runtimeModule.failNewCpu = false;
+
     const recommendation = api._test.benchmarkRecommendation([
         { backend: 'gpu', status: 'failed', medianMs: 0 },
         { backend: 'cpu', status: 'passed', medianMs: 10 }
     ]);
     assert(recommendation.backend === 'cpu', 'failed GPU measurements safely recommend the CPU path');
-    console.log('PASS v1.6.12 model-pack performance diagnostics and safe rollback contract');
+    console.log('PASS v1.6.13 model-pack performance diagnostics, backend recovery, and safe rollback contract');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

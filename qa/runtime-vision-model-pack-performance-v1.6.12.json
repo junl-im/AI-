@@ -1,6 +1,6 @@
 {
   "version": "1.6.12",
-  "generatedAt": "2026-07-25T00:49:23.337056+00:00",
+  "generatedAt": "2026-07-27T02:19:30.893710+00:00",
   "passed": true,
   "checks": {
     "gpuAndCpuBenchmarked": true,
@@ -21,8 +21,8 @@
       "label": "이전 모델",
       "provider": "mediapipe-tasks-vision",
       "runtimeVersion": "",
-      "installedAt": "2026-07-25T00:49:22.969Z",
-      "verifiedAt": "2026-07-25T00:49:22.970Z",
+      "installedAt": "2026-07-27T02:19:30.561Z",
+      "verifiedAt": "2026-07-27T02:19:30.561Z",
       "verification": "verified",
       "totalBytes": 227,
       "sizeLabel": "227B",
@@ -34,8 +34,8 @@
       "label": "새 모델",
       "provider": "mediapipe-tasks-vision",
       "runtimeVersion": "",
-      "installedAt": "2026-07-25T00:49:23.101Z",
-      "verifiedAt": "2026-07-25T00:49:23.101Z",
+      "installedAt": "2026-07-27T02:19:30.689Z",
+      "verifiedAt": "2026-07-27T02:19:30.689Z",
       "verification": "verified",
       "totalBytes": 224,
       "sizeLabel": "224B",
@@ -46,22 +46,22 @@
       "packId": "vision-65f398e04650b733",
       "results": [
         {
-          "id": "bench-3594dfc57ec77ec3",
+          "id": "bench-c474c2a55f5a2428",
           "packId": "vision-65f398e04650b733",
           "backend": "gpu",
-          "createdAt": "2026-07-25T00:49:22.995Z",
+          "createdAt": "2026-07-27T02:19:30.586Z",
           "iterations": 4,
           "medianMs": 2,
-          "p95Ms": 2,
+          "p95Ms": 2.1,
           "fps": 500,
           "status": "passed",
           "error": ""
         },
         {
-          "id": "bench-f4d7c3ad7dd9bdb4",
+          "id": "bench-e4be2193210a9e33",
           "packId": "vision-65f398e04650b733",
           "backend": "cpu",
-          "createdAt": "2026-07-25T00:49:23.031Z",
+          "createdAt": "2026-07-27T02:19:30.621Z",
           "iterations": 4,
           "medianMs": 7,
           "p95Ms": 7,
@@ -92,7 +92,7 @@
         "rollback": {
           "packId": "vision-65f398e04650b733",
           "backend": "cpu",
-          "recoveredAt": "2026-07-25T00:49:23.118Z",
+          "recoveredAt": "2026-07-27T02:19:30.704Z",
           "reason": "model-switch"
         },
         "activationError": "synthetic delegate startup failure"
@@ -105,14 +105,14 @@
         "lastRecovery": {
           "packId": "vision-65f398e04650b733",
           "backend": "cpu",
-          "recoveredAt": "2026-07-25T00:49:23.118Z",
+          "recoveredAt": "2026-07-27T02:19:30.704Z",
           "reason": "model-switch"
         }
       },
       "rollback": {
         "packId": "vision-65f398e04650b733",
         "backend": "cpu",
-        "createdAt": "2026-07-25T00:49:23.102Z",
+        "createdAt": "2026-07-27T02:19:30.690Z",
         "reason": "model-switch"
       },
       "buttonHidden": false
@@ -127,7 +127,7 @@
       "rollback": {
         "packId": "vision-65f398e04650b733",
         "backend": "cpu",
-        "recoveredAt": "2026-07-25T00:49:23.181Z",
+        "recoveredAt": "2026-07-27T02:19:30.766Z",
         "reason": "model-switch"
       }
     },
@@ -138,8 +138,8 @@
           "label": "새 모델",
           "provider": "mediapipe-tasks-vision",
           "runtimeVersion": "",
-          "installedAt": "2026-07-25T00:49:23.101Z",
-          "verifiedAt": "2026-07-25T00:49:23.173Z",
+          "installedAt": "2026-07-27T02:19:30.689Z",
+          "verifiedAt": "2026-07-27T02:19:30.759Z",
           "verification": "verified",
           "totalBytes": 224,
           "sizeLabel": "224B",
@@ -151,8 +151,8 @@
           "label": "이전 모델",
           "provider": "mediapipe-tasks-vision",
           "runtimeVersion": "",
-          "installedAt": "2026-07-25T00:49:22.969Z",
-          "verifiedAt": "2026-07-25T00:49:23.179Z",
+          "installedAt": "2026-07-27T02:19:30.561Z",
+          "verifiedAt": "2026-07-27T02:19:30.765Z",
           "verification": "verified",
           "totalBytes": 227,
           "sizeLabel": "227B",
@@ -172,7 +172,7 @@
         "lastRecovery": {
           "packId": "vision-65f398e04650b733",
           "backend": "cpu",
-          "recoveredAt": "2026-07-25T00:49:23.181Z",
+          "recoveredAt": "2026-07-27T02:19:30.766Z",
           "reason": "model-switch"
         }
       },
@@ -189,7 +189,7 @@
       "rollback": {
         "packId": "vision-5610f5cfd24c0254",
         "backend": "gpu",
-        "createdAt": "2026-07-25T00:49:23.181Z",
+        "createdAt": "2026-07-27T02:19:30.766Z",
         "reason": "rollback-undo"
       },
       "performance": {
@@ -205,10 +205,10 @@
         "vision-65f398e04650b733": {
           "history": [
             {
-              "id": "bench-f4d7c3ad7dd9bdb4",
+              "id": "bench-e4be2193210a9e33",
               "packId": "vision-65f398e04650b733",
               "backend": "cpu",
-              "createdAt": "2026-07-25T00:49:23.031Z",
+              "createdAt": "2026-07-27T02:19:30.621Z",
               "iterations": 4,
               "medianMs": 7,
               "p95Ms": 7,
@@ -217,13 +217,13 @@
               "error": ""
             },
             {
-              "id": "bench-3594dfc57ec77ec3",
+              "id": "bench-c474c2a55f5a2428",
               "packId": "vision-65f398e04650b733",
               "backend": "gpu",
-              "createdAt": "2026-07-25T00:49:22.995Z",
+              "createdAt": "2026-07-27T02:19:30.586Z",
               "iterations": 4,
               "medianMs": 2,
-              "p95Ms": 2,
+              "p95Ms": 2.1,
               "fps": 500,
               "status": "passed",
               "error": ""
@@ -231,10 +231,10 @@
           ],
           "latest": [
             {
-              "id": "bench-f4d7c3ad7dd9bdb4",
+              "id": "bench-e4be2193210a9e33",
               "packId": "vision-65f398e04650b733",
               "backend": "cpu",
-              "createdAt": "2026-07-25T00:49:23.031Z",
+              "createdAt": "2026-07-27T02:19:30.621Z",
               "iterations": 4,
               "medianMs": 7,
               "p95Ms": 7,
@@ -243,13 +243,13 @@
               "error": ""
             },
             {
-              "id": "bench-3594dfc57ec77ec3",
+              "id": "bench-c474c2a55f5a2428",
               "packId": "vision-65f398e04650b733",
               "backend": "gpu",
-              "createdAt": "2026-07-25T00:49:22.995Z",
+              "createdAt": "2026-07-27T02:19:30.586Z",
               "iterations": 4,
               "medianMs": 2,
-              "p95Ms": 2,
+              "p95Ms": 2.1,
               "fps": 500,
               "status": "passed",
               "error": ""

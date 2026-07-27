@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.12 - keyframe timeline editing, range application, and collision-safe smart reframe engine
+// AI Shorts Studio v1.6.13 - keyframe timeline editing, range application, and collision-safe smart reframe engine
 'use strict';
 
 (function exposeSmartReframeEngine(global) {

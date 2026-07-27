@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.12 - local vision model-pack benchmarks, device recommendations, and safe rollback
+// AI Shorts Studio v1.6.13 - local vision model-pack benchmarks, device recommendations, and safe rollback
 'use strict';
 
 (function exposeVisionModelPackManager(global) {
@@ -326,16 +326,27 @@
         return removed;
     }
 
-    async function makeRoomForPack(nextId) {
+    function planRoomForPack(nextId) {
         const store = readStore();
-        if (store.packs.some(pack => pack.id === nextId) || store.packs.length < MAX_PACKS) return store;
+        if (store.packs.some(pack => pack.id === nextId) || store.packs.length < MAX_PACKS) {
+            return { store, evictionCandidate: null };
+        }
         const active = readActive().packId;
         const candidate = store.packs.slice().reverse().find(pack => pack.id !== active);
         if (!candidate) throw new Error(`설치 가능한 모델 팩은 최대 ${MAX_PACKS}개입니다. 기존 팩을 먼저 삭제해 주세요.`);
-        await cacheDeletePack(candidate);
-        store.packs = store.packs.filter(pack => pack.id !== candidate.id);
-        saveStore(store);
-        return store;
+        return { store, evictionCandidate: candidate };
+    }
+
+    async function deleteCachedFiles(packId, files) {
+        if (!cacheReady()) return 0;
+        const cache = await global.caches.open(CACHE_NAME);
+        let removed = 0;
+        for (const file of files || []) {
+            try {
+                if (await cache.delete(assetUrl(packId, file.path), { ignoreSearch: true })) removed += 1;
+            } catch (_) { /* best-effort rollback cleanup */ }
+        }
+        return removed;
     }
 
     async function installFromFiles(fileList, options) {
@@ -363,24 +374,31 @@
         }
         const identity = await sha256(new TextEncoder().encode(buffers.map(item => `${item.path}:${item.sha256}`).sort().join('|')));
         const packId = `vision-${identity.slice(0, 16)}`;
-        const store = await makeRoomForPack(packId);
-        const existing = store.packs.find(pack => pack.id === packId);
-        if (existing) await cacheDeletePack(existing);
+        const plan = planRoomForPack(packId);
+        const existing = plan.store.packs.find(pack => pack.id === packId);
         const cache = await global.caches.open(CACHE_NAME);
-        for (let index = 0; index < buffers.length; index += 1) {
-            const item = buffers[index];
-            const response = new Response(item.buffer.slice(0), {
-                status: 200,
-                headers: {
-                    'Content-Type': item.contentType,
-                    'Content-Length': String(item.bytes),
-                    'Cache-Control': 'public, max-age=31536000, immutable',
-                    'X-AI-Shorts-SHA256': item.sha256,
-                    'X-Content-Type-Options': 'nosniff'
-                }
-            });
-            await cache.put(assetUrl(packId, item.path), response);
-            if (progress) progress(60 + Math.round(((index + 1) / buffers.length) * 35), `로컬 저장 중 · ${index + 1}/${buffers.length}`);
+        const written = [];
+        try {
+            for (let index = 0; index < buffers.length; index += 1) {
+                const item = buffers[index];
+                const response = new Response(item.buffer.slice(0), {
+                    status: 200,
+                    headers: {
+                        'Content-Type': item.contentType,
+                        'Content-Length': String(item.bytes),
+                        'Cache-Control': 'public, max-age=31536000, immutable',
+                        'X-AI-Shorts-SHA256': item.sha256,
+                        'X-Content-Type-Options': 'nosniff'
+                    }
+                });
+                await cache.put(assetUrl(packId, item.path), response);
+                written.push(item);
+                if (progress) progress(60 + Math.round(((index + 1) / buffers.length) * 35), `로컬 저장 중 · ${index + 1}/${buffers.length}`);
+            }
+        } catch (error) {
+            if (!existing) await deleteCachedFiles(packId, written);
+            const reason = safeText(error && error.message || error, 180);
+            throw new Error(`모델 팩 저장에 실패했습니다. 기존 모델 팩은 유지됩니다.${reason ? ` (${reason})` : ''}`);
         }
         const packageFile = selection.files.find(item => item.name === 'package.json');
         const pack = sanitizePack({
@@ -396,8 +414,15 @@
             runtimePath: 'vision_bundle.mjs'
         });
         const nextStore = readStore();
-        nextStore.packs = [pack].concat(nextStore.packs.filter(item => item.id !== pack.id)).slice(0, MAX_PACKS);
+        nextStore.packs = [pack].concat(nextStore.packs.filter(item => item.id !== pack.id && (!plan.evictionCandidate || item.id !== plan.evictionCandidate.id))).slice(0, MAX_PACKS);
         saveStore(nextStore);
+        if (!findPack(pack.id)) {
+            if (!existing) await deleteCachedFiles(packId, buffers);
+            throw new Error('모델 팩 파일은 저장했지만 설치 정보를 보존하지 못했습니다. 브라우저 저장 공간을 확인해 주세요.');
+        }
+        if (plan.evictionCandidate) {
+            try { await cacheDeletePack(plan.evictionCandidate); } catch (_) { /* orphaned cache is harmless and can be reclaimed later */ }
+        }
         if (progress) progress(100, '모델 팩 설치 완료');
         dispatchChange({ type: 'installed', pack: publicPack(pack), ignoredCount: selection.ignoredCount });
         return publicPack(pack);
@@ -634,6 +659,27 @@
         return !(global.navigator && global.navigator.serviceWorker && global.navigator.serviceWorker.controller);
     }
 
+    function activationRollbackCandidate(targetPackId, requestedBackend) {
+        const selected = readActive();
+        const runtimePackId = runtimeState.packId && runtimeState.provider ? runtimeState.packId : '';
+        const currentPackId = runtimePackId || selected.packId;
+        const currentBackend = runtimePackId ? runtimeState.backend : selected.backend;
+        const targetBackend = normalizeBackend(requestedBackend);
+        const backendChanges = currentPackId === targetPackId && targetBackend !== 'auto' && normalizeBackend(currentBackend) !== targetBackend;
+        if (currentPackId && findPack(currentPackId) && (currentPackId !== targetPackId || backendChanges)) {
+            const reason = currentPackId === targetPackId ? 'backend-switch' : 'model-switch';
+            const candidate = {
+                packId: currentPackId,
+                backend: normalizeBackend(currentBackend),
+                createdAt: nowIso(),
+                reason
+            };
+            if (reason === 'model-switch') saveRollback(candidate.packId, candidate.backend, reason);
+            return candidate;
+        }
+        return readRollback();
+    }
+
     async function activatePack(packId, options) {
         const opts = options || {};
         const id = String(packId || '').toLowerCase();
@@ -644,10 +690,7 @@
             const pack = findPack(id);
             if (!pack) throw new Error('활성화할 모델 팩이 설치되어 있지 않습니다.');
             if (serviceWorkerRequired(opts)) throw new Error('모델 팩 설치 후 앱을 한 번 새로고침해야 사용할 수 있습니다.');
-            const previous = readActive();
-            const rollbackCandidate = previous.packId && previous.packId !== pack.id && findPack(previous.packId)
-                ? saveRollback(previous.packId, runtimeState.backend || previous.backend, 'model-switch')
-                : readRollback();
+            const rollbackCandidate = activationRollbackCandidate(pack.id, backend);
             try {
                 const verification = await verifyPack(pack.id, opts);
                 if (!verification.ok) throw new Error('모델 팩 무결성이 손상되어 활성화하지 않았습니다. 다시 설치해 주세요.');
@@ -780,6 +823,6 @@
         probeCapabilities,
         snapshot,
         assetUrl,
-        _test: Object.freeze({ selectInputFiles, normalizeBackend, contentTypeFor, storedPath, sha256, safeBenchmark, benchmarkRecommendation, percentile, readRollback, saveRollback, PATH_SEGMENT, CACHE_NAME, REQUIRED_RUNTIME_FILES, BENCHMARK_KEY, ROLLBACK_KEY })
+        _test: Object.freeze({ selectInputFiles, normalizeBackend, contentTypeFor, storedPath, sha256, safeBenchmark, benchmarkRecommendation, percentile, readRollback, saveRollback, activationRollbackCandidate, planRoomForPack, PATH_SEGMENT, CACHE_NAME, REQUIRED_RUNTIME_FILES, BENCHMARK_KEY, ROLLBACK_KEY })
     });
 })(window);

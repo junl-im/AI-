@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.6.13 - Transactional Model Pack Safety & QA Controls
+
+- 모델 팩 설치를 신규 파일 완전 저장, 메타데이터 확인, 기존 팩 정리 순서의 트랜잭션 경로로 변경
+- Cache Storage 쓰기 실패 시 부분 저장 파일을 정리하고 기존 팩·활성 선택을 보존
+- 같은 모델의 CPU/GPU 전환 실패 시 오래된 롤백 팩이 아니라 현재 모델의 마지막 정상 backend로 복구
+- 기존 이전 모델 롤백 대상은 backend 복구 후에도 유지
+- 반복 내보내기 시 이전 다운로드 Object URL을 즉시 정리하고 pagehide/beforeunload에서 잔여 URL을 모두 해제
+- 실미디어 반복 내보내기 Object URL·힙 안정성 감사를 현재 릴리스 아티팩트로 갱신
+- QA 실행기에 범위, 검색, 샤드, 개별 타임아웃, fail-fast, JSON 보고서 옵션 추가
+- 결과 전달 형식을 `DELIVERY_RULES.md`에 영구 규칙으로 추가
+
 ## v1.6.12 - Model Pack Benchmark & Safe Rollback
 
 - GPU·WASM CPU 로컬 성능 측정

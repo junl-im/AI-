@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.12 - local transcript-to-face speaker direction without remote inference
+// AI Shorts Studio v1.6.13 - local transcript-to-face speaker direction without remote inference
 'use strict';
 
 (function exposeSpeakerFaceLinker(global) {

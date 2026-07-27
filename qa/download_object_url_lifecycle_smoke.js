@@ -9,6 +9,7 @@ const source = fs.readFileSync(path.join(root, 'src/download/download-service.js
 const timers = [];
 const revoked = [];
 const anchors = [];
+const listeners = new Map();
 let sequence = 0;
 const document = {
     body: { appendChild(node) { anchors.push(node); } },
@@ -24,7 +25,7 @@ const window = {
     URL: { createObjectURL() { return `blob:test-${++sequence}`; }, revokeObjectURL(url) { revoked.push(url); } },
     setTimeout(callback, delay) { timers.push({ callback, delay }); return timers.length; },
     clearTimeout() {},
-    addEventListener() {}
+    addEventListener(type, callback) { listeners.set(type, callback); }
 };
 const context = vm.createContext({
     window,
@@ -43,11 +44,22 @@ context.HTMLCanvasElement.prototype = {};
 context.HTMLMediaElement.prototype = {};
 vm.runInContext(source, context, { filename: 'download-service.js' });
 const api = window.AIShortsDownloadService;
-api.saveBlob({ size: 1024, type: 'video/webm' }, 'clip.webm');
+api.saveBlob({ size: 1024, type: 'video/webm' }, 'clip-1.webm');
 if (!anchors[0] || !anchors[0].clicked) throw new Error('download anchor must be clicked');
-if (revoked.length) throw new Error('object URL must not be revoked synchronously');
-if (!timers.length || timers[0].delay < 10000) throw new Error('object URL release must not use the previous 1 second timeout');
+if (revoked.length) throw new Error('current object URL must not be revoked synchronously');
+if (!timers.length || timers[0].delay < 10000) throw new Error('object URL release must keep a browser-safe delay');
 if (api.getObjectUrlStats().active !== 1) throw new Error('active download URL must be tracked');
-timers[0].callback();
-if (revoked.length !== 1 || api.getObjectUrlStats().active !== 0) throw new Error('scheduled release must revoke and remove the URL');
-console.log('PASS delayed bounded download object URL lifecycle');
+
+api.saveBlob({ size: 2048, type: 'video/webm' }, 'clip-2.webm');
+if (revoked.length !== 1 || revoked[0] !== 'blob:test-1') throw new Error('a new export must release the superseded download URL');
+if (api.getObjectUrlStats().active !== 1) throw new Error('repeated exports must keep at most one active download URL');
+if (!anchors[1] || !anchors[1].clicked) throw new Error('replacement download anchor must be clicked');
+
+timers[1].callback();
+if (revoked.length !== 2 || revoked[1] !== 'blob:test-2' || api.getObjectUrlStats().active !== 0) throw new Error('scheduled release must revoke the latest URL');
+
+api.saveBlob({ size: 4096, type: 'video/webm' }, 'clip-3.webm');
+if (typeof listeners.get('beforeunload') !== 'function' || typeof listeners.get('pagehide') !== 'function') throw new Error('download URLs must have unload lifecycle owners');
+listeners.get('beforeunload')();
+if (revoked.length !== 3 || revoked[2] !== 'blob:test-3' || api.getObjectUrlStats().active !== 0) throw new Error('beforeunload must release all remaining download URLs');
+console.log('PASS delayed, single-active, unload-safe download Object URL lifecycle');

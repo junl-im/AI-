@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.12 - shared adaptive-rate audio analysis core
+// AI Shorts Studio v1.6.13 - shared adaptive-rate audio analysis core
 'use strict';
 
 (function exposeAudioAnalysisCore(global) {

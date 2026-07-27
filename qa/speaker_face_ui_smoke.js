@@ -9,6 +9,6 @@ const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/smart-reframe.css'), 'utf8');
 ['smartReframeSpeakerPriorityToggle', 'smartReframeSpeakerLinkBtn', 'smartReframeSpeakerStatus'].forEach(id => ok(html.includes(`id="${id}"`), `${id} control exists`));
 ok(loader.includes("versioned('src/vision/speaker-face-linker.js', 'editing')"), 'speaker linker stays on editing-stage lazy load');
-ok(sw.includes('src/vision/speaker-face-linker.js?v=1.6.12-model-pack-benchmark-rollback'), 'speaker linker is available offline');
+ok(sw.includes('src/vision/speaker-face-linker.js?v=1.6.13-transactional-model-pack-qa-controls'), 'speaker linker is available offline');
 ok(css.includes('.smart-reframe-speaker-status') && css.includes('.smart-reframe-speaker-toggle'), 'speaker controls have responsive ownership');
 console.log('PASS speaker-directed smart reframe UI, staged loading, and offline shell guardrails');

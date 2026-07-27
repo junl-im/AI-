@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.6.12 speaker-directed smart reframe controls */
+/* AI Shorts Studio v1.6.13 speaker-directed smart reframe controls */
 .smart-reframe-panel {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -317,7 +317,7 @@
 }
 
 
-/* v1.6.12 per-segment speaker-face tuning */
+/* v1.6.13 per-segment speaker-face tuning */
 .speaker-face-tuning-panel {
     grid-column: 1 / -1;
     border-top: 1px solid rgba(148, 163, 184, 0.16);
@@ -369,7 +369,7 @@
     .speaker-face-tuning-actions .smart-reframe-toggle { flex: 1 1 132px; justify-content: center; }
 }
 
-/* v1.6.12 direct crop editing on the preview surface */
+/* v1.6.13 direct crop editing on the preview surface */
 .direct-crop-overlay {
     position: absolute;
     inset: 10px;
@@ -564,7 +564,7 @@
     }
 }
 
-/* v1.6.12 crop keyframe timeline editing */
+/* v1.6.13 crop keyframe timeline editing */
 .crop-keyframe-timeline-panel {
     min-width: 0;
     border-top: 1px solid rgba(148, 163, 184, 0.16);
@@ -693,7 +693,7 @@
     }
 }
 
-/* v1.6.12 device benchmark and rollback diagnostics */
+/* v1.6.13 device benchmark and rollback diagnostics */
 .vision-model-pack-diagnostics {
     display: grid;
     gap: 4px;

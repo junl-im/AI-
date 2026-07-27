@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.12 - compact model performance diagnostics and safe rollback controls
+// AI Shorts Studio v1.6.13 - compact model performance diagnostics and safe rollback controls
 'use strict';
 
 (function installVisionModelPackPanel(global) {

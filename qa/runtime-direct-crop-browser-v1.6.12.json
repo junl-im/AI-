@@ -1,6 +1,6 @@
 {
   "version": "1.6.12",
-  "generatedAt": "2026-07-25T00:49:19.805600+00:00",
+  "generatedAt": "2026-07-27T02:19:27.745394+00:00",
   "harness": "real MP4 import, smart crop, pointer drag, wheel zoom, keyboard nudge, automatic keyframe save, path visualization, undo, and escape exit",
   "before": {
     "x": 0.53963,
@@ -10,10 +10,10 @@
   },
   "afterDrag": {
     "x": 0.59859,
-    "y": 0.47149,
+    "y": 0.46931,
     "zoom": 1.08,
     "active": "true",
-    "line": "59.86,47.15"
+    "line": "59.86,46.93"
   },
   "afterWheel": {
     "x": 0.6,

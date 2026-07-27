@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.12 - timeline-aware crop editing and collision-safe smart-reframe coordination
+// AI Shorts Studio v1.6.13 - timeline-aware crop editing and collision-safe smart-reframe coordination
 'use strict';
 
 (function bootAIShortsStudio(global) {

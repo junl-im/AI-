@@ -1,6 +1,6 @@
 {
   "version": "1.6.12",
-  "generatedAt": "2026-07-25T00:49:13.665463+00:00",
+  "generatedAt": "2026-07-27T02:19:21.890180+00:00",
   "harness": "real MP4 import, smart crop keyframe creation, marker selection, clipboard paste, drag collision cleanup, and selected-range application",
   "initial": {
     "count": 3,

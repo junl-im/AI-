@@ -1,0 +1,46 @@
+{
+  "app": "AI Shorts Studio",
+  "version": "1.6.13",
+  "createdAt": "2026-07-27T02:34:34.655Z",
+  "shardCount": 4,
+  "selectedCount": 255,
+  "executedCount": 255,
+  "passedCount": 255,
+  "failedCount": 0,
+  "durationMs": 58168,
+  "shards": [
+    {
+      "shard": "1/4",
+      "selectedCount": 64,
+      "passedCount": 64,
+      "failedCount": 0,
+      "durationMs": 17075,
+      "report": "qa-run-shard-1.json"
+    },
+    {
+      "shard": "2/4",
+      "selectedCount": 64,
+      "passedCount": 64,
+      "failedCount": 0,
+      "durationMs": 9952,
+      "report": "qa-run-shard-2.json"
+    },
+    {
+      "shard": "3/4",
+      "selectedCount": 64,
+      "passedCount": 64,
+      "failedCount": 0,
+      "durationMs": 17855,
+      "report": "qa-run-shard-3.json"
+    },
+    {
+      "shard": "4/4",
+      "selectedCount": 63,
+      "passedCount": 63,
+      "failedCount": 0,
+      "durationMs": 13286,
+      "report": "qa-run-shard-4.json"
+    }
+  ],
+  "passed": true
+}

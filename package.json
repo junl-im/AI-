@@ -1,11 +1,13 @@
 {
-  "name": "ai-shorts-studio-v1-6-12",
-  "version": "1.6.12",
+  "name": "ai-shorts-studio-v1-6-13",
+  "version": "1.6.13",
   "private": true,
-  "description": "AI Shorts Studio v1.6.12 - local model-pack CPU/GPU benchmarks, device recommendations, and safe automatic rollback",
+  "description": "AI Shorts Studio v1.6.13 - transactional model-pack installs, last-known-good backend recovery, bounded export Object URLs, and controllable QA execution",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
+    "check:list": "node qa/run_all_checks.js --list",
+    "check:report": "node qa/run_all_checks.js --report qa/latest-qa-run.json",
     "package:clean": "bash tools/create-distribution-zips.sh",
     "package:full": "bash tools/create-release-zip.sh",
     "package:patch": "bash tools/create-patch-zip.sh",
@@ -13,6 +15,7 @@
     "test": "npm run check"
   },
   "qaChecks": [
+    "node qa/qa_runner_controls_smoke.js",
     "node --check src/config/app-runtime-config.js",
     "node --check src/boot/app-version-sync.js",
     "node --check src/boot/update-sentinel.js",
@@ -51,6 +54,7 @@
     "node qa/speaker_face_tuning_smoke.js",
     "node --check src/vision/vision-model-pack-manager.js",
     "node qa/vision_model_pack_manager_smoke.js",
+    "node qa/vision_model_pack_transaction_smoke.js",
     "node qa/vision_model_pack_performance_rollback_smoke.js",
     "node --check src/ui/vision-model-pack-panel.js",
     "node qa/vision_model_pack_ui_smoke.js",

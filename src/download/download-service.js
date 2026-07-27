@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.12 - download diagnostics with storage and offline lifecycle state
+// AI Shorts Studio v1.6.13 - download diagnostics with storage and offline lifecycle state
 'use strict';
 
 (function exposeDownloadService(global) {
@@ -60,6 +60,7 @@
     function saveBlob(blob, filename) {
         if (!blob) throw new Error('저장할 파일이 없습니다.');
         if (!global.URL || typeof global.URL.createObjectURL !== 'function') throw new Error('이 브라우저에서는 파일 저장 URL을 만들 수 없습니다.');
+        releaseAllDownloadUrls('superseded-export');
         const url = scheduleUrlRelease(global.URL.createObjectURL(blob));
         const anchor = document.createElement('a');
         anchor.href = url;
@@ -137,7 +138,10 @@
         return snapshot;
     }
 
-    if (typeof global.addEventListener === 'function') global.addEventListener('pagehide', () => releaseAllDownloadUrls('pagehide'));
+    if (typeof global.addEventListener === 'function') {
+        global.addEventListener('beforeunload', () => releaseAllDownloadUrls('beforeunload'));
+        global.addEventListener('pagehide', () => releaseAllDownloadUrls('pagehide'));
+    }
 
     global.AIShortsDownloadService = Object.freeze({
         saveBlob,
