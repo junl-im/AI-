@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const pkg = require(path.join(root, 'package.json'));
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
 function fail(message) {
@@ -27,10 +28,10 @@ if (!header.includes('class="signature-label">DESIGNED BY</span><strong>곰같�
 if (header.includes('패치') || header.includes('Modular Engine') || header.includes('HyperFlow') || header.includes('바로 분석')) {
     fail('top header should not show patch labels, engine labels, HyperFlow jargon, or analysis button');
 }
-if (!html.includes('<title>AI 쇼츠 제작 스튜디오 v1.6.15</title>')) {
+if (!html.includes(`<title>AI 쇼츠 제작 스튜디오 v${pkg.version}</title>`)) {
     fail('document title should be clean and version-only');
 }
-if (!html.includes('>v1.6.15</button>')) {
+if (!html.includes(`>v${pkg.version}</button>`)) {
     fail('version badge should show only the version number');
 }
 if (dialog.includes('패치') || dialog.includes('HyperFlow') || dialog.includes('Modular Engine')) {

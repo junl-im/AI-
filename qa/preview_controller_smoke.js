@@ -107,7 +107,7 @@ function assert(condition, message) {
     controller.dispose();
     assert(controller.snapshot().disposed === true && !controller.snapshot().stillRafActive, 'dispose clears pending still rendering and marks controller closed');
     assert(cancelledRafs.length >= 1, 'controller cancellation reaches the RAF owner');
-    console.log('PASS v1.6.15 isolated preview lifecycle and teardown contract');
+    console.log('PASS v1.6.20 isolated preview lifecycle and teardown contract');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

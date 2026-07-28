@@ -5,6 +5,9 @@ const path = require('path');
 const vm = require('vm');
 const crypto = require('crypto');
 const root = path.resolve(__dirname, '..');
+const pkg = require(path.join(root, 'package.json'));
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 const source = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 function keyOf(input) { return typeof input === 'string' ? input : input && input.url || String(input || ''); }
 function diskResponse(input) {
@@ -33,10 +36,10 @@ function createHarness() {
     const h = createHarness();
     h.stores.set('ai-shorts-studio-shell-v1.5.23-old-known-good', new Map([['./index.html', new Response('old')]]));
     await h.dispatch('install');
-    const currentName = [...h.stores.keys()].find(name => name.includes('v1.6.15'));
+    const currentName = [...h.stores.keys()].find(name => name.includes(`v${pkg.version}`));
     const store = h.stores.get(currentName);
     if (!store) throw new Error('current integrity cache missing');
-    const target = './assets/css/theme.css?v=1.6.15-preview-cache-diagnostics';
+    const target = `./assets/css/theme.css?v=${buildKey}`;
     store.set(target, new Response('tampered-content', { status: 200 }));
     const statusMessages = await h.dispatch('message', { data: { type: 'ai-shorts-service-worker-status-request', requestId: 'status' } });
     const status = statusMessages.find(item => item.requestId === 'status').report;

@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 function read(file) { return fs.readFileSync(path.join(root, file), 'utf8'); }
 function ok(condition, message) {
     if (!condition) {
@@ -17,10 +19,10 @@ const sw = read('sw.js');
 const pkg = require('../package.json');
 const css = read('assets/css/save-readiness.css');
 const js = read('src/ui/save-readiness.js');
-ok(pkg.version === '1.6.15', 'package version is v1.6.15');
-ok(html.includes('assets/css/save-readiness.css?v=1.6.15-preview-cache-diagnostics'), 'save readiness stylesheet linked');
+ok(pkg.version === '1.6.24', 'package version is v1.6.24');
+ok(html.includes(`assets/css/save-readiness.css?v=${buildKey}`), 'save readiness stylesheet linked');
 ok(loader.includes("versioned('src/ui/save-readiness.js', 'editing')"), 'save readiness script staged');
-ok(sw.includes('./assets/css/save-readiness.css?v=1.6.15-preview-cache-diagnostics'), 'service worker caches save readiness css');
+ok(sw.includes(`./assets/css/save-readiness.css?v=${buildKey}`), 'service worker caches save readiness css');
 ok(sw.includes('async function cacheFirst'), 'service worker caches save readiness JS on first use');
 ok(css.includes('.save-readiness-panel') && css.includes('.preview-ready-strip'), 'save readiness and preview strip styles exist');
 ok(css.includes('@media (prefers-reduced-motion: reduce)'), 'reduced motion fallback exists');

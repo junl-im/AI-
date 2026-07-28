@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Chromium audit for local vision model-pack benchmark, recommendation, and rollback."""
+"""Chromium audit for local vision model-pack benchmark history, recommendation, and rollback."""
 from __future__ import annotations
 
 import asyncio
@@ -25,7 +25,7 @@ export const FaceDetector = {
     const gpu = options?.baseOptions?.delegate === 'GPU';
     return {
       detectForVideo() {
-        const duration = gpu ? 2 : 7;
+        const duration = gpu ? 20 : 60;
         const end = performance.now() + duration;
         while (performance.now() < end) {}
         return { detections: [] };
@@ -43,7 +43,7 @@ def html() -> str:
 <div class="vision-model-pack-status"><strong id="visionPackStatus"></strong><small id="visionPackDetail"></small></div>
 <div class="vision-model-pack-controls"><label><span>팩</span><select id="visionPackSelect"><option value=""></option></select></label><label><span>실행</span><select id="visionPackBackend"><option value="auto">자동</option><option value="gpu">GPU</option><option value="cpu">CPU</option></select></label></div>
 <div class="vision-model-pack-actions"><button id="visionPackInstallBtn"></button><input id="visionPackFolderInput" type="file" multiple hidden><button id="visionPackActivateBtn"></button><button id="visionPackDeactivateBtn" hidden></button><button id="visionPackVerifyBtn"></button><button id="visionPackBenchmarkBtn">측정</button><button id="visionPackRollbackBtn" hidden>복구</button><button id="visionPackRemoveBtn"></button></div>
-<div class="vision-model-pack-diagnostics"><strong id="visionPackRecommendation" data-backend="auto"></strong><small id="visionPackBenchmarkDetail"></small></div><progress id="visionPackProgress" max="100" value="0" hidden></progress></div></details>
+<div class="vision-model-pack-diagnostics"><strong id="visionPackRecommendation" data-backend="auto"></strong><small id="visionPackBenchmarkDetail"></small></div><div class="vision-model-pack-history"><svg id="visionPackHistoryChart" viewBox="0 0 280 84" hidden></svg><small id="visionPackHistoryDetail"></small></div><progress id="visionPackProgress" max="100" value="0" hidden></progress></div></details>
 <script>
 const values = new Map(); Object.defineProperty(window,'localStorage',{{value:{{getItem:k=>values.has(k)?values.get(k):null,setItem:(k,v)=>values.set(k,String(v)),removeItem:k=>values.delete(k)}}}});
 const digest=async(_algorithm,data)=>{{const bytes=new Uint8Array(data);const words=new Uint32Array([2166136261,2246822507,3266489917,668265263,374761393,1274126177,2654435761,1597334677]);for(let i=0;i<bytes.length;i+=1)for(let j=0;j<words.length;j+=1)words[j]=Math.imul(words[j]^(bytes[i]+i+j),16777619+j*2);return words.buffer;}};
@@ -78,8 +78,11 @@ async def run() -> dict:
           const oldPack=await api.installFromFiles(makeFiles('old','face_detector.task'),{label:'이전 모델'});
           const runtimeModule=await import(api.assetUrl(oldPack.id,'vision_bundle.mjs')+'?audit=benchmark');
           const bench=await api.benchmarkPack(oldPack.id,{backends:['gpu','cpu'],iterations:4,warmup:1,runtimeModule});
+          await new Promise(r=>setTimeout(r,10));
+          const bench2=await api.benchmarkPack(oldPack.id,{backends:['gpu','cpu'],iterations:4,warmup:1,runtimeModule});
           await new Promise(r=>setTimeout(r,50));
-          const uiAfterBench={recommendation:document.querySelector('#visionPackRecommendation').textContent.trim(),backend:document.querySelector('#visionPackRecommendation').dataset.backend,detail:document.querySelector('#visionPackBenchmarkDetail').textContent.trim()};
+          const historyChart=document.querySelector('#visionPackHistoryChart');
+          const uiAfterBench={recommendation:document.querySelector('#visionPackRecommendation').textContent.trim(),backend:document.querySelector('#visionPackRecommendation').dataset.backend,detail:document.querySelector('#visionPackBenchmarkDetail').textContent.trim(),historyDetail:document.querySelector('#visionPackHistoryDetail').textContent.trim(),historyHidden:historyChart.hidden,cpuLines:historyChart.querySelectorAll('[data-backend=cpu]').length,gpuLines:historyChart.querySelectorAll('[data-backend=gpu]').length};
           await api.activatePack(oldPack.id,{backend:'cpu'});
           const newPack=await api.installFromFiles(makeFiles('new','blaze_face.task'),{label:'새 모델'});
           globalThis.__failVisionPackId=newPack.id;
@@ -90,13 +93,14 @@ async def run() -> dict:
           await api.activatePack(newPack.id,{backend:'gpu'});
           const manual=await api.rollbackToPrevious();
           await new Promise(r=>setTimeout(r,50));
-          return {oldPack,newPack,bench,uiAfterBench,afterAuto,manual,final:api.snapshot(),closed:globalThis.__visionPerfClosed||0};
+          return {oldPack,newPack,bench,bench2,uiAfterBench,afterAuto,manual,final:api.snapshot(),closed:globalThis.__visionPerfClosed||0};
         }''')
         await browser.close()
     checks={
       'gpuAndCpuBenchmarked': len(result['bench']['results'])==2 and all(x['status']=='passed' for x in result['bench']['results']),
       'gpuRecommended': result['bench']['recommendation']['backend']=='gpu',
       'recommendationRendered': result['uiAfterBench']['backend']=='gpu' and 'GPU' in result['uiAfterBench']['recommendation'] and 'ms' in result['uiAfterBench']['detail'],
+      'historyChartRendered': result['uiAfterBench']['historyHidden'] is False and result['uiAfterBench']['cpuLines'] >= 3 and result['uiAfterBench']['gpuLines'] >= 3 and 'CPU 2회' in result['uiAfterBench']['historyDetail'] and 'GPU 2회' in result['uiAfterBench']['historyDetail'],
       'automaticRollback': result['afterAuto']['recovered']['recovered'] is True and result['afterAuto']['active']['packId']==result['oldPack']['id'],
       'rollbackButtonVisible': result['afterAuto']['buttonHidden'] is False,
       'manualRollback': result['manual']['packId']==result['oldPack']['id'] and result['manual']['recovered'] is True,

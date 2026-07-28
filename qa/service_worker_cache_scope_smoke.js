@@ -5,6 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
+const pkg = require(path.join(root, 'package.json'));
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 
 function ok(condition, message) {
     if (!condition) throw new Error(message);
@@ -24,7 +27,7 @@ function ok(condition, message) {
     const caches = {
         keys: async () => [
             'ai-shorts-studio-shell-v1.3.6-media-engine',
-            'ai-shorts-studio-shell-v1.6.15-preview-cache-diagnostics',
+            `ai-shorts-studio-shell-v${buildKey}`,
             'another-app-shell-v9',
             'shared-image-cache'
         ],
@@ -46,7 +49,7 @@ function ok(condition, message) {
     listeners.activate({ waitUntil(promise) { pending = promise; } });
     await pending;
     ok(deleted.includes('ai-shorts-studio-shell-v1.3.6-media-engine'), 'old AI Shorts shell cache is deleted');
-    ok(!deleted.includes('ai-shorts-studio-shell-v1.6.15-preview-cache-diagnostics'), 'current AI Shorts shell cache is preserved');
+    ok(!deleted.includes(`ai-shorts-studio-shell-v${buildKey}`), 'current AI Shorts shell cache is preserved');
     ok(!deleted.includes('another-app-shell-v9') && !deleted.includes('shared-image-cache'), 'unrelated origin caches are preserved');
     ok(claimed === 1, 'service worker still claims clients after scoped cleanup');
     console.log('PASS namespace-safe service worker cache activation guardrails');

@@ -4,6 +4,9 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
+const pkg = require(path.join(root, 'package.json'));
 function read(file) { return fs.readFileSync(path.join(root, file), 'utf8'); }
 function fail(message) { console.error('FAIL ' + message); process.exit(1); }
 
@@ -17,11 +20,11 @@ function fail(message) { console.error('FAIL ' + message); process.exit(1); }
 
 const html = read('index.html');
 [
-    'src/engine/module-contracts.js?v=1.6.15-preview-cache-diagnostics',
-    'src/engine/analysis-cache.js?v=1.6.15-preview-cache-diagnostics',
-    'src/engine/pro-engine-tuner.js?v=1.6.15-preview-cache-diagnostics',
-    'src/engine/stability-auditor.js?v=1.6.15-preview-cache-diagnostics',
-    'assets/css/pro-engine.css?v=1.6.15-preview-cache-diagnostics'
+    `src/engine/module-contracts.js?v=${buildKey}`,
+    `src/engine/analysis-cache.js?v=${buildKey}`,
+    `src/engine/pro-engine-tuner.js?v=${buildKey}`,
+    `src/engine/stability-auditor.js?v=${buildKey}`,
+    `assets/css/pro-engine.css?v=${buildKey}`
 ].forEach(token => { if (!html.includes(token)) fail(`index missing ${token}`); });
 
 const kernel = read('src/engine/engine-kernel.js');

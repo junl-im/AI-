@@ -4,7 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
-const output = path.join(root, 'qa', 'runtime-service-worker-lifecycle-v1.6.15.json');
+const pkg = require(path.join(root, 'package.json'));
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
+const output = path.join(root, 'qa', `runtime-service-worker-lifecycle-v${pkg.version}.json`);
 
 const handlers = {};
 const cacheStores = new Map();
@@ -56,7 +59,7 @@ async function dispatchWaitable(type, detail) {
 (async () => {
     await makeCache('ai-shorts-studio-shell-v1.3.9-old').put('./old.js', new Response('old'));
     await dispatchWaitable('install');
-    const currentName = [...cacheStores.keys()].find(name => name.includes('v1.6.15-preview-cache-diagnostics'));
+    const currentName = [...cacheStores.keys()].find(name => name.includes(`v${buildKey}`));
     const currentCache = currentName && cacheStores.get(currentName);
     const shellCached = Boolean(currentCache && currentCache.has('./index.html'));
     await dispatchWaitable('activate');
@@ -68,7 +71,7 @@ async function dispatchWaitable(type, detail) {
     const offlineBody = await response.text();
 
     const report = {
-        version: '1.6.15',
+        version: pkg.version,
         auditMode: 'isolated-service-worker-runtime',
         handlers: Object.keys(handlers).sort(),
         install: { skipWaitingCalls, shellCached, currentCache: currentName || '' },

@@ -1,9 +1,10 @@
-// AI Shorts Studio v1.6.15 - local model storage diagnostics, benchmarks, and safe rollback
+// AI Shorts Studio v1.6.20 - confidence-gated benchmark recommendations and diagnostic export
 'use strict';
 
 (function exposeVisionModelPackManager(global) {
     const doc = global.document;
     const config = global.AIShortsRuntimeConfig || {};
+    const downloadService = global.AIShortsDownloadService || {};
     const CACHE_NAME = String(config.VISION_MODEL_PACK_CACHE_NAME || 'ai-shorts-vision-model-packs-v1');
     const STORE_KEY = String(config.VISION_MODEL_PACK_STORE_KEY || 'ai-shorts-vision-model-packs-v1');
     const ACTIVE_KEY = String(config.VISION_MODEL_PACK_ACTIVE_KEY || 'ai-shorts-vision-model-pack-active-v1');
@@ -19,6 +20,7 @@
     const STORAGE_WRITE_OVERHEAD_RATIO = Math.max(1, Math.min(2, Number(config.VISION_MODEL_PACK_STORAGE_WRITE_OVERHEAD_RATIO || 1.15)));
     const BENCHMARK_MAX_AGE_MS = Math.max(60 * 60 * 1000, Math.min(90 * 24 * 60 * 60 * 1000, Number(config.VISION_MODEL_PACK_BENCHMARK_MAX_AGE_MS || 14 * 24 * 60 * 60 * 1000)));
     const BENCHMARK_REFRESH_DELAY_MS = Math.max(500, Math.min(60 * 1000, Number(config.VISION_MODEL_PACK_BENCHMARK_REFRESH_DELAY_MS || 3000)));
+    const AUTO_RECOMMENDATION_MIN_CONFIDENCE_SCORE = Math.max(40, Math.min(90, Number(config.VISION_MODEL_PACK_AUTO_RECOMMENDATION_MIN_CONFIDENCE_SCORE || 55)));
     const PATH_SEGMENT = '__ai_shorts_vision_pack__';
     const REQUIRED_RUNTIME_FILES = Object.freeze([
         'vision_bundle.mjs',
@@ -44,6 +46,8 @@
         benchmarkPackId: '',
         benchmarkRefreshTimer: null,
         benchmarkRefreshPackId: '',
+        benchmarkRecoveryPackId: '',
+        benchmarkRecoveryBound: false,
         lastError: '',
         lastRecovery: null
     };
@@ -138,9 +142,25 @@
         return ['auto', 'gpu', 'cpu'].includes(key) ? key : 'auto';
     }
 
+    function safeBenchmarkContext(value) {
+        const input = value && typeof value === 'object' ? value : {};
+        const visibility = input.visibility === 'hidden' ? 'hidden' : 'visible';
+        return {
+            visibility,
+            focused: input.focused === false ? false : input.focused === true ? true : null,
+            saveData: Boolean(input.saveData),
+            effectiveType: safeText(input.effectiveType || '', 20),
+            batterySupported: Boolean(input.batterySupported),
+            batteryLevel: Math.max(0, Math.min(1, Number(input.batteryLevel) || 0)),
+            charging: input.charging === false ? false : input.charging === true ? true : null,
+            capturedAt: safeText(input.capturedAt || '', 40)
+        };
+    }
+
     function safeBenchmark(value) {
         const input = value && typeof value === 'object' ? value : {};
         const backend = normalizeBackend(input.backend);
+        const confidence = ['high', 'medium', 'low'].includes(String(input.confidence || '')) ? String(input.confidence) : 'unknown';
         return {
             id: /^bench-[a-f0-9]{16}$/i.test(String(input.id || '')) ? String(input.id).toLowerCase() : '',
             packId: /^vision-[a-f0-9]{16}$/i.test(String(input.packId || '')) ? String(input.packId).toLowerCase() : '',
@@ -152,7 +172,13 @@
             fps: Math.max(0, Number(input.fps) || 0),
             status: input.status === 'failed' ? 'failed' : 'passed',
             error: safeText(input.error || '', 180),
-            environmentKey: safeText(input.environmentKey || '', 180)
+            environmentKey: safeText(input.environmentKey || '', 180),
+            confidence,
+            confidenceScore: Math.max(0, Math.min(100, Math.round(Number(input.confidenceScore) || 0))),
+            confidenceReasons: Object.freeze((Array.isArray(input.confidenceReasons) ? input.confidenceReasons : []).map(item => safeText(item, 80)).filter(Boolean).slice(0, 6)),
+            sampleCv: Math.max(0, Number(input.sampleCv) || 0),
+            spreadRatio: Math.max(0, Number(input.spreadRatio) || 0),
+            context: Object.freeze(safeBenchmarkContext(input.context))
         };
     }
 
@@ -179,6 +205,76 @@
         return safeText([platform || 'unknown', cores || 'unknown', memory || 'unknown', gpu, isolation].join('|'), 180);
     }
 
+    async function collectBenchmarkContext(options) {
+        const opts = options || {};
+        if (opts.context) return Object.freeze(safeBenchmarkContext(opts.context));
+        const nav = global.navigator || {};
+        const connection = nav.connection || nav.mozConnection || nav.webkitConnection || {};
+        const context = {
+            visibility: doc && doc.visibilityState === 'hidden' ? 'hidden' : 'visible',
+            focused: doc && typeof doc.hasFocus === 'function' ? Boolean(doc.hasFocus()) : null,
+            saveData: Boolean(connection.saveData),
+            effectiveType: safeText(connection.effectiveType || '', 20),
+            batterySupported: false,
+            batteryLevel: 0,
+            charging: null,
+            capturedAt: nowIso()
+        };
+        if (typeof nav.getBattery === 'function') {
+            try {
+                const battery = await nav.getBattery();
+                context.batterySupported = true;
+                context.batteryLevel = Math.max(0, Math.min(1, Number(battery && battery.level) || 0));
+                context.charging = battery && battery.charging === false ? false : battery && battery.charging === true ? true : null;
+            } catch (_) { /* Battery Status API is optional. */ }
+        }
+        return Object.freeze(safeBenchmarkContext(context));
+    }
+
+    function benchmarkReadiness(context) {
+        const safe = safeBenchmarkContext(context);
+        const reasons = [];
+        if (safe.visibility === 'hidden') reasons.push('앱이 백그라운드 상태');
+        if (safe.focused === false) reasons.push('창 포커스 없음');
+        if (safe.batterySupported && safe.charging === false && safe.batteryLevel > 0 && safe.batteryLevel < 0.2) reasons.push('배터리 20% 미만');
+        return Object.freeze({ ready: reasons.length === 0, reasons: Object.freeze(reasons) });
+    }
+
+    function benchmarkConfidence(samples, context, iterations) {
+        const list = (Array.isArray(samples) ? samples : []).map(Number).filter(value => Number.isFinite(value) && value > 0);
+        const safe = safeBenchmarkContext(context);
+        const mean = list.length ? list.reduce((sum, value) => sum + value, 0) / list.length : 0;
+        const variance = list.length && mean > 0 ? list.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / list.length : 0;
+        const sampleCv = mean > 0 ? Math.sqrt(variance) / mean : 0;
+        const median = percentile(list, 0.5);
+        const p95 = percentile(list, 0.95);
+        const spreadRatio = median > 0 ? Math.max(0, (p95 - median) / median) : 0;
+        const reasons = [];
+        let score = 100;
+        if (safe.visibility === 'hidden') { score -= 35; reasons.push('백그라운드 측정'); }
+        if (safe.focused === false) { score -= 15; reasons.push('창 포커스 없음'); }
+        if (safe.saveData) { score -= 8; reasons.push('데이터 절약 모드'); }
+        if (safe.batterySupported && safe.charging === false && safe.batteryLevel > 0 && safe.batteryLevel < 0.2) { score -= 20; reasons.push('낮은 배터리'); }
+        if (sampleCv >= 0.25) { score -= 30; reasons.push('측정 변동이 매우 큼'); }
+        else if (sampleCv >= 0.15) { score -= 20; reasons.push('측정 변동이 큼'); }
+        else if (sampleCv >= 0.08) { score -= 10; reasons.push('측정 변동 감지'); }
+        if (spreadRatio >= 0.5) { score -= 18; reasons.push('후반 지연 급증'); }
+        else if (spreadRatio >= 0.25) { score -= 9; reasons.push('후반 지연 증가'); }
+        if (Math.max(1, Number(iterations) || list.length) < 5) { score -= 10; reasons.push('반복 횟수 부족'); }
+        score = Math.max(0, Math.min(100, Math.round(score)));
+        const level = score >= 80 ? 'high' : score >= 55 ? 'medium' : 'low';
+        if (!reasons.length) reasons.push('전경·안정 상태에서 반복 측정');
+        return Object.freeze({ level, score, reasons: Object.freeze(reasons.slice(0, 6)), sampleCv: Number(sampleCv.toFixed(4)), spreadRatio: Number(spreadRatio.toFixed(4)), context: Object.freeze(safe) });
+    }
+
+    function benchmarkConfidenceSummary(results, recommendation) {
+        const list = (Array.isArray(results) ? results : []).filter(item => item && item.status === 'passed');
+        const selected = list.find(item => item.backend === (recommendation && recommendation.backend)) || (recommendation && recommendation.backend === 'auto' ? null : list[0]) || null;
+        if (!selected) return Object.freeze({ level: 'low', score: 0, reasons: Object.freeze(['완료된 측정 없음']), context: Object.freeze(safeBenchmarkContext(null)) });
+        const level = ['high', 'medium', 'low'].includes(selected.confidence) ? selected.confidence : 'low';
+        return Object.freeze({ level, score: selected.confidenceScore || 0, reasons: Object.freeze(Array.from(selected.confidenceReasons || [])), context: Object.freeze(safeBenchmarkContext(selected.context)), backend: selected.backend, sampleCv: selected.sampleCv || 0, spreadRatio: selected.spreadRatio || 0 });
+    }
+
     function benchmarkTrend(history) {
         const list = Array.isArray(history) ? history : [];
         const output = {};
@@ -201,6 +297,42 @@
             });
         });
         return Object.freeze(output);
+    }
+
+    function benchmarkSeries(history, options) {
+        const opts = options || {};
+        const limit = Math.max(2, Math.min(20, Math.round(Number(opts.limit) || 10)));
+        const environmentKey = safeText(opts.environmentKey || benchmarkEnvironmentKey(), 180);
+        const list = (Array.isArray(history) ? history : []).filter(item => item && item.status === 'passed' && item.medianMs > 0 && item.environmentKey === environmentKey);
+        const output = {};
+        const combined = [];
+        ['gpu', 'cpu'].forEach(backend => {
+            const points = list.filter(item => item.backend === backend).slice(0, limit).reverse().map(item => Object.freeze({
+                id: item.id,
+                backend,
+                createdAt: item.createdAt,
+                timestamp: Number.isFinite(Date.parse(item.createdAt || '')) ? Date.parse(item.createdAt) : 0,
+                medianMs: Number(item.medianMs) || 0,
+                p95Ms: Number(item.p95Ms) || 0,
+                fps: Number(item.fps) || 0,
+                iterations: Math.max(1, Number(item.iterations) || 1)
+            }));
+            output[backend] = Object.freeze(points);
+            combined.push(...points);
+        });
+        const timestamps = combined.map(item => item.timestamp).filter(value => value > 0);
+        const medians = combined.map(item => item.medianMs).filter(value => value > 0);
+        return Object.freeze({
+            environmentKey,
+            limit,
+            count: combined.length,
+            firstAt: timestamps.length ? new Date(Math.min.apply(Math, timestamps)).toISOString() : '',
+            lastAt: timestamps.length ? new Date(Math.max.apply(Math, timestamps)).toISOString() : '',
+            minMedianMs: medians.length ? Math.min.apply(Math, medians) : 0,
+            maxMedianMs: medians.length ? Math.max.apply(Math, medians) : 0,
+            gpu: output.gpu,
+            cpu: output.cpu
+        });
     }
 
     function benchmarkFreshness(packId, options) {
@@ -260,17 +392,40 @@
         return list[index];
     }
 
-    function benchmarkRecommendation(results) {
+    function benchmarkEligibleForAuto(record, options) {
+        const opts = options || {};
+        const minimumScore = Math.max(0, Math.min(100, Number(opts.minimumScore) || AUTO_RECOMMENDATION_MIN_CONFIDENCE_SCORE));
+        if (!record || record.status !== 'passed' || !(record.medianMs > 0)) return false;
+        const confidence = ['high', 'medium', 'low'].includes(record.confidence) ? record.confidence : 'unknown';
+        const score = Math.max(0, Number(record.confidenceScore) || (confidence === 'high' ? 100 : confidence === 'medium' ? minimumScore : 0));
+        return confidence !== 'low' && confidence !== 'unknown' && score >= minimumScore;
+    }
+
+    function benchmarkRecommendation(results, options) {
+        const opts = options || {};
         const passed = (Array.isArray(results) ? results : []).filter(item => item && item.status === 'passed' && item.medianMs > 0);
-        const cpu = passed.find(item => item.backend === 'cpu');
-        const gpu = passed.find(item => item.backend === 'gpu');
-        if (gpu && !cpu) return { backend: 'gpu', reason: 'GPU 경로만 정상 완료됨', confidence: 'high' };
-        if (cpu && !gpu) return { backend: 'cpu', reason: 'WASM CPU 경로만 정상 완료됨', confidence: 'high' };
-        if (!cpu && !gpu) return { backend: 'auto', reason: '완료된 성능 측정이 없음', confidence: 'low' };
-        const improvement = (cpu.medianMs - gpu.medianMs) / Math.max(0.001, cpu.medianMs);
-        if (improvement >= 0.08) return { backend: 'gpu', reason: `GPU 중앙 처리 시간이 ${Math.round(improvement * 100)}% 짧음`, confidence: improvement >= 0.2 ? 'high' : 'medium' };
-        if (improvement <= -0.08) return { backend: 'cpu', reason: `WASM CPU 중앙 처리 시간이 ${Math.round(Math.abs(improvement) * 100)}% 짧음`, confidence: improvement <= -0.2 ? 'high' : 'medium' };
-        return { backend: 'cpu', reason: '성능 차이가 작아 호환성이 높은 WASM CPU 권장', confidence: 'medium' };
+        const eligible = passed.filter(item => benchmarkEligibleForAuto(item, opts));
+        const excluded = passed.filter(item => !benchmarkEligibleForAuto(item, opts)).map(item => item.backend);
+        const cpu = eligible.find(item => item.backend === 'cpu');
+        const gpu = eligible.find(item => item.backend === 'gpu');
+        let recommendation;
+        if (gpu && !cpu) recommendation = { backend: 'gpu', reason: '신뢰 가능한 GPU 측정만 자동 추천에 사용됨', confidence: gpu.confidence === 'high' ? 'high' : 'medium' };
+        else if (cpu && !gpu) recommendation = { backend: 'cpu', reason: '신뢰 가능한 WASM CPU 측정만 자동 추천에 사용됨', confidence: cpu.confidence === 'high' ? 'high' : 'medium' };
+        else if (!cpu && !gpu) recommendation = { backend: 'auto', reason: passed.length ? '신뢰도 낮은 측정은 자동 추천에서 제외됨' : '완료된 성능 측정이 없음', confidence: 'low' };
+        else {
+            const improvement = (cpu.medianMs - gpu.medianMs) / Math.max(0.001, cpu.medianMs);
+            if (improvement >= 0.08) recommendation = { backend: 'gpu', reason: `GPU 중앙 처리 시간이 ${Math.round(improvement * 100)}% 짧음`, confidence: improvement >= 0.2 ? 'high' : 'medium' };
+            else if (improvement <= -0.08) recommendation = { backend: 'cpu', reason: `WASM CPU 중앙 처리 시간이 ${Math.round(Math.abs(improvement) * 100)}% 짧음`, confidence: improvement <= -0.2 ? 'high' : 'medium' };
+            else recommendation = { backend: 'cpu', reason: '성능 차이가 작아 호환성이 높은 WASM CPU 권장', confidence: 'medium' };
+            const selected = eligible.find(item => item.backend === recommendation.backend);
+            if (selected && selected.confidence === 'medium' && recommendation.confidence === 'high') recommendation.confidence = 'medium';
+        }
+        return Object.freeze(Object.assign({}, recommendation, {
+            policy: 'confidence-gated',
+            minimumConfidenceScore: Math.max(0, Math.min(100, Number(opts.minimumScore) || AUTO_RECOMMENDATION_MIN_CONFIDENCE_SCORE)),
+            eligibleBackends: Object.freeze(eligible.map(item => item.backend)),
+            excludedBackends: Object.freeze(excluded)
+        }));
     }
 
     function performanceSummary(packId) {
@@ -279,12 +434,17 @@
         const latest = {};
         history.forEach(item => { if (!latest[item.backend]) latest[item.backend] = item; });
         const results = Object.values(latest);
+        const series = benchmarkSeries(history);
+        const recommendation = benchmarkRecommendation(results);
         return Object.freeze({
             history: Object.freeze(history.map(item => Object.freeze(clone(item)))),
+            historyCount: history.length,
             latest: Object.freeze(results.map(item => Object.freeze(clone(item)))),
-            recommendation: Object.freeze(benchmarkRecommendation(results)),
+            recommendation: Object.freeze(recommendation),
+            confidence: benchmarkConfidenceSummary(results, recommendation),
             freshness: benchmarkFreshness(id, { history }),
-            trend: benchmarkTrend(history)
+            trend: benchmarkTrend(history),
+            series
         });
     }
 
@@ -792,6 +952,7 @@
         const warmup = Math.max(1, Math.min(6, Number(opts.warmup) || 2));
         const now = typeof opts.now === 'function' ? opts.now : () => global.performance && global.performance.now ? global.performance.now() : Date.now();
         const samples = [];
+        const context = await collectBenchmarkContext(opts);
         try {
             for (let index = 0; index < warmup + iterations; index += 1) {
                 const started = now();
@@ -807,6 +968,7 @@
         }
         const medianMs = percentile(samples, 0.5);
         const p95Ms = percentile(samples, 0.95);
+        const confidence = benchmarkConfidence(samples, context, iterations);
         const seed = `${pack.id}:${selected}:${nowIso()}:${medianMs.toFixed(4)}`;
         const digest = await sha256(new TextEncoder().encode(seed));
         return saveBenchmark({
@@ -819,7 +981,13 @@
             p95Ms: Number(p95Ms.toFixed(3)),
             fps: Number((1000 / Math.max(0.001, medianMs)).toFixed(2)),
             status: 'passed',
-            environmentKey: benchmarkEnvironmentKey()
+            environmentKey: benchmarkEnvironmentKey(),
+            confidence: confidence.level,
+            confidenceScore: confidence.score,
+            confidenceReasons: confidence.reasons,
+            sampleCv: confidence.sampleCv,
+            spreadRatio: confidence.spreadRatio,
+            context: confidence.context
         });
     }
 
@@ -831,19 +999,21 @@
         if (!verification.ok) throw new Error('손상된 모델 팩은 성능을 측정할 수 없습니다.');
         const requested = Array.isArray(opts.backends) ? opts.backends : ['gpu', 'cpu'];
         const capabilities = probeCapabilities();
+        const context = await collectBenchmarkContext(opts);
         const backends = requested.map(normalizeBackend).filter((item, index, list) => item !== 'auto' && list.indexOf(item) === index).filter(item => item !== 'gpu' || capabilities.gpuDelegate || opts.runtimeModule);
         const results = [];
         for (const backend of backends) {
             try {
-                results.push(await benchmarkBackend(pack, backend, opts));
+                results.push(await benchmarkBackend(pack, backend, Object.assign({}, opts, { context })));
             } catch (error) {
                 const digest = await sha256(new TextEncoder().encode(`${pack.id}:${backend}:${nowIso()}:failed`));
-                results.push(saveBenchmark({ id: `bench-${digest.slice(0, 16)}`, packId: pack.id, backend, createdAt: nowIso(), status: 'failed', error: error && error.message || error, iterations: 1, environmentKey: benchmarkEnvironmentKey() }));
+                results.push(saveBenchmark({ id: `bench-${digest.slice(0, 16)}`, packId: pack.id, backend, createdAt: nowIso(), status: 'failed', error: error && error.message || error, iterations: 1, environmentKey: benchmarkEnvironmentKey(), confidence: 'low', confidenceScore: 0, confidenceReasons: ['측정 실패'], context }));
             }
         }
         const recommendation = benchmarkRecommendation(results);
-        dispatchChange({ type: 'benchmark-complete', packId: pack.id, results: clone(results), recommendation });
-        return Object.freeze({ packId: pack.id, results: Object.freeze(results.map(item => Object.freeze(clone(item)))), recommendation: Object.freeze(recommendation) });
+        const confidence = benchmarkConfidenceSummary(results, recommendation);
+        dispatchChange({ type: 'benchmark-complete', packId: pack.id, results: clone(results), recommendation, confidence });
+        return Object.freeze({ packId: pack.id, results: Object.freeze(results.map(item => Object.freeze(clone(item)))), recommendation: Object.freeze(recommendation), confidence });
     }
 
     async function benchmarkPack(packId, options) {
@@ -865,12 +1035,32 @@
         return runtimeState.benchmarking;
     }
 
+    function armBenchmarkRecovery(packId) {
+        const id = String(packId || '').toLowerCase();
+        if (!id || !findPack(id)) return false;
+        runtimeState.benchmarkRecoveryPackId = id;
+        if (runtimeState.benchmarkRecoveryBound) return true;
+        runtimeState.benchmarkRecoveryBound = true;
+        const retry = () => {
+            const pending = runtimeState.benchmarkRecoveryPackId;
+            if (!pending || runtimeState.packId !== pending) return;
+            if (doc && doc.visibilityState === 'hidden') return;
+            if (doc && typeof doc.hasFocus === 'function' && !doc.hasFocus()) return;
+            runtimeState.benchmarkRecoveryPackId = '';
+            scheduleBenchmarkRefresh(pending, { delayMs: 500, recovered: true });
+            dispatchChange({ type: 'benchmark-refresh-recovered', packId: pending });
+        };
+        if (doc && typeof doc.addEventListener === 'function') doc.addEventListener('visibilitychange', retry, { passive: true });
+        if (global && typeof global.addEventListener === 'function') global.addEventListener('focus', retry, { passive: true });
+        return true;
+    }
+
     function scheduleBenchmarkRefresh(packId, options) {
         const opts = options || {};
         const id = String(packId || '').toLowerCase();
         const freshness = benchmarkFreshness(id);
         if (!findPack(id) || !freshness.due) return Object.freeze({ scheduled: false, packId: id, reason: freshness.reason, code: freshness.code });
-        if (doc && doc.visibilityState === 'hidden') return Object.freeze({ scheduled: false, packId: id, reason: '백그라운드 탭에서는 자동 측정을 보류합니다.', code: 'hidden' });
+        if (doc && doc.visibilityState === 'hidden') { armBenchmarkRecovery(id); return Object.freeze({ scheduled: false, packId: id, reason: '백그라운드 탭에서는 자동 측정을 보류합니다.', code: 'hidden' }); }
         if (runtimeState.benchmarkRefreshTimer) {
             if (runtimeState.benchmarkRefreshPackId === id) return Object.freeze({ scheduled: true, packId: id, reason: freshness.reason, code: freshness.code });
             try { global.clearTimeout(runtimeState.benchmarkRefreshTimer); } catch (_) { /* ignored */ }
@@ -881,8 +1071,15 @@
             runtimeState.benchmarkRefreshTimer = null;
             runtimeState.benchmarkRefreshPackId = '';
             if (runtimeState.packId !== id || runtimeState.benchmarking || !benchmarkFreshness(id).due) return;
+            const context = await collectBenchmarkContext({});
+            const readiness = benchmarkReadiness(context);
+            if (!readiness.ready) {
+                armBenchmarkRecovery(id);
+                dispatchChange({ type: 'benchmark-refresh-deferred', packId: id, reasons: Array.from(readiness.reasons) });
+                return;
+            }
             dispatchChange({ type: 'benchmark-refresh-started', packId: id, reason: freshness.reason });
-            try { await benchmarkPack(id, { background: true }); }
+            try { await benchmarkPack(id, { background: true, context }); }
             catch (error) { dispatchChange({ type: 'benchmark-refresh-failed', packId: id, message: safeText(error && error.message || error, 180) }); }
         }, delay);
         dispatchChange({ type: 'benchmark-refresh-scheduled', packId: id, reason: freshness.reason, delayMs: delay });
@@ -1091,6 +1288,54 @@
         });
     }
 
+    function normalizeBenchmarkDiagnostics(value) {
+        const input = value && typeof value === 'object' ? value : {};
+        const sourceVersion = Math.max(1, Number(input.schemaVersion || input.version) || 1);
+        return Object.freeze({
+            schema: 'ai-shorts-vision-benchmark-diagnostics',
+            schemaVersion: 2,
+            migratedFrom: sourceVersion < 2 ? sourceVersion : null,
+            exportType: 'vision-model-benchmark-diagnostics',
+            version: 2,
+            appVersion: safeText(input.appVersion || config.APP_VERSION || 'dev', 40),
+            generatedAt: safeText(input.generatedAt || nowIso(), 40),
+            pack: input.pack && typeof input.pack === 'object' ? input.pack : null,
+            environmentKey: safeText(input.environmentKey || benchmarkEnvironmentKey(), 180),
+            policy: input.policy && typeof input.policy === 'object' ? input.policy : Object.freeze({ automaticRecommendation: 'confidence-gated', minimumConfidenceScore: AUTO_RECOMMENDATION_MIN_CONFIDENCE_SCORE, lowConfidenceExcluded: true }),
+            performance: input.performance && typeof input.performance === 'object' ? input.performance : Object.freeze({ historyCount: 0, latest: [], recommendation: { backend: 'auto', confidence: 'low' } }),
+            privacy: Object.freeze({ localOnly: true, includesModelFiles: false, includesMedia: false })
+        });
+    }
+
+    function createBenchmarkDiagnostics(packId) {
+        const id = String(packId || '').toLowerCase();
+        const pack = findPack(id);
+        const performance = performanceSummary(id);
+        return normalizeBenchmarkDiagnostics({
+            schema: 'ai-shorts-vision-benchmark-diagnostics',
+            schemaVersion: 2,
+            exportType: 'vision-model-benchmark-diagnostics',
+            version: 2,
+            appVersion: safeText(config.APP_VERSION || 'dev', 40),
+            generatedAt: nowIso(),
+            pack: pack ? Object.freeze({ id: pack.id, label: pack.label, runtimeVersion: pack.runtimeVersion, totalBytes: pack.totalBytes, verification: pack.verification }) : null,
+            environmentKey: benchmarkEnvironmentKey(),
+            policy: Object.freeze({ automaticRecommendation: 'confidence-gated', minimumConfidenceScore: AUTO_RECOMMENDATION_MIN_CONFIDENCE_SCORE, lowConfidenceExcluded: true }),
+            performance
+        });
+    }
+
+    function exportBenchmarkDiagnostics(packId) {
+        const payload = createBenchmarkDiagnostics(packId);
+        const stamp = payload.generatedAt.replace(/[:.]/g, '-');
+        const filename = `ai-shorts-vision-benchmark-diagnostics-${stamp}.json`;
+        if (!downloadService || typeof downloadService.saveBlob !== 'function' || typeof global.Blob !== 'function') return Object.freeze({ saved: false, filename, payload });
+        const blob = new global.Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        downloadService.saveBlob(blob, filename);
+        dispatchChange({ type: 'benchmark-diagnostics-export', packId: String(packId || '').toLowerCase(), historyCount: payload.performance.historyCount });
+        return Object.freeze({ saved: true, filename, historyCount: payload.performance.historyCount, payload });
+    }
+
     function snapshot() {
         const selected = readActive();
         return Object.freeze({
@@ -1100,7 +1345,7 @@
             capabilities: probeCapabilities(),
             rollback: Object.freeze(readRollback() || { packId: '', backend: 'auto', createdAt: '', reason: '' }),
             performance: Object.freeze(readStore().packs.reduce((output, pack) => { output[pack.id] = performanceSummary(pack.id); return output; }, {})),
-            policy: Object.freeze({ localFilesOnly: true, remoteDownload: false, integrity: 'sha256', cacheName: CACHE_NAME, maxFiles: MAX_FILES, storageReserveBytes: STORAGE_RESERVE_BYTES, benchmarkMaxAgeMs: BENCHMARK_MAX_AGE_MS })
+            policy: Object.freeze({ localFilesOnly: true, remoteDownload: false, integrity: 'sha256', cacheName: CACHE_NAME, maxFiles: MAX_FILES, storageReserveBytes: STORAGE_RESERVE_BYTES, benchmarkMaxAgeMs: BENCHMARK_MAX_AGE_MS, autoRecommendationMinConfidenceScore: AUTO_RECOMMENDATION_MIN_CONFIDENCE_SCORE })
         });
     }
 
@@ -1110,7 +1355,11 @@
         activatePack,
         benchmarkPack,
         performanceSummary,
+        createBenchmarkDiagnostics,
+        normalizeBenchmarkDiagnostics,
+        exportBenchmarkDiagnostics,
         scheduleBenchmarkRefresh,
+        armBenchmarkRecovery,
         estimateInstallCapacity,
         inspectOrphanedCache,
         cleanupOrphanedCache,
@@ -1124,6 +1373,6 @@
         probeCapabilities,
         snapshot,
         assetUrl,
-        _test: Object.freeze({ selectInputFiles, normalizeBackend, contentTypeFor, storedPath, sha256, safeBenchmark, benchmarkRecommendation, benchmarkTrend, benchmarkFreshness, benchmarkEnvironmentKey, percentile, readRollback, saveRollback, activationRollbackCandidate, planRoomForPack, capacityFromEstimate, isQuotaError, scanOrphanedCache, PATH_SEGMENT, CACHE_NAME, REQUIRED_RUNTIME_FILES, BENCHMARK_KEY, ROLLBACK_KEY, BENCHMARK_MAX_AGE_MS })
+        _test: Object.freeze({ selectInputFiles, normalizeBackend, contentTypeFor, storedPath, sha256, safeBenchmark, safeBenchmarkContext, benchmarkRecommendation, benchmarkEligibleForAuto, benchmarkTrend, benchmarkSeries, benchmarkFreshness, benchmarkEnvironmentKey, collectBenchmarkContext, armBenchmarkRecovery, benchmarkReadiness, benchmarkConfidence, benchmarkConfidenceSummary, normalizeBenchmarkDiagnostics, percentile, readRollback, saveRollback, activationRollbackCandidate, planRoomForPack, capacityFromEstimate, isQuotaError, scanOrphanedCache, PATH_SEGMENT, CACHE_NAME, REQUIRED_RUNTIME_FILES, BENCHMARK_KEY, ROLLBACK_KEY, BENCHMARK_MAX_AGE_MS, AUTO_RECOMMENDATION_MIN_CONFIDENCE_SCORE })
     });
 })(window);

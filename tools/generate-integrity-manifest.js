@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const root = path.resolve(__dirname, '..');
 const swPath = path.join(root, 'sw.js');
 const manifestPath = path.join(root, 'asset-integrity.json');
+const configPath = path.join(root, 'src/config/app-runtime-config.js');
 let sw = fs.readFileSync(swPath, 'utf8');
 const shellMatch = sw.match(/const SHELL_FILES = \[([\s\S]*?)\n\];/);
 if (!shellMatch) throw new Error('SHELL_FILES not found');
@@ -20,10 +21,13 @@ for (const entry of entries) {
     assets[key] = crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
 }
 const runtime = require(path.join(root, 'package.json'));
+const configSource = fs.readFileSync(configPath, 'utf8');
+const buildKeyMatch = configSource.match(/BUILD_KEY:\s*'([^']+)'/);
+if (!buildKeyMatch) throw new Error('BUILD_KEY not found');
 const manifest = {
     app: 'AI Shorts Studio',
     version: runtime.version,
-    buildKey: '1.6.15-preview-cache-diagnostics',
+    buildKey: buildKeyMatch[1],
     algorithm: 'sha256',
     generatedAt: new Date().toISOString(),
     assetCount: Object.keys(assets).length,

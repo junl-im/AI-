@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - model performance, storage diagnostics, and safe rollback controls
+// AI Shorts Studio v1.6.20 - confidence-gated benchmark history and diagnostics export controls
 'use strict';
 
 (function installVisionModelPackPanel(global) {
@@ -28,7 +28,7 @@
 
     function setBusy(next, label) {
         busy = Boolean(next);
-        ['visionPackSelect', 'visionPackBackend', 'visionPackInstallBtn', 'visionPackActivateBtn', 'visionPackVerifyBtn', 'visionPackRemoveBtn', 'visionPackDeactivateBtn', 'visionPackBenchmarkBtn', 'visionPackRollbackBtn', 'visionPackCleanupBtn'].forEach(id => {
+        ['visionPackSelect', 'visionPackBackend', 'visionPackInstallBtn', 'visionPackActivateBtn', 'visionPackVerifyBtn', 'visionPackRemoveBtn', 'visionPackDeactivateBtn', 'visionPackBenchmarkBtn', 'visionPackBenchmarkExportBtn', 'visionPackRollbackBtn', 'visionPackCleanupBtn'].forEach(id => {
             const control = els[id];
             if (control) control.disabled = busy || control.dataset.noPack === 'true';
         });
@@ -49,6 +49,119 @@
 
     function selectedPackId() {
         return String(els.visionPackSelect && els.visionPackSelect.value || '');
+    }
+
+    function formatDateShort(value) {
+        const timestamp = Date.parse(String(value || ''));
+        if (!Number.isFinite(timestamp)) return '';
+        const date = new Date(timestamp);
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    function svgNode(name, attributes) {
+        const node = doc.createElementNS('http://www.w3.org/2000/svg', name);
+        Object.entries(attributes || {}).forEach(([key, value]) => node.setAttribute(key, String(value)));
+        return node;
+    }
+
+    function renderBenchmarkHistory(performance) {
+        const chart = els.visionPackHistoryChart;
+        const detail = els.visionPackHistoryDetail;
+        if (!chart || !detail) return;
+        const series = performance && performance.series || { cpu: [], gpu: [], count: 0, minMedianMs: 0, maxMedianMs: 0, firstAt: '', lastAt: '' };
+        const cpu = Array.from(series.cpu || []);
+        const gpu = Array.from(series.gpu || []);
+        const points = cpu.concat(gpu);
+        chart.textContent = '';
+        if (!points.length) {
+            chart.hidden = true;
+            chart.setAttribute('aria-label', '저장된 장치 성능 측정 이력이 없습니다.');
+            detail.textContent = '같은 장치 환경에서 측정을 반복하면 CPU·GPU 중앙 처리 시간 추세가 표시됩니다.';
+            return;
+        }
+        chart.hidden = false;
+        const width = 280;
+        const height = 84;
+        const padX = 14;
+        const padY = 12;
+        const minValue = Math.max(0, Number(series.minMedianMs) || Math.min(...points.map(item => Number(item.medianMs) || 0)));
+        const maxValue = Math.max(minValue, Number(series.maxMedianMs) || Math.max(...points.map(item => Number(item.medianMs) || 0)));
+        const valueSpan = Math.max(1, maxValue - minValue);
+        const timestamps = points.map(item => Number(item.timestamp) || Date.parse(item.createdAt || '')).filter(Number.isFinite);
+        const minTime = timestamps.length ? Math.min(...timestamps) : 0;
+        const maxTime = timestamps.length ? Math.max(...timestamps) : minTime;
+        const timeSpan = Math.max(1, maxTime - minTime);
+        const mapPoint = item => {
+            const timestamp = Number(item.timestamp) || Date.parse(item.createdAt || '') || minTime;
+            const x = padX + ((timestamp - minTime) / timeSpan) * (width - padX * 2);
+            const y = height - padY - (((Number(item.medianMs) || minValue) - minValue) / valueSpan) * (height - padY * 2);
+            return { x: Number(x.toFixed(2)), y: Number(y.toFixed(2)) };
+        };
+        [0.25, 0.5, 0.75].forEach(ratio => {
+            const y = padY + ratio * (height - padY * 2);
+            chart.appendChild(svgNode('line', { x1: padX, x2: width - padX, y1: y, y2: y, class: 'vision-benchmark-grid' }));
+        });
+        const benchmarkClass = Object.freeze({
+            cpu: Object.freeze({ line: 'vision-benchmark-line vision-benchmark-line-cpu', point: 'vision-benchmark-point vision-benchmark-point-cpu' }),
+            gpu: Object.freeze({ line: 'vision-benchmark-line vision-benchmark-line-gpu', point: 'vision-benchmark-point vision-benchmark-point-gpu' })
+        });
+        [['cpu', cpu], ['gpu', gpu]].forEach(([backend, list]) => {
+            if (!list.length) return;
+            const mapped = list.map(mapPoint);
+            const classes = benchmarkClass[backend] || benchmarkClass.cpu;
+            const line = svgNode('polyline', {
+                points: mapped.map(item => `${item.x},${item.y}`).join(' '),
+                class: classes.line,
+                'data-backend': backend
+            });
+            chart.appendChild(line);
+            mapped.forEach((point, index) => {
+                const source = list[index];
+                const dot = svgNode('circle', {
+                    cx: point.x,
+                    cy: point.y,
+                    r: 2.8,
+                    class: classes.point,
+                    'data-backend': backend
+                });
+                const title = svgNode('title');
+                const confidenceLabel = source.confidence === 'high' ? '신뢰도 높음' : source.confidence === 'medium' ? '신뢰도 보통' : source.confidence === 'low' ? '신뢰도 낮음' : '신뢰도 미기록';
+                title.textContent = `${backend === 'gpu' ? 'GPU' : 'CPU'} ${Number(source.medianMs).toFixed(1)}ms · ${formatDateShort(source.createdAt)} · ${confidenceLabel}`;
+                dot.appendChild(title);
+                chart.appendChild(dot);
+            });
+        });
+        const labels = [];
+        if (cpu.length) labels.push(`CPU ${cpu.length}회`);
+        if (gpu.length) labels.push(`GPU ${gpu.length}회`);
+        const rangeText = series.firstAt && series.lastAt ? ` · ${formatDateShort(series.firstAt)}~${formatDateShort(series.lastAt)}` : '';
+        const latestCpu = cpu[cpu.length - 1];
+        const latestGpu = gpu[gpu.length - 1];
+        const latestText = [latestCpu && `CPU ${Number(latestCpu.medianMs).toFixed(1)}ms`, latestGpu && `GPU ${Number(latestGpu.medianMs).toFixed(1)}ms`].filter(Boolean).join(' · ');
+        detail.textContent = `${labels.join(' · ')}${rangeText}${latestText ? ` · 최근 ${latestText}` : ''}`;
+        chart.setAttribute('aria-label', `모델 성능 측정 이력. ${detail.textContent}`);
+    }
+
+    function renderBenchmarkConfidence(performance) {
+        const confidence = performance && performance.confidence || { level: 'low', score: 0, reasons: ['완료된 측정 없음'], context: {} };
+        const level = confidence.level === 'high' ? 'high' : confidence.level === 'medium' ? 'medium' : 'low';
+        if (els.visionPackConfidence) {
+            const label = level === 'high' ? '측정 신뢰도 높음' : level === 'medium' ? '측정 신뢰도 보통' : '측정 신뢰도 낮음';
+            els.visionPackConfidence.textContent = confidence.score ? `${label} · ${confidence.score}점` : label;
+            els.visionPackConfidence.dataset.confidence = level;
+        }
+        if (els.visionPackConfidenceDetail) {
+            const context = confidence.context || {};
+            const contextBits = [];
+            if (context.visibility === 'hidden') contextBits.push('백그라운드');
+            else if (context.visibility === 'visible') contextBits.push('전경');
+            if (context.focused === false) contextBits.push('포커스 없음');
+            if (context.batterySupported) contextBits.push(`${context.charging ? '충전 중' : '배터리'} ${Math.round((Number(context.batteryLevel) || 0) * 100)}%`);
+            if (context.saveData) contextBits.push('데이터 절약');
+            const reasons = Array.from(confidence.reasons || []).filter(Boolean);
+            const detail = reasons.length ? reasons.join(' · ') : '측정 환경 정보 없음';
+            els.visionPackConfidenceDetail.textContent = `${detail}${contextBits.length ? ` · ${contextBits.join(' · ')}` : ''} · 발열은 변동성으로 간접 추정`;
+        }
     }
 
     function renderStorageDiagnostics() {
@@ -133,7 +246,7 @@
             els.visionPackBackend.disabled = busy || !ready;
             els.visionPackBackend.dataset.noPack = ready ? 'false' : 'true';
         }
-        [els.visionPackActivateBtn, els.visionPackVerifyBtn, els.visionPackRemoveBtn, els.visionPackBenchmarkBtn].forEach(control => {
+        [els.visionPackActivateBtn, els.visionPackVerifyBtn, els.visionPackRemoveBtn, els.visionPackBenchmarkBtn, els.visionPackBenchmarkExportBtn].forEach(control => {
             if (!control) return;
             control.dataset.noPack = ready ? 'false' : 'true';
             control.disabled = busy || !ready;
@@ -155,7 +268,7 @@
         }
         if (els.visionPackRecommendation) {
             const freshness = performance.freshness || { due: !Array.from(performance.latest || []).length };
-            const label = freshness.due && Array.from(performance.latest || []).length ? '재측정 필요' : recommendation.backend === 'gpu' ? 'GPU 권장' : recommendation.backend === 'cpu' ? 'WASM CPU 권장' : '성능 측정 필요';
+            const label = recommendation.backend === 'auto' && Array.from(recommendation.excludedBackends || []).length ? '자동 추천 보류' : freshness.due && Array.from(performance.latest || []).length ? '재측정 필요' : recommendation.backend === 'gpu' ? 'GPU 권장' : recommendation.backend === 'cpu' ? 'WASM CPU 권장' : '성능 측정 필요';
             els.visionPackRecommendation.textContent = label;
             els.visionPackRecommendation.dataset.backend = recommendation.backend || 'auto';
         }
@@ -169,9 +282,12 @@
                 const recommendedTrend = trend[recommendation.backend];
                 const trendText = recommendedTrend && recommendedTrend.samples > 1 ? ` · 직전 대비 ${Math.abs(recommendedTrend.deltaPercent).toFixed(1)}% ${recommendedTrend.direction === 'improved' ? '개선' : recommendedTrend.direction === 'regressed' ? '저하' : '유지'}` : '';
                 const freshnessText = performance.freshness && performance.freshness.due ? ` · 재측정: ${performance.freshness.reason}` : '';
-                els.visionPackBenchmarkDetail.textContent = `${summary} · ${recommendation.reason}${trendText}${freshnessText}`;
+                const exclusionText = Array.from(recommendation.excludedBackends || []).length ? ` · 자동 제외 ${Array.from(recommendation.excludedBackends).map(item => item === 'gpu' ? 'GPU' : 'CPU').join(', ')}` : '';
+                els.visionPackBenchmarkDetail.textContent = `${summary} · ${recommendation.reason}${exclusionText}${trendText}${freshnessText}`;
             } else els.visionPackBenchmarkDetail.textContent = '이 장치에서 CPU·GPU 얼굴 감지 속도를 측정해 실행 방식을 추천합니다.';
         }
+        renderBenchmarkConfidence(performance);
+        renderBenchmarkHistory(performance);
         if (els.visionPackStatus) {
             els.visionPackStatus.textContent = active
                 ? `브라우저 얼굴 추적 사용 중 · ${snapshot.runtime.backend === 'gpu' ? 'GPU' : 'WASM'}`
@@ -262,7 +378,9 @@
             const result = await manager.benchmarkPack(id, { onProgress: updateProgress });
             const recommended = result.recommendation.backend === 'gpu' ? 'GPU' : result.recommendation.backend === 'cpu' ? 'WASM CPU' : '자동';
             if (els.visionPackBackend && result.recommendation.backend !== 'auto') els.visionPackBackend.value = result.recommendation.backend;
-            toast(`성능 측정 완료 · ${recommended} 실행을 권장합니다.`, 'success');
+            const confidence = result.confidence && result.confidence.level || 'low';
+            const confidenceText = confidence === 'high' ? '신뢰도 높음' : confidence === 'medium' ? '신뢰도 보통' : '신뢰도 낮음';
+            toast(`성능 측정 완료 · ${recommended} 실행 권장 · ${confidenceText}`, confidence === 'low' ? 'warning' : 'success');
         } catch (error) {
             toast(error && error.message || '모델 성능을 측정하지 못했습니다.', 'error');
         } finally {
@@ -270,6 +388,14 @@
             render();
             refreshStorageDiagnostics({ silent: true, reason: 'state-change' });
         }
+    }
+
+    function exportBenchmarkDiagnostics() {
+        const id = selectedPackId();
+        if (!id || busy || typeof manager.exportBenchmarkDiagnostics !== 'function') return null;
+        const result = manager.exportBenchmarkDiagnostics(id);
+        toast(result && result.saved ? 'CPU·GPU 성능 진단 JSON을 저장했습니다.' : '내보낼 성능 측정 기록이 없습니다.', result && result.saved ? 'success' : 'warning');
+        return result;
     }
 
     async function rollbackSelected() {
@@ -348,8 +474,8 @@
         [
             'visionModelPackPanel', 'visionPackStatus', 'visionPackDetail', 'visionPackSelect', 'visionPackBackend',
             'visionPackInstallBtn', 'visionPackFolderInput', 'visionPackActivateBtn', 'visionPackDeactivateBtn',
-            'visionPackVerifyBtn', 'visionPackRemoveBtn', 'visionPackBenchmarkBtn', 'visionPackRollbackBtn',
-            'visionPackRecommendation', 'visionPackBenchmarkDetail', 'visionPackProgress',
+            'visionPackVerifyBtn', 'visionPackRemoveBtn', 'visionPackBenchmarkBtn', 'visionPackBenchmarkExportBtn', 'visionPackRollbackBtn',
+            'visionPackRecommendation', 'visionPackBenchmarkDetail', 'visionPackConfidence', 'visionPackConfidenceDetail', 'visionPackHistoryChart', 'visionPackHistoryDetail', 'visionPackProgress',
             'visionPackStorageSummary', 'visionPackStorageDetail', 'visionPackCleanupBtn'
         ].forEach(id => { els[id] = byId(id); });
         if (!els.visionModelPackPanel) return;
@@ -359,6 +485,7 @@
         els.visionPackActivateBtn && els.visionPackActivateBtn.addEventListener('click', activateSelected);
         els.visionPackDeactivateBtn && els.visionPackDeactivateBtn.addEventListener('click', deactivateSelected);
         els.visionPackBenchmarkBtn && els.visionPackBenchmarkBtn.addEventListener('click', benchmarkSelected);
+        els.visionPackBenchmarkExportBtn && els.visionPackBenchmarkExportBtn.addEventListener('click', exportBenchmarkDiagnostics);
         els.visionPackRollbackBtn && els.visionPackRollbackBtn.addEventListener('click', rollbackSelected);
         els.visionPackVerifyBtn && els.visionPackVerifyBtn.addEventListener('click', verifySelected);
         els.visionPackRemoveBtn && els.visionPackRemoveBtn.addEventListener('click', removeSelected);
@@ -366,7 +493,7 @@
         doc.addEventListener('ai-shorts-vision-pack-change', () => { render(); refreshStorageDiagnostics({ silent: true, reason: 'pack-change' }); });
         render();
         refreshStorageDiagnostics({ reason: 'panel-init' });
-        global.AIShortsVisionModelPackPanel = Object.freeze({ render, refreshStorageDiagnostics, cleanupModelCache, installFiles, verifySelected, activateSelected, benchmarkSelected, rollbackSelected, deactivateSelected, removeSelected });
+        global.AIShortsVisionModelPackPanel = Object.freeze({ render, renderBenchmarkHistory, renderBenchmarkConfidence, refreshStorageDiagnostics, cleanupModelCache, installFiles, verifySelected, activateSelected, benchmarkSelected, exportBenchmarkDiagnostics, rollbackSelected, deactivateSelected, removeSelected });
     }
 
     if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init, { once: true });

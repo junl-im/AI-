@@ -104,7 +104,7 @@ function assert(condition, message) {
     assert(afterStore.packs.length === 3 && afterStore.packs.some(pack => pack.id === oldest.id), 'failed installation preserves the existing pack inventory');
     assert(Array.from(stores.keys()).sort().join('|') === beforeKeys.join('|'), 'failed installation removes partially staged cache entries');
     assert(JSON.parse(values.get('ai-shorts-vision-model-pack-active-v1')).packId === active.id, 'failed installation preserves the active model selection');
-    console.log('PASS v1.6.15 transactional vision model-pack installation guardrails');
+    console.log('PASS v1.6.20 transactional vision model-pack installation guardrails');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

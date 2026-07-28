@@ -4,6 +4,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/responsive-workspace.css'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
@@ -20,8 +22,8 @@ const heroStart = html.indexOf('<section class="brand-panel cinematic-brand-pane
 const heroEnd = html.indexOf('</section>\n    </header>', heroStart);
 const hero = html.slice(heroStart, heroEnd);
 
-assert(html.includes('assets/css/responsive-workspace.css?v=1.6.15-preview-cache-diagnostics'), 'responsive workspace stylesheet is linked');
-assert(sw.includes('responsive-workspace.css?v=1.6.15-preview-cache-diagnostics'), 'responsive workspace stylesheet is cached');
+assert(html.includes(`assets/css/responsive-workspace.css?v=${buildKey}`), 'responsive workspace stylesheet is linked');
+assert(sw.includes(`responsive-workspace.css?v=${buildKey}`), 'responsive workspace stylesheet is cached');
 assert(html.includes('class="start-command-panel flow-overview-panel"'), 'mobile flow overview exists below hero');
 assert(!hero.includes('hero-cta-row'), 'hero title panel does not contain quick action buttons');
 assert(!hero.includes('workflow-rail'), 'hero title panel does not contain workflow rail');

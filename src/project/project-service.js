@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - schema-v5 speaker-directed smart-reframe project helpers
+// AI Shorts Studio v1.6.20 - schema-v5 speaker-directed smart-reframe project helpers
 'use strict';
 
 (function exposeProjectService(global) {
@@ -166,7 +166,14 @@
                 source: safeText(item.source, 32) || 'face-activity',
                 segmentCount: Math.max(1, Math.round(finiteNumber(item.segmentCount, 1, 1, 5000))),
                 locked: item.locked === true,
-                mode: item.locked === true || item.mode === 'manual' ? 'manual' : 'auto'
+                mode: item.locked === true || item.mode === 'manual' ? 'manual' : 'auto',
+                priority: item.priority === 'primary' || item.priority === 'secondary' ? item.priority : 'auto',
+                confidenceHistory: (Array.isArray(item.confidenceHistory) ? item.confidenceHistory : []).slice(-12).map((entry, index) => ({
+                    sequence: Math.max(1, Math.round(finiteNumber(entry && entry.sequence, index + 1, 1, 100000))),
+                    confidence: Number(finiteNumber(entry && entry.confidence, 0, 0, 1).toFixed(4)),
+                    subjectId: /^subject-[1-9][0-9]{0,2}$/.test(safeText(entry && entry.subjectId, 24)) ? safeText(entry && entry.subjectId, 24) : 'auto',
+                    source: safeText(entry && entry.source, 32) || 'face-activity'
+                }))
             };
         }).filter(Boolean).sort((a, b) => a.start - b.start || a.end - b.end);
         return { subjectId, keyframes, speakerPriority: input.speakerPriority !== false, speakerCues };

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - localhost-only open-source AI provider gateway with model pinning
+// AI Shorts Studio v1.6.20 - localhost-only open-source AI provider gateway with model pinning
 'use strict';
 
 (function exposeLocalAIProviderRegistry(global) {

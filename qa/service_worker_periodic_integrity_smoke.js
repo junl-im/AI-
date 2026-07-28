@@ -5,6 +5,7 @@ const path = require('path');
 const vm = require('vm');
 const crypto = require('crypto');
 const root = path.resolve(__dirname, '..');
+const pkg = require(path.join(root, 'package.json'));
 const source = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 function keyOf(input) { return typeof input === 'string' ? input : input && input.url || String(input || ''); }
 function diskResponse(input) {
@@ -31,7 +32,7 @@ function harness() {
 (async () => {
     const h = harness();
     await h.dispatch('install');
-    const cacheName = [...h.stores.keys()].find(name => name.includes('v1.6.15'));
+    const cacheName = [...h.stores.keys()].find(name => name.includes(`v${pkg.version}`));
     const store = h.stores.get(cacheName);
     const target = [...store.keys()].find(key => key.includes('assets/css/theme.css'));
     if (!target) throw new Error('expected first rotating sample target is missing');

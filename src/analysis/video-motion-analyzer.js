@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - cancellable spatial motion and subject-saliency analyzer
+// AI Shorts Studio v1.6.20 - cancellable spatial motion and subject-saliency analyzer
 'use strict';
 
 (function exposeVideoMotionAnalyzer(global) {

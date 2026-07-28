@@ -7,6 +7,7 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/studio-experience.css'), 'utf8');
 const controller = fs.readFileSync(path.join(root, 'src/ui/studio-experience-controller.js'), 'utf8');
 const app = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
+const analysis = fs.readFileSync(path.join(root, 'src/app/analysis-controller.js'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 
 const checks = [
@@ -22,7 +23,7 @@ const checks = [
     ['hero start navigates without opening the picker directly', controller.includes("focusImportPanel('hero')") && !controller.includes('fileInput.click()')],
     ['next action resolves cancellation state', controller.includes("key: 'cancel-analysis'")],
     ['app exposes external analysis request', app.includes("'ai-shorts-analysis-request'")],
-    ['app cancels through operation owner', app.includes("operationCoordinator.cancel && operationCoordinator.cancel('analysis'")],
+    ['analysis controller cancels through operation owner', analysis.includes("operationCoordinator.cancel && operationCoordinator.cancel('analysis'")],
     ['experience CSS is available offline and staged JS uses runtime caching', sw.includes('assets/css/studio-experience.css') && sw.includes('async function cacheFirst')]
 ];
 
@@ -30,4 +31,4 @@ for (const [name, ok] of checks) {
     if (!ok) throw new Error(name);
     console.log('PASS ' + name);
 }
-console.log('PASS v1.6.15 workspace-first UI/UX and cancellable analysis guardrails');
+console.log('PASS v1.6.20 workspace-first UI/UX and cancellable analysis guardrails');

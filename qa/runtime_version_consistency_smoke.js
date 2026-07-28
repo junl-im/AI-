@@ -40,7 +40,8 @@ const checks = [
     ['src/ui/export-finish-center.js', 'const config = global.AIShortsRuntimeConfig || {};', "version: config.APP_VERSION || 'dev'"],
     ['src/ui/session-continuity.js', 'const config = global.AIShortsRuntimeConfig || {};', "version: config.APP_VERSION || 'dev'"],
     ['src/ui/flow-director-final.js', 'const BUILD_VERSION', 'document.body.dataset.build = BUILD_VERSION'],
-    ['src/app.js', "version: String(config.APP_VERSION || 'dev').replace(/^v/i, '')", 'version: state.engineMeta.version']
+    ['src/app/analysis-controller.js', "version: String(config.APP_VERSION || 'dev').replace(/^v/i, '')", 'state.engineMeta = result.engine'],
+    ['src/app.js', 'state, config, store, elements: els, audioExtractor', 'analysisControllerFactory.createAnalysisController']
 ];
 for (const [file, tokenA, tokenB] of checks) {
     const source = read(file);

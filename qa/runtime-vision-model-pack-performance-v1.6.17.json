@@ -1,0 +1,715 @@
+{
+  "version": "1.6.17",
+  "generatedAt": "2026-07-27T04:08:19.461805+00:00",
+  "passed": true,
+  "checks": {
+    "gpuAndCpuBenchmarked": true,
+    "gpuRecommended": true,
+    "recommendationRendered": true,
+    "historyChartRendered": true,
+    "automaticRollback": true,
+    "rollbackButtonVisible": true,
+    "manualRollback": true,
+    "undoTargetPreserved": true,
+    "detectorsClosed": true,
+    "noExternalRequests": true,
+    "noPageErrors": true,
+    "noConsoleErrors": true
+  },
+  "result": {
+    "oldPack": {
+      "id": "vision-65f398e04650b733",
+      "label": "이전 모델",
+      "provider": "mediapipe-tasks-vision",
+      "runtimeVersion": "",
+      "installedAt": "2026-07-27T04:08:19.025Z",
+      "verifiedAt": "2026-07-27T04:08:19.025Z",
+      "verification": "verified",
+      "totalBytes": 227,
+      "sizeLabel": "227B",
+      "fileCount": 8,
+      "modelDigest": "6bbefcb6b870bb28"
+    },
+    "newPack": {
+      "id": "vision-5610f5cfd24c0254",
+      "label": "새 모델",
+      "provider": "mediapipe-tasks-vision",
+      "runtimeVersion": "",
+      "installedAt": "2026-07-27T04:08:19.228Z",
+      "verifiedAt": "2026-07-27T04:08:19.228Z",
+      "verification": "verified",
+      "totalBytes": 224,
+      "sizeLabel": "224B",
+      "fileCount": 8,
+      "modelDigest": "1f6e06a0e352ccae"
+    },
+    "bench": {
+      "packId": "vision-65f398e04650b733",
+      "results": [
+        {
+          "id": "bench-809fceae2ba69cb0",
+          "packId": "vision-65f398e04650b733",
+          "backend": "gpu",
+          "createdAt": "2026-07-27T04:08:19.054Z",
+          "iterations": 4,
+          "medianMs": 2,
+          "p95Ms": 2,
+          "fps": 500,
+          "status": "passed",
+          "error": "",
+          "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+          "confidence": "high",
+          "confidenceScore": 90,
+          "confidenceReasons": [
+            "반복 횟수 부족"
+          ],
+          "sampleCv": 0,
+          "spreadRatio": 0,
+          "context": {
+            "visibility": "visible",
+            "focused": true,
+            "saveData": false,
+            "effectiveType": "4g",
+            "batterySupported": false,
+            "batteryLevel": 0,
+            "charging": null,
+            "capturedAt": "2026-07-27T04:08:19.043Z"
+          }
+        },
+        {
+          "id": "bench-034c1657c21b9725",
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "createdAt": "2026-07-27T04:08:19.090Z",
+          "iterations": 4,
+          "medianMs": 7,
+          "p95Ms": 7,
+          "fps": 142.86,
+          "status": "passed",
+          "error": "",
+          "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+          "confidence": "high",
+          "confidenceScore": 90,
+          "confidenceReasons": [
+            "반복 횟수 부족"
+          ],
+          "sampleCv": 0,
+          "spreadRatio": 0,
+          "context": {
+            "visibility": "visible",
+            "focused": true,
+            "saveData": false,
+            "effectiveType": "4g",
+            "batterySupported": false,
+            "batteryLevel": 0,
+            "charging": null,
+            "capturedAt": "2026-07-27T04:08:19.043Z"
+          }
+        }
+      ],
+      "recommendation": {
+        "backend": "gpu",
+        "reason": "GPU 중앙 처리 시간이 71% 짧음",
+        "confidence": "high"
+      },
+      "confidence": {
+        "level": "high",
+        "score": 90,
+        "reasons": [
+          "반복 횟수 부족"
+        ],
+        "context": {
+          "visibility": "visible",
+          "focused": true,
+          "saveData": false,
+          "effectiveType": "4g",
+          "batterySupported": false,
+          "batteryLevel": 0,
+          "charging": null,
+          "capturedAt": "2026-07-27T04:08:19.043Z"
+        },
+        "backend": "gpu",
+        "sampleCv": 0,
+        "spreadRatio": 0
+      }
+    },
+    "bench2": {
+      "packId": "vision-65f398e04650b733",
+      "results": [
+        {
+          "id": "bench-b76f6a8f9ceb01ea",
+          "packId": "vision-65f398e04650b733",
+          "backend": "gpu",
+          "createdAt": "2026-07-27T04:08:19.118Z",
+          "iterations": 4,
+          "medianMs": 2,
+          "p95Ms": 2,
+          "fps": 500,
+          "status": "passed",
+          "error": "",
+          "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+          "confidence": "high",
+          "confidenceScore": 90,
+          "confidenceReasons": [
+            "반복 횟수 부족"
+          ],
+          "sampleCv": 0,
+          "spreadRatio": 0,
+          "context": {
+            "visibility": "visible",
+            "focused": true,
+            "saveData": false,
+            "effectiveType": "4g",
+            "batterySupported": false,
+            "batteryLevel": 0,
+            "charging": null,
+            "capturedAt": "2026-07-27T04:08:19.108Z"
+          }
+        },
+        {
+          "id": "bench-e4afaa412526fa50",
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "createdAt": "2026-07-27T04:08:19.154Z",
+          "iterations": 4,
+          "medianMs": 7,
+          "p95Ms": 7,
+          "fps": 142.86,
+          "status": "passed",
+          "error": "",
+          "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+          "confidence": "high",
+          "confidenceScore": 90,
+          "confidenceReasons": [
+            "반복 횟수 부족"
+          ],
+          "sampleCv": 0,
+          "spreadRatio": 0,
+          "context": {
+            "visibility": "visible",
+            "focused": true,
+            "saveData": false,
+            "effectiveType": "4g",
+            "batterySupported": false,
+            "batteryLevel": 0,
+            "charging": null,
+            "capturedAt": "2026-07-27T04:08:19.108Z"
+          }
+        }
+      ],
+      "recommendation": {
+        "backend": "gpu",
+        "reason": "GPU 중앙 처리 시간이 71% 짧음",
+        "confidence": "high"
+      },
+      "confidence": {
+        "level": "high",
+        "score": 90,
+        "reasons": [
+          "반복 횟수 부족"
+        ],
+        "context": {
+          "visibility": "visible",
+          "focused": true,
+          "saveData": false,
+          "effectiveType": "4g",
+          "batterySupported": false,
+          "batteryLevel": 0,
+          "charging": null,
+          "capturedAt": "2026-07-27T04:08:19.108Z"
+        },
+        "backend": "gpu",
+        "sampleCv": 0,
+        "spreadRatio": 0
+      }
+    },
+    "uiAfterBench": {
+      "recommendation": "GPU 권장",
+      "backend": "gpu",
+      "detail": "CPU 7.0ms · 142.9fps / GPU 2.0ms · 500.0fps · GPU 중앙 처리 시간이 71% 짧음 · 직전 대비 0.0% 유지",
+      "historyDetail": "CPU 2회 · GPU 2회 · 7/27~7/27 · 최근 CPU 7.0ms · GPU 2.0ms",
+      "historyHidden": false,
+      "cpuLines": 3,
+      "gpuLines": 3
+    },
+    "afterAuto": {
+      "recovered": {
+        "active": true,
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "lastError": "",
+        "lastRecovery": null,
+        "recovered": true,
+        "rollback": {
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "recoveredAt": "2026-07-27T04:08:19.249Z",
+          "reason": "model-switch"
+        },
+        "activationError": "synthetic delegate startup failure"
+      },
+      "active": {
+        "active": true,
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "lastError": "새 모델 시작 실패 · 이전 모델로 자동 복구됨: synthetic delegate startup failure",
+        "lastRecovery": {
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "recoveredAt": "2026-07-27T04:08:19.249Z",
+          "reason": "model-switch"
+        }
+      },
+      "rollback": {
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "createdAt": "2026-07-27T04:08:19.230Z",
+        "reason": "model-switch"
+      },
+      "buttonHidden": false
+    },
+    "manual": {
+      "active": true,
+      "packId": "vision-65f398e04650b733",
+      "backend": "cpu",
+      "lastError": "",
+      "lastRecovery": null,
+      "recovered": true,
+      "rollback": {
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "recoveredAt": "2026-07-27T04:08:19.325Z",
+        "reason": "model-switch"
+      }
+    },
+    "final": {
+      "packs": [
+        {
+          "id": "vision-5610f5cfd24c0254",
+          "label": "새 모델",
+          "provider": "mediapipe-tasks-vision",
+          "runtimeVersion": "",
+          "installedAt": "2026-07-27T04:08:19.228Z",
+          "verifiedAt": "2026-07-27T04:08:19.309Z",
+          "verification": "verified",
+          "totalBytes": 224,
+          "sizeLabel": "224B",
+          "fileCount": 8,
+          "modelDigest": "1f6e06a0e352ccae"
+        },
+        {
+          "id": "vision-65f398e04650b733",
+          "label": "이전 모델",
+          "provider": "mediapipe-tasks-vision",
+          "runtimeVersion": "",
+          "installedAt": "2026-07-27T04:08:19.025Z",
+          "verifiedAt": "2026-07-27T04:08:19.321Z",
+          "verification": "verified",
+          "totalBytes": 227,
+          "sizeLabel": "227B",
+          "fileCount": 8,
+          "modelDigest": "6bbefcb6b870bb28"
+        }
+      ],
+      "selected": {
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu"
+      },
+      "runtime": {
+        "active": true,
+        "packId": "vision-65f398e04650b733",
+        "backend": "cpu",
+        "lastError": "",
+        "lastRecovery": {
+          "packId": "vision-65f398e04650b733",
+          "backend": "cpu",
+          "recoveredAt": "2026-07-27T04:08:19.325Z",
+          "reason": "model-switch"
+        }
+      },
+      "capabilities": {
+        "cacheStorage": true,
+        "sha256": true,
+        "webAssembly": true,
+        "serviceWorkerControlled": true,
+        "gpuDelegate": false,
+        "webGPU": false,
+        "storageEstimate": false,
+        "maxPackBytes": 67108864,
+        "maxPacks": 3
+      },
+      "rollback": {
+        "packId": "vision-5610f5cfd24c0254",
+        "backend": "gpu",
+        "createdAt": "2026-07-27T04:08:19.326Z",
+        "reason": "rollback-undo"
+      },
+      "performance": {
+        "vision-5610f5cfd24c0254": {
+          "history": [],
+          "historyCount": 0,
+          "latest": [],
+          "recommendation": {
+            "backend": "auto",
+            "reason": "완료된 성능 측정이 없음",
+            "confidence": "low"
+          },
+          "confidence": {
+            "level": "low",
+            "score": 0,
+            "reasons": [
+              "완료된 측정 없음"
+            ],
+            "context": {
+              "visibility": "visible",
+              "focused": null,
+              "saveData": false,
+              "effectiveType": "",
+              "batterySupported": false,
+              "batteryLevel": 0,
+              "charging": null,
+              "capturedAt": ""
+            }
+          },
+          "freshness": {
+            "due": true,
+            "reason": "CPU 측정 기록 없음",
+            "code": "missing",
+            "latestAt": "",
+            "nextDueAt": "",
+            "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+          },
+          "trend": {
+            "gpu": {
+              "samples": 0,
+              "latestMedianMs": 0,
+              "previousMedianMs": 0,
+              "deltaPercent": 0,
+              "direction": "unknown"
+            },
+            "cpu": {
+              "samples": 0,
+              "latestMedianMs": 0,
+              "previousMedianMs": 0,
+              "deltaPercent": 0,
+              "direction": "unknown"
+            }
+          },
+          "series": {
+            "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+            "limit": 10,
+            "count": 0,
+            "firstAt": "",
+            "lastAt": "",
+            "minMedianMs": 0,
+            "maxMedianMs": 0,
+            "gpu": [],
+            "cpu": []
+          }
+        },
+        "vision-65f398e04650b733": {
+          "history": [
+            {
+              "id": "bench-e4afaa412526fa50",
+              "packId": "vision-65f398e04650b733",
+              "backend": "cpu",
+              "createdAt": "2026-07-27T04:08:19.154Z",
+              "iterations": 4,
+              "medianMs": 7,
+              "p95Ms": 7,
+              "fps": 142.86,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+              "confidence": "high",
+              "confidenceScore": 90,
+              "confidenceReasons": [
+                "반복 횟수 부족"
+              ],
+              "sampleCv": 0,
+              "spreadRatio": 0,
+              "context": {
+                "visibility": "visible",
+                "focused": true,
+                "saveData": false,
+                "effectiveType": "4g",
+                "batterySupported": false,
+                "batteryLevel": 0,
+                "charging": null,
+                "capturedAt": "2026-07-27T04:08:19.108Z"
+              }
+            },
+            {
+              "id": "bench-b76f6a8f9ceb01ea",
+              "packId": "vision-65f398e04650b733",
+              "backend": "gpu",
+              "createdAt": "2026-07-27T04:08:19.118Z",
+              "iterations": 4,
+              "medianMs": 2,
+              "p95Ms": 2,
+              "fps": 500,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+              "confidence": "high",
+              "confidenceScore": 90,
+              "confidenceReasons": [
+                "반복 횟수 부족"
+              ],
+              "sampleCv": 0,
+              "spreadRatio": 0,
+              "context": {
+                "visibility": "visible",
+                "focused": true,
+                "saveData": false,
+                "effectiveType": "4g",
+                "batterySupported": false,
+                "batteryLevel": 0,
+                "charging": null,
+                "capturedAt": "2026-07-27T04:08:19.108Z"
+              }
+            },
+            {
+              "id": "bench-034c1657c21b9725",
+              "packId": "vision-65f398e04650b733",
+              "backend": "cpu",
+              "createdAt": "2026-07-27T04:08:19.090Z",
+              "iterations": 4,
+              "medianMs": 7,
+              "p95Ms": 7,
+              "fps": 142.86,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+              "confidence": "high",
+              "confidenceScore": 90,
+              "confidenceReasons": [
+                "반복 횟수 부족"
+              ],
+              "sampleCv": 0,
+              "spreadRatio": 0,
+              "context": {
+                "visibility": "visible",
+                "focused": true,
+                "saveData": false,
+                "effectiveType": "4g",
+                "batterySupported": false,
+                "batteryLevel": 0,
+                "charging": null,
+                "capturedAt": "2026-07-27T04:08:19.043Z"
+              }
+            },
+            {
+              "id": "bench-809fceae2ba69cb0",
+              "packId": "vision-65f398e04650b733",
+              "backend": "gpu",
+              "createdAt": "2026-07-27T04:08:19.054Z",
+              "iterations": 4,
+              "medianMs": 2,
+              "p95Ms": 2,
+              "fps": 500,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+              "confidence": "high",
+              "confidenceScore": 90,
+              "confidenceReasons": [
+                "반복 횟수 부족"
+              ],
+              "sampleCv": 0,
+              "spreadRatio": 0,
+              "context": {
+                "visibility": "visible",
+                "focused": true,
+                "saveData": false,
+                "effectiveType": "4g",
+                "batterySupported": false,
+                "batteryLevel": 0,
+                "charging": null,
+                "capturedAt": "2026-07-27T04:08:19.043Z"
+              }
+            }
+          ],
+          "historyCount": 4,
+          "latest": [
+            {
+              "id": "bench-e4afaa412526fa50",
+              "packId": "vision-65f398e04650b733",
+              "backend": "cpu",
+              "createdAt": "2026-07-27T04:08:19.154Z",
+              "iterations": 4,
+              "medianMs": 7,
+              "p95Ms": 7,
+              "fps": 142.86,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+              "confidence": "high",
+              "confidenceScore": 90,
+              "confidenceReasons": [
+                "반복 횟수 부족"
+              ],
+              "sampleCv": 0,
+              "spreadRatio": 0,
+              "context": {
+                "visibility": "visible",
+                "focused": true,
+                "saveData": false,
+                "effectiveType": "4g",
+                "batterySupported": false,
+                "batteryLevel": 0,
+                "charging": null,
+                "capturedAt": "2026-07-27T04:08:19.108Z"
+              }
+            },
+            {
+              "id": "bench-b76f6a8f9ceb01ea",
+              "packId": "vision-65f398e04650b733",
+              "backend": "gpu",
+              "createdAt": "2026-07-27T04:08:19.118Z",
+              "iterations": 4,
+              "medianMs": 2,
+              "p95Ms": 2,
+              "fps": 500,
+              "status": "passed",
+              "error": "",
+              "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+              "confidence": "high",
+              "confidenceScore": 90,
+              "confidenceReasons": [
+                "반복 횟수 부족"
+              ],
+              "sampleCv": 0,
+              "spreadRatio": 0,
+              "context": {
+                "visibility": "visible",
+                "focused": true,
+                "saveData": false,
+                "effectiveType": "4g",
+                "batterySupported": false,
+                "batteryLevel": 0,
+                "charging": null,
+                "capturedAt": "2026-07-27T04:08:19.108Z"
+              }
+            }
+          ],
+          "recommendation": {
+            "backend": "gpu",
+            "reason": "GPU 중앙 처리 시간이 71% 짧음",
+            "confidence": "high"
+          },
+          "confidence": {
+            "level": "high",
+            "score": 90,
+            "reasons": [
+              "반복 횟수 부족"
+            ],
+            "context": {
+              "visibility": "visible",
+              "focused": true,
+              "saveData": false,
+              "effectiveType": "4g",
+              "batterySupported": false,
+              "batteryLevel": 0,
+              "charging": null,
+              "capturedAt": "2026-07-27T04:08:19.108Z"
+            },
+            "backend": "gpu",
+            "sampleCv": 0,
+            "spreadRatio": 0
+          },
+          "freshness": {
+            "due": false,
+            "reason": "최근 장치 성능 측정 유효",
+            "code": "fresh",
+            "latestAt": "2026-07-27T04:08:19.154Z",
+            "nextDueAt": "2026-08-10T04:08:19.154Z",
+            "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard"
+          },
+          "trend": {
+            "gpu": {
+              "samples": 2,
+              "latestMedianMs": 2,
+              "previousMedianMs": 2,
+              "deltaPercent": 0,
+              "direction": "stable"
+            },
+            "cpu": {
+              "samples": 2,
+              "latestMedianMs": 7,
+              "previousMedianMs": 7,
+              "deltaPercent": 0,
+              "direction": "stable"
+            }
+          },
+          "series": {
+            "environmentKey": "Linux x86_64|5|unknown|no-webgl2|standard",
+            "limit": 10,
+            "count": 4,
+            "firstAt": "2026-07-27T04:08:19.054Z",
+            "lastAt": "2026-07-27T04:08:19.154Z",
+            "minMedianMs": 2,
+            "maxMedianMs": 7,
+            "gpu": [
+              {
+                "id": "bench-809fceae2ba69cb0",
+                "backend": "gpu",
+                "createdAt": "2026-07-27T04:08:19.054Z",
+                "timestamp": 1785125299054,
+                "medianMs": 2,
+                "p95Ms": 2,
+                "fps": 500,
+                "iterations": 4
+              },
+              {
+                "id": "bench-b76f6a8f9ceb01ea",
+                "backend": "gpu",
+                "createdAt": "2026-07-27T04:08:19.118Z",
+                "timestamp": 1785125299118,
+                "medianMs": 2,
+                "p95Ms": 2,
+                "fps": 500,
+                "iterations": 4
+              }
+            ],
+            "cpu": [
+              {
+                "id": "bench-034c1657c21b9725",
+                "backend": "cpu",
+                "createdAt": "2026-07-27T04:08:19.090Z",
+                "timestamp": 1785125299090,
+                "medianMs": 7,
+                "p95Ms": 7,
+                "fps": 142.86,
+                "iterations": 4
+              },
+              {
+                "id": "bench-e4afaa412526fa50",
+                "backend": "cpu",
+                "createdAt": "2026-07-27T04:08:19.154Z",
+                "timestamp": 1785125299154,
+                "medianMs": 7,
+                "p95Ms": 7,
+                "fps": 142.86,
+                "iterations": 4
+              }
+            ]
+          }
+        }
+      },
+      "policy": {
+        "localFilesOnly": true,
+        "remoteDownload": false,
+        "integrity": "sha256",
+        "cacheName": "ai-shorts-vision-model-packs-v1",
+        "maxFiles": 16,
+        "storageReserveBytes": 8388608,
+        "benchmarkMaxAgeMs": 1209600000
+      }
+    },
+    "closed": 7
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "externalRequests": []
+}

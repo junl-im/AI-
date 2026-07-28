@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - closed-loop storage recovery navigation and cleanup impact preview
+// AI Shorts Studio v1.6.20 - closed-loop storage recovery navigation and cleanup impact preview
 'use strict';
 (function bootStorageHealthPanel(global) {
     if (global.AIShortsStorageHealthPanel) return;

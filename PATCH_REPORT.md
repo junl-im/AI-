@@ -1,58 +1,21 @@
-# v1.6.15 Patch Report
+# Patch Report v1.6.24
 
-기준 릴리스: `v1.6.14`
-
-## 문제 1: 미리보기 수명주기 소유권 집중
-
-`src/app.js`가 정지 화면 RAF, 재생 RAF, 완료 감시 interval, 작업 토큰을 직접 소유해 가져오기·분석·편집 로직과 정리 책임이 섞여 있었습니다. 기능 변경 시 타이머 또는 RAF 정리를 빠뜨릴 위험이 있었습니다.
-
-### 해결
-
-- `src/app/preview-controller.js`로 preview 자원 소유권 분리
-- 정지 화면 RAF 중복 예약 방지
-- 재생 시작 전 이전 playback 정리
-- 재생 거절·stale operation·수동 정지·페이지 종료 공통 teardown
-- `src/app.js`의 기존 함수 이름은 호환 브리지로 유지
-
-## 문제 2: 고아 모델 캐시 가시성 부족
-
-v1.6.14는 quota 부족 시 고아 파일을 자동 정리했지만, 사용자가 현재 저장소 사용량과 정리 가능한 고아 캐시를 사전에 확인하거나 직접 정리할 수 없었습니다.
-
-### 해결
-
-- 삭제하지 않는 `inspectOrphanedCache()` 추가
-- origin estimate, 설치 팩 합산 용량, 고아 캐시 상태를 결합한 `storageDiagnostics()` 추가
-- 비전 모델 패널에 사용량·quota·여유 공간·고아 개수·추정 용량 표시
-- 사용자 명시 버튼으로만 수동 고아 캐시 정리
-- 정리 후 저장소 진단 자동 갱신과 회수 추정량 안내
-
-## 문제 3: 시작 성능 예산과 무결성 해시 회귀
-
-Preview Controller를 직접 스크립트로 추가한 직후 시작 스크립트가 49개에서 50개로 증가했고, 최종 변경 전 생성된 무결성 매니페스트가 최신 파일 해시와 달라졌습니다.
-
-### 해결
-
-- feedback UX를 staged loader의 shell 단계로 이동해 직접 시작 스크립트를 49개로 복구
-- 최종 코드 기준 `asset-integrity.json`과 서비스워커 manifest hash 재생성
-- 캐시 변조 탐지, 수동 복구, 복구 실패 시 이전 known-good 캐시 보존 회귀 통과
-
-## 회귀 보존
-
-- 설치 전 quota 사전 점검과 고아 자동 회수
-- 신규 파일 완전 저장 후 메타데이터 커밋
-- 실패 시 기존 팩·활성 선택 보존
-- 동일 모델 backend 실패 시 마지막 정상 backend 복구
-- 이전 모델 롤백 대상 유지
-- 반복 export Object URL 정리
-- 서비스워커 앱 셸과 모델 팩 캐시 소유권 분리
+## 변경
+- 겹치는 두 화자의 얼굴을 상·하 2분할로 동시에 유지하는 `speaker-dual-face` 구성 추가
+- 주 화자·보조 화자 역할과 자동 우선순위 정렬 추가
+- 같은 시간 범위의 보조 화자 cue 직접 추가 기능
+- 동일 화자 라벨의 얼굴 연결·고정·역할 일괄 교정
+- cue별 연결 신뢰도 이력 최대 12건 보존 및 최근 이력 UI 표시
+- 프로젝트 import/export allowlist에 `priority`, `confidenceHistory` 추가
+- 수동 keyframe과 전역 주 피사체 고정은 dual 화자 화면보다 계속 우선
 
 ## 검증
-
-- 전체 QA **259/259 통과**
-- Chromium 4개 화면 오류·가로 overflow 0
-- 실미디어 5회 heap 4.927→5.475MiB, dispose 후 Object URL 0
-- 현재 버전 20초 스마트 리프레임과 30분 1080p 스마트 crop 통과
-
-## 개인정보·보안
-
-저장소 진단은 origin 사용량과 모델 팩 메타데이터·전용 캐시 URL만 확인합니다. 영상·얼굴 데이터·프로젝트 본문은 읽거나 외부로 전송하지 않습니다.
+- 신규 overlap composition·dual renderer·bulk history 회귀 통과
+- 실제 Chromium 20초 영상에서 dual face, 역할 순서, 연결 이력 통과
+- 실제 30분 1080p 스마트 리프레임 집중 감사 통과
+- 현재 버전 5회 실미디어 heap/Object URL 감사 통과
+- Chromium browser/renderer/GPU 프로세스 메모리 감사 통과
+- 서비스워커 135개 자산 무결성 검사 통과
+- 전체 등록 회귀 **281/281 통과, 실패 0건**
+- v1.6.23 대비 변경·추가 **88개**, 삭제 0개
+- 최종 배포 프로젝트 **1035개 파일**

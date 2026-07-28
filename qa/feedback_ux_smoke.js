@@ -4,6 +4,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const config = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (config.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/feedback-ux.css'), 'utf8');
 const js = fs.readFileSync(path.join(root, 'src/ui/feedback-ux.js'), 'utf8');
@@ -12,7 +14,7 @@ const loader = fs.readFileSync(path.join(root, 'src/boot/staged-ui-loader.js'), 
 
 const requiredHtml = [
     'class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>',
-    'feedback-ux.css?v=1.6.15-preview-cache-diagnostics'
+    `feedback-ux.css?v=${buildKey}`
 ];
 const missingHtml = requiredHtml.filter(token => !html.includes(token));
 if (missingHtml.length) {

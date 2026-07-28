@@ -4,6 +4,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const config = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (config.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 function read(file) { return fs.readFileSync(path.join(root, file), 'utf8'); }
 function assertIncludes(file, token) {
     const text = read(file);
@@ -31,16 +33,16 @@ function assertIncludes(file, token) {
     }
 });
 
-assertIncludes('index.html', 'src/engine/module-registry.js?v=1.6.15-preview-cache-diagnostics');
-assertIncludes('index.html', 'src/engine/engine-kernel.js?v=1.6.15-preview-cache-diagnostics');
+assertIncludes('index.html', `src/engine/module-registry.js?v=${buildKey}`);
+assertIncludes('index.html', `src/engine/engine-kernel.js?v=${buildKey}`);
 assertIncludes('index.html', 'engineStatusText');
 assertIncludes('src/app.js', 'global.AIShortsEngineKernel');
-assertIncludes('src/app.js', 'engineKernel.analyzeMedia');
+assertIncludes('src/app/analysis-controller.js', 'engineKernel.analyzeMedia');
 assertIncludes('src/app.js', 'engineKernel.createRecommendations');
 assertIncludes('src/state/app-state.js', 'engineMeta');
 assertIncludes('src/state/app-state.js', 'engineOptions');
 assertIncludes('src/ui/waveform-view.js', 'engineBadges');
-assertIncludes('sw.js', 'src/engine/scoring-pipeline.js?v=1.6.15-preview-cache-diagnostics');
+assertIncludes('sw.js', `src/engine/scoring-pipeline.js?v=${buildKey}`);
 assertIncludes('README.md', '모듈형 엔진');
 
 const kernel = read('src/engine/engine-kernel.js');

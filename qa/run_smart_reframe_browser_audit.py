@@ -171,6 +171,39 @@ async def run_audit(media: Path) -> dict:
             const cue = AIShortsAppState.state.smartReframe?.speakerCues?.[0];
             return { locked: cue?.locked === true, mode: cue?.mode || '', source: cue?.source || '', persistedLocked: AIShortsAppState.state.smartReframeEdits?.speakerCues?.[0]?.locked === true };
         }""")
+        overlap_target = await page.evaluate("""() => {
+            const cues = AIShortsAppState.state.smartReframe?.speakerCues || [];
+            const subjects = AIShortsAppState.state.smartReframe?.subjects || [];
+            const first = cues[0];
+            const primary = subjects.find(subject => subject.id === first?.subjectId) || subjects[0];
+            const alternate = subjects.find(subject => subject.id !== primary?.id) || subjects[1] || subjects[0];
+            return { primary: primary?.id || '', secondary: alternate?.id || '' };
+        }""")
+        await page.select_option('#speakerFaceSubjectSelect', overlap_target['primary'])
+        await page.select_option('#speakerCuePrioritySelect', 'primary')
+        await page.check('#speakerFaceLockToggle')
+        await page.click('#speakerFaceApplyBtn')
+        await page.click('#speakerCueOverlapBtn')
+        await page.wait_for_function("() => (AIShortsAppState.state.smartReframe?.speakerCues?.length || 0) === 3", timeout=10000)
+        await page.select_option('#speakerFaceSubjectSelect', overlap_target['secondary'])
+        await page.select_option('#speakerCuePrioritySelect', 'secondary')
+        await page.check('#speakerFaceLockToggle')
+        await page.click('#speakerFaceApplyBtn')
+        await page.wait_for_function("(id) => AIShortsSmartReframe.getFocusAt(AIShortsAppState.state.smartReframe, .7)?.source === 'speaker-dual-face' && AIShortsAppState.state.smartReframe?.speakerCues?.some(cue => cue.subjectId === id && cue.priority === 'secondary')", arg=overlap_target['secondary'], timeout=10000)
+        overlap = await page.evaluate("""() => {
+            const track = AIShortsAppState.state.smartReframe;
+            const focus = AIShortsSmartReframe.getFocusAt(track, .7);
+            const chips = [...document.querySelectorAll('#speakerFaceConfidenceHistory span')].map(node => node.textContent?.trim() || '');
+            return {
+                cueCount: track?.speakerCues?.length || 0,
+                source: focus?.source || '',
+                subjects: (focus?.dualSubjects || []).map(item => item.subjectId),
+                priorities: (focus?.dualSubjects || []).map(item => item.speakerPriority),
+                historyCount: chips.length,
+                overlapButtonVisible: Boolean(document.querySelector('#speakerCueOverlapBtn')),
+                status: document.querySelector('#smartReframeSpeakerStatus')?.textContent?.trim() || ''
+            };
+        }""")
         await browser.close()
 
     checks = {
@@ -190,6 +223,9 @@ async def run_audit(media: Path) -> dict:
         'speakerCueLockSurvivesRelink': tuning_locked['locked'] is True and tuning_locked['mode'] == 'manual' and tuning_locked['source'] == 'manual-override' and tuning_locked['panelState'] == 'manual',
         'speakerCueConfidenceVisible': tuning_locked['confidence'].endswith('%'),
         'speakerCueReturnsToAuto': tuning_auto['locked'] is False and tuning_auto['mode'] == 'auto' and tuning_auto['source'] != 'manual-override' and tuning_auto['persistedLocked'] is False,
+        'overlappingSpeakersUseDualFaceLayout': overlap['cueCount'] == 3 and overlap['source'] == 'speaker-dual-face' and len(set(overlap['subjects'])) == 2 and overlap['priorities'][0] == 'primary' and overlap['priorities'][1] == 'secondary',
+        'speakerConfidenceHistoryVisible': overlap['historyCount'] >= 2 and overlap['overlapButtonVisible'] is True,
+        'overlapStatusVisible': '동시 발화' in overlap['status'],
         'progressCompletes': '스마트 리프레임 준비 완료' in edited['progress'],
         'operationReleased': edited['operationActive'] is False,
         'noPageErrors': not errors,
@@ -198,12 +234,12 @@ async def run_audit(media: Path) -> dict:
     return {
         'version': VERSION,
         'generatedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
-        'harness': 'real 20-second MP4 import, motion fallback, explicit two-face detector, manual subject pin, crop-keyframe create/delete, local transcript speaker-face switching, per-segment manual lock/auto restore, and operation cleanup',
+        'harness': 'real 20-second MP4 import, motion fallback, explicit two-face detector, manual subject pin, crop-keyframe create/delete, local transcript speaker-face switching, overlap dual-face composition, confidence history, per-segment manual lock/auto restore, and operation cleanup',
         'motion': motion,
         'edited': edited,
         'deleted': deleted,
         'speaker': speaker,
-        'speakerTuning': { 'target': tuning_target, 'locked': tuning_locked, 'auto': tuning_auto },
+        'speakerTuning': { 'target': tuning_target, 'locked': tuning_locked, 'auto': tuning_auto, 'overlapTarget': overlap_target, 'overlap': overlap },
         'checks': checks,
         'passed': all(checks.values()),
         'pageErrors': errors,

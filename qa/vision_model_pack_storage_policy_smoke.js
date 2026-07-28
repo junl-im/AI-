@@ -144,7 +144,7 @@ function assert(condition, message) {
     }
     assert(blocked, 'insufficient quota without reclaimable orphans blocks installation with a specific error');
     assert(putCount === putsBeforeFailure, 'quota rejection occurs before any new cache write');
-    console.log('PASS v1.6.15 vision model-pack storage preflight and orphan reclamation guardrails');
+    console.log('PASS v1.6.20 vision model-pack storage preflight and orphan reclamation guardrails');
 })().catch(error => {
     console.error(error && error.stack || error);
     process.exit(1);

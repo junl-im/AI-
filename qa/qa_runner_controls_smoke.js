@@ -23,4 +23,4 @@ assert(noMatch.status === 2, 'empty QA filters fail clearly instead of reporting
 const source = fs.readFileSync(runner, 'utf8');
 assert(source.includes("result.error.code === 'ETIMEDOUT'") && source.includes('--timeout-ms'), 'each QA command has an explicit timeout guard');
 assert(source.includes('--report') && source.includes('JSON.stringify(payload, null, 2)'), 'QA runs can emit a machine-readable handoff report');
-console.log('PASS v1.6.15 bounded, shardable, reportable QA execution controls');
+console.log('PASS v1.6.20 bounded, shardable, reportable QA execution controls');

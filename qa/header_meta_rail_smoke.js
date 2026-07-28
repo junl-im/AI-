@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 function assert(condition, message) {
   if (!condition) { console.error('FAIL', message); process.exit(1); }
@@ -13,13 +15,13 @@ const html = read('index.html');
 const css = read('assets/css/header-meta-rail.css');
 const bridge = read('src/ui/flow-command-bridge.js');
 const sw = read('sw.js');
-assert(pkg.version === '1.6.15', 'header metadata release version is v1.6.15');
+assert(pkg.version === '1.6.24', 'header metadata release version matches package version');
 assert(!html.includes('LOCAL · PRIVATE · 9:16') && !html.includes('brand-compat-pill'), 'center metadata slogan and markup are absent');
-assert(html.includes('>v1.6.15</button>') && html.includes('모바일 · PC 호환'), 'build version and compatibility share the left rail');
+assert(html.includes(`>v${pkg.version}</button>`) && html.includes('모바일 · PC 호환'), 'build version and compatibility share the left rail');
 assert(html.includes('class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>'), 'designer credit remains on the right rail');
 assert(css.includes('grid-template-columns: minmax(0, 1fr) auto'), 'header uses a two-column metadata rail');
 assert(css.includes('@media (max-width: 720px)') && css.includes('.badge-version::before') && css.includes('display: block !important'), 'mobile explicitly preserves BUILD');
 assert(css.includes('.brand-signature-pill .signature-label') && css.includes('display: inline !important'), 'mobile explicitly preserves DESIGNED BY');
 assert(!bridge.includes('LOCAL · PRIVATE · 9:16') && !bridge.includes('brand-compat-pill'), 'runtime bridge does not recreate removed metadata');
-assert(html.includes('header-meta-rail.css?v=1.6.15-preview-cache-diagnostics') && sw.includes('header-meta-rail.css?v=1.6.15-preview-cache-diagnostics'), 'metadata rail stylesheet is loaded and cached');
-console.log('PASS v1.6.15 header metadata rail guardrails present');
+assert(html.includes(`header-meta-rail.css?v=${buildKey}`) && sw.includes(`header-meta-rail.css?v=${buildKey}`), 'metadata rail stylesheet is loaded and cached');
+console.log('PASS v1.6.24 header metadata rail guardrails present');

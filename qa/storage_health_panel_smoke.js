@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 function read(file) { return fs.readFileSync(path.join(root, file), 'utf8'); }
 function ok(value, message) { if (!value) throw new Error(message); console.log(`PASS ${message}`); }
 const html = read('index.html');
@@ -11,10 +13,10 @@ const loader = read('src/boot/staged-ui-loader.js');
 const panel = read('src/ui/storage-health-panel.js');
 const runtime = read('src/boot/runtime-health.js');
 const diagnostics = read('src/download/download-service.js');
-ok(html.includes('assets/css/storage-health-panel.css?v=1.6.15-preview-cache-diagnostics'), 'storage health stylesheet is linked');
-ok(html.includes('src/storage/storage-manager.js?v=1.6.15-preview-cache-diagnostics'), 'quota-aware storage manager is on the core path');
+ok(html.includes(`assets/css/storage-health-panel.css?v=${buildKey}`), 'storage health stylesheet is linked');
+ok(html.includes(`src/storage/storage-manager.js?v=${buildKey}`), 'quota-aware storage manager is on the core path');
 ok(loader.includes("versioned('src/ui/storage-health-panel.js', 'shell')"), 'storage health UI is loaded with the shell phase');
-ok(sw.includes('storage-health-panel.css?v=1.6.15-preview-cache-diagnostics') && sw.includes('storage-manager.js?v=1.6.15-preview-cache-diagnostics'), 'storage diagnostics assets are available offline');
+ok(sw.includes(`storage-health-panel.css?v=${buildKey}`) && sw.includes(`storage-manager.js?v=${buildKey}`), 'storage diagnostics assets are available offline');
 ok(panel.includes('storageHealthCleanupBtn') && panel.includes('serviceWorker.getStatus') && panel.includes('AIShortsSessionContinuity'), 'panel exposes cleanup, service worker, and session recovery status');
 ok(panel.includes('mountAtPageEnd') && panel.includes('navigateToHealthPanel') && panel.includes('returnToWorkspaceTop'), 'storage status is footer-mounted with closed-loop issue and recovery navigation');
 ok(panel.includes('analysisCacheNamespaceSelect') && panel.includes('analysisCacheMaintenanceHistory') && panel.includes('deletePersistentAnalysisCacheNamespaces'), 'panel exposes legacy namespace selection and bounded cleanup history');

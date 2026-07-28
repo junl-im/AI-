@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - isolated preview RAF, timer, playback, and teardown ownership
+// AI Shorts Studio v1.6.20 - isolated preview RAF, timer, playback, and teardown ownership
 'use strict';
 
 (function installPreviewController(global) {

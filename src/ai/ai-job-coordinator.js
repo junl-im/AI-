@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - bounded serial local AI job queue with cancellation and redacted history
+// AI Shorts Studio v1.6.20 - bounded serial local AI job queue with cancellation and redacted history
 'use strict';
 
 (function exposeAIJobCoordinator(global) {

@@ -4,6 +4,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 function read(file) { return fs.readFileSync(path.join(root, file), 'utf8'); }
 function fail(message) { console.error(`FAIL ${message}`); process.exit(1); }
 function assert(condition, message) { if (!condition) fail(message); }
@@ -11,10 +13,10 @@ function includes(file, token) { assert(read(file).includes(token), `${file} mus
 
 const pkg = JSON.parse(read('package.json'));
 const loader = read('src/boot/staged-ui-loader.js');
-assert(pkg.version === '1.6.15', 'package version must be 1.2.9');
-includes('index.html', 'assets/css/export-finish-center.css?v=1.6.15-preview-cache-diagnostics');
+assert(pkg.version === '1.6.24', 'package version must be 1.2.9');
+includes('index.html', `assets/css/export-finish-center.css?v=${buildKey}`);
 assert(loader.includes("versioned('src/ui/export-finish-center.js', 'export')"), 'export finish center script must be staged');
-includes('sw.js', './assets/css/export-finish-center.css?v=1.6.15-preview-cache-diagnostics');
+includes('sw.js', `./assets/css/export-finish-center.css?v=${buildKey}`);
 assert(read('sw.js').includes('async function cacheFirst'), 'export finish center uses runtime cache-first loading');
 includes('src/ui/export-finish-center.js', 'AIShortsExportFinishCenter');
 includes('src/ui/export-finish-center.js', 'ai-shorts-render-queue');

@@ -23,7 +23,7 @@ vm.runInContext(timelineSource, context);
 const engine = window.AIShortsSmartReframe;
 const api = window.AIShortsCropKeyframeTimeline;
 
-ok(pkg.version === '1.6.15', 'crop keyframe timeline release version is v1.6.15');
+ok(pkg.version === '1.6.24', 'crop keyframe timeline release version is v1.6.24');
 ['cropKeyframeTimelinePanel', 'cropKeyframeTimeline', 'cropKeyframeMarkerLayer', 'cropKeyframeSceneLayer', 'cropKeyframePlayhead', 'cropKeyframeCopyBtn', 'cropKeyframePasteBtn', 'cropKeyframeRangeBtn', 'cropKeyframeDeleteBtn'].forEach(id => ok(html.includes(`id="${id}"`), `${id} anchor exists`));
 ok(loader.includes("versioned('src/ui/crop-keyframe-timeline.js', 'editing')"), 'timeline editor stays on editing-stage lazy load');
 ok(app.includes('getCropKeyframeTimelineController') && app.includes('engine.moveKeyframe') && app.includes('engine.applyKeyframeToRange'), 'app connects timeline editing to collision-safe engine operations');
@@ -47,4 +47,4 @@ track = engine.applyKeyframeToRange(track, { x: 0.55, y: 0.42, zoom: 1.16 }, 3, 
 const rangeKeys = track.keyframes.filter(item => item.time >= 3 && item.time <= 7);
 ok(rangeKeys.length === 3 && rangeKeys.some(item => item.time === 5), 'range application replaces interior edits and anchors the scene boundary');
 ok(rangeKeys.every(item => item.x === 0.55 && item.zoom === 1.16), 'range application keeps one crop consistently across the selected interval');
-console.log('PASS v1.6.15 crop keyframe timeline contracts present');
+console.log('PASS v1.6.24 crop keyframe timeline contracts present');

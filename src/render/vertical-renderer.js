@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - smart-reframe, cancellable vertical renderer with media-state restoration
+// AI Shorts Studio v1.6.24 - dual-speaker split composition and cancellable vertical rendering
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -49,6 +49,38 @@
         ctx.fillRect(0, 0, width, height);
     }
 
+
+    function drawDualSpeakerFaces(ctx, source, width, height, sourceWidth, sourceHeight, focus, qualityFilter, smart) {
+        const engine = getSmartReframeEngine();
+        const subjects = Array.isArray(focus && focus.dualSubjects) ? focus.dualSubjects.slice(0, 2) : [];
+        if (subjects.length < 2 || !engine.resolveCropRect) return false;
+        const coverScale = Math.max(width / sourceWidth, height / sourceHeight);
+        const backgroundWidth = sourceWidth * coverScale;
+        const backgroundHeight = sourceHeight * coverScale;
+        ctx.save();
+        ctx.filter = `blur(28px) ${qualityFilter || 'saturate(1.08)'} brightness(0.58)`;
+        ctx.drawImage(source, (width - backgroundWidth) / 2, (height - backgroundHeight) / 2, backgroundWidth, backgroundHeight);
+        ctx.restore();
+        const gap = Math.max(4, Math.round(height * 0.004));
+        const paneHeight = (height - gap) / 2;
+        subjects.forEach((subjectFocus, index) => {
+            const rect = engine.resolveCropRect(sourceWidth, sourceHeight, width, paneHeight, subjectFocus, Object.assign({}, smart.options || {}, { captionOptions: null }));
+            const top = index ? paneHeight + gap : 0;
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, top, width, paneHeight);
+            ctx.clip();
+            if (qualityFilter) ctx.filter = qualityFilter;
+            ctx.drawImage(source, rect.sx, rect.sy, rect.sw, rect.sh, 0, top, width, paneHeight);
+            ctx.restore();
+        });
+        ctx.save();
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.fillRect(0, paneHeight, width, gap);
+        ctx.restore();
+        return true;
+    }
+
     function drawCoverImage(ctx, source, width, height, cropMode, qualityOptions, smartOptions) {
         const sourceWidth = source.videoWidth || source.naturalWidth || width;
         const sourceHeight = source.videoHeight || source.naturalHeight || height;
@@ -82,6 +114,7 @@
         if (cropMode === 'smart' && smartEngine.getFocusAt && smartEngine.resolveCropRect) {
             const focus = smartEngine.getFocusAt(smart.track || smart.smartReframe, Number(smart.time) || 0);
             if (focus) {
+                if (focus.source === 'speaker-dual-face' && drawDualSpeakerFaces(ctx, source, width, height, sourceWidth, sourceHeight, focus, qualityFilter, smart)) return;
                 const rect = smartEngine.resolveCropRect(sourceWidth, sourceHeight, width, height, focus, Object.assign({}, smart.options || {}, {
                     captionOptions: smart.captionOptions || null
                 }));

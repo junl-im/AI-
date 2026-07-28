@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/icon-system.css'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
@@ -15,7 +17,7 @@ for (const name of required) {
   if (!css.includes(`[data-icon="${name}"]`)) throw new Error(`missing CSS mapping: ${name}`);
   if (!sw.includes(`./assets/icons/studio/${name}.svg`)) throw new Error(`missing service worker icon cache: ${name}`);
 }
-if (!html.includes('assets/css/icon-system.css?v=1.6.15-preview-cache-diagnostics')) throw new Error('icon stylesheet not loaded');
+if (!html.includes(`assets/css/icon-system.css?v=${buildKey}`)) throw new Error('icon stylesheet not loaded');
 const menu = html.match(/<nav[^>]*class="bottom-dock-tabs"[^>]*>[\s\S]*?<\/nav>/)?.[0] || '';
 for (const name of ['upload','spark','candidates','preview','waveform','cut','edit','export']) {
   if (!menu.includes(`data-icon="${name}"`)) throw new Error(`menu icon missing: ${name}`);

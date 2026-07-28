@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - modular preview ownership and collision-safe smart-reframe coordination
+// AI Shorts Studio v1.6.24 - dual-speaker composition, role-aware timeline editing, and bulk face correction
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -31,9 +31,11 @@
     const renderWorkflowController = global.AIShortsRenderWorkflowController || {};
     const settingsControllerFactory = global.AIShortsSettingsController || {};
     const previewControllerFactory = global.AIShortsPreviewController || {};
+    const analysisControllerFactory = global.AIShortsAnalysisController || {};
 
     const els = {};
     let previewController = null;
+    let analysisController = null;
     let renderWorkflow = null;
     let settingsController = null;
     let projectIOController = null;
@@ -44,6 +46,8 @@
     let directCropController = null;
     let cropKeyframeTimelineController = null;
     let speakerTuneIndex = -1;
+    let supportDiagnosticsInspection = null;
+    let supportDiagnosticsComparison = null;
 
 
     function isAbortError(error) {
@@ -155,6 +159,189 @@
         return previewController;
     }
 
+
+    function getAnalysisController() {
+        if (analysisController) return analysisController;
+        if (!analysisControllerFactory.createAnalysisController) return null;
+        analysisController = analysisControllerFactory.createAnalysisController({
+            state, config, store, elements: els, audioExtractor, motionAnalyzer, engineKernel, operationCoordinator, downloadService,
+            getActiveMediaElement, activateFlowTab, updateButtons, setProgress, toast, ensureMotionSmartReframe,
+            getAutoCutOptions, buildAutoCutTimeline, createRecommendations, createFallbackAudioAnalysis,
+            beginOperation, assertOperation, finishOperation, isAbortError
+        });
+        return analysisController;
+    }
+
+    function supportDiagnosticsOptions() {
+        return {
+            config,
+            appState: store,
+            analysisController: getAnalysisController(),
+            visionManager: global.AIShortsVisionModelPacks || {},
+            runtimeHealth,
+            operationCoordinator,
+            serviceWorkerRegistration,
+            downloadService
+        };
+    }
+
+    async function exportSupportDiagnosticsBundle() {
+        try {
+            const loader = global.AIShortsStagedUiLoader || {};
+            if (!global.AIShortsSupportDiagnostics && typeof loader.ensure === 'function') await loader.ensure('shell');
+            const service = global.AIShortsSupportDiagnostics || {};
+            if (typeof service.exportBundle !== 'function') throw new Error('통합 진단 모듈을 불러오지 못했습니다.');
+            const result = service.exportBundle(supportDiagnosticsOptions());
+            toast(result && result.saved ? '분석·성능·런타임 통합 진단을 저장했습니다.' : '통합 진단을 저장하지 못했습니다.', result && result.saved ? 'success' : 'warning');
+            return result;
+        } catch (error) {
+            toast(error && error.message || '통합 진단을 만들지 못했습니다.', 'error');
+            return null;
+        }
+    }
+
+    async function ensureSupportDiagnosticsService() {
+        const loader = global.AIShortsStagedUiLoader || {};
+        if (!global.AIShortsSupportDiagnostics && typeof loader.ensure === 'function') await loader.ensure('shell');
+        const service = global.AIShortsSupportDiagnostics || {};
+        if (typeof service.inspectFile !== 'function') throw new Error('진단 호환성 검사 모듈을 불러오지 못했습니다.');
+        return service;
+    }
+
+    function closeSupportDiagnosticsPreview() {
+        if (els.supportDiagnosticsDialog) els.supportDiagnosticsDialog.hidden = true;
+    }
+
+    function renderSupportDiagnosticsInspection(inspection, comparison) {
+        supportDiagnosticsInspection = inspection || null;
+        supportDiagnosticsComparison = comparison || null;
+        const compatible = Boolean(inspection && inspection.compatible);
+        if (els.supportDiagnosticsDialog) els.supportDiagnosticsDialog.hidden = false;
+        if (els.supportDiagnosticsState) {
+            els.supportDiagnosticsState.dataset.status = compatible ? 'compatible' : 'invalid';
+            els.supportDiagnosticsState.textContent = compatible
+                ? inspection.migrated ? '호환됨 · 구버전 정규화 필요' : '호환됨 · 읽기 전용 미리보기'
+                : '열 수 없음 · 아래 조치 확인';
+        }
+        if (els.supportDiagnosticsMeta) {
+            const file = inspection && inspection.file || {};
+            const schema = inspection && inspection.schema || '알 수 없는 형식';
+            const version = inspection && inspection.schemaVersion ? `v${inspection.schemaVersion}` : '버전 미상';
+            const size = Number(file.size || 0);
+            els.supportDiagnosticsMeta.textContent = `${file.name || '진단 JSON'} · ${schema} ${version} · ${size ? `${Math.max(1, Math.round(size / 1024))}KiB` : '크기 미상'}`;
+        }
+        if (els.supportDiagnosticsSummary) {
+            els.supportDiagnosticsSummary.textContent = '';
+            const summary = inspection && inspection.summary || {};
+            const values = compatible ? [
+                ['앱 버전', summary.appVersion || '미상'],
+                ['분석 이력', `${Number(summary.analysisHistoryCount || 0)}건`],
+                ['벤치마크', `${Number(summary.benchmarkCount || 0)}팩`],
+                ['런타임 오류', `${Number(summary.runtimeErrorCount || 0)}건`],
+                ['진단 기록', `${Number(summary.diagnosticCount || 0)}건`],
+                ['활성 작업', `${Number(summary.activeOperationCount || 0)}건`]
+            ] : [['검사 결과', '호환 불가']];
+            values.forEach(([labelText, valueText]) => {
+                const row = document.createElement('div');
+                const label = document.createElement('span');
+                const value = document.createElement('strong');
+                label.textContent = labelText;
+                value.textContent = valueText;
+                row.append(label, value);
+                els.supportDiagnosticsSummary.appendChild(row);
+            });
+        }
+        if (els.supportDiagnosticsIssueList) {
+            els.supportDiagnosticsIssueList.textContent = '';
+            const notices = [].concat(inspection && inspection.issues || [], inspection && inspection.warnings || []);
+            if (!notices.length) notices.push({ severity: 'success', message: '현재 앱에서 안전하게 미리볼 수 있는 진단 파일입니다.', action: '가져온 데이터는 프로젝트에 자동 적용되지 않습니다.' });
+            notices.forEach(item => {
+                const row = document.createElement('li');
+                row.dataset.severity = item.severity || 'info';
+                const message = document.createElement('strong');
+                const action = document.createElement('span');
+                message.textContent = item.message || '진단 안내';
+                action.textContent = item.action || '';
+                row.append(message, action);
+                els.supportDiagnosticsIssueList.appendChild(row);
+            });
+        }
+        if (els.supportDiagnosticsComparison) {
+            els.supportDiagnosticsComparison.hidden = !compatible || !supportDiagnosticsComparison;
+        }
+        if (els.supportDiagnosticsComparisonSummary) {
+            const summary = supportDiagnosticsComparison && supportDiagnosticsComparison.summary || {};
+            els.supportDiagnosticsComparisonSummary.textContent = compatible && supportDiagnosticsComparison
+                ? `현재 환경과 ${Number(summary.matches || 0)}개 일치 · ${Number(summary.differences || 0)}개 차이 · ${Number(summary.warnings || 0)}개 주의`
+                : '호환 가능한 진단을 불러오면 현재 환경과 비교합니다.';
+        }
+        if (els.supportDiagnosticsComparisonList) {
+            els.supportDiagnosticsComparisonList.textContent = '';
+            const items = supportDiagnosticsComparison && supportDiagnosticsComparison.items || [];
+            items.forEach(item => {
+                const row = document.createElement('li');
+                row.dataset.status = item.status || 'info';
+                const label = document.createElement('strong');
+                const values = document.createElement('span');
+                const detail = document.createElement('small');
+                label.textContent = item.label || item.key || '비교 항목';
+                values.textContent = `가져온 값 ${item.imported || '미상'} · 현재 ${item.current || '미상'}`;
+                detail.textContent = item.detail || '';
+                row.append(label, values, detail);
+                els.supportDiagnosticsComparisonList.appendChild(row);
+            });
+        }
+        if (els.supportDiagnosticsNormalizedBtn) els.supportDiagnosticsNormalizedBtn.disabled = !compatible;
+        if (els.supportDiagnosticsReportBtn) els.supportDiagnosticsReportBtn.disabled = !compatible;
+    }
+
+    async function handleSupportDiagnosticsFile(event) {
+        const input = event && event.target;
+        const file = input && input.files && input.files[0];
+        if (!file) return null;
+        try {
+            const service = await ensureSupportDiagnosticsService();
+            const inspection = await service.inspectFile(file, { maxBytes: Number(config.MAX_SUPPORT_DIAGNOSTIC_FILE_BYTES || 2 * 1024 * 1024) });
+            const comparison = typeof service.compareInspectionToCurrent === 'function' ? service.compareInspectionToCurrent(inspection, supportDiagnosticsOptions()) : null;
+            renderSupportDiagnosticsInspection(inspection, comparison);
+            if (store.addDiagnostic) store.addDiagnostic({ type: 'support-diagnostics-import-preview', status: inspection.compatible ? 'compatible' : inspection.code, schema: inspection.schema || '', schemaVersion: inspection.schemaVersion || 0 });
+            toast(inspection.compatible ? '진단 파일을 읽기 전용으로 검사했습니다.' : '진단 파일을 열 수 없습니다. 안내 내용을 확인하세요.', inspection.compatible ? 'success' : 'warning');
+            return inspection;
+        } catch (error) {
+            const fallback = { compatible: false, code: 'import-failed', issues: [{ severity: 'error', message: error && error.message || '진단 파일 검사에 실패했습니다.', action: '파일을 다시 선택하거나 앱에서 진단을 새로 내보내세요.' }], warnings: [], summary: {}, file: { name: file.name || 'diagnostics.json', size: file.size || 0 } };
+            renderSupportDiagnosticsInspection(fallback, null);
+            toast('진단 파일 검사에 실패했습니다.', 'error');
+            return fallback;
+        } finally {
+            if (input) input.value = '';
+        }
+    }
+
+    async function exportNormalizedSupportDiagnostics() {
+        try {
+            const service = await ensureSupportDiagnosticsService();
+            const result = service.exportNormalizedInspection(supportDiagnosticsInspection, supportDiagnosticsOptions());
+            toast(result && result.saved ? '현재 앱 형식의 정규화 진단을 저장했습니다.' : '저장할 호환 진단이 없습니다.', result && result.saved ? 'success' : 'warning');
+            return result;
+        } catch (error) {
+            toast(error && error.message || '정규화 진단을 저장하지 못했습니다.', 'error');
+            return null;
+        }
+    }
+
+    async function exportSupportDiagnosticsSummary() {
+        try {
+            const service = await ensureSupportDiagnosticsService();
+            if (typeof service.exportSupportSummaryReport !== 'function') throw new Error('지원 요약 보고서 기능을 불러오지 못했습니다.');
+            const result = service.exportSupportSummaryReport(supportDiagnosticsInspection, supportDiagnosticsOptions());
+            toast(result && result.saved ? '현재 환경 비교가 포함된 지원 요약 보고서를 저장했습니다.' : '요약할 호환 진단이 없습니다.', result && result.saved ? 'success' : 'warning');
+            return result;
+        } catch (error) {
+            toast(error && error.message || '지원 요약 보고서를 저장하지 못했습니다.', 'error');
+            return null;
+        }
+    }
+
     function $(id) { return document.getElementById(id); }
 
     function initElements() {
@@ -164,12 +351,16 @@
             'smartReframePanel', 'smartReframeStatus', 'smartReframeDetail', 'smartReframeAnalyzeBtn', 'smartReframeCaptionAvoidanceToggle',
             'smartReframeSpeakerPriorityToggle', 'smartReframeSpeakerLinkBtn', 'smartReframeSpeakerStatus',
             'speakerFaceTuningPanel', 'speakerFaceTuningCount', 'speakerFacePrevBtn', 'speakerFaceNextBtn', 'speakerFaceCueRange',
-            'speakerFaceCueMeta', 'speakerFaceSubjectSelect', 'speakerFaceConfidenceValue', 'speakerFaceConfidenceMeter',
-            'speakerFaceLockToggle', 'speakerFaceApplyBtn', 'speakerFaceAutoBtn',
+            'speakerFaceCueMeta', 'speakerCueTimeline', 'speakerCueStartInput', 'speakerCueEndInput', 'speakerCueLabelInput', 'speakerCuePrioritySelect',
+            'speakerFaceSubjectSelect', 'speakerFaceConfidenceValue', 'speakerFaceConfidenceMeter', 'speakerFaceConfidenceHistory',
+            'speakerFaceLockToggle', 'speakerFaceApplyBtn', 'speakerFaceApplySpeakerBtn', 'speakerCueSplitBtn', 'speakerCueOverlapBtn', 'speakerCueDeleteBtn', 'speakerFaceAutoBtn',
             'smartReframeEditor', 'smartReframeSubjectSelect', 'smartReframeXInput', 'smartReframeYInput', 'smartReframeZoomInput',
             'smartReframeXValue', 'smartReframeYValue', 'smartReframeZoomValue', 'smartReframeKeyframeDetail',
             'smartReframeKeyframeSetBtn', 'smartReframeKeyframeDeleteBtn', 'smartReframeKeyframeResetBtn',
-            'analysisStatus', 'progressBar', 'recommendationList', 'recommendationCount', 'previewStatus',
+            'analysisStatus', 'progressBar', 'analysisTimingPanel', 'analysisTimingSummary', 'analysisTimingDetail', 'analysisTimingComparison', 'analysisTimingExportBtn', 'analysisTimingList',
+            'analysisTimingHistoryPanel', 'analysisTimingHistoryCount', 'analysisTimingHistorySearch', 'analysisTimingHistoryStatus', 'analysisTimingHistorySelectedExportBtn', 'analysisTimingHistoryClearBtn', 'analysisTimingHistoryEmpty', 'analysisTimingHistoryList', 'analysisTimingHistoryRetentionDays', 'analysisTimingHistoryMaxItems', 'analysisTimingHistoryPolicySaveBtn', 'analysisTimingHistoryPolicyStatus', 'supportDiagnosticsBundleBtn', 'supportDiagnosticsImportBtn', 'supportDiagnosticsFileInput',
+            'supportDiagnosticsDialog', 'supportDiagnosticsCloseBtn', 'supportDiagnosticsDismissBtn', 'supportDiagnosticsState', 'supportDiagnosticsMeta', 'supportDiagnosticsSummary', 'supportDiagnosticsIssueList', 'supportDiagnosticsComparison', 'supportDiagnosticsComparisonSummary', 'supportDiagnosticsComparisonList', 'supportDiagnosticsNormalizedBtn', 'supportDiagnosticsReportBtn',
+            'recommendationList', 'recommendationCount', 'previewStatus',
             'previewCanvas', 'sourceVideo', 'sourceAudio', 'previewBtn', 'stopPreviewBtn', 'exportBtn',
             'directCropPanel', 'directCropOverlay', 'directCropPathOverlay', 'directCropPathLine', 'directCropPathDots', 'directCropCurrentDot',
             'directCropGestureHint', 'directCropStatus', 'directCropDetail', 'directCropToggleBtn', 'directCropSaveBtn', 'directCropUndoBtn',
@@ -670,6 +861,15 @@
         if (els.speakerFacePrevBtn) els.speakerFacePrevBtn.disabled = index <= 0;
         if (els.speakerFaceNextBtn) els.speakerFaceNextBtn.disabled = index < 0 || index >= cues.length - 1;
         if (els.speakerFaceApplyBtn) els.speakerFaceApplyBtn.disabled = !cue || !subjects.length;
+        if (els.speakerFaceApplySpeakerBtn) els.speakerFaceApplySpeakerBtn.disabled = !cue || !cue.speaker || !subjects.length;
+        if (els.speakerCueSplitBtn) els.speakerCueSplitBtn.disabled = !cue;
+        if (els.speakerCueOverlapBtn) els.speakerCueOverlapBtn.disabled = !cue;
+        if (els.speakerCueDeleteBtn) els.speakerCueDeleteBtn.disabled = !cue;
+        [els.speakerCueStartInput, els.speakerCueEndInput, els.speakerCueLabelInput, els.speakerCuePrioritySelect].forEach(input => { if (input) input.disabled = !cue; });
+        if (els.speakerCueStartInput) els.speakerCueStartInput.value = cue ? Number(cue.start).toFixed(2) : '';
+        if (els.speakerCueEndInput) els.speakerCueEndInput.value = cue ? Number(cue.end).toFixed(2) : '';
+        if (els.speakerCueLabelInput) els.speakerCueLabelInput.value = cue ? (cue.speaker || '') : '';
+        if (els.speakerCuePrioritySelect) els.speakerCuePrioritySelect.value = cue ? (cue.priority || 'auto') : 'auto';
         if (els.speakerFaceAutoBtn) els.speakerFaceAutoBtn.disabled = !cue;
         if (els.speakerFaceLockToggle) {
             els.speakerFaceLockToggle.disabled = !cue;
@@ -678,12 +878,45 @@
         const confidence = cue ? Math.max(0, Math.min(1, Number(cue.confidence) || 0)) : 0;
         if (els.speakerFaceConfidenceValue) els.speakerFaceConfidenceValue.textContent = `${Math.round(confidence * 100)}%`;
         if (els.speakerFaceConfidenceMeter) els.speakerFaceConfidenceMeter.value = confidence;
+        if (els.speakerFaceConfidenceHistory) {
+            els.speakerFaceConfidenceHistory.textContent = '';
+            const history = Array.isArray(cue && cue.confidenceHistory) ? cue.confidenceHistory.slice(-6) : [];
+            history.forEach((entry, historyIndex) => {
+                const chip = document.createElement('span');
+                chip.dataset.current = historyIndex === history.length - 1 ? 'true' : 'false';
+                chip.textContent = `${Math.round((Number(entry.confidence) || 0) * 100)}%`;
+                chip.title = `${entry.subjectId === 'auto' ? '자동 추적' : entry.subjectId} · ${entry.source || 'face-activity'}`;
+                els.speakerFaceConfidenceHistory.appendChild(chip);
+            });
+        }
         if (els.speakerFaceCueRange) els.speakerFaceCueRange.textContent = cue ? `${formatSpeakerCueTime(cue.start)}–${formatSpeakerCueTime(cue.end)} · ${cue.speaker || `발화 ${index + 1}`}` : '발화 구간 없음';
         if (els.speakerFaceCueMeta) {
             const subject = cue && subjects.find(item => item.id === cue.subjectId);
             els.speakerFaceCueMeta.textContent = !cue
                 ? '전사 또는 자막을 연결하면 구간별 얼굴을 조정할 수 있습니다.'
                 : `${subject ? subject.label : '자동 추적'} · ${cue.locked ? '수동 고정' : '자동 연결'} · ${cue.source === 'diarization-face' ? '화자 라벨 기반' : cue.source === 'face-activity' ? '얼굴 활동 기반' : cue.source === 'manual-override' ? '사용자 지정' : '자동 대체'}`;
+        }
+        if (els.speakerCueTimeline) {
+            els.speakerCueTimeline.textContent = '';
+            cues.forEach((item, cueIndex) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'speaker-cue-item';
+                button.dataset.selected = cueIndex === index ? 'true' : 'false';
+                button.setAttribute('role', 'option');
+                button.setAttribute('aria-selected', cueIndex === index ? 'true' : 'false');
+                const timeLabel = document.createElement('strong');
+                timeLabel.textContent = `${formatSpeakerCueTime(item.start)}–${formatSpeakerCueTime(item.end)}`;
+                const speakerLabel = document.createElement('span');
+                speakerLabel.textContent = item.speaker || `발화 ${cueIndex + 1}`;
+                const modeLabel = document.createElement('small');
+                const overlaps = cues.filter((candidate, candidateIndex) => candidateIndex !== cueIndex && Math.min(item.end, candidate.end) - Math.max(item.start, candidate.start) > 0.049).length;
+                const role = item.priority === 'primary' ? '주 화자' : item.priority === 'secondary' ? '보조 화자' : '';
+                modeLabel.textContent = [item.locked ? '수동 고정' : item.subjectId === 'auto' ? '자동 추적' : '얼굴 연결', role, overlaps ? `겹침 ${overlaps}` : ''].filter(Boolean).join(' · ');
+                button.append(timeLabel, speakerLabel, modeLabel);
+                button.addEventListener('click', () => { speakerTuneIndex = cueIndex; selectSpeakerTuneCue(0); });
+                els.speakerCueTimeline.appendChild(button);
+            });
         }
     }
 
@@ -705,15 +938,92 @@
         if (!cue || !engine.updateSpeakerCue || !engine.speakerCueKey) return;
         const subjectId = els.speakerFaceSubjectSelect ? els.speakerFaceSubjectSelect.value : 'auto';
         const locked = Boolean(els.speakerFaceLockToggle && els.speakerFaceLockToggle.checked && subjectId !== 'auto');
+        const start = Math.max(0, Number(els.speakerCueStartInput && els.speakerCueStartInput.value));
+        const end = Math.max(start + 0.05, Number(els.speakerCueEndInput && els.speakerCueEndInput.value));
+        const speaker = String(els.speakerCueLabelInput && els.speakerCueLabelInput.value || '').trim().slice(0, 40);
+        const priority = els.speakerCuePrioritySelect ? els.speakerCuePrioritySelect.value : 'auto';
+        const boundedStart = start;
+        const boundedEnd = end;
+        if (!(boundedEnd > boundedStart + 0.049)) { toast('발화 구간은 최소 0.05초 이상이어야 합니다.', 'warning'); return; }
         state.smartReframe = engine.updateSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), {
-            subjectId,
-            locked,
+            start: boundedStart, end: boundedEnd, speaker, subjectId, locked, priority,
             source: locked ? 'manual-override' : cue.source
         }) || state.smartReframe;
         persistSmartReframeEdits(state.smartReframe);
         updateSmartReframeUI();
         renderPreviewStill();
         toast(locked ? '이 발화 구간의 얼굴 연결을 고정했습니다.' : subjectId === 'auto' ? '이 발화 구간을 자동 추적으로 전환했습니다.' : '이 발화 구간의 얼굴 연결을 변경했습니다.', 'success');
+    }
+
+
+    function applySpeakerTuneToMatchingSpeaker() {
+        const engine = getSmartReframeEngine();
+        const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+        const index = getSpeakerTuneIndex(cues);
+        const cue = index >= 0 ? cues[index] : null;
+        if (!cue || !cue.speaker || !engine.updateSpeakerCuesBySpeaker) return;
+        const subjectId = els.speakerFaceSubjectSelect ? els.speakerFaceSubjectSelect.value : 'auto';
+        const locked = Boolean(els.speakerFaceLockToggle && els.speakerFaceLockToggle.checked && subjectId !== 'auto');
+        const priority = els.speakerCuePrioritySelect ? els.speakerCuePrioritySelect.value : cue.priority || 'auto';
+        state.smartReframe = engine.updateSpeakerCuesBySpeaker(state.smartReframe, cue.speaker, {
+            subjectId, locked, priority, source: locked ? 'manual-override' : cue.source
+        }) || state.smartReframe;
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        const count = (state.smartReframe.speakerCues || []).filter(item => item.speaker === cue.speaker).length;
+        toast(`${cue.speaker} 화자의 ${count}개 구간에 얼굴 연결과 역할을 적용했습니다.`, 'success');
+    }
+
+    function splitSpeakerTuneCue() {
+        const engine = getSmartReframeEngine();
+        const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+        const index = getSpeakerTuneIndex(cues);
+        const cue = index >= 0 ? cues[index] : null;
+        if (!cue || !engine.splitSpeakerCue || !engine.speakerCueKey) return;
+        const current = Math.max(cue.start + 0.05, Math.min(cue.end - 0.05, getSmartReframeTime()));
+        if (current <= cue.start + 0.049 || current >= cue.end - 0.049) { toast('재생 위치를 구간 안쪽으로 옮긴 뒤 분할하세요.', 'warning'); return; }
+        const nextLabel = String(els.speakerCueLabelInput && els.speakerCueLabelInput.value || cue.speaker || '').trim().slice(0, 40);
+        state.smartReframe = engine.splitSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), current, { speaker: nextLabel, locked: false, mode: 'auto' }) || state.smartReframe;
+        speakerTuneIndex = Math.min(index + 1, (state.smartReframe.speakerCues || []).length - 1);
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        toast('동시 발화 또는 화자 전환 지점으로 구간을 분할했습니다.', 'success');
+    }
+
+    function addOverlappingSpeakerTuneCue() {
+        const engine = getSmartReframeEngine();
+        const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+        const index = getSpeakerTuneIndex(cues);
+        const cue = index >= 0 ? cues[index] : null;
+        if (!cue || !engine.duplicateSpeakerCue || !engine.speakerCueKey) return;
+        const baseLabel = String(cue.speaker || `화자 ${index + 1}`).trim().slice(0, 32);
+        const used = new Set(cues.map(item => item.speaker));
+        let suffix = 2;
+        let label = `${baseLabel} 보조`.slice(0, 40);
+        while (used.has(label) && suffix < 100) { label = `${baseLabel} 보조 ${suffix}`.slice(0, 40); suffix += 1; }
+        state.smartReframe = engine.duplicateSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), { speaker: label, priority: 'secondary' }) || state.smartReframe;
+        const nextCues = state.smartReframe.speakerCues || [];
+        speakerTuneIndex = nextCues.findIndex(item => item.start === cue.start && item.end === cue.end && item.speaker === label);
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        toast('같은 시간 범위에 보조 화자를 추가했습니다. 얼굴을 선택하면 2분할 화면으로 유지됩니다.', 'success');
+    }
+
+    function deleteSpeakerTuneCue() {
+        const engine = getSmartReframeEngine();
+        const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+        const index = getSpeakerTuneIndex(cues);
+        const cue = index >= 0 ? cues[index] : null;
+        if (!cue || !engine.removeSpeakerCue || !engine.speakerCueKey) return;
+        state.smartReframe = engine.removeSpeakerCue(state.smartReframe, engine.speakerCueKey(cue)) || state.smartReframe;
+        speakerTuneIndex = Math.max(0, Math.min(index, (state.smartReframe.speakerCues || []).length - 1));
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        toast('선택한 발화 구간을 삭제했습니다.', 'action');
     }
 
     async function resetSpeakerTuneCue() {
@@ -749,7 +1059,8 @@
         else if (cues.length) {
             const linked = cues.filter(cue => cue.subjectId !== 'auto').length;
             const switches = cues.reduce((count, cue, index) => index && cues[index - 1].subjectId !== cue.subjectId ? count + 1 : count, 0);
-            els.smartReframeSpeakerStatus.textContent = `발화 ${cues.length}구간 · 얼굴 연결 ${linked}구간 · 전환 ${switches}회`;
+            const overlaps = cues.reduce((count, cue, index) => count + cues.slice(index + 1).filter(other => cue.subjectId !== 'auto' && other.subjectId !== 'auto' && cue.subjectId !== other.subjectId && Math.min(cue.end, other.end) - Math.max(cue.start, other.start) > 0.049).length, 0);
+            els.smartReframeSpeakerStatus.textContent = `발화 ${cues.length}구간 · 얼굴 연결 ${linked}구간 · 전환 ${switches}회${overlaps ? ` · 동시 발화 ${overlaps}쌍` : ''}`;
         } else if (!segments.length) els.smartReframeSpeakerStatus.textContent = '로컬 전사 또는 자막을 적용하면 말하는 사람을 우선 추적합니다.';
         else if (!subjects.length) els.smartReframeSpeakerStatus.textContent = '얼굴 감지 후 발화 구간과 인물을 연결할 수 있습니다.';
         else els.smartReframeSpeakerStatus.textContent = '발화 구간과 얼굴 움직임을 연결할 준비가 됐습니다.';
@@ -1387,17 +1698,67 @@
             });
         }
         if (els.analyzeBtn) els.analyzeBtn.addEventListener('click', generateRecommendationsFromAnalysis);
+        if (els.analysisTimingExportBtn) els.analysisTimingExportBtn.addEventListener('click', () => {
+            const controller = getAnalysisController();
+            if (!controller || !controller.exportTimingDiagnostics) return;
+            const result = controller.exportTimingDiagnostics();
+            toast(result && result.saved ? '분석 타이밍 진단 JSON을 저장했습니다.' : '저장할 분석 타이밍 기록이 없습니다.', result && result.saved ? 'success' : 'warning');
+        });
+        if (els.analysisTimingHistorySearch) els.analysisTimingHistorySearch.addEventListener('input', () => {
+            const controller = getAnalysisController();
+            if (controller && controller.setTimingHistoryFilter) controller.setTimingHistoryFilter(els.analysisTimingHistorySearch.value, els.analysisTimingHistoryStatus && els.analysisTimingHistoryStatus.value || 'all');
+        });
+        if (els.analysisTimingHistoryStatus) els.analysisTimingHistoryStatus.addEventListener('change', () => {
+            const controller = getAnalysisController();
+            if (controller && controller.setTimingHistoryFilter) controller.setTimingHistoryFilter(els.analysisTimingHistorySearch && els.analysisTimingHistorySearch.value || '', els.analysisTimingHistoryStatus.value);
+        });
+        if (els.analysisTimingHistoryList) els.analysisTimingHistoryList.addEventListener('change', event => {
+            const checkbox = event.target && event.target.closest ? event.target.closest('[data-history-select]') : null;
+            if (!checkbox) return;
+            const controller = getAnalysisController();
+            if (controller && controller.setTimingHistorySelection) controller.setTimingHistorySelection(checkbox.dataset.historySelect, checkbox.checked);
+        });
+        if (els.analysisTimingHistoryList) els.analysisTimingHistoryList.addEventListener('click', event => {
+            const button = event.target && event.target.closest ? event.target.closest('[data-history-delete]') : null;
+            if (!button) return;
+            const controller = getAnalysisController();
+            const removed = controller && controller.deleteTimingHistoryEntry && controller.deleteTimingHistoryEntry(button.dataset.historyDelete);
+            toast(removed ? '선택한 분석 이력을 삭제했습니다.' : '삭제할 분석 이력을 찾지 못했습니다.', removed ? 'success' : 'warning');
+        });
+        if (els.analysisTimingHistorySelectedExportBtn) els.analysisTimingHistorySelectedExportBtn.addEventListener('click', () => {
+            const controller = getAnalysisController();
+            const result = controller && controller.exportSelectedTimingHistory ? controller.exportSelectedTimingHistory() : null;
+            toast(result && result.saved ? `선택한 분석 이력 ${result.historyCount}건을 저장했습니다.` : '내보낼 분석 이력을 선택해 주세요.', result && result.saved ? 'success' : 'warning');
+        });
+        if (els.analysisTimingHistoryClearBtn) els.analysisTimingHistoryClearBtn.addEventListener('click', () => {
+            const confirmed = typeof global.confirm !== 'function' || global.confirm('저장된 분석 이력을 모두 삭제할까요? 현재 분석 결과와 원본 파일은 유지됩니다.');
+            if (!confirmed) return;
+            const controller = getAnalysisController();
+            const removed = controller && controller.clearTimingHistory ? controller.clearTimingHistory() : 0;
+            toast(removed ? `분석 이력 ${removed}건을 삭제했습니다.` : '삭제할 분석 이력이 없습니다.', removed ? 'success' : 'warning');
+        });
+        if (els.analysisTimingHistoryPolicySaveBtn) els.analysisTimingHistoryPolicySaveBtn.addEventListener('click', () => {
+            const controller = getAnalysisController();
+            if (!controller || !controller.updateTimingHistoryPolicy) return;
+            const result = controller.updateTimingHistoryPolicy({
+                retentionDays: Number(els.analysisTimingHistoryRetentionDays && els.analysisTimingHistoryRetentionDays.value || 90),
+                maxItems: Number(els.analysisTimingHistoryMaxItems && els.analysisTimingHistoryMaxItems.value || 12)
+            });
+            toast(result.removed ? `보존 설정을 저장하고 오래된 이력 ${result.removed}건을 정리했습니다.` : '분석 이력 보존 설정을 저장했습니다.', 'success');
+        });
+        if (els.supportDiagnosticsBundleBtn) els.supportDiagnosticsBundleBtn.addEventListener('click', exportSupportDiagnosticsBundle);
+        if (els.supportDiagnosticsImportBtn) els.supportDiagnosticsImportBtn.addEventListener('click', () => { if (els.supportDiagnosticsFileInput) els.supportDiagnosticsFileInput.click(); });
+        if (els.supportDiagnosticsFileInput) els.supportDiagnosticsFileInput.addEventListener('change', handleSupportDiagnosticsFile);
+        if (els.supportDiagnosticsNormalizedBtn) els.supportDiagnosticsNormalizedBtn.addEventListener('click', exportNormalizedSupportDiagnostics);
+        if (els.supportDiagnosticsReportBtn) els.supportDiagnosticsReportBtn.addEventListener('click', exportSupportDiagnosticsSummary);
+        if (els.supportDiagnosticsCloseBtn) els.supportDiagnosticsCloseBtn.addEventListener('click', closeSupportDiagnosticsPreview);
+        if (els.supportDiagnosticsDismissBtn) els.supportDiagnosticsDismissBtn.addEventListener('click', closeSupportDiagnosticsPreview);
+        if (els.supportDiagnosticsDialog) els.supportDiagnosticsDialog.addEventListener('click', event => { if (event.target === els.supportDiagnosticsDialog) closeSupportDiagnosticsPreview(); });
+        document.addEventListener('keydown', event => { if (event.key === 'Escape' && els.supportDiagnosticsDialog && !els.supportDiagnosticsDialog.hidden) closeSupportDiagnosticsPreview(); });
         if (els.analysisCancelBtn) els.analysisCancelBtn.addEventListener('click', () => {
             if (els.analysisCancelBtn.disabled || !state.isAnalyzing) return;
-            const cancelled = operationCoordinator.cancel && operationCoordinator.cancel('analysis', '사용자가 자동 분석을 취소했습니다.');
-            if (!cancelled) return;
-            els.analysisCancelBtn.disabled = true;
-            els.analysisCancelBtn.textContent = '중단 중';
-            els.analysisCancelBtn.dataset.cancelRequested = 'true';
-            setProgress(0, '분석 취소 요청');
-            toast('자동 분석을 안전하게 중단하고 있습니다.', 'warning');
-            if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-cancel-request', fileName: state.file && state.file.name || '' });
-            document.dispatchEvent(new CustomEvent('ai-shorts-experience-sync'));
+            const controller = getAnalysisController();
+            if (controller) controller.cancel('사용자가 자동 분석을 취소했습니다.');
         });
         document.addEventListener('ai-shorts-analysis-request', event => {
             if (!state.file || state.isAnalyzing) return;
@@ -1488,6 +1849,10 @@
         if (els.speakerFacePrevBtn) els.speakerFacePrevBtn.addEventListener('click', () => selectSpeakerTuneCue(-1));
         if (els.speakerFaceNextBtn) els.speakerFaceNextBtn.addEventListener('click', () => selectSpeakerTuneCue(1));
         if (els.speakerFaceApplyBtn) els.speakerFaceApplyBtn.addEventListener('click', applySpeakerTuneCue);
+        if (els.speakerFaceApplySpeakerBtn) els.speakerFaceApplySpeakerBtn.addEventListener('click', applySpeakerTuneToMatchingSpeaker);
+        if (els.speakerCueSplitBtn) els.speakerCueSplitBtn.addEventListener('click', splitSpeakerTuneCue);
+        if (els.speakerCueOverlapBtn) els.speakerCueOverlapBtn.addEventListener('click', addOverlappingSpeakerTuneCue);
+        if (els.speakerCueDeleteBtn) els.speakerCueDeleteBtn.addEventListener('click', deleteSpeakerTuneCue);
         if (els.speakerFaceAutoBtn) els.speakerFaceAutoBtn.addEventListener('click', resetSpeakerTuneCue);
         if (els.smartReframeSubjectSelect) els.smartReframeSubjectSelect.addEventListener('change', applySmartReframeSubjectSelection);
         if (els.smartReframeKeyframeSetBtn) els.smartReframeKeyframeSetBtn.addEventListener('click', setSmartReframeKeyframe);
@@ -1554,6 +1919,8 @@
             if (importController) importController.dispose();
             const playbackController = getPreviewController();
             if (playbackController) playbackController.dispose();
+            const analyzerController = getAnalysisController();
+            if (analyzerController) analyzerController.dispose();
         }, { once: true });
     }
 
@@ -1589,181 +1956,9 @@
         media.src = state.fileUrl;
     }
 
-    function waitForActiveMediaMetadata(token) {
-        const media = getActiveMediaElement();
-        if (!media) return Promise.resolve(0);
-        const known = Number(media.duration) || Number(state.fileMeta && state.fileMeta.duration) || 0;
-        if (known > 0 && Number.isFinite(known)) return Promise.resolve(known);
-        const timeoutMs = Number(config.MEDIA_METADATA_WAIT_MS || 5000);
-        return new Promise(resolve => {
-            let timer = 0;
-            let settled = false;
-            const signal = token && token.signal || null;
-            function cleanup() {
-                media.removeEventListener('loadedmetadata', finish);
-                media.removeEventListener('durationchange', finish);
-                media.removeEventListener('error', finish);
-                if (signal) signal.removeEventListener('abort', finish);
-                if (timer) clearTimeout(timer);
-            }
-            function finish() {
-                if (settled) return;
-                settled = true;
-                cleanup();
-                const duration = Number(media.duration) || 0;
-                if (duration > 0 && Number.isFinite(duration)) state.fileMeta.duration = duration;
-                resolve(duration);
-            }
-            media.addEventListener('loadedmetadata', finish, { once: true });
-            media.addEventListener('durationchange', finish, { once: true });
-            media.addEventListener('error', finish, { once: true });
-            if (signal) signal.addEventListener('abort', finish, { once: true });
-            timer = setTimeout(finish, timeoutMs);
-        });
-    }
-
-    async function analyzeCurrentFile(options) {
-        const analysisOptions = Object.assign({ autoGenerate: false }, options || {});
-        if (!state.file) return;
-        const inputFile = state.file;
-        const inputKind = state.fileKind;
-        const inputUrl = state.fileUrl;
-        const token = beginOperation('analysis', { fileName: inputFile.name, source: analysisOptions.source || 'manual' });
-        state.isAnalyzing = true;
-        activateFlowTab('recommend', { reveal: true, force: true, source: analysisOptions.source || 'analysis-start' });
-        state.recommendations = [];
-        state.selectedRecommendationId = '';
-        updateButtons();
-        setProgress(3, '분석 시작');
-        const reportProgress = (percent, message) => {
-            if (token && operationCoordinator.isCurrent && !operationCoordinator.isCurrent(token)) return;
-            setProgress(percent, message);
-        };
-        try {
-            setProgress(2, '미디어 길이 확인 중');
-            await waitForActiveMediaMetadata(token);
-            assertOperation(token);
-            const inputMeta = Object.assign({}, state.fileMeta || {});
-            if (engineKernel.analyzeMedia) {
-                const budget = engineKernel.createBudget ? engineKernel.createBudget(inputMeta, config) : null;
-                if (budget && budget.longMedia) {
-                    setProgress(4, `${budget.label} · 분석 메모리 약 ${budget.estimatedAnalysisMemoryMb || 0}MB`);
-                    if (store.addDiagnostic) store.addDiagnostic({
-                        type: 'long-media-budget',
-                        duration: inputMeta.duration,
-                        sizeMb: budget.sizeMb,
-                        sampleRate: budget.analysisSampleRate,
-                        estimatedMemoryMb: budget.estimatedAnalysisMemoryMb,
-                        estimatedDecodeMemoryMb: budget.estimatedDecodeMemoryMb,
-                        memoryRisk: budget.memoryRisk
-                    });
-                }
-                if (budget && budget.hardBlock) {
-                    throw new Error(`이 파일은 브라우저 디코딩 예상 메모리가 약 ${budget.estimatedDecodeMemoryMb || 0}MB로 너무 큽니다. MP3·AAC로 변환하거나 파일을 나눠 다시 열어주세요.`);
-                }
-                if (budget && budget.memoryRisk === 'high') {
-                    const memoryMessage = `긴 파일 메모리 주의 · 디코딩 예상 약 ${budget.estimatedDecodeMemoryMb || 0}MB`;
-                    setProgress(4, memoryMessage);
-                    toast('긴 파일을 안전 모드로 분석합니다. 다른 무거운 탭을 닫으면 더 안정적입니다.', 'warning');
-                    if (els.importStatus && !els.importStatus.textContent.includes('메모리 주의')) els.importStatus.textContent += ' · 메모리 주의';
-                    if (store.addDiagnostic) store.addDiagnostic({ type: 'decode-memory-warning', estimatedDecodeMemoryMb: budget.estimatedDecodeMemoryMb, sizeMb: budget.sizeMb, duration: budget.duration });
-                }
-                const result = await engineKernel.analyzeMedia({
-                    file: inputFile,
-                    fileKind: inputKind,
-                    fileUrl: inputUrl,
-                    fileMeta: inputMeta,
-                    config,
-                    budget,
-                    signal: token && token.signal || null,
-                    onProgress: reportProgress,
-                    onWarning: message => {
-                        if (token && operationCoordinator.isCurrent && !operationCoordinator.isCurrent(token)) return;
-                        toast(message, 'warning');
-                        if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-warning', message });
-                    },
-                    getAutoCutOptions
-                });
-                assertOperation(token, '새 원본이 열려 이전 분석 결과를 폐기했습니다.');
-                state.audioBuffer = result.audioBuffer;
-                state.channelData = result.channelData;
-                state.audioAnalysis = result.audioAnalysis;
-                state.motionAnalysis = result.motionAnalysis;
-                ensureMotionSmartReframe();
-                state.autoCuts = result.autoCuts;
-                state.waveformBins = result.waveformBins || [];
-                state.fileMeta = Object.assign({}, state.fileMeta || {}, result.fileMeta || {});
-                state.engineMeta = result.engine || { version: String(config.APP_VERSION || 'dev').replace(/^v/i, '') };
-                if (engineKernel.auditRuntime) state.engineMeta.stability = engineKernel.auditRuntime(state);
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'engine-analysis', version: state.engineMeta.version, mode: state.engineMeta.mode, budget: state.engineMeta.budget && state.engineMeta.budget.tier });
-            } else {
-                let audioResult = null;
-                try {
-                    audioResult = await audioExtractor.analyzeFileAudio(inputFile, reportProgress, token && token.signal || null, {
-                        maxSeconds: Number(config.MAX_ANALYSIS_SECONDS || 1800),
-                        targetSampleRate: 8000,
-                        retainDecoded: false,
-                        retainChannelData: false
-                    });
-                    assertOperation(token);
-                } catch (audioError) {
-                    if (isAbortError(audioError)) throw audioError;
-                    if (inputKind !== 'video') throw audioError;
-                    toast('비디오 오디오 디코딩이 제한되어 움직임 중심으로 분석합니다.');
-                    if (store.addDiagnostic) store.addDiagnostic({ type: 'audio-decode-fallback', message: audioError.message });
-                }
-                if (audioResult) {
-                    state.audioBuffer = audioResult.decoded;
-                    state.channelData = audioResult.channelData;
-                    state.audioAnalysis = audioResult.analysis;
-                    state.waveformBins = audioResult.waveformBins;
-                    state.fileMeta.duration = Number(audioResult.analysis.duration) || state.fileMeta.duration;
-                } else {
-                    state.audioAnalysis = createFallbackAudioAnalysis(state.fileMeta.duration || (els.sourceVideo && els.sourceVideo.duration) || 30);
-                    state.waveformBins = new Array(160).fill(0).map((_, i) => 0.18 + Math.sin(i * 0.29) * 0.08);
-                }
-                if (inputKind === 'video' && motionAnalyzer.analyzeVideoMotion) {
-                    state.motionAnalysis = await motionAnalyzer.analyzeVideoMotion(inputUrl, reportProgress, token && token.signal || null, { maxSamples: 120 });
-                    ensureMotionSmartReframe();
-                    assertOperation(token);
-                    state.fileMeta.duration = state.fileMeta.duration || state.motionAnalysis.duration;
-                }
-                setProgress(90, '자동 컷 포인트 계산 중');
-                buildAutoCutTimeline();
-            }
-            assertOperation(token);
-            if (analysisOptions.autoGenerate) {
-                setProgress(92, '모듈형 추천 엔진 계산 중');
-                createRecommendations({ autoSelect: false });
-                setProgress(100, '추천 완료');
-                toast('쇼츠 추천 구간을 만들었습니다.', 'success');
-                activateFlowTab('candidates', { reveal: true });
-            } else {
-                setProgress(100, '분석 완료 · 추천 탭으로 이동');
-                toast('자동 분석 완료 · 추천 탭에서 후보를 생성하세요.', 'success');
-                activateFlowTab('recommend', { reveal: true });
-            }
-            finishOperation(token, 'analysis-complete');
-        } catch (error) {
-            if (isAbortError(error)) {
-                setProgress(0, '분석 취소됨');
-                toast('자동 분석을 취소했습니다. 다음 작업 버튼에서 다시 시작할 수 있습니다.', 'warning');
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-cancelled', message: error.message });
-            } else {
-                setProgress(0, '분석 실패');
-                toast(error.message || '분석에 실패했습니다.', 'error');
-                if (store.addDiagnostic) store.addDiagnostic({ type: 'analysis-error', message: error.message });
-            }
-        } finally {
-            const current = !token || !operationCoordinator.isCurrent || operationCoordinator.isCurrent(token);
-            const operationState = operationCoordinator.snapshot ? operationCoordinator.snapshot() : null;
-            const newerAnalysisActive = Boolean(operationState && operationState.active && operationState.active.some(item => item.channel === 'analysis' && (!token || item.id !== token.id)));
-            if (current) finishOperation(token, 'analysis-finalized');
-            if (state.file === inputFile && !newerAnalysisActive) {
-                state.isAnalyzing = false;
-                updateButtons();
-            }
-        }
+    function analyzeCurrentFile(options) {
+        const controller = getAnalysisController();
+        return controller ? controller.analyzeCurrentFile(options) : Promise.resolve(false);
     }
 
 
@@ -2038,6 +2233,7 @@ ${tags}`.trim());
     function init() {
         if (!state) return;
         initElements();
+        getAnalysisController();
         syncSettingsToUI();
         bindEvents();
         createRenderWorkflow();

@@ -3,6 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 function assert(value, message) {
     if (!value) {
@@ -16,10 +18,10 @@ const html = read('index.html');
 const css = read('assets/css/workspace-layout-controls.css');
 const js = read('src/ui/workspace-layout-controls.js');
 const sw = read('sw.js');
-assert(pkg.version === '1.6.15', 'workspace controls release version is v1.6.15');
-assert(html.includes('workspace-layout-controls.css?v=1.6.15-preview-cache-diagnostics'), 'workspace layout stylesheet is linked');
+assert(pkg.version === '1.6.24', 'workspace controls release version matches package version');
+assert(html.includes(`workspace-layout-controls.css?v=${buildKey}`), 'workspace layout stylesheet is linked');
 assert(html.indexOf('workspace-layout-controls.css') > html.indexOf('active-stage-beacon.css'), 'workspace layout stylesheet is the final visual override');
-assert(html.includes('workspace-layout-controls.js?v=1.6.15-preview-cache-diagnostics'), 'workspace controller is loaded');
+assert(html.includes(`workspace-layout-controls.js?v=${buildKey}`), 'workspace controller is loaded');
 assert(html.includes('id="workspaceLayoutToolbar"') && html.includes('data-workspace-mode="preview"') && html.includes('data-workspace-mode="waveform"'), 'desktop layout toolbar exposes balanced, preview, and waveform views');
 assert((html.match(/data-workspace-divider=/g) || []).length === 2, 'two accessible column dividers are present');
 assert(html.includes('role="separator"') && html.includes('aria-orientation="vertical"') && html.includes('tabindex="0"'), 'column dividers support assistive technology and keyboard focus');
@@ -32,5 +34,5 @@ assert(js.includes("mode = 'balanced';") && !js.includes('JSON.stringify({ weigh
 assert(js.includes("['ArrowLeft', 'ArrowRight']") && js.includes("event.key === 'Home'"), 'dividers support keyboard resizing and reset');
 assert(js.includes('setPointerCapture') && js.includes('releasePointerCapture'), 'pointer drag stays owned by the active divider');
 assert(js.includes('guardFocusMode') && js.includes('ai-shorts-navigation-request') && js.includes('[data-flow-tab]'), 'explicit workflow navigation automatically leaves incompatible focus views');
-assert(sw.includes('workspace-layout-controls.css?v=1.6.15-preview-cache-diagnostics') && sw.includes('workspace-layout-controls.js?v=1.6.15-preview-cache-diagnostics'), 'workspace control assets are cached');
-console.log('PASS v1.6.15 resizable desktop workspace and focus view guardrails');
+assert(sw.includes(`workspace-layout-controls.css?v=${buildKey}`) && sw.includes(`workspace-layout-controls.js?v=${buildKey}`), 'workspace control assets are cached');
+console.log('PASS v1.6.24 resizable desktop workspace and focus view guardrails');

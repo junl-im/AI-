@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 const source = fs.readFileSync(path.join(root, 'src/app/render-workflow-controller.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
@@ -50,7 +52,7 @@ vm.runInNewContext(source, { window, console, Object, Array, Number, String, Boo
 assert(window.AIShortsRenderWorkflowController && typeof window.AIShortsRenderWorkflowController.create === 'function', 'render workflow controller exposes a factory');
 assert(!source.includes('.innerHTML'), 'render queue UI does not build user-facing rows with innerHTML');
 assert(html.indexOf('src/app/render-workflow-controller.js') < html.indexOf('src/app.js'), 'render workflow controller loads before the main app');
-assert(sw.includes('./src/app/render-workflow-controller.js?v=1.6.15-preview-cache-diagnostics'), 'render workflow controller is available offline');
+assert(sw.includes(`./src/app/render-workflow-controller.js?v=${buildKey}`), 'render workflow controller is available offline');
 
 const sourceFile = { name: 'source.mp4' };
 const state = {
@@ -137,7 +139,7 @@ assert(findByClass(elements.renderQueueList, 'render-queue-error').textContent =
     assert(saveCount === 1, 'render workflow saves one completed output');
     assert(finishCount === 1, 'render operation finishes exactly once');
     assert(state.selectedRecommendationId === 'first' && state.selectedRange.start === 1, 'editor selection is restored after rendering');
-    console.log('PASS v1.6.15 modular render workflow guardrails');
+    console.log('PASS v1.6.20 modular render workflow guardrails');
 })().catch(error => {
     console.error(error.stack || error.message || error);
     process.exit(1);

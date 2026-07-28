@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.15 - keyframe timeline editing, range application, and collision-safe smart reframe engine
+// AI Shorts Studio v1.6.24 - keyframe timeline editing, range application, and collision-safe smart reframe engine
 'use strict';
 
 (function exposeSmartReframeEngine(global) {
@@ -126,10 +126,45 @@
         return output;
     }
 
+    function safeSpeakerPriority(value) {
+        const priority = String(value || 'auto');
+        return priority === 'primary' || priority === 'secondary' ? priority : 'auto';
+    }
+
+    function safeConfidenceHistory(items, fallback) {
+        const cue = fallback || {};
+        const output = (Array.isArray(items) ? items : []).slice(-12).map((item, index) => ({
+            sequence: Math.max(1, Math.round(finite(item && item.sequence, index + 1))),
+            confidence: Number(clamp(item && item.confidence, 0, 1).toFixed(4)),
+            subjectId: safeSubjectId(item && item.subjectId),
+            source: String(item && item.source || 'face-activity').slice(0, 32)
+        }));
+        if (!output.length) output.push({
+            sequence: 1,
+            confidence: Number(clamp(cue.confidence, 0, 1).toFixed(4)),
+            subjectId: safeSubjectId(cue.subjectId),
+            source: String(cue.source || 'face-activity').slice(0, 32)
+        });
+        return output;
+    }
+
+    function appendConfidenceHistory(items, cue) {
+        const history = safeConfidenceHistory(items, cue);
+        const last = history[history.length - 1];
+        const next = {
+            sequence: last ? last.sequence + 1 : 1,
+            confidence: Number(clamp(cue && cue.confidence, 0, 1).toFixed(4)),
+            subjectId: safeSubjectId(cue && cue.subjectId),
+            source: String(cue && cue.source || 'face-activity').slice(0, 32)
+        };
+        if (last && last.confidence === next.confidence && last.subjectId === next.subjectId && last.source === next.source) return history;
+        return history.concat(next).slice(-12);
+    }
+
     function safeSpeakerCue(input) {
         const cue = input || {};
         const start = Math.max(0, finite(cue.start, 0));
-        return {
+        const safe = {
             start: Number(start.toFixed(3)),
             end: Number(Math.max(start + 0.05, finite(cue.end, start + 0.05)).toFixed(3)),
             speaker: String(cue.speaker || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 40),
@@ -138,8 +173,11 @@
             source: String(cue.source || 'face-activity').slice(0, 32),
             segmentCount: Math.max(1, Math.round(finite(cue.segmentCount, 1))),
             locked: cue.locked === true,
-            mode: cue.locked === true || cue.mode === 'manual' ? 'manual' : 'auto'
+            mode: cue.locked === true || cue.mode === 'manual' ? 'manual' : 'auto',
+            priority: safeSpeakerPriority(cue.priority)
         };
+        safe.confidenceHistory = safeConfidenceHistory(cue.confidenceHistory, safe);
+        return safe;
     }
 
     function normalizeSpeakerCues(items) {
@@ -151,19 +189,19 @@
         return `${safe.start.toFixed(3)}:${safe.end.toFixed(3)}:${safe.speaker}`;
     }
 
-    function getSpeakerCueAt(cues, time) {
-        const list = Array.isArray(cues) ? cues : [];
+    function speakerPriorityRank(cue) {
+        return cue && cue.priority === 'primary' ? 3 : cue && cue.priority === 'secondary' ? 1 : 2;
+    }
+
+    function getSpeakerCuesAt(cues, time) {
         const target = Math.max(0, finite(time, 0));
-        let low = 0;
-        let high = list.length - 1;
-        while (low <= high) {
-            const middle = Math.floor((low + high) / 2);
-            const cue = list[middle];
-            if (target < cue.start) high = middle - 1;
-            else if (target > cue.end) low = middle + 1;
-            else return cue;
-        }
-        return null;
+        return (Array.isArray(cues) ? cues : []).filter(cue => target >= finite(cue && cue.start, 0) && target <= finite(cue && cue.end, 0))
+            .slice()
+            .sort((left, right) => speakerPriorityRank(right) - speakerPriorityRank(left) || finite(right && right.confidence, 0) - finite(left && left.confidence, 0) || finite(left && left.start, 0) - finite(right && right.start, 0));
+    }
+
+    function getSpeakerCueAt(cues, time) {
+        return getSpeakerCuesAt(cues, time)[0] || null;
     }
 
     function median(values) {
@@ -648,9 +686,33 @@
         return rebuildTrack(track, { activeSubjectId: safeSubjectId(subjectId) });
     }
 
+    function overlapDuration(left, right) {
+        return Math.max(0, Math.min(finite(left && left.end, 0), finite(right && right.end, 0)) - Math.max(finite(left && left.start, 0), finite(right && right.start, 0)));
+    }
+
+    function mergeSpeakerCueHistory(nextCues, previousCues) {
+        const previous = normalizeSpeakerCues(previousCues);
+        return normalizeSpeakerCues(nextCues).map(cue => {
+            let match = null;
+            let score = 0;
+            previous.forEach(item => {
+                const overlap = overlapDuration(cue, item);
+                const speakerMatch = cue.speaker && item.speaker && cue.speaker === item.speaker;
+                const nextScore = overlap + (speakerMatch ? 2 : 0);
+                if (nextScore > score) { score = nextScore; match = item; }
+            });
+            if (!match || score <= 0) return cue;
+            const merged = Object.assign({}, cue, {
+                priority: match.priority || cue.priority,
+                confidenceHistory: appendConfidenceHistory(match.confidenceHistory, cue)
+            });
+            return safeSpeakerCue(merged);
+        });
+    }
+
     function applySpeakerCues(track, cues, enabled) {
         if (!track) return null;
-        return rebuildTrack(track, { speakerCues: normalizeSpeakerCues(cues), speakerPriority: enabled !== false });
+        return rebuildTrack(track, { speakerCues: mergeSpeakerCueHistory(cues, track.speakerCues), speakerPriority: enabled !== false });
     }
 
     function clearSpeakerCues(track) {
@@ -675,9 +737,86 @@
                 next.mode = 'auto';
                 if (next.source === 'manual-override') next.source = 'face-activity';
             }
+            if (patch && Object.prototype.hasOwnProperty.call(patch, 'priority')) next.priority = safeSpeakerPriority(patch.priority);
+            const connectionChanged = next.subjectId !== cue.subjectId || next.confidence !== cue.confidence || next.source !== cue.source;
+            if (connectionChanged) next.confidenceHistory = appendConfidenceHistory(cue.confidenceHistory, next);
             return safeSpeakerCue(next);
         });
         return changed ? rebuildTrack(track, { speakerCues }) : track;
+    }
+
+    function updateSpeakerCuesBySpeaker(track, speaker, patch) {
+        if (!track) return null;
+        const label = String(speaker || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 40);
+        if (!label) return track;
+        let changed = false;
+        const cues = normalizeSpeakerCues(track.speakerCues).map(cue => {
+            if (cue.speaker !== label) return cue;
+            changed = true;
+            const next = Object.assign({}, cue, patch || {});
+            if (Object.prototype.hasOwnProperty.call(patch || {}, 'subjectId')) next.subjectId = safeSubjectId(patch.subjectId);
+            if (Object.prototype.hasOwnProperty.call(patch || {}, 'priority')) next.priority = safeSpeakerPriority(patch.priority);
+            if (patch && patch.locked === true) {
+                next.locked = true;
+                next.mode = 'manual';
+                next.source = String(patch.source || 'manual-override').slice(0, 32);
+            } else if (patch && patch.locked === false) {
+                next.locked = false;
+                next.mode = 'auto';
+                if (next.source === 'manual-override') next.source = 'face-activity';
+            }
+            next.confidenceHistory = appendConfidenceHistory(cue.confidenceHistory, next);
+            return safeSpeakerCue(next);
+        });
+        return changed ? rebuildTrack(track, { speakerCues: cues }) : track;
+    }
+
+    function replaceSpeakerCues(track, cues) {
+        return track ? rebuildTrack(track, { speakerCues: normalizeSpeakerCues(cues) }) : null;
+    }
+
+    function splitSpeakerCue(track, cueKey, time, patch) {
+        if (!track) return null;
+        const key = String(cueKey || '');
+        const target = Math.max(0, finite(time, 0));
+        const cues = normalizeSpeakerCues(track.speakerCues);
+        const output = [];
+        let changed = false;
+        cues.forEach(cue => {
+            if (speakerCueKey(cue) !== key || target <= cue.start + 0.05 || target >= cue.end - 0.05) {
+                output.push(cue);
+                return;
+            }
+            changed = true;
+            output.push(safeSpeakerCue(Object.assign({}, cue, { end: target })));
+            output.push(safeSpeakerCue(Object.assign({}, cue, patch || {}, { start: target, end: cue.end })));
+        });
+        return changed ? rebuildTrack(track, { speakerCues: output }) : track;
+    }
+
+    function removeSpeakerCue(track, cueKey) {
+        if (!track) return null;
+        const key = String(cueKey || '');
+        const cues = normalizeSpeakerCues(track.speakerCues).filter(cue => speakerCueKey(cue) !== key);
+        return cues.length === normalizeSpeakerCues(track.speakerCues).length ? track : rebuildTrack(track, { speakerCues: cues });
+    }
+
+    function duplicateSpeakerCue(track, cueKey, patch) {
+        if (!track) return null;
+        const key = String(cueKey || '');
+        const cues = normalizeSpeakerCues(track.speakerCues);
+        const cue = cues.find(item => speakerCueKey(item) === key);
+        if (!cue || cues.length >= MAX_SPEAKER_CUES) return track;
+        const duplicate = safeSpeakerCue(Object.assign({}, cue, {
+            subjectId: 'auto',
+            confidence: 0,
+            source: 'face-activity',
+            locked: false,
+            mode: 'auto',
+            priority: 'secondary',
+            confidenceHistory: []
+        }, patch || {}));
+        return rebuildTrack(track, { speakerCues: cues.concat(duplicate) });
     }
 
     function setSpeakerPriority(track, enabled) {
@@ -777,24 +916,51 @@
         };
     }
 
+    function speakerFocusForCue(track, cue, target) {
+        const subject = cue && cue.subjectId !== 'auto' ? (track.subjects || []).find(item => item.id === cue.subjectId) : null;
+        const selected = subject ? getPointAtArray(subject.points, target, track.sceneCuts) : null;
+        if (!selected) return null;
+        return Object.assign({}, selected, {
+            time: target,
+            source: 'speaker-face',
+            subjectId: subject.id,
+            speaker: cue.speaker || '',
+            speakerPriority: cue.priority || 'auto',
+            speakerConfidence: cue.confidence,
+            confidence: clamp((selected.confidence + cue.confidence) / 2, 0, 1)
+        });
+    }
+
     function getFocusAt(track, time) {
         const target = Math.max(0, finite(time, 0));
         let base = getPointAtArray(track && track.points, target, track && track.sceneCuts);
         if (!base) return null;
         if (track && track.activeSubjectId === 'auto' && track.speakerPriority !== false) {
-            const cue = getSpeakerCueAt(track.speakerCues, target);
-            const subject = cue && cue.subjectId !== 'auto' ? (track.subjects || []).find(item => item.id === cue.subjectId) : null;
-            const selected = subject ? getPointAtArray(subject.points, target, track.sceneCuts) : null;
-            if (selected) {
-                base = Object.assign({}, selected, {
-                    time: target,
-                    source: 'speaker-face',
-                    subjectId: subject.id,
-                    speaker: cue.speaker || '',
-                    speakerConfidence: cue.confidence,
-                    confidence: clamp((selected.confidence + cue.confidence) / 2, 0, 1)
+            const cues = getSpeakerCuesAt(track.speakerCues, target);
+            const focuses = [];
+            const subjectIds = new Set();
+            cues.forEach(cue => {
+                if (cue.subjectId === 'auto' || subjectIds.has(cue.subjectId)) return;
+                const selected = speakerFocusForCue(track, cue, target);
+                if (!selected) return;
+                subjectIds.add(cue.subjectId);
+                focuses.push(selected);
+            });
+            if (focuses.length > 1) {
+                const primary = focuses[0];
+                const secondary = focuses[1];
+                const primaryWeight = primary.speakerPriority === 'primary' ? 0.64 : secondary.speakerPriority === 'primary' ? 0.42 : 0.54;
+                base = Object.assign({}, primary, {
+                    x: primary.x * primaryWeight + secondary.x * (1 - primaryWeight),
+                    y: primary.y * primaryWeight + secondary.y * (1 - primaryWeight),
+                    zoom: 1,
+                    source: 'speaker-dual-face',
+                    secondarySubjectId: secondary.subjectId,
+                    secondarySpeaker: secondary.speaker,
+                    dualSubjects: [primary, secondary],
+                    confidence: clamp((primary.confidence + secondary.confidence) / 2, 0, 1)
                 });
-            }
+            } else if (focuses[0]) base = focuses[0];
         }
         const manual = getKeyframeFocus(track && track.keyframes, target);
         if (!manual) return base;
@@ -920,6 +1086,12 @@
         applySpeakerCues,
         clearSpeakerCues,
         updateSpeakerCue,
+        replaceSpeakerCues,
+        splitSpeakerCue,
+        removeSpeakerCue,
+        duplicateSpeakerCue,
+        updateSpeakerCuesBySpeaker,
+        getSpeakerCuesAt,
         getSpeakerCueAt,
         speakerCueKey,
         setSpeakerPriority,

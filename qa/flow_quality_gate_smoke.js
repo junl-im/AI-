@@ -4,6 +4,9 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
+const configSource = fs.readFileSync(path.join(root, 'src/config/app-runtime-config.js'), 'utf8');
+const buildKey = (configSource.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
+const pkg = require(path.join(root, 'package.json'));
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const loader = fs.readFileSync(path.join(root, 'src/boot/staged-ui-loader.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'assets/css/flow-quality-gate.css'), 'utf8');
@@ -18,9 +21,9 @@ function assert(condition, message) {
     console.log(`PASS ${message}`);
 }
 
-assert(html.includes('assets/css/flow-quality-gate.css?v=1.6.15-preview-cache-diagnostics'), 'flow quality gate stylesheet is linked');
+assert(html.includes(`assets/css/flow-quality-gate.css?v=${buildKey}`), 'flow quality gate stylesheet is linked');
 assert(loader.includes("versioned('src/ui/flow-quality-gate.js', 'shell')"), 'flow quality gate script is staged');
-assert(sw.includes('./assets/css/flow-quality-gate.css?v=1.6.15-preview-cache-diagnostics'), 'flow quality gate stylesheet is cached');
+assert(sw.includes(`./assets/css/flow-quality-gate.css?v=${buildKey}`), 'flow quality gate stylesheet is cached');
 assert(sw.includes('async function cacheFirst') && sw.includes('cache.put(request, response.clone())'), 'staged scripts are cached on first use');
 assert(js.includes("const ORDER = ['file', 'recommend', 'candidates', 'preview', 'waveform', 'cut', 'edit', 'export']"), 'canonical 8-step flow order is guarded');
 assert(js.includes('bestTabForState'), 'state-aware fallback tab resolver exists');
@@ -29,4 +32,4 @@ assert(js.includes('window-error') || js.includes('unhandledrejection'), 'runtim
 assert(js.includes('flow-quality-hidden-legacy'), 'legacy duplicate UI is hidden by runtime guard');
 assert(css.includes('[data-flow-panel][hidden]'), 'hidden panels are force-hidden');
 assert(css.includes('.is-flow-active'), 'active panel class is styled');
-assert(html.includes('data-build="1.6.15"'), 'build marker is v1.6.15');
+assert(html.includes(`data-build="${pkg.version}"`), 'build marker matches package version');

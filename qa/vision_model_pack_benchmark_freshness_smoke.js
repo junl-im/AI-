@@ -72,5 +72,5 @@ function assert(condition, message) {
     assert(typeof api.scheduleBenchmarkRefresh === 'function', 'model manager exposes an automatic benchmark refresh scheduler');
     assert(panel.includes('manager.scheduleBenchmarkRefresh(runtime.packId)'), 'model activation schedules stale benchmark refresh from the UI owner');
     assert(panel.includes("'재측정 필요'"), 'model panel clearly labels expired or environment-mismatched measurements');
-    console.log('PASS v1.6.15 model benchmark freshness, trend, and auto-refresh policy');
+    console.log('PASS v1.6.20 model benchmark freshness, trend, and auto-refresh policy');
 })();

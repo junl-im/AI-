@@ -1,5 +1,86 @@
+## v1.6.24
+
+- 겹치는 두 화자를 상·하 2분할로 동시에 유지하는 `speaker-dual-face` 렌더 추가
+- cue별 primary/secondary/auto 역할과 안정적인 pane 순서 정책 추가
+- 같은 시간 범위의 보조 화자 cue 직접 추가
+- 동일 화자 라벨의 얼굴 연결·고정·역할 일괄 교정
+- 연결 신뢰도 이력을 cue당 최대 12건 보존하고 최근 6건 UI 표시
+- 프로젝트 allowlist에 역할과 bounded confidence history 추가
+- 실제 20초 Chromium dual-speaker 흐름, 30분 1080p 집중 감사, 5회 heap, process memory 재검증
+- 등록 QA를 281개로 확장하고 전체 281/281 통과
+- 서비스워커 135개 자산 무결성 manifest 갱신
+
+
+## v1.6.23
+
+- 화자 cue 가로 타임라인과 직접 선택 UI 추가
+- 발화 시작·종료 시간, 화자 라벨 직접 편집
+- 현재 재생 위치 기준 cue 분할로 동시 발화·화자 전환 구간 분리
+- cue 개별 삭제와 기존 구간별 얼굴 수동 고정 통합
+- 인접 cue 경계와 최소 0.05초 길이 검증 추가
+- 외부 화자 라벨을 textContent로 렌더링해 마크업 주입 차단
+- 스마트 리프레임 실제 브라우저 감사와 5회 실미디어 heap 감사 재생성
+- 서비스워커 135개 자산 무결성 manifest 갱신
+
+# v1.6.21 - Diagnostics Environment Comparison, Support Summary, and Retention Policy
+
+- 가져온 support/analysis/benchmark 진단과 현재 실행 환경을 앱 버전, runtime capability, 오류, 이력, benchmark, service worker 상태로 비교합니다.
+- 비교 항목을 same/changed/warning으로 분류하고 읽기 전용 modal에 표시합니다.
+- 개인정보가 제거된 Markdown 지원 요약 보고서를 공용 Download Service로 저장합니다.
+- 분석 timing history의 보존 기간(1~365일)과 최대 건수(2~30건)를 설정하고 즉시 pruning합니다.
+- 보존 정책은 별도 localStorage key로 관리하며 storage 차단 시 분석 실행은 계속 유지합니다.
+- 무결성 manifest 생성기가 runtime config의 실제 build key를 읽도록 수정했습니다.
+- v1.6.21 Chromium 4개 화면, 진단 가져오기, 5회 실미디어 heap, process memory, 30분 1080p smart-reframe 증빙을 재생성했습니다.
+- 등록 QA를 274개로 확장하고 전체 274/274를 통과했습니다.
+
+# v1.6.20 - Diagnostics Import Preview & Compatibility Guidance
+
+- 통합 지원 진단, 분석 timing 진단, CPU/GPU benchmark 진단 JSON의 읽기 전용 가져오기와 미리보기를 추가했습니다.
+- support/analysis/benchmark schema와 version을 식별하고 legacy version 1 진단을 현재 support bundle로 정규화합니다.
+- 미래 schema, 알 수 없는 형식, 비어 있는 파일, 손상 JSON, 과대 파일, 읽기 실패를 구분해 사용자 조치 안내를 표시합니다.
+- imported nested data를 allowlist로 다시 직렬화해 파일명, 로컬 경로, URL, raw error text, 모델 source metadata를 제거합니다.
+- 호환 진단을 현재 schema의 정규화본으로 저장하며 공용 Download Service의 Object URL 수명주기를 재사용합니다.
+- 실제 Chromium에서 legacy import, future schema, corrupted JSON, normalized download, Escape 종료, 개인정보 제거를 검증했습니다.
+- 직접 시작 스크립트 49개, CSS conflict/duplicate/shadow 0건, 4개 viewport 오류·overflow 0건을 유지했습니다.
+- 서비스워커 manifest를 135개 자산과 새 build key로 갱신했습니다.
+
 # Changelog
 
+## v1.6.19 - Searchable History, Support Bundle, and Schema Compatibility
+
+- 분석 timing 이력을 토큰·상태·병목·실행 출처로 검색하고 완료/실패/취소 상태로 필터링할 수 있습니다.
+- 각 분석 이력에 안정적인 privacy-safe ID를 부여해 개별 삭제와 전체 삭제를 지원합니다.
+- 기존 배열형 및 version 1 timing history를 schema version 2 envelope로 자동 마이그레이션합니다.
+- 분석 timing, CPU/GPU benchmark, 런타임 기능, operation, 서비스워커 상태를 하나의 지원용 진단 JSON으로 묶습니다.
+- 통합 진단에서 파일명·경로·원본 바이트·모델 파일·origin·operation metadata를 제외합니다.
+- 분석 및 benchmark 개별 진단에 schema/schemaVersion을 추가하고 legacy version 1 payload 정규화를 지원합니다.
+- 통합 진단 모듈을 staged shell로 적재해 직접 시작 스크립트 49개 예산을 유지합니다.
+- 서비스워커 무결성 대상을 135개 자산으로 확장했습니다.
+- 등록 QA를 269개로 확장하고 전체 269/269을 통과했습니다.
+
+## v1.6.18 - Timing History, Diagnostic Export, and Confidence-Gated Recommendation
+
+- 분석 timing을 최대 12건의 privacy-safe local history로 보존하고 동일 원본/직전 완료 분석과 비교합니다.
+- 총시간·단계별 변화와 병목 이동을 UI에 표시합니다.
+- 분석 timing과 CPU/GPU benchmark 진단을 공용 Download Service 기반 JSON으로 내보냅니다.
+- raw 파일명·로컬 경로를 이력과 진단 payload에서 제외합니다.
+- 자동 backend 추천은 high/medium이며 점수 55 이상인 측정만 사용합니다.
+- 모든 결과가 낮은 신뢰도이면 자동 추천을 보류하고 재측정을 안내합니다.
+- opaque 문서에서 localStorage getter가 거부돼도 Analysis Controller가 계속 동작하도록 수정했습니다.
+- 등록 QA를 266개로 확장하고 8개 샤드에서 266/266을 통과했습니다.
+
+## v1.6.17 - Analysis Timing & Benchmark Confidence
+
+- Analysis Controller에 준비·메타데이터·예산·엔진/폴백·모션·컷·추천·정리 stage timing을 추가했습니다.
+- 완료·실패·취소 시 열린 stage를 모두 정리하고 총시간, 병목 단계, 병목 비율을 상태와 diagnostics에 보존합니다.
+- 추천 화면에 접근 가능한 분석 병목 진단 패널과 단계별 duration 목록을 추가했습니다.
+- CPU/GPU 벤치마크에 visibility, focus, data saver, Battery Status API context를 기록합니다.
+- 반복 sample CV와 p95 spread를 사용해 0~100 confidence score와 high/medium/low 등급을 계산합니다.
+- 빠른 backend라도 측정 환경이 불안정하면 recommendation confidence를 낮춥니다.
+- 백그라운드·포커스 없음·비충전 저배터리에서는 자동 benchmark refresh를 보류합니다.
+- 발열은 직접 센서로 주장하지 않고 측정 변동성으로 간접 추정한다고 UI에 명시했습니다.
+- 현재 4개 viewport, 5회 실미디어 heap, process memory, 30분 1080p smart-reframe 증빙을 재생성했습니다.
+- 등록 QA를 264개로 확장하고 결정적 4개 샤드에서 **264/264, 실패 0건**을 확인했습니다.
 ## v1.6.15 - Preview Ownership & Model Cache Diagnostics
 
 - 미리보기 RAF, 완료 감시 timer, operation token을 `src/app/preview-controller.js`로 분리했습니다.
