@@ -6,5 +6,5 @@ function ok(v,m){if(!v)throw new Error(m)}
 ok(fs.existsSync(file),'current-version speaker paging browser evidence exists');
 const report=JSON.parse(fs.readFileSync(file,'utf8'));
 ok(report.version===version&&report.passed===true,'speaker paging browser audit passed for current version');
-['energyImmediateSelection','manualPageOrder','slideTransitionState','bulkGridCropApplied','noRuntimeErrors'].forEach(key=>ok(report.checks&&report.checks[key]===true,`${key} passed`));
-console.log('PASS current-version energy/manual paging and bulk grid crop browser evidence');
+['energyStabilityControls','manualPageOrder','slideTransitionState','manualPageReorder','bulkGridCropApplied','noRuntimeErrors'].forEach(key=>ok(report.checks&&report.checks[key]===true,`${key} passed`));
+console.log('PASS current-version stable energy/manual paging, reorder, transitions, and bulk grid crop browser evidence');

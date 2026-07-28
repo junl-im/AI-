@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-6-30",
-  "version": "1.6.30",
+  "name": "ai-shorts-studio-v1-6-32",
+  "version": "1.6.32",
   "private": true,
-  "description": "AI Shorts Studio v1.6.30 - energy-aware speaker paging, manual page composition, bulk grid crops, and animated transitions",
+  "description": "AI Shorts Studio v1.6.32 - per-page speaker timing, in-page ordering, and live energy hold diagnostics",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -305,6 +305,13 @@
     "node qa/speaker_multi_grid_render_smoke.js",
     "node qa/speaker_grid_cell_crop_smoke.js",
     "node qa/speaker_energy_paging_smoke.js",
+    "node qa/speaker_energy_stability_smoke.js",
+    "node qa/speaker_manual_page_editor_smoke.js",
+    "node qa/speaker_page_timing_browser_smoke.js",
+    "python3 qa/run_speaker_page_timing_audit.py",
+    "node qa/speaker_manual_page_duration_smoke.js",
+    "node qa/speaker_transition_easing_direction_smoke.js",
+    "node qa/speaker_manual_page_reorder_smoke.js",
     "node qa/speaker_grid_bulk_crop_smoke.js",
     "node qa/speaker_grid_manual_pages_smoke.js",
     "node qa/speaker_grid_transition_render_smoke.js",
@@ -313,7 +320,7 @@
     "node qa/speaker_live_preview_overlay_smoke.js",
     "python3 qa/run_speaker_live_preview_audit.py",
     "node qa/speaker_live_preview_browser_audit_smoke.js",
-    "python3 qa/run_speaker_paging_v1630_audit.py",
+    "python3 qa/run_speaker_paging_v1631_audit.py",
     "node qa/speaker_paging_browser_audit_smoke.js"
   ],
   "devDependencies": {

@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.30 - adjustable grid cells, three-speaker layouts, and paged multi-speaker focus
+// AI Shorts Studio v1.6.32 - per-page speaker timing, in-page ordering, and live energy hold visualization
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -58,6 +58,7 @@
     let speakerDividerPointerId = null;
     let speakerDividerDragControl = null;
     let speakerDividerDragSurface = null;
+    let speakerManualPageDragIndex = -1;
     let supportDiagnosticsInspection = null;
     let supportDiagnosticsComparison = null;
 
@@ -367,7 +368,8 @@
             'speakerCueSelectedCount', 'speakerCueSelectAllBtn', 'speakerCueSelectionClearBtn', 'speakerCueUndoBtn', 'speakerCueRedoBtn',
             'speakerPaneOrientationSelect', 'speakerPaneSplitInput', 'speakerPaneSplitValue', 'speakerPanePositionSelect', 'speakerPaneLayoutPreview', 'speakerPaneDividerControl',
             'speakerGridPrimarySizeInput', 'speakerGridPrimarySizeValue', 'speakerGridPrimaryPositionSelect', 'speakerGridPagingSelect', 'speakerGridPageSecondsInput',
-            'speakerGridTransitionSelect', 'speakerGridTransitionMsInput', 'speakerGridManualPagesInput',
+            'speakerGridEnergyThresholdInput', 'speakerGridEnergyHysteresisInput', 'speakerGridEnergyHoldInput',
+            'speakerGridTransitionSelect', 'speakerGridTransitionMsInput', 'speakerGridTransitionEasingSelect', 'speakerGridSlideDirectionSelect', 'speakerGridManualPagesInput', 'speakerGridManualPageEditor', 'speakerEnergyStatus', 'speakerEnergyBars', 'speakerEnergyHoldStatus',
             'speakerGridCropXInput', 'speakerGridCropXValue', 'speakerGridCropYInput', 'speakerGridCropYValue', 'speakerGridCropZoomInput', 'speakerGridCropZoomValue',
             'speakerCueBulkShiftToggle', 'speakerCueBulkShiftInput', 'speakerCueBulkLabelToggle', 'speakerCueBulkLabelInput',
             'speakerCueBulkFaceToggle', 'speakerCueBulkPriorityToggle', 'speakerCueBulkGridCropToggle', 'speakerCueBulkPreview', 'speakerCueBulkPreviewText', 'speakerCueBulkApplyBtn',
@@ -502,7 +504,7 @@
             subjectId: String(edits.subjectId || 'auto'),
             keyframes: Array.isArray(edits.keyframes) ? edits.keyframes.map(item => Object.assign({}, item)) : [],
             speakerPriority: typeof edits.speakerPriority === 'boolean' ? edits.speakerPriority : getSmartReframeOptions().speakerPriority !== false,
-            speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, edits.speakerLayout || {}, { gridManualPages: Array.isArray(edits.speakerLayout && edits.speakerLayout.gridManualPages) ? edits.speakerLayout.gridManualPages.map(page => page.slice()) : [] }),
+            speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: [], gridManualPageSeconds: [] }, edits.speakerLayout || {}, { gridManualPages: Array.isArray(edits.speakerLayout && edits.speakerLayout.gridManualPages) ? edits.speakerLayout.gridManualPages.map(page => page.slice()) : [], gridManualPageSeconds: Array.isArray(edits.speakerLayout && edits.speakerLayout.gridManualPageSeconds) ? edits.speakerLayout.gridManualPageSeconds.slice() : [] }),
             speakerCues: Array.isArray(edits.speakerCues) ? edits.speakerCues.map(item => Object.assign({}, item, { gridCrop: Object.assign({ x: 0, y: 0, zoom: 1 }, item.gridCrop || {}) })) : []
         };
     }
@@ -510,7 +512,7 @@
     function persistSmartReframeEdits(track) {
         const engine = getSmartReframeEngine();
         if (engine.extractEdits) state.smartReframeEdits = engine.extractEdits(track);
-        else state.smartReframeEdits = { subjectId: track && track.activeSubjectId || 'auto', keyframes: Array.isArray(track && track.keyframes) ? track.keyframes.slice() : [], speakerPriority: track && track.speakerPriority !== false, speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, track && track.speakerLayout || {}), speakerCues: Array.isArray(track && track.speakerCues) ? track.speakerCues.slice() : [] };
+        else state.smartReframeEdits = { subjectId: track && track.activeSubjectId || 'auto', keyframes: Array.isArray(track && track.keyframes) ? track.keyframes.slice() : [], speakerPriority: track && track.speakerPriority !== false, speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: [], gridManualPageSeconds: [] }, track && track.speakerLayout || {}), speakerCues: Array.isArray(track && track.speakerCues) ? track.speakerCues.slice() : [] };
         return state.smartReframeEdits;
     }
 
@@ -862,7 +864,7 @@
                 gridCrop: Object.assign({ x: 0, y: 0, zoom: 1 }, item.gridCrop || {}),
                 confidenceHistory: Array.isArray(item.confidenceHistory) ? item.confidenceHistory.map(entry => Object.assign({}, entry)) : []
             })) : [],
-            speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, source.speakerLayout || {}, { gridManualPages: Array.isArray(source.speakerLayout && source.speakerLayout.gridManualPages) ? source.speakerLayout.gridManualPages.map(page => page.slice()) : [] })
+            speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: [], gridManualPageSeconds: [] }, source.speakerLayout || {}, { gridManualPages: Array.isArray(source.speakerLayout && source.speakerLayout.gridManualPages) ? source.speakerLayout.gridManualPages.map(page => page.slice()) : [], gridManualPageSeconds: Array.isArray(source.speakerLayout && source.speakerLayout.gridManualPageSeconds) ? source.speakerLayout.gridManualPageSeconds.slice() : [] })
         };
     }
 
@@ -1018,7 +1020,7 @@
     }
 
     function syncSpeakerPaneLayoutPreview(layoutInput) {
-        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, layoutInput || {});
+        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: [], gridManualPageSeconds: [] }, layoutInput || {});
         const orientation = layout.orientation === 'horizontal' ? 'horizontal' : 'vertical';
         const split = Math.max(0.35, Math.min(0.65, Number(layout.split) || 0.5));
         const primaryPosition = orientation === 'horizontal' ? (layout.primaryPosition === 'right' ? 'right' : 'left') : (layout.primaryPosition === 'bottom' ? 'bottom' : 'top');
@@ -1158,7 +1160,7 @@
             : (Array.isArray(focus && focus.dualSubjects) ? focus.dualSubjects.slice(0, 2) : []);
         if (subjects.length < 2) return [];
         if (focus.source === 'speaker-grid-face') return speakerGridPaneGeometry(subjects, width, height, focus.speakerLayout);
-        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, focus.speakerLayout || {});
+        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: [], gridManualPageSeconds: [] }, focus.speakerLayout || {});
         const split = Math.max(0.35, Math.min(0.65, Number(layout.split) || 0.5));
         if (layout.orientation === 'horizontal') {
             const primaryWidth = width * split;
@@ -1184,7 +1186,7 @@
         overlay.hidden = !active;
         overlay.dataset.mode = active ? (focus.source === 'speaker-grid-face' ? 'grid' : 'dual') : 'none';
         if (!active) { overlay.dataset.transitionActive = 'false'; return; }
-        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, focus.speakerLayout || state.smartReframe.speakerLayout || {});
+        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: [], gridManualPageSeconds: [] }, focus.speakerLayout || state.smartReframe.speakerLayout || {});
         const orientation = layout.orientation === 'horizontal' ? 'horizontal' : 'vertical';
         const split = Math.max(0.35, Math.min(0.65, Number(layout.split) || 0.5));
         const primaryPosition = orientation === 'horizontal' ? (layout.primaryPosition === 'right' ? 'right' : 'left') : (layout.primaryPosition === 'bottom' ? 'bottom' : 'top');
@@ -1193,6 +1195,8 @@
         overlay.dataset.primaryPosition = primaryPosition;
         const transitionProgress = Math.max(0, Math.min(1, Number(focus.gridTransitionProgress == null ? 1 : focus.gridTransitionProgress)));
         overlay.dataset.transition = layout.gridTransition === 'slide' ? 'slide' : layout.gridTransition === 'none' ? 'none' : 'fade';
+        overlay.dataset.slideDirection = ['left', 'right', 'up', 'down'].includes(layout.gridSlideDirection) ? layout.gridSlideDirection : 'left';
+        overlay.dataset.transitionEasing = ['linear', 'ease-in', 'ease-out'].includes(layout.gridTransitionEasing) ? layout.gridTransitionEasing : 'ease-in-out';
         overlay.dataset.transitionActive = focus.source === 'speaker-grid-face' && transitionProgress < 1 ? 'true' : 'false';
         overlay.style.setProperty('--speaker-grid-transition-progress', String(transitionProgress));
         overlay.style.setProperty('--speaker-live-divider-percent', `${(physicalDivider * 100).toFixed(1)}%`);
@@ -1221,12 +1225,40 @@
             els.speakerPreviewDividerControl.setAttribute('aria-valuenow', String(Math.round(split * 100)));
             els.speakerPreviewDividerControl.setAttribute('aria-valuetext', `주 화자 ${Math.round(split * 100)}%`);
         }
-        if (els.speakerPreviewOverlayStatus) {
-            const count = geometry.length;
-            const paging = focus.source === 'speaker-grid-face' && Number(focus.gridPageCount) > 1 ? ` · 페이지 ${Number(focus.gridPage) + 1}/${focus.gridPageCount}` : '';
+        syncSpeakerEnergyStatus(focus, getSmartReframeTime());
+        if (els.speakerPreviewOverlayStatus) {            const count = geometry.length;
+            const paging = focus.source === 'speaker-grid-face' && Number(focus.gridPageCount) > 1 ? ` · 페이지 ${Number(focus.gridPage) + 1}/${focus.gridPageCount}${focus.gridPageDuration ? ` · ${Number(focus.gridPageDuration).toFixed(1)}초` : ''}` : '';
             const trigger = focus.gridPageTrigger === 'energy' ? ' · 에너지 즉시 전환' : focus.gridPageTrigger === 'manual' ? ' · 수동 페이지' : ''; 
             els.speakerPreviewOverlayStatus.textContent = focus.source === 'speaker-grid-face' ? `${count}명 표시 / ${Number(focus.gridTotalSubjects) || count}명 동시 화자 grid${paging}${trigger}` : `2명 동시 화자 · 주 화자 ${Math.round(split * 100)}%`;
         }
+    }
+
+    function syncSpeakerEnergyStatus(focus, target) {
+        if (!els.speakerEnergyStatus || !els.speakerEnergyBars || !els.speakerEnergyHoldStatus) return;
+        const track = state.smartReframe;
+        const layout = track && track.speakerLayout || {};
+        const active = Boolean(track && layout.gridPaging === 'energy');
+        els.speakerEnergyStatus.hidden = !active;
+        if (!active) return;
+        const time = Math.max(0, Number(target) || 0);
+        const selectedIds = new Set(Array.isArray(focus && focus.gridSubjects) ? focus.gridSubjects.map(item => item.subjectId) : []);
+        const activeCues = (Array.isArray(track.speakerCues) ? track.speakerCues : []).filter(cue => time >= Number(cue.start || 0) && time <= Number(cue.end || 0) && cue.subjectId !== 'auto');
+        const rows = [];
+        const seen = new Set();
+        activeCues.sort((a, b) => Number(b.energy || 0) - Number(a.energy || 0)).forEach(cue => { if (!seen.has(cue.subjectId)) { seen.add(cue.subjectId); rows.push(cue); } });
+        els.speakerEnergyBars.textContent = '';
+        rows.slice(0, 8).forEach(cue => {
+            const item = document.createElement('div'); item.className = 'speaker-energy-row'; item.dataset.selected = selectedIds.has(cue.subjectId) ? 'true' : 'false';
+            const label = document.createElement('span'); label.textContent = cue.speaker || cue.subjectId;
+            const meter = document.createElement('meter'); meter.min = 0; meter.max = 1; meter.value = Math.max(0, Math.min(1, Number(cue.energy == null ? cue.confidence : cue.energy) || 0));
+            const value = document.createElement('output'); value.textContent = `${Math.round(meter.value * 100)}%`;
+            item.append(label, meter, value); els.speakerEnergyBars.appendChild(item);
+        });
+        const threshold = Math.max(0, Math.min(1, Number(layout.gridEnergyThreshold == null ? 0.35 : layout.gridEnergyThreshold)));
+        const hold = Math.max(0, Math.min(5, Number(layout.gridEnergyHoldSeconds == null ? 1.2 : layout.gridEnergyHoldSeconds)));
+        const waiting = rows.filter(cue => !selectedIds.has(cue.subjectId) && Number(cue.energy || 0) >= threshold).map(cue => ({ cue, remaining: Math.max(0, hold - Math.max(0, time - Number(cue.start || 0))) })).sort((a, b) => b.remaining - a.remaining)[0];
+        const trigger = focus && focus.gridPageTrigger === 'energy' ? '에너지 paging 활성' : '에너지 감시 중';
+        els.speakerEnergyHoldStatus.textContent = waiting && waiting.remaining > 0.01 ? `${trigger} · ${waiting.cue.speaker || waiting.cue.subjectId} hold ${waiting.remaining.toFixed(1)}초 남음` : `${trigger} · 임계값 ${Math.round(threshold * 100)}% · 선택 ${selectedIds.size}명`;
     }
 
     function syncSpeakerPanePositionOptions(orientation, requested) {
@@ -1257,6 +1289,128 @@
         return (Array.isArray(pages) ? pages : []).map(page => (Array.isArray(page) ? page : []).join(',')).filter(Boolean).join(' | ');
     }
 
+    function speakerManualPageDurations(pages, input) {
+        const fallback = Math.max(1, Math.min(10, Number(state.smartReframe && state.smartReframe.speakerLayout && state.smartReframe.speakerLayout.gridPageSeconds || 3)));
+        const source = Array.isArray(input) ? input : state.smartReframe && state.smartReframe.speakerLayout && state.smartReframe.speakerLayout.gridManualPageSeconds;
+        return (Array.isArray(pages) ? pages : []).map((_, index) => Math.max(1, Math.min(10, Number(Array.isArray(source) && source[index] != null ? source[index] : fallback))));
+    }
+
+    function commitSpeakerManualPages(pages, durations, message) {
+        if (els.speakerGridManualPagesInput) els.speakerGridManualPagesInput.value = formatSpeakerGridManualPages(pages);
+        applySpeakerLayoutSettings({ gridManualPages: pages, gridManualPageSeconds: speakerManualPageDurations(pages, durations) });
+        if (message) toast(message, 'action');
+    }
+
+    function moveSpeakerManualPage(fromIndex, toIndex) {
+        const pages = parseSpeakerGridManualPages(els.speakerGridManualPagesInput && els.speakerGridManualPagesInput.value);
+        const durations = speakerManualPageDurations(pages);
+        const from = Math.max(0, Math.min(pages.length - 1, Number(fromIndex) || 0));
+        const to = Math.max(0, Math.min(pages.length - 1, Number(toIndex) || 0));
+        if (from === to || !pages[from]) return;
+        const moved = pages.splice(from, 1)[0];
+        const movedDuration = durations.splice(from, 1)[0];
+        pages.splice(to, 0, moved);
+        durations.splice(to, 0, movedDuration);
+        commitSpeakerManualPages(pages, durations, `수동 화자 페이지 ${from + 1}을 ${to + 1}번으로 이동했습니다.`);
+    }
+
+    function moveSpeakerManualPageSubject(pageIndex, fromIndex, toIndex) {
+        const pages = parseSpeakerGridManualPages(els.speakerGridManualPagesInput && els.speakerGridManualPagesInput.value);
+        const durations = speakerManualPageDurations(pages);
+        const page = pages[pageIndex];
+        if (!page || fromIndex === toIndex || !page[fromIndex]) return;
+        const bounded = Math.max(0, Math.min(page.length - 1, Number(toIndex) || 0));
+        const moved = page.splice(fromIndex, 1)[0];
+        page.splice(bounded, 0, moved);
+        commitSpeakerManualPages(pages, durations, `${moved} 화자를 페이지 ${pageIndex + 1}의 ${bounded + 1}번째로 이동했습니다.`);
+    }
+
+    function setSpeakerManualPageDuration(pageIndex, value) {
+        const pages = parseSpeakerGridManualPages(els.speakerGridManualPagesInput && els.speakerGridManualPagesInput.value);
+        const durations = speakerManualPageDurations(pages);
+        if (!pages[pageIndex]) return;
+        durations[pageIndex] = Math.max(1, Math.min(10, Number(value) || 3));
+        commitSpeakerManualPages(pages, durations, `페이지 ${pageIndex + 1} 표시 시간을 ${durations[pageIndex]}초로 변경했습니다.`);
+    }
+
+    function renderSpeakerManualPageEditor(pagesInput, durationsInput, enabled) {
+        if (!els.speakerGridManualPageEditor) return;
+        const pages = Array.isArray(pagesInput) ? pagesInput : [];
+        const durations = speakerManualPageDurations(pages, durationsInput);
+        els.speakerGridManualPageEditor.textContent = '';
+        els.speakerGridManualPageEditor.dataset.state = pages.length ? 'ready' : 'empty';
+        if (!pages.length) {
+            const empty = document.createElement('small');
+            empty.textContent = '수동 페이지를 입력하면 페이지와 페이지 안 화자 순서·표시 시간을 편집할 수 있습니다.';
+            els.speakerGridManualPageEditor.appendChild(empty);
+            return;
+        }
+        pages.forEach((page, index) => {
+            const card = document.createElement('div');
+            card.className = 'speaker-grid-manual-page-card';
+            card.draggable = Boolean(enabled);
+            card.dataset.pageIndex = String(index);
+            card.setAttribute('role', 'listitem');
+            card.setAttribute('aria-label', `페이지 ${index + 1}, ${durations[index]}초, ${page.join(', ')}`);
+            const grip = document.createElement('span');
+            grip.className = 'speaker-grid-manual-page-grip';
+            grip.textContent = '⋮⋮';
+            grip.setAttribute('aria-hidden', 'true');
+            const content = document.createElement('div');
+            content.className = 'speaker-grid-manual-page-content';
+            const heading = document.createElement('strong');
+            heading.textContent = `페이지 ${index + 1}`;
+            const duration = document.createElement('label');
+            duration.className = 'speaker-grid-manual-page-duration';
+            const durationText = document.createElement('span');
+            durationText.textContent = '표시 시간';
+            const durationInput = document.createElement('input');
+            durationInput.type = 'number'; durationInput.min = '1'; durationInput.max = '10'; durationInput.step = '0.5';
+            durationInput.value = String(durations[index]); durationInput.disabled = !enabled;
+            durationInput.setAttribute('aria-label', `페이지 ${index + 1} 표시 시간 초`);
+            durationInput.addEventListener('change', () => setSpeakerManualPageDuration(index, durationInput.value));
+            duration.append(durationText, durationInput);
+            const subjects = document.createElement('div');
+            subjects.className = 'speaker-grid-manual-subject-list';
+            subjects.setAttribute('role', 'list');
+            page.forEach((subjectId, subjectIndex) => {
+                const chip = document.createElement('div');
+                chip.className = 'speaker-grid-manual-subject-chip';
+                chip.draggable = Boolean(enabled);
+                chip.dataset.subjectIndex = String(subjectIndex);
+                chip.setAttribute('role', 'listitem');
+                const name = document.createElement('span'); name.textContent = subjectId;
+                const actions = document.createElement('span'); actions.className = 'speaker-grid-manual-subject-actions';
+                [['←', subjectIndex - 1], ['→', subjectIndex + 1]].forEach(([text, next]) => {
+                    const button = document.createElement('button'); button.type = 'button'; button.className = 'mini-action'; button.textContent = text;
+                    button.disabled = !enabled || next < 0 || next >= page.length;
+                    button.setAttribute('aria-label', `${subjectId} ${text === '←' ? '앞으로' : '뒤로'} 이동`);
+                    button.addEventListener('click', () => moveSpeakerManualPageSubject(index, subjectIndex, next));
+                    actions.appendChild(button);
+                });
+                chip.addEventListener('dragstart', event => { if (event.dataTransfer) { event.stopPropagation(); event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('application/x-speaker-subject', `${index}:${subjectIndex}`); } });
+                chip.addEventListener('dragover', event => { if (enabled && event.dataTransfer && Array.from(event.dataTransfer.types || []).includes('application/x-speaker-subject')) event.preventDefault(); });
+                chip.addEventListener('drop', event => { const value = event.dataTransfer && event.dataTransfer.getData('application/x-speaker-subject'); if (!value) return; event.preventDefault(); event.stopPropagation(); const [sourcePage, sourceIndex] = value.split(':').map(Number); if (sourcePage === index) moveSpeakerManualPageSubject(index, sourceIndex, subjectIndex); });
+                chip.append(name, actions); subjects.appendChild(chip);
+            });
+            content.append(heading, duration, subjects);
+            const controls = document.createElement('span');
+            controls.className = 'speaker-grid-manual-page-actions';
+            [['위', index - 1], ['아래', index + 1]].forEach(([text, next]) => {
+                const button = document.createElement('button'); button.type = 'button'; button.className = 'mini-action'; button.textContent = text;
+                button.disabled = !enabled || next < 0 || next >= pages.length;
+                button.addEventListener('click', () => moveSpeakerManualPage(index, next)); controls.appendChild(button);
+            });
+            card.addEventListener('dragstart', event => { if (event.target !== card && event.target.closest('.speaker-grid-manual-subject-chip')) return; speakerManualPageDragIndex = index; card.dataset.dragging = 'true'; if (event.dataTransfer) { event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', String(index)); } });
+            card.addEventListener('dragover', event => { if (enabled && !(event.dataTransfer && Array.from(event.dataTransfer.types || []).includes('application/x-speaker-subject'))) { event.preventDefault(); card.dataset.dropTarget = 'true'; } });
+            card.addEventListener('dragleave', () => { delete card.dataset.dropTarget; });
+            card.addEventListener('drop', event => { if (event.dataTransfer && Array.from(event.dataTransfer.types || []).includes('application/x-speaker-subject')) return; event.preventDefault(); delete card.dataset.dropTarget; const source = speakerManualPageDragIndex >= 0 ? speakerManualPageDragIndex : Number(event.dataTransfer && event.dataTransfer.getData('text/plain')); speakerManualPageDragIndex = -1; moveSpeakerManualPage(source, index); });
+            card.addEventListener('dragend', () => { speakerManualPageDragIndex = -1; delete card.dataset.dragging; delete card.dataset.dropTarget; });
+            card.append(grip, content, controls);
+            els.speakerGridManualPageEditor.appendChild(card);
+        });
+    }
+
     function applySpeakerLayoutSettings(options) {
         const opts = Object.assign({ recordHistory: true, persist: true }, options || {});
         const engine = getSmartReframeEngine();
@@ -1271,11 +1425,19 @@
         const requestedPaging = String(els.speakerGridPagingSelect && els.speakerGridPagingSelect.value || 'rotate');
         const gridPaging = ['priority', 'energy', 'manual'].includes(requestedPaging) ? requestedPaging : 'rotate';
         const gridPageSeconds = Math.max(1, Math.min(10, Number(els.speakerGridPageSecondsInput && els.speakerGridPageSecondsInput.value || 3)));
+        const gridEnergyThreshold = Math.max(0, Math.min(1, Number(els.speakerGridEnergyThresholdInput && els.speakerGridEnergyThresholdInput.value || 0.35)));
+        const gridEnergyHysteresis = Math.max(0, Math.min(0.3, Number(els.speakerGridEnergyHysteresisInput && els.speakerGridEnergyHysteresisInput.value || 0.08)));
+        const gridEnergyHoldSeconds = Math.max(0, Math.min(5, Number(els.speakerGridEnergyHoldInput && els.speakerGridEnergyHoldInput.value || 1.2)));
         const requestedTransition = String(els.speakerGridTransitionSelect && els.speakerGridTransitionSelect.value || 'fade');
         const gridTransition = ['none', 'slide'].includes(requestedTransition) ? requestedTransition : 'fade';
         const gridTransitionMs = Math.max(120, Math.min(1200, Math.round(Number(els.speakerGridTransitionMsInput && els.speakerGridTransitionMsInput.value || 320))));
-        const gridManualPages = parseSpeakerGridManualPages(els.speakerGridManualPagesInput && els.speakerGridManualPagesInput.value);
-        state.smartReframe = engine.updateSpeakerLayout(state.smartReframe, { orientation, split, primaryPosition, gridPrimarySize, gridPrimaryPosition, gridPaging, gridPageSeconds, gridTransition, gridTransitionMs, gridManualPages }) || state.smartReframe;
+        const requestedEasing = String(els.speakerGridTransitionEasingSelect && els.speakerGridTransitionEasingSelect.value || 'ease-in-out');
+        const gridTransitionEasing = ['linear', 'ease-in', 'ease-out'].includes(requestedEasing) ? requestedEasing : 'ease-in-out';
+        const requestedDirection = String(els.speakerGridSlideDirectionSelect && els.speakerGridSlideDirectionSelect.value || 'auto');
+        const gridSlideDirection = ['left', 'right', 'up', 'down'].includes(requestedDirection) ? requestedDirection : 'auto';
+        const gridManualPages = Array.isArray(opts.gridManualPages) ? opts.gridManualPages : parseSpeakerGridManualPages(els.speakerGridManualPagesInput && els.speakerGridManualPagesInput.value);
+        const gridManualPageSeconds = speakerManualPageDurations(gridManualPages, opts.gridManualPageSeconds);
+        state.smartReframe = engine.updateSpeakerLayout(state.smartReframe, { orientation, split, primaryPosition, gridPrimarySize, gridPrimaryPosition, gridPaging, gridPageSeconds, gridEnergyThreshold, gridEnergyHysteresis, gridEnergyHoldSeconds, gridTransition, gridTransitionMs, gridTransitionEasing, gridSlideDirection, gridManualPages, gridManualPageSeconds }) || state.smartReframe;
         if (opts.persist) persistSmartReframeEdits(state.smartReframe);
         updateSmartReframeUI();
         renderPreviewStill();
@@ -1326,8 +1488,10 @@
         const index = getSpeakerTuneIndex(cues);
         speakerTuneIndex = index;
         const cue = index >= 0 ? cues[index] : null;
-        const speakerLayout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, track && track.speakerLayout || {});
+        const speakerLayout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: [], gridManualPageSeconds: [] }, track && track.speakerLayout || {});
         const speakerLayoutOrientation = speakerLayout.orientation === 'horizontal' ? 'horizontal' : 'vertical';
+        const speakerEnergyFocus = track && getSmartReframeEngine().getFocusAt ? getSmartReframeEngine().getFocusAt(track, getSmartReframeTime()) : null;
+        syncSpeakerEnergyStatus(speakerEnergyFocus, getSmartReframeTime());
         if (els.speakerFaceTuningCount) els.speakerFaceTuningCount.textContent = `${cues.length}구간`;
         if (els.speakerFaceTuningPanel) els.speakerFaceTuningPanel.dataset.state = cue ? (cue.locked ? 'manual' : 'auto') : 'empty';
         if (els.speakerCueSelectedCount) els.speakerCueSelectedCount.textContent = `선택 ${speakerCueSelection.size}개`;
@@ -1358,9 +1522,15 @@
         if (els.speakerGridPrimaryPositionSelect) { els.speakerGridPrimaryPositionSelect.disabled = !track; els.speakerGridPrimaryPositionSelect.value = ['top', 'bottom', 'left', 'right'].includes(speakerLayout.gridPrimaryPosition) ? speakerLayout.gridPrimaryPosition : 'top'; }
         if (els.speakerGridPagingSelect) { els.speakerGridPagingSelect.disabled = !track; els.speakerGridPagingSelect.value = ['priority', 'energy', 'manual'].includes(speakerLayout.gridPaging) ? speakerLayout.gridPaging : 'rotate'; }
         if (els.speakerGridPageSecondsInput) { els.speakerGridPageSecondsInput.disabled = !track || speakerLayout.gridPaging === 'priority' || speakerLayout.gridPaging === 'energy'; els.speakerGridPageSecondsInput.value = String(Number(speakerLayout.gridPageSeconds || 3)); }
+        if (els.speakerGridEnergyThresholdInput) { els.speakerGridEnergyThresholdInput.disabled = !track || speakerLayout.gridPaging !== 'energy'; els.speakerGridEnergyThresholdInput.value = String(Number(speakerLayout.gridEnergyThreshold == null ? 0.35 : speakerLayout.gridEnergyThreshold)); }
+        if (els.speakerGridEnergyHysteresisInput) { els.speakerGridEnergyHysteresisInput.disabled = !track || speakerLayout.gridPaging !== 'energy'; els.speakerGridEnergyHysteresisInput.value = String(Number(speakerLayout.gridEnergyHysteresis == null ? 0.08 : speakerLayout.gridEnergyHysteresis)); }
+        if (els.speakerGridEnergyHoldInput) { els.speakerGridEnergyHoldInput.disabled = !track || speakerLayout.gridPaging !== 'energy'; els.speakerGridEnergyHoldInput.value = String(Number(speakerLayout.gridEnergyHoldSeconds == null ? 1.2 : speakerLayout.gridEnergyHoldSeconds)); }
         if (els.speakerGridTransitionSelect) { els.speakerGridTransitionSelect.disabled = !track || speakerLayout.gridPaging === 'priority' || speakerLayout.gridPaging === 'energy'; els.speakerGridTransitionSelect.value = ['none', 'slide'].includes(speakerLayout.gridTransition) ? speakerLayout.gridTransition : 'fade'; }
         if (els.speakerGridTransitionMsInput) { els.speakerGridTransitionMsInput.disabled = !track || speakerLayout.gridPaging === 'priority' || speakerLayout.gridPaging === 'energy' || speakerLayout.gridTransition === 'none'; els.speakerGridTransitionMsInput.value = String(Math.round(Number(speakerLayout.gridTransitionMs || 320))); }
+        if (els.speakerGridTransitionEasingSelect) { els.speakerGridTransitionEasingSelect.disabled = !track || speakerLayout.gridPaging === 'priority' || speakerLayout.gridPaging === 'energy' || speakerLayout.gridTransition === 'none'; els.speakerGridTransitionEasingSelect.value = ['linear', 'ease-in', 'ease-out'].includes(speakerLayout.gridTransitionEasing) ? speakerLayout.gridTransitionEasing : 'ease-in-out'; }
+        if (els.speakerGridSlideDirectionSelect) { els.speakerGridSlideDirectionSelect.disabled = !track || speakerLayout.gridPaging === 'priority' || speakerLayout.gridPaging === 'energy' || speakerLayout.gridTransition !== 'slide'; els.speakerGridSlideDirectionSelect.value = ['left', 'right', 'up', 'down'].includes(speakerLayout.gridSlideDirection) ? speakerLayout.gridSlideDirection : 'auto'; }
         if (els.speakerGridManualPagesInput) { els.speakerGridManualPagesInput.disabled = !track || speakerLayout.gridPaging !== 'manual'; els.speakerGridManualPagesInput.value = formatSpeakerGridManualPages(speakerLayout.gridManualPages); }
+        renderSpeakerManualPageEditor(speakerLayout.gridManualPages, speakerLayout.gridManualPageSeconds, Boolean(track && speakerLayout.gridPaging === 'manual'));
         syncSpeakerPaneLayoutPreview(speakerLayout);
         if (els.speakerFaceSubjectSelect) {
             const signature = subjects.map(subject => `${subject.id}:${subject.label}`).join('|');
@@ -2485,8 +2655,11 @@
         if (els.speakerGridPrimaryPositionSelect) els.speakerGridPrimaryPositionSelect.addEventListener('change', applySpeakerLayoutSettings);
         if (els.speakerGridPagingSelect) els.speakerGridPagingSelect.addEventListener('change', applySpeakerLayoutSettings);
         if (els.speakerGridPageSecondsInput) els.speakerGridPageSecondsInput.addEventListener('change', applySpeakerLayoutSettings);
+        [els.speakerGridEnergyThresholdInput, els.speakerGridEnergyHysteresisInput, els.speakerGridEnergyHoldInput].forEach(input => { if (input) input.addEventListener('change', applySpeakerLayoutSettings); });
         if (els.speakerGridTransitionSelect) els.speakerGridTransitionSelect.addEventListener('change', applySpeakerLayoutSettings);
         if (els.speakerGridTransitionMsInput) els.speakerGridTransitionMsInput.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridTransitionEasingSelect) els.speakerGridTransitionEasingSelect.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridSlideDirectionSelect) els.speakerGridSlideDirectionSelect.addEventListener('change', applySpeakerLayoutSettings);
         if (els.speakerGridManualPagesInput) els.speakerGridManualPagesInput.addEventListener('change', applySpeakerLayoutSettings);
         [['speakerGridCropXInput','speakerGridCropXValue'], ['speakerGridCropYInput','speakerGridCropYValue'], ['speakerGridCropZoomInput','speakerGridCropZoomValue']].forEach(([inputId, outputId]) => {
             if (!els[inputId]) return;

@@ -1,43 +1,41 @@
-# PATCH REPORT v1.6.30
+# PATCH REPORT v1.6.32
 
 ## 변경 범위
 
-- `src/vision/smart-reframe-engine.js`: cue 에너지, energy/manual paging, 이전 페이지·transition progress
-- `src/vision/speaker-face-linker.js`: segment RMS/energy 정규화·병합
-- `src/render/vertical-renderer.js`: grid page fade·slide 합성
-- `src/app.js`: 오디오 프레임 에너지 집계, manual page UI, transition 설정, grid crop bulk patch
-- `src/project/project-service.js`: energy·manual pages·transition bounded allowlist 저장·복구
+- `src/vision/smart-reframe-engine.js`: 페이지별 시간 정규화, 누적 cycle 계산, focus 시간 상태와 cache identity 확장
+- `src/app.js`: 페이지 시간 입력, 페이지 내부 화자 정렬, 실시간 energy/hold 상태 UI
+- `src/project/project-service.js`: `gridManualPageSeconds` allowlist 저장·복구
 - `src/state/app-state.js`: 신규 speaker layout 기본값
-- `index.html`, `assets/css/smart-reframe.css`: paging·transition·manual page·bulk crop 컨트롤
-- 신규 QA: energy paging, manual pages, transition render, bulk grid crop, Chromium paging audit
+- `index.html`, `assets/css/smart-reframe.css`: 에너지 진단·페이지 duration·subject chip UI
+- 신규 QA: manual page duration/editor, v1.6.32 Chromium page timing audit, browser evidence consumer
 
 ## 안전성
 
-- cue 에너지는 0~1, 전환 시간은 120~1200ms로 제한합니다.
-- 수동 페이지는 최대 12개, 페이지당 최대 4개 subject ID만 허용합니다.
-- 임의 문자열과 prototype 키는 프로젝트 경계에서 제거합니다.
-- 에너지 paging은 기존 최대 4인 렌더 상한을 유지합니다.
-- fade·slide는 기존 렌더 프레임 시간을 사용하며 신규 RAF·interval을 추가하지 않습니다.
-- Object URL·Preview Controller·Render Queue·Download Service 소유권을 변경하지 않았습니다.
-- v1.6.29 프로젝트는 신규 필드가 없으면 기존 rotate·transition 없음 기본값으로 복구됩니다.
+- 페이지별 시간은 1~10초로 제한합니다.
+- 시간 배열은 유효한 수동 페이지 길이에 맞춰 정렬합니다.
+- 페이지와 시간을 함께 이동해 재정렬 후 시간 소유권이 바뀌지 않도록 합니다.
+- 페이지당 subject ID를 최대 4개로 제한하고 중복·빈 값을 제거합니다.
+- 에너지 UI는 기존 preview callback을 사용하며 신규 RAF·interval·Object URL을 추가하지 않습니다.
+- 기존 v1.6.31 프로젝트는 신규 필드가 없으면 전역 `gridPageSeconds`를 기본값으로 사용합니다.
 
 ## 최종 검증
 
-- 전체 QA: 300/300, 실패 0건
-- 6개 샤드: 50/50 × 6
-- 실미디어 5회 JS heap: 5.309 → 5.866MiB
-- URL 생성 10개·해제 10개, 종료 후 활성 0개
-- Chromium RSS: 772.865 → 876.131MiB
-- JS heap 기울기: 0.008MiB/cycle
+- 전체 QA: **307/307, 실패 0건**
+- 구간: 100/100 + 100/100 + 40/40 + 43/43 + 24/24
+- 실미디어 5회 JS heap: 5.385 → 5.581 → 5.692 → 5.783 → 5.880MiB
+- 종료 후 Object URL 0개, operation·render queue 잔류 0건
+- Chromium RSS: 770.180 → 836.062MiB
+- Chromium USS: 243.481 → 266.637MiB
+- JS heap 기울기: 0.0052MiB/cycle
 - CSS 충돌·동일값 중복·shadow: 0건
-- 구조 probe: 안전 167, 필수 26, 미확인 13
+- 구조 probe: 안전 166, 필수 27, 미확인 13
 - 서비스워커 무결성 대상: 135개 자산
-- manifest SHA-256: `a1fb7c74e82b391ec0047be5d4422f93115265b0c1f56d6d0465b6c20a08088a`
+- manifest SHA-256: `29809a1637112e3db0fab5b825dcc75b418e186fdfeaba083f993d5a8a184c6f`
 
 ## 배포 범위
 
-- v1.6.29 대비 변경·추가: **49개**
-- 신규 파일: **27개**
+- v1.6.31 대비 변경·추가: **48개**
+- 신규 파일: **26개**
 - 수정 파일: **22개**
 - 삭제 파일: **0개**
-- 최종 프로젝트: **1173개 파일**
+- 최종 프로젝트: **1224개 파일**

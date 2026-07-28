@@ -1,13 +1,13 @@
-# PROJECT NOTES v1.6.30
+# PROJECT NOTES v1.6.32
 
-- `speakerCue.energy`는 cue 시간 범위의 로컬 `audioAnalysis.frames[].rmsNorm` 평균입니다.
-- `speakerLayout.gridPaging`은 `rotate`, `priority`, `energy`, `manual`입니다.
-- energy 정책은 주 화자를 고정하고 보조 화자를 에너지 순으로 즉시 선택합니다.
-- manual 정책은 최대 12개 페이지, 페이지당 최대 4개 subject ID를 저장합니다.
-- `gridTransition`은 `none`, `fade`, `slide`이며 `gridTransitionMs`는 120~1200ms입니다.
-- rotate/manual 전환은 이전 page와 진행률을 focus에 포함합니다.
-- energy/priority는 즉시 결정을 우선하며 지연 전환을 적용하지 않습니다.
-- 선택 cue의 현재 grid crop은 bounded bulk patch로 일괄 적용할 수 있습니다.
-- renderer는 신규 timer 없이 media timestamp로 transition을 계산합니다.
-- 직접 crop keyframe과 전역 피사체 고정은 grid보다 우선합니다.
-- 전체 QA 300/300, 배포 파일 1173개, v1.6.29 대비 변경·추가 49개입니다.
+- `gridManualPageSeconds`는 `gridManualPages`와 같은 index의 페이지 표시 시간 배열입니다.
+- 각 페이지 시간은 1~10초이며 누락된 값은 `gridPageSeconds`로 복구합니다.
+- 수동 페이지 선택은 각 페이지 시간의 cumulative cycle로 계산합니다.
+- page reorder는 페이지 subject 배열과 duration을 항상 함께 이동합니다.
+- 페이지 내부 subject는 drag-and-drop과 좌·우 버튼으로 재정렬할 수 있습니다.
+- subject ID는 페이지당 최대 4개이며 중복과 빈 값은 정규화 과정에서 제거됩니다.
+- focus는 현재 페이지의 `gridPageDuration`, `gridPageElapsed`를 제공합니다.
+- energy 상태 UI는 활성 화자 에너지, grid 선택 여부, threshold와 hold 남은 시간을 표시합니다.
+- energy 상태는 기존 preview render callback에서 갱신하며 별도 timer를 만들지 않습니다.
+- 기존 threshold·hysteresis·hold, transition, manual paging, grid crop 계약을 유지합니다.
+- 전체 QA 307/307, 배포 파일 1224개, v1.6.31 대비 변경·추가 48개입니다.

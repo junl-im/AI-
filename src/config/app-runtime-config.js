@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.30 - horizontal speaker panes, Shift/drag selection, and selective bulk editing
+// AI Shorts Studio v1.6.32 - horizontal speaker panes, Shift/drag selection, and selective bulk editing
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.30',
-    BUILD_KEY: '1.6.30-energy-manual-paging-transitions',
+    APP_VERSION: 'v1.6.32',
+    BUILD_KEY: '1.6.32-page-timing-subject-order-energy-status',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     ANALYSIS_TIMING_HISTORY_KEY: 'ai-shorts-analysis-timing-history-v1',
     ANALYSIS_TIMING_HISTORY_LIMIT: 12,

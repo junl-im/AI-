@@ -194,11 +194,18 @@
             gridPrimaryPosition: ['top', 'bottom', 'left', 'right'].includes(layoutInput.gridPrimaryPosition) ? layoutInput.gridPrimaryPosition : 'top',
             gridPaging: ['priority', 'energy', 'manual'].includes(layoutInput.gridPaging) ? layoutInput.gridPaging : 'rotate',
             gridPageSeconds: Number(finiteNumber(layoutInput.gridPageSeconds, 3, 1, 10).toFixed(1)),
+            gridEnergyThreshold: Number(finiteNumber(layoutInput.gridEnergyThreshold, 0.35, 0, 1).toFixed(3)),
+            gridEnergyHysteresis: Number(finiteNumber(layoutInput.gridEnergyHysteresis, 0.08, 0, 0.3).toFixed(3)),
+            gridEnergyHoldSeconds: Number(finiteNumber(layoutInput.gridEnergyHoldSeconds, 1.2, 0, 5).toFixed(2)),
             gridTransition: ['none', 'slide'].includes(layoutInput.gridTransition) ? layoutInput.gridTransition : 'fade',
             gridTransitionMs: Math.round(finiteNumber(layoutInput.gridTransitionMs, 320, 120, 1200)),
+            gridTransitionEasing: ['linear', 'ease-in', 'ease-out'].includes(layoutInput.gridTransitionEasing) ? layoutInput.gridTransitionEasing : 'ease-in-out',
+            gridSlideDirection: ['left', 'right', 'up', 'down'].includes(layoutInput.gridSlideDirection) ? layoutInput.gridSlideDirection : 'auto',
             gridManualPages: (Array.isArray(layoutInput.gridManualPages) ? layoutInput.gridManualPages : []).slice(0, 12).map(page => (Array.isArray(page) ? page : [])
-                .map(value => safeText(value, 24)).filter(value => /^subject-[1-9][0-9]{0,2}$/.test(value)).filter((value, index, list) => list.indexOf(value) === index).slice(0, 4)).filter(page => page.length)
+                .map(value => safeText(value, 24)).filter(value => /^subject-[1-9][0-9]{0,2}$/.test(value)).filter((value, index, list) => list.indexOf(value) === index).slice(0, 4)).filter(page => page.length),
+            gridManualPageSeconds: []
         };
+        speakerLayout.gridManualPageSeconds = speakerLayout.gridManualPages.map((_, index) => Number(finiteNumber(Array.isArray(layoutInput.gridManualPageSeconds) ? layoutInput.gridManualPageSeconds[index] : undefined, speakerLayout.gridPageSeconds, 1, 10).toFixed(1)));
         return { subjectId, keyframes, speakerPriority: input.speakerPriority !== false, speakerLayout, speakerCues };
     }
 
@@ -296,7 +303,7 @@
             fileName: state && state.file ? state.file.name : fileMeta && fileMeta.name || '',
             fileKind: state && state.fileKind || '',
             settings: Object.assign({}, state && state.settings || {}),
-            smartReframeEdits: state && state.smartReframeEdits ? state.smartReframeEdits : { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerLayout: { orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, speakerCues: [] },
+            smartReframeEdits: state && state.smartReframeEdits ? state.smartReframeEdits : { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerLayout: { orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: [], gridManualPageSeconds: [] }, speakerCues: [] },
             selectedRecommendationId: state && state.selectedRecommendationId || '',
             selectedRange: state && state.selectedRange ? Object.assign({}, state.selectedRange) : null,
             recommendations: (state && state.recommendations || []).map(item => Object.assign({}, item)),

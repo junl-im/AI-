@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## v1.6.32
+
+- 수동 화자 페이지별 표시 시간 1~10초 설정과 cumulative cycle 계산 추가
+- 페이지 재정렬 시 페이지별 표시 시간이 같은 페이지와 함께 이동하도록 동기화
+- 수동 페이지 내부 화자 drag-and-drop 및 좌·우 이동 버튼 추가
+- 현재 활성 화자 에너지 막대, grid 선택 상태, threshold와 hold 남은 시간 시각화 추가
+- `gridManualPageSeconds` 프로젝트 allowlist·track identity·undo/redo 깊은 복사 경로 확장
+- 수동 페이지 시간·내부 화자 순서·에너지 상태 Chromium 감사와 신규 회귀 4건 추가
+- 기존 speaker paging 감사가 페이지 카드 내부 버튼을 잘못 해석하던 위치 기반 가정을 명시적 selector 계약으로 수정
+- 정적 `data-build` 마커와 v1.6.32 build key·서비스워커 앱 셸 무결성 manifest 갱신
+
+## v1.6.31
+
+- energy paging 임계값 0~1 설정 추가
+- 기존 화자 유지 hysteresis 0~0.3 설정 추가
+- 신규 고에너지 화자 최소 유지시간 0~5초 설정 추가
+- hidden mutable state 없는 결정적 과거 cue snapshot 안정화 로직 추가
+- 기존 `gridPageTrigger: energy` 호환 계약 유지
+- 수동 페이지 drag-and-drop 재정렬과 위·아래 버튼 추가
+- transition easing `linear`, `ease-in`, `ease-out`, `ease-in-out` 추가
+- slide 방향 `auto`, `left`, `right`, `up`, `down` 추가
+- 프로젝트 allowlist·track cache identity·preview overlay·final renderer 동기화
+- energy stability·transition direction·manual reorder 회귀와 v1.6.31 Chromium 감사 추가
+- v1.6.31 build key와 서비스워커 앱 셸 무결성 manifest 갱신
+
 ## v1.6.30
 
 - 오디오 `rmsNorm` 기반 발화 에너지 paging 즉시 전환 추가

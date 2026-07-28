@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.30 - energy/manual speaker paging with fade and slide transitions
+// AI Shorts Studio v1.6.31 - eased directional multi-speaker page transitions
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -161,7 +161,7 @@
         }));
     }
 
-    function drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, alpha, offsetX) {
+    function drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, alpha, offsetX, offsetY) {
         if (!Array.isArray(subjects) || subjects.length < 3) return;
         const engine = getSmartReframeEngine();
         const gap = Math.max(4, Math.round(Math.min(width, height) * 0.006));
@@ -169,14 +169,15 @@
         cells.forEach((cell, index) => {
             const subject = subjects[index];
             const left = cell.left + (Number(offsetX) || 0);
+            const top = cell.top + (Number(offsetY) || 0);
             const rect = engine.resolveCropRect(sourceWidth, sourceHeight, cell.width, cell.height, subject, Object.assign({}, smart.options || {}, { captionOptions: null }));
             ctx.save();
             ctx.globalAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
             ctx.beginPath();
-            ctx.rect(left, cell.top, cell.width, cell.height);
+            ctx.rect(left, top, cell.width, cell.height);
             ctx.clip();
             if (qualityFilter) ctx.filter = qualityFilter;
-            ctx.drawImage(source, rect.sx, rect.sy, rect.sw, rect.sh, left, cell.top, cell.width, cell.height);
+            ctx.drawImage(source, rect.sx, rect.sy, rect.sw, rect.sh, left, top, cell.width, cell.height);
             ctx.restore();
         });
     }
@@ -198,15 +199,22 @@
         const transition = layout.gridTransition === 'slide' ? 'slide' : layout.gridTransition === 'none' ? 'none' : 'fade';
         if (previous.length >= 3 && progress < 1 && transition !== 'none') {
             if (transition === 'slide') {
-                const travel = width * 0.18;
-                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, previous, layout, qualityFilter, smart, 1 - progress * 0.35, -travel * progress);
-                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, 0.65 + progress * 0.35, travel * (1 - progress));
+                const direction = ['left', 'right', 'up', 'down'].includes(layout.gridSlideDirection) ? layout.gridSlideDirection : 'left';
+                const horizontal = direction === 'left' || direction === 'right';
+                const sign = direction === 'right' || direction === 'down' ? 1 : -1;
+                const travel = (horizontal ? width : height) * 0.18;
+                const previousX = horizontal ? sign * travel * progress : 0;
+                const previousY = horizontal ? 0 : sign * travel * progress;
+                const currentX = horizontal ? -sign * travel * (1 - progress) : 0;
+                const currentY = horizontal ? 0 : -sign * travel * (1 - progress);
+                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, previous, layout, qualityFilter, smart, 1 - progress * 0.35, previousX, previousY);
+                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, 0.65 + progress * 0.35, currentX, currentY);
             } else {
-                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, previous, layout, qualityFilter, smart, 1 - progress, 0);
-                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, progress, 0);
+                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, previous, layout, qualityFilter, smart, 1 - progress, 0, 0);
+                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, progress, 0, 0);
             }
         } else {
-            drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, 1, 0);
+            drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, 1, 0, 0);
         }
         return true;
     }

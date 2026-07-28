@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.30 - energy paging, manual speaker pages, bulk grid crops, and page transitions
+// AI Shorts Studio v1.6.32 - per-page speaker timing, in-page ordering, and live energy hold diagnostics
 'use strict';
 
 (function exposeSmartReframeEngine(global) {
@@ -17,7 +17,7 @@
         subjectMatchDistance: 0.24,
         subjectId: 'auto',
         speakerPriority: true,
-        speakerLayout: Object.freeze({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: Object.freeze([]) })
+        speakerLayout: Object.freeze({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridEnergyThreshold: 0.35, gridEnergyHysteresis: 0.08, gridEnergyHoldSeconds: 1.2, gridTransition: 'fade', gridTransitionMs: 320, gridTransitionEasing: 'ease-in-out', gridSlideDirection: 'auto', gridManualPages: Object.freeze([]), gridManualPageSeconds: Object.freeze([]) })
     });
     const MAX_KEYFRAMES = 120;
     const MAX_SUBJECTS = 12;
@@ -147,6 +147,12 @@
             .filter(page => page.length));
     }
 
+    function safeGridManualPageSeconds(items, pages, fallback) {
+        const source = Array.isArray(items) ? items : [];
+        const defaultSeconds = Number(clamp(fallback == null ? 3 : fallback, 1, 10).toFixed(1));
+        return Object.freeze((Array.isArray(pages) ? pages : []).map((_, index) => Number(clamp(source[index] == null ? defaultSeconds : source[index], 1, 10).toFixed(1))));
+    }
+
     function safeSpeakerLayout(value) {
         const input = value && typeof value === 'object' ? value : {};
         const orientation = input.orientation === 'horizontal' ? 'horizontal' : 'vertical';
@@ -156,6 +162,10 @@
         const gridPrimaryPosition = ['top', 'bottom', 'left', 'right'].includes(input.gridPrimaryPosition) ? input.gridPrimaryPosition : 'top';
         const gridPaging = ['priority', 'energy', 'manual'].includes(input.gridPaging) ? input.gridPaging : 'rotate';
         const gridTransition = ['none', 'slide'].includes(input.gridTransition) ? input.gridTransition : 'fade';
+        const gridTransitionEasing = ['linear', 'ease-in', 'ease-out'].includes(input.gridTransitionEasing) ? input.gridTransitionEasing : 'ease-in-out';
+        const gridSlideDirection = ['left', 'right', 'up', 'down'].includes(input.gridSlideDirection) ? input.gridSlideDirection : 'auto';
+        const gridPageSeconds = Number(clamp(input.gridPageSeconds == null ? 3 : input.gridPageSeconds, 1, 10).toFixed(1));
+        const gridManualPages = safeGridManualPages(input.gridManualPages);
         return Object.freeze({
             orientation,
             split: Number(clamp(input.split == null ? 0.5 : input.split, 0.35, 0.65).toFixed(3)),
@@ -163,10 +173,16 @@
             gridPrimarySize: Number(clamp(input.gridPrimarySize == null ? 0.54 : input.gridPrimarySize, 0.45, 0.65).toFixed(3)),
             gridPrimaryPosition,
             gridPaging,
-            gridPageSeconds: Number(clamp(input.gridPageSeconds == null ? 3 : input.gridPageSeconds, 1, 10).toFixed(1)),
+            gridPageSeconds,
+            gridEnergyThreshold: Number(clamp(input.gridEnergyThreshold == null ? 0.35 : input.gridEnergyThreshold, 0, 1).toFixed(3)),
+            gridEnergyHysteresis: Number(clamp(input.gridEnergyHysteresis == null ? 0.08 : input.gridEnergyHysteresis, 0, 0.3).toFixed(3)),
+            gridEnergyHoldSeconds: Number(clamp(input.gridEnergyHoldSeconds == null ? 1.2 : input.gridEnergyHoldSeconds, 0, 5).toFixed(2)),
             gridTransition,
             gridTransitionMs: Math.round(clamp(input.gridTransitionMs == null ? 320 : input.gridTransitionMs, 120, 1200)),
-            gridManualPages: safeGridManualPages(input.gridManualPages)
+            gridTransitionEasing,
+            gridSlideDirection,
+            gridManualPages,
+            gridManualPageSeconds: safeGridManualPageSeconds(input.gridManualPageSeconds, gridManualPages, gridPageSeconds)
         });
     }
 
@@ -386,7 +402,7 @@
         const keyframes = Array.isArray(track && track.keyframes) ? track.keyframes : [];
         const speakerCues = Array.isArray(track && track.speakerCues) ? track.speakerCues : [];
         const layout = safeSpeakerLayout(track && track.speakerLayout);
-        const text = `${track && track.source || 'motion'}|${track && track.activeSubjectId || 'auto'}|${track && track.speakerPriority !== false ? 'speaker-on' : 'speaker-off'}|${layout.split}:${layout.primaryPosition}:${layout.gridPaging}:${layout.gridPageSeconds}:${layout.gridTransition}:${layout.gridTransitionMs}:${JSON.stringify(layout.gridManualPages)}|${points.map(point => `${point.time.toFixed(2)}:${point.x.toFixed(3)}:${point.y.toFixed(3)}:${point.confidence.toFixed(2)}`).join('|')}|${keyframes.map(item => `${item.time}:${item.x}:${item.y}:${item.zoom}`).join('|')}|${speakerCues.map(item => `${item.start}:${item.end}:${item.subjectId}:${item.confidence}:${item.priority}:${item.energy}:${item.gridCrop.x}:${item.gridCrop.y}:${item.gridCrop.zoom}`).join('|')}`;
+        const text = `${track && track.source || 'motion'}|${track && track.activeSubjectId || 'auto'}|${track && track.speakerPriority !== false ? 'speaker-on' : 'speaker-off'}|${layout.split}:${layout.primaryPosition}:${layout.gridPaging}:${layout.gridPageSeconds}:${layout.gridEnergyThreshold}:${layout.gridEnergyHysteresis}:${layout.gridEnergyHoldSeconds}:${layout.gridTransition}:${layout.gridTransitionMs}:${layout.gridTransitionEasing}:${layout.gridSlideDirection}:${JSON.stringify(layout.gridManualPages)}:${JSON.stringify(layout.gridManualPageSeconds)}|${points.map(point => `${point.time.toFixed(2)}:${point.x.toFixed(3)}:${point.y.toFixed(3)}:${point.confidence.toFixed(2)}`).join('|')}|${keyframes.map(item => `${item.time}:${item.x}:${item.y}:${item.zoom}`).join('|')}|${speakerCues.map(item => `${item.start}:${item.end}:${item.subjectId}:${item.confidence}:${item.priority}:${item.energy}:${item.gridCrop.x}:${item.gridCrop.y}:${item.gridCrop.zoom}`).join('|')}`;
         for (let index = 0; index < text.length; index += 1) {
             hash ^= text.charCodeAt(index);
             hash = Math.imul(hash, 16777619);
@@ -1021,6 +1037,8 @@
             speakerPriority: cue.priority || 'auto',
             speakerConfidence: cue.confidence,
             speakerEnergy: Number(clamp(cue.energy == null ? cue.confidence : cue.energy, 0, 1).toFixed(4)),
+            speakerCueStart: Number(cue.start || 0),
+            speakerCueEnd: Number(cue.end || 0),
             gridCrop,
             confidence: clamp((selected.confidence + cue.confidence) / 2, 0, 1)
         });
@@ -1034,30 +1052,80 @@
         return selected;
     }
 
-    function transitionProgress(target, layout) {
-        if (layout.gridTransition === 'none') return 1;
-        const seconds = Math.max(1, layout.gridPageSeconds);
-        const elapsed = Math.max(0, finite(target, 0)) % seconds;
-        return Number(clamp(elapsed / Math.max(0.12, layout.gridTransitionMs / 1000), 0, 1).toFixed(4));
+    function easeTransitionProgress(value, easing) {
+        const progress = clamp(value, 0, 1);
+        if (easing === 'linear') return progress;
+        if (easing === 'ease-in') return progress * progress;
+        if (easing === 'ease-out') return 1 - ((1 - progress) * (1 - progress));
+        return progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
     }
 
-    function pagedGridFocuses(focuses, target, layoutInput) {
+    function transitionProgress(target, layout, pageSeconds) {
+        if (layout.gridTransition === 'none') return 1;
+        const seconds = Math.max(1, finite(pageSeconds, layout.gridPageSeconds));
+        const elapsed = Math.max(0, finite(target, 0)) % seconds;
+        const raw = clamp(elapsed / Math.max(0.12, layout.gridTransitionMs / 1000), 0, 1);
+        return Number(easeTransitionProgress(raw, layout.gridTransitionEasing).toFixed(4));
+    }
+
+    function manualPageAt(target, pages, pageSeconds, fallbackSeconds) {
+        const list = Array.isArray(pages) ? pages : [];
+        const durations = safeGridManualPageSeconds(pageSeconds, list, fallbackSeconds);
+        if (!list.length) return { page: 0, elapsed: 0, duration: Math.max(1, finite(fallbackSeconds, 3)), cycle: 0 };
+        const cycle = durations.reduce((sum, value) => sum + value, 0) || Math.max(1, finite(fallbackSeconds, 3));
+        let cursor = Math.max(0, finite(target, 0)) % cycle;
+        for (let index = 0; index < durations.length; index += 1) {
+            const duration = durations[index];
+            if (cursor < duration || index === durations.length - 1) return { page: index, elapsed: cursor, duration, cycle };
+            cursor -= duration;
+        }
+        return { page: 0, elapsed: 0, duration: durations[0], cycle };
+    }
+
+    function stableEnergySubjects(list, previousList, target, layout) {
+        const primary = list.find(item => item.speakerPriority === 'primary') || list[0];
+        const threshold = layout.gridEnergyThreshold;
+        const hysteresis = layout.gridEnergyHysteresis;
+        const holdSeconds = layout.gridEnergyHoldSeconds;
+        const previousCandidates = (Array.isArray(previousList) ? previousList : []).filter(item => item && item.subjectId !== (primary && primary.subjectId));
+        const previousIds = new Set(previousCandidates.sort((a, b) => finite(b.speakerEnergy, 0) - finite(a.speakerEnergy, 0)).slice(0, 3).map(item => item.subjectId));
+        const others = list.filter(item => item !== primary).map(item => {
+            const energy = finite(item.speakerEnergy, 0);
+            const incumbent = previousIds.has(item.subjectId);
+            const age = Math.max(0, finite(target, 0) - finite(item.speakerCueStart, 0));
+            const holdPenalty = !incumbent && holdSeconds > 0 && age < holdSeconds ? hysteresis : 0;
+            return { item, energy, score: energy + (incumbent ? hysteresis : 0) - holdPenalty };
+        });
+        const eligible = others.filter(entry => entry.energy >= threshold).sort((a, b) => b.score - a.score || b.energy - a.energy || finite(b.item.confidence, 0) - finite(a.item.confidence, 0));
+        const fallback = others.filter(entry => entry.energy < threshold).sort((a, b) => b.score - a.score || b.energy - a.energy || finite(b.item.confidence, 0) - finite(a.item.confidence, 0));
+        return [primary].concat(eligible.concat(fallback).slice(0, 3).map(entry => entry.item));
+    }
+
+    function pagedGridFocuses(focuses, target, layoutInput, previousEnergyFocuses) {
         const list = Array.isArray(focuses) ? focuses.slice() : [];
         const layout = safeSpeakerLayout(layoutInput);
         if (list.length <= 4) return { subjects: list, previousSubjects: [], page: 0, pageCount: 1, total: list.length, transitionProgress: 1, trigger: 'none' };
         if (layout.gridPaging === 'priority') return { subjects: list.slice(0, 4), previousSubjects: [], page: 0, pageCount: 1, total: list.length, transitionProgress: 1, trigger: 'priority' };
         if (layout.gridPaging === 'energy') {
-            const primary = list.find(item => item.speakerPriority === 'primary') || list[0];
-            const selected = [primary].concat(list.filter(item => item !== primary).sort((left, right) => finite(right.speakerEnergy, 0) - finite(left.speakerEnergy, 0) || finite(right.confidence, 0) - finite(left.confidence, 0)).slice(0, 3));
-            return { subjects: selected, previousSubjects: [], page: 0, pageCount: 1, total: list.length, transitionProgress: 1, trigger: 'energy' };
+            const selected = stableEnergySubjects(list, previousEnergyFocuses, target, layout);
+            return { subjects: selected, previousSubjects: [], page: 0, pageCount: 1, total: list.length, transitionProgress: 1, trigger: 'energy', stabilized: true };
         }
         if (layout.gridPaging === 'manual' && layout.gridManualPages.length) {
-            const pages = layout.gridManualPages.map(ids => ids.map(id => list.find(item => item.subjectId === id)).filter(Boolean)).filter(page => page.length >= 3);
-            if (pages.length) {
-                const page = Math.floor(Math.max(0, finite(target, 0)) / Math.max(1, layout.gridPageSeconds)) % pages.length;
-                const progress = transitionProgress(target, layout);
-                const previousPage = (page - 1 + pages.length) % pages.length;
-                return { subjects: pages[page].slice(0, 4), previousSubjects: finite(target, 0) > 0.0001 && progress < 1 && pages.length > 1 ? pages[previousPage].slice(0, 4) : [], page, pageCount: pages.length, total: list.length, transitionProgress: progress, trigger: 'manual' };
+            const sourcePages = layout.gridManualPages.map((ids, index) => ({
+                subjects: ids.map(id => list.find(item => item.subjectId === id)).filter(Boolean),
+                duration: layout.gridManualPageSeconds[index] || layout.gridPageSeconds
+            })).filter(entry => entry.subjects.length >= 3);
+            if (sourcePages.length) {
+                const pageState = manualPageAt(target, sourcePages, sourcePages.map(entry => entry.duration), layout.gridPageSeconds);
+                const page = pageState.page;
+                const progress = transitionProgress(pageState.elapsed, layout, pageState.duration);
+                const previousPage = (page - 1 + sourcePages.length) % sourcePages.length;
+                return {
+                    subjects: sourcePages[page].subjects.slice(0, 4),
+                    previousSubjects: finite(target, 0) > 0.0001 && progress < 1 && sourcePages.length > 1 ? sourcePages[previousPage].subjects.slice(0, 4) : [],
+                    page, pageCount: sourcePages.length, total: list.length, transitionProgress: progress, trigger: 'manual',
+                    pageDuration: pageState.duration, pageElapsed: pageState.elapsed
+                };
             }
         }
         const primary = list[0];
@@ -1078,23 +1146,32 @@
         };
     }
 
+    function speakerFocusesAt(track, target) {
+        const cues = getSpeakerCuesAt(track && track.speakerCues, target);
+        const focuses = [];
+        const subjectIds = new Set();
+        cues.forEach(cue => {
+            if (cue.subjectId === 'auto' || subjectIds.has(cue.subjectId)) return;
+            const selected = speakerFocusForCue(track, cue, target);
+            if (!selected) return;
+            subjectIds.add(cue.subjectId);
+            focuses.push(selected);
+        });
+        return focuses;
+    }
+
     function getFocusAt(track, time) {
         const target = Math.max(0, finite(time, 0));
         let base = getPointAtArray(track && track.points, target, track && track.sceneCuts);
         if (!base) return null;
         if (track && track.activeSubjectId === 'auto' && track.speakerPriority !== false) {
-            const cues = getSpeakerCuesAt(track.speakerCues, target);
-            const focuses = [];
-            const subjectIds = new Set();
-            cues.forEach(cue => {
-                if (cue.subjectId === 'auto' || subjectIds.has(cue.subjectId)) return;
-                const selected = speakerFocusForCue(track, cue, target);
-                if (!selected) return;
-                subjectIds.add(cue.subjectId);
-                focuses.push(selected);
-            });
+            const focuses = speakerFocusesAt(track, target);
             if (focuses.length > 2) {
-                const paged = pagedGridFocuses(focuses, target, track.speakerLayout);
+                const layout = safeSpeakerLayout(track.speakerLayout);
+                const previousEnergyFocuses = layout.gridPaging === 'energy' && layout.gridEnergyHoldSeconds > 0
+                    ? speakerFocusesAt(track, Math.max(0, target - layout.gridEnergyHoldSeconds))
+                    : [];
+                const paged = pagedGridFocuses(focuses, target, layout, previousEnergyFocuses);
                 const gridSubjects = paged.subjects.slice(0, 4);
                 const confidence = gridSubjects.reduce((sum, item) => sum + item.confidence, 0) / gridSubjects.length;
                 base = Object.assign({}, gridSubjects[0], {
@@ -1110,6 +1187,8 @@
                     gridPage: paged.page,
                     gridPageCount: paged.pageCount,
                     gridTotalSubjects: paged.total,
+                    gridPageDuration: paged.pageDuration || layout.gridPageSeconds,
+                    gridPageElapsed: paged.pageElapsed || 0,
                     speakerLayout: safeSpeakerLayout(track.speakerLayout),
                     confidence: clamp(confidence, 0, 1)
                 });
@@ -1281,6 +1360,6 @@
         resolveCropRect,
         scoreRange,
         getStatus,
-        _test: Object.freeze({ smoothPoints, normalizeDetection, choosePrimary, buildTrack, assignSubjects, composeSubjectPoints, getPointAtArray, sceneIndexAt, normalizeSpeakerCues, normalizeKeyframes, safeKeyframe, safeSpeakerLayout, safeGridCrop, safeGridManualPages, pagedGridFocuses })
+        _test: Object.freeze({ smoothPoints, normalizeDetection, choosePrimary, buildTrack, assignSubjects, composeSubjectPoints, getPointAtArray, sceneIndexAt, normalizeSpeakerCues, normalizeKeyframes, safeKeyframe, safeSpeakerLayout, safeGridCrop, safeGridManualPages, safeGridManualPageSeconds, manualPageAt, easeTransitionProgress, stableEnergySubjects, pagedGridFocuses })
     });
 })(window);
