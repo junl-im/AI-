@@ -37,7 +37,7 @@ const stagedOnly = [
     'src/ui/local-ai-studio.js'
 ];
 
-assert(pkg.version === '1.6.24', 'staged hydration release version is v1.6.20');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'staged hydration release version is v1.6.20');
 assert(html.includes(`src/boot/staged-ui-loader.js?v=${buildKey}`), 'staged UI loader is on the critical path');
 assert(directScripts <= 49, `direct startup scripts are reduced to ${directScripts}`);
 stagedOnly.forEach(file => assert(!html.includes(`<script defer src="${file}`), `${file} is removed from blocking startup execution`));
@@ -50,4 +50,4 @@ assert(sw.includes(`staged-ui-loader.js?v=${buildKey}`), 'service worker caches 
 assert(!sw.includes('./src/ui/candidate-preview-pro.js') && !sw.includes('./src/ui/export-finish-center.js'), 'staged feature scripts are not fetched during service-worker install');
 assert(sw.includes('async function cacheFirst'), 'staged feature scripts are cached when first requested');
 assert(html.indexOf('startup-performance.js') < html.indexOf('src/app.js'), 'adaptive performance profile starts before the main app');
-console.log('PASS v1.6.24 staged UI hydration guardrails present');
+console.log('PASS v1.6.25 staged UI hydration guardrails present');

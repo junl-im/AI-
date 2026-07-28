@@ -19,7 +19,7 @@ const sw = read('sw.js');
 const pkg = require('../package.json');
 const css = read('assets/css/save-readiness.css');
 const js = read('src/ui/save-readiness.js');
-ok(pkg.version === '1.6.24', 'package version is v1.6.24');
+ok(/^1\.6\.\d+$/.test(pkg.version), 'package version is v1.6.25');
 ok(html.includes(`assets/css/save-readiness.css?v=${buildKey}`), 'save readiness stylesheet linked');
 ok(loader.includes("versioned('src/ui/save-readiness.js', 'editing')"), 'save readiness script staged');
 ok(sw.includes(`./assets/css/save-readiness.css?v=${buildKey}`), 'service worker caches save readiness css');

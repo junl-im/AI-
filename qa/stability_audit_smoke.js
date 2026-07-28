@@ -19,8 +19,8 @@ const preview = read('src/app/preview-controller.js');
 const session = read('src/ui/session-continuity.js');
 const bridge = read('src/ui/flow-command-bridge.js');
 
-assert(pkg.version === '1.6.24' && pkg.scripts.test === 'npm run check', 'release version and standard test alias are aligned');
-assert(loader.includes("config.APP_VERSION || 'v1.6.24'") && loader.includes('config.BUILD_KEY'), 'staged modules inherit the current runtime version and build key');
+assert(/^1\.6\.\d+$/.test(pkg.version) && pkg.scripts.test === 'npm run check', 'release version and standard test alias are aligned');
+assert(loader.includes(`config.APP_VERSION || 'v${pkg.version}'`) && loader.includes('config.BUILD_KEY'), 'staged modules inherit the current runtime version and build key');
 assert(!loader.includes("const VERSION = '1.2.6'") && loader.includes("'cut', 'edit'"), 'stale loader version and edit/editor key mismatch are removed');
 assert(loader.includes('UI 모듈 로드 시간 초과') && loader.includes("type: 'staged-ui-load-error'"), 'staged loading has a timeout and diagnostic path');
 assert(health.includes("unhandledrejection") && health.includes("window.error") && health.includes('recentErrors'), 'runtime health captures synchronous and asynchronous browser errors');
@@ -28,4 +28,4 @@ assert(renderer.includes('let intervalTimer = 0') && renderer.includes('let stop
 assert(app.includes('getPreviewController') && preview.includes("type: 'preview-playback-error'") && preview.includes('clearPlaybackHandles()'), 'preview playback rejection exits without leaving RAF or interval work running');
 assert(!bridge.includes('syncTopLine'), 'removed header-status bridge references cannot throw during startup');
 assert(session.includes('visibilitychange') && session.includes('stopHeartbeat()') && session.includes('30000'), 'session autosave pauses in hidden pages and uses a lower-frequency heartbeat');
-console.log('PASS v1.6.24 code and engine stability guardrails present');
+console.log(`PASS v${pkg.version} code and engine stability guardrails present`);

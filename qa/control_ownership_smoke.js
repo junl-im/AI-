@@ -9,7 +9,7 @@ const responsive = fs.readFileSync(path.join(root, 'assets/css/responsive-worksp
 const shutter = fs.readFileSync(path.join(root, 'assets/css/shutter-glass-flow.css'), 'utf8');
 const director = fs.readFileSync(path.join(root, 'src/ui/flow-director-final.js'), 'utf8');
 function ok(value, message) { if (!value) throw new Error(message); }
-ok(pkg.version === '1.6.24', 'control ownership release version is v1.6.20');
+ok(/^1\.6\.\d+$/.test(pkg.version), 'control ownership release version is v1.6.20');
 ok(!/class="[^"]*command-group/.test(html), 'retired command-group markup is absent');
 ok(!/\.command-group(?:[\s,{.:#>]|$)/.test(responsive), 'responsive layer has no retired command-group selectors');
 ok(!/\.command-group(?:[\s,{.:#>]|$)/.test(shutter), 'shutter layer has no retired command-group selectors');

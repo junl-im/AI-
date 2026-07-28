@@ -6,7 +6,7 @@
     if (!doc) return;
 
     const config = global.AIShortsRuntimeConfig || {};
-    const VERSION = String(config.APP_VERSION || 'v1.6.24').replace(/^v/i, '');
+    const VERSION = String(config.APP_VERSION || 'v1.6.30').replace(/^v/i, '');
     const BUILD_KEY = String(config.BUILD_KEY || `${VERSION}-staged-ui`);
     const versioned = (path, label) => `${path}?v=${encodeURIComponent(BUILD_KEY)}-${label}`;
     const phases = Object.freeze({

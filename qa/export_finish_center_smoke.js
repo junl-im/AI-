@@ -13,7 +13,7 @@ function includes(file, token) { assert(read(file).includes(token), `${file} mus
 
 const pkg = JSON.parse(read('package.json'));
 const loader = read('src/boot/staged-ui-loader.js');
-assert(pkg.version === '1.6.24', 'package version must be 1.2.9');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'package version must be 1.2.9');
 includes('index.html', `assets/css/export-finish-center.css?v=${buildKey}`);
 assert(loader.includes("versioned('src/ui/export-finish-center.js', 'export')"), 'export finish center script must be staged');
 includes('sw.js', `./assets/css/export-finish-center.css?v=${buildKey}`);

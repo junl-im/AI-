@@ -12,7 +12,7 @@ function ok(condition, message) { if (!condition) throw new Error(message); cons
 (async () => {
   const downloads = [];
   const diagnostics = [];
-  const window = { Blob, AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.24', DIAGNOSTIC_HISTORY_LIMIT: 20 } };
+  const window = { Blob, AIShortsRuntimeConfig: { APP_VERSION: 'v1.6.25', DIAGNOSTIC_HISTORY_LIMIT: 20 } };
   vm.runInContext(source, vm.createContext({ window, Blob, Object, Array, Map, Set, Math, Number, String, Date, Error, Promise, JSON, console }), { filename: 'support-diagnostics.js' });
   const service = window.AIShortsSupportDiagnostics;
   const imported = service.inspectBundle({
@@ -46,5 +46,5 @@ function ok(condition, message) { if (!condition) throw new Error(message); cons
   ok(html.includes('id="supportDiagnosticsComparisonList"') && html.includes('id="supportDiagnosticsReportBtn"'), 'diagnostics modal exposes current-environment comparison and summary report controls');
   ok(app.includes('exportSupportDiagnosticsSummary') && app.includes('compareInspectionToCurrent'), 'app wiring owns comparison rendering and report export');
   ok(css.includes('.support-diagnostics-comparison-list') && css.includes('[data-status="warning"]'), 'comparison rows have explicit status-aware CSS ownership');
-  console.log('PASS v1.6.24 support diagnostics comparison and summary report contract');
+  console.log('PASS v1.6.25 support diagnostics comparison and summary report contract');
 })().catch(error => { console.error(error && error.stack || error); process.exit(1); });

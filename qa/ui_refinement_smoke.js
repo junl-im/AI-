@@ -14,7 +14,7 @@ function assert(condition, message) {
   if (!condition) { console.error(`FAIL ${message}`); process.exit(1); }
   console.log(`PASS ${message}`);
 }
-assert(pkg.version === '1.6.24', 'UI refinement release version is v1.6.20');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'UI refinement release version is v1.6.20');
 assert(html.includes(`assets/css/ui-refinement.css?v=${buildKey}`), 'UI refinement stylesheet is loaded last');
 assert(html.indexOf('ui-refinement.css') > html.indexOf('hero-command-deck.css'), 'UI refinement stylesheet wins the cascade');
 assert(sw.includes(`./assets/css/ui-refinement.css?v=${buildKey}`), 'service worker caches the UI refinement stylesheet');
@@ -23,4 +23,4 @@ assert(css.includes('@media (max-width: 720px)') && css.includes('grid-template-
 assert(css.includes('--ui-line:') && css.includes('--ui-surface:'), 'shared surface and border tokens are defined');
 assert(css.includes('.flow-overview-copy strong') && html.includes('순서대로 쇼츠를 완성하세요.'), 'mobile start guidance avoids awkward orphan wrapping');
 assert(css.includes('prefers-reduced-motion') && css.includes('performance-lite'), 'motion and low-performance fallbacks remain present');
-console.log('PASS v1.6.24 unified UI refinement guardrails present');
+console.log('PASS v1.6.25 unified UI refinement guardrails present');

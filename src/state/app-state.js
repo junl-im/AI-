@@ -149,7 +149,7 @@
         audioAnalysis: null,
         motionAnalysis: null,
         smartReframe: null,
-        smartReframeEdits: { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerCues: [] },
+        smartReframeEdits: { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerLayout: { orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, speakerCues: [] },
         transcriptSegments: [],
         isReframing: false,
         autoCuts: null,
@@ -208,7 +208,7 @@
         state.audioAnalysis = null;
         state.motionAnalysis = null;
         state.smartReframe = null;
-        state.smartReframeEdits = { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerCues: [] };
+        state.smartReframeEdits = { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerLayout: { orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, speakerCues: [] };
         state.transcriptSegments = [];
         state.isReframing = false;
         state.autoCuts = null;

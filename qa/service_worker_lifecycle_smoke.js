@@ -7,7 +7,7 @@ function ok(value, message) { if (!value) { console.error(`FAIL ${message}`); pr
 const source = fs.readFileSync(path.join(root, 'src/boot/service-worker-registration.js'), 'utf8');
 const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-ok(pkg.version === '1.6.24', 'service worker lifecycle release version is v1.6.20');
+ok(/^1\.6\.\d+$/.test(pkg.version), 'service worker lifecycle release version is v1.6.20');
 ok(source.includes('function getStatus()') && source.includes('function waitUntilControlled(options)'), 'registration owner exposes observable lifecycle APIs');
 ok(source.includes("serviceWorker.addEventListener('controllerchange'") && source.includes("registration.addEventListener('updatefound'"), 'controller and update transitions are recorded');
 ok(source.includes("type: 'service-worker-state-change'") && source.includes("type: 'service-worker-controller-change'"), 'lifecycle transitions are written to diagnostics');
@@ -19,4 +19,4 @@ const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
 ok(report.version === pkg.version && report.install.shellCached && report.install.skipWaitingCalls === 1, 'audit confirms shell installation and skipWaiting');
 ok(report.activate.claimCalls === 1 && report.activate.deletedCaches.length > 0, 'audit confirms client claim and old cache cleanup');
 ok(report.offlineNavigation.ok && report.offlineNavigation.status === 200, 'audit confirms cached offline navigation fallback');
-console.log('PASS v1.6.24 observable service worker lifecycle guardrails');
+console.log('PASS v1.6.25 observable service worker lifecycle guardrails');

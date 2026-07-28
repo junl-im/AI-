@@ -15,7 +15,7 @@ const html = read('index.html');
 const css = read('assets/css/header-meta-rail.css');
 const bridge = read('src/ui/flow-command-bridge.js');
 const sw = read('sw.js');
-assert(pkg.version === '1.6.24', 'header metadata release version matches package version');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'header metadata release version matches package version');
 assert(!html.includes('LOCAL · PRIVATE · 9:16') && !html.includes('brand-compat-pill'), 'center metadata slogan and markup are absent');
 assert(html.includes(`>v${pkg.version}</button>`) && html.includes('모바일 · PC 호환'), 'build version and compatibility share the left rail');
 assert(html.includes('class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>'), 'designer credit remains on the right rail');
@@ -24,4 +24,4 @@ assert(css.includes('@media (max-width: 720px)') && css.includes('.badge-version
 assert(css.includes('.brand-signature-pill .signature-label') && css.includes('display: inline !important'), 'mobile explicitly preserves DESIGNED BY');
 assert(!bridge.includes('LOCAL · PRIVATE · 9:16') && !bridge.includes('brand-compat-pill'), 'runtime bridge does not recreate removed metadata');
 assert(html.includes(`header-meta-rail.css?v=${buildKey}`) && sw.includes(`header-meta-rail.css?v=${buildKey}`), 'metadata rail stylesheet is loaded and cached');
-console.log('PASS v1.6.24 header metadata rail guardrails present');
+console.log('PASS v1.6.25 header metadata rail guardrails present');

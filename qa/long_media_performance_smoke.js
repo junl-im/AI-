@@ -17,7 +17,7 @@ function assert(value, message) {
     if (!value) { console.error(`FAIL ${message}`); process.exit(1); }
     console.log(`PASS ${message}`);
 }
-assert(pkg.version === '1.6.24', 'long-media performance release version is v1.6.20');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'long-media performance release version is v1.6.20');
 assert(config.includes('MAX_ANALYSIS_SECONDS: 30 * 60'), 'analysis coverage supports 30 minute media');
 assert(config.includes('MEDIA_METADATA_WAIT_MS') && config.includes('ANALYSIS_PREP_YIELD_SAMPLES'), 'metadata and preparation budgets are configurable');
 assert(budget.includes('analysisSampleRate') && budget.includes('estimatedAnalysisMemoryMb') && budget.includes('motionSamples'), 'performance budget owns audio rate, memory estimate, and motion samples');

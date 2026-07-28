@@ -168,6 +168,12 @@
                 locked: item.locked === true,
                 mode: item.locked === true || item.mode === 'manual' ? 'manual' : 'auto',
                 priority: item.priority === 'primary' || item.priority === 'secondary' ? item.priority : 'auto',
+                energy: Number(finiteNumber(item.energy, item.confidence, 0, 1).toFixed(4)),
+                gridCrop: {
+                    x: Number(finiteNumber(item.gridCrop && item.gridCrop.x, 0, -0.25, 0.25).toFixed(4)),
+                    y: Number(finiteNumber(item.gridCrop && item.gridCrop.y, 0, -0.25, 0.25).toFixed(4)),
+                    zoom: Number(finiteNumber(item.gridCrop && item.gridCrop.zoom, 1, 1, 1.35).toFixed(4))
+                },
                 confidenceHistory: (Array.isArray(item.confidenceHistory) ? item.confidenceHistory : []).slice(-12).map((entry, index) => ({
                     sequence: Math.max(1, Math.round(finiteNumber(entry && entry.sequence, index + 1, 1, 100000))),
                     confidence: Number(finiteNumber(entry && entry.confidence, 0, 0, 1).toFixed(4)),
@@ -176,7 +182,24 @@
                 }))
             };
         }).filter(Boolean).sort((a, b) => a.start - b.start || a.end - b.end);
-        return { subjectId, keyframes, speakerPriority: input.speakerPriority !== false, speakerCues };
+        const layoutInput = isPlainObject(input.speakerLayout) ? input.speakerLayout : {};
+        const orientation = layoutInput.orientation === 'horizontal' ? 'horizontal' : 'vertical';
+        const speakerLayout = {
+            orientation,
+            split: Number(finiteNumber(layoutInput.split, 0.5, 0.35, 0.65).toFixed(3)),
+            primaryPosition: orientation === 'horizontal'
+                ? (layoutInput.primaryPosition === 'right' ? 'right' : 'left')
+                : (layoutInput.primaryPosition === 'bottom' ? 'bottom' : 'top'),
+            gridPrimarySize: Number(finiteNumber(layoutInput.gridPrimarySize, 0.54, 0.45, 0.65).toFixed(3)),
+            gridPrimaryPosition: ['top', 'bottom', 'left', 'right'].includes(layoutInput.gridPrimaryPosition) ? layoutInput.gridPrimaryPosition : 'top',
+            gridPaging: ['priority', 'energy', 'manual'].includes(layoutInput.gridPaging) ? layoutInput.gridPaging : 'rotate',
+            gridPageSeconds: Number(finiteNumber(layoutInput.gridPageSeconds, 3, 1, 10).toFixed(1)),
+            gridTransition: ['none', 'slide'].includes(layoutInput.gridTransition) ? layoutInput.gridTransition : 'fade',
+            gridTransitionMs: Math.round(finiteNumber(layoutInput.gridTransitionMs, 320, 120, 1200)),
+            gridManualPages: (Array.isArray(layoutInput.gridManualPages) ? layoutInput.gridManualPages : []).slice(0, 12).map(page => (Array.isArray(page) ? page : [])
+                .map(value => safeText(value, 24)).filter(value => /^subject-[1-9][0-9]{0,2}$/.test(value)).filter((value, index, list) => list.indexOf(value) === index).slice(0, 4)).filter(page => page.length)
+        };
+        return { subjectId, keyframes, speakerPriority: input.speakerPriority !== false, speakerLayout, speakerCues };
     }
 
     function sanitizeFileMeta(value) {
@@ -273,7 +296,7 @@
             fileName: state && state.file ? state.file.name : fileMeta && fileMeta.name || '',
             fileKind: state && state.fileKind || '',
             settings: Object.assign({}, state && state.settings || {}),
-            smartReframeEdits: state && state.smartReframeEdits ? state.smartReframeEdits : { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerCues: [] },
+            smartReframeEdits: state && state.smartReframeEdits ? state.smartReframeEdits : { subjectId: 'auto', keyframes: [], speakerPriority: true, speakerLayout: { orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, speakerCues: [] },
             selectedRecommendationId: state && state.selectedRecommendationId || '',
             selectedRange: state && state.selectedRange ? Object.assign({}, state.selectedRange) : null,
             recommendations: (state && state.recommendations || []).map(item => Object.assign({}, item)),

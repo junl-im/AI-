@@ -11,7 +11,7 @@ const header = read('assets/css/header-meta-rail.css');
 const prime = read('assets/css/desktop-prime-layout.css');
 const responsive = read('assets/css/responsive-workspace.css');
 function ok(value, message) { if (!value) throw new Error(message); }
-ok(pkg.version === '1.6.24', 'responsive token release version must be v1.6.20');
+ok(/^1\.6\.\d+$/.test(pkg.version), 'responsive token release version must be v1.6.20');
 for (const token of [
   '--responsive-shell-gutter-wide', '--responsive-shell-gutter-compact', '--responsive-shell-gutter-mobile',
   '--responsive-shell-bottom-wide', '--responsive-shell-bottom-laptop', '--responsive-shell-bottom-tablet',

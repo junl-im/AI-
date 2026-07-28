@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.20 - local transcript-to-face speaker direction without remote inference
+// AI Shorts Studio v1.6.30 - local transcript-to-face speaker direction with bounded speech energy
 'use strict';
 
 (function exposeSpeakerFaceLinker(global) {
@@ -42,7 +42,8 @@
                 start: Number(start.toFixed(3)),
                 end: Number(Math.max(start + 0.05, requestedEnd).toFixed(3)),
                 speaker: safeToken(item && (item.speaker || item.speakerId || item.speakerLabel), ''),
-                textLength: String(item && item.text || '').trim().length
+                textLength: String(item && item.text || '').trim().length,
+                energy: Number(clamp(item && (item.energy == null ? item.rmsNorm == null ? item.loudness : item.rmsNorm : item.energy), 0, 1).toFixed(4))
             };
         }).filter(item => item.end > item.start);
     }
@@ -147,6 +148,7 @@
             if (previous && previous.subjectId === cue.subjectId && previous.speaker === cue.speaker && cue.start - previous.end <= opts.mergeGap && previous.source === cue.source) {
                 previous.end = cue.end;
                 previous.confidence = Number(((previous.confidence + cue.confidence) / 2).toFixed(4));
+                previous.energy = Number(((Number(previous.energy) + Number(cue.energy)) / 2).toFixed(4));
                 previous.segmentCount += cue.segmentCount;
                 return;
             }
@@ -217,6 +219,7 @@
                 subjectId: choice.subjectId,
                 confidence: Number(clamp(choice.score, 0, 1).toFixed(4)),
                 source: mappedActivity && mappedActivity.score >= opts.minScore ? 'diarization-face' : choice.subjectId === 'auto' ? 'fallback' : 'face-activity',
+                energy: segment.energy,
                 segmentCount: 1
             };
         });

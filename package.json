@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-6-23",
-  "version": "1.6.24",
+  "name": "ai-shorts-studio-v1-6-30",
+  "version": "1.6.30",
   "private": true,
-  "description": "AI Shorts Studio v1.6.24 - dual-speaker composition, speaker roles, confidence history, and bulk face correction",
+  "description": "AI Shorts Studio v1.6.30 - energy-aware speaker paging, manual page composition, bulk grid crops, and animated transitions",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -56,6 +56,10 @@
     "node qa/speaker_overlap_composition_smoke.js",
     "node qa/speaker_dual_render_smoke.js",
     "node qa/speaker_face_bulk_history_smoke.js",
+    "node qa/speaker_dual_layout_controls_smoke.js",
+    "node qa/speaker_multi_edit_history_smoke.js",
+    "node qa/speaker_horizontal_layout_smoke.js",
+    "node qa/speaker_range_selective_bulk_smoke.js",
     "node --check src/vision/vision-model-pack-manager.js",
     "node qa/vision_model_pack_manager_smoke.js",
     "node qa/vision_model_pack_transaction_smoke.js",
@@ -295,7 +299,22 @@
     "node qa/local_ai_studio_smoke.js",
     "node qa/workflow_focus_layout_smoke.js",
     "python3 qa/run_workflow_focus_layout_audit.py",
-    "node qa/workflow_focus_layout_browser_audit_smoke.js"
+    "node qa/workflow_focus_layout_browser_audit_smoke.js",
+    "node qa/speaker_divider_touch_preview_smoke.js",
+    "node qa/speaker_multi_grid_smoke.js",
+    "node qa/speaker_multi_grid_render_smoke.js",
+    "node qa/speaker_grid_cell_crop_smoke.js",
+    "node qa/speaker_energy_paging_smoke.js",
+    "node qa/speaker_grid_bulk_crop_smoke.js",
+    "node qa/speaker_grid_manual_pages_smoke.js",
+    "node qa/speaker_grid_transition_render_smoke.js",
+    "node qa/speaker_grid_paging_smoke.js",
+    "node qa/speaker_grid_layout_render_smoke.js",
+    "node qa/speaker_live_preview_overlay_smoke.js",
+    "python3 qa/run_speaker_live_preview_audit.py",
+    "node qa/speaker_live_preview_browser_audit_smoke.js",
+    "python3 qa/run_speaker_paging_v1630_audit.py",
+    "node qa/speaker_paging_browser_audit_smoke.js"
   ],
   "devDependencies": {
     "postcss": "^8.5.6"

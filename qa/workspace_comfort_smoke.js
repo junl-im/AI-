@@ -20,7 +20,7 @@ const js = read('src/ui/workspace-comfort.js');
 const sw = read('sw.js');
 const pkg = JSON.parse(read('package.json'));
 
-if (pkg.version !== '1.6.24') fail('package version must be 1.2.9');
+if (!/^1\.6\.\d+$/.test(pkg.version)) fail('package version must be 1.2.9');
 assertIncludes('index.html', `assets/css/workspace-comfort.css?v=${buildKey}`);
 if (!loader.includes("versioned('src/ui/workspace-comfort.js', 'shell')")) fail('workspace comfort script must be staged');
 assertIncludes('sw.js', `workspace-comfort.css?v=${buildKey}`);

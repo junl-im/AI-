@@ -204,6 +204,71 @@ async def run_audit(media: Path) -> dict:
                 status: document.querySelector('#smartReframeSpeakerStatus')?.textContent?.trim() || ''
             };
         }""")
+        await page.select_option('#speakerPaneOrientationSelect', 'horizontal')
+        await page.wait_for_function("() => AIShortsAppState.state.smartReframe?.speakerLayout?.orientation === 'horizontal'", timeout=10000)
+        await page.locator('#speakerPaneSplitInput').fill('62')
+        await page.dispatch_event('#speakerPaneSplitInput', 'change')
+        await page.select_option('#speakerPanePositionSelect', 'right')
+        await page.wait_for_function("() => AIShortsAppState.state.smartReframe?.speakerLayout?.orientation === 'horizontal' && AIShortsAppState.state.smartReframe?.speakerLayout?.split === .62 && AIShortsAppState.state.smartReframe?.speakerLayout?.primaryPosition === 'right'", timeout=10000)
+        await page.evaluate("() => { const panel = document.querySelector('#speakerFaceTuningPanel'); if (panel) panel.open = true; }")
+        await page.locator('#speakerPaneLayoutPreview').scroll_into_view_if_needed()
+        await page.wait_for_timeout(100)
+        preview_box = await page.locator('#speakerPaneLayoutPreview').bounding_box()
+        divider_box = await page.locator('#speakerPaneDividerControl').bounding_box()
+        if preview_box and divider_box:
+            await page.mouse.move(divider_box['x'] + divider_box['width'] / 2, divider_box['y'] + divider_box['height'] / 2)
+            await page.mouse.down()
+            await page.mouse.move(preview_box['x'] + preview_box['width'] * .40, preview_box['y'] + preview_box['height'] / 2, steps=4)
+            await page.mouse.up()
+        drag_split = await page.evaluate("() => AIShortsAppState.state.smartReframe?.speakerLayout?.split || 0")
+        await page.locator('#speakerPaneDividerControl').focus()
+        await page.keyboard.press('ArrowRight')
+        await page.keyboard.press('ArrowRight')
+        expected_keyboard_split = min(.65, round(drag_split * 100 + 2) / 100)
+        await page.wait_for_function("(expected) => Math.abs((AIShortsAppState.state.smartReframe?.speakerLayout?.split || 0) - expected) < .001", arg=expected_keyboard_split, timeout=10000)
+        layout = await page.evaluate("""() => {
+            const track = AIShortsAppState.state.smartReframe;
+            const focus = AIShortsSmartReframe.getFocusAt(track, .7);
+            const divider = document.querySelector('#speakerPaneDividerControl');
+            const preview = document.querySelector('#speakerPaneLayoutPreview');
+            return {
+                orientation: track?.speakerLayout?.orientation || '',
+                split: track?.speakerLayout?.split || 0,
+                primaryPosition: track?.speakerLayout?.primaryPosition || '',
+                focusOrientation: focus?.speakerLayout?.orientation || '',
+                focusSplit: focus?.speakerLayout?.split || 0,
+                focusPosition: focus?.speakerLayout?.primaryPosition || '',
+                output: document.querySelector('#speakerPaneSplitValue')?.textContent?.trim() || '',
+                dividerOrientation: divider?.getAttribute('aria-orientation') || '',
+                dividerValue: divider?.getAttribute('aria-valuenow') || '',
+                previewOrientation: preview?.dataset?.orientation || '',
+                previewPosition: preview?.dataset?.primaryPosition || '',
+                dragSplit: Number(window.__speakerDividerDragSplit || 0)
+            };
+        }""")
+        cards = page.locator('.speaker-cue-card input[type="checkbox"]')
+        await cards.nth(0).click()
+        await page.locator('.speaker-cue-card input[type="checkbox"]').nth(1).click(modifiers=['Shift'])
+        await page.wait_for_function("() => document.querySelector('#speakerCueSelectedCount')?.textContent?.includes('2개')", timeout=10000)
+        await page.check('#speakerCueBulkShiftToggle')
+        await page.check('#speakerCueBulkLabelToggle')
+        await page.locator('#speakerCueBulkShiftInput').fill('0.1')
+        await page.locator('#speakerCueBulkLabelInput').fill('일괄 화자')
+        bulk_preview = await page.evaluate("""() => ({
+            state: document.querySelector('#speakerCueBulkPreview')?.dataset?.state || '',
+            text: document.querySelector('#speakerCueBulkPreviewText')?.textContent?.trim() || '',
+            disabled: Boolean(document.querySelector('#speakerCueBulkApplyBtn')?.disabled)
+        })""")
+        before_bulk = await page.evaluate("() => (AIShortsAppState.state.smartReframe?.speakerCues || []).map(cue => ({ start: cue.start, speaker: cue.speaker, subjectId: cue.subjectId, priority: cue.priority }))")
+        await page.click('#speakerCueBulkApplyBtn')
+        await page.wait_for_function("() => (AIShortsAppState.state.smartReframe?.speakerCues || []).filter(cue => cue.speaker === '일괄 화자').length === 2", timeout=10000)
+        after_bulk = await page.evaluate("() => (AIShortsAppState.state.smartReframe?.speakerCues || []).map(cue => ({ start: cue.start, speaker: cue.speaker, subjectId: cue.subjectId, priority: cue.priority }))")
+        await page.click('#speakerCueUndoBtn')
+        await page.wait_for_function("() => (AIShortsAppState.state.smartReframe?.speakerCues || []).filter(cue => cue.speaker === '일괄 화자').length === 0", timeout=10000)
+        after_undo = await page.evaluate("() => (AIShortsAppState.state.smartReframe?.speakerCues || []).map(cue => ({ start: cue.start, speaker: cue.speaker }))")
+        await page.click('#speakerCueRedoBtn')
+        await page.wait_for_function("() => (AIShortsAppState.state.smartReframe?.speakerCues || []).filter(cue => cue.speaker === '일괄 화자').length === 2", timeout=10000)
+        after_redo = await page.evaluate("() => (AIShortsAppState.state.smartReframe?.speakerCues || []).map(cue => ({ start: cue.start, speaker: cue.speaker }))")
         await browser.close()
 
     checks = {
@@ -225,6 +290,12 @@ async def run_audit(media: Path) -> dict:
         'speakerCueReturnsToAuto': tuning_auto['locked'] is False and tuning_auto['mode'] == 'auto' and tuning_auto['source'] != 'manual-override' and tuning_auto['persistedLocked'] is False,
         'overlappingSpeakersUseDualFaceLayout': overlap['cueCount'] == 3 and overlap['source'] == 'speaker-dual-face' and len(set(overlap['subjects'])) == 2 and overlap['priorities'][0] == 'primary' and overlap['priorities'][1] == 'secondary',
         'speakerConfidenceHistoryVisible': overlap['historyCount'] >= 2 and overlap['overlapButtonVisible'] is True,
+        'adjustableSpeakerPaneLayoutWorks': layout['orientation'] == 'horizontal' and abs(layout['split'] - expected_keyboard_split) < .001 and layout['primaryPosition'] == 'right' and layout['focusOrientation'] == 'horizontal' and abs(layout['focusSplit'] - expected_keyboard_split) < .001 and layout['focusPosition'] == 'right' and layout['output'] == f"{round(expected_keyboard_split * 100)}%",
+        'directDividerPointerKeyboardWorks': abs(drag_split - .6) <= .011 and layout['dividerOrientation'] == 'vertical' and layout['dividerValue'] == str(round(expected_keyboard_split * 100)) and layout['previewOrientation'] == 'horizontal' and layout['previewPosition'] == 'right',
+        'bulkEditPreviewMatchesPatch': bulk_preview['state'] == 'ready' and '2개 구간' in bulk_preview['text'] and '시간 +0.10초' in bulk_preview['text'] and '라벨 “일괄 화자”' in bulk_preview['text'] and bulk_preview['disabled'] is False,
+        'multiCueBulkEditWorks': sum(1 for cue in after_bulk if cue['speaker'] == '일괄 화자') == 2 and any(abs(cue['start'] - .3) < .001 for cue in after_bulk),
+        'selectiveBulkPreservesUncheckedFields': sorted((cue['subjectId'], cue['priority']) for cue in before_bulk[:2]) == sorted((cue['subjectId'], cue['priority']) for cue in after_bulk if cue['speaker'] == '일괄 화자'),
+        'speakerTimelineUndoRedoWorks': all(cue['speaker'] != '일괄 화자' for cue in after_undo) and sum(1 for cue in after_redo if cue['speaker'] == '일괄 화자') == 2,
         'overlapStatusVisible': '동시 발화' in overlap['status'],
         'progressCompletes': '스마트 리프레임 준비 완료' in edited['progress'],
         'operationReleased': edited['operationActive'] is False,
@@ -234,12 +305,12 @@ async def run_audit(media: Path) -> dict:
     return {
         'version': VERSION,
         'generatedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
-        'harness': 'real 20-second MP4 import, motion fallback, explicit two-face detector, manual subject pin, crop-keyframe create/delete, local transcript speaker-face switching, overlap dual-face composition, confidence history, per-segment manual lock/auto restore, and operation cleanup',
+        'harness': 'real 20-second MP4 import, motion fallback, explicit two-face detector, manual subject pin, crop-keyframe create/delete, local transcript speaker-face switching, overlap dual-face composition, horizontal pane layout, direct pointer/keyboard divider, Shift/touch range selection, bulk edit preview, selective multi-cue bulk edit, timeline undo/redo, confidence history, per-segment manual lock/auto restore, and operation cleanup',
         'motion': motion,
         'edited': edited,
         'deleted': deleted,
         'speaker': speaker,
-        'speakerTuning': { 'target': tuning_target, 'locked': tuning_locked, 'auto': tuning_auto, 'overlapTarget': overlap_target, 'overlap': overlap },
+        'speakerTuning': { 'target': tuning_target, 'locked': tuning_locked, 'auto': tuning_auto, 'overlapTarget': overlap_target, 'overlap': overlap, 'layout': dict(layout, dragSplit=drag_split), 'bulkPreview': bulk_preview, 'beforeBulk': before_bulk, 'afterBulk': after_bulk, 'afterUndo': after_undo, 'afterRedo': after_redo },
         'checks': checks,
         'passed': all(checks.values()),
         'pageErrors': errors,

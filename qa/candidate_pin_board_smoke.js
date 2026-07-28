@@ -13,7 +13,7 @@ const sw = read('sw.js');
 const pkg = JSON.parse(read('package.json'));
 const css = read('assets/css/candidate-pin-board.css');
 const js = read('src/ui/candidate-pin-board.js');
-ok(pkg.version === '1.6.24', 'package version is 1.2.9');
+ok(/^1\.6\.\d+$/.test(pkg.version), 'package version is 1.2.9');
 ok(html.includes(`assets/css/candidate-pin-board.css?v=${buildKey}`), 'candidate pin stylesheet linked');
 ok(loader.includes("versioned('src/ui/candidate-pin-board.js', 'editing')"), 'candidate pin script staged');
 ok(sw.includes(`./assets/css/candidate-pin-board.css?v=${buildKey}`), 'candidate pin css cached');

@@ -2,6 +2,7 @@
 'use strict';
 const fs = require('fs');
 const html = fs.readFileSync('index.html', 'utf8');
+const version = require('../package.json').version;
 const app = fs.readFileSync('src/app.js', 'utf8');
 const tabs = fs.readFileSync('src/ui/hyperflow-tabs.js', 'utf8');
 const polish = fs.readFileSync('src/ui/flow-polish.js', 'utf8');
@@ -13,7 +14,7 @@ if (!html.includes('compareModeBtn')) fail('comparison mode button missing');
 if (!html.includes('autoplayPreviewToggle')) fail('auto preview toggle missing');
 if ((html.match(/id="analyzeBtn"/g) || []).length !== 1) fail('recommendation generation button must remain single');
 if (!html.includes('tab-state-dot')) fail('bottom dock state badges missing');
-if (!html.includes('v1.6.24</button>')) fail('version badge must be simple v1.6.24');
+if (!html.includes(`v${version}</button>`)) fail('version badge must match package version');
 if (!html.includes('class="signature-label">DESIGNED BY</span><strong>곰같은여우</strong>')) fail('designer signature must stay on header line');
 if (tabs.includes('recommendBtn && analyzeBtn')) fail('undefined recommendBtn mirror must be removed');
 if (!app.includes('autoplayPreviewToggle')) fail('app must read auto preview toggle');

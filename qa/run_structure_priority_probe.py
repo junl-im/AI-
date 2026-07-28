@@ -3,11 +3,13 @@
 import asyncio
 import json
 import re
+import subprocess
 from pathlib import Path
 from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / 'qa' / 'runtime-structure-priority-probe-v1.6.20.json'
+PACKAGE_VERSION = json.loads((ROOT / 'package.json').read_text(encoding='utf-8')).get('version', 'dev')
+OUTPUT = ROOT / 'qa' / f'runtime-structure-priority-probe-v{PACKAGE_VERSION}.json'
 TARGET_FILES = [
     'assets/css/pc-dock-reveal-hotfix.css',
     'assets/css/desktop-prime-layout.css',

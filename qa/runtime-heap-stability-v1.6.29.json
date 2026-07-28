@@ -1,0 +1,577 @@
+{
+  "version": "1.6.29",
+  "generatedAt": "2026-07-28T07:05:27.924871+00:00",
+  "harness": "Chromium inline asset harness with real 16-second MP3 analysis/render, CDP forced GC, and Object URL instrumentation",
+  "cycles": 5,
+  "media": {
+    "name": "heap-cycle-16s.mp3",
+    "sizeBytes": 192716
+  },
+  "thresholds": {
+    "maxGrowthBytes": 25165824,
+    "maxGrowthMiB": 24.0,
+    "maxSlopeBytesPerCycle": 2097152,
+    "maxSlopeMiBPerCycle": 2.0
+  },
+  "baseline": {
+    "cycle": 0,
+    "heap": {
+      "usedSize": 3276668,
+      "totalSize": 5201920,
+      "embedderHeapUsedSize": 8497672,
+      "backingStorageSize": 2423554
+    },
+    "heapMiB": {
+      "used": 3.125,
+      "total": 4.961,
+      "embedderUsed": 8.104,
+      "backingStorage": 2.311
+    },
+    "urls": {
+      "created": 0,
+      "revoked": 0,
+      "active": 0,
+      "sourceActive": 0,
+      "exportActive": 0,
+      "activeUrls": []
+    },
+    "operations": {
+      "mediaSessionId": 0,
+      "active": []
+    },
+    "queue": {
+      "running": false,
+      "total": 0,
+      "done": 0,
+      "failed": 0,
+      "cancelled": 0,
+      "queued": 0,
+      "progress": 0,
+      "current": null,
+      "items": []
+    },
+    "mediaSessionId": 0,
+    "recommendationCount": 0,
+    "diagnosticsCount": 20,
+    "hasAudioAnalysis": false,
+    "hasMotionAnalysis": false
+  },
+  "samples": [
+    {
+      "cycle": 1,
+      "heap": {
+        "usedSize": 5577264,
+        "totalSize": 7380992,
+        "embedderHeapUsedSize": 10905784,
+        "backingStorageSize": 2429245
+      },
+      "heapMiB": {
+        "used": 5.319,
+        "total": 7.039,
+        "embedderUsed": 10.401,
+        "backingStorage": 2.317
+      },
+      "urls": {
+        "created": 2,
+        "revoked": 0,
+        "active": 2,
+        "sourceActive": 1,
+        "exportActive": 1,
+        "activeUrls": [
+          {
+            "url": "blob:null/99f62a60-1aeb-4f7e-8ef6-6eadd8de20d4",
+            "kind": "source"
+          },
+          {
+            "url": "blob:null/766d0cb6-a3cb-4806-a264-1548ce730608",
+            "kind": "export"
+          }
+        ]
+      },
+      "operations": {
+        "mediaSessionId": 1,
+        "active": []
+      },
+      "queue": {
+        "running": false,
+        "total": 0,
+        "done": 0,
+        "failed": 0,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 0,
+        "current": null,
+        "items": []
+      },
+      "mediaSessionId": 1,
+      "recommendationCount": 1,
+      "diagnosticsCount": 20,
+      "hasAudioAnalysis": true,
+      "hasMotionAnalysis": false
+    },
+    {
+      "cycle": 2,
+      "heap": {
+        "usedSize": 5814636,
+        "totalSize": 8429568,
+        "embedderHeapUsedSize": 15385264,
+        "backingStorageSize": 2429254
+      },
+      "heapMiB": {
+        "used": 5.545,
+        "total": 8.039,
+        "embedderUsed": 14.673,
+        "backingStorage": 2.317
+      },
+      "urls": {
+        "created": 4,
+        "revoked": 2,
+        "active": 2,
+        "sourceActive": 1,
+        "exportActive": 1,
+        "activeUrls": [
+          {
+            "url": "blob:null/61e27cf2-9f1f-4304-9396-b1d18d7a9d3b",
+            "kind": "source"
+          },
+          {
+            "url": "blob:null/57ea4adc-0860-4cd6-ab33-5c8b76a63933",
+            "kind": "export"
+          }
+        ]
+      },
+      "operations": {
+        "mediaSessionId": 2,
+        "active": []
+      },
+      "queue": {
+        "running": false,
+        "total": 0,
+        "done": 0,
+        "failed": 0,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 0,
+        "current": null,
+        "items": []
+      },
+      "mediaSessionId": 2,
+      "recommendationCount": 1,
+      "diagnosticsCount": 20,
+      "hasAudioAnalysis": true,
+      "hasMotionAnalysis": false
+    },
+    {
+      "cycle": 3,
+      "heap": {
+        "usedSize": 5881292,
+        "totalSize": 8691712,
+        "embedderHeapUsedSize": 9653976,
+        "backingStorageSize": 2429254
+      },
+      "heapMiB": {
+        "used": 5.609,
+        "total": 8.289,
+        "embedderUsed": 9.207,
+        "backingStorage": 2.317
+      },
+      "urls": {
+        "created": 6,
+        "revoked": 4,
+        "active": 2,
+        "sourceActive": 1,
+        "exportActive": 1,
+        "activeUrls": [
+          {
+            "url": "blob:null/682d138d-a78c-4e2a-9e61-4e6c007fc538",
+            "kind": "source"
+          },
+          {
+            "url": "blob:null/ae0e0a68-2534-44cc-b01e-1f249f63d924",
+            "kind": "export"
+          }
+        ]
+      },
+      "operations": {
+        "mediaSessionId": 3,
+        "active": []
+      },
+      "queue": {
+        "running": false,
+        "total": 0,
+        "done": 0,
+        "failed": 0,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 0,
+        "current": null,
+        "items": []
+      },
+      "mediaSessionId": 3,
+      "recommendationCount": 1,
+      "diagnosticsCount": 20,
+      "hasAudioAnalysis": true,
+      "hasMotionAnalysis": false
+    },
+    {
+      "cycle": 4,
+      "heap": {
+        "usedSize": 5983712,
+        "totalSize": 7905280,
+        "embedderHeapUsedSize": 9705928,
+        "backingStorageSize": 2429254
+      },
+      "heapMiB": {
+        "used": 5.707,
+        "total": 7.539,
+        "embedderUsed": 9.256,
+        "backingStorage": 2.317
+      },
+      "urls": {
+        "created": 8,
+        "revoked": 6,
+        "active": 2,
+        "sourceActive": 1,
+        "exportActive": 1,
+        "activeUrls": [
+          {
+            "url": "blob:null/4812c89d-1984-4c56-a99d-beb128a7f71a",
+            "kind": "source"
+          },
+          {
+            "url": "blob:null/f7417a38-b3d4-48be-a1fa-e1b91b7a875f",
+            "kind": "export"
+          }
+        ]
+      },
+      "operations": {
+        "mediaSessionId": 4,
+        "active": []
+      },
+      "queue": {
+        "running": false,
+        "total": 0,
+        "done": 0,
+        "failed": 0,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 0,
+        "current": null,
+        "items": []
+      },
+      "mediaSessionId": 4,
+      "recommendationCount": 1,
+      "diagnosticsCount": 20,
+      "hasAudioAnalysis": true,
+      "hasMotionAnalysis": false
+    },
+    {
+      "cycle": 5,
+      "heap": {
+        "usedSize": 4340264,
+        "totalSize": 6635520,
+        "embedderHeapUsedSize": 9937360,
+        "backingStorageSize": 1016758
+      },
+      "heapMiB": {
+        "used": 4.139,
+        "total": 6.328,
+        "embedderUsed": 9.477,
+        "backingStorage": 0.97
+      },
+      "urls": {
+        "created": 10,
+        "revoked": 8,
+        "active": 2,
+        "sourceActive": 1,
+        "exportActive": 1,
+        "activeUrls": [
+          {
+            "url": "blob:null/546c0e31-b9b1-4cdc-8948-bafb9ac31550",
+            "kind": "source"
+          },
+          {
+            "url": "blob:null/e5f3ac94-9007-4386-8913-753575220985",
+            "kind": "export"
+          }
+        ]
+      },
+      "operations": {
+        "mediaSessionId": 5,
+        "active": []
+      },
+      "queue": {
+        "running": false,
+        "total": 0,
+        "done": 0,
+        "failed": 0,
+        "cancelled": 0,
+        "queued": 0,
+        "progress": 0,
+        "current": null,
+        "items": []
+      },
+      "mediaSessionId": 5,
+      "recommendationCount": 1,
+      "diagnosticsCount": 20,
+      "hasAudioAnalysis": true,
+      "hasMotionAnalysis": false
+    }
+  ],
+  "disposed": {
+    "cycle": 6,
+    "heap": {
+      "usedSize": 4338484,
+      "totalSize": 6635520,
+      "embedderHeapUsedSize": 9741720,
+      "backingStorageSize": 1016693
+    },
+    "heapMiB": {
+      "used": 4.138,
+      "total": 6.328,
+      "embedderUsed": 9.29,
+      "backingStorage": 0.97
+    },
+    "urls": {
+      "created": 10,
+      "revoked": 10,
+      "active": 0,
+      "sourceActive": 0,
+      "exportActive": 0,
+      "activeUrls": []
+    },
+    "operations": {
+      "mediaSessionId": 5,
+      "active": []
+    },
+    "queue": {
+      "running": false,
+      "total": 0,
+      "done": 0,
+      "failed": 0,
+      "cancelled": 0,
+      "queued": 0,
+      "progress": 0,
+      "current": null,
+      "items": []
+    },
+    "mediaSessionId": 5,
+    "recommendationCount": 1,
+    "diagnosticsCount": 20,
+    "hasAudioAnalysis": true,
+    "hasMotionAnalysis": false
+  },
+  "trend": {
+    "windowSize": 1,
+    "firstWindowStartCycle": 5,
+    "firstWindowMedianBytes": 4340264,
+    "lastWindowMedianBytes": 4340264,
+    "growthBytes": 0,
+    "growthPercent": 0.0,
+    "slopeBytesPerCycle": -230492,
+    "firstWindowMedianMiB": 4.139,
+    "lastWindowMedianMiB": 4.139,
+    "growthMiB": 0.0,
+    "slopeMiBPerCycle": -0.22
+  },
+  "checks": {
+    "completedCycles": true,
+    "noPageErrors": true,
+    "noRuntimeErrors": true,
+    "operationsReleasedEveryCycle": true,
+    "renderQueueReleasedEveryCycle": true,
+    "boundedObjectUrlsDuringCycles": true,
+    "objectUrlsReleasedOnDispose": true,
+    "boundedHeapWindowGrowth": true,
+    "boundedHeapSlope": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "runtimeHealth": {
+    "webAudio": true,
+    "worker": true,
+    "mediaRecorder": true,
+    "canvasCaptureStream": true,
+    "mediaCaptureStream": true,
+    "serviceWorker": false,
+    "serviceWorkerControlled": false,
+    "secureContext": false,
+    "crossOriginIsolated": false,
+    "hydrationReady": "core",
+    "hydrationError": "",
+    "runtimeErrors": 0,
+    "storage": {
+      "supported": false,
+      "usage": 0,
+      "quota": 0,
+      "ratio": 0,
+      "localStorageBytes": 0,
+      "cacheCount": 0,
+      "level": "unknown",
+      "at": ""
+    },
+    "serviceWorkerLifecycle": {
+      "supported": false,
+      "registered": false,
+      "controlled": false,
+      "scope": "",
+      "installing": false,
+      "waiting": false,
+      "active": false,
+      "controllerChanges": 0,
+      "version": "v1.6.29",
+      "installReport": null,
+      "update": {
+        "state": "idle",
+        "attempts": 0,
+        "lastCheckedAt": "",
+        "lastSuccessAt": "",
+        "lastError": "",
+        "nextRetryAt": ""
+      },
+      "repair": {
+        "state": "idle",
+        "requestedAt": "",
+        "completedAt": "",
+        "repaired": 0,
+        "failed": 0,
+        "lastError": ""
+      },
+      "integrityAudit": {
+        "state": "idle",
+        "requestedAt": "",
+        "completedAt": "",
+        "checked": 0,
+        "healthy": 0,
+        "repaired": 0,
+        "failed": 0,
+        "cursor": 0,
+        "nextCursor": 0,
+        "lastError": "",
+        "nextAuditAt": ""
+      }
+    },
+    "sessionContinuity": {
+      "storageKey": "ai-shorts-session-continuity-v112",
+      "schemaVersion": 5,
+      "backupLimit": 2,
+      "backupCapacity": 3,
+      "backupCount": 0,
+      "compressedBackupCount": 0,
+      "backupStoredChars": 0,
+      "backupRawChars": 0,
+      "backupSavingsPercent": 0,
+      "hasPrimary": false,
+      "invalid": false,
+      "invalidReason": "",
+      "loadedSource": "",
+      "lastMigrationFrom": 0,
+      "lastSavedAt": "",
+      "recoveryHistoryCount": 0,
+      "lastRecovery": null,
+      "selectableSnapshotCount": 0,
+      "selectedRestoreSource": "ai-shorts-session-continuity-v112",
+      "protectedBackup": null,
+      "protectedBackupCount": 0,
+      "protectedBackupMeta": {
+        "name": "중요 백업",
+        "note": "",
+        "createdAt": "2026-07-28T07:05:27.818Z",
+        "source": ""
+      },
+      "availableSnapshots": []
+    },
+    "analysisCache": {
+      "size": 1,
+      "limit": 4,
+      "maxAgeMs": 1800000,
+      "hits": 4,
+      "misses": 1,
+      "evictions": 0,
+      "expired": 0,
+      "manualPruned": 0,
+      "lastHitAgeMs": 12563,
+      "oldestAgeMs": 16736,
+      "cloneSafe": true,
+      "fingerprintedKeys": true,
+      "adaptiveFingerprinting": true,
+      "fingerprintSampleBytes": 16384,
+      "hitRate": 80,
+      "diagnosticEventCount": 14,
+      "fingerprint": {
+        "computations": 5,
+        "promiseHits": 0,
+        "failures": 0,
+        "averageMs": 58.7,
+        "lastMs": 83.6,
+        "maxMs": 83.6,
+        "totalBytes": 963580,
+        "lastBytes": 192716,
+        "fullFileHashes": 5,
+        "sampledHashes": 0,
+        "fallbackHashes": 5,
+        "collisionAvoidanceCount": 0,
+        "metadataHistorySize": 1,
+        "fullHashMaxBytes": 2097152,
+        "baseSampleBytes": 16384,
+        "maxSampleBytes": 131072,
+        "lastMode": "full",
+        "lastAlgorithm": "fnv1a"
+      },
+      "persistent": {
+        "supported": true,
+        "enabled": true,
+        "state": "error",
+        "databaseName": "ai-shorts-analysis-cache-v1",
+        "namespace": "analysis-contract-v3",
+        "appVersion": "1.6.29",
+        "contractVersion": "3",
+        "size": 0,
+        "totalBytes": 0,
+        "maxItems": 8,
+        "maxBytes": 16777216,
+        "effectiveMaxItems": 8,
+        "effectiveMaxBytes": 16777216,
+        "minItems": 2,
+        "minBytes": 4194304,
+        "maxAgeMs": 604800000,
+        "hits": 0,
+        "misses": 0,
+        "hitRate": 0,
+        "writes": 0,
+        "writeFailures": 0,
+        "evictions": 0,
+        "expired": 0,
+        "clears": 0,
+        "selectiveDeletes": 0,
+        "bulkDeletes": 0,
+        "invalidations": 0,
+        "oldNamespaceDeletes": 0,
+        "legacyNamespaceCount": 0,
+        "legacyItems": 0,
+        "legacyBytes": 0,
+        "optionSignatureGroups": 0,
+        "unprofiledOptionEntries": 0,
+        "maintenanceHistoryCount": 0,
+        "storageTrendCount": 0,
+        "readAllScans": 0,
+        "readAllRows": 0,
+        "lastReadAllRows": 0,
+        "lastReadAllMs": 0,
+        "maxReadAllMs": 0,
+        "quotaLevel": "unknown",
+        "quotaRatio": 0,
+        "quotaUsage": 0,
+        "quotaLimit": 0,
+        "quotaChecks": 0,
+        "quotaErrors": 0,
+        "quotaCleanups": 0,
+        "lastQuotaAt": "",
+        "lastError": "Failed to execute 'open' on 'IDBFactory': access to the Indexed Database API is denied in this context.",
+        "lastOperationAt": ""
+      }
+    },
+    "localAI": null,
+    "localAIJobs": null
+  }
+}

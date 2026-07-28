@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.24 - dual-speaker split composition and cancellable vertical rendering
+// AI Shorts Studio v1.6.30 - energy/manual speaker paging with fade and slide transitions
 'use strict';
 
 (function exposeVerticalRenderer(global) {
@@ -61,23 +61,153 @@
         ctx.filter = `blur(28px) ${qualityFilter || 'saturate(1.08)'} brightness(0.58)`;
         ctx.drawImage(source, (width - backgroundWidth) / 2, (height - backgroundHeight) / 2, backgroundWidth, backgroundHeight);
         ctx.restore();
-        const gap = Math.max(4, Math.round(height * 0.004));
-        const paneHeight = (height - gap) / 2;
-        subjects.forEach((subjectFocus, index) => {
-            const rect = engine.resolveCropRect(sourceWidth, sourceHeight, width, paneHeight, subjectFocus, Object.assign({}, smart.options || {}, { captionOptions: null }));
-            const top = index ? paneHeight + gap : 0;
+        const layout = focus && focus.speakerLayout && typeof focus.speakerLayout === 'object' ? focus.speakerLayout : {};
+        const orientation = layout.orientation === 'horizontal' ? 'horizontal' : 'vertical';
+        const primarySplit = Math.max(0.35, Math.min(0.65, Number(layout.split) || 0.5));
+        const gap = Math.max(4, Math.round((orientation === 'horizontal' ? width : height) * 0.004));
+        if (orientation === 'horizontal') {
+            const primaryOnRight = layout.primaryPosition === 'right';
+            const usableWidth = width - gap;
+            const primaryWidth = usableWidth * primarySplit;
+            const secondaryWidth = usableWidth - primaryWidth;
+            const panes = primaryOnRight
+                ? [
+                    { focus: subjects[1], left: 0, width: secondaryWidth },
+                    { focus: subjects[0], left: secondaryWidth + gap, width: primaryWidth }
+                ]
+                : [
+                    { focus: subjects[0], left: 0, width: primaryWidth },
+                    { focus: subjects[1], left: primaryWidth + gap, width: secondaryWidth }
+                ];
+            panes.forEach(pane => {
+                const rect = engine.resolveCropRect(sourceWidth, sourceHeight, pane.width, height, pane.focus, Object.assign({}, smart.options || {}, { captionOptions: null }));
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(pane.left, 0, pane.width, height);
+                ctx.clip();
+                if (qualityFilter) ctx.filter = qualityFilter;
+                ctx.drawImage(source, rect.sx, rect.sy, rect.sw, rect.sh, pane.left, 0, pane.width, height);
+                ctx.restore();
+            });
+            const dividerX = primaryOnRight ? secondaryWidth : primaryWidth;
+            ctx.save();
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+            ctx.fillRect(dividerX, 0, gap, height);
+            ctx.restore();
+            return true;
+        }
+        const primaryOnBottom = layout.primaryPosition === 'bottom';
+        const usableHeight = height - gap;
+        const primaryHeight = usableHeight * primarySplit;
+        const secondaryHeight = usableHeight - primaryHeight;
+        const panes = primaryOnBottom
+            ? [
+                { focus: subjects[1], top: 0, height: secondaryHeight },
+                { focus: subjects[0], top: secondaryHeight + gap, height: primaryHeight }
+            ]
+            : [
+                { focus: subjects[0], top: 0, height: primaryHeight },
+                { focus: subjects[1], top: primaryHeight + gap, height: secondaryHeight }
+            ];
+        panes.forEach(pane => {
+            const rect = engine.resolveCropRect(sourceWidth, sourceHeight, width, pane.height, pane.focus, Object.assign({}, smart.options || {}, { captionOptions: null }));
             ctx.save();
             ctx.beginPath();
-            ctx.rect(0, top, width, paneHeight);
+            ctx.rect(0, pane.top, width, pane.height);
             ctx.clip();
             if (qualityFilter) ctx.filter = qualityFilter;
-            ctx.drawImage(source, rect.sx, rect.sy, rect.sw, rect.sh, 0, top, width, paneHeight);
+            ctx.drawImage(source, rect.sx, rect.sy, rect.sw, rect.sh, 0, pane.top, width, pane.height);
             ctx.restore();
         });
+        const dividerY = primaryOnBottom ? secondaryHeight : primaryHeight;
         ctx.save();
         ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-        ctx.fillRect(0, paneHeight, width, gap);
+        ctx.fillRect(0, dividerY, width, gap);
         ctx.restore();
+        return true;
+    }
+
+    function speakerGridCells(count, width, height, layoutInput, gap) {
+        const layout = layoutInput && typeof layoutInput === 'object' ? layoutInput : {};
+        if (count === 3) {
+            const size = Math.max(0.45, Math.min(0.65, Number(layout.gridPrimarySize) || 0.54));
+            const position = ['top', 'bottom', 'left', 'right'].includes(layout.gridPrimaryPosition) ? layout.gridPrimaryPosition : 'top';
+            if (position === 'left' || position === 'right') {
+                const primaryWidth = width * size - gap / 2;
+                const secondaryWidth = width - primaryWidth - gap;
+                const primaryLeft = position === 'right' ? secondaryWidth + gap : 0;
+                const secondaryLeft = position === 'right' ? 0 : primaryWidth + gap;
+                return [
+                    { left: primaryLeft, top: 0, width: primaryWidth, height },
+                    { left: secondaryLeft, top: 0, width: secondaryWidth, height: height / 2 - gap / 2 },
+                    { left: secondaryLeft, top: height / 2 + gap / 2, width: secondaryWidth, height: height / 2 - gap / 2 }
+                ];
+            }
+            const primaryHeight = height * size - gap / 2;
+            const secondaryHeight = height - primaryHeight - gap;
+            const primaryTop = position === 'bottom' ? secondaryHeight + gap : 0;
+            const secondaryTop = position === 'bottom' ? 0 : primaryHeight + gap;
+            return [
+                { left: 0, top: primaryTop, width, height: primaryHeight },
+                { left: 0, top: secondaryTop, width: width / 2 - gap / 2, height: secondaryHeight },
+                { left: width / 2 + gap / 2, top: secondaryTop, width: width / 2 - gap / 2, height: secondaryHeight }
+            ];
+        }
+        return Array.from({ length: count }, (_, index) => ({
+            left: (index % 2) * (width / 2 + gap / 2),
+            top: Math.floor(index / 2) * (height / 2 + gap / 2),
+            width: width / 2 - gap / 2,
+            height: height / 2 - gap / 2
+        }));
+    }
+
+    function drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, alpha, offsetX) {
+        if (!Array.isArray(subjects) || subjects.length < 3) return;
+        const engine = getSmartReframeEngine();
+        const gap = Math.max(4, Math.round(Math.min(width, height) * 0.006));
+        const cells = speakerGridCells(subjects.length, width, height, layout, gap);
+        cells.forEach((cell, index) => {
+            const subject = subjects[index];
+            const left = cell.left + (Number(offsetX) || 0);
+            const rect = engine.resolveCropRect(sourceWidth, sourceHeight, cell.width, cell.height, subject, Object.assign({}, smart.options || {}, { captionOptions: null }));
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
+            ctx.beginPath();
+            ctx.rect(left, cell.top, cell.width, cell.height);
+            ctx.clip();
+            if (qualityFilter) ctx.filter = qualityFilter;
+            ctx.drawImage(source, rect.sx, rect.sy, rect.sw, rect.sh, left, cell.top, cell.width, cell.height);
+            ctx.restore();
+        });
+    }
+
+    function drawSpeakerGridFaces(ctx, source, width, height, sourceWidth, sourceHeight, focus, qualityFilter, smart) {
+        const engine = getSmartReframeEngine();
+        const subjects = Array.isArray(focus && focus.gridSubjects) ? focus.gridSubjects.slice(0, 4) : [];
+        if (subjects.length < 3 || !engine.resolveCropRect) return false;
+        const coverScale = Math.max(width / sourceWidth, height / sourceHeight);
+        const backgroundWidth = sourceWidth * coverScale;
+        const backgroundHeight = sourceHeight * coverScale;
+        ctx.save();
+        ctx.filter = `blur(30px) ${qualityFilter || 'saturate(1.08)'} brightness(0.52)`;
+        ctx.drawImage(source, (width - backgroundWidth) / 2, (height - backgroundHeight) / 2, backgroundWidth, backgroundHeight);
+        ctx.restore();
+        const layout = focus && focus.speakerLayout && typeof focus.speakerLayout === 'object' ? focus.speakerLayout : {};
+        const previous = Array.isArray(focus && focus.gridPreviousSubjects) ? focus.gridPreviousSubjects.slice(0, 4) : [];
+        const progress = Math.max(0, Math.min(1, Number(focus && focus.gridTransitionProgress == null ? 1 : focus.gridTransitionProgress)));
+        const transition = layout.gridTransition === 'slide' ? 'slide' : layout.gridTransition === 'none' ? 'none' : 'fade';
+        if (previous.length >= 3 && progress < 1 && transition !== 'none') {
+            if (transition === 'slide') {
+                const travel = width * 0.18;
+                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, previous, layout, qualityFilter, smart, 1 - progress * 0.35, -travel * progress);
+                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, 0.65 + progress * 0.35, travel * (1 - progress));
+            } else {
+                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, previous, layout, qualityFilter, smart, 1 - progress, 0);
+                drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, progress, 0);
+            }
+        } else {
+            drawSpeakerGridSubjectSet(ctx, source, width, height, sourceWidth, sourceHeight, subjects, layout, qualityFilter, smart, 1, 0);
+        }
         return true;
     }
 
@@ -114,6 +244,7 @@
         if (cropMode === 'smart' && smartEngine.getFocusAt && smartEngine.resolveCropRect) {
             const focus = smartEngine.getFocusAt(smart.track || smart.smartReframe, Number(smart.time) || 0);
             if (focus) {
+                if (focus.source === 'speaker-grid-face' && drawSpeakerGridFaces(ctx, source, width, height, sourceWidth, sourceHeight, focus, qualityFilter, smart)) return;
                 if (focus.source === 'speaker-dual-face' && drawDualSpeakerFaces(ctx, source, width, height, sourceWidth, sourceHeight, focus, qualityFilter, smart)) return;
                 const rect = smartEngine.resolveCropRect(sourceWidth, sourceHeight, width, height, focus, Object.assign({}, smart.options || {}, {
                     captionOptions: smart.captionOptions || null

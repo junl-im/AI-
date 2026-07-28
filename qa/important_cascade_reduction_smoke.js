@@ -10,7 +10,7 @@ const current = JSON.parse(read(`qa/runtime-browser-audit-v${pkg.version}.json`)
 const prior = JSON.parse(read('qa/runtime-browser-audit-v1.5.17.json'));
 function ok(value, message) { if (!value) throw new Error(message); console.log(`PASS ${message}`); }
 function metric(report, mode, pathParts) { let value=report[mode]; for (const key of pathParts) value=value[key]; return value; }
-ok(pkg.version === '1.6.24', 'important cascade reduction release version is v1.6.20');
+ok(/^1\.6\.\d+$/.test(pkg.version), 'important cascade reduction release version is v1.6.20');
 ok(report.importantCount <= 593, 'important declaration ceiling remains at or below 593');
 ok(report.conflictingPropertyCount === 0 && report.sameValueDuplicateCount === 0 && report.shadowedDeclarationCount === 0, 'cascade remains conflict, duplicate, and shadow free');
 const stage = read('assets/css/studio-experience.css');

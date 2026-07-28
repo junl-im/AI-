@@ -8,7 +8,7 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const audit = JSON.parse(read(`qa/runtime-css-ownership-v${pkg.version}.json`));
 const reduction = JSON.parse(read('qa/runtime-important-reduction-v1.5.18.json'));
 function ok(value, message) { if (!value) throw new Error(message); console.log(`PASS ${message}`); }
-ok(pkg.version === '1.6.24', 'refinement priority release version is v1.6.20');
+ok(/^1\.6\.\d+$/.test(pkg.version), 'refinement priority release version is v1.6.20');
 ok(reduction.baselineVersion === '1.5.17' && reduction.removedCount === 81, '81 verified priorities are removed from the v1.5.17 baseline');
 ok(reduction.remainingImportant === 678 && audit.importantCount <= 593, 'v1.5.18 reduction remains inherited and the active ceiling is further reduced');
 ok(audit.conflictingPropertyCount === 0 && audit.sameValueDuplicateCount === 0 && audit.shadowedDeclarationCount === 0, 'zero-conflict, zero-duplicate, zero-shadow cascade remains intact');

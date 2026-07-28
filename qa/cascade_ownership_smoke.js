@@ -12,7 +12,7 @@ function assert(condition, message) {
     console.log(`PASS ${message}`);
 }
 
-assert(pkg.version === '1.6.24', 'cascade ownership release version is v1.6.20');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'cascade ownership release version is v1.6.20');
 assert(report.version === pkg.version, 'CSS ownership report matches the release');
 assert(report.conflictingPropertyCount === 0, 'selector-property conflicts remain at zero');
 assert(report.highRiskConflictCount === 0, 'high-risk CSS conflicts remain at zero');

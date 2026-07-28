@@ -1,6 +1,6 @@
 'use strict';
 const fs=require('fs'),vm=require('vm'); const code=fs.readFileSync('src/diagnostics/support-diagnostics.js','utf8');
-const window={AIShortsRuntimeConfig:{APP_VERSION:'v1.6.24'},Blob:global.Blob}; window.window=window;
+const window={AIShortsRuntimeConfig:{APP_VERSION:'v1.6.25'},Blob:global.Blob}; window.window=window;
 vm.runInNewContext(code,{window,console,Date,Math,Object,Array,JSON,Promise});
 const api=window.AIShortsSupportDiagnostics;
 const normalized=api.normalizeBundle({appVersion:'v1.6.20',runtime:{webAudio:true,worker:true,serviceWorker:true,secureContext:true,runtimeErrors:0},analysis:{history:[]},benchmarks:[],serviceWorker:{controlled:true}});

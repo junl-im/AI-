@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.24 - keyframe timeline editing, range application, and collision-safe smart reframe engine
+// AI Shorts Studio v1.6.30 - energy paging, manual speaker pages, bulk grid crops, and page transitions
 'use strict';
 
 (function exposeSmartReframeEngine(global) {
@@ -16,7 +16,8 @@
         sceneCutThreshold: 0.58,
         subjectMatchDistance: 0.24,
         subjectId: 'auto',
-        speakerPriority: true
+        speakerPriority: true,
+        speakerLayout: Object.freeze({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: Object.freeze([]) })
     });
     const MAX_KEYFRAMES = 120;
     const MAX_SUBJECTS = 12;
@@ -131,6 +132,44 @@
         return priority === 'primary' || priority === 'secondary' ? priority : 'auto';
     }
 
+    function safeGridCrop(value) {
+        const input = value && typeof value === 'object' ? value : {};
+        return Object.freeze({
+            x: Number(clamp(input.x == null ? 0 : input.x, -0.25, 0.25).toFixed(4)),
+            y: Number(clamp(input.y == null ? 0 : input.y, -0.25, 0.25).toFixed(4)),
+            zoom: Number(clamp(input.zoom == null ? 1 : input.zoom, 1, 1.35).toFixed(4))
+        });
+    }
+
+    function safeGridManualPages(items) {
+        return Object.freeze((Array.isArray(items) ? items : []).slice(0, 12).map(page => Object.freeze((Array.isArray(page) ? page : [])
+            .map(safeSubjectId).filter(id => id !== 'auto').filter((id, index, list) => list.indexOf(id) === index).slice(0, 4)))
+            .filter(page => page.length));
+    }
+
+    function safeSpeakerLayout(value) {
+        const input = value && typeof value === 'object' ? value : {};
+        const orientation = input.orientation === 'horizontal' ? 'horizontal' : 'vertical';
+        const primaryPosition = orientation === 'horizontal'
+            ? (input.primaryPosition === 'right' ? 'right' : 'left')
+            : (input.primaryPosition === 'bottom' ? 'bottom' : 'top');
+        const gridPrimaryPosition = ['top', 'bottom', 'left', 'right'].includes(input.gridPrimaryPosition) ? input.gridPrimaryPosition : 'top';
+        const gridPaging = ['priority', 'energy', 'manual'].includes(input.gridPaging) ? input.gridPaging : 'rotate';
+        const gridTransition = ['none', 'slide'].includes(input.gridTransition) ? input.gridTransition : 'fade';
+        return Object.freeze({
+            orientation,
+            split: Number(clamp(input.split == null ? 0.5 : input.split, 0.35, 0.65).toFixed(3)),
+            primaryPosition,
+            gridPrimarySize: Number(clamp(input.gridPrimarySize == null ? 0.54 : input.gridPrimarySize, 0.45, 0.65).toFixed(3)),
+            gridPrimaryPosition,
+            gridPaging,
+            gridPageSeconds: Number(clamp(input.gridPageSeconds == null ? 3 : input.gridPageSeconds, 1, 10).toFixed(1)),
+            gridTransition,
+            gridTransitionMs: Math.round(clamp(input.gridTransitionMs == null ? 320 : input.gridTransitionMs, 120, 1200)),
+            gridManualPages: safeGridManualPages(input.gridManualPages)
+        });
+    }
+
     function safeConfidenceHistory(items, fallback) {
         const cue = fallback || {};
         const output = (Array.isArray(items) ? items : []).slice(-12).map((item, index) => ({
@@ -174,7 +213,9 @@
             segmentCount: Math.max(1, Math.round(finite(cue.segmentCount, 1))),
             locked: cue.locked === true,
             mode: cue.locked === true || cue.mode === 'manual' ? 'manual' : 'auto',
-            priority: safeSpeakerPriority(cue.priority)
+            priority: safeSpeakerPriority(cue.priority),
+            energy: Number(clamp(cue.energy == null ? cue.rmsNorm == null ? cue.confidence : cue.rmsNorm : cue.energy, 0, 1).toFixed(4)),
+            gridCrop: safeGridCrop(cue.gridCrop)
         };
         safe.confidenceHistory = safeConfidenceHistory(cue.confidenceHistory, safe);
         return safe;
@@ -344,7 +385,8 @@
         const points = Array.isArray(track && track.points) ? track.points : [];
         const keyframes = Array.isArray(track && track.keyframes) ? track.keyframes : [];
         const speakerCues = Array.isArray(track && track.speakerCues) ? track.speakerCues : [];
-        const text = `${track && track.source || 'motion'}|${track && track.activeSubjectId || 'auto'}|${track && track.speakerPriority !== false ? 'speaker-on' : 'speaker-off'}|${points.map(point => `${point.time.toFixed(2)}:${point.x.toFixed(3)}:${point.y.toFixed(3)}:${point.confidence.toFixed(2)}`).join('|')}|${keyframes.map(item => `${item.time}:${item.x}:${item.y}:${item.zoom}`).join('|')}|${speakerCues.map(item => `${item.start}:${item.end}:${item.subjectId}:${item.confidence}`).join('|')}`;
+        const layout = safeSpeakerLayout(track && track.speakerLayout);
+        const text = `${track && track.source || 'motion'}|${track && track.activeSubjectId || 'auto'}|${track && track.speakerPriority !== false ? 'speaker-on' : 'speaker-off'}|${layout.split}:${layout.primaryPosition}:${layout.gridPaging}:${layout.gridPageSeconds}:${layout.gridTransition}:${layout.gridTransitionMs}:${JSON.stringify(layout.gridManualPages)}|${points.map(point => `${point.time.toFixed(2)}:${point.x.toFixed(3)}:${point.y.toFixed(3)}:${point.confidence.toFixed(2)}`).join('|')}|${keyframes.map(item => `${item.time}:${item.x}:${item.y}:${item.zoom}`).join('|')}|${speakerCues.map(item => `${item.start}:${item.end}:${item.subjectId}:${item.confidence}:${item.priority}:${item.energy}:${item.gridCrop.x}:${item.gridCrop.y}:${item.gridCrop.zoom}`).join('|')}`;
         for (let index = 0; index < text.length; index += 1) {
             hash ^= text.charCodeAt(index);
             hash = Math.imul(hash, 16777619);
@@ -378,6 +420,7 @@
         const keyframes = normalizeKeyframes(prepared.keyframes);
         const speakerCues = normalizeSpeakerCues(prepared.speakerCues);
         const speakerPriority = prepared.speakerPriority !== false;
+        const speakerLayout = safeSpeakerLayout(prepared.speakerLayout);
         const facePoints = points.filter(point => point.source === 'face');
         const averageConfidence = points.length ? points.reduce((sum, point) => sum + point.confidence, 0) / points.length : 0;
         const summary = Object.assign({}, prepared.summary || {}, {
@@ -391,7 +434,8 @@
             sceneCuts: prepared.sceneCuts.length,
             keyframes: keyframes.length,
             speakerCues: speakerCues.length,
-            speakerPriority
+            speakerPriority,
+            speakerLayout
         });
         const draft = {
             version: 2,
@@ -411,6 +455,7 @@
             keyframes: Object.freeze(keyframes.map(item => Object.freeze(item))),
             speakerCues: Object.freeze(speakerCues.map(item => Object.freeze(item))),
             speakerPriority,
+            speakerLayout,
             summary: Object.freeze(summary)
         };
         draft.id = trackId(draft);
@@ -433,7 +478,8 @@
             activeSubjectId: additional.activeSubjectId || opts.subjectId || 'auto',
             keyframes: additional.keyframes || [],
             speakerCues: additional.speakerCues || [],
-            speakerPriority: Object.prototype.hasOwnProperty.call(additional, 'speakerPriority') ? additional.speakerPriority : opts.speakerPriority
+            speakerPriority: Object.prototype.hasOwnProperty.call(additional, 'speakerPriority') ? additional.speakerPriority : opts.speakerPriority,
+            speakerLayout: additional.speakerLayout || opts.speakerLayout
         });
     }
 
@@ -678,7 +724,8 @@
             activeSubjectId: Object.prototype.hasOwnProperty.call(next, 'activeSubjectId') ? next.activeSubjectId : track.activeSubjectId,
             keyframes: Object.prototype.hasOwnProperty.call(next, 'keyframes') ? next.keyframes : track.keyframes,
             speakerCues: Object.prototype.hasOwnProperty.call(next, 'speakerCues') ? next.speakerCues : track.speakerCues,
-            speakerPriority: Object.prototype.hasOwnProperty.call(next, 'speakerPriority') ? next.speakerPriority : track.speakerPriority
+            speakerPriority: Object.prototype.hasOwnProperty.call(next, 'speakerPriority') ? next.speakerPriority : track.speakerPriority,
+            speakerLayout: Object.prototype.hasOwnProperty.call(next, 'speakerLayout') ? next.speakerLayout : track.speakerLayout
         });
     }
 
@@ -769,6 +816,48 @@
             return safeSpeakerCue(next);
         });
         return changed ? rebuildTrack(track, { speakerCues: cues }) : track;
+    }
+
+    function updateSpeakerCuesBulk(track, cueKeys, patch) {
+        if (!track) return null;
+        const keys = new Set((Array.isArray(cueKeys) ? cueKeys : []).map(value => String(value || '')).filter(Boolean));
+        if (!keys.size) return track;
+        const input = patch && typeof patch === 'object' ? patch : {};
+        const timeShift = clamp(input.timeShift, -3600, 3600);
+        let changed = false;
+        const cues = normalizeSpeakerCues(track.speakerCues).map(cue => {
+            if (!keys.has(speakerCueKey(cue))) return cue;
+            changed = true;
+            const next = Object.assign({}, cue);
+            if (Number.isFinite(Number(input.timeShift)) && Math.abs(timeShift) > 0.0005) {
+                const duration = Math.max(0.05, cue.end - cue.start);
+                next.start = Math.max(0, cue.start + timeShift);
+                next.end = next.start + duration;
+            }
+            if (Object.prototype.hasOwnProperty.call(input, 'speaker')) next.speaker = String(input.speaker || '');
+            if (Object.prototype.hasOwnProperty.call(input, 'subjectId')) next.subjectId = safeSubjectId(input.subjectId);
+            if (Object.prototype.hasOwnProperty.call(input, 'priority')) next.priority = safeSpeakerPriority(input.priority);
+            if (Object.prototype.hasOwnProperty.call(input, 'gridCrop')) next.gridCrop = safeGridCrop(input.gridCrop);
+            if (Object.prototype.hasOwnProperty.call(input, 'energy')) next.energy = clamp(input.energy, 0, 1);
+            if (input.locked === true) {
+                next.locked = true;
+                next.mode = 'manual';
+                next.source = String(input.source || 'manual-override').slice(0, 32);
+            } else if (input.locked === false) {
+                next.locked = false;
+                next.mode = 'auto';
+                if (next.source === 'manual-override') next.source = 'face-activity';
+            }
+            const connectionChanged = next.subjectId !== cue.subjectId || next.confidence !== cue.confidence || next.source !== cue.source;
+            if (connectionChanged) next.confidenceHistory = appendConfidenceHistory(cue.confidenceHistory, next);
+            return safeSpeakerCue(next);
+        });
+        return changed ? rebuildTrack(track, { speakerCues: cues }) : track;
+    }
+
+    function updateSpeakerLayout(track, patch) {
+        if (!track) return null;
+        return rebuildTrack(track, { speakerLayout: safeSpeakerLayout(Object.assign({}, track.speakerLayout || {}, patch || {})) });
     }
 
     function replaceSpeakerCues(track, cues) {
@@ -920,15 +1009,73 @@
         const subject = cue && cue.subjectId !== 'auto' ? (track.subjects || []).find(item => item.id === cue.subjectId) : null;
         const selected = subject ? getPointAtArray(subject.points, target, track.sceneCuts) : null;
         if (!selected) return null;
+        const gridCrop = safeGridCrop(cue.gridCrop);
         return Object.assign({}, selected, {
             time: target,
+            x: clamp(selected.x + gridCrop.x, 0, 1),
+            y: clamp(selected.y + gridCrop.y, 0, 1),
+            zoom: clamp((selected.zoom || 1) * gridCrop.zoom, 1, 1.35),
             source: 'speaker-face',
             subjectId: subject.id,
             speaker: cue.speaker || '',
             speakerPriority: cue.priority || 'auto',
             speakerConfidence: cue.confidence,
+            speakerEnergy: Number(clamp(cue.energy == null ? cue.confidence : cue.energy, 0, 1).toFixed(4)),
+            gridCrop,
             confidence: clamp((selected.confidence + cue.confidence) / 2, 0, 1)
         });
+    }
+
+    function rotatingGridPage(list, page, pageSize) {
+        if (!list.length) return [];
+        const start = (page * pageSize) % list.length;
+        const selected = [];
+        for (let index = 0; index < Math.min(pageSize, list.length); index += 1) selected.push(list[(start + index) % list.length]);
+        return selected;
+    }
+
+    function transitionProgress(target, layout) {
+        if (layout.gridTransition === 'none') return 1;
+        const seconds = Math.max(1, layout.gridPageSeconds);
+        const elapsed = Math.max(0, finite(target, 0)) % seconds;
+        return Number(clamp(elapsed / Math.max(0.12, layout.gridTransitionMs / 1000), 0, 1).toFixed(4));
+    }
+
+    function pagedGridFocuses(focuses, target, layoutInput) {
+        const list = Array.isArray(focuses) ? focuses.slice() : [];
+        const layout = safeSpeakerLayout(layoutInput);
+        if (list.length <= 4) return { subjects: list, previousSubjects: [], page: 0, pageCount: 1, total: list.length, transitionProgress: 1, trigger: 'none' };
+        if (layout.gridPaging === 'priority') return { subjects: list.slice(0, 4), previousSubjects: [], page: 0, pageCount: 1, total: list.length, transitionProgress: 1, trigger: 'priority' };
+        if (layout.gridPaging === 'energy') {
+            const primary = list.find(item => item.speakerPriority === 'primary') || list[0];
+            const selected = [primary].concat(list.filter(item => item !== primary).sort((left, right) => finite(right.speakerEnergy, 0) - finite(left.speakerEnergy, 0) || finite(right.confidence, 0) - finite(left.confidence, 0)).slice(0, 3));
+            return { subjects: selected, previousSubjects: [], page: 0, pageCount: 1, total: list.length, transitionProgress: 1, trigger: 'energy' };
+        }
+        if (layout.gridPaging === 'manual' && layout.gridManualPages.length) {
+            const pages = layout.gridManualPages.map(ids => ids.map(id => list.find(item => item.subjectId === id)).filter(Boolean)).filter(page => page.length >= 3);
+            if (pages.length) {
+                const page = Math.floor(Math.max(0, finite(target, 0)) / Math.max(1, layout.gridPageSeconds)) % pages.length;
+                const progress = transitionProgress(target, layout);
+                const previousPage = (page - 1 + pages.length) % pages.length;
+                return { subjects: pages[page].slice(0, 4), previousSubjects: finite(target, 0) > 0.0001 && progress < 1 && pages.length > 1 ? pages[previousPage].slice(0, 4) : [], page, pageCount: pages.length, total: list.length, transitionProgress: progress, trigger: 'manual' };
+            }
+        }
+        const primary = list[0];
+        const rotating = list.slice(1);
+        const pageSize = 3;
+        const pageCount = Math.max(1, Math.ceil(rotating.length / pageSize));
+        const page = Math.floor(Math.max(0, finite(target, 0)) / Math.max(1, layout.gridPageSeconds)) % pageCount;
+        const progress = transitionProgress(target, layout);
+        const previousPage = (page - 1 + pageCount) % pageCount;
+        return {
+            subjects: [primary].concat(rotatingGridPage(rotating, page, pageSize)),
+            previousSubjects: finite(target, 0) > 0.0001 && progress < 1 && pageCount > 1 ? [primary].concat(rotatingGridPage(rotating, previousPage, pageSize)) : [],
+            page,
+            pageCount,
+            total: list.length,
+            transitionProgress: progress,
+            trigger: 'rotate'
+        };
     }
 
     function getFocusAt(track, time) {
@@ -946,7 +1093,27 @@
                 subjectIds.add(cue.subjectId);
                 focuses.push(selected);
             });
-            if (focuses.length > 1) {
+            if (focuses.length > 2) {
+                const paged = pagedGridFocuses(focuses, target, track.speakerLayout);
+                const gridSubjects = paged.subjects.slice(0, 4);
+                const confidence = gridSubjects.reduce((sum, item) => sum + item.confidence, 0) / gridSubjects.length;
+                base = Object.assign({}, gridSubjects[0], {
+                    x: gridSubjects.reduce((sum, item) => sum + item.x, 0) / gridSubjects.length,
+                    y: gridSubjects.reduce((sum, item) => sum + item.y, 0) / gridSubjects.length,
+                    zoom: 1,
+                    source: 'speaker-grid-face',
+                    gridSubjects,
+                    gridPreviousSubjects: paged.previousSubjects || [],
+                    gridTransitionProgress: paged.transitionProgress == null ? 1 : paged.transitionProgress,
+                    gridPageTrigger: paged.trigger || 'none',
+                    dualSubjects: gridSubjects.slice(0, 2),
+                    gridPage: paged.page,
+                    gridPageCount: paged.pageCount,
+                    gridTotalSubjects: paged.total,
+                    speakerLayout: safeSpeakerLayout(track.speakerLayout),
+                    confidence: clamp(confidence, 0, 1)
+                });
+            } else if (focuses.length > 1) {
                 const primary = focuses[0];
                 const secondary = focuses[1];
                 const primaryWeight = primary.speakerPriority === 'primary' ? 0.64 : secondary.speakerPriority === 'primary' ? 0.42 : 0.54;
@@ -958,6 +1125,7 @@
                     secondarySubjectId: secondary.subjectId,
                     secondarySpeaker: secondary.speaker,
                     dualSubjects: [primary, secondary],
+                    speakerLayout: safeSpeakerLayout(track.speakerLayout),
                     confidence: clamp((primary.confidence + secondary.confidence) / 2, 0, 1)
                 });
             } else if (focuses[0]) base = focuses[0];
@@ -981,7 +1149,8 @@
             activeSubjectId: safe.subjectId || safe.activeSubjectId || track.activeSubjectId || 'auto',
             keyframes: Array.isArray(safe.keyframes) ? safe.keyframes : track.keyframes,
             speakerCues: Array.isArray(safe.speakerCues) ? safe.speakerCues : track.speakerCues,
-            speakerPriority: typeof safe.speakerPriority === 'boolean' ? safe.speakerPriority : track.speakerPriority
+            speakerPriority: typeof safe.speakerPriority === 'boolean' ? safe.speakerPriority : track.speakerPriority,
+            speakerLayout: safe.speakerLayout || track.speakerLayout
         });
     }
 
@@ -990,6 +1159,7 @@
             subjectId: safeSubjectId(track && track.activeSubjectId || 'auto'),
             keyframes: Object.freeze(normalizeKeyframes(track && track.keyframes).map(item => Object.freeze(item))),
             speakerPriority: track && track.speakerPriority !== false,
+            speakerLayout: safeSpeakerLayout(track && track.speakerLayout),
             speakerCues: Object.freeze(normalizeSpeakerCues(track && track.speakerCues).map(item => Object.freeze(item)))
         });
     }
@@ -1091,6 +1261,8 @@
         removeSpeakerCue,
         duplicateSpeakerCue,
         updateSpeakerCuesBySpeaker,
+        updateSpeakerCuesBulk,
+        updateSpeakerLayout,
         getSpeakerCuesAt,
         getSpeakerCueAt,
         speakerCueKey,
@@ -1109,6 +1281,6 @@
         resolveCropRect,
         scoreRange,
         getStatus,
-        _test: Object.freeze({ smoothPoints, normalizeDetection, choosePrimary, buildTrack, assignSubjects, composeSubjectPoints, getPointAtArray, sceneIndexAt, normalizeSpeakerCues, normalizeKeyframes, safeKeyframe })
+        _test: Object.freeze({ smoothPoints, normalizeDetection, choosePrimary, buildTrack, assignSubjects, composeSubjectPoints, getPointAtArray, sceneIndexAt, normalizeSpeakerCues, normalizeKeyframes, safeKeyframe, safeSpeakerLayout, safeGridCrop, safeGridManualPages, pagedGridFocuses })
     });
 })(window);

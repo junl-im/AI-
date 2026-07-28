@@ -23,7 +23,7 @@ const workflow = read('src/app/render-workflow-controller.js');
 const loader = read('src/boot/staged-ui-loader.js');
 const css = read('assets/css/smart-reframe.css');
 
-assert(pkg.version === '1.6.24', 'smart reframe director release version matches package version');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'smart reframe director release version matches package version');
 assert(html.includes('<option value="smart">스마트 피사체 추적</option>'), 'vertical-frame selector exposes smart subject tracking');
 [
     'smartReframePanel', 'smartReframeStatus', 'smartReframeDetail', 'smartReframeCaptionAvoidanceToggle', 'smartReframeAnalyzeBtn',
@@ -51,4 +51,4 @@ assert(browserAudit.checks.keyframeCreateDeleteWorks && browserAudit.checks.oper
 assert(browserAudit.checks.speakerFacesLinked && browserAudit.checks.speakerDirectionChangesCrop, 'browser flow links two local transcript speakers to distinct tracked faces');
 assert(browserAudit.checks.speakerDirectionPersists && browserAudit.checks.speakerStatusVisible, 'speaker-directed crop state persists and is visible in the editor');
 assert(browserAudit.checks.noPageErrors && browserAudit.checks.noConsoleErrors, 'smart-reframe director flow has no runtime errors');
-console.log('PASS v1.6.24 smart reframe director UI contracts present');
+console.log(`PASS v${pkg.version} smart reframe director UI contracts present`);

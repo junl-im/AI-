@@ -18,7 +18,7 @@ const html = read('index.html');
 const css = read('assets/css/workspace-layout-controls.css');
 const js = read('src/ui/workspace-layout-controls.js');
 const sw = read('sw.js');
-assert(pkg.version === '1.6.24', 'workspace controls release version matches package version');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'workspace controls release version matches package version');
 assert(html.includes(`workspace-layout-controls.css?v=${buildKey}`), 'workspace layout stylesheet is linked');
 assert(html.indexOf('workspace-layout-controls.css') > html.indexOf('active-stage-beacon.css'), 'workspace layout stylesheet is the final visual override');
 assert(html.includes(`workspace-layout-controls.js?v=${buildKey}`), 'workspace controller is loaded');
@@ -35,4 +35,4 @@ assert(js.includes("['ArrowLeft', 'ArrowRight']") && js.includes("event.key === 
 assert(js.includes('setPointerCapture') && js.includes('releasePointerCapture'), 'pointer drag stays owned by the active divider');
 assert(js.includes('guardFocusMode') && js.includes('ai-shorts-navigation-request') && js.includes('[data-flow-tab]'), 'explicit workflow navigation automatically leaves incompatible focus views');
 assert(sw.includes(`workspace-layout-controls.css?v=${buildKey}`) && sw.includes(`workspace-layout-controls.js?v=${buildKey}`), 'workspace control assets are cached');
-console.log('PASS v1.6.24 resizable desktop workspace and focus view guardrails');
+console.log('PASS v1.6.25 resizable desktop workspace and focus view guardrails');

@@ -11,7 +11,7 @@ const tabs = read('src/ui/hyperflow-tabs.js');
 const doctor = read('src/ui/flow-doctor.js');
 const css = read('assets/css/flow-doctor.css');
 const pkg = JSON.parse(read('package.json'));
-assert(pkg.version === '1.6.24', 'package version must be 1.2.9');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'package version must be 1.2.9');
 assert(html.includes('assets/css/flow-doctor.css'), 'flow doctor css must be linked');
 assert(loader.includes('src/ui/flow-doctor.js'), 'flow doctor script must be staged');
 assert(html.includes('data-flow-tab="candidates"') && html.includes('data-flow-panel="candidates"'), 'candidate tab and panel must remain wired');

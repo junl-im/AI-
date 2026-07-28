@@ -28,6 +28,7 @@
         const assertOperation = requireFunction(deps.assertOperation, 'assertOperation');
         const finishOperation = requireFunction(deps.finishOperation, 'finishOperation');
         const isAbortError = requireFunction(deps.isAbortError, 'isAbortError');
+        const onRendered = typeof deps.onRendered === 'function' ? deps.onRendered : function noop() {};
 
         let playbackRaf = 0;
         let playbackTimer = 0;
@@ -70,6 +71,7 @@
                 relativeTime: 0,
                 segmentDuration: selected ? selected.duration : 0
             });
+            onRendered(media ? media.currentTime : (selected ? selected.start : 0));
             return true;
         }
 
@@ -156,6 +158,7 @@
                     relativeTime: Math.max(0, media.currentTime - selected.start),
                     segmentDuration: selected.duration
                 });
+                onRendered(media.currentTime);
                 if (qualityEffects.calculateFadeVolume) {
                     const relativeTime = Math.max(0, media.currentTime - selected.start);
                     media.volume = qualityEffects.calculateFadeVolume(relativeTime, selected.duration, qualityOptions);

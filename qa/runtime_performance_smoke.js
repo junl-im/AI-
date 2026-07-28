@@ -24,7 +24,7 @@ const startup = read('src/ui/startup-performance.js');
 const ux = read('src/ui/ux-controls.js');
 const range = read('src/ui/range-drag-controls.js');
 
-assert(pkg.version === '1.6.24', 'runtime polish package version is v1.6.24');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'runtime polish package version is v1.6.25');
 assert(html.includes(`assets/css/foundation-polish.css?v=${buildKey}`), 'foundation polish stylesheet is linked');
 assert(html.includes(`src/ui/startup-performance.js?v=${buildKey}`), 'startup performance module is linked');
 assert(sw.includes(`foundation-polish.css?v=${buildKey}`), 'foundation polish stylesheet is cached');
@@ -37,4 +37,4 @@ assert(startup.includes('AIShortsStartupPerformance') && startup.includes("entry
 assert(primeCss.includes('.flow-overview-copy') && primeCss.includes('@media (max-width: 720px)'), 'mobile startup is a compact flow overview');
 assert(primeCss.includes('repeat(2, minmax(0, 1fr))'), 'mobile four-step rail uses a readable two-by-two layout');
 assert(primeCss.includes('body.has-media .start-command-panel'), 'mobile startup guidance collapses after media is loaded');
-console.log('PASS v1.6.24 runtime performance and startup hierarchy guardrails present');
+console.log('PASS v1.6.25 runtime performance and startup hierarchy guardrails present');

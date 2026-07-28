@@ -1,44 +1,60 @@
-# AI Shorts Studio v1.6.24 정밀 분석 보고서
+# AUDIT REPORT v1.6.30
 
-## 1. 시스템
-정적 PWA·서비스워커·IndexedDB 분석 캐시·localStorage 진단 구조를 유지합니다. 이번 변경은 speaker-directed smart-reframe의 겹침 cue 선택과 렌더 구성에 집중했습니다.
+## 기능·브라우저
 
-## 2. 기능
-- 완전 겹침 발화에 보조 화자 cue 추가
-- cue별 주 화자·보조 화자 역할 지정
-- 서로 다른 두 얼굴을 상·하 pane에 동시에 유지
-- 동일 화자 라벨 구간 일괄 얼굴 교정
-- 최근 연결 신뢰도 변화 표시
-- 기존 시간·라벨·삭제·수동 고정 편집 유지
+- 6명 동시 발화에서 RMS 에너지 상위 보조 화자 즉시 선별 통과
+- 명시적인 주 화자 고정 통과
+- 수동 페이지 subject ID 순서·다음 페이지 전환 통과
+- slide 이전 페이지·현재 페이지·진행률 전달 통과
+- fade·slide 최종 캔버스 합성 통과
+- 선택 6개 cue에 grid crop X 14%, Y -9%, 확대 121% 일괄 적용 통과
+- 일괄 변경 미리보기와 실제 patch 일치 통과
+- 실제 20초 스마트 리프레임 전체 흐름 통과
+- 실제 30분 1920×1080 crop 경계·9:16 비율·자막 안전 영역 통과
+- 데스크톱·소형 노트북·태블릿·모바일 페이지·콘솔·Promise·런타임 오류 0건
 
-## 3. 엔진
-`smart-reframe-engine.js`는 현재 시각에 활성인 모든 cue를 역할과 신뢰도로 정렬합니다. 서로 다른 subject가 두 명 이상이면 `speaker-dual-face` focus와 두 subject point를 반환합니다. 수동 crop keyframe과 전역 주 피사체 pin은 기존처럼 가장 높은 우선순위를 유지합니다.
+## 메모리·자원
 
-## 4. 렌더
-`vertical-renderer.js`는 dual focus에서 흐린 배경 위에 주 화자를 위 pane, 보조 화자를 아래 pane에 각각 독립 crop합니다. 단일 화자와 모션 fallback은 기존 crop 경로를 그대로 사용합니다.
+실미디어 5회 JS heap:
 
-## 5. 문제와 개선
-- 기존 단일 crop은 화면 양쪽의 동시 화자 중 한 명을 잃을 수 있었습니다.
-- cue별 역할이 없어 자동 신뢰도만으로 화면 순서가 바뀔 수 있었습니다.
-- 수동 얼굴 교정을 동일 화자의 모든 구간에 반복 적용해야 했습니다.
-- 연결 신뢰도 변화가 마지막 값 하나로만 표시됐습니다.
+- cycle 1: 5.309MiB
+- cycle 2: 5.550MiB
+- cycle 3: 5.684MiB
+- cycle 4: 5.781MiB
+- cycle 5: 5.866MiB
+- URL 생성 10개·해제 10개
+- 종료 후 활성 URL 0개
+- 매 회차 operation·render queue 잔류 0건
 
-이를 dual pane, 역할 metadata, 일괄 교정, bounded confidence history로 개선했습니다.
+Chromium 프로세스 메모리:
 
-## 6. 성능·수명주기
-직접 시작 스크립트는 49개를 유지합니다. dual pane은 겹침 cue가 실제로 두 얼굴에 연결된 프레임에서만 활성화됩니다. 별도 timer·RAF·Object URL을 만들지 않으며 기존 Preview Controller와 Render Queue 소유권을 유지합니다.
+- 초기 RSS: 772.865MiB
+- 최종·최대 RSS: 876.131MiB
+- 초기 USS: 243.633MiB
+- 최종 USS: 290.102MiB
+- JS heap 기울기: 0.008MiB/cycle
+- 런타임 오류 0건
 
-## 7. 검증
-- 전체 QA 281/281 통과, 실패 0건
-- 실제 Chromium dual speaker flow 통과
-- 5회 heap `5.103 → 5.618MiB`
-- process RSS `769.519 → 846.660MiB`, JS heap slope `0.0052MiB/cycle`
-- 30분 1080p 집중 감사 통과
-- 서비스워커 135개 자산 무결성 통과
-- v1.6.23 대비 변경·추가 88개, 삭제 0개
-- 최종 배포 파일 1035개
+RSS는 browser·renderer·GPU·utility 캐시를 포함하므로 JS 누수 단독 판정값으로 사용하지 않습니다.
 
-## 8. 남은 제한
-- 3명 이상 동시 화자는 상위 두 얼굴만 표시합니다.
-- dual pane은 상·하 50:50 고정입니다.
-- 실제 Safari·Samsung Internet 모바일 기기 검증이 남아 있습니다.
+## CSS·구조
+
+- CSS 파일 50개
+- selector-property 충돌 0건
+- 동일값 중복 0건
+- shadow 선언 0건
+- `!important` 593개
+- 구조 후보 206건: 안전 167, 필수 26, 미확인 13
+
+## 장시간 증빙
+
+현재 실제 30분 1920×1080 집중 감사에서 24개 bounded spatial sample, motion track, caption-safe crop, 원본 경계와 9:16 비율을 확인했습니다. 15→30→15분 전체 harness는 첫 15분 분석·2초 렌더를 완료한 뒤 두 번째 파일 교체 정리 경계가 현재 실행 환경에서 멈춰 완주하지 못했습니다. 미디어 교체·분석 persistence·Render Queue·Object URL 소유권은 변경하지 않았으므로 기존 완주 증빙을 승계하고, 변경된 paging·transition renderer는 현재 단위·Chromium·30분 집중 감사로 별도 검증했습니다.
+
+## 서비스워커·패키지
+
+- 앱 셸 무결성 대상: 135개
+- manifest SHA-256: `a1fb7c74e82b391ec0047be5d4422f93115265b0c1f56d6d0465b6c20a08088a`
+- 전체 QA: 300/300
+- 배포 파일: 1173개
+- 패치 변경·추가: 49개
+- 삭제: 0개

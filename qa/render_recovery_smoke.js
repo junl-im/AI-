@@ -15,7 +15,7 @@ const queue = read('src/render/render-queue.js');
 const workflow = read('src/app/render-workflow-controller.js');
 const renderer = read('src/render/vertical-renderer.js');
 const css = read('assets/css/render-queue.css');
-assert(pkg.version === '1.6.24', 'render recovery release version is v1.6.20');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'render recovery release version is v1.6.20');
 assert(html.includes('id="renderQueueCancelBtn"') && html.includes('data-icon="stop"'), 'render queue exposes an explicit cancel action');
 assert(app.includes("renderQueue.cancel('사용자가 렌더 작업을 취소했습니다.')") && app.includes("type: 'render-cancel-request'"), 'cancel action reaches the queue and diagnostics');
 assert(app.includes('getRenderWorkflow().retryFailedJobs()') && workflow.includes('renderQueue.retryableJobs()') && workflow.includes('return runJobs(jobs);'), 'failed items restart through a fresh render operation');

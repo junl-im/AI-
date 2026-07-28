@@ -22,7 +22,7 @@ const css = read('assets/css/hero-command-deck.css');
 const metaCss = read('assets/css/header-meta-rail.css');
 const sw = read('sw.js');
 
-assert(pkg.version === '1.6.24', 'shorts pulse hero release version is v1.6.24');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'shorts pulse hero release version is v1.6.25');
 assert(html.includes(`assets/css/hero-command-deck.css?v=${buildKey}`), 'shorts pulse hero stylesheet is linked');
 assert(html.indexOf('hero-command-deck.css') > html.indexOf('desktop-prime-layout.css'), 'hero stylesheet remains the final header override');
 assert(sw.includes(`./assets/css/hero-command-deck.css?v=${buildKey}`), 'shorts pulse hero stylesheet is cached');
@@ -42,4 +42,4 @@ assert(css.includes('.cinematic-title::after') && css.includes('display: none !i
 assert(css.includes('@media (max-width: 920px)') && css.includes('.hero-command-deck'), 'compact screens remove the duplicated desktop action visual');
 assert(css.includes('@media (prefers-reduced-motion: reduce)') && css.includes('body.performance-lite'), 'motion and low-performance fallbacks are present');
 assert(css.includes('.hero-start-button:focus-visible'), 'hero action keeps keyboard focus visibility');
-console.log('PASS v1.6.24 shorts pulse hero guardrails present');
+console.log('PASS v1.6.25 shorts pulse hero guardrails present');

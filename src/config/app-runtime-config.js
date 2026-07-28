@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.24 - dual-speaker composition, speaker roles, confidence history, and bulk face correction
+// AI Shorts Studio v1.6.30 - horizontal speaker panes, Shift/drag selection, and selective bulk editing
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.24',
-    BUILD_KEY: '1.6.24-dual-speaker-priority-confidence-history',
+    APP_VERSION: 'v1.6.30',
+    BUILD_KEY: '1.6.30-energy-manual-paging-transitions',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     ANALYSIS_TIMING_HISTORY_KEY: 'ai-shorts-analysis-timing-history-v1',
     ANALYSIS_TIMING_HISTORY_LIMIT: 12,

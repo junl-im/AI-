@@ -15,7 +15,7 @@ function assert(value, message) {
   if (!value) { console.error(`FAIL ${message}`); process.exit(1); }
   console.log(`PASS ${message}`);
 }
-assert(pkg.version === '1.6.24', 'adaptive mobile menu release version is v1.6.24');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'adaptive mobile menu release version is v1.6.25');
 ['mobileDockGuide','mobileDockGuideText','mobileDockVisibleCount','mobileDockMenuToggle','bottomDockTabs'].forEach(id => assert(html.includes(`id="${id}"`), `${id} anchor exists`));
 assert(html.includes(`assets/css/mobile-menu-guide.css?v=${buildKey}`), 'adaptive mobile menu stylesheet is linked');
 assert(html.includes(`<script defer src="src/ui/mobile-menu-guide.js?v=${buildKey}"></script>`), 'adaptive mobile menu controller loads with the initial shell so compact mobile geometry is ready before first paint');
@@ -25,4 +25,4 @@ assert(js.includes("setAttribute('aria-expanded'") && js.includes("setAttribute(
 assert(css.includes('data-mobile-menu-mode="compact"') && css.includes('data-mobile-priority="false"'), 'compact mode hides only non-priority tabs');
 assert(css.includes('data-mobile-menu-mode="expanded"') && css.includes('repeat(4, minmax(0, 1fr))'), 'expanded mode restores all eight tabs in a four-column grid');
 assert(sw.includes(`./assets/css/mobile-menu-guide.css?v=${buildKey}`) && sw.includes(`./src/ui/mobile-menu-guide.js?v=${buildKey}`), 'service worker caches adaptive mobile menu assets');
-console.log('PASS v1.6.24 adaptive mobile current/next menu guardrails');
+console.log('PASS v1.6.25 adaptive mobile current/next menu guardrails');

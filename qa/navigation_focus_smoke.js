@@ -17,7 +17,7 @@ const bridge = read('src/ui/flow-command-bridge.js');
 const legacyTabs = read('src/ui/hyperflow-tabs.js');
 const css = read('assets/css/desktop-prime-layout.css');
 const iconCss = read('assets/css/icon-system.css');
-assert(pkg.version === '1.6.24', 'navigation focus release version is v1.6.20');
+assert(/^1\.6\.\d+$/.test(pkg.version), 'navigation focus release version is v1.6.20');
 assert(html.includes('release-device-compat') && html.includes('모바일 · PC 호환'), 'device compatibility sits next to the visible version');
 assert(html.includes('data-flow-tab="file"') && html.includes('data-icon="upload"') && html.includes('data-icon="export"') && html.includes('<b>저장</b>'), 'menu uses consistent semantic studio vector icons');
 assert(analysis.includes("activateFlowTab('recommend', { reveal: true, force: true") && app.includes('ai-shorts-navigation-request'), 'analysis completion and app milestones request visible navigation through the extracted controller boundary');

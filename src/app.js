@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.24 - dual-speaker composition, role-aware timeline editing, and bulk face correction
+// AI Shorts Studio v1.6.30 - adjustable grid cells, three-speaker layouts, and paged multi-speaker focus
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -46,6 +46,18 @@
     let directCropController = null;
     let cropKeyframeTimelineController = null;
     let speakerTuneIndex = -1;
+    const speakerCueSelection = new Set();
+    const speakerTimelineUndoStack = [];
+    const speakerTimelineRedoStack = [];
+    const MAX_SPEAKER_TIMELINE_HISTORY = 30;
+    let speakerSelectionAnchorIndex = -1;
+    let speakerSelectionDragActive = false;
+    let speakerSelectionDragValue = true;
+    let speakerSelectionPointerId = null;
+    let speakerDividerDragActive = false;
+    let speakerDividerPointerId = null;
+    let speakerDividerDragControl = null;
+    let speakerDividerDragSurface = null;
     let supportDiagnosticsInspection = null;
     let supportDiagnosticsComparison = null;
 
@@ -154,7 +166,7 @@
             state, store, elements: els, renderer, qualityEffects, operationCoordinator,
             getSelectedRecommendation, getActiveMediaElement, getSmartReframeOptions, getCaptionOptions,
             getQualityOptions, getActiveCaptionText, activateFlowTab, updateButtons, toast,
-            beginOperation, assertOperation, finishOperation, isAbortError
+            beginOperation, assertOperation, finishOperation, isAbortError, onRendered: syncSpeakerPreviewOverlay
         });
         return previewController;
     }
@@ -352,6 +364,13 @@
             'smartReframeSpeakerPriorityToggle', 'smartReframeSpeakerLinkBtn', 'smartReframeSpeakerStatus',
             'speakerFaceTuningPanel', 'speakerFaceTuningCount', 'speakerFacePrevBtn', 'speakerFaceNextBtn', 'speakerFaceCueRange',
             'speakerFaceCueMeta', 'speakerCueTimeline', 'speakerCueStartInput', 'speakerCueEndInput', 'speakerCueLabelInput', 'speakerCuePrioritySelect',
+            'speakerCueSelectedCount', 'speakerCueSelectAllBtn', 'speakerCueSelectionClearBtn', 'speakerCueUndoBtn', 'speakerCueRedoBtn',
+            'speakerPaneOrientationSelect', 'speakerPaneSplitInput', 'speakerPaneSplitValue', 'speakerPanePositionSelect', 'speakerPaneLayoutPreview', 'speakerPaneDividerControl',
+            'speakerGridPrimarySizeInput', 'speakerGridPrimarySizeValue', 'speakerGridPrimaryPositionSelect', 'speakerGridPagingSelect', 'speakerGridPageSecondsInput',
+            'speakerGridTransitionSelect', 'speakerGridTransitionMsInput', 'speakerGridManualPagesInput',
+            'speakerGridCropXInput', 'speakerGridCropXValue', 'speakerGridCropYInput', 'speakerGridCropYValue', 'speakerGridCropZoomInput', 'speakerGridCropZoomValue',
+            'speakerCueBulkShiftToggle', 'speakerCueBulkShiftInput', 'speakerCueBulkLabelToggle', 'speakerCueBulkLabelInput',
+            'speakerCueBulkFaceToggle', 'speakerCueBulkPriorityToggle', 'speakerCueBulkGridCropToggle', 'speakerCueBulkPreview', 'speakerCueBulkPreviewText', 'speakerCueBulkApplyBtn',
             'speakerFaceSubjectSelect', 'speakerFaceConfidenceValue', 'speakerFaceConfidenceMeter', 'speakerFaceConfidenceHistory',
             'speakerFaceLockToggle', 'speakerFaceApplyBtn', 'speakerFaceApplySpeakerBtn', 'speakerCueSplitBtn', 'speakerCueOverlapBtn', 'speakerCueDeleteBtn', 'speakerFaceAutoBtn',
             'smartReframeEditor', 'smartReframeSubjectSelect', 'smartReframeXInput', 'smartReframeYInput', 'smartReframeZoomInput',
@@ -361,7 +380,7 @@
             'analysisTimingHistoryPanel', 'analysisTimingHistoryCount', 'analysisTimingHistorySearch', 'analysisTimingHistoryStatus', 'analysisTimingHistorySelectedExportBtn', 'analysisTimingHistoryClearBtn', 'analysisTimingHistoryEmpty', 'analysisTimingHistoryList', 'analysisTimingHistoryRetentionDays', 'analysisTimingHistoryMaxItems', 'analysisTimingHistoryPolicySaveBtn', 'analysisTimingHistoryPolicyStatus', 'supportDiagnosticsBundleBtn', 'supportDiagnosticsImportBtn', 'supportDiagnosticsFileInput',
             'supportDiagnosticsDialog', 'supportDiagnosticsCloseBtn', 'supportDiagnosticsDismissBtn', 'supportDiagnosticsState', 'supportDiagnosticsMeta', 'supportDiagnosticsSummary', 'supportDiagnosticsIssueList', 'supportDiagnosticsComparison', 'supportDiagnosticsComparisonSummary', 'supportDiagnosticsComparisonList', 'supportDiagnosticsNormalizedBtn', 'supportDiagnosticsReportBtn',
             'recommendationList', 'recommendationCount', 'previewStatus',
-            'previewCanvas', 'sourceVideo', 'sourceAudio', 'previewBtn', 'stopPreviewBtn', 'exportBtn',
+            'previewCanvas', 'speakerPreviewOverlay', 'speakerPreviewGuideLayer', 'speakerPreviewGuide1', 'speakerPreviewGuide2', 'speakerPreviewGuide3', 'speakerPreviewGuide4', 'speakerPreviewDividerControl', 'speakerPreviewOverlayStatus', 'sourceVideo', 'sourceAudio', 'previewBtn', 'stopPreviewBtn', 'exportBtn',
             'directCropPanel', 'directCropOverlay', 'directCropPathOverlay', 'directCropPathLine', 'directCropPathDots', 'directCropCurrentDot',
             'directCropGestureHint', 'directCropStatus', 'directCropDetail', 'directCropToggleBtn', 'directCropSaveBtn', 'directCropUndoBtn',
             'cropKeyframeTimelinePanel', 'cropKeyframeTimeline', 'cropKeyframeSceneLayer', 'cropKeyframeMarkerLayer', 'cropKeyframePlayhead',
@@ -483,14 +502,15 @@
             subjectId: String(edits.subjectId || 'auto'),
             keyframes: Array.isArray(edits.keyframes) ? edits.keyframes.map(item => Object.assign({}, item)) : [],
             speakerPriority: typeof edits.speakerPriority === 'boolean' ? edits.speakerPriority : getSmartReframeOptions().speakerPriority !== false,
-            speakerCues: Array.isArray(edits.speakerCues) ? edits.speakerCues.map(item => Object.assign({}, item)) : []
+            speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, edits.speakerLayout || {}, { gridManualPages: Array.isArray(edits.speakerLayout && edits.speakerLayout.gridManualPages) ? edits.speakerLayout.gridManualPages.map(page => page.slice()) : [] }),
+            speakerCues: Array.isArray(edits.speakerCues) ? edits.speakerCues.map(item => Object.assign({}, item, { gridCrop: Object.assign({ x: 0, y: 0, zoom: 1 }, item.gridCrop || {}) })) : []
         };
     }
 
     function persistSmartReframeEdits(track) {
         const engine = getSmartReframeEngine();
         if (engine.extractEdits) state.smartReframeEdits = engine.extractEdits(track);
-        else state.smartReframeEdits = { subjectId: track && track.activeSubjectId || 'auto', keyframes: Array.isArray(track && track.keyframes) ? track.keyframes.slice() : [], speakerPriority: track && track.speakerPriority !== false, speakerCues: Array.isArray(track && track.speakerCues) ? track.speakerCues.slice() : [] };
+        else state.smartReframeEdits = { subjectId: track && track.activeSubjectId || 'auto', keyframes: Array.isArray(track && track.keyframes) ? track.keyframes.slice() : [], speakerPriority: track && track.speakerPriority !== false, speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, track && track.speakerLayout || {}), speakerCues: Array.isArray(track && track.speakerCues) ? track.speakerCues.slice() : [] };
         return state.smartReframeEdits;
     }
 
@@ -502,6 +522,14 @@
 
     function setSmartReframeTrack(track) {
         state.smartReframe = applyPendingSmartReframeEdits(track);
+        speakerCueSelection.clear();
+        speakerSelectionAnchorIndex = -1;
+        speakerSelectionDragActive = false;
+        speakerSelectionPointerId = null;
+        speakerDividerDragActive = false;
+        speakerDividerPointerId = null;
+        speakerTimelineUndoStack.length = 0;
+        speakerTimelineRedoStack.length = 0;
         persistSmartReframeEdits(state.smartReframe);
         return state.smartReframe;
     }
@@ -513,6 +541,7 @@
         const desired = getSmartReframeEdits();
         if (current.subjectId !== desired.subjectId
             || current.speakerPriority !== desired.speakerPriority
+            || JSON.stringify(current.speakerLayout || {}) !== JSON.stringify(desired.speakerLayout || {})
             || JSON.stringify(current.keyframes || []) !== JSON.stringify(desired.keyframes || [])
             || JSON.stringify(current.speakerCues || []) !== JSON.stringify(desired.speakerCues || [])) {
             state.smartReframe = engine.applyEdits(state.smartReframe, desired) || state.smartReframe;
@@ -802,9 +831,21 @@
         updateSpeakerFaceUI();
     }
 
+    function speakerSegmentEnergy(start, end) {
+        const frames = Array.isArray(state.audioAnalysis && state.audioAnalysis.frames) ? state.audioAnalysis.frames : [];
+        if (!frames.length) return 0;
+        const from = Math.max(0, Number(start) || 0);
+        const to = Math.max(from, Number(end) || from);
+        const selected = frames.filter(frame => Number(frame.time) >= from && Number(frame.time) <= to);
+        const list = selected.length ? selected : frames.slice().sort((left, right) => Math.abs(Number(left.time) - (from + to) / 2) - Math.abs(Number(right.time) - (from + to) / 2)).slice(0, 2);
+        return list.length ? Math.max(0, Math.min(1, list.reduce((sum, frame) => sum + (Number(frame.rmsNorm) || 0), 0) / list.length)) : 0;
+    }
+
     function getSpeakerSegments() {
-        if (Array.isArray(state.transcriptSegments) && state.transcriptSegments.length) return state.transcriptSegments.map(item => Object.assign({}, item));
-        return Array.isArray(state.captions) ? state.captions.map(item => Object.assign({}, item)) : [];
+        const input = Array.isArray(state.transcriptSegments) && state.transcriptSegments.length ? state.transcriptSegments : Array.isArray(state.captions) ? state.captions : [];
+        return input.map(item => Object.assign({}, item, {
+            energy: Number.isFinite(Number(item && item.energy)) ? Math.max(0, Math.min(1, Number(item.energy))) : speakerSegmentEnergy(item && item.start, item && item.end)
+        }));
     }
 
     function formatSpeakerCueTime(value) {
@@ -812,6 +853,453 @@
         const minutes = Math.floor(total / 60);
         const seconds = total - minutes * 60;
         return `${String(minutes).padStart(2, '0')}:${seconds.toFixed(1).padStart(4, '0')}`;
+    }
+
+    function speakerTimelineSnapshot(track) {
+        const source = track || state.smartReframe || {};
+        return {
+            speakerCues: Array.isArray(source.speakerCues) ? source.speakerCues.map(item => Object.assign({}, item, {
+                gridCrop: Object.assign({ x: 0, y: 0, zoom: 1 }, item.gridCrop || {}),
+                confidenceHistory: Array.isArray(item.confidenceHistory) ? item.confidenceHistory.map(entry => Object.assign({}, entry)) : []
+            })) : [],
+            speakerLayout: Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, source.speakerLayout || {}, { gridManualPages: Array.isArray(source.speakerLayout && source.speakerLayout.gridManualPages) ? source.speakerLayout.gridManualPages.map(page => page.slice()) : [] })
+        };
+    }
+
+    function speakerTimelineSnapshotKey(snapshot) {
+        return JSON.stringify(snapshot || {});
+    }
+
+    function recordSpeakerTimelineHistory() {
+        if (!state.smartReframe) return;
+        const snapshot = speakerTimelineSnapshot(state.smartReframe);
+        const last = speakerTimelineUndoStack[speakerTimelineUndoStack.length - 1];
+        if (!last || speakerTimelineSnapshotKey(last) !== speakerTimelineSnapshotKey(snapshot)) {
+            speakerTimelineUndoStack.push(snapshot);
+            if (speakerTimelineUndoStack.length > MAX_SPEAKER_TIMELINE_HISTORY) speakerTimelineUndoStack.shift();
+        }
+        speakerTimelineRedoStack.length = 0;
+    }
+
+    function restoreSpeakerTimelineSnapshot(snapshot) {
+        const engine = getSmartReframeEngine();
+        if (!state.smartReframe || !snapshot || !engine.replaceSpeakerCues) return false;
+        let next = engine.replaceSpeakerCues(state.smartReframe, snapshot.speakerCues || []) || state.smartReframe;
+        if (engine.updateSpeakerLayout) next = engine.updateSpeakerLayout(next, snapshot.speakerLayout || {}) || next;
+        state.smartReframe = next;
+        speakerCueSelection.clear();
+        speakerTuneIndex = Math.max(0, Math.min(speakerTuneIndex, (next.speakerCues || []).length - 1));
+        persistSmartReframeEdits(next);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        return true;
+    }
+
+    function undoSpeakerTimelineEdit() {
+        if (!speakerTimelineUndoStack.length || !state.smartReframe) return;
+        speakerTimelineRedoStack.push(speakerTimelineSnapshot(state.smartReframe));
+        const snapshot = speakerTimelineUndoStack.pop();
+        if (restoreSpeakerTimelineSnapshot(snapshot)) toast('화자 타임라인 편집을 취소했습니다.', 'action');
+    }
+
+    function redoSpeakerTimelineEdit() {
+        if (!speakerTimelineRedoStack.length || !state.smartReframe) return;
+        speakerTimelineUndoStack.push(speakerTimelineSnapshot(state.smartReframe));
+        const snapshot = speakerTimelineRedoStack.pop();
+        if (restoreSpeakerTimelineSnapshot(snapshot)) toast('화자 타임라인 편집을 다시 적용했습니다.', 'action');
+    }
+
+    function reconcileSpeakerCueSelection(cues) {
+        const engine = getSmartReframeEngine();
+        if (!engine.speakerCueKey) return;
+        const valid = new Set((Array.isArray(cues) ? cues : []).map(cue => engine.speakerCueKey(cue)));
+        Array.from(speakerCueSelection).forEach(key => { if (!valid.has(key)) speakerCueSelection.delete(key); });
+    }
+
+    function selectAllSpeakerCues() {
+        const engine = getSmartReframeEngine();
+        const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+        if (!engine.speakerCueKey) return;
+        cues.forEach(cue => speakerCueSelection.add(engine.speakerCueKey(cue)));
+        syncSpeakerFaceTuningUI();
+    }
+
+    function clearSpeakerCueSelection() {
+        speakerCueSelection.clear();
+        speakerSelectionAnchorIndex = -1;
+        speakerSelectionDragActive = false;
+        speakerSelectionPointerId = null;
+        syncSpeakerFaceTuningUI();
+    }
+
+    function setSpeakerCueSelected(cues, cueIndex, selected) {
+        const engine = getSmartReframeEngine();
+        const cue = Array.isArray(cues) ? cues[cueIndex] : null;
+        if (!cue || !engine.speakerCueKey) return;
+        const key = engine.speakerCueKey(cue);
+        if (selected) speakerCueSelection.add(key);
+        else speakerCueSelection.delete(key);
+    }
+
+    function selectSpeakerCueRange(cues, fromIndex, toIndex, selected) {
+        const start = Math.max(0, Math.min(Number(fromIndex) || 0, Number(toIndex) || 0));
+        const end = Math.min((Array.isArray(cues) ? cues.length : 0) - 1, Math.max(Number(fromIndex) || 0, Number(toIndex) || 0));
+        for (let index = start; index <= end; index += 1) setSpeakerCueSelected(cues, index, selected !== false);
+    }
+
+    function updateSpeakerCueSelection(cues, cueIndex, selected, extendRange) {
+        if (extendRange && speakerSelectionAnchorIndex >= 0) selectSpeakerCueRange(cues, speakerSelectionAnchorIndex, cueIndex, selected);
+        else setSpeakerCueSelected(cues, cueIndex, selected);
+        speakerSelectionAnchorIndex = cueIndex;
+    }
+
+    function getBulkSpeakerCuePatch() {
+        const patch = {};
+        if (els.speakerCueBulkShiftToggle && els.speakerCueBulkShiftToggle.checked) {
+            patch.timeShift = Number(els.speakerCueBulkShiftInput && els.speakerCueBulkShiftInput.value || 0);
+        }
+        if (els.speakerCueBulkLabelToggle && els.speakerCueBulkLabelToggle.checked) {
+            patch.speaker = String(els.speakerCueBulkLabelInput && els.speakerCueBulkLabelInput.value || '').trim().slice(0, 40);
+        }
+        if (els.speakerCueBulkFaceToggle && els.speakerCueBulkFaceToggle.checked) {
+            const subjectId = els.speakerFaceSubjectSelect ? els.speakerFaceSubjectSelect.value : 'auto';
+            const locked = Boolean(els.speakerFaceLockToggle && els.speakerFaceLockToggle.checked && subjectId !== 'auto');
+            Object.assign(patch, { subjectId, locked, source: locked ? 'manual-override' : 'face-activity' });
+        }
+        if (els.speakerCueBulkPriorityToggle && els.speakerCueBulkPriorityToggle.checked) {
+            patch.priority = els.speakerCuePrioritySelect ? els.speakerCuePrioritySelect.value : 'auto';
+        }
+        if (els.speakerCueBulkGridCropToggle && els.speakerCueBulkGridCropToggle.checked) {
+            patch.gridCrop = {
+                x: Math.max(-0.25, Math.min(0.25, Number(els.speakerGridCropXInput && els.speakerGridCropXInput.value || 0) / 100)),
+                y: Math.max(-0.25, Math.min(0.25, Number(els.speakerGridCropYInput && els.speakerGridCropYInput.value || 0) / 100)),
+                zoom: Math.max(1, Math.min(1.35, Number(els.speakerGridCropZoomInput && els.speakerGridCropZoomInput.value || 100) / 100))
+            };
+        }
+        return patch;
+    }
+
+    function bulkSpeakerFieldSelected() {
+        return Object.keys(getBulkSpeakerCuePatch()).length > 0;
+    }
+
+    function describeBulkSpeakerCuePatch(patch, count) {
+        const fields = [];
+        if (Object.prototype.hasOwnProperty.call(patch, 'timeShift')) fields.push(`시간 ${patch.timeShift >= 0 ? '+' : ''}${Number(patch.timeShift).toFixed(2)}초`);
+        if (Object.prototype.hasOwnProperty.call(patch, 'speaker')) fields.push(patch.speaker ? `라벨 “${patch.speaker}”` : '라벨 삭제');
+        if (Object.prototype.hasOwnProperty.call(patch, 'subjectId')) fields.push(patch.subjectId === 'auto' ? '얼굴 자동 추적' : `${patch.subjectId} 얼굴${patch.locked ? ' 고정' : ''}`);
+        if (Object.prototype.hasOwnProperty.call(patch, 'priority')) fields.push(`역할 ${patch.priority === 'primary' ? '주 화자' : patch.priority === 'secondary' ? '보조 화자' : '자동'}`);
+        if (Object.prototype.hasOwnProperty.call(patch, 'gridCrop')) fields.push(`셀 crop X ${Math.round(patch.gridCrop.x * 100)}% · Y ${Math.round(patch.gridCrop.y * 100)}% · 확대 ${Math.round(patch.gridCrop.zoom * 100)}%`);
+        return fields.length ? `${count}개 구간 · ${fields.join(' · ')}` : '적용할 필드를 하나 이상 선택하세요.';
+    }
+
+    function syncBulkSpeakerCuePreview() {
+        const count = speakerCueSelection.size;
+        const patch = getBulkSpeakerCuePatch();
+        const ready = count > 0 && Object.keys(patch).length > 0;
+        if (els.speakerCueBulkPreview) els.speakerCueBulkPreview.dataset.state = ready ? 'ready' : count ? 'fields' : 'empty';
+        if (els.speakerCueBulkPreviewText) els.speakerCueBulkPreviewText.textContent = count ? describeBulkSpeakerCuePatch(patch, count) : '구간을 선택하고 적용할 필드를 고르세요.';
+        if (els.speakerCueBulkApplyBtn) els.speakerCueBulkApplyBtn.disabled = !ready;
+        return { count, patch, ready };
+    }
+
+    function syncSpeakerCueSelectionDom() {
+        const cards = els.speakerCueTimeline ? els.speakerCueTimeline.querySelectorAll('.speaker-cue-card') : [];
+        cards.forEach(card => {
+            const key = card.dataset.cueKey || '';
+            const selected = speakerCueSelection.has(key);
+            card.dataset.multiSelected = selected ? 'true' : 'false';
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            if (checkbox) checkbox.checked = selected;
+        });
+        if (els.speakerCueSelectedCount) els.speakerCueSelectedCount.textContent = `선택 ${speakerCueSelection.size}개`;
+        if (els.speakerCueSelectionClearBtn) els.speakerCueSelectionClearBtn.disabled = !speakerCueSelection.size;
+        syncBulkSpeakerCuePreview();
+    }
+
+    function syncSpeakerPaneLayoutPreview(layoutInput) {
+        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, layoutInput || {});
+        const orientation = layout.orientation === 'horizontal' ? 'horizontal' : 'vertical';
+        const split = Math.max(0.35, Math.min(0.65, Number(layout.split) || 0.5));
+        const primaryPosition = orientation === 'horizontal' ? (layout.primaryPosition === 'right' ? 'right' : 'left') : (layout.primaryPosition === 'bottom' ? 'bottom' : 'top');
+        const physicalDivider = primaryPosition === 'right' || primaryPosition === 'bottom' ? 1 - split : split;
+        if (els.speakerPaneLayoutPreview) {
+            els.speakerPaneLayoutPreview.dataset.orientation = orientation;
+            els.speakerPaneLayoutPreview.dataset.primaryPosition = primaryPosition;
+            els.speakerPaneLayoutPreview.style.setProperty('--speaker-divider-percent', `${(physicalDivider * 100).toFixed(1)}%`);
+            els.speakerPaneLayoutPreview.style.setProperty('--speaker-primary-percent', `${(split * 100).toFixed(1)}%`);
+        }
+        [els.speakerPaneDividerControl, els.speakerPreviewDividerControl].forEach(control => {
+            if (!control) return;
+            control.setAttribute('aria-orientation', orientation === 'horizontal' ? 'vertical' : 'horizontal');
+            control.setAttribute('aria-valuenow', String(Math.round(split * 100)));
+            control.setAttribute('aria-valuetext', `주 화자 ${Math.round(split * 100)}%`);
+        });
+        syncSpeakerPreviewOverlay(getSmartReframeTime());
+    }
+
+    function speakerPaneSplitFromPointer(event, surface) {
+        const preview = surface || els.speakerPaneLayoutPreview;
+        if (!preview) return 0.5;
+        const rect = preview.getBoundingClientRect();
+        const orientation = els.speakerPaneOrientationSelect && els.speakerPaneOrientationSelect.value === 'horizontal' ? 'horizontal' : 'vertical';
+        const requested = String(els.speakerPanePositionSelect && els.speakerPanePositionSelect.value || '');
+        const reverse = requested === 'right' || requested === 'bottom';
+        const physical = orientation === 'horizontal'
+            ? (Number(event.clientX) - rect.left) / Math.max(1, rect.width)
+            : (Number(event.clientY) - rect.top) / Math.max(1, rect.height);
+        return Math.max(0.35, Math.min(0.65, reverse ? 1 - physical : physical));
+    }
+
+    function setSpeakerPaneSplitDraft(split, options) {
+        const opts = Object.assign({ recordHistory: false, persist: false }, options || {});
+        const percent = Math.round(Math.max(0.35, Math.min(0.65, Number(split) || 0.5)) * 100);
+        if (els.speakerPaneSplitInput) els.speakerPaneSplitInput.value = String(percent);
+        if (els.speakerPaneSplitValue) els.speakerPaneSplitValue.textContent = `${percent}%`;
+        applySpeakerLayoutSettings(opts);
+    }
+
+    function dividerSurfaceForControl(control) {
+        return control === els.speakerPreviewDividerControl ? els.speakerPreviewOverlay : els.speakerPaneLayoutPreview;
+    }
+
+    function beginSpeakerPaneDividerDrag(event) {
+        const control = event.currentTarget || els.speakerPaneDividerControl;
+        const surface = dividerSurfaceForControl(control);
+        if (!state.smartReframe || !control || !surface || event.button !== 0) return;
+        event.preventDefault();
+        speakerDividerDragActive = true;
+        speakerDividerPointerId = event.pointerId;
+        speakerDividerDragControl = control;
+        speakerDividerDragSurface = surface;
+        recordSpeakerTimelineHistory();
+        if (control.setPointerCapture) control.setPointerCapture(event.pointerId);
+        setSpeakerPaneSplitDraft(speakerPaneSplitFromPointer(event, surface), { recordHistory: false, persist: true });
+    }
+
+    function moveSpeakerPaneDivider(event) {
+        if (!speakerDividerDragActive || speakerDividerPointerId !== event.pointerId) return;
+        event.preventDefault();
+        setSpeakerPaneSplitDraft(speakerPaneSplitFromPointer(event, speakerDividerDragSurface), { recordHistory: false, persist: true });
+    }
+
+    function finishSpeakerPaneDividerDrag(event) {
+        if (!speakerDividerDragActive || event && speakerDividerPointerId !== null && event.pointerId !== speakerDividerPointerId) return;
+        speakerDividerDragActive = false;
+        const control = speakerDividerDragControl;
+        if (control && speakerDividerPointerId !== null && control.hasPointerCapture && control.hasPointerCapture(speakerDividerPointerId)) {
+            control.releasePointerCapture(speakerDividerPointerId);
+        }
+        speakerDividerPointerId = null;
+        speakerDividerDragControl = null;
+        speakerDividerDragSurface = null;
+        persistSmartReframeEdits(state.smartReframe);
+        syncSpeakerFaceTuningUI();
+    }
+
+    function handleSpeakerPaneDividerKeydown(event) {
+        if (!state.smartReframe) return;
+        const current = Math.round(Number(els.speakerPaneSplitInput && els.speakerPaneSplitInput.value || 50));
+        const step = event.shiftKey ? 5 : 1;
+        let next = current;
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next -= step;
+        else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next += step;
+        else if (event.key === 'Home') next = 35;
+        else if (event.key === 'End') next = 65;
+        else return;
+        event.preventDefault();
+        recordSpeakerTimelineHistory();
+        setSpeakerPaneSplitDraft(next / 100, { recordHistory: false, persist: true });
+    }
+
+    function speakerGuideCropSummary(subject, paneWidth, paneHeight) {
+        const engine = getSmartReframeEngine();
+        const video = els.sourceVideo;
+        if (!subject || !engine.resolveCropRect || !video || !video.videoWidth || !video.videoHeight) return '';
+        const rect = engine.resolveCropRect(video.videoWidth, video.videoHeight, Math.max(1, paneWidth), Math.max(1, paneHeight), subject, Object.assign({}, getSmartReframeOptions(), { captionOptions: null }));
+        const widthPercent = Math.round((rect.sw / video.videoWidth) * 100);
+        const heightPercent = Math.round((rect.sh / video.videoHeight) * 100);
+        return `crop ${widthPercent}%×${heightPercent}%`;
+    }
+
+    function speakerGridPaneGeometry(subjects, width, height, layoutInput) {
+        const layout = Object.assign({ gridPrimarySize: 0.54, gridPrimaryPosition: 'top' }, layoutInput || {});
+        const count = Array.isArray(subjects) ? subjects.length : 0;
+        if (count === 3) {
+            const size = Math.max(0.45, Math.min(0.65, Number(layout.gridPrimarySize) || 0.54));
+            const position = ['top', 'bottom', 'left', 'right'].includes(layout.gridPrimaryPosition) ? layout.gridPrimaryPosition : 'top';
+            if (position === 'left' || position === 'right') {
+                const primaryWidth = width * size;
+                const secondaryWidth = width - primaryWidth;
+                const primaryLeft = position === 'right' ? secondaryWidth : 0;
+                const secondaryLeft = position === 'right' ? 0 : primaryWidth;
+                return [
+                    { subject: subjects[0], left: primaryLeft, top: 0, width: primaryWidth, height },
+                    { subject: subjects[1], left: secondaryLeft, top: 0, width: secondaryWidth, height: height / 2 },
+                    { subject: subjects[2], left: secondaryLeft, top: height / 2, width: secondaryWidth, height: height / 2 }
+                ];
+            }
+            const primaryHeight = height * size;
+            const secondaryHeight = height - primaryHeight;
+            const primaryTop = position === 'bottom' ? secondaryHeight : 0;
+            const secondaryTop = position === 'bottom' ? 0 : primaryHeight;
+            return [
+                { subject: subjects[0], left: 0, top: primaryTop, width, height: primaryHeight },
+                { subject: subjects[1], left: 0, top: secondaryTop, width: width / 2, height: secondaryHeight },
+                { subject: subjects[2], left: width / 2, top: secondaryTop, width: width / 2, height: secondaryHeight }
+            ];
+        }
+        return (Array.isArray(subjects) ? subjects : []).map((subject, index) => ({ subject, left: (index % 2) * width / 2, top: Math.floor(index / 2) * height / 2, width: width / 2, height: height / 2 }));
+    }
+
+    function speakerPreviewPaneGeometry(focus, width, height) {
+        const subjects = focus && focus.source === 'speaker-grid-face'
+            ? (Array.isArray(focus.gridSubjects) ? focus.gridSubjects.slice(0, 4) : [])
+            : (Array.isArray(focus && focus.dualSubjects) ? focus.dualSubjects.slice(0, 2) : []);
+        if (subjects.length < 2) return [];
+        if (focus.source === 'speaker-grid-face') return speakerGridPaneGeometry(subjects, width, height, focus.speakerLayout);
+        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, focus.speakerLayout || {});
+        const split = Math.max(0.35, Math.min(0.65, Number(layout.split) || 0.5));
+        if (layout.orientation === 'horizontal') {
+            const primaryWidth = width * split;
+            const secondaryWidth = width - primaryWidth;
+            return layout.primaryPosition === 'right'
+                ? [{ subject: subjects[1], left: 0, top: 0, width: secondaryWidth, height }, { subject: subjects[0], left: secondaryWidth, top: 0, width: primaryWidth, height }]
+                : [{ subject: subjects[0], left: 0, top: 0, width: primaryWidth, height }, { subject: subjects[1], left: primaryWidth, top: 0, width: secondaryWidth, height }];
+        }
+        const primaryHeight = height * split;
+        const secondaryHeight = height - primaryHeight;
+        return layout.primaryPosition === 'bottom'
+            ? [{ subject: subjects[1], left: 0, top: 0, width, height: secondaryHeight }, { subject: subjects[0], left: 0, top: secondaryHeight, width, height: primaryHeight }]
+            : [{ subject: subjects[0], left: 0, top: 0, width, height: primaryHeight }, { subject: subjects[1], left: 0, top: primaryHeight, width, height: secondaryHeight }];
+    }
+
+    function syncSpeakerPreviewOverlay(time) {
+        const overlay = els.speakerPreviewOverlay;
+        if (!overlay) return;
+        const directCropActive = Boolean(els.directCropOverlay && els.directCropOverlay.dataset.active === 'true');
+        const engine = getSmartReframeEngine();
+        const focus = state.smartReframe && engine.getFocusAt ? engine.getFocusAt(state.smartReframe, Number(time) || 0) : null;
+        const active = !directCropActive && state.settings && state.settings.cropMode === 'smart' && focus && (focus.source === 'speaker-dual-face' || focus.source === 'speaker-grid-face');
+        overlay.hidden = !active;
+        overlay.dataset.mode = active ? (focus.source === 'speaker-grid-face' ? 'grid' : 'dual') : 'none';
+        if (!active) { overlay.dataset.transitionActive = 'false'; return; }
+        const layout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, focus.speakerLayout || state.smartReframe.speakerLayout || {});
+        const orientation = layout.orientation === 'horizontal' ? 'horizontal' : 'vertical';
+        const split = Math.max(0.35, Math.min(0.65, Number(layout.split) || 0.5));
+        const primaryPosition = orientation === 'horizontal' ? (layout.primaryPosition === 'right' ? 'right' : 'left') : (layout.primaryPosition === 'bottom' ? 'bottom' : 'top');
+        const physicalDivider = primaryPosition === 'right' || primaryPosition === 'bottom' ? 1 - split : split;
+        overlay.dataset.orientation = orientation;
+        overlay.dataset.primaryPosition = primaryPosition;
+        const transitionProgress = Math.max(0, Math.min(1, Number(focus.gridTransitionProgress == null ? 1 : focus.gridTransitionProgress)));
+        overlay.dataset.transition = layout.gridTransition === 'slide' ? 'slide' : layout.gridTransition === 'none' ? 'none' : 'fade';
+        overlay.dataset.transitionActive = focus.source === 'speaker-grid-face' && transitionProgress < 1 ? 'true' : 'false';
+        overlay.style.setProperty('--speaker-grid-transition-progress', String(transitionProgress));
+        overlay.style.setProperty('--speaker-live-divider-percent', `${(physicalDivider * 100).toFixed(1)}%`);
+        const rect = overlay.getBoundingClientRect();
+        const geometry = speakerPreviewPaneGeometry(focus, Math.max(1, rect.width), Math.max(1, rect.height));
+        const guides = [els.speakerPreviewGuide1, els.speakerPreviewGuide2, els.speakerPreviewGuide3, els.speakerPreviewGuide4];
+        guides.forEach((guide, index) => {
+            if (!guide) return;
+            const pane = geometry[index];
+            guide.hidden = !pane;
+            if (!pane) return;
+            guide.style.left = `${(pane.left / Math.max(1, rect.width)) * 100}%`;
+            guide.style.top = `${(pane.top / Math.max(1, rect.height)) * 100}%`;
+            guide.style.width = `${(pane.width / Math.max(1, rect.width)) * 100}%`;
+            guide.style.height = `${(pane.height / Math.max(1, rect.height)) * 100}%`;
+            const role = index === 0 ? '주 화자' : `화자 ${index + 1}`;
+            const label = pane.subject.speaker || pane.subject.subjectId || role;
+            const crop = speakerGuideCropSummary(pane.subject, pane.width, pane.height);
+            guide.textContent = `${role} · ${label}${crop ? ` · ${crop}` : ''}`;
+        });
+        if (els.speakerPreviewDividerControl) {
+            const dual = focus.source === 'speaker-dual-face';
+            els.speakerPreviewDividerControl.hidden = !dual;
+            els.speakerPreviewDividerControl.tabIndex = dual ? 0 : -1;
+            els.speakerPreviewDividerControl.setAttribute('aria-orientation', orientation === 'horizontal' ? 'vertical' : 'horizontal');
+            els.speakerPreviewDividerControl.setAttribute('aria-valuenow', String(Math.round(split * 100)));
+            els.speakerPreviewDividerControl.setAttribute('aria-valuetext', `주 화자 ${Math.round(split * 100)}%`);
+        }
+        if (els.speakerPreviewOverlayStatus) {
+            const count = geometry.length;
+            const paging = focus.source === 'speaker-grid-face' && Number(focus.gridPageCount) > 1 ? ` · 페이지 ${Number(focus.gridPage) + 1}/${focus.gridPageCount}` : '';
+            const trigger = focus.gridPageTrigger === 'energy' ? ' · 에너지 즉시 전환' : focus.gridPageTrigger === 'manual' ? ' · 수동 페이지' : ''; 
+            els.speakerPreviewOverlayStatus.textContent = focus.source === 'speaker-grid-face' ? `${count}명 표시 / ${Number(focus.gridTotalSubjects) || count}명 동시 화자 grid${paging}${trigger}` : `2명 동시 화자 · 주 화자 ${Math.round(split * 100)}%`;
+        }
+    }
+
+    function syncSpeakerPanePositionOptions(orientation, requested) {
+        if (!els.speakerPanePositionSelect) return;
+        const horizontal = orientation === 'horizontal';
+        const choices = horizontal ? [['left', '왼쪽 화면'], ['right', '오른쪽 화면']] : [['top', '위 화면'], ['bottom', '아래 화면']];
+        const fallback = choices[0][0];
+        const selected = choices.some(item => item[0] === requested) ? requested : fallback;
+        const signature = choices.map(item => item[0]).join('|');
+        if (els.speakerPanePositionSelect.dataset.signature !== signature) {
+            els.speakerPanePositionSelect.textContent = '';
+            choices.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item[0];
+                option.textContent = item[1];
+                els.speakerPanePositionSelect.appendChild(option);
+            });
+            els.speakerPanePositionSelect.dataset.signature = signature;
+        }
+        els.speakerPanePositionSelect.value = selected;
+    }
+
+    function parseSpeakerGridManualPages(value) {
+        return String(value || '').split(/\||\n/).map(page => page.split(/[\s,]+/).map(item => item.trim()).filter(item => /^subject-[1-9][0-9]{0,2}$/.test(item)).filter((item, index, list) => list.indexOf(item) === index).slice(0, 4)).filter(page => page.length).slice(0, 12);
+    }
+
+    function formatSpeakerGridManualPages(pages) {
+        return (Array.isArray(pages) ? pages : []).map(page => (Array.isArray(page) ? page : []).join(',')).filter(Boolean).join(' | ');
+    }
+
+    function applySpeakerLayoutSettings(options) {
+        const opts = Object.assign({ recordHistory: true, persist: true }, options || {});
+        const engine = getSmartReframeEngine();
+        if (!state.smartReframe || !engine.updateSpeakerLayout) return;
+        if (opts.recordHistory) recordSpeakerTimelineHistory();
+        const orientation = els.speakerPaneOrientationSelect && els.speakerPaneOrientationSelect.value === 'horizontal' ? 'horizontal' : 'vertical';
+        const split = Math.max(0.35, Math.min(0.65, Number(els.speakerPaneSplitInput && els.speakerPaneSplitInput.value || 50) / 100));
+        const requested = String(els.speakerPanePositionSelect && els.speakerPanePositionSelect.value || '');
+        const primaryPosition = orientation === 'horizontal' ? (requested === 'right' ? 'right' : 'left') : (requested === 'bottom' ? 'bottom' : 'top');
+        const gridPrimarySize = Math.max(0.45, Math.min(0.65, Number(els.speakerGridPrimarySizeInput && els.speakerGridPrimarySizeInput.value || 54) / 100));
+        const gridPrimaryPosition = ['top', 'bottom', 'left', 'right'].includes(String(els.speakerGridPrimaryPositionSelect && els.speakerGridPrimaryPositionSelect.value || 'top')) ? els.speakerGridPrimaryPositionSelect.value : 'top';
+        const requestedPaging = String(els.speakerGridPagingSelect && els.speakerGridPagingSelect.value || 'rotate');
+        const gridPaging = ['priority', 'energy', 'manual'].includes(requestedPaging) ? requestedPaging : 'rotate';
+        const gridPageSeconds = Math.max(1, Math.min(10, Number(els.speakerGridPageSecondsInput && els.speakerGridPageSecondsInput.value || 3)));
+        const requestedTransition = String(els.speakerGridTransitionSelect && els.speakerGridTransitionSelect.value || 'fade');
+        const gridTransition = ['none', 'slide'].includes(requestedTransition) ? requestedTransition : 'fade';
+        const gridTransitionMs = Math.max(120, Math.min(1200, Math.round(Number(els.speakerGridTransitionMsInput && els.speakerGridTransitionMsInput.value || 320))));
+        const gridManualPages = parseSpeakerGridManualPages(els.speakerGridManualPagesInput && els.speakerGridManualPagesInput.value);
+        state.smartReframe = engine.updateSpeakerLayout(state.smartReframe, { orientation, split, primaryPosition, gridPrimarySize, gridPrimaryPosition, gridPaging, gridPageSeconds, gridTransition, gridTransitionMs, gridManualPages }) || state.smartReframe;
+        if (opts.persist) persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+    }
+
+    function applyBulkSpeakerCueEdit() {
+        const engine = getSmartReframeEngine();
+        if (!state.smartReframe || !engine.updateSpeakerCuesBulk || !speakerCueSelection.size) return;
+        if (!bulkSpeakerFieldSelected()) {
+            toast('일괄 적용할 필드를 하나 이상 선택해주세요.', 'warning');
+            return;
+        }
+        const patch = getBulkSpeakerCuePatch();
+        recordSpeakerTimelineHistory();
+        const count = speakerCueSelection.size;
+        state.smartReframe = engine.updateSpeakerCuesBulk(state.smartReframe, Array.from(speakerCueSelection), patch) || state.smartReframe;
+        speakerCueSelection.clear();
+        speakerSelectionAnchorIndex = -1;
+        if (els.speakerCueBulkShiftInput) els.speakerCueBulkShiftInput.value = '0';
+        if (els.speakerCueBulkLabelInput) els.speakerCueBulkLabelInput.value = '';
+        persistSmartReframeEdits(state.smartReframe);
+        updateSmartReframeUI();
+        renderPreviewStill();
+        toast(`선택한 ${count}개 화자 구간에 선택 필드만 적용했습니다.`, 'success');
     }
 
     function getSpeakerTuneIndex(cues) {
@@ -834,11 +1322,46 @@
         const track = state.smartReframe;
         const cues = Array.isArray(track && track.speakerCues) ? track.speakerCues : [];
         const subjects = Array.isArray(track && track.subjects) ? track.subjects : [];
+        reconcileSpeakerCueSelection(cues);
         const index = getSpeakerTuneIndex(cues);
         speakerTuneIndex = index;
         const cue = index >= 0 ? cues[index] : null;
+        const speakerLayout = Object.assign({ orientation: 'vertical', split: 0.5, primaryPosition: 'top', gridPrimarySize: 0.54, gridPrimaryPosition: 'top', gridPaging: 'rotate', gridPageSeconds: 3, gridTransition: 'fade', gridTransitionMs: 320, gridManualPages: [] }, track && track.speakerLayout || {});
+        const speakerLayoutOrientation = speakerLayout.orientation === 'horizontal' ? 'horizontal' : 'vertical';
         if (els.speakerFaceTuningCount) els.speakerFaceTuningCount.textContent = `${cues.length}구간`;
         if (els.speakerFaceTuningPanel) els.speakerFaceTuningPanel.dataset.state = cue ? (cue.locked ? 'manual' : 'auto') : 'empty';
+        if (els.speakerCueSelectedCount) els.speakerCueSelectedCount.textContent = `선택 ${speakerCueSelection.size}개`;
+        if (els.speakerCueSelectAllBtn) els.speakerCueSelectAllBtn.disabled = !cues.length || speakerCueSelection.size === cues.length;
+        if (els.speakerCueSelectionClearBtn) els.speakerCueSelectionClearBtn.disabled = !speakerCueSelection.size;
+        if (els.speakerCueUndoBtn) els.speakerCueUndoBtn.disabled = !speakerTimelineUndoStack.length;
+        if (els.speakerCueRedoBtn) els.speakerCueRedoBtn.disabled = !speakerTimelineRedoStack.length;
+        [els.speakerCueBulkShiftToggle, els.speakerCueBulkLabelToggle, els.speakerCueBulkFaceToggle, els.speakerCueBulkPriorityToggle, els.speakerCueBulkGridCropToggle].forEach(input => { if (input) input.disabled = !speakerCueSelection.size; });
+        if (els.speakerCueBulkShiftInput) els.speakerCueBulkShiftInput.disabled = !speakerCueSelection.size || !(els.speakerCueBulkShiftToggle && els.speakerCueBulkShiftToggle.checked);
+        if (els.speakerCueBulkLabelInput) els.speakerCueBulkLabelInput.disabled = !speakerCueSelection.size || !(els.speakerCueBulkLabelToggle && els.speakerCueBulkLabelToggle.checked);
+        syncBulkSpeakerCuePreview();
+        if (els.speakerPaneOrientationSelect) {
+            els.speakerPaneOrientationSelect.disabled = !track;
+            els.speakerPaneOrientationSelect.value = speakerLayoutOrientation;
+        }
+        if (els.speakerPaneSplitInput) {
+            els.speakerPaneSplitInput.disabled = !track;
+            els.speakerPaneSplitInput.value = String(Math.round(Number(speakerLayout.split || 0.5) * 100));
+        }
+        if (els.speakerPaneSplitValue) els.speakerPaneSplitValue.textContent = `${Math.round(Number(speakerLayout.split || 0.5) * 100)}%`;
+        if (els.speakerPanePositionSelect) {
+            els.speakerPanePositionSelect.disabled = !track;
+            syncSpeakerPanePositionOptions(speakerLayoutOrientation, speakerLayout.primaryPosition);
+        }
+        if (els.speakerPaneDividerControl) els.speakerPaneDividerControl.tabIndex = track ? 0 : -1;
+        if (els.speakerGridPrimarySizeInput) { els.speakerGridPrimarySizeInput.disabled = !track; els.speakerGridPrimarySizeInput.value = String(Math.round(Number(speakerLayout.gridPrimarySize || 0.54) * 100)); }
+        if (els.speakerGridPrimarySizeValue) els.speakerGridPrimarySizeValue.textContent = `${Math.round(Number(speakerLayout.gridPrimarySize || 0.54) * 100)}%`;
+        if (els.speakerGridPrimaryPositionSelect) { els.speakerGridPrimaryPositionSelect.disabled = !track; els.speakerGridPrimaryPositionSelect.value = ['top', 'bottom', 'left', 'right'].includes(speakerLayout.gridPrimaryPosition) ? speakerLayout.gridPrimaryPosition : 'top'; }
+        if (els.speakerGridPagingSelect) { els.speakerGridPagingSelect.disabled = !track; els.speakerGridPagingSelect.value = ['priority', 'energy', 'manual'].includes(speakerLayout.gridPaging) ? speakerLayout.gridPaging : 'rotate'; }
+        if (els.speakerGridPageSecondsInput) { els.speakerGridPageSecondsInput.disabled = !track || speakerLayout.gridPaging === 'priority' || speakerLayout.gridPaging === 'energy'; els.speakerGridPageSecondsInput.value = String(Number(speakerLayout.gridPageSeconds || 3)); }
+        if (els.speakerGridTransitionSelect) { els.speakerGridTransitionSelect.disabled = !track || speakerLayout.gridPaging === 'priority' || speakerLayout.gridPaging === 'energy'; els.speakerGridTransitionSelect.value = ['none', 'slide'].includes(speakerLayout.gridTransition) ? speakerLayout.gridTransition : 'fade'; }
+        if (els.speakerGridTransitionMsInput) { els.speakerGridTransitionMsInput.disabled = !track || speakerLayout.gridPaging === 'priority' || speakerLayout.gridPaging === 'energy' || speakerLayout.gridTransition === 'none'; els.speakerGridTransitionMsInput.value = String(Math.round(Number(speakerLayout.gridTransitionMs || 320))); }
+        if (els.speakerGridManualPagesInput) { els.speakerGridManualPagesInput.disabled = !track || speakerLayout.gridPaging !== 'manual'; els.speakerGridManualPagesInput.value = formatSpeakerGridManualPages(speakerLayout.gridManualPages); }
+        syncSpeakerPaneLayoutPreview(speakerLayout);
         if (els.speakerFaceSubjectSelect) {
             const signature = subjects.map(subject => `${subject.id}:${subject.label}`).join('|');
             if (els.speakerFaceSubjectSelect.dataset.signature !== signature) {
@@ -875,6 +1398,15 @@
             els.speakerFaceLockToggle.disabled = !cue;
             els.speakerFaceLockToggle.checked = Boolean(cue && cue.locked);
         }
+        const gridCrop = Object.assign({ x: 0, y: 0, zoom: 1 }, cue && cue.gridCrop || {});
+        const gridCropControls = [els.speakerGridCropXInput, els.speakerGridCropYInput, els.speakerGridCropZoomInput];
+        gridCropControls.forEach(input => { if (input) input.disabled = !cue; });
+        if (els.speakerGridCropXInput) els.speakerGridCropXInput.value = String(Math.round(Number(gridCrop.x || 0) * 100));
+        if (els.speakerGridCropYInput) els.speakerGridCropYInput.value = String(Math.round(Number(gridCrop.y || 0) * 100));
+        if (els.speakerGridCropZoomInput) els.speakerGridCropZoomInput.value = String(Math.round(Number(gridCrop.zoom || 1) * 100));
+        if (els.speakerGridCropXValue) els.speakerGridCropXValue.textContent = `${Number(gridCrop.x) >= 0 ? '+' : ''}${Math.round(Number(gridCrop.x || 0) * 100)}%`;
+        if (els.speakerGridCropYValue) els.speakerGridCropYValue.textContent = `${Number(gridCrop.y) >= 0 ? '+' : ''}${Math.round(Number(gridCrop.y || 0) * 100)}%`;
+        if (els.speakerGridCropZoomValue) els.speakerGridCropZoomValue.textContent = `${Math.round(Number(gridCrop.zoom || 1) * 100)}%`;
         const confidence = cue ? Math.max(0, Math.min(1, Number(cue.confidence) || 0)) : 0;
         if (els.speakerFaceConfidenceValue) els.speakerFaceConfidenceValue.textContent = `${Math.round(confidence * 100)}%`;
         if (els.speakerFaceConfidenceMeter) els.speakerFaceConfidenceMeter.value = confidence;
@@ -894,11 +1426,42 @@
             const subject = cue && subjects.find(item => item.id === cue.subjectId);
             els.speakerFaceCueMeta.textContent = !cue
                 ? '전사 또는 자막을 연결하면 구간별 얼굴을 조정할 수 있습니다.'
-                : `${subject ? subject.label : '자동 추적'} · ${cue.locked ? '수동 고정' : '자동 연결'} · ${cue.source === 'diarization-face' ? '화자 라벨 기반' : cue.source === 'face-activity' ? '얼굴 활동 기반' : cue.source === 'manual-override' ? '사용자 지정' : '자동 대체'}`;
+                : `${subject ? subject.label : '자동 추적'} · ${cue.locked ? '수동 고정' : '자동 연결'} · 에너지 ${Math.round((Number(cue.energy) || 0) * 100)}% · ${cue.source === 'diarization-face' ? '화자 라벨 기반' : cue.source === 'face-activity' ? '얼굴 활동 기반' : cue.source === 'manual-override' ? '사용자 지정' : '자동 대체'}`;
         }
         if (els.speakerCueTimeline) {
             els.speakerCueTimeline.textContent = '';
+            const engine = getSmartReframeEngine();
             cues.forEach((item, cueIndex) => {
+                const key = engine.speakerCueKey ? engine.speakerCueKey(item) : `${item.start}:${item.end}:${item.speaker}`;
+                const card = document.createElement('div');
+                card.className = 'speaker-cue-card';
+                card.dataset.cueIndex = String(cueIndex);
+                card.dataset.cueKey = key;
+                card.dataset.multiSelected = speakerCueSelection.has(key) ? 'true' : 'false';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = speakerCueSelection.has(key);
+                checkbox.setAttribute('aria-label', `${item.speaker || `발화 ${cueIndex + 1}`} 구간 선택`);
+                checkbox.addEventListener('pointerdown', event => {
+                    if (event.button !== 0) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    speakerSelectionDragActive = true;
+                    speakerSelectionPointerId = event.pointerId;
+                    speakerSelectionDragValue = !speakerCueSelection.has(key);
+                    if (els.speakerCueTimeline && els.speakerCueTimeline.setPointerCapture) els.speakerCueTimeline.setPointerCapture(event.pointerId);
+                    updateSpeakerCueSelection(cues, cueIndex, speakerSelectionDragValue, event.shiftKey);
+                    syncSpeakerCueSelectionDom();
+                });
+                checkbox.addEventListener('change', event => {
+                    updateSpeakerCueSelection(cues, cueIndex, checkbox.checked, event.shiftKey);
+                    syncSpeakerFaceTuningUI();
+                });
+                card.addEventListener('pointerenter', event => {
+                    if (!speakerSelectionDragActive || event.buttons !== 1) return;
+                    setSpeakerCueSelected(cues, cueIndex, speakerSelectionDragValue);
+                    syncSpeakerCueSelectionDom();
+                });
                 const button = document.createElement('button');
                 button.type = 'button';
                 button.className = 'speaker-cue-item';
@@ -914,8 +1477,18 @@
                 const role = item.priority === 'primary' ? '주 화자' : item.priority === 'secondary' ? '보조 화자' : '';
                 modeLabel.textContent = [item.locked ? '수동 고정' : item.subjectId === 'auto' ? '자동 추적' : '얼굴 연결', role, overlaps ? `겹침 ${overlaps}` : ''].filter(Boolean).join(' · ');
                 button.append(timeLabel, speakerLabel, modeLabel);
-                button.addEventListener('click', () => { speakerTuneIndex = cueIndex; selectSpeakerTuneCue(0); });
-                els.speakerCueTimeline.appendChild(button);
+                button.addEventListener('click', event => {
+                    if (event.shiftKey) {
+                        updateSpeakerCueSelection(cues, cueIndex, true, true);
+                        syncSpeakerFaceTuningUI();
+                    } else {
+                        speakerSelectionAnchorIndex = cueIndex;
+                    }
+                    speakerTuneIndex = cueIndex;
+                    selectSpeakerTuneCue(0);
+                });
+                card.append(checkbox, button);
+                els.speakerCueTimeline.appendChild(card);
             });
         }
     }
@@ -942,11 +1515,17 @@
         const end = Math.max(start + 0.05, Number(els.speakerCueEndInput && els.speakerCueEndInput.value));
         const speaker = String(els.speakerCueLabelInput && els.speakerCueLabelInput.value || '').trim().slice(0, 40);
         const priority = els.speakerCuePrioritySelect ? els.speakerCuePrioritySelect.value : 'auto';
+        const gridCrop = {
+            x: Math.max(-0.25, Math.min(0.25, Number(els.speakerGridCropXInput && els.speakerGridCropXInput.value || 0) / 100)),
+            y: Math.max(-0.25, Math.min(0.25, Number(els.speakerGridCropYInput && els.speakerGridCropYInput.value || 0) / 100)),
+            zoom: Math.max(1, Math.min(1.35, Number(els.speakerGridCropZoomInput && els.speakerGridCropZoomInput.value || 100) / 100))
+        };
         const boundedStart = start;
         const boundedEnd = end;
         if (!(boundedEnd > boundedStart + 0.049)) { toast('발화 구간은 최소 0.05초 이상이어야 합니다.', 'warning'); return; }
+        recordSpeakerTimelineHistory();
         state.smartReframe = engine.updateSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), {
-            start: boundedStart, end: boundedEnd, speaker, subjectId, locked, priority,
+            start: boundedStart, end: boundedEnd, speaker, subjectId, locked, priority, gridCrop,
             source: locked ? 'manual-override' : cue.source
         }) || state.smartReframe;
         persistSmartReframeEdits(state.smartReframe);
@@ -965,8 +1544,14 @@
         const subjectId = els.speakerFaceSubjectSelect ? els.speakerFaceSubjectSelect.value : 'auto';
         const locked = Boolean(els.speakerFaceLockToggle && els.speakerFaceLockToggle.checked && subjectId !== 'auto');
         const priority = els.speakerCuePrioritySelect ? els.speakerCuePrioritySelect.value : cue.priority || 'auto';
+        const gridCrop = {
+            x: Math.max(-0.25, Math.min(0.25, Number(els.speakerGridCropXInput && els.speakerGridCropXInput.value || 0) / 100)),
+            y: Math.max(-0.25, Math.min(0.25, Number(els.speakerGridCropYInput && els.speakerGridCropYInput.value || 0) / 100)),
+            zoom: Math.max(1, Math.min(1.35, Number(els.speakerGridCropZoomInput && els.speakerGridCropZoomInput.value || 100) / 100))
+        };
+        recordSpeakerTimelineHistory();
         state.smartReframe = engine.updateSpeakerCuesBySpeaker(state.smartReframe, cue.speaker, {
-            subjectId, locked, priority, source: locked ? 'manual-override' : cue.source
+            subjectId, locked, priority, gridCrop, source: locked ? 'manual-override' : cue.source
         }) || state.smartReframe;
         persistSmartReframeEdits(state.smartReframe);
         updateSmartReframeUI();
@@ -984,6 +1569,7 @@
         const current = Math.max(cue.start + 0.05, Math.min(cue.end - 0.05, getSmartReframeTime()));
         if (current <= cue.start + 0.049 || current >= cue.end - 0.049) { toast('재생 위치를 구간 안쪽으로 옮긴 뒤 분할하세요.', 'warning'); return; }
         const nextLabel = String(els.speakerCueLabelInput && els.speakerCueLabelInput.value || cue.speaker || '').trim().slice(0, 40);
+        recordSpeakerTimelineHistory();
         state.smartReframe = engine.splitSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), current, { speaker: nextLabel, locked: false, mode: 'auto' }) || state.smartReframe;
         speakerTuneIndex = Math.min(index + 1, (state.smartReframe.speakerCues || []).length - 1);
         persistSmartReframeEdits(state.smartReframe);
@@ -1003,6 +1589,7 @@
         let suffix = 2;
         let label = `${baseLabel} 보조`.slice(0, 40);
         while (used.has(label) && suffix < 100) { label = `${baseLabel} 보조 ${suffix}`.slice(0, 40); suffix += 1; }
+        recordSpeakerTimelineHistory();
         state.smartReframe = engine.duplicateSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), { speaker: label, priority: 'secondary' }) || state.smartReframe;
         const nextCues = state.smartReframe.speakerCues || [];
         speakerTuneIndex = nextCues.findIndex(item => item.start === cue.start && item.end === cue.end && item.speaker === label);
@@ -1018,6 +1605,7 @@
         const index = getSpeakerTuneIndex(cues);
         const cue = index >= 0 ? cues[index] : null;
         if (!cue || !engine.removeSpeakerCue || !engine.speakerCueKey) return;
+        recordSpeakerTimelineHistory();
         state.smartReframe = engine.removeSpeakerCue(state.smartReframe, engine.speakerCueKey(cue)) || state.smartReframe;
         speakerTuneIndex = Math.max(0, Math.min(index, (state.smartReframe.speakerCues || []).length - 1));
         persistSmartReframeEdits(state.smartReframe);
@@ -1032,6 +1620,7 @@
         const index = getSpeakerTuneIndex(cues);
         const cue = index >= 0 ? cues[index] : null;
         if (!cue || !engine.updateSpeakerCue || !engine.speakerCueKey) return;
+        recordSpeakerTimelineHistory();
         state.smartReframe = engine.updateSpeakerCue(state.smartReframe, engine.speakerCueKey(cue), { subjectId: 'auto', locked: false, mode: 'auto', source: 'face-activity' }) || state.smartReframe;
         persistSmartReframeEdits(state.smartReframe);
         await linkSpeakerFaces(null, 'speaker-tuning-auto');
@@ -1850,6 +2439,70 @@
         if (els.speakerFaceNextBtn) els.speakerFaceNextBtn.addEventListener('click', () => selectSpeakerTuneCue(1));
         if (els.speakerFaceApplyBtn) els.speakerFaceApplyBtn.addEventListener('click', applySpeakerTuneCue);
         if (els.speakerFaceApplySpeakerBtn) els.speakerFaceApplySpeakerBtn.addEventListener('click', applySpeakerTuneToMatchingSpeaker);
+        if (els.speakerCueSelectAllBtn) els.speakerCueSelectAllBtn.addEventListener('click', selectAllSpeakerCues);
+        if (els.speakerCueSelectionClearBtn) els.speakerCueSelectionClearBtn.addEventListener('click', clearSpeakerCueSelection);
+        if (els.speakerCueUndoBtn) els.speakerCueUndoBtn.addEventListener('click', undoSpeakerTimelineEdit);
+        if (els.speakerCueRedoBtn) els.speakerCueRedoBtn.addEventListener('click', redoSpeakerTimelineEdit);
+        if (els.speakerCueBulkApplyBtn) els.speakerCueBulkApplyBtn.addEventListener('click', applyBulkSpeakerCueEdit);
+        [els.speakerCueBulkShiftToggle, els.speakerCueBulkLabelToggle, els.speakerCueBulkFaceToggle, els.speakerCueBulkPriorityToggle, els.speakerCueBulkGridCropToggle].forEach(input => {
+            if (input) input.addEventListener('change', syncSpeakerFaceTuningUI);
+        });
+        [els.speakerCueBulkShiftInput, els.speakerCueBulkLabelInput, els.speakerFaceSubjectSelect, els.speakerFaceLockToggle, els.speakerCuePrioritySelect, els.speakerGridCropXInput, els.speakerGridCropYInput, els.speakerGridCropZoomInput].forEach(input => {
+            if (input) input.addEventListener('input', syncBulkSpeakerCuePreview);
+            if (input) input.addEventListener('change', syncBulkSpeakerCuePreview);
+        });
+        if (els.speakerCueTimeline) els.speakerCueTimeline.addEventListener('pointermove', event => {
+            if (!speakerSelectionDragActive || speakerSelectionPointerId !== event.pointerId) return;
+            const target = document.elementFromPoint(event.clientX, event.clientY);
+            const card = target && target.closest ? target.closest('.speaker-cue-card') : null;
+            if (!card || !els.speakerCueTimeline.contains(card)) return;
+            const cues = Array.isArray(state.smartReframe && state.smartReframe.speakerCues) ? state.smartReframe.speakerCues : [];
+            const cueIndex = Number(card.dataset.cueIndex);
+            if (!Number.isInteger(cueIndex)) return;
+            setSpeakerCueSelected(cues, cueIndex, speakerSelectionDragValue);
+            syncSpeakerCueSelectionDom();
+        });
+        const finishSpeakerSelectionDrag = event => {
+            if (!speakerSelectionDragActive || event && speakerSelectionPointerId !== null && event.pointerId !== speakerSelectionPointerId) return;
+            if (els.speakerCueTimeline && speakerSelectionPointerId !== null && els.speakerCueTimeline.hasPointerCapture && els.speakerCueTimeline.hasPointerCapture(speakerSelectionPointerId)) els.speakerCueTimeline.releasePointerCapture(speakerSelectionPointerId);
+            speakerSelectionDragActive = false;
+            speakerSelectionPointerId = null;
+            syncSpeakerFaceTuningUI();
+        };
+        document.addEventListener('pointerup', finishSpeakerSelectionDrag);
+        document.addEventListener('pointercancel', finishSpeakerSelectionDrag);
+        if (els.speakerPaneOrientationSelect) els.speakerPaneOrientationSelect.addEventListener('change', () => {
+            syncSpeakerPanePositionOptions(els.speakerPaneOrientationSelect.value, '');
+            applySpeakerLayoutSettings();
+        });
+        if (els.speakerPaneSplitInput) els.speakerPaneSplitInput.addEventListener('input', () => {
+            if (els.speakerPaneSplitValue) els.speakerPaneSplitValue.textContent = `${els.speakerPaneSplitInput.value}%`;
+        });
+        if (els.speakerPaneSplitInput) els.speakerPaneSplitInput.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerPanePositionSelect) els.speakerPanePositionSelect.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridPrimarySizeInput) els.speakerGridPrimarySizeInput.addEventListener('input', () => { if (els.speakerGridPrimarySizeValue) els.speakerGridPrimarySizeValue.textContent = `${els.speakerGridPrimarySizeInput.value}%`; });
+        if (els.speakerGridPrimarySizeInput) els.speakerGridPrimarySizeInput.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridPrimaryPositionSelect) els.speakerGridPrimaryPositionSelect.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridPagingSelect) els.speakerGridPagingSelect.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridPageSecondsInput) els.speakerGridPageSecondsInput.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridTransitionSelect) els.speakerGridTransitionSelect.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridTransitionMsInput) els.speakerGridTransitionMsInput.addEventListener('change', applySpeakerLayoutSettings);
+        if (els.speakerGridManualPagesInput) els.speakerGridManualPagesInput.addEventListener('change', applySpeakerLayoutSettings);
+        [['speakerGridCropXInput','speakerGridCropXValue'], ['speakerGridCropYInput','speakerGridCropYValue'], ['speakerGridCropZoomInput','speakerGridCropZoomValue']].forEach(([inputId, outputId]) => {
+            if (!els[inputId]) return;
+            els[inputId].addEventListener('input', () => {
+                const value = Number(els[inputId].value || 0);
+                if (els[outputId]) els[outputId].textContent = inputId === 'speakerGridCropZoomInput' ? `${value}%` : `${value >= 0 ? '+' : ''}${value}%`;
+            });
+        });
+        [els.speakerPaneDividerControl, els.speakerPreviewDividerControl].forEach(control => {
+            if (!control) return;
+            control.addEventListener('pointerdown', beginSpeakerPaneDividerDrag);
+            control.addEventListener('pointermove', moveSpeakerPaneDivider);
+            control.addEventListener('pointerup', finishSpeakerPaneDividerDrag);
+            control.addEventListener('pointercancel', finishSpeakerPaneDividerDrag);
+            control.addEventListener('keydown', handleSpeakerPaneDividerKeydown);
+        });
         if (els.speakerCueSplitBtn) els.speakerCueSplitBtn.addEventListener('click', splitSpeakerTuneCue);
         if (els.speakerCueOverlapBtn) els.speakerCueOverlapBtn.addEventListener('click', addOverlappingSpeakerTuneCue);
         if (els.speakerCueDeleteBtn) els.speakerCueDeleteBtn.addEventListener('click', deleteSpeakerTuneCue);

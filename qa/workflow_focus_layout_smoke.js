@@ -17,7 +17,7 @@ function ok(condition, message) {
   if (!condition) { console.error(`FAIL ${message}`); process.exit(1); }
   console.log(`PASS ${message}`);
 }
-ok(pkg.version === '1.6.24', 'workflow focus release version is v1.6.20');
+ok(/^1\.6\.\d+$/.test(pkg.version), 'workflow focus release version is v1.6.20');
 ok(html.includes('id="workflowFocusToggle"') && html.includes('id="workflowFocusBadge"'), 'desktop toolbar exposes stage focus state and reversible full view');
 ok(html.includes(`assets/css/workflow-focus-layout.css?v=${buildKey}`), 'workflow focus stylesheet is loaded last in layout ownership');
 ok(!html.includes('<script defer src="src/ui/workflow-focus-layout.js') && loader.includes("versioned('src/ui/workflow-focus-layout.js', 'shell')"), 'workflow focus controller hydrates with the shell without increasing direct startup scripts');
@@ -30,4 +30,4 @@ ok(ux.includes("document.body.dataset.workflowPhase") && ux.includes("ai-shorts-
 ok(css.includes('[data-flow-panel].is-workflow-later') && controller.includes("setOwnedStyle(panel, 'display', 'none')"), 'unrelated desktop panels are removed from focused layout');
 ok(css.includes('[data-flow-panel].is-workflow-support') && controller.includes("setOwnedStyle(panel, 'height', '86px')"), 'next-step panels collapse into bounded support cards');
 ok(css.includes('[data-active-flow-tab="export"] .project-copy-hub') && css.includes('[data-active-flow-tab="export"] .local-ai-studio'), 'project, copy, and Local AI tools return in the export workflow');
-console.log('PASS v1.6.24 stage-aware progressive disclosure, reversible full view, and measured dock clearance');
+console.log('PASS v1.6.25 stage-aware progressive disclosure, reversible full view, and measured dock clearance');

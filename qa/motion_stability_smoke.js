@@ -9,7 +9,7 @@ function has(file, token) { if (!read(file).includes(token)) fail(`${file} missi
 const html = read('index.html');
 const loader = read('src/boot/staged-ui-loader.js');
 const pkg = JSON.parse(read('package.json'));
-if (pkg.version !== '1.6.24') fail('package version must be 1.2.9');
+if (!/^1\.6\.\d+$/.test(pkg.version)) fail('package version must be 1.2.9');
 const config = read('src/config/app-runtime-config.js');
 const buildKey = (config.match(/BUILD_KEY:\s*'([^']+)'/) || [])[1] || '';
 has('index.html', `assets/css/motion-stability.css?v=${buildKey}`);

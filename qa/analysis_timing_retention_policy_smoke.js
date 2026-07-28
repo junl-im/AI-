@@ -24,7 +24,7 @@ vm.runInContext(source, vm.createContext({ window, document, Blob, AbortControll
 const elements = { analysisTimingPanel: node(), analysisTimingHistoryCount: node(), analysisTimingHistoryClearBtn: node(), analysisTimingHistoryEmpty: node(), analysisTimingHistoryList: node(), analysisTimingHistoryRetentionDays: node(), analysisTimingHistoryMaxItems: node(), analysisTimingHistoryPolicyStatus: node() };
 const controller = window.AIShortsAnalysisController.createAnalysisController({
   state: { file: null, fileMeta: null }, storage, elements, store: { addDiagnostic() {} },
-  config: { APP_VERSION: 'v1.6.24', ANALYSIS_TIMING_HISTORY_KEY: 'history-test', ANALYSIS_TIMING_HISTORY_POLICY_KEY: 'policy-test', ANALYSIS_TIMING_HISTORY_LIMIT: 12, ANALYSIS_TIMING_HISTORY_RETENTION_DAYS: 90 },
+  config: { APP_VERSION: 'v1.6.25', ANALYSIS_TIMING_HISTORY_KEY: 'history-test', ANALYSIS_TIMING_HISTORY_POLICY_KEY: 'policy-test', ANALYSIS_TIMING_HISTORY_LIMIT: 12, ANALYSIS_TIMING_HISTORY_RETENTION_DAYS: 90 },
   getActiveMediaElement() { return null; }, activateFlowTab() {}, updateButtons() {}, setProgress() {}, toast() {}, ensureMotionSmartReframe() {}, getAutoCutOptions() { return {}; }, buildAutoCutTimeline() {}, createRecommendations() {}, createFallbackAudioAnalysis() { return {}; }, beginOperation() { return null; }, assertOperation() {}, finishOperation() {}, isAbortError() { return false; }
 });
 ok(controller.getTimingHistory().length === 3, 'stored timing history is pruned by the saved maximum item policy');
@@ -39,4 +39,4 @@ ok(elements.analysisTimingHistoryRetentionDays.value === '5' && elements.analysi
 ok(html.includes('id="analysisTimingHistoryRetentionDays"') && html.includes('id="analysisTimingHistoryMaxItems"') && html.includes('id="analysisTimingHistoryPolicySaveBtn"'), 'analysis history panel exposes bounded retention settings');
 ok(app.includes('updateTimingHistoryPolicy') && app.includes('analysisTimingHistoryPolicySaveBtn'), 'app wiring saves retention changes through the controller owner');
 ok(css.includes('.analysis-history-retention') && css.includes('grid-template-columns'), 'retention settings have responsive visual ownership');
-console.log('PASS v1.6.24 analysis timing retention policy contract');
+console.log('PASS v1.6.25 analysis timing retention policy contract');
