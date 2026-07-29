@@ -1,0 +1,300 @@
+{
+  "app": "AI Shorts Studio",
+  "version": "1.6.33",
+  "createdAt": "2026-07-28T09:57:42.295Z",
+  "selectedCount": 28,
+  "executedCount": 28,
+  "passedCount": 28,
+  "failedCount": 0,
+  "durationMs": 14268,
+  "options": {
+    "from": 212,
+    "to": 239,
+    "match": "",
+    "shard": "1/1",
+    "timeoutMs": 180000,
+    "failFast": false
+  },
+  "results": [
+    {
+      "index": 212,
+      "command": "python3 qa/run_storage_health_browser_audit.py",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 6986,
+      "error": ""
+    },
+    {
+      "index": 213,
+      "command": "node qa/storage_health_browser_audit_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 22,
+      "error": ""
+    },
+    {
+      "index": 214,
+      "command": "python3 qa/run_layout_harmony_browser_audit.py",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 3008,
+      "error": ""
+    },
+    {
+      "index": 215,
+      "command": "node qa/layout_harmony_browser_audit_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 22,
+      "error": ""
+    },
+    {
+      "index": 216,
+      "command": "node qa/session_recovery_export_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 26,
+      "error": ""
+    },
+    {
+      "index": 217,
+      "command": "node --check src/ui/export-finish-center.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 19,
+      "error": ""
+    },
+    {
+      "index": 218,
+      "command": "node qa/export_finish_center_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 20,
+      "error": ""
+    },
+    {
+      "index": 219,
+      "command": "node --check src/ui/flow-director-final.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 16,
+      "error": ""
+    },
+    {
+      "index": 220,
+      "command": "node qa/shutter_flow_director_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 18,
+      "error": ""
+    },
+    {
+      "index": 221,
+      "command": "node --check src/ui/flow-command-bridge.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 17,
+      "error": ""
+    },
+    {
+      "index": 222,
+      "command": "node qa/no_shake_command_bridge_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 19,
+      "error": ""
+    },
+    {
+      "index": 223,
+      "command": "node qa/runtime_responsiveness_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 19,
+      "error": ""
+    },
+    {
+      "index": 224,
+      "command": "node qa/navigation_focus_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 20,
+      "error": ""
+    },
+    {
+      "index": 225,
+      "command": "node qa/staged_ui_loading_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 19,
+      "error": ""
+    },
+    {
+      "index": 226,
+      "command": "node qa/ui_refinement_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 19,
+      "error": ""
+    },
+    {
+      "index": 227,
+      "command": "node qa/ui_clarity_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 21,
+      "error": ""
+    },
+    {
+      "index": 228,
+      "command": "node qa/responsive_density_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 18,
+      "error": ""
+    },
+    {
+      "index": 229,
+      "command": "node qa/run_css_ownership_audit.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 71,
+      "error": ""
+    },
+    {
+      "index": 230,
+      "command": "node qa/css_ownership_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 19,
+      "error": ""
+    },
+    {
+      "index": 231,
+      "command": "node qa/cascade_ownership_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 20,
+      "error": ""
+    },
+    {
+      "index": 232,
+      "command": "node qa/important_cascade_reduction_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 21,
+      "error": ""
+    },
+    {
+      "index": 233,
+      "command": "node qa/refinement_priority_reduction_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 19,
+      "error": ""
+    },
+    {
+      "index": 234,
+      "command": "python3 qa/run_interaction_state_audit.py",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 3143,
+      "error": ""
+    },
+    {
+      "index": 235,
+      "command": "node qa/interaction_state_priority_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 23,
+      "error": ""
+    },
+    {
+      "index": 236,
+      "command": "node qa/structure_responsive_priority_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 27,
+      "error": ""
+    },
+    {
+      "index": 237,
+      "command": "node qa/same_value_css_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 18,
+      "error": ""
+    },
+    {
+      "index": 238,
+      "command": "node qa/orphan_css_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 590,
+      "error": ""
+    },
+    {
+      "index": 239,
+      "command": "node qa/control_ownership_smoke.js",
+      "ok": true,
+      "timedOut": false,
+      "status": 0,
+      "signal": "",
+      "elapsedMs": 24,
+      "error": ""
+    }
+  ]
+}

@@ -37,6 +37,8 @@ assert(provider.includes('LOCAL_AI_ALLOW_REMOTE_ENDPOINTS') && provider.includes
 assert(provider.includes('verifyModelPin') && provider.includes("state === 'mismatch'") && provider.includes('generateStructured') && provider.includes('transcribe'), 'model digest gating, structured generation, and speech transcription are implemented');
 assert(jobs.includes('concurrency: 1') && jobs.includes('AbortController') && jobs.includes('sanitizeMeta'), 'AI jobs are serial, cancellable, and metadata-redacted');
 assert(ui.includes('CREATIVE_SCHEMA') && ui.includes('additionalProperties: false') && ui.includes('applyTranscriptResult') && ui.includes('includeCaptionsToggle'), 'UI uses strict structured copy and explicit transcript application controls');
+assert(ui.includes('probeUiSequences') && ui.includes('LOCAL_AI_PROBE_SUPERSEDED') && ui.includes('invalidateProbeView'), 'UI ignores superseded probe results and invalidates stale status when provider endpoints change');
+assert(ui.includes('providers.pinModel(providerId, model, currentModelDigest(), endpoint)') && ui.includes('providers.unpinModel(providerId, model, endpoint)'), 'UI scopes model pin and unpin actions to the active endpoint');
 assert(!/probeProvider\(['"](?:creative|speech)['"]\);/.test(ui.split('function init()')[1] || ''), 'initialization does not automatically contact a local AI server');
 assert(css.includes('.local-ai-grid') && css.includes('.local-ai-summary') && css.includes('grid-area: ai') && css.includes('@media (max-width: 620px)') && !css.includes('!important'), 'local AI disclosure has responsive workflow ownership without new priority overrides');
 const layout = fs.readFileSync(path.join(root, 'assets/css/workspace-layout-controls.css'), 'utf8');

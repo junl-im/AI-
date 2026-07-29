@@ -1,0 +1,100 @@
+{
+  "version": "1.6.38",
+  "generatedAt": "2026-07-29T06:48:04.717572+00:00",
+  "grid": {
+    "mode": "grid",
+    "visibleGuides": 4,
+    "labels": [
+      "주 화자 · 주 화자",
+      "화자 2 · 화자 2",
+      "화자 3 · 화자 3",
+      "화자 4 · 화자 4"
+    ],
+    "status": "4명 표시 / 6명 동시 화자 grid · 페이지 1/2 · 1.5초",
+    "dividerHidden": true,
+    "firstPage": [
+      "subject-1",
+      "subject-2",
+      "subject-3",
+      "subject-4"
+    ],
+    "secondPage": [
+      "subject-1",
+      "subject-5",
+      "subject-6",
+      "subject-2"
+    ],
+    "firstCrop": {
+      "x": 0.08,
+      "y": -0.05,
+      "zoom": 1.12
+    },
+    "overflow": 0
+  },
+  "threeSpeakerLayout": {
+    "guides": [
+      {
+        "left": 40,
+        "top": 0,
+        "width": 60,
+        "height": 100
+      },
+      {
+        "left": 0,
+        "top": 0,
+        "width": 40,
+        "height": 50
+      },
+      {
+        "left": 0,
+        "top": 50,
+        "width": 40,
+        "height": 50
+      }
+    ],
+    "position": "right",
+    "size": 0.6
+  },
+  "gridCrop": {
+    "cue": {
+      "x": 0.1,
+      "y": -0.06,
+      "zoom": 1.18
+    },
+    "focus": {
+      "x": 0.1,
+      "y": -0.06,
+      "zoom": 1.18
+    }
+  },
+  "dual": {
+    "mode": "dual",
+    "orientation": "horizontal",
+    "position": "right",
+    "visibleGuides": 2,
+    "status": "2명 동시 화자 · 주 화자 62%",
+    "dividerOrientation": "vertical",
+    "dividerValue": "62",
+    "labels": [
+      "주 화자 · 화자 2",
+      "화자 2 · 주 화자"
+    ],
+    "dragSplit": 0.6
+  },
+  "checks": {
+    "pagedSpeakerGridVisible": true,
+    "gridPagingRotatesSecondarySpeakers": true,
+    "gridLabelsSafeAndVisible": true,
+    "gridDividerDisabled": true,
+    "threeSpeakerPrimaryRightLayout": true,
+    "gridCellCropApplied": true,
+    "dualOverlayVisible": true,
+    "liveDividerPointerKeyboardWorks": true,
+    "liveDividerAccessible": true,
+    "viewportContained": true,
+    "noRuntimeErrors": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": []
+}

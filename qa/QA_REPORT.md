@@ -1,38 +1,33 @@
-# QA REPORT v1.6.32
+# QA REPORT v1.6.39
+
+## 등록 결과
+
+- 전체 등록 검사: **317개**
+- 통과: **317/317**
+- 실패: **0개**
+- 합산 실행 시간: **88.495초**
+- 최종 원본: `qa/qa-run-v1.6.39-final.json`
 
 ## 신규·갱신 검사
 
-- `speaker_manual_page_duration_smoke.js`
-- `speaker_manual_page_editor_smoke.js`
-- `run_speaker_page_timing_audit.py`
-- `speaker_page_timing_browser_smoke.js`
-- 갱신된 `speaker_face_project_smoke.js`
-- 갱신된 `run_speaker_paging_v1631_audit.py`
+- 신규 `local_ai_endpoint_pin_history_smoke.js`
+- 갱신 `local_ai_endpoint_integrity_smoke.js`
+- 강화 `local_ai_studio_smoke.js`
+- 기존 Local AI race·transport·deadline·resilience·queue 회귀 재검증
 
-## 최종 결과
+## 핵심 증빙
 
-- 전체 등록 검사: 307개
-- 통과: 307개
-- 실패: 0개
-- 구간: 100/100 + 100/100 + 40/40 + 43/43 + 24/24
-- 집계 파일: `qa-run-final-summary.json`
+- legacy pin이 현재 endpoint 범위 v2 pin으로 이관됨
+- endpoint A/B가 동일 모델명에 서로 다른 digest를 독립 pin함
+- 한 endpoint의 unpin이 다른 endpoint pin을 삭제하지 않음
+- 다른 endpoint pin이 있으면 probe 전 generation이 stale 상태로 차단됨
+- generation·transcription 실패가 bounded history에 기록됨
+- failure history에 prompt·schema·endpoint·미디어 내용이 포함되지 않음
+- 4-viewport·heap·process-memory·30분 Smart Reframe·speaker browser 감사 통과
+- 서비스워커 135개 앱 셸 무결성 통과
 
-## 현재 버전 증빙
+## 실행 방식과 한계
 
-- 수동 페이지 시간 [2, 5] 복구와 [2, 6] 변경 통과
-- 2.2초에서 두 번째 페이지 선택·8.2초에서 첫 페이지 순환 통과
-- 페이지 내부 subject 순서 변경 통과
-- 활성 화자 에너지 6개 행과 선택 화자 4개 표시 통과
-- 신규 화자 hold 0.7초 남음 표시 통과
-- 실제 20초 스마트 리프레임 전체 감사 통과
-- 실제 30분 1920×1080 집중 감사 통과
-- 실미디어 5회 JS heap 5.385 → 5.581 → 5.692 → 5.783 → 5.880MiB
-- URL 생성 10개·해제 10개, 종료 후 활성 0개
-- Chromium RSS 770.180 → 836.062MiB
-- Chromium USS 243.481 → 266.637MiB
-- JS heap 기울기 0.0052MiB/cycle
-- CSS 충돌·동일값 중복·shadow 0건
-- 구조 probe 안전 166·필수 27·미확인 13
-- 서비스워커 무결성 대상 135개
-
-15→30→15분 전체 미디어 교체·Render Queue·Object URL 경로는 변경되지 않아 v1.6.31 증빙을 승계했습니다. 변경된 페이지 시간·화자 순서·energy status 경로는 현재 단위·Chromium·실제 30분 감사에서 별도 검증했습니다.
+- Chromium 감사 산출물을 먼저 생성해야 하는 검사는 생성 후 독립 재실행했습니다.
+- 최종 원본은 분할 실행과 성공 재실행 기록을 package.json 등록 순서로 통합한 결과입니다.
+- 실제 모델 바이너리 추론, 물리 GPU, iOS Safari·Samsung Internet 실기기 검증은 포함하지 않습니다.

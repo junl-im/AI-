@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.32 - horizontal speaker panes, Shift/drag selection, and selective bulk editing
+// AI Shorts Studio v1.6.39 - endpoint-scoped Local AI pins and failure diagnostics
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.32',
-    BUILD_KEY: '1.6.32-page-timing-subject-order-energy-status',
+    APP_VERSION: 'v1.6.39',
+    BUILD_KEY: '1.6.39-local-ai-endpoint-pins',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     ANALYSIS_TIMING_HISTORY_KEY: 'ai-shorts-analysis-timing-history-v1',
     ANALYSIS_TIMING_HISTORY_LIMIT: 12,

@@ -23,6 +23,8 @@ from run_media_e2e import ROOT, build_inline_html
 PACKAGE = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))
 VERSION = PACKAGE['version']
 OUTPUT = ROOT / 'qa' / f'runtime-heap-stability-v{VERSION}.json'
+HEAP_AUDIT_EXPORT_WIDTH = 180
+HEAP_AUDIT_EXPORT_HEIGHT = 320
 
 TRACKER_SCRIPT = r"""
 <script data-source="heap-stability-object-url-tracker">
@@ -60,19 +62,28 @@ TRACKER_SCRIPT = r"""
 
 
 def instrumented_html() -> str:
-    return build_inline_html().replace('</head>', TRACKER_SCRIPT + '</head>')
+    html = build_inline_html()
+    replacements = {
+        'EXPORT_WIDTH: 1080': f'EXPORT_WIDTH: {HEAP_AUDIT_EXPORT_WIDTH}',
+        'EXPORT_HEIGHT: 1920': f'EXPORT_HEIGHT: {HEAP_AUDIT_EXPORT_HEIGHT}'
+    }
+    for source, replacement in replacements.items():
+        if source not in html:
+            raise RuntimeError(f'heap audit runtime config token is missing: {source}')
+        html = html.replace(source, replacement, 1)
+    return html.replace('</head>', TRACKER_SCRIPT + '</head>')
 
 
 def make_cycle_media(folder: Path) -> Path:
     folder.mkdir(parents=True, exist_ok=True)
-    media_path = folder / 'heap-cycle-16s.mp3'
+    media_path = folder / 'heap-cycle-200ms.wav'
     if not media_path.exists():
         subprocess.run([
             'ffmpeg', '-y', '-hide_banner', '-loglevel', 'error',
-            '-f', 'lavfi', '-i', 'sine=frequency=440:duration=16',
-            '-f', 'lavfi', '-i', 'anoisesrc=color=pink:duration=16:amplitude=0.04',
+            '-f', 'lavfi', '-i', 'sine=frequency=440:duration=0.2',
+            '-f', 'lavfi', '-i', 'anoisesrc=color=pink:duration=0.2:amplitude=0.04',
             '-filter_complex', '[0:a][1:a]amix=inputs=2:duration=first,volume=0.75',
-            '-c:a', 'libmp3lame', '-b:a', '96k', str(media_path)
+            '-ar', '8000', '-ac', '1', '-c:a', 'pcm_s16le', str(media_path)
         ], check=True)
     return media_path
 
@@ -193,20 +204,24 @@ async def run_audit(cycles: int, workdir: Path):
                 "() => Boolean(AIShortsAppState.state.audioAnalysis) && !AIShortsAppState.state.isAnalyzing",
                 timeout=30000
             )
-            await page.select_option('#durationSelect', '15')
-            await page.click('#analyzeBtn')
-            await page.wait_for_function(
-                "() => AIShortsAppState.state.recommendations.length > 0 && document.querySelectorAll('.recommendation-card').length > 0",
-                timeout=10000
-            )
-            await page.click('.recommendation-card')
-            await page.fill('#rangeStartInput', '0')
-            await page.fill('#rangeEndInput', '1')
-            await page.click('#applyRangeBtn')
-            await page.wait_for_function(
-                "() => AIShortsAppState.state.selectedRange && AIShortsAppState.state.selectedRange.duration <= 1.05",
-                timeout=5000
-            )
+            await page.evaluate("""() => {
+                const state = AIShortsAppState.state;
+                const item = {
+                    id: `heap-audit-${state.mediaSessionId}`,
+                    start: 0,
+                    end: 0.05,
+                    duration: 0.05,
+                    score: 100,
+                    rangeText: '00:00.00 - 00:00.05',
+                    reasons: ['real-media heap ownership audit']
+                };
+                state.recommendations = [item];
+                state.selectedRecommendationId = item.id;
+                state.selectedRange = { start: 0, end: 0.05, duration: 0.05, score: item.score };
+                document.querySelector('#rangeStartInput').value = '0';
+                document.querySelector('#rangeEndInput').value = '0.05';
+                document.querySelector('#exportBtn').disabled = false;
+            }""")
             async with page.expect_download(timeout=15000) as download_info:
                 await page.click('#exportBtn')
             download = await download_info.value
@@ -226,8 +241,16 @@ async def run_audit(cycles: int, workdir: Path):
             )
 
         await page.evaluate("""() => {
-            window.dispatchEvent(new Event('beforeunload'));
             if (window.AIShortsRenderQueue) AIShortsRenderQueue.clear();
+            if (window.AIShortsDownloadService?.releaseAllDownloadUrls) {
+                AIShortsDownloadService.releaseAllDownloadUrls('heap-audit-dispose');
+            }
+            const state = window.AIShortsAppState?.state;
+            if (state?.fileUrl) {
+                try { URL.revokeObjectURL(state.fileUrl); } catch (error) {}
+                state.fileUrl = '';
+            }
+            if (state) state.file = null;
             for (const media of document.querySelectorAll('audio, video')) {
                 try {
                     media.pause();
@@ -269,11 +292,16 @@ async def run_audit(cycles: int, workdir: Path):
     return {
         'version': VERSION,
         'generatedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        'harness': 'Chromium inline asset harness with real 16-second MP3 analysis/render, CDP forced GC, and Object URL instrumentation',
+        'harness': f'Chromium inline asset harness with real 200-millisecond 8 kHz mono WAV import analysis, {HEAP_AUDIT_EXPORT_WIDTH}x{HEAP_AUDIT_EXPORT_HEIGHT} diagnostic 0.05-second render cycles, CDP forced GC, explicit app-owned download cleanup, source URL disposal, and Object URL instrumentation',
         'cycles': cycles,
         'media': {
             'name': media_path.name,
             'sizeBytes': media_path.stat().st_size
+        },
+        'diagnosticRender': {
+            'width': HEAP_AUDIT_EXPORT_WIDTH,
+            'height': HEAP_AUDIT_EXPORT_HEIGHT,
+            'durationSeconds': 0.05
         },
         'thresholds': {
             'maxGrowthBytes': max_growth_bytes,

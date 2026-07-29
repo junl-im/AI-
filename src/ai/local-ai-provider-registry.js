@@ -1,15 +1,21 @@
-// AI Shorts Studio v1.6.20 - localhost-only open-source AI provider gateway with model pinning
+// AI Shorts Studio v1.6.39 - endpoint-scoped model pins and failure-aware local AI diagnostics
 'use strict';
 
 (function exposeLocalAIProviderRegistry(global) {
     const config = global.AIShortsRuntimeConfig || {};
     const storageManager = global.AIShortsStorageManager || {};
     const SETTINGS_KEY = config.LOCAL_AI_SETTINGS_KEY || 'ai-shorts-local-ai-v1';
-    const historyLimit = Math.max(5, Math.min(100, Number(config.LOCAL_AI_HISTORY_LIMIT || 20)));
-    const maxResponseBytes = Math.max(64 * 1024, Math.min(16 * 1024 * 1024, Number(config.LOCAL_AI_MAX_RESPONSE_BYTES || 2 * 1024 * 1024)));
-    const maxPromptChars = Math.max(1000, Math.min(100000, Number(config.LOCAL_AI_MAX_PROMPT_CHARS || 24000)));
-    const maxSchemaChars = Math.max(1000, Math.min(50000, Number(config.LOCAL_AI_MAX_SCHEMA_CHARS || 12000)));
+    const historyLimit = Math.round(safeNumber(config.LOCAL_AI_HISTORY_LIMIT, 20, 5, 100));
+    const requestTimeoutMs = safeNumber(config.LOCAL_AI_REQUEST_TIMEOUT_MS, 120000, 500, 30 * 60 * 1000);
+    const maxResponseBytes = Math.round(safeNumber(config.LOCAL_AI_MAX_RESPONSE_BYTES, 2 * 1024 * 1024, 64 * 1024, 16 * 1024 * 1024));
+    const maxPromptChars = Math.round(safeNumber(config.LOCAL_AI_MAX_PROMPT_CHARS, 24000, 1000, 100000));
+    const maxSchemaChars = Math.round(safeNumber(config.LOCAL_AI_MAX_SCHEMA_CHARS, 12000, 1000, 50000));
+    const maxTranscriptionBytes = Math.round(safeNumber(config.LOCAL_AI_MAX_TRANSCRIPTION_BYTES, 512 * 1024 * 1024, 1024 * 1024, 2 * 1024 * 1024 * 1024));
+    const maxCaptionCues = Math.round(safeNumber(config.MAX_CAPTION_CUES, 5000, 1, 50000));
+    const maxCaptionTextChars = Math.round(safeNumber(config.MAX_CAPTION_TEXT_CHARS, 1000000, 1000, 5000000));
     const statuses = new Map();
+    const probeSequences = new Map();
+    const probeControllers = new Map();
     const history = [];
 
     const PROVIDERS = Object.freeze({
@@ -20,7 +26,11 @@
     });
 
     function safeText(value, maxLength) {
-        return String(value == null ? '' : value).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, maxLength || 240);
+        const numericLimit = Number(maxLength);
+        const limit = Number.isFinite(numericLimit) && numericLimit > 0
+            ? Math.max(1, Math.min(16 * 1024 * 1024, Math.floor(numericLimit)))
+            : 240;
+        return String(value == null ? '' : value).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, limit);
     }
 
     function safeNumber(value, fallback, min, max) {
@@ -91,7 +101,21 @@
         const sourcePins = input.modelPins && typeof input.modelPins === 'object' ? input.modelPins : {};
         Object.keys(sourcePins).slice(0, 40).forEach(key => {
             const digest = normalizeDigest(sourcePins[key]);
-            if (digest) pins[safeText(key, 240)] = digest;
+            if (!digest) return;
+            const rawKey = safeText(key, 240);
+            if (rawKey.startsWith('v2|')) {
+                const parts = rawKey.split('|');
+                const providerId = parts[1] || '';
+                const endpointToken = parts[2] || '';
+                const modelId = parts.slice(3).join('|');
+                if (PROVIDERS[providerId] && /^[a-f0-9]{16}$/.test(endpointToken) && modelId) pins[rawKey] = digest;
+                return;
+            }
+            const separator = rawKey.indexOf(':');
+            const providerId = separator > 0 ? rawKey.slice(0, separator) : '';
+            const modelId = separator > 0 ? rawKey.slice(separator + 1) : '';
+            if (!PROVIDERS[providerId] || !modelId) return;
+            pins[scopedModelPinKey(providerId, modelId, endpoints[providerId])] = digest;
         });
         return {
             creativeProviderId: PROVIDERS[input.creativeProviderId] && PROVIDERS[input.creativeProviderId].capabilities.includes('creative') ? input.creativeProviderId : defaults.creativeProviderId,
@@ -127,11 +151,36 @@
 
     function getSettings() { return JSON.parse(JSON.stringify(settings)); }
 
+    function probeSupersededError(message) {
+        const error = new Error(message || '새 연결 확인이 시작되어 이전 요청을 중단했습니다.');
+        error.name = 'AbortError';
+        error.code = 'LOCAL_AI_PROBE_SUPERSEDED';
+        return error;
+    }
+
+    function abortProviderProbe(providerId, message) {
+        const controller = probeControllers.get(providerId);
+        if (!controller || controller.signal.aborted) return false;
+        controller.abort(probeSupersededError(message));
+        return true;
+    }
+
     function configure(patch) {
-        const next = Object.assign({}, settings, patch || {});
-        next.endpoints = Object.assign({}, settings.endpoints, patch && patch.endpoints || {});
-        next.modelPins = Object.assign({}, settings.modelPins, patch && patch.modelPins || {});
-        return saveSettings(next);
+        const input = patch && typeof patch === 'object' ? patch : {};
+        const previousEndpoints = Object.assign({}, settings.endpoints);
+        const next = Object.assign({}, settings, input);
+        next.endpoints = Object.assign({}, settings.endpoints, input.endpoints || {});
+        next.modelPins = Object.prototype.hasOwnProperty.call(input, 'modelPins')
+            ? Object.assign({}, input.modelPins && typeof input.modelPins === 'object' ? input.modelPins : {})
+            : Object.assign({}, settings.modelPins);
+        const saved = saveSettings(next);
+        Object.keys(PROVIDERS).forEach(providerId => {
+            if (previousEndpoints[providerId] === settings.endpoints[providerId]) return;
+            probeSequences.set(providerId, (probeSequences.get(providerId) || 0) + 1);
+            abortProviderProbe(providerId, '로컬 AI 주소가 변경되어 이전 연결 확인을 중단했습니다.');
+            statuses.delete(providerId);
+        });
+        return saved;
     }
 
     function provider(providerId) {
@@ -149,6 +198,26 @@
         return new URL(String(path || '').replace(/^\/+/, ''), `${endpoint.replace(/\/$/, '')}/`).toString();
     }
 
+    function localTimeoutError(message) {
+        const error = new Error(message || '로컬 AI 응답 시간이 초과되었습니다.');
+        error.name = 'TimeoutError';
+        error.code = 'LOCAL_AI_TIMEOUT';
+        return error;
+    }
+
+    function createTimeoutBudget(value, fallback) {
+        const totalMs = safeNumber(value, fallback, 500, 30 * 60 * 1000);
+        const deadline = Date.now() + totalMs;
+        return Object.freeze({
+            totalMs,
+            remaining() {
+                const remainingMs = deadline - Date.now();
+                if (remainingMs < 500) throw localTimeoutError();
+                return Math.min(totalMs, remainingMs);
+            }
+        });
+    }
+
     function combineSignal(externalSignal, timeoutMs) {
         const controller = new AbortController();
         let timer = 0;
@@ -160,10 +229,7 @@
         }
         timer = global.setTimeout(() => {
             timedOut = true;
-            const error = new Error('로컬 AI 응답 시간이 초과되었습니다.');
-            error.name = 'TimeoutError';
-            error.code = 'LOCAL_AI_TIMEOUT';
-            controller.abort(error);
+            controller.abort(localTimeoutError());
         }, Math.max(500, timeoutMs));
         return {
             signal: controller.signal,
@@ -175,15 +241,37 @@
         };
     }
 
+    function recoveryFor(error) {
+        const code = safeText(error && error.code, 80);
+        const status = Math.round(safeNumber(error && error.status, 0, 0, 999));
+        if (code === 'LOCAL_AI_REDIRECT_BLOCKED') return 'redirect가 아닌 최종 localhost API 주소를 직접 입력하세요.';
+        if (code === 'LOCAL_AI_TIMEOUT' || code === 'LOCAL_AI_JOB_TIMEOUT') return '모델 로딩 상태와 서버 처리 시간을 확인한 뒤 다시 시도하세요.';
+        if (code === 'LOCAL_AI_RESPONSE_TOO_LARGE') return '서버의 출력 길이·토큰 수를 줄인 뒤 다시 시도하세요.';
+        if (code === 'LOCAL_AI_MODEL_RECHECK_REQUIRED' || code === 'LOCAL_AI_MODEL_PIN_MISMATCH') return '현재 주소에서 연결 확인을 다시 실행하고 모델 digest를 확인하세요.';
+        if (status === 401 || status === 403) return '인증 없는 localhost API인지와 서버 접근 정책을 확인하세요.';
+        if (status === 404 || status === 405) return '서버 종류와 API 기본 경로가 맞는지 확인하세요.';
+        if (status === 413) return '미디어 또는 요청 크기를 줄인 뒤 다시 시도하세요.';
+        if (status === 429) return '서버 작업이 끝난 뒤 잠시 후 다시 시도하세요.';
+        if (status >= 500) return '로컬 모델 로딩 상태와 서버 로그를 확인하세요.';
+        if (code === 'LOCAL_AI_UNREACHABLE') return '서버 실행 여부, localhost 주소, CORS·TLS 설정을 확인하세요.';
+        return '';
+    }
+
     function responseSizeError() {
         const error = new Error('로컬 AI 응답이 허용 크기를 초과했습니다.');
         error.code = 'LOCAL_AI_RESPONSE_TOO_LARGE';
+        error.recovery = recoveryFor(error);
         return error;
     }
 
     async function readTextLimited(response, limit) {
         const declared = Number(response.headers && response.headers.get && response.headers.get('content-length'));
-        if (declared && declared > limit) throw responseSizeError();
+        if (Number.isFinite(declared) && declared > limit) {
+            try {
+                if (response.body && typeof response.body.cancel === 'function') await response.body.cancel();
+            } catch (_) { /* best effort transport release */ }
+            throw responseSizeError();
+        }
         if (!response.body || typeof response.body.getReader !== 'function') {
             const text = await response.text();
             if (new Blob([text]).size > limit) throw responseSizeError();
@@ -208,11 +296,18 @@
 
     async function request(endpoint, path, init, options) {
         const opts = options || {};
-        const timeoutMs = safeNumber(opts.timeoutMs, Number(config.LOCAL_AI_REQUEST_TIMEOUT_MS || 120000), 500, 30 * 60 * 1000);
+        const timeoutMs = safeNumber(opts.timeoutMs, requestTimeoutMs, 500, 30 * 60 * 1000);
         const combined = combineSignal(opts.signal, timeoutMs);
         const url = joinEndpoint(endpoint, path);
         try {
-            const response = await global.fetch(url, Object.assign({ cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer', signal: combined.signal }, init || {}));
+            const requestInit = Object.assign({}, init || {}, {
+                cache: 'no-store',
+                credentials: 'omit',
+                referrerPolicy: 'no-referrer',
+                redirect: 'error',
+                signal: combined.signal
+            });
+            const response = await global.fetch(url, requestInit);
             const text = opts.skipBody ? '' : await readTextLimited(response, safeNumber(opts.maxBytes, maxResponseBytes, 1024, 32 * 1024 * 1024));
             let data = null;
             if (text) {
@@ -230,11 +325,21 @@
                     throw timeout;
                 }
                 const aborted = new Error(reason && reason.message || error && error.message || '로컬 AI 작업이 취소되었습니다.');
-                aborted.name = 'AbortError';
+                aborted.name = reason && reason.name || 'AbortError';
+                if (reason && reason.code) aborted.code = safeText(reason.code, 80);
+                if (reason && reason.recovery) aborted.recovery = safeText(reason.recovery, 240);
+                if (reason && Number.isFinite(Number(reason.status))) aborted.status = Math.round(Number(reason.status));
+                if (reason) aborted.cause = reason;
                 throw aborted;
             }
-            const wrapped = new Error(error && error.message ? error.message : '로컬 AI 서버에 연결하지 못했습니다.');
-            wrapped.code = 'LOCAL_AI_UNREACHABLE';
+            const transportDetail = [error && error.message, error && error.cause && error.cause.message].filter(Boolean).join(' ');
+            const redirectBlocked = /redirect/i.test(transportDetail);
+            const wrapped = new Error(redirectBlocked
+                ? '로컬 AI 서버가 다른 주소로 redirect하여 요청을 차단했습니다.'
+                : '로컬 AI 서버에 연결하지 못했습니다.');
+            wrapped.code = redirectBlocked ? 'LOCAL_AI_REDIRECT_BLOCKED' : 'LOCAL_AI_UNREACHABLE';
+            wrapped.recovery = recoveryFor(wrapped);
+            if (error) wrapped.cause = error;
             throw wrapped;
         } finally { combined.cleanup(); }
     }
@@ -242,7 +347,12 @@
     function responseError(result, fallback) {
         const data = result && result.data;
         const detail = data && typeof data === 'object' && (data.error && (data.error.message || data.error) || data.message) || '';
-        return new Error(safeText(detail || fallback || `로컬 AI 요청 실패 (${result && result.response && result.response.status || 0})`, 500));
+        const status = Math.round(safeNumber(result && result.response && result.response.status, 0, 0, 999));
+        const error = new Error(safeText(detail || fallback || `로컬 AI 요청 실패 (${status})`, 500));
+        error.status = status;
+        error.code = status ? `LOCAL_AI_HTTP_${status}` : 'LOCAL_AI_HTTP_ERROR';
+        error.recovery = recoveryFor(error);
+        return error;
     }
 
     function normalizeDigest(value) {
@@ -256,7 +366,7 @@
         return Object.freeze({
             id,
             name: safeText(source.name || source.model || source.id, 160),
-            size: Math.max(0, Number(source.size) || 0),
+            size: Math.round(safeNumber(source.size, 0, 0, Number.MAX_SAFE_INTEGER)),
             digest: normalizeDigest(source.digest),
             family: safeText(source.details && (source.details.family || source.details.format) || source.owned_by, 80),
             parameterSize: safeText(source.details && source.details.parameter_size, 80),
@@ -264,21 +374,29 @@
         });
     }
 
-    function statusValue(providerId, state, extra) {
+    function createStatusValue(providerId, state, extra) {
         const item = provider(providerId);
-        const endpoint = endpointFor(providerId, extra && extra.endpoint);
-        const value = Object.freeze(Object.assign({
+        const source = extra && typeof extra === 'object' ? extra : {};
+        const endpoint = endpointFor(providerId, source.endpoint);
+        const models = Object.freeze((Array.isArray(source.models) ? source.models : []).slice());
+        return Object.freeze({
             providerId: item.id,
             label: item.label,
-            state,
+            state: ['idle', 'checking', 'ready', 'error'].includes(state) ? state : 'error',
             endpointToken: hashToken(endpoint),
-            checkedAt: new Date().toISOString(),
-            latencyMs: 0,
-            capabilities: item.capabilities.slice(),
-            models: [],
-            error: ''
-        }, extra || {}, { endpoint: undefined }));
-        statuses.set(item.id, value);
+            checkedAt: safeText(source.checkedAt || new Date().toISOString(), 80),
+            latencyMs: Math.round(safeNumber(source.latencyMs, 0, 0, 30 * 60 * 1000)),
+            capabilities: Object.freeze(item.capabilities.slice()),
+            models,
+            error: safeText(source.error, 240),
+            errorCode: safeText(source.errorCode, 80),
+            recovery: safeText(source.recovery, 240)
+        });
+    }
+
+    function statusValue(providerId, state, extra) {
+        const value = createStatusValue(providerId, state, extra);
+        statuses.set(value.providerId, value);
         return value;
     }
 
@@ -291,6 +409,7 @@
             ok: Boolean(event && event.ok),
             elapsedMs: Math.max(0, Number(event && event.elapsedMs) || 0),
             error: safeText(event && event.error, 240),
+            errorCode: safeText(event && event.errorCode, 80),
             at: new Date().toISOString()
         });
         history.unshift(item);
@@ -301,67 +420,128 @@
         const item = provider(providerId);
         const endpoint = endpointFor(providerId, options && options.endpoint);
         const started = Date.now();
+        const probeSequence = (probeSequences.get(item.id) || 0) + 1;
+        probeSequences.set(item.id, probeSequence);
+        abortProviderProbe(item.id);
+        const probeController = new AbortController();
+        probeControllers.set(item.id, probeController);
+        const externalSignal = options && options.signal;
+        const forwardAbort = () => probeController.abort(externalSignal && externalSignal.reason || new DOMException('작업이 취소되었습니다.', 'AbortError'));
+        if (externalSignal) {
+            if (externalSignal.aborted) forwardAbort();
+            else externalSignal.addEventListener('abort', forwardAbort, { once: true });
+        }
+        const isCurrentProbe = () => probeSequences.get(item.id) === probeSequence && probeControllers.get(item.id) === probeController;
+        const timeoutMs = options && options.timeoutMs != null ? options.timeoutMs : config.LOCAL_AI_PROBE_TIMEOUT_MS || 5000;
         statusValue(providerId, 'checking', { endpoint, checkedAt: new Date().toISOString() });
         try {
             let result;
             let models = [];
             if (item.id === 'ollama') {
-                result = await request(endpoint, '/api/tags', { method: 'GET', headers: { Accept: 'application/json' } }, { signal: options && options.signal, timeoutMs: options && options.timeoutMs || config.LOCAL_AI_PROBE_TIMEOUT_MS || 5000 });
+                result = await request(endpoint, '/api/tags', { method: 'GET', headers: { Accept: 'application/json' } }, { signal: probeController.signal, timeoutMs });
                 if (!result.response.ok) throw responseError(result, 'Ollama 모델 목록을 읽지 못했습니다.');
                 models = Array.isArray(result.data && result.data.models) ? result.data.models.map(normalizeModel).filter(model => model.id) : [];
             } else if (item.id === 'llamacpp' || item.id === 'openailocal') {
-                result = await request(endpoint, '/v1/models', { method: 'GET', headers: { Accept: 'application/json' } }, { signal: options && options.signal, timeoutMs: options && options.timeoutMs || config.LOCAL_AI_PROBE_TIMEOUT_MS || 5000 });
+                result = await request(endpoint, '/v1/models', { method: 'GET', headers: { Accept: 'application/json' } }, { signal: probeController.signal, timeoutMs });
                 if (!result.response.ok) throw responseError(result, 'OpenAI 호환 모델 목록을 읽지 못했습니다.');
                 models = Array.isArray(result.data && result.data.data) ? result.data.data.map(normalizeModel).filter(model => model.id) : [];
             } else {
-                result = await request(endpoint, '/', { method: 'GET', headers: { Accept: 'application/json,text/html;q=0.8,*/*;q=0.1' } }, { signal: options && options.signal, timeoutMs: options && options.timeoutMs || config.LOCAL_AI_PROBE_TIMEOUT_MS || 5000, maxBytes: 256 * 1024 });
+                result = await request(endpoint, '/', { method: 'GET', headers: { Accept: 'application/json,text/html;q=0.8,*/*;q=0.1' } }, { signal: probeController.signal, timeoutMs, maxBytes: 256 * 1024 });
                 if (!result.response.ok && result.response.status !== 404) throw responseError(result, 'whisper.cpp 서버 상태를 확인하지 못했습니다.');
             }
+            if (!isCurrentProbe()) throw probeSupersededError();
             const latencyMs = Date.now() - started;
-            const value = statusValue(providerId, 'ready', { endpoint, latencyMs, models });
+            const value = createStatusValue(providerId, 'ready', { endpoint, latencyMs, models });
+            statuses.set(item.id, value);
             remember({ type: 'probe', providerId, capability: item.capabilities.join(','), ok: true, elapsedMs: latencyMs });
             return value;
         } catch (error) {
             const latencyMs = Date.now() - started;
-            statusValue(providerId, 'error', { endpoint, latencyMs, error: safeText(error.message, 240) });
-            remember({ type: 'probe', providerId, capability: item.capabilities.join(','), ok: false, elapsedMs: latencyMs, error: error.message });
+            if (error && error.code === 'LOCAL_AI_PROBE_SUPERSEDED') throw error;
+            if (isCurrentProbe()) {
+                statuses.set(item.id, createStatusValue(providerId, 'error', {
+                    endpoint,
+                    latencyMs,
+                    error: safeText(error.message, 240),
+                    errorCode: safeText(error.code, 80),
+                    recovery: safeText(error.recovery || recoveryFor(error), 240)
+                }));
+                remember({ type: 'probe', providerId, capability: item.capabilities.join(','), ok: false, elapsedMs: latencyMs, error: error.message, errorCode: error.code });
+            }
             throw error;
+        } finally {
+            if (externalSignal) externalSignal.removeEventListener('abort', forwardAbort);
+            if (probeControllers.get(item.id) === probeController) probeControllers.delete(item.id);
         }
     }
 
-    function modelPinKey(providerId, modelId) { return `${safeText(providerId, 40)}:${safeText(modelId, 160)}`; }
+    function scopedModelPinKey(providerId, modelId, endpointOverride) {
+        const item = provider(providerId);
+        const endpoint = normalizeEndpoint(endpointOverride || settings && settings.endpoints && settings.endpoints[item.id], item.defaultEndpoint);
+        return `v2|${safeText(item.id, 40)}|${hashToken(endpoint)}|${safeText(modelId, 160)}`;
+    }
 
-    function pinModel(providerId, modelId, digest) {
+    function pinModel(providerId, modelId, digest, endpointOverride) {
         const normalized = normalizeDigest(digest);
         if (!normalized) throw new Error('이 제공자는 검증 가능한 모델 digest를 제공하지 않습니다.');
-        const pins = Object.assign({}, settings.modelPins, { [modelPinKey(providerId, modelId)]: normalized });
+        const pins = Object.assign({}, settings.modelPins, { [scopedModelPinKey(providerId, modelId, endpointOverride)]: normalized });
         configure({ modelPins: pins });
         return normalized;
     }
 
-    function unpinModel(providerId, modelId) {
+    function unpinModel(providerId, modelId, endpointOverride) {
         const pins = Object.assign({}, settings.modelPins);
-        const key = modelPinKey(providerId, modelId);
+        const key = scopedModelPinKey(providerId, modelId, endpointOverride);
         const existed = Object.prototype.hasOwnProperty.call(pins, key);
         delete pins[key];
         configure({ modelPins: pins });
         return existed;
     }
 
-    function getModelPin(providerId, modelId) { return settings.modelPins[modelPinKey(providerId, modelId)] || ''; }
-
-    function currentModel(providerId, modelId) {
-        const status = statuses.get(providerId);
-        return status && Array.isArray(status.models) ? status.models.find(model => model.id === modelId || model.name === modelId) || null : null;
+    function getModelPin(providerId, modelId, endpointOverride) {
+        return settings.modelPins[scopedModelPinKey(providerId, modelId, endpointOverride)] || '';
     }
 
-    function verifyModelPin(providerId, modelId) {
-        const expected = getModelPin(providerId, modelId);
-        const model = currentModel(providerId, modelId);
+    function hasOtherEndpointPin(providerId, modelId, endpointOverride) {
+        const currentKey = scopedModelPinKey(providerId, modelId, endpointOverride);
+        const prefix = `v2|${safeText(providerId, 40)}|`;
+        const suffix = `|${safeText(modelId, 160)}`;
+        return Object.keys(settings.modelPins).some(key => key !== currentKey && key.startsWith(prefix) && key.endsWith(suffix));
+    }
+
+    function currentModel(providerId, modelId, endpointOverride) {
+        const status = statuses.get(providerId);
+        const expectedEndpointToken = hashToken(endpointFor(providerId, endpointOverride));
+        if (!status || status.state !== 'ready' || status.endpointToken !== expectedEndpointToken) return null;
+        return Array.isArray(status.models) ? status.models.find(model => model.id === modelId || model.name === modelId) || null : null;
+    }
+
+    function verifyModelPin(providerId, modelId, endpointOverride) {
+        const expected = getModelPin(providerId, modelId, endpointOverride);
+        const status = statuses.get(providerId);
+        const expectedEndpointToken = hashToken(endpointFor(providerId, endpointOverride));
+        const endpointCurrent = Boolean(status && status.state === 'ready' && status.endpointToken === expectedEndpointToken);
+        const model = endpointCurrent ? currentModel(providerId, modelId, endpointOverride) : null;
         const actual = normalizeDigest(model && model.digest);
-        if (!expected) return Object.freeze({ state: actual ? 'unpinned' : 'unsupported', expected: '', actual });
+        if (!expected) {
+            if (actual) return Object.freeze({ state: 'unpinned', expected: '', actual });
+            if (endpointCurrent) return Object.freeze({ state: 'unsupported', expected: '', actual: '' });
+            return Object.freeze({ state: hasOtherEndpointPin(providerId, modelId, endpointOverride) ? 'stale' : 'unchecked', expected: '', actual: '' });
+        }
+        if (!endpointCurrent) return Object.freeze({ state: 'stale', expected, actual: '' });
         if (!actual) return Object.freeze({ state: 'unverified', expected, actual: '' });
         return Object.freeze({ state: expected === actual ? 'verified' : 'mismatch', expected, actual });
+    }
+
+    function modelIntegrityError(pin) {
+        const error = new Error(pin.state === 'mismatch'
+            ? '고정한 모델 digest와 현재 모델이 다릅니다. 연결을 다시 확인하고 명시적으로 재고정하세요.'
+            : pin.state === 'stale'
+                ? '로컬 AI 주소가 변경되어 고정 모델을 다시 확인해야 합니다. 연결 확인 후 생성하세요.'
+                : '고정한 모델 digest를 현재 서버에서 확인할 수 없습니다. 연결 확인 후 다시 시도하세요.');
+        error.code = pin.state === 'mismatch' ? 'LOCAL_AI_MODEL_PIN_MISMATCH' : 'LOCAL_AI_MODEL_RECHECK_REQUIRED';
+        error.recovery = recoveryFor(error);
+        return error;
     }
 
     function parseStructuredContent(value) {
@@ -384,58 +564,76 @@
         const schema = input && input.schema && typeof input.schema === 'object' ? input.schema : null;
         if (!prompt) throw new Error('AI 카피 생성을 위한 입력이 없습니다.');
         if (!model) throw new Error('사용할 로컬 모델을 선택하세요.');
-        if (schema && JSON.stringify(schema).length > maxSchemaChars) throw new Error('구조화 출력 스키마가 너무 큽니다.');
+        if (schema) {
+            let schemaText = '';
+            try { schemaText = JSON.stringify(schema); }
+            catch (_) { throw new Error('구조화 출력 스키마는 순환 참조 없이 JSON으로 직렬화할 수 있어야 합니다.'); }
+            if (schemaText.length > maxSchemaChars) throw new Error('구조화 출력 스키마가 너무 큽니다.');
+        }
         return { prompt, system, model, schema };
     }
 
     async function generateStructured(providerId, input) {
-        const item = provider(providerId);
-        if (!item.capabilities.includes('creative')) throw new Error('선택한 제공자는 카피 생성을 지원하지 않습니다.');
-        const endpoint = endpointFor(providerId, input && input.endpoint);
-        const normalized = assertCreativeInput(input);
-        const pin = verifyModelPin(providerId, normalized.model);
-        if (pin.state === 'mismatch') throw new Error('고정한 모델 digest와 현재 모델이 다릅니다. 연결을 다시 확인하고 명시적으로 재고정하세요.');
         const started = Date.now();
-        let result;
-        if (item.transport === 'ollama') {
-            result = await request(endpoint, '/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                body: JSON.stringify({ model: normalized.model, prompt: normalized.prompt, system: normalized.system, stream: false, format: normalized.schema || 'json', options: { temperature: safeNumber(input && input.temperature, 0.25, 0, 2), num_predict: safeNumber(input && input.maxTokens, 600, 64, 4096) } })
-            }, { signal: input && input.signal, timeoutMs: input && input.timeoutMs });
-            if (!result.response.ok) throw responseError(result, 'Ollama 생성 요청에 실패했습니다.');
-        } else {
-            const schemaName = safeText(input && input.schemaName || 'shorts_output', 60).replace(/[^a-zA-Z0-9_-]/g, '_') || 'shorts_output';
-            const baseBody = {
-                model: normalized.model,
-                messages: [{ role: 'system', content: normalized.system }, { role: 'user', content: normalized.prompt }],
-                stream: false,
-                temperature: safeNumber(input && input.temperature, 0.25, 0, 2),
-                max_tokens: safeNumber(input && input.maxTokens, 600, 64, 4096)
-            };
-            const schemaFormat = item.id === 'llamacpp'
-                ? { type: 'json_schema', schema: normalized.schema }
-                : { type: 'json_schema', json_schema: { name: schemaName, strict: true, schema: normalized.schema } };
-            const strictBody = Object.assign({}, baseBody, normalized.schema ? { response_format: schemaFormat } : { response_format: { type: 'json_object' } });
-            result = await request(endpoint, '/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(strictBody) }, { signal: input && input.signal, timeoutMs: input && input.timeoutMs });
-            if (!result.response.ok && result.response.status === 400 && normalized.schema) {
-                result = await request(endpoint, '/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(Object.assign({}, baseBody, { response_format: { type: 'json_object' } })) }, { signal: input && input.signal, timeoutMs: input && input.timeoutMs });
+        let modelToken = '';
+        try {
+            const item = provider(providerId);
+            if (!item.capabilities.includes('creative')) throw new Error('선택한 제공자는 카피 생성을 지원하지 않습니다.');
+            const endpoint = endpointFor(providerId, input && input.endpoint);
+            const normalized = assertCreativeInput(input);
+            modelToken = hashToken(normalized.model);
+            const pin = verifyModelPin(providerId, normalized.model, endpoint);
+            if (['mismatch', 'stale', 'unverified'].includes(pin.state)) throw modelIntegrityError(pin);
+            const timeoutBudget = createTimeoutBudget(input && input.timeoutMs, requestTimeoutMs);
+            let result;
+            if (item.transport === 'ollama') {
+                result = await request(endpoint, '/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    body: JSON.stringify({ model: normalized.model, prompt: normalized.prompt, system: normalized.system, stream: false, format: normalized.schema || 'json', options: { temperature: safeNumber(input && input.temperature, 0.25, 0, 2), num_predict: safeNumber(input && input.maxTokens, 600, 64, 4096) } })
+                }, { signal: input && input.signal, timeoutMs: timeoutBudget.remaining() });
+                if (!result.response.ok) throw responseError(result, 'Ollama 생성 요청에 실패했습니다.');
+            } else {
+                const schemaName = safeText(input && input.schemaName || 'shorts_output', 60).replace(/[^a-zA-Z0-9_-]/g, '_') || 'shorts_output';
+                const baseBody = {
+                    model: normalized.model,
+                    messages: [{ role: 'system', content: normalized.system }, { role: 'user', content: normalized.prompt }],
+                    stream: false,
+                    temperature: safeNumber(input && input.temperature, 0.25, 0, 2),
+                    max_tokens: safeNumber(input && input.maxTokens, 600, 64, 4096)
+                };
+                const schemaFormat = item.id === 'llamacpp'
+                    ? { type: 'json_schema', schema: normalized.schema }
+                    : { type: 'json_schema', json_schema: { name: schemaName, strict: true, schema: normalized.schema } };
+                const strictBody = Object.assign({}, baseBody, normalized.schema ? { response_format: schemaFormat } : { response_format: { type: 'json_object' } });
+                result = await request(endpoint, '/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(strictBody) }, { signal: input && input.signal, timeoutMs: timeoutBudget.remaining() });
+                if (!result.response.ok && result.response.status === 400 && normalized.schema) {
+                    result = await request(endpoint, '/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(Object.assign({}, baseBody, { response_format: { type: 'json_object' } })) }, { signal: input && input.signal, timeoutMs: timeoutBudget.remaining() });
+                }
+                if (!result.response.ok) throw responseError(result, 'OpenAI 호환 생성 요청에 실패했습니다.');
             }
-            if (!result.response.ok) throw responseError(result, 'OpenAI 호환 생성 요청에 실패했습니다.');
+            const content = item.transport === 'ollama' ? result.data && result.data.response : result.data && result.data.choices && result.data.choices[0] && result.data.choices[0].message && result.data.choices[0].message.content;
+            const output = parseStructuredContent(content);
+            if (!output || Array.isArray(output) || typeof output !== 'object') throw new Error('로컬 AI 구조화 출력 형식이 올바르지 않습니다.');
+            const elapsedMs = Date.now() - started;
+            remember({ type: 'generate', providerId, capability: 'creative', modelToken, ok: true, elapsedMs });
+            return Object.freeze({ output, providerId, model: normalized.model, modelToken, elapsedMs, pin: verifyModelPin(providerId, normalized.model, endpoint) });
+        } catch (error) {
+            remember({ type: 'generate', providerId, capability: 'creative', modelToken, ok: false, elapsedMs: Date.now() - started, error: error && error.message, errorCode: error && error.code });
+            throw error;
         }
-        const content = item.transport === 'ollama' ? result.data && result.data.response : result.data && result.data.choices && result.data.choices[0] && result.data.choices[0].message && result.data.choices[0].message.content;
-        const output = parseStructuredContent(content);
-        if (!output || Array.isArray(output) || typeof output !== 'object') throw new Error('로컬 AI 구조화 출력 형식이 올바르지 않습니다.');
-        const elapsedMs = Date.now() - started;
-        remember({ type: 'generate', providerId, capability: 'creative', modelToken: hashToken(normalized.model), ok: true, elapsedMs });
-        return Object.freeze({ output, providerId, model: normalized.model, modelToken: hashToken(normalized.model), elapsedMs, pin: verifyModelPin(providerId, normalized.model) });
     }
 
     function parseTimestamp(value) {
-        if (Number.isFinite(Number(value))) return Math.max(0, Number(value));
-        const text = String(value || '').trim().replace(',', '.');
+        if (value == null) return null;
+        const text = String(value).trim().replace(',', '.');
+        if (!text) return null;
+        if (!text.includes(':')) {
+            const numeric = Number(text);
+            return Number.isFinite(numeric) ? Math.max(0, numeric) : null;
+        }
         const parts = text.split(':').map(Number);
-        if (!parts.length || parts.some(part => !Number.isFinite(part))) return 0;
+        if (!parts.length || parts.length > 3 || parts.some(part => !Number.isFinite(part))) return null;
         if (parts.length === 3) return Math.max(0, parts[0] * 3600 + parts[1] * 60 + parts[2]);
         if (parts.length === 2) return Math.max(0, parts[0] * 60 + parts[1]);
         return Math.max(0, parts[0]);
@@ -443,14 +641,15 @@
 
     function normalizeSegments(data) {
         const source = Array.isArray(data && data.segments) ? data.segments : Array.isArray(data && data.transcription) ? data.transcription : [];
-        return source.slice(0, Number(config.MAX_CAPTION_CUES || 5000)).map((segment, index) => {
+        return source.slice(0, maxCaptionCues).map((segment, index) => {
             const timestamps = segment && segment.timestamps || {};
             const offsets = segment && segment.offsets || {};
             let start = parseTimestamp(segment && (segment.start != null ? segment.start : timestamps.from));
             let end = parseTimestamp(segment && (segment.end != null ? segment.end : timestamps.to));
-            if (!start && Number.isFinite(Number(offsets.from))) start = Math.max(0, Number(offsets.from) / 1000);
-            if (!end && Number.isFinite(Number(offsets.to))) end = Math.max(start, Number(offsets.to) / 1000);
-            if (end <= start) end = start + 2.5;
+            if (start == null && Number.isFinite(Number(offsets.from))) start = Math.max(0, Number(offsets.from) / 1000);
+            if (start == null) start = 0;
+            if (end == null && Number.isFinite(Number(offsets.to))) end = Math.max(start, Number(offsets.to) / 1000);
+            if (end == null || end <= start) end = start + 2.5;
             return Object.freeze({ index: index + 1, start, end, text: safeText(segment && segment.text, 1000), speaker: safeText(segment && (segment.speaker || segment.speaker_id || segment.speakerLabel), 40) });
         }).filter(segment => segment.text);
     }
@@ -469,55 +668,92 @@
     }
 
     async function transcribe(providerId, file, input) {
-        const item = provider(providerId);
-        if (!item.capabilities.includes('speech')) throw new Error('선택한 제공자는 음성 전사를 지원하지 않습니다.');
-        if (!file || typeof file.size !== 'number') throw new Error('전사할 미디어 파일이 없습니다.');
-        const maxBytes = Math.max(1024 * 1024, Number(config.LOCAL_AI_MAX_TRANSCRIPTION_BYTES || 512 * 1024 * 1024));
-        if (file.size > maxBytes) throw new Error(`로컬 전사 파일은 ${Math.round(maxBytes / 1024 / 1024)}MB 이하만 지원합니다.`);
-        const endpoint = endpointFor(providerId, input && input.endpoint);
-        const language = safeText(input && input.language, 12);
-        const model = safeText(input && input.model || settings.speechModel || 'whisper', 160);
         const started = Date.now();
-        let result;
-        if (item.id === 'whispercpp') {
-            const form = new FormData();
-            form.append('file', file, safeText(file.name || 'media', 180));
-            form.append('response_format', 'json');
-            form.append('temperature', '0.0');
-            if (language && language !== 'auto') form.append('language', language);
-            result = await request(endpoint, '/inference', { method: 'POST', body: form, headers: { Accept: 'application/json' } }, { signal: input && input.signal, timeoutMs: input && input.timeoutMs || 15 * 60 * 1000, maxBytes: 8 * 1024 * 1024 });
-            if (!result.response.ok && [404, 405].includes(result.response.status)) result = null;
-            else if (!result.response.ok) throw responseError(result, 'whisper.cpp 전사 요청에 실패했습니다.');
+        let modelToken = '';
+        try {
+            const item = provider(providerId);
+            if (!item.capabilities.includes('speech')) throw new Error('선택한 제공자는 음성 전사를 지원하지 않습니다.');
+            if (!file || typeof file.size !== 'number' || !Number.isFinite(file.size) || file.size < 0) throw new Error('전사할 미디어 파일이 없습니다.');
+            if (file.size > maxTranscriptionBytes) throw new Error(`로컬 전사 파일은 ${Math.round(maxTranscriptionBytes / 1024 / 1024)}MB 이하만 지원합니다.`);
+            const endpoint = endpointFor(providerId, input && input.endpoint);
+            const language = safeText(input && input.language, 12);
+            const model = safeText(input && input.model || settings.speechModel || 'whisper', 160);
+            modelToken = hashToken(model);
+            const timeoutBudget = createTimeoutBudget(input && input.timeoutMs, 15 * 60 * 1000);
+            let result;
+            if (item.id === 'whispercpp') {
+                const form = new FormData();
+                form.append('file', file, safeText(file.name || 'media', 180));
+                form.append('response_format', 'json');
+                form.append('temperature', '0.0');
+                if (language && language !== 'auto') form.append('language', language);
+                result = await request(endpoint, '/inference', { method: 'POST', body: form, headers: { Accept: 'application/json' } }, { signal: input && input.signal, timeoutMs: timeoutBudget.remaining(), maxBytes: 8 * 1024 * 1024 });
+                if (!result.response.ok && [404, 405].includes(result.response.status)) result = null;
+                else if (!result.response.ok) throw responseError(result, 'whisper.cpp 전사 요청에 실패했습니다.');
+            }
+            if (!result) {
+                const form = new FormData();
+                form.append('file', file, safeText(file.name || 'media', 180));
+                form.append('model', model || 'whisper');
+                form.append('response_format', 'verbose_json');
+                form.append('timestamp_granularities[]', 'segment');
+                if (language && language !== 'auto') form.append('language', language);
+                result = await request(endpoint, '/v1/audio/transcriptions', { method: 'POST', body: form, headers: { Accept: 'application/json' } }, { signal: input && input.signal, timeoutMs: timeoutBudget.remaining(), maxBytes: 8 * 1024 * 1024 });
+                if (!result.response.ok) throw responseError(result, '로컬 음성 전사 요청에 실패했습니다.');
+            }
+            const data = result.data && typeof result.data === 'object' ? result.data : { text: result.text };
+            const segments = normalizeSegments(data);
+            const text = safeText(data.text || segments.map(segment => segment.text).join(' '), maxCaptionTextChars);
+            if (!text && !segments.length) throw new Error('로컬 전사 결과에 텍스트가 없습니다.');
+            const elapsedMs = Date.now() - started;
+            remember({ type: 'transcribe', providerId, capability: 'speech', modelToken, ok: true, elapsedMs });
+            return Object.freeze({ text, segments: Object.freeze(segments), srt: segments.length ? segmentsToSrt(segments) : '', language: safeText(data.language || data.detected_language || language || 'auto', 20), elapsedMs, providerId, modelToken });
+        } catch (error) {
+            remember({ type: 'transcribe', providerId, capability: 'speech', modelToken, ok: false, elapsedMs: Date.now() - started, error: error && error.message, errorCode: error && error.code });
+            throw error;
         }
-        if (!result) {
-            const form = new FormData();
-            form.append('file', file, safeText(file.name || 'media', 180));
-            form.append('model', model || 'whisper');
-            form.append('response_format', 'verbose_json');
-            form.append('timestamp_granularities[]', 'segment');
-            if (language && language !== 'auto') form.append('language', language);
-            result = await request(endpoint, '/v1/audio/transcriptions', { method: 'POST', body: form, headers: { Accept: 'application/json' } }, { signal: input && input.signal, timeoutMs: input && input.timeoutMs || 15 * 60 * 1000, maxBytes: 8 * 1024 * 1024 });
-            if (!result.response.ok) throw responseError(result, '로컬 음성 전사 요청에 실패했습니다.');
-        }
-        const data = result.data && typeof result.data === 'object' ? result.data : { text: result.text };
-        const segments = normalizeSegments(data);
-        const text = safeText(data.text || segments.map(segment => segment.text).join(' '), Number(config.MAX_CAPTION_TEXT_CHARS || 1000000));
-        if (!text && !segments.length) throw new Error('로컬 전사 결과에 텍스트가 없습니다.');
-        const elapsedMs = Date.now() - started;
-        remember({ type: 'transcribe', providerId, capability: 'speech', modelToken: hashToken(model), ok: true, elapsedMs });
-        return Object.freeze({ text, segments: Object.freeze(segments), srt: segments.length ? segmentsToSrt(segments) : '', language: safeText(data.language || data.detected_language || language || 'auto', 20), elapsedMs, providerId, modelToken: hashToken(model) });
     }
 
     function listProviders(capability) {
-        return Object.values(PROVIDERS).filter(item => !capability || item.capabilities.includes(capability)).map(item => Object.freeze({ id: item.id, label: item.label, defaultEndpoint: item.defaultEndpoint, capabilities: item.capabilities.slice() }));
+        return Object.values(PROVIDERS).filter(item => !capability || item.capabilities.includes(capability)).map(item => Object.freeze({ id: item.id, label: item.label, defaultEndpoint: item.defaultEndpoint, capabilities: Object.freeze(item.capabilities.slice()) }));
+    }
+
+    function idleStatus(providerId) {
+        const item = provider(providerId);
+        return Object.freeze({
+            providerId: item.id,
+            label: item.label,
+            state: 'idle',
+            endpointToken: hashToken(endpointFor(item.id)),
+            checkedAt: '',
+            latencyMs: 0,
+            capabilities: Object.freeze(item.capabilities.slice()),
+            models: Object.freeze([]),
+            error: '',
+            errorCode: '',
+            recovery: ''
+        });
     }
 
     function snapshot() {
         return Object.freeze({
-            providers: Object.freeze(Object.fromEntries(Object.keys(PROVIDERS).map(id => [id, statuses.get(id) || Object.freeze({ providerId: id, state: 'idle', endpointToken: hashToken(endpointFor(id)), checkedAt: '', latencyMs: 0, capabilities: PROVIDERS[id].capabilities.slice(), models: [], error: '' })]))),
+            providers: Object.freeze(Object.fromEntries(Object.keys(PROVIDERS).map(id => [id, statuses.get(id) || idleStatus(id)]))),
             settings: Object.freeze({ creativeProviderId: settings.creativeProviderId, speechProviderId: settings.speechProviderId, creativeModelToken: hashToken(settings.creativeModel), speechModelToken: hashToken(settings.speechModel), language: settings.language, includeCaptions: settings.includeCaptions, autoApplyTranscript: settings.autoApplyTranscript, pinnedModelCount: Object.keys(settings.modelPins).length }),
             history: Object.freeze(history.slice()),
-            policy: Object.freeze({ loopbackOnly: !config.LOCAL_AI_ALLOW_REMOTE_ENDPOINTS, credentials: 'omit', maxResponseBytes, maxPromptChars })
+            policy: Object.freeze({
+                loopbackOnly: !config.LOCAL_AI_ALLOW_REMOTE_ENDPOINTS,
+                credentials: 'omit',
+                referrerPolicy: 'no-referrer',
+                redirects: 'blocked',
+                requestTimeoutMs,
+                maxResponseBytes,
+                maxPromptChars,
+                maxSchemaChars,
+                maxTranscriptionBytes,
+                maxCaptionCues,
+                maxCaptionTextChars,
+                modelPinScope: 'endpoint'
+            })
         });
     }
 

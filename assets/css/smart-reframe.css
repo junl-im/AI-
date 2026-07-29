@@ -1126,7 +1126,7 @@
 @media (max-width: 760px) { .speaker-grid-manual-pages-field { grid-column: auto; } }
 
 
-/* v1.6.32 stable energy paging, directional easing, and manual page ordering */
+/* v1.6.33 stable energy paging, directional easing, and manual page ordering */
 .speaker-grid-manual-page-editor { display: grid; gap: 6px; margin-top: 8px; }
 .speaker-grid-manual-page-editor > small { color: #94a3b8; line-height: 1.45; }
 .speaker-grid-manual-page-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 7px 8px; border: 1px solid rgba(148, 163, 184, 0.22); border-radius: 9px; background: rgba(2, 6, 23, 0.48); color: #dbeafe; font-size: 0.7rem; }
@@ -1139,7 +1139,7 @@
 @media (max-width: 760px) { .speaker-grid-manual-page-card { grid-template-columns: auto minmax(0, 1fr); } .speaker-grid-manual-page-actions { grid-column: 1 / -1; justify-content: flex-end; } }
 
 
-/* v1.6.32 per-page manual timing, subject ordering, and energy hold diagnostics */
+/* v1.6.33 per-page manual timing, subject ordering, and energy hold diagnostics */
 .speaker-grid-manual-page-content { min-width: 0; display: grid; gap: 7px; }
 .speaker-grid-manual-page-content > strong { color: #e0f2fe; font-size: .74rem; }
 .speaker-grid-manual-page-duration { display: inline-flex; align-items: center; gap: 7px; color: #94a3b8; }

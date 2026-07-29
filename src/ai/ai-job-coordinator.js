@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.20 - bounded serial local AI job queue with cancellation and redacted history
+// AI Shorts Studio v1.6.39 - reentrancy-safe serial local AI queue with enforced cancellation and detached history
 'use strict';
 
 (function exposeAIJobCoordinator(global) {
@@ -6,8 +6,12 @@
     const queue = [];
     const history = [];
     const listeners = new Set();
-    const queueLimit = Math.max(1, Math.min(20, Number(config.LOCAL_AI_QUEUE_LIMIT || 6)));
-    const historyLimit = Math.max(5, Math.min(100, Number(config.LOCAL_AI_JOB_HISTORY_LIMIT || 20)));
+    function boundedNumber(value, fallback, min, max) {
+        const number = Number(value);
+        return Math.max(min, Math.min(max, Number.isFinite(number) ? number : fallback));
+    }
+    const queueLimit = Math.round(boundedNumber(config.LOCAL_AI_QUEUE_LIMIT, 6, 1, 20));
+    const historyLimit = Math.round(boundedNumber(config.LOCAL_AI_JOB_HISTORY_LIMIT, 20, 5, 100));
     let active = null;
     let sequence = 0;
 
@@ -79,9 +83,56 @@
         if (global.document) global.document.dispatchEvent(new CustomEvent('ai-shorts-local-ai-job-sync', { detail: value }));
     }
 
+    function toHistoryRecord(job) {
+        return Object.freeze({
+            id: job.id,
+            kind: job.kind,
+            state: job.state,
+            progress: job.progress,
+            message: job.message,
+            createdAt: job.createdAt,
+            startedAt: job.startedAt || '',
+            endedAt: job.endedAt || '',
+            elapsedMs: job.elapsedMs || 0,
+            meta: job.meta,
+            error: job.error || ''
+        });
+    }
+
     function remember(job) {
-        history.unshift(job);
+        history.unshift(toHistoryRecord(job));
         if (history.length > historyLimit) history.splice(historyLimit);
+    }
+
+    function releaseJob(job) {
+        job.executor = null;
+        job.resolve = null;
+        job.reject = null;
+        job.controller = null;
+    }
+
+    function signalError(job, signal) {
+        const reason = signal && signal.reason;
+        if (reason instanceof Error) return reason;
+        if (reason && typeof reason === 'object' && reason.name) return reason;
+        return job.timedOut ? timeoutError(reason) : abortError(reason);
+    }
+
+    function runExecutor(job, report) {
+        const signal = job.controller.signal;
+        if (signal.aborted) return Promise.reject(signalError(job, signal));
+        let onAbort = null;
+        const aborted = new Promise((resolve, reject) => {
+            onAbort = () => reject(signalError(job, signal));
+            signal.addEventListener('abort', onAbort, { once: true });
+        });
+        const execution = Promise.resolve().then(() => {
+            if (signal.aborted) throw signalError(job, signal);
+            return job.executor(Object.freeze({ signal, report, jobId: job.id }));
+        });
+        return Promise.race([execution, aborted]).finally(() => {
+            if (onAbort) signal.removeEventListener('abort', onAbort);
+        });
     }
 
     function settle(job, state, error) {
@@ -106,30 +157,35 @@
         job.startedAtMs = Date.now();
         job.message = '시작 중';
         emit();
-        const timeoutMs = Math.max(1000, Math.min(30 * 60 * 1000, Number(job.timeoutMs || config.LOCAL_AI_REQUEST_TIMEOUT_MS || 120000)));
+        const configuredTimeout = job.timeoutMs == null ? config.LOCAL_AI_REQUEST_TIMEOUT_MS : job.timeoutMs;
+        const timeoutMs = boundedNumber(configuredTimeout, 120000, 1000, 30 * 60 * 1000);
         const timer = global.setTimeout(() => {
             job.timedOut = true;
             job.controller.abort(timeoutError());
         }, timeoutMs);
         const report = (progress, message) => {
             if (active !== job || job.state !== 'running') return false;
-            job.progress = Math.max(0, Math.min(99, Number(progress) || 0));
+            job.progress = boundedNumber(progress, 0, 0, 99);
             if (message) job.message = safeText(message, 160);
             emit();
             return true;
         };
         try {
-            const result = await job.executor(Object.freeze({ signal: job.controller.signal, report, jobId: job.id }));
+            const result = await runExecutor(job, report);
             global.clearTimeout(timer);
+            const resolveJob = job.resolve;
             settle(job, 'completed');
-            job.resolve(result);
+            releaseJob(job);
+            resolveJob(result);
         } catch (error) {
             global.clearTimeout(timer);
             const timedOut = Boolean(job.timedOut || error && (error.name === 'TimeoutError' || error.code === 'LOCAL_AI_JOB_TIMEOUT' || error.code === 'LOCAL_AI_TIMEOUT'));
             const cancelled = !timedOut && Boolean(job.controller.signal.aborted || error && error.name === 'AbortError');
             const finalError = timedOut ? timeoutError(error && error.message) : cancelled ? abortError(error && error.message) : error;
+            const rejectJob = job.reject;
             settle(job, cancelled ? 'cancelled' : 'failed', finalError);
-            job.reject(finalError);
+            releaseJob(job);
+            rejectJob(finalError);
         }
     }
 
@@ -185,12 +241,14 @@
     }
 
     function settleQueuedCancellation(job, reason) {
+        const rejectJob = job.reject;
         job.state = 'cancelled';
         job.endedAt = now();
         job.message = '대기 중 취소됨';
         job.error = safeText(reason || '사용자가 대기 작업을 취소했습니다.', 300);
         remember(job);
-        job.reject(abortError(job.error));
+        releaseJob(job);
+        rejectJob(abortError(job.error));
         emit();
     }
 

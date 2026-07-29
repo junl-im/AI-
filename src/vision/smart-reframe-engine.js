@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.32 - per-page speaker timing, in-page ordering, and live energy hold diagnostics
+// AI Shorts Studio v1.6.34 - resilient page timing, bounded transitions, and stable energy diagnostics
 'use strict';
 
 (function exposeSmartReframeEngine(global) {
@@ -149,8 +149,43 @@
 
     function safeGridManualPageSeconds(items, pages, fallback) {
         const source = Array.isArray(items) ? items : [];
-        const defaultSeconds = Number(clamp(fallback == null ? 3 : fallback, 1, 10).toFixed(1));
-        return Object.freeze((Array.isArray(pages) ? pages : []).map((_, index) => Number(clamp(source[index] == null ? defaultSeconds : source[index], 1, 10).toFixed(1))));
+        const fallbackValue = finite(fallback, 3);
+        const defaultSeconds = Number(clamp(fallbackValue, 1, 10).toFixed(1));
+        return Object.freeze((Array.isArray(pages) ? pages : []).map((_, index) => {
+            const candidate = source[index];
+            const seconds = candidate == null || candidate === '' ? defaultSeconds : finite(candidate, defaultSeconds);
+            return Number(clamp(seconds, 1, 10).toFixed(1));
+        }));
+    }
+
+    function speakerPageExactIdentity(page) {
+        return (Array.isArray(page) ? page : []).join('|');
+    }
+
+    function speakerPageSetIdentity(page) {
+        return (Array.isArray(page) ? page : []).slice().sort().join('|');
+    }
+
+    function alignGridManualPageSeconds(previousPagesInput, previousSecondsInput, nextPagesInput, fallbackInput) {
+        const previousPages = safeGridManualPages(previousPagesInput);
+        const nextPages = safeGridManualPages(nextPagesInput);
+        const fallback = Number(clamp(finite(fallbackInput, 3), 1, 10).toFixed(1));
+        const previousSeconds = safeGridManualPageSeconds(previousSecondsInput, previousPages, fallback);
+        const records = previousPages.map((page, index) => ({
+            exact: speakerPageExactIdentity(page),
+            set: speakerPageSetIdentity(page),
+            seconds: previousSeconds[index],
+            used: false
+        }));
+        return Object.freeze(nextPages.map(page => {
+            const exact = speakerPageExactIdentity(page);
+            const set = speakerPageSetIdentity(page);
+            let match = records.find(record => !record.used && record.exact === exact);
+            if (!match) match = records.find(record => !record.used && record.set === set);
+            if (!match) return fallback;
+            match.used = true;
+            return match.seconds;
+        }));
     }
 
     function safeSpeakerLayout(value) {
@@ -1060,11 +1095,17 @@
         return progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
     }
 
+    function transitionWindowSeconds(layout, pageSeconds) {
+        const seconds = Math.max(1, finite(pageSeconds, layout.gridPageSeconds));
+        const requested = Math.max(0.12, finite(layout.gridTransitionMs, 320) / 1000);
+        return Math.min(requested, Math.max(0.12, seconds * 0.5));
+    }
+
     function transitionProgress(target, layout, pageSeconds) {
         if (layout.gridTransition === 'none') return 1;
         const seconds = Math.max(1, finite(pageSeconds, layout.gridPageSeconds));
         const elapsed = Math.max(0, finite(target, 0)) % seconds;
-        const raw = clamp(elapsed / Math.max(0.12, layout.gridTransitionMs / 1000), 0, 1);
+        const raw = clamp(elapsed / transitionWindowSeconds(layout, seconds), 0, 1);
         return Number(easeTransitionProgress(raw, layout.gridTransitionEasing).toFixed(4));
     }
 
@@ -1360,6 +1401,7 @@
         resolveCropRect,
         scoreRange,
         getStatus,
-        _test: Object.freeze({ smoothPoints, normalizeDetection, choosePrimary, buildTrack, assignSubjects, composeSubjectPoints, getPointAtArray, sceneIndexAt, normalizeSpeakerCues, normalizeKeyframes, safeKeyframe, safeSpeakerLayout, safeGridCrop, safeGridManualPages, safeGridManualPageSeconds, manualPageAt, easeTransitionProgress, stableEnergySubjects, pagedGridFocuses })
+        alignGridManualPageSeconds,
+        _test: Object.freeze({ smoothPoints, normalizeDetection, choosePrimary, buildTrack, assignSubjects, composeSubjectPoints, getPointAtArray, sceneIndexAt, normalizeSpeakerCues, normalizeKeyframes, safeKeyframe, safeSpeakerLayout, safeGridCrop, safeGridManualPages, safeGridManualPageSeconds, alignGridManualPageSeconds, manualPageAt, easeTransitionProgress, transitionWindowSeconds, transitionProgress, stableEnergySubjects, pagedGridFocuses })
     });
 })(window);

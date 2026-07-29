@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.20 - local AI connection, creative copy, transcription, and model integrity UI
+// AI Shorts Studio v1.6.39 - endpoint-scoped model pin controls and stale-safe local AI UI
 'use strict';
 
 (function exposeLocalAIStudio(global) {
@@ -10,6 +10,7 @@
     let lastCreativeResult = null;
     let lastTranscriptResult = null;
     let unsubscribe = null;
+    const probeUiSequences = { creative: 0, speech: 0 };
 
     function byId(id) { return document.getElementById(id); }
 
@@ -70,11 +71,19 @@
         }));
     }
 
+    function errorMessage(error, fallback) {
+        const message = safeText(error && error.message || fallback || '로컬 AI 요청에 실패했습니다.', 220);
+        const recovery = safeText(error && error.recovery, 220);
+        return recovery && !message.includes(recovery) ? `${message} · ${recovery}` : message;
+    }
+
     function statusLabel(status) {
         if (!status || status.state === 'idle') return '연결 확인 전';
         if (status.state === 'checking') return '연결 확인 중';
         if (status.state === 'ready') return `연결됨 · ${formatElapsed(status.latencyMs)}`;
-        return `연결 실패 · ${safeText(status.error, 100)}`;
+        const message = safeText(status.error, 100) || '서버에 연결하지 못했습니다.';
+        const recovery = safeText(status.recovery, 140);
+        return `연결 실패 · ${message}${recovery ? ` · ${recovery}` : ''}`;
     }
 
     function renderProviderStatus(capability, status) {
@@ -82,6 +91,7 @@
         if (!target) return;
         target.textContent = statusLabel(status);
         target.dataset.state = status && status.state || 'idle';
+        target.title = status && status.recovery ? safeText(status.recovery, 240) : '';
     }
 
     function renderModels(status, preferred) {
@@ -120,21 +130,31 @@
     function renderPinStatus() {
         const providerId = selectedProvider('creative');
         const model = els.creativeModelSelect && els.creativeModelSelect.value || '';
-        const pin = providers.verifyModelPin ? providers.verifyModelPin(providerId, model) : { state: 'unsupported' };
+        const endpoint = els.creativeEndpointInput && els.creativeEndpointInput.value || '';
+        const pin = providers.verifyModelPin ? providers.verifyModelPin(providerId, model, endpoint) : { state: 'unsupported' };
         if (els.modelPinStatus) {
             const labels = {
                 verified: '모델 digest 일치 · 안전',
                 mismatch: '모델 digest 변경 감지 · 생성 차단',
                 unpinned: '검증 가능한 digest · 아직 고정 안 함',
-                unverified: '고정값은 있으나 현재 digest 확인 불가',
+                unverified: '현재 서버에서 고정 digest 확인 불가 · 생성 차단',
+                stale: '주소 변경 감지 · 연결 재확인 필요',
+                unchecked: '현재 주소 연결 확인 전',
                 unsupported: '이 제공자는 digest를 노출하지 않음'
             };
             els.modelPinStatus.textContent = labels[pin.state] || '모델 무결성 확인 전';
             els.modelPinStatus.dataset.state = pin.state || 'unsupported';
         }
         if (els.modelPinBtn) {
-            els.modelPinBtn.disabled = !model || !currentModelDigest();
-            els.modelPinBtn.textContent = pin.state === 'verified' ? '모델 고정 해제' : pin.state === 'mismatch' ? '현재 모델로 재고정' : '모델 digest 고정';
+            const canUseCurrentDigest = ['verified', 'mismatch', 'unpinned'].includes(pin.state) && Boolean(currentModelDigest());
+            els.modelPinBtn.disabled = !model || !canUseCurrentDigest;
+            els.modelPinBtn.textContent = pin.state === 'verified'
+                ? '모델 고정 해제'
+                : pin.state === 'mismatch'
+                    ? '현재 모델로 재고정'
+                    : ['stale', 'unchecked'].includes(pin.state)
+                        ? '연결 다시 확인'
+                        : '모델 digest 고정';
         }
     }
 
@@ -149,8 +169,16 @@
         return providers.configure(patch);
     }
 
+    function invalidateProbeView(capability) {
+        if (!Object.prototype.hasOwnProperty.call(probeUiSequences, capability)) return;
+        probeUiSequences[capability] += 1;
+        renderProviderStatus(capability, { state: 'idle' });
+        if (capability === 'creative') renderPinStatus();
+    }
+
     async function probeProvider(capability) {
         const providerId = selectedProvider(capability);
+        const uiSequence = ++probeUiSequences[capability];
         let settings;
         try { settings = configureFromUI(capability); }
         catch (error) { toast(error.message, 'error'); return null; }
@@ -163,13 +191,15 @@
         }, { timeoutMs: 15000, meta: { providerId, capability, source: 'local-ai-studio' } }) : providers.probe(providerId, { endpoint });
         try {
             const status = await promise;
+            if (probeUiSequences[capability] !== uiSequence || selectedProvider(capability) !== providerId) return null;
             renderProviderStatus(capability, status);
             if (capability === 'creative') renderModels(status, settings.creativeModel);
             toast(`${status.label || providerId} 연결을 확인했습니다.`, 'success');
             return status;
         } catch (error) {
-            renderProviderStatus(capability, { state: 'error', error: error.message });
-            toast(error.message || '로컬 AI 연결 확인에 실패했습니다.', 'error');
+            if (probeUiSequences[capability] !== uiSequence || error && error.code === 'LOCAL_AI_PROBE_SUPERSEDED') return null;
+            renderProviderStatus(capability, { state: 'error', error: error.message, recovery: error.recovery });
+            toast(errorMessage(error, '로컬 AI 연결 확인에 실패했습니다.'), 'error');
             return null;
         }
     }
@@ -289,7 +319,7 @@
             if (store.addDiagnostic) store.addDiagnostic({ type: 'local-ai-creative-complete', providerId, modelToken: result.modelToken, elapsedMs: result.elapsedMs });
             return lastCreativeResult;
         } catch (error) {
-            if (error && error.name !== 'AbortError') toast(error.message || '로컬 AI 카피 생성에 실패했습니다.', 'error');
+            if (error && error.name !== 'AbortError') toast(errorMessage(error, '로컬 AI 카피 생성에 실패했습니다.'), 'error');
             return null;
         }
     }
@@ -313,10 +343,11 @@
         const providerId = selectedProvider('creative');
         const model = els.creativeModelSelect && els.creativeModelSelect.value || '';
         if (!model) return;
-        const pin = providers.verifyModelPin(providerId, model);
+        const endpoint = els.creativeEndpointInput && els.creativeEndpointInput.value || '';
+        const pin = providers.verifyModelPin(providerId, model, endpoint);
         try {
-            if (pin.state === 'verified') providers.unpinModel(providerId, model);
-            else providers.pinModel(providerId, model, currentModelDigest());
+            if (pin.state === 'verified') providers.unpinModel(providerId, model, endpoint);
+            else providers.pinModel(providerId, model, currentModelDigest(), endpoint);
             renderPinStatus();
             toast(pin.state === 'verified' ? '모델 digest 고정을 해제했습니다.' : '현재 모델 digest를 고정했습니다.', 'action');
         } catch (error) { toast(error.message, 'warning'); }
@@ -369,7 +400,7 @@
             if (store.addDiagnostic) store.addDiagnostic({ type: 'local-ai-transcription-complete', providerId, modelToken: result.modelToken, segments: result.segments.length, elapsedMs: result.elapsedMs });
             return result;
         } catch (error) {
-            if (error && error.name !== 'AbortError') toast(error.message || '로컬 음성 전사에 실패했습니다.', 'error');
+            if (error && error.name !== 'AbortError') toast(errorMessage(error, '로컬 음성 전사에 실패했습니다.'), 'error');
             return null;
         }
     }
@@ -422,8 +453,10 @@
     }
 
     function bindEvents() {
-        if (els.creativeProviderSelect) els.creativeProviderSelect.addEventListener('change', () => { applyProviderEndpoint('creative', selectedProvider('creative')); renderModels(null, ''); });
-        if (els.speechProviderSelect) els.speechProviderSelect.addEventListener('change', () => applyProviderEndpoint('speech', selectedProvider('speech')));
+        if (els.creativeProviderSelect) els.creativeProviderSelect.addEventListener('change', () => { invalidateProbeView('creative'); applyProviderEndpoint('creative', selectedProvider('creative')); renderModels(null, ''); });
+        if (els.creativeEndpointInput) els.creativeEndpointInput.addEventListener('input', () => { invalidateProbeView('creative'); renderPinStatus(); });
+        if (els.speechProviderSelect) els.speechProviderSelect.addEventListener('change', () => { invalidateProbeView('speech'); applyProviderEndpoint('speech', selectedProvider('speech')); });
+        if (els.speechEndpointInput) els.speechEndpointInput.addEventListener('input', () => invalidateProbeView('speech'));
         if (els.creativeProbeBtn) els.creativeProbeBtn.addEventListener('click', () => probeProvider('creative'));
         if (els.speechProbeBtn) els.speechProbeBtn.addEventListener('click', () => probeProvider('speech'));
         if (els.creativeModelSelect) els.creativeModelSelect.addEventListener('change', () => { providers.configure({ creativeModel: els.creativeModelSelect.value }); renderPinStatus(); });

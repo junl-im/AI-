@@ -68,6 +68,19 @@ function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
     try { await cancellable; } catch (error) { cancelObserved = error.name === 'AbortError'; }
     assert(cancelObserved && api.snapshot().history[0].state === 'cancelled', 'cancelled job rejects with AbortError and records cancelled state');
 
+    let stubbornCancelled = false;
+    const stubborn = api.submit('stubborn', async () => new Promise(() => {}), { meta: { providerId: 'ollama', capability: 'creative' } });
+    await delay(20);
+    assert(api.cancelActive('force coordinator release') === true, 'uncooperative active job accepts cancellation');
+    try {
+        await Promise.race([stubborn, delay(250).then(() => { throw new Error('stubborn cancellation did not settle'); })]);
+    } catch (error) {
+        stubbornCancelled = error.name === 'AbortError';
+    }
+    assert(stubbornCancelled && api.snapshot().active === null, 'coordinator settles cancellation even when the executor ignores AbortSignal');
+    const afterStubborn = await Promise.race([api.submit('after-stubborn', async () => 'released'), delay(250).then(() => { throw new Error('queue stayed blocked after stubborn cancellation'); })]);
+    assert(afterStubborn === 'released', 'serial queue continues after forced cancellation settlement');
+
     const queuedOne = api.submit('one', async () => { await delay(80); return 1; });
     const queuedTwo = api.submit('two', async () => 2);
     await delay(5);
@@ -79,11 +92,23 @@ function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
     assert(events.includes('ai-shorts-local-ai-job-sync'), 'job state changes dispatch a UI synchronization event');
 
     let timedOut = false;
-    const timeoutJob = api.submit('timeout', async job => new Promise((resolve, reject) => {
-        job.signal.addEventListener('abort', () => reject(job.signal.reason || new Error('timeout')), { once: true });
-    }), { timeoutMs: 1000, meta: { providerId: 'ollama', capability: 'creative' } });
+    const timeoutJob = api.submit('timeout', async () => new Promise(() => {}), { timeoutMs: 1000, meta: { providerId: 'ollama', capability: 'creative' } });
     try { await timeoutJob; } catch (error) { timedOut = error.name === 'TimeoutError' && error.code === 'LOCAL_AI_JOB_TIMEOUT'; }
-    assert(timedOut && api.snapshot().history[0].state === 'failed', 'job timeout is reported as a failure instead of a silent user cancellation');
+    assert(timedOut && api.snapshot().history[0].state === 'failed', 'job timeout settles even when the executor ignores AbortSignal');
+    assert(source.includes('history.unshift(toHistoryRecord(job))') && !source.includes('history.unshift(job)'), 'history stores detached public records instead of executor closures and promise callbacks');
+
+    const invalidWindow = {
+        setTimeout,
+        clearTimeout,
+        AIShortsRuntimeConfig: { LOCAL_AI_QUEUE_LIMIT: 'broken', LOCAL_AI_JOB_HISTORY_LIMIT: Infinity, LOCAL_AI_REQUEST_TIMEOUT_MS: 'broken' },
+        document: { dispatchEvent() {} }
+    };
+    const invalidContext = vm.createContext({ window: invalidWindow, document: invalidWindow.document, CustomEvent, AbortController, setTimeout, clearTimeout, console, Date, Error, Promise, Math, Number, String, Object, Array, Map, Set });
+    vm.runInContext(source, invalidContext, { filename: 'ai-job-coordinator-invalid-config.js' });
+    const invalidApi = invalidWindow.AIShortsAIJobCoordinator;
+    assert(invalidApi.snapshot().queueLimit === 6, 'invalid queue configuration recovers to the bounded default');
+    for (let index = 0; index < 25; index += 1) await invalidApi.submit(`history-${index}`, async () => index);
+    assert(invalidApi.snapshot().history.length === 20, 'invalid history configuration recovers to the bounded default retention');
     unsubscribe();
     console.log('PASS bounded queue, serial execution, cancellation, progress, and history redaction');
 })().catch(error => {

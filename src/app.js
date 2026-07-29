@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.32 - per-page speaker timing, in-page ordering, and live energy hold visualization
+// AI Shorts Studio v1.6.34 - resilient page timing, bounded transitions, and stable energy diagnostics
 'use strict';
 
 (function bootAIShortsStudio(global) {
@@ -1239,26 +1239,38 @@
         const layout = track && track.speakerLayout || {};
         const active = Boolean(track && layout.gridPaging === 'energy');
         els.speakerEnergyStatus.hidden = !active;
-        if (!active) return;
+        if (!active) {
+            delete els.speakerEnergyBars.dataset.signature;
+            return;
+        }
         const time = Math.max(0, Number(target) || 0);
         const selectedIds = new Set(Array.isArray(focus && focus.gridSubjects) ? focus.gridSubjects.map(item => item.subjectId) : []);
         const activeCues = (Array.isArray(track.speakerCues) ? track.speakerCues : []).filter(cue => time >= Number(cue.start || 0) && time <= Number(cue.end || 0) && cue.subjectId !== 'auto');
         const rows = [];
         const seen = new Set();
-        activeCues.sort((a, b) => Number(b.energy || 0) - Number(a.energy || 0)).forEach(cue => { if (!seen.has(cue.subjectId)) { seen.add(cue.subjectId); rows.push(cue); } });
-        els.speakerEnergyBars.textContent = '';
-        rows.slice(0, 8).forEach(cue => {
-            const item = document.createElement('div'); item.className = 'speaker-energy-row'; item.dataset.selected = selectedIds.has(cue.subjectId) ? 'true' : 'false';
-            const label = document.createElement('span'); label.textContent = cue.speaker || cue.subjectId;
-            const meter = document.createElement('meter'); meter.min = 0; meter.max = 1; meter.value = Math.max(0, Math.min(1, Number(cue.energy == null ? cue.confidence : cue.energy) || 0));
-            const value = document.createElement('output'); value.textContent = `${Math.round(meter.value * 100)}%`;
-            item.append(label, meter, value); els.speakerEnergyBars.appendChild(item);
-        });
+        const energyValue = cue => Math.max(0, Math.min(1, Number(cue && (cue.energy == null ? cue.confidence : cue.energy)) || 0));
+        activeCues.sort((a, b) => energyValue(b) - energyValue(a)).forEach(cue => { if (!seen.has(cue.subjectId)) { seen.add(cue.subjectId); rows.push(cue); } });
+        const visibleRows = rows.slice(0, 8);
+        const rowSignature = visibleRows.map(cue => `${cue.subjectId}:${energyValue(cue).toFixed(3)}:${selectedIds.has(cue.subjectId) ? 1 : 0}:${cue.speaker || ''}`).join('|');
+        if (els.speakerEnergyBars.dataset.signature !== rowSignature) {
+            els.speakerEnergyBars.textContent = '';
+            const fragment = document.createDocumentFragment();
+            visibleRows.forEach(cue => {
+                const item = document.createElement('div'); item.className = 'speaker-energy-row'; item.dataset.selected = selectedIds.has(cue.subjectId) ? 'true' : 'false';
+                const label = document.createElement('span'); label.textContent = cue.speaker || cue.subjectId;
+                const meter = document.createElement('meter'); meter.min = 0; meter.max = 1; meter.value = energyValue(cue);
+                const value = document.createElement('output'); value.textContent = `${Math.round(meter.value * 100)}%`;
+                item.append(label, meter, value); fragment.appendChild(item);
+            });
+            els.speakerEnergyBars.appendChild(fragment);
+            els.speakerEnergyBars.dataset.signature = rowSignature;
+        }
         const threshold = Math.max(0, Math.min(1, Number(layout.gridEnergyThreshold == null ? 0.35 : layout.gridEnergyThreshold)));
         const hold = Math.max(0, Math.min(5, Number(layout.gridEnergyHoldSeconds == null ? 1.2 : layout.gridEnergyHoldSeconds)));
-        const waiting = rows.filter(cue => !selectedIds.has(cue.subjectId) && Number(cue.energy || 0) >= threshold).map(cue => ({ cue, remaining: Math.max(0, hold - Math.max(0, time - Number(cue.start || 0))) })).sort((a, b) => b.remaining - a.remaining)[0];
+        const waiting = rows.filter(cue => !selectedIds.has(cue.subjectId) && energyValue(cue) >= threshold).map(cue => ({ cue, remaining: Math.max(0, hold - Math.max(0, time - Number(cue.start || 0))) })).sort((a, b) => b.remaining - a.remaining)[0];
         const trigger = focus && focus.gridPageTrigger === 'energy' ? '에너지 paging 활성' : '에너지 감시 중';
-        els.speakerEnergyHoldStatus.textContent = waiting && waiting.remaining > 0.01 ? `${trigger} · ${waiting.cue.speaker || waiting.cue.subjectId} hold ${waiting.remaining.toFixed(1)}초 남음` : `${trigger} · 임계값 ${Math.round(threshold * 100)}% · 선택 ${selectedIds.size}명`;
+        const statusText = waiting && waiting.remaining > 0.01 ? `${trigger} · ${waiting.cue.speaker || waiting.cue.subjectId} hold ${waiting.remaining.toFixed(1)}초 남음` : `${trigger} · 임계값 ${Math.round(threshold * 100)}% · 선택 ${selectedIds.size}명`;
+        if (els.speakerEnergyHoldStatus.textContent !== statusText) els.speakerEnergyHoldStatus.textContent = statusText;
     }
 
     function syncSpeakerPanePositionOptions(orientation, requested) {
@@ -1290,9 +1302,22 @@
     }
 
     function speakerManualPageDurations(pages, input) {
-        const fallback = Math.max(1, Math.min(10, Number(state.smartReframe && state.smartReframe.speakerLayout && state.smartReframe.speakerLayout.gridPageSeconds || 3)));
+        const fallbackInput = Number(state.smartReframe && state.smartReframe.speakerLayout && state.smartReframe.speakerLayout.gridPageSeconds);
+        const fallback = Number.isFinite(fallbackInput) ? Math.max(1, Math.min(10, fallbackInput)) : 3;
         const source = Array.isArray(input) ? input : state.smartReframe && state.smartReframe.speakerLayout && state.smartReframe.speakerLayout.gridManualPageSeconds;
-        return (Array.isArray(pages) ? pages : []).map((_, index) => Math.max(1, Math.min(10, Number(Array.isArray(source) && source[index] != null ? source[index] : fallback))));
+        return (Array.isArray(pages) ? pages : []).map((_, index) => {
+            const candidate = Array.isArray(source) ? source[index] : null;
+            const number = candidate == null || candidate === '' ? fallback : Number(candidate);
+            return Number((Number.isFinite(number) ? Math.max(1, Math.min(10, number)) : fallback).toFixed(1));
+        });
+    }
+
+    function alignSpeakerManualPageDurations(pages) {
+        const layout = state.smartReframe && state.smartReframe.speakerLayout || {};
+        const previousPages = Array.isArray(layout.gridManualPages) ? layout.gridManualPages : [];
+        const smartEngine = getSmartReframeEngine();
+        if (smartEngine.alignGridManualPageSeconds) return Array.from(smartEngine.alignGridManualPageSeconds(previousPages, layout.gridManualPageSeconds, pages, layout.gridPageSeconds));
+        return speakerManualPageDurations(pages);
     }
 
     function commitSpeakerManualPages(pages, durations, message) {
@@ -1329,7 +1354,10 @@
         const pages = parseSpeakerGridManualPages(els.speakerGridManualPagesInput && els.speakerGridManualPagesInput.value);
         const durations = speakerManualPageDurations(pages);
         if (!pages[pageIndex]) return;
-        durations[pageIndex] = Math.max(1, Math.min(10, Number(value) || 3));
+        const layout = state.smartReframe && state.smartReframe.speakerLayout || {};
+        const fallback = speakerManualPageDurations([[]], [layout.gridPageSeconds])[0];
+        const number = value == null || value === '' ? fallback : Number(value);
+        durations[pageIndex] = Number((Number.isFinite(number) ? Math.max(1, Math.min(10, number)) : fallback).toFixed(1));
         commitSpeakerManualPages(pages, durations, `페이지 ${pageIndex + 1} 표시 시간을 ${durations[pageIndex]}초로 변경했습니다.`);
     }
 
@@ -1355,6 +1383,7 @@
             const grip = document.createElement('span');
             grip.className = 'speaker-grid-manual-page-grip';
             grip.textContent = '⋮⋮';
+            grip.title = '드래그해서 페이지 순서 변경';
             grip.setAttribute('aria-hidden', 'true');
             const content = document.createElement('div');
             content.className = 'speaker-grid-manual-page-content';
@@ -1399,9 +1428,17 @@
             [['위', index - 1], ['아래', index + 1]].forEach(([text, next]) => {
                 const button = document.createElement('button'); button.type = 'button'; button.className = 'mini-action'; button.textContent = text;
                 button.disabled = !enabled || next < 0 || next >= pages.length;
+                button.setAttribute('aria-label', `페이지 ${index + 1} ${text === '위' ? '위로' : '아래로'} 이동`);
                 button.addEventListener('click', () => moveSpeakerManualPage(index, next)); controls.appendChild(button);
             });
-            card.addEventListener('dragstart', event => { if (event.target !== card && event.target.closest('.speaker-grid-manual-subject-chip')) return; speakerManualPageDragIndex = index; card.dataset.dragging = 'true'; if (event.dataTransfer) { event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', String(index)); } });
+            card.addEventListener('dragstart', event => {
+                const targetNode = event.target && event.target.closest ? event.target : null;
+                if (targetNode && targetNode.closest('.speaker-grid-manual-subject-chip')) return;
+                if (!enabled || targetNode && targetNode.closest('input,button,select,textarea,label')) { event.preventDefault(); return; }
+                speakerManualPageDragIndex = index;
+                card.dataset.dragging = 'true';
+                if (event.dataTransfer) { event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', String(index)); }
+            });
             card.addEventListener('dragover', event => { if (enabled && !(event.dataTransfer && Array.from(event.dataTransfer.types || []).includes('application/x-speaker-subject'))) { event.preventDefault(); card.dataset.dropTarget = 'true'; } });
             card.addEventListener('dragleave', () => { delete card.dataset.dropTarget; });
             card.addEventListener('drop', event => { if (event.dataTransfer && Array.from(event.dataTransfer.types || []).includes('application/x-speaker-subject')) return; event.preventDefault(); delete card.dataset.dropTarget; const source = speakerManualPageDragIndex >= 0 ? speakerManualPageDragIndex : Number(event.dataTransfer && event.dataTransfer.getData('text/plain')); speakerManualPageDragIndex = -1; moveSpeakerManualPage(source, index); });
@@ -1436,7 +1473,7 @@
         const requestedDirection = String(els.speakerGridSlideDirectionSelect && els.speakerGridSlideDirectionSelect.value || 'auto');
         const gridSlideDirection = ['left', 'right', 'up', 'down'].includes(requestedDirection) ? requestedDirection : 'auto';
         const gridManualPages = Array.isArray(opts.gridManualPages) ? opts.gridManualPages : parseSpeakerGridManualPages(els.speakerGridManualPagesInput && els.speakerGridManualPagesInput.value);
-        const gridManualPageSeconds = speakerManualPageDurations(gridManualPages, opts.gridManualPageSeconds);
+        const gridManualPageSeconds = Array.isArray(opts.gridManualPageSeconds) ? speakerManualPageDurations(gridManualPages, opts.gridManualPageSeconds) : alignSpeakerManualPageDurations(gridManualPages);
         state.smartReframe = engine.updateSpeakerLayout(state.smartReframe, { orientation, split, primaryPosition, gridPrimarySize, gridPrimaryPosition, gridPaging, gridPageSeconds, gridEnergyThreshold, gridEnergyHysteresis, gridEnergyHoldSeconds, gridTransition, gridTransitionMs, gridTransitionEasing, gridSlideDirection, gridManualPages, gridManualPageSeconds }) || state.smartReframe;
         if (opts.persist) persistSmartReframeEdits(state.smartReframe);
         updateSmartReframeUI();
