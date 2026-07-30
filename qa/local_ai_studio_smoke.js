@@ -18,8 +18,10 @@ function assert(value, message) {
 }
 
 const requiredIds = [
-    'localAIStudio', 'creativeProviderSelect', 'creativeEndpointInput', 'creativeProbeBtn',
+    'localAIStudio', 'creativeProfileSelect', 'creativeProfileNameInput', 'creativeProfileSaveBtn', 'creativeProfileDeleteBtn',
+    'creativeProviderSelect', 'creativeEndpointInput', 'creativeProbeBtn',
     'creativeModelSelect', 'modelPinBtn', 'generateCreativeBtn', 'applyCreativeBtn',
+    'speechProfileSelect', 'speechProfileNameInput', 'speechProfileSaveBtn', 'speechProfileDeleteBtn',
     'speechProviderSelect', 'speechEndpointInput', 'speechProbeBtn', 'transcribeBtn',
     'transcriptPreview', 'applyTranscriptBtn', 'aiJobStatus', 'aiJobProgress', 'aiJobCancelBtn'
 ];
@@ -35,12 +37,14 @@ assert(sw.includes('./src/ai/ai-job-coordinator.js') && sw.includes('./src/ai/lo
 assert(html.includes("connect-src 'self' http://127.0.0.1:*") && !html.includes('connect-src *'), 'CSP permits explicit loopback connections without opening arbitrary network access');
 assert(provider.includes('LOCAL_AI_ALLOW_REMOTE_ENDPOINTS') && provider.includes('isLoopbackHostname') && provider.includes("credentials: 'omit'") && provider.includes("referrerPolicy: 'no-referrer'"), 'provider layer enforces loopback-only requests with credential and referrer isolation');
 assert(provider.includes('verifyModelPin') && provider.includes("state === 'mismatch'") && provider.includes('generateStructured') && provider.includes('transcribe'), 'model digest gating, structured generation, and speech transcription are implemented');
+assert(provider.includes('listEndpointProfiles') && provider.includes('saveEndpointProfile') && provider.includes('activateEndpointProfile') && provider.includes('removeEndpointProfile'), 'provider registry exposes bounded named endpoint profile lifecycle APIs');
 assert(jobs.includes('concurrency: 1') && jobs.includes('AbortController') && jobs.includes('sanitizeMeta'), 'AI jobs are serial, cancellable, and metadata-redacted');
 assert(ui.includes('CREATIVE_SCHEMA') && ui.includes('additionalProperties: false') && ui.includes('applyTranscriptResult') && ui.includes('includeCaptionsToggle'), 'UI uses strict structured copy and explicit transcript application controls');
 assert(ui.includes('probeUiSequences') && ui.includes('LOCAL_AI_PROBE_SUPERSEDED') && ui.includes('invalidateProbeView'), 'UI ignores superseded probe results and invalidates stale status when provider endpoints change');
 assert(ui.includes('providers.pinModel(providerId, model, currentModelDigest(), endpoint)') && ui.includes('providers.unpinModel(providerId, model, endpoint)'), 'UI scopes model pin and unpin actions to the active endpoint');
+assert(ui.includes('saveCurrentEndpointProfile') && ui.includes('activateEndpointProfile') && ui.includes('removeCurrentEndpointProfile') && ui.includes('전환 후 연결 재확인 필요'), 'UI manages named endpoint profiles while preserving reconnect guidance');
 assert(!/probeProvider\(['"](?:creative|speech)['"]\);/.test(ui.split('function init()')[1] || ''), 'initialization does not automatically contact a local AI server');
-assert(css.includes('.local-ai-grid') && css.includes('.local-ai-summary') && css.includes('grid-area: ai') && css.includes('@media (max-width: 620px)') && !css.includes('!important'), 'local AI disclosure has responsive workflow ownership without new priority overrides');
+assert(css.includes('.local-ai-grid') && css.includes('.local-ai-summary') && css.includes('.local-ai-profile-manager') && css.includes('.local-ai-profile-meta') && css.includes('grid-area: ai') && css.includes('@media (max-width: 620px)') && !css.includes('!important'), 'local AI disclosure and endpoint profile manager have responsive ownership without new priority overrides');
 const layout = fs.readFileSync(path.join(root, 'assets/css/workspace-layout-controls.css'), 'utf8');
 assert(layout.includes('\"ai ai ai ai ai\"') && layout.includes('.local-ai-studio'), 'desktop workspace assigns the Local AI disclosure an explicit aligned grid row');
 console.log('PASS local AI shell, privacy policy, explicit-connect UX, and responsive ownership');

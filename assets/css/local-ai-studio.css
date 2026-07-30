@@ -1,4 +1,4 @@
-/* AI Shorts Studio v1.6.20 - workflow-integrated, collapsible localhost AI workbench */
+/* AI Shorts Studio v1.6.40 - endpoint profile management for the localhost AI workbench */
 .local-ai-studio {
     grid-area: ai;
     display: block;
@@ -179,8 +179,49 @@
 .local-ai-result,
 .local-ai-actions,
 .local-ai-model-row,
-.local-ai-toggle-row {
+.local-ai-toggle-row,
+.local-ai-profile-manager {
     grid-column: 1 / -1;
+}
+
+.local-ai-profile-manager {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 9px;
+    align-items: end;
+    padding: 11px;
+    border: 1px solid rgba(103, 232, 249, 0.16);
+    border-radius: 13px;
+    background: rgba(8, 47, 73, 0.13);
+}
+
+.local-ai-profile-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    min-height: 40px;
+}
+
+.local-ai-profile-meta {
+    grid-column: 1 / -1;
+    display: block;
+    min-height: 20px;
+    color: #94a3b8;
+    font-size: 0.72rem;
+    line-height: 1.45;
+}
+
+.local-ai-profile-meta[data-state="ready"] {
+    color: #a7f3d0;
+}
+
+.local-ai-profile-meta[data-state="error"] {
+    color: #fecaca;
+}
+
+.local-ai-profile-meta[data-state="direct"] {
+    color: #fde68a;
 }
 
 .local-ai-studio input,
@@ -366,7 +407,17 @@
     .local-ai-result,
     .local-ai-actions,
     .local-ai-model-row,
-    .local-ai-toggle-row {
+    .local-ai-toggle-row,
+    .local-ai-profile-manager {
+        grid-column: 1;
+    }
+
+    .local-ai-profile-manager {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .local-ai-profile-meta {
         grid-column: 1;
     }
 

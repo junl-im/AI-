@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.39 - endpoint-scoped model pins and failure-aware local AI diagnostics
+// AI Shorts Studio v1.6.40 - named endpoint profiles with isolated model, pin, and probe state
 'use strict';
 
 (function exposeLocalAIProviderRegistry(global) {
@@ -13,7 +13,10 @@
     const maxTranscriptionBytes = Math.round(safeNumber(config.LOCAL_AI_MAX_TRANSCRIPTION_BYTES, 512 * 1024 * 1024, 1024 * 1024, 2 * 1024 * 1024 * 1024));
     const maxCaptionCues = Math.round(safeNumber(config.MAX_CAPTION_CUES, 5000, 1, 50000));
     const maxCaptionTextChars = Math.round(safeNumber(config.MAX_CAPTION_TEXT_CHARS, 1000000, 1000, 5000000));
+    const endpointProfileLimit = Math.round(safeNumber(config.LOCAL_AI_ENDPOINT_PROFILE_LIMIT, 8, 1, 20));
+    const endpointProfileModelLimit = Math.round(safeNumber(config.LOCAL_AI_ENDPOINT_PROFILE_MODEL_LIMIT, 40, 1, 100));
     const statuses = new Map();
+    const latestStatusKeys = new Map();
     const probeSequences = new Map();
     const probeControllers = new Map();
     const history = [];
@@ -73,13 +76,83 @@
         return url.toString().replace(/\/$/, '');
     }
 
+    function defaultProfileId(providerId) {
+        return `default-${safeText(providerId, 40).toLowerCase().replace(/[^a-z0-9_-]+/g, '-')}`;
+    }
+
+    function defaultProfileName(item) {
+        return `${item.label} 기본`;
+    }
+
+    function sanitizeProfileId(value, providerId, endpoint, name) {
+        const candidate = safeText(value, 64).toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '');
+        if (/^[a-z0-9][a-z0-9_-]{0,63}$/.test(candidate)) return candidate;
+        return `profile-${hashToken(`${providerId}|${endpoint}|${name}`)}`;
+    }
+
+    function sanitizeProfileProbe(value) {
+        const source = value && typeof value === 'object' ? value : {};
+        const state = ['idle', 'ready', 'error'].includes(source.state) ? source.state : 'idle';
+        return {
+            state,
+            checkedAt: safeText(source.checkedAt, 80),
+            latencyMs: Math.round(safeNumber(source.latencyMs, 0, 0, 30 * 60 * 1000)),
+            error: state === 'error' ? safeText(source.error, 240) : '',
+            errorCode: state === 'error' ? safeText(source.errorCode, 80) : '',
+            recovery: state === 'error' ? safeText(source.recovery, 240) : ''
+        };
+    }
+
+    function sanitizeEndpointProfile(providerId, value, fallbackEndpoint, fallbackName) {
+        const item = provider(providerId);
+        const source = value && typeof value === 'object' ? value : {};
+        const endpoint = normalizeEndpoint(source.endpoint || fallbackEndpoint, item.defaultEndpoint);
+        const name = safeText(source.name || fallbackName || defaultProfileName(item), 60) || defaultProfileName(item);
+        const models = [];
+        const seenModels = new Set();
+        (Array.isArray(source.models) ? source.models : []).slice(0, endpointProfileModelLimit).forEach(raw => {
+            const model = normalizeModel(raw);
+            if (!model.id || seenModels.has(model.id)) return;
+            seenModels.add(model.id);
+            models.push(model);
+        });
+        return {
+            id: sanitizeProfileId(source.id, item.id, endpoint, name),
+            name,
+            endpoint,
+            creativeModel: safeText(source.creativeModel, 160),
+            speechModel: safeText(source.speechModel, 160),
+            models,
+            lastProbe: sanitizeProfileProbe(source.lastProbe)
+        };
+    }
+
+    function defaultEndpointProfile(item, endpoint) {
+        return sanitizeEndpointProfile(item.id, {
+            id: defaultProfileId(item.id),
+            name: defaultProfileName(item),
+            endpoint: endpoint || item.defaultEndpoint,
+            creativeModel: '',
+            speechModel: item.capabilities.includes('speech') ? 'whisper' : ''
+        }, endpoint || item.defaultEndpoint, defaultProfileName(item));
+    }
+
     function defaultSettings() {
         const endpoints = {};
-        Object.values(PROVIDERS).forEach(provider => { endpoints[provider.id] = provider.defaultEndpoint; });
+        const endpointProfiles = {};
+        const activeEndpointProfileIds = {};
+        Object.values(PROVIDERS).forEach(item => {
+            endpoints[item.id] = item.defaultEndpoint;
+            const profile = defaultEndpointProfile(item, item.defaultEndpoint);
+            endpointProfiles[item.id] = [profile];
+            activeEndpointProfileIds[item.id] = profile.id;
+        });
         return {
             creativeProviderId: 'ollama',
             speechProviderId: 'whispercpp',
             endpoints,
+            endpointProfiles,
+            activeEndpointProfileIds,
             creativeModel: '',
             speechModel: 'whisper',
             language: 'auto',
@@ -96,6 +169,34 @@
         Object.values(PROVIDERS).forEach(provider => {
             try { endpoints[provider.id] = normalizeEndpoint(input.endpoints && input.endpoints[provider.id], provider.defaultEndpoint); }
             catch (_) { endpoints[provider.id] = provider.defaultEndpoint; }
+        });
+        const endpointProfiles = {};
+        const activeEndpointProfileIds = {};
+        Object.values(PROVIDERS).forEach(item => {
+            const rawProfiles = input.endpointProfiles && Array.isArray(input.endpointProfiles[item.id])
+                ? input.endpointProfiles[item.id]
+                : [];
+            const profiles = [];
+            const seenIds = new Set();
+            const seenEndpoints = new Set();
+            rawProfiles.slice(0, endpointProfileLimit).forEach(raw => {
+                try {
+                    const profile = sanitizeEndpointProfile(item.id, raw, endpoints[item.id], defaultProfileName(item));
+                    const endpointToken = hashToken(profile.endpoint);
+                    if (seenIds.has(profile.id) || seenEndpoints.has(endpointToken)) return;
+                    seenIds.add(profile.id);
+                    seenEndpoints.add(endpointToken);
+                    profiles.push(profile);
+                } catch (_) { /* invalid saved profile */ }
+            });
+            if (!profiles.length) profiles.push(defaultEndpointProfile(item, endpoints[item.id]));
+            endpointProfiles[item.id] = profiles;
+            const requestedId = safeText(input.activeEndpointProfileIds && input.activeEndpointProfileIds[item.id], 64);
+            const requested = profiles.find(profile => profile.id === requestedId);
+            const matching = profiles.find(profile => profile.endpoint === endpoints[item.id]);
+            activeEndpointProfileIds[item.id] = requested && requested.endpoint === endpoints[item.id]
+                ? requested.id
+                : matching ? matching.id : '';
         });
         const pins = {};
         const sourcePins = input.modelPins && typeof input.modelPins === 'object' ? input.modelPins : {};
@@ -121,6 +222,8 @@
             creativeProviderId: PROVIDERS[input.creativeProviderId] && PROVIDERS[input.creativeProviderId].capabilities.includes('creative') ? input.creativeProviderId : defaults.creativeProviderId,
             speechProviderId: PROVIDERS[input.speechProviderId] && PROVIDERS[input.speechProviderId].capabilities.includes('speech') ? input.speechProviderId : defaults.speechProviderId,
             endpoints,
+            endpointProfiles,
+            activeEndpointProfileIds,
             creativeModel: safeText(input.creativeModel, 160),
             speechModel: safeText(input.speechModel || defaults.speechModel, 160),
             language: ['auto', 'ko', 'en', 'ja', 'zh'].includes(input.language) ? input.language : defaults.language,
@@ -170,15 +273,27 @@
         const previousEndpoints = Object.assign({}, settings.endpoints);
         const next = Object.assign({}, settings, input);
         next.endpoints = Object.assign({}, settings.endpoints, input.endpoints || {});
+        next.endpointProfiles = Object.prototype.hasOwnProperty.call(input, 'endpointProfiles')
+            ? Object.assign({}, input.endpointProfiles && typeof input.endpointProfiles === 'object' ? input.endpointProfiles : {})
+            : Object.assign({}, settings.endpointProfiles);
+        next.activeEndpointProfileIds = Object.assign({}, settings.activeEndpointProfileIds, input.activeEndpointProfileIds || {});
         next.modelPins = Object.prototype.hasOwnProperty.call(input, 'modelPins')
             ? Object.assign({}, input.modelPins && typeof input.modelPins === 'object' ? input.modelPins : {})
             : Object.assign({}, settings.modelPins);
+        Object.keys(PROVIDERS).forEach(providerId => {
+            if (!input.endpoints || !Object.prototype.hasOwnProperty.call(input.endpoints, providerId)) return;
+            if (input.activeEndpointProfileIds && Object.prototype.hasOwnProperty.call(input.activeEndpointProfileIds, providerId)) return;
+            const normalized = normalizeEndpoint(input.endpoints[providerId], PROVIDERS[providerId].defaultEndpoint);
+            const matching = (settings.endpointProfiles[providerId] || []).find(profile => profile.endpoint === normalized);
+            next.activeEndpointProfileIds[providerId] = matching ? matching.id : '';
+        });
         const saved = saveSettings(next);
         Object.keys(PROVIDERS).forEach(providerId => {
             if (previousEndpoints[providerId] === settings.endpoints[providerId]) return;
             probeSequences.set(providerId, (probeSequences.get(providerId) || 0) + 1);
             abortProviderProbe(providerId, '로컬 AI 주소가 변경되어 이전 연결 확인을 중단했습니다.');
-            statuses.delete(providerId);
+            latestStatusKeys.delete(providerId);
+            Array.from(statuses.keys()).forEach(key => { if (key.startsWith(`${providerId}|`)) statuses.delete(key); });
         });
         return saved;
     }
@@ -192,6 +307,128 @@
     function endpointFor(providerId, override) {
         const item = provider(providerId);
         return normalizeEndpoint(override || settings.endpoints[item.id], item.defaultEndpoint);
+    }
+
+    function statusKey(providerId, endpointOverride) {
+        const item = provider(providerId);
+        return `${item.id}|${hashToken(endpointFor(item.id, endpointOverride))}`;
+    }
+
+    function getProviderStatus(providerId, endpointOverride) {
+        return statuses.get(statusKey(providerId, endpointOverride)) || idleStatus(providerId, endpointOverride);
+    }
+
+    function cloneProfile(profile, activeId) {
+        const endpointToken = hashToken(profile.endpoint);
+        const pinPrefix = `v2|${safeText(profile.providerId || '', 40)}|${endpointToken}|`;
+        return {
+            id: profile.id,
+            name: profile.name,
+            endpoint: profile.endpoint,
+            endpointToken,
+            creativeModel: profile.creativeModel,
+            speechModel: profile.speechModel,
+            models: (profile.models || []).map(model => Object.assign({}, model)),
+            lastProbe: Object.assign({}, profile.lastProbe),
+            active: profile.id === activeId,
+            pinCount: Object.keys(settings.modelPins).filter(key => key.startsWith(pinPrefix)).length
+        };
+    }
+
+    function listEndpointProfiles(providerId) {
+        const item = provider(providerId);
+        const activeId = settings.activeEndpointProfileIds[item.id] || '';
+        return (settings.endpointProfiles[item.id] || []).map(profile => cloneProfile(Object.assign({ providerId: item.id }, profile), activeId));
+    }
+
+    function getEndpointProfile(providerId, profileId) {
+        const item = provider(providerId);
+        const profile = (settings.endpointProfiles[item.id] || []).find(entry => entry.id === safeText(profileId, 64));
+        return profile ? cloneProfile(Object.assign({ providerId: item.id }, profile), settings.activeEndpointProfileIds[item.id] || '') : null;
+    }
+
+    function saveEndpointProfile(providerId, value) {
+        const item = provider(providerId);
+        const source = value && typeof value === 'object' ? value : {};
+        const currentProfiles = (settings.endpointProfiles[item.id] || []).map(profile => Object.assign({}, profile));
+        const requestedId = safeText(source.id, 64);
+        const existingIndex = requestedId ? currentProfiles.findIndex(profile => profile.id === requestedId) : -1;
+        const existing = existingIndex >= 0 ? currentProfiles[existingIndex] : null;
+        const merged = Object.assign({}, existing || {}, source, {
+            id: requestedId || '',
+            endpoint: source.endpoint || existing && existing.endpoint || settings.endpoints[item.id],
+            name: source.name || existing && existing.name || ''
+        });
+        if (!merged.name) throw new Error('endpoint 프로필 이름을 입력하세요.');
+        const profile = sanitizeEndpointProfile(item.id, merged, settings.endpoints[item.id], defaultProfileName(item));
+        const duplicate = currentProfiles.find((entry, index) => index !== existingIndex && entry.endpoint === profile.endpoint);
+        if (duplicate) throw new Error('같은 제공자에 동일한 localhost 주소 프로필이 이미 있습니다.');
+        if (existingIndex >= 0) currentProfiles[existingIndex] = profile;
+        else {
+            if (currentProfiles.length >= endpointProfileLimit) throw new Error(`제공자별 endpoint 프로필은 최대 ${endpointProfileLimit}개까지 저장할 수 있습니다.`);
+            currentProfiles.push(profile);
+        }
+        const endpointProfiles = Object.assign({}, settings.endpointProfiles, { [item.id]: currentProfiles });
+        const activeEndpointProfileIds = Object.assign({}, settings.activeEndpointProfileIds, { [item.id]: profile.id });
+        const endpoints = Object.assign({}, settings.endpoints, { [item.id]: profile.endpoint });
+        const patch = { endpointProfiles, activeEndpointProfileIds, endpoints };
+        if (item.capabilities.includes('creative')) patch.creativeModel = profile.creativeModel;
+        if (item.capabilities.includes('speech')) patch.speechModel = profile.speechModel || 'whisper';
+        configure(patch);
+        return getEndpointProfile(item.id, profile.id);
+    }
+
+    function activateEndpointProfile(providerId, profileId) {
+        const item = provider(providerId);
+        const profile = (settings.endpointProfiles[item.id] || []).find(entry => entry.id === safeText(profileId, 64));
+        if (!profile) throw new Error('선택한 endpoint 프로필을 찾을 수 없습니다.');
+        const patch = {
+            endpoints: Object.assign({}, settings.endpoints, { [item.id]: profile.endpoint }),
+            activeEndpointProfileIds: Object.assign({}, settings.activeEndpointProfileIds, { [item.id]: profile.id })
+        };
+        if (item.capabilities.includes('creative')) patch.creativeModel = profile.creativeModel;
+        if (item.capabilities.includes('speech')) patch.speechModel = profile.speechModel || 'whisper';
+        const saved = configure(patch);
+        return Object.freeze({ settings: saved, profile: getEndpointProfile(item.id, profile.id), status: getProviderStatus(item.id, profile.endpoint) });
+    }
+
+    function removeEndpointProfile(providerId, profileId) {
+        const item = provider(providerId);
+        const currentProfiles = (settings.endpointProfiles[item.id] || []).map(profile => Object.assign({}, profile));
+        if (currentProfiles.length <= 1) throw new Error('제공자별 endpoint 프로필은 최소 1개를 유지해야 합니다.');
+        const index = currentProfiles.findIndex(profile => profile.id === safeText(profileId, 64));
+        if (index < 0) return false;
+        const removed = currentProfiles[index];
+        currentProfiles.splice(index, 1);
+        const wasActive = settings.activeEndpointProfileIds[item.id] === removed.id;
+        const replacement = wasActive ? currentProfiles[0] : currentProfiles.find(profile => profile.id === settings.activeEndpointProfileIds[item.id]) || currentProfiles[0];
+        const endpointProfiles = Object.assign({}, settings.endpointProfiles, { [item.id]: currentProfiles });
+        const activeEndpointProfileIds = Object.assign({}, settings.activeEndpointProfileIds, { [item.id]: replacement.id });
+        const endpoints = Object.assign({}, settings.endpoints, { [item.id]: replacement.endpoint });
+        const endpointToken = hashToken(removed.endpoint);
+        const pinPrefix = `v2|${item.id}|${endpointToken}|`;
+        const modelPins = Object.fromEntries(Object.entries(settings.modelPins).filter(([key]) => !key.startsWith(pinPrefix)));
+        const patch = { endpointProfiles, activeEndpointProfileIds, endpoints, modelPins };
+        if (item.capabilities.includes('creative')) patch.creativeModel = replacement.creativeModel;
+        if (item.capabilities.includes('speech')) patch.speechModel = replacement.speechModel || 'whisper';
+        configure(patch);
+        statuses.delete(statusKey(item.id, removed.endpoint));
+        return true;
+    }
+
+    function rememberProfileProbe(providerId, endpoint, status) {
+        const item = provider(providerId);
+        let matched = false;
+        const profiles = (settings.endpointProfiles[item.id] || []).map(profile => {
+            if (profile.endpoint !== endpoint) return Object.assign({}, profile);
+            matched = true;
+            return Object.assign({}, profile, {
+                models: status.state === 'ready' ? (status.models || []).slice(0, endpointProfileModelLimit).map(model => Object.assign({}, model)) : (profile.models || []).slice(),
+                lastProbe: sanitizeProfileProbe(status)
+            });
+        });
+        if (!matched) return;
+        saveSettings(Object.assign({}, settings, { endpointProfiles: Object.assign({}, settings.endpointProfiles, { [item.id]: profiles }) }));
     }
 
     function joinEndpoint(endpoint, path) {
@@ -396,7 +633,9 @@
 
     function statusValue(providerId, state, extra) {
         const value = createStatusValue(providerId, state, extra);
-        statuses.set(value.providerId, value);
+        const key = statusKey(value.providerId, extra && extra.endpoint);
+        statuses.set(key, value);
+        latestStatusKeys.set(value.providerId, key);
         return value;
     }
 
@@ -452,20 +691,27 @@
             if (!isCurrentProbe()) throw probeSupersededError();
             const latencyMs = Date.now() - started;
             const value = createStatusValue(providerId, 'ready', { endpoint, latencyMs, models });
-            statuses.set(item.id, value);
+            const key = statusKey(item.id, endpoint);
+            statuses.set(key, value);
+            latestStatusKeys.set(item.id, key);
+            rememberProfileProbe(item.id, endpoint, value);
             remember({ type: 'probe', providerId, capability: item.capabilities.join(','), ok: true, elapsedMs: latencyMs });
             return value;
         } catch (error) {
             const latencyMs = Date.now() - started;
             if (error && error.code === 'LOCAL_AI_PROBE_SUPERSEDED') throw error;
             if (isCurrentProbe()) {
-                statuses.set(item.id, createStatusValue(providerId, 'error', {
+                const failedStatus = createStatusValue(providerId, 'error', {
                     endpoint,
                     latencyMs,
                     error: safeText(error.message, 240),
                     errorCode: safeText(error.code, 80),
                     recovery: safeText(error.recovery || recoveryFor(error), 240)
-                }));
+                });
+                const key = statusKey(item.id, endpoint);
+                statuses.set(key, failedStatus);
+                latestStatusKeys.set(item.id, key);
+                rememberProfileProbe(item.id, endpoint, failedStatus);
                 remember({ type: 'probe', providerId, capability: item.capabilities.join(','), ok: false, elapsedMs: latencyMs, error: error.message, errorCode: error.code });
             }
             throw error;
@@ -510,7 +756,7 @@
     }
 
     function currentModel(providerId, modelId, endpointOverride) {
-        const status = statuses.get(providerId);
+        const status = statuses.get(statusKey(providerId, endpointOverride));
         const expectedEndpointToken = hashToken(endpointFor(providerId, endpointOverride));
         if (!status || status.state !== 'ready' || status.endpointToken !== expectedEndpointToken) return null;
         return Array.isArray(status.models) ? status.models.find(model => model.id === modelId || model.name === modelId) || null : null;
@@ -518,7 +764,7 @@
 
     function verifyModelPin(providerId, modelId, endpointOverride) {
         const expected = getModelPin(providerId, modelId, endpointOverride);
-        const status = statuses.get(providerId);
+        const status = statuses.get(statusKey(providerId, endpointOverride));
         const expectedEndpointToken = hashToken(endpointFor(providerId, endpointOverride));
         const endpointCurrent = Boolean(status && status.state === 'ready' && status.endpointToken === expectedEndpointToken);
         const model = endpointCurrent ? currentModel(providerId, modelId, endpointOverride) : null;
@@ -718,13 +964,13 @@
         return Object.values(PROVIDERS).filter(item => !capability || item.capabilities.includes(capability)).map(item => Object.freeze({ id: item.id, label: item.label, defaultEndpoint: item.defaultEndpoint, capabilities: Object.freeze(item.capabilities.slice()) }));
     }
 
-    function idleStatus(providerId) {
+    function idleStatus(providerId, endpointOverride) {
         const item = provider(providerId);
         return Object.freeze({
             providerId: item.id,
             label: item.label,
             state: 'idle',
-            endpointToken: hashToken(endpointFor(item.id)),
+            endpointToken: hashToken(endpointFor(item.id, endpointOverride)),
             checkedAt: '',
             latencyMs: 0,
             capabilities: Object.freeze(item.capabilities.slice()),
@@ -737,8 +983,11 @@
 
     function snapshot() {
         return Object.freeze({
-            providers: Object.freeze(Object.fromEntries(Object.keys(PROVIDERS).map(id => [id, statuses.get(id) || idleStatus(id)]))),
-            settings: Object.freeze({ creativeProviderId: settings.creativeProviderId, speechProviderId: settings.speechProviderId, creativeModelToken: hashToken(settings.creativeModel), speechModelToken: hashToken(settings.speechModel), language: settings.language, includeCaptions: settings.includeCaptions, autoApplyTranscript: settings.autoApplyTranscript, pinnedModelCount: Object.keys(settings.modelPins).length }),
+            providers: Object.freeze(Object.fromEntries(Object.keys(PROVIDERS).map(id => {
+                const latest = latestStatusKeys.get(id);
+                return [id, latest && statuses.get(latest) || getProviderStatus(id, settings.endpoints[id])];
+            }))),
+            settings: Object.freeze({ creativeProviderId: settings.creativeProviderId, speechProviderId: settings.speechProviderId, creativeModelToken: hashToken(settings.creativeModel), speechModelToken: hashToken(settings.speechModel), language: settings.language, includeCaptions: settings.includeCaptions, autoApplyTranscript: settings.autoApplyTranscript, pinnedModelCount: Object.keys(settings.modelPins).length, endpointProfileCount: Object.values(settings.endpointProfiles).reduce((sum, profiles) => sum + profiles.length, 0), activeEndpointProfileTokens: Object.freeze(Object.fromEntries(Object.entries(settings.activeEndpointProfileIds).map(([id, value]) => [id, value ? hashToken(value) : '']))) }),
             history: Object.freeze(history.slice()),
             policy: Object.freeze({
                 loopbackOnly: !config.LOCAL_AI_ALLOW_REMOTE_ENDPOINTS,
@@ -752,13 +1001,16 @@
                 maxTranscriptionBytes,
                 maxCaptionCues,
                 maxCaptionTextChars,
-                modelPinScope: 'endpoint'
+                modelPinScope: 'endpoint',
+                endpointProfileLimit,
+                endpointProfileModelLimit
             })
         });
     }
 
     global.AIShortsLocalAIProviders = Object.freeze({
         listProviders, getSettings, configure, normalizeEndpoint, isLoopbackHostname, endpointFor,
+        listEndpointProfiles, getEndpointProfile, saveEndpointProfile, activateEndpointProfile, removeEndpointProfile, getProviderStatus,
         probe, generateStructured, transcribe, pinModel, unpinModel, getModelPin, verifyModelPin,
         hashToken, snapshot, segmentsToSrt
     });

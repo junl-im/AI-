@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## v1.6.40
+
+- 제공자별 named Local AI endpoint profile 저장·전환·삭제 API 추가
+- 기존 endpoint-only settings를 provider별 deterministic default profile로 자동 migration
+- profile별 endpoint·선호 모델·최근 probe·bounded model cache 독립 보존
+- profile 전환 시 endpoint-bound runtime trust를 초기화하고 새 probe 전 generation 차단
+- profile 삭제 시 해당 endpoint digest pin 정리, duplicate endpoint와 final profile 삭제 차단
+- desktop/mobile Local AI 패널에 profile 선택·이름·저장·삭제·상태 요약 UI 추가
+- diagnostics snapshot은 profile count와 active token만 노출하고 endpoint/profile 원문 비공개
+- 정적 body build marker를 v1.6.40으로 동기화
+- 신규 `local_ai_endpoint_profiles_smoke.js` 등록, 전체 QA 318/318 통과
+- 현재 버전 4-viewport·5-cycle heap·8-cycle process-memory·30분 Smart Reframe·speaker browser 감사 갱신
+- 서비스워커 135개 자산 v1.6.40 무결성 갱신
+- 최종 전달 3단 구성과 통파일/패치 ZIP 동시 제공 규칙 유지
+
 ## v1.6.39
 
 - Local AI 모델 digest pin을 provider·endpoint token·model id 범위로 분리

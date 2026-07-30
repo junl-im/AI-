@@ -1,4 +1,4 @@
-// AI Shorts Studio v1.6.39 - endpoint-scoped model pin controls and stale-safe local AI UI
+// AI Shorts Studio v1.6.40 - named endpoint profile controls with reconnect-safe Local AI UI
 'use strict';
 
 (function exposeLocalAIStudio(global) {
@@ -57,6 +57,184 @@
         const settings = providers.getSettings ? providers.getSettings() : { endpoints: {} };
         const input = endpointInput(capability);
         if (input) input.value = settings.endpoints && settings.endpoints[providerId] || '';
+    }
+
+    function profileControls(capability) {
+        return capability === 'creative'
+            ? { select: els.creativeProfileSelect, name: els.creativeProfileNameInput, save: els.creativeProfileSaveBtn, remove: els.creativeProfileDeleteBtn, meta: els.creativeProfileMeta }
+            : { select: els.speechProfileSelect, name: els.speechProfileNameInput, save: els.speechProfileSaveBtn, remove: els.speechProfileDeleteBtn, meta: els.speechProfileMeta };
+    }
+
+    function endpointProfiles(providerId) {
+        return providers.listEndpointProfiles ? providers.listEndpointProfiles(providerId) : [];
+    }
+
+    function renderProfileMeta(capability, profile, count, direct) {
+        const controls = profileControls(capability);
+        if (!controls.meta) return;
+        if (direct || !profile) {
+            controls.meta.textContent = `직접 입력 주소 · 이름을 지정해 새 프로필로 저장할 수 있습니다. · 저장된 프로필 ${count || 0}개`;
+            controls.meta.dataset.state = 'direct';
+            return;
+        }
+        const probe = profile.lastProbe || {};
+        const probeText = probe.state === 'ready'
+            ? `최근 확인 성공${probe.checkedAt ? ` · ${safeText(probe.checkedAt, 19).replace('T', ' ')}` : ''}`
+            : probe.state === 'error'
+                ? `최근 확인 실패${probe.errorCode ? ` · ${probe.errorCode}` : ''}`
+                : '연결 확인 기록 없음';
+        controls.meta.textContent = `${probeText} · 저장 모델 ${Array.isArray(profile.models) ? profile.models.length : 0}개 · digest 고정 ${profile.pinCount || 0}개 · 전환 후 연결 재확인 필요`;
+        controls.meta.dataset.state = probe.state === 'ready' ? 'ready' : probe.state === 'error' ? 'error' : 'idle';
+    }
+
+    function renderEndpointProfileSelect(capability, providerId) {
+        const controls = profileControls(capability);
+        if (!controls.select) return null;
+        const profiles = endpointProfiles(providerId);
+        const settings = providers.getSettings ? providers.getSettings() : { activeEndpointProfileIds: {} };
+        const activeId = settings.activeEndpointProfileIds && settings.activeEndpointProfileIds[providerId] || '';
+        const direct = document.createElement('option');
+        direct.value = '';
+        direct.textContent = '직접 입력 / 새 프로필';
+        const options = [direct].concat(profiles.map(profile => {
+            const option = document.createElement('option');
+            option.value = profile.id;
+            option.textContent = `${profile.name} · ${profile.endpoint.replace(/^https?:\/\//, '')}`;
+            return option;
+        }));
+        controls.select.replaceChildren(...options);
+        controls.select.value = profiles.some(profile => profile.id === activeId) ? activeId : '';
+        const active = profiles.find(profile => profile.id === controls.select.value) || null;
+        if (controls.name) controls.name.value = active ? active.name : '';
+        if (controls.remove) controls.remove.disabled = !active || profiles.length <= 1;
+        renderProfileMeta(capability, active, profiles.length, !active);
+        return active;
+    }
+
+    function renderProfileModels(capability, profile, settings) {
+        if (capability === 'creative') {
+            const preferred = profile && profile.creativeModel || settings && settings.creativeModel || '';
+            const cached = profile && Array.isArray(profile.models) && profile.models.length ? { models: profile.models } : null;
+            renderModels(cached, preferred);
+        } else if (els.speechModelInput) {
+            els.speechModelInput.value = profile && profile.speechModel || settings && settings.speechModel || 'whisper';
+        }
+    }
+
+    function refreshProviderProfileViews(providerId) {
+        const settings = providers.getSettings ? providers.getSettings() : { endpoints: {} };
+        ['creative', 'speech'].forEach(capability => {
+            if (selectedProvider(capability) !== providerId) return;
+            applyProviderEndpoint(capability, providerId);
+            const profile = renderEndpointProfileSelect(capability, providerId);
+            const status = providers.getProviderStatus ? providers.getProviderStatus(providerId, settings.endpoints && settings.endpoints[providerId]) : { state: 'idle' };
+            renderProviderStatus(capability, status);
+            renderProfileModels(capability, profile, settings);
+        });
+    }
+
+    function invalidateProviderViews(providerId) {
+        ['creative', 'speech'].forEach(capability => {
+            if (selectedProvider(capability) === providerId) invalidateProbeView(capability);
+        });
+    }
+
+    function markProfileDirect(capability) {
+        const controls = profileControls(capability);
+        const providerId = selectedProvider(capability);
+        const selected = controls.select && controls.select.value ? providers.getEndpointProfile(providerId, controls.select.value) : null;
+        const rawEndpoint = endpointInput(capability) && endpointInput(capability).value || '';
+        let same = false;
+        try { same = Boolean(selected && providers.normalizeEndpoint(rawEndpoint) === selected.endpoint); } catch (_) { same = false; }
+        if (same) return;
+        if (controls.select) controls.select.value = '';
+        if (controls.name) controls.name.value = '';
+        if (controls.remove) controls.remove.disabled = true;
+        renderProfileMeta(capability, null, endpointProfiles(providerId).length, true);
+    }
+
+    function activateEndpointProfile(capability) {
+        const controls = profileControls(capability);
+        const providerId = selectedProvider(capability);
+        const profileId = controls.select && controls.select.value || '';
+        if (!profileId) {
+            markProfileDirect(capability);
+            invalidateProbeView(capability);
+            return null;
+        }
+        try {
+            invalidateProviderViews(providerId);
+            const result = providers.activateEndpointProfile(providerId, profileId);
+            refreshProviderProfileViews(providerId);
+            toast(`${result.profile.name} 프로필을 적용했습니다. 연결을 다시 확인하세요.`, 'action');
+            return result.profile;
+        } catch (error) {
+            toast(error.message, 'error');
+            refreshProviderProfileViews(providerId);
+            return null;
+        }
+    }
+
+    function profileModelPatch(capability) {
+        return capability === 'creative'
+            ? { creativeModel: els.creativeModelSelect && els.creativeModelSelect.value || '' }
+            : { speechModel: els.speechModelInput && els.speechModelInput.value || 'whisper' };
+    }
+
+    function saveCurrentEndpointProfile(capability) {
+        const controls = profileControls(capability);
+        const providerId = selectedProvider(capability);
+        const endpoint = endpointInput(capability) && endpointInput(capability).value || '';
+        const name = safeText(controls.name && controls.name.value, 60);
+        try {
+            const profile = providers.saveEndpointProfile(providerId, Object.assign({
+                id: controls.select && controls.select.value || '',
+                name,
+                endpoint
+            }, profileModelPatch(capability)));
+            invalidateProviderViews(providerId);
+            refreshProviderProfileViews(providerId);
+            toast(`${profile.name} endpoint 프로필을 저장했습니다.`, 'success');
+            return profile;
+        } catch (error) {
+            toast(error.message, 'warning');
+            return null;
+        }
+    }
+
+    function removeCurrentEndpointProfile(capability) {
+        const controls = profileControls(capability);
+        const providerId = selectedProvider(capability);
+        const profileId = controls.select && controls.select.value || '';
+        const profile = profileId && providers.getEndpointProfile ? providers.getEndpointProfile(providerId, profileId) : null;
+        if (!profile) return false;
+        if (global.confirm && !global.confirm(`'${profile.name}' 프로필과 해당 endpoint의 모델 digest 고정을 삭제할까요?`)) return false;
+        try {
+            invalidateProviderViews(providerId);
+            providers.removeEndpointProfile(providerId, profileId);
+            refreshProviderProfileViews(providerId);
+            toast('endpoint 프로필을 삭제하고 남은 프로필로 전환했습니다.', 'action');
+            return true;
+        } catch (error) {
+            toast(error.message, 'warning');
+            return false;
+        }
+    }
+
+    function persistActiveProfileModel(capability) {
+        const controls = profileControls(capability);
+        const providerId = selectedProvider(capability);
+        const profileId = controls.select && controls.select.value || '';
+        const profile = profileId && providers.getEndpointProfile ? providers.getEndpointProfile(providerId, profileId) : null;
+        if (!profile) return;
+        try {
+            providers.saveEndpointProfile(providerId, Object.assign({
+                id: profile.id,
+                name: profile.name,
+                endpoint: profile.endpoint
+            }, profileModelPatch(capability)));
+            renderEndpointProfileSelect(capability, providerId);
+        } catch (_) { /* explicit save button handles visible errors */ }
     }
 
     function populateProviderSelect(select, capability, selected) {
@@ -194,11 +372,13 @@
             if (probeUiSequences[capability] !== uiSequence || selectedProvider(capability) !== providerId) return null;
             renderProviderStatus(capability, status);
             if (capability === 'creative') renderModels(status, settings.creativeModel);
+            renderEndpointProfileSelect(capability, providerId);
             toast(`${status.label || providerId} 연결을 확인했습니다.`, 'success');
             return status;
         } catch (error) {
             if (probeUiSequences[capability] !== uiSequence || error && error.code === 'LOCAL_AI_PROBE_SUPERSEDED') return null;
             renderProviderStatus(capability, { state: 'error', error: error.message, recovery: error.recovery });
+            renderEndpointProfileSelect(capability, providerId);
             toast(errorMessage(error, '로컬 AI 연결 확인에 실패했습니다.'), 'error');
             return null;
         }
@@ -453,13 +633,29 @@
     }
 
     function bindEvents() {
-        if (els.creativeProviderSelect) els.creativeProviderSelect.addEventListener('change', () => { invalidateProbeView('creative'); applyProviderEndpoint('creative', selectedProvider('creative')); renderModels(null, ''); });
-        if (els.creativeEndpointInput) els.creativeEndpointInput.addEventListener('input', () => { invalidateProbeView('creative'); renderPinStatus(); });
-        if (els.speechProviderSelect) els.speechProviderSelect.addEventListener('change', () => { invalidateProbeView('speech'); applyProviderEndpoint('speech', selectedProvider('speech')); });
-        if (els.speechEndpointInput) els.speechEndpointInput.addEventListener('input', () => invalidateProbeView('speech'));
+        if (els.creativeProviderSelect) els.creativeProviderSelect.addEventListener('change', () => {
+            invalidateProbeView('creative');
+            applyProviderEndpoint('creative', selectedProvider('creative'));
+            const profile = renderEndpointProfileSelect('creative', selectedProvider('creative'));
+            renderProfileModels('creative', profile, providers.getSettings());
+        });
+        if (els.creativeEndpointInput) els.creativeEndpointInput.addEventListener('input', () => { invalidateProbeView('creative'); markProfileDirect('creative'); renderPinStatus(); });
+        if (els.speechProviderSelect) els.speechProviderSelect.addEventListener('change', () => {
+            invalidateProbeView('speech');
+            applyProviderEndpoint('speech', selectedProvider('speech'));
+            const profile = renderEndpointProfileSelect('speech', selectedProvider('speech'));
+            renderProfileModels('speech', profile, providers.getSettings());
+        });
+        if (els.speechEndpointInput) els.speechEndpointInput.addEventListener('input', () => { invalidateProbeView('speech'); markProfileDirect('speech'); });
+        if (els.creativeProfileSelect) els.creativeProfileSelect.addEventListener('change', () => activateEndpointProfile('creative'));
+        if (els.speechProfileSelect) els.speechProfileSelect.addEventListener('change', () => activateEndpointProfile('speech'));
+        if (els.creativeProfileSaveBtn) els.creativeProfileSaveBtn.addEventListener('click', () => saveCurrentEndpointProfile('creative'));
+        if (els.speechProfileSaveBtn) els.speechProfileSaveBtn.addEventListener('click', () => saveCurrentEndpointProfile('speech'));
+        if (els.creativeProfileDeleteBtn) els.creativeProfileDeleteBtn.addEventListener('click', () => removeCurrentEndpointProfile('creative'));
+        if (els.speechProfileDeleteBtn) els.speechProfileDeleteBtn.addEventListener('click', () => removeCurrentEndpointProfile('speech'));
         if (els.creativeProbeBtn) els.creativeProbeBtn.addEventListener('click', () => probeProvider('creative'));
         if (els.speechProbeBtn) els.speechProbeBtn.addEventListener('click', () => probeProvider('speech'));
-        if (els.creativeModelSelect) els.creativeModelSelect.addEventListener('change', () => { providers.configure({ creativeModel: els.creativeModelSelect.value }); renderPinStatus(); });
+        if (els.creativeModelSelect) els.creativeModelSelect.addEventListener('change', () => { providers.configure({ creativeModel: els.creativeModelSelect.value }); persistActiveProfileModel('creative'); renderPinStatus(); });
         if (els.modelPinBtn) els.modelPinBtn.addEventListener('click', toggleModelPin);
         if (els.generateCreativeBtn) els.generateCreativeBtn.addEventListener('click', generateCreativeCopy);
         if (els.applyCreativeBtn) els.applyCreativeBtn.addEventListener('click', applyCreativeResult);
@@ -469,15 +665,17 @@
         if (els.includeCaptionsToggle) els.includeCaptionsToggle.addEventListener('change', () => providers.configure({ includeCaptions: els.includeCaptionsToggle.checked }));
         if (els.autoApplyTranscriptToggle) els.autoApplyTranscriptToggle.addEventListener('change', () => providers.configure({ autoApplyTranscript: els.autoApplyTranscriptToggle.checked }));
         if (els.speechLanguageSelect) els.speechLanguageSelect.addEventListener('change', () => providers.configure({ language: els.speechLanguageSelect.value }));
-        if (els.speechModelInput) els.speechModelInput.addEventListener('change', () => providers.configure({ speechModel: els.speechModelInput.value }));
+        if (els.speechModelInput) els.speechModelInput.addEventListener('change', () => { providers.configure({ speechModel: els.speechModelInput.value }); persistActiveProfileModel('speech'); });
     }
 
     function initElements() {
         [
+            'creativeProfileSelect', 'creativeProfileNameInput', 'creativeProfileSaveBtn', 'creativeProfileDeleteBtn', 'creativeProfileMeta',
             'creativeProviderSelect', 'creativeEndpointInput', 'creativeProbeBtn', 'creativeProviderStatus',
             'creativeModelSelect', 'modelPinBtn', 'modelPinStatus', 'includeCaptionsToggle', 'generateCreativeBtn',
             'creativeResult', 'aiTitleResult', 'aiHookResult', 'aiDescriptionResult', 'aiHashtagResult', 'aiReasonResult',
-            'applyCreativeBtn', 'aiCopyMemo', 'speechProviderSelect', 'speechEndpointInput', 'speechProbeBtn',
+            'applyCreativeBtn', 'aiCopyMemo', 'speechProfileSelect', 'speechProfileNameInput', 'speechProfileSaveBtn', 'speechProfileDeleteBtn', 'speechProfileMeta',
+            'speechProviderSelect', 'speechEndpointInput', 'speechProbeBtn',
             'speechProviderStatus', 'speechModelInput', 'speechLanguageSelect', 'autoApplyTranscriptToggle',
             'transcribeBtn', 'transcriptResult', 'transcriptMeta', 'transcriptPreview', 'applyTranscriptBtn',
             'aiJobStatus', 'aiJobProgress', 'aiJobCancelBtn', 'aiJobHistory', 'titleInput', 'hashtagInput'
@@ -492,11 +690,13 @@
         populateProviderSelect(els.speechProviderSelect, 'speech', settings.speechProviderId);
         applyProviderEndpoint('creative', settings.creativeProviderId);
         applyProviderEndpoint('speech', settings.speechProviderId);
-        if (els.speechModelInput) els.speechModelInput.value = settings.speechModel || 'whisper';
+        const creativeProfile = renderEndpointProfileSelect('creative', settings.creativeProviderId);
+        const speechProfile = renderEndpointProfileSelect('speech', settings.speechProviderId);
+        if (els.speechModelInput) els.speechModelInput.value = speechProfile && speechProfile.speechModel || settings.speechModel || 'whisper';
         if (els.speechLanguageSelect) els.speechLanguageSelect.value = settings.language || 'auto';
         if (els.includeCaptionsToggle) els.includeCaptionsToggle.checked = settings.includeCaptions !== false;
         if (els.autoApplyTranscriptToggle) els.autoApplyTranscriptToggle.checked = Boolean(settings.autoApplyTranscript);
-        renderModels(null, settings.creativeModel);
+        renderProfileModels('creative', creativeProfile, settings);
         renderCreativeResult(null);
         renderTranscriptResult(null);
         bindEvents();

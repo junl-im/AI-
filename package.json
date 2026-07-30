@@ -1,8 +1,8 @@
 {
-  "name": "ai-shorts-studio-v1-6-39",
-  "version": "1.6.39",
+  "name": "ai-shorts-studio-v1-6-40",
+  "version": "1.6.40",
   "private": true,
-  "description": "AI Shorts Studio v1.6.39 - endpoint-scoped Local AI model pins and failure-aware diagnostics",
+  "description": "AI Shorts Studio v1.6.40 - named Local AI endpoint profiles with isolated model, pin, and probe state",
   "scripts": {
     "serve": "python3 -m http.server 8080",
     "check": "node qa/run_all_checks.js",
@@ -301,6 +301,7 @@
     "node qa/local_ai_transport_integration_smoke.js",
     "node qa/local_ai_operation_deadline_smoke.js",
     "node qa/local_ai_endpoint_pin_history_smoke.js",
+    "node qa/local_ai_endpoint_profiles_smoke.js",
     "node qa/ai_job_coordinator_smoke.js",
     "node qa/ai_job_reentrant_cancel_smoke.js",
     "node qa/local_ai_studio_smoke.js",

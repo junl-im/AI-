@@ -1,9 +1,9 @@
-// AI Shorts Studio v1.6.39 - endpoint-scoped Local AI pins and failure diagnostics
+// AI Shorts Studio v1.6.40 - named Local AI endpoint profiles and reconnect-safe trust state
 'use strict';
 
 window.AIShortsRuntimeConfig = Object.freeze({
-    APP_VERSION: 'v1.6.39',
-    BUILD_KEY: '1.6.39-local-ai-endpoint-pins',
+    APP_VERSION: 'v1.6.40',
+    BUILD_KEY: '1.6.40-local-ai-endpoint-profiles',
     ANALYSIS_WORKER_URL: 'src/workers/highlight-analysis.worker.js',
     ANALYSIS_TIMING_HISTORY_KEY: 'ai-shorts-analysis-timing-history-v1',
     ANALYSIS_TIMING_HISTORY_LIMIT: 12,
@@ -95,6 +95,8 @@ window.AIShortsRuntimeConfig = Object.freeze({
     LOCAL_AI_QUEUE_LIMIT: 6,
     LOCAL_AI_JOB_HISTORY_LIMIT: 20,
     LOCAL_AI_HISTORY_LIMIT: 20,
+    LOCAL_AI_ENDPOINT_PROFILE_LIMIT: 8,
+    LOCAL_AI_ENDPOINT_PROFILE_MODEL_LIMIT: 40,
     LOCAL_AI_PROBE_TIMEOUT_MS: 5000,
     LOCAL_AI_REQUEST_TIMEOUT_MS: 120000,
     LOCAL_AI_MAX_RESPONSE_BYTES: 2 * 1024 * 1024,

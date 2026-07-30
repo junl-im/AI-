@@ -1,0 +1,75 @@
+{
+  "version": "1.6.40",
+  "generatedAt": "2026-07-30T02:58:17.464808+00:00",
+  "legacyPreview": {
+    "hidden": false,
+    "state": "호환됨 · 구버전 정규화 필요",
+    "status": "compatible",
+    "meta": "legacy-analysis.json · ai-shorts-analysis-timing-diagnostics v1 · 1KiB",
+    "summary": "앱 버전\nv1.6.15\n분석 이력\n1건\n벤치마크\n0팩\n런타임 오류\n0건\n진단 기록\n0건\n활성 작업\n0건",
+    "issues": "구버전 analysis 진단을 현재 지원 Bundle 형식으로 변환했습니다.\n미리보기 후 정규화본을 저장하면 다음 검사에서 바로 사용할 수 있습니다.",
+    "normalizedDisabled": false,
+    "bodyOverflow": 0
+  },
+  "futurePreview": {
+    "hidden": false,
+    "state": "열 수 없음 · 아래 조치 확인",
+    "status": "invalid",
+    "meta": "future-bundle.json · ai-shorts-support-diagnostics-bundle v99 · 1KiB",
+    "summary": "검사 결과\n호환 불가",
+    "issues": "이 파일은 더 새로운 schema version 99을 사용합니다.\n최신 AI Shorts Studio에서 열거나, 현재 앱을 업데이트한 뒤 다시 시도하세요.",
+    "normalizedDisabled": true,
+    "bodyOverflow": 0
+  },
+  "corruptPreview": {
+    "hidden": false,
+    "state": "열 수 없음 · 아래 조치 확인",
+    "status": "invalid",
+    "meta": "corrupt.json · 알 수 없는 형식 버전 미상 · 1KiB",
+    "summary": "검사 결과\n호환 불가",
+    "issues": "JSON 문법이 손상되어 파일을 읽을 수 없습니다.\n텍스트 편집으로 수정하지 않은 원본 진단 파일을 다시 선택하세요.",
+    "normalizedDisabled": true,
+    "bodyOverflow": 0
+  },
+  "normalizedFilename": "ai-shorts-support-diagnostics-normalized-2026-07-30T02-58-17-105Z.json",
+  "diagnostics": [
+    {
+      "type": "support-diagnostics-import-preview",
+      "status": "invalid-json",
+      "schema": "",
+      "schemaVersion": 0
+    },
+    {
+      "type": "support-diagnostics-import-preview",
+      "status": "future-schema",
+      "schema": "ai-shorts-support-diagnostics-bundle",
+      "schemaVersion": 99
+    },
+    {
+      "type": "support-diagnostics-normalized-export",
+      "status": null,
+      "schema": null,
+      "schemaVersion": null
+    },
+    {
+      "type": "support-diagnostics-import-preview",
+      "status": "compatible",
+      "schema": "ai-shorts-analysis-timing-diagnostics",
+      "schemaVersion": 1
+    }
+  ],
+  "checks": {
+    "legacyPreviewCompatible": true,
+    "legacyPreviewContained": true,
+    "normalizedDownloadValid": true,
+    "normalizedDownloadPrivate": true,
+    "futureSchemaGuidance": true,
+    "corruptJsonGuidance": true,
+    "escapeClosesPreview": true,
+    "diagnosticsBounded": true,
+    "noRuntimeErrors": true
+  },
+  "passed": true,
+  "pageErrors": [],
+  "consoleErrors": []
+}
