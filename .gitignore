@@ -1,10 +1,43 @@
+# JavaScript
 node_modules/
 dist/
-*.zip
-check.log
-.DS_Store
-.env
-.firebase/
+coverage/
+*.tsbuildinfo
 
+# Python
 __pycache__/
-*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.py[cod]
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*service-account*.json
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Audio and model artifacts
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.onnx
+*.pt
+*.pth
+*.safetensors
+models/
+uploads/
+outputs/

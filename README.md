@@ -1,43 +1,52 @@
-# AI Shorts Studio v1.6.40
+# SoriON AI
 
-브라우저 안에서 원본 미디어를 분석하고 세로 쇼츠 후보를 편집·렌더링하는 로컬 우선 정적 웹 스튜디오입니다. 분석, Local AI, 미리보기, 렌더, 저장, 진단 책임을 분리한 모듈형 엔진 구조를 유지합니다.
+**한국인을 위한 모바일 우선 AI Voice Platform**
 
-## 이번 업데이트
+SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 복제를 하나의 모바일 중심 경험으로 제공하기 위한 신규 프로젝트입니다. 기존 프로젝트의 코드는 사용하지 않고 2026년 7월 31일에 완전히 새로 시작했습니다.
 
-- Ollama, llama.cpp, whisper.cpp, Local OpenAI-compatible 제공자마다 이름이 있는 localhost endpoint 프로필을 저장·전환·삭제할 수 있습니다.
-- 기존 단일 endpoint 설정은 업데이트 시 제공자별 기본 프로필로 자동 이관됩니다.
-- 프로필은 endpoint, 선호 모델, 최근 확인 결과, bounded 모델 목록을 독립 보존합니다.
-- 프로필 전환 시 이전 런타임 신뢰 상태를 재사용하지 않고 반드시 새 endpoint 연결 확인을 요구합니다.
-- 프로필 삭제 시 해당 endpoint에 속한 digest pin을 함께 정리하며 제공자별 마지막 프로필은 삭제할 수 없습니다.
-- 진단 snapshot에는 endpoint·프로필 원문 대신 개수와 비가역 token만 노출합니다.
-- Local AI 패널에 프로필 선택, 이름, 저장, 삭제, 최근 확인·모델·pin 요약 UI를 추가했습니다.
-- 신규 `local_ai_endpoint_profiles_smoke.js`를 등록해 migration, 격리, 전환, 삭제, privacy 계약을 검증합니다.
+## 현재 상태
 
-## 핵심 계약
+- 버전: `0.1.0 Foundation`
+- 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
+- API: FastAPI + Python
+- AI 엔진: 교체 가능한 어댑터 구조와 개발용 Mock 엔진
+- 저장: 브라우저 IndexedDB 우선, Firebase는 선택적 동기화 계층
+- 언어: 사용자 화면과 오류 메시지 모두 한국어 우선
 
-- endpoint 프로필은 제공자별 최대 8개, 최근 모델 cache는 프로필별 최대 40개로 제한됩니다.
-- 모델 pin은 계속 `provider + endpoint token + model id` 범위로 저장됩니다.
-- 프로필을 바꾸면 저장된 모델과 endpoint는 복원되지만 생성·전사 전 새 probe가 필요합니다.
-- 같은 제공자에 동일 endpoint 프로필을 중복 저장할 수 없습니다.
-- 로컬 AI endpoint는 loopback 주소만 허용하며 redirect를 따라가지 않습니다.
-- Local AI 진단 이력에는 prompt, schema, endpoint 주소, 원본 미디어 내용이 저장되지 않습니다.
+## 바로 시작하기
 
-## 실행
+1. `.env.example`을 `.env`로 복사합니다.
+2. 루트에서 `npm install`을 실행합니다.
+3. API 환경을 준비합니다: `cd services/api && uv sync --dev`.
+4. 터미널 1에서 `npm run dev`을 실행합니다.
+5. 터미널 2에서 `cd services/api && uv run uvicorn app.main:app --reload`를 실행합니다.
+6. 브라우저에서 `http://localhost:5173`을 엽니다.
 
-정적 파일 서버에서 프로젝트 루트를 열고 `index.html`에 접속합니다.
+자세한 순서는 [`START_HERE.md`](START_HERE.md)를 참고하세요.
 
-```bash
-python3 -m http.server 8080
+## 개발 원칙
+
+- 모바일 화면을 기준으로 먼저 완성합니다.
+- 소스 파일은 500줄을 넘기지 않습니다.
+- 실제 동작이 없는 UI를 배포하지 않습니다.
+- 음성 원본은 명시적 동의 없이 클라우드로 전송하지 않습니다.
+- `main` 직접 커밋을 금지하고 `develop`과 기능 브랜치를 사용합니다.
+- 기능에는 테스트와 문서 변경이 함께 포함되어야 합니다.
+
+## 디렉터리
+
+```text
+./        모바일 PWA
+services/api/    FastAPI와 AI 엔진 어댑터
+docs/            제품·기술·운영 문서
+scripts/         프로젝트 규칙 자동 검사
+.github/         CI와 협업 템플릿
 ```
 
-미디어, 모델, 프로젝트, 진단 정보는 로컬 우선으로 처리됩니다.
+## 브랜드
 
-## 검증
-
-- 전체 등록 QA: **318/318 통과**, 실패 0개
-- 신규 endpoint profile migration·격리·전환·삭제·pin cleanup 회귀 통과
-- 실제 loopback HTTP transport·shared deadline·probe cancellation 회귀 재통과
-- 서비스워커 앱 셸 135개 SHA-256 무결성 통과
-- 4개 viewport·5회 실미디어 heap·8회 process-memory·실제 30분 1080p Smart Reframe 감사 통과
-
-세부 인수인계는 `HANDOFF.md`, 감사 범위는 `AUDIT_REPORT.md`, 변경 범위는 `PATCH_REPORT.md`, 전달 규칙은 `DELIVERY_RULES.md`를 확인합니다.
+- 공식 서비스명: **SoriON AI**
+- 한국어 이름: **소리온 AI**
+- 제작 브랜드: **곰같은여우**
+- 내부 코드명: **SOA**
+- 슬로건: **목소리의 가능성을 켜다.**

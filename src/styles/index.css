@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-soa-paper: #f5f3ee;
+  --color-soa-ink: #171714;
+  --color-soa-muted: #74736d;
+  --color-soa-line: #dedbd2;
+  --color-soa-card: #fffefb;
+  --color-soa-lime: #d8ff72;
+  --color-soa-coral: #ff856f;
+  --color-soa-violet: #9d8cff;
+  --shadow-soa: 0 24px 70px rgba(34, 31, 25, 0.12);
+}
+
+:root {
+  color: var(--color-soa-ink);
+  background: var(--color-soa-paper);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-soa-paper);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overscroll-behavior-y: none;
+}
+
+button,
+textarea,
+select,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  color: #171714;
+  background: #d8ff72;
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.glass {
+  background: color-mix(in srgb, #fffefb 90%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.focus-ring:focus-visible {
+  outline: 3px solid color-mix(in srgb, #9d8cff 50%, transparent);
+  outline-offset: 2px;
+}
