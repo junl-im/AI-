@@ -130,7 +130,28 @@ await requireText('.github/workflows/ci.yml', [
   'actions/upload-pages-artifact@v5',
   'actions/deploy-pages@v5',
 ])
-await requireText('src/test/setup.ts', ["afterEach", "cleanup()", "Blob.prototype.arrayBuffer"])
+await requireText('src/test/setup.ts', [
+  'afterEach',
+  'cleanup()',
+  'Object.defineProperty(Blob.prototype',
+  "reader.readAsArrayBuffer(this)",
+])
+await requireText('src/tts/mockWave.test.ts', [
+  'async function readBlob',
+  "typeof blob.arrayBuffer === 'function'",
+  'reader.readAsArrayBuffer(blob)',
+])
+await requireText('src/components/layout/BrandMasthead.tsx', [
+  'data-testid="brand-title-microphone"',
+  'data-testid="voice-core-microphone"',
+])
+await requireText('src/components/layout/BrandMasthead.test.tsx', [
+  '문장을 목소리로, 목소리를 새로운 가능성으로.',
+  '한국어의 감정과 호흡을 더 자연스럽게.',
+  '생성부터 복제와 변환까지, 모바일에서 빠르게.',
+  "getByTestId('brand-title-microphone')",
+  "getByTestId('voice-core-microphone')",
+])
 
 await requireText('src/pages/VoiceClonePage.tsx', [
   '10초 안에 준비합니다.',

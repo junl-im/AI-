@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { BrandMasthead } from './BrandMasthead'
 
@@ -11,11 +11,13 @@ describe('BrandMasthead', () => {
     expect(screen.getAllByText('곰같은여우').length).toBeGreaterThan(0)
   })
 
-  it('contains rotating Korean-first messages and microphone marks', () => {
+  it('contains the current rotating copy and microphone identity', () => {
     render(<BrandMasthead />)
 
-    expect(screen.getByText('문장을 목소리로.')).toBeInTheDocument()
-    expect(screen.getByText('목소리를 새로운 가능성으로.')).toBeInTheDocument()
+    const introduction = within(screen.getByLabelText('SoriON 소개 문장'))
+    expect(introduction.getByText('문장을 목소리로, 목소리를 새로운 가능성으로.')).toBeInTheDocument()
+    expect(introduction.getByText('한국어의 감정과 호흡을 더 자연스럽게.')).toBeInTheDocument()
+    expect(introduction.getByText('생성부터 복제와 변환까지, 모바일에서 빠르게.')).toBeInTheDocument()
     expect(screen.getByTestId('brand-title-microphone')).toBeInTheDocument()
     expect(screen.getByTestId('voice-core-microphone')).toBeInTheDocument()
   })

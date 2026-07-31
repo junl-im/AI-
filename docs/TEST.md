@@ -144,3 +144,12 @@ npm run test:api
 - 손상 WAV와 5초 미만 WAV 거부
 
 현재 API 테스트 기준은 40개 이상 통과다.
+
+
+## 0.6.1 Web 배너·Blob 회귀 검사
+
+- BrandMasthead 테스트가 현재 10초 전환 설명 3종의 완전한 문구를 검사하는지 확인
+- 제목 마이크와 Voice Core 마이크에 안정적인 test id가 있는지 확인
+- JSDOM Blob에 `arrayBuffer`가 없을 때 FileReader fallback으로 RIFF/WAVE 헤더를 읽는지 확인
+- 전역 setup의 Blob 폴리필이 prototype 단순 대입이 아니라 `Object.defineProperty`를 사용하는지 확인
+- UI 문구 변경 시 구현과 테스트 계약을 함께 갱신하지 않으면 규칙 검사가 실패하는지 확인

@@ -1,5 +1,24 @@
 # HANDOVER
 
+## 2026-07-31 20:55 KST · v0.6.1
+
+1. 작업 일시: 2026-07-31 20:55 KST
+2. 대상·기준 버전: `0.6.0 → 0.6.1`
+3. 변경 내용: BrandMasthead의 현재 배너 문구·마이크 표식에 맞춰 Web 테스트를 갱신하고, JSDOM Blob 변환 fallback을 테스트 내부와 setup에 강화함.
+4. 변경 이유: 0.6.0 UI는 정상 렌더링됐지만 테스트가 0.5.x 시기의 짧은 문구와 사라진 test id를 계속 기대해 Web quality가 실패했기 때문임.
+5. 영향 범위: BrandMasthead 컴포넌트·테스트, Mock WAV 테스트, Vitest setup, 프로젝트 규칙 검사, 버전·문서.
+6. 주요 파일: `BrandMasthead.tsx`, `BrandMasthead.test.tsx`, `mockWave.test.ts`, `src/test/setup.ts`, `check-project-rules.mjs`.
+7. 검증 결과: 프로젝트 규칙 통과, FastAPI 44 tests passed, compileall passed, 패치 적용본과 전체본 일치 확인.
+8. 제한·주의: sandbox npm registry에 `@tailwindcss/vite`가 없어 정식 Vitest·ESLint·Vite build는 실행하지 못했으며 GitHub Actions 확인이 필요함.
+9. 산출물: `SoriON-AI-0.6.1-full.zip`, `SoriON-AI-0.6.0-to-0.6.1-patch.zip`, `SoriON-AI-0.6.1-artifacts.sha256`.
+10. 다음 예상 업데이트: `0.7.0 CosyVoice Worker Streaming & Clone Execution`.
+
+## 다음 예상 업데이트
+
+- CI Web·API·Pages가 모두 성공한 뒤 CosyVoice Worker 실제 실행 경계 구현
+- Worker health, GPU·CUDA·VRAM·모델 진단
+- 스트리밍 TTS·복제, 취소·재시도, Dock 세션 복원
+
 ## 2026-07-31 18:39 KST · v0.6.0
 
 1. 작업 일시: 2026-07-31 18:39 KST

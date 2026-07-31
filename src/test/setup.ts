@@ -7,24 +7,29 @@ afterEach(() => {
   document.body.replaceChildren()
 })
 
-if (!Blob.prototype.arrayBuffer) {
-  Blob.prototype.arrayBuffer = function arrayBuffer(): Promise<ArrayBuffer> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.addEventListener('load', () => {
-        if (reader.result instanceof ArrayBuffer) {
-          resolve(reader.result)
-          return
-        }
-        reject(new TypeError('Blob을 ArrayBuffer로 변환하지 못했습니다.'))
+if (typeof Blob.prototype.arrayBuffer !== 'function') {
+  Object.defineProperty(Blob.prototype, 'arrayBuffer', {
+    configurable: true,
+    writable: true,
+    value(this: Blob): Promise<ArrayBuffer> {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.addEventListener('load', () => {
+          if (reader.result instanceof ArrayBuffer) {
+            resolve(reader.result)
+            return
+          }
+          reject(new TypeError('Blob을 ArrayBuffer로 변환하지 못했습니다.'))
+        })
+        reader.addEventListener('error', () => {
+          reject(reader.error ?? new Error('Blob 읽기에 실패했습니다.'))
+        })
+        reader.readAsArrayBuffer(this)
       })
-      reader.addEventListener('error', () => {
-        reject(reader.error ?? new Error('Blob 읽기에 실패했습니다.'))
-      })
-      reader.readAsArrayBuffer(this)
-    })
-  }
+    },
+  })
 }
+
 
 if (!URL.createObjectURL) {
   URL.createObjectURL = () => 'blob:sorion-test'

@@ -7,7 +7,7 @@ const subtitles = [
 ]
 
 function TitleMicrophone() {
-  return <span className="soa-title-mic" aria-hidden="true"><i /><i /><i /><i /></span>
+  return <span className="soa-title-mic" aria-hidden="true" data-testid="brand-title-microphone"><i /><i /><i /><i /></span>
 }
 
 function LightningWave() {
@@ -30,7 +30,7 @@ export function BrandMasthead() {
       <div className="soa-masthead__inner">
         <div className="soa-meta-bar">
           <div className="soa-meta-group">
-            <span className="soa-meta-label">BUILD</span><strong>v0.6.0</strong>
+            <span className="soa-meta-label">BUILD</span><strong>v0.6.1</strong>
             <span className="soa-meta-divider" aria-hidden="true" />
             <span className="soa-device-mark" aria-hidden="true"><i /><b /></span>
             <span>모바일 · PC 호환</span>
@@ -56,7 +56,7 @@ export function BrandMasthead() {
 
           <div className="soa-voice-console" aria-hidden="true">
             <div className="soa-voice-console__topline"><span>VOICE CORE</span><span className="soa-live-dot">ONLINE</span></div>
-            <div className="soa-console-mic"><i /><i /><i /><i /></div>
+            <div className="soa-console-mic" data-testid="voice-core-microphone"><i /><i /><i /><i /></div>
             <div className="soa-voice-console__copy"><strong>소리의 가능성을 켜다.</strong><span>SoriON Voice Engine</span></div>
             <LightningWave />
           </div>

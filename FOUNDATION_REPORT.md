@@ -1,30 +1,31 @@
-# SoriON AI 0.6.0 Result Report
+# SoriON AI 0.6.1 Result Report
 
-## Completed
+## 작업 목적
 
-- Added a mobile-first three-step voice clone foundation: capture, quality and consent, sample preparation.
-- Added direct microphone recording and WAV, MP3, M4A, WEBM, OGG upload entry points.
-- Added client-side duration, silence, clipping and RMS analysis.
-- Added IndexedDB v3 `voiceProfiles` local-first storage.
-- Added explicit rights, AI disclosure and prohibited-use consent gates.
-- Added FastAPI voice clone capability, profile preparation and deletion endpoints.
-- Added UUID-only sample storage, 25MB limit, seven-day cleanup and WAV validation.
-- Added a separate CosyVoice Worker adapter boundary without importing the model into the gateway.
-- Expanded the fixed Dock with a queue, previous and next, repeat, playback rate and download.
-- Connected TTS results and voice samples to one audio orchestration store.
-- Removed runtime caches and `.sorion` data from release artifacts.
+0.6.0 배너 구현과 Web 테스트 계약이 어긋나 GitHub Actions가 실패한 문제를 수정한다.
 
-## Verification
+## 원인
 
-- FastAPI: 44 tests passed on the available Python 3.13 environment.
-- Python compileall passed.
-- Strict TypeScript check with local external-module declarations passed for source and tests.
-- Project delivery and source rules passed after documentation was updated.
-- Full archive and patch-applied tree are compared before delivery.
+- 배너 설명은 긴 문장 3종으로 변경됐지만 테스트는 과거 짧은 문장 2종을 조회했다.
+- 테스트가 요구하는 마이크 test id가 컴포넌트 리팩터링 과정에서 빠졌다.
+- JSDOM Blob 구현에 따라 `arrayBuffer()`가 없을 수 있는데 테스트가 해당 메서드를 직접 호출했다.
 
-## Not completed
+## 수정
 
-- CosyVoice model download and CUDA execution are not bundled.
-- Actual zero-shot clone inference is not presented as complete.
-- MP3, M4A, WEBM and OGG server-side waveform decoding awaits the worker or FFmpeg layer.
-- The sandbox npm registry does not provide `@tailwindcss/vite`, so official npm install, Vitest, ESLint and Vite production build must be confirmed by GitHub Actions.
+- 현재 설명 3종을 정확히 검사하도록 BrandMasthead 테스트 갱신
+- 제목·Voice Core 마이크 test id 복원
+- Mock WAV 테스트에 FileReader fallback 추가
+- Blob 전역 폴리필을 `Object.defineProperty`로 강화
+- 동일 회귀를 차단하는 프로젝트 규칙 추가
+
+## 검증
+
+- `npm run quality:rules`: 통과
+- FastAPI pytest: 44 passed
+- Python compileall: 통과
+- 전체본과 패치 적용본 파일 해시 일치
+- npm install: sandbox 내부 registry의 `@tailwindcss/vite` 미제공으로 실행 불가
+
+## 배포 판단
+
+GitHub Actions에서 Web quality, API quality, Pages deploy가 모두 성공한 뒤 0.7.0 기능 개발을 진행한다.

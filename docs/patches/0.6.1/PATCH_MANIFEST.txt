@@ -1,0 +1,37 @@
+SoriON AI Patch Manifest
+From: 0.6.0
+To: 0.6.1
+Delete files: none
+
+Files:
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/API.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/RELEASE.md
+docs/TEST.md
+docs/patches/0.6.1/DELETE_LIST.txt
+docs/patches/0.6.1/PATCH_MANIFEST.txt
+docs/patches/0.6.1/PATCH_README.md
+package.json
+scripts/check-project-rules.mjs
+services/api/app/api/routes/engines.py
+services/api/app/api/routes/health.py
+services/api/app/api/routes/quality.py
+services/api/app/api/routes/setup.py
+services/api/app/engines/voiceclone/cosyvoice_worker.py
+services/api/app/main.py
+services/api/pyproject.toml
+services/api/tests/test_engine_strategy.py
+services/api/tests/test_health.py
+services/api/tests/test_quality.py
+services/api/tests/test_setup.py
+src/components/layout/BrandMasthead.test.tsx
+src/components/layout/BrandMasthead.tsx
+src/quality/qualityReport.test.ts
+src/quality/qualityReport.ts
+src/test/setup.ts
+src/tts/mockWave.test.ts

@@ -1,5 +1,7 @@
 # NEXT UPDATE
 
+현재 기준 버전: `0.6.1`
+
 ## 목표 버전
 
 v0.7.0 CosyVoice Worker Streaming & Clone Execution
@@ -16,6 +18,12 @@ v0.7.0 CosyVoice Worker Streaming & Clone Execution
 - 복제 결과에 AI 합성 표시와 프로필 출처 연결
 - MP3, M4A, WEBM, OGG 서버 재분석
 - Dock 큐의 프로젝트 세션 저장과 복구
+
+## 0.6.1에서 넘기는 결정
+
+- 배너 카피 테스트는 현재 화면 문구와 함께 변경해야 한다.
+- Blob 기반 WAV 테스트는 JSDOM 메서드 존재 여부에 의존하지 않는다.
+- Web quality가 다시 초록색이 되기 전에는 0.7.0 기능을 병합하지 않는다.
 
 ## 선행 조건
 

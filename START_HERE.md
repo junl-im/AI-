@@ -40,12 +40,12 @@ cd services/api
 uv run uvicorn app.main:app --reload
 ```
 
-## 4. 0.6.0 첫 확인
+## 4. 0.6.1 첫 확인
 
 - `.github/workflows`에 `ci.yml` 하나만 남았는지 확인합니다.
 - Web quality에서 TypeScript, Vitest, ESLint, Vite build가 통과하는지 확인합니다.
 - API quality에서 Ruff와 pytest 44개 이상이 Python 3.10으로 통과하는지 확인합니다.
-- 상단에 `BUILD v0.6.0`이 표시되는지 확인합니다.
+- 상단에 `BUILD v0.6.1`이 표시되는지 확인합니다.
 - Dock 메뉴에 `복제`가 추가됐는지 확인합니다.
 - 복제 화면에서 마이크 녹음과 파일 선택이 가능한지 확인합니다.
 - 10초 가이드와 길이·무음·클리핑·음량 결과가 표시되는지 확인합니다.
@@ -80,10 +80,10 @@ MeloTTS는 별도 모델과 PyTorch 계열 의존성이 필요하므로 기본 A
 
 1. Pull Request를 `main`에 병합합니다.
 2. Actions에서 `SoriON CI & Pages` 실행 하나가 성공하는지 확인합니다.
-3. 공개 주소에서 `BUILD v0.6.0`을 확인합니다.
+3. 공개 주소에서 `BUILD v0.6.1`을 확인합니다.
 4. 공개 Pages에는 Python TTS 엔진이 포함되지 않으므로 API 주소를 별도 설정하지 않으면 Demo WAV가 사용됩니다.
 
 
-## 0.6.0 운영 연결과 복제
+## 0.6.1 운영 연결과 복제
 
 설정 화면에서 Voice API 주소를 입력하고 연결 검사를 실행합니다. 목소리 복제 원칙은 `docs/VOICE_CLONE.md`, Dock 구조는 `docs/PLAYER_DOCK.md`를 확인합니다.

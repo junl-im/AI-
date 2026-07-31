@@ -75,3 +75,12 @@ Semantic Versioning을 사용한다.
 - 삭제 파일: 없음
 - `.git`, `node_modules`, `dist`, `.sorion`, 가상환경, Python 캐시, 테스트 캐시는 포함하지 않는다.
 - 배포 전 `quality:rules`, Web quality, API quality · Python 3.10, Pages 배포를 확인한다.
+
+
+## 0.6.1 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.6.1-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.6.0-to-0.6.1-patch.zip`
+- 패치 기준 버전: `0.6.0`
+- 삭제 파일: 없음
+- 목적: Web quality의 배너 기대값과 JSDOM Blob 호환성 회귀 수정

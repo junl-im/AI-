@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.6.1 - 2026-07-31
+
+### Fixed
+
+- Compact 배너로 변경된 뒤에도 과거 짧은 문구를 찾던 `BrandMasthead` 테스트 수정
+- 제목 마이크와 Voice Core 마이크의 안정적인 회귀 검사용 test id 복원
+- JSDOM에서 `Blob.arrayBuffer()`가 없거나 덮어쓰기 어려운 환경의 WAV 테스트 수정
+- 테스트 폴리필을 단순 prototype 대입 대신 `Object.defineProperty` 방식으로 강화
+
+### Added
+
+- 배너의 현재 한국어 설명 3종과 마이크 표식이 구현·테스트에 함께 존재하는지 규칙 검사
+- Mock WAV 테스트가 FileReader fallback을 직접 보유하는지 규칙 검사
+
+### Changed
+
+- 웹·API·품질 보고서 버전을 `0.6.1`로 통일
+
+### Verification
+
+- FastAPI 테스트 44개 통과
+- 프로젝트 절대 규칙 검사 통과
+- Python compileall 통과
+- npm registry 제한으로 로컬 Vitest 전체 실행은 불가하며 GitHub Actions가 최종 판정
+
 ## 0.6.0 - 2026-07-31
 
 ### Added

@@ -6,7 +6,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.6.0 Voice Clone & Advanced Linked Player`
+- 버전: `0.6.1 Voice Clone & Advanced Linked Player`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
 - 주력 AI 엔진 방향: Fun-CosyVoice 3 어댑터 예정
@@ -18,7 +18,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 - 저장: IndexedDB v3 프로젝트·품질 평가·음성 프로필, Firebase는 선택적 동기화 계층
 - CI·배포: Web·API·Pages를 단일 GitHub Actions 실행으로 관리
 
-## 0.6.0에서 가능한 작업
+## 0.6.1에서 가능한 작업
 
 1. 문장을 입력해 AI 또는 로컬 한국어 음성을 생성합니다.
 2. 엔진이 지원하는 감정·속도·피치 설정만 활성화합니다.
@@ -37,7 +37,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 MeloTTS, Local TTS, Demo WAV는 화면과 프로젝트 데이터에서 서로 다른 모드로 표시됩니다.
 
-상단 브랜드 영역은 모바일·PC 모두 높이를 줄인 배너형 구조이며, `곰같은여우 SoriON AI`와 핵심 문장이 순차적으로 페이드됩니다. 로고의 `AI` 중 `I`와 PC Voice Core에는 SVG 없이 CSS로 만든 마이크를 사용합니다. 0.6.0에서는 목소리 복제 준비와 재생 대기열을 추가했습니다. 실제 CosyVoice 모델이 연결되지 않은 상태는 샘플 준비로만 표시합니다. 주력 엔진은 Fun-CosyVoice 3, 복제 전문가용 보조 엔진은 GPT-SoVITS이며 MeloTTS와 운영체제 음성은 로컬 대체 엔진으로 유지합니다.
+상단 브랜드 영역은 모바일·PC 모두 높이를 줄인 배너형 구조이며, `곰같은여우 SoriON AI`와 핵심 문장이 순차적으로 페이드됩니다. 로고의 `AI` 중 `I`와 PC Voice Core에는 SVG 없이 CSS로 만든 마이크를 사용합니다. 0.6.1에서는 목소리 복제 준비와 재생 대기열을 추가했습니다. 실제 CosyVoice 모델이 연결되지 않은 상태는 샘플 준비로만 표시합니다. 주력 엔진은 Fun-CosyVoice 3, 복제 전문가용 보조 엔진은 GPT-SoVITS이며 MeloTTS와 운영체제 음성은 로컬 대체 엔진으로 유지합니다.
 
 ## 바로 시작하기
 

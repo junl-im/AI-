@@ -22,7 +22,7 @@ class CosyVoiceCloneEngine:
             supports_voice_clone=True,
             ready=ready,
             reason=(
-                "Worker URL은 설정됐지만 0.6.0에서는 health 확인 전 준비 완료로 표시하지 않습니다."
+                "Worker URL은 설정됐지만 0.6.1에서는 health 확인 전 준비 완료로 표시하지 않습니다."
                 if configured
                 else "SORION_COSYVOICE_WORKER_URL을 설정하면 별도 모델 Worker와 연결됩니다."
             ),
