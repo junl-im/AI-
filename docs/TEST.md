@@ -78,6 +78,13 @@ npm run test:api
 - 같은 컴포넌트를 여러 테스트에서 렌더링해도 이전 DOM이 남지 않는지 확인
 - GitHub Pages Source가 `GitHub Actions`인지 확인
 
+## 0.5.4 setup-uv 액션 고정 검사
+
+- `.github/workflows/ci.yml`에 `astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b`가 있는지 확인
+- setup-uv 입력에 `version: '0.11.32'`가 있는지 확인
+- `astral-sh/setup-uv@v8` 같은 부동 태그가 다시 들어오면 규칙 검사가 실패하는지 확인
+- API Job이 Python 3.10 설정 뒤 uv 설치·동기화·Ruff·pytest 순서로 실행되는지 확인
+
 ## 0.5.3 CI 테스트 호환성 검사
 
 - JSDOM의 `Blob`에 `arrayBuffer()`가 없어도 WAV RIFF 헤더 테스트가 실행되는지 확인

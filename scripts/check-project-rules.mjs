@@ -71,7 +71,8 @@ await requireText('docs/RELEASE.md', ['전체 통파일 ZIP', '덮어쓰기용 �
 await requireText('.github/workflows/ci.yml', [
   'name: SoriON CI & Pages',
   'branches:',
-  'astral-sh/setup-uv@v8',
+  'astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b',
+  "version: '0.11.32'",
   "python-version: '3.10'",
   'actions/checkout@v6',
   'actions/setup-node@v6',
@@ -94,6 +95,11 @@ try {
 
 
 const workflowContent = await readFile(join(root, '.github/workflows/ci.yml'), 'utf8')
+
+if (/astral-sh\/setup-uv@v\d+(?:\.\d+){0,2}/.test(workflowContent)) {
+  failures.push('.github/workflows/ci.yml: setup-uv는 존재 여부가 변할 수 있는 태그가 아니라 검증된 커밋 SHA로 고정해야 합니다.')
+}
+
 for (const legacyAction of ['actions/checkout@v4', 'actions/setup-node@v4', 'actions/setup-python@v4', 'astral-sh/setup-uv@v6', 'actions/configure-pages@v5', 'actions/upload-pages-artifact@v4', 'actions/deploy-pages@v4']) {
   if (workflowContent.includes(legacyAction)) {
     failures.push(`.github/workflows/ci.yml: Node.js 20 기반 액션 ${legacyAction}이 남아 있습니다.`)

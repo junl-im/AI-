@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 0.5.4 - 2026-07-31
+
+### Fixed
+
+- GitHub Actions가 존재하지 않는 `astral-sh/setup-uv@v8` 태그를 해석하지 못해 API Job이 시작 전에 종료되던 문제 수정
+
+### Changed
+
+- setup-uv를 Astral 공식 문서의 불변 커밋 `08807647e7069bb48b6ef5acd8ec9567f424441b`로 고정 (`v8.1.0`)
+- 액션이 설치하는 uv 실행 파일을 `0.11.32`로 고정해 CI 재현성 강화
+- `setup-python@v6`가 Python 3.10을 준비하고 setup-uv는 uv 설치와 API 캐시만 담당하도록 역할 분리
+- 프로젝트 규칙 검사에서 `setup-uv@v8` 같은 부동 태그를 금지하고 공식 SHA·uv 버전 누락을 차단
+- 웹과 API 버전을 `0.5.4`로 갱신
+
+### Notes
+
+- 액션 버전은 실제 존재 여부를 공식 저장소·문서에서 확인하고, 보안과 재현성을 위해 가능한 경우 커밋 SHA로 고정한다.
+- 이번 수정은 API 코드 오류가 아니라 Job 준비 단계의 Action 참조 오류를 해결한다.
+
 ## 0.5.3 - 2026-07-31
 
 ### Fixed

@@ -750,3 +750,74 @@ SoriON AI의 목표는 한국인이 모바일에서 앱처럼 사용하며 10초
 ### 다음 예상 업데이트
 
 CI의 Web·API·Deploy가 모두 성공하면 `0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 샘플 품질 검사, 명시적 동의, 로컬 보관·삭제, 교체형 VoiceCloneEngine 계약을 구현한다.
+
+## 2026-07-31 15:43 KST - 0.5.4 setup-uv Action Pin Patch
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.5.3`
+- 대상 버전: `0.5.4`
+
+### 프로젝트 목표 재확인
+
+SoriON AI는 한국인이 모바일에서 앱처럼 사용하며 10초 안에 음성 생성·복제·변환을 시작하는 차세대 AI Voice Platform이다. 기능 개발을 이어가기 전에 CI가 확실히 실행돼야 하므로, 이번 패치는 API Job이 시작조차 못한 Action 참조 문제를 우선 복구한다.
+
+### 변경 내용
+
+- 존재하지 않는 `astral-sh/setup-uv@v8` 참조를 제거했다.
+- Astral 공식 문서가 제시한 setup-uv v8.1.0 커밋 SHA `08807647e7069bb48b6ef5acd8ec9567f424441b`로 고정했다.
+- setup-uv가 설치할 uv 버전을 `0.11.32`로 고정했다.
+- Python 3.10 준비는 `actions/setup-python@v6`, uv 설치·캐시는 setup-uv가 담당하도록 역할을 분리했다.
+- 프로젝트 규칙 검사에 setup-uv 부동 태그 금지와 공식 SHA·uv 버전 필수 검사를 추가했다.
+- 웹·API·문서 버전을 `0.5.4`로 갱신했다.
+
+### 변경 이유
+
+- GitHub Actions는 존재하지 않는 Action ref를 Job 실행 전에 해석하므로, 잘못된 `@v8` 태그 하나만으로 API 테스트·Ruff가 전혀 실행되지 않았다.
+- 공식 문서가 권장하는 불변 SHA는 태그 이동·누락 위험을 줄이고 동일 Action 코드를 재현한다.
+- uv 실행 파일 버전까지 고정하면 의존성 해결 동작이 예고 없이 바뀌는 위험을 줄일 수 있다.
+
+### 영향 범위
+
+- GitHub Actions API quality Job
+- Python 3.10·uv 설치 단계
+- 프로젝트 자동 규칙 검사
+- 배포·테스트·릴리스 문서
+
+### 주요 변경 파일
+
+- `.github/workflows/ci.yml`
+- `scripts/check-project-rules.mjs`
+- `package.json`
+- `services/api/pyproject.toml`
+- `docs/CHANGELOG.md`
+- `docs/TEST.md`
+- `docs/GITHUB_PAGES.md`
+- `docs/patches/0.5.4/`
+
+### 검증 결과
+
+- 프로젝트 규칙 검사 통과
+- workflow에 공식 setup-uv SHA와 uv 0.11.32가 포함됐는지 검사 통과
+- setup-uv 부동 태그가 남지 않았는지 검사 통과
+- Python 전체 문법 컴파일 통과
+- FastAPI 테스트 31개 통과 (현재 제공 Python 런타임)
+- 전체본과 패치 적용본 198개 파일 동등성 검사 통과
+- 패치 변경·추가 파일 26개 확인
+- 전체 ZIP·패치 ZIP 무결성 검사 통과
+
+### 알려진 제한과 주의사항
+
+- 현재 컨테이너는 CPython 3.10 다운로드 주소의 DNS 조회가 불가능해 실제 Python 3.10 실행을 재현하지 못했다. GitHub-hosted runner에서 Action 다운로드와 Python 3.10 Job 성공을 Push 후 최종 확인해야 한다.
+- 향후 Action 갱신 시 major 태그를 추측하지 말고 공식 릴리스와 문서에서 커밋 SHA를 확인해야 한다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.5.4-full.zip`
+- 패치: `SoriON-AI-0.5.3-to-0.5.4-patch.zip`
+- 체크섬: `SoriON-AI-0.5.4-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+CI의 Web·API·Deploy가 모두 성공하면 `0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 샘플 품질 검사, 명시적 동의, 로컬 보관·삭제, 교체형 VoiceCloneEngine 계약을 구현한다.
+
