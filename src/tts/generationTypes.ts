@@ -10,6 +10,7 @@ export interface GeneratedAudio {
   source: AudioSource
   durationSeconds: number
   result: TtsSynthesisResult
+  revokeOnRemove?: boolean
 }
 
 export interface GenerationAttempt {

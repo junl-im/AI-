@@ -1,5 +1,49 @@
 # CHANGELOG
 
+## 0.6.0 - 2026-07-31
+
+### Added
+
+- 모바일 마이크 녹음과 WAV·MP3·M4A·WEBM·OGG 음성 파일 선택
+- 길이, 무음 비율, 클리핑, RMS 음량의 브라우저 1차 품질 검사
+- `녹음 → 확인·동의 → 목소리 만들기` 3단계 복제 준비 화면
+- 권리 확인, AI 합성 고지, 사칭·사기 금지의 명시적 동의 게이트
+- IndexedDB v3 `voiceProfiles` 로컬 우선 저장소
+- FastAPI `/voice-clones/capabilities`, `/profiles`, 삭제 API
+- UUID 샘플 저장, 25MB 제한, 7일 TTL, WAV 컨테이너·최소 길이 검사
+- 별도 `CosyVoiceCloneEngine` Worker 연결 경계
+- Dock 재생 대기열, 이전·다음, 전체·한 곡 반복, 재생 속도, 다운로드
+- TTS 결과와 복제 원본 샘플의 단일 플레이어 orchestration
+- Object URL 트랙 소유권과 제거 시 메모리 해제
+
+### Changed
+
+- 하단 Dock 메뉴를 만들기, 복제, 품질, 프로젝트 네 항목으로 변경
+- 브라우저 FormData 요청은 `Content-Type`을 강제하지 않도록 HTTP 클라이언트 수정
+- API와 웹 표시 버전을 `0.6.0`으로 통일
+- 릴리스 산출물에서 `.sorion`, Python 캐시, 테스트 캐시를 제거
+
+### Security
+
+- 동의가 하나라도 빠진 복제 프로필 요청 차단
+- 실제 Worker가 없을 때 복제 성공으로 표시하지 않음
+- 원본 음성의 공개 조회 라우트 미제공
+- 동의 철회 시 로컬과 API 임시 샘플 삭제 요청
+
+### Verification
+
+- FastAPI 테스트 44개 통과
+- Python compileall 통과
+- 외부 모듈 선언 기반 TypeScript strict 소스·테스트 검사 통과
+
+## 0.5.8 - 2026-07-31
+
+- Compact 10-second subtitle brand banner.
+- Contained lightning waveform in Voice Core.
+- Desktop two-frame workspace and mobile single-frame layout.
+- Settings moved from Dock to top meta bar.
+- Fixed linked-player Dock based on selectively re-authored FoxBear playback concepts.
+
 ## 0.5.7 - 2026-07-31
 
 ### Fixed
@@ -353,11 +397,3 @@
 - Pull Request 템플릿에 전달 문서와 릴리스 산출물 확인 항목 추가
 - RELEASE와 CODING_RULE 문서에 전달·인수인계 차단 조건 추가
 - 웹과 API 버전을 `0.1.4`로 갱신
-
-## 0.5.8 - 2026-07-31
-
-- Compact 10-second subtitle brand banner.
-- Contained lightning waveform in Voice Core.
-- Desktop two-frame workspace and mobile single-frame layout.
-- Settings moved from Dock to top meta bar.
-- Fixed linked-player Dock based on selectively re-authored FoxBear playback concepts.

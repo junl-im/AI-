@@ -3,7 +3,7 @@ import { extname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
-const ignored = new Set(['.git', '.venv', 'node_modules', 'dist', 'coverage', '__pycache__', '.pytest_cache', '.ruff_cache'])
+const ignored = new Set(['.git', '.venv', 'node_modules', 'dist', 'coverage', '__pycache__', '.pytest_cache', '.ruff_cache', '.sorion'])
 const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.py', '.css'])
 const failures = []
 
@@ -131,6 +131,40 @@ await requireText('.github/workflows/ci.yml', [
   'actions/deploy-pages@v5',
 ])
 await requireText('src/test/setup.ts', ["afterEach", "cleanup()", "Blob.prototype.arrayBuffer"])
+
+await requireText('src/pages/VoiceClonePage.tsx', [
+  '10초 안에 준비합니다.',
+  'prepareVoiceCloneProfile',
+  'prohibitedUseConfirmed',
+])
+await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
+  '대기열',
+  'selectNext',
+  'playbackRate',
+  'cycleRepeatMode',
+])
+await requireText('services/api/app/api/routes/voice_clones.py', [
+  'SOA-5001',
+  'rights_confirmed',
+  'prohibited_use_confirmed',
+  '/capabilities',
+  '/profiles',
+])
+await requireText('services/api/app/engines/voiceclone/cosyvoice_worker.py', [
+  'Fun-CosyVoice 3 Worker',
+  'SORION_COSYVOICE_WORKER_URL',
+])
+await requireText('docs/VOICE_CLONE.md', [
+  '로컬 우선',
+  '명시적 동의',
+  '실제 복제 성공으로 표시하지 않는다',
+])
+await requireText('docs/PLAYER_DOCK.md', [
+  '재생 대기열',
+  '이전·다음',
+  '반복',
+  '재생 속도',
+])
 
 try {
   const workflowFiles = await readdir(join(root, '.github', 'workflows'))

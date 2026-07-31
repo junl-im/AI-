@@ -1,0 +1,155 @@
+.soa-dock__inner {
+  position: relative;
+}
+
+.soa-dock__nav {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.soa-player-transport {
+  display: grid;
+  grid-template-columns: 28px 38px 28px;
+  align-items: center;
+  gap: 3px;
+}
+
+.soa-player-transport > button {
+  height: 30px;
+  border: 0;
+  border-radius: 10px;
+  color: rgba(238, 243, 255, 0.75);
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 900;
+}
+
+.soa-player-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  grid-column: 1 / -1;
+}
+
+.soa-player-actions button,
+.soa-player-actions a,
+.soa-player-actions select {
+  min-height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  color: rgba(238, 243, 255, 0.75);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 9px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.soa-player-actions button,
+.soa-player-actions a {
+  display: inline-grid;
+  min-width: 30px;
+  place-items: center;
+  padding: 0 8px;
+}
+
+.soa-player-actions select {
+  padding: 0 5px;
+}
+
+.soa-player-actions .is-active {
+  color: #fff;
+  border-color: rgba(157, 140, 255, 0.5);
+  background: rgba(157, 140, 255, 0.2);
+}
+
+.soa-player-queue {
+  position: absolute;
+  right: 8px;
+  bottom: calc(100% + 8px);
+  width: min(420px, calc(100vw - 20px));
+  max-height: 48vh;
+  overflow: auto;
+  border: 1px solid rgba(154, 177, 221, 0.2);
+  border-radius: 20px;
+  padding: 12px;
+  color: #eef3ff;
+  background: rgba(10, 16, 29, 0.98);
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.42);
+}
+
+.soa-player-queue__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.soa-player-queue__head strong {
+  font-size: 12px;
+}
+
+.soa-player-queue__head button {
+  border: 0;
+  color: rgba(238, 243, 255, 0.5);
+  background: transparent;
+  font-size: 9px;
+}
+
+.soa-player-queue > p {
+  margin: 14px 0 4px;
+  color: rgba(238, 243, 255, 0.45);
+  font-size: 11px;
+}
+
+.soa-player-queue ol {
+  display: grid;
+  gap: 5px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.soa-player-queue li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px;
+  gap: 4px;
+}
+
+.soa-player-queue li > button:first-child {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 9px;
+  color: rgba(238, 243, 255, 0.72);
+  text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.soa-player-queue li.is-current > button:first-child {
+  color: #fff;
+  background: rgba(157, 140, 255, 0.16);
+}
+
+.soa-player-queue li strong {
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.soa-player-queue li small,
+.soa-player-queue li span {
+  color: rgba(238, 243, 255, 0.4);
+  font-size: 8px;
+}
+
+.soa-player-queue li > button:last-child {
+  border: 0;
+  border-radius: 10px;
+  color: rgba(238, 243, 255, 0.45);
+  background: rgba(255, 255, 255, 0.04);
+}
+

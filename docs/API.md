@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.5.7",
+  "version": "0.6.0",
   "default_engine": "auto"
 }
 ```
@@ -43,7 +43,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.5.7",
+  "version": "0.6.0",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -163,7 +163,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.5.7",
+  "version": "0.6.0",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
@@ -200,3 +200,47 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 ```
 
 `phase`는 `queued`, `normalizing`, `generating`, `merging`, `completed`, `cancelled`, `failed` 중 하나다.
+
+
+## GET /voice-clones/capabilities
+
+현재 복제 Worker 준비 상태, 최대 파일 크기, 권장 녹음 길이, 허용 확장자를 반환한다.
+
+```json
+{
+  "engine_id": "cosyvoice3-worker",
+  "engine_name": "Fun-CosyVoice 3 Worker",
+  "ready": false,
+  "reason": "SORION_COSYVOICE_WORKER_URL을 설정하면 별도 모델 Worker와 연결됩니다.",
+  "recommended_seconds": 10,
+  "max_file_bytes": 26214400,
+  "accepted_extensions": [".m4a", ".mp3", ".ogg", ".wav", ".webm"]
+}
+```
+
+## POST /voice-clones/profiles
+
+`multipart/form-data` 요청을 사용한다.
+
+- `sample`: 음성 파일
+- `display_name`: 프로필 표시 이름
+- `consent_json`: 권리, AI 고지, 금지 용도, 동의 시각, 사용 목적
+- `client_analysis_json`: 길이, 무음, 클리핑, 음량 분석
+
+세 가지 동의 확인이 모두 참이 아니면 `SOA-5001`로 거부한다. 차단된 품질은 `SOA-5007`로 거부한다. WAV는 서버에서 컨테이너와 5초 최소 길이를 다시 확인한다. 실제 Worker가 없으면 `engine-unavailable`이며 복제 성공으로 표시하지 않는다.
+
+## DELETE /voice-clones/profiles/{profile_id}
+
+UUID에 연결된 원본 샘플과 JSON 동의 메타데이터를 삭제한다. 원본 샘플은 공개 조회 API로 제공하지 않는다.
+
+## 음성 복제 오류 코드
+
+- `SOA-5001`: 권한·AI 고지·금지 용도 동의 누락
+- `SOA-5002`: 지원하지 않는 음성 확장자
+- `SOA-5003`: 25MB 파일 크기 초과
+- `SOA-5004`: 빈 파일
+- `SOA-5005`: 잘못된 동의 JSON
+- `SOA-5006`: 잘못된 품질 분석 JSON
+- `SOA-5007`: 클라이언트 품질 검사 차단
+- `SOA-5008`: 손상된 WAV
+- `SOA-5009`: 5초 미만 WAV

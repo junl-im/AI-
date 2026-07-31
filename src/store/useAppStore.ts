@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppPage = 'home' | 'quality' | 'projects' | 'settings'
+export type AppPage = 'home' | 'clone' | 'quality' | 'projects' | 'settings'
 export type BackendStatus = 'unknown' | 'checking' | 'online' | 'offline'
 
 interface AppState {

@@ -20,7 +20,7 @@ const DEFAULT_TEXT = '안녕하세요. 목소리의 가능성을 켜는 소리�
 
 export function HomePage() {
   const showNotice = useAppStore((state) => state.showNotice)
-  const setPlayerAudio = usePlayerStore((state) => state.setAudio)
+  const enqueuePlayerAudio = usePlayerStore((state) => state.enqueue)
   const [text, setText] = useState(DEFAULT_TEXT)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
   const [emotion, setEmotion] = useState<VoiceEmotion>('neutral')
@@ -74,7 +74,8 @@ export function HomePage() {
     const audio = await generation.generate({ request, voiceName: voice.shortName })
     if (!audio) return
 
-    setPlayerAudio(audio, request.text.slice(0, 34))
+    enqueuePlayerAudio(audio, request.text.slice(0, 34))
+    generation.handoffAudioUrl(audio.url)
 
     try {
       await saveGeneration(request, audio.result.jobId, audio.result.engineId, audio.result.engineMode, audio.source)
@@ -87,7 +88,8 @@ export function HomePage() {
   async function handleRetry() {
     const audio = await generation.retry()
     if (!audio || !generation.lastAttempt) return
-    setPlayerAudio(audio, generation.lastAttempt.request.text.slice(0, 34))
+    enqueuePlayerAudio(audio, generation.lastAttempt.request.text.slice(0, 34))
+    generation.handoffAudioUrl(audio.url)
     try {
       await saveGeneration(generation.lastAttempt.request, audio.result.jobId, audio.result.engineId, audio.result.engineMode, audio.source)
       showNotice('같은 설정으로 다시 생성했습니다.')

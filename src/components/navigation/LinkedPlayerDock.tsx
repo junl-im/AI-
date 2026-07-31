@@ -1,13 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type MouseEvent,
+  type SyntheticEvent,
+} from 'react'
 import type { AppPage } from '../../store/useAppStore'
 import { useAppStore } from '../../store/useAppStore'
-import { usePlayerStore } from '../../store/usePlayerStore'
+import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
+import { PlayerQueuePanel } from './PlayerQueuePanel'
 
 const items: Array<{ page: AppPage; label: string; icon: string }> = [
   { page: 'home', label: '만들기', icon: '＋' },
+  { page: 'clone', label: '복제', icon: '◉' },
   { page: 'quality', label: '품질', icon: '◎' },
   { page: 'projects', label: '프로젝트', icon: '▣' },
 ]
+
+const rates = [0.75, 1, 1.25, 1.5, 2]
 
 function formatTime(value: number) {
   const safe = Number.isFinite(value) ? Math.max(0, value) : 0
@@ -17,29 +29,79 @@ function formatTime(value: number) {
 export function LinkedPlayerDock() {
   const page = useAppStore((state) => state.page)
   const setPage = useAppStore((state) => state.setPage)
-  const audio = usePlayerStore((state) => state.audio)
-  const title = usePlayerStore((state) => state.title)
-  const ref = useRef<HTMLAudioElement>(null)
+  const queue = usePlayerStore((state) => state.queue)
+  const currentTrackId = usePlayerStore((state) => state.currentTrackId)
+  const repeatMode = usePlayerStore((state) => state.repeatMode)
+  const playbackRate = usePlayerStore((state) => state.playbackRate)
+  const select = usePlayerStore((state) => state.select)
+  const remove = usePlayerStore((state) => state.remove)
+  const clearQueue = usePlayerStore((state) => state.clearQueue)
+  const selectNext = usePlayerStore((state) => state.selectNext)
+  const selectPrevious = usePlayerStore((state) => state.selectPrevious)
+  const cycleRepeatMode = usePlayerStore((state) => state.cycleRepeatMode)
+  const setPlaybackRate = usePlayerStore((state) => state.setPlaybackRate)
+  const track = usePlayerStore(getCurrentTrack)
+  const ref = useRef<HTMLAudioElement | null>(null)
+  const resumeAfterTrackChange = useRef(false)
+  const playbackRateRef = useRef(playbackRate)
   const [playing, setPlaying] = useState(false)
   const [current, setCurrent] = useState(0)
   const [duration, setDuration] = useState(0)
+  const [queueOpen, setQueueOpen] = useState(false)
   const progress = duration > 0 ? Math.min(100, (current / duration) * 100) : 0
-  const bars = useMemo(() => [18, 34, 58, 28, 74, 42, 86, 38, 68, 30, 52, 22, 44, 70, 36, 56, 26, 48], [])
+  const bars = useMemo(
+    () => [18, 34, 58, 28, 74, 42, 86, 38, 68, 30, 52, 22, 44, 70, 36, 56, 26, 48],
+    [],
+  )
 
   useEffect(() => {
     const element = ref.current
     if (!element) return
+    const shouldResume = resumeAfterTrackChange.current
     element.pause()
     element.load()
+    element.playbackRate = playbackRateRef.current
     setPlaying(false)
     setCurrent(0)
-  }, [audio?.url])
+    setDuration(0)
+    if (shouldResume && currentTrackId) {
+      const resume = () => void element.play().catch(() => undefined)
+      element.addEventListener('canplay', resume, { once: true })
+    }
+    resumeAfterTrackChange.current = false
+  }, [currentTrackId])
+
+  useEffect(() => {
+    playbackRateRef.current = playbackRate
+    if (ref.current) ref.current.playbackRate = playbackRate
+  }, [playbackRate])
 
   async function toggle() {
     const element = ref.current
-    if (!element || !audio) return
+    if (!element || !track) return
     if (element.paused) await element.play()
     else element.pause()
+  }
+
+  function move(direction: 'next' | 'previous') {
+    resumeAfterTrackChange.current = playing
+    const selected = direction === 'next' ? selectNext() : selectPrevious()
+    if (!selected) resumeAfterTrackChange.current = false
+  }
+
+  function handleEnded() {
+    const element = ref.current
+    if (!element) return
+    if (repeatMode === 'one') {
+      element.currentTime = 0
+      void element.play()
+      return
+    }
+    resumeAfterTrackChange.current = true
+    if (!selectNext()) {
+      resumeAfterTrackChange.current = false
+      setPlaying(false)
+    }
   }
 
   return (
@@ -60,16 +122,29 @@ export function LinkedPlayerDock() {
         </nav>
 
         <section className="soa-linked-player" aria-label="연계형 오디오 플레이어">
-          <button type="button" className="soa-player-toggle" onClick={() => void toggle()} disabled={!audio} aria-label={playing ? '일시정지' : '재생'}>
-            {playing ? 'Ⅱ' : '▶'}
-          </button>
+          <div className="soa-player-transport">
+            <button type="button" onClick={() => move('previous')} disabled={!track} aria-label="이전 음성">‹</button>
+            <button
+              type="button"
+              className="soa-player-toggle"
+              onClick={() => void toggle()}
+              disabled={!track}
+              aria-label={playing ? '일시정지' : '재생'}
+            >
+              {playing ? 'Ⅱ' : '▶'}
+            </button>
+            <button type="button" onClick={() => move('next')} disabled={!track} aria-label="다음 음성">›</button>
+          </div>
           <div className="soa-player-main">
-            <div className="soa-player-title"><strong>{title}</strong><span>{audio ? audio.result.engineId : 'VOICE LINK READY'}</span></div>
+            <div className="soa-player-title">
+              <strong>{track?.title ?? '아직 연결된 음성이 없습니다.'}</strong>
+              <span>{track?.audio.result.engineId ?? 'VOICE LINK READY'}</span>
+            </div>
             <button
               type="button"
               className="soa-player-wave"
-              disabled={!audio}
-              onClick={(event) => {
+              disabled={!track}
+              onClick={(event: MouseEvent<HTMLButtonElement>) => {
                 const element = ref.current
                 if (!element || !duration) return
                 const rect = event.currentTarget.getBoundingClientRect()
@@ -78,22 +153,69 @@ export function LinkedPlayerDock() {
               aria-label="재생 위치 이동"
             >
               <span className="soa-player-progress" style={{ width: `${progress}%` }} />
-              {bars.map((height, index) => <i key={`${height}-${index}`} style={{ height: `${height}%` }} />)}
+              {bars.map((height, index) => (
+                <i key={`${height}-${index}`} style={{ height: `${height}%` }} />
+              ))}
               <b style={{ left: `${progress}%` }} />
             </button>
           </div>
           <time>{formatTime(current)} / {formatTime(duration)}</time>
+          <div className="soa-player-actions">
+            <button
+              type="button"
+              onClick={cycleRepeatMode}
+              className={repeatMode !== 'off' ? 'is-active' : ''}
+              aria-label={`반복 모드 ${repeatMode}`}
+            >
+              {repeatMode === 'one' ? '↻1' : '↻'}
+            </button>
+            <select
+              aria-label="재생 속도"
+              value={playbackRate}
+              onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                setPlaybackRate(Number(event.target.value))
+              }}
+            >
+              {rates.map((rate) => <option key={rate} value={rate}>{rate}×</option>)}
+            </select>
+            <a
+              href={track?.audio.url}
+              download={track?.audio.filename}
+              aria-disabled={!track}
+              onClick={(event: MouseEvent<HTMLAnchorElement>) => {
+                if (!track) event.preventDefault()
+              }}
+            >
+              ↓
+            </a>
+            <button type="button" onClick={() => setQueueOpen((open) => !open)}>
+              대기열 {queue.length}
+            </button>
+          </div>
           <audio
             ref={ref}
-            src={audio?.url}
+            src={track?.audio.url}
             preload="metadata"
-            onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
-            onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
+            onLoadedMetadata={(event: SyntheticEvent<HTMLAudioElement>) => {
+              setDuration(event.currentTarget.duration)
+            }}
+            onTimeUpdate={(event: SyntheticEvent<HTMLAudioElement>) => {
+              setCurrent(event.currentTarget.currentTime)
+            }}
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
-            onEnded={() => setPlaying(false)}
+            onEnded={handleEnded}
           />
         </section>
+        {queueOpen ? (
+          <PlayerQueuePanel
+            tracks={queue}
+            currentTrackId={currentTrackId}
+            onSelect={select}
+            onRemove={remove}
+            onClear={clearQueue}
+          />
+        ) : null}
       </div>
     </aside>
   )

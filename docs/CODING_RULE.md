@@ -60,3 +60,12 @@ npm run quality:rules
 - 표준 라이브러리 기능은 `requires-python` 하한에서 실제 import 가능한지 확인한다.
 - UTC 시간대는 Python 3.10과 호환되는 `datetime.timezone.utc`를 사용한다.
 - Vitest는 전역 API 사용 여부와 무관하게 `afterEach(cleanup)`으로 DOM을 정리한다.
+
+## 음성 복제 코드 규칙
+
+- 브라우저 품질 결과만 믿고 서버 검증을 생략하지 않는다.
+- 동의 검증과 파일 저장은 같은 API 요청 경계에서 처리한다.
+- 사용자 파일명을 서버 저장 경로로 사용하지 않는다.
+- 모델 패키지는 FastAPI 게이트웨이에 직접 import하지 않고 Worker 어댑터 뒤에 둔다.
+- Worker가 준비되지 않았을 때 성공 상태를 반환하지 않는다.
+- Object URL은 명시적인 소유 컴포넌트 또는 store가 한 번만 해제한다.

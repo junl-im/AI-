@@ -65,3 +65,13 @@ Semantic Versioning을 사용한다.
 - 오디오 자동 재생을 사용하지 않는다.
 - 다운로드 파일명에 운영체제 금지 문자가 없어야 한다.
 - Blob Object URL은 화면 생명주기에 맞춰 해제해야 한다.
+
+
+## 0.6.0 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.6.0-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.5.8-to-0.6.0-patch.zip`
+- 패치 기준 버전: `0.5.8`
+- 삭제 파일: 없음
+- `.git`, `node_modules`, `dist`, `.sorion`, 가상환경, Python 캐시, 테스트 캐시는 포함하지 않는다.
+- 배포 전 `quality:rules`, Web quality, API quality · Python 3.10, Pages 배포를 확인한다.

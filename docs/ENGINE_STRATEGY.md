@@ -117,3 +117,20 @@ Kokoro는 가볍고 빠르며 Apache 계열 배포에 유리하지만 공식 언
 - 음성 원본은 기본 로컬 보관이며 명시적 동의 없이 업로드하지 않는다.
 - 엔진은 `Engine Adapter` 뒤에 두어 한 모델에 종속되지 않는다.
 - 라이선스가 상업 사용을 제한하면 기본 엔진으로 자동 활성화하지 않는다.
+
+## 0.6.0 Worker 적용 결정
+
+FastAPI 게이트웨이는 Fun-CosyVoice 3 패키지와 PyTorch를 직접 로딩하지 않는다. 웹 요청, 동의 검증, 임시 샘플 수명 주기와 모델 추론을 분리한다.
+
+```text
+SoriON Web
+  → FastAPI Gateway
+    → consent and sample validation
+    → profile UUID
+    → CosyVoice Worker URL
+      → model and GPU lifecycle
+      → zero-shot prompt
+      → streaming synthesis
+```
+
+`SORION_COSYVOICE_WORKER_URL`이 비어 있으면 `cosyvoice3-worker`는 준비되지 않은 것으로 표시한다. 0.6.0에서는 샘플 준비까지만 지원하며 실제 모델 추론 결과로 위장하지 않는다.

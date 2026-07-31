@@ -124,3 +124,23 @@ npm run test:api
 - 작업 상태는 `failed`, 오류 코드는 `generation-timeout`이어야 한다.
 - 타임아웃 이후 같은 작업은 활성 작업 레지스트리에 남아 있지 않아야 한다.
 - Python 3.10 호환성 검사는 `except asyncio.TimeoutError` 구문을 정적으로 확인한다.
+
+
+## 0.6.0 추가 검사
+
+### Web
+
+- 정상 10초 샘플과 짧고 클리핑된 샘플의 품질 판정
+- Player store의 대기열 추가와 현재 트랙 선택
+- Object URL 소유 트랙 삭제 시 URL 해제
+- FormData 요청에서 브라우저가 multipart boundary를 설정하도록 Content-Type 강제 금지
+
+### API
+
+- 복제 capability 응답
+- 동의 누락 차단
+- 품질 차단 샘플 거부
+- 유효한 WAV 프로필 준비와 삭제
+- 손상 WAV와 5초 미만 WAV 거부
+
+현재 API 테스트 기준은 40개 이상 통과다.

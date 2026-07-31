@@ -1,0 +1,92 @@
+SoriON AI Patch Manifest
+From: 0.5.8
+To: 0.6.0
+
+Added files: 27
+docs/PLAYER_DOCK.md
+docs/VOICE_CLONE.md
+docs/patches/0.6.0/DELETE_LIST.txt
+docs/patches/0.6.0/PATCH_MANIFEST.txt
+docs/patches/0.6.0/PATCH_README.md
+services/api/app/api/routes/voice_clones.py
+services/api/app/engines/voiceclone/cosyvoice_worker.py
+services/api/app/schemas/voiceclone.py
+services/api/app/storage/voice_clone_store.py
+services/api/tests/test_voice_clones.py
+src/components/clone/CloneConsentCard.tsx
+src/components/clone/CloneReadyCard.tsx
+src/components/clone/CloneStepIndicator.tsx
+src/components/clone/SampleQualityCard.tsx
+src/components/clone/VoiceSampleCapture.tsx
+src/components/navigation/PlayerQueuePanel.tsx
+src/hooks/useVoiceRecorder.ts
+src/pages/VoiceClonePage.tsx
+src/player/playerTypes.ts
+src/store/usePlayerStore.test.ts
+src/styles/player-dock.css
+src/styles/voice-clone.css
+src/voiceclone/audioAnalysis.test.ts
+src/voiceclone/audioAnalysis.ts
+src/voiceclone/profileRepository.ts
+src/voiceclone/voiceCloneApi.ts
+src/voiceclone/voiceCloneTypes.ts
+
+Modified files: 51
+.env.example
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/API.md
+docs/ARCHITECTURE.md
+docs/CHANGELOG.md
+docs/CODING_RULE.md
+docs/DATABASE.md
+docs/ENGINE_STRATEGY.md
+docs/ERROR_CODES.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/RELEASE.md
+docs/ROADMAP.md
+docs/SECURITY.md
+docs/TEST.md
+docs/UI_GUIDE.md
+package.json
+scripts/check-project-rules.mjs
+services/api/app/api/router.py
+services/api/app/api/routes/engines.py
+services/api/app/api/routes/health.py
+services/api/app/api/routes/quality.py
+services/api/app/api/routes/setup.py
+services/api/app/core/config.py
+services/api/app/engines/registry.py
+services/api/app/engines/voiceclone/__init__.py
+services/api/app/main.py
+services/api/pyproject.toml
+services/api/tests/test_engine_strategy.py
+services/api/tests/test_health.py
+services/api/tests/test_quality.py
+services/api/tests/test_setup.py
+src/api/httpClient.test.ts
+src/api/httpClient.ts
+src/app/App.tsx
+src/components/layout/BrandMasthead.tsx
+src/components/layout/DesktopContextFrame.tsx
+src/components/navigation/BottomNavigation.tsx
+src/components/navigation/LinkedPlayerDock.tsx
+src/hooks/useVoiceGeneration.ts
+src/pages/HomePage.tsx
+src/quality/qualityReport.test.ts
+src/quality/qualityReport.ts
+src/storage/database.ts
+src/store/useAppStore.ts
+src/store/usePlayerStore.ts
+src/styles/index.css
+src/tts/generationTypes.ts
+src/voiceclone/contracts.ts
+
+Deleted files: 0
+없음
+
+Notes:
+- ZIP 내부 경로는 저장소 루트 기준이다.
+- .git, node_modules, dist, 가상환경, 캐시, 런타임 음원은 포함하지 않는다.

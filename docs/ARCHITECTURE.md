@@ -78,3 +78,28 @@ FastAPI
 
 - `projects`: 음성 프로젝트 메타데이터
 - `qualityReviews`: 문장·엔진별 품질 평가
+
+
+## 0.6.0 음성 복제 경계
+
+```text
+Voice Clone Page
+  → MediaRecorder 또는 파일 선택
+  → Web Audio 품질 검사
+  → 권한·AI 고지·금지 용도 동의
+  → IndexedDB voiceProfiles
+  → FastAPI voice-clones profile preparation
+  → separate CosyVoice Worker boundary
+```
+
+FastAPI 게이트웨이는 CosyVoice와 PyTorch를 직접 import하지 않는다. `CosyVoiceCloneEngine`은 Worker 주소와 기능 상태만 공개한다. 모델 로딩, CUDA 초기화, speaker prompt 생성, 실제 제로샷 추론은 별도 서비스가 맡는다.
+
+## 0.6.0 연계형 플레이어
+
+`usePlayerStore`는 최대 20개 `PlayerTrack`을 관리한다. Dock의 단일 `audio` 요소가 TTS 결과와 복제 원본 샘플을 재생한다. 브라우저 Object URL은 트랙 소유권 플래그가 있는 경우에만 제거하며 일반 API URL은 해제하지 않는다.
+
+## IndexedDB v3
+
+- `projects`: TTS 프로젝트 메타데이터
+- `qualityReviews`: 문장·엔진 품질 평가
+- `voiceProfiles`: 동의된 음성 샘플 Blob, 품질 분석, 동의 기록

@@ -70,6 +70,7 @@ export function useVoiceGeneration() {
       filename: buildAudioFilename(attempt.request.text, attempt.voiceName, 'wav'),
       source: 'browser-demo',
       durationSeconds: getMockWaveDuration(attempt.request.text),
+      revokeOnRemove: true,
       result: {
         jobId: crypto.randomUUID(),
         status: 'mock-complete',
@@ -146,6 +147,11 @@ export function useVoiceGeneration() {
     }
   }, [createBrowserDemo, releaseLocalUrl, startPolling, stopPolling])
 
+
+  const handoffAudioUrl = useCallback((url: string) => {
+    if (localUrlRef.current === url) localUrlRef.current = null
+  }, [])
+
   const cancel = useCallback(() => {
     const jobId = jobIdRef.current
     controllerRef.current?.abort()
@@ -165,5 +171,5 @@ export function useVoiceGeneration() {
     setState(initialState)
   }, [releaseLocalUrl, stopPolling])
 
-  return { ...state, generate, retry, cancel, reset }
+  return { ...state, generate, retry, cancel, reset, handoffAudioUrl }
 }

@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     audio_ttl_minutes: int = 30
     max_segment_chars: int = 180
     audio_directory: str = ".sorion/audio"
+    voice_clone_directory: str = ".sorion/voice-clones"
+    voice_clone_ttl_days: int = 7
+    voice_clone_max_file_bytes: int = 25 * 1024 * 1024
+    cosyvoice_worker_url: str = ""
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../../.env"),
@@ -32,6 +36,10 @@ class Settings(BaseSettings):
     @property
     def audio_path(self) -> Path:
         return Path(self.audio_directory).expanduser().resolve()
+
+    @property
+    def voice_clone_path(self) -> Path:
+        return Path(self.voice_clone_directory).expanduser().resolve()
 
 
 @lru_cache

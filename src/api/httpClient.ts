@@ -50,13 +50,14 @@ export async function apiRequest<T>(path: string, init?: RequestInit, options: A
   options.signal?.addEventListener('abort', abortFromCaller, { once: true })
 
   try {
+    const headers = new Headers(init?.headers)
+    if (!(init?.body instanceof FormData) && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json')
+    }
     const response = await fetch(`${baseUrl}${path}`, {
       ...init,
       signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        ...init?.headers,
-      },
+      headers,
     })
 
     const contentType = response.headers.get('content-type') ?? ''

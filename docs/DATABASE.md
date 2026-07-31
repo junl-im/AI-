@@ -56,7 +56,7 @@ Firestore에는 원본 음성, 생성 음원, 모델 파일을 직접 저장하�
 
 ## IndexedDB v2
 
-데이터베이스 이름은 `sorion-ai`, 버전은 2다.
+데이터베이스 이름은 `sorion-ai`, 현재 버전은 3이다.
 
 ### `qualityReviews`
 
@@ -68,3 +68,15 @@ Firestore에는 원본 음성, 생성 음원, 모델 파일을 직접 저장하�
 - `createdAt`, `updatedAt`
 
 평가 문장에는 개인 정보가 들어갈 수 있으므로 Firebase에 자동 동기화하지 않는다. JSON·CSV 내보내기는 사용자가 명시적으로 눌렀을 때만 수행한다.
+
+
+## IndexedDB v3 · `voiceProfiles`
+
+- key: `id` UUID
+- `displayName`, `status`, `engineId`
+- `fileName`, `mimeType`, `sampleBlob`
+- `analysis`: 길이, 샘플레이트, 채널, RMS, 무음, 클리핑, 상태, 안내
+- `consent`: 권리 확인, AI 고지, 금지 용도 확인, 동의 시각, 사용 목적
+- `createdAt`, `updatedAt`
+
+원본 Blob은 기본적으로 이 기기에만 저장하며 자동 Firebase 동기화 대상이 아니다. 사용자가 동의를 철회하면 프로필과 Blob을 함께 삭제한다.
