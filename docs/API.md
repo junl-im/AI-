@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "default_engine": "auto"
 }
 ```
@@ -140,7 +140,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.5.2",
+  "version": "0.5.3",
   "ready": true,
   "real_engine_count": 1,
   "steps": [

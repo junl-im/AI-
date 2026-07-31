@@ -674,3 +674,79 @@ SoriON AI의 목표는 한국인이 모바일에서 앱처럼 사용하며 10초
 ### 다음 예상 업데이트
 
 `0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 파일 업로드, 샘플 품질 검사, 본인 목소리·권한 동의, 로컬 보관과 삭제, 교체 가능한 VoiceCloneEngine 계약을 구현한다.
+
+## 2026-07-31 15:35 KST - 0.5.3 CI Test Compatibility Patch
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.5.2`
+- 대상 버전: `0.5.3`
+
+### 프로젝트 목표 재확인
+
+SoriON AI의 목표는 한국인이 모바일에서 앱처럼 사용하며 10초 안에 음성 생성·복제·변환을 시작하는 차세대 AI Voice Platform이다. 다음 핵심 기능을 추가하기 전에 자동 검사가 실제 브라우저·Python 지원 범위를 정확히 검증해야 하므로 이번 패치는 CI 호환성 복구를 우선했다.
+
+### 변경 내용
+
+- JSDOM Blob에 `arrayBuffer()`가 없을 때 `FileReader`로 동작하는 테스트 폴리필을 추가했다.
+- Testing Library cleanup 뒤 `document.body`를 비워 테스트 간 DOM 누적을 차단했다.
+- HomePage 테스트를 현재 렌더 컨테이너로 제한하고 `읽을 문장` textarea를 `textbox` 역할로 찾게 했다.
+- Ruff의 `UP017`을 제외해 Python 3.10 호환 `timezone.utc`를 유지했다.
+- API Job의 작업 디렉터리를 `services/api`로 고정했다.
+- setup-uv v8이 Python 3.10과 API 프로젝트 경로를 직접 관리하게 했다.
+- checkout·setup-node·setup-python을 v6, setup-uv를 v8로 갱신했다.
+- Pages 액션도 configure-pages v6, upload-pages-artifact v5, deploy-pages v5로 갱신했다.
+- 프로젝트 규칙 검사에 Blob 폴리필, 구형 액션, Python 3.10 Ruff 설정 검사를 추가했다.
+
+### 변경 이유
+
+- Mock WAV 생성 로직은 정상이어도 JSDOM Blob API 차이로 테스트가 실패했다.
+- 접근성 이름만으로 찾으면 레이블 영역과 실제 입력 컨트롤이 동시에 일치할 수 있었다.
+- Python 3.10을 지원하면서 Python 3.11 전용 `datetime.UTC`를 요구하는 린트 규칙을 그대로 둘 수 없었다.
+- GitHub가 JavaScript Action 런타임을 Node.js 24로 전환해 구형 action major가 경고를 발생시켰다.
+
+### 영향 범위
+
+- Web 테스트 공통 환경
+- HomePage 회귀 테스트
+- API Ruff 정책과 Python 3.10 CI
+- GitHub Actions 런타임
+- 프로젝트 자동 규칙 검사
+- 테스트·Pages·릴리스 문서
+
+### 주요 변경 파일
+
+- `.github/workflows/ci.yml`
+- `src/test/setup.ts`
+- `src/pages/HomePage.test.tsx`
+- `services/api/pyproject.toml`
+- `services/api/tests/test_python_compatibility.py`
+- `scripts/check-project-rules.mjs`
+- `docs/TEST.md`
+- `docs/GITHUB_PAGES.md`
+
+### 검증 결과
+
+- 프로젝트 규칙 검사 통과
+- 현재 제공 Python 환경에서 FastAPI 테스트 31개 통과
+- Python 전체 문법 컴파일 통과
+- 워크플로 필수 액션·Python 버전·작업 디렉터리 검사 통과
+- 모든 소스 파일 500줄 이하 확인
+- SVG·비밀키·금지 산출물 미포함 확인
+- 패치 적용본과 전체본 파일 동등성 검사 통과
+
+### 알려진 제한과 주의사항
+
+- 현재 작업 환경의 네트워크 제한으로 npm 의존성 설치와 정식 Vitest·ESLint·Vite build를 실행하지 못했다.
+- 같은 제한으로 uv 관리 CPython 3.10을 내려받지 못해 실제 Python 3.10 Job은 GitHub Actions에서 최종 확인해야 한다.
+- GitHub Pages Source는 계속 `GitHub Actions`로 유지해야 중복 `pages-build-deployment`가 생기지 않는다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.5.3-full.zip`
+- 패치: `SoriON-AI-0.5.2-to-0.5.3-patch.zip`
+- 체크섬: `SoriON-AI-0.5.3-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+CI의 Web·API·Deploy가 모두 성공하면 `0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 샘플 품질 검사, 명시적 동의, 로컬 보관·삭제, 교체형 VoiceCloneEngine 계약을 구현한다.

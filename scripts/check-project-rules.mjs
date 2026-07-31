@@ -71,10 +71,16 @@ await requireText('docs/RELEASE.md', ['전체 통파일 ZIP', '덮어쓰기용 �
 await requireText('.github/workflows/ci.yml', [
   'name: SoriON CI & Pages',
   'branches:',
-  'uv python install 3.10',
-  'actions/deploy-pages@v4',
+  'astral-sh/setup-uv@v8',
+  "python-version: '3.10'",
+  'actions/checkout@v6',
+  'actions/setup-node@v6',
+  'actions/setup-python@v6',
+  'actions/configure-pages@v6',
+  'actions/upload-pages-artifact@v5',
+  'actions/deploy-pages@v5',
 ])
-await requireText('src/test/setup.ts', ["afterEach", "cleanup()"])
+await requireText('src/test/setup.ts', ["afterEach", "cleanup()", "Blob.prototype.arrayBuffer"])
 
 try {
   const workflowFiles = await readdir(join(root, '.github', 'workflows'))
@@ -84,6 +90,14 @@ try {
   }
 } catch {
   failures.push('.github/workflows: 워크플로 폴더를 읽을 수 없습니다.')
+}
+
+
+const workflowContent = await readFile(join(root, '.github/workflows/ci.yml'), 'utf8')
+for (const legacyAction of ['actions/checkout@v4', 'actions/setup-node@v4', 'actions/setup-python@v4', 'astral-sh/setup-uv@v6', 'actions/configure-pages@v5', 'actions/upload-pages-artifact@v4', 'actions/deploy-pages@v4']) {
+  if (workflowContent.includes(legacyAction)) {
+    failures.push(`.github/workflows/ci.yml: Node.js 20 기반 액션 ${legacyAction}이 남아 있습니다.`)
+  }
 }
 
 for (const relativePath of [

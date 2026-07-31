@@ -6,7 +6,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.5.2 CI Stability Patch`
+- 버전: `0.5.3 CI Test Compatibility Patch`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
 - AI 엔진: 선택 설치형 MeloTTS 한국어 어댑터
@@ -18,7 +18,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 - 저장: 브라우저 IndexedDB 우선, Firebase는 선택적 동기화 계층
 - CI·배포: Web·API·Pages를 단일 GitHub Actions 실행으로 관리
 
-## 0.5.2에서 가능한 작업
+## 0.5.3에서 가능한 작업
 
 1. 문장을 입력해 AI 또는 로컬 한국어 음성을 생성합니다.
 2. 엔진이 지원하는 감정·속도·피치 설정만 활성화합니다.
@@ -33,7 +33,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 MeloTTS, Local TTS, Demo WAV는 화면과 프로젝트 데이터에서 서로 다른 모드로 표시됩니다.
 
-상단 브랜드 영역은 모바일·PC 모두 높이를 줄인 배너형 구조이며, `곰같은여우 SoriON AI`와 핵심 문장이 순차적으로 페이드됩니다. 로고의 `AI` 중 `I`와 PC Voice Core에는 SVG 없이 CSS로 만든 마이크를 사용합니다. 0.5.2에서는 Web·API 품질 검사와 Pages 배포를 하나의 워크플로로 통합하고 Python 3.10 호환성을 고정했습니다.
+상단 브랜드 영역은 모바일·PC 모두 높이를 줄인 배너형 구조이며, `곰같은여우 SoriON AI`와 핵심 문장이 순차적으로 페이드됩니다. 로고의 `AI` 중 `I`와 PC Voice Core에는 SVG 없이 CSS로 만든 마이크를 사용합니다. 0.5.3에서는 JSDOM Blob·접근성 쿼리 테스트를 보정하고, Python 3.10 Ruff 정책과 Node.js 24 기반 GitHub Actions를 고정했습니다.
 
 ## 바로 시작하기
 

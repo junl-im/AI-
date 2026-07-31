@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## 0.5.3 - 2026-07-31
+
+### Fixed
+
+- JSDOM 환경에서 `Blob.arrayBuffer()`가 제공되지 않아 Mock WAV 테스트가 중단되던 문제를 `FileReader` 기반 테스트 폴리필로 수정
+- `HomePage`의 섹션과 textarea가 같은 접근성 이름을 가져 전역 쿼리가 중복 요소를 찾던 문제를 현재 렌더 컨테이너와 `textbox` 역할 쿼리로 수정
+- Python 3.10에서 `timezone.utc`를 유지해야 하는 코드가 Ruff `UP017`에 의해 Python 3.11 전용 `datetime.UTC`로 변경 요구되던 충돌을 명시적으로 제외
+- API CI가 저장소 루트와 API 하위 프로젝트 경로를 혼용하던 실행 구조를 `services/api` 작업 디렉터리 기준으로 통일
+
+### Changed
+
+- `actions/checkout`, `actions/setup-node`, `actions/setup-python`을 Node.js 24 기반 v6로 갱신
+- `astral-sh/setup-uv`를 v8로 갱신하고 Python 3.10·API 작업 디렉터리를 액션 입력으로 고정
+- Pages 액션을 `configure-pages@v6`, `upload-pages-artifact@v5`, `deploy-pages@v5`로 갱신
+- Web CI 런타임을 Node.js 24로 변경하고 자동 npm 캐시를 명시적으로 비활성화
+- 테스트 종료 시 Testing Library cleanup 후 `document.body`를 초기화해 테스트 간 DOM 오염을 이중 차단
+- 프로젝트 규칙 검사에 구형 Node.js 20 액션, Blob 폴리필, Python 3.10 Ruff 호환성 회귀 검사를 추가
+- 웹과 API 버전을 `0.5.3`으로 갱신
+
+### Notes
+
+- GitHub Pages 액션도 Node.js 24 대응 stable major로 갱신하고 워크플로 전체에 Node.js 24 강제 환경 변수를 유지했다.
+- 로컬 환경의 외부 패키지 다운로드 제한으로 정식 Vitest와 Python 3.10 uv 환경 실행은 불가능했으며, GitHub Actions 성공 여부가 최종 확인 기준이다.
+
 ## 0.5.2 - 2026-07-31
 
 ### Fixed

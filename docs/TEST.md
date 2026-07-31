@@ -77,3 +77,15 @@ npm run test:api
 - API 소스에 `from datetime import UTC` 또는 `datetime.UTC`가 없는지 확인
 - 같은 컴포넌트를 여러 테스트에서 렌더링해도 이전 DOM이 남지 않는지 확인
 - GitHub Pages Source가 `GitHub Actions`인지 확인
+
+## 0.5.3 CI 테스트 호환성 검사
+
+- JSDOM의 `Blob`에 `arrayBuffer()`가 없어도 WAV RIFF 헤더 테스트가 실행되는지 확인
+- `FileReader` 기반 폴리필이 `ArrayBuffer`를 반환하고 읽기 실패를 reject하는지 확인
+- HomePage 테스트가 전체 document가 아니라 현재 render 컨테이너만 검색하는지 확인
+- `읽을 문장` 입력을 접근성 이름과 `textbox` 역할 조합으로 유일하게 찾는지 확인
+- 매 테스트 후 Testing Library cleanup과 `document.body` 초기화가 실행되는지 확인
+- API Ruff가 `py310`을 유지하고 `UP017`만 제외하는지 확인
+- `timezone.utc`가 Python 3.10 호환 코드로 유지되는지 확인
+- API Job이 `services/api`에서 Python 3.10으로 Ruff와 pytest를 실행하는지 확인
+- checkout·setup-node·setup-uv에 Node.js 20 세대 major가 남지 않았는지 확인

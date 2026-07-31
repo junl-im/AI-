@@ -47,10 +47,17 @@ SoriON AI의 목표는 연구 도구가 아니라 한국인이 모바일에서 1
 - `docs/SECURITY.md`
 - `docs/HANDOVER.md`
 
+## 0.5.3 선행 안정화 결과
+
+- JSDOM Blob 호환 폴리필과 HomePage 쿼리 범위 수정
+- Python 3.10과 Ruff UP017 충돌 제거
+- checkout·setup-node·setup-uv의 Node.js 24 대응 버전 적용
+- 다음 기능 구현 전 GitHub Actions 전체 성공을 필수 조건으로 유지
+
 ## 선행 확인
 
 - `SoriON CI & Pages` 단일 실행에서 Web·API·Deploy 성공
-- 공개 사이트에 `BUILD v0.5.2` 표시
+- 공개 사이트에 `BUILD v0.5.3` 표시
 - 설정 화면에서 Voice API 주소 저장과 연결 검사 성공
 - 긴 문장 생성 중 실제 진행률 표시 확인
 - 품질 별점 저장 후 JSON·CSV 다운로드 확인

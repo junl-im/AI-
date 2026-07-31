@@ -1,6 +1,6 @@
 [project]
 name = "sorion-api"
-version = "0.5.2"
+version = "0.5.3"
 description = "SoriON AI engine gateway"
 requires-python = ">=3.10,<3.13"
 dependencies = [
@@ -27,3 +27,4 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+ignore = ["UP017"]
