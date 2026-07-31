@@ -1,16 +1,18 @@
 import type { PropsWithChildren } from 'react'
-import { BottomNavigation } from '../navigation/BottomNavigation'
+import { LinkedPlayerDock } from '../navigation/LinkedPlayerDock'
 import { NoticeToast } from '../ui/NoticeToast'
 import { BrandMasthead } from './BrandMasthead'
+import { DesktopContextFrame } from './DesktopContextFrame'
 
 export function AppShell({ children }: PropsWithChildren) {
   return (
     <div className="min-h-dvh bg-[#070b14]">
       <BrandMasthead />
-      <div className="relative mx-auto flex min-h-[62dvh] w-full max-w-[560px] flex-col rounded-t-[34px] bg-soa-paper px-4 pt-3 shadow-[0_-22px_80px_rgba(0,0,0,0.22)] sm:px-6 lg:rounded-[34px_34px_0_0]">
-        {children}
-        <BottomNavigation />
+      <div className="soa-workspace-shell">
+        <section className="soa-primary-frame">{children}</section>
+        <DesktopContextFrame />
       </div>
+      <LinkedPlayerDock />
       <NoticeToast />
     </div>
   )

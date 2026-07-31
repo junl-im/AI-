@@ -13,12 +13,14 @@ import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import { useVoiceGeneration } from '../hooks/useVoiceGeneration'
 import { saveProject } from '../projects/projectRepository'
 import { useAppStore } from '../store/useAppStore'
+import { usePlayerStore } from '../store/usePlayerStore'
 import { getVoicePreset, voicePresets } from '../tts/voicePresets'
 
 const DEFAULT_TEXT = '안녕하세요. 목소리의 가능성을 켜는 소리온입니다.'
 
 export function HomePage() {
   const showNotice = useAppStore((state) => state.showNotice)
+  const setPlayerAudio = usePlayerStore((state) => state.setAudio)
   const [text, setText] = useState(DEFAULT_TEXT)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
   const [emotion, setEmotion] = useState<VoiceEmotion>('neutral')
@@ -72,6 +74,8 @@ export function HomePage() {
     const audio = await generation.generate({ request, voiceName: voice.shortName })
     if (!audio) return
 
+    setPlayerAudio(audio, request.text.slice(0, 34))
+
     try {
       await saveGeneration(request, audio.result.jobId, audio.result.engineId, audio.result.engineMode, audio.source)
       showNotice(audio.result.engineMode === 'ai' ? 'AI 음성을 생성하고 프로젝트에 저장했습니다.' : audio.result.engineMode === 'local' ? '로컬 음성을 생성하고 프로젝트에 저장했습니다.' : '데모 WAV를 만들고 프로젝트에 저장했습니다.')
@@ -83,6 +87,7 @@ export function HomePage() {
   async function handleRetry() {
     const audio = await generation.retry()
     if (!audio || !generation.lastAttempt) return
+    setPlayerAudio(audio, generation.lastAttempt.request.text.slice(0, 34))
     try {
       await saveGeneration(generation.lastAttempt.request, audio.result.jobId, audio.result.engineId, audio.result.engineMode, audio.source)
       showNotice('같은 설정으로 다시 생성했습니다.')

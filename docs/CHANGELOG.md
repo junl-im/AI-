@@ -353,3 +353,11 @@
 - Pull Request 템플릿에 전달 문서와 릴리스 산출물 확인 항목 추가
 - RELEASE와 CODING_RULE 문서에 전달·인수인계 차단 조건 추가
 - 웹과 API 버전을 `0.1.4`로 갱신
+
+## 0.5.8 - 2026-07-31
+
+- Compact 10-second subtitle brand banner.
+- Contained lightning waveform in Voice Core.
+- Desktop two-frame workspace and mobile single-frame layout.
+- Settings moved from Dock to top meta bar.
+- Fixed linked-player Dock based on selectively re-authored FoxBear playback concepts.
