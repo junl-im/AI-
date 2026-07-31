@@ -1,60 +1,56 @@
-# SECURITY
+# SoriON API · Worker 보안
 
-## 핵심 위협
+현재 기준 버전: `0.7.1`
 
-- 타인의 목소리를 무단 복제하거나 사칭하는 행위
-- 사용자 문장과 생성 음원의 무단 저장
-- 임시 음원 URL 추측 및 장기 노출
-- TTS 프로세스 명령 삽입
-- 과도한 생성 요청과 비용 공격
-- API 키와 서비스 계정 유출
+## API와 Worker 인증
 
-## 0.3.0 방어
+공개 FastAPI와 GPU Worker는 같은 서비스 토큰과 서명 비밀키를 공유한다.
+Worker `/health`만 공개하고 `/ready`와 `/v1/*`는 인증한다.
 
-- 시스템 명령은 shell 문자열이 아닌 인수 배열로 실행합니다.
-- Windows 입력 문장은 임시 UTF-8 파일로 전달하고 PowerShell 코드에 삽입하지 않습니다.
-- 음원 파일명은 클라이언트 원문이 아닌 UUID만 사용합니다.
-- 음원 라우트는 basename과 저장 루트 일치를 검사합니다.
-- 응답은 `private, no-store`를 사용합니다.
-- 기본 동시 생성 수는 1, 제한 시간은 75초입니다.
-- 기본 임시 음원 보관 시간은 30분입니다.
-- 취소 시 실행 중인 하위 프로세스를 종료합니다.
+요청에는 다음 헤더가 들어간다.
 
-## 음성 복제 원칙
+```text
+X-SoriON-Service-Token
+X-SoriON-Timestamp
+X-SoriON-Signature
+```
 
-- 본인 또는 적법한 권리자의 명시적 동의가 필수입니다.
-- 동의 확인 전 복제 엔진을 호출하지 않습니다.
-- 생성물에 합성 여부와 출처를 표시할 수 있어야 합니다.
-- 신고, 삭제, 차단 절차를 제품 기능으로 제공합니다.
+서명은 `method + path + timestamp + SHA-256(body)`를 HMAC-SHA256으로 계산한다.
+기본 유효 시간은 30초이며 만료 요청과 변조된 body를 거부한다.
 
-## 비밀 관리
+```env
+SORION_WORKER_SERVICE_TOKEN=replace-with-random-token
+SORION_WORKER_SIGNATURE_SECRET=replace-with-random-secret
+SORION_WORKER_AUTH_TTL_SECONDS=30
 
-서비스 계정, AI 공급자 키, 결제 키는 서버 비밀 저장소에서만 사용하며 클라이언트 번들에 포함하지 않습니다. 모델 파일과 사용자 음성은 Git에 커밋하지 않습니다.
+SORION_WORKER_SERVICE_TOKEN=replace-with-random-token
+SORION_WORKER_SIGNATURE_SECRET=replace-with-random-secret
+```
 
-## 운영 전 보강
+첫 두 값은 API `.env`, 뒤의 `SORION_WORKER_*` 값은 Worker `.env`에 둔다.
+실제 배포에서는 저장소에 값을 커밋하지 않고 배포 플랫폼 Secret으로 주입한다.
 
-현재 임시 음원 URL은 개발 파일럿용이며 사용자 인증이 없습니다. 외부 공개 API에서는 인증된 단기 URL 또는 프록시 스트리밍으로 교체해야 합니다.
+## 요청 제한
 
-## 외부 Voice API 주소
+FastAPI는 사용자 ID 또는 IP 기준으로 분당 요청을 제한한다. Worker도 서비스 토큰 기준으로
+별도 제한한다. 제한을 넘으면 HTTP 429와 재시도 시각을 반환한다.
 
-- API 주소는 브라우저 localStorage에 저장된다.
-- 주소에 API 키, 비밀번호, 토큰을 쿼리 문자열로 넣지 않는다.
-- 운영 API는 HTTPS와 사용자 인증을 사용해야 한다.
-- CORS는 실제 웹 출처만 허용하고 `*`와 credentials 조합을 사용하지 않는다.
-- Setup API는 환경 진단만 반환하며 비밀 환경 변수와 전체 파일 경로 노출을 최소화해야 한다.
+## 감사 로그
 
-## 품질 보고서
+API와 Worker는 본문·음성 데이터 없이 다음 운영 메타데이터만 JSONL 감사 로그에 남긴다.
 
-품질 보고서에는 평가에 사용한 전체 문장과 메모가 포함된다. 다운로드 전 개인 정보와 제3자 비밀 정보를 확인한다. 앱은 보고서를 자동 업로드하지 않는다.
+- 시각
+- 요청 경로와 메서드
+- 응답 상태
+- 요청 ID
+- 익명화된 actor 키
+- 인증 실패·요청 제한·작업 생성·취소·재시도 이벤트
 
+원본 문장과 음성 파일은 감사 로그에 기록하지 않는다.
 
-## 0.6.0 복제 샘플 방어
+## 외부 노출 원칙
 
-- 본인·권리 확인, AI 합성 고지, 사칭·사기 금지 확인이 모두 없으면 API가 저장을 거부한다.
-- 샘플 파일명은 UUID로 바꾸며 원래 파일 경로를 사용하지 않는다.
-- WAV, MP3, M4A, WEBM, OGG만 허용하고 기본 최대 크기는 25MB다.
-- WAV는 서버에서 컨테이너를 열어 손상 여부와 5초 최소 길이를 검사한다.
-- 샘플 저장 루트는 `.sorion/voice-clones`이며 공개 파일 제공 라우트가 없다.
-- 기본 TTL은 7일이며 동의 철회 시 즉시 삭제한다.
-- 브라우저 분석 결과를 단독 신뢰하지 않는다. 다음 Worker 버전에서 모든 형식을 재분석한다.
-- Worker 주소가 없으면 샘플 준비 상태만 반환하고 실제 복제 성공으로 표시하지 않는다.
+- Worker는 공용 인터넷에 직접 노출하지 않는다.
+- 방화벽 또는 사설 네트워크로 FastAPI에서만 접근한다.
+- `/health`에는 모델 경로·GPU 상세를 노출하지 않는다.
+- 상세 진단은 인증된 `/v1/diagnostics`에서만 제공한다.

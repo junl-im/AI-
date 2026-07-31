@@ -84,6 +84,16 @@ async def connectivity(request: Request) -> ConnectivityResponse:
             latency_ms=int(clone_latency) if isinstance(clone_latency, int) else None,
         ),
         ConnectivityCheck(
+            id="worker-auth",
+            label="API ↔ Worker 서명 인증",
+            status="ready" if settings.worker_auth_enabled else "warning",
+            detail=(
+                "서비스 토큰과 HMAC 서명이 활성화됐습니다."
+                if settings.worker_auth_enabled
+                else "로컬 개발 모드입니다. 공개 배포 전 Worker Secret을 설정하세요."
+            ),
+        ),
+        ConnectivityCheck(
             id="cors",
             label="웹 CORS 허용",
             status="ready" if settings.cors_origin_list else "missing",
@@ -96,7 +106,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.7.0",
+        version="0.7.1",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",

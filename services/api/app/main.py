@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
 from app.core.config import get_settings
@@ -11,10 +12,21 @@ from app.engines.registry import engine_registry
 from app.engines.tts.melo_tts import MeloTtsEngine
 from app.engines.tts.system_tts import SystemTtsEngine
 from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine
+from app.services.audit_log import AuditLogger
 from app.services.job_manager import JobManager
+from app.services.rate_limit import FixedWindowRateLimiter
 from app.services.tts_pipeline import TtsPipeline
 from app.storage.audio_store import AudioStore
 from app.storage.voice_clone_store import VoiceCloneStore
+
+
+def client_key(request: Request) -> str:
+    user_id = request.headers.get("X-SoriON-User-ID", "").strip()
+    if user_id:
+        return f"user:{user_id[:80]}"
+    forwarded = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+    host = forwarded or (request.client.host if request.client else "unknown")
+    return f"ip:{host}"
 
 
 @asynccontextmanager
@@ -24,6 +36,10 @@ async def lifespan(app: FastAPI):
     store.cleanup_expired()
     app.state.audio_store = store
     app.state.settings = settings
+    app.state.audit_logger = AuditLogger(settings.audit_path)
+    app.state.rate_limiter = FixedWindowRateLimiter(
+        settings.public_rate_limit_per_minute
+    )
     clone_store = VoiceCloneStore(
         settings.voice_clone_path,
         settings.voice_clone_ttl_days,
@@ -47,6 +63,8 @@ async def lifespan(app: FastAPI):
             settings.cosyvoice_worker_url,
             settings.cosyvoice_worker_timeout_seconds,
             settings.cosyvoice_worker_job_timeout_seconds,
+            settings.worker_service_token,
+            settings.worker_signature_secret,
         )
     )
     yield
@@ -57,7 +75,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.7.0",
+    version="0.7.1",
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -70,10 +88,48 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def add_request_id(request: Request, call_next):
+async def govern_request(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid4()))
+    actor = client_key(request)
+    is_api = request.url.path.startswith("/api/v1/")
+    exempt = request.url.path.endswith("/health") or request.method == "OPTIONS"
+    if is_api and not exempt:
+        allowed, remaining, reset = request.app.state.rate_limiter.check(actor)
+        if not allowed:
+            request.app.state.audit_logger.write(
+                event="rate-limit",
+                method=request.method,
+                path=request.url.path,
+                status_code=429,
+                request_id=request_id,
+                actor=actor,
+            )
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "SOA-7001: 요청이 너무 많습니다. 잠시 후 다시 시도하세요."},
+                headers={
+                    "X-Request-ID": request_id,
+                    "X-RateLimit-Remaining": "0",
+                    "X-RateLimit-Reset": str(reset),
+                },
+            )
+    else:
+        remaining = settings.public_rate_limit_per_minute
+        reset = 0
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id
+    if is_api:
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        response.headers["X-RateLimit-Reset"] = str(reset)
+    if request.method in {"POST", "DELETE"}:
+        request.app.state.audit_logger.write(
+            event="api-mutation",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            request_id=request_id,
+            actor=actor,
+        )
     return response
 
 

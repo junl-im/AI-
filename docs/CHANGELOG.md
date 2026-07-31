@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.7.1 - 2026-07-31
+
+- API와 CosyVoice Worker 사이 서비스 토큰·HMAC-SHA256 요청 서명을 추가했다.
+- 만료 요청, 변조 body, 잘못된 토큰을 Worker에서 차단한다.
+- API와 Worker에 사용자/IP·서비스 토큰 기준 요청 제한을 추가했다.
+- 음성 데이터 없이 운영 메타데이터만 남기는 JSONL 감사 로그를 추가했다.
+- production Worker에서 보안 Secret이 없으면 readiness를 차단한다.
+- 모델 필수 파일, CUDA, VRAM, 디스크 여유 공간, CPU 실행 정책 진단을 추가했다.
+- SSE event id와 Last-Event-ID 복구 계약을 추가했다.
+- 종료된 Worker 작업·입력 샘플 TTL 정리를 추가했다.
+- 버전을 0.7.1로 통일하고 보안·인수인계 문서를 갱신했다.
+
 ## 0.7.0 - 2026-07-31
 
 ### Added

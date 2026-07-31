@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -27,6 +28,10 @@ class Settings(BaseSettings):
     cosyvoice_worker_url: str = ""
     cosyvoice_worker_timeout_seconds: float = 2.5
     cosyvoice_worker_job_timeout_seconds: float = 45.0
+    worker_service_token: str = ""
+    worker_signature_secret: str = ""
+    public_rate_limit_per_minute: int = Field(default=120, ge=10, le=5000)
+    audit_log_path: str = ".sorion/audit/api.jsonl"
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../../.env"),
@@ -45,6 +50,14 @@ class Settings(BaseSettings):
     @property
     def voice_clone_path(self) -> Path:
         return Path(self.voice_clone_directory).expanduser().resolve()
+
+    @property
+    def audit_path(self) -> Path:
+        return Path(self.audit_log_path).expanduser().resolve()
+
+    @property
+    def worker_auth_enabled(self) -> bool:
+        return bool(self.worker_service_token and self.worker_signature_secret)
 
 
 @lru_cache

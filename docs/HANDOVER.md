@@ -1,5 +1,18 @@
 # HANDOVER
 
+## 2026-07-31 23:36 KST · v0.7.1
+
+1. 작업명: Production CosyVoice Adapter & API Security.
+2. 대상·기준 버전: `0.7.0 → 0.7.1`.
+3. API↔Worker 서비스 토큰과 HMAC-SHA256 요청 서명을 구현했다.
+4. API·Worker 요청 제한과 JSONL 감사 로그를 구현했다.
+5. production 보안 Secret, 모델 필수 파일, CUDA·VRAM·디스크 진단을 readiness에 연결했다.
+6. SSE `Last-Event-ID` 복구와 Worker 작업 TTL 정리를 구현했다.
+7. 원본 문장·음성은 감사 로그에 남기지 않는다.
+8. 전체본과 패치 적용본의 파일 해시 동등성을 검증한다.
+9. 산출물: `SoriON-AI-0.7.1-full.zip`, `SoriON-AI-0.7.0-to-0.7.1-patch.zip`.
+10. 다음 예상 업데이트: `0.7.2 GPU Deployment & Progressive Playback`.
+
 ## 2026-07-31 22:37 KST · v0.7.0
 
 1. 작업 일시: 2026-07-31 22:37 KST

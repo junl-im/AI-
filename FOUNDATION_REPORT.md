@@ -1,38 +1,50 @@
-# SoriON AI 0.7.0 Result Report
+# SoriON AI 0.7.1 Result Report
 
 ## 결과
 
-- FastAPI와 분리된 `services/worker` CosyVoice 실행 서비스를 추가했다.
-- Worker health, readiness, GPU·CUDA·VRAM·모델·adapter 진단을 분리했다.
-- 공식 CosyVoice `AutoModel` 호출 구조를 따르는 선택 설치 adapter를 추가했다.
-- 문장별 복제 작업, SSE 진행 이벤트, 취소, 실패·취소 구간 재시도와 WAV 병합을 구현했다.
-- FastAPI에 복제 작업 생성·조회·취소·재시도·이벤트·음원 프록시 API를 추가했다.
-- 복제 화면에 실제 실행 문장 입력, 문장별 진행률, 취소·재시도 UI를 추가했다.
-- 완료된 복제 WAV를 Linked Player Dock에 자동 연결한다.
-- Worker가 준비되지 않았을 때 작업 생성을 503으로 차단하고 성공으로 위장하지 않는다.
-- API·Worker·Web·Pages 품질 작업을 단일 GitHub Actions workflow에서 연결했다.
+`0.7.1 Production CosyVoice Adapter & API Security`는 공개 FastAPI와 사설 GPU Worker 사이의 운영 경계를 강화한다.
 
-## 검증
+- API↔Worker 서비스 토큰과 HMAC-SHA256 요청 서명
+- 요청 본문 SHA-256 포함 및 기본 30초 만료 검증
+- 잘못된 토큰, 만료 요청, 변조 요청의 HTTP 401 차단
+- API 사용자/IP 기준 요청 제한
+- Worker 서비스 토큰 기준 요청 제한
+- 원문과 음성을 제외한 JSONL 감사 로그
+- production 환경의 Worker Secret readiness gate
+- 모델 필수 파일, CUDA, VRAM, 디스크, CPU 저속 모드 정책 진단
+- SSE revision id와 `Last-Event-ID` 재연결 계약
+- 종료된 Worker 작업과 입력 샘플 TTL 정리
 
-- API pytest: 53 passed
-- Worker pytest: 5 passed
-- Python compileall 통과
-- 실제 Uvicorn Worker 시작, `/health` 정상, 모델 미설치 `/ready` not-ready 응답 확인
-- FastAPI↔Worker 실제 HTTP 연결과 capabilities의 Worker v0.7.0·not-ready 전달 확인
-- 프로젝트 규칙 검사 통과
+## 운영 원칙
+
+- Worker `/health`만 공개할 수 있다.
+- `/ready`와 `/v1/*`는 서명 인증을 요구한다.
+- Worker는 공용 인터넷에 직접 노출하지 않고 사설 네트워크 또는 방화벽 뒤에 둔다.
+- 실제 Secret과 CosyVoice 모델 가중치는 릴리스 ZIP에 포함하지 않는다.
+- 감사 로그에 합성 문장, 음성 파일, 동의 원문을 기록하지 않는다.
+- 모델 또는 GPU 조건이 부족하면 readiness를 차단하며 성공으로 위장하지 않는다.
+
+## 검증 결과
+
+- 프로젝트 절대 규칙 검사 통과
+- FastAPI 테스트 56개 통과
+- CosyVoice Worker 테스트 9개 통과
+- Python 전체 compileall 통과
+- Python 3.10 문법 모드로 84개 Python 파일 파싱 통과
+- 인증된 Worker Uvicorn 실서버 기동 및 API↔Worker 서명 통신 통과
+- 잘못된 Worker 서명 거부 확인
 - GitHub Actions YAML 파싱 통과
-- TypeScript·TSX 89개 파일 구문 검사 통과
-- CSS 6개 파일 파싱 통과
-- 모든 프로젝트 파일 500줄 이하
-- Python Ruff 표시 폭 100칸 초과 0건
-- 전체본 290개 파일
-- 0.6.4 대비 변경·추가 66개 파일, 삭제 0개
-- 패치 적용본과 전체본 파일 해시 동등성 확인
-- 전체 ZIP과 패치 ZIP 무결성 확인
+- 모든 소스 파일 500줄 이하
+- Python Ruff 표시 폭 100칸 제한 통과
 
-## 제한
+## 로컬 환경 제한
 
-- 모델 가중치, PyTorch, torchaudio, CosyVoice 저장소 의존성은 포함하지 않는다.
-- 현재 실행 환경에는 GPU 모델이 없어 실제 CosyVoice 음질·지연·VRAM을 측정하지 못했다.
-- 현재 npm registry에 일부 Web 패키지가 없어 정식 Vitest·ESLint·Vite production build는 실행하지 못했다. GitHub Actions의 Web quality가 최종 확인 단계다.
-- 공식 Ruff 실행 파일은 네트워크 제한으로 설치하지 못했다. 동일 line-length 규칙과 프로젝트 검사, Python 테스트를 통과했으며 GitHub Actions Ruff가 최종 판정한다.
+현재 실행 환경에는 CPython 3.10과 Ruff 실행 모듈이 설치되어 있지 않아 공식 Python 3.10 pytest와 Ruff 명령은 직접 실행하지 못했다. 대신 Python 3.10 AST 문법 검사, 전체 테스트, 프로젝트 표시 폭 검사를 수행했다. 최종 Python 3.10·Ruff 판정은 GitHub Actions에서 확인해야 한다.
+
+내부 npm 저장소가 `@tailwindcss/vite`를 제공하지 않아 npm 의존성 설치, Vitest, ESLint, Vite production build는 실행하지 못했다. 이번 버전의 Web 변경은 표시 버전 갱신뿐이지만 최종 Web quality 역시 GitHub Actions에서 확인해야 한다.
+
+## 릴리스 파일
+
+- 전체 프로젝트 파일: 302개
+- 패치 변경·추가 파일: 54개
+- 삭제 파일: 0개

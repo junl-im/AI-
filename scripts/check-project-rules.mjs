@@ -317,6 +317,33 @@ await requireText('docs/PLAYER_DOCK.md', [
   '재생 속도',
 ])
 
+await requireText('services/worker/app/security.py', [
+  'X-SoriON-Service-Token'.toLowerCase(),
+  'SOA-W7005',
+  'hmac.compare_digest',
+])
+await requireText('services/api/app/services/worker_auth.py', [
+  'X-SoriON-Service-Token',
+  'X-SoriON-Signature',
+  'hashlib.sha256',
+])
+await requireText('services/worker/app/main.py', [
+  'Last-Event-ID',
+  'id: {current.revision}',
+  'WorkerAuditLogger',
+  'FixedWindowRateLimiter',
+])
+await requireText('services/api/app/main.py', [
+  'X-RateLimit-Remaining',
+  'AuditLogger',
+  'FixedWindowRateLimiter',
+])
+await requireText('docs/SECURITY.md', [
+  'HMAC-SHA256',
+  '서비스 토큰',
+  '감사 로그',
+])
+
 try {
   const workflowFiles = await readdir(join(root, '.github', 'workflows'))
   const activeWorkflows = workflowFiles.filter((name) => /\.ya?ml$/i.test(name))

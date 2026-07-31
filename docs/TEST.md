@@ -195,3 +195,15 @@ npm run test:worker
 - 진행 중 UI가 문장별 상태와 취소 버튼을 표시하는지 검사한다.
 - 완료 시 Linked Player Dock 연결 안내를 표시하는지 검사한다.
 - CI는 API와 별도로 Worker Python 3.10 Ruff·pytest를 실행한다.
+
+
+## 0.7.1 인증·제한·복구 회귀 검사
+
+- API Worker 서명 헤더 생성과 로컬 비활성 모드
+- Worker 유효 서명 수락과 만료 서명 거부
+- 인증이 켜진 Worker의 무서명 요청 401
+- 서명된 multipart 복제 작업 생성 202
+- API·Worker 고정 창 요청 제한
+- Worker health 공개와 readiness 인증 분리
+- SSE revision id와 Last-Event-ID 전달 계약
+- 종료 작업 TTL 정리 계약

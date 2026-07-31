@@ -65,3 +65,20 @@
 - 제로샷 speaker prompt와 복제 실행
 - 스트리밍 TTS·복제 결과
 - 프로젝트별 Dock 세션 복구
+
+
+## 0.7.1 완료
+
+- API↔Worker 서명 인증
+- 요청 제한과 감사 로그
+- 모델·GPU readiness 강화
+- SSE 재연결 계약
+- 종료 작업 TTL 정리
+
+## 0.7.2 예정
+
+- GPU 배포 템플릿
+- 모델 설치·체크섬·로딩 진행률
+- 문장별 조기 재생
+- Worker 재시작 상태 복구
+- speaker prompt cache 수명주기

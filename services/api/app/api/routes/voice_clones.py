@@ -292,12 +292,13 @@ async def retry_clone_job(job_id: UUID) -> VoiceCloneJobResponse:
 
 
 @router.get("/jobs/{job_id}/events")
-async def clone_job_events(job_id: UUID) -> StreamingResponse:
+async def clone_job_events(job_id: UUID, request: Request) -> StreamingResponse:
     engine = get_clone_engine()
+    last_event_id = request.headers.get("Last-Event-ID")
 
     async def stream() -> AsyncIterator[bytes]:
         try:
-            async for chunk in engine.stream_events(str(job_id)):
+            async for chunk in engine.stream_events(str(job_id), last_event_id):
                 yield chunk
         except WorkerClientError as error:
             payload = json.dumps({"detail": str(error)}, ensure_ascii=False)

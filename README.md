@@ -6,7 +6,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.7.0 CosyVoice Worker Streaming & Clone Execution`
+- 버전: `0.7.1 Production CosyVoice Adapter & API Security`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
 - 주력 AI 엔진: 선택 설치형 Fun-CosyVoice 3 `AutoModel` Worker adapter
@@ -18,7 +18,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 - 저장: IndexedDB v3 프로젝트·품질 평가·음성 프로필, Firebase는 선택적 동기화 계층
 - CI·배포: Web·API·Worker·Pages를 단일 GitHub Actions 실행으로 관리
 
-## 0.7.0에서 가능한 작업
+## 0.7.1에서 가능한 작업
 
 1. 설정에서 Health·Setup·TTS·복제·통합 진단 API를 한 번에 점검합니다.
 2. GitHub Pages 정적 배포와 실제 Python API를 명확히 구분합니다.
@@ -105,3 +105,8 @@ GitHub Pages는 정적 웹만 실행합니다. Python API와 TTS 모델은 별�
 3. 다음 예상 업데이트 내역
 
 각 업데이트마다 `docs/HANDOVER.md`, `docs/CHANGELOG.md`, `docs/NEXT_UPDATE.md`를 함께 갱신합니다.
+
+
+### 0.7.1 운영 보안
+
+API↔Worker 서명 인증, 요청 제한, 감사 로그, 모델·GPU readiness 진단을 제공한다.

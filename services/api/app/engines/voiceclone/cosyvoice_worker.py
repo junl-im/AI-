@@ -7,6 +7,7 @@ from pathlib import Path
 import httpx
 
 from app.schemas.engine import EngineInfo
+from app.services.worker_auth import build_worker_auth_headers
 
 
 class WorkerClientError(RuntimeError):
@@ -21,11 +22,15 @@ class CosyVoiceCloneEngine:
         worker_url: str,
         timeout_seconds: float = 2.5,
         job_timeout_seconds: float = 45.0,
+        service_token: str = "",
+        signature_secret: str = "",
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
         self.worker_url = worker_url.strip().rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.job_timeout_seconds = job_timeout_seconds
+        self.service_token = service_token
+        self.signature_secret = signature_secret
         self.transport = transport
         self._ready = False
         self._health_ok = False
@@ -66,7 +71,7 @@ class CosyVoiceCloneEngine:
         started = time.perf_counter()
         self._last_checked_at = datetime.now(timezone.utc).isoformat()
         try:
-            health = await self._request_json("GET", "/health", self.timeout_seconds)
+            health = await self._request_json("GET", "/health", self.timeout_seconds, False)
             self._health_ok = health.get("status") == "ok"
             readiness = await self._request_json("GET", "/ready", self.timeout_seconds)
             self._worker_version = str(health.get("version") or "unknown")
@@ -108,24 +113,25 @@ class CosyVoiceCloneEngine:
         sample_path: Path,
     ) -> dict[str, object]:
         self._require_worker_url()
+        path = "/v1/jobs"
         try:
             async with httpx.AsyncClient(
                 transport=self.transport,
                 timeout=self.job_timeout_seconds,
             ) as client:
                 with sample_path.open("rb") as sample:
-                    response = await client.post(
-                        f"{self.worker_url}/v1/jobs",
+                    request = client.build_request(
+                        "POST",
+                        f"{self.worker_url}{path}",
                         data={"profile_id": profile_id, "text": text},
                         files={
-                            "sample": (
-                                sample_path.name,
-                                sample,
-                                "application/octet-stream",
-                            )
+                            "sample": (sample_path.name, sample, "application/octet-stream")
                         },
-                        headers={"User-Agent": "SoriON-API/0.7.0"},
+                        headers={"User-Agent": "SoriON-API/0.7.1"},
                     )
+                    body = await request.aread()
+                    request.headers.update(self._auth_headers("POST", path, body))
+                    response = await client.send(request)
             return self._decode_response(response)
         except (httpx.HTTPError, OSError) as error:
             raise WorkerClientError(f"Worker 작업을 시작하지 못했습니다: {error}") from error
@@ -156,24 +162,32 @@ class CosyVoiceCloneEngine:
                 transport=self.transport,
                 timeout=self.job_timeout_seconds,
             ) as client:
-                response = await client.get(f"{self.worker_url}{path}")
+                response = await client.get(
+                    f"{self.worker_url}{path}",
+                    headers=self._auth_headers("GET", path, b""),
+                )
             if not response.is_success:
                 self._raise_for_response(response)
             return response.content
         except httpx.HTTPError as error:
             raise WorkerClientError(f"Worker 음원을 받지 못했습니다: {error}") from error
 
-    async def stream_events(self, job_id: str) -> AsyncIterator[bytes]:
+    async def stream_events(
+        self,
+        job_id: str,
+        last_event_id: str | None = None,
+    ) -> AsyncIterator[bytes]:
         self._require_worker_url()
+        path = f"/v1/jobs/{job_id}/events"
+        headers = {"Accept": "text/event-stream", **self._auth_headers("GET", path, b"")}
+        if last_event_id:
+            headers["Last-Event-ID"] = last_event_id
         try:
-            async with httpx.AsyncClient(
-                transport=self.transport,
-                timeout=None,
-            ) as client:
+            async with httpx.AsyncClient(transport=self.transport, timeout=None) as client:
                 async with client.stream(
                     "GET",
-                    f"{self.worker_url}/v1/jobs/{job_id}/events",
-                    headers={"Accept": "text/event-stream"},
+                    f"{self.worker_url}{path}",
+                    headers=headers,
                 ) as response:
                     if not response.is_success:
                         self._raise_for_response(response)
@@ -187,24 +201,33 @@ class CosyVoiceCloneEngine:
         method: str,
         path: str,
         timeout_seconds: float,
+        authenticate: bool = True,
     ) -> dict[str, object]:
         self._require_worker_url()
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": "SoriON-API/0.7.1",
+        }
+        if authenticate:
+            headers.update(self._auth_headers(method, path, b""))
         try:
             async with httpx.AsyncClient(
                 transport=self.transport,
                 timeout=timeout_seconds,
             ) as client:
-                response = await client.request(
-                    method,
-                    f"{self.worker_url}{path}",
-                    headers={
-                        "Accept": "application/json",
-                        "User-Agent": "SoriON-API/0.7.0",
-                    },
-                )
+                response = await client.request(method, f"{self.worker_url}{path}", headers=headers)
             return self._decode_response(response)
         except httpx.HTTPError as error:
             raise WorkerClientError(f"Worker에 연결할 수 없습니다: {error}") from error
+
+    def _auth_headers(self, method: str, path: str, body: bytes) -> dict[str, str]:
+        return build_worker_auth_headers(
+            method,
+            path,
+            body,
+            self.service_token,
+            self.signature_secret,
+        )
 
     def _decode_response(self, response: httpx.Response) -> dict[str, object]:
         if not response.is_success:

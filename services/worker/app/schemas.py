@@ -20,7 +20,7 @@ WorkerSegmentStatus = Literal[
 
 class HealthResponse(BaseModel):
     status: Literal["ok"] = "ok"
-    version: str = "0.7.0"
+    version: str = "0.7.1"
     service: str = "sorion-cosyvoice-worker"
 
 
@@ -31,6 +31,7 @@ class WorkerDiagnosticsResponse(BaseModel):
     device: str
     model_path: str | None
     model_exists: bool
+    missing_model_files: list[str]
     adapter_module: str | None
     adapter_loaded: bool
     torch_available: bool
@@ -38,11 +39,14 @@ class WorkerDiagnosticsResponse(BaseModel):
     cuda_device_count: int
     gpu_name: str | None
     vram_total_mb: int | None
+    disk_free_mb: int | None
+    security_enabled: bool
+    security_ready: bool
 
 
 class ReadinessResponse(BaseModel):
     status: Literal["ready", "not-ready"]
-    version: str = "0.7.0"
+    version: str = "0.7.1"
     diagnostics: WorkerDiagnosticsResponse
 
 

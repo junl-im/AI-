@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "default_engine": "auto"
 }
 ```
@@ -43,7 +43,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.7.0",
+  "version": "0.7.1",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -164,7 +164,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.7.0",
+  "version": "0.7.1",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
@@ -292,3 +292,20 @@ Worker health/readiness 스냅샷, 버전, 지연 시간, GPU·CUDA·VRAM·모�
 - `SOA-5101`: Worker 요청 실패
 - `SOA-5102`: 음성 프로필 없음
 - `SOA-5103`: Worker 또는 모델 readiness 실패
+
+
+## 0.7.1 Worker 인증 헤더
+
+FastAPI는 Worker의 `/ready`와 `/v1/*` 호출에 다음 헤더를 자동으로 붙인다.
+
+```text
+X-SoriON-Service-Token
+X-SoriON-Timestamp
+X-SoriON-Signature
+```
+
+서명 입력은 HTTP method, path, timestamp, request body SHA-256이다. Worker는 기본 30초보다
+오래된 요청과 body가 바뀐 요청을 거부한다. `/health`는 로드밸런서 확인을 위해 공개한다.
+
+SSE 재연결 시 브라우저의 `Last-Event-ID`를 API가 Worker까지 전달한다. Worker는 각 이벤트에
+revision 기반 `id`를 넣어 이미 받은 상태를 중복 전송하지 않는다.

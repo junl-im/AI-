@@ -6,10 +6,12 @@ from uuid import UUID, uuid4
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
+from app.audit import WorkerAuditLogger
 from app.config import WorkerSettings, get_settings
 from app.jobs import TERMINAL_STATUSES, WorkerJobManager
+from app.rate_limit import FixedWindowRateLimiter
 from app.runtime import CosyVoiceRuntime
 from app.schemas import (
     HealthResponse,
@@ -17,13 +19,10 @@ from app.schemas import (
     WorkerDiagnosticsResponse,
     WorkerJobResponse,
 )
+from app.security import verify_worker_request
 
 
-async def save_sample(
-    sample: UploadFile,
-    destination: Path,
-    max_bytes: int,
-) -> None:
+async def save_sample(sample: UploadFile, destination: Path, max_bytes: int) -> None:
     total = 0
     destination.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -47,6 +46,10 @@ async def save_sample(
         )
 
 
+def protected_path(path: str) -> bool:
+    return path == "/ready" or path.startswith("/v1/")
+
+
 def create_app(
     settings: WorkerSettings | None = None,
     runtime: CosyVoiceRuntime | None = None,
@@ -60,17 +63,22 @@ def create_app(
         current_runtime = runtime or CosyVoiceRuntime(worker_settings)
         app.state.settings = worker_settings
         app.state.runtime = current_runtime
+        app.state.audit = WorkerAuditLogger(worker_settings.resolved_audit_path)
+        app.state.rate_limiter = FixedWindowRateLimiter(
+            worker_settings.rate_limit_per_minute
+        )
         app.state.job_manager = WorkerJobManager(
             current_runtime,
             output_root / "jobs",
             worker_settings.max_concurrent_jobs,
+            worker_settings.job_ttl_minutes,
         )
         yield
 
     app = FastAPI(
         title="SoriON CosyVoice Worker",
-        version="0.7.0",
-        description="격리된 CosyVoice 음성 복제 실행 서비스",
+        version="0.7.1",
+        description="인증·감사·TTL을 포함한 CosyVoice 음성 복제 실행 서비스",
         lifespan=lifespan,
     )
     app.add_middleware(
@@ -80,6 +88,43 @@ def create_app(
         allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def protect_worker(request: Request, call_next):
+        if request.method == "OPTIONS" or not protected_path(request.url.path):
+            return await call_next(request)
+        body = await request.body()
+        result = verify_worker_request(
+            request.method,
+            request.url.path,
+            request.headers,
+            body,
+            worker_settings.service_token,
+            worker_settings.signature_secret,
+            worker_settings.auth_ttl_seconds,
+        )
+        actor = request.headers.get("X-SoriON-Service-Token", "anonymous")[:12]
+        if not result.ok:
+            request.app.state.audit.write("auth-failed", request.url.path, 401, actor)
+            return JSONResponse(status_code=401, content={"detail": result.reason})
+        allowed, remaining, reset = request.app.state.rate_limiter.check(actor)
+        if not allowed:
+            request.app.state.audit.write("rate-limit", request.url.path, 429, actor)
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "SOA-W7006: Worker 요청 제한을 초과했습니다."},
+                headers={"X-RateLimit-Reset": str(reset)},
+            )
+        response = await call_next(request)
+        response.headers["X-RateLimit-Remaining"] = str(remaining)
+        if request.method == "POST":
+            request.app.state.audit.write(
+                "worker-mutation",
+                request.url.path,
+                response.status_code,
+                actor,
+            )
+        return response
 
     @app.get("/health", response_model=HealthResponse)
     def health() -> HealthResponse:
@@ -149,16 +194,21 @@ def create_app(
         job = request.app.state.job_manager.get(job_id)
         if job is None:
             raise HTTPException(status_code=404, detail="SOA-W2004: 작업을 찾지 못했습니다.")
+        header = request.headers.get("Last-Event-ID", "-1")
+        try:
+            initial_revision = int(header)
+        except ValueError:
+            initial_revision = -1
 
         async def stream():
-            last_revision = -1
+            last_revision = initial_revision
             while True:
                 current = request.app.state.job_manager.get(job_id)
                 if current is None:
                     break
-                if current.revision != last_revision:
+                if current.revision > last_revision:
                     payload = json.dumps(current.snapshot(), ensure_ascii=False)
-                    yield f"event: progress\ndata: {payload}\n\n"
+                    yield f"id: {current.revision}\nevent: progress\ndata: {payload}\n\n"
                     last_revision = current.revision
                 if current.status in TERMINAL_STATUSES:
                     break
@@ -198,7 +248,8 @@ def create_app(
             (item for item in job.segments if item.index == segment_index),
             None,
         )
-        if segment is None or segment.status != "completed" or not segment.output_path.exists():
+        missing = segment is None or segment.status != "completed"
+        if missing or not segment.output_path.exists():
             raise HTTPException(status_code=409, detail="SOA-W2006: 완성된 구간 음원이 없습니다.")
         return FileResponse(
             segment.output_path,

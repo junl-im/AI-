@@ -10,7 +10,7 @@ router = APIRouter()
 
 @router.get("/strategy", response_model=EngineStrategyResponse)
 async def engine_strategy() -> EngineStrategyResponse:
-    return current_engine_strategy("0.7.0")
+    return current_engine_strategy("0.7.1")
 
 
 @router.get("", response_model=list[EngineInfo])

@@ -136,3 +136,11 @@ SoriON Web
 ```
 
 `SORION_COSYVOICE_WORKER_URL`이 비어 있거나 Worker `/ready`가 준비되지 않은 경우 복제 실행을 차단한다. `0.7.0`은 작업 생성·문장별 진행·취소·재시도·최종 WAV 전달 계약을 제공하며, 모델 가중치와 대형 AI 의존성은 일반 릴리스 ZIP에 포함하지 않는다.
+
+
+## 0.7.1 운영 경계
+
+CosyVoice Worker는 FastAPI와 분리된 GPU 실행 계층으로 유지한다. 공개 API만 인터넷에 노출하고
+Worker는 사설 네트워크에 둔다. 두 서비스는 서비스 토큰과 HMAC-SHA256 요청 서명으로 연결한다.
+모델 경로, 필수 파일, CUDA, VRAM, 디스크, CPU 저속 모드 정책을 readiness에 반영하며 조건이
+충족되지 않으면 복제 성공으로 표시하지 않는다.

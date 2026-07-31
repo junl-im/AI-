@@ -1,5 +1,6 @@
 import asyncio
 import re
+import shutil
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -105,14 +106,17 @@ class WorkerJobManager:
         runtime: CosyVoiceRuntime,
         output_root: Path,
         max_concurrent: int,
+        job_ttl_minutes: int = 60,
     ) -> None:
         self.runtime = runtime
         self.output_root = output_root
         self.output_root.mkdir(parents=True, exist_ok=True)
         self._jobs: dict[UUID, JobRecord] = {}
         self._semaphore = asyncio.Semaphore(max_concurrent)
+        self.job_ttl_minutes = job_ttl_minutes
 
     def create(self, profile_id: str, text: str, sample_path: Path) -> JobRecord:
+        self.cleanup_expired()
         job_id = uuid4()
         job_root = self.output_root / str(job_id)
         job_root.mkdir(parents=True, exist_ok=True)
@@ -133,7 +137,24 @@ class WorkerJobManager:
         return job
 
     def get(self, job_id: UUID) -> JobRecord | None:
+        self.cleanup_expired()
         return self._jobs.get(job_id)
+
+    def cleanup_expired(self, now: datetime | None = None) -> int:
+        current = now or datetime.now(timezone.utc)
+        removed = 0
+        for job_id, job in list(self._jobs.items()):
+            if job.status not in TERMINAL_STATUSES:
+                continue
+            updated = datetime.fromisoformat(job.updated_at)
+            age_minutes = (current - updated).total_seconds() / 60
+            if age_minutes < self.job_ttl_minutes:
+                continue
+            shutil.rmtree(job.output_path.parent, ignore_errors=True)
+            job.sample_path.unlink(missing_ok=True)
+            self._jobs.pop(job_id, None)
+            removed += 1
+        return removed
 
     async def cancel(self, job_id: UUID) -> JobRecord | None:
         job = self.get(job_id)

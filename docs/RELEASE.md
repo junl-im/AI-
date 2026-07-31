@@ -117,3 +117,12 @@ Semantic Versioning을 사용한다.
 - 핵심 확인: Worker health/readiness, GPU 진단, 작업 생성·취소·재시도, Dock 자동 연결
 - 모델 가중치, torch, torchaudio, CosyVoice 저장소 의존성은 ZIP에 포함하지 않는다.
 - 삭제 파일: 없음
+
+
+## 0.7.1 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.7.1-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.7.0-to-0.7.1-patch.zip`
+- 체크섬: `SoriON-AI-0.7.1-artifacts.sha256`
+- 보안 Secret과 모델 가중치는 ZIP에 포함하지 않는다.
+- 패치 기준 버전은 정확히 `0.7.0`이며 삭제 대상은 없다.

@@ -23,6 +23,7 @@ class FakeRuntime:
             device="cpu",
             model_path=None,
             model_exists=False,
+            missing_model_files=[],
             adapter_module="tests.fake",
             adapter_loaded=self.ready,
             torch_available=False,
@@ -30,6 +31,9 @@ class FakeRuntime:
             cuda_device_count=0,
             gpu_name=None,
             vram_total_mb=None,
+            disk_free_mb=1024,
+            security_enabled=False,
+            security_ready=True,
         )
 
     async def generate(
@@ -139,3 +143,45 @@ def test_worker_can_cancel_and_retry(tmp_path: Path):
         assert retried["status"] in {"queued", "running"}
         completed = wait_for_terminal(client, job_id)
         assert completed["status"] == "completed"
+
+
+def test_worker_requires_auth_when_configured(tmp_path: Path):
+    secured = settings(tmp_path).model_copy(
+        update={"service_token": "token", "signature_secret": "secret"}
+    )
+    app = create_app(secured, FakeRuntime())
+    with TestClient(app) as client:
+        assert client.get("/health").status_code == 200
+        assert client.get("/ready").status_code == 401
+
+
+def test_worker_accepts_signed_multipart_request(tmp_path: Path):
+    import hashlib
+    import hmac
+    import time as time_module
+
+    secured = settings(tmp_path).model_copy(
+        update={"service_token": "token", "signature_secret": "secret"}
+    )
+    app = create_app(secured, FakeRuntime())
+    with TestClient(app) as client:
+        request = client.build_request(
+            "POST",
+            "/v1/jobs",
+            data={"profile_id": "profile-1", "text": "서명 테스트입니다."},
+            files={"sample": ("sample.wav", b"sample", "audio/wav")},
+        )
+        body = request.read()
+        timestamp = str(int(time_module.time()))
+        body_hash = hashlib.sha256(body).hexdigest()
+        payload = "\n".join(("POST", "/v1/jobs", timestamp, body_hash))
+        signature = hmac.new(b"secret", payload.encode(), hashlib.sha256).hexdigest()
+        request.headers.update(
+            {
+                "X-SoriON-Service-Token": "token",
+                "X-SoriON-Timestamp": timestamp,
+                "X-SoriON-Signature": signature,
+            }
+        )
+        response = client.send(request)
+        assert response.status_code == 202
