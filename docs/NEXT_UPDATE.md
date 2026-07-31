@@ -51,7 +51,7 @@ SoriON AI는 한국인이 모바일에서 앱처럼 사용하며 10초 안에 �
 - `SoriON CI & Pages`의 Web·API·Deploy 모두 성공
 - API Ruff E501·I001 오류가 0건인지 확인
 - `/api/v1/engines/strategy` 응답 확인
-- 공개 사이트에 `BUILD v0.5.5` 표시
+- 공개 사이트에 `BUILD v0.5.6` 표시
 
 ## 이후 방향
 

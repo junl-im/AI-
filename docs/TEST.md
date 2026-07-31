@@ -107,3 +107,12 @@ npm run test:api
 - GPT-SoVITS가 복제 전문가용 보조 엔진으로 표시되는지 확인
 - Fish Audio S2가 평가 전용으로 표시되는지 확인
 - `docs/ENGINE_STRATEGY.md`에 Python 백엔드 이유와 라이선스 주의사항이 있는지 확인
+
+## 0.5.6 Ruff 한글 표시 폭 검사
+
+- Ruff E501이 사용하는 동아시아 전각·광각 문자의 2칸 표시 폭을 로컬 규칙 검사에 반영
+- `system_tts.py`, `engine_diagnostics.py`, `setup_diagnostics.py`의 보고된 6개 줄이 100칸 이하인지 확인
+- `services/api/app`과 `services/api/tests` 전체 Python 줄의 Ruff 표시 폭이 100칸 이하인지 pytest로 확인
+- 단순 `line.length` 검사가 한글 긴 줄을 놓치지 않는지 회귀 확인
+- Python 3.10 호환성, import 정렬, API 전체 테스트를 함께 확인
+

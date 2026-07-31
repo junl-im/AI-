@@ -6,7 +6,7 @@
 - 서비스 경로: `https://junl-im.github.io/AI-/`
 - Vite 배포 기준 경로: `/AI-/`
 
-## 0.5.5 배포 구조
+## 0.5.6 배포 구조
 
 `.github/workflows/ci.yml` 하나가 다음 작업을 관리한다.
 
@@ -60,14 +60,14 @@ Pull Request가 열린 `develop` 또는 기능 브랜치에 새 커밋을 Push�
 3. `Application → Storage → Clear site data`를 실행한다.
 4. 설치형 PWA가 있다면 제거한 뒤 다시 접속한다.
 
-## 0.5.5 확인
+## 0.5.6 확인
 
-- 공개 화면 상단에 `BUILD v0.5.5` 표시
+- 공개 화면 상단에 `BUILD v0.5.6` 표시
 - 브랜드 문구와 마이크 배너 정상 표시
 - GitHub Pages에서는 API 미연결 시 `DEMO WAV` 표시
 - 로컬 Voice API를 연결하면 실제 엔진 상태와 진행률 표시
 
-## 0.5.5 Action 런타임 호환성
+## 0.5.6 Action 런타임 호환성
 
 Web·API 품질 Job의 JavaScript Action을 Node.js 24 기반 버전으로 올렸다.
 

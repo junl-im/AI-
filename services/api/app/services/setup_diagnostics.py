@@ -44,7 +44,7 @@ def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> 
             status="ready" if python_ready else "missing",
             required=True,
             detail=sys.version.split()[0],
-            action=None if python_ready else "Python 3.11 이상을 설치하세요.",
+            action=None if python_ready else "Python 3.10 이상을 설치하세요.",
         ),
         _audio_directory_check(settings.audio_path),
         SetupStep(
@@ -57,7 +57,11 @@ def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> 
                 if ready_real
                 else "MeloTTS 또는 한국어 시스템 음성을 찾지 못했습니다."
             ),
-            action=None if ready_real else "docs/ENGINE_PILOT.md의 운영체제별 설치 절차를 진행하세요.",
+            action=(
+                None
+                if ready_real
+                else "docs/ENGINE_PILOT.md의 운영체제별 설치 절차를 진행하세요."
+            ),
         ),
         SetupStep(
             id="ffmpeg",

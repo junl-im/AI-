@@ -34,20 +34,32 @@ def engine_diagnostic(engine: TtsEngine) -> EngineDiagnostic:
         except (ImportError, ValueError):
             package_ready = False
         model_loaded = getattr(engine, "_model", None) is not None
-        checks.extend([
-            DiagnosticCheck(
-                id="melo-package",
-                label="MeloTTS 패키지",
-                status=_status(package_ready),
-                detail="melo.api 모듈을 찾았습니다." if package_ready else "MeloTTS 선택 설치가 필요합니다.",
-            ),
-            DiagnosticCheck(
-                id="melo-model",
-                label="한국어 모델",
-                status="ready" if model_loaded else "idle",
-                detail="모델이 메모리에 로딩되었습니다." if model_loaded else "첫 생성 요청 때 지연 로딩됩니다.",
-            ),
-        ])
+        package_detail = (
+            "melo.api 모듈을 찾았습니다."
+            if package_ready
+            else "MeloTTS 선택 설치가 필요합니다."
+        )
+        model_detail = (
+            "모델이 메모리에 로딩되었습니다."
+            if model_loaded
+            else "첫 생성 요청 때 지연 로딩됩니다."
+        )
+        checks.extend(
+            [
+                DiagnosticCheck(
+                    id="melo-package",
+                    label="MeloTTS 패키지",
+                    status=_status(package_ready),
+                    detail=package_detail,
+                ),
+                DiagnosticCheck(
+                    id="melo-model",
+                    label="한국어 모델",
+                    status="ready" if model_loaded else "idle",
+                    detail=model_detail,
+                ),
+            ]
+        )
     elif info.id == "system":
         executable = next(
             (
@@ -57,12 +69,19 @@ def engine_diagnostic(engine: TtsEngine) -> EngineDiagnostic:
             ),
             None,
         )
-        checks.append(DiagnosticCheck(
-            id="system-executable",
-            label="시스템 음성 도구",
-            status=_status(executable is not None),
-            detail=f"{executable} 실행 파일을 찾았습니다." if executable else "지원 음성 도구를 찾지 못했습니다.",
-        ))
+        executable_detail = (
+            f"{executable} 실행 파일을 찾았습니다."
+            if executable
+            else "지원 음성 도구를 찾지 못했습니다."
+        )
+        checks.append(
+            DiagnosticCheck(
+                id="system-executable",
+                label="시스템 음성 도구",
+                status=_status(executable is not None),
+                detail=executable_detail,
+            )
+        )
 
     return EngineDiagnostic(
         engine_id=info.id,

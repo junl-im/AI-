@@ -7,6 +7,29 @@ const ignored = new Set(['.git', '.venv', 'node_modules', 'dist', 'coverage', '_
 const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.py', '.css'])
 const failures = []
 
+function isWideCodePoint(codePoint) {
+  return (
+    (codePoint >= 0x1100 && codePoint <= 0x115f) ||
+    codePoint === 0x2329 ||
+    codePoint === 0x232a ||
+    (codePoint >= 0x2e80 && codePoint <= 0xa4cf) ||
+    (codePoint >= 0xac00 && codePoint <= 0xd7a3) ||
+    (codePoint >= 0xf900 && codePoint <= 0xfaff) ||
+    (codePoint >= 0xfe10 && codePoint <= 0xfe19) ||
+    (codePoint >= 0xfe30 && codePoint <= 0xfe6f) ||
+    (codePoint >= 0xff01 && codePoint <= 0xff60) ||
+    (codePoint >= 0xffe0 && codePoint <= 0xffe6) ||
+    (codePoint >= 0x1f300 && codePoint <= 0x1faff)
+  )
+}
+
+function ruffDisplayWidth(line) {
+  return Array.from(line).reduce((width, character) => {
+    const codePoint = character.codePointAt(0)
+    return width + (isWideCodePoint(codePoint) ? 2 : 1)
+  }, 0)
+}
+
 async function walk(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     if (ignored.has(entry.name)) continue
@@ -27,8 +50,11 @@ async function walk(directory) {
     if (lineCount > 500) failures.push(`${path}: ${lineCount}줄로 500줄 제한을 초과했습니다.`)
     if (extension === '.py') {
       lines.forEach((line, index) => {
-        if (line.length > 100) {
-          failures.push(`${path}:${index + 1}: Python 100자 제한을 초과했습니다. (${line.length}자)`)
+        const displayWidth = ruffDisplayWidth(line)
+        if (displayWidth > 100) {
+          failures.push(
+            `${path}:${index + 1}: Ruff 표시 폭 100자를 초과했습니다. (${displayWidth}칸)`,
+          )
         }
       })
     }

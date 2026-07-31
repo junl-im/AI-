@@ -27,7 +27,10 @@ class SystemSpeechAdapter:
 
     @staticmethod
     def _unavailable_reason() -> str:
-        return "한국어 시스템 음성 도구를 찾지 못했습니다. Windows 음성, macOS say 또는 eSpeak를 설치해 주세요."
+        return (
+            "한국어 시스템 음성 도구를 찾지 못했습니다. "
+            "Windows 음성, macOS say 또는 eSpeak를 설치해 주세요."
+        )
 
     def _detect(self, configured_voice: str) -> SystemBackend | None:
         system = platform.system().lower()
@@ -214,7 +217,10 @@ class SystemTtsEngine(TtsEngine):
             engine_mode="local",
             audio_url=f"/api/v1/audio/{output_path.name}",
             estimated_duration_seconds=round(duration, 1),
-            message="기기에 설치된 한국어 시스템 음성으로 WAV를 생성했습니다. AI 모델 음성은 아닙니다.",
+            message=(
+                "기기에 설치된 한국어 시스템 음성으로 WAV를 생성했습니다. "
+                "AI 모델 음성은 아닙니다."
+            ),
         )
 
     @staticmethod

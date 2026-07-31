@@ -1,33 +1,33 @@
-# SoriON AI 0.5.5 API Lint & Engine Strategy Report
+# SoriON AI 0.5.6 Ruff Unicode Width Guard Report
 
 ## 결과
 
-GitHub Actions의 Python 3.10 Ruff 단계에서 발견된 E501 긴 줄 22건과 I001 import 정렬 2건을 수정했다. API 코드의 동작 계약은 유지하면서 줄바꿈과 import 순서만 정리했다.
+GitHub Actions Ruff가 보고한 E501 6건을 수정했다. 이전 로컬 검사는 Python 문자열 길이만 계산해 한글 한 글자를 1자로 보았지만, Ruff는 한글과 동아시아 광각 문자를 화면상 2칸으로 계산한다. 이 차이 때문에 로컬에서는 통과하고 GitHub에서는 실패했다.
 
-SoriON의 엔진 방향도 공식 문서 기준으로 재정의했다. 주력 TTS와 제로샷 복제 후보는 Fun-CosyVoice 3, 복제 전문가용 보조 엔진은 GPT-SoVITS, 로컬 대체는 MeloTTS와 운영체제 음성으로 결정했다. Fish Audio S2는 상업 라이선스가 별도로 필요해 평가 전용으로 분류했다.
+0.5.6은 단순 줄바꿈 수정에 그치지 않고 프로젝트 규칙 검사와 API 회귀 테스트를 Ruff 표시 폭 기준으로 변경해 같은 문제가 다시 누락되지 않도록 했다.
 
 ## 주요 변경
 
-- Python 소스와 테스트의 100자 초과 줄 제거
-- `app/main.py`와 Python 호환성 테스트의 import 블록 정렬
-- 프로젝트 규칙 검사에 Python 100자 제한 추가
-- `/api/v1/engines/strategy` 엔진 전략 API 추가
-- `docs/ENGINE_STRATEGY.md` 추가
-- CosyVoice 3를 차기 주력 엔진으로 결정
-- GPT-SoVITS를 복제 전문가용 보조 엔진으로 결정
-- MeloTTS를 주력 엔진이 아닌 로컬 대체 엔진으로 재분류
-- Fish Audio S2를 라이선스 계약 전 평가 전용으로 분류
+- 시스템 음성 미설치 안내와 생성 완료 메시지 분리
+- MeloTTS 패키지·모델 진단 문구를 별도 변수로 분리
+- 시스템 음성 실행 파일 진단 문구를 별도 변수로 분리
+- Setup 설치 안내 줄바꿈
+- Python 3.11 설치 안내를 지원 최소 버전인 Python 3.10으로 정정
+- JavaScript 프로젝트 규칙 검사에 동아시아 표시 폭 계산 추가
+- Python API 테스트에 Ruff 표시 폭 전체 스캔 추가
 
 ## 검증
 
+- 동아시아 표시 폭 100칸 초과 Python 줄 0개
 - Python 전체 문법 컴파일 통과
-- FastAPI 테스트 32개 통과
-- Python 앱·테스트의 100자 초과 줄 0개
-- 엔진 전략 API 회귀 테스트 통과
+- FastAPI 테스트 33개 통과
 - 프로젝트 절대 규칙 검사 통과
 - 모든 소스 파일 500줄 이하
 - SVG, 비밀키, 런타임 음원, 캐시 미포함
+- 전체본과 패치 적용본 208개 파일 완전 일치
+
+- 덮어쓰기 패치 변경·추가 파일 31개, 삭제 파일 0개
 
 ## 제한
 
-현재 작업 환경에는 Ruff 실행 파일과 외부 패키지 레지스트리 접근이 없어 공식 Ruff 바이너리 자체는 실행하지 못했다. GitHub Actions에서 Ruff와 Python 3.10 pytest를 최종 확인해야 한다.
+현재 작업 환경은 외부 Python 패키지 다운로드가 차단되어 Ruff 실행 파일을 새로 설치할 수 없다. 대신 Ruff E501의 동아시아 표시 폭 규칙을 동일하게 재현하는 독립 검사와 pytest를 실행했다. GitHub Actions의 공식 Ruff 실행이 최종 확인 기준이다.

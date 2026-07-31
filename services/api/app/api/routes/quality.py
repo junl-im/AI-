@@ -30,7 +30,7 @@ def _absolute_audio_url(request: Request, audio_url: str | None) -> str | None:
 
 @router.get("/diagnostics", response_model=QualityDiagnosticsResponse)
 async def diagnostics() -> QualityDiagnosticsResponse:
-    return quality_diagnostics("0.5.5", engine_registry.list_tts())
+    return quality_diagnostics("0.5.6", engine_registry.list_tts())
 
 
 @router.get("/sentences", response_model=list[EvaluationSentence])

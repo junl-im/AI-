@@ -897,3 +897,65 @@ SoriON AI는 웹 음성 도구가 아니라 한국인이 모바일에서 10초 �
 ### 다음 예상 업데이트
 
 `0.6.0 CosyVoice 3 & Mobile Voice Clone Foundation`에서 별도 worker, 스트리밍 TTS, 모바일 10초 녹음, 품질 검사, 동의, 제로샷 복제 계약을 구현한다.
+
+## 2026-07-31 16:33 KST - 0.5.6 Ruff Unicode Width Guard
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.5.5`
+- 대상 버전: `0.5.6`
+
+### 변경 내용
+
+- GitHub Ruff E501 로그에 남은 한글 포함 긴 줄 6곳을 표시 폭 100칸 이하로 분리했다.
+- 로컬 규칙 검사가 한글을 1자로만 계산하던 문제를 수정했다.
+- 한글, CJK, 전각 문자와 이모지를 2칸으로 계산하는 Ruff 표시 폭 검사를 추가했다.
+- API 테스트가 앱과 테스트 전체 Python 줄의 표시 폭을 회귀 검사하도록 강화했다.
+- Setup 진단의 Python 설치 안내를 Python 3.10 이상으로 정정했다.
+
+### 변경 이유
+
+이전 검사에서 `line.length`만 사용해 한글 줄이 로컬에서는 100자 이하로 보였지만 Ruff에서는 화면 표시 폭 100칸을 초과했다. 로컬 검사와 CI의 기준을 동일하게 맞추지 않으면 같은 누락이 반복되므로 검사 계약 자체를 수정했다.
+
+### 영향 범위
+
+- Python 시스템 음성 엔진 메시지
+- 엔진·설치 진단 서비스
+- 프로젝트 자동 규칙 검사
+- Python 3.10 호환성 테스트
+- 릴리스·테스트·인수인계 문서
+
+### 주요 변경 파일
+
+- `services/api/app/engines/tts/system_tts.py`
+- `services/api/app/services/engine_diagnostics.py`
+- `services/api/app/services/setup_diagnostics.py`
+- `services/api/tests/test_python_compatibility.py`
+- `scripts/check-project-rules.mjs`
+- `docs/CHANGELOG.md`
+- `docs/TEST.md`
+
+### 검증 결과
+
+- Python 동아시아 표시 폭 100칸 초과 줄 0개
+- Python 전체 문법 컴파일 통과
+- FastAPI 테스트 33개 통과
+- 프로젝트 절대 규칙 검사 통과
+- 전체본과 패치 적용본 208개 파일 완전 일치
+- 패치 변경·추가 파일 31개, 삭제 파일 0개
+
+### 알려진 제한과 주의사항
+
+- 현재 작업 환경은 외부 패키지 다운로드가 차단되어 공식 Ruff 바이너리를 설치하지 못했다.
+- GitHub Actions에서 `uv run --python 3.10 ruff check app tests --output-format=github`의 최종 성공을 확인해야 한다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.5.6-full.zip`
+- 패치: `SoriON-AI-0.5.5-to-0.5.6-patch.zip`
+- 체크섬: `SoriON-AI-0.5.6-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+CI의 Web·API·Deploy가 모두 성공하면 `0.6.0 CosyVoice 3 & Mobile Voice Clone Foundation`에서 모바일 녹음, 샘플 품질 검사, 동의, 제로샷 복제 계약과 엔진 worker 기반을 구현한다.
+
