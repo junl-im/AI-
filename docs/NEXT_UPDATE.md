@@ -1,40 +1,37 @@
 # NEXT UPDATE
 
-현재 기준 버전: `0.6.4`
+현재 기준 버전: `0.7.0`
 
 ## 목표 버전
 
-v0.7.0 CosyVoice Worker Streaming & Clone Execution
+v0.7.1 Production CosyVoice Adapter & API Security
 
 ## 다음 예상 업데이트
 
-- 별도 CosyVoice Worker 서비스와 health·readiness 계약
-- GPU, CUDA, VRAM, 모델 경로와 모델 로딩 상태 진단
-- 동의된 음성 프로필의 zero-shot speaker prompt 생성
-- 실제 한국어 제로샷 목소리 복제 실행
-- text-in·audio-out 스트리밍 조각 전달
-- 첫 음성 지연 시간과 실시간 배율 측정
-- Worker 작업 취소, 재연결, 장애 복구
-- 실패한 문장 구간만 재시도
-- 문장별 생성 리스트와 Worker 구간 진행률 연결
-- 생성 완료 시 적응형 Linked Player Dock 자동 표시
-- 공개 HTTPS FastAPI 배포 프로필과 인증 경계
+- 실제 GPU 서버 설치 자동 진단과 CosyVoice 의존성 설치 가이드
+- Worker 모델 다운로드·체크섬·로딩 진행률
+- API↔Worker 서비스 토큰과 요청 서명
+- 사용자별 요청 제한, 동시 작업 제한, 감사 이벤트
+- SSE 자동 재연결과 마지막 이벤트 ID 복구
+- 완료된 문장 구간부터 Dock에 순차 재생하는 progressive playback
+- MP3·M4A·WEBM·OGG 서버 디코딩과 2차 품질 검사
+- speaker prompt 캐시와 동의 철회 시 즉시 폐기
+- Worker 재시작 뒤 작업 상태 복구
+- 실제 GPU 환경의 한국어 음질·지연·VRAM 벤치마크
 
-## 0.6.4에서 넘기는 결정
+## 0.7.0에서 넘기는 결정
 
-- 생성 화면의 첫 훅은 #111·800, 보조 문장은 #7A7A7A·600으로 유지한다.
-- 입력 카드는 생성 헤더에 32px 겹치고 보라·파랑 radial glow를 유지한다.
-- 기본 입력 제한은 500자이며 빈 입력에서는 생성 CTA를 비활성화한다.
-- 한국어 발음 보정 토글은 API `normalize_text`와 실제로 연결한다.
-- 긴 문장 생성 결과는 문장별 리스트와 하나의 최종 WAV를 함께 제공한다.
-- Dock 메뉴는 모든 스크롤 위치에서 페이지 상단으로 이동해야 한다.
-- 음성이 없으면 플레이어를 숨기고, 준비되면 메뉴 위에 표시한다.
-- 실제 모델이 없을 때 Demo 또는 샘플 준비를 복제 성공으로 표시하지 않는다.
+- `/health`와 `/ready`를 반드시 분리한다.
+- adapter 또는 모델이 없으면 작업 생성은 503이며 성공으로 표시하지 않는다.
+- FastAPI 게이트웨이는 torch와 CosyVoice를 직접 import하지 않는다.
+- 원본 음성은 공개 조회 API로 제공하지 않는다.
+- 작업은 문장별로 생성하고 실패·취소 구간만 재시도한다.
+- 최종 음성은 완료 후 Linked Player Dock에 자동 연결한다.
+- 모델 가중치와 대형 AI 의존성은 일반 웹 릴리스 ZIP에 포함하지 않는다.
 
 ## 선행 조건
 
-- Web quality, API quality, Pages 배포가 모두 성공해야 한다.
-- `/api/v1/connectivity`에서 API·저장소·CORS가 정상이어야 한다.
-- 실제 모델과 코드·가중치 라이선스를 배포 전에 다시 확인한다.
-- 원본 음성 샘플을 공개 URL로 노출하지 않는다.
-- 공개 Worker에는 인증, 요청 제한, 감사 로그를 적용한다.
+- Web, API, Worker quality가 모두 성공해야 한다.
+- 실제 GPU 서버에서 `/ready`가 `ready`여야 한다.
+- 공개 배포 전에 API와 Worker 사이 인증을 적용해야 한다.
+- 한국어 샘플과 생성 결과의 사용 권한·고지 정책을 검토해야 한다.

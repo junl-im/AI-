@@ -1,5 +1,25 @@
 # HANDOVER
 
+## 2026-07-31 22:37 KST · v0.7.0
+
+1. 작업 일시: 2026-07-31 22:37 KST
+2. 대상·기준 버전: `0.6.4 → 0.7.0`
+3. 변경 내용: 별도 CosyVoice Worker, health·readiness·GPU 진단, 공식 AutoModel adapter, 문장별 작업·SSE·취소·재시도·WAV 병합, FastAPI 프록시, 복제 실행 UI와 Dock 자동 연결을 구현함.
+4. 변경 이유: 기존 복제 기능은 샘플 준비와 URL probe만 있었고 실제 작업 생성·상태·음원 전달 계약이 없었기 때문임.
+5. 영향 범위: `services/worker`, FastAPI voice clone routes·schemas·store·engine client, 복제 UI·API types, CI, 환경 변수, 테스트·문서.
+6. 주요 파일: `services/worker/app/main.py`, `jobs.py`, `runtime.py`, `adapters/cosyvoice3.py`, `voice_clones.py`, `VoiceClonePage.tsx`, `CloneExecutionCard.tsx`.
+7. 검증 결과: API 53 tests, Worker 5 tests, Uvicorn Worker와 API↔Worker HTTP smoke, compileall, 프로젝트 규칙, YAML·TS/TSX·CSS 정적 검사, 전체 290개·패치 66개 파일 동등성, ZIP 무결성 통과.
+8. 제한·주의: GPU 모델과 대형 의존성은 포함하지 않으며 실제 CosyVoice 음질·지연·VRAM은 GPU 배포에서 검증해야 함. npm registry와 Ruff 설치 제한으로 정식 Web quality·Ruff는 GitHub Actions 최종 확인.
+9. 산출물: `SoriON-AI-0.7.0-full.zip`, `SoriON-AI-0.6.4-to-0.7.0-patch.zip`, `SoriON-AI-0.7.0-artifacts.sha256`.
+10. 다음 예상 업데이트: `0.7.1 Production CosyVoice Adapter & API Security`.
+
+## 다음 예상 업데이트
+
+- 실제 GPU 설치 자동 진단과 모델 로딩 진행률
+- API↔Worker 서비스 인증과 요청 제한
+- SSE 재연결·progressive playback·작업 복구
+- 실제 한국어 음질·지연·VRAM 벤치마크
+
 ## 2026-07-31 22:30 KST · v0.6.4
 
 1. 작업 일시: 2026-07-31 22:30 KST

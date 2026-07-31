@@ -197,3 +197,118 @@ def test_voice_clone_store_cleans_expired_profile_files(tmp_path: Path):
     assert store.cleanup_expired() == 2
     assert not sample.exists()
     assert not metadata.exists()
+
+
+def worker_job_payload(job_id: str, status: str = "running") -> dict:
+    completed = status == "completed"
+    return {
+        "id": job_id,
+        "profile_id": "profile-1",
+        "status": status,
+        "progress": 100 if completed else 45,
+        "phase": "completed" if completed else "synthesizing",
+        "message": "완료" if completed else "생성 중",
+        "text": "첫 번째 문장입니다.",
+        "created_at": "2026-07-31T00:00:00Z",
+        "updated_at": "2026-07-31T00:00:01Z",
+        "first_audio_ms": 820 if completed else None,
+        "duration_seconds": 1.2 if completed else None,
+        "audio_url": f"/v1/jobs/{job_id}/audio" if completed else None,
+        "events_url": f"/v1/jobs/{job_id}/events",
+        "error": None,
+        "segments": [
+            {
+                "index": 1,
+                "text": "첫 번째 문장입니다.",
+                "status": "completed" if completed else "running",
+                "progress": 100 if completed else 45,
+                "message": "완료" if completed else "생성 중",
+                "error": None,
+                "audio_url": (
+                    f"/v1/jobs/{job_id}/segments/1/audio" if completed else None
+                ),
+            }
+        ],
+    }
+
+
+def prepare_profile_for_job(client, tmp_path: Path) -> str:
+    client.app.state.voice_clone_store = VoiceCloneStore(tmp_path, 7, 1024 * 1024)
+    response = client.post(
+        "/api/v1/voice-clones/profiles",
+        data={
+            "display_name": "실행 목소리",
+            "consent_json": consent_payload(),
+            "client_analysis_json": analysis_payload(),
+        },
+        files={"sample": ("sample.wav", wav_bytes(), "audio/wav")},
+    )
+    assert response.status_code == 200
+    return response.json()["id"]
+
+
+def test_voice_clone_job_routes_proxy_worker(client, tmp_path: Path, monkeypatch):
+    from app.engines.registry import engine_registry
+
+    profile_id = prepare_profile_for_job(client, tmp_path)
+    engine = engine_registry.resolve_voice_clone("auto")
+    job_id = str(uuid4())
+
+    async def probe():
+        engine._ready = True
+        engine._reason = "준비됨"
+        return True
+
+    async def create_job(_profile_id, text, sample_path):
+        assert _profile_id == profile_id
+        assert text == "첫 번째 문장입니다."
+        assert sample_path.exists()
+        return worker_job_payload(job_id)
+
+    async def get_job(_job_id):
+        assert _job_id == job_id
+        return worker_job_payload(job_id, "completed")
+
+    async def cancel_job(_job_id):
+        return worker_job_payload(_job_id, "cancelled")
+
+    async def retry_job(_job_id):
+        return worker_job_payload(_job_id, "running")
+
+    async def download_audio(_job_id, segment_index=None):
+        assert _job_id == job_id
+        assert segment_index in {None, 1}
+        return wav_bytes(0.1)
+
+    monkeypatch.setattr(engine, "probe", probe)
+    monkeypatch.setattr(engine, "create_job", create_job)
+    monkeypatch.setattr(engine, "get_job", get_job)
+    monkeypatch.setattr(engine, "cancel_job", cancel_job)
+    monkeypatch.setattr(engine, "retry_job", retry_job)
+    monkeypatch.setattr(engine, "download_audio", download_audio)
+
+    created = client.post(
+        f"/api/v1/voice-clones/profiles/{profile_id}/jobs",
+        json={"text": "첫 번째 문장입니다."},
+    )
+    assert created.status_code == 202
+    assert created.json()["events_url"].endswith(f"/{job_id}/events")
+
+    status_response = client.get(f"/api/v1/voice-clones/jobs/{job_id}")
+    assert status_response.status_code == 200
+    assert status_response.json()["status"] == "completed"
+    assert status_response.json()["segments"][0]["audio_url"].endswith(
+        f"/{job_id}/segments/1/audio"
+    )
+
+    cancelled = client.post(f"/api/v1/voice-clones/jobs/{job_id}/cancel")
+    assert cancelled.json()["status"] == "cancelled"
+    retried = client.post(f"/api/v1/voice-clones/jobs/{job_id}/retry")
+    assert retried.json()["status"] == "running"
+
+    audio = client.get(f"/api/v1/voice-clones/jobs/{job_id}/audio")
+    assert audio.status_code == 200
+    assert audio.content[:4] == b"RIFF"
+    segment = client.get(f"/api/v1/voice-clones/jobs/{job_id}/segments/1/audio")
+    assert segment.status_code == 200
+    assert segment.content[:4] == b"RIFF"

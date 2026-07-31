@@ -6,19 +6,19 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.6.4 Premium Creation UX`
+- 버전: `0.7.0 CosyVoice Worker Streaming & Clone Execution`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
-- 주력 AI 엔진 방향: Fun-CosyVoice 3 어댑터 예정
+- 주력 AI 엔진: 선택 설치형 Fun-CosyVoice 3 `AutoModel` Worker adapter
 - 무료 로컬 대체 엔진: Windows·macOS·eSpeak 시스템 한국어 음성
 - 한국어 처리: 숫자·날짜·금액·퍼센트·영문 약어 정규화
 - 긴 문장: 자동 분할 후 PCM WAV 병합
-- 운영 연결: API 5경로 통합 점검, CORS·저장소·Worker health, 실제 생성 진행률
+- 운영 연결: API·Worker health/readiness, GPU·CUDA·VRAM·모델 진단, 실제 작업 진행률
 - 품질 연구소: A/B 재생, IndexedDB 평가 저장, JSON·CSV 보고서
 - 저장: IndexedDB v3 프로젝트·품질 평가·음성 프로필, Firebase는 선택적 동기화 계층
-- CI·배포: Web·API·Pages를 단일 GitHub Actions 실행으로 관리
+- CI·배포: Web·API·Worker·Pages를 단일 GitHub Actions 실행으로 관리
 
-## 0.6.4에서 가능한 작업
+## 0.7.0에서 가능한 작업
 
 1. 설정에서 Health·Setup·TTS·복제·통합 진단 API를 한 번에 점검합니다.
 2. GitHub Pages 정적 배포와 실제 Python API를 명확히 구분합니다.
@@ -38,6 +38,11 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 16. 생성 후 긴 문장이 문장별 완료 리스트로 나뉘는 과정을 확인합니다.
 17. 음성이 준비되면 메뉴 위에 나타나는 Dock 플레이어에서 대기열, 이전·다음, 반복, 속도, 다운로드를 사용합니다.
 18. Dock 메뉴는 어느 스크롤 위치에서 눌러도 해당 화면 상단으로 이동합니다.
+19. 별도 CosyVoice Worker의 health와 모델 readiness를 구분합니다.
+20. GPU, CUDA, VRAM, 모델 경로, adapter 로딩 상태를 진단합니다.
+21. 동의된 프로필로 문장별 복제 작업을 생성하고 진행률을 확인합니다.
+22. 작업을 취소하거나 실패·취소 구간만 다시 실행합니다.
+23. 완성된 복제 WAV를 Linked Player Dock에 자동 연결합니다.
 
 MeloTTS, Local TTS, Demo WAV는 화면과 프로젝트 데이터에서 서로 다른 모드로 표시됩니다.
 
@@ -48,6 +53,7 @@ MeloTTS, Local TTS, Demo WAV는 화면과 프로젝트 데이터에서 서로 �
 ```bash
 cp .env.example .env
 npm install
+npm run dev:worker
 npm run dev:api
 ```
 
@@ -64,6 +70,7 @@ npm run dev
 - 목소리 복제: [`docs/VOICE_CLONE.md`](docs/VOICE_CLONE.md)
 - 연계형 플레이어: [`docs/PLAYER_DOCK.md`](docs/PLAYER_DOCK.md)
 - API 연결 진단: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
+- CosyVoice Worker: [`docs/COSYVOICE_WORKER.md`](docs/COSYVOICE_WORKER.md)
 - 전체 개발 규칙: [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
 
 ## GitHub Pages 배포

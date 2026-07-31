@@ -39,7 +39,14 @@ async def connectivity(request: Request) -> ConnectivityResponse:
     tts_infos = [engine.info() for engine in engine_registry.list_tts()]
     clone_infos = [engine.info() for engine in clone_engines]
     real_tts = [engine for engine in tts_infos if engine.ready and engine.mode != "mock"]
-    clone_ready = [engine for engine in clone_infos if engine.ready]
+    clone_engine = clone_engines[0] if clone_engines else None
+    clone_snapshot = clone_engine.probe_snapshot() if clone_engine else {}
+    clone_health = bool(clone_snapshot.get("health_ok"))
+    clone_ready = bool(clone_snapshot.get("ready"))
+    clone_reason = str(
+        clone_snapshot.get("reason") or "복제 Worker가 등록되지 않았습니다."
+    )
+    clone_latency = clone_snapshot.get("latency_ms")
     checks = [
         ConnectivityCheck(
             id="api",
@@ -59,18 +66,22 @@ async def connectivity(request: Request) -> ConnectivityResponse:
             ),
         ),
         ConnectivityCheck(
-            id="clone-worker",
-            label="CosyVoice Worker",
-            status="ready" if clone_ready else "warning",
+            id="clone-worker-health",
+            label="CosyVoice Worker 프로세스",
+            status="ready" if clone_health else "warning",
             detail=(
-                ", ".join(engine.name for engine in clone_ready)
-                if clone_ready
-                else (
-                    clone_infos[0].reason
-                    if clone_infos
-                    else "복제 Worker가 등록되지 않았습니다."
-                )
+                "Worker /health 응답을 확인했습니다."
+                if clone_health
+                else clone_reason
             ),
+            latency_ms=int(clone_latency) if isinstance(clone_latency, int) else None,
+        ),
+        ConnectivityCheck(
+            id="clone-worker-readiness",
+            label="CosyVoice 모델 Readiness",
+            status="ready" if clone_ready else "warning",
+            detail=clone_reason,
+            latency_ms=int(clone_latency) if isinstance(clone_latency, int) else None,
         ),
         ConnectivityCheck(
             id="cors",
@@ -85,7 +96,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.6.4",
+        version="0.7.0",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",

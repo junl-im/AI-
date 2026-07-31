@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,13 +13,15 @@
     "test:watch": "vitest",
     "test:api": "python -m pytest services/api/tests",
     "quality:rules": "node scripts/check-project-rules.mjs",
-    "quality": "npm run quality:rules && npm run lint && npm run typecheck && npm run test && npm run test:api",
+    "quality": "npm run quality:rules && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
     "lint:web": "npm run lint",
     "typecheck:web": "npm run typecheck",
-    "dev:api": "node scripts/start-api.mjs"
+    "dev:api": "node scripts/start-api.mjs",
+    "test:worker": "python -m pytest services/worker/tests",
+    "dev:worker": "node scripts/start-worker.mjs"
   },
   "engines": {
     "node": ">=22.0.0",

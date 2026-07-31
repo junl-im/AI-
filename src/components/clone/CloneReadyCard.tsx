@@ -13,7 +13,7 @@ export function CloneReadyCard({
       <h2>{profile.displayName}</h2>
       <p>{profile.message}</p>
       <dl>
-        <div><dt>상태</dt><dd>{profile.status === 'engine-ready' ? '엔진 준비됨' : '샘플 준비 완료'}</dd></div>
+        <div><dt>상태</dt><dd>{profile.status === 'engine-ready' ? '실제 생성 가능' : '샘플 준비 완료'}</dd></div>
         <div><dt>엔진</dt><dd>{profile.engineId}</dd></div>
         <div><dt>원본</dt><dd>로컬 우선 보관</dd></div>
       </dl>

@@ -1,18 +1,33 @@
 import json
+from collections.abc import AsyncIterator
 from datetime import datetime, timezone
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile, status
+from fastapi import (
+    APIRouter,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
+from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
 
 from app.engines.registry import engine_registry
+from app.engines.voiceclone.cosyvoice_worker import WorkerClientError
 from app.schemas.voiceclone import (
     VoiceCloneCapabilityResponse,
     VoiceCloneClientAnalysis,
     VoiceCloneConsent,
     VoiceCloneDeleteResponse,
+    VoiceCloneJobCreateRequest,
+    VoiceCloneJobResponse,
     VoiceCloneProfileResponse,
+    VoiceCloneWorkerResponse,
 )
 from app.storage.voice_clone_store import ALLOWED_EXTENSIONS
 
@@ -49,12 +64,55 @@ def parse_client_analysis(value: str) -> VoiceCloneClientAnalysis:
         ) from error
 
 
+def get_clone_engine():
+    engine = engine_registry.resolve_voice_clone("auto")
+    if engine is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="SOA-5100: 음성 복제 Worker가 등록되지 않았습니다.",
+        )
+    return engine
+
+
+def worker_error(error: WorkerClientError) -> HTTPException:
+    code = error.status_code if 400 <= error.status_code < 600 else 502
+    return HTTPException(status_code=code, detail=f"SOA-5101: {error}")
+
+
+def map_job_payload(payload: dict[str, object]) -> VoiceCloneJobResponse:
+    job_id = str(payload.get("id") or "")
+    mapped = dict(payload)
+    mapped["audio_url"] = (
+        f"/api/v1/voice-clones/jobs/{job_id}/audio"
+        if payload.get("audio_url")
+        else None
+    )
+    mapped["events_url"] = f"/api/v1/voice-clones/jobs/{job_id}/events"
+    segments = []
+    raw_segments = payload.get("segments")
+    if isinstance(raw_segments, list):
+        for value in raw_segments:
+            if not isinstance(value, dict):
+                continue
+            segment = dict(value)
+            index = segment.get("index")
+            segment["audio_url"] = (
+                f"/api/v1/voice-clones/jobs/{job_id}/segments/{index}/audio"
+                if segment.get("audio_url")
+                else None
+            )
+            segments.append(segment)
+    mapped["segments"] = segments
+    return VoiceCloneJobResponse.model_validate(mapped)
+
+
 @router.get("/capabilities", response_model=VoiceCloneCapabilityResponse)
 async def capabilities(request: Request) -> VoiceCloneCapabilityResponse:
     engine = engine_registry.resolve_voice_clone("auto")
     if engine is not None:
         await engine.probe()
     info = engine.info() if engine else None
+    snapshot = engine.probe_snapshot() if engine else {}
     settings = request.app.state.settings
     return VoiceCloneCapabilityResponse(
         engine_id=info.id if info else "cosyvoice3-worker",
@@ -63,6 +121,34 @@ async def capabilities(request: Request) -> VoiceCloneCapabilityResponse:
         reason=info.reason if info else "음성 복제 엔진이 등록되지 않았습니다.",
         max_file_bytes=settings.voice_clone_max_file_bytes,
         accepted_extensions=sorted(ALLOWED_EXTENSIONS),
+        worker_version=snapshot.get("worker_version"),
+        diagnostics=snapshot.get("diagnostics"),
+    )
+
+
+@router.get("/worker", response_model=VoiceCloneWorkerResponse)
+async def worker_status() -> VoiceCloneWorkerResponse:
+    engine = get_clone_engine()
+    await engine.probe()
+    snapshot = engine.probe_snapshot()
+    return VoiceCloneWorkerResponse(
+        ready=bool(snapshot.get("ready")),
+        reason=str(snapshot.get("reason") or "Worker 상태를 확인하지 못했습니다."),
+        worker_version=(
+            str(snapshot["worker_version"])
+            if snapshot.get("worker_version") is not None
+            else None
+        ),
+        latency_ms=(
+            int(snapshot["latency_ms"])
+            if snapshot.get("latency_ms") is not None
+            else None
+        ),
+        diagnostics=(
+            snapshot["diagnostics"]
+            if isinstance(snapshot.get("diagnostics"), dict)
+            else None
+        ),
     )
 
 
@@ -110,10 +196,12 @@ async def create_profile(
 
     created_at = datetime.now(timezone.utc).isoformat()
     engine = engine_registry.resolve_voice_clone("auto")
+    if engine is not None:
+        await engine.probe()
     info = engine.info() if engine else None
     engine_id = info.id if info else "cosyvoice3-worker"
     engine_ready = bool(info and info.ready)
-    profile_status = "sample-ready" if engine_ready else "engine-unavailable"
+    profile_status = "engine-ready" if engine_ready else "engine-unavailable"
     ready_message = (
         "동의된 샘플을 안전하게 보관했습니다. "
         "Worker가 준비되어 실제 복제 작업을 시작할 수 있습니다."
@@ -145,6 +233,105 @@ async def create_profile(
         created_at=created_at,
         message=message,
     )
+
+
+@router.post(
+    "/profiles/{profile_id}/jobs",
+    response_model=VoiceCloneJobResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def create_clone_job(
+    profile_id: UUID,
+    payload: VoiceCloneJobCreateRequest,
+    request: Request,
+) -> VoiceCloneJobResponse:
+    sample_path = request.app.state.voice_clone_store.sample_path(profile_id)
+    if sample_path is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SOA-5102: 동의된 음성 프로필을 찾지 못했습니다.",
+        )
+    engine = get_clone_engine()
+    if not await engine.probe():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"SOA-5103: {engine.info().reason}",
+        )
+    try:
+        result = await engine.create_job(str(profile_id), payload.text.strip(), sample_path)
+    except WorkerClientError as error:
+        raise worker_error(error) from error
+    return map_job_payload(result)
+
+
+@router.get("/jobs/{job_id}", response_model=VoiceCloneJobResponse)
+async def get_clone_job(job_id: UUID) -> VoiceCloneJobResponse:
+    try:
+        result = await get_clone_engine().get_job(str(job_id))
+    except WorkerClientError as error:
+        raise worker_error(error) from error
+    return map_job_payload(result)
+
+
+@router.post("/jobs/{job_id}/cancel", response_model=VoiceCloneJobResponse)
+async def cancel_clone_job(job_id: UUID) -> VoiceCloneJobResponse:
+    try:
+        result = await get_clone_engine().cancel_job(str(job_id))
+    except WorkerClientError as error:
+        raise worker_error(error) from error
+    return map_job_payload(result)
+
+
+@router.post("/jobs/{job_id}/retry", response_model=VoiceCloneJobResponse)
+async def retry_clone_job(job_id: UUID) -> VoiceCloneJobResponse:
+    try:
+        result = await get_clone_engine().retry_job(str(job_id))
+    except WorkerClientError as error:
+        raise worker_error(error) from error
+    return map_job_payload(result)
+
+
+@router.get("/jobs/{job_id}/events")
+async def clone_job_events(job_id: UUID) -> StreamingResponse:
+    engine = get_clone_engine()
+
+    async def stream() -> AsyncIterator[bytes]:
+        try:
+            async for chunk in engine.stream_events(str(job_id)):
+                yield chunk
+        except WorkerClientError as error:
+            payload = json.dumps({"detail": str(error)}, ensure_ascii=False)
+            yield f"event: error\ndata: {payload}\n\n".encode()
+
+    return StreamingResponse(
+        stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@router.get("/jobs/{job_id}/audio")
+async def clone_job_audio(job_id: UUID) -> Response:
+    try:
+        content = await get_clone_engine().download_audio(str(job_id))
+    except WorkerClientError as error:
+        raise worker_error(error) from error
+    return Response(
+        content=content,
+        media_type="audio/wav",
+        headers={
+            "Content-Disposition": f'attachment; filename="sorion-clone-{job_id}.wav"'
+        },
+    )
+
+
+@router.get("/jobs/{job_id}/segments/{segment_index}/audio")
+async def clone_segment_audio(job_id: UUID, segment_index: int) -> Response:
+    try:
+        content = await get_clone_engine().download_audio(str(job_id), segment_index)
+    except WorkerClientError as error:
+        raise worker_error(error) from error
+    return Response(content=content, media_type="audio/wav")
 
 
 @router.delete("/profiles/{profile_id}", response_model=VoiceCloneDeleteResponse)

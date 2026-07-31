@@ -18,6 +18,7 @@ npm run typecheck
 npm run test
 npm run build
 npm run test:api
+npm run test:worker
 ```
 
 ## 0.5.0 추가 검사
@@ -181,3 +182,16 @@ npm run test:api
 - 생성 결과는 문장별 완료 구간 리스트를 제공한다.
 - Dock 메뉴 클릭은 현재 스크롤 위치와 관계없이 화면 상단으로 이동한다.
 - API pipeline은 `normalize_text=false`에서 날짜 표기를 원문으로 유지한다.
+
+
+## 0.7.0 Worker·복제 실행 회귀 검사
+
+- `/health` 성공과 `/ready` not-ready 상태를 별도로 검사한다.
+- adapter가 준비되지 않으면 작업 생성이 503인지 검사한다.
+- 문장 2개 작업이 구간 WAV 2개와 최종 RIFF WAV를 만드는지 검사한다.
+- 취소 후 완료되지 않은 구간만 재시도해 완료되는지 검사한다.
+- FastAPI가 작업 생성·상태·취소·재시도·최종·구간 음원을 프록시하는지 검사한다.
+- Worker가 없는 UI에서 실제 실행 버튼이 비활성화되는지 검사한다.
+- 진행 중 UI가 문장별 상태와 취소 버튼을 표시하는지 검사한다.
+- 완료 시 Linked Player Dock 연결 안내를 표시하는지 검사한다.
+- CI는 API와 별도로 Worker Python 3.10 Ruff·pytest를 실행한다.

@@ -1,0 +1,1 @@
+"""SoriON CosyVoice worker package."""

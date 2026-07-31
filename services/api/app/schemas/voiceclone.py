@@ -4,7 +4,25 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 VoiceClonePurpose = Literal["personal", "content", "accessibility"]
-VoiceCloneProfileStatus = Literal["sample-ready", "engine-ready", "engine-unavailable"]
+VoiceCloneProfileStatus = Literal[
+    "sample-ready",
+    "engine-ready",
+    "engine-unavailable",
+]
+VoiceCloneJobStatus = Literal[
+    "queued",
+    "running",
+    "completed",
+    "failed",
+    "cancelled",
+]
+VoiceCloneSegmentStatus = Literal[
+    "queued",
+    "running",
+    "completed",
+    "failed",
+    "cancelled",
+]
 
 
 class VoiceCloneConsent(BaseModel):
@@ -23,6 +41,8 @@ class VoiceCloneCapabilityResponse(BaseModel):
     recommended_seconds: int = 10
     max_file_bytes: int
     accepted_extensions: list[str]
+    worker_version: str | None = None
+    diagnostics: dict[str, object] | None = None
 
 
 class VoiceCloneProfileResponse(BaseModel):
@@ -50,3 +70,43 @@ class VoiceCloneClientAnalysis(BaseModel):
     clipping_ratio: float | None = Field(default=None, ge=0, le=1)
     status: Literal["good", "warning", "blocked"]
     messages: list[str] = Field(default_factory=list, max_length=12)
+
+
+class VoiceCloneJobCreateRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=500)
+
+
+class VoiceCloneSegmentResponse(BaseModel):
+    index: int
+    text: str
+    status: VoiceCloneSegmentStatus
+    progress: int = Field(ge=0, le=100)
+    message: str
+    error: str | None = None
+    audio_url: str | None = None
+
+
+class VoiceCloneJobResponse(BaseModel):
+    id: str
+    profile_id: str
+    status: VoiceCloneJobStatus
+    progress: int = Field(ge=0, le=100)
+    phase: str
+    message: str
+    text: str
+    created_at: str
+    updated_at: str
+    first_audio_ms: int | None = None
+    duration_seconds: float | None = None
+    audio_url: str | None = None
+    events_url: str
+    error: str | None = None
+    segments: list[VoiceCloneSegmentResponse]
+
+
+class VoiceCloneWorkerResponse(BaseModel):
+    ready: bool
+    reason: str
+    worker_version: str | None = None
+    latency_ms: int | None = None
+    diagnostics: dict[str, object] | None = None

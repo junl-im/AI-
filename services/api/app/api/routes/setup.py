@@ -10,4 +10,4 @@ router = APIRouter()
 
 @router.get("", response_model=SetupStatusResponse)
 async def get_setup_status() -> SetupStatusResponse:
-    return setup_status("0.6.4", get_settings(), engine_registry.list_tts())
+    return setup_status("0.7.0", get_settings(), engine_registry.list_tts())

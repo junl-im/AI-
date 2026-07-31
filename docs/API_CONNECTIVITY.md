@@ -107,3 +107,13 @@ SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS=2.5
 
 0.6.2는 Worker health 연결까지만 검증한다. 실제 스트리밍 생성과 제로샷 복제 실행은
 0.7.0에서 추가한다.
+
+## 0.7.0 Worker 상태 분리
+
+연결 진단은 다음 두 항목을 별도로 반환한다.
+
+- `clone-worker-health`: Worker 프로세스 `/health` 응답
+- `clone-worker-readiness`: adapter·모델·GPU 준비 상태 `/ready`
+
+프로세스가 살아 있어도 모델이 없으면 health는 ready, readiness는 warning이다.
+복제 작업 생성은 readiness가 ready일 때만 허용한다.

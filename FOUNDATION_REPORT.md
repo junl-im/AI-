@@ -1,33 +1,38 @@
-# SoriON AI 0.6.4 Result Report
+# SoriON AI 0.7.0 Result Report
 
-## 목표
+## 결과
 
-첫 화면에서 사용자가 즉시 문장을 입력하고 목소리를 고른 뒤 WAV 생성을 시작하도록 생성 UX의 시각 계층과 상호작용을 정리한다.
-
-## 구현
-
-- `문장 하나면,`을 #111·800으로 강조하고 보조 문장을 #7A7A7A·600으로 낮췄다.
-- 생성 헤더 뒤에 보라·파랑 radial glow를 추가하고 메인 입력 카드를 32px 겹쳤다.
-- 첫 화면에 500자 입력창, 실시간 카운터, 한국어 숫자·날짜 발음 보정 토글을 노출했다.
-- 발음 보정 토글을 실제 API `normalize_text` 계약과 연결했다.
-- 목소리 프리셋을 모바일 가로 스크롤 칩으로 변경했다.
-- 빈 입력·입력 완료·생성 중 상태에 따라 CTA 문구와 활성 상태가 달라진다.
-- 생성 완료 후 native 파형 대신 문장별 생성 구간 완료 리스트를 표시한다.
-- Dock 메뉴의 터치 영역을 키우고 active pill에 눌린 inner shadow를 적용했다.
-- Dock 메뉴를 어느 스크롤 위치에서 눌러도 해당 페이지 상단으로 이동한다.
+- FastAPI와 분리된 `services/worker` CosyVoice 실행 서비스를 추가했다.
+- Worker health, readiness, GPU·CUDA·VRAM·모델·adapter 진단을 분리했다.
+- 공식 CosyVoice `AutoModel` 호출 구조를 따르는 선택 설치 adapter를 추가했다.
+- 문장별 복제 작업, SSE 진행 이벤트, 취소, 실패·취소 구간 재시도와 WAV 병합을 구현했다.
+- FastAPI에 복제 작업 생성·조회·취소·재시도·이벤트·음원 프록시 API를 추가했다.
+- 복제 화면에 실제 실행 문장 입력, 문장별 진행률, 취소·재시도 UI를 추가했다.
+- 완료된 복제 WAV를 Linked Player Dock에 자동 연결한다.
+- Worker가 준비되지 않았을 때 작업 생성을 503으로 차단하고 성공으로 위장하지 않는다.
+- API·Worker·Web·Pages 품질 작업을 단일 GitHub Actions workflow에서 연결했다.
 
 ## 검증
 
-- 프로젝트 절대 규칙 검사 통과
-- FastAPI 테스트 50개 통과
+- API pytest: 53 passed
+- Worker pytest: 5 passed
 - Python compileall 통과
-- Ruff와 정식 npm 품질 검사는 GitHub Actions에서 최종 확인
-- TypeScript·TSX 87개 파일 구문 검사와 CSS 파싱 통과
-- 전체본 268개 파일과 패치 적용본의 파일 해시 일치 확인
-- 패치 변경·추가 파일 51개, 삭제 파일 0개
-- 전체 ZIP과 패치 ZIP 압축 무결성 검사 통과
-- `.git`, `node_modules`, `dist`, `.sorion`, Python 캐시 미포함
+- 실제 Uvicorn Worker 시작, `/health` 정상, 모델 미설치 `/ready` not-ready 응답 확인
+- FastAPI↔Worker 실제 HTTP 연결과 capabilities의 Worker v0.7.0·not-ready 전달 확인
+- 프로젝트 규칙 검사 통과
+- GitHub Actions YAML 파싱 통과
+- TypeScript·TSX 89개 파일 구문 검사 통과
+- CSS 6개 파일 파싱 통과
+- 모든 프로젝트 파일 500줄 이하
+- Python Ruff 표시 폭 100칸 초과 0건
+- 전체본 290개 파일
+- 0.6.4 대비 변경·추가 66개 파일, 삭제 0개
+- 패치 적용본과 전체본 파일 해시 동등성 확인
+- 전체 ZIP과 패치 ZIP 무결성 확인
 
-## 다음 단계
+## 제한
 
-0.7.0에서 CosyVoice Worker의 실제 readiness, 스트리밍 TTS, 제로샷 복제 실행 계층을 연결한다.
+- 모델 가중치, PyTorch, torchaudio, CosyVoice 저장소 의존성은 포함하지 않는다.
+- 현재 실행 환경에는 GPU 모델이 없어 실제 CosyVoice 음질·지연·VRAM을 측정하지 못했다.
+- 현재 npm registry에 일부 Web 패키지가 없어 정식 Vitest·ESLint·Vite production build는 실행하지 못했다. GitHub Actions의 Web quality가 최종 확인 단계다.
+- 공식 Ruff 실행 파일은 네트워크 제한으로 설치하지 못했다. 동일 line-length 규칙과 프로젝트 검사, Python 테스트를 통과했으며 GitHub Actions Ruff가 최종 판정한다.

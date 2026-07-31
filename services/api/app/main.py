@@ -46,6 +46,7 @@ async def lifespan(app: FastAPI):
         CosyVoiceCloneEngine(
             settings.cosyvoice_worker_url,
             settings.cosyvoice_worker_timeout_seconds,
+            settings.cosyvoice_worker_job_timeout_seconds,
         )
     )
     yield
@@ -56,7 +57,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.6.4",
+    version="0.7.0",
     lifespan=lifespan,
 )
 app.add_middleware(

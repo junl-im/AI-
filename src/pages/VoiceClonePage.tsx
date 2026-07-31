@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CloneConsentCard } from '../components/clone/CloneConsentCard'
+import { CloneExecutionCard } from '../components/clone/CloneExecutionCard'
 import { CloneReadyCard } from '../components/clone/CloneReadyCard'
 import { CloneStepIndicator } from '../components/clone/CloneStepIndicator'
 import { SampleQualityCard } from '../components/clone/SampleQualityCard'
@@ -10,13 +11,18 @@ import { usePlayerStore } from '../store/usePlayerStore'
 import { analyzeAudioFile } from '../voiceclone/audioAnalysis'
 import { deleteVoiceProfile, saveVoiceProfile } from '../voiceclone/profileRepository'
 import {
+  cancelVoiceCloneJob,
   deleteRemoteVoiceCloneProfile,
   getVoiceCloneCapability,
+  getVoiceCloneJob,
   prepareVoiceCloneProfile,
+  retryVoiceCloneJob,
+  startVoiceCloneJob,
   type VoiceCloneCapability,
 } from '../voiceclone/voiceCloneApi'
 import type {
   VoiceCloneConsent,
+  VoiceCloneJob,
   VoiceCloneProfile,
   VoiceSampleAnalysis,
 } from '../voiceclone/voiceCloneTypes'
@@ -52,10 +58,15 @@ function localProfile(input: {
   }
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : '음성 복제 요청을 처리하지 못했습니다.'
+}
+
 export function VoiceClonePage() {
   const recorder = useVoiceRecorder()
   const showNotice = useAppStore((state) => state.showNotice)
   const enqueue = usePlayerStore((state) => state.enqueue)
+  const enqueuedJobId = useRef<string | null>(null)
   const [analysis, setAnalysis] = useState<VoiceSampleAnalysis | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [displayName, setDisplayName] = useState('내 SoriON 목소리')
@@ -64,6 +75,9 @@ export function VoiceClonePage() {
   const [capability, setCapability] = useState<VoiceCloneCapability | null>(null)
   const [capabilityError, setCapabilityError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [job, setJob] = useState<VoiceCloneJob | null>(null)
+  const [jobBusy, setJobBusy] = useState(false)
+  const [jobError, setJobError] = useState<string | null>(null)
   const currentStep = profile ? 3 : analysis ? 2 : 1
   const consentReady = consent.rightsConfirmed
     && consent.disclosureConfirmed
@@ -113,12 +127,60 @@ export function VoiceClonePage() {
     return () => { active = false }
   }, [recorder.file])
 
+  useEffect(() => {
+    if (!job || !['queued', 'running'].includes(job.status)) return undefined
+    let active = true
+    const timer = window.setInterval(() => {
+      void getVoiceCloneJob(job.id)
+        .then((nextJob) => {
+          if (active) setJob(nextJob)
+        })
+        .catch((error) => {
+          if (active) setJobError(errorMessage(error))
+        })
+    }, 750)
+    return () => {
+      active = false
+      window.clearInterval(timer)
+    }
+  }, [job?.id, job?.status])
+
+  useEffect(() => {
+    if (!job || job.status !== 'completed' || !job.audioUrl) return
+    if (enqueuedJobId.current === job.id) return
+    enqueuedJobId.current = job.id
+    enqueue({
+      url: job.audioUrl,
+      filename: `sorion-clone-${job.id}.wav`,
+      source: 'api',
+      durationSeconds: job.durationSeconds ?? 0,
+      result: {
+        jobId: job.id,
+        status: 'completed',
+        engineId: 'cosyvoice3-worker',
+        engineMode: 'ai',
+        audioUrl: job.audioUrl,
+        estimatedDurationSeconds: job.durationSeconds ?? 0,
+        message: job.message,
+        normalizedText: job.text,
+        segmentCount: job.segments.length,
+        processingMs: null,
+        fileSizeBytes: null,
+        realtimeFactor: null,
+      },
+    }, `${profile?.displayName ?? 'SoriON 복제 목소리'} · 생성 결과`)
+    showNotice('복제 음성을 완성해 하단 플레이어에 연결했습니다.')
+  }, [enqueue, job, profile?.displayName, showNotice])
+
   const engineLabel = useMemo(() => {
     if (capabilityError) return capabilityError
     if (!capability) return 'CosyVoice Worker 확인 중'
-    return capability.ready
-      ? `${capability.engineName} 준비됨`
-      : `${capability.engineName} 연결 대기`
+    const gpu = capability.diagnostics?.gpu_name
+    const version = capability.workerVersion ? ` v${capability.workerVersion}` : ''
+    if (capability.ready) {
+      return `${capability.engineName}${version} 준비됨${gpu ? ` · ${gpu}` : ''}`
+    }
+    return `${capability.engineName}${version} 연결 대기`
   }, [capability, capabilityError])
 
   async function handlePrepare() {
@@ -185,11 +247,53 @@ export function VoiceClonePage() {
     }
   }
 
+  async function handleStart(text: string) {
+    if (!profile || !capability?.ready) return
+    setJobBusy(true)
+    setJobError(null)
+    try {
+      const nextJob = await startVoiceCloneJob(profile.id, text)
+      enqueuedJobId.current = null
+      setJob(nextJob)
+    } catch (error) {
+      setJobError(errorMessage(error))
+    } finally {
+      setJobBusy(false)
+    }
+  }
+
+  async function handleCancel() {
+    if (!job) return
+    setJobBusy(true)
+    try {
+      setJob(await cancelVoiceCloneJob(job.id))
+    } catch (error) {
+      setJobError(errorMessage(error))
+    } finally {
+      setJobBusy(false)
+    }
+  }
+
+  async function handleRetry() {
+    if (!job) return
+    setJobBusy(true)
+    setJobError(null)
+    try {
+      setJob(await retryVoiceCloneJob(job.id))
+    } catch (error) {
+      setJobError(errorMessage(error))
+    } finally {
+      setJobBusy(false)
+    }
+  }
+
   async function handleDelete() {
     if (!profile) return
     await deleteVoiceProfile(profile.id).catch(() => undefined)
     await deleteRemoteVoiceCloneProfile(profile.id).catch(() => undefined)
     setProfile(null)
+    setJob(null)
+    setJobError(null)
     recorder.reset()
     setAnalysis(null)
     setConsent(initialConsent)
@@ -199,9 +303,9 @@ export function VoiceClonePage() {
   return (
     <div className="soa-clone-page">
       <header className="soa-page-intro">
-        <span>VOICE CLONE · LOCAL FIRST</span>
-        <h1>내 목소리를<br /><b>10초 안에 준비합니다.</b></h1>
-        <p>녹음과 품질 검사는 휴대폰에서 먼저 처리하고, 동의가 확인된 샘플만 복제 엔진에 전달합니다.</p>
+        <span>VOICE CLONE · WORKER EXECUTION</span>
+        <h1>내 목소리를<br /><b>실제 AI 음성으로 연결합니다.</b></h1>
+        <p>동의된 샘플만 별도 Worker에 전달하고, 문장별 생성 상태와 취소·재시도를 실시간으로 관리합니다.</p>
         <small>{engineLabel}</small>
       </header>
       <CloneStepIndicator current={currentStep} />
@@ -226,6 +330,19 @@ export function VoiceClonePage() {
           onSubmit={() => void handlePrepare()}
         />
         {profile ? <CloneReadyCard profile={profile} onDelete={() => void handleDelete()} /> : null}
+        {profile ? (
+          <CloneExecutionCard
+            profileName={profile.displayName}
+            ready={Boolean(capability?.ready && profile.status === 'engine-ready')}
+            reason={capability?.reason ?? capabilityError}
+            job={job}
+            busy={jobBusy}
+            error={jobError}
+            onStart={(text) => void handleStart(text)}
+            onCancel={() => void handleCancel()}
+            onRetry={() => void handleRetry()}
+          />
+        ) : null}
       </div>
     </div>
   )

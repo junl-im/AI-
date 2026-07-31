@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     voice_clone_max_file_bytes: int = 25 * 1024 * 1024
     cosyvoice_worker_url: str = ""
     cosyvoice_worker_timeout_seconds: float = 2.5
+    cosyvoice_worker_job_timeout_seconds: float = 45.0
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../../.env"),

@@ -12,7 +12,7 @@ def current_engine_strategy(version: str) -> EngineStrategyResponse:
                 id="cosyvoice3",
                 name="Fun-CosyVoice 3",
                 role="primary",
-                status="planned",
+                status="integrated",
                 languages=["ko-KR", "en-US", "ja-JP", "zh-CN"],
                 capabilities=[
                     "tts",

@@ -129,6 +129,9 @@ await requireText('.github/workflows/ci.yml', [
   'actions/configure-pages@v6',
   'actions/upload-pages-artifact@v5',
   'actions/deploy-pages@v5',
+  'CosyVoice Worker quality · Python 3.10',
+  'working-directory: services/worker',
+  'Run Worker tests',
 ])
 await requireText('src/test/setup.ts', [
   'afterEach',
@@ -154,8 +157,11 @@ await requireText('src/components/layout/BrandMasthead.test.tsx', [
 ])
 
 await requireText('src/pages/VoiceClonePage.tsx', [
-  '10초 안에 준비합니다.',
+  '실제 AI 음성으로 연결합니다.',
   'prepareVoiceCloneProfile',
+  'startVoiceCloneJob',
+  'cancelVoiceCloneJob',
+  'retryVoiceCloneJob',
   'prohibitedUseConfirmed',
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
@@ -202,6 +208,40 @@ await requireText('docs/VOICE_CLONE.md', [
   '로컬 우선',
   '명시적 동의',
   '실제 복제 성공으로 표시하지 않는다',
+])
+
+await requireText('services/worker/app/main.py', [
+  '@app.get("/health"',
+  '@app.get("/ready"',
+  '/v1/jobs/{job_id}/events',
+  '/v1/jobs/{job_id}/audio',
+])
+await requireText('services/worker/app/jobs.py', [
+  '실패하거나 취소된 구간만 다시 시도합니다.',
+  'merge_wav_files',
+  'first_audio_ms',
+])
+await requireText('services/worker/app/adapters/cosyvoice3.py', [
+  'AutoModel',
+  'inference_cross_lingual',
+  '스트리밍 음성 조각',
+])
+await requireText('services/api/app/api/routes/voice_clones.py', [
+  '/profiles/{profile_id}/jobs',
+  '/jobs/{job_id}/cancel',
+  '/jobs/{job_id}/retry',
+  '/jobs/{job_id}/events',
+])
+await requireText('src/components/clone/CloneExecutionCard.tsx', [
+  'REAL CLONE EXECUTION',
+  '실패·취소 구간만 다시 시도',
+  'Linked Player Dock에 연결했습니다.',
+])
+await requireText('docs/COSYVOICE_WORKER.md', [
+  'GET /health',
+  'GET /ready',
+  'SORION_WORKER_MODEL_PATH',
+  '실패하거나 취소된 구간만 다시 실행',
 ])
 
 await requireText('src/pages/HomePage.tsx', [

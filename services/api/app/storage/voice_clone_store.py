@@ -63,6 +63,25 @@ class VoiceCloneStore:
             encoding="utf-8",
         )
 
+
+    def load_metadata(self, profile_id: UUID) -> dict[str, object] | None:
+        path = self.root / f"{profile_id}.json"
+        if not path.exists():
+            return None
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return None
+        return payload if isinstance(payload, dict) else None
+
+    def sample_path(self, profile_id: UUID) -> Path | None:
+        metadata = self.load_metadata(profile_id)
+        sample_file = metadata.get("sample_file") if metadata else None
+        if not isinstance(sample_file, str):
+            return None
+        path = self.root / sample_file
+        return path if path.exists() else None
+
     def delete_profile(self, profile_id: UUID) -> bool:
         deleted = False
         for path in self.root.glob(f"{profile_id}.*"):

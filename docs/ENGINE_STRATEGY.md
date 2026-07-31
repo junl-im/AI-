@@ -101,11 +101,11 @@ Kokoro는 가볍고 빠르며 Apache 계열 배포에 유리하지만 공식 언
 
 ## 5. 다음 구현 순서
 
-1. `CosyVoiceEngine` 어댑터와 별도 worker 프로세스
-2. 모델 설치·다운로드·GPU 메모리 진단
-3. 스트리밍 생성 API와 모바일 플레이어
-4. 10초 참조 음성 기반 제로샷 복제
-5. 사용자 동의·삭제·오용 방지 정책
+1. Worker 모델 다운로드·체크섬·로딩 진행률
+2. API↔Worker 서비스 인증과 요청 제한
+3. SSE 재연결과 완료 구간 progressive playback
+4. speaker prompt 캐시와 동의 철회 연동
+5. 실제 GPU 한국어 음질·지연·VRAM 벤치마크
 6. GPT-SoVITS 전문가 모드
 7. 한국어 발음·감정·속도 A/B 벤치마크
 
@@ -118,7 +118,7 @@ Kokoro는 가볍고 빠르며 Apache 계열 배포에 유리하지만 공식 언
 - 엔진은 `Engine Adapter` 뒤에 두어 한 모델에 종속되지 않는다.
 - 라이선스가 상업 사용을 제한하면 기본 엔진으로 자동 활성화하지 않는다.
 
-## 0.6.0 Worker 적용 결정
+## 0.7.0 Worker 실행 구조
 
 FastAPI 게이트웨이는 Fun-CosyVoice 3 패키지와 PyTorch를 직접 로딩하지 않는다. 웹 요청, 동의 검증, 임시 샘플 수명 주기와 모델 추론을 분리한다.
 
@@ -126,11 +126,13 @@ FastAPI 게이트웨이는 Fun-CosyVoice 3 패키지와 PyTorch를 직접 로딩
 SoriON Web
   → FastAPI Gateway
     → consent and sample validation
-    → profile UUID
-    → CosyVoice Worker URL
+    → profile UUID and job proxy
+    → CosyVoice Worker
+      → health and readiness
       → model and GPU lifecycle
-      → zero-shot prompt
-      → streaming synthesis
+      → sentence jobs and SSE progress
+      → cross-lingual zero-shot synthesis
+      → segment WAV and merged WAV
 ```
 
-`SORION_COSYVOICE_WORKER_URL`이 비어 있으면 `cosyvoice3-worker`는 준비되지 않은 것으로 표시한다. 0.6.0에서는 샘플 준비까지만 지원하며 실제 모델 추론 결과로 위장하지 않는다.
+`SORION_COSYVOICE_WORKER_URL`이 비어 있거나 Worker `/ready`가 준비되지 않은 경우 복제 실행을 차단한다. `0.7.0`은 작업 생성·문장별 진행·취소·재시도·최종 WAV 전달 계약을 제공하며, 모델 가중치와 대형 AI 의존성은 일반 릴리스 ZIP에 포함하지 않는다.

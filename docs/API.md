@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "default_engine": "auto"
 }
 ```
@@ -43,7 +43,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.6.4",
+  "version": "0.7.0",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -164,7 +164,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.6.4",
+  "version": "0.7.0",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
@@ -258,3 +258,37 @@ setup, engines, voice-clones/capabilities를 함께 호출해 경로별 연결 �
 
 GitHub Pages는 이 API를 실행하지 않습니다. 로컬 또는 공개 HTTPS FastAPI 주소를
 별도로 연결해야 합니다.
+
+
+## 0.7.0 Voice Clone Worker API
+
+### `GET /voice-clones/worker`
+
+Worker health/readiness 스냅샷, 버전, 지연 시간, GPU·CUDA·VRAM·모델 진단을 반환한다.
+
+### `POST /voice-clones/profiles/{profile_id}/jobs`
+
+```json
+{ "text": "내 목소리로 만들 문장입니다." }
+```
+
+동의된 프로필의 원본 샘플을 Worker에 전달해 문장별 복제 작업을 만든다. Worker가
+준비되지 않았으면 `SOA-5103`과 HTTP 503을 반환한다.
+
+### 작업 상태와 제어
+
+- `GET /voice-clones/jobs/{job_id}`
+- `GET /voice-clones/jobs/{job_id}/events`
+- `POST /voice-clones/jobs/{job_id}/cancel`
+- `POST /voice-clones/jobs/{job_id}/retry`
+- `GET /voice-clones/jobs/{job_id}/audio`
+- `GET /voice-clones/jobs/{job_id}/segments/{index}/audio`
+
+응답에는 전체 진행률, 첫 음성 지연, 문장별 상태와 구간 음원 URL이 포함된다.
+
+### 추가 오류 코드
+
+- `SOA-5100`: Worker 미등록
+- `SOA-5101`: Worker 요청 실패
+- `SOA-5102`: 음성 프로필 없음
+- `SOA-5103`: Worker 또는 모델 readiness 실패

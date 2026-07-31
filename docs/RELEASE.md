@@ -107,3 +107,13 @@ Semantic Versioning을 사용한다.
 - 핵심 확인: 500자 입력창, 발음 보정 토글, 가로 목소리 칩, 동적 CTA, 문장별 생성 리스트, Dock 상단 이동
 - 패치 기준 버전: `0.6.3`
 - 삭제 파일: 없음
+
+
+## 0.7.0 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.7.0-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.6.4-to-0.7.0-patch.zip`
+- 패치 기준 버전: `0.6.4`
+- 핵심 확인: Worker health/readiness, GPU 진단, 작업 생성·취소·재시도, Dock 자동 연결
+- 모델 가중치, torch, torchaudio, CosyVoice 저장소 의존성은 ZIP에 포함하지 않는다.
+- 삭제 파일: 없음
