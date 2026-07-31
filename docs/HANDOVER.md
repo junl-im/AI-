@@ -50,3 +50,10 @@
 - 영향: 이제 압축 해제 후 루트의 `index.html`과 `src/`를 바로 확인할 수 있다.
 - 실행: 루트에서 `npm install` 후 `npm run dev`를 사용한다.
 - 배포: Firebase Hosting은 루트 빌드 결과인 `dist/`만 배포한다.
+
+## 2026-07-31 11:38 KST - GitHub Actions 트리거 수정
+
+- 변경: `.github/workflows/ci.yml`에 `workflow_dispatch`와 전체 브랜치 `push` 트리거를 추가했다.
+- 이유: 초기 커밋이 `main` 또는 기존 브랜치에 push될 때 CI가 실행되지 않아 Actions의 All workflows가 비어 보였다.
+- 영향: 앞으로 어떤 브랜치에 push해도 CI 실행 기록이 생성된다. PR 검사는 `main`, `develop` 대상으로 유지한다.
+- 추가: package-lock이 없는 상태에서 npm 캐시 탐색이 실패할 수 있어 초기 단계에서는 cache 옵션을 제거했다.

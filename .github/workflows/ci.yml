@@ -1,31 +1,67 @@
-name: quality
+name: SoriON CI
 
 on:
-  pull_request:
-    branches: [main, develop]
+  workflow_dispatch:
   push:
-    branches: [develop]
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sorion-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   web:
+    name: Web quality
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm install
-      - run: npm run quality:rules
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run test
-      - run: npm run build
+
+      - name: Install web dependencies
+        run: npm install
+
+      - name: Check project rules
+        run: npm run quality:rules
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
 
   api:
+    name: API quality
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-      - run: uv sync --project services/api --dev
-      - run: uv run --project services/api pytest services/api/tests
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install API dependencies
+        run: uv sync --project services/api --dev
+
+      - name: Run API tests
+        run: uv run --project services/api pytest services/api/tests

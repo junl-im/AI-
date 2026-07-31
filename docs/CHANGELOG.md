@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.1.2 - 2026-07-31
+
+- GitHub Actions를 모든 브랜치 push에서 실행하도록 수정
+- Actions 탭에서 수동 실행할 수 있도록 `workflow_dispatch` 추가
+- package-lock이 없는 초기 저장소에서 실패할 수 있는 npm cache 설정 제거
+- 워크플로 이름과 단계 이름을 명확하게 정리
+
 모든 주요 변경은 이 문서에 기록한다.
 
 ## [0.1.0] — 2026-07-31
