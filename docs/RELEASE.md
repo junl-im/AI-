@@ -84,3 +84,10 @@ Semantic Versioning을 사용한다.
 - 패치 기준 버전: `0.6.0`
 - 삭제 파일: 없음
 - 목적: Web quality의 배너 기대값과 JSDOM Blob 호환성 회귀 수정
+
+## 0.6.2 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.6.2-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.6.1-to-0.6.2-patch.zip`
+- 핵심 확인: 설정의 5경로 연결 검사, `/api/v1/connectivity`, CORS, Worker health
+- 삭제 파일: 없음

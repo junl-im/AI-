@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "default_engine": "auto"
 }
 ```
@@ -43,7 +43,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.6.1",
+  "version": "0.6.2",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -163,7 +163,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.6.1",
+  "version": "0.6.2",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
@@ -244,3 +244,16 @@ UUID에 연결된 원본 샘플과 JSON 동의 메타데이터를 삭제한다. 
 - `SOA-5007`: 클라이언트 품질 검사 차단
 - `SOA-5008`: 손상된 WAV
 - `SOA-5009`: 5초 미만 WAV
+
+## Engine connectivity
+
+```http
+GET /api/v1/connectivity
+```
+
+FastAPI 게이트웨이, 임시 음원 저장소, 실제 TTS 엔진, CORS Origin,
+CosyVoice Worker health를 한 번에 반환합니다. 웹 설정 화면은 이 경로와 health,
+setup, engines, voice-clones/capabilities를 함께 호출해 경로별 연결 실패를 구분합니다.
+
+GitHub Pages는 이 API를 실행하지 않습니다. 로컬 또는 공개 HTTPS FastAPI 주소를
+별도로 연결해야 합니다.

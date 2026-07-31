@@ -1,31 +1,35 @@
-# SoriON AI 0.6.1 Result Report
+# SoriON AI 0.6.2 Result Report
 
-## 작업 목적
+## 목표
 
-0.6.0 배너 구현과 Web 테스트 계약이 어긋나 GitHub Actions가 실패한 문제를 수정한다.
+정적 GitHub Pages와 Python 엔진 서버를 혼동하던 연결 구조를 바로잡고, 실제 API·TTS·복제 Worker 상태를 사용자가 직접 확인할 수 있게 한다.
 
-## 원인
+## 원인 진단
 
-- 배너 설명은 긴 문장 3종으로 변경됐지만 테스트는 과거 짧은 문장 2종을 조회했다.
-- 테스트가 요구하는 마이크 test id가 컴포넌트 리팩터링 과정에서 빠졌다.
-- JSDOM Blob 구현에 따라 `arrayBuffer()`가 없을 수 있는데 테스트가 해당 메서드를 직접 호출했다.
+- GitHub Pages는 Python FastAPI를 실행하지 않는데 웹이 같은 Origin의 `/api/v1`을 암묵적으로 호출했다.
+- 연결 실패가 브라우저 Demo WAV로 전환되어 실제 API 실패가 눈에 잘 띄지 않았다.
+- FastAPI 기본 CORS에 GitHub Pages Origin이 없으면 `.env` 없이 실행한 서버가 공개 웹 요청을 차단했다.
+- Setup은 Python 3.10을 지원하면서도 3.11 이상만 준비 완료로 판정했다.
+- CosyVoice Worker는 URL 설정 여부만 알 수 있었고 실제 health를 확인하지 않았다.
+- API의 snake_case health 응답과 상대 음원 URL을 웹에서 명시적으로 변환하지 않았다.
 
-## 수정
+## 구현
 
-- 현재 설명 3종을 정확히 검사하도록 BrandMasthead 테스트 갱신
-- 제목·Voice Core 마이크 test id 복원
-- Mock WAV 테스트에 FileReader fallback 추가
-- Blob 전역 폴리필을 `Object.defineProperty`로 강화
-- 동일 회귀를 차단하는 프로젝트 규칙 추가
+- 정적 배포의 API 미설정 상태와 개발 프록시를 분리했다.
+- 설정에 5경로 통합 연결 검사와 응답 시간 표시를 추가했다.
+- `/api/v1/connectivity` 진단 API를 추가했다.
+- 실제 TTS, 음원 저장소, CORS, CosyVoice Worker health를 점검한다.
+- 기본 CORS에 localhost, 127.0.0.1, GitHub Pages Origin을 포함했다.
+- Python 지원 판정을 3.10 이상으로 통일했다.
+- API 음원 URL을 현재 설정된 API Origin에 맞게 해석한다.
+- `npm run dev:api`로 FastAPI를 시작할 수 있게 했다.
 
 ## 검증
 
-- `npm run quality:rules`: 통과
-- FastAPI pytest: 44 passed
-- Python compileall: 통과
-- 전체본과 패치 적용본 파일 해시 일치
-- npm install: sandbox 내부 registry의 `@tailwindcss/vite` 미제공으로 실행 불가
-
-## 배포 판단
-
-GitHub Actions에서 Web quality, API quality, Pages deploy가 모두 성공한 뒤 0.7.0 기능 개발을 진행한다.
+- FastAPI 테스트 49개 통과
+- 실제 Uvicorn 서버에서 health·connectivity·CORS preflight 통과
+- Linux 시스템 한국어 TTS로 4.3초 WAV 생성·다운로드·RIFF 검사 통과
+- Python compileall 통과
+- TypeScript·TSX 구문 검사 통과
+- 프로젝트 절대 규칙 검사 통과
+- npm registry에 `@tailwindcss/vite`가 없어 정식 npm install·Vitest·Vite build는 GitHub Actions에서 최종 확인

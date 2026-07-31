@@ -7,13 +7,13 @@
 권장 작업 브랜치:
 
 ```text
-feature/voice-clone-player-queue
+fix/engine-connectivity
 ```
 
 권장 커밋 메시지:
 
 ```text
-feat: add voice clone foundation and player queue
+fix: repair API and engine connectivity
 ```
 
 ## 2. 기본 환경 설정
@@ -21,8 +21,7 @@ feat: add voice clone foundation and player queue
 ```bash
 cp .env.example .env
 npm install
-cd services/api
-uv sync --dev
+uv --version
 ```
 
 ## 3. 실행
@@ -36,26 +35,22 @@ npm run dev
 API:
 
 ```bash
-cd services/api
-uv run uvicorn app.main:app --reload
+npm run dev:api
 ```
 
-## 4. 0.6.1 첫 확인
+## 4. 0.6.2 첫 확인
 
-- `.github/workflows`에 `ci.yml` 하나만 남았는지 확인합니다.
-- Web quality에서 TypeScript, Vitest, ESLint, Vite build가 통과하는지 확인합니다.
-- API quality에서 Ruff와 pytest 44개 이상이 Python 3.10으로 통과하는지 확인합니다.
-- 상단에 `BUILD v0.6.1`이 표시되는지 확인합니다.
-- Dock 메뉴에 `복제`가 추가됐는지 확인합니다.
-- 복제 화면에서 마이크 녹음과 파일 선택이 가능한지 확인합니다.
-- 10초 가이드와 길이·무음·클리핑·음량 결과가 표시되는지 확인합니다.
-- 세 가지 동의 항목을 모두 선택하기 전에는 샘플 준비 버튼이 비활성인지 확인합니다.
-- API가 없을 때 실제 복제 성공이 아닌 로컬 샘플 준비로 표시되는지 확인합니다.
-- Dock에서 대기열, 이전·다음, 반복, 속도, 다운로드가 동작하는지 확인합니다.
-- 음성 생성 결과와 복제 원본 샘플이 같은 Dock에 연결되는지 확인합니다.
-- 동의 철회 버튼이 IndexedDB와 API 임시 샘플 삭제를 요청하는지 확인합니다.
-- `/api/v1/voice-clones/capabilities`가 Worker 준비 상태를 반환하는지 확인합니다.
-- 유효한 WAV는 프로필 준비가 되고 5초 미만 WAV와 동의 누락 요청은 거부되는지 확인합니다.
+- 설정에서 `전체 연결 검사`를 실행합니다.
+- `/api/v1/health`, `/setup`, `/engines`, `/voice-clones/capabilities`가 각각 정상인지 확인합니다.
+- `/api/v1/connectivity`에 실제 TTS, 저장소, CORS, Worker 상태가 표시되는지 확인합니다.
+- GitHub Pages에서는 API 주소가 없을 때 `API 미설정`이 표시되는지 확인합니다.
+- 같은 PC의 API는 `http://127.0.0.1:8000`으로 연결합니다.
+- 휴대폰에서는 localhost가 아닌 PC LAN IP 또는 공개 HTTPS API를 사용합니다.
+- Python 3.10이 Setup 진단에서 지원 상태로 표시되는지 확인합니다.
+- CosyVoice Worker URL만 입력하고 Worker가 꺼져 있으면 준비 완료로 표시되지 않는지 확인합니다.
+- 실제 API 음원 URL이 설정한 API Origin으로 해석되는지 확인합니다.
+- 상단에 `BUILD v0.6.2`가 표시되는지 확인합니다.
+- API quality에서 pytest 49개 이상이 통과하는지 확인합니다.
 
 ## 5. 엔진 설치와 품질 평가
 
@@ -80,10 +75,10 @@ MeloTTS는 별도 모델과 PyTorch 계열 의존성이 필요하므로 기본 A
 
 1. Pull Request를 `main`에 병합합니다.
 2. Actions에서 `SoriON CI & Pages` 실행 하나가 성공하는지 확인합니다.
-3. 공개 주소에서 `BUILD v0.6.1`을 확인합니다.
+3. 공개 주소에서 `BUILD v0.6.2`을 확인합니다.
 4. 공개 Pages에는 Python TTS 엔진이 포함되지 않으므로 API 주소를 별도 설정하지 않으면 Demo WAV가 사용됩니다.
 
 
-## 0.6.1 운영 연결과 복제
+## 0.6.2 운영 연결과 복제
 
-설정 화면에서 Voice API 주소를 입력하고 연결 검사를 실행합니다. 목소리 복제 원칙은 `docs/VOICE_CLONE.md`, Dock 구조는 `docs/PLAYER_DOCK.md`를 확인합니다.
+연결 원인과 실행 방식은 `docs/API_CONNECTIVITY.md`를 먼저 확인합니다. 목소리 복제 원칙은 `docs/VOICE_CLONE.md`, Dock 구조는 `docs/PLAYER_DOCK.md`를 확인합니다.

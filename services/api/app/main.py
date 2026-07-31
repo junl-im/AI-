@@ -43,7 +43,10 @@ async def lifespan(app: FastAPI):
     if settings.allow_mock_engine:
         engine_registry.register_tts(MockTtsEngine())
     engine_registry.register_voice_clone(
-        CosyVoiceCloneEngine(settings.cosyvoice_worker_url)
+        CosyVoiceCloneEngine(
+            settings.cosyvoice_worker_url,
+            settings.cosyvoice_worker_timeout_seconds,
+        )
     )
     yield
     engine_registry.clear()
@@ -53,7 +56,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.6.1",
+    version="0.6.2",
     lifespan=lifespan,
 )
 app.add_middleware(

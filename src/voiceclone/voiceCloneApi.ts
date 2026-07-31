@@ -35,8 +35,12 @@ interface ApiVoiceCloneCapability {
   accepted_extensions: string[]
 }
 
-export async function getVoiceCloneCapability(): Promise<VoiceCloneCapability> {
-  const result = await apiRequest<ApiVoiceCloneCapability>('/voice-clones/capabilities')
+export async function getVoiceCloneCapability(baseUrl?: string): Promise<VoiceCloneCapability> {
+  const result = await apiRequest<ApiVoiceCloneCapability>(
+    '/voice-clones/capabilities',
+    undefined,
+    { baseUrl, timeoutMs: 8_000 },
+  )
   return {
     engineId: result.engine_id,
     engineName: result.engine_name,

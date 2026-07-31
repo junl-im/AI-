@@ -1,5 +1,25 @@
 # HANDOVER
 
+## 2026-07-31 21:12 KST · v0.6.2
+
+1. 작업 일시: 2026-07-31 21:12 KST
+2. 대상·기준 버전: `0.6.1 → 0.6.2`
+3. 변경 내용: GitHub Pages와 Python API 배포 경계를 명확히 하고, API 기본 주소·CORS·Python 진단·음원 URL·CosyVoice Worker health·통합 연결 검사 화면을 수정함.
+4. 변경 이유: 공개 웹은 정적 파일만 제공하는데 `/api/v1`을 같은 Origin에서 암묵적으로 찾았고, 실패가 Demo WAV로 전환되어 실제 연결 장애가 숨겨졌기 때문임.
+5. 영향 범위: HTTP client, API setup wizard, engine catalog, Home engine status, FastAPI config·router·connectivity schema, CosyVoice Worker adapter, 실행 스크립트, 테스트·문서.
+6. 주요 파일: `src/api/httpClient.ts`, `src/settings/connectivityApi.ts`, `ApiSetupWizard.tsx`, `useEngineCatalog.ts`, `services/api/app/api/routes/connectivity.py`, `cosyvoice_worker.py`, `scripts/start-api.mjs`.
+7. 검증 결과: FastAPI 49 tests passed, compileall passed, TypeScript·TSX syntax passed, 실제 Uvicorn health·connectivity·CORS 통과, Linux 시스템 TTS 4.3초 WAV 생성·다운로드 통과.
+8. 제한·주의: GitHub Pages는 Python을 실행하지 않으므로 실제 모바일 서비스에는 별도 공개 HTTPS API와 GPU Worker 배포가 필요함. sandbox npm registry에 `@tailwindcss/vite`가 없어 정식 npm build는 GitHub Actions 확인이 필요함.
+9. 산출물: `SoriON-AI-0.6.2-full.zip`, `SoriON-AI-0.6.1-to-0.6.2-patch.zip`, `SoriON-AI-0.6.2-artifacts.sha256`.
+10. 다음 예상 업데이트: `0.7.0 CosyVoice Worker Streaming & Clone Execution`.
+
+## 다음 예상 업데이트
+
+- 실제 CosyVoice Worker 서비스와 GPU·CUDA·VRAM·모델 진단
+- 제로샷 복제 실행과 스트리밍 음성 조각
+- Worker 작업 취소·재연결·실패 구간 재시도
+- 공개 HTTPS FastAPI 배포 프로필과 비밀·인증 경계
+
 ## 2026-07-31 20:55 KST · v0.6.1
 
 1. 작업 일시: 2026-07-31 20:55 KST

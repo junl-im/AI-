@@ -1,4 +1,4 @@
-import { apiRequest } from '../api/httpClient'
+import { apiRequest, resolveApiAssetUrl } from '../api/httpClient'
 import type {
   EngineDiagnostic,
   EvaluationSentence,
@@ -63,7 +63,7 @@ function mapResult(result: ApiQualityResult): QualityResult {
     engineName: result.engine_name,
     engineMode: result.engine_mode,
     status: result.status,
-    audioUrl: result.audio_url,
+    audioUrl: resolveApiAssetUrl(result.audio_url),
     message: result.message,
     elapsedMs: result.elapsed_ms,
     durationSeconds: result.duration_seconds,

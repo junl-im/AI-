@@ -1,5 +1,35 @@
 # CHANGELOG
 
+## 0.6.2 - 2026-07-31
+
+### Fixed
+
+- GitHub Pages에서 존재하지 않는 같은 Origin `/api/v1`을 기본 API로 호출하던 문제
+- API 장애가 Demo WAV 전환에 가려져 엔진 연결 상태를 알기 어렵던 문제
+- `.env` 없이 FastAPI를 실행할 때 GitHub Pages Origin이 CORS 기본값에서 빠지던 문제
+- Python 3.10 지원 프로젝트가 Setup에서 Python 3.11 이상을 요구하던 문제
+- CosyVoice Worker URL만 설정하고 실제 health를 확인하지 못하던 문제
+- API health의 snake_case 응답과 상대 음원 URL을 웹에서 정확히 변환하지 않던 문제
+
+### Added
+
+- `/api/v1/connectivity` 통합 연결 진단 API
+- Health·Setup·TTS·복제·통합 진단 5경로 검사와 응답 시간 표시
+- 실제 TTS, CORS, 임시 음원 저장소, CosyVoice Worker 상태 보고
+- 정적 배포, PC localhost, 모바일 LAN, 공개 HTTPS API 경고
+- `npm run dev:api` FastAPI 실행 명령
+- Worker `/health` 실제 probe와 상태 스냅샷
+- CORS·연결 진단·Worker probe 회귀 테스트
+
+### Verification
+
+- FastAPI 테스트 49개 통과
+- 실제 Uvicorn health·connectivity·CORS preflight 통과
+- Linux 시스템 TTS WAV 생성·다운로드·RIFF 검사 통과
+- Python compileall 통과
+- TypeScript·TSX 구문 검사 통과
+- npm registry 제한으로 정식 Web quality는 GitHub Actions에서 최종 확인
+
 ## 0.6.1 - 2026-07-31
 
 ### Fixed

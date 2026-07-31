@@ -62,6 +62,7 @@ export function VoiceClonePage() {
   const [consent, setConsent] = useState<VoiceCloneConsent>(initialConsent)
   const [profile, setProfile] = useState<VoiceCloneProfile | null>(null)
   const [capability, setCapability] = useState<VoiceCloneCapability | null>(null)
+  const [capabilityError, setCapabilityError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const currentStep = profile ? 3 : analysis ? 2 : 1
   const consentReady = consent.rightsConfirmed
@@ -77,7 +78,12 @@ export function VoiceClonePage() {
   )
 
   useEffect(() => {
-    void getVoiceCloneCapability().then(setCapability).catch(() => undefined)
+    void getVoiceCloneCapability()
+      .then((result) => {
+        setCapability(result)
+        setCapabilityError(null)
+      })
+      .catch(() => setCapabilityError('Voice API 미연결 · 로컬 샘플 준비만 가능'))
   }, [])
 
   useEffect(() => {
@@ -108,11 +114,12 @@ export function VoiceClonePage() {
   }, [recorder.file])
 
   const engineLabel = useMemo(() => {
+    if (capabilityError) return capabilityError
     if (!capability) return 'CosyVoice Worker 확인 중'
     return capability.ready
       ? `${capability.engineName} 준비됨`
       : `${capability.engineName} 연결 대기`
-  }, [capability])
+  }, [capability, capabilityError])
 
   async function handlePrepare() {
     if (!recorder.file || !analysis || !canSubmit) return

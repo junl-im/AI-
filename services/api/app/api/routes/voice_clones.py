@@ -50,8 +50,10 @@ def parse_client_analysis(value: str) -> VoiceCloneClientAnalysis:
 
 
 @router.get("/capabilities", response_model=VoiceCloneCapabilityResponse)
-def capabilities(request: Request) -> VoiceCloneCapabilityResponse:
+async def capabilities(request: Request) -> VoiceCloneCapabilityResponse:
     engine = engine_registry.resolve_voice_clone("auto")
+    if engine is not None:
+        await engine.probe()
     info = engine.info() if engine else None
     settings = request.app.state.settings
     return VoiceCloneCapabilityResponse(

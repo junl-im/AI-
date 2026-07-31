@@ -35,12 +35,12 @@ def _audio_directory_check(path: Path) -> SetupStep:
 def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> SetupStatusResponse:
     real_engines = [engine.info() for engine in engines if engine.info().mode != "mock"]
     ready_real = [engine for engine in real_engines if engine.ready]
-    python_ready = sys.version_info >= (3, 11)
+    python_ready = sys.version_info >= (3, 10)
     ffmpeg = shutil.which("ffmpeg")
     steps = [
         SetupStep(
             id="python",
-            label="Python 3.11 이상",
+            label="Python 3.10 이상",
             status="ready" if python_ready else "missing",
             required=True,
             detail=sys.version.split()[0],

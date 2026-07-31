@@ -180,6 +180,37 @@ await requireText('docs/VOICE_CLONE.md', [
   '명시적 동의',
   '실제 복제 성공으로 표시하지 않는다',
 ])
+
+await requireText('src/api/httpClient.ts', [
+  'getApiConnectionContext',
+  "source: ApiBaseSource",
+  'Voice API 주소가 설정되지 않았습니다.',
+  'resolveApiAssetUrl',
+])
+await requireText('src/settings/connectivityApi.ts', [
+  'runApiConnectivityAudit',
+  "'health-route'",
+  "'engines-route'",
+  "'clone-route'",
+])
+await requireText('services/api/app/api/routes/connectivity.py', [
+  '@router.get("/connectivity"',
+  'CosyVoice Worker',
+  '실제 한국어 TTS',
+])
+await requireText('services/api/app/services/setup_diagnostics.py', [
+  'sys.version_info >= (3, 10)',
+  'Python 3.10 이상',
+])
+await requireText('services/api/app/core/config.py', [
+  'https://junl-im.github.io',
+  'cosyvoice_worker_timeout_seconds',
+])
+await requireText('docs/API_CONNECTIVITY.md', [
+  'GitHub Pages에는 Python API가 포함되지 않는다',
+  'npm run dev:api',
+  '/api/v1/connectivity',
+])
 await requireText('docs/PLAYER_DOCK.md', [
   '재생 대기열',
   '이전·다음',

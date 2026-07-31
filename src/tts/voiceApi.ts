@@ -1,5 +1,5 @@
 import type { EngineInfo, HealthResult, TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
-import { apiRequest } from '../api/httpClient'
+import { apiRequest, resolveApiAssetUrl } from '../api/httpClient'
 
 export type JobProgressPhase = 'queued' | 'normalizing' | 'generating' | 'merging' | 'completed' | 'cancelled' | 'failed'
 
@@ -69,12 +69,25 @@ interface ApiEngineInfo {
   reason: string | null
 }
 
-export function checkHealth(baseUrl?: string) {
-  return apiRequest<HealthResult>('/health', undefined, { baseUrl })
+interface ApiHealthResult {
+  status: 'ok'
+  service: string
+  version: string
+  default_engine: string
 }
 
-export async function listEngines(): Promise<EngineInfo[]> {
-  const engines = await apiRequest<ApiEngineInfo[]>('/engines')
+export async function checkHealth(baseUrl?: string): Promise<HealthResult> {
+  const result = await apiRequest<ApiHealthResult>('/health', undefined, { baseUrl })
+  return {
+    status: result.status,
+    service: result.service,
+    version: result.version,
+    defaultEngine: result.default_engine,
+  }
+}
+
+export async function listEngines(baseUrl?: string): Promise<EngineInfo[]> {
+  const engines = await apiRequest<ApiEngineInfo[]>('/engines', undefined, { baseUrl })
   return engines.map((engine) => ({
     id: engine.id,
     name: engine.name,
@@ -116,7 +129,7 @@ export async function synthesizeSpeech(
     status: result.status,
     engineId: result.engine_id,
     engineMode: result.engine_mode,
-    audioUrl: result.audio_url,
+    audioUrl: resolveApiAssetUrl(result.audio_url),
     estimatedDurationSeconds: result.estimated_duration_seconds,
     message: result.message,
     normalizedText: result.normalized_text,

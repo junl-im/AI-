@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준 버전: `0.6.1`
+현재 기준 버전: `0.6.2`
 
 ## 목표 버전
 
@@ -8,26 +8,30 @@ v0.7.0 CosyVoice Worker Streaming & Clone Execution
 
 ## 다음 예상 업데이트
 
-- 별도 CosyVoice Worker 서비스와 health 계약
-- 모델 경로, GPU, CUDA, VRAM 사전 진단
-- 동의된 프로필의 제로샷 speaker prompt 준비
-- TTS와 복제 작업의 스트리밍 음성 조각 전달
+- 별도 CosyVoice Worker 서비스와 health·readiness 계약
+- GPU, CUDA, VRAM, 모델 경로와 모델 로딩 상태 진단
+- 동의된 음성 프로필의 zero-shot speaker prompt 생성
+- 실제 한국어 제로샷 목소리 복제 실행
+- text-in·audio-out 스트리밍 조각 전달
 - 첫 음성 지연 시간과 실시간 배율 측정
-- Worker 작업 취소와 장애 복구
-- 실패 구간만 재시도
-- 복제 결과에 AI 합성 표시와 프로필 출처 연결
-- MP3, M4A, WEBM, OGG 서버 재분석
-- Dock 큐의 프로젝트 세션 저장과 복구
+- Worker 작업 취소, 재연결, 장애 복구
+- 실패한 문장 구간만 재시도
+- 복제 결과를 Linked Player Dock에 즉시 연결
+- 공개 HTTPS FastAPI 배포 프로필과 인증 경계
 
-## 0.6.1에서 넘기는 결정
+## 0.6.2에서 넘기는 결정
 
-- 배너 카피 테스트는 현재 화면 문구와 함께 변경해야 한다.
-- Blob 기반 WAV 테스트는 JSDOM 메서드 존재 여부에 의존하지 않는다.
-- Web quality가 다시 초록색이 되기 전에는 0.7.0 기능을 병합하지 않는다.
+- GitHub Pages는 웹 전용이며 Python API를 포함한다고 가정하지 않는다.
+- 공개 정적 배포는 API 주소가 없으면 `API 미설정`으로 표시한다.
+- 같은 PC 개발은 localhost, 휴대폰은 LAN IP 또는 공개 HTTPS API를 사용한다.
+- API, TTS, 복제 Worker 상태를 분리해서 보여준다.
+- Worker URL 문자열만으로 준비 완료를 판정하지 않고 `/health`를 실제 검사한다.
+- 실제 모델이 없을 때 Demo 또는 샘플 준비를 복제 성공으로 표시하지 않는다.
 
 ## 선행 조건
 
 - Web quality, API quality, Pages 배포가 모두 성공해야 한다.
-- 실제 모델과 코드의 라이선스 문서를 배포 전에 다시 확인한다.
-- GPU가 없는 개발 환경에서는 Worker mock과 계약 테스트만 실행한다.
-- 원본 샘플을 공개 URL로 노출하지 않는다.
+- `/api/v1/connectivity`에서 API·저장소·CORS가 정상이어야 한다.
+- 실제 모델과 코드·가중치 라이선스를 배포 전에 다시 확인한다.
+- 원본 음성 샘플을 공개 URL로 노출하지 않는다.
+- 공개 Worker에는 인증, 요청 제한, 감사 로그를 적용한다.

@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -18,7 +18,8 @@
     "build:web": "npm run build",
     "test:web": "npm run test",
     "lint:web": "npm run lint",
-    "typecheck:web": "npm run typecheck"
+    "typecheck:web": "npm run typecheck",
+    "dev:api": "node scripts/start-api.mjs"
   },
   "engines": {
     "node": ">=22.0.0",

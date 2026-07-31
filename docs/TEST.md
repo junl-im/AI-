@@ -153,3 +153,12 @@ npm run test:api
 - JSDOM Blob에 `arrayBuffer`가 없을 때 FileReader fallback으로 RIFF/WAVE 헤더를 읽는지 확인
 - 전역 setup의 Blob 폴리필이 prototype 단순 대입이 아니라 `Object.defineProperty`를 사용하는지 확인
 - UI 문구 변경 시 구현과 테스트 계약을 함께 갱신하지 않으면 규칙 검사가 실패하는지 확인
+
+## 0.6.2 API·엔진 연결 회귀 검사
+
+- `/api/v1/connectivity`가 API, TTS, CORS, 저장소, 복제 Worker 상태를 반환하는지 검사
+- 기본 CORS가 `https://junl-im.github.io` preflight를 허용하는지 검사
+- Setup의 최소 Python 표시가 3.10과 일치하는지 검사
+- CosyVoice Worker `/health` 성공과 URL 미설정 상태를 각각 검사
+- 웹 HTTP client가 저장된 API Origin으로 상대 음원 URL을 변환하는지 검사
+- 공개 정적 배포에서 API 미설정 상태를 명확히 표시하는지 Web quality에서 검사

@@ -103,3 +103,25 @@ FastAPI 게이트웨이는 CosyVoice와 PyTorch를 직접 import하지 않는다
 - `projects`: TTS 프로젝트 메타데이터
 - `qualityReviews`: 문장·엔진 품질 평가
 - `voiceProfiles`: 동의된 음성 샘플 Blob, 품질 분석, 동의 기록
+
+## 0.6.2 정적 웹과 엔진 서버 경계
+
+```text
+GitHub Pages · static HTTPS
+  → React PWA only
+  → configured API URL required
+
+FastAPI Gateway
+  → health / setup / connectivity
+  → TTS registry and audio delivery
+  → voice-clone consent and sample preparation
+
+CosyVoice Worker
+  → separate health endpoint
+  → model, GPU and zero-shot inference in 0.7.0
+```
+
+공개 정적 웹은 같은 Origin에 Python API가 있다고 가정하지 않는다. 로컬 Vite에서만
+`/api` 프록시를 기본으로 사용하고, 그 외 배포에서는 저장된 주소 또는
+`VITE_API_BASE_URL`이 없으면 API 미설정 상태가 된다. 상대 음원 URL은 현재 연결된
+API Origin으로 해석한다.

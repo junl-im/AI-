@@ -6,7 +6,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     environment: str = "development"
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = (
+        "http://localhost:5173,http://127.0.0.1:5173,"
+        "https://junl-im.github.io"
+    )
     default_tts_engine: str = "auto"
     allow_mock_engine: bool = True
     enable_melo_tts: bool = True
@@ -22,6 +25,7 @@ class Settings(BaseSettings):
     voice_clone_ttl_days: int = 7
     voice_clone_max_file_bytes: int = 25 * 1024 * 1024
     cosyvoice_worker_url: str = ""
+    cosyvoice_worker_timeout_seconds: float = 2.5
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../../.env"),

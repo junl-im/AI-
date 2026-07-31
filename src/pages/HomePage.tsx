@@ -20,6 +20,7 @@ const DEFAULT_TEXT = '안녕하세요. 목소리의 가능성을 켜는 소리�
 
 export function HomePage() {
   const showNotice = useAppStore((state) => state.showNotice)
+  const setPage = useAppStore((state) => state.setPage)
   const enqueuePlayerAudio = usePlayerStore((state) => state.enqueue)
   const [text, setText] = useState(DEFAULT_TEXT)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
@@ -115,7 +116,13 @@ export function HomePage() {
         </p>
       </section>
 
-      <EngineStatusCard engine={engineCatalog.selected} loading={engineCatalog.loading} />
+      <EngineStatusCard
+        engine={engineCatalog.selected}
+        loading={engineCatalog.loading}
+        configured={engineCatalog.configured}
+        error={engineCatalog.error}
+        onOpenSettings={() => setPage('settings')}
+      />
 
       <motion.form
         onSubmit={handleSubmit}
@@ -143,7 +150,13 @@ export function HomePage() {
           disabled={busy}
           className="focus-ring mt-5 min-h-14 w-full rounded-[20px] bg-soa-ink px-5 text-base font-black text-white shadow-[0_16px_32px_rgba(23,23,20,0.18)] transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-55"
         >
-          {busy ? '소리온이 음성을 만들고 있어요…' : '음성 생성 시작'}
+          {busy
+            ? '소리온이 음성을 만들고 있어요…'
+            : engineCatalog.loading
+              ? '음성 생성 시작'
+              : engineCatalog.selected?.mode === 'mock' || !engineCatalog.selected
+                ? '데모 WAV 만들기'
+                : '음성 생성 시작'}
         </button>
         <p className="mt-2 text-center text-[10px] font-bold leading-4 text-soa-muted">
           로컬 API에 한국어 시스템 음성이 있으면 실제 WAV를 만들고, 연결되지 않으면 기능 확인용 데모 WAV를 만듭니다.

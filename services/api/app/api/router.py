@@ -1,9 +1,10 @@
 from fastapi import APIRouter
 
-from app.api.routes import audio, engines, health, quality, setup, tts, voice_clones
+from app.api.routes import audio, connectivity, engines, health, quality, setup, tts, voice_clones
 
 api_router = APIRouter()
 api_router.include_router(health.router, tags=["system"])
+api_router.include_router(connectivity.router, tags=["system"])
 api_router.include_router(engines.router, prefix="/engines", tags=["engines"])
 api_router.include_router(tts.router, prefix="/tts", tags=["tts"])
 api_router.include_router(quality.router, prefix="/quality", tags=["quality"])

@@ -1,7 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { apiRequest, normalizeApiBaseUrl } from './httpClient'
+import {
+  apiRequest,
+  getApiConnectionContext,
+  normalizeApiBaseUrl,
+  resolveApiAssetUrl,
+  saveApiBaseUrl,
+} from './httpClient'
 
 afterEach(() => {
+  window.localStorage.clear()
   vi.unstubAllGlobals()
 })
 
@@ -13,8 +20,22 @@ describe('normalizeApiBaseUrl', () => {
   it('does not duplicate an existing API path', () => {
     expect(normalizeApiBaseUrl('https://voice.example.com/api/v1')).toBe('https://voice.example.com/api/v1')
   })
+
+  it('keeps an empty value unconfigured', () => {
+    expect(normalizeApiBaseUrl('   ')).toBe('')
+  })
 })
 
+describe('API connection context', () => {
+  it('uses a saved API address and resolves relative audio URLs', () => {
+    saveApiBaseUrl('https://voice.example.com')
+
+    expect(getApiConnectionContext().source).toBe('saved')
+    expect(resolveApiAssetUrl('/api/v1/audio/result.wav')).toBe(
+      'https://voice.example.com/api/v1/audio/result.wav',
+    )
+  })
+})
 
 describe('apiRequest', () => {
   it('does not force JSON content type for FormData', async () => {
