@@ -26,7 +26,14 @@ class TtsPipeline:
         progress: ProgressReporter | None = None,
     ) -> TtsSynthesisResponse:
         started = time.perf_counter()
-        await self._report(progress, "normalizing", 7, 0, 0, "숫자와 날짜를 한국어 발음에 맞게 정리합니다.")
+        await self._report(
+            progress,
+            "normalizing",
+            7,
+            0,
+            0,
+            "숫자와 날짜를 한국어 발음에 맞게 정리합니다.",
+        )
         normalization = normalize_korean_text(request.text)
         segments = split_korean_text(normalization.normalized, self.max_segment_chars)
         total_segments = max(1, len(segments))
@@ -36,9 +43,23 @@ class TtsPipeline:
         )
 
         if len(segments) <= 1 or engine.info().mode == "mock":
-            await self._report(progress, "generating", 35, 1, total_segments, "음성 엔진이 문장을 읽고 있습니다.")
+            await self._report(
+                progress,
+                "generating",
+                35,
+                1,
+                total_segments,
+                "음성 엔진이 문장을 읽고 있습니다.",
+            )
             result = await engine.synthesize(normalized_request)
-            await self._report(progress, "generating", 92, total_segments, total_segments, "생성 결과를 확인하고 있습니다.")
+            await self._report(
+                progress,
+                "generating",
+                92,
+                total_segments,
+                total_segments,
+                "생성 결과를 확인하고 있습니다.",
+            )
             return self._enrich(result, normalization.normalized, total_segments, started)
 
         paths: list[Path] = []
@@ -69,11 +90,25 @@ class TtsPipeline:
                     first_result = child_result
 
             assert first_result is not None
-            await self._report(progress, "merging", 88, total_segments, total_segments, "분할 음성을 하나의 WAV로 연결합니다.")
+            await self._report(
+                progress,
+                "merging",
+                88,
+                total_segments,
+                total_segments,
+                "분할 음성을 하나의 WAV로 연결합니다.",
+            )
             output = self.store.output_path(UUID(str(parent_id)), "wav")
             duration = merge_wav_files(paths, output)
             elapsed_ms = round((time.perf_counter() - started) * 1000)
-            await self._report(progress, "merging", 96, total_segments, total_segments, "최종 WAV 파일을 점검합니다.")
+            await self._report(
+                progress,
+                "merging",
+                96,
+                total_segments,
+                total_segments,
+                "최종 WAV 파일을 점검합니다.",
+            )
             return TtsSynthesisResponse(
                 job_id=str(parent_id),
                 status="completed",

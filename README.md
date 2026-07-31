@@ -6,10 +6,10 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.5.4 setup-uv Action Pin Patch`
+- 버전: `0.5.5 API Lint & Engine Strategy Patch`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
-- AI 엔진: 선택 설치형 MeloTTS 한국어 어댑터
+- 주력 AI 엔진 방향: Fun-CosyVoice 3 어댑터 예정
 - 무료 로컬 대체 엔진: Windows·macOS·eSpeak 시스템 한국어 음성
 - 한국어 처리: 숫자·날짜·금액·퍼센트·영문 약어 정규화
 - 긴 문장: 자동 분할 후 PCM WAV 병합
@@ -18,7 +18,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 - 저장: 브라우저 IndexedDB 우선, Firebase는 선택적 동기화 계층
 - CI·배포: Web·API·Pages를 단일 GitHub Actions 실행으로 관리
 
-## 0.5.4에서 가능한 작업
+## 0.5.5에서 가능한 작업
 
 1. 문장을 입력해 AI 또는 로컬 한국어 음성을 생성합니다.
 2. 엔진이 지원하는 감정·속도·피치 설정만 활성화합니다.
@@ -33,7 +33,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 MeloTTS, Local TTS, Demo WAV는 화면과 프로젝트 데이터에서 서로 다른 모드로 표시됩니다.
 
-상단 브랜드 영역은 모바일·PC 모두 높이를 줄인 배너형 구조이며, `곰같은여우 SoriON AI`와 핵심 문장이 순차적으로 페이드됩니다. 로고의 `AI` 중 `I`와 PC Voice Core에는 SVG 없이 CSS로 만든 마이크를 사용합니다. 0.5.4에서는 존재하지 않는 `setup-uv@v8` 태그를 제거하고, Astral 공식 문서의 `setup-uv v8.1.0` 불변 커밋 SHA와 uv `0.11.32`를 고정했습니다. GitHub Action 태그를 추측하지 않고 검증된 SHA만 사용하도록 자동 규칙도 강화했습니다.
+상단 브랜드 영역은 모바일·PC 모두 높이를 줄인 배너형 구조이며, `곰같은여우 SoriON AI`와 핵심 문장이 순차적으로 페이드됩니다. 로고의 `AI` 중 `I`와 PC Voice Core에는 SVG 없이 CSS로 만든 마이크를 사용합니다. 0.5.5에서는 Python 3.10 Ruff 오류를 정리하고, 주력 엔진을 Fun-CosyVoice 3, 복제 전문가용 보조 엔진을 GPT-SoVITS로 결정했습니다. MeloTTS와 운영체제 음성은 로컬 대체 엔진으로 유지합니다.
 
 ## 바로 시작하기
 
@@ -51,6 +51,7 @@ uv run uvicorn app.main:app --reload
 npm run dev
 ```
 
+- 엔진 전략: [`docs/ENGINE_STRATEGY.md`](docs/ENGINE_STRATEGY.md)
 - 엔진 설치: [`docs/ENGINE_PILOT.md`](docs/ENGINE_PILOT.md)
 - 품질 연구소: [`docs/QUALITY_LAB.md`](docs/QUALITY_LAB.md)
 - 운영 연결: [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md)

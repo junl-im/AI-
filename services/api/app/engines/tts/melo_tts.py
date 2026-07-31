@@ -50,7 +50,11 @@ class MeloTtsEngine(TtsEngine):
             supports_pitch=False,
             supports_voice_clone=False,
             ready=self._ready,
-            reason=None if self._ready else "MeloTTS 선택 설치가 필요합니다. docs/ENGINE_PILOT.md를 확인해 주세요.",
+            reason=(
+                None
+                if self._ready
+                else "MeloTTS 선택 설치가 필요합니다. docs/ENGINE_PILOT.md를 확인해 주세요."
+            ),
         )
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:

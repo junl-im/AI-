@@ -7,12 +7,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.router import api_router
 from app.core.config import get_settings
 from app.engines.mock_tts import MockTtsEngine
-from app.engines.tts.melo_tts import MeloTtsEngine
 from app.engines.registry import engine_registry
+from app.engines.tts.melo_tts import MeloTtsEngine
 from app.engines.tts.system_tts import SystemTtsEngine
 from app.services.job_manager import JobManager
-from app.storage.audio_store import AudioStore
 from app.services.tts_pipeline import TtsPipeline
+from app.storage.audio_store import AudioStore
 
 
 @asynccontextmanager
@@ -40,7 +40,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.5.4",
+    version="0.5.5",
     lifespan=lifespan,
 )
 app.add_middleware(

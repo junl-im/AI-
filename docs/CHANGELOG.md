@@ -1,5 +1,31 @@
 # CHANGELOG
 
+## 0.5.5 - 2026-07-31
+
+### Fixed
+
+- Python 3.10 API 품질 검사에서 발생한 E501 100자 초과 오류를 전부 수정
+- `app/main.py`와 Python 호환성 테스트의 Ruff I001 import 정렬 오류 수정
+
+### Added
+
+- Python 소스 100자 제한을 로컬 프로젝트 규칙 검사에 추가
+- `GET /api/v1/engines/strategy` 엔진 전략 API 추가
+- `docs/ENGINE_STRATEGY.md`에 Python 백엔드 이유와 엔진 선정 기준 기록
+
+### Changed
+
+- 주력 TTS·제로샷 복제 엔진 방향을 Fun-CosyVoice 3로 결정
+- GPT-SoVITS를 복제 전문가용 보조 엔진으로 분류
+- MeloTTS와 운영체제 음성을 로컬 대체 엔진으로 유지
+- Fish Audio S2를 상업 라이선스 계약 전 평가 전용으로 분류
+- 웹과 API 버전을 `0.5.5`로 갱신
+
+### Notes
+
+- React·TypeScript는 사용자 화면을 담당하고 Python은 AI 모델 실행 서버에만 사용한다.
+- 실제 CosyVoice 3 모델 연결은 다음 기능 버전에서 별도 worker와 함께 구현한다.
+
 ## 0.5.4 - 2026-07-31
 
 ### Fixed

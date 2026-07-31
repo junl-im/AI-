@@ -70,7 +70,11 @@ async def test_pipeline_normalizes_splits_and_merges_long_text(tmp_path):
     assert result.file_size_bytes and result.file_size_bytes > 44
     assert result.processing_ms is not None
     assert "이천이십육년" in (result.normalized_text or "")
-    assert all(not path.name.startswith(str(parent_id)) or path.name == f"{parent_id}.wav" for path in tmp_path.iterdir())
+    assert all(
+        not path.name.startswith(str(parent_id))
+        or path.name == f"{parent_id}.wav"
+        for path in tmp_path.iterdir()
+    )
 
 @pytest.mark.asyncio
 async def test_pipeline_reports_segment_progress(tmp_path):

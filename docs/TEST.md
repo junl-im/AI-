@@ -96,3 +96,14 @@ npm run test:api
 - `timezone.utc`가 Python 3.10 호환 코드로 유지되는지 확인
 - API Job이 `services/api`에서 Python 3.10으로 Ruff와 pytest를 실행하는지 확인
 - checkout·setup-node·setup-uv에 Node.js 20 세대 major가 남지 않았는지 확인
+
+
+## 0.5.5 API Lint·엔진 전략 검사
+
+- `services/api/app`과 `services/api/tests`의 Python 줄이 100자를 넘지 않는지 확인
+- `app/main.py` import 블록이 Ruff 기준으로 정렬됐는지 확인
+- `tests/test_python_compatibility.py` import 뒤 불필요한 빈 줄이 없는지 확인
+- `/api/v1/engines/strategy`가 CosyVoice 3를 주력 TTS·복제 엔진으로 반환하는지 확인
+- GPT-SoVITS가 복제 전문가용 보조 엔진으로 표시되는지 확인
+- Fish Audio S2가 평가 전용으로 표시되는지 확인
+- `docs/ENGINE_STRATEGY.md`에 Python 백엔드 이유와 라이선스 주의사항이 있는지 확인

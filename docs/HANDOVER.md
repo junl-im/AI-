@@ -821,3 +821,79 @@ SoriON AI는 한국인이 모바일에서 앱처럼 사용하며 10초 안에 �
 
 CI의 Web·API·Deploy가 모두 성공하면 `0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 샘플 품질 검사, 명시적 동의, 로컬 보관·삭제, 교체형 VoiceCloneEngine 계약을 구현한다.
 
+
+
+## 2026-07-31 16:02 KST - 0.5.5 API Lint & Engine Strategy Patch
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.5.4`
+- 대상 버전: `0.5.5`
+
+### 프로젝트 목표 재확인
+
+SoriON AI는 웹 음성 도구가 아니라 한국인이 모바일에서 10초 안에 음성 생성·복제·변환을 시작하는 차세대 AI Voice Platform이다. React·TypeScript는 모바일 사용자 경험을 담당하고 Python은 AI 모델 실행 서버에만 사용한다.
+
+### 변경 내용
+
+- GitHub Actions Ruff 로그에 보고된 E501 긴 줄을 전부 100자 이하로 정리했다.
+- `app/main.py`와 `tests/test_python_compatibility.py`의 import 블록을 정렬했다.
+- 프로젝트 규칙 검사에서 Python 100자 제한을 직접 검사하도록 강화했다.
+- `GET /api/v1/engines/strategy`를 추가했다.
+- Fun-CosyVoice 3를 주력 TTS·제로샷 복제 후보로 결정했다.
+- GPT-SoVITS를 복제 전문가용 보조 엔진으로 결정했다.
+- MeloTTS와 시스템 음성은 로컬 대체 엔진으로 유지했다.
+- Fish Audio S2는 상업 라이선스 계약 전 평가 전용으로 분류했다.
+- `docs/ENGINE_STRATEGY.md`에 선정 근거와 Python 사용 이유를 기록했다.
+
+### 변경 이유
+
+- API 코드는 실행되기 전에 Ruff 스타일 검사에서 종료됐으므로 기능 추가보다 CI 복구가 우선이었다.
+- 음성 AI 공식 구현과 GPU 최적화 생태계가 Python·PyTorch 중심이므로 엔진 서버는 Python이 가장 현실적이다.
+- 한국어, 제로샷 복제, 스트리밍, 감정 지시, 상업 배포 가능성을 동시에 고려한 엔진 기준이 필요했다.
+
+### 영향 범위
+
+- FastAPI Python 3.10 품질 검사
+- 엔진 선택·설치 로드맵
+- 엔진 상태 API
+- 프로젝트 자동 규칙 검사
+- README, API, 테스트, 인수인계 문서
+
+### 주요 변경 파일
+
+- `services/api/app/api/routes/quality.py`
+- `services/api/app/api/routes/tts.py`
+- `services/api/app/main.py`
+- `services/api/app/services/`
+- `services/api/app/schemas/engine_strategy.py`
+- `services/api/app/services/engine_strategy.py`
+- `services/api/tests/test_engine_strategy.py`
+- `scripts/check-project-rules.mjs`
+- `docs/ENGINE_STRATEGY.md`
+
+### 검증 결과
+
+- Python 전체 문법 컴파일 통과
+- FastAPI 테스트 32개 통과
+- Python 앱·테스트의 100자 초과 줄 0개
+- 프로젝트 절대 규칙 검사 통과
+- 엔진 전략 API 회귀 테스트 통과
+- 모든 소스 파일 500줄 이하 확인
+- SVG·비밀키·런타임 음원·캐시 미포함 확인
+
+### 알려진 제한과 주의사항
+
+- 현재 작업 환경에 Ruff 바이너리와 외부 패키지 레지스트리 접근이 없어 공식 Ruff 실행은 GitHub Actions에서 최종 확인해야 한다.
+- CosyVoice 3와 GPT-SoVITS는 이번 패치에서 전략만 결정했으며 실제 모델을 성공한 것처럼 표시하지 않는다.
+- Fish Audio S2는 상업 서비스에 별도 라이선스가 필요하므로 기본 엔진으로 사용하지 않는다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.5.5-full.zip`
+- 패치: `SoriON-AI-0.5.4-to-0.5.5-patch.zip`
+- 체크섬: `SoriON-AI-0.5.5-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+`0.6.0 CosyVoice 3 & Mobile Voice Clone Foundation`에서 별도 worker, 스트리밍 TTS, 모바일 10초 녹음, 품질 검사, 동의, 제로샷 복제 계약을 구현한다.

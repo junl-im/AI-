@@ -44,7 +44,10 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
         )
 
     try:
-        result = await manager.run(job_id, lambda: pipeline.synthesize(engine, normalized, report))
+        result = await manager.run(
+            job_id,
+            lambda: pipeline.synthesize(engine, normalized, report),
+        )
     except JobAlreadyRunningError as error:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -56,9 +59,15 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
             detail="SOA-4008: 음성 생성 시간이 초과되었습니다.",
         ) from error
     except asyncio.CancelledError as error:
-        raise HTTPException(status_code=499, detail="SOA-4007: 사용자가 음성 생성을 취소했습니다.") from error
+        raise HTTPException(
+            status_code=499,
+            detail="SOA-4007: 사용자가 음성 생성을 취소했습니다.",
+        ) from error
     except ValueError as error:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(error),
+        ) from error
     except RuntimeError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

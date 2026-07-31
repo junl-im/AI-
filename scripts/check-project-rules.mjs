@@ -22,8 +22,16 @@ async function walk(directory) {
     if (!sourceExtensions.has(extension)) continue
 
     const content = await readFile(fullPath, 'utf8')
-    const lineCount = content.split(/\r?\n/).length
+    const lines = content.split(/\r?\n/)
+    const lineCount = lines.length
     if (lineCount > 500) failures.push(`${path}: ${lineCount}줄로 500줄 제한을 초과했습니다.`)
+    if (extension === '.py') {
+      lines.forEach((line, index) => {
+        if (line.length > 100) {
+          failures.push(`${path}:${index + 1}: Python 100자 제한을 초과했습니다. (${line.length}자)`)
+        }
+      })
+    }
 
     const secretPatterns = [
       /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
@@ -68,6 +76,16 @@ await requireText('docs/HANDOVER.md', [currentVersion, '다음 예상 업데이�
 await requireText('docs/CHANGELOG.md', [`## ${currentVersion}`])
 await requireText('docs/NEXT_UPDATE.md', ['# NEXT UPDATE', '## 목표 버전'])
 await requireText('docs/RELEASE.md', ['전체 통파일 ZIP', '덮어쓰기용 패치 ZIP'])
+await requireText('docs/ENGINE_STRATEGY.md', [
+  'Fun-CosyVoice 3',
+  'GPT-SoVITS',
+  'Fish Audio S2',
+  '왜 Python 백엔드인가',
+])
+await requireText('services/api/app/api/routes/engines.py', [
+  '/strategy',
+  'current_engine_strategy',
+])
 await requireText('.github/workflows/ci.yml', [
   'name: SoriON CI & Pages',
   'branches:',

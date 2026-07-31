@@ -1,5 +1,7 @@
 # KOREAN TTS ENGINE PILOT
 
+> 이 문서는 0.3.0의 MeloTTS 파일럿 기록입니다. 현재 주력 엔진 방향은 `docs/ENGINE_STRATEGY.md`를 따릅니다. MeloTTS는 로컬 대체 엔진으로 유지합니다.
+
 ## 엔진 우선순위
 
 `0.3.0`의 `auto` 선택 순서는 다음과 같습니다.

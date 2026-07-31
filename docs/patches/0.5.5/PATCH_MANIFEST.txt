@@ -1,0 +1,51 @@
+# SoriON AI 0.5.4 -> 0.5.5 PATCH MANIFEST
+
+## 수정 파일
+
+- FOUNDATION_REPORT.md
+- README.md
+- START_HERE.md
+- package.json
+- scripts/check-project-rules.mjs
+- src/components/layout/BrandMasthead.tsx
+- src/quality/qualityReport.ts
+- src/quality/qualityReport.test.ts
+- docs/API.md
+- docs/CHANGELOG.md
+- docs/ENGINE_PILOT.md
+- docs/GITHUB_PAGES.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/TEST.md
+- services/api/pyproject.toml
+- services/api/app/main.py
+- services/api/app/api/routes/engines.py
+- services/api/app/api/routes/health.py
+- services/api/app/api/routes/quality.py
+- services/api/app/api/routes/setup.py
+- services/api/app/api/routes/tts.py
+- services/api/app/engines/registry.py
+- services/api/app/engines/tts/melo_tts.py
+- services/api/app/schemas/tts.py
+- services/api/app/services/engine_diagnostics.py
+- services/api/app/services/job_manager.py
+- services/api/app/services/tts_pipeline.py
+- services/api/tests/test_health.py
+- services/api/tests/test_python_compatibility.py
+- services/api/tests/test_quality.py
+- services/api/tests/test_setup.py
+- services/api/tests/test_tts_pipeline.py
+
+## 추가 파일
+
+- docs/ENGINE_STRATEGY.md
+- docs/patches/0.5.5/DELETE_LIST.txt
+- docs/patches/0.5.5/PATCH_MANIFEST.txt
+- docs/patches/0.5.5/PATCH_README.md
+- services/api/app/schemas/engine_strategy.py
+- services/api/app/services/engine_strategy.py
+- services/api/tests/test_engine_strategy.py
+
+## 삭제 파일
+
+- 없음

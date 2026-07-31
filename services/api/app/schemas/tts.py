@@ -7,8 +7,23 @@ from app.schemas.engine import EngineMode
 
 Emotion = Literal["neutral", "happy", "calm", "sad", "angry", "commercial"]
 OutputFormat = Literal["mp3", "wav", "flac"]
-JobStatus = Literal["queued", "processing", "completed", "mock-complete", "cancelled", "failed"]
-JobPhase = Literal["queued", "normalizing", "generating", "merging", "completed", "cancelled", "failed"]
+JobStatus = Literal[
+    "queued",
+    "processing",
+    "completed",
+    "mock-complete",
+    "cancelled",
+    "failed",
+]
+JobPhase = Literal[
+    "queued",
+    "normalizing",
+    "generating",
+    "merging",
+    "completed",
+    "cancelled",
+    "failed",
+]
 
 
 class TtsSynthesisRequest(BaseModel):

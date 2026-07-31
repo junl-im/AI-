@@ -21,7 +21,10 @@ class EngineRegistry:
             info = engine.info()
             if info.ready and info.mode != "mock":
                 return engine
-        return next((engine for engine in self._tts_engines.values() if engine.info().ready), None)
+        return next(
+            (engine for engine in self._tts_engines.values() if engine.info().ready),
+            None,
+        )
 
     def list_tts(self) -> list[TtsEngine]:
         return list(self._tts_engines.values())

@@ -1,53 +1,33 @@
-# SoriON AI 0.5.4 setup-uv Action Pin Report
+# SoriON AI 0.5.5 API Lint & Engine Strategy Report
 
-## 목적
+## 결과
 
-GitHub Actions의 API quality Job이 테스트 실행 전 `astral-sh/setup-uv@v8`을 찾지 못해 종료되는 문제를 수정한다. 다음 기능 개발 전에 CI 준비 단계의 재현성과 신뢰성을 확보한다.
+GitHub Actions의 Python 3.10 Ruff 단계에서 발견된 E501 긴 줄 22건과 I001 import 정렬 2건을 수정했다. API 코드의 동작 계약은 유지하면서 줄바꿈과 import 순서만 정리했다.
 
-## 확인된 원인
+SoriON의 엔진 방향도 공식 문서 기준으로 재정의했다. 주력 TTS와 제로샷 복제 후보는 Fun-CosyVoice 3, 복제 전문가용 보조 엔진은 GPT-SoVITS, 로컬 대체는 MeloTTS와 운영체제 음성으로 결정했다. Fish Audio S2는 상업 라이선스가 별도로 필요해 평가 전용으로 분류했다.
 
-`astral-sh/setup-uv` 저장소에는 실행 시점에 해석 가능한 `v8` 메이저 태그가 없었다. GitHub Actions는 workflow를 준비하면서 Action ref를 먼저 다운로드하므로, Ruff·pytest·Python 코드와 무관하게 Job이 3초 만에 실패했다.
+## 주요 변경
 
-## 수정 내용
+- Python 소스와 테스트의 100자 초과 줄 제거
+- `app/main.py`와 Python 호환성 테스트의 import 블록 정렬
+- 프로젝트 규칙 검사에 Python 100자 제한 추가
+- `/api/v1/engines/strategy` 엔진 전략 API 추가
+- `docs/ENGINE_STRATEGY.md` 추가
+- CosyVoice 3를 차기 주력 엔진으로 결정
+- GPT-SoVITS를 복제 전문가용 보조 엔진으로 결정
+- MeloTTS를 주력 엔진이 아닌 로컬 대체 엔진으로 재분류
+- Fish Audio S2를 라이선스 계약 전 평가 전용으로 분류
 
-- `astral-sh/setup-uv@v8` 제거
-- 공식 setup-uv v8.1.0 불변 커밋 SHA로 고정
-  - `08807647e7069bb48b6ef5acd8ec9567f424441b`
-- 설치할 uv 실행 파일을 `0.11.32`로 고정
-- Python 3.10 설치는 `actions/setup-python@v6`에 유지
-- setup-uv는 uv 설치, API 작업 디렉터리 탐색, 캐시만 담당
-- 프로젝트 규칙에 부동 setup-uv 태그 금지 검사 추가
+## 검증
 
-## 검증 결과
+- Python 전체 문법 컴파일 통과
+- FastAPI 테스트 32개 통과
+- Python 앱·테스트의 100자 초과 줄 0개
+- 엔진 전략 API 회귀 테스트 통과
+- 프로젝트 절대 규칙 검사 통과
+- 모든 소스 파일 500줄 이하
+- SVG, 비밀키, 런타임 음원, 캐시 미포함
 
-- 프로젝트 규칙 검사: 통과
-- setup-uv 공식 SHA 존재 검사: 통과
-- uv 0.11.32 고정 검사: 통과
-- `setup-uv@v8` 잔존 검사: 통과
-- Python 전체 문법 컴파일: 통과
-- FastAPI 테스트: 31개 통과 (현재 제공 Python 런타임)
-- 모든 소스 파일 500줄 이하: 통과
-- SVG·비밀키·런타임 산출물 검사: 통과
-- 패치 적용본과 전체본 파일 동등성: 통과
-- 전체 프로젝트 파일: 198개
-- 패치 변경·추가 파일: 26개
-- ZIP 무결성: 통과
+## 제한
 
-## 적용 후 확인
-
-```text
-SoriON CI & Pages
-├─ Web quality
-├─ API quality · Python 3.10
-└─ Deploy GitHub Pages
-```
-
-API 로그의 `Set up uv` 단계가 정상 완료되고 다음 단계인 Python 버전 확인, 의존성 동기화, Ruff, pytest가 순서대로 실행돼야 한다.
-
-## 현재 환경 제한
-
-현재 컨테이너는 CPython 3.10 다운로드 주소를 DNS로 조회하지 못해 `uv run --python 3.10` 실기동은 실행하지 못했다. 실제 GitHub runner에서 Action 다운로드와 Python 3.10 테스트 성공을 최종 확인해야 한다.
-
-## 다음 단계
-
-CI 전체 성공을 확인한 뒤 `0.6.0 Mobile Voice Clone Foundation`으로 진행한다.
+현재 작업 환경에는 Ruff 실행 파일과 외부 패키지 레지스트리 접근이 없어 공식 Ruff 바이너리 자체는 실행하지 못했다. GitHub Actions에서 Ruff와 Python 3.10 pytest를 최종 확인해야 한다.

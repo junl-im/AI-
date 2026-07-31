@@ -50,7 +50,11 @@ def engine_diagnostic(engine: TtsEngine) -> EngineDiagnostic:
         ])
     elif info.id == "system":
         executable = next(
-            (name for name in ("espeak-ng", "espeak", "say", "powershell", "pwsh") if shutil.which(name)),
+            (
+                name
+                for name in ("espeak-ng", "espeak", "say", "powershell", "pwsh")
+                if shutil.which(name)
+            ),
             None,
         )
         checks.append(DiagnosticCheck(

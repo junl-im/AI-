@@ -30,7 +30,7 @@ def _absolute_audio_url(request: Request, audio_url: str | None) -> str | None:
 
 @router.get("/diagnostics", response_model=QualityDiagnosticsResponse)
 async def diagnostics() -> QualityDiagnosticsResponse:
-    return quality_diagnostics("0.5.4", engine_registry.list_tts())
+    return quality_diagnostics("0.5.5", engine_registry.list_tts())
 
 
 @router.get("/sentences", response_model=list[EvaluationSentence])
@@ -57,7 +57,10 @@ async def text_preview(payload: TextPreviewRequest, request: Request) -> TextPre
 
 
 @router.post("/compare", response_model=QualityCompareResponse)
-async def compare_engines(payload: QualityCompareRequest, request: Request) -> QualityCompareResponse:
+async def compare_engines(
+    payload: QualityCompareRequest,
+    request: Request,
+) -> QualityCompareResponse:
     pipeline = request.app.state.tts_pipeline
     manager = request.app.state.job_manager
     normalized, changes, _ = pipeline.preview(payload.text)

@@ -18,7 +18,12 @@ class GenerationTimeoutError(TimeoutError):
 
 
 class JobManager:
-    def __init__(self, max_concurrent: int, timeout_seconds: float, history_limit: int = 100) -> None:
+    def __init__(
+        self,
+        max_concurrent: int,
+        timeout_seconds: float,
+        history_limit: int = 100,
+    ) -> None:
         self._semaphore = asyncio.Semaphore(max(1, max_concurrent))
         self._timeout_seconds = timeout_seconds
         self._history_limit = max(10, history_limit)
@@ -113,16 +118,29 @@ class JobManager:
                 progress=0,
                 message="음성 생성 상태를 준비했습니다.",
             )
-            updated = current.model_copy(update={
-                "status": status or current.status,
-                "phase": phase or current.phase,
-                "progress": max(0, min(100, progress if progress is not None else current.progress)),
-                "current_segment": current_segment if current_segment is not None else current.current_segment,
-                "total_segments": total_segments if total_segments is not None else current.total_segments,
-                "message": message or current.message,
-                "error": error,
-                "updated_at": self._now(),
-            })
+            next_progress = progress if progress is not None else current.progress
+            next_current_segment = (
+                current_segment
+                if current_segment is not None
+                else current.current_segment
+            )
+            next_total_segments = (
+                total_segments
+                if total_segments is not None
+                else current.total_segments
+            )
+            updated = current.model_copy(
+                update={
+                    "status": status or current.status,
+                    "phase": phase or current.phase,
+                    "progress": max(0, min(100, next_progress)),
+                    "current_segment": next_current_segment,
+                    "total_segments": next_total_segments,
+                    "message": message or current.message,
+                    "error": error,
+                    "updated_at": self._now(),
+                }
+            )
             self._snapshots[job_id] = updated
             self._trim_history()
             return updated

@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "default_engine": "auto"
 }
 ```
@@ -36,6 +36,29 @@
   }
 ]
 ```
+
+## GET /engines/strategy
+
+SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다. 실제 설치 상태가 아니라 제품 엔진 방향을 제공하는 API입니다.
+
+```json
+{
+  "version": "0.5.5",
+  "primary_tts_engine": "cosyvoice3",
+  "primary_clone_engine": "cosyvoice3",
+  "local_fallback_engine": "melo",
+  "candidates": [
+    {
+      "id": "cosyvoice3",
+      "role": "primary",
+      "status": "planned",
+      "languages": ["ko-KR", "en-US", "ja-JP", "zh-CN"]
+    }
+  ]
+}
+```
+
+라이선스와 선정 근거는 `docs/ENGINE_STRATEGY.md`를 확인합니다.
 
 ## POST /tts/synthesize
 
@@ -140,7 +163,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.5.4",
+  "version": "0.5.5",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
