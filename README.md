@@ -6,7 +6,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.1.4 Delivery Rules Foundation`
+- 버전: `0.1.5 GitHub Pages Deployment Fix`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
 - AI 엔진: 교체 가능한 어댑터 구조와 개발용 Mock 엔진
@@ -23,6 +23,12 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 6. 브라우저에서 `http://localhost:5173`을 엽니다.
 
 자세한 순서는 [`START_HERE.md`](START_HERE.md)를 참고하세요.
+
+## GitHub Pages 배포
+
+저장소 `junl-im/AI-`는 Vite 소스를 그대로 공개하지 않고 GitHub Actions가 만든 `dist/`만 배포한다.
+
+최초 한 번 GitHub의 `Settings → Pages → Source`를 **GitHub Actions**로 지정한 뒤 `main`에 Push한다. 자세한 절차는 [`docs/GITHUB_PAGES.md`](docs/GITHUB_PAGES.md)를 확인한다.
 
 ## 개발 원칙
 

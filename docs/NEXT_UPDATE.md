@@ -32,8 +32,10 @@
 
 ## 선행 조건
 
+- GitHub Pages `Deploy SoriON to GitHub Pages` 워크플로 성공 확인
+- 실제 서비스 주소에서 `BUILD v0.1.5` 표시 확인
 - 개발 PC에서 `npm install` 성공 확인
-- 현재 CI의 웹 품질 검사 정상 실행 확인
+- 현재 CI와 Pages 배포의 웹 품질 검사 정상 실행 확인
 - 첫 실제 한국어 TTS 엔진의 라이선스와 실행 환경 결정
 
 ## 위험 요소
@@ -47,3 +49,5 @@
 - 결과 전달은 전체 ZIP과 덮어쓰기용 패치 ZIP을 항상 함께 제공한다.
 - 모든 업데이트는 `HANDOVER.md`, `CHANGELOG.md`, 이 문서를 동시에 갱신한다.
 - 프로젝트의 공식 대문 표기는 `곰같은여우 SoriON AI`를 유지한다.
+
+- GitHub Pages는 소스 루트가 아니라 `/AI-/` base로 빌드한 `dist/`만 배포한다.

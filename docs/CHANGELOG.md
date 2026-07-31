@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.1.5 - 2026-07-31
+
+### Fixed
+
+- 새 Vite 빌드가 GitHub Pages에 배포되지 않아 이전 쇼츠 스튜디오가 계속 열리던 문제 수정
+- 프로젝트 사이트 주소 `/AI-/`에 맞게 Vite base, PWA 시작 경로, 아이콘, 탐색 fallback 수정
+- 루트 절대 경로였던 favicon 경로를 Vite base 경로로 변경
+
+### Added
+
+- `main` Push와 수동 실행을 지원하는 GitHub Pages 전용 배포 워크플로
+- `dist/` 아티팩트 업로드와 `github-pages` 환경 배포 단계
+- 기존 서비스워커 캐시 정리와 즉시 활성화 설정
+- GitHub Pages 최초 설정·캐시 복구 문서
+
 ## 0.1.2 - 2026-07-31
 
 - GitHub Actions를 모든 브랜치 push에서 실행하도록 수정

@@ -23,7 +23,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.1.4",
+    version="0.1.5",
     lifespan=lifespan,
 )
 app.add_middleware(

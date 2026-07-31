@@ -25,6 +25,14 @@ Semantic Versioning을 사용한다.
 - Minor: 호환되는 기능 추가
 - Major: API나 데이터 계약의 파괴적 변경
 
+## GitHub Pages
+
+- 게시 소스는 **GitHub Actions**를 사용한다.
+- `.github/workflows/deploy-pages.yml`이 `main` Push에서 실행된다.
+- 저장소 경로 `/AI-/`를 Vite base와 PWA scope에 적용한다.
+- 소스 루트가 아니라 빌드 결과 `dist/`만 배포한다.
+- 배포 성공 전에는 이전 Pages 릴리스가 계속 서비스될 수 있다.
+
 ## Firebase Hosting
 
 오직 `dist`만 배포한다. `index.html`, Service Worker, Manifest에는 장기 immutable 캐시를 적용하지 않는다.

@@ -1,0 +1,40 @@
+SoriON AI patch manifest
+from: 0.1.2
+to: 0.1.5
+generated: 2026-07-31 12:00 KST
+
+[changed or added files]
+.github/pull_request_template.md
+.github/workflows/deploy-pages.yml
+DELIVERY_RULES.md
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/CODING_RULE.md
+docs/GITHUB_PAGES.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/RELEASE.md
+docs/patches/0.1.4/PATCH_MANIFEST.txt
+docs/patches/0.1.4/PATCH_README.md
+docs/patches/0.1.5/DELETE_LIST.txt
+docs/patches/0.1.5/PATCH_MANIFEST.txt
+docs/patches/0.1.5/PATCH_README.md
+docs/patches/0.1.5/remove-obsolete-files.mjs
+index.html
+package.json
+scripts/check-project-rules.mjs
+services/api/app/api/routes/health.py
+services/api/app/main.py
+services/api/pyproject.toml
+services/api/tests/test_health.py
+src/components/layout/AppShell.tsx
+src/components/layout/BrandMasthead.test.tsx
+src/components/layout/BrandMasthead.tsx
+src/pages/HomePage.tsx
+src/styles/index.css
+vite.config.ts
+
+[deleted files]
+src/components/ui/BrandMark.tsx

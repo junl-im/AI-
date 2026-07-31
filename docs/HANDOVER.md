@@ -146,3 +146,70 @@
 ### 다음 예상 업데이트
 
 `0.2.0 Mobile Voice Workspace`에서 모바일 텍스트 입력, 한국어 음성 프리셋, 생성 상태, 오디오 플레이어 셸, WAV 다운로드 흐름을 구축한다.
+
+## 2026-07-31 12:00 KST - 0.1.5 GitHub Pages 배포 복구
+
+### 대상 버전과 기준 버전
+
+- 실제 GitHub 기준 버전: `0.1.2`
+- 전체 프로젝트 기준 버전: `0.1.4`
+- 대상 버전: `0.1.5`
+
+### 변경 내용
+
+- `main` Push에서 Vite 앱을 빌드하고 `dist/`를 GitHub Pages에 배포하는 전용 워크플로를 추가했다.
+- 저장소명 `AI-`에 맞춰 배포 base를 `/AI-/`로 설정했다.
+- PWA Manifest, 아이콘, Service Worker 탐색 fallback을 프로젝트 하위 경로에 맞췄다.
+- 이전 PWA 캐시를 정리하고 새 서비스워커가 즉시 활성화되도록 설정했다.
+- GitHub Pages 게시 소스를 `GitHub Actions`로 선택하는 최초 1회 절차를 문서화했다.
+
+### 변경 이유
+
+새 SoriON 소스와 CI는 GitHub에 반영됐지만 Pages 배포 작업이 없어 마지막 성공 배포본인 AI 쇼츠 스튜디오가 계속 서비스되고 있었다. `.git` 폴더는 원인이 아니며, 배포 산출물과 프로젝트 하위 경로 설정이 빠진 것이 원인이었다.
+
+### 영향 범위
+
+- GitHub Actions 배포
+- Vite production base 경로
+- PWA Manifest와 Service Worker
+- favicon과 정적 자산 경로
+- 릴리스·시작·배포 문서
+
+### 변경·추가된 주요 파일
+
+- `.github/workflows/deploy-pages.yml`
+- `vite.config.ts`
+- `index.html`
+- `docs/GITHUB_PAGES.md`
+- `docs/HANDOVER.md`
+- `docs/CHANGELOG.md`
+- `docs/NEXT_UPDATE.md`
+- `docs/RELEASE.md`
+- `README.md`
+- `START_HERE.md`
+
+### 검증 결과
+
+- 프로젝트 규칙 검사 통과
+- FastAPI 테스트 통과
+- YAML 구조와 Pages 필수 권한·아티팩트 경로 검사 통과
+- 전체 ZIP과 실제 GitHub `0.1.2` 기준 패치 ZIP 경로 검사 통과
+- 실제 GitHub 원격 배포는 사용자의 Push와 Pages Source 설정 후 확인해야 함
+
+### 알려진 제한과 주의사항
+
+- GitHub의 `Settings → Pages → Source`가 반드시 `GitHub Actions`여야 한다.
+- 배포 성공 후 특정 기기에서만 이전 화면이 남으면 기존 서비스워커 사이트 데이터를 한 번 삭제해야 한다.
+- 저장소명을 변경하면 워크플로의 `VITE_BASE_PATH`도 함께 변경해야 한다.
+- GitHub 원격에는 현재 `0.1.2`까지만 확인되어 패치는 `0.1.2 → 0.1.5` 기준으로 제작한다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.1.5-full.zip`
+- 패치: `SoriON-AI-0.1.2-to-0.1.5-pages-fix-patch.zip`
+- 체크섬: `SoriON-AI-0.1.5-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+GitHub Pages 실제 배포 성공과 모바일 캐시 교체를 확인한 뒤 `0.2.0 Mobile Voice Workspace` 개발로 진행한다.
+

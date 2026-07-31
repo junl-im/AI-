@@ -72,3 +72,13 @@ feature/voice-upload
 6. `npm run quality:rules`와 관련 테스트를 실행합니다.
 
 영구 전달 기준은 [`DELIVERY_RULES.md`](DELIVERY_RULES.md)를 참고합니다.
+
+## 7. GitHub Pages 배포
+
+1. GitHub 저장소의 `Settings → Pages`를 연다.
+2. `Build and deployment → Source`를 **GitHub Actions**로 선택한다.
+3. `main` 브랜치에 Push한다.
+4. Actions에서 `Deploy SoriON to GitHub Pages` 성공을 확인한다.
+5. `https://junl-im.github.io/AI-/`를 연다.
+
+기존 사이트가 한 기기에서만 남으면 서비스워커와 사이트 데이터를 한 번 지운다. 자세한 내용은 [`docs/GITHUB_PAGES.md`](docs/GITHUB_PAGES.md)를 참고한다.
