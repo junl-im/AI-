@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -6,8 +7,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     environment: str = "development"
     cors_origins: str = "http://localhost:5173"
-    default_tts_engine: str = "mock"
+    default_tts_engine: str = "auto"
     allow_mock_engine: bool = True
+    enable_melo_tts: bool = True
+    melo_device: str = "auto"
+    enable_system_tts: bool = True
+    system_tts_voice: str = ""
+    generation_timeout_seconds: float = 75.0
+    max_concurrent_generations: int = 1
+    audio_ttl_minutes: int = 30
+    max_segment_chars: int = 180
+    audio_directory: str = ".sorion/audio"
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../../.env"),
@@ -18,6 +28,10 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [item.strip() for item in self.cors_origins.split(",") if item.strip()]
+
+    @property
+    def audio_path(self) -> Path:
+        return Path(self.audio_directory).expanduser().resolve()
 
 
 @lru_cache

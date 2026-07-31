@@ -1,4 +1,5 @@
-import type { VoiceEmotion } from '../ai/contracts'
+import type { EngineMode, VoiceEmotion } from '../ai/contracts'
+import type { AudioSource } from '../tts/generationTypes'
 
 export interface VoiceProject {
   id: string
@@ -10,4 +11,8 @@ export interface VoiceProject {
   updatedAt: string
   status: 'draft' | 'generated'
   lastJobId?: string
+  engineId?: string
+  engineMode?: EngineMode
+  audioSource?: AudioSource
+  outputFormat?: 'mp3' | 'wav' | 'flac'
 }

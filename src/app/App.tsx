@@ -2,11 +2,13 @@ import { AnimatePresence, motion } from 'motion/react'
 import { AppShell } from '../components/layout/AppShell'
 import { HomePage } from '../pages/HomePage'
 import { ProjectsPage } from '../pages/ProjectsPage'
+import { QualityPage } from '../pages/QualityPage'
 import { SettingsPage } from '../pages/SettingsPage'
 import { useAppStore } from '../store/useAppStore'
 
 const pages = {
   home: HomePage,
+  quality: QualityPage,
   projects: ProjectsPage,
   settings: SettingsPage,
 }

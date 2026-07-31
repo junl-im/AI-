@@ -1,0 +1,69 @@
+SoriON AI patch manifest
+from: 0.3.0
+to: 0.4.0
+mode: overwrite repository root
+deleted files: none
+
+changed and added files:
+.env.example
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/API.md
+docs/ARCHITECTURE.md
+docs/CHANGELOG.md
+docs/GITHUB_PAGES.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/QUALITY_LAB.md
+docs/TEST.md
+docs/UI_GUIDE.md
+docs/evaluation/KOREAN_TTS_SENTENCES.json
+docs/patches/0.4.0/PATCH_MANIFEST.txt
+docs/patches/0.4.0/PATCH_README.md
+package.json
+services/api/app/api/router.py
+services/api/app/api/routes/health.py
+services/api/app/api/routes/quality.py
+services/api/app/api/routes/tts.py
+services/api/app/core/config.py
+services/api/app/data/korean_tts_sentences.json
+services/api/app/engines/mock_tts.py
+services/api/app/engines/tts/melo_tts.py
+services/api/app/engines/tts/system_tts.py
+services/api/app/main.py
+services/api/app/schemas/engine.py
+services/api/app/schemas/quality.py
+services/api/app/schemas/tts.py
+services/api/app/services/engine_diagnostics.py
+services/api/app/services/process_metrics.py
+services/api/app/services/text_normalizer.py
+services/api/app/services/text_segmenter.py
+services/api/app/services/tts_pipeline.py
+services/api/app/services/wav_tools.py
+services/api/pyproject.toml
+services/api/tests/test_health.py
+services/api/tests/test_quality.py
+services/api/tests/test_text_processing.py
+services/api/tests/test_tts_pipeline.py
+services/api/tests/test_wav_tools.py
+src/ai/contracts.ts
+src/app/App.tsx
+src/components/evaluation/QualityDiagnosticsCard.tsx
+src/components/evaluation/QualityResultCard.tsx
+src/components/evaluation/TextPreviewCard.tsx
+src/components/layout/BrandMasthead.tsx
+src/components/navigation/BottomNavigation.tsx
+src/components/voice/AdvancedVoiceSettings.tsx
+src/components/voice/AudioResultCard.tsx
+src/components/voice/EmotionSelector.tsx
+src/components/voice/EngineStatusCard.tsx
+src/hooks/useVoiceGeneration.ts
+src/pages/HomePage.tsx
+src/pages/QualityPage.tsx
+src/quality/formatMetrics.test.ts
+src/quality/formatMetrics.ts
+src/quality/qualityApi.ts
+src/quality/qualityTypes.ts
+src/store/useAppStore.ts
+src/tts/voiceApi.ts

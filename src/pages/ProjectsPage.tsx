@@ -3,6 +3,7 @@ import { StatusPill } from '../components/ui/StatusPill'
 import { listProjects } from '../projects/projectRepository'
 import type { VoiceProject } from '../projects/projectTypes'
 import { useAppStore } from '../store/useAppStore'
+import { getVoicePreset } from '../tts/voicePresets'
 
 export function ProjectsPage() {
   const setPage = useAppStore((state) => state.setPage)
@@ -26,22 +27,31 @@ export function ProjectsPage() {
         <section className="mt-8 rounded-[28px] border border-dashed border-soa-line bg-soa-card p-8 text-center">
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#ece9e1] text-2xl" aria-hidden="true">▣</div>
           <h2 className="mt-4 font-black tracking-[-0.035em]">아직 저장된 작업이 없습니다</h2>
-          <p className="mt-2 text-sm leading-6 text-soa-muted">음성 생성 요청을 보내면 이 기기의 IndexedDB에 프로젝트가 자동 저장됩니다.</p>
+          <p className="mt-2 text-sm leading-6 text-soa-muted">음성을 생성하면 이 기기의 IndexedDB에 프로젝트 정보가 자동 저장됩니다.</p>
         </section>
       ) : (
         <ul className="mt-6 space-y-3">
-          {projects.map((project) => (
-            <li key={project.id} className="rounded-[24px] border border-soa-line bg-soa-card p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h2 className="truncate font-black tracking-[-0.03em]">{project.title}</h2>
-                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-soa-muted">{project.text}</p>
+          {projects.map((project) => {
+            const voice = getVoicePreset(project.voiceId)
+            const isDemo = project.audioSource === 'browser-demo' || project.engineMode === 'mock'
+            const modeLabel = isDemo ? '데모' : project.engineMode === 'ai' ? 'AI' : project.engineMode === 'local' ? '로컬' : project.status === 'generated' ? '완료' : '초안'
+            return (
+              <li key={project.id} className="rounded-[24px] border border-soa-line bg-soa-card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="truncate font-black tracking-[-0.03em]">{project.title}</h2>
+                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-soa-muted">{project.text}</p>
+                  </div>
+                  <StatusPill label={modeLabel} tone={isDemo ? 'warning' : project.status === 'generated' ? 'good' : 'neutral'} />
                 </div>
-                <StatusPill label={project.status === 'generated' ? '완료' : '초안'} tone={project.status === 'generated' ? 'good' : 'neutral'} />
-              </div>
-              <p className="mt-3 text-[11px] font-semibold text-soa-muted">{new Date(project.updatedAt).toLocaleString('ko-KR')}</p>
-            </li>
-          ))}
+                <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-semibold text-soa-muted">
+                  <span>{voice.name}</span>
+                  <span>{project.outputFormat?.toUpperCase() ?? 'WAV'}</span>
+                  <span>{new Date(project.updatedAt).toLocaleString('ko-KR')}</span>
+                </div>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

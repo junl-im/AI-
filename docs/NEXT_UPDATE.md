@@ -2,52 +2,55 @@
 
 ## 목표 버전
 
-`0.2.0 Mobile Voice Workspace`
+`0.5.0 Korean TTS Production Readiness`
 
 ## 목표
 
-모바일에서 10초 안에 텍스트 음성 생성 작업을 시작할 수 있는 첫 실사용 워크스페이스를 완성한다.
+품질 연구소에서 얻은 진단과 A/B 결과를 저장·내보내고, 실제 MeloTTS 설치부터 장시간 생성 운영까지 반복 가능한 절차로 만든다.
 
 ## 예상 구현
 
-- 모바일 한 화면 중심의 텍스트 입력 영역
-- 한국어 음성 프리셋 카드
-- 기본 설정과 Advanced 설정 분리
-- 생성 상태, 실패, 재시도 UI
-- 생성 결과 오디오 플레이어 셸
-- WAV 다운로드 버튼과 파일명 규칙
-- Mock 엔진과 실제 엔진의 상태 표시 분리
-- 360px, 390px, 430px 모바일 폭 테스트
+- MeloTTS 설치 단계별 Setup Wizard
+- 패키지·한국어 MeCab·모델 파일·장치별 상세 진단
+- 모델 worker 프로세스 분리와 재시작
+- 생성 진행률 SSE 또는 polling API
+- 품질 별점·메모 IndexedDB 영구 저장
+- JSON·CSV 품질 보고서 내보내기
+- 평가 세트 일괄 실행과 중단·재개
+- FFmpeg 선택 어댑터를 통한 샘플레이트 통일
+- 긴 문장 생성 큐와 구간별 실패 재시도
+- 외부 API 주소 설정과 연결 테스트
+- 공개 음원 라우트 인증 설계 초안
 
 ## 예상 변경 영역
 
-- `src/pages/HomePage.tsx`
-- `src/components/voice/`
-- `src/tts/`
-- `src/styles/`
-- `services/api/app/engines/tts/`
-- `docs/UI_GUIDE.md`
-- `docs/API.md`
-- 테스트 파일
+- `services/api/app/workers/`
+- `services/api/app/services/quality_reports.py`
+- `services/api/app/api/routes/quality.py`
+- `src/pages/QualityPage.tsx`
+- `src/quality/`
+- `src/projects/`
+- `docs/QUALITY_LAB.md`
+- `docs/SECURITY.md`
+- `docs/HANDOVER.md`
 
 ## 선행 조건
 
-- GitHub Pages `Deploy SoriON to GitHub Pages` 워크플로 성공 확인
-- 실제 서비스 주소에서 `BUILD v0.1.5` 표시 확인
-- 개발 PC에서 `npm install` 성공 확인
-- 현재 CI와 Pages 배포의 웹 품질 검사 정상 실행 확인
-- 첫 실제 한국어 TTS 엔진의 라이선스와 실행 환경 결정
+- 일반 개발 PC에서 `0.4.0` production build 통과
+- 실제 MeloTTS 또는 시스템 음성으로 장문 병합 1회 성공
+- 품질 연구소 A/B 결과 청취 확인
+- GitHub Pages의 `BUILD v0.4.0` 확인
 
 ## 위험 요소
 
-- 무료 호스팅 환경에서는 GPU 모델을 직접 실행하기 어렵다.
-- 모바일 브라우저의 자동 재생 제한을 고려해야 한다.
-- 실제 음성 복제는 동의와 악용 방지 정책이 준비되기 전까지 연결하지 않는다.
+- MeloTTS 의존성과 최신 PyTorch·Python 조합이 충돌할 수 있습니다.
+- 모델 프로세스를 분리하면 취소·정리·로그 관리가 복잡해집니다.
+- 브라우저 저장 보고서에는 사용자 입력 문장이 포함되므로 삭제와 내보내기 동의가 필요합니다.
+- FFmpeg를 기본 의존성으로 강제하면 설치 난이도가 높아질 수 있습니다.
 
 ## 이번 버전에서 넘기는 결정
 
-- 결과 전달은 전체 ZIP과 덮어쓰기용 패치 ZIP을 항상 함께 제공한다.
-- 모든 업데이트는 `HANDOVER.md`, `CHANGELOG.md`, 이 문서를 동시에 갱신한다.
-- 프로젝트의 공식 대문 표기는 `곰같은여우 SoriON AI`를 유지한다.
-
-- GitHub Pages는 소스 루트가 아니라 `/AI-/` base로 빌드한 `dist/`만 배포한다.
+- 품질 별점과 메모는 아직 영구 저장하지 않습니다.
+- 주소·전화번호·수식의 읽기 규칙은 자동 적용하지 않습니다.
+- WAV 병합은 같은 형식의 비압축 PCM만 허용합니다.
+- 모델 파일은 전체 ZIP과 패치 ZIP에 포함하지 않습니다.

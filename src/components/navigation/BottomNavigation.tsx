@@ -3,6 +3,7 @@ import { useAppStore } from '../../store/useAppStore'
 
 const items: Array<{ page: AppPage; label: string; icon: string }> = [
   { page: 'home', label: '만들기', icon: '＋' },
+  { page: 'quality', label: '품질', icon: '◎' },
   { page: 'projects', label: '프로젝트', icon: '▣' },
   { page: 'settings', label: '설정', icon: '⚙' },
 ]
@@ -13,7 +14,7 @@ export function BottomNavigation() {
 
   return (
     <nav className="safe-bottom sticky bottom-0 z-20 mt-4 border-t border-soa-line/80 bg-soa-paper/95 pt-2 backdrop-blur-xl" aria-label="주요 메뉴">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-1.5">
         {items.map((item) => {
           const active = currentPage === item.page
           return (

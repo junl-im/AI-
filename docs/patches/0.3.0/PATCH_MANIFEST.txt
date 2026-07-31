@@ -1,0 +1,67 @@
+SoriON AI patch manifest
+from: 0.2.0
+to: 0.3.0
+mode: overwrite repository root
+deleted files: none
+
+changed and added files:
+.env.example
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/API.md
+docs/ARCHITECTURE.md
+docs/CHANGELOG.md
+docs/DATABASE.md
+docs/ENGINE_PILOT.md
+docs/ERROR_CODES.md
+docs/GITHUB_PAGES.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/SECURITY.md
+docs/TEST.md
+docs/UI_GUIDE.md
+docs/evaluation/KOREAN_TTS_SENTENCES.json
+docs/patches/0.3.0/PATCH_MANIFEST.txt
+docs/patches/0.3.0/PATCH_README.md
+package.json
+services/api/.python-version
+services/api/app/api/router.py
+services/api/app/api/routes/__init__.py
+services/api/app/api/routes/audio.py
+services/api/app/api/routes/health.py
+services/api/app/api/routes/tts.py
+services/api/app/core/config.py
+services/api/app/engines/mock_tts.py
+services/api/app/engines/registry.py
+services/api/app/engines/tts/melo_tts.py
+services/api/app/engines/tts/scripts/windows_speech.ps1
+services/api/app/engines/tts/system_tts.py
+services/api/app/main.py
+services/api/app/schemas/engine.py
+services/api/app/schemas/tts.py
+services/api/app/services/__init__.py
+services/api/app/services/job_manager.py
+services/api/app/storage/__init__.py
+services/api/app/storage/audio_store.py
+services/api/pyproject.toml
+services/api/tests/test_audio_store.py
+services/api/tests/test_health.py
+services/api/tests/test_job_manager.py
+services/api/tests/test_melo_tts.py
+services/api/tests/test_system_tts.py
+services/api/tests/test_tts.py
+src/ai/contracts.ts
+src/api/httpClient.ts
+src/components/layout/BrandMasthead.tsx
+src/components/voice/AudioResultCard.tsx
+src/components/voice/EngineStatusCard.tsx
+src/components/voice/GenerationProgress.tsx
+src/hooks/useEngineCatalog.ts
+src/hooks/useVoiceGeneration.ts
+src/pages/HomePage.tsx
+src/pages/ProjectsPage.tsx
+src/pages/SettingsPage.tsx
+src/projects/projectTypes.ts
+src/tts/generationTypes.ts
+src/tts/voiceApi.ts

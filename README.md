@@ -2,52 +2,65 @@
 
 **한국인을 위한 모바일 우선 AI Voice Platform**
 
-SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 복제를 하나의 모바일 중심 경험으로 제공하기 위한 신규 프로젝트입니다. 기존 프로젝트의 코드는 사용하지 않고 2026년 7월 31일에 완전히 새로 시작했습니다.
+SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 복제를 하나의 모바일 중심 경험으로 제공하기 위한 신규 프로젝트입니다. 기존 프로젝트의 기능 코드는 사용하지 않고 완전히 새 코드베이스로 진행합니다.
 
 ## 현재 상태
 
-- 버전: `0.1.5 GitHub Pages Deployment Fix`
+- 버전: `0.4.0 Korean Voice Quality Lab`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
-- AI 엔진: 교체 가능한 어댑터 구조와 개발용 Mock 엔진
+- AI 엔진: 선택 설치형 MeloTTS 한국어 어댑터
+- 무료 로컬 대체 엔진: Windows·macOS·eSpeak 시스템 한국어 음성
+- 한국어 처리: 숫자·날짜·금액·퍼센트·영문 약어 정규화
+- 긴 문장: 자동 분할 후 PCM WAV 병합
+- 품질 연구소: 엔진 사전 진단, 평가 문장, A/B 재생, 생성 속도·RTF·파일 크기 비교
 - 저장: 브라우저 IndexedDB 우선, Firebase는 선택적 동기화 계층
-- 언어: 사용자 화면과 오류 메시지 모두 한국어 우선
+
+## 0.4.0에서 가능한 작업
+
+1. 문장을 입력해 AI 또는 로컬 한국어 음성을 생성합니다.
+2. 엔진이 지원하는 감정·속도·피치 설정만 활성화합니다.
+3. 숫자, 날짜, 금액, 퍼센트, 영문 약어를 한국어 읽기 형태로 전처리합니다.
+4. 긴 문장을 여러 구간으로 나누어 생성한 뒤 WAV 하나로 연결합니다.
+5. 생성 시간, 음원 길이, 실시간 배율, 파일 크기, 구간 수를 확인합니다.
+6. 품질 탭에서 MeloTTS 설치와 시스템 음성 상태를 진단합니다.
+7. 같은 문장을 최대 두 엔진으로 생성해 A/B 청취 평가를 진행합니다.
+
+MeloTTS, Local TTS, Demo WAV는 화면과 프로젝트 데이터에서 서로 다른 모드로 표시됩니다.
 
 ## 바로 시작하기
 
-1. `.env.example`을 `.env`로 복사합니다.
-2. 루트에서 `npm install`을 실행합니다.
-3. API 환경을 준비합니다: `cd services/api && uv sync --dev`.
-4. 터미널 1에서 `npm run dev`을 실행합니다.
-5. 터미널 2에서 `cd services/api && uv run uvicorn app.main:app --reload`를 실행합니다.
-6. 브라우저에서 `http://localhost:5173`을 엽니다.
+```bash
+cp .env.example .env
+npm install
+cd services/api
+uv sync --dev
+uv run uvicorn app.main:app --reload
+```
 
-자세한 순서는 [`START_HERE.md`](START_HERE.md)를 참고하세요.
+다른 터미널의 프로젝트 루트에서:
+
+```bash
+npm run dev
+```
+
+- 엔진 설치: [`docs/ENGINE_PILOT.md`](docs/ENGINE_PILOT.md)
+- 품질 연구소: [`docs/QUALITY_LAB.md`](docs/QUALITY_LAB.md)
+- 전체 개발 규칙: [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
 
 ## GitHub Pages 배포
 
-저장소 `junl-im/AI-`는 Vite 소스를 그대로 공개하지 않고 GitHub Actions가 만든 `dist/`만 배포한다.
-
-최초 한 번 GitHub의 `Settings → Pages → Source`를 **GitHub Actions**로 지정한 뒤 `main`에 Push한다. 자세한 절차는 [`docs/GITHUB_PAGES.md`](docs/GITHUB_PAGES.md)를 확인한다.
+GitHub Pages는 정적 웹만 실행합니다. Python API와 TTS 모델은 별도 PC 또는 서버에서 실행해야 합니다. API가 연결되지 않으면 생성 화면은 명확히 표시된 Demo WAV로 전환되고, 품질 연구소는 API 필요 상태를 표시합니다.
 
 ## 개발 원칙
 
 - 모바일 화면을 기준으로 먼저 완성합니다.
 - 소스 파일은 500줄을 넘기지 않습니다.
 - 실제 동작이 없는 UI를 배포하지 않습니다.
+- Mock, Demo, Local TTS, 실제 AI 결과를 사용자에게 명확히 구분합니다.
 - 음성 원본은 명시적 동의 없이 클라우드로 전송하지 않습니다.
-- `main` 직접 커밋을 금지하고 `develop`과 기능 브랜치를 사용합니다.
-- 기능에는 테스트와 문서 변경이 함께 포함되어야 합니다.
-
-## 디렉터리
-
-```text
-./        모바일 PWA
-services/api/    FastAPI와 AI 엔진 어댑터
-docs/            제품·기술·운영 문서
-scripts/         프로젝트 규칙 자동 검사
-.github/         CI와 협업 템플릿
-```
+- `main` 직접 커밋을 금지하고 기능 브랜치를 사용합니다.
+- 기능에는 테스트, 인수인계, 다음 계획이 함께 포함되어야 합니다.
 
 ## 브랜드
 
@@ -60,10 +73,10 @@ scripts/         프로젝트 규칙 자동 검사
 
 ## 결과 전달 규칙
 
-모든 업데이트 결과는 아래 순서를 고정한다.
+모든 업데이트 결과는 아래 순서를 고정합니다.
 
 1. 결과
 2. 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP
 3. 다음 예상 업데이트 내역
 
-각 업데이트마다 `docs/HANDOVER.md`, `docs/CHANGELOG.md`, `docs/NEXT_UPDATE.md`를 함께 갱신한다. 전체 기준은 [`DELIVERY_RULES.md`](DELIVERY_RULES.md)를 따른다.
+각 업데이트마다 `docs/HANDOVER.md`, `docs/CHANGELOG.md`, `docs/NEXT_UPDATE.md`를 함께 갱신합니다.

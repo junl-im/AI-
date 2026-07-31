@@ -12,7 +12,7 @@ export function BrandMasthead() {
         <div className="soa-meta-bar">
           <div className="soa-meta-group" aria-label="빌드와 호환 정보">
             <span className="soa-meta-label">BUILD</span>
-            <strong>v0.1.5</strong>
+            <strong>v0.4.0</strong>
             <span className="soa-meta-divider" aria-hidden="true" />
             <span className="soa-device-mark" aria-hidden="true">
               <i />
@@ -63,7 +63,7 @@ export function BrandMasthead() {
             <div className="soa-voice-console__glow" />
             <div className="soa-voice-console__topline">
               <span>VOICE CORE</span>
-              <span className="soa-live-dot">ONLINE</span>
+              <span className="soa-live-dot">PILOT</span>
             </div>
             <div className="soa-sound-orb">
               <span>S</span>

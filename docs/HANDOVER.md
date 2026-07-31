@@ -213,3 +213,230 @@
 
 GitHub Pages 실제 배포 성공과 모바일 캐시 교체를 확인한 뒤 `0.2.0 Mobile Voice Workspace` 개발로 진행한다.
 
+
+## 2026-07-31 12:38 KST - 0.2.0 Mobile Voice Workspace
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.1.5`
+- 대상 버전: `0.2.0`
+
+### 변경 내용
+
+- 모바일에서 문장 입력, 한국어 음성 선택, 감정 선택, 생성, 재생, WAV 다운로드까지 이어지는 첫 Voice Workspace를 구현했다.
+- `소리`, `온`, `담` 음성 프리셋을 선택 카드로 분리했다.
+- 속도와 피치는 Advanced 영역에 숨겨 기본 사용자의 클릭 수를 줄였다.
+- 생성 단계를 준비, API 요청, 데모 렌더링, 완료, 실패로 구분했다.
+- API가 실제 `audio_url`을 반환하면 해당 음원을 사용하고, Mock 또는 API 미연결이면 브라우저 데모 WAV를 생성하도록 했다.
+- 데모 음원은 실제 TTS로 오인하지 않도록 `DEMO WAV`, `browser-demo`, `MOCK` 표시를 유지한다.
+- 생성 결과의 재생, WAV 다운로드, 동일 설정 재시도, 결과 닫기를 구현했다.
+- 프로젝트 메타데이터에 `engineId`, `audioSource`, `outputFormat`을 추가했다.
+
+### 변경 이유
+
+Foundation 단계의 연결 확인 화면을 실제 모바일 사용 흐름으로 발전시키고, 실제 TTS 엔진을 연결하기 전에 UI, 상태, 플레이어, 다운로드, 저장 계약을 먼저 안정화하기 위해서다.
+
+### 영향 범위
+
+- 홈 Voice Workspace 전체
+- TTS 요청과 결과 상태 관리
+- 브라우저 Object URL 관리
+- 프로젝트 저장 스키마의 선택 필드
+- 설정·프로젝트 상태 표현
+- API Mock 메시지와 버전
+- UI, API, Architecture, Test 문서
+
+### 변경·추가된 주요 파일
+
+- `src/pages/HomePage.tsx`
+- `src/components/voice/*`
+- `src/hooks/useVoiceGeneration.ts`
+- `src/tts/voicePresets.ts`
+- `src/tts/mockWave.ts`
+- `src/tts/audioFile.ts`
+- `src/tts/generationTypes.ts`
+- `src/projects/projectTypes.ts`
+- `src/pages/ProjectsPage.tsx`
+- `src/pages/SettingsPage.tsx`
+- `services/api/app/engines/mock_tts.py`
+- 관련 테스트와 문서
+
+### 검증 결과
+
+- 프로젝트 규칙 검사 통과
+- FastAPI 테스트 3개 통과
+- Python 문법 검사 통과
+- TypeScript·TSX 구문 변환 검사 통과
+- 임시 외부 모듈 스텁을 사용한 내부 TypeScript strict 검사 통과
+- WAV 생성 로직의 RIFF/WAVE/data 구조와 파일명 런타임 검사 통과
+- 전체 및 패치 ZIP에 `.git`, `node_modules`, `dist`, 캐시, SVG가 없는지 검사
+- 0.1.5에 패치를 적용한 124개 파일과 전체 0.2.0 프로젝트가 일치함을 확인
+
+### 알려진 제한과 주의사항
+
+- 브라우저 데모 WAV는 실제 사람 음성이 아닌 짧은 합성 톤이다.
+- API 미연결을 오류 화면으로 막지 않고 데모로 전환하므로 실제 AI 여부 표시는 절대 제거하지 않는다.
+- 생성한 오디오 Blob 자체는 IndexedDB에 저장하지 않는다. 새로 열면 프로젝트 메타데이터만 남는다.
+- 현재 환경의 내부 npm 저장소에 `@tailwindcss/vite`가 없어 npm 설치, Vitest, TypeScript 전체 검사, Vite build를 실행하지 못했다.
+- 실제 모바일 자동 재생은 사용하지 않으며 사용자가 플레이 버튼을 눌러야 한다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.2.0-full.zip`
+- 패치: `SoriON-AI-0.1.5-to-0.2.0-patch.zip`
+- 체크섬: `SoriON-AI-0.2.0-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+`0.3.0 Korean TTS Engine Pilot`에서 한국어 품질, 라이선스, CPU·GPU 실행 비용을 비교한 뒤 첫 실제 TTS 엔진 어댑터를 연결한다.
+
+## 2026-07-31 13:15 KST - 0.3.0 Korean TTS Engine Pilot
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.2.0`
+- 대상 버전: `0.3.0`
+
+### 변경 내용
+
+- MeloTTS가 설치된 환경에서 한국어 AI WAV를 생성하는 지연 로딩 어댑터를 추가했다.
+- Windows System.Speech, macOS `say`, Linux eSpeak를 탐지하는 Local TTS 어댑터를 추가했다.
+- 실제 AI가 준비되지 않으면 Local TTS, 그다음 Mock 순서로 자동 선택한다.
+- 엔진 목록에 `ai`, `local`, `mock`, 준비 여부, 실패 이유를 공개한다.
+- 클라이언트가 만든 UUID로 작업을 추적하고 생성 중 취소할 수 있게 했다.
+- 동시 생성 수, 제한 시간, 중복 작업 ID를 관리하는 JobManager를 추가했다.
+- 생성 WAV를 UUID 이름으로 임시 보관하고 기본 30분 뒤 정리한다.
+- 음원 제공 라우트에 경로 이동 차단과 no-store 헤더를 적용했다.
+- 모바일 워크스페이스에 현재 엔진 표시와 생성 취소 버튼을 추가했다.
+- 한국어 숫자, 날짜, 단위, 영문, 외래어, 높임말 평가 문장을 추가했다.
+
+### 변경 이유
+
+브라우저 Demo만으로는 실제 음성 품질과 서버 계약을 검증할 수 없었다. 대형 AI 모델 설치를 모든 환경에 강제하지 않으면서도, 설치 가능 환경에서는 MeloTTS를 사용하고 일반 PC에서는 운영체제 한국어 음성으로 실제 WAV 파이프라인을 검증하기 위해서다.
+
+### 영향 범위
+
+- FastAPI 엔진 등록과 생명주기
+- TTS 요청·응답 스키마
+- 작업 취소와 제한 시간
+- 임시 음원 저장 및 제공
+- 모바일 생성 상태와 설정 화면
+- 엔진·보안·테스트 문서
+
+### 변경·추가된 주요 파일
+
+- `services/api/app/engines/tts/melo_tts.py`
+- `services/api/app/engines/tts/system_tts.py`
+- `services/api/app/services/job_manager.py`
+- `services/api/app/storage/audio_store.py`
+- `services/api/app/api/routes/audio.py`
+- `src/hooks/useEngineCatalog.ts`
+- `src/hooks/useVoiceGeneration.ts`
+- `src/components/voice/EngineStatusCard.tsx`
+- `src/components/voice/GenerationProgress.tsx`
+- `docs/ENGINE_PILOT.md`
+- `docs/evaluation/KOREAN_TTS_SENTENCES.json`
+
+### 검증 결과
+
+- FastAPI 테스트 14개 통과
+- Linux eSpeak 환경에서 실제 한국어 WAV 생성 확인
+- 주입형 가짜 Melo 모델로 AI 어댑터 WAV 계약 확인
+- AudioStore 경로 이동 차단과 만료 정리 테스트 통과
+- Python 문법 검사 통과
+- 프로젝트 500줄·SVG·비밀키 규칙 검사 통과 예정
+- 현재 실행 환경의 내부 npm 저장소에 `@tailwindcss/vite`가 없어 npm 설치, Vitest, Vite build는 실행하지 못함
+
+### 알려진 제한과 주의사항
+
+- MeloTTS는 별도 저장소와 모델 설치가 필요하며 현재 ZIP에 포함되지 않는다.
+- MeloTTS 한국어 전처리는 운영체제에 따라 MeCab 설치 문제가 발생할 수 있다.
+- Local TTS의 음질과 음색은 운영체제에 설치된 음성 패키지에 따라 다르다.
+- Local TTS는 실제 음성이지만 AI 엔진으로 표시하지 않는다.
+- GitHub Pages는 Python API를 실행하지 않는다.
+- 외부 공개 API에서는 현재 임시 파일 라우트에 사용자 인증을 추가해야 한다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.3.0-full.zip`
+- 패치: `SoriON-AI-0.2.0-to-0.3.0-patch.zip`
+- 체크섬: `SoriON-AI-0.3.0-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+`0.4.0 Korean Voice Quality Lab`에서 MeloTTS 실제 설치 검증, 한국어 평가 세트 실행, AI·Local TTS A/B 비교, 생성 속도와 품질 기록을 구현한다.
+
+## 2026-07-31 13:22 KST - 0.4.0 Korean Voice Quality Lab
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.3.0`
+- 대상 버전: `0.4.0`
+
+### 변경 내용
+
+- 한국어 숫자, 날짜, 시각, 금액, 퍼센트, 단위, 영문 약어 전처리를 추가했다.
+- 전처리된 긴 문장을 기본 180자 이하로 나누고 같은 형식의 PCM WAV를 하나로 연결한다.
+- 병합 구간 사이에 120ms 무음을 넣고 자식 임시 WAV는 완료 후 즉시 삭제한다.
+- TTS 결과에 실제 읽은 문장, 구간 수, 처리 시간, 파일 크기, RTF를 추가했다.
+- 엔진 계약에 감정, 속도, 피치 지원 여부를 명시하고 지원하지 않는 UI를 비활성화했다.
+- Python, 운영체제, 메모리, MeloTTS 패키지, 모델 로딩, 시스템 음성 상태를 확인하는 진단 API를 추가했다.
+- 품질 탭에서 평가 문장 선택, 전처리 미리보기, 최대 두 엔진 A/B 생성, 별점과 메모를 사용할 수 있게 했다.
+- 평가 문장을 14종으로 확장했다.
+
+### 변경 이유
+
+실제 한국어 음성 엔진을 연결한 뒤에는 단순히 음원이 생성되는지만으로 품질을 판단할 수 없다. 한국어 특유의 숫자·금액·영문 혼용을 안정적으로 읽게 하고, 긴 문장을 엔진 한도에 맞게 처리하며, 같은 문장으로 AI와 시스템 음성을 반복 비교할 수 있는 기준 도구가 필요했다.
+
+### 영향 범위
+
+- 모든 TTS 요청 전처리
+- 긴 문장 생성과 임시 파일 생명주기
+- TTS 응답 스키마
+- 엔진 기능 계약
+- 모바일 하단 탐색과 품질 화면
+- 평가 데이터와 API 문서
+
+### 변경·추가된 주요 파일
+
+- `services/api/app/services/text_normalizer.py`
+- `services/api/app/services/text_segmenter.py`
+- `services/api/app/services/wav_tools.py`
+- `services/api/app/services/tts_pipeline.py`
+- `services/api/app/services/engine_diagnostics.py`
+- `services/api/app/api/routes/quality.py`
+- `services/api/app/schemas/quality.py`
+- `src/pages/QualityPage.tsx`
+- `src/components/evaluation/*`
+- `src/quality/*`
+- `docs/QUALITY_LAB.md`
+
+### 검증 결과
+
+- FastAPI 테스트 23개 통과
+- Python 문법 검사 통과
+- 날짜 뒤에 한국어 조사가 붙는 표현의 정규화 회귀 테스트 통과
+- 같은 형식의 PCM WAV 병합 및 120ms 무음 검사 통과
+- 장문 분할 결과와 자식 임시 WAV 정리 검사 통과
+- 품질 진단, 평가 문장, 전처리, Mock 비교 API 검사 통과
+- Linux eSpeak 실엔진으로 장문 2구간 생성, 전처리, 최종 WAV 병합 확인
+- 외부 모듈 스텁을 사용한 내부 TypeScript strict 검사와 전체 TS/TSX 파서 검사 통과
+- 현재 실행 환경의 npm 저장소에 `@tailwindcss/vite`가 없어 정식 npm 설치와 웹 build는 실행하지 못함
+
+### 알려진 제한과 주의사항
+
+- 숫자 전처리는 일반적인 정수·소수 표현을 대상으로 하며 전화번호, 주소, 수식은 별도 규칙이 필요하다.
+- WAV 병합은 비압축 PCM 형식과 같은 오디오 파라미터만 허용한다.
+- 별점과 청취 메모는 새로고침하면 사라진다.
+- 실제 MeloTTS 모델 다운로드 상태와 GPU 메모리는 현재 진단 범위에 포함되지 않는다.
+- GitHub Pages는 FastAPI를 실행하지 않으므로 품질 탭의 서버 기능은 로컬 API가 필요하다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.4.0-full.zip`
+- 패치: `SoriON-AI-0.3.0-to-0.4.0-patch.zip`
+- 체크섬: `SoriON-AI-0.4.0-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+`0.5.0 Korean TTS Production Readiness`에서 설치 Wizard, 모델 worker, 진행률, 품질 보고서 저장·내보내기, 일괄 평가를 구현한다.

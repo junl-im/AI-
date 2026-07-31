@@ -1,36 +1,64 @@
 import { motion } from 'motion/react'
-import { useState, type ChangeEvent, type FormEvent } from 'react'
-import type { TtsSynthesisRequest, TtsSynthesisResult, VoiceEmotion } from '../ai/contracts'
-import { StatusPill } from '../components/ui/StatusPill'
+import { useState, type FormEvent } from 'react'
+import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
+import { AdvancedVoiceSettings } from '../components/voice/AdvancedVoiceSettings'
+import { AudioResultCard } from '../components/voice/AudioResultCard'
+import { EmotionSelector } from '../components/voice/EmotionSelector'
+import { EngineStatusCard } from '../components/voice/EngineStatusCard'
+import { GenerationErrorCard } from '../components/voice/GenerationErrorCard'
+import { GenerationProgress } from '../components/voice/GenerationProgress'
+import { TextComposer } from '../components/voice/TextComposer'
+import { VoicePresetSelector } from '../components/voice/VoicePresetSelector'
+import { useEngineCatalog } from '../hooks/useEngineCatalog'
+import { useVoiceGeneration } from '../hooks/useVoiceGeneration'
 import { saveProject } from '../projects/projectRepository'
 import { useAppStore } from '../store/useAppStore'
-import { synthesizeSpeech } from '../tts/voiceApi'
-import { validateVoiceSample } from '../utils/fileValidation'
+import { getVoicePreset, voicePresets } from '../tts/voicePresets'
 
-const voices = [
-  { id: 'sori-warm', name: '소리 · 따뜻함' },
-  { id: 'on-clear', name: '온 · 또렷함' },
-  { id: 'dam-calm', name: '담 · 차분함' },
-]
-
-const emotions: Array<{ id: VoiceEmotion; name: string }> = [
-  { id: 'neutral', name: '자연스럽게' },
-  { id: 'happy', name: '밝게' },
-  { id: 'calm', name: '차분하게' },
-  { id: 'commercial', name: '광고톤' },
-]
+const DEFAULT_TEXT = '안녕하세요. 목소리의 가능성을 켜는 소리온입니다.'
 
 export function HomePage() {
   const showNotice = useAppStore((state) => state.showNotice)
-  const [text, setText] = useState('안녕하세요. 목소리의 가능성을 켜는 소리온입니다.')
-  const [voiceId, setVoiceId] = useState(voices[0].id)
+  const [text, setText] = useState(DEFAULT_TEXT)
+  const [voiceId, setVoiceId] = useState(voicePresets[0].id)
   const [emotion, setEmotion] = useState<VoiceEmotion>('neutral')
   const [advanced, setAdvanced] = useState(false)
   const [speed, setSpeed] = useState(1)
   const [pitch, setPitch] = useState(0)
-  const [sampleName, setSampleName] = useState<string | null>(null)
-  const [result, setResult] = useState<TtsSynthesisResult | null>(null)
-  const [submitting, setSubmitting] = useState(false)
+  const generation = useVoiceGeneration()
+  const engineCatalog = useEngineCatalog()
+  const busy = ['preparing', 'requesting', 'rendering'].includes(generation.phase)
+
+  function buildRequest(): TtsSynthesisRequest {
+    return {
+      text: text.trim(),
+      voiceId,
+      emotion: engineCatalog.selected?.supportsEmotion ? emotion : 'neutral',
+      speed: engineCatalog.selected?.supportsSpeed ? speed : 1,
+      pitch: engineCatalog.selected?.supportsPitch ? pitch : 0,
+      format: 'wav',
+      engineId: engineCatalog.selected?.id,
+    }
+  }
+
+  async function saveGeneration(request: TtsSynthesisRequest, jobId: string, engineId: string, engineMode: 'ai' | 'local' | 'mock', source: 'api' | 'browser-demo') {
+    const now = new Date().toISOString()
+    await saveProject({
+      id: crypto.randomUUID(),
+      title: request.text.slice(0, 24),
+      text: request.text,
+      voiceId: request.voiceId,
+      emotion: request.emotion,
+      createdAt: now,
+      updatedAt: now,
+      status: 'generated',
+      lastJobId: jobId,
+      engineId,
+      engineMode,
+      audioSource: source,
+      outputFormat: request.format,
+    })
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -39,151 +67,87 @@ export function HomePage() {
       return
     }
 
-    const request: TtsSynthesisRequest = {
-      text: text.trim(),
-      voiceId,
-      emotion,
-      speed,
-      pitch,
-      format: 'wav',
-    }
+    const request = buildRequest()
+    const voice = getVoicePreset(voiceId)
+    const audio = await generation.generate({ request, voiceName: voice.shortName })
+    if (!audio) return
 
-    setSubmitting(true)
     try {
-      const nextResult = await synthesizeSpeech(request)
-      const now = new Date().toISOString()
-      await saveProject({
-        id: crypto.randomUUID(),
-        title: text.trim().slice(0, 24),
-        text: text.trim(),
-        voiceId,
-        emotion,
-        createdAt: now,
-        updatedAt: now,
-        status: nextResult.audioUrl ? 'generated' : 'draft',
-        lastJobId: nextResult.jobId,
-      })
-      setResult(nextResult)
-      showNotice(nextResult.message)
-    } catch (error) {
-      showNotice(error instanceof Error ? error.message : '음성 생성 요청에 실패했습니다.')
-    } finally {
-      setSubmitting(false)
+      await saveGeneration(request, audio.result.jobId, audio.result.engineId, audio.result.engineMode, audio.source)
+      showNotice(audio.result.engineMode === 'ai' ? 'AI 음성을 생성하고 프로젝트에 저장했습니다.' : audio.result.engineMode === 'local' ? '로컬 음성을 생성하고 프로젝트에 저장했습니다.' : '데모 WAV를 만들고 프로젝트에 저장했습니다.')
+    } catch {
+      showNotice('음성은 준비됐지만 프로젝트 저장에는 실패했습니다.')
     }
   }
 
-  function handleSample(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    const validation = validateVoiceSample(file)
-    if (!validation.valid) {
-      event.target.value = ''
-      showNotice(validation.message)
-      return
+  async function handleRetry() {
+    const audio = await generation.retry()
+    if (!audio || !generation.lastAttempt) return
+    try {
+      await saveGeneration(generation.lastAttempt.request, audio.result.jobId, audio.result.engineId, audio.result.engineMode, audio.source)
+      showNotice('같은 설정으로 다시 생성했습니다.')
+    } catch {
+      showNotice('다시 생성했지만 프로젝트 저장에는 실패했습니다.')
     }
-    setSampleName(file.name)
-    showNotice('음성 샘플은 현재 기기에만 준비되었습니다.')
   }
 
   return (
-    <div className="pb-3 pt-6">
-      <section className="mb-6">
-        <StatusPill label="VOICE STUDIO" tone="good" />
-        <h1 className="mt-4 max-w-[390px] text-[38px] font-black leading-[0.98] tracking-[-0.07em]">
-          문장을 입력하면,
+    <div className="pb-3 pt-5">
+      <section className="mb-5 px-1">
+        <div className="flex items-center gap-2 text-[10px] font-black tracking-[0.17em] text-soa-muted">
+          <span className="inline-block size-2 rounded-full bg-soa-lime shadow-[0_0_0_5px_rgba(216,255,114,0.28)]" aria-hidden="true" />
+          KOREAN VOICE WORKSPACE
+        </div>
+        <h1 className="mt-4 max-w-[440px] text-[36px] font-black leading-[0.98] tracking-[-0.07em] sm:text-[42px]">
+          문장 하나면,
           <br />
-          <span className="text-soa-muted">소리온이 말합니다.</span>
+          <span className="text-soa-muted">목소리는 바로 시작됩니다.</span>
         </h1>
-        <p className="mt-4 max-w-sm text-sm leading-6 text-soa-muted">
-          어려운 설정은 숨기고 가장 중요한 작업만 앞에 두었습니다. 문장을 입력하고 목소리를 고른 뒤 바로 생성하세요.
+        <p className="mt-4 max-w-md text-sm font-medium leading-6 text-soa-muted">
+          문장을 입력하면 숫자와 날짜를 한국어 발음에 맞게 다듬고, 긴 문장은 자동으로 나눠 하나의 WAV로 연결합니다.
         </p>
       </section>
+
+      <EngineStatusCard engine={engineCatalog.selected} loading={engineCatalog.loading} />
 
       <motion.form
         onSubmit={handleSubmit}
         layout
-        className="rounded-[30px] border border-soa-line bg-soa-card p-4 shadow-soa"
+        className="rounded-[30px] border border-soa-line bg-soa-card p-4 shadow-soa sm:p-5"
       >
-        <label htmlFor="voice-text" className="mb-2 block text-xs font-bold text-soa-muted">읽을 문장</label>
-        <textarea
-          id="voice-text"
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          maxLength={1000}
-          rows={6}
-          className="focus-ring w-full resize-none rounded-2xl border border-soa-line bg-white px-4 py-3 text-[17px] font-medium leading-7 tracking-[-0.025em]"
-          placeholder="목소리로 만들 문장을 입력하세요."
+        <TextComposer value={text} onChange={setText} />
+        <VoicePresetSelector value={voiceId} onChange={setVoiceId} />
+        <EmotionSelector value={emotion} supported={engineCatalog.selected?.supportsEmotion ?? false} onChange={setEmotion} />
+        <AdvancedVoiceSettings
+          open={advanced}
+          speed={speed}
+          pitch={pitch}
+          supportsSpeed={engineCatalog.selected?.supportsSpeed ?? false}
+          supportsPitch={engineCatalog.selected?.supportsPitch ?? false}
+          onToggle={() => setAdvanced((value) => !value)}
+          onSpeedChange={setSpeed}
+          onPitchChange={setPitch}
         />
-        <div className="mt-2 flex justify-end text-[11px] font-semibold text-soa-muted">{text.length} / 1,000</div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <label className="text-xs font-bold text-soa-muted">
-            목소리
-            <select
-              value={voiceId}
-              onChange={(event) => setVoiceId(event.target.value)}
-              className="focus-ring mt-2 w-full rounded-2xl border border-soa-line bg-white px-3 py-3 text-sm font-semibold text-soa-ink"
-            >
-              {voices.map((voice) => <option key={voice.id} value={voice.id}>{voice.name}</option>)}
-            </select>
-          </label>
-          <label className="text-xs font-bold text-soa-muted">
-            느낌
-            <select
-              value={emotion}
-              onChange={(event) => setEmotion(event.target.value as VoiceEmotion)}
-              className="focus-ring mt-2 w-full rounded-2xl border border-soa-line bg-white px-3 py-3 text-sm font-semibold text-soa-ink"
-            >
-              {emotions.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
-          </label>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setAdvanced((value) => !value)}
-          className="focus-ring mt-4 w-full rounded-2xl border border-soa-line px-4 py-3 text-left text-sm font-bold text-soa-muted"
-          aria-expanded={advanced}
-        >
-          {advanced ? '−' : '+'} Advanced 설정
-        </button>
-
-        {advanced ? (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-3 space-y-4 rounded-2xl bg-[#f4f2ec] p-4">
-            <label className="block text-xs font-bold text-soa-muted">
-              속도 {speed.toFixed(1)}배
-              <input type="range" min="0.7" max="1.4" step="0.1" value={speed} onChange={(event) => setSpeed(Number(event.target.value))} className="mt-2 w-full" />
-            </label>
-            <label className="block text-xs font-bold text-soa-muted">
-              피치 {pitch > 0 ? '+' : ''}{pitch}
-              <input type="range" min="-6" max="6" step="1" value={pitch} onChange={(event) => setPitch(Number(event.target.value))} className="mt-2 w-full" />
-            </label>
-            <label className="block rounded-2xl border border-dashed border-soa-line bg-white px-4 py-3 text-sm font-semibold">
-              <span className="block">목소리 샘플 선택</span>
-              <span className="mt-1 block text-xs font-normal text-soa-muted">{sampleName ?? 'MP3, WAV, FLAC, M4A · 최대 25MB'}</span>
-              <input type="file" accept="audio/*" onChange={handleSample} className="mt-3 block w-full text-xs" />
-            </label>
-          </motion.div>
-        ) : null}
+        <GenerationProgress phase={generation.phase} onCancel={generation.cancel} />
 
         <button
           type="submit"
-          disabled={submitting}
-          className="focus-ring mt-4 min-h-14 w-full rounded-2xl bg-soa-ink px-5 text-base font-black text-white transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+          disabled={busy}
+          className="focus-ring mt-5 min-h-14 w-full rounded-[20px] bg-soa-ink px-5 text-base font-black text-white shadow-[0_16px_32px_rgba(23,23,20,0.18)] transition active:scale-[0.99] disabled:cursor-wait disabled:opacity-55"
         >
-          {submitting ? 'AI 서버 확인 중…' : '음성 생성 시작'}
+          {busy ? '소리온이 음성을 만들고 있어요…' : '음성 생성 시작'}
         </button>
+        <p className="mt-2 text-center text-[10px] font-bold leading-4 text-soa-muted">
+          로컬 API에 한국어 시스템 음성이 있으면 실제 WAV를 만들고, 연결되지 않으면 기능 확인용 데모 WAV를 만듭니다.
+        </p>
       </motion.form>
 
-      {result ? (
-        <section className="mt-4 rounded-[26px] border border-soa-line bg-soa-lime p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-black tracking-[-0.035em]">개발 연결 결과</h2>
-            <StatusPill label={result.engineId} />
-          </div>
-          <p className="mt-2 text-sm leading-6">{result.message}</p>
-          <p className="mt-3 text-xs font-semibold text-soa-muted">작업 ID {result.jobId.slice(0, 8)} · 예상 {result.estimatedDurationSeconds.toFixed(1)}초</p>
-        </section>
+      {generation.audio ? (
+        <AudioResultCard audio={generation.audio} onRetry={() => void handleRetry()} onReset={generation.reset} />
+      ) : null}
+      {generation.error ? (
+        <GenerationErrorCard message={generation.error} onRetry={() => void handleRetry()} />
       ) : null}
     </div>
   )
