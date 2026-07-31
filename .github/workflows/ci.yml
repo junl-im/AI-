@@ -1,8 +1,10 @@
-name: SoriON CI
+name: SoriON CI & Pages
 
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -10,9 +12,11 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: sorion-ci-${{ github.workflow }}-${{ github.ref }}
+  group: sorion-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -46,10 +50,22 @@ jobs:
         run: npm run test
 
       - name: Build
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: npm run build
 
+      - name: Configure GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
   api:
-    name: API quality
+    name: API quality · Python 3.10
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -60,8 +76,31 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
 
+      - name: Install minimum supported Python
+        run: uv python install 3.10
+
       - name: Install API dependencies
-        run: uv sync --project services/api --dev
+        run: uv sync --project services/api --dev --python 3.10
+
+      - name: Ruff
+        run: uv run --project services/api --python 3.10 ruff check services/api/app services/api/tests
 
       - name: Run API tests
-        run: uv run --project services/api pytest services/api/tests
+        run: uv run --project services/api --python 3.10 pytest services/api/tests
+
+  deploy:
+    name: Deploy GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs:
+      - web
+      - api
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4

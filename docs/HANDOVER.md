@@ -597,3 +597,80 @@ SoriON AI의 목표는 한국인이 모바일에서 앱처럼 사용하며 10초
 ### 다음 예상 업데이트
 
 `0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 파일 업로드, 샘플 품질 검사, 본인 목소리·사용 권한 동의, 로컬 보관과 삭제, 교체 가능한 VoiceCloneEngine 계약을 구현한다.
+
+## 2026-07-31 14:55 KST - 0.5.2 CI Stability Patch
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.5.1`
+- 대상 버전: `0.5.2`
+
+### 프로젝트 목표 재확인
+
+SoriON AI의 목표는 한국인이 모바일에서 앱처럼 사용하며 10초 안에 음성 생성·복제·변환을 시작하는 차세대 AI Voice Platform이다. 다음 핵심 기능으로 이동하기 전에 배포와 자동 검사가 신뢰할 수 있어야 하므로 이번 패치는 기능 추가보다 CI 안정화를 우선했다.
+
+### 변경 내용
+
+- Web 품질, API 품질, Pages 배포를 `ci.yml` 하나로 통합했다.
+- 자동 Push 대상은 `main`으로 제한하고 `develop`·기능 브랜치는 Pull Request 이벤트로 검사하게 했다.
+- 별도 `deploy-pages.yml`을 삭제했다.
+- Pages 배포는 Web·API 검사 성공 뒤에만 실행한다.
+- API CI가 Python 3.10을 명시적으로 설치하고 사용하게 했다.
+- `datetime.UTC`를 `timezone.utc`로 교체했다.
+- Ruff 기준을 `py310`으로 내렸다.
+- Testing Library DOM을 매 테스트 후 명시적으로 정리한다.
+- 프로젝트 규칙 검사에 단일 워크플로와 Python 3.10 호환성 검사를 추가했다.
+
+### 변경 이유
+
+- 기능 브랜치에 Pull Request가 열린 상태에서 `push`와 `pull_request`가 같은 커밋을 두 번 실행할 수 있었다.
+- 별도 CI와 Pages 워크플로가 모두 `main` Push를 구독하면 All workflows에 실행이 두 개 생긴다.
+- API가 Python 3.10을 지원한다고 선언했지만 `datetime.UTC`는 Python 3.11부터 제공되어 import 단계에서 실패했다.
+- Vitest에서 globals를 켜지 않아 Testing Library 자동 cleanup이 등록되지 않았고, 두 번째 마스트헤드 테스트에서 같은 DOM이 중복됐다.
+
+### 영향 범위
+
+- GitHub Actions 실행 수와 Pages 배포 순서
+- Python 3.10 API 호환성
+- React 컴포넌트 테스트 격리
+- 프로젝트 규칙 검사
+- 릴리스·Pages·테스트 문서
+
+### 주요 변경 파일
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/deploy-pages.yml` 삭제
+- `services/api/app/services/job_manager.py`
+- `services/api/app/storage/audio_store.py`
+- `services/api/tests/test_audio_store.py`
+- `services/api/tests/test_python_compatibility.py`
+- `src/test/setup.ts`
+- `scripts/check-project-rules.mjs`
+- `docs/GITHUB_PAGES.md`
+- `docs/patches/0.5.2/`
+
+### 검증 결과
+
+- 프로젝트 절대 규칙 검사 통과
+- FastAPI 테스트 30개 통과
+- Python 전체 문법 컴파일 통과
+- API 소스의 `datetime.UTC` 잔존 여부 검사 통과
+- 활성 워크플로가 `ci.yml` 하나인지 검사 통과
+- `0.5.1`에 패치를 적용하고 삭제 스크립트를 실행한 결과와 전체 `0.5.2`의 192개 파일 동등성 검사 통과
+- 현재 작업 환경의 npm 저장소 제한으로 정식 Vitest·ESLint·Vite build는 로컬 실행하지 못함
+
+### 알려진 제한과 주의사항
+
+- GitHub Pages Source가 `Deploy from a branch`로 남아 있으면 GitHub 기본 `pages-build-deployment`가 별도로 실행된다. 사용자가 저장소 설정에서 `GitHub Actions`로 한 번 변경해야 한다.
+- 패치 ZIP은 기존 `deploy-pages.yml`을 자동으로 지우지 못하므로 적용 후 삭제 스크립트를 실행해야 한다.
+- GitHub에서 최종 Web 테스트와 Pages 배포 성공 여부를 Push 후 확인해야 한다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.5.2-full.zip`
+- 패치: `SoriON-AI-0.5.1-to-0.5.2-patch.zip`
+- 체크섬: `SoriON-AI-0.5.2-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+`0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 파일 업로드, 샘플 품질 검사, 본인 목소리·권한 동의, 로컬 보관과 삭제, 교체 가능한 VoiceCloneEngine 계약을 구현한다.

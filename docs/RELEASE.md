@@ -28,7 +28,7 @@ Semantic Versioning을 사용한다.
 ## GitHub Pages
 
 - 게시 소스는 **GitHub Actions**를 사용한다.
-- `.github/workflows/deploy-pages.yml`이 `main` Push에서 실행된다.
+- `.github/workflows/ci.yml` 하나가 품질 검사와 `main` Pages 배포를 함께 관리한다.
 - 저장소 경로 `/AI-/`를 Vite base와 PWA scope에 적용한다.
 - 소스 루트가 아니라 빌드 결과 `dist/`만 배포한다.
 - 배포 성공 전에는 이전 Pages 릴리스가 계속 서비스될 수 있다.

@@ -6,69 +6,63 @@
 - 서비스 경로: `https://junl-im.github.io/AI-/`
 - Vite 배포 기준 경로: `/AI-/`
 
-## 왜 기존 사이트가 계속 보였나
+## 0.5.2 배포 구조
 
-새 SoriON 소스는 `main`에 올라갔지만 새 Vite 빌드 결과인 `dist/`를 Pages에 올리는 배포 워크플로가 없었다. GitHub Pages는 마지막 성공 배포본을 계속 제공하므로 이전 AI 쇼츠 스튜디오가 유지됐다.
+`.github/workflows/ci.yml` 하나가 다음 작업을 관리한다.
 
-`.git` 폴더는 원인이 아니다. `.git`은 로컬 변경 이력과 원격 저장소 연결을 보존한다.
+1. Web quality
+2. API quality · Python 3.10
+3. 두 품질 작업 성공 후 GitHub Pages 배포
+
+`main` Push는 하나의 `SoriON CI & Pages` 실행으로 검사와 배포가 이어진다. `develop`과 기능 브랜치는 `main` 또는 `develop` 대상 Pull Request에서 검사한다.
+
+별도 `.github/workflows/deploy-pages.yml`은 삭제했다. 품질 검사와 배포 워크플로를 각각 Push에 연결하면 같은 커밋이 All workflows에 두 번 나타날 수 있기 때문이다.
 
 ## 최초 1회 GitHub 설정
 
 1. GitHub 저장소에서 `Settings`를 연다.
 2. 왼쪽 `Pages`를 연다.
 3. `Build and deployment`의 `Source`를 **GitHub Actions**로 선택한다.
-4. 저장소의 `main` 브랜치에 배포 패치를 Push한다.
-5. `Actions`에서 **Deploy SoriON to GitHub Pages**가 성공하는지 확인한다.
+4. `Deploy from a branch`를 사용하지 않는다.
+5. `main`에 패치를 병합한다.
+6. Actions에서 `SoriON CI & Pages` 실행 하나가 생성되는지 확인한다.
 
-## 자동 배포
+Pages Source가 브랜치 배포로 남아 있으면 GitHub가 관리하는 `pages-build-deployment`가 별도로 생성된다. 이것은 `.git` 폴더 문제가 아니라 저장소 Pages 설정 문제다.
 
-`.github/workflows/deploy-pages.yml`은 다음 때 실행된다.
+## 정상 실행 형태
 
-- `main` 브랜치 Push
-- Actions 화면의 수동 실행
+`main` Push 한 번에 All workflows에는 프로젝트 실행 하나가 추가되고, 그 안에서 다음 작업이 보인다.
 
-워크플로는 품질 검사 후 `VITE_BASE_PATH=/AI-/`로 빌드하고 `dist/`만 Pages에 배포한다.
+```text
+Web quality
+API quality · Python 3.10
+Deploy GitHub Pages
+```
 
-## 기존 화면이 브라우저에 남는 경우
+Pull Request가 열린 `develop` 또는 기능 브랜치에 새 커밋을 Push해도 PR 이벤트 하나만 실행된다. 이 브랜치들을 Push 자동 트리거에서 제외해 같은 커밋의 Push·PR 중복 실행을 막는다.
+
+## 배포 경로
+
+워크플로는 저장소 이름을 사용해 Vite base를 자동 설정한다.
+
+```text
+/${{ github.event.repository.name }}/
+```
+
+현재 저장소에서는 `/AI-/`가 된다. `dist/`만 Pages 아티팩트로 업로드한다.
+
+## 이전 화면이 남는 경우
 
 배포 성공 후에도 한 기기에서만 이전 화면이 보이면 기존 PWA 서비스워커 캐시일 수 있다.
 
-1. 먼저 강력 새로고침을 실행한다.
-2. 그래도 남으면 브라우저 개발자 도구의 `Application → Service Workers`에서 기존 워커를 해제한다.
+1. 강력 새로고침을 실행한다.
+2. 개발자 도구 `Application → Service Workers`에서 기존 워커를 해제한다.
 3. `Application → Storage → Clear site data`를 실행한다.
-4. 설치형 PWA가 있다면 제거한 뒤 사이트를 다시 연다.
+4. 설치형 PWA가 있다면 제거한 뒤 다시 접속한다.
 
-새 서비스워커는 오래된 캐시를 정리하고 즉시 활성화하도록 설정돼 있다.
+## 0.5.2 확인
 
-## 저장소 이름을 바꿀 때
-
-저장소 이름이 바뀌면 워크플로의 다음 값을 함께 바꾼다.
-
-```yaml
-VITE_BASE_PATH: /새-저장소-이름/
-```
-
-## 0.3.0 배포 확인
-
-- 공개 화면 상단에 `BUILD v0.3.0`이 표시되는지 확인한다.
-- 문장 입력과 음성 프리셋 선택이 동작하는지 확인한다.
-- GitHub Pages에는 FastAPI가 없으므로 생성 결과가 `DEMO WAV`로 표시되는 것이 정상이다.
-- WAV 재생과 다운로드가 가능해야 한다.
-
-## 0.5.0 배포 확인
-
-- 공개 화면 상단에 `BUILD v0.5.0`이 표시되는지 확인한다.
-- 하단의 `품질` 탭이 렌더링되는지 확인한다.
-- Pages에는 Python API가 없으므로 품질 탭이 `API 필요` 상태를 정확히 표시해야 한다.
-
-## 0.5.0 로컬 Voice API 연결
-
-GitHub Pages의 출처는 `https://junl-im.github.io`입니다. 로컬 FastAPI를 연결하려면 API의 `SORION_CORS_ORIGINS`에 이 출처를 추가합니다. 저장소 경로 `/AI-/`는 CORS origin에 포함하지 않습니다.
-
-설정 화면의 Voice API 연결 마법사에서 `http://127.0.0.1:8000`을 검사한 뒤 저장합니다. 브라우저 보안 정책이나 회사 네트워크가 루프백 연결을 차단하면 같은 Wi-Fi의 별도 HTTPS API 또는 로컬 개발 화면을 사용해야 합니다.
-
-## 0.5.1 배포 확인
-
-- 공개 화면 상단에 `BUILD v0.5.1`이 표시되는지 확인한다.
-- 브랜드명과 한국어 문구가 같은 배너 영역에서 순차적으로 바뀌는지 확인한다.
-- PC에서 Voice Core 마이크가 표시되고 모바일에서는 작업 화면이 빠르게 이어지는지 확인한다.
+- 공개 화면 상단에 `BUILD v0.5.2` 표시
+- 브랜드 문구와 마이크 배너 정상 표시
+- GitHub Pages에서는 API 미연결 시 `DEMO WAV` 표시
+- 로컬 Voice API를 연결하면 실제 엔진 상태와 진행률 표시

@@ -3,7 +3,7 @@ def test_setup_status_explains_required_steps(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.5.1"
+    assert body["version"] == "0.5.2"
     assert isinstance(body["ready"], bool)
     assert isinstance(body["real_engine_count"], int)
     steps = {item["id"]: item for item in body["steps"]}

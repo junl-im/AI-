@@ -67,3 +67,13 @@ npm run test:api
 - 760px 이상에서 Voice Core가 표시되고 그 이하에서는 숨겨지는지 확인
 - 모션 감소 환경에서 첫 슬라이드만 정적으로 표시되는지 확인
 - SVG 파일과 SVG 아이콘이 새로 추가되지 않았는지 확인
+
+## 0.5.2 CI 안정성 검사
+
+- `.github/workflows`의 활성 YAML이 `ci.yml` 하나인지 확인
+- 기능 브랜치 PR 갱신 시 동일 커밋의 Push·PR 실행이 중복되지 않는지 확인
+- `main` Push 한 번에서 Web quality, API quality, Deploy GitHub Pages가 같은 실행 안에 표시되는지 확인
+- API CI가 Python 3.10으로 실행되는지 확인
+- API 소스에 `from datetime import UTC` 또는 `datetime.UTC`가 없는지 확인
+- 같은 컴포넌트를 여러 테스트에서 렌더링해도 이전 DOM이 남지 않는지 확인
+- GitHub Pages Source가 `GitHub Actions`인지 확인

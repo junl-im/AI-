@@ -108,3 +108,13 @@ SoriON-AI-{from-version}-to-{version}-patch.zip
 6. 검사 후 커밋하고 Push한다.
 
 이 문서는 SoriON AI 프로젝트의 영구 전달 기준이다.
+
+## CI와 배포 안정성 규칙
+
+- 동일 커밋에서 프로젝트 워크플로가 불필요하게 두 번 실행되지 않도록 `push`와 `pull_request` 범위를 분리한다.
+- 활성 GitHub Actions 워크플로는 원칙적으로 `.github/workflows/ci.yml` 하나에서 품질 검사와 Pages 배포를 관리한다.
+- GitHub Pages의 Source는 `GitHub Actions`를 사용한다. `Deploy from a branch`와 프로젝트 배포 워크플로를 동시에 사용하지 않는다.
+- API CI는 지원 최소 버전인 Python 3.10에서 반드시 실행한다.
+- `requires-python`의 하한보다 최신 버전에서만 제공되는 표준 라이브러리 API를 사용하지 않는다.
+- React 컴포넌트 테스트는 매 테스트 후 DOM을 명시적으로 정리해 테스트 간 상태가 누적되지 않게 한다.
+- CI 실패를 확인한 상태에서 다음 기능 패치를 진행하지 않고 먼저 안정화 패치를 만든다.

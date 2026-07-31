@@ -3,7 +3,7 @@ import { extname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
-const ignored = new Set(['.git', '.venv', 'node_modules', 'dist', 'coverage', '__pycache__'])
+const ignored = new Set(['.git', '.venv', 'node_modules', 'dist', 'coverage', '__pycache__', '.pytest_cache', '.ruff_cache'])
 const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.py', '.css'])
 const failures = []
 
@@ -68,6 +68,33 @@ await requireText('docs/HANDOVER.md', [currentVersion, '다음 예상 업데이�
 await requireText('docs/CHANGELOG.md', [`## ${currentVersion}`])
 await requireText('docs/NEXT_UPDATE.md', ['# NEXT UPDATE', '## 목표 버전'])
 await requireText('docs/RELEASE.md', ['전체 통파일 ZIP', '덮어쓰기용 패치 ZIP'])
+await requireText('.github/workflows/ci.yml', [
+  'name: SoriON CI & Pages',
+  'branches:',
+  'uv python install 3.10',
+  'actions/deploy-pages@v4',
+])
+await requireText('src/test/setup.ts', ["afterEach", "cleanup()"])
+
+try {
+  const workflowFiles = await readdir(join(root, '.github', 'workflows'))
+  const activeWorkflows = workflowFiles.filter((name) => /\.ya?ml$/i.test(name))
+  if (activeWorkflows.length !== 1 || activeWorkflows[0] !== 'ci.yml') {
+    failures.push(`.github/workflows: 활성 워크플로는 ci.yml 하나여야 합니다. 현재: ${activeWorkflows.join(', ')}`)
+  }
+} catch {
+  failures.push('.github/workflows: 워크플로 폴더를 읽을 수 없습니다.')
+}
+
+for (const relativePath of [
+  'services/api/app/services/job_manager.py',
+  'services/api/app/storage/audio_store.py',
+]) {
+  const content = await readFile(join(root, relativePath), 'utf8')
+  if (/from datetime import .*\bUTC\b/.test(content) || /datetime\.UTC/.test(content)) {
+    failures.push(`${relativePath}: Python 3.10과 호환되지 않는 datetime.UTC 사용이 있습니다.`)
+  }
+}
 
 if (failures.length > 0) {
   console.error('프로젝트 규칙 검사 실패')

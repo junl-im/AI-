@@ -53,3 +53,10 @@ npm run quality:rules
 - Object URL은 새 결과 생성, 닫기, 화면 종료 시 해제한다.
 - 오디오 자동 재생을 기본값으로 사용하지 않는다.
 - 다운로드 파일명은 운영체제 금지 문자를 제거한다.
+
+## 최소 런타임 호환성
+
+- API의 지원 최소 버전은 Python 3.10이다.
+- 표준 라이브러리 기능은 `requires-python` 하한에서 실제 import 가능한지 확인한다.
+- UTC 시간대는 Python 3.10과 호환되는 `datetime.timezone.utc`를 사용한다.
+- Vitest는 전역 API 사용 여부와 무관하게 `afterEach(cleanup)`으로 DOM을 정리한다.

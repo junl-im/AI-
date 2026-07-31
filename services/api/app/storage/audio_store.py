@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from uuid import UUID
 
@@ -27,10 +27,10 @@ class AudioStore:
         path.unlink(missing_ok=True)
 
     def cleanup_expired(self, now: datetime | None = None) -> int:
-        current = now or datetime.now(UTC)
+        current = now or datetime.now(timezone.utc)
         removed = 0
         for path in self.root.glob("*.*"):
-            modified = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC)
+            modified = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
             if current - modified > self.ttl:
                 path.unlink(missing_ok=True)
                 removed += 1

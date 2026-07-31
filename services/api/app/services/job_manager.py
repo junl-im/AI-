@@ -1,6 +1,6 @@
 import asyncio
 from collections.abc import Awaitable, Callable
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import TypeVar
 
 from app.schemas.tts import JobPhase, JobProgressResponse, JobStatus
@@ -175,4 +175,4 @@ class JobManager:
 
     @staticmethod
     def _now() -> str:
-        return datetime.now(UTC).isoformat()
+        return datetime.now(timezone.utc).isoformat()

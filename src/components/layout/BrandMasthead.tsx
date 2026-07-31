@@ -44,7 +44,7 @@ export function BrandMasthead() {
         <div className="soa-meta-bar">
           <div className="soa-meta-group" aria-label="빌드와 호환 정보">
             <span className="soa-meta-label">BUILD</span>
-            <strong>v0.5.1</strong>
+            <strong>v0.5.2</strong>
             <span className="soa-meta-divider" aria-hidden="true" />
             <span className="soa-device-mark" aria-hidden="true"><i /><b /></span>
             <span>모바일 · PC 호환</span>

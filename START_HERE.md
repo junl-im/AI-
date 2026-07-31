@@ -7,13 +7,13 @@
 권장 작업 브랜치:
 
 ```text
-feature/compact-brand-banner
+fix/ci-stability
 ```
 
 권장 커밋 메시지:
 
 ```text
-feat: add compact animated brand banner
+fix: stabilize CI and Pages workflow
 ```
 
 ## 2. 기본 환경 설정
@@ -40,9 +40,13 @@ cd services/api
 uv run uvicorn app.main:app --reload
 ```
 
-## 4. 0.5.1 첫 확인
+## 4. 0.5.2 첫 확인
 
-- 상단에 `BUILD v0.5.1`이 표시되는지 확인합니다.
+- `.github/workflows`에 `ci.yml` 하나만 남았는지 확인합니다.
+- GitHub Pages Source가 `GitHub Actions`인지 확인합니다.
+- `main` Push 한 번에 `SoriON CI & Pages` 실행 하나만 생성되는지 확인합니다.
+- Web quality, API quality · Python 3.10, Deploy GitHub Pages가 같은 실행 안에 표시되는지 확인합니다.
+- 상단에 `BUILD v0.5.2`이 표시되는지 확인합니다.
 - 상단 배너 높이가 이전 버전보다 줄었는지 확인합니다.
 - `곰같은여우 SoriON AI`와 세 개의 한국어 문장이 순서대로 페이드되는지 확인합니다.
 - `AI`의 `I`가 마이크 형태인지 확인합니다.
@@ -76,11 +80,11 @@ MeloTTS는 별도 모델과 PyTorch 계열 의존성이 필요하므로 기본 A
 ## 7. GitHub Pages 배포
 
 1. Pull Request를 `main`에 병합합니다.
-2. Actions에서 `Deploy SoriON to GitHub Pages` 성공을 확인합니다.
-3. 공개 주소에서 `BUILD v0.5.1`을 확인합니다.
+2. Actions에서 `SoriON CI & Pages` 실행 하나가 성공하는지 확인합니다.
+3. 공개 주소에서 `BUILD v0.5.2`을 확인합니다.
 4. 공개 Pages에는 Python TTS 엔진이 포함되지 않으므로 API 주소를 별도 설정하지 않으면 Demo WAV가 사용됩니다.
 
 
-## 0.5.1 운영 연결
+## 0.5.2 운영 연결
 
 설정 화면에서 Voice API 주소를 입력하고 연결 검사를 실행합니다. 자세한 흐름은 `docs/PRODUCTION_READINESS.md`를 확인합니다.

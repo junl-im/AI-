@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## 0.5.2 - 2026-07-31
+
+### Fixed
+
+- Python 3.10에서 import할 수 없는 `datetime.UTC` 사용을 `timezone.utc`로 교체
+- Vitest 전역 API 비활성 환경에서 테스트 DOM이 누적되던 문제를 명시적 `afterEach(cleanup)`으로 수정
+- 브랜드 배너 테스트가 두 번째 테스트에서 중복 DOM 때문에 실패하던 문제 수정
+- 기능 브랜치의 열린 Pull Request에서 `push`와 `pull_request`가 같은 커밋을 두 번 검사하던 트리거 정리
+
+### Changed
+
+- Web 품질, API 품질, GitHub Pages 배포를 `.github/workflows/ci.yml` 하나로 통합
+- `push` 자동 실행 범위를 `main`으로 제한하고 `develop`·기능 브랜치는 PR 이벤트로 검사
+- API CI를 지원 최소 버전인 Python 3.10으로 명시하고 Ruff 검사를 추가
+- Ruff 대상 버전을 `py310`으로 변경
+- 프로젝트 규칙 검사에 단일 워크플로, Python 3.10 UTC 호환성, 테스트 cleanup 검사를 추가
+- 웹과 API 버전을 `0.5.2`로 갱신
+
+### Removed
+
+- 중복 Pages 실행을 만들던 `.github/workflows/deploy-pages.yml`
+
+### Notes
+
+- GitHub 저장소의 `Settings → Pages → Source`는 반드시 `GitHub Actions`여야 한다.
+- `Deploy from a branch`가 남아 있으면 GitHub가 생성한 `pages-build-deployment`가 별도로 실행될 수 있다.
+
 ## 0.5.1 - 2026-07-31
 
 ### Added

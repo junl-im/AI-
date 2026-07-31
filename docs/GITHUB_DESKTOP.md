@@ -25,3 +25,10 @@
 ## 충돌
 
 충돌 해결 전 현재 변경을 커밋하거나 Stash한다. AI 엔진 설정과 문서 충돌은 양쪽 내용을 무조건 합치지 말고 최신 설계 결정을 확인한다.
+
+## Actions 중복 방지
+
+- 기능 브랜치 Push 자체는 자동 CI 대상이 아니며, Pull Request를 열면 PR 이벤트로 검사한다.
+- `main` Push는 검사와 배포를 한 번 실행하고, `develop`과 기능 브랜치는 Pull Request 이벤트로 검사한다.
+- 같은 변경에서 Push와 Pull Request 실행이 동시에 두 개 생기면 워크플로 트리거를 먼저 점검한다.
+- Pages Source는 `GitHub Actions`로 유지하고 `Deploy from a branch`를 함께 사용하지 않는다.
