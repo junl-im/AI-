@@ -76,6 +76,10 @@ export function LinkedPlayerDock() {
     if (ref.current) ref.current.playbackRate = playbackRate
   }, [playbackRate])
 
+  useEffect(() => {
+    if (!track) setQueueOpen(false)
+  }, [track])
+
   async function toggle() {
     const element = ref.current
     if (!element || !track) return
@@ -105,8 +109,99 @@ export function LinkedPlayerDock() {
   }
 
   return (
-    <aside className="soa-dock safe-bottom" aria-label="SoriON 고정 플레이어와 메뉴">
+    <aside
+      className={`soa-dock ${track ? 'soa-dock--has-player' : 'soa-dock--nav-only'}`}
+      aria-label="SoriON 고정 Dock"
+    >
       <div className="soa-dock__inner">
+        {track ? (
+          <section className="soa-linked-player" aria-label="연계형 오디오 플레이어">
+            <div className="soa-player-transport">
+              <button
+                type="button"
+                onClick={() => move('previous')}
+                aria-label="이전 음성"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="soa-player-toggle"
+                onClick={() => void toggle()}
+                aria-label={playing ? '일시정지' : '재생'}
+              >
+                {playing ? 'Ⅱ' : '▶'}
+              </button>
+              <button type="button" onClick={() => move('next')} aria-label="다음 음성">
+                ›
+              </button>
+            </div>
+            <div className="soa-player-main">
+              <div className="soa-player-title">
+                <strong>{track.title}</strong>
+                <span>{track.audio.result.engineId}</span>
+              </div>
+              <button
+                type="button"
+                className="soa-player-wave"
+                onClick={(event: MouseEvent<HTMLButtonElement>) => {
+                  const element = ref.current
+                  if (!element || !duration) return
+                  const rect = event.currentTarget.getBoundingClientRect()
+                  element.currentTime = ((event.clientX - rect.left) / rect.width) * duration
+                }}
+                aria-label="재생 위치 이동"
+              >
+                <span className="soa-player-progress" style={{ width: `${progress}%` }} />
+                {bars.map((height, index) => (
+                  <i key={`${height}-${index}`} style={{ height: `${height}%` }} />
+                ))}
+                <b style={{ left: `${progress}%` }} />
+              </button>
+            </div>
+            <time>{formatTime(current)} / {formatTime(duration)}</time>
+            <div className="soa-player-actions">
+              <button
+                type="button"
+                onClick={cycleRepeatMode}
+                className={repeatMode !== 'off' ? 'is-active' : ''}
+                aria-label={`반복 모드 ${repeatMode}`}
+              >
+                {repeatMode === 'one' ? '↻1' : '↻'}
+              </button>
+              <select
+                aria-label="재생 속도"
+                value={playbackRate}
+                onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                  setPlaybackRate(Number(event.target.value))
+                }}
+              >
+                {rates.map((rate) => <option key={rate} value={rate}>{rate}×</option>)}
+              </select>
+              <a href={track.audio.url} download={track.audio.filename} aria-label="현재 음성 다운로드">
+                ↓
+              </a>
+              <button type="button" onClick={() => setQueueOpen((open) => !open)}>
+                대기열 {queue.length}
+              </button>
+            </div>
+            <audio
+              ref={ref}
+              src={track.audio.url}
+              preload="metadata"
+              onLoadedMetadata={(event: SyntheticEvent<HTMLAudioElement>) => {
+                setDuration(event.currentTarget.duration)
+              }}
+              onTimeUpdate={(event: SyntheticEvent<HTMLAudioElement>) => {
+                setCurrent(event.currentTarget.currentTime)
+              }}
+              onPlay={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
+              onEnded={handleEnded}
+            />
+          </section>
+        ) : null}
+
         <nav className="soa-dock__nav" aria-label="주요 메뉴">
           {items.map((item) => (
             <button
@@ -121,93 +216,7 @@ export function LinkedPlayerDock() {
           ))}
         </nav>
 
-        <section className="soa-linked-player" aria-label="연계형 오디오 플레이어">
-          <div className="soa-player-transport">
-            <button type="button" onClick={() => move('previous')} disabled={!track} aria-label="이전 음성">‹</button>
-            <button
-              type="button"
-              className="soa-player-toggle"
-              onClick={() => void toggle()}
-              disabled={!track}
-              aria-label={playing ? '일시정지' : '재생'}
-            >
-              {playing ? 'Ⅱ' : '▶'}
-            </button>
-            <button type="button" onClick={() => move('next')} disabled={!track} aria-label="다음 음성">›</button>
-          </div>
-          <div className="soa-player-main">
-            <div className="soa-player-title">
-              <strong>{track?.title ?? '아직 연결된 음성이 없습니다.'}</strong>
-              <span>{track?.audio.result.engineId ?? 'VOICE LINK READY'}</span>
-            </div>
-            <button
-              type="button"
-              className="soa-player-wave"
-              disabled={!track}
-              onClick={(event: MouseEvent<HTMLButtonElement>) => {
-                const element = ref.current
-                if (!element || !duration) return
-                const rect = event.currentTarget.getBoundingClientRect()
-                element.currentTime = ((event.clientX - rect.left) / rect.width) * duration
-              }}
-              aria-label="재생 위치 이동"
-            >
-              <span className="soa-player-progress" style={{ width: `${progress}%` }} />
-              {bars.map((height, index) => (
-                <i key={`${height}-${index}`} style={{ height: `${height}%` }} />
-              ))}
-              <b style={{ left: `${progress}%` }} />
-            </button>
-          </div>
-          <time>{formatTime(current)} / {formatTime(duration)}</time>
-          <div className="soa-player-actions">
-            <button
-              type="button"
-              onClick={cycleRepeatMode}
-              className={repeatMode !== 'off' ? 'is-active' : ''}
-              aria-label={`반복 모드 ${repeatMode}`}
-            >
-              {repeatMode === 'one' ? '↻1' : '↻'}
-            </button>
-            <select
-              aria-label="재생 속도"
-              value={playbackRate}
-              onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-                setPlaybackRate(Number(event.target.value))
-              }}
-            >
-              {rates.map((rate) => <option key={rate} value={rate}>{rate}×</option>)}
-            </select>
-            <a
-              href={track?.audio.url}
-              download={track?.audio.filename}
-              aria-disabled={!track}
-              onClick={(event: MouseEvent<HTMLAnchorElement>) => {
-                if (!track) event.preventDefault()
-              }}
-            >
-              ↓
-            </a>
-            <button type="button" onClick={() => setQueueOpen((open) => !open)}>
-              대기열 {queue.length}
-            </button>
-          </div>
-          <audio
-            ref={ref}
-            src={track?.audio.url}
-            preload="metadata"
-            onLoadedMetadata={(event: SyntheticEvent<HTMLAudioElement>) => {
-              setDuration(event.currentTarget.duration)
-            }}
-            onTimeUpdate={(event: SyntheticEvent<HTMLAudioElement>) => {
-              setCurrent(event.currentTarget.currentTime)
-            }}
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
-            onEnded={handleEnded}
-          />
-        </section>
-        {queueOpen ? (
+        {track && queueOpen ? (
           <PlayerQueuePanel
             tracks={queue}
             currentTrackId={currentTrackId}

@@ -163,6 +163,29 @@ await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   'selectNext',
   'playbackRate',
   'cycleRepeatMode',
+  "track ? 'soa-dock--has-player' : 'soa-dock--nav-only'",
+  "{track ? (",
+  '<nav className="soa-dock__nav"',
+])
+await requireText('src/components/navigation/LinkedPlayerDock.test.tsx', [
+  '음성이 없으면 메뉴 Dock만 표시한다',
+  '완성 음성이 생기면 플레이어를 메뉴 위에 표시한다',
+  'Node.DOCUMENT_POSITION_FOLLOWING',
+])
+await requireText('src/components/layout/AppShell.tsx', [
+  'soa-workspace-shell--has-player',
+  'getCurrentTrack(state) !== null',
+])
+await requireText('src/components/layout/AppShell.test.tsx', [
+  '플레이어 유무에 따라 작업 화면의 하단 안전 여백을 바꾼다',
+  'soa-workspace-shell--has-player',
+])
+await requireText('src/styles/player-dock.css', [
+  '.soa-dock--nav-only',
+  '.soa-linked-player',
+  'order: 1',
+  '.soa-dock__nav',
+  'order: 2',
 ])
 await requireText('services/api/app/api/routes/voice_clones.py', [
   'SOA-5001',

@@ -1,5 +1,25 @@
 # HANDOVER
 
+## 2026-07-31 21:24 KST · v0.6.3
+
+1. 작업 일시: 2026-07-31 21:24 KST
+2. 대상·기준 버전: `0.6.2 → 0.6.3`
+3. 변경 내용: Dock의 기존 어두운 배경 톤을 유지하고, 완성 음성이 있을 때만 플레이어를 메뉴 위에 표시하도록 변경함.
+4. 변경 이유: 빈 플레이어가 항상 공간을 차지했고 PC에서 메뉴와 플레이어 순서가 사용자 의도와 반대로 보였기 때문임.
+5. 영향 범위: AppShell 적응형 하단 여백, LinkedPlayerDock 조건부 렌더링, Dock CSS, Web 회귀 테스트, 릴리스 문서.
+6. 주요 파일: `AppShell.tsx`, `LinkedPlayerDock.tsx`, `LinkedPlayerDock.test.tsx`, `player-dock.css`, `index.css`.
+7. 검증 결과: 프로젝트 규칙 통과, FastAPI 49 tests passed, Python compileall 통과, 변경 TypeScript·CSS 정적 검사 통과, 패치 적용본과 전체본 260개 파일 완전 일치, ZIP 무결성 통과.
+8. 제한·주의: sandbox npm registry에 `@tailwindcss/vite`가 없어 정식 Vitest·ESLint·Vite build는 GitHub Actions 확인이 필요함.
+9. 산출물: `SoriON-AI-0.6.3-full.zip`, `SoriON-AI-0.6.2-to-0.6.3-patch.zip`, `SoriON-AI-0.6.3-artifacts.sha256`.
+10. 다음 예상 업데이트: `0.7.0 CosyVoice Worker Streaming & Clone Execution`.
+
+## 다음 예상 업데이트
+
+- 실제 CosyVoice Worker와 health·readiness 분리
+- GPU·CUDA·VRAM·모델 로딩 진단
+- 제로샷 복제 실행과 스트리밍 음성 조각
+- 완료 음원을 적응형 Dock 플레이어에 즉시 연결
+
 ## 2026-07-31 21:12 KST · v0.6.2
 
 1. 작업 일시: 2026-07-31 21:12 KST

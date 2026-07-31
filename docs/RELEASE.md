@@ -91,3 +91,11 @@ Semantic Versioning을 사용한다.
 - 덮어쓰기용 패치 ZIP: `SoriON-AI-0.6.1-to-0.6.2-patch.zip`
 - 핵심 확인: 설정의 5경로 연결 검사, `/api/v1/connectivity`, CORS, Worker health
 - 삭제 파일: 없음
+
+
+## 0.6.3 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.6.3-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.6.2-to-0.6.3-patch.zip`
+- 핵심 확인: 빈 상태 메뉴 전용 Dock, 음성 준비 후 플레이어 상단 표시, 적응형 하단 여백
+- 삭제 파일: 없음

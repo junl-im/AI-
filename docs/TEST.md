@@ -162,3 +162,12 @@ npm run test:api
 - CosyVoice Worker `/health` 성공과 URL 미설정 상태를 각각 검사
 - 웹 HTTP client가 저장된 API Origin으로 상대 음원 URL을 변환하는지 검사
 - 공개 정적 배포에서 API 미설정 상태를 명확히 표시하는지 Web quality에서 검사
+
+
+## 0.6.3 적응형 Dock 회귀 검사
+
+- 빈 대기열에서는 `연계형 오디오 플레이어` 영역이 없어야 한다.
+- 완성 음원을 enqueue하면 플레이어가 나타나야 한다.
+- DOM 순서는 플레이어가 주요 메뉴보다 앞이어야 한다.
+- Dock 상태 클래스는 `soa-dock--nav-only`와 `soa-dock--has-player`를 구분한다.
+- AppShell은 플레이어 유무에 따라 하단 안전 여백 클래스를 전환한다.

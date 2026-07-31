@@ -1,9 +1,79 @@
+.soa-dock {
+  position: fixed;
+  z-index: 50;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0 10px max(8px, env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
 .soa-dock__inner {
   position: relative;
+  display: grid;
+  width: min(100%, 1376px);
+  margin: auto;
+  gap: 6px;
+  border: 1px solid rgba(154, 177, 221, 0.18);
+  border-radius: 24px;
+  padding: 8px;
+  background: linear-gradient(180deg, rgba(16, 24, 40, 0.96), rgba(7, 11, 20, 0.97));
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(22px);
+  pointer-events: auto;
+}
+
+.soa-dock--nav-only .soa-dock__inner {
+  padding-block: 7px;
 }
 
 .soa-dock__nav {
+  order: 2;
+  display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  border-radius: 16px;
+  padding: 3px;
+  background: rgba(245, 243, 238, 0.035);
+}
+
+.soa-dock__nav button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 13px;
+  color: rgba(225, 234, 252, 0.62);
+  background: transparent;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.soa-dock__nav button span {
+  margin-right: 5px;
+}
+
+.soa-dock__nav button.is-active {
+  color: #fff;
+  background: rgba(157, 140, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(157, 140, 255, 0.14);
+}
+
+.soa-linked-player {
+  order: 1;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 17px;
+  padding: 8px;
+  color: #eef3ff;
+  background: linear-gradient(110deg, rgba(255, 255, 255, 0.055), rgba(157, 140, 255, 0.045));
+  animation: soa-player-reveal 180ms ease-out both;
+}
+
+.soa-linked-player audio {
+  display: none;
 }
 
 .soa-player-transport {
@@ -22,12 +92,90 @@
   font-weight: 900;
 }
 
+.soa-player-transport > .soa-player-toggle {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(145deg, #775cff, #3ecce7);
+}
+
+.soa-player-main {
+  min-width: 0;
+}
+
+.soa-player-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 9px;
+}
+
+.soa-player-title strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.soa-player-title span {
+  color: rgba(220, 231, 252, 0.42);
+  font-size: 7px;
+}
+
+.soa-player-wave {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 25px;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 9px;
+  padding: 2px 5px;
+  background: rgba(225, 240, 250, 0.1);
+}
+
+.soa-player-wave i {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  max-width: 4px;
+  border-radius: 99px;
+  background: linear-gradient(#64e0f6, #9b7cff);
+  opacity: 0.48;
+}
+
+.soa-player-progress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, rgba(82, 207, 238, 0.18), rgba(157, 140, 255, 0.22));
+}
+
+.soa-player-wave b {
+  position: absolute;
+  z-index: 3;
+  top: 2px;
+  bottom: 2px;
+  width: 1px;
+  background: #fff;
+  box-shadow: 0 0 9px #6fe4ff;
+}
+
+.soa-linked-player time {
+  color: rgba(226, 235, 255, 0.55);
+  font-size: 9px;
+  text-align: right;
+}
+
 .soa-player-actions {
   display: flex;
+  grid-column: 1 / -1;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
-  grid-column: 1 / -1;
 }
 
 .soa-player-actions button,
@@ -56,8 +204,8 @@
 }
 
 .soa-player-actions .is-active {
-  color: #fff;
   border-color: rgba(157, 140, 255, 0.5);
+  color: #fff;
   background: rgba(157, 140, 255, 0.2);
 }
 
@@ -153,3 +301,45 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+@keyframes soa-player-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 639px) {
+  .soa-linked-player {
+    grid-template-columns: 104px minmax(0, 1fr) 58px;
+  }
+
+  .soa-player-title span {
+    display: none;
+  }
+}
+
+@media (min-width: 980px) {
+  .soa-dock__inner {
+    gap: 7px;
+  }
+
+  .soa-dock__nav button {
+    min-height: 48px;
+  }
+
+  .soa-linked-player {
+    grid-template-columns: 112px minmax(0, 1fr) 82px;
+    padding: 9px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soa-linked-player {
+    animation: none;
+  }
+}

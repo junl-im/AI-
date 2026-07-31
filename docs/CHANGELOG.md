@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.6.3 - 2026-07-31
+
+### Changed
+
+- Dock 플레이어를 주요 메뉴보다 위에 배치
+- 기존 앱 배경과 이어지는 어두운 반투명 Dock 색상 톤 유지
+- 음성이 준비된 경우에만 연계형 플레이어 렌더링
+- 음원 유무에 따라 작업 화면의 하단 안전 여백을 자동 조절
+- 모바일과 PC 모두 `플레이어 → 메뉴` 순서로 통일
+
+### Added
+
+- 메뉴 전용 Dock과 플레이어 포함 Dock 상태 클래스
+- 플레이어 조건부 표시와 DOM 순서를 검증하는 Web 회귀 테스트
+- 프로젝트 규칙에 조건부 플레이어·상단 배치·적응형 여백 계약 추가
+
+### Verification
+
+- 프로젝트 절대 규칙 검사 통과
+- FastAPI 테스트 49개 통과
+- Python compileall 통과
+- 변경 TypeScript·TSX 정적 검사와 CSS 파싱 통과
+- 패치 적용본과 전체본 260개 파일 완전 일치
+- npm registry에 `@tailwindcss/vite`가 없어 정식 Web quality는 GitHub Actions에서 최종 확인
+
 ## 0.6.2 - 2026-07-31
 
 ### Fixed
