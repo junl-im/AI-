@@ -1,4 +1,4 @@
-# SoriON AI
+# 곰같은여우 SoriON AI
 
 **한국인을 위한 모바일 우선 AI Voice Platform**
 
@@ -6,7 +6,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.1.0 Foundation`
+- 버전: `0.1.4 Delivery Rules Foundation`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
 - AI 엔진: 교체 가능한 어댑터 구조와 개발용 Mock 엔진
@@ -45,8 +45,19 @@ scripts/         프로젝트 규칙 자동 검사
 
 ## 브랜드
 
-- 공식 서비스명: **SoriON AI**
+- 공식 대문 표기: **곰같은여우 SoriON AI**
+- 제품명: **SoriON AI**
 - 한국어 이름: **소리온 AI**
 - 제작 브랜드: **곰같은여우**
 - 내부 코드명: **SOA**
 - 슬로건: **목소리의 가능성을 켜다.**
+
+## 결과 전달 규칙
+
+모든 업데이트 결과는 아래 순서를 고정한다.
+
+1. 결과
+2. 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP
+3. 다음 예상 업데이트 내역
+
+각 업데이트마다 `docs/HANDOVER.md`, `docs/CHANGELOG.md`, `docs/NEXT_UPDATE.md`를 함께 갱신한다. 전체 기준은 [`DELIVERY_RULES.md`](DELIVERY_RULES.md)를 따른다.

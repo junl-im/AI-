@@ -1,4 +1,4 @@
-# SoriON AI 시작 안내
+# 곰같은여우 SoriON AI 시작 안내
 
 ## 1. GitHub Desktop에 추가
 
@@ -57,3 +57,18 @@ feature/voice-upload
 ```
 
 첫 실제 AI 연결은 `feature/tts-engine-kokoro`에서 시작합니다.
+
+## 6. 업데이트 패치 적용
+
+패치 ZIP은 기준 버전이 현재 프로젝트와 일치할 때 저장소 루트에 바로 압축 해제해 덮어씁니다.
+
+적용 전 순서:
+
+1. GitHub Desktop에서 작업 중인 변경사항을 커밋하거나 백업합니다.
+2. `.git` 폴더는 유지합니다.
+3. 패치 ZIP의 `PATCH_README.md`에서 기준 버전을 확인합니다.
+4. 저장소 루트에 압축을 해제합니다.
+5. GitHub Desktop의 Changes와 `PATCH_MANIFEST.txt`를 비교합니다.
+6. `npm run quality:rules`와 관련 테스트를 실행합니다.
+
+영구 전달 기준은 [`DELIVERY_RULES.md`](DELIVERY_RULES.md)를 참고합니다.

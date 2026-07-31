@@ -11,10 +11,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon-64.png'],
       manifest: {
-        name: 'SoriON AI',
+        name: '곰같은여우 SoriON AI',
         short_name: 'SoriON',
         description: '한국인을 위한 모바일 우선 AI Voice Platform',
-        theme_color: '#f5f3ee',
+        theme_color: '#0b1220',
         background_color: '#f5f3ee',
         display: 'standalone',
         orientation: 'portrait-primary',

@@ -4,15 +4,18 @@
 
 ## 변경 내용
 
-- 
+-
 
 ## 검증
 
 - [ ] 모바일 360px 화면 확인
 - [ ] 테스트 추가 또는 수정
 - [ ] `npm run quality:rules` 통과
-- [ ] 관련 문서와 HANDOVER.md 갱신
+- [ ] 관련 문서와 `docs/HANDOVER.md` 갱신
+- [ ] `docs/CHANGELOG.md`에 현재 버전 기록
+- [ ] `docs/NEXT_UPDATE.md`에 다음 작업 기록
 - [ ] 민감 정보와 음성 원본이 포함되지 않음
+- [ ] 릴리스 시 전체 ZIP·패치 ZIP·체크섬을 함께 생성
 
 ## 영향 범위
 

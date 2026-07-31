@@ -86,16 +86,16 @@ export function HomePage() {
   }
 
   return (
-    <div className="pb-3 pt-7">
+    <div className="pb-3 pt-6">
       <section className="mb-6">
-        <StatusPill label="MOBILE FIRST" tone="good" />
+        <StatusPill label="VOICE STUDIO" tone="good" />
         <h1 className="mt-4 max-w-[390px] text-[38px] font-black leading-[0.98] tracking-[-0.07em]">
-          생각을 목소리로,
+          문장을 입력하면,
           <br />
-          <span className="text-soa-muted">단 10초 만에.</span>
+          <span className="text-soa-muted">소리온이 말합니다.</span>
         </h1>
         <p className="mt-4 max-w-sm text-sm leading-6 text-soa-muted">
-          어려운 설정 없이 문장을 입력하세요. 실제 음성 엔진은 다음 단계에서 연결되며, 지금은 전체 흐름과 API 구조를 검증합니다.
+          어려운 설정은 숨기고 가장 중요한 작업만 앞에 두었습니다. 문장을 입력하고 목소리를 고른 뒤 바로 생성하세요.
         </p>
       </section>
 

@@ -1,19 +1,16 @@
 import type { PropsWithChildren } from 'react'
 import { BottomNavigation } from '../navigation/BottomNavigation'
-import { BrandMark } from '../ui/BrandMark'
 import { NoticeToast } from '../ui/NoticeToast'
+import { BrandMasthead } from './BrandMasthead'
 
 export function AppShell({ children }: PropsWithChildren) {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[520px] flex-col bg-soa-paper px-4 pt-4 sm:px-6">
-      <header className="flex items-center justify-between py-2">
-        <BrandMark />
-        <span className="rounded-full border border-soa-line bg-soa-card px-3 py-1.5 text-[11px] font-semibold tracking-[-0.01em] text-soa-muted">
-          FOUNDATION 0.1
-        </span>
-      </header>
-      {children}
-      <BottomNavigation />
+    <div className="min-h-dvh bg-[#070b14]">
+      <BrandMasthead />
+      <div className="relative mx-auto flex min-h-[62dvh] w-full max-w-[560px] flex-col rounded-t-[34px] bg-soa-paper px-4 pt-3 shadow-[0_-22px_80px_rgba(0,0,0,0.22)] sm:px-6 lg:rounded-[34px_34px_0_0]">
+        {children}
+        <BottomNavigation />
+      </div>
       <NoticeToast />
     </div>
   )

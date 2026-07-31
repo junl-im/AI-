@@ -37,3 +37,11 @@ npm run quality:rules
 ```
 
 이 검사는 500줄 제한, SVG, 대표적인 비밀키 패턴을 검사한다.
+
+## 전달과 인수인계
+
+- 코드 변경 결과에는 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP을 함께 만든다.
+- `docs/HANDOVER.md`에는 작업 일시, 이유, 영향, 검증, 제한, 산출물, 다음 계획을 기록한다.
+- `docs/CHANGELOG.md`와 `docs/NEXT_UPDATE.md`를 같은 작업에서 갱신한다.
+- 전달 규칙을 생략한 업데이트는 완료로 보지 않는다.
+- 세부 형식은 루트의 `DELIVERY_RULES.md`를 따른다.
