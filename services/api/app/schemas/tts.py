@@ -34,6 +34,7 @@ class TtsSynthesisRequest(BaseModel):
     pitch: int = Field(default=0, ge=-12, le=12)
     output_format: OutputFormat = "wav"
     engine_id: str | None = None
+    normalize_text: bool = True
     job_id: UUID | None = None
 
 

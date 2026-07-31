@@ -101,3 +101,22 @@ async def test_pipeline_reports_segment_progress(tmp_path):
     assert reports[0][0] == "normalizing"
     assert any(item[0] == "generating" and item[2] == 1 for item in reports)
     assert any(item[0] == "merging" and item[1] >= 88 for item in reports)
+
+
+@pytest.mark.asyncio
+async def test_pipeline_can_disable_korean_pronunciation_normalization(tmp_path):
+    store = AudioStore(tmp_path, ttl_minutes=30)
+    engine = SegmentWaveEngine(store)
+    pipeline = TtsPipeline(store, max_segment_chars=180)
+
+    result = await pipeline.synthesize(
+        engine,
+        TtsSynthesisRequest(
+            text="2026-08-01에 시작합니다.",
+            voice_id="sori-warm",
+            normalize_text=False,
+        ),
+    )
+
+    assert result.normalized_text == "2026-08-01에 시작합니다."
+    assert engine.seen_texts == ["2026-08-01에 시작합니다."]

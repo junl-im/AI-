@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 
 from app.engines.base import TtsEngine
 from app.schemas.tts import JobPhase, TtsSynthesisRequest, TtsSynthesisResponse
-from app.services.text_normalizer import normalize_korean_text
+from app.services.text_normalizer import NormalizationResult, normalize_korean_text
 from app.services.text_segmenter import split_korean_text
 from app.services.wav_tools import merge_wav_files, wav_duration_seconds
 from app.storage.audio_store import AudioStore
@@ -32,9 +32,13 @@ class TtsPipeline:
             7,
             0,
             0,
-            "숫자와 날짜를 한국어 발음에 맞게 정리합니다.",
+            (
+                "숫자와 날짜를 한국어 발음에 맞게 정리합니다."
+                if request.normalize_text
+                else "입력 문장을 생성 구간으로 준비합니다."
+            ),
         )
-        normalization = normalize_korean_text(request.text)
+        normalization = self._normalize(request)
         segments = split_korean_text(normalization.normalized, self.max_segment_chars)
         total_segments = max(1, len(segments))
         parent_id = request.job_id or uuid4()
@@ -126,6 +130,17 @@ class TtsPipeline:
         finally:
             for path in paths:
                 self.store.remove(path)
+
+    @staticmethod
+    def _normalize(request: TtsSynthesisRequest) -> NormalizationResult:
+        if request.normalize_text:
+            return normalize_korean_text(request.text)
+        cleaned = " ".join(request.text.split())
+        return NormalizationResult(
+            original=request.text,
+            normalized=cleaned,
+            changes=[],
+        )
 
     def preview(self, text: str) -> tuple[str, list[str], list[str]]:
         normalization = normalize_korean_text(text)

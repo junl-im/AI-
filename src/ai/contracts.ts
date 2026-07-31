@@ -9,6 +9,7 @@ export interface TtsSynthesisRequest {
   pitch: number
   format: 'mp3' | 'wav' | 'flac'
   engineId?: string
+  normalizeText: boolean
 }
 
 export interface TtsSynthesisResult {

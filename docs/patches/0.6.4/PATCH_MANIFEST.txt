@@ -1,0 +1,65 @@
+SoriON AI Patch Manifest
+From: 0.6.3
+To: 0.6.4
+
+Changed files: 43
+Added files: 8
+Deleted files: 0
+
+[CHANGED]
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/API.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/PLAYER_DOCK.md
+docs/RELEASE.md
+docs/TEST.md
+docs/UI_GUIDE.md
+package.json
+scripts/check-project-rules.mjs
+services/api/app/api/routes/connectivity.py
+services/api/app/api/routes/engines.py
+services/api/app/api/routes/health.py
+services/api/app/api/routes/quality.py
+services/api/app/api/routes/setup.py
+services/api/app/engines/voiceclone/cosyvoice_worker.py
+services/api/app/main.py
+services/api/app/schemas/tts.py
+services/api/app/services/tts_pipeline.py
+services/api/pyproject.toml
+services/api/tests/test_connectivity.py
+services/api/tests/test_engine_strategy.py
+services/api/tests/test_health.py
+services/api/tests/test_quality.py
+services/api/tests/test_setup.py
+services/api/tests/test_tts_pipeline.py
+src/ai/contracts.ts
+src/components/layout/BrandMasthead.tsx
+src/components/navigation/LinkedPlayerDock.test.tsx
+src/components/navigation/LinkedPlayerDock.tsx
+src/components/voice/AudioResultCard.tsx
+src/components/voice/TextComposer.tsx
+src/components/voice/VoicePresetSelector.tsx
+src/pages/HomePage.test.tsx
+src/pages/HomePage.tsx
+src/quality/qualityReport.test.ts
+src/quality/qualityReport.ts
+src/styles/index.css
+src/styles/player-dock.css
+src/tts/voiceApi.ts
+
+[ADDED]
+docs/patches/0.6.4/DELETE_LIST.txt
+docs/patches/0.6.4/PATCH_MANIFEST.txt
+docs/patches/0.6.4/PATCH_README.md
+src/components/voice/SegmentResultList.test.tsx
+src/components/voice/SegmentResultList.tsx
+src/styles/creation-workspace.css
+src/tts/segmentText.test.ts
+src/tts/segmentText.ts
+
+[DELETED]
+(none)

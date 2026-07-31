@@ -1,10 +1,12 @@
 import { formatBytes, formatMilliseconds } from '../../quality/formatMetrics'
 import { downloadAudioFile } from '../../tts/audioFile'
 import type { GeneratedAudio } from '../../tts/generationTypes'
+import { SegmentResultList } from './SegmentResultList'
 import { StatusPill } from '../ui/StatusPill'
 
 interface AudioResultCardProps {
   audio: GeneratedAudio
+  sourceText: string
   onRetry: () => void
   onReset: () => void
 }
@@ -15,8 +17,9 @@ function resultLabel(audio: GeneratedAudio) {
   return 'AI AUDIO'
 }
 
-export function AudioResultCard({ audio, onRetry, onReset }: AudioResultCardProps) {
+export function AudioResultCard({ audio, sourceText, onRetry, onReset }: AudioResultCardProps) {
   const isDemo = audio.source === 'browser-demo' || audio.result.engineMode === 'mock'
+  const spokenText = audio.result.normalizedText || sourceText
 
   return (
     <section className="mt-4 rounded-[28px] border border-soa-line bg-soa-lime p-5" aria-labelledby="audio-result-title">
@@ -28,11 +31,9 @@ export function AudioResultCard({ audio, onRetry, onReset }: AudioResultCardProp
         <StatusPill label={resultLabel(audio)} tone={isDemo ? 'warning' : 'good'} />
       </div>
 
-      <audio controls preload="metadata" src={audio.url} className="mt-4 w-full" aria-label="생성된 음성 미리듣기">
-        현재 브라우저에서는 오디오 재생을 지원하지 않습니다.
-      </audio>
-
       <p className="mt-3 text-xs font-semibold leading-5 text-soa-muted">{audio.result.message}</p>
+      <SegmentResultList text={spokenText} reportedCount={audio.result.segmentCount} />
+
       <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] font-bold text-soa-muted">
         <span className="rounded-xl bg-white/45 p-2">엔진 {audio.result.engineId}</span>
         <span className="rounded-xl bg-white/45 p-2">음원 {audio.durationSeconds.toFixed(1)}초</span>
@@ -41,12 +42,6 @@ export function AudioResultCard({ audio, onRetry, onReset }: AudioResultCardProp
         <span className="rounded-xl bg-white/45 p-2">구간 {audio.result.segmentCount}개</span>
         <span className="rounded-xl bg-white/45 p-2">RTF {audio.result.realtimeFactor ?? '-'}</span>
       </div>
-      {audio.result.normalizedText && audio.result.normalizedText !== audio.result.message ? (
-        <details className="mt-3 rounded-2xl bg-white/45 p-3 text-xs">
-          <summary className="cursor-pointer font-black">실제 읽은 문장</summary>
-          <p className="mt-2 font-semibold leading-5 text-soa-muted">{audio.result.normalizedText}</p>
-        </details>
-      ) : null}
 
       <button
         type="button"

@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.6.4 - 2026-07-31
+
+### Changed
+
+- 생성 훅과 보조 문장의 색상·굵기 계층 분리
+- 보라·파랑 radial glow와 32px 오버랩 입력 카드 적용
+- 첫 화면 입력 제한을 500자로 조정하고 실시간 카운터 노출
+- 목소리 선택을 모바일 가로 스크롤 칩으로 변경
+- 입력 상태에 따라 WAV 생성 CTA 문구와 활성 상태 변경
+- Dock 터치 영역 확대와 active pill inner shadow 적용
+
+### Added
+
+- 숫자·날짜 자동 변환 토글과 실제 API `normalize_text` 계약
+- 생성 후 문장별 완료 구간 리스트
+- Dock 메뉴 클릭 시 페이지 상단 이동
+- 텍스트 분할 UI 유틸리티와 Web·API 회귀 테스트
+
+### Verification
+
+- 프로젝트 규칙, FastAPI 50 tests, compileall 통과
+- TypeScript·TSX 87개 파일 구문 검사와 CSS 파싱 통과
+- npm registry 제한으로 정식 Web quality와 Ruff는 GitHub Actions에서 최종 확인
+- 전체본과 패치 적용본 해시 일치 및 ZIP 무결성 통과
+
 ## 0.6.3 - 2026-07-31
 
 ### Changed

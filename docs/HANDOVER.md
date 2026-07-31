@@ -1,5 +1,25 @@
 # HANDOVER
 
+## 2026-07-31 22:30 KST · v0.6.4
+
+1. 작업 일시: 2026-07-31 22:30 KST
+2. 대상·기준 버전: `0.6.3 → 0.6.4`
+3. 변경 내용: 생성 화면 타이포 계층, radial glow, 32px 카드 오버랩, 500자 입력창, 발음 보정 토글, 가로 목소리 칩, 동적 CTA, 문장별 생성 구간 리스트, Dock 상단 이동을 구현함.
+4. 변경 이유: 사용자가 첫 화면에서 즉시 입력·생성 흐름을 이해하고 한국어 발음 보정과 긴 문장 자동 분할이라는 제품 강점을 바로 확인하도록 하기 위함.
+5. 영향 범위: HomePage, TextComposer, VoicePresetSelector, AudioResultCard, LinkedPlayerDock, TTS API 계약, FastAPI pipeline, CSS, Web·API 테스트, 문서.
+6. 주요 파일: `HomePage.tsx`, `TextComposer.tsx`, `creation-workspace.css`, `segmentText.ts`, `SegmentResultList.tsx`, `LinkedPlayerDock.tsx`, `tts_pipeline.py`.
+7. 검증 결과: 프로젝트 규칙, FastAPI 50 tests, compileall, TypeScript·TSX 구문 검사, CSS 파싱 통과. npm registry 제한으로 정식 Web quality와 Ruff는 GitHub Actions에서 최종 확인.
+8. 제한·주의: CTA의 약 3초 표시는 짧은 문장 목표 안내이며 실제 시간은 엔진·장비·문장 길이에 따라 달라질 수 있음.
+9. 산출물: `SoriON-AI-0.6.4-full.zip`, `SoriON-AI-0.6.3-to-0.6.4-patch.zip`, `SoriON-AI-0.6.4-artifacts.sha256`.
+10. 다음 예상 업데이트: `0.7.0 CosyVoice Worker Streaming & Clone Execution`.
+
+## 다음 예상 업데이트
+
+- 실제 CosyVoice Worker와 GPU·CUDA·VRAM·모델 readiness
+- 제로샷 복제 실행과 스트리밍 음성 조각
+- 문장별 진행률·재시도·Dock 즉시 재생 연결
+- 공개 API 인증과 요청 제한 기본 경계
+
 ## 2026-07-31 21:24 KST · v0.6.3
 
 1. 작업 일시: 2026-07-31 21:24 KST

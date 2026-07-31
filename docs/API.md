@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "default_engine": "auto"
 }
 ```
@@ -43,7 +43,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.6.3",
+  "version": "0.6.4",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -71,11 +71,12 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
   "pitch": 0,
   "output_format": "wav",
   "engine_id": "melo",
+  "normalize_text": true,
   "job_id": "client-generated-uuid"
 }
 ```
 
-`engine_id`를 생략하면 준비된 실제 엔진을 우선 선택합니다. API는 한국어 전처리 후 180자를 넘는 문장을 나누어 생성하고 같은 형식의 PCM WAV를 하나로 병합합니다.
+`engine_id`를 생략하면 준비된 실제 엔진을 우선 선택합니다. `normalize_text`가 참이면 숫자와 날짜를 한국어 읽기 형태로 바꿉니다. 거짓이면 공백만 정리하고 원문 표기를 유지합니다. API는 180자를 넘는 문장을 나누어 생성하고 같은 형식의 PCM WAV를 하나로 병합합니다.
 
 ### 실제 음원 응답
 
@@ -163,7 +164,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.6.3",
+  "version": "0.6.4",
   "ready": true,
   "real_engine_count": 1,
   "steps": [

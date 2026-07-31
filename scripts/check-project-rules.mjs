@@ -204,6 +204,42 @@ await requireText('docs/VOICE_CLONE.md', [
   '실제 복제 성공으로 표시하지 않는다',
 ])
 
+await requireText('src/pages/HomePage.tsx', [
+  'soa-creation-title',
+  'WAV로 생성하기 (약 3초)',
+  'normalizeText: pronunciationCorrection',
+  'maxLength={500}',
+])
+await requireText('src/components/voice/TextComposer.tsx', [
+  '바로 여기에 변환할 문장을 입력하세요.',
+  '숫자·날짜 자동 변환',
+  '2026년 8월 1일 → 이천이십육년 팔월 일일',
+])
+await requireText('src/components/voice/VoicePresetSelector.tsx', [
+  'soa-voice-chip-row',
+  '옆으로 밀어 비교하세요',
+])
+await requireText('src/components/voice/SegmentResultList.tsx', [
+  '문장별 생성 구간',
+  '하단 Dock에서 이어집니다.',
+])
+await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
+  "window.scrollTo({ top: 0, behavior: 'smooth' })",
+])
+await requireText('services/api/app/schemas/tts.py', [
+  'normalize_text: bool = True',
+])
+await requireText('services/api/app/services/tts_pipeline.py', [
+  'if request.normalize_text:',
+  'NormalizationResult(',
+])
+await requireText('src/styles/creation-workspace.css', [
+  'margin: -32px 10px 0',
+  'radial-gradient',
+  'color: #111',
+  'color: #7a7a7a',
+])
+
 await requireText('src/api/httpClient.ts', [
   'getApiConnectionContext',
   "source: ApiBaseSource",

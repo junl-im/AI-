@@ -60,7 +60,7 @@ class CosyVoiceCloneEngine:
         started = time.perf_counter()
         request = Request(
             f"{self.worker_url}/health",
-            headers={"Accept": "application/json", "User-Agent": "SoriON-API/0.6.3"},
+            headers={"Accept": "application/json", "User-Agent": "SoriON-API/0.6.4"},
         )
         self._last_checked_at = datetime.now(timezone.utc).isoformat()
         try:

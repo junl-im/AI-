@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GeneratedAudio } from '../../tts/generationTypes'
 import { useAppStore } from '../../store/useAppStore'
@@ -37,6 +37,7 @@ describe('LinkedPlayerDock', () => {
     vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined)
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined)
     vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined)
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
   })
 
 
@@ -66,4 +67,15 @@ describe('LinkedPlayerDock', () => {
     expect(relation & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(screen.getByLabelText('SoriON 고정 Dock')).toHaveClass('soa-dock--has-player')
   })
+
+  it('Dock 메뉴를 누르면 페이지와 관계없이 화면 상단으로 이동한다', () => {
+    useAppStore.setState({ page: 'quality' })
+    render(<LinkedPlayerDock />)
+
+    fireEvent.click(screen.getByRole('button', { name: /만들기/ }))
+
+    expect(useAppStore.getState().page).toBe('home')
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
+  })
+
 })

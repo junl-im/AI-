@@ -208,7 +208,10 @@ export function LinkedPlayerDock() {
               key={item.page}
               type="button"
               aria-current={page === item.page ? 'page' : undefined}
-              onClick={() => setPage(item.page)}
+              onClick={() => {
+                setPage(item.page)
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
               className={page === item.page ? 'is-active' : ''}
             >
               <span aria-hidden="true">{item.icon}</span>{item.label}

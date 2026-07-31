@@ -23,6 +23,7 @@ interface ApiTtsRequest {
   pitch: number
   output_format: TtsSynthesisRequest['format']
   engine_id?: string
+  normalize_text: boolean
   job_id: string
 }
 
@@ -118,6 +119,7 @@ export async function synthesizeSpeech(
     pitch: request.pitch,
     output_format: request.format,
     engine_id: request.engineId,
+    normalize_text: request.normalizeText,
     job_id: jobId,
   }
   const result = await apiRequest<ApiTtsResult>('/tts/synthesize', {
