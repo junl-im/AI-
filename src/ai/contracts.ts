@@ -13,7 +13,7 @@ export interface TtsSynthesisRequest {
 
 export interface TtsSynthesisResult {
   jobId: string
-  status: 'queued' | 'processing' | 'completed' | 'mock-complete' | 'cancelled'
+  status: 'queued' | 'processing' | 'completed' | 'mock-complete' | 'cancelled' | 'failed'
   engineId: string
   engineMode: EngineMode
   audioUrl: string | null

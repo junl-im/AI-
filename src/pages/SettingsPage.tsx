@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { ApiSetupWizard } from '../components/settings/ApiSetupWizard'
 import { StatusPill } from '../components/ui/StatusPill'
 import { consumeGoogleSignInResult, isFirebaseConfigured, startGoogleSignIn } from '../firebase/firebaseClient'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
@@ -43,6 +44,7 @@ export function SettingsPage() {
       <p className="mt-2 text-sm leading-6 text-soa-muted">초보자에게 필요한 설정만 먼저 보여주고, 전문 설정은 기능 화면 안에 숨깁니다.</p>
 
       <section className="mt-6 space-y-3">
+        <ApiSetupWizard />
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-black tracking-[-0.035em]">Voice API</h2>

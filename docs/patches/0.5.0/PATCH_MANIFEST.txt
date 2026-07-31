@@ -1,0 +1,73 @@
+SoriON AI patch manifest
+from: 0.4.0
+to: 0.5.0
+mode: overwrite repository root
+deleted files: 0
+
+deleted file list:
+none
+
+changed and added files: 63
+.env.example
+.gitignore
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/API.md
+docs/ARCHITECTURE.md
+docs/CHANGELOG.md
+docs/DATABASE.md
+docs/ERROR_CODES.md
+docs/GITHUB_PAGES.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/PRODUCTION_READINESS.md
+docs/QUALITY_LAB.md
+docs/ROADMAP.md
+docs/SECURITY.md
+docs/TEST.md
+docs/UI_GUIDE.md
+docs/patches/0.5.0/DELETE_LIST.txt
+docs/patches/0.5.0/PATCH_MANIFEST.txt
+docs/patches/0.5.0/PATCH_README.md
+package.json
+services/api/app/api/router.py
+services/api/app/api/routes/health.py
+services/api/app/api/routes/quality.py
+services/api/app/api/routes/setup.py
+services/api/app/api/routes/tts.py
+services/api/app/main.py
+services/api/app/schemas/setup.py
+services/api/app/schemas/tts.py
+services/api/app/services/job_manager.py
+services/api/app/services/setup_diagnostics.py
+services/api/app/services/tts_pipeline.py
+services/api/pyproject.toml
+services/api/tests/test_health.py
+services/api/tests/test_job_manager.py
+services/api/tests/test_quality.py
+services/api/tests/test_setup.py
+services/api/tests/test_tts.py
+services/api/tests/test_tts_pipeline.py
+src/ai/contracts.ts
+src/api/httpClient.test.ts
+src/api/httpClient.ts
+src/components/evaluation/QualityResultCard.tsx
+src/components/layout/BrandMasthead.tsx
+src/components/settings/ApiSetupWizard.tsx
+src/components/voice/GenerationProgress.tsx
+src/hooks/useEngineCatalog.ts
+src/hooks/useVoiceGeneration.ts
+src/pages/HomePage.tsx
+src/pages/QualityPage.tsx
+src/pages/SettingsPage.tsx
+src/projects/projectRepository.ts
+src/quality/qualityReport.test.ts
+src/quality/qualityReport.ts
+src/quality/qualityReviewRepository.ts
+src/quality/qualityReviewTypes.ts
+src/settings/setupApi.ts
+src/settings/setupTypes.ts
+src/storage/database.ts
+src/tts/generationTypes.ts
+src/tts/voiceApi.ts

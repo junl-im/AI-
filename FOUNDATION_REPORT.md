@@ -1,37 +1,36 @@
-# 곰같은여우 SoriON AI 0.4.0 구현 보고서
+# SoriON AI 0.5.1 Foundation Report
 
-작성: 2026-07-31 13:22 KST  
-버전: 0.4.0  
-단계: Korean Voice Quality Lab
+## 결과
 
-## 완료 범위
+`0.5.0 Korean TTS Production Readiness`의 기능은 유지하면서 상단 마스트헤드를 모바일·PC 공통의 압축형 브랜드 배너로 다시 설계했다. 브랜드명과 핵심 문장은 같은 공간에서 순차적으로 페이드되며, `SoriON AI`의 `I`와 PC Voice Core를 마이크 아이덴티티로 통일했다.
 
-- 한국어 숫자·날짜·시각·금액·퍼센트·단위·영문 약어 전처리
-- 긴 문장 자동 분할과 PCM WAV 병합
-- 처리 시간·음원 길이·파일 크기·RTF 측정
-- 엔진별 감정·속도·피치 지원 계약
-- 모바일 품질 연구소 화면
-- 엔진 사전 진단, 평가 문장, 전처리 미리보기, A/B 비교 API
-- 평가 문장 14종
-- 인수인계, 변경 이력, 다음 계획 갱신
+## 구현 범위
 
-## 검증
+- 모바일·PC 상단 영역 높이 축소
+- 배너형 메시지 슬라이드와 20초 순환 페이드
+- `곰같은여우 SoriON AI` 브랜드 첫 슬라이드
+- 한국어 핵심 문장 3종 순환
+- 로고 `AI`의 `I`를 CSS 마이크로 표현
+- PC Voice Core의 CSS 스튜디오 마이크
+- 모션 감소 환경의 정적 브랜드 표시
+- 마스트헤드 CSS 파일 분리
+- 렌더링 회귀 테스트와 문서 갱신
 
-- FastAPI 테스트 23개 통과
-- Linux eSpeak 실엔진으로 장문 2구간 생성·WAV 병합 확인
-- Python compileall 통과
-- WAV 병합 결과 RIFF/WAVE 유효성 확인
-- 장문 병합 후 자식 임시 파일 정리 확인
-- 프로젝트 500줄·SVG·비밀키 규칙 검사 통과
-- 내부 TypeScript strict 검사와 TS/TSX 파서 검사 통과
-- 최종 프로젝트 파일 167개
+## 검증 결과
 
-## 제한
+- 프로젝트 규칙 검사 통과
+- FastAPI 테스트 29개 통과
+- Python 전체 문법 컴파일 통과
+- 임시 JSX 선언을 사용한 `BrandMasthead.tsx` strict TypeScript 검사 통과
+- `tinycss2` 기반 CSS 구문 검사 통과
+- 모든 소스 파일 500줄 이하 확인
+- SVG·비밀키·금지 산출물 미포함 확인
+- `0.5.0`에 패치를 적용한 결과와 전체 `0.5.1`의 188개 파일 동등성 검사 통과
 
-현재 환경의 내부 npm 저장소에 `@tailwindcss/vite`가 없어 `npm install`, Vitest, ESLint, Vite production build는 실행하지 못했다. 일반 개발 PC 또는 GitHub Actions에서 웹 검사를 완료해야 한다.
+## 검증 제한
 
-## 산출물
+현재 실행 환경의 내부 npm 저장소에 `@tailwindcss/vite` 패키지가 없어 `npm install`이 404로 실패했다. 따라서 정식 Vitest, ESLint, Vite production build는 이 환경에서 실행하지 못했으며 GitHub Actions에서 최종 확인해야 한다.
 
-- `SoriON-AI-0.4.0-full.zip`
-- `SoriON-AI-0.3.0-to-0.4.0-patch.zip`
-- `SoriON-AI-0.4.0-artifacts.sha256`
+## 동작 제한
+
+배너 문구는 자동 순환하며 사용자가 직접 넘기는 컨트롤은 제공하지 않는다. `prefers-reduced-motion`이 활성화된 환경에서는 첫 브랜드 슬라이드만 정적으로 표시한다. 실제 렌더링은 브라우저와 설치된 글꼴에 따라 줄바꿈이 조금 달라질 수 있다.

@@ -5,7 +5,12 @@ from fastapi import APIRouter, HTTPException, Request, status
 
 from app.core.config import get_settings
 from app.engines.registry import engine_registry
-from app.schemas.tts import JobCancelResponse, TtsSynthesisRequest, TtsSynthesisResponse
+from app.schemas.tts import (
+    JobCancelResponse,
+    JobProgressResponse,
+    TtsSynthesisRequest,
+    TtsSynthesisResponse,
+)
 from app.services.job_manager import GenerationTimeoutError, JobAlreadyRunningError
 
 router = APIRouter()
@@ -27,8 +32,19 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
     manager = request.app.state.job_manager
     pipeline = request.app.state.tts_pipeline
 
+    async def report(phase, progress, current_segment, total_segments, message) -> None:
+        await manager.update(
+            job_id,
+            status="processing",
+            phase=phase,
+            progress=progress,
+            current_segment=current_segment,
+            total_segments=total_segments,
+            message=message,
+        )
+
     try:
-        result = await manager.run(job_id, lambda: pipeline.synthesize(engine, normalized))
+        result = await manager.run(job_id, lambda: pipeline.synthesize(engine, normalized, report))
     except JobAlreadyRunningError as error:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -52,6 +68,17 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
     if result.audio_url and result.audio_url.startswith("/"):
         result.audio_url = f"{str(request.base_url).rstrip('/')}{result.audio_url}"
     return result
+
+
+@router.get("/jobs/{job_id}", response_model=JobProgressResponse)
+async def get_job(job_id: str, request: Request) -> JobProgressResponse:
+    snapshot = await request.app.state.job_manager.get(job_id)
+    if snapshot is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SOA-4010: 작업 상태를 찾지 못했습니다.",
+        )
+    return snapshot
 
 
 @router.delete("/jobs/{job_id}", response_model=JobCancelResponse)

@@ -3,13 +3,14 @@ import { ApiError } from '../api/httpClient'
 import { buildAudioFilename } from '../tts/audioFile'
 import type { GeneratedAudio, GenerationAttempt, VoiceGenerationState } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
-import { cancelSpeech, synthesizeSpeech } from '../tts/voiceApi'
+import { cancelSpeech, getSpeechProgress, synthesizeSpeech } from '../tts/voiceApi'
 
 const initialState: VoiceGenerationState = {
   phase: 'idle',
   audio: null,
   error: null,
   lastAttempt: null,
+  progress: null,
 }
 
 function waitForPaint(): Promise<void> {
@@ -21,6 +22,12 @@ export function useVoiceGeneration() {
   const localUrlRef = useRef<string | null>(null)
   const controllerRef = useRef<AbortController | null>(null)
   const jobIdRef = useRef<string | null>(null)
+  const pollTimerRef = useRef<number | null>(null)
+
+  const stopPolling = useCallback(() => {
+    if (pollTimerRef.current !== null) window.clearTimeout(pollTimerRef.current)
+    pollTimerRef.current = null
+  }, [])
 
   const releaseLocalUrl = useCallback(() => {
     if (!localUrlRef.current) return
@@ -30,11 +37,28 @@ export function useVoiceGeneration() {
 
   useEffect(() => () => {
     controllerRef.current?.abort()
+    stopPolling()
     releaseLocalUrl()
-  }, [releaseLocalUrl])
+  }, [releaseLocalUrl, stopPolling])
+
+  const startPolling = useCallback((jobId: string, signal: AbortSignal) => {
+    const poll = async () => {
+      if (signal.aborted || jobIdRef.current !== jobId) return
+      try {
+        const progress = await getSpeechProgress(jobId)
+        setState((current) => ({ ...current, progress }))
+        if (['completed', 'failed', 'cancelled'].includes(progress.phase)) return
+      } catch {
+        // 첫 POST가 작업 스냅샷을 만들기 전의 404와 일시적인 상태 조회 실패는 다음 주기에 재시도한다.
+      }
+      pollTimerRef.current = window.setTimeout(() => void poll(), 450)
+    }
+    pollTimerRef.current = window.setTimeout(() => void poll(), 250)
+  }, [])
 
   const createBrowserDemo = useCallback(async (attempt: GenerationAttempt, message: string): Promise<GeneratedAudio> => {
-    setState((current) => ({ ...current, phase: 'rendering', error: null }))
+    stopPolling()
+    setState((current) => ({ ...current, phase: 'rendering', error: null, progress: null }))
     await waitForPaint()
     releaseLocalUrl()
     const blob = createMockWave(attempt.request.text, attempt.request.voiceId)
@@ -61,20 +85,23 @@ export function useVoiceGeneration() {
         realtimeFactor: null,
       },
     }
-  }, [releaseLocalUrl])
+  }, [releaseLocalUrl, stopPolling])
 
   const generate = useCallback(async (attempt: GenerationAttempt): Promise<GeneratedAudio | null> => {
     controllerRef.current?.abort()
+    stopPolling()
     const controller = new AbortController()
     const jobId = crypto.randomUUID()
     controllerRef.current = controller
     jobIdRef.current = jobId
-    setState({ phase: 'preparing', audio: null, error: null, lastAttempt: attempt })
+    setState({ phase: 'preparing', audio: null, error: null, lastAttempt: attempt, progress: null })
     await waitForPaint()
     setState((current) => ({ ...current, phase: 'requesting' }))
+    startPolling(jobId, controller.signal)
 
     try {
       const result = await synthesizeSpeech(attempt.request, jobId, controller.signal)
+      stopPolling()
       let audio: GeneratedAudio
 
       if (result.audioUrl) {
@@ -93,11 +120,12 @@ export function useVoiceGeneration() {
         )
       }
 
-      setState({ phase: 'completed', audio, error: null, lastAttempt: attempt })
+      setState((current) => ({ ...current, phase: 'completed', audio, error: null, lastAttempt: attempt }))
       return audio
     } catch (error) {
+      stopPolling()
       if (error instanceof ApiError && error.code === 'SOA-2003') {
-        setState({ phase: 'cancelled', audio: null, error: null, lastAttempt: attempt })
+        setState({ phase: 'cancelled', audio: null, error: null, lastAttempt: attempt, progress: null })
         return null
       }
       if (error instanceof ApiError && (error.status === 0 || error.status === 408)) {
@@ -105,24 +133,25 @@ export function useVoiceGeneration() {
           attempt,
           'AI API에 연결되지 않아 브라우저 데모 음원을 만들었습니다. 실제 TTS 엔진 연결 전 기능 확인용입니다.',
         )
-        setState({ phase: 'completed', audio, error: null, lastAttempt: attempt })
+        setState({ phase: 'completed', audio, error: null, lastAttempt: attempt, progress: null })
         return audio
       }
 
       const message = error instanceof Error ? error.message : '음성을 생성하지 못했습니다.'
-      setState({ phase: 'failed', audio: null, error: message, lastAttempt: attempt })
+      setState((current) => ({ ...current, phase: 'failed', audio: null, error: message, lastAttempt: attempt }))
       return null
     } finally {
       if (controllerRef.current === controller) controllerRef.current = null
       if (jobIdRef.current === jobId) jobIdRef.current = null
     }
-  }, [createBrowserDemo, releaseLocalUrl])
+  }, [createBrowserDemo, releaseLocalUrl, startPolling, stopPolling])
 
   const cancel = useCallback(() => {
     const jobId = jobIdRef.current
     controllerRef.current?.abort()
+    stopPolling()
     if (jobId) void cancelSpeech(jobId).catch(() => undefined)
-  }, [])
+  }, [stopPolling])
 
   const retry = useCallback(() => {
     if (!state.lastAttempt) return Promise.resolve(null)
@@ -131,9 +160,10 @@ export function useVoiceGeneration() {
 
   const reset = useCallback(() => {
     controllerRef.current?.abort()
+    stopPolling()
     releaseLocalUrl()
     setState(initialState)
-  }, [releaseLocalUrl])
+  }, [releaseLocalUrl, stopPolling])
 
   return { ...state, generate, retry, cancel, reset }
 }

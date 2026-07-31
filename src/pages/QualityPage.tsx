@@ -15,6 +15,8 @@ import type {
   TextPreview,
 } from '../quality/qualityTypes'
 import { StatusPill } from '../components/ui/StatusPill'
+import { exportQualityReviewsCsv, exportQualityReviewsJson } from '../quality/qualityReport'
+import { listQualityReviews } from '../quality/qualityReviewRepository'
 
 const FALLBACK_SENTENCE: EvaluationSentence = {
   id: 'fallback-basic',
@@ -34,6 +36,7 @@ export function QualityPage() {
   const [loadingPreview, setLoadingPreview] = useState(false)
   const [comparing, setComparing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [reviewCount, setReviewCount] = useState(0)
 
   const refreshDiagnostics = useCallback(async () => {
     setLoadingDiagnostics(true)
@@ -51,15 +54,20 @@ export function QualityPage() {
     }
   }, [])
 
+  const refreshReviewCount = useCallback(() => {
+    void listQualityReviews().then((items) => setReviewCount(items.length)).catch(() => undefined)
+  }, [])
+
   useEffect(() => {
     void refreshDiagnostics()
+    refreshReviewCount()
     void getEvaluationSentences().then((items) => {
       if (items.length) {
         setSentences(items)
         setText(items[0].text)
       }
     }).catch(() => undefined)
-  }, [refreshDiagnostics])
+  }, [refreshDiagnostics, refreshReviewCount])
 
   const comparableEngines = useMemo(
     () => diagnostics?.engines.filter((engine) => engine.ready && engine.mode !== 'mock') ?? [],
@@ -85,6 +93,17 @@ export function QualityPage() {
     } finally {
       setLoadingPreview(false)
     }
+  }
+
+
+  async function exportReviews(format: 'json' | 'csv') {
+    const reviews = await listQualityReviews()
+    if (!reviews.length) {
+      setError('저장된 품질 평가가 없습니다.')
+      return
+    }
+    if (format === 'json') exportQualityReviewsJson(reviews)
+    else exportQualityReviewsCsv(reviews)
   }
 
   async function handleCompare() {
@@ -177,9 +196,19 @@ export function QualityPage() {
         {comparison ? (
           <section>
             <div className="mb-3"><span className="text-[10px] font-black tracking-[0.15em] text-soa-muted">COMPARISON RESULT</span><h2 className="mt-1 text-2xl font-black tracking-[-0.05em]">청취 결과</h2></div>
-            <div className="space-y-3">{comparison.results.map((result) => <QualityResultCard key={result.engineId} result={result} />)}</div>
+            <div className="space-y-3">{comparison.results.map((result) => <QualityResultCard key={result.engineId} result={result} sentence={text} onSaved={refreshReviewCount} />)}</div>
           </section>
         ) : null}
+
+        <section className="rounded-[28px] border border-soa-line bg-soa-card p-5">
+          <span className="text-[10px] font-black tracking-[0.15em] text-soa-muted">QUALITY REPORT</span>
+          <div className="mt-1 flex items-center justify-between gap-3"><h2 className="text-xl font-black tracking-[-0.05em]">저장된 평가 {reviewCount}개</h2><StatusPill label="LOCAL ONLY" /></div>
+          <p className="mt-2 text-xs font-semibold leading-5 text-soa-muted">평가 기록은 이 기기에만 저장됩니다. 모델 비교와 인수인계에 쓸 수 있도록 보고서로 내보냅니다.</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => void exportReviews('json')} className="focus-ring min-h-11 rounded-2xl border border-soa-line bg-white text-xs font-black">JSON 내보내기</button>
+            <button type="button" onClick={() => void exportReviews('csv')} className="focus-ring min-h-11 rounded-2xl bg-soa-ink text-xs font-black text-white">CSV 내보내기</button>
+          </div>
+        </section>
       </div>
     </div>
   )

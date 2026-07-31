@@ -440,3 +440,160 @@ Foundation 단계의 연결 확인 화면을 실제 모바일 사용 흐름으�
 ### 다음 예상 업데이트
 
 `0.5.0 Korean TTS Production Readiness`에서 설치 Wizard, 모델 worker, 진행률, 품질 보고서 저장·내보내기, 일괄 평가를 구현한다.
+
+## 2026-07-31 14:18 KST - 0.5.0 Korean TTS Production Readiness
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.4.0`
+- 대상 버전: `0.5.0`
+
+### 프로젝트 목표 재확인
+
+SoriON AI의 최종 목표는 웹 음성 실험실이 아니라, Voicebox보다 쉽게 시작하고 ElevenLabs보다 한국인에게 편하며 모바일에서 앱처럼 사용하는 차세대 AI Voice Platform이다. 사용자는 10초 안에 음성 생성·복제·변환을 시작할 수 있어야 한다. 이번 버전은 연구소 기능을 더 늘리는 대신 실제 서비스 연결과 복구 가능성을 우선했다.
+
+### 변경 내용
+
+- 사용자가 로컬·원격 FastAPI 주소를 입력하고 연결 검사 후 이 기기에 저장할 수 있는 3단계 Setup Wizard를 추가했다.
+- Python, 임시 음원 폴더 쓰기 권한, 실제 한국어 엔진, FFmpeg, CORS를 확인하는 `/api/v1/setup` API를 추가했다.
+- JobManager가 대기, 정규화, 생성, 병합, 완료, 취소, 실패 스냅샷을 유지하도록 확장했다.
+- 웹에서 생성 POST와 동시에 작업 상태를 polling해 실제 퍼센트와 장문 구간을 표시한다.
+- 프로젝트와 품질 평가가 같은 IndexedDB를 안전하게 공유하도록 데이터베이스 버전을 2로 올렸다.
+- 품질 별점과 메모를 문장·엔진 조합별로 저장하고 JSON·CSV로 내보내게 했다.
+- API 주소가 바뀌면 엔진 목록을 자동으로 다시 읽도록 앱 이벤트를 추가했다.
+
+### 변경 이유
+
+- GitHub Pages와 로컬 AI API를 연결할 때 환경 변수 수정만 요구하면 모바일 사용자에게 어렵다.
+- 장문 생성이 멈춘 것처럼 보이면 속도가 기능이라는 원칙을 지킬 수 없다.
+- A/B 평가가 새로고침마다 사라지면 실제 한국어 엔진 선정 근거가 남지 않는다.
+- 다음 핵심 기능인 목소리 복제로 이동하기 전에 연결, 진행률, 로컬 데이터 보존 규칙이 필요하다.
+
+### 영향 범위
+
+- 설정 화면과 API 기본 주소
+- 모든 엔진 목록 조회와 TTS 요청
+- TTS 작업 생명주기와 상태 API
+- 홈 생성 진행 UI
+- IndexedDB 스키마
+- 품질 평가와 보고서 다운로드
+- API·데이터베이스·보안·테스트 문서
+
+### 주요 변경 파일
+
+- `services/api/app/services/job_manager.py`
+- `services/api/app/services/tts_pipeline.py`
+- `services/api/app/api/routes/tts.py`
+- `services/api/app/api/routes/setup.py`
+- `services/api/app/services/setup_diagnostics.py`
+- `src/components/settings/ApiSetupWizard.tsx`
+- `src/api/httpClient.ts`
+- `src/hooks/useVoiceGeneration.ts`
+- `src/components/voice/GenerationProgress.tsx`
+- `src/storage/database.ts`
+- `src/quality/qualityReviewRepository.ts`
+- `src/quality/qualityReport.ts`
+- `docs/PRODUCTION_READINESS.md`
+
+### 검증 결과
+
+- FastAPI 테스트 29개 통과
+- Python 전체 문법 컴파일 통과
+- 임시 외부 모듈 선언을 사용한 TypeScript strict 검사 통과
+- 진행률 완료·취소 스냅샷 테스트 통과
+- 장문 파이프라인의 정규화·구간 생성·병합 진행 순서 테스트 통과
+- Setup 진단 응답과 필수 항목 테스트 통과
+- API 주소 정규화와 JSON·CSV 보고서 변환 테스트 추가
+- 모든 소스 파일 500줄 이하 확인
+- SVG·비밀키·금지 산출물 검사
+
+### 알려진 제한과 주의사항
+
+- 현재 Setup Wizard는 설치 안내와 상태 확인까지만 수행하며 시스템 패키지를 자동 설치하지 않는다.
+- 모델 worker 프로세스 분리, 평가 세트 일괄 실행, 실패 구간만 재생성은 이번 범위에서 제외했다.
+- API 주소는 localStorage에 저장되므로 비밀키나 인증 토큰을 주소에 포함하면 안 된다.
+- 품질 평가에는 사용자가 입력한 문장이 들어가므로 보고서 공유 전 개인 정보를 확인해야 한다.
+- 내부 npm 저장소에 `@tailwindcss/vite`가 없어 정식 npm 설치, Vitest, ESLint, Vite production build는 현재 환경에서 실행하지 못했다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.5.0-full.zip`
+- 패치: `SoriON-AI-0.4.0-to-0.5.0-patch.zip`
+- 체크섬: `SoriON-AI-0.5.0-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+`0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 샘플 품질 검사, 본인 목소리·권한 동의, 로컬 보관과 삭제, 교체형 VoiceCloneEngine 계약을 구현한다.
+
+## 2026-07-31 14:30 KST - 0.5.1 Compact Brand Banner
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.5.0`
+- 대상 버전: `0.5.1`
+
+### 프로젝트 목표 재확인
+
+SoriON AI의 목표는 한국인이 모바일에서 앱처럼 사용하며 10초 안에 음성 생성·복제·변환을 시작하는 차세대 AI Voice Platform이다. 이번 패치는 기능을 늘리는 대신 첫 화면의 높이와 브랜드 전달 방식을 정리해 실제 작업 화면이 더 빨리 보이도록 했다.
+
+### 변경 내용
+
+- 모바일과 PC 상단 마스트헤드의 세로 여백과 Voice Core 높이를 줄였다.
+- `곰같은여우 SoriON AI`, `문장을 목소리로.`, `목소리를 새로운 가능성으로.`, `한국어의 감정까지 자연스럽게.`를 한 배너 공간에서 순차적으로 페이드한다.
+- `SoriON AI`의 마지막 `I`를 CSS 마이크로 표현했다.
+- PC Voice Core의 기존 S 오브를 CSS 스튜디오 마이크로 교체했다.
+- 마이크 그릴, 요크, 스탠드, 광원과 웨이브 애니메이션을 SVG 없이 구현했다.
+- 모션 감소 설정에서는 첫 브랜드 슬라이드만 정적으로 표시한다.
+- 대형 마스트헤드 CSS를 별도 파일로 분리해 500줄 제한을 유지했다.
+
+### 변경 이유
+
+- 상단이 너무 높으면 모바일의 핵심 입력 영역이 늦게 나타나 모바일 First 원칙에 어긋난다.
+- 고정된 긴 소개 문장보다 짧은 브랜드 메시지가 순환하는 배너가 제품 정체성을 더 빠르게 전달한다.
+- 마이크를 로고와 Voice Core에 함께 사용하면 SoriON AI만의 음성 플랫폼 아이덴티티가 강화된다.
+
+### 영향 범위
+
+- 모든 페이지 공통 상단 마스트헤드
+- 모바일·PC 첫 화면 높이
+- 브랜드 로고 표기
+- 모션 감소 접근성
+- 마스트헤드 컴포넌트 테스트
+
+### 주요 변경 파일
+
+- `src/components/layout/BrandMasthead.tsx`
+- `src/components/layout/BrandMasthead.test.tsx`
+- `src/styles/index.css`
+- `src/styles/masthead.css`
+- `docs/UI_GUIDE.md`
+- `docs/TEST.md`
+
+### 검증 결과
+
+- 프로젝트 규칙 검사 통과
+- FastAPI 테스트 29개 통과
+- Python 전체 문법 컴파일 통과
+- 임시 JSX 선언을 사용한 `BrandMasthead.tsx` strict TypeScript 검사 통과
+- `tinycss2` 기반 CSS 구문 검사 통과
+- 브랜드 제목, 한국어 순환 문구, 두 마이크 마크 DOM 회귀 테스트 추가
+- 모든 소스 파일 500줄 이하 및 SVG 미사용 확인
+- `0.5.0`에 패치를 적용한 결과와 전체 `0.5.1`의 188개 파일 동등성 검사 통과
+
+### 알려진 제한과 주의사항
+
+- 자동 배너는 사용자가 직접 넘기는 버튼을 제공하지 않는다.
+- 모션 감소 환경에서는 문구 순환 대신 브랜드명만 표시한다.
+- 시스템 글꼴에 따라 매우 좁은 기기에서 문구 줄바꿈이 달라질 수 있다.
+- 실제 음성 복제 기능은 이번 패치 범위가 아니며 다음 `0.6.0`에서 진행한다.
+- 내부 npm 저장소에 `@tailwindcss/vite`가 없어 정식 Vitest, ESLint, Vite production build는 현재 환경에서 실행하지 못했다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.5.1-full.zip`
+- 패치: `SoriON-AI-0.5.0-to-0.5.1-patch.zip`
+- 체크섬: `SoriON-AI-0.5.1-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+`0.6.0 Mobile Voice Clone Foundation`에서 모바일 녹음, 파일 업로드, 샘플 품질 검사, 본인 목소리·사용 권한 동의, 로컬 보관과 삭제, 교체 가능한 VoiceCloneEngine 계약을 구현한다.

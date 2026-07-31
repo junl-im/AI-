@@ -129,7 +129,7 @@ export function HomePage() {
           onPitchChange={setPitch}
         />
 
-        <GenerationProgress phase={generation.phase} onCancel={generation.cancel} />
+        <GenerationProgress phase={generation.phase} progress={generation.progress} onCancel={generation.cancel} />
 
         <button
           type="submit"

@@ -53,3 +53,18 @@ Firestore에는 원본 음성, 생성 음원, 모델 파일을 직접 저장하�
 ## 0.3.0 엔진 모드
 
 기존 프로젝트 레코드의 `engineId`, `audioSource`, `outputFormat` 선택 필드를 유지합니다. 새 프로젝트에는 선택 필드 `engineMode`를 저장해 `ai`, `local`, `mock`을 구분합니다. 기존 IndexedDB 레코드는 이 필드가 없어도 정상 표시됩니다.
+
+## IndexedDB v2
+
+데이터베이스 이름은 `sorion-ai`, 버전은 2다.
+
+### `qualityReviews`
+
+- key: `id`
+- 문장과 엔진 ID를 기반으로 만든 안정적인 로컬 ID
+- `sentence`, `engineId`, `engineName`, `engineMode`
+- `rating`, `note`
+- `elapsedMs`, `durationSeconds`, `realtimeFactor`
+- `createdAt`, `updatedAt`
+
+평가 문장에는 개인 정보가 들어갈 수 있으므로 Firebase에 자동 동기화하지 않는다. JSON·CSV 내보내기는 사용자가 명시적으로 눌렀을 때만 수행한다.

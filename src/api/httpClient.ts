@@ -1,4 +1,6 @@
 const DEFAULT_TIMEOUT_MS = 12_000
+const API_BASE_STORAGE_KEY = 'sorion-api-base-url'
+const DEFAULT_API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
 
 export class ApiError extends Error {
   constructor(
@@ -13,13 +15,37 @@ export class ApiError extends Error {
 interface ApiRequestOptions {
   timeoutMs?: number
   signal?: AbortSignal
+  baseUrl?: string
+}
+
+export function normalizeApiBaseUrl(value: string): string {
+  const trimmed = value.trim().replace(/\/+$/, '')
+  if (!trimmed) return DEFAULT_API_BASE
+  return trimmed.endsWith('/api/v1') ? trimmed : `${trimmed}/api/v1`
+}
+
+export function getApiBaseUrl(): string {
+  if (typeof window === 'undefined') return DEFAULT_API_BASE
+  return window.localStorage.getItem(API_BASE_STORAGE_KEY) || DEFAULT_API_BASE
+}
+
+export function saveApiBaseUrl(value: string): string {
+  const normalized = normalizeApiBaseUrl(value)
+  window.localStorage.setItem(API_BASE_STORAGE_KEY, normalized)
+  window.dispatchEvent(new Event('sorion-api-change'))
+  return normalized
+}
+
+export function resetApiBaseUrl(): void {
+  window.localStorage.removeItem(API_BASE_STORAGE_KEY)
+  window.dispatchEvent(new Event('sorion-api-change'))
 }
 
 export async function apiRequest<T>(path: string, init?: RequestInit, options: ApiRequestOptions = {}): Promise<T> {
   const controller = new AbortController()
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
   const timer = window.setTimeout(() => controller.abort('timeout'), timeoutMs)
-  const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
+  const baseUrl = options.baseUrl ? normalizeApiBaseUrl(options.baseUrl) : getApiBaseUrl()
   const abortFromCaller = () => controller.abort('caller')
   options.signal?.addEventListener('abort', abortFromCaller, { once: true })
 

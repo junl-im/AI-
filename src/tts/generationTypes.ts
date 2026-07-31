@@ -1,4 +1,5 @@
 import type { TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
+import type { SpeechJobProgress } from './voiceApi'
 
 export type GenerationPhase = 'idle' | 'preparing' | 'requesting' | 'rendering' | 'completed' | 'cancelled' | 'failed'
 export type AudioSource = 'api' | 'browser-demo'
@@ -21,4 +22,5 @@ export interface VoiceGenerationState {
   audio: GeneratedAudio | null
   error: string | null
   lastAttempt: GenerationAttempt | null
+  progress: SpeechJobProgress | null
 }

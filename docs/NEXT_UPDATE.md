@@ -2,55 +2,58 @@
 
 ## 목표 버전
 
-`0.5.0 Korean TTS Production Readiness`
+`0.6.0 Mobile Voice Clone Foundation`
+
+## 제품 방향
+
+SoriON AI의 목표는 연구 도구가 아니라 한국인이 모바일에서 10초 안에 음성 생성·복제·변환을 시작하는 AI Voice Platform이다. 다음 버전부터 품질 연구소 중심 개발을 멈추고 두 번째 핵심 흐름인 **목소리 복제**로 이동한다.
 
 ## 목표
 
-품질 연구소에서 얻은 진단과 A/B 결과를 저장·내보내고, 실제 MeloTTS 설치부터 장시간 생성 운영까지 반복 가능한 절차로 만든다.
+상단의 압축형 브랜드 배너와 마이크 아이덴티티는 `0.5.1`에서 완료했다. 다음 버전은 시각 장식 확장보다 모바일 목소리 복제의 안전한 핵심 흐름을 우선한다.
+
+사용자가 휴대폰에서 짧은 샘플을 안전하게 녹음하고, 소유권과 동의를 확인한 뒤, 복제 엔진에 전달할 수 있는 모바일 온보딩과 데이터 계약을 만든다. 실제 복제 모델이 없어도 녹음·검증·삭제·동의 흐름은 완전하게 동작해야 한다.
 
 ## 예상 구현
 
-- MeloTTS 설치 단계별 Setup Wizard
-- 패키지·한국어 MeCab·모델 파일·장치별 상세 진단
-- 모델 worker 프로세스 분리와 재시작
-- 생성 진행률 SSE 또는 polling API
-- 품질 별점·메모 IndexedDB 영구 저장
-- JSON·CSV 품질 보고서 내보내기
-- 평가 세트 일괄 실행과 중단·재개
-- FFmpeg 선택 어댑터를 통한 샘플레이트 통일
-- 긴 문장 생성 큐와 구간별 실패 재시도
-- 외부 API 주소 설정과 연결 테스트
-- 공개 음원 라우트 인증 설계 초안
+- 모바일 마이크 녹음과 파일 업로드
+- 10초·30초 샘플 품질 가이드
+- 무음, 클리핑, 너무 짧은 음원 사전 검사
+- 본인 목소리·정당한 권한 확인 체크리스트
+- 명시적 동의 기록과 철회·삭제 흐름
+- 복제 샘플은 기본적으로 기기 로컬 보관
+- 엔진 교체형 `VoiceCloneEngine` 계약
+- 복제 준비 상태와 예상 처리 시간 표시
+- 원본 음성 → 대상 음색 변환 요청 계약 초안
+- 모바일 3단계 흐름: 녹음 → 확인 → 복제 시작
+
+## 절대 조건
+
+- 타인의 목소리를 동의 없이 복제하는 기능을 제공하지 않는다.
+- 미성년자, 사칭, 금융·공공기관 오용 방지 문구와 차단 지점을 먼저 설계한다.
+- 음성 원본을 Firebase 또는 외부 서버에 자동 업로드하지 않는다.
+- 실제 복제 모델이 연결되지 않았는데 성공한 것처럼 표시하지 않는다.
+- 초보자의 기본 흐름은 3번 이하의 주요 조작으로 끝나야 한다.
 
 ## 예상 변경 영역
 
-- `services/api/app/workers/`
-- `services/api/app/services/quality_reports.py`
-- `services/api/app/api/routes/quality.py`
-- `src/pages/QualityPage.tsx`
-- `src/quality/`
-- `src/projects/`
-- `docs/QUALITY_LAB.md`
+- `src/pages/ClonePage.tsx`
+- `src/components/clone/`
+- `src/voiceclone/`
+- `src/storage/`
+- `services/api/app/engines/voiceclone/`
+- `services/api/app/api/routes/voiceclone.py`
+- `docs/VOICE_CLONE_POLICY.md`
 - `docs/SECURITY.md`
 - `docs/HANDOVER.md`
 
-## 선행 조건
+## 선행 확인
 
-- 일반 개발 PC에서 `0.4.0` production build 통과
-- 실제 MeloTTS 또는 시스템 음성으로 장문 병합 1회 성공
-- 품질 연구소 A/B 결과 청취 확인
-- GitHub Pages의 `BUILD v0.4.0` 확인
+- 공개 사이트에 `BUILD v0.5.1` 표시
+- 설정 화면에서 Voice API 주소 저장과 연결 검사 성공
+- 긴 문장 생성 중 실제 진행률 표시 확인
+- 품질 별점 저장 후 JSON·CSV 다운로드 확인
 
-## 위험 요소
+## 이후 방향
 
-- MeloTTS 의존성과 최신 PyTorch·Python 조합이 충돌할 수 있습니다.
-- 모델 프로세스를 분리하면 취소·정리·로그 관리가 복잡해집니다.
-- 브라우저 저장 보고서에는 사용자 입력 문장이 포함되므로 삭제와 내보내기 동의가 필요합니다.
-- FFmpeg를 기본 의존성으로 강제하면 설치 난이도가 높아질 수 있습니다.
-
-## 이번 버전에서 넘기는 결정
-
-- 품질 별점과 메모는 아직 영구 저장하지 않습니다.
-- 주소·전화번호·수식의 읽기 규칙은 자동 적용하지 않습니다.
-- WAV 병합은 같은 형식의 비압축 PCM만 허용합니다.
-- 모델 파일은 전체 ZIP과 패치 ZIP에 포함하지 않습니다.
+`0.7.0`에서는 음성 → 음성 변환의 첫 파이프라인과 STT 자막 기반 편집을 연결한다.

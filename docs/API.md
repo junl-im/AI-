@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "default_engine": "auto"
 }
 ```
@@ -129,3 +129,51 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 - 원문 텍스트와 음성 파일은 애플리케이션 로그에 남기지 않습니다.
 - Mock, Demo, Local TTS, AI 상태를 같은 것으로 위장하지 않습니다.
 - 모든 응답에 `X-Request-ID`를 포함합니다.
+
+## 0.5.0 Setup 상태
+
+### `GET /api/v1/setup`
+
+웹 연결 전에 Python 버전, 임시 음원 폴더, 실제 한국어 엔진, FFmpeg, CORS 상태를 확인한다.
+
+주요 응답:
+
+```json
+{
+  "version": "0.5.1",
+  "ready": true,
+  "real_engine_count": 1,
+  "steps": [
+    {
+      "id": "real-engine",
+      "label": "실제 한국어 음성 엔진",
+      "status": "ready",
+      "required": true,
+      "detail": "SoriON Local Korean Voice",
+      "action": null
+    }
+  ]
+}
+```
+
+## 0.5.0 작업 진행률
+
+### `GET /api/v1/tts/jobs/{job_id}`
+
+생성 요청에 사용한 UUID로 현재 상태를 조회한다. 작업이 끝난 뒤에도 최근 스냅샷을 조회할 수 있다.
+
+```json
+{
+  "job_id": "UUID",
+  "status": "processing",
+  "phase": "generating",
+  "progress": 48,
+  "current_segment": 2,
+  "total_segments": 4,
+  "message": "4개 중 2번째 구간을 생성하고 있습니다.",
+  "error": null,
+  "updated_at": "2026-07-31T05:18:00+00:00"
+}
+```
+
+`phase`는 `queued`, `normalizing`, `generating`, `merging`, `completed`, `cancelled`, `failed` 중 하나다.

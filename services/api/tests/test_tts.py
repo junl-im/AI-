@@ -51,3 +51,30 @@ def test_cancel_unknown_job_is_safe(client):
 
     assert response.status_code == 200
     assert response.json()["cancelled"] is False
+
+
+def test_completed_job_progress_can_be_read(client):
+    job_id = str(uuid4())
+    response = client.post(
+        "/api/v1/tts/synthesize",
+        json={
+            "text": "작업 진행률을 확인합니다.",
+            "voice_id": "sori-warm",
+            "engine_id": "mock",
+            "job_id": job_id,
+        },
+    )
+    assert response.status_code == 200
+
+    progress = client.get(f"/api/v1/tts/jobs/{job_id}")
+    assert progress.status_code == 200
+    body = progress.json()
+    assert body["job_id"] == job_id
+    assert body["phase"] == "completed"
+    assert body["progress"] == 100
+
+
+def test_unknown_job_progress_returns_404(client):
+    response = client.get(f"/api/v1/tts/jobs/{uuid4()}")
+    assert response.status_code == 404
+    assert "SOA-4010" in response.json()["detail"]

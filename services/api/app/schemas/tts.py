@@ -7,7 +7,8 @@ from app.schemas.engine import EngineMode
 
 Emotion = Literal["neutral", "happy", "calm", "sad", "angry", "commercial"]
 OutputFormat = Literal["mp3", "wav", "flac"]
-JobStatus = Literal["queued", "processing", "completed", "mock-complete", "cancelled"]
+JobStatus = Literal["queued", "processing", "completed", "mock-complete", "cancelled", "failed"]
+JobPhase = Literal["queued", "normalizing", "generating", "merging", "completed", "cancelled", "failed"]
 
 
 class TtsSynthesisRequest(BaseModel):
@@ -36,12 +37,19 @@ class TtsSynthesisResponse(BaseModel):
     realtime_factor: float | None = None
 
 
+class JobProgressResponse(BaseModel):
+    job_id: str
+    status: JobStatus
+    phase: JobPhase
+    progress: int = Field(ge=0, le=100)
+    current_segment: int = 0
+    total_segments: int = 0
+    message: str
+    error: str | None = None
+    updated_at: str
+
+
 class JobCancelResponse(BaseModel):
     job_id: str
     cancelled: bool
     message: str
-    normalized_text: str | None = None
-    segment_count: int = 1
-    processing_ms: int | None = None
-    file_size_bytes: int | None = None
-    realtime_factor: float | None = None

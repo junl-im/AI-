@@ -6,17 +6,18 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.4.0 Korean Voice Quality Lab`
+- 버전: `0.5.1 Compact Brand Banner`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
 - AI 엔진: 선택 설치형 MeloTTS 한국어 어댑터
 - 무료 로컬 대체 엔진: Windows·macOS·eSpeak 시스템 한국어 음성
 - 한국어 처리: 숫자·날짜·금액·퍼센트·영문 약어 정규화
 - 긴 문장: 자동 분할 후 PCM WAV 병합
-- 품질 연구소: 엔진 사전 진단, 평가 문장, A/B 재생, 생성 속도·RTF·파일 크기 비교
+- 운영 연결: Voice API 주소 설정, 설치 상태 진단, 실제 생성 진행률
+- 품질 연구소: A/B 재생, IndexedDB 평가 저장, JSON·CSV 보고서
 - 저장: 브라우저 IndexedDB 우선, Firebase는 선택적 동기화 계층
 
-## 0.4.0에서 가능한 작업
+## 0.5.1에서 가능한 작업
 
 1. 문장을 입력해 AI 또는 로컬 한국어 음성을 생성합니다.
 2. 엔진이 지원하는 감정·속도·피치 설정만 활성화합니다.
@@ -25,8 +26,13 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 5. 생성 시간, 음원 길이, 실시간 배율, 파일 크기, 구간 수를 확인합니다.
 6. 품질 탭에서 MeloTTS 설치와 시스템 음성 상태를 진단합니다.
 7. 같은 문장을 최대 두 엔진으로 생성해 A/B 청취 평가를 진행합니다.
+8. 설정 화면에서 로컬·원격 Voice API를 3단계로 연결합니다.
+9. 긴 문장 생성의 퍼센트와 현재 구간을 확인합니다.
+10. 별점과 메모를 저장하고 JSON·CSV 보고서를 내려받습니다.
 
 MeloTTS, Local TTS, Demo WAV는 화면과 프로젝트 데이터에서 서로 다른 모드로 표시됩니다.
+
+상단 브랜드 영역은 모바일·PC 모두 높이를 줄인 배너형 구조이며, `곰같은여우 SoriON AI`와 핵심 문장이 순차적으로 페이드됩니다. 로고의 `AI` 중 `I`와 PC Voice Core에는 SVG 없이 CSS로 만든 마이크를 사용합니다.
 
 ## 바로 시작하기
 
@@ -46,6 +52,7 @@ npm run dev
 
 - 엔진 설치: [`docs/ENGINE_PILOT.md`](docs/ENGINE_PILOT.md)
 - 품질 연구소: [`docs/QUALITY_LAB.md`](docs/QUALITY_LAB.md)
+- 운영 연결: [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md)
 - 전체 개발 규칙: [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
 
 ## GitHub Pages 배포

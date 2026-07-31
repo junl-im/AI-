@@ -1,6 +1,20 @@
 import type { EngineInfo, HealthResult, TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
 import { apiRequest } from '../api/httpClient'
 
+export type JobProgressPhase = 'queued' | 'normalizing' | 'generating' | 'merging' | 'completed' | 'cancelled' | 'failed'
+
+export interface SpeechJobProgress {
+  jobId: string
+  status: TtsSynthesisResult['status']
+  phase: JobProgressPhase
+  progress: number
+  currentSegment: number
+  totalSegments: number
+  message: string
+  error: string | null
+  updatedAt: string
+}
+
 interface ApiTtsRequest {
   text: string
   voice_id: string
@@ -27,6 +41,18 @@ interface ApiTtsResult {
   realtime_factor: number | null
 }
 
+interface ApiJobProgress {
+  job_id: string
+  status: TtsSynthesisResult['status']
+  phase: JobProgressPhase
+  progress: number
+  current_segment: number
+  total_segments: number
+  message: string
+  error: string | null
+  updated_at: string
+}
+
 interface ApiEngineInfo {
   id: string
   name: string
@@ -43,8 +69,8 @@ interface ApiEngineInfo {
   reason: string | null
 }
 
-export function checkHealth() {
-  return apiRequest<HealthResult>('/health')
+export function checkHealth(baseUrl?: string) {
+  return apiRequest<HealthResult>('/health', undefined, { baseUrl })
 }
 
 export async function listEngines(): Promise<EngineInfo[]> {
@@ -98,6 +124,21 @@ export async function synthesizeSpeech(
     processingMs: result.processing_ms,
     fileSizeBytes: result.file_size_bytes,
     realtimeFactor: result.realtime_factor,
+  }
+}
+
+export async function getSpeechProgress(jobId: string): Promise<SpeechJobProgress> {
+  const result = await apiRequest<ApiJobProgress>(`/tts/jobs/${encodeURIComponent(jobId)}`, undefined, { timeoutMs: 4_000 })
+  return {
+    jobId: result.job_id,
+    status: result.status,
+    phase: result.phase,
+    progress: result.progress,
+    currentSegment: result.current_segment,
+    totalSegments: result.total_segments,
+    message: result.message,
+    error: result.error,
+    updatedAt: result.updated_at,
   }
 }
 
