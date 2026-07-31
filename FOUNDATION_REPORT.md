@@ -1,33 +1,38 @@
-# SoriON AI 0.5.6 Ruff Unicode Width Guard Report
+# SoriON AI 0.5.7 Python 3.10 Timeout Compatibility Report
 
 ## 결과
 
-GitHub Actions Ruff가 보고한 E501 6건을 수정했다. 이전 로컬 검사는 Python 문자열 길이만 계산해 한글 한 글자를 1자로 보았지만, Ruff는 한글과 동아시아 광각 문자를 화면상 2칸으로 계산한다. 이 차이 때문에 로컬에서는 통과하고 GitHub에서는 실패했다.
+GitHub Actions의 Python 3.10 환경에서 `asyncio.wait_for()`가 발생시킨
+`asyncio.TimeoutError`가 사용자 정의 `GenerationTimeoutError`로 변환되지 않고
+그대로 외부로 전달되던 문제를 수정했다.
 
-0.5.6은 단순 줄바꿈 수정에 그치지 않고 프로젝트 규칙 검사와 API 회귀 테스트를 Ruff 표시 폭 기준으로 변경해 같은 문제가 다시 누락되지 않도록 했다.
+Python 3.10에서는 `asyncio.TimeoutError`와 내장 `TimeoutError`가 서로 다른 예외
+클래스다. 기존 구현은 내장 `TimeoutError`만 처리했기 때문에 Python 3.13 로컬
+테스트에서는 통과하고 Python 3.10 CI에서만 실패했다.
 
 ## 주요 변경
 
-- 시스템 음성 미설치 안내와 생성 완료 메시지 분리
-- MeloTTS 패키지·모델 진단 문구를 별도 변수로 분리
-- 시스템 음성 실행 파일 진단 문구를 별도 변수로 분리
-- Setup 설치 안내 줄바꿈
-- Python 3.11 설치 안내를 지원 최소 버전인 Python 3.10으로 정정
-- JavaScript 프로젝트 규칙 검사에 동아시아 표시 폭 계산 추가
-- Python API 테스트에 Ruff 표시 폭 전체 스캔 추가
+- `except TimeoutError`를 `except asyncio.TimeoutError`로 변경
+- 타임아웃 발생 시 내부 작업을 취소하고 `asyncio.gather(..., return_exceptions=True)`로 정리
+- 타임아웃 상태를 `failed / generation-timeout`으로 보존
+- 종료된 작업이 작업 레지스트리에 남지 않는지 회귀 검사
+- Python 3.10 호환성 테스트에 예외 처리 구문 정적 검사 추가
+- 프로젝트 규칙 검사에 Python 3.10 타임아웃 처리 계약 추가
 
 ## 검증
 
-- 동아시아 표시 폭 100칸 초과 Python 줄 0개
+- FastAPI 테스트 34개 통과
+- 타임아웃 변환·상태 저장·작업 정리 테스트 통과
 - Python 전체 문법 컴파일 통과
-- FastAPI 테스트 33개 통과
 - 프로젝트 절대 규칙 검사 통과
+- Python 동아시아 표시 폭 100칸 초과 줄 0개
 - 모든 소스 파일 500줄 이하
 - SVG, 비밀키, 런타임 음원, 캐시 미포함
-- 전체본과 패치 적용본 208개 파일 완전 일치
-
-- 덮어쓰기 패치 변경·추가 파일 31개, 삭제 파일 0개
+- 전체 프로젝트 211개 파일, 패치 변경·추가 30개 파일
 
 ## 제한
 
-현재 작업 환경은 외부 Python 패키지 다운로드가 차단되어 Ruff 실행 파일을 새로 설치할 수 없다. 대신 Ruff E501의 동아시아 표시 폭 규칙을 동일하게 재현하는 독립 검사와 pytest를 실행했다. GitHub Actions의 공식 Ruff 실행이 최종 확인 기준이다.
+현재 작업 환경에는 CPython 3.10이 설치되어 있지 않고 외부 다운로드 DNS가
+차단되어 실제 3.10 인터프리터 실행은 재현하지 못했다. 대신 Python 3.10에서
+분리되어 있는 `asyncio.TimeoutError`를 명시적으로 처리하도록 구현과 정적 회귀
+검사를 추가했다. 최종 Python 3.10 판정은 GitHub Actions에서 확인한다.

@@ -20,7 +20,7 @@ const review: QualityReview = {
 describe('quality report export', () => {
   it('builds a versioned JSON report', () => {
     const report = buildQualityReport([review])
-    expect(report.version).toBe('0.5.6')
+    expect(report.version).toBe('0.5.7')
     expect(report.reviews).toHaveLength(1)
   })
 

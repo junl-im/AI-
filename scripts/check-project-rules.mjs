@@ -112,6 +112,11 @@ await requireText('services/api/app/api/routes/engines.py', [
   '/strategy',
   'current_engine_strategy',
 ])
+await requireText('services/api/app/services/job_manager.py', [
+  'except asyncio.TimeoutError as error:',
+  'await asyncio.gather(task, return_exceptions=True)',
+  'raise GenerationTimeoutError(job_id) from error',
+])
 await requireText('.github/workflows/ci.yml', [
   'name: SoriON CI & Pages',
   'branches:',

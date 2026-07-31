@@ -56,8 +56,9 @@ class JobManager:
                 message="음성 생성이 완료되었습니다.",
             )
             return result
-        except TimeoutError as error:
+        except asyncio.TimeoutError as error:
             task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
             await self.update(
                 job_id,
                 status="failed",

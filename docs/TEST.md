@@ -116,3 +116,11 @@ npm run test:api
 - 단순 `line.length` 검사가 한글 긴 줄을 놓치지 않는지 회귀 확인
 - Python 3.10 호환성, import 정렬, API 전체 테스트를 함께 확인
 
+
+## 0.5.7 Python 3.10 비동기 타임아웃 검사
+
+- `JobManager`는 `asyncio.wait_for()`에서 발생한 `asyncio.TimeoutError`를 잡아야 한다.
+- 외부 호출자에게는 `GenerationTimeoutError`만 전달해야 한다.
+- 작업 상태는 `failed`, 오류 코드는 `generation-timeout`이어야 한다.
+- 타임아웃 이후 같은 작업은 활성 작업 레지스트리에 남아 있지 않아야 한다.
+- Python 3.10 호환성 검사는 `except asyncio.TimeoutError` 구문을 정적으로 확인한다.

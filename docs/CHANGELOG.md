@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 0.5.7 - 2026-07-31
+
+### Fixed
+
+- Python 3.10에서 `asyncio.wait_for()`의 `asyncio.TimeoutError`가 그대로 노출되던 문제 수정
+- 타임아웃 작업 취소 후 내부 Task가 남을 수 있는 경계를 명시적으로 정리
+
+### Added
+
+- 타임아웃 후 `failed / generation-timeout` 상태 저장 회귀 테스트
+- 종료 작업이 작업 레지스트리에서 제거되는지 확인하는 회귀 테스트
+- Python 3.10용 `asyncio.TimeoutError` 처리 구문 정적 호환성 검사
+- 프로젝트 규칙 검사에 비동기 타임아웃 처리 계약 추가
+
+### Changed
+
+- 웹과 API 버전을 `0.5.7`로 갱신
+
+### Notes
+
+- Python 3.10에서는 `asyncio.TimeoutError`와 내장 `TimeoutError`가 별도 클래스다.
+- Python 3.11 이상에서는 두 예외가 호환되므로 로컬 최신 Python에서만 검사하면 이 회귀를 놓칠 수 있다.
+
 ## 0.5.6 - 2026-07-31
 
 ### Fixed

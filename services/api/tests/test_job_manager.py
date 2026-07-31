@@ -31,8 +31,16 @@ async def test_job_manager_times_out():
     async def never_finishes():
         await asyncio.sleep(1)
 
-    with pytest.raises(GenerationTimeoutError):
+    with pytest.raises(GenerationTimeoutError) as captured:
         await manager.run("timeout", never_finishes)
+
+    assert captured.value.args == ("timeout",)
+    snapshot = await manager.get("timeout")
+    assert snapshot is not None
+    assert snapshot.status == "failed"
+    assert snapshot.phase == "failed"
+    assert snapshot.error == "generation-timeout"
+    assert await manager.cancel("timeout") is False
 
 
 @pytest.mark.asyncio
@@ -49,6 +57,7 @@ async def test_job_manager_cancels_running_job():
     assert await manager.cancel("cancel-me") is True
     with pytest.raises(asyncio.CancelledError):
         await task
+
 
 @pytest.mark.asyncio
 async def test_job_manager_keeps_progress_snapshot_after_completion():

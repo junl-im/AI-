@@ -959,3 +959,66 @@ SoriON AI는 웹 음성 도구가 아니라 한국인이 모바일에서 10초 �
 
 CI의 Web·API·Deploy가 모두 성공하면 `0.6.0 CosyVoice 3 & Mobile Voice Clone Foundation`에서 모바일 녹음, 샘플 품질 검사, 동의, 제로샷 복제 계약과 엔진 worker 기반을 구현한다.
 
+
+## 2026-07-31 16:55 KST - 0.5.7 Python 3.10 Timeout Compatibility
+
+### 대상 버전과 기준 버전
+
+- 기준 버전: `0.5.6`
+- 대상 버전: `0.5.7`
+
+### 변경 내용
+
+- `JobManager`가 내장 `TimeoutError`가 아니라 `asyncio.TimeoutError`를 처리하도록 수정했다.
+- 타임아웃 시 내부 Task를 취소하고 결과를 회수해 백그라운드 작업이 남지 않도록 했다.
+- 타임아웃 결과를 `failed`, `generation-timeout` 상태로 저장하는 검사를 추가했다.
+- 타임아웃 작업이 작업 레지스트리에서 제거되는지 검사했다.
+- Python 3.10 호환성 테스트와 프로젝트 규칙 검사에 예외 처리 계약을 추가했다.
+
+### 변경 이유
+
+Python 3.10에서는 `asyncio.TimeoutError`와 내장 `TimeoutError`가 서로 다른 클래스다.
+기존 코드는 내장 예외만 처리해 Python 3.13에서는 통과하지만 GitHub의 Python 3.10
+환경에서는 원시 `asyncio.TimeoutError`가 그대로 전달됐다.
+
+### 영향 범위
+
+- TTS 작업 제한 시간 처리
+- 실패 작업 상태 조회
+- 작업 취소 및 Task 정리
+- Python 3.10 CI 회귀 검사
+- 릴리스 및 인수인계 문서
+
+### 주요 변경 파일
+
+- `services/api/app/services/job_manager.py`
+- `services/api/tests/test_job_manager.py`
+- `services/api/tests/test_python_compatibility.py`
+- `scripts/check-project-rules.mjs`
+- `docs/CHANGELOG.md`
+- `docs/TEST.md`
+
+### 검증 결과
+
+- FastAPI 테스트 34개 통과
+- Python 전체 문법 컴파일 통과
+- 타임아웃 상태와 Task 정리 회귀 검사 통과
+- 프로젝트 절대 규칙 검사 통과
+- Python 표시 폭 100칸 초과 줄 0개
+- 전체 프로젝트 211개 파일, 패치 변경·추가 30개 파일
+- 삭제 파일 0개
+
+### 알려진 제한과 주의사항
+
+- 작업 환경에 CPython 3.10이 없고 외부 다운로드 DNS가 차단되어 실제 3.10 실행은 재현하지 못했다.
+- Python 3.10에서 분리된 예외 클래스를 직접 처리하고 정적 회귀 검사를 추가했으며, 최종 확인은 GitHub Actions에서 수행한다.
+
+### 생성 산출물
+
+- 전체: `SoriON-AI-0.5.7-full.zip`
+- 패치: `SoriON-AI-0.5.6-to-0.5.7-patch.zip`
+- 체크섬: `SoriON-AI-0.5.7-artifacts.sha256`
+
+### 다음 예상 업데이트
+
+CI의 Web·API·Deploy가 모두 성공하면 `0.6.0 CosyVoice 3 & Mobile Voice Clone Foundation`에서 모바일 녹음, 샘플 품질 검사, 동의, 제로샷 복제 계약과 엔진 worker 기반을 구현한다.

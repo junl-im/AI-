@@ -42,3 +42,12 @@ def test_python_lines_fit_ruff_display_width():
                     offenders.append(f"{relative_path}:{line_number}:{width}")
 
     assert offenders == []
+
+
+def test_python_310_catches_asyncio_timeout_error():
+    source = (
+        API_ROOT / "app" / "services" / "job_manager.py"
+    ).read_text(encoding="utf-8")
+
+    assert "except asyncio.TimeoutError as error:" in source
+    assert "except TimeoutError as error:" not in source
