@@ -2,6 +2,12 @@
 
 ## 0.8.2 - 2026-08-01
 
+### CI Hotfix
+
+- VoicePresetSelector 테스트를 현재 접근성 이름인 `혜린 추천`·`도윤 또렷함`에 맞췄습니다.
+- 모바일 연결 취소 회귀 테스트를 polling 횟수 대신 동일 job join으로 동기화했습니다.
+- API·Worker Ruff를 `0.15.22`로 고정해 CI 린트 결과의 재현성을 높였습니다.
+
 ### Mobile Job Recovery/API Idempotency
 
 - HTTP 요청이 취소되어도 TTS 생성 Task가 계속 실행되도록 `asyncio.shield`를 적용했습니다.

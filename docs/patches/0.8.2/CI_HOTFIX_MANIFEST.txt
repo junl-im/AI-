@@ -1,0 +1,21 @@
+# SoriON AI 0.8.2 CI hotfix manifest
+base_version=0.8.2
+target_version=0.8.2-ci-hotfix
+added=2
+modified=5
+deleted=0
+patch_files=7
+
+[ADDED]
+docs/patches/0.8.2/CI_HOTFIX.md
+docs/patches/0.8.2/CI_HOTFIX_MANIFEST.txt
+
+[MODIFIED]
+docs/CHANGELOG.md
+services/api/pyproject.toml
+services/api/tests/test_job_manager.py
+services/worker/pyproject.toml
+src/components/voice/VoicePresetSelector.test.tsx
+
+[DELETED]
+(none)

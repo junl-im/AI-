@@ -78,12 +78,10 @@ async def test_caller_cancellation_does_not_cancel_background_generation():
     assert snapshot.status == "processing"
 
     release.set()
-    for _ in range(20):
-        result = await manager.get_result("mobile-drop")
-        if result is not None:
-            break
-        await asyncio.sleep(0)
-
+    assert (
+        await manager.run("mobile-drop", slow_job, request_key="request-a")
+        == "done"
+    )
     assert await manager.get_result("mobile-drop") == "done"
     completed = await manager.get("mobile-drop")
     assert completed is not None
