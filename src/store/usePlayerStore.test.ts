@@ -32,11 +32,11 @@ describe('usePlayerStore', () => {
     vi.restoreAllMocks()
   })
 
-  it('queues tracks and selects the newest track', () => {
+  it('queues tracks and keeps the first completed track selected', () => {
     usePlayerStore.getState().enqueue(audio('one'), '첫 음성')
     usePlayerStore.getState().enqueue(audio('two'), '두 번째 음성')
     expect(usePlayerStore.getState().queue).toHaveLength(2)
-    expect(getCurrentTrack(usePlayerStore.getState())?.title).toBe('두 번째 음성')
+    expect(getCurrentTrack(usePlayerStore.getState())?.title).toBe('첫 음성')
   })
 
   it('revokes an owned object URL when a track is removed', () => {

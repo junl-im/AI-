@@ -275,3 +275,36 @@ def test_expired_completed_job_returns_410_without_regeneration(
         )
     finally:
         get_settings.cache_clear()
+
+
+def test_default_engine_catalog_excludes_metered_cloud_engines(client):
+    response = client.get("/api/v1/engines")
+
+    assert response.status_code == 200
+    ids = {item["id"] for item in response.json()}
+    assert "naver-clova" not in ids
+    assert "google-chirp3-hd" not in ids
+    assert "azure-speech" not in ids
+    assert "elevenlabs-v3" not in ids
+    assert all(item["cost_tier"] == "free" for item in response.json())
+
+
+def test_completed_job_progress_is_available_as_sse(client):
+    job_id = str(uuid4())
+    created = client.post(
+        "/api/v1/tts/synthesize",
+        json={
+            "text": "완료된 작업 진행률을 스트림으로 확인합니다.",
+            "voice_id": "sori-warm",
+            "engine_id": "mock",
+            "job_id": job_id,
+        },
+    )
+    assert created.status_code == 200
+
+    response = client.get(f"/api/v1/tts/jobs/{job_id}/events")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    assert "event: progress" in response.text
+    assert '"phase":"completed"' in response.text

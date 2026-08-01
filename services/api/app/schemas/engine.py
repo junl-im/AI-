@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 EngineMode = Literal["mock", "local", "ai"]
 EngineHealth = Literal["ready", "cooldown", "unavailable"]
 EngineQualityTier = Literal["basic", "standard", "premium", "reference"]
+EngineCostTier = Literal["free", "metered"]
 
 
 class EngineInfo(BaseModel):
@@ -23,6 +24,8 @@ class EngineInfo(BaseModel):
     reason: str | None = None
     quality_tier: EngineQualityTier = "basic"
     korean_specialization: int = Field(default=0, ge=0, le=100)
+    cost_tier: EngineCostTier = "free"
+    auto_eligible: bool = True
     long_form: bool = False
     streaming: bool = False
     recommended: bool = False

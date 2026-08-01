@@ -42,10 +42,11 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       const nextQueue = [...state.queue, track]
       const overflow = Math.max(0, nextQueue.length - MAX_QUEUE_SIZE)
       nextQueue.slice(0, overflow).forEach(releaseTrack)
-      return {
-        queue: nextQueue.slice(overflow),
-        currentTrackId: id,
-      }
+      const queue = nextQueue.slice(overflow)
+      const currentTrackId = queue.some((item) => item.id === state.currentTrackId)
+        ? state.currentTrackId
+        : queue[0]?.id ?? null
+      return { queue, currentTrackId }
     })
     return id
   },

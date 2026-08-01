@@ -61,6 +61,7 @@ class ElevenLabsTtsEngine(TtsEngine):
             ready=ready,
             reason=None if ready else "ElevenLabs API key와 한국어 voice ID가 필요합니다.",
             quality_tier="premium",
+            cost_tier="metered",
             korean_specialization=75,
             long_form=True,
             streaming=False,
@@ -97,7 +98,7 @@ class ElevenLabsTtsEngine(TtsEngine):
                 headers={
                     "xi-api-key": self.api_key,
                     "Content-Type": "application/json",
-                    "User-Agent": "SoriON-API/0.8.9",
+                    "User-Agent": "SoriON-API/0.9.0",
                 },
                 json=payload,
             )

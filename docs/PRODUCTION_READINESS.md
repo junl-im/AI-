@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.8.9`
+현재 기준 버전: `0.9.0`
 
 ## 목적
 
@@ -80,3 +80,12 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - 상단 브랜드는 모든 작업 화면에서 첫 페이지로 이동한다.
 - 첫 뒤로가기 확인과 두 번째 뒤로가기 이탈을 모바일 실기기에서 검사한다.
 - `/connectivity`와 `/engines` 추천 엔진 상태가 일치해야 한다.
+
+## 0.9.0 무료 우선 배포 게이트
+
+- 기본 `SORION_ENGINE_COST_POLICY`는 `free-only`여야 한다.
+- free-only에서 NAVER·Google·Azure·ElevenLabs Adapter가 등록·호출되면 배포를 차단한다.
+- `/engines`의 `cost_tier`와 `auto_eligible`이 실제 정책과 일치해야 한다.
+- SSE가 프록시에서 buffering되지 않아야 하며 실패 시 polling 복구가 유지돼야 한다.
+- 다음 블록 완료가 현재 재생 트랙을 임의로 변경하면 배포를 차단한다.
+- 모델이 없는 System·Browser 음성을 AI 음질로 표시하지 않는다.

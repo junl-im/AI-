@@ -14,6 +14,10 @@ const voiceApiMocks = vi.hoisted(() => ({
 
 vi.mock('../tts/voiceApi', () => voiceApiMocks)
 
+vi.mock('../tts/jobProgressStream', () => ({
+  streamSpeechProgress: vi.fn().mockResolvedValue(true),
+}))
+
 const completedResult: TtsSynthesisResult = {
   jobId: 'mobile-job',
   status: 'completed',

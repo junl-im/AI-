@@ -43,12 +43,14 @@ class EngineOrchestrator:
         preferred_order: list[str] | None = None,
         failure_threshold: int = 2,
         cooldown_seconds: float = 30.0,
+        allow_metered: bool = False,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
         self.registry = registry
         self.preferred_order = preferred_order or []
         self.failure_threshold = max(1, failure_threshold)
         self.cooldown_seconds = max(1.0, cooldown_seconds)
+        self.allow_metered = allow_metered
         self._clock = clock
         self._runtime: dict[str, EngineRuntimeState] = {}
         self._lock = asyncio.Lock()
@@ -59,7 +61,11 @@ class EngineOrchestrator:
             (
                 engine.info().id
                 for engine in candidates
-                if engine.info().ready and not self._circuit_open(engine.info().id)
+                if (
+                    engine.info().ready
+                    and self._policy_allows(engine.info())
+                    and not self._circuit_open(engine.info().id)
+                )
             ),
             None,
         )
@@ -79,6 +85,7 @@ class EngineOrchestrator:
             result.append(
                 info.model_copy(
                     update={
+                        "auto_eligible": self._policy_allows(info),
                         "recommended": info.id == recommended_id,
                         "health": health,
                         "success_count": state.successes,
@@ -100,9 +107,26 @@ class EngineOrchestrator:
         candidates = self._candidate_engines(request, preferred)
         if not candidates:
             selected = self.registry.get_tts(preferred) if preferred != "auto" else None
+            if (
+                selected is not None
+                and selected.info().ready
+                and not self._policy_allows(selected.info())
+            ):
+                raise EngineUnavailableError(
+                    "무료 우선 정책에서는 과금형 음성 엔진을 자동 또는 직접 호출하지 않습니다."
+                )
             if preferred != "auto" and selected is None:
                 raise EngineUnavailableError(f"'{preferred}' 음성 엔진을 찾지 못했습니다.")
-            ready = [engine.info() for engine in self.registry.list_tts() if engine.info().ready]
+            all_ready = [
+                engine.info()
+                for engine in self.registry.list_tts()
+                if engine.info().ready
+            ]
+            ready = [info for info in all_ready if self._policy_allows(info)]
+            if preferred == "auto" and not ready and all_ready:
+                raise EngineUnavailableError(
+                    "무료 우선 정책에서 허용된 음성 엔진이 준비되지 않았습니다."
+                )
             compatible = [info for info in ready if self._compatible(info, request)]
             if preferred == "auto" and compatible:
                 raise EngineUnavailableError(
@@ -153,7 +177,11 @@ class EngineOrchestrator:
     ) -> list[TtsEngine]:
         if preferred != "auto":
             engine = self.registry.get_tts(preferred)
-            if engine is None or not self._compatible(engine.info(), request):
+            if (
+                engine is None
+                or not self._policy_allows(engine.info())
+                or not self._compatible(engine.info(), request)
+            ):
                 return []
             return [engine]
 
@@ -161,7 +189,8 @@ class EngineOrchestrator:
         available = [
             engine
             for engine in ranked
-            if self._compatible(engine.info(), request)
+            if self._policy_allows(engine.info())
+            and self._compatible(engine.info(), request)
             and not self._circuit_open(engine.info().id)
         ]
         return available
@@ -176,7 +205,7 @@ class EngineOrchestrator:
         self,
         info: EngineInfo,
         request: TtsSynthesisRequest | None,
-    ) -> tuple[int, int, int, int, int, str]:
+    ) -> tuple[int, int, int, int, int, int, str]:
         try:
             configured_rank = self.preferred_order.index(info.id)
         except ValueError:
@@ -190,6 +219,7 @@ class EngineOrchestrator:
                 capability_penalty += 20
             if request.speed != 1 and not info.supports_speed:
                 capability_penalty += 20
+        cost_rank = 0 if info.cost_tier == "free" else 1
         quality_rank = {
             "reference": 0,
             "premium": 1,
@@ -199,11 +229,15 @@ class EngineOrchestrator:
         return (
             0 if info.ready else 1,
             configured_rank + capability_penalty,
+            cost_rank,
             quality_rank,
             100 - info.korean_specialization,
             mode_rank,
             info.id,
         )
+
+    def _policy_allows(self, info: EngineInfo) -> bool:
+        return info.cost_tier == "free" or self.allow_metered
 
     @staticmethod
     def _compatible(info: EngineInfo, request: TtsSynthesisRequest) -> bool:

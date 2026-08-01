@@ -1,8 +1,10 @@
 import asyncio
+from collections.abc import AsyncIterator
 import hashlib
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Request, status
+from fastapi.responses import StreamingResponse
 
 from app.core.config import get_settings
 from app.schemas.tts import (
@@ -141,6 +143,47 @@ async def get_job(job_id: str, request: Request) -> JobProgressResponse:
             detail="SOA-4010: 작업 상태를 찾지 못했습니다.",
         )
     return snapshot
+
+
+@router.get("/jobs/{job_id}/events")
+async def stream_job_events(job_id: str, request: Request) -> StreamingResponse:
+    manager = request.app.state.job_manager
+    interval = max(0.1, request.app.state.settings.job_poll_interval_seconds)
+
+    async def events() -> AsyncIterator[str]:
+        last_payload = ""
+        missing_checks = 0
+        while True:
+            if await request.is_disconnected():
+                return
+            snapshot = await manager.get(job_id)
+            if snapshot is None:
+                missing_checks += 1
+                if missing_checks >= 40:
+                    yield (
+                        'event: error\n'
+                        'data: {"code":"SOA-4010","message":"작업 상태를 찾지 못했습니다."}\n\n'
+                    )
+                    return
+            else:
+                missing_checks = 0
+                payload = snapshot.model_dump_json()
+                if payload != last_payload:
+                    yield f"event: progress\ndata: {payload}\n\n"
+                    last_payload = payload
+                if snapshot.phase in {"completed", "failed", "cancelled"}:
+                    return
+            await asyncio.sleep(interval)
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.get("/jobs/{job_id}/result", response_model=TtsSynthesisResponse)

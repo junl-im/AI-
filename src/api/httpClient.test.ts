@@ -76,7 +76,7 @@ describe('API connection context', () => {
       if (url.startsWith('https://voice-b.example.com/api/v1/health')) {
         return Promise.resolve(new Response(JSON.stringify({
           status: 'ok',
-          version: '0.8.9',
+          version: '0.9.0',
           default_engine: 'auto',
         }), {
           status: 200,

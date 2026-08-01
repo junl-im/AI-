@@ -58,6 +58,7 @@ class NaverClovaTtsEngine(TtsEngine):
             ready=ready,
             reason=None if ready else "NAVER CLOVA Voice 인증 정보가 필요합니다.",
             quality_tier="premium",
+            cost_tier="metered",
             korean_specialization=100,
             long_form=True,
         )
@@ -83,7 +84,7 @@ class NaverClovaTtsEngine(TtsEngine):
         headers = {
             "X-NCP-APIGW-API-KEY-ID": self.client_id,
             "X-NCP-APIGW-API-KEY": self.client_secret,
-            "User-Agent": "SoriON-API/0.8.9",
+            "User-Agent": "SoriON-API/0.9.0",
         }
         async with httpx.AsyncClient(
             transport=self.transport,

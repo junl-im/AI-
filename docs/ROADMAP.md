@@ -182,9 +182,21 @@
 - 공개 API 미연결 시 Web Speech API 한국어 음성 자동 대체 재생
 - 실제 서버 엔진 우선순위와 브라우저 음성의 비-AI 표시
 
-## 0.8.9 예정
+## 0.8.9 완료
 
-- 실제 한국어 AI 엔진 운영 배포와 품질 평가
-- Progressive Playback, SSE 진행률과 실패 구간 재생성
-- 전체 프로젝트 WAV 병합·다운로드와 다중 블록 편집
+- 공통 내부 페이지 셸과 한국어 Engine Mesh
+- 복수 공개 API 후보 자동 장애 전환
+- Premium Cloud Adapter 경계와 한국어 특화 순위 메타데이터
 
+## 0.9.0 완료
+
+- 무료 사용 기본 `free-only` 엔진 정책
+- 유료 공급자 Adapter의 서버 명시 opt-in
+- TTS job SSE 진행률과 polling fallback
+- Progressive Queue 현재 트랙 보존
+
+## 0.9.1 예정
+
+- 무료 CosyVoice 로컬 모델 설치·체크섬·readiness 온보딩
+- 한국어 무료 엔진 블라인드 품질 벤치마크
+- 전체 WAV 병합·다운로드와 실패 문장 재생성

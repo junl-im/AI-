@@ -1,6 +1,6 @@
 # API CONNECTIVITY
 
-현재 기준 버전: `0.8.9`
+현재 기준 버전: `0.9.0`
 
 ## 배포 경계
 
@@ -82,6 +82,7 @@ GET /api/v1/engines
 GET /api/v1/setup
 POST /api/v1/tts/synthesize
 GET /api/v1/tts/jobs/{job_id}
+GET /api/v1/tts/jobs/{job_id}/events
 GET /api/v1/tts/jobs/{job_id}/result
 ```
 
@@ -114,3 +115,9 @@ https://junl-im.github.io
 후보는 순서대로 `/health`를 검사하며 실패하면 현재 주소를 제외하고 다음 HTTPS API로 자동 전환한다.
 Secret은 Web에 넣지 않고 FastAPI 서버에만 둔다. 사용자 화면에는 주소 입력이나 엔진 선택 기능을
 제공하지 않는다.
+
+## 0.9.0 무료 우선 연결 규칙
+
+API 주소 자동 탐색과 엔진 비용 정책은 별개다. 연결된 API가 있더라도 기본 `free-only`에서는
+CosyVoice·Melo·System 같은 무료 후보만 자동 실행한다. 과금형 공급자 키가 있더라도 `balanced`를
+서버에서 명시하지 않으면 등록하지 않는다. 진행률은 SSE를 우선하고 실패 시 polling으로 대체한다.

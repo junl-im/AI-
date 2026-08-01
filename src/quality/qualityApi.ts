@@ -23,6 +23,8 @@ interface ApiEngineDiagnostic {
   ready: boolean
   provider: string
   quality_tier: 'basic' | 'standard' | 'premium' | 'reference'
+  cost_tier: 'free' | 'metered'
+  auto_eligible: boolean
   korean_specialization: number
   long_form: boolean
   streaming: boolean
@@ -97,6 +99,8 @@ export async function getQualityDiagnostics(): Promise<QualityDiagnostics> {
       ready: engine.ready,
       provider: engine.provider,
       qualityTier: engine.quality_tier,
+      costTier: engine.cost_tier,
+      autoEligible: engine.auto_eligible,
       koreanSpecialization: engine.korean_specialization,
       longForm: engine.long_form,
       streaming: engine.streaming,

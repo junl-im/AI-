@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,9 +13,10 @@ class Settings(BaseSettings):
         "https://junl-im.github.io"
     )
     default_tts_engine: str = "auto"
+    engine_cost_policy: Literal["free-only", "balanced"] = "free-only"
     tts_engine_order: str = (
-        "cosyvoice3,naver-clova,google-chirp3-hd,azure-speech,"
-        "elevenlabs-v3,melo,system,mock"
+        "cosyvoice3,melo,system,naver-clova,google-chirp3-hd,"
+        "azure-speech,elevenlabs-v3,mock"
     )
     engine_failure_threshold: int = Field(default=2, ge=1, le=10)
     engine_cooldown_seconds: float = Field(default=30.0, ge=1.0, le=600.0)
@@ -92,6 +94,10 @@ class Settings(BaseSettings):
     @property
     def worker_auth_enabled(self) -> bool:
         return bool(self.worker_service_token and self.worker_signature_secret)
+
+    @property
+    def metered_tts_enabled(self) -> bool:
+        return self.engine_cost_policy == "balanced"
 
 
 @lru_cache

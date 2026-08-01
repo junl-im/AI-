@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.9.0 - 2026-08-01
+
+### Free-First Engine Policy
+
+- 서버 기본 정책을 `free-only`로 설정해 유료 공급자 Adapter를 자동 등록·호출하지 않습니다.
+- CosyVoice Worker, MeloTTS, System Voice를 무료 서버 후보로 우선하며 Browser Speech를 공개 Web 안전망으로 유지합니다.
+- `balanced`를 서버 운영자가 명시한 경우에만 NAVER·Google·Azure·ElevenLabs가 후보가 됩니다.
+- 엔진 정보에 `cost_tier`, `auto_eligible`을 추가하고 전략 API에 비용 정책과 자동 순서를 공개합니다.
+
+### Progressive TTS Progress
+
+- `GET /api/v1/tts/jobs/{job_id}/events` SSE 진행 스트림을 추가했습니다.
+- Web은 SSE를 우선 사용하고 미지원·연결 실패 시 기존 polling으로 자동 대체합니다.
+- 뒤 블록이 완료돼도 현재 플레이어 트랙이 임의로 바뀌지 않도록 Queue 선택을 안정화했습니다.
+- 설정 화면에 `무료 우선 자동` 상태를 읽기 전용으로 표시합니다.
+
 ## 0.8.9 - 2026-08-01
 
 ### Unified Product Shell

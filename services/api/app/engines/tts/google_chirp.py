@@ -49,6 +49,7 @@ class GoogleChirpTtsEngine(TtsEngine):
             ready=ready,
             reason=None if ready else "Google Cloud TTS API key가 필요합니다.",
             quality_tier="premium",
+            cost_tier="metered",
             korean_specialization=90,
             long_form=True,
             streaming=False,
@@ -78,7 +79,7 @@ class GoogleChirpTtsEngine(TtsEngine):
                 self.endpoint,
                 params={"key": self.api_key},
                 json=payload,
-                headers={"User-Agent": "SoriON-API/0.8.9"},
+                headers={"User-Agent": "SoriON-API/0.9.0"},
             )
         ensure_success(response, "Google Chirp 3 HD")
         try:

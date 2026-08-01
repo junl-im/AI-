@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.8.9 Unified Product Shell & Korean Neural Engine Mesh**
+현재 기준 버전: **0.9.0 Free-First Korean Progressive Voice**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-01 22:20 KST**
+최종 갱신: **2026-08-01 23:49 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -159,14 +159,14 @@ health · readiness · GPU diagnostics · jobs · SSE · WAV
 - 문장별 job, SSE revision, cancel, 실패 구간 retry.
 - 서비스 토큰 + HMAC-SHA256 서명, rate limit, 감사 로그.
 ## 8. 엔진 전략과 실제 상태
-우선순위:
-1. CosyVoice 3 기준 음색: 한국어 주력 TTS·복제·향후 스트리밍.
-2. NAVER CLOVA Voice Premium: 한국어 특화 상용 대체.
-3. Google Chirp 3 HD·Azure Neural·ElevenLabs v3: 품질·표현력별 자동 대체.
-4. MeloTTS·System Voice·Browser Speech: 로컬·공개 Web 안전망.
+기본 무료 우선순위:
+1. CosyVoice 3 기준 음색: 준비된 로컬 Worker가 있을 때 주력 AI TTS.
+2. MeloTTS: 설치된 경우 로컬 무료 AI 대체.
+3. System Voice·Browser Speech: 운영체제·공개 Web 재생 안전망.
+4. NAVER·Google·Azure·ElevenLabs는 `balanced`를 서버 운영자가 명시한 경우에만 후보가 된다.
 5. GPT-SoVITS·Fish Audio는 라이선스·운영 검증 전 평가 후보이며 Kokoro는 주력에서 제외한다.
 현재 진실:
-- CosyVoice 일반 TTS와 NAVER·Google·Azure·ElevenLabs Adapter 경계가 구현됐다.
+- CosyVoice 일반 TTS와 Cloud Adapter 경계가 구현됐지만 기본 free-only에서는 과금형을 등록하지 않는다.
 - 자격 증명·Worker·동의된 기준 음성이 준비된 엔진만 자동 후보가 된다.
 - 릴리스 ZIP에는 모델 가중치, PyTorch, CUDA, CosyVoice 저장소가 없다.
 - 모델 미설치 시 `/health`는 정상이어도 `/ready`는 not-ready다.
@@ -183,6 +183,7 @@ GET  /engines
 GET  /engines/strategy
 POST /tts/synthesize
 GET  /tts/jobs/{job_id}
+GET  /tts/jobs/{job_id}/events
 GET  /tts/jobs/{job_id}/result
 DELETE /tts/jobs/{job_id}
 GET  /audio/{filename}
@@ -259,7 +260,7 @@ VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE
 ```
 API core·job:
 ```text
-SORION_ENVIRONMENT, SORION_CORS_ORIGINS, SORION_DEFAULT_TTS_ENGINE, SORION_TTS_ENGINE_ORDER
+SORION_ENVIRONMENT, SORION_CORS_ORIGINS, SORION_ENGINE_COST_POLICY, SORION_DEFAULT_TTS_ENGINE, SORION_TTS_ENGINE_ORDER
 SORION_ENGINE_FAILURE_THRESHOLD, SORION_ENGINE_COOLDOWN_SECONDS, SORION_GENERATION_TIMEOUT_SECONDS
 SORION_MAX_CONCURRENT_GENERATIONS, SORION_JOB_STORE_PATH, SORION_JOB_CLAIM_TTL_SECONDS
 SORION_JOB_RESULT_TTL_MINUTES, SORION_JOB_HISTORY_TTL_HOURS, SORION_JOB_POLL_INTERVAL_SECONDS
@@ -305,9 +306,9 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.8.9-full.zip`.
-- 패치: `SoriON-AI-0.8.8-to-0.8.9-patch.zip`.
-- 기준본: `SoriON-AI-0.8.8-full.zip`.
+- 전체본: `SoriON-AI-0.9.0-full.zip`.
+- 패치: `SoriON-AI-0.8.9-to-0.9.0-patch.zip`.
+- 기준본: `SoriON-AI-0.8.9-full.zip`.
 - 삭제 대상: 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
@@ -321,7 +322,7 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 ## 18. 알려진 제한과 위험
 - GitHub Pages만으로 서버 AI 합성은 불가능하며 별도 HTTPS FastAPI가 필요하다.
 - 공개 API가 없으면 Browser Speech만 재생되며 AI·WAV 다운로드·복제는 준비되지 않는다.
-- Premium Cloud는 서버 자격 증명, CosyVoice는 모델·GPU·동의된 기준 음성이 별도 필요하다.
+- CosyVoice는 모델·GPU·동의된 기준 음성이 별도 필요하고 free-only는 과금형 API를 호출하지 않는다.
 - Web Speech 받아쓰기는 브라우저 지원과 권한에 따라 동작하지 않을 수 있다.
 - 장문은 현재 블록 순차 생성이며 최종 WAV 재병합 Export는 미완료다.
 - 자동 탐색은 보안상 전체 LAN을 스캔하지 않는다.
@@ -358,14 +359,14 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.9.0 Progressive Korean Voice Streaming**.
+다음 목표 버전: **0.9.1 Free Local Model Onboarding & Korean Benchmark**.
 우선순위:
-1. 공개 HTTPS FastAPI 다중 리전과 사설 GPU Worker 운영 템플릿.
-2. CosyVoice·Premium Cloud의 실제 자격 증명·비용·quota 모니터링.
-3. 첫 문장 Progressive Playback, SSE 진행률과 첫 오디오 지연 측정.
-4. 실패 구간 재생성, 전체 WAV 병합과 생성·재생 queue 일치.
-5. Android Chrome·iOS Safari·설치형 PWA 실기기 매트릭스.
-금지: 수동 API·엔진 UI, github.io API 오탐, 채팅형 기본 제작 화면, 모델 없는 AI 성공 표시.
+1. 무료 CosyVoice 모델 설치·체크섬·라이선스 동의와 readiness 자동 진단.
+2. CPU·GPU 프로필별 요구량과 중단·재개 가능한 명시적 모델 준비.
+3. 한국어 발음·억양·문단 호흡·지연의 익명 블라인드 벤치마크.
+4. 전체 WAV 병합, 실패 문장만 재생성, SSE 장시간 재연결 강화.
+5. Android·iOS·설치형 PWA와 Windows·macOS·Linux 무료 음성 매트릭스.
+금지: 유료 API 기본 호출, 수동 엔진 UI, 모델 없는 AI 성공 표시.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -373,115 +374,30 @@ CI Hotfix 4 테스트 규칙:
   `docs/archive/HANDOVER_HISTORY_0.5.8-0.7.2.md`.
 - 전체 버전 요약:
   `docs/CHANGELOG.md`.
-## 23. 2026-08-01 11:06 KST · v0.8.0 릴리스 기록
-1. 작업 일시: 2026-08-01 11:06 KST.
-2. 대상·기준: `0.7.3 → 0.8.0`.
-3. 변경 내용: 초기 랜딩 유지, 편집 진입 후 ChatGPT형 채팅과 CapCut형 타임라인으로
-   전체 생성 UX를 개편했다. API 연결 시스템 메시지와 바텀시트를 추가했다.
-4. 변경 이유: 기존 입력→음성→감정→고급설정 구조가 초보자에게 복잡했고,
-   API 미설정 오류가 기능 이탈의 가장 큰 원인이었다.
-5. 영향 범위: AppShell, HomePage, Dock 진입, API 자동 탐색, 엔진 상태,
-   문장별 TTS 생성, 플레이어 큐, CSS, 테스트, 문서.
-6. 주요 파일: `HomePage.tsx`, `LandingHome.tsx`, `useTimelineGeneration.ts`,
-   `components/workspace/*`, `ConnectionBottomSheet.tsx`, `workspace-*.css`,
-   `timeline-editor.css`, `httpClient.ts`, `connectivity.py`.
-7. 검증 결과: API 56개, Worker 9개 테스트 통과. Python compileall, Python 3.10 AST,
-   TypeScript 대체 정적 검사, CSS·YAML 파싱, 실제 API·Worker·System TTS HTTP 통합 검사를 수행했다.
-8. 알려진 제한: 실제 LLM, GPU 모델, 타임라인 영구 저장과 편집 Export는 미완료다.
-9. 산출물: `SoriON-AI-0.8.0-full.zip`,
-   `SoriON-AI-0.7.3-to-0.8.0-patch.zip`.
-10. 다음 예상 업데이트: `0.8.1 Timeline Persistence & Real Script Model Bridge`.
-## 24. 2026-08-01 11:44 KST · v0.8.1 릴리스 기록
-1. 작업 일시: 2026-08-01 11:44 KST.
-2. 대상·기준: `0.8.0 → 0.8.1`.
-3. 변경 내용: 모바일 API 주소·재연결·오류 분류·요청 ID·계층 상태를 강화하고,
-   TTS POST 응답이 끊겨도 job ID로 완료 결과를 복구하도록 했다.
-4. API 변경: `GET /api/v1/tts/jobs/{job_id}/result`, Worker·GPU 세부 상태,
-   Private Network preflight, client ID 기반 rate-limit 구분을 추가했다.
-5. 모바일 변경: 16px 입력, 44px 터치 영역, safe-area, 최근 주소 선택, API·TTS·Worker·GPU
-   4단계 바텀시트, 온라인·네트워크·포그라운드 자동 재검사를 추가했다.
-6. 실제 점검: Worker health 정상·model not-ready, API connectivity 정상, System TTS WAV
-   147,358 bytes 생성, 완료 결과 복구 API와 PNA preflight를 실제 HTTP로 확인했다.
-7. 검증 결과: API 60개, Worker 9개 테스트 통과. 프로젝트 규칙, compileall, Python 3.10
-   AST, 핵심 TypeScript strict 대체 검사, 104개 TS/TSX 구문, CSS 11개 파싱 통과.
-8. 알려진 제한: 실제 CosyVoice 모델·CUDA GPU와 실제 LLM은 릴리스에 포함되지 않는다.
-9. 산출물: `SoriON-AI-0.8.1-full.zip`, `SoriON-AI-0.8.0-to-0.8.1-patch.zip`.
-10. 다음 예상 업데이트: `0.8.2 Timeline Persistence & Real Script Model Bridge`.
-## 25. 2026-08-01 12:25 KST · v0.8.2 릴리스 기록
-1. 작업 일시: 2026-08-01 12:25 KST.
-2. 대상·기준: `0.8.1 → 0.8.2`.
-3. 변경 내용: 동일 TTS job·동일 요청은 실행 Task와 완료 결과를 재사용하고, 다른 payload 재사용은 409로 차단했다.
-4. 모바일 변경: 타임라인 블록에 job ID를 보존하고 실패 재시도는 기존 상태·결과를 먼저 복구하도록 변경했다.
-5. 연결 안전성: HTTP 호출 취소가 서버 생성 Task를 취소하지 않도록 shield하고, 명시적 DELETE만 실제 작업을 취소한다.
-6. 호환성: localStorage 실패 시 메모리 fallback, `randomUUID` 미지원 브라우저용 ID 생성기를 추가했다.
-7. 편집 안전성: 생성 중 텍스트 수정·분할 시 클라이언트 요청과 polling을 중단하고 오래된 결과 덮어쓰기를 막았다.
-8. 검증 결과: API 65개, Worker 9개 테스트와 Python compileall, 프로젝트 규칙, 108개 TS/TSX 구문 검사를 통과했다.
-9. 제한: npm 의존성 저장소 404로 정식 Web test/lint/build, Ruff 미설치로 공식 Ruff는 실행하지 못했다. job은 아직 API 메모리 기반이다.
-10. 산출물: `SoriON-AI-0.8.2-full.zip`, `SoriON-AI-0.8.1-to-0.8.2-patch.zip`.
-11. 다음 예상 업데이트: `0.8.3 Mobile Session Persistence & Engine Operations`.
-
-## 26. 2026-08-01 14:09 KST · v0.8.2 API PNA CI 핫픽스
-1. GitHub Actions Python 3.10에서 PNA preflight가 400으로 실패한 로그를 기준으로 수정했다.
-2. 일반 `CORSMiddleware` 뒤에서 응답 헤더를 추가하던 방식을 제거했다.
-3. `PrivateNetworkCORSMiddleware`가 PNA 확장 헤더를 표준 CORS 검사에서만 분리하고,
-   Origin·Method·요청 헤더가 허용된 경우에만 allow-private-network 응답을 추가한다.
-4. 잘못된 Origin과 PNA 비활성화가 계속 400인지 회귀 테스트를 추가했다.
-5. 검증 결과: API 68개, Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST 통과.
-6. Python 3.10 실인터프리터 다운로드는 실행 환경 DNS 제한으로 불가했으며 CI 재실행이 최종 확인이다.
-7. 산출물: `SoriON-AI-0.8.2-full-pna-hotfix.zip`, `SoriON-AI-0.8.2-pna-hotfix-patch.zip`.
-## 27. 2026-08-01 · v0.8.3~0.8.5 요약
-1. 0.8.3은 SQLite JobStore·재시작 복구·claim·TTL·프로세스 간 취소를 추가했다.
-2. 0.8.4는 자동 API bootstrap, 랜딩 Dock 숨김과 프로젝트 복원을 추가했다.
-3. 0.8.5는 공통 IA, 자동 엔진 fallback·circuit breaker를 추가했고 CI 핫픽스로 Ruff·잔존 UI를 정리했다.
-## 31. 2026-08-01 18:30 KST · v0.8.6 릴리스 기록
-1. 작업 일시: 2026-08-01 18:30 KST.
-2. 대상·기준: `0.8.5 CI Hotfix → 0.8.6`.
-3. 변경 내용: 20,000자 장문 원고 편집기, 문장별 순차 제작, IndexedDB 세션 복원,
-   공식 SoriON 아이콘, 상단 브랜드 홈 이동과 뒤로가기 1회 확인·2회 즉시 이탈을 추가했다.
-4. 변경 이유: 한 문장 채팅형 제작은 오디오북·강의·광고처럼 긴 원고를 다루는 제품 목표와
-   맞지 않았고, GitHub Pages가 자신을 Voice API로 오인해 연결 대기 오류를 반복했다.
-5. 영향 범위: 랜딩·작업공간 IA, HomePage, 타임라인, Player 연계, 세션 저장소,
-   PWA 아이콘, 브라우저 history, API 자동 탐색, 연결 진단, Pages workflow와 문서.
-6. 주요 파일: `LongformComposer.tsx`, `HomePage.tsx`, `useExitConfirmation.ts`,
-   `workspaceSessionRepository.ts`, `apiConnection.ts`, `httpClient.ts`, `connectivity.py`,
-   `sorion-logo.png`, `ci.yml`, `LONGFORM_VOICE_WORKSPACE.md`.
-7. 검증 결과: API 90개·Worker 9개, 프로젝트 규칙, Python compileall·3.10 AST,
-   TS/TSX 120개 구문, 상대 import 250개, CSS·JSON·YAML 구조 검사를 통과했다.
-   로컬 `system` 엔진으로 147,848-byte WAV 실제 생성도 확인했다.
-8. 알려진 제한: 현재 실행 환경에는 npm 의존성과 공식 Ruff가 없어 ESLint·정식 TypeScript
-   project build·Vitest·Vite build·Ruff는 GitHub Actions 최종 확인이 필요하다. 공개 Pages는
-   실제 HTTPS FastAPI 배포와 `SORION_PUBLIC_API_BASE_URL` 없이는 음성을 생성할 수 없다.
-   로컬 System Voice는 실제 WAV를 만들지만 AI 모델 음성이 아니며 CosyVoice·GPU는 미준비다.
-9. 산출물: `SoriON-AI-0.8.6-full.zip`,
-   `SoriON-AI-0.8.5-ci-hotfix-to-0.8.6-patch.zip`.
-10. 다음 예상 업데이트는 모바일 더빙 편집 IA 확정이다.
-## 32. 2026-08-01 · v0.8.7 릴리스와 CI 핫픽스
-1. 프로젝트 상단바, 화자·설정 Sheet, 세로형 대사 블록과 고정 플레이어를 추가했다.
-2. 첫 핫픽스는 TimelineEditor 대사 버튼의 중복 접근성 이름을 번호·상태별로 분리했다.
-## 33. 2026-08-01 20:05 KST · v0.8.7 Web quality CI 핫픽스 2
-1. 기준: `0.8.7-ci-hotfix → 0.8.7-ci-hotfix-2`.
-2. 현재 화자 선택과 같은 화자의 미리듣기 버튼이 `/혜린/` 조회에서 충돌한 문제를 수정했다.
-3. 이름을 `현재 목소리 혜린 선택`과 `혜린 목소리 미리듣기`로 분리하고 popup·expanded 상태를 추가했다.
-4. DubbingVoiceControls와 HomePage 테스트는 정확한 접근성 이름만 조회한다.
-5. 제작 화면의 팝업 메뉴는 네이티브 `details/summary`에 의존하지 않고 명시적 button, React 상태, `aria-expanded`를 사용한다.
-6. 프로젝트 메뉴와 대사 블록 메뉴는 선택 즉시 닫히며 대사 메뉴 이름에는 대사 번호를 포함한다.
-5. API 90개·Worker 9개, TS/TSX 구문·상대 import·패치 동등성을 확인한다.
-6. 다음 목표는 `0.8.8 Korean Voice Quality Streaming`이다.
-## 34. 2026-08-01 21:35 KST · v0.8.8
-1. 만들기 포함 모든 내부 페이지에 기존 공통 상단 배너와 작은 SoriON 명칭을 복원했다.
-2. 사용자 제공 1254×1254 PNG를 공식 원본으로 사용하고 `sorion-icon.svg`를 삭제했다.
-3. 공개 API가 없으면 Web Speech API 한국어 음성을 자동 사용해 실제 재생을 가능하게 한다.
-4. 브라우저 음성은 AI·WAV로 가장하지 않으며 다운로드·복제·정밀 감정은 API가 필요하다.
-5. 실제 API 엔진은 항상 브라우저 대체 음성보다 우선하고 자동 재연결은 계속 유지한다.
-6. 다음 목표는 `0.8.9 Public Korean AI Voice Deployment & Streaming`이다.
-## 35. 2026-08-01 22:20 KST · v0.8.9
-1. 작업 일시: 2026-08-01 22:20 KST.
-2. 대상·기준: `0.8.8 → 0.8.9`.
-3. 변경 내용: 공통 PageScaffold, Premium Korean Engine Mesh와 복수 API 자동 장애 전환을 추가했다.
-4. 변경 이유: 페이지별 IA 편차와 실제 등록 엔진 부족, 실패 API 고정 재시도를 함께 해소하기 위해서다.
-5. 영향 범위: 내부 페이지 셸, 연결 bootstrap, 엔진 registry·orchestrator, 진단 API와 배포 workflow.
-6. 주요 파일: `WorkspacePageScaffold.tsx`, `apiConnection.ts`, `engine_orchestrator.py`, `engines/tts/*`.
-7. 검증 결과: API 98개·Worker 9개, 프로젝트 규칙, Python 3.10 AST, TS 구문·import 검사를 통과했다.
-8. 제한: 실제 Premium 합성은 서버 자격 증명, CosyVoice는 모델·GPU·동의된 기준 음성이 필요하다.
-9. 산출물: `SoriON-AI-0.8.9-full.zip`, `SoriON-AI-0.8.8-to-0.8.9-patch.zip`.
-10. 다음 예상 업데이트: `0.9.0 Progressive Korean Voice Streaming`.
+## 23. 0.8.0~0.8.5 요약
+- 장문 제작 이전의 채팅·타임라인 기반, 모바일 API 복구, SQLite JobStore, 자동 bootstrap과
+  엔진 fallback 기반을 만들었다. 상세 기록은 CHANGELOG와 archive HANDOVER에 보존한다.
+## 24. 0.8.6~0.8.8 요약
+- 장문 편집, 세션 복원, 공식 로고, 더빙 UI, 공통 상단 배너와 Browser Speech 안전망을 확정했다.
+- 0.8.7 Web quality 접근성·메뉴·테스트 타이밍 핫픽스는 CHANGELOG에 보존한다.
+## 25. 2026-08-01 22:20 KST · v0.8.9
+- 공통 PageScaffold, Premium Korean Engine Mesh와 복수 API 자동 장애 전환을 추가했다.
+- API 98개·Worker 9개와 프로젝트 규칙·Python 3.10·TS 구문 검사를 통과했다.
+- 실제 Premium 합성은 서버 자격 증명, CosyVoice는 모델·GPU·기준 음성이 필요하다.
+## 26. 2026-08-01 23:49 KST · v0.9.0 릴리스 기록
+1. 작업 일시: 2026-08-01 23:49 KST.
+2. 대상·기준: `0.8.9 → 0.9.0`.
+3. 변경 내용: 기본 `free-only` 정책, 비용 등급·자동 후보 메타데이터, TTS job SSE와
+   Web polling fallback, Progressive Queue 현재 트랙 보존을 추가했다.
+4. 변경 이유: 무료 사용자의 기본 실행에서 유료 API가 후보가 되는 위험을 제거하고 장문 생성
+   진행 상태를 더 빠르게 보여 주기 위해서다.
+5. 영향 범위: API 설정·engine registry·orchestrator·strategy·diagnostics, TTS route,
+   Web 진행 훅·Player store·Settings, 테스트와 문서.
+6. 주요 파일: `engine_orchestrator.py`, `engine_strategy.py`, `tts.py`,
+   `jobProgressStream.ts`, `useTimelineGeneration.ts`, `usePlayerStore.ts`.
+7. 검증 결과: API 103개·Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST,
+   TS/TSX 구문·상대 import, JSON·YAML 검사를 통과했다.
+8. 제한: npm mirror 404로 공식 ESLint·typecheck·Vitest·Vite build를 실행하지 못했고,
+   Ruff도 미설치다. CosyVoice 모델·GPU는 별도 준비 대상이다.
+9. 산출물: `SoriON-AI-0.9.0-full.zip`, `SoriON-AI-0.8.9-to-0.9.0-patch.zip`.
+10. 다음 예상 업데이트: `0.9.1 Free Local Model Onboarding & Korean Benchmark`.

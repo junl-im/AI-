@@ -12,6 +12,6 @@ async def health() -> HealthResponse:
     return HealthResponse(
         status="ok",
         service="sorion-api",
-        version="0.8.9",
+        version="0.9.0",
         default_engine=settings.default_tts_engine,
     )

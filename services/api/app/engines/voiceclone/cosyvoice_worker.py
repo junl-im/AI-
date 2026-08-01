@@ -131,7 +131,7 @@ class CosyVoiceCloneEngine:
                         files={
                             "sample": (sample_path.name, sample, "application/octet-stream")
                         },
-                        headers={"User-Agent": "SoriON-API/0.8.9"},
+                        headers={"User-Agent": "SoriON-API/0.9.0"},
                     )
                     body = await request.aread()
                     request.headers.update(self._auth_headers("POST", path, body))
@@ -210,7 +210,7 @@ class CosyVoiceCloneEngine:
         self._require_worker_url()
         headers = {
             "Accept": "application/json",
-            "User-Agent": "SoriON-API/0.8.9",
+            "User-Agent": "SoriON-API/0.9.0",
         }
         if authenticate:
             headers.update(self._auth_headers(method, path, b""))

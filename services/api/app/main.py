@@ -97,41 +97,42 @@ async def lifespan(app: FastAPI):
             settings.cosyvoice_tts_profile_id,
         )
     )
-    engine_registry.register_tts(
-        NaverClovaTtsEngine(
-            store,
-            settings.naver_clova_client_id,
-            settings.naver_clova_client_secret,
-            settings.naver_clova_speaker,
-            settings.cloud_tts_timeout_seconds,
+    if settings.metered_tts_enabled:
+        engine_registry.register_tts(
+            NaverClovaTtsEngine(
+                store,
+                settings.naver_clova_client_id,
+                settings.naver_clova_client_secret,
+                settings.naver_clova_speaker,
+                settings.cloud_tts_timeout_seconds,
+            )
         )
-    )
-    engine_registry.register_tts(
-        GoogleChirpTtsEngine(
-            store,
-            settings.google_tts_api_key,
-            settings.google_tts_voice,
-            settings.cloud_tts_timeout_seconds,
+        engine_registry.register_tts(
+            GoogleChirpTtsEngine(
+                store,
+                settings.google_tts_api_key,
+                settings.google_tts_voice,
+                settings.cloud_tts_timeout_seconds,
+            )
         )
-    )
-    engine_registry.register_tts(
-        AzureSpeechTtsEngine(
-            store,
-            settings.azure_speech_key,
-            settings.azure_speech_region,
-            settings.azure_speech_voice,
-            settings.cloud_tts_timeout_seconds,
+        engine_registry.register_tts(
+            AzureSpeechTtsEngine(
+                store,
+                settings.azure_speech_key,
+                settings.azure_speech_region,
+                settings.azure_speech_voice,
+                settings.cloud_tts_timeout_seconds,
+            )
         )
-    )
-    engine_registry.register_tts(
-        ElevenLabsTtsEngine(
-            store,
-            settings.elevenlabs_api_key,
-            settings.elevenlabs_voice_id,
-            settings.elevenlabs_model_id,
-            settings.cloud_tts_timeout_seconds,
+        engine_registry.register_tts(
+            ElevenLabsTtsEngine(
+                store,
+                settings.elevenlabs_api_key,
+                settings.elevenlabs_voice_id,
+                settings.elevenlabs_model_id,
+                settings.cloud_tts_timeout_seconds,
+            )
         )
-    )
     if settings.enable_melo_tts:
         engine_registry.register_tts(MeloTtsEngine(store, settings.melo_device))
     if settings.enable_system_tts:
@@ -143,6 +144,7 @@ async def lifespan(app: FastAPI):
         preferred_order=settings.tts_engine_order_list,
         failure_threshold=settings.engine_failure_threshold,
         cooldown_seconds=settings.engine_cooldown_seconds,
+        allow_metered=settings.metered_tts_enabled,
     )
     engine_registry.register_voice_clone(cosyvoice_worker)
     yield
@@ -153,7 +155,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.8.9",
+    version="0.9.0",
     lifespan=lifespan,
 )
 app.add_middleware(

@@ -21,7 +21,7 @@ function csvCell(value: string | number | null): string {
 export function buildQualityReport(reviews: QualityReview[]) {
   return {
     app: '곰같은여우 SoriON AI',
-    version: '0.8.9',
+    version: '0.9.0',
     exportedAt: new Date().toISOString(),
     reviews,
   }

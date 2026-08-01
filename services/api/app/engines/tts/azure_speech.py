@@ -52,6 +52,7 @@ class AzureSpeechTtsEngine(TtsEngine):
             ready=ready,
             reason=None if ready else "Azure Speech key와 region이 필요합니다.",
             quality_tier="premium",
+            cost_tier="metered",
             korean_specialization=85,
             long_form=True,
         )
@@ -76,7 +77,7 @@ class AzureSpeechTtsEngine(TtsEngine):
             "Ocp-Apim-Subscription-Key": self.subscription_key,
             "Content-Type": "application/ssml+xml",
             "X-Microsoft-OutputFormat": "riff-24khz-16bit-mono-pcm",
-            "User-Agent": "SoriON-API/0.8.9",
+            "User-Agent": "SoriON-API/0.9.0",
         }
         async with httpx.AsyncClient(
             transport=self.transport,

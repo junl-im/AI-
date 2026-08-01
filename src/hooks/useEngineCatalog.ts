@@ -9,11 +9,15 @@ function readyEngineMessage(engines: EngineInfo[]): {
   status: 'online' | 'degraded' | 'offline'
   message: string
 } {
-  const real = engines.find((engine) => engine.ready && !['mock', 'browser'].includes(engine.mode))
+  const real = engines.find((engine) => (
+    engine.ready
+    && engine.autoEligible !== false
+    && !['mock', 'browser'].includes(engine.mode)
+  ))
   if (real) {
     return {
       status: 'online',
-      message: `${real.name} 엔진을 사용할 수 있습니다.`,
+      message: `${real.name} · 무료 우선 자동 연결`,
     }
   }
   const browser = engines.find((engine) => engine.ready && engine.mode === 'browser')
@@ -109,7 +113,11 @@ export function useEngineCatalog() {
 
   const selected = useMemo(
     () => engines.find((engine) => engine.ready && engine.recommended)
-      ?? engines.find((engine) => engine.ready && !['mock', 'browser'].includes(engine.mode))
+      ?? engines.find((engine) => (
+        engine.ready
+        && engine.autoEligible !== false
+        && !['mock', 'browser'].includes(engine.mode)
+      ))
       ?? engines.find((engine) => engine.ready && engine.mode === 'browser')
       ?? engines.find((engine) => engine.ready)
       ?? null,

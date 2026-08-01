@@ -1,41 +1,40 @@
 # NEXT UPDATE
 
-현재 기준: `0.8.9 Unified Product Shell & Korean Neural Engine Mesh`
+현재 기준: `0.9.0 Free-First Korean Progressive Voice`
 
 ## 목표 버전
 
-`0.9.0 Progressive Korean Voice Streaming`
+`0.9.1 Free Local Model Onboarding & Korean Benchmark`
 
 ## 방향
 
-브라우저 대체 음성으로 공개 Web의 기본 재생은 보장했지만, 제품 목표는 자연스러운 한국어 AI
-음성과 다운로드 가능한 결과입니다. 다음 패치는 실제 공개 HTTPS API와 AI Worker를 배포 가능한
-형태로 완성하고 첫 문장부터 재생하는 스트리밍 체감을 강화합니다.
+무료 사용자가 별도 유료 API 없이도 실제 한국어 AI 음질을 얻을 수 있도록 로컬 모델 준비 과정을
+단순화하고, 유료급이라는 표현 대신 동일 원고의 측정 가능한 블라인드 평가로 품질을 증명한다.
 
-## 1. 실제 공개 AI 엔진
+## 1. 무료 로컬 모델 온보딩
 
-- 공개 HTTPS FastAPI 다중 리전 배포 템플릿과 health-based routing
-- CosyVoice·Premium Cloud Adapter의 실제 운영 자격 증명과 비용·quota 모니터링
-- GPU Worker 모델·CUDA·VRAM readiness
-- 브라우저 음성과 AI 엔진의 UI·데이터 구분 유지
-- API URL 누락을 배포 전에 명확히 차단
+- CosyVoice Worker 모델 존재·체크섬·라이선스 동의 검사
+- GPU·CPU 환경별 자동 프로필과 메모리 요구량 안내
+- 모델 다운로드는 명시적 사용자 실행으로만 시작하고 중단·재개 지원
+- Worker readiness 실패 원인을 한 화면에서 자동 진단
+- 모델·가중치·사용자 음성을 Git 저장소와 릴리스 ZIP에서 계속 제외
 
-## 2. 한국어 장문 품질
+## 2. 한국어 품질 벤치마크
 
-- 숫자·날짜·단위·영문 혼용·고유명사 평가 세트
-- 문단 호흡과 문장 끝 억양 평가
-- 실패한 문장 구간만 재생성
-- System, Browser, CosyVoice 결과 블라인드 비교
+- 숫자·날짜·금액·단위·영문·고유명사·존댓말 평가 세트 확장
+- 자연스러움·발음 정확도·문단 호흡·첫 음성 지연·실시간 배율 측정
+- CosyVoice·Melo·System·Browser 결과의 익명 블라인드 비교
+- 무료 엔진만으로 통과해야 하는 품질 게이트 정의
 
-## 3. 스트리밍과 결과물
+## 3. 결과물 완성
 
-- SSE 문장별 진행률
-- 첫 문장 완성 즉시 Progressive Playback
-- 전체 프로젝트 WAV 병합·다운로드
-- 생성 순서와 재생 Queue 순서 동기화
+- 전체 프로젝트 WAV 병합과 다운로드
+- 실패한 문장만 재생성하고 기존 완료 블록 재사용
+- SSE 재연결의 Last-Event-ID와 장시간 작업 안정성 강화
+- 모바일 화면 잠금·복귀 뒤 진행 상태와 재생 Queue 복원
 
 ## 4. 실기기 검증
 
-- Android Chrome Web Speech 재생
-- iOS Safari·설치형 PWA 재생과 백그라운드 복귀
-- API 전환 중 브라우저 음성 Queue 안전성
+- Android Chrome·iOS Safari·설치형 PWA
+- Windows·macOS·Linux 무료 System Voice 차이 기록
+- CPU 전용과 NVIDIA GPU 환경별 로컬 Worker 준비 시간 측정

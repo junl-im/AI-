@@ -1,5 +1,12 @@
 # SoriON AI Engine Strategy
 
+## 0.9.0 무료 우선 운영 정책
+
+기본 서버 정책은 `free-only`다. 자동 합성은 CosyVoice Worker, MeloTTS, System Voice 같은
+무료 후보만 평가하며 NAVER·Google·Azure·ElevenLabs는 `balanced`를 운영자가 명시한 경우에만
+등록한다. 비용 정책은 사용자 UI가 아니라 서버 운영 설정이고, 사용자는 항상 `engine_id=auto`를
+사용한다. 자세한 계약은 `docs/FREE_FIRST_ENGINE_POLICY.md`를 따른다.
+
 기준일: 2026-08-01
 
 ## 1. 왜 Python 백엔드인가

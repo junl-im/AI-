@@ -292,3 +292,12 @@ Semantic Versioning을 사용한다.
 - 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.8-to-0.8.9-patch.zip`
 - 범위: 공통 제품 셸, 한국어 Premium TTS Adapter Mesh, 자동 API 다중 후보 장애 전환
 - 삭제 파일: 없음
+
+## 0.9.0 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.0-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.9-to-0.9.0-patch.zip`
+- 패치 기준 버전: `0.8.9`
+- 핵심 확인: 무료 우선 엔진 정책, 과금형 Adapter opt-in, TTS job SSE와 polling fallback
+- 삭제 파일: 없음
+- 모델 가중치, Secret, 사용자 음성, 실행 DB와 캐시는 포함하지 않는다.

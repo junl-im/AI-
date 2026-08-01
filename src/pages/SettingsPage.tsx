@@ -2,11 +2,13 @@ import { useEffect } from 'react'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { StatusPill } from '../components/ui/StatusPill'
 import { consumeGoogleSignInResult, isFirebaseConfigured, startGoogleSignIn } from '../firebase/firebaseClient'
+import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import { useAppStore } from '../store/useAppStore'
 
 export function SettingsPage() {
   const showNotice = useAppStore((state) => state.showNotice)
   const firebaseReady = isFirebaseConfigured()
+  const engineCatalog = useEngineCatalog()
 
   useEffect(() => {
     void consumeGoogleSignInResult().then((user) => {
@@ -33,6 +35,18 @@ export function SettingsPage() {
       description="연결과 엔진 선택은 시스템이 자동으로 관리합니다. 여기에는 계정과 개인정보처럼 사용자가 결정해야 하는 항목만 둡니다."
     >
       <section className="space-y-3">
+        <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-black tracking-[-0.035em]">음성 엔진 운영</h2>
+            <StatusPill label="무료 우선 자동" tone="good" />
+          </div>
+          <p className="mt-2 text-sm leading-6 text-soa-muted">
+            유료 API는 기본 자동 후보에서 제외합니다. CosyVoice·MeloTTS·시스템 음성·브라우저 음성을 순서대로 자동 연결합니다.
+          </p>
+          <p className="mt-3 rounded-2xl bg-white p-3 text-xs font-bold text-soa-muted">
+            현재 {engineCatalog.selected?.name ?? (engineCatalog.loading ? '엔진 확인 중' : '브라우저 대체 음성 대기')}
+          </p>
+        </article>
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-black tracking-[-0.035em]">계정과 동기화</h2>

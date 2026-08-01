@@ -10,6 +10,7 @@ import {
   isBrowserSpeechSupported,
 } from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
+import { streamSpeechProgress } from '../tts/jobProgressStream'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import {
   getSpeechProgress,
@@ -112,22 +113,27 @@ export function useTimelineGeneration() {
     revision: number,
     signal: AbortSignal,
   ) => {
+    const applyProgress = (progress: Awaited<ReturnType<typeof getSpeechProgress>>) => {
+      updateVoiceBlock(
+        blockId,
+        { progress: Math.max(8, progress.progress) },
+        revision,
+      )
+    }
     const poll = async () => {
       if (signal.aborted) return
       try {
         const progress = await getSpeechProgress(jobId, signal)
-        updateVoiceBlock(
-          blockId,
-          { progress: Math.max(8, progress.progress) },
-          revision,
-        )
+        applyProgress(progress)
         if (['completed', 'failed', 'cancelled'].includes(progress.phase)) return
       } catch {
-        // 생성 POST보다 진행 상태가 늦게 만들어지는 짧은 구간은 다음 주기에 다시 확인한다.
+        // SSE를 지원하지 않는 서버와 생성 직전의 짧은 404 구간은 폴링으로 복구한다.
       }
-      timers.current.set(blockId, window.setTimeout(() => void poll(), 450))
+      timers.current.set(blockId, window.setTimeout(() => void poll(), 650))
     }
-    timers.current.set(blockId, window.setTimeout(() => void poll(), 250))
+    void streamSpeechProgress(jobId, applyProgress, signal).then((streamed) => {
+      if (!streamed && !signal.aborted) void poll()
+    })
   }, [updateVoiceBlock])
 
   const runBlock = useCallback(async (

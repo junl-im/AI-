@@ -1,34 +1,34 @@
-# SoriON AI 0.8.9 Result Report
+# SoriON AI 0.9.0 Result Report
 
-작업 일시: 2026-08-01 22:20 KST
+작업 일시: 2026-08-01 23:49 KST
 
-결과 버전: **0.8.9 Unified Product Shell & Korean Neural Engine Mesh**
+결과 버전: **0.9.0 Free-First Korean Progressive Voice**
 
 ## 결과
 
-- 프로젝트·품질·복제·설정 페이지를 공통 PageScaffold로 통일했다.
-- 모든 내부 페이지에 같은 제목 계층, 상태 영역, 여백과 카드 리듬을 적용했다.
-- CosyVoice Worker 일반 TTS와 네 개의 Premium Cloud TTS Adapter를 등록했다.
-- 한국어 특화도·품질 등급·요청 기능 적합성을 자동 순위에 반영하고 장문·스트리밍 역량을 진단에 공개했다.
-- 준비되지 않은 엔진은 추천하지 않고 실패 엔진은 circuit breaker로 자동 격리한다.
-- 런타임 JSON과 복수 Actions Variable로 공개 HTTPS API 후보를 자동 장애 전환한다.
-- 사용자는 API 주소나 엔진을 직접 연결하지 않는다.
+- 서버 기본 엔진 정책을 `free-only`로 고정해 무료 사용 흐름에서 과금형 API를 등록·호출하지 않는다.
+- CosyVoice Worker, MeloTTS, System Voice를 무료 서버 후보로 우선하고 Browser Speech를 Web 안전망으로 유지한다.
+- NAVER·Google·Azure·ElevenLabs는 운영자가 `balanced`를 명시한 경우에만 서버 후보가 된다.
+- 엔진 목록과 전략 응답에 비용 등급과 자동 후보 여부를 공개한다.
+- TTS job 진행 상태를 SSE로 전달하고 Web은 실패 시 polling으로 자동 대체한다.
+- 장문 생성 중 뒤 블록이 완료돼도 현재 플레이어 선택이 임의로 바뀌지 않도록 Queue를 안정화했다.
+- 설정 화면은 `무료 우선 자동` 정책을 읽기 전용으로 표시하며 수동 엔진 선택을 제공하지 않는다.
 
 ## 검증 범위
 
-- API 98개·Worker 9개 회귀 테스트
-- Python compileall, Python 3.10 AST·표시 폭 검사
-- 프로젝트 규칙, Web 테스트 계약, 세션 규칙
+- API **103개**, Worker **9개** 회귀 테스트
+- Python compileall과 Python 3.10 AST 호환성
+- 프로젝트·세션·Web 테스트 계약 규칙
 - TypeScript·TSX 구문과 상대경로 import
-- 패치 적용 동등성, ZIP 무결성, SHA-256
+- JSON·YAML·줄 끝 공백·500줄 제한
+- 0.8.9 기준 패치 적용 동등성, ZIP 무결성, SHA-256
 
-## 배포 현실
+## 실행 환경 제한
 
-Premium 엔진은 각 공급자의 서버 측 자격 증명이 있을 때만 자동 등록된다. CosyVoice 일반 TTS는
-준비된 Worker와 명시적 동의를 받은 한국어 기준 음성 파일이 모두 있어야 한다. GitHub Pages에는
-비밀키를 넣지 않으며 별도 HTTPS FastAPI 배포가 필요하다. API가 없을 때는 브라우저 음성이
-안전망으로 동작하지만 Premium AI 음질이나 WAV 서버 결과로 표시하지 않는다.
+현재 패키지 미러가 `@tailwindcss/vite`를 404로 반환해 공식 ESLint·프로젝트 typecheck·Vitest·
+Vite build를 실행하지 못했다. Ruff도 설치돼 있지 않아 공식 Ruff는 GitHub Actions에서 최종 확인한다.
+로컬 고품질 AI 음성을 위한 CosyVoice 모델·PyTorch·CUDA·GPU는 릴리스 ZIP에 포함하지 않는다.
 
 ## 다음 목표
 
-`0.9.0 Progressive Korean Voice Streaming`
+`0.9.1 Free Local Model Onboarding & Korean Benchmark`

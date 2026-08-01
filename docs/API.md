@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.8.9",
+  "version": "0.9.0",
   "default_engine": "auto"
 }
 ```
@@ -50,7 +50,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.8.9",
+  "version": "0.9.0",
   "primary_tts_engine": "auto",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -69,8 +69,9 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 `quality_tier`와 `korean_specialization`은 자동 순위와 품질 진단에 사용하며, `long_form`과
 `streaming`은 현재 Adapter가 제공하는 실행 역량을 진단에 표시한다. 인증 정보가 없는 Premium
-Adapter는 `ready=false`로 남으며,
-자동 모드는 준비된 후보만 선택하고 실패 시 다음 엔진으로 전환한다.
+Adapter는 기본 `free-only` 정책에서 registry에 등록되지 않는다. `/engines`는 각 엔진의
+`cost_tier`와 `auto_eligible`을 반환한다. 서버 운영자가 `SORION_ENGINE_COST_POLICY=balanced`를
+명시한 경우에만 과금형 Adapter가 준비 후보가 된다.
 
 ## POST /tts/synthesize
 
@@ -114,7 +115,7 @@ Adapter는 `ready=false`로 남으며,
 }
 ```
 
-## 0.8.9 한국어 Neural Engine Mesh
+## 0.9.0 무료 우선 Korean Engine Mesh
 
 `/engines`의 `recommended`는 현재 API 프로세스가 자동 요청에 가장 먼저 사용할 준비 엔진이다.
 `health=cooldown`은 반복 실패로 잠시 자동 후보에서 제외됐다는 의미이며 시간이 지나면 다시
@@ -191,7 +192,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.8.9",
+  "version": "0.9.0",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
@@ -228,6 +229,11 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 ```
 
 `phase`는 `queued`, `normalizing`, `generating`, `merging`, `completed`, `cancelled`, `failed` 중 하나다.
+
+### `GET /api/v1/tts/jobs/{job_id}/events`
+
+TTS 작업 진행 상태를 `text/event-stream`으로 전달한다. Web은 이 경로를 우선 사용하고 스트림이
+불가능하면 `/jobs/{job_id}` polling으로 자동 전환한다. 완료·실패·취소 이벤트 뒤 연결을 닫는다.
 
 ### `GET /api/v1/tts/jobs/{job_id}/result`
 
