@@ -286,8 +286,11 @@ await requireText('src/tts/voiceApi.ts', ['recoverSpeechResult', '/result', 'ret
 await requireText('services/api/app/api/routes/tts.py', ['@router.get("/jobs/{job_id}/result"', 'get_result'])
 await requireText('services/api/app/main.py', ['PrivateNetworkCORSMiddleware', 'X-SoriON-Client-ID', 'X-Request-ID'])
 await requireText('services/api/app/middleware/private_network_cors.py', ['Access-Control-Request-Private-Network', 'Access-Control-Allow-Private-Network', 'Disallowed CORS private-network'])
+await requireText('services/api/app/services/sqlite_job_store.py', ['BEGIN IMMEDIATE', 'CREATE TABLE IF NOT EXISTS tts_jobs', 'claim_expires_at', 'cancel_requested'])
+await requireText('services/api/app/main.py', ['SQLiteJobStore', 'job_store_file'])
+await requireText('.env.example', ['SORION_JOB_STORE_PATH=.sorion/jobs.sqlite3', 'SORION_JOB_RESULT_TTL_MINUTES=30', 'SORION_JOB_HISTORY_TTL_HOURS=24'])
 await requireText('src/settings/connectivityTypes.ts', ['workerHealthy', 'gpuReady', 'recommendedRecheckSeconds'])
-await requireText('docs/MOBILE_ENGINE_RELIABILITY.md', ['API·TTS·Worker·GPU', 'GET  /api/v1/tts/jobs/{job_id}/result', 'SORION_ALLOW_PRIVATE_NETWORK=true'])
+await requireText('docs/MOBILE_ENGINE_RELIABILITY.md', ['API·TTS·Worker·GPU', 'GET  /api/v1/tts/jobs/{job_id}/result', 'SORION_ALLOW_PRIVATE_NETWORK=true', '0.8.3 서버 재시작·다중 프로세스 복구'])
 
 await requireText('src/pages/HomePage.tsx', [
   'soa-editor-workspace',

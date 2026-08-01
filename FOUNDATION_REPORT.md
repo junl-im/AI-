@@ -1,116 +1,113 @@
-# SoriON AI 0.8.2 Result Report
+# SoriON AI 0.8.3 Result Report
 
-작성: 2026-08-01 12:25 KST
+작업 일시: 2026-08-01 15:00 KST
+기준 버전: 0.8.2 Mobile Job Recovery/API Idempotency
+결과 버전: 0.8.3 Persistent Job Store/Atomic Claim
 
-## 목표
+## 1. 결과
 
-모바일을 주 사용 환경으로 보고 네트워크 전환, PWA 백그라운드 중단, 중복 탭과 HTTP
-응답 단절에서도 같은 TTS 작업이 중복 실행되지 않도록 Web과 FastAPI의 job 수명·복구
-계약을 강화한다. 실제 모델이 없는 상태는 성공으로 숨기지 않는다.
+이번 패치는 FastAPI의 TTS job을 프로세스 메모리에서 SQLite 기반 JobStore로 옮겼다.
+클라이언트 job ID, 요청 fingerprint, 진행 snapshot과 완료 응답이 API 재시작 뒤에도
+남으며 여러 API 프로세스가 같은 DB 파일을 공유할 때 동일 job을 한 번만 실행한다.
 
-## 파일·인수인계 분석 결론
+사용자에게 보이는 API 계약은 유지된다.
 
-- 기존 0.8.1은 Web이 job ID로 `/result`를 조회했지만 HTTP 호출 취소가 내부 Task를 취소할
-  수 있어 모바일 단절 복구 계약이 완전하지 않았다.
-- 완료된 job ID를 다시 POST하면 재생성될 수 있고 다른 payload 재사용도 차단하지 않았다.
-- 타임라인 블록이 job ID를 보존하지 않아 복구 실패 뒤 새 작업이 만들어질 수 있었다.
-- iOS private mode·저장공간 quota에서 localStorage 쓰기가 앱 흐름을 깨뜨릴 수 있었다.
-- 일부 모바일 브라우저의 `crypto.randomUUID()` 미지원 fallback이 없었다.
-- 기존 다음 목표가 LLM·편집 확장 중심이라 사용자 결정인 모바일 엔진/API 강화와 충돌했다.
+- 같은 job ID·같은 요청: 실행 중 join 또는 완료 결과 재사용
+- 같은 job ID·다른 요청: HTTP 409, `SOA-4009`
+- 완료 결과 TTL 만료: HTTP 410, `SOA-4012`
+- 알 수 없는 job: HTTP 404, `SOA-4010`
+- 다른 API 프로세스에서 취소: SQLite 취소 신호를 owner Task가 감지
 
-## 완료 항목
+## 2. 구현 내용
 
-### FastAPI job 멱등성
+### 교체 가능한 JobStore
 
-- 요청 payload에서 job ID를 제외한 SHA-256 fingerprint 생성
-- 같은 job ID·같은 fingerprint는 실행 중 Task 공유
-- 완료 뒤 같은 요청은 저장 결과 반환, 합성 factory 재실행 없음
-- 같은 job ID·다른 fingerprint는 HTTP 409 `SOA-4009`
-- fingerprint, snapshot, result를 같은 history 수명으로 정리
+- `JobStore` protocol과 `MemoryJobStore`를 분리했다.
+- 기본 운영 저장소로 `SQLiteJobStore`를 추가했다.
+- 결과 직렬화를 `job_result_codec.py`로 분리했다.
+- 파일별 500줄 제한을 지키도록 memory/protocol, SQLite, codec을 나눴다.
 
-### 모바일 연결 단절 복구
+### 원자적 claim
 
-- `asyncio.shield`로 HTTP 호출 수명과 실제 생성 Task 수명 분리
-- 호출 코루틴 취소·연결 단절 뒤에도 서버 생성 계속
-- 명시적 `DELETE /tts/jobs/{job_id}`만 Task 취소
-- 완료 상태와 `/result`에서 기존 결과 복구
+- SQLite `BEGIN IMMEDIATE` transaction에서 job ID와 fingerprint를 확인한다.
+- owner와 claim 만료 시각을 저장한다.
+- 유효 claim이 있으면 다른 manager는 결과를 polling한다.
+- owner 프로세스가 사라지면 claim TTL 뒤 다른 manager가 재획득한다.
+- claim TTL은 생성 timeout보다 최소 5초 길게 보정한다.
 
-### 타임라인 recover-first
+### 결과와 이력 TTL
 
-- 음성 블록에 `jobId` 저장
-- POST 전에 job ID를 상태에 반영
-- 재시도 시 progress/result 조회 후 필요할 때만 새 POST
-- 네트워크 오류에서는 기존 ID 유지
-- 404·410 또는 failed/cancelled 상태에서만 새 ID 생성
-- 블록별 single-flight로 반복 탭의 동시 생성 방지
-- 편집·분할 시 AbortController와 polling 정리, stale 결과 덮어쓰기 차단
+- 완료 응답 TTL과 job 이력 TTL을 분리했다.
+- 기본 결과 TTL: 30분.
+- 기본 이력 TTL: 24시간.
+- 결과가 사라져도 completed tombstone을 유지해 같은 ID를 조용히 재생성하지 않는다.
+- startup cleanup에서 만료 결과와 이력을 정리하고 정리 건수를 감사 로그에 기록한다.
 
-### 모바일 브라우저 호환
+### 취소와 감사 로그
 
-- localStorage 읽기·쓰기·삭제 예외를 메모리 fallback으로 처리
-- iOS private mode·quota 오류에서도 API 주소와 익명 client ID를 세션 동안 유지
-- `randomUUID`, `getRandomValues`, 최종 호환 fallback 순서의 공통 ID 생성기
-- Voice Clone, Home, Player, HTTP, Voice/Timeline generation의 직접 UUID 호출 통합
+- 취소 요청을 SQLite에 기록한다.
+- owner process watcher가 취소 신호를 polling하고 실제 생성 Task를 취소한다.
+- job ID payload 충돌과 결과 만료를 별도 audit event로 기록한다.
 
-### 인수인계·개발 목표
+### CI 안정화 포함
 
-- 현재 버전을 `0.8.2 Mobile Job Recovery/API Idempotency`로 통일
-- 다음 목표를 `0.8.3 Mobile Session Persistence & Engine Operations`로 변경
-- LLM 기능보다 영속 JobStore, IndexedDB 세션 복원, 엔진 운영 진단·인증을 우선
-- HANDOVER, CHANGELOG, NEXT_UPDATE, RELEASE, ROADMAP, 테스트·아키텍처 문서 갱신
+- Ruff I001이 발생한 PNA middleware import block을 정리했다.
+- Web CI의 Vitest 파일 병렬 실행을 끄는 `test:ci` 명령을 유지했다.
 
-## 자동 검증
+## 3. 새 환경 변수
 
-- 프로젝트 절대 규칙: 통과 (`v0.8.2`)
-- FastAPI 테스트: **65 passed**
-- CosyVoice Worker 테스트: **9 passed**
-- Python compileall: 통과
-- TypeScript·TSX 구문: **108 files, 0 errors**
-- 소스 파일 500줄 이하와 Python 표시 폭 규칙: 프로젝트 규칙 검사 통과
-- 패치 적용 동등성: 최종 패키징 단계에서 전체 파일 SHA-256 비교
+```text
+SORION_JOB_STORE_PATH=.sorion/jobs.sqlite3
+SORION_JOB_CLAIM_TTL_SECONDS=120
+SORION_JOB_RESULT_TTL_MINUTES=30
+SORION_JOB_HISTORY_TTL_HOURS=24
+SORION_JOB_POLL_INTERVAL_SECONDS=0.1
+```
 
-## 실행하지 못한 공식 검사
+여러 API 프로세스는 같은 로컬 SQLite 파일을 사용해야 한다. 네트워크 파일시스템이나
+여러 서버 노드에서는 SQLite locking과 공유 스토리지 특성을 별도로 검증해야 한다.
 
-현재 실행 환경의 npm 저장소가 `@tailwindcss/vite`를 404로 반환해 Web 의존성 설치가
-완료되지 않았다. 따라서 정식 Vitest, ESLint, TypeScript project typecheck와 Vite production
-build는 실행하지 못했다. Ruff 실행 파일도 없어 공식 Ruff 명령을 실행하지 못했다. Python
-테스트·compileall과 TypeScript parser로 대체 확인했으며 GitHub Actions에서 정식 검사가 필요하다.
+## 4. 검증
 
-## 알려진 제한
+통과:
 
-- job snapshot, fingerprint와 결과는 API 프로세스 메모리에 있어 API 재시작 시 사라진다.
-- 다중 Uvicorn worker 간에는 아직 job claim과 결과를 공유하지 않는다.
-- localStorage fallback은 세션 메모리이므로 앱 종료 뒤 영구 복원되지 않는다.
-- 실제 CosyVoice 모델·CUDA GPU와 실제 LLM은 릴리스에 포함되지 않는다.
-- 공개 사용자 인증과 job 소유권 검사는 아직 없다.
-- HTTPS Web에서 HTTP LAN API 차단은 Web 코드로 우회할 수 없다.
+- FastAPI pytest: 77 passed
+- CosyVoice Worker pytest: 9 passed
+- 프로젝트 절대 규칙
+- Python compileall
+- Python 3.10 AST parsing
+- `git diff --check`
+- SQLite API restart recovery
+- 두 JobManager 원자적 single execution
+- stale claim recovery
+- result tombstone expiration
+- cross-manager cancellation
+- TTL cleanup
 
-## 릴리스 구성
+실행하지 못함:
 
-- 전체 프로젝트 파일: 345개
-- 추가 파일: 6개
-- 수정 파일: 48개
-- 삭제 파일: 0개
-- 패치 포함 파일: 54개
+- Ruff 0.15.22: 현재 Python package mirror에 배포본이 없어 설치 실패
+- Web ESLint/TypeScript/Vitest/Vite build: 현재 작업본에 `node_modules`와 lockfile이 없고
+  외부 의존성 설치를 보장할 수 없어 GitHub Actions에서 최종 확인 필요
 
-## 산출물
+## 5. 알려진 제한
 
-- `SoriON-AI-0.8.2-full.zip`
-- `SoriON-AI-0.8.1-to-0.8.2-patch.zip`
-- `SoriON-AI-0.8.2-artifacts.sha256`
-- `docs/HANDOVER.md`
-- `docs/CHANGELOG.md`
-- `docs/NEXT_UPDATE.md`
-- `docs/patches/0.8.2/`
+- SQLite는 단일 호스트 또는 신뢰할 수 있는 공유 파일 경로 기준이다.
+- 실제 생성 Task는 여전히 owner 프로세스 메모리에 있다. 프로세스가 죽으면 claim TTL 뒤
+  새 프로세스가 요청을 재실행한다.
+- 실제 CosyVoice 모델, CUDA, GPU benchmark와 실제 LLM은 포함되지 않는다.
+- 모바일 타임라인 자체의 IndexedDB 자동 복원은 0.8.4 범위다.
 
-## 2026-08-01 API PNA CI 핫픽스 추가 보고
+## 6. 산출물
 
-GitHub Actions의 Python 3.10 의존성 조합에서 Private Network preflight가 400을 반환했다.
-기존 구조는 일반 CORS 미들웨어가 preflight를 먼저 종료한 뒤 애플리케이션 미들웨어가
-allow-private-network 헤더를 추가하려 했기 때문에 Starlette 버전 차이에 취약했다.
+- `SoriON-AI-0.8.3-full.zip`
+- `SoriON-AI-0.8.2-to-0.8.3-patch.zip`
+- `SoriON-AI-0.8.3-artifacts.sha256`
+- `docs/patches/0.8.3/PATCH_README.md`
+- `docs/patches/0.8.3/PATCH_MANIFEST.txt`
 
-전용 `PrivateNetworkCORSMiddleware`로 교체해 PNA 확장 헤더만 표준 CORS 검증 입력에서
-분리하고, 허용 Origin·Method·요청 헤더 검증이 성공한 경우에만 PNA 허용 헤더를 추가했다.
-잘못된 Origin과 설정 비활성화는 400으로 유지한다. 로컬 검증은 API 68개, Worker 9개,
-프로젝트 규칙, compileall, Python 3.10 AST가 통과했다. Python 3.10 실행 환경 다운로드는
-DNS 제한으로 수행하지 못했으므로 GitHub Actions 재실행 결과가 최종 판정이다.
+## 7. 다음 목표
+
+0.8.4는 모바일 채팅·타임라인·job ID·선택 엔진을 IndexedDB에 저장하고 PWA 종료,
+새로고침, 화면 잠금 뒤 서버 job에 recover-first로 다시 연결한다. Object URL 소실,
+quota 초과, private mode와 iOS 데이터 정리도 같은 패치에서 다룬다.

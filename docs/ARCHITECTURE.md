@@ -156,8 +156,8 @@ Mobile Web
 
 API, 실제 TTS, Worker 프로세스, GPU·모델 상태를 분리한다. 온라인 복귀, NetworkInformation
 변경, PWA 포그라운드 복귀에서 단일 연결 점검을 실행한다. 생성 POST는 재전송하지 않고
-UUID job의 상태와 완료 결과를 조회해 모바일 응답 단절을 복구한다. FastAPI는 완료 결과를
-제한된 메모리 스냅샷으로 보관하며 기존 TTL 정리와 함께 제거한다.
+UUID job의 상태와 완료 결과를 조회해 모바일 응답 단절을 복구한다. FastAPI는 완료 결과와
+진행 스냅샷을 SQLite JobStore에 보관하며 결과 TTL과 이력 TTL을 분리해 정리한다.
 
 ## 0.8.2 TTS job 멱등성 계층
 
@@ -173,7 +173,21 @@ Timeline block(jobId)
       → explicit DELETE cancels
 ```
 
-현재 fingerprint, snapshot과 result는 한 API 프로세스의 제한된 메모리 history에 저장된다.
-따라서 연결 단절 복구와 같은 프로세스 내 중복 방지는 보장하지만 API 재시작·다중 프로세스
-영속성은 0.8.3 JobStore에서 해결한다.
+## 0.8.3 SQLite JobStore와 원자적 claim
+
+```text
+POST same job ID
+  → SQLite BEGIN IMMEDIATE
+  → request fingerprint 확인
+  → 완료 결과가 있으면 즉시 반환
+  → 유효한 claim이 있으면 해당 작업 완료를 polling
+  → claim이 없거나 만료됐으면 현재 프로세스가 원자적으로 획득
+  → snapshot/result/TTL을 SQLite에 기록
+```
+
+실행 Task 자체는 프로세스 메모리에 남지만 job ID, fingerprint, 상태와 완료 결과는
+`SORION_JOB_STORE_PATH`의 SQLite 파일에 저장된다. claim TTL은 생성 timeout보다 길게
+보정되며 프로세스 종료 뒤 만료된 claim은 다른 API 프로세스가 재획득한다. 완료 결과가
+만료돼도 이력 TTL 동안 tombstone을 유지해 같은 job ID의 POST와 `/result`가 410을 반환한다.
+취소 요청은 SQLite에 기록하고 owner 프로세스의 watcher가 실제 Task를 취소한다.
 

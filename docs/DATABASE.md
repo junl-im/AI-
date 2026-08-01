@@ -80,3 +80,21 @@ Firestore에는 원본 음성, 생성 음원, 모델 파일을 직접 저장하�
 - `createdAt`, `updatedAt`
 
 원본 Blob은 기본적으로 이 기기에만 저장하며 자동 Firebase 동기화 대상이 아니다. 사용자가 동의를 철회하면 프로필과 Blob을 함께 삭제한다.
+
+## 0.8.3 API SQLite · `tts_jobs`
+
+기본 파일은 `SORION_JOB_STORE_PATH=.sorion/jobs.sqlite3`이다. Web IndexedDB와 별개이며
+FastAPI 프로세스들이 같은 파일을 공유할 때 원자적 claim과 재시작 복구를 제공한다.
+
+- `job_id`: 클라이언트가 보낸 UUID, primary key
+- `request_key`: job ID에 묶인 요청 fingerprint
+- `status`, `phase`, `progress`: 공개 작업 상태
+- `current_segment`, `total_segments`, `message`, `error`: 진행 메타데이터
+- `result_type`, `result_json`: 완료 응답 직렬화 결과
+- `owner_id`, `claim_expires_at`: 현재 실행 프로세스와 lease
+- `result_expires_at`: 결과 조회 가능 TTL
+- `record_expires_at`: 충돌·만료 판정을 위한 이력 tombstone TTL
+- `cancel_requested`: 다른 API 프로세스에서 전달된 취소 신호
+
+SQLite에는 원문 음성 텍스트를 별도 열로 저장하지 않는다. 요청 fingerprint와 결과
+메타데이터만 보관하며 실제 WAV는 기존 `SORION_AUDIO_DIRECTORY` 수명 주기를 따른다.

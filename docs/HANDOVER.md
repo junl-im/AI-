@@ -1,9 +1,9 @@
 # SoriON AI MASTER HANDOVER
-상태: **절대 필독 · 임시채팅 영구 메모리 원본**  
-현재 기준 버전: **0.8.2 Mobile Job Recovery/API Idempotency**  
-기준 버전: **0.7.3 Handover Memory Baseline**  
-최종 갱신: **2026-08-01 14:09 KST**  
-제품 소유·디자인: **곰같은여우**  
+상태: **절대 필독 · 임시채팅 영구 메모리 원본**
+현재 기준 버전: **0.8.3 Persistent Job Store/Atomic Claim**
+기준 버전: **0.7.3 Handover Memory Baseline**
+최종 갱신: **2026-08-01 15:00 KST**
+제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
@@ -309,6 +309,11 @@ SORION_ENABLE_MELO_TTS
 SORION_MELO_DEVICE
 SORION_ENABLE_SYSTEM_TTS
 SORION_SYSTEM_TTS_VOICE
+SORION_JOB_STORE_PATH
+SORION_JOB_CLAIM_TTL_SECONDS
+SORION_JOB_RESULT_TTL_MINUTES
+SORION_JOB_HISTORY_TTL_HOURS
+SORION_JOB_POLL_INTERVAL_SECONDS
 SORION_COSYVOICE_WORKER_URL
 SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS
 SORION_WORKER_SERVICE_TOKEN
@@ -351,10 +356,10 @@ SORION_WORKER_JOB_TTL_MINUTES
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.8.2-full-pna-hotfix.zip`.
-- 패치: `SoriON-AI-0.8.2-pna-hotfix-patch.zip`.
-- 체크섬: `SoriON-AI-0.8.2-pna-hotfix-artifacts.sha256`.
-- 패치 기준은 첫 0.8.2 CI 핫픽스가 적용된 저장소다.
+- 전체본: `SoriON-AI-0.8.3-full.zip`.
+- 패치: `SoriON-AI-0.8.2-to-0.8.3-patch.zip`.
+- 체크섬: `SoriON-AI-0.8.3-artifacts.sha256`.
+- 패치 기준은 package version `0.8.2`이며 직전 CI 안정화 수정을 포함한다.
 - 삭제 파일은 현재 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
@@ -376,7 +381,7 @@ SORION_WORKER_JOB_TTL_MINUTES
 - 타임라인 상태는 아직 새로고침 후 영구 복원되지 않는다.
 - 실제 LLM 대본 생성은 미연결이며 로컬 초안만 제공한다.
 - 정식 npm 테스트와 build는 패키지 저장소 가용성에 영향을 받는다.
-- 현재 TTS job 상태와 완료 결과는 API 프로세스 메모리에 있어 재시작 시 사라진다.
+- TTS job DB는 모든 API 프로세스가 같은 로컬 SQLite 파일을 공유해야 한다.
 - localStorage 실패 시 세션 메모리 fallback은 동작하지만 앱 종료 뒤 영구 복원되지는 않는다.
 ## 19. 절대 전달 규칙
 최종 응답 순서:
@@ -404,16 +409,14 @@ npm run build
 ```
 네트워크 제한 시 실행하지 못한 항목과 이유를 결과 보고서에 정확히 기록한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.8.3 Mobile Session Persistence & Engine Operations**.
+다음 목표 버전: **0.8.4 Mobile Session Persistence**.
 우선순위:
-1. 메모리 JobManager를 교체 가능한 영속 JobStore로 분리하고 API 재시작 복구.
-2. 다중 API 프로세스에서도 동일 job ID 단일 실행을 보장하는 원자적 claim.
-3. 타임라인·job ID·선택 엔진의 IndexedDB 저장과 PWA 종료 후 recover-first 복원.
-4. 엔진 readiness·queue·지연·최근 실패를 운영 schema와 진단 UI로 고정.
-5. 공개 HTTPS API 인증과 사용자별 job 접근 권한.
-6. Android Chrome·iOS Safari·설치형 PWA 실기기 단절 복구 매트릭스.
-7. 이후 WAV Export, 연속 재생, 실제 LLM Adapter 순으로 진행.
-금지: 서버 영속화 전 작업을 영구 job이라고 표현하거나 재연결 때 무조건 새 POST하지 않는다.
+1. 채팅·타임라인 블록·순서·생성 옵션·job ID를 IndexedDB에 저장.
+2. 새로고침·PWA 종료 뒤 서버 상태와 `/result`를 먼저 조회해 세션 복원.
+3. Object URL 소실, quota 초과, private mode와 iOS 데이터 정리 fallback.
+4. Android Chrome·iOS Safari·설치형 PWA 단절 복구 실기기 매트릭스.
+5. 이후 엔진 운영 진단, 공개 API 인증, WAV Export, 실제 LLM Adapter 순으로 진행.
+금지: 저장 실패를 앱 전체 오류로 전파하거나 복원 실패 때 같은 POST를 무조건 재전송하지 않는다.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -477,3 +480,14 @@ npm run build
 5. 검증 결과: API 68개, Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST 통과.
 6. Python 3.10 실인터프리터 다운로드는 실행 환경 DNS 제한으로 불가했으며 CI 재실행이 최종 확인이다.
 7. 산출물: `SoriON-AI-0.8.2-full-pna-hotfix.zip`, `SoriON-AI-0.8.2-pna-hotfix-patch.zip`.
+## 27. 2026-08-01 15:00 KST · v0.8.3 릴리스 기록
+1. 작업 일시: 2026-08-01 15:00 KST.
+2. 대상·기준: `0.8.2 → 0.8.3`, 직전 CI 안정화 수정 포함.
+3. 변경 내용: SQLite JobStore, 재시작 결과 복구, 원자적 claim, stale claim 재획득, TTL tombstone과 cross-process 취소를 추가했다.
+4. 변경 이유: 메모리 JobManager는 API 재시작·다중 프로세스에서 job ID와 완료 결과를 잃었다.
+5. 영향 범위: FastAPI startup, TTS route, config, JobManager/JobStore, API 테스트, 환경 변수와 운영 문서.
+6. 주요 파일: `job_manager.py`, `job_store.py`, `sqlite_job_store.py`, `job_result_codec.py`, `main.py`, `test_job_store.py`.
+7. 검증 결과: API 77개, Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST와 diff whitespace 통과.
+8. 제한: Ruff·Web 정식 품질은 현재 패키지 저장소 미지원으로 실행하지 못했고 GitHub Actions 확인이 필요하다. SQLite는 모든 API 프로세스가 같은 로컬 파일을 공유해야 한다.
+9. 산출물: `SoriON-AI-0.8.3-full.zip`, `SoriON-AI-0.8.2-to-0.8.3-patch.zip`, `SoriON-AI-0.8.3-artifacts.sha256`.
+10. 다음 예상 업데이트: `0.8.4 Mobile Session Persistence`.

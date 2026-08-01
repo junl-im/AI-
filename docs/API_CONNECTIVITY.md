@@ -1,6 +1,6 @@
 # API CONNECTIVITY
 
-현재 기준 버전: `0.8.2`
+현재 기준 버전: `0.8.3`
 
 ## 배포 경계
 
@@ -60,7 +60,7 @@ npm run dev:api
 
 ```json
 {
-  "version": "0.8.2",
+  "version": "0.8.3",
   "api_ready": true,
   "tts_ready": true,
   "worker_configured": true,
@@ -89,7 +89,7 @@ GET /api/v1/tts/jobs/{job_id}/result
 
 - 진행 중 결과 요청: 409
 - 알 수 없는 job: 404
-- 완료 결과가 메모리 TTL에서 사라짐: 410
+- 완료 결과가 SQLite result TTL에서 사라짐: 410
 
 ## CORS와 Private Network
 

@@ -184,3 +184,13 @@ Semantic Versioning을 사용한다.
 - 패치 기준: 첫 0.8.2 CI 핫픽스 적용본
 - 핵심 확인: Python 3.10 PNA preflight 200, 잘못된 Origin·비활성화 400
 - 삭제 파일: 없음
+
+## 0.8.3 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.3-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.2-to-0.8.3-patch.zip`
+- 체크섬: `SoriON-AI-0.8.3-artifacts.sha256`
+- 패치 기준: `0.8.2`이며 직전 CI 안정화 수정도 포함한다.
+- 주요 변경: SQLite JobStore, API 재시작 결과 복구, 원자적 claim, TTL tombstone,
+  cross-process 취소, TTL 조회 정리, 77개 API 회귀 테스트.
+- 삭제 대상: 없음. 저장소에 별도로 존재하는 모델·DB archive ZIP은 패치에 포함하지 않는다.

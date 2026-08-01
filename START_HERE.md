@@ -1,6 +1,6 @@
 # 곰같은여우 SoriON AI 시작 안내
 
-현재 버전: `0.8.2 Mobile Job Recovery/API Idempotency`
+현재 버전: `0.8.3 Persistent Job Store/Atomic Claim`
 
 ## 0. 가장 먼저 읽을 파일
 
@@ -13,7 +13,7 @@
 
 ## 1. 패치 적용 원칙
 
-- 패치는 `package.json` 버전이 정확히 `0.8.1`일 때만 적용합니다.
+- 패치는 `package.json` 버전이 정확히 `0.8.2`일 때만 적용합니다.
 - 기존 `.git` 폴더는 유지합니다.
 - 저장소 루트에 패치 ZIP을 풀고 같은 이름의 파일을 덮어씁니다.
 - `DELETE_LIST.txt`가 있으면 명시된 파일만 삭제합니다.
@@ -21,13 +21,13 @@
 권장 브랜치:
 
 ```text
-fix/mobile-job-recovery-idempotency
+feat/persistent-job-store
 ```
 
 권장 커밋:
 
 ```text
-fix: make mobile TTS jobs idempotent and recoverable
+feat: persist TTS jobs with atomic SQLite claims
 ```
 
 ## 2. 기본 환경
@@ -76,9 +76,9 @@ Worker `/health`는 정상이어도 `/ready`는 not-ready입니다.
 - 공개 서비스는 HTTPS FastAPI와 사설 Worker 구성이 필요합니다.
 - 전체 `192.168.x.x` 대역을 자동 스캔하지 않습니다.
 
-## 5. 0.8.2 첫 확인
+## 5. 0.8.3 첫 확인
 
-- 상단 `BUILD v0.8.2`
+- 상단 `BUILD v0.8.3`
 - 초기 브랜드 랜딩 유지
 - Dock 진입 후 Chat-to-Timeline 작업공간
 - 연결 바텀시트의 API·TTS·Worker·GPU 네 상태
@@ -86,7 +86,8 @@ Worker `/health`는 정상이어도 `/ready`는 not-ready입니다.
 - 온라인 복귀·네트워크 전환·앱 복귀 후 자동 재검사
 - API request ID와 지연 시간 표시
 - TTS 생성 중 연결이 끊겨도 동일 job 결과 복구
-- 같은 job ID·같은 payload는 중복 합성 없이 결과 재사용
+- API 재시작 뒤에도 같은 job ID의 완료 결과 복구
+- 여러 API 프로세스에서 같은 job ID·payload를 한 번만 실행
 - 같은 job ID·다른 payload는 `SOA-4009`로 차단
 - 타임라인 실패 블록 재시도 시 기존 job을 먼저 복구
 - iOS private mode·저장공간 오류에서도 API 주소를 세션 동안 유지
@@ -125,7 +126,7 @@ uv run --python 3.10 pytest tests -q
 
 현재 기준 테스트 수:
 
-- API: 65개
+- API: 77개
 - Worker: 9개
 
 ## 7. 실제 연결 확인
@@ -147,6 +148,6 @@ GET /api/v1/tts/jobs/{job_id}/result
 2. Pull Request에서 Web·API·Worker quality를 확인합니다.
 3. 모두 성공한 뒤 `main`에 병합합니다.
 4. Pages Source는 `GitHub Actions`를 사용합니다.
-5. 공개 주소에서 `BUILD v0.8.2`을 확인합니다.
+5. 공개 주소에서 `BUILD v0.8.3`을 확인합니다.
 
 GitHub Pages에는 Python API와 GPU Worker가 포함되지 않습니다.

@@ -8,7 +8,7 @@ Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되�
 
 ## 현재 상태
 
-- 버전: `0.8.2 Mobile Job Recovery/API Idempotency`
+- 버전: `0.8.3 Persistent Job Store/Atomic Claim`
 - 웹: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - GPU Worker: 선택 설치형 Fun-CosyVoice 3 Adapter
@@ -17,12 +17,12 @@ Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되�
 - 재생: 첫 완성 블록부터 나타나는 Linked Player Dock
 - 연결 상태: API·실제 TTS·Worker·GPU/모델 네 계층
 - 모바일 복구: 타임라인 job ID 보존, recover-first 재시도, 저장소 실패 fallback
-- API 멱등성: 동일 job·동일 요청은 단일 실행/결과 재사용, payload 충돌은 409 차단
+- API 영속성: SQLite 결과 복구, 원자적 claim, payload 충돌 409, 결과 만료 410
 - 한국어 처리: 숫자·날짜·시각·금액·퍼센트·단위·영문 약어 정규화
 - 저장: IndexedDB 프로젝트·품질 평가·동의된 음성 프로필
 - 배포: Web·API·Worker quality와 GitHub Pages를 하나의 Workflow로 관리
 
-## 0.8.2 핵심
+## 0.8.3 핵심
 
 ### 모바일 API 연결
 
@@ -48,6 +48,15 @@ GPU       CUDA·모델이 실제 추론 준비 상태인가
 ```
 
 Worker가 실행 중이어도 모델이나 GPU가 없으면 `준비 안 됨`으로 표시합니다.
+
+### 서버 작업 영속화
+
+- TTS job 상태·요청 fingerprint·완료 결과를 SQLite에 저장
+- API 재시작 뒤에도 같은 job ID의 상태와 완료 결과 복구
+- 여러 API 프로세스가 같은 SQLite를 사용할 때 원자적 claim으로 단일 실행
+- 실행 프로세스가 사라지면 claim TTL 뒤 다른 프로세스가 작업을 재획득
+- 결과 TTL과 job 이력 TTL을 분리해 완료 tombstone과 HTTP 410 계약 유지
+- 다른 API 프로세스로 전달된 취소 요청도 저장소를 통해 실행 Task에 반영
 
 ### 모바일 요청 복구와 서버 멱등성
 

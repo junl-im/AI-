@@ -1,4 +1,10 @@
+import time
 from uuid import uuid4
+
+from fastapi.testclient import TestClient
+
+from app.core.config import get_settings
+from app.main import app
 
 
 def test_mock_tts_validates_contract(client):
@@ -146,3 +152,75 @@ def test_same_job_id_rejects_different_payload(client):
     assert first.status_code == 200
     assert second.status_code == 409
     assert "SOA-4009" in second.json()["detail"]
+
+
+def test_completed_job_result_survives_api_restart(tmp_path, monkeypatch):
+    job_id = str(uuid4())
+    monkeypatch.setenv(
+        "SORION_JOB_STORE_PATH",
+        str(tmp_path / "restart-jobs.sqlite3"),
+    )
+    monkeypatch.setenv("SORION_AUDIO_DIRECTORY", str(tmp_path / "audio"))
+    monkeypatch.setenv("SORION_AUDIT_LOG_PATH", str(tmp_path / "audit.jsonl"))
+    get_settings.cache_clear()
+    try:
+        with TestClient(app) as first_client:
+            created = first_client.post(
+                "/api/v1/tts/synthesize",
+                json={
+                    "text": "API가 재시작되어도 완료 결과를 복구합니다.",
+                    "voice_id": "sori-warm",
+                    "engine_id": "mock",
+                    "job_id": job_id,
+                },
+            )
+            assert created.status_code == 200
+
+        get_settings.cache_clear()
+        with TestClient(app) as restarted_client:
+            recovered = restarted_client.get(
+                f"/api/v1/tts/jobs/{job_id}/result"
+            )
+            assert recovered.status_code == 200
+            assert recovered.json() == created.json()
+    finally:
+        get_settings.cache_clear()
+
+
+def test_expired_completed_job_returns_410_without_regeneration(
+    tmp_path,
+    monkeypatch,
+):
+    job_id = str(uuid4())
+    audit_path = tmp_path / "audit.jsonl"
+    monkeypatch.setenv(
+        "SORION_JOB_STORE_PATH",
+        str(tmp_path / "expired-jobs.sqlite3"),
+    )
+    monkeypatch.setenv("SORION_AUDIO_DIRECTORY", str(tmp_path / "audio"))
+    monkeypatch.setenv("SORION_AUDIT_LOG_PATH", str(audit_path))
+    monkeypatch.setenv("SORION_JOB_RESULT_TTL_MINUTES", "0")
+    get_settings.cache_clear()
+    payload = {
+        "text": "만료된 완료 작업은 새로 합성하지 않습니다.",
+        "voice_id": "sori-warm",
+        "engine_id": "mock",
+        "job_id": job_id,
+    }
+    try:
+        with TestClient(app) as test_client:
+            created = test_client.post("/api/v1/tts/synthesize", json=payload)
+            assert created.status_code == 200
+            time.sleep(0.03)
+
+            result = test_client.get(f"/api/v1/tts/jobs/{job_id}/result")
+            repeated = test_client.post("/api/v1/tts/synthesize", json=payload)
+
+            assert result.status_code == 410
+            assert repeated.status_code == 410
+            assert "SOA-4012" in repeated.json()["detail"]
+        assert '"event":"tts-job-result-expired"' in audit_path.read_text(
+            encoding="utf-8"
+        )
+    finally:
+        get_settings.cache_clear()

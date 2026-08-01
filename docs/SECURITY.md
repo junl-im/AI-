@@ -1,6 +1,6 @@
 # SoriON API · Worker 보안
 
-현재 기준 버전: `0.8.2`
+현재 기준 버전: `0.8.3`
 
 ## API와 Worker 인증
 
@@ -65,3 +65,10 @@ Web은 인증 토큰 대신 사용할 수 없는 익명 `X-SoriON-Client-ID`와 
 개발 LAN 연결은 `SORION_ALLOW_PRIVATE_NETWORK=true`에서 Private Network preflight를
 허용한다. 이 헤더는 개발 편의를 위한 CORS 응답일 뿐 인증이나 암호화를 대신하지 않는다.
 공개 서비스는 HTTPS, 사용자 인증, Origin 제한, 방화벽과 Worker 사설망을 적용한다.
+
+## 0.8.3 JobStore 데이터 경계
+
+SQLite `tts_jobs`에는 원문 텍스트와 음성 샘플을 별도 열로 저장하지 않는다. 요청 payload는
+SHA-256 fingerprint로만 식별하고 완료 응답의 엔진·음원 URL·처리 메타데이터를 보관한다.
+DB 파일은 API 서버의 비공개 데이터 디렉터리에 두고 Web 정적 배포나 릴리스 ZIP에 포함하지
+않는다. 여러 API 프로세스가 공유하더라도 파일 권한은 API 서비스 계정으로 제한한다.

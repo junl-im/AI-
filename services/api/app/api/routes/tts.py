@@ -12,7 +12,11 @@ from app.schemas.tts import (
     TtsSynthesisRequest,
     TtsSynthesisResponse,
 )
-from app.services.job_manager import GenerationTimeoutError, JobConflictError
+from app.services.job_manager import (
+    GenerationTimeoutError,
+    JobConflictError,
+    JobResultExpiredError,
+)
 
 router = APIRouter()
 
@@ -57,9 +61,30 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
             request_key=request_key,
         )
     except JobConflictError as error:
+        request.app.state.audit_logger.write(
+            event="tts-job-conflict",
+            method=request.method,
+            path=request.url.path,
+            status_code=status.HTTP_409_CONFLICT,
+            request_id=request.state.request_id,
+            actor=request.state.actor,
+        )
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="SOA-4009: 같은 작업 ID를 다른 음성 요청에 재사용할 수 없습니다.",
+        ) from error
+    except JobResultExpiredError as error:
+        request.app.state.audit_logger.write(
+            event="tts-job-result-expired",
+            method=request.method,
+            path=request.url.path,
+            status_code=status.HTTP_410_GONE,
+            request_id=request.state.request_id,
+            actor=request.state.actor,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="SOA-4012: 완료 결과가 만료됐습니다. 새 작업 ID로 다시 생성해 주세요.",
         ) from error
     except GenerationTimeoutError as error:
         raise HTTPException(
@@ -83,7 +108,9 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
         ) from error
 
     if result.audio_url and result.audio_url.startswith("/"):
-        result.audio_url = f"{str(request.base_url).rstrip('/')}{result.audio_url}"
+        return result.model_copy(
+            update={"audio_url": f"{str(request.base_url).rstrip('/')}{result.audio_url}"}
+        )
     return result
 
 

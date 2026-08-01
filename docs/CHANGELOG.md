@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.8.3 - 2026-08-01
+
+### Persistent Job Store/Atomic Claim
+
+- 메모리 기반 TTS job 상태를 교체 가능한 JobStore 계층으로 분리했습니다.
+- 기본 저장소를 SQLite WAL 모드로 구성하고 job ID, 요청 fingerprint, 진행 상태와 완료 결과를 저장합니다.
+- API 재시작 뒤에도 완료 job 상태와 `/result` 응답을 복구합니다.
+- 여러 API 프로세스가 같은 DB를 사용할 때 `BEGIN IMMEDIATE` 원자적 claim으로 동일 job을 한 번만 실행합니다.
+- owner 프로세스가 사라진 작업은 claim TTL 뒤 다른 프로세스가 재획득합니다.
+- 결과 TTL과 이력 TTL을 분리하고 완료 결과 만료 뒤 HTTP 410 tombstone을 유지합니다.
+- 장기 실행 서버에서도 조회·재요청 시 만료 결과와 이력을 즉시 정리합니다.
+- 다른 API 프로세스에서 요청한 취소를 SQLite 신호와 owner watcher로 실제 Task에 전달합니다.
+- job 충돌과 결과 만료를 감사 로그 이벤트로 기록합니다.
+- CI Web 테스트는 파일 직렬 실행을 사용하고 PNA middleware import 정렬 오류를 수정했습니다.
+
+### Verification
+
+- FastAPI 테스트 77개 통과
+- CosyVoice Worker 테스트 9개 통과
+- 프로젝트 규칙, Python compileall, Python 3.10 AST, git diff whitespace 검사 통과
+- 현재 실행 환경의 패키지 저장소에 Ruff 0.15.22와 npm 의존성이 없어 정식 Ruff와 Web 품질 검사는 실행하지 못함
+
 ## 0.8.2 - 2026-08-01
 
 ### API PNA CI Hotfix

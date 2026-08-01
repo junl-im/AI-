@@ -270,3 +270,17 @@ GitHub Actions에서 최종 확인한다.
 현재 기준 테스트 수는 API 65개, Worker 9개다. Web 테스트는 새 회귀 케이스를 포함했으나
 현재 실행 환경의 패키지 저장소 404 때문에 정식 Vitest 실행은 GitHub Actions에서 확인한다.
 
+
+## 0.8.3 영속 JobStore 회귀 검사
+
+- SQLite에 저장한 완료 결과를 새 JobManager와 API 재시작 뒤 복구
+- 같은 SQLite를 쓰는 두 JobManager가 동일 job factory를 한 번만 실행
+- 프로세스 종료를 가정한 만료 claim을 다른 manager가 재획득
+- 결과 TTL 뒤 completed tombstone과 410 계약 유지
+- 다른 manager가 보낸 취소 요청을 owner Task가 감지해 취소
+- 결과 TTL과 이력 TTL cleanup 통계 및 레코드 삭제
+- 서버 재시작 없이 조회할 때 만료 이력이 즉시 정리되는지 확인
+- 기존 메모리 JobManager 멱등성·timeout·취소·진행률 회귀 유지
+
+현재 기준 테스트 수는 API 77개, Worker 9개다. Web 품질 검사는 의존성 설치가 가능한
+GitHub Actions에서 ESLint, TypeScript, Vitest 직렬 실행과 Vite build를 최종 확인한다.

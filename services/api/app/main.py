@@ -15,6 +15,7 @@ from app.middleware.private_network_cors import PrivateNetworkCORSMiddleware
 from app.services.audit_log import AuditLogger
 from app.services.job_manager import JobManager
 from app.services.rate_limit import FixedWindowRateLimiter
+from app.services.sqlite_job_store import SQLiteJobStore
 from app.services.tts_pipeline import TtsPipeline
 from app.storage.audio_store import AudioStore
 from app.storage.voice_clone_store import VoiceCloneStore
@@ -35,11 +36,11 @@ def client_key(request: Request) -> str:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
+    app.state.settings = settings
+    app.state.audit_logger = AuditLogger(settings.audit_path)
     store = AudioStore(settings.audio_path, settings.audio_ttl_minutes)
     store.cleanup_expired()
     app.state.audio_store = store
-    app.state.settings = settings
-    app.state.audit_logger = AuditLogger(settings.audit_path)
     app.state.rate_limiter = FixedWindowRateLimiter(
         settings.public_rate_limit_per_minute
     )
@@ -51,10 +52,29 @@ async def lifespan(app: FastAPI):
     clone_store.cleanup_expired()
     app.state.voice_clone_store = clone_store
     app.state.tts_pipeline = TtsPipeline(store, settings.max_segment_chars)
+    job_store = SQLiteJobStore(settings.job_store_file)
     app.state.job_manager = JobManager(
         max_concurrent=settings.max_concurrent_generations,
         timeout_seconds=settings.generation_timeout_seconds,
+        store=job_store,
+        claim_ttl_seconds=settings.job_claim_ttl_seconds,
+        result_ttl_seconds=settings.job_result_ttl_minutes * 60,
+        history_ttl_seconds=settings.job_history_ttl_hours * 60 * 60,
+        poll_interval_seconds=settings.job_poll_interval_seconds,
     )
+    cleanup = await app.state.job_manager.initialize()
+    if cleanup.expired_results or cleanup.deleted_jobs:
+        app.state.audit_logger.write(
+            event="job-store-cleanup",
+            method="SYSTEM",
+            path=str(settings.job_store_file),
+            status_code=200,
+            request_id="startup",
+            actor=(
+                f"expired-results:{cleanup.expired_results};"
+                f"deleted-jobs:{cleanup.deleted_jobs}"
+            ),
+        )
     if settings.enable_melo_tts:
         engine_registry.register_tts(MeloTtsEngine(store, settings.melo_device))
     if settings.enable_system_tts:
@@ -78,7 +98,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.8.2",
+    version="0.8.3",
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -102,6 +122,7 @@ async def govern_request(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid4()))
     request.state.request_id = request_id
     actor = client_key(request)
+    request.state.actor = actor
     is_api = request.url.path.startswith("/api/v1/")
     exempt = request.url.path.endswith("/health") or request.method == "OPTIONS"
     if is_api and not exempt:

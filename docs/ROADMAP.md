@@ -126,10 +126,18 @@
 - 모바일 localStorage 실패 fallback과 randomUUID 호환
 - 생성 중 편집·분할의 stale 결과 방지
 
-## 0.8.3 예정
+## 0.8.3 완료
 
-- API 재시작·다중 프로세스를 견디는 영속 JobStore
+- SQLite 기반 교체 가능한 TTS JobStore
+- API 재시작 뒤 상태·완료 결과 복구
+- 다중 API 프로세스 원자적 claim과 stale claim 재획득
+- 결과 TTL·이력 TTL 분리와 completed tombstone 410
+- 저장소 기반 cross-process 취소 신호
+
+## 0.8.4 예정
+
 - 타임라인·job ID·선택 엔진 IndexedDB 복원
-- 엔진 queue·지연·readiness 운영 진단
-- 공개 API 인증과 사용자별 job 접근 권한
+- PWA 종료·새로고침 뒤 recover-first 재연결
+- Object URL 소실 시 서버 결과 또는 Blob 복구
+- 저장 quota·private mode·iOS 정리 fallback
 - Android Chrome·iOS Safari·PWA 단절 복구 실기기 매트릭스

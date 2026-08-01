@@ -1,6 +1,6 @@
 # MOBILE ENGINE/API RELIABILITY
 
-버전: `0.8.2`
+버전: `0.8.3`
 
 ## 목표
 
@@ -153,7 +153,17 @@ X-SoriON-Client-ID
 - FastAPI는 같은 job ID와 같은 요청 fingerprint를 하나의 Task로 합치고 완료 결과를 재사용한다.
 - 같은 job ID에 다른 요청이 들어오면 HTTP 409 `SOA-4009`를 반환한다.
 - HTTP 연결 취소는 생성 Task를 취소하지 않는다. 명시적 DELETE만 서버 작업을 취소한다.
-- snapshot, fingerprint와 결과는 제한된 메모리 history에 있으며 API 재시작 시 사라진다.
+- snapshot, fingerprint와 결과는 0.8.3부터 SQLite JobStore에 저장된다.
+
+## 0.8.3 서버 재시작·다중 프로세스 복구
+
+- API 재시작 뒤에도 같은 job ID의 상태와 완료 결과를 조회한다.
+- 여러 API 프로세스는 같은 SQLite 파일에서 원자적 claim을 사용한다.
+- 유효 claim이 있는 동안 다른 프로세스는 새 합성을 시작하지 않고 결과를 기다린다.
+- 프로세스가 종료되면 claim TTL 뒤 다른 프로세스가 작업을 재획득한다.
+- 완료 결과 TTL 뒤 이력 tombstone이 남아 있는 동안 POST와 `/result`는 410을 반환한다.
+- 다른 API 프로세스에서 보낸 취소 요청은 owner process watcher가 실제 Task에 반영한다.
+- 기본 결과 TTL은 30분, job history TTL은 24시간이다.
 
 ## 모바일 브라우저 fallback
 

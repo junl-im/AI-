@@ -14,7 +14,7 @@
 
 ## 작업 진행률
 
-`POST /api/v1/tts/synthesize`는 최종 결과가 나올 때까지 유지된다. 웹은 같은 `job_id`로 `GET /api/v1/tts/jobs/{job_id}`를 주기적으로 조회한다.
+`POST /api/v1/tts/synthesize`는 최종 결과가 나올 때까지 유지된다. 웹은 같은 `job_id`로 `GET /api/v1/tts/jobs/{job_id}`를 주기적으로 조회한다. 상태와 완료 결과는 SQLite JobStore에 저장돼 API 재시작 뒤에도 복구된다.
 
 진행 단계:
 

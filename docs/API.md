@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "default_engine": "auto"
 }
 ```
@@ -43,7 +43,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.8.2",
+  "version": "0.8.3",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -164,7 +164,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.8.2",
+  "version": "0.8.3",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
@@ -211,6 +211,12 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 0.8.2부터 같은 job ID와 같은 요청은 실행 중 Task를 공유하고 완료 뒤 같은 결과를 반환한다.
 같은 job ID에 text, voice, speed, engine 등 다른 payload를 보내면 HTTP 409와 `SOA-4009`를
 반환한다. 클라이언트 연결이 취소돼도 서버 생성은 계속되며 명시적 DELETE만 작업을 취소한다.
+
+0.8.3부터 job snapshot, 요청 fingerprint와 완료 응답은 SQLite JobStore에 저장된다.
+API가 재시작돼도 완료 결과를 복구하며 여러 API 프로세스가 같은 DB를 사용할 때 원자적
+claim으로 동일 job을 한 번만 실행한다. 결과 TTL이 지나면 이력 tombstone이 남아 있는 동안
+POST와 `/result`는 HTTP 410과 `SOA-4012`를 반환한다. claim lease가 만료된 미완료 작업은
+다른 프로세스가 재획득할 수 있다.
 
 
 ## GET /voice-clones/capabilities

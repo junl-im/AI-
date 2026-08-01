@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     system_tts_voice: str = ""
     generation_timeout_seconds: float = 75.0
     max_concurrent_generations: int = 1
+    job_store_path: str = ".sorion/jobs.sqlite3"
+    job_claim_ttl_seconds: float = 120.0
+    job_result_ttl_minutes: int = 30
+    job_history_ttl_hours: int = 24
+    job_poll_interval_seconds: float = 0.1
     audio_ttl_minutes: int = 30
     max_segment_chars: int = 180
     audio_directory: str = ".sorion/audio"
@@ -47,6 +52,10 @@ class Settings(BaseSettings):
     @property
     def audio_path(self) -> Path:
         return Path(self.audio_directory).expanduser().resolve()
+
+    @property
+    def job_store_file(self) -> Path:
+        return Path(self.job_store_path).expanduser().resolve()
 
     @property
     def voice_clone_path(self) -> Path:
