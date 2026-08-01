@@ -284,3 +284,20 @@ GitHub Actions에서 최종 확인한다.
 
 현재 기준 테스트 수는 API 77개, Worker 9개다. Web 품질 검사는 의존성 설치가 가능한
 GitHub Actions에서 ESLint, TypeScript, Vitest 직렬 실행과 Vite build를 최종 확인한다.
+
+## 0.8.4 자동 연결·Dock·프로젝트 복원 회귀 검사
+
+- API 후보에 같은 Origin `/api/v1`이 포함되는지 확인
+- 미설정 상태에서 bootstrap이 주소 입력 UI 없이 자동 탐색하는지 확인
+- 수동 연결 Bottom Sheet와 API Setup Wizard가 번들 경로에서 제거됐는지 확인
+- 초기 랜딩에서는 Dock과 `--has-player` 레이아웃이 생성되지 않는지 확인
+- 작업공간 진입 뒤 메뉴 Dock이 나타나는지 확인
+- 프로젝트 목록 항목 클릭이 home 작업공간과 active project를 설정하는지 확인
+- 저장된 채팅·보이스·옵션·타임라인·job ID 위치가 복원되는지 확인
+- 프로젝트 복원 시 새 synthesis POST보다 기존 job result를 먼저 조회하는지 확인
+- 일부 실패의 null job ID가 뒤 문장으로 이동하지 않는지 확인
+- 만료된 결과를 자동 재생성하지 않고 블록별 재생성 안내로 남기는지 확인
+
+현재 기준 테스트 수는 API 77개, Worker 9개다. Web 회귀 테스트는 추가했으며 108개
+TS/TSX 구문과 대체 strict 타입 검사는 통과했다. 정식 ESLint, TypeScript, Vitest와 Vite
+build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.

@@ -134,7 +134,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.8.3",
+        version="0.8.4",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",

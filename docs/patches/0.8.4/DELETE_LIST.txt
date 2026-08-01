@@ -1,0 +1,5 @@
+# SoriON AI 0.8.3 -> 0.8.4
+src/components/settings/ApiSetupWizard.tsx
+src/components/settings/ConnectionBottomSheet.tsx
+src/components/voice/EngineStatusCard.tsx
+src/styles/connection-sheet.css

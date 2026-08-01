@@ -191,3 +191,28 @@ POST same job ID
 만료돼도 이력 TTL 동안 tombstone을 유지해 같은 job ID의 POST와 `/result`가 410을 반환한다.
 취소 요청은 SQLite에 기록하고 owner 프로세스의 watcher가 실제 Task를 취소한다.
 
+
+## 0.8.4 Automatic Bootstrap과 Project Restore
+
+```text
+Web bootstrap
+  → same-origin /api/v1
+  → VITE_API_BASE_URL
+  → last-good/history
+  → safe local candidates
+  → connectivity + engine catalog
+  → ready real engine auto-selection
+
+Project list click
+  → activeProject in Zustand
+  → Home workspace entry
+  → messages/voice/timeline reconstruction
+  → persisted job IDs recover-first
+  → ready audio enqueue to Linked Player
+```
+
+API 주소 입력, 엔진 수동 선택과 연결 Bottom Sheet는 아키텍처에서 제거했다. 첫 브랜드
+랜딩에서는 Dock을 렌더링하지 않으며 작업공간 진입 뒤에만 메뉴와 Player를 구성한다.
+프로젝트 편집 상태는 IndexedDB가 담당하고 음성 작업 상태·완료 결과는 SQLite JobStore가
+담당한다. 브라우저는 전체 LAN을 스캔하지 않으며 정적 운영 배포는 HTTPS API 환경변수나
+same-origin reverse proxy가 선행 조건이다.

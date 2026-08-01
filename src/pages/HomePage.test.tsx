@@ -11,9 +11,9 @@ describe('HomePage', () => {
     useAppStore.setState({
       page: 'home',
       workspaceEntered: false,
-      connectionSheetOpen: false,
+      activeProject: null,
       backendStatus: 'offline',
-      backendMessage: 'Voice API가 설정되지 않았습니다.',
+      backendMessage: '음성 시스템을 자동으로 찾고 있습니다.',
       notice: null,
     })
     vi.restoreAllMocks()
@@ -37,7 +37,7 @@ describe('HomePage', () => {
 
     expect(textbox).toHaveAttribute('placeholder', '메시지를 입력하세요…')
     expect(scoped.getByRole('radio', { name: /혜린/ })).toBeInTheDocument()
-    expect(scoped.getByRole('button', { name: /API 연결 안됨/ })).toBeInTheDocument()
+    expect(scoped.getByText('음성 시스템 준비 중')).toBeInTheDocument()
 
     fireEvent.change(textbox, {
       target: { value: '첫 번째 문장입니다. 두 번째 문장입니다.' },
@@ -47,6 +47,6 @@ describe('HomePage', () => {
     expect(scoped.getByText('첫 번째 문장입니다.')).toBeInTheDocument()
     expect(scoped.getByText('두 번째 문장입니다.')).toBeInTheDocument()
     expect(scoped.getAllByText(/음성 · 혜린/)).toHaveLength(2)
-    expect(useAppStore.getState().connectionSheetOpen).toBe(true)
+    expect(useAppStore.getState().notice).toBeNull()
   })
 })

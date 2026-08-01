@@ -213,7 +213,7 @@ export async function runApiConnectivityAudit(
   options: ConnectivityAuditOptions = {},
 ): Promise<ApiConnectivityReport> {
   const baseUrl = normalizeApiBaseUrl(value)
-  if (!baseUrl) throw new ApiError('검사할 Voice API 주소를 입력해 주세요.', 0, 'SOA-2004', 'invalid-url')
+  if (!baseUrl) throw new ApiError('자동 연결 후보가 없습니다.', 0, 'SOA-2004', 'invalid-url')
   const started = performance.now()
   const health = await timedCheck(
     'health-route',

@@ -194,3 +194,15 @@ Semantic Versioning을 사용한다.
 - 주요 변경: SQLite JobStore, API 재시작 결과 복구, 원자적 claim, TTL tombstone,
   cross-process 취소, TTL 조회 정리, 77개 API 회귀 테스트.
 - 삭제 대상: 없음. 저장소에 별도로 존재하는 모델·DB archive ZIP은 패치에 포함하지 않는다.
+
+## 0.8.4 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.4-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.3-to-0.8.4-patch.zip`
+- 체크섬: `SoriON-AI-0.8.4-artifacts.sha256`
+- 패치 기준: `0.8.3`
+- 주요 변경: 자동 API·엔진 bootstrap, 수동 연결 UI 제거, 첫 랜딩 Dock 비노출,
+  프로젝트 클릭 복원과 저장 job 결과 recover-first
+- 삭제 대상: `ApiSetupWizard.tsx`, `ConnectionBottomSheet.tsx`, `EngineStatusCard.tsx`,
+  `connection-sheet.css`
+- Secret, 사용자 음성, 모델 가중치, `.git`, 캐시, 실행 DB와 빌드 산출물은 포함하지 않는다.

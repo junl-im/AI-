@@ -217,7 +217,7 @@ await requireText('src/components/layout/AppShell.tsx', [
   'soa-workspace-shell--editor',
   'CompactWorkspaceHeader',
   'BrandMasthead',
-  'ConnectionBottomSheet',
+  '{workspaceEntered ? <LinkedPlayerDock /> : null}',
 ])
 await requireText('src/components/layout/AppShell.test.tsx', [
   '플레이어 유무에 따라 작업 화면의 하단 안전 여백을 바꾼다',
@@ -297,7 +297,8 @@ await requireText('src/pages/HomePage.tsx', [
   'interpretComposerPrompt',
   'timeline.stageText',
   'Progressive Playback',
-  'openConnectionSheet',
+  'requestAutomaticApiReconnect',
+  'timeline.restoreProject',
 ])
 await requireText('src/pages/LandingHome.tsx', [
   'AI 음성 스튜디오 시작',
@@ -320,13 +321,6 @@ await requireText('src/components/workspace/TimelineEditor.tsx', [
   '블록 자르기',
   '재시도',
   '＋ 쉼 0.5초',
-])
-await requireText('src/components/settings/ConnectionBottomSheet.tsx', [
-  '음성 엔진 연결',
-  '이 기기에서 찾기',
-  'HealthDot label="API"',
-  'HealthDot label="Worker"',
-  'HealthDot label="GPU"',
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   "window.scrollTo({ top: 0, behavior: 'smooth' })",
@@ -358,11 +352,14 @@ await requireText('src/styles/workspace-shell.css', [
 await requireText('src/api/httpClient.ts', [
   'getApiConnectionContext',
   "source: ApiBaseSource",
-  'Voice API 주소가 설정되지 않았습니다.',
+  '음성 시스템을 자동으로 연결하지 못했습니다.',
   'discoverApiBaseUrl',
   'probeApiBaseUrl',
+  'requestAutomaticApiReconnect',
   'resolveApiAssetUrl',
 ])
+await requireText('src/hooks/useBackendBootstrap.ts', ['discoverApiBaseUrl', 'saveApiBaseUrl', 'sorion-api-reconnect'])
+await requireText('src/pages/ProjectsPage.tsx', ['openProject(project)', '프로젝트 불러오기', '불러오기 →'])
 await requireText('src/settings/connectivityApi.ts', [
   'runApiConnectivityAudit',
   "'health-route'",

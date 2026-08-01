@@ -1,6 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { TtsSynthesisRequest } from '../ai/contracts'
-import { getApiConnectionContext } from '../api/httpClient'
+import {
+  getApiConnectionContext,
+  requestAutomaticApiReconnect,
+} from '../api/httpClient'
 import { ChatComposer } from '../components/workspace/ChatComposer'
 import { ConversationPanel } from '../components/workspace/ConversationPanel'
 import { TimelineEditor } from '../components/workspace/TimelineEditor'
@@ -66,13 +69,15 @@ export function HomePage() {
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const backendStatus = useAppStore((state) => state.backendStatus)
   const backendMessage = useAppStore((state) => state.backendMessage)
-  const openConnectionSheet = useAppStore((state) => state.openConnectionSheet)
   const showNotice = useAppStore((state) => state.showNotice)
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
+  const activeProject = useAppStore((state) => state.activeProject)
+  const clearActiveProject = useAppStore((state) => state.clearActiveProject)
   const enqueue = usePlayerStore((state) => state.enqueue)
   const [messages, setMessages] = useState<WorkspaceMessage[]>(initialMessages)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
   const [previewingId, setPreviewingId] = useState<string | null>(null)
+  const [pendingRecoveryIds, setPendingRecoveryIds] = useState<string[]>([])
   const engineCatalog = useEngineCatalog()
   const timeline = useTimelineGeneration()
   const selectedVoice = useMemo(() => getVoicePreset(voiceId), [voiceId])
@@ -83,6 +88,43 @@ export function HomePage() {
     (backendStatus === 'online' || backendStatus === 'degraded')
     && engineCatalog.selected !== null
   )
+
+  useEffect(() => {
+    if (!activeProject) return
+    const voice = getVoicePreset(activeProject.voiceId)
+    setVoiceId(activeProject.voiceId)
+    setMessages([
+      initialMessages[0],
+      {
+        id: createRandomId(),
+        role: 'user',
+        text: activeProject.text,
+      },
+      {
+        id: createRandomId(),
+        role: 'assistant',
+        badge: '프로젝트 불러옴',
+        text: `${activeProject.title} 작업을 타임라인에 복원했습니다.`,
+      },
+    ])
+    const recoverableIds = timeline.restoreProject(activeProject, {
+      voiceId: activeProject.voiceId,
+      voiceName: voice.name,
+      emotion: activeProject.emotion,
+      speed: activeProject.speed ?? 1,
+      engineId: activeProject.engineId,
+      normalizeText: activeProject.normalizeText ?? true,
+    })
+    setPendingRecoveryIds(recoverableIds)
+    clearActiveProject()
+  }, [activeProject, clearActiveProject, timeline.restoreProject])
+
+  useEffect(() => {
+    if (!engineAvailable || pendingRecoveryIds.length === 0) return
+    const ids = pendingRecoveryIds
+    setPendingRecoveryIds([])
+    void timeline.recoverBlocks(ids)
+  }, [engineAvailable, pendingRecoveryIds, timeline.recoverBlocks])
 
   if (!workspaceEntered) return <LandingHome />
 
@@ -114,10 +156,14 @@ export function HomePage() {
   async function saveConversationProject(
     text: string,
     options: TimelineGenerationOptions,
-    audios: GeneratedAudio[],
+    blockIds: string[],
+    generated: Awaited<ReturnType<typeof timeline.generateAll>>,
   ) {
-    const first = audios[0]
+    const first = generated[0]?.audio
     if (!first) return
+    const completedByBlock = new Map(
+      generated.map((item) => [item.blockId, item.audio.result.jobId]),
+    )
     const now = new Date().toISOString()
     await saveProject({
       id: createRandomId(),
@@ -133,6 +179,9 @@ export function HomePage() {
       engineMode: first.result.engineMode,
       audioSource: first.source,
       outputFormat: 'wav',
+      speed: options.speed,
+      normalizeText: options.normalizeText,
+      jobIds: blockIds.map((blockId) => completedByBlock.get(blockId) ?? null),
     })
   }
 
@@ -151,10 +200,10 @@ export function HomePage() {
     if (!getApiConnectionContext().configured || !engineAvailable) {
       appendMessage({
         role: 'system',
-        badge: '연결 필요',
-        text: '타임라인 블록은 준비했습니다. 음성을 만들려면 Voice API와 엔진을 연결해 주세요.',
+        badge: '자동 연결 중',
+        text: '타임라인 블록은 준비했습니다. 음성 시스템이 준비되면 다시 생성할 수 있습니다.',
       })
-      openConnectionSheet()
+      requestAutomaticApiReconnect()
       return
     }
 
@@ -163,8 +212,8 @@ export function HomePage() {
       badge: backendStatus === 'degraded' ? 'Demo 엔진 · 실제 AI 아님' : 'Progressive Playback',
       text: `${ids.length}개 문장을 앞에서부터 생성합니다. 첫 블록이 끝나는 즉시 Dock에서 들을 수 있어요.`,
     })
-    const audios = await timeline.generateAll(ids)
-    if (audios.length === 0) {
+    const generated = await timeline.generateAll(ids)
+    if (generated.length === 0) {
       appendMessage({
         role: 'system',
         badge: '생성 실패',
@@ -175,10 +224,10 @@ export function HomePage() {
     appendMessage({
       role: 'assistant',
       badge: '완료',
-      text: `${audios.length}개 음성 블록을 Dock 재생 대기열에 연결했습니다.`,
+      text: `${generated.length}개 음성 블록을 Dock 재생 대기열에 연결했습니다.`,
     })
     try {
-      await saveConversationProject(prompt.spokenText, options, audios)
+      await saveConversationProject(prompt.spokenText, options, ids, generated)
     } catch {
       showNotice('음성은 완성됐지만 프로젝트 저장에는 실패했습니다.')
     }
@@ -191,9 +240,9 @@ export function HomePage() {
       appendMessage({
         role: 'assistant',
         badge: '목소리 선택',
-        text: `${voice.name} 목소리를 선택했습니다. API 연결 후 프리뷰를 만들 수 있어요.`,
+        text: `${voice.name} 목소리를 선택했습니다. 음성 시스템을 자동으로 준비하고 있어요.`,
       })
-      openConnectionSheet()
+      requestAutomaticApiReconnect()
       return
     }
     setPreviewingId(nextVoiceId)
@@ -230,7 +279,8 @@ export function HomePage() {
 
   async function retryBlock(id: string) {
     if (!engineAvailable) {
-      openConnectionSheet()
+      requestAutomaticApiReconnect()
+      showNotice('음성 시스템을 자동으로 다시 확인하고 있습니다.')
       return
     }
     await timeline.retryBlock(id)
@@ -249,7 +299,6 @@ export function HomePage() {
           messages={messages}
           backendStatus={backendStatus}
           backendMessage={backendMessage}
-          onConnect={openConnectionSheet}
         />
         <ChatComposer
           disabled={busy}

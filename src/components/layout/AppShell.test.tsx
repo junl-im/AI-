@@ -37,7 +37,7 @@ describe('AppShell', () => {
     useAppStore.setState({
       page: 'home',
       workspaceEntered: false,
-      connectionSheetOpen: false,
+      activeProject: null,
       backendStatus: 'unknown',
       backendMessage: '상태 미확인',
       notice: null,
@@ -57,11 +57,13 @@ describe('AppShell', () => {
 
     expect(view.container.querySelector('.soa-workspace-shell--landing')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '곰같은여우 SoriON AI' })).toBeInTheDocument()
+    expect(screen.queryByRole('complementary', { name: 'SoriON 고정 Dock' })).not.toBeInTheDocument()
 
     act(() => useAppStore.getState().enterWorkspace('home'))
 
     expect(view.container.querySelector('.soa-workspace-shell--editor')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /SoriON AI/ })).toBeInTheDocument()
+    expect(screen.getByRole('complementary', { name: 'SoriON 고정 Dock' })).toBeInTheDocument()
   })
 
   it('플레이어 유무에 따라 작업 화면의 하단 안전 여백을 바꾼다', () => {
@@ -73,6 +75,10 @@ describe('AppShell', () => {
     act(() => {
       usePlayerStore.getState().enqueue(generatedAudio(), '완성 음성')
     })
+
+    expect(workspace).not.toHaveClass('soa-workspace-shell--has-player')
+
+    act(() => useAppStore.getState().enterWorkspace('home'))
 
     expect(workspace).toHaveClass('soa-workspace-shell--has-player')
   })

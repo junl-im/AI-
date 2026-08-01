@@ -5,20 +5,18 @@ interface ConversationPanelProps {
   messages: WorkspaceMessage[]
   backendStatus: BackendStatus
   backendMessage: string
-  onConnect: () => void
 }
 
 function connectionTitle(status: BackendStatus): string {
-  if (status === 'checking') return 'API·엔진 상태 확인 중'
-  if (status === 'degraded') return 'Demo 엔진만 연결됨'
-  return 'API 연결 안됨'
+  if (status === 'checking') return '음성 시스템 준비 중'
+  if (status === 'degraded') return '기본 음성으로 준비됨'
+  return '음성 시스템 준비 중'
 }
 
 export function ConversationPanel({
   messages,
   backendStatus,
   backendMessage,
-  onConnect,
 }: ConversationPanelProps) {
   const connected = backendStatus === 'online'
 
@@ -31,18 +29,13 @@ export function ConversationPanel({
       </div>
 
       {!connected ? (
-        <button
-          type="button"
-          className={`soa-system-message is-${backendStatus}`}
-          onClick={onConnect}
-        >
-          <span aria-hidden="true">⚙</span>
+        <div className={`soa-system-message is-${backendStatus}`} role="status">
+          <span aria-hidden="true">●</span>
           <span>
             <strong>{connectionTitle(backendStatus)}</strong>
-            <small>{backendMessage} · 여기를 눌러 연결 상태 확인</small>
+            <small>{backendMessage}</small>
           </span>
-          <b aria-hidden="true">›</b>
-        </button>
+        </div>
       ) : (
         <div className="soa-system-message is-online" role="status">
           <span aria-hidden="true">●</span>

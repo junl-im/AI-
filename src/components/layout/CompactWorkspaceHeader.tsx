@@ -19,7 +19,6 @@ export function CompactWorkspaceHeader() {
   const page = useAppStore((state) => state.page)
   const backendStatus = useAppStore((state) => state.backendStatus)
   const engineHealth = useAppStore((state) => state.engineHealth)
-  const openConnectionSheet = useAppStore((state) => state.openConnectionSheet)
   const exitWorkspace = useAppStore((state) => state.exitWorkspace)
 
   return (
@@ -32,11 +31,10 @@ export function CompactWorkspaceHeader() {
         </span>
       </button>
       <div className="soa-compact-header__actions">
-        <button
-          type="button"
+        <div
           className={`soa-engine-chip is-${backendStatus}`}
-          onClick={openConnectionSheet}
-          aria-label={`엔진 연결 상태: ${statusLabel(backendStatus)}`}
+          role="status"
+          aria-label={`자동 엔진 상태: ${statusLabel(backendStatus)}`}
         >
           <span className="soa-engine-chip__dots" aria-hidden="true">
             <i className={`is-${engineHealth.api}`} />
@@ -46,7 +44,7 @@ export function CompactWorkspaceHeader() {
           </span>
           <span>{statusLabel(backendStatus)}</span>
           {engineHealth.latencyMs !== null ? <small>{engineHealth.latencyMs}ms</small> : null}
-        </button>
+        </div>
         <button type="button" className="soa-intro-button" onClick={exitWorkspace}>
           처음
         </button>

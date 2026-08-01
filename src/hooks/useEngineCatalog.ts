@@ -42,8 +42,7 @@ export function useEngineCatalog() {
     setError(null)
     if (!context.configured) {
       setEngines([])
-      setBackendStatus('offline', 'Voice API 주소가 설정되지 않았습니다.')
-      setError('Voice API 주소가 설정되지 않았습니다.')
+      setBackendStatus('checking', '음성 시스템을 자동으로 찾고 있습니다.')
       setLoading(false)
       return
     }

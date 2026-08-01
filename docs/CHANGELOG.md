@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 0.8.4 - 2026-08-01
+
+### Automatic Engine Bootstrap & Project Restore
+
+- 사용자가 API 주소를 입력하거나 엔진을 수동 선택하는 연결 Bottom Sheet를 제거했습니다.
+- 앱 시작 시 같은 Origin, 배포 환경 변수, 마지막 성공 주소와 안전한 로컬 후보를 자동 탐색합니다.
+- 자동 탐색에 성공하면 API·TTS·Worker·GPU 상태를 확인하고 준비된 실제 엔진을 자동 선택합니다.
+- 연결 실패 시 설정 화면을 띄우지 않고 네트워크 복귀·앱 포그라운드·단계적 재시도로 다시 탐색합니다.
+- 초기 랜딩에서는 메뉴와 Player Dock을 렌더링하지 않고 작업공간 진입 뒤에만 표시합니다.
+- 최근 프로젝트 항목을 실제 불러오기 버튼으로 바꾸고 채팅·보이스·타임라인을 복원합니다.
+- 저장된 job ID가 남아 있으면 새 합성을 보내지 않고 SQLite 결과를 먼저 복구합니다.
+- 여러 문장 중 일부 생성이 실패해도 job ID 위치가 뒤섞이지 않도록 null 자리까지 보존합니다.
+- 만료된 음원은 자동 재생성하지 않고 해당 블록에서 다시 생성할 수 있도록 안내합니다.
+
+### Verification
+
+- FastAPI 테스트 77개 통과
+- CosyVoice Worker 테스트 9개 통과
+- 프로젝트 규칙, 108개 TypeScript·TSX 구문 검사, 대체 strict 타입 검사와 diff whitespace 검사 통과
+- npm 패키지 저장소 404·외부 registry timeout으로 정식 ESLint, TypeScript, Vitest, Vite build는 실행하지 못함
+
 ## 0.8.3 - 2026-08-01
 
 ### Persistent Job Store/Atomic Claim

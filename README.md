@@ -8,7 +8,7 @@ Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되�
 
 ## 현재 상태
 
-- 버전: `0.8.3 Persistent Job Store/Atomic Claim`
+- 버전: `0.8.4 Automatic Engine Bootstrap & Project Restore`
 - 웹: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - GPU Worker: 선택 설치형 Fun-CosyVoice 3 Adapter
@@ -20,23 +20,17 @@ Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되�
 - API 영속성: SQLite 결과 복구, 원자적 claim, payload 충돌 409, 결과 만료 410
 - 한국어 처리: 숫자·날짜·시각·금액·퍼센트·단위·영문 약어 정규화
 - 저장: IndexedDB 프로젝트·품질 평가·동의된 음성 프로필
+- 프로젝트 복원: 목록 클릭 시 채팅·보이스·타임라인과 저장된 job 결과 recover-first
 - 배포: Web·API·Worker quality와 GitHub Pages를 하나의 Workflow로 관리
 
-## 0.8.3 핵심
+## 0.8.4 핵심
 
-### 모바일 API 연결
+### 자동 음성 시스템 연결
 
-휴대폰에서 `localhost`는 PC가 아니라 휴대폰 자신입니다. 로컬 개발은 PC의 LAN 주소를
-입력하고, HTTPS로 배포된 웹에서는 공개 HTTPS API를 사용해야 합니다.
-
-웹은 다음 주소를 순서대로 활용합니다.
-
-1. 사용자가 저장한 주소
-2. 마지막으로 성공한 주소
-3. 최근 주소 최대 5개
-4. 개발 환경 변수와 안전한 현재 호스트 후보
-
-전체 사설 네트워크를 무단 스캔하지 않습니다.
+사용자는 API 주소를 입력하거나 엔진을 고르지 않습니다. 앱이 시작되면 같은 Origin,
+`VITE_API_BASE_URL`, 마지막 성공 주소와 안전한 로컬 후보를 자동 확인하고 준비된 실제
+엔진을 자동 선택합니다. 전체 사설 네트워크를 무단 스캔하지 않으며, 연결 실패 시에도
+설정 창을 띄우지 않고 네트워크 복귀와 앱 복귀 시 내부적으로 다시 확인합니다.
 
 ### 네 계층 엔진 상태
 
@@ -77,8 +71,8 @@ Worker가 실행 중이어도 모델이나 GPU가 없으면 `준비 안 됨`으�
 
 - 주요 터치 영역 최소 44px
 - 입력 글자 16px 이상으로 iOS 자동 확대 방지
-- 하단 composer·Dock·바텀시트에 safe-area 반영
-- 연결 바텀시트에서 API·TTS·Worker·GPU를 한 화면에서 확인
+- 하단 composer·작업공간 Dock에 safe-area 반영
+- 첫 랜딩에서는 Dock을 숨기고 작업공간 진입 뒤에만 표시
 
 ## 바로 시작하기
 
@@ -101,8 +95,8 @@ npm run dev
 - API: `http://127.0.0.1:8000`
 - Worker: `http://127.0.0.1:9000`
 
-휴대폰에서 같은 Wi-Fi의 PC API를 사용할 때는 `http://PC-LAN-IP:8000`을 입력합니다.
-공개 HTTPS Web에서는 HTTPS API가 필요합니다.
+휴대폰 로컬 개발에서는 현재 Web 호스트의 API 후보를 앱이 자동 확인합니다. 공개 HTTPS Web은
+`VITE_API_BASE_URL`에 HTTPS API를 주입하거나 같은 Origin reverse proxy를 구성합니다.
 
 실제 CosyVoice에는 PyTorch, CUDA, 모델 가중치와 별도 GPU 환경이 필요합니다.
 모델이 없으면 Worker `/health`는 정상이어도 `/ready`는 not-ready입니다.
@@ -122,8 +116,8 @@ npm run dev
 ## GitHub Pages 배포 현실
 
 GitHub Pages는 정적 React Web만 실행합니다. Python API와 GPU Worker는 별도 PC 또는
-서버에서 실행해야 합니다. API 실패를 Demo 성공으로 숨기지 않으며, 채팅 화면과 연결
-바텀시트에서 원인을 표시합니다.
+서버에서 실행해야 합니다. API 실패를 Demo 성공으로 숨기지 않으며, 수동 연결 화면 없이
+상태를 표시하고 안전한 후보를 자동으로 다시 탐색합니다.
 
 ## 개발 원칙
 

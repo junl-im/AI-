@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.8.3 Persistent Job Store/Atomic Claim**
+현재 기준 버전: **0.8.4 Automatic Engine Bootstrap & Project Restore**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-01 15:00 KST**
+최종 갱신: **2026-08-01 15:30 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -100,7 +100,7 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
   - 도윤 · 명료 · 남성 · 한국어.
   - 소리 · 따뜻 · 중성 · 한국어.
 - 목소리를 누르면 연결된 API로 짧은 프리뷰를 생성한다.
-- API 미연결 시 선택은 유지하되 연결 바텀시트를 연다.
+- API 미연결 시 선택은 유지하고 시스템이 백그라운드에서 안전 후보를 다시 탐색한다.
 - `새 보이스 만들기`는 목록 하단에 고정하고 복제 화면으로 이동한다.
 ### CapCut형 타임라인
 - 메시지의 문장을 각각 음성 블록으로 만든다.
@@ -119,17 +119,11 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
 - 수정·분할된 기존 음성은 무효화하고 재생성이 필요하다.
 - 쉼 0.5초 추가와 전체 비우기를 제공한다.
 ### 엔진 연결 UX
-- API 미설정 오류를 설정 탭으로 보내지 않는다.
-- 채팅 화면 안에 `API 연결 안됨 · 여기를 눌러 연결하기` 시스템 메시지를 표시한다.
-- 클릭 시 바텀시트가 열린다.
-- 바텀시트 기능:
-  - 저장된 API 주소 검사.
-  - localhost와 현재 호스트의 8000 포트 안전 탐색.
-  - 주소 직접 입력과 클립보드 붙여넣기.
-  - API, Worker, GPU 상태 점 표시.
-  - Health, Setup, Engines, Clone, Connectivity 경로 통합 검사.
-- 브라우저 보안상 192.168.x.x 전체 대역을 무단 스캔하지 않는다.
-- 사용자가 PC LAN 주소를 직접 붙여넣을 수 있다.
+- 사용자가 API 주소를 입력하거나 엔진을 수동 선택하는 화면을 제공하지 않는다.
+- 앱이 같은 Origin, `VITE_API_BASE_URL`, 마지막 성공 주소와 안전한 로컬 후보를 자동 탐색한다.
+- 준비된 실제 엔진을 자동 선택하고 API·TTS·Worker·GPU 상태는 수동 조작 없는 상태 표시로만 제공한다.
+- 실패 시 온라인 복귀, 앱 포그라운드와 단계적 재시도에서 내부적으로 다시 탐색한다.
+- 브라우저 보안상 전체 LAN 대역을 무단 스캔하지 않으며 배포 API는 HTTPS 환경변수로 주입한다.
 ### Dock
 - 기존 #1A1F2E 계열 반투명 배경과 blur를 유지한다.
 - 순서: `만들기 → 복제 → 품질 → 프로젝트`.
@@ -140,8 +134,8 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
 - 설정은 Dock에 넣지 않는다.
 ## 5-1. 0.8.1 모바일 엔진·API 신뢰성 기준
 - API 주소에 스킴이 없어도 LAN IP는 HTTP, 공개 도메인은 현재 페이지에 맞춰 정규화한다.
-- 저장 주소, 마지막 성공 주소, 최근 주소 5개를 분리 보관한다.
-- 모바일 자동 탐색은 저장 주소와 현재 호스트 후보만 사용하며 전체 LAN을 스캔하지 않는다.
+- 배포 주소, 마지막 성공 주소와 최근 자동 발견 주소를 분리 보관한다.
+- 모바일 자동 탐색은 같은 Origin·배포 주소·성공 이력·현재 호스트 후보만 사용하며 전체 LAN을 스캔하지 않는다.
 - HTTPS 페이지에서 HTTP LAN API가 차단되는 경우 생성 요청 전에 원인을 명확히 보여 준다.
 - 휴대폰에서 localhost는 휴대폰 자신이므로 PC LAN IP 또는 공개 HTTPS 주소를 안내한다.
 - API, 실제 TTS, Worker 프로세스, GPU·모델을 네 계층으로 분리해 표시한다.
@@ -180,10 +174,10 @@ health · readiness · GPU diagnostics · jobs · SSE · WAV
 - 목소리 세로 라이브러리와 API 프리뷰.
 - 문장별 Progressive TTS 생성.
 - CapCut형 타임라인, 순서 변경, 자르기, 수정, 쉼, 재시도.
-- 연결 시스템 메시지와 API 연결 바텀시트.
+- 사용자 입력 없는 자동 API 탐색과 수동 조작 없는 계층 상태 표시.
 - API·실제 TTS·Demo 상태를 구분하고 Worker·GPU 3단계 상태를 표시.
-- 적응형 Linked Player Dock과 최대 20개 큐.
-- 목소리 복제, 품질 연구소, 프로젝트 저장소 유지.
+- 초기 랜딩에서는 숨고 작업공간 진입 뒤 나타나는 Linked Player Dock과 최대 20개 큐.
+- 목소리 복제, 품질 연구소와 클릭 시 편집 상태를 복원하는 프로젝트 저장소.
 ### FastAPI Gateway
 - Health, Setup, Connectivity, Engine Registry.
 - Connectivity 응답에 `api_ready`, `tts_ready`, `voice_clone_ready`,
@@ -356,16 +350,16 @@ SORION_WORKER_JOB_TTL_MINUTES
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.8.3-full.zip`.
-- 패치: `SoriON-AI-0.8.2-to-0.8.3-patch.zip`.
-- 체크섬: `SoriON-AI-0.8.3-artifacts.sha256`.
-- 패치 기준은 package version `0.8.2`이며 직전 CI 안정화 수정을 포함한다.
-- 삭제 파일은 현재 없음.
+- 전체본: `SoriON-AI-0.8.4-full.zip`.
+- 패치: `SoriON-AI-0.8.3-to-0.8.4-patch.zip`.
+- 체크섬: `SoriON-AI-0.8.4-artifacts.sha256`.
+- 패치 기준은 package version `0.8.3`이다.
+- 삭제: `ApiSetupWizard.tsx`, `ConnectionBottomSheet.tsx`, `EngineStatusCard.tsx`, `connection-sheet.css`.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
 - 편집 진입 후 대형 헤더를 다시 노출하지 않는다.
-- API 연결 실패를 설정 페이지에만 숨기지 않는다.
-- 플레이어를 음성이 없을 때 빈 상태로 노출하지 않는다.
+- API 연결을 사용자 주소 입력이나 엔진 수동 선택에 의존시키지 않는다.
+- 초기 랜딩에 Dock이나 플레이어를 노출하지 않는다.
 - 플레이어를 Dock 메뉴 아래로 내리지 않는다.
 - 고급 감정·피치 설정을 초보자 첫 흐름에 다시 넣지 않는다.
 - 실제 LLM이 없는데 AI 대본 생성이라고 표시하지 않는다.
@@ -409,14 +403,14 @@ npm run build
 ```
 네트워크 제한 시 실행하지 못한 항목과 이유를 결과 보고서에 정확히 기록한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.8.4 Mobile Session Persistence**.
+다음 목표 버전: **0.8.5 Mobile Workspace Session Persistence**.
 우선순위:
-1. 채팅·타임라인 블록·순서·생성 옵션·job ID를 IndexedDB에 저장.
-2. 새로고침·PWA 종료 뒤 서버 상태와 `/result`를 먼저 조회해 세션 복원.
+1. 열린 채팅·타임라인·생성 옵션·job ID를 IndexedDB에 자동 저장.
+2. 새로고침·PWA 종료 뒤 서버 상태와 `/result`를 먼저 조회해 마지막 작업공간 복원.
 3. Object URL 소실, quota 초과, private mode와 iOS 데이터 정리 fallback.
 4. Android Chrome·iOS Safari·설치형 PWA 단절 복구 실기기 매트릭스.
 5. 이후 엔진 운영 진단, 공개 API 인증, WAV Export, 실제 LLM Adapter 순으로 진행.
-금지: 저장 실패를 앱 전체 오류로 전파하거나 복원 실패 때 같은 POST를 무조건 재전송하지 않는다.
+금지: 수동 API 연결 UI를 다시 만들거나 복원 실패 때 같은 POST를 무조건 재전송하지 않는다.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -487,7 +481,14 @@ npm run build
 4. 변경 이유: 메모리 JobManager는 API 재시작·다중 프로세스에서 job ID와 완료 결과를 잃었다.
 5. 영향 범위: FastAPI startup, TTS route, config, JobManager/JobStore, API 테스트, 환경 변수와 운영 문서.
 6. 주요 파일: `job_manager.py`, `job_store.py`, `sqlite_job_store.py`, `job_result_codec.py`, `main.py`, `test_job_store.py`.
-7. 검증 결과: API 77개, Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST와 diff whitespace 통과.
+7. 검증 결과: API 75개, Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST와 diff whitespace 통과.
 8. 제한: Ruff·Web 정식 품질은 현재 패키지 저장소 미지원으로 실행하지 못했고 GitHub Actions 확인이 필요하다. SQLite는 모든 API 프로세스가 같은 로컬 파일을 공유해야 한다.
 9. 산출물: `SoriON-AI-0.8.3-full.zip`, `SoriON-AI-0.8.2-to-0.8.3-patch.zip`, `SoriON-AI-0.8.3-artifacts.sha256`.
 10. 다음 예상 업데이트: `0.8.4 Mobile Session Persistence`.
+
+## 28. 2026-08-01 15:30 KST · v0.8.4 릴리스 기록
+1. 작업 일시·대상: 2026-08-01 15:30 KST, `0.8.3 → 0.8.4`.
+2. 변경·이유: 수동 API/엔진 연결 UI를 제거하고 자동 탐색·자동 선택으로 바꿨으며, 첫 랜딩 Dock을 숨기고 프로젝트 클릭 복원을 구현했다.
+3. 영향·파일: `httpClient.ts`, `useBackendBootstrap.ts`, `AppShell.tsx`, `HomePage.tsx`, `ProjectsPage.tsx`, `useTimelineGeneration.ts`, Zustand store와 관련 테스트·문서. 수동 연결 컴포넌트 4개를 삭제했다.
+4. 검증: API 77개·Worker 9개, 프로젝트 규칙, 108개 TS/TSX 구문, 대체 strict 타입과 whitespace 검사 통과. npm registry 제한으로 정식 Web lint/type/test/build는 CI 확인이 필요하다.
+5. 산출물·다음: `SoriON-AI-0.8.4-full.zip`, `SoriON-AI-0.8.3-to-0.8.4-patch.zip`; 다음은 `0.8.5 Mobile Workspace Session Persistence`다.

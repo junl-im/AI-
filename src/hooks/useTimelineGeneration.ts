@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
 import { ApiError } from '../api/httpClient'
+import type { VoiceProject } from '../projects/projectTypes'
 import { usePlayerStore } from '../store/usePlayerStore'
 import { buildAudioFilename } from '../tts/audioFile'
 import type { GeneratedAudio } from '../tts/generationTypes'
@@ -22,6 +23,11 @@ export interface TimelineGenerationOptions {
   speed: number
   engineId?: string
   normalizeText: boolean
+}
+
+export interface TimelineGenerationResult {
+  blockId: string
+  audio: GeneratedAudio
 }
 
 type BlocksUpdater = (current: TimelineBlock[]) => TimelineBlock[]
@@ -155,8 +161,9 @@ export function useTimelineGeneration() {
     timers.current.set(blockId, window.setTimeout(() => void poll(), 250))
   }, [updateVoiceBlock])
 
-  const generateBlock = useCallback(async (
+  const runBlock = useCallback(async (
     blockId: string,
+    allowSynthesis = true,
   ): Promise<GeneratedAudio | null> => {
     if (controllers.current.has(blockId)) return null
     const block = blocksRef.current.find((item) => item.id === blockId)
@@ -194,9 +201,27 @@ export function useTimelineGeneration() {
           }
         } catch (error) {
           const expired = error instanceof ApiError && [404, 410].includes(error.status)
+          if (expired && !allowSynthesis) {
+            updateVoiceBlock(blockId, {
+              status: 'queued',
+              progress: 0,
+              jobId: null,
+              error: '저장된 음원 보관 기간이 끝났습니다. 다시 생성을 눌러 주세요.',
+            })
+            return null
+          }
           if (expired) jobId = null
           else throw error
         }
+      }
+
+      if (!result && !allowSynthesis) {
+        updateVoiceBlock(blockId, {
+          status: 'queued',
+          progress: 0,
+          error: '저장된 음원 결과를 찾지 못했습니다. 다시 생성을 눌러 주세요.',
+        })
+        return null
       }
 
       if (!result) {
@@ -255,14 +280,62 @@ export function useTimelineGeneration() {
     }
   }, [enqueue, pollProgress, stopPolling, updateVoiceBlock])
 
-  const generateAll = useCallback(async (ids: string[]) => {
+  const generateBlock = useCallback(
+    (blockId: string) => runBlock(blockId, true),
+    [runBlock],
+  )
+
+  const recoverBlocks = useCallback(async (ids: string[]) => {
     const results: GeneratedAudio[] = []
     for (const id of ids) {
-      const audio = await generateBlock(id)
+      const audio = await runBlock(id, false)
       if (audio) results.push(audio)
     }
     return results
+  }, [runBlock])
+
+  const generateAll = useCallback(async (ids: string[]) => {
+    const results: TimelineGenerationResult[] = []
+    for (const id of ids) {
+      const audio = await generateBlock(id)
+      if (audio) results.push({ blockId: id, audio })
+    }
+    return results
   }, [generateBlock])
+
+  const restoreProject = useCallback((
+    project: VoiceProject,
+    options: TimelineGenerationOptions,
+  ): string[] => {
+    controllers.current.forEach((controller) => controller.abort())
+    timers.current.forEach((timer) => window.clearTimeout(timer))
+    controllers.current.clear()
+    timers.current.clear()
+    blocksRef.current.forEach((block) => {
+      if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
+    })
+
+    const jobIds = project.jobIds?.length
+      ? project.jobIds
+      : project.lastJobId
+        ? [project.lastJobId]
+        : []
+    let voiceIndex = 0
+    const restored = blocksFromText(project.text, options).map((block) => {
+      if (block.kind !== 'voice') return block
+      const jobId = jobIds[voiceIndex] ?? null
+      voiceIndex += 1
+      return {
+        ...block,
+        jobId,
+        error: jobId ? '저장된 음원 결과를 확인하고 있습니다.' : null,
+      }
+    })
+    commit(() => restored)
+    return restored
+      .filter((block): block is TimelineVoiceBlock => block.kind === 'voice' && Boolean(block.jobId))
+      .map((block) => block.id)
+  }, [commit, removeTrack])
 
   const moveBlock = useCallback((id: string, direction: -1 | 1) => {
     commit((current) => {
@@ -345,6 +418,8 @@ export function useTimelineGeneration() {
   return {
     blocks,
     stageText,
+    restoreProject,
+    recoverBlocks,
     generateAll,
     retryBlock: generateBlock,
     moveBlock,

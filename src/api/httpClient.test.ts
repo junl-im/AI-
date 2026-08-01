@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   apiRequest,
+  getApiDiscoveryCandidates,
   getApiConnectionContext,
   normalizeApiBaseUrl,
   resolveApiAssetUrl,
@@ -35,6 +36,12 @@ describe('normalizeApiBaseUrl', () => {
 })
 
 describe('API connection context', () => {
+  it('includes the current origin as an automatic API candidate', () => {
+    expect(getApiDiscoveryCandidates()[0]).toBe(
+      normalizeApiBaseUrl(`${window.location.origin}/api/v1`),
+    )
+  })
+
   it('uses a saved API address and resolves relative audio URLs', () => {
     saveApiBaseUrl('https://voice.example.com')
 

@@ -1,5 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { getApiConnectionContext } from '../api/httpClient'
+import {
+  discoverApiBaseUrl,
+  getApiConnectionContext,
+  saveApiBaseUrl,
+} from '../api/httpClient'
 import { getNetworkInformation, getMobileNetworkSnapshot } from '../network/mobileNetwork'
 import { runApiConnectivityAudit } from '../settings/connectivityApi'
 import { useAppStore } from '../store/useAppStore'
@@ -41,12 +45,25 @@ export function useBackendBootstrap(): void {
       }
       runningRef.current = true
       clearRetry()
-      const context = getApiConnectionContext()
+      let context = getApiConnectionContext()
       if (!context.configured) {
         resetEngineHealth()
-        setBackendStatus('offline', 'Voice API가 설정되지 않았습니다. 채팅의 연결 메시지를 눌러 주세요.')
-        runningRef.current = false
-        return
+        setBackendStatus('checking', '음성 시스템을 자동으로 찾고 있습니다.')
+        try {
+          const discovered = await discoverApiBaseUrl()
+          saveApiBaseUrl(discovered.baseUrl)
+          context = getApiConnectionContext()
+        } catch (error) {
+          setBackendStatus(
+            'offline',
+            error instanceof Error
+              ? error.message
+              : '음성 시스템을 자동으로 연결하지 못했습니다.',
+          )
+          runningRef.current = false
+          scheduleRetry(inspect)
+          return
+        }
       }
 
       setBackendStatus('checking', '모바일 네트워크에서 API·TTS·Worker·GPU를 확인하고 있습니다.')
@@ -103,6 +120,7 @@ export function useBackendBootstrap(): void {
 
     void inspect()
     window.addEventListener('sorion-api-change', requestInspect)
+    window.addEventListener('sorion-api-reconnect', requestInspect)
     window.addEventListener('online', requestInspect)
     window.addEventListener('offline', requestInspect)
     document.addEventListener('visibilitychange', handleVisibility)
@@ -111,6 +129,7 @@ export function useBackendBootstrap(): void {
       aliveRef.current = false
       clearRetry()
       window.removeEventListener('sorion-api-change', requestInspect)
+      window.removeEventListener('sorion-api-reconnect', requestInspect)
       window.removeEventListener('online', requestInspect)
       window.removeEventListener('offline', requestInspect)
       document.removeEventListener('visibilitychange', handleVisibility)

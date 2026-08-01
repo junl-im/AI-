@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { VoiceProject } from '../projects/projectTypes'
 import type { ConnectionLayerState } from '../settings/connectivityTypes'
 
 export type AppPage = 'home' | 'clone' | 'quality' | 'projects' | 'settings'
@@ -29,16 +30,16 @@ const initialEngineHealth: EngineHealthSnapshot = {
 interface AppState {
   page: AppPage
   workspaceEntered: boolean
-  connectionSheetOpen: boolean
+  activeProject: VoiceProject | null
   backendStatus: BackendStatus
   backendMessage: string
   engineHealth: EngineHealthSnapshot
   notice: string | null
   setPage: (page: AppPage) => void
   enterWorkspace: (page?: AppPage) => void
+  openProject: (project: VoiceProject) => void
+  clearActiveProject: () => void
   exitWorkspace: () => void
-  openConnectionSheet: () => void
-  closeConnectionSheet: () => void
   setBackendStatus: (status: BackendStatus, message?: string) => void
   setEngineHealth: (health: Partial<EngineHealthSnapshot>) => void
   resetEngineHealth: () => void
@@ -49,16 +50,20 @@ interface AppState {
 export const useAppStore = create<AppState>((set) => ({
   page: 'home',
   workspaceEntered: false,
-  connectionSheetOpen: false,
+  activeProject: null,
   backendStatus: 'unknown',
-  backendMessage: 'Voice API 상태를 확인하지 않았습니다.',
+  backendMessage: '음성 시스템을 자동으로 확인하고 있습니다.',
   engineHealth: initialEngineHealth,
   notice: null,
   setPage: (page) => set({ page }),
   enterWorkspace: (page = 'home') => set({ page, workspaceEntered: true }),
+  openProject: (activeProject) => set({
+    activeProject,
+    page: 'home',
+    workspaceEntered: true,
+  }),
+  clearActiveProject: () => set({ activeProject: null }),
   exitWorkspace: () => set({ page: 'home', workspaceEntered: false }),
-  openConnectionSheet: () => set({ connectionSheetOpen: true }),
-  closeConnectionSheet: () => set({ connectionSheetOpen: false }),
   setBackendStatus: (backendStatus, backendMessage) => set((state) => ({
     backendStatus,
     backendMessage: backendMessage ?? state.backendMessage,

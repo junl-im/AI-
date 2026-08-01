@@ -134,10 +134,18 @@
 - 결과 TTL·이력 TTL 분리와 completed tombstone 410
 - 저장소 기반 cross-process 취소 신호
 
-## 0.8.4 예정
+## 0.8.4 완료
 
-- 타임라인·job ID·선택 엔진 IndexedDB 복원
-- PWA 종료·새로고침 뒤 recover-first 재연결
+- 수동 API 주소 입력과 엔진 연결 Bottom Sheet 제거
+- 같은 Origin·환경 변수·성공 이력·안전 로컬 후보 자동 탐색
+- 첫 랜딩 Dock 비노출, 작업공간 진입 뒤 메뉴·Player Dock 표시
+- 최근 프로젝트 클릭 불러오기와 채팅·보이스·타임라인 복원
+- 저장된 job ID 결과 recover-first와 만료 시 블록별 재생성 안내
+
+## 0.8.5 예정
+
+- 열린 채팅·타임라인 전체 IndexedDB 자동 저장
+- PWA 종료·새로고침 뒤 마지막 작업공간 자동 복원
 - Object URL 소실 시 서버 결과 또는 Blob 복구
 - 저장 quota·private mode·iOS 정리 fallback
 - Android Chrome·iOS Safari·PWA 단절 복구 실기기 매트릭스

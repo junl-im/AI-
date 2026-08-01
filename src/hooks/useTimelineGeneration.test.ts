@@ -95,4 +95,63 @@ describe('useTimelineGeneration mobile recovery', () => {
     expect(recovered.status).toBe('ready')
     expect(recovered.jobId).toBe(originalJobId)
   })
+
+  it('restores a saved project and recovers its persisted job without creating a new one', async () => {
+    voiceApiMocks.getSpeechProgress.mockResolvedValueOnce({
+      jobId: 'saved-job',
+      status: 'completed',
+      phase: 'completed',
+      progress: 100,
+      currentSegment: 1,
+      totalSegments: 1,
+      message: '완료',
+      error: null,
+      updatedAt: new Date().toISOString(),
+    })
+    voiceApiMocks.getSpeechResult.mockResolvedValueOnce({
+      ...completedResult,
+      jobId: 'saved-job',
+    })
+    const { result } = renderHook(() => useTimelineGeneration())
+    let recoverableIds: string[] = []
+
+    act(() => {
+      recoverableIds = result.current.restoreProject({
+        id: 'project-1',
+        title: '저장 프로젝트',
+        text: '저장된 프로젝트 문장입니다.',
+        voiceId: 'sori-warm',
+        emotion: 'neutral',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'generated',
+        lastJobId: 'saved-job',
+      }, {
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        engineId: 'system',
+        normalizeText: true,
+      })
+    })
+
+    expect(recoverableIds).toHaveLength(1)
+    expect(result.current.blocks).toHaveLength(1)
+
+    await act(async () => {
+      await result.current.recoverBlocks(recoverableIds)
+    })
+
+    expect(voiceApiMocks.getSpeechResult).toHaveBeenCalledWith(
+      'saved-job',
+      expect.any(AbortSignal),
+    )
+    expect(voiceApiMocks.synthesizeSpeech).not.toHaveBeenCalled()
+    expect(result.current.blocks[0]).toMatchObject({
+      kind: 'voice',
+      status: 'ready',
+      jobId: 'saved-job',
+    })
+  })
 })

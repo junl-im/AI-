@@ -25,7 +25,6 @@ export type ApiFailureKind =
   | 'invalid-url'
   | 'unknown'
 
-
 function storageGet(key: string): string | null {
   if (typeof window === 'undefined') return volatileStorage.get(key) ?? null
   try {
@@ -162,7 +161,7 @@ function connectionProblem(value: string): ApiError | null {
   if (typeof window === 'undefined') return null
   const baseUrl = normalizeApiBaseUrl(value)
   if (!baseUrl) {
-    return new ApiError('Voice API 주소 형식이 올바르지 않습니다.', 0, 'SOA-2004', 'invalid-url')
+    return new ApiError('음성 시스템 연결 주소 형식이 올바르지 않습니다.', 0, 'SOA-2004', 'invalid-url')
   }
   if (!navigator.onLine) {
     return new ApiError('휴대폰이 오프라인입니다. 네트워크 연결 후 자동으로 다시 확인합니다.', 0, 'SOA-2005', 'offline', true)
@@ -171,7 +170,7 @@ function connectionProblem(value: string): ApiError | null {
   const browserIsRemote = !isLoopbackHostname(window.location.hostname)
   if (browserIsRemote && isLoopbackHostname(apiUrl.hostname) && isLikelyMobileDevice()) {
     return new ApiError(
-      '휴대폰의 localhost는 휴대폰 자신입니다. PC의 LAN 주소나 공개 HTTPS API를 입력해 주세요.',
+      '휴대폰에서는 localhost 후보를 사용할 수 없습니다. 배포된 HTTPS 음성 시스템이 필요합니다.',
       0,
       'SOA-2006',
       'mobile-localhost',
@@ -183,7 +182,7 @@ function connectionProblem(value: string): ApiError | null {
     && !isLoopbackHostname(apiUrl.hostname)
   ) {
     return new ApiError(
-      'HTTPS 웹앱에서는 HTTP API가 차단됩니다. HTTPS API 주소를 사용하거나 같은 HTTP 개발 환경에서 여세요.',
+      'HTTPS 웹앱에서는 HTTP 음성 시스템이 차단됩니다. 배포 설정에 HTTPS API가 필요합니다.',
       0,
       'SOA-2007',
       'mixed-content',
@@ -264,7 +263,7 @@ export function getApiBaseUrl(): string {
 
 export function saveApiBaseUrl(value: string): string {
   const normalized = normalizeApiBaseUrl(value)
-  if (!normalized) throw new ApiError('저장할 Voice API 주소를 확인해 주세요.', 0, 'SOA-2004', 'invalid-url')
+  if (!normalized) throw new ApiError('자동 연결 주소를 확인할 수 없습니다.', 0, 'SOA-2004', 'invalid-url')
   storageSet(API_BASE_STORAGE_KEY, normalized)
   rememberApiUrl(normalized, false)
   window.dispatchEvent(new Event('sorion-api-change'))
@@ -279,13 +278,15 @@ export function resetApiBaseUrl(): void {
 export function getApiDiscoveryCandidates(): string[] {
   const candidates = new Set<string>()
   const context = getApiConnectionContext()
-  ;[context.baseUrl, context.lastGoodUrl, ...context.history, ENV_API_BASE]
+  if (typeof window !== 'undefined') {
+    candidates.add(normalizeApiBaseUrl(`${window.location.origin}${API_PATH}`))
+  }
+  ;[ENV_API_BASE, context.lastGoodUrl, context.baseUrl, ...context.history]
     .map(normalizeApiBaseUrl)
     .filter(Boolean)
     .forEach((item) => candidates.add(item))
-
   if (typeof window !== 'undefined') {
-    const { hostname, protocol, origin } = window.location
+    const { hostname, protocol } = window.location
     if (isLoopbackHostname(hostname)) {
       candidates.add(normalizeApiBaseUrl('http://127.0.0.1:8000'))
       candidates.add(normalizeApiBaseUrl('http://localhost:8000'))
@@ -295,10 +296,12 @@ export function getApiDiscoveryCandidates(): string[] {
     }
     if (protocol === 'https:') {
       candidates.add(normalizeApiBaseUrl(`https://${hostname}:8443`))
-      candidates.add(normalizeApiBaseUrl(`${origin}${API_PATH}`))
     }
   }
   return [...candidates].filter(Boolean)
+}
+export function requestAutomaticApiReconnect(): void {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('sorion-api-reconnect'))
 }
 
 function clientId(): string {
@@ -336,7 +339,7 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
 
 export async function probeApiBaseUrl(value: string, timeoutMs = 3_500): Promise<ApiProbeResult> {
   const baseUrl = normalizeApiBaseUrl(value)
-  if (!baseUrl) throw new ApiError('검사할 Voice API 주소가 없습니다.', 0, 'SOA-2004', 'invalid-url')
+  if (!baseUrl) throw new ApiError('검사할 자동 연결 후보가 없습니다.', 0, 'SOA-2004', 'invalid-url')
   const blocked = connectionProblem(baseUrl)
   if (blocked) throw blocked
   const started = performance.now()
@@ -401,7 +404,7 @@ export async function apiRequest<T>(
   const baseUrl = options.baseUrl ? normalizeApiBaseUrl(options.baseUrl) : getApiBaseUrl()
   if (!baseUrl) {
     throw new ApiError(
-      'Voice API 주소가 설정되지 않았습니다. 채팅의 엔진 연결 메시지에서 API를 연결해 주세요.',
+      '음성 시스템을 자동으로 연결하지 못했습니다. 서버 배포 설정을 확인해 주세요.',
       0,
       'SOA-2000',
       'unconfigured',

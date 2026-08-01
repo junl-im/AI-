@@ -3,7 +3,6 @@ import { useBackendBootstrap } from '../../hooks/useBackendBootstrap'
 import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
 import { useAppStore } from '../../store/useAppStore'
 import { LinkedPlayerDock } from '../navigation/LinkedPlayerDock'
-import { ConnectionBottomSheet } from '../settings/ConnectionBottomSheet'
 import { NoticeToast } from '../ui/NoticeToast'
 import { BrandMasthead } from './BrandMasthead'
 import { CompactWorkspaceHeader } from './CompactWorkspaceHeader'
@@ -11,7 +10,9 @@ import { CompactWorkspaceHeader } from './CompactWorkspaceHeader'
 export function AppShell({ children }: PropsWithChildren) {
   useBackendBootstrap()
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
-  const hasPlayer = usePlayerStore((state) => getCurrentTrack(state) !== null)
+  const hasPlayer = usePlayerStore((state) => (
+    workspaceEntered && getCurrentTrack(state) !== null
+  ))
   const shellClassName = [
     'soa-workspace-shell',
     workspaceEntered ? 'soa-workspace-shell--editor' : 'soa-workspace-shell--landing',
@@ -24,8 +25,7 @@ export function AppShell({ children }: PropsWithChildren) {
       <div className={shellClassName}>
         <section className="soa-primary-frame">{children}</section>
       </div>
-      <LinkedPlayerDock />
-      <ConnectionBottomSheet />
+      {workspaceEntered ? <LinkedPlayerDock /> : null}
       <NoticeToast />
     </div>
   )

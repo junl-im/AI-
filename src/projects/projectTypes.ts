@@ -15,4 +15,7 @@ export interface VoiceProject {
   engineMode?: EngineMode
   audioSource?: AudioSource
   outputFormat?: 'mp3' | 'wav' | 'flac'
+  speed?: number
+  normalizeText?: boolean
+  jobIds?: Array<string | null>
 }
