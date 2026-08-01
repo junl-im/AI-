@@ -254,3 +254,44 @@
     grid-row: 2;
   }
 }
+
+@media (max-width: 919px) {
+  .soa-timeline {
+    padding: 14px 10px 18px;
+  }
+
+  .soa-timeline__head button {
+    min-height: 44px;
+    padding-inline: 13px;
+    font-size: 9px;
+  }
+
+  .soa-timeline-track {
+    scroll-padding-inline: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .soa-timeline-block {
+    min-height: 136px;
+    flex-basis: min(78vw, 270px);
+    padding: 12px;
+  }
+
+  .soa-timeline-block--pause {
+    min-height: 136px;
+    flex-basis: 88px;
+  }
+
+  .soa-timeline-actions button,
+  .soa-timeline-edit button {
+    min-height: 40px;
+    padding-inline: 11px;
+    font-size: 9px;
+  }
+
+  .soa-timeline-edit textarea {
+    min-height: 86px;
+    padding: 10px;
+    font-size: 16px;
+  }
+}

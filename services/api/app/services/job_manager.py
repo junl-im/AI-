@@ -29,6 +29,7 @@ class JobManager:
         self._history_limit = max(10, history_limit)
         self._tasks: dict[str, asyncio.Task[object]] = {}
         self._snapshots: dict[str, JobProgressResponse] = {}
+        self._results: dict[str, object] = {}
         self._lock = asyncio.Lock()
 
     async def run(self, job_id: str, factory: JobFactory[T]) -> T:
@@ -48,6 +49,8 @@ class JobManager:
 
         try:
             result = await asyncio.wait_for(task, timeout=self._timeout_seconds)
+            async with self._lock:
+                self._results[job_id] = result
             await self.update(
                 job_id,
                 status="completed",
@@ -150,6 +153,10 @@ class JobManager:
         async with self._lock:
             return self._snapshots.get(job_id)
 
+    async def get_result(self, job_id: str) -> object | None:
+        async with self._lock:
+            return self._results.get(job_id)
+
     async def cancel(self, job_id: str) -> bool:
         async with self._lock:
             task = self._tasks.get(job_id)
@@ -172,6 +179,7 @@ class JobManager:
         removable = [key for key in self._snapshots if key not in active]
         for key in removable[:overflow]:
             self._snapshots.pop(key, None)
+            self._results.pop(key, None)
 
     @classmethod
     def _snapshot(

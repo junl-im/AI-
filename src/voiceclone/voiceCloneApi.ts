@@ -97,11 +97,14 @@ function mapJob(value: ApiVoiceCloneJob): VoiceCloneJob {
   }
 }
 
-export async function getVoiceCloneCapability(baseUrl?: string): Promise<VoiceCloneCapability> {
+export async function getVoiceCloneCapability(
+  baseUrl?: string,
+  signal?: AbortSignal,
+): Promise<VoiceCloneCapability> {
   const result = await apiRequest<ApiVoiceCloneCapability>(
     '/voice-clones/capabilities',
     undefined,
-    { baseUrl, timeoutMs: 8_000 },
+    { baseUrl, signal, timeoutMs: 8_000, retries: 1 },
   )
   return {
     engineId: result.engine_id,

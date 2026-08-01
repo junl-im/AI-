@@ -1,5 +1,5 @@
 import type { EngineInfo, HealthResult, TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
-import { apiRequest, resolveApiAssetUrl } from '../api/httpClient'
+import { ApiError, apiRequest, resolveApiAssetUrl } from '../api/httpClient'
 
 export type JobProgressPhase = 'queued' | 'normalizing' | 'generating' | 'merging' | 'completed' | 'cancelled' | 'failed'
 
@@ -77,8 +77,45 @@ interface ApiHealthResult {
   default_engine: string
 }
 
-export async function checkHealth(baseUrl?: string): Promise<HealthResult> {
-  const result = await apiRequest<ApiHealthResult>('/health', undefined, { baseUrl })
+function mapTtsResult(result: ApiTtsResult): TtsSynthesisResult {
+  return {
+    jobId: result.job_id,
+    status: result.status,
+    engineId: result.engine_id,
+    engineMode: result.engine_mode,
+    audioUrl: resolveApiAssetUrl(result.audio_url),
+    estimatedDurationSeconds: result.estimated_duration_seconds,
+    message: result.message,
+    normalizedText: result.normalized_text,
+    segmentCount: result.segment_count,
+    processingMs: result.processing_ms,
+    fileSizeBytes: result.file_size_bytes,
+    realtimeFactor: result.realtime_factor,
+  }
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const finish = () => {
+      signal?.removeEventListener('abort', abort)
+      resolve()
+    }
+    const timer = window.setTimeout(finish, ms)
+    const abort = () => {
+      window.clearTimeout(timer)
+      signal?.removeEventListener('abort', abort)
+      reject(new ApiError('음성 생성을 취소했습니다.', 499, 'SOA-2003', 'cancelled'))
+    }
+    if (signal?.aborted) {
+      abort()
+      return
+    }
+    signal?.addEventListener('abort', abort, { once: true })
+  })
+}
+
+export async function checkHealth(baseUrl?: string, signal?: AbortSignal): Promise<HealthResult> {
+  const result = await apiRequest<ApiHealthResult>('/health', undefined, { baseUrl, signal, retries: 1 })
   return {
     status: result.status,
     service: result.service,
@@ -87,8 +124,8 @@ export async function checkHealth(baseUrl?: string): Promise<HealthResult> {
   }
 }
 
-export async function listEngines(baseUrl?: string): Promise<EngineInfo[]> {
-  const engines = await apiRequest<ApiEngineInfo[]>('/engines', undefined, { baseUrl })
+export async function listEngines(baseUrl?: string, signal?: AbortSignal): Promise<EngineInfo[]> {
+  const engines = await apiRequest<ApiEngineInfo[]>('/engines', undefined, { baseUrl, signal, retries: 1 })
   return engines.map((engine) => ({
     id: engine.id,
     name: engine.name,
@@ -122,28 +159,81 @@ export async function synthesizeSpeech(
     normalize_text: request.normalizeText,
     job_id: jobId,
   }
-  const result = await apiRequest<ApiTtsResult>('/tts/synthesize', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  }, { signal, timeoutMs: 90_000 })
-  return {
-    jobId: result.job_id,
-    status: result.status,
-    engineId: result.engine_id,
-    engineMode: result.engine_mode,
-    audioUrl: resolveApiAssetUrl(result.audio_url),
-    estimatedDurationSeconds: result.estimated_duration_seconds,
-    message: result.message,
-    normalizedText: result.normalized_text,
-    segmentCount: result.segment_count,
-    processingMs: result.processing_ms,
-    fileSizeBytes: result.file_size_bytes,
-    realtimeFactor: result.realtime_factor,
+  try {
+    const result = await apiRequest<ApiTtsResult>('/tts/synthesize', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }, { signal, timeoutMs: 90_000, retries: 0 })
+    return mapTtsResult(result)
+  } catch (error) {
+    if (error instanceof ApiError && ['timeout', 'cors-or-network', 'offline'].includes(error.kind)) {
+      return recoverSpeechResult(jobId, signal)
+    }
+    throw error
   }
 }
 
-export async function getSpeechProgress(jobId: string): Promise<SpeechJobProgress> {
-  const result = await apiRequest<ApiJobProgress>(`/tts/jobs/${encodeURIComponent(jobId)}`, undefined, { timeoutMs: 4_000 })
+export async function getSpeechResult(
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<TtsSynthesisResult> {
+  const result = await apiRequest<ApiTtsResult>(
+    `/tts/jobs/${encodeURIComponent(jobId)}/result`,
+    undefined,
+    { signal, timeoutMs: 6_000, retries: 1 },
+  )
+  return mapTtsResult(result)
+}
+
+export async function recoverSpeechResult(
+  jobId: string,
+  signal?: AbortSignal,
+  maxWaitMs = 45_000,
+): Promise<TtsSynthesisResult> {
+  const deadline = Date.now() + maxWaitMs
+  let lastError: ApiError | null = null
+  while (Date.now() < deadline) {
+    if (signal?.aborted) {
+      throw new ApiError('음성 생성을 취소했습니다.', 499, 'SOA-2003', 'cancelled')
+    }
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      await sleep(1_000, signal)
+      continue
+    }
+    try {
+      const progress = await getSpeechProgress(jobId, signal)
+      if (progress.phase === 'completed') return getSpeechResult(jobId, signal)
+      if (progress.phase === 'failed' || progress.phase === 'cancelled') {
+        throw new ApiError(
+          progress.error ?? progress.message,
+          409,
+          progress.phase === 'failed' ? 'SOA-4013' : 'SOA-2003',
+          progress.phase === 'failed' ? 'server' : 'cancelled',
+        )
+      }
+    } catch (error) {
+      if (error instanceof ApiError) {
+        lastError = error
+        if (error.kind === 'cancelled' || error.code === 'SOA-4013') throw error
+        if (![0, 404, 408, 409, 502, 503, 504].includes(error.status)) throw error
+      }
+    }
+    await sleep(900, signal)
+  }
+  throw lastError ?? new ApiError(
+    '모바일 연결 복구 시간이 초과되었습니다. 같은 타임라인 블록에서 다시 시도해 주세요.',
+    408,
+    'SOA-2013',
+    'timeout',
+    true,
+  )
+}
+
+export async function getSpeechProgress(
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<SpeechJobProgress> {
+  const result = await apiRequest<ApiJobProgress>(`/tts/jobs/${encodeURIComponent(jobId)}`, undefined, { signal, timeoutMs: 4_000, retries: 1 })
   return {
     jobId: result.job_id,
     status: result.status,

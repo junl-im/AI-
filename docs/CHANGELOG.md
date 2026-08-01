@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.8.1 - 2026-08-01
+
+### Mobile Engine/API Reliability
+
+- 모바일 API 주소 정규화, 최근 성공 주소, 안전 자동 탐색을 강화했습니다.
+- API·TTS·Worker·GPU 상태를 별도 계층으로 표시합니다.
+- 네트워크 전환·앱 복귀 시 자동 재검사와 단계적 재연결을 추가했습니다.
+- GET 요청 재시도, 요청 ID, 모바일 timeout, 오류 분류를 추가했습니다.
+- TTS POST 응답이 끊겨도 job ID로 완료 결과를 복구할 수 있습니다.
+- 재시도 대기 중 AbortSignal listener를 완료·취소 시 정리합니다.
+- Private Network preflight와 모바일 CORS 응답을 강화했습니다.
+- 입력·타임라인·Dock·바텀시트의 모바일 터치 영역과 safe-area를 보강했습니다.
+
 ## 0.8.0 - 2026-08-01
 
 ### Chat-to-Timeline 전체 UX 개편

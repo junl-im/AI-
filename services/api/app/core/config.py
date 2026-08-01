@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     worker_service_token: str = ""
     worker_signature_secret: str = ""
     public_rate_limit_per_minute: int = Field(default=120, ge=10, le=5000)
+    allow_private_network: bool = True
     audit_log_path: str = ".sorion/audit/api.jsonl"
 
     model_config = SettingsConfigDict(

@@ -116,12 +116,12 @@
 
 .soa-engine-chip,
 .soa-intro-button {
-  min-height: 38px;
-  border: 1px solid rgba(148, 169, 210, 0.14);
+  min-height: 44px;
+  border: 0;
   border-radius: 999px;
   padding: 0 12px;
   color: rgba(238, 243, 255, 0.72);
-  background: rgba(255, 255, 255, 0.045);
+  background: rgba(255, 255, 255, 0.055);
   font-size: 9px;
   font-weight: 850;
 }
@@ -132,26 +132,29 @@
   gap: 7px;
 }
 
-.soa-engine-chip i {
-  width: 7px;
-  height: 7px;
+.soa-engine-chip > small {
+  color: rgba(238, 243, 255, 0.34);
+  font-size: 7px;
+}
+
+.soa-engine-chip__dots {
+  display: grid;
+  grid-template-columns: repeat(2, 6px);
+  gap: 3px;
+}
+
+.soa-engine-chip__dots i {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #ff8f7b;
-  box-shadow: 0 0 0 4px rgba(255, 143, 123, 0.1);
+  background: #697286;
 }
 
-.soa-engine-chip.is-online i {
-  background: #64f0ba;
-  box-shadow: 0 0 0 4px rgba(100, 240, 186, 0.1);
-}
-
-.soa-engine-chip.is-degraded i {
-  background: #ffe27b;
-  box-shadow: 0 0 0 4px rgba(255, 226, 123, 0.1);
-}
-
-.soa-engine-chip.is-checking i {
-  background: #ffe27b;
+.soa-engine-chip__dots i.is-ready { background: #64f0ba; }
+.soa-engine-chip__dots i.is-warning { background: #ffe27b; }
+.soa-engine-chip__dots i.is-offline { background: #ff7b6d; }
+.soa-engine-chip__dots i.is-checking {
+  background: #b9aaff;
   animation: soa-pulse 1s infinite alternate;
 }
 

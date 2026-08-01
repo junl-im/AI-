@@ -227,3 +227,32 @@ npm run test:worker
 - DELIVERY_RULES에 임시채팅 인수인계 메모리 절대 규칙이 있어야 한다.
 - START_HERE의 첫 절차가 HANDOVER 필독이어야 한다.
 
+
+
+## 0.8.0 Chat-to-Timeline 회귀 검사
+
+- 초기 랜딩과 편집 작업공간이 분리되는지 확인
+- 메시지 전송이 문장·쉼 블록을 생성하는지 확인
+- 선택 보이스와 생성 옵션이 블록에 고정되는지 확인
+- 첫 ready 블록이 Dock에 즉시 추가되는지 확인
+- 실패 블록만 재시도할 수 있는지 확인
+- API 미설정이 채팅 시스템 메시지와 연결 바텀시트로 이어지는지 확인
+- 불필요한 작업공간 외곽 테두리가 다시 추가되지 않는지 확인
+
+## 0.8.1 모바일 엔진·API 신뢰성 회귀 검사
+
+- 스킴 없는 LAN IP와 공개 도메인의 API 주소 정규화
+- 마지막 성공 주소와 최근 주소 최대 5개 저장
+- 휴대폰 localhost와 HTTPS→HTTP mixed-content 사전 차단
+- GET 일시 오류 재시도와 POST 무재시도
+- 모든 요청의 request ID와 익명 client ID 헤더
+- API·TTS·Worker·GPU 네 계층 상태 파생
+- 온라인·네트워크 변경·PWA 복귀 시 단일 재점검
+- TTS POST 응답 단절 후 job 상태와 `/result`로 완료 음원 복구
+- 완료 전 409, 알 수 없는 job 404, 만료 결과 410 계약
+- Private Network preflight 응답
+- 느린 3G·데이터 절약 모드 timeout 조정
+- 모바일 입력 16px, 터치 영역 44px, safe-area CSS 유지
+
+현재 기준 테스트 수는 API 60개, Worker 9개다. Web Vitest·ESLint·Vite build는
+GitHub Actions에서 최종 확인한다.

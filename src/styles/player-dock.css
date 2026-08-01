@@ -343,3 +343,35 @@
     animation: none;
   }
 }
+
+@media (max-width: 639px) {
+  .soa-dock {
+    padding-inline: 8px;
+  }
+
+  .soa-dock__inner {
+    border: 0;
+    border-radius: 22px;
+  }
+
+  .soa-dock__nav button {
+    min-height: 58px;
+    font-size: 11px;
+  }
+
+  .soa-player-transport > button {
+    min-width: 40px;
+    height: 40px;
+  }
+
+  .soa-player-transport > .soa-player-toggle {
+    width: 42px;
+    height: 42px;
+  }
+
+  .soa-player-actions button,
+  .soa-player-actions a,
+  .soa-player-actions select {
+    min-height: 38px;
+  }
+}

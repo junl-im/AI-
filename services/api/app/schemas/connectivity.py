@@ -24,6 +24,13 @@ class ConnectivityResponse(BaseModel):
     tts_ready: bool
     voice_clone_ready: bool
     worker_configured: bool
+    worker_healthy: bool
+    gpu_ready: bool
+    gpu_name: str | None = None
+    vram_total_mb: int | None = None
+    request_id: str | None = None
+    server_time: str
+    recommended_recheck_seconds: int
     cors_origins: list[str]
     tts_engines: list[EngineInfo]
     voice_clone_engines: list[EngineInfo]

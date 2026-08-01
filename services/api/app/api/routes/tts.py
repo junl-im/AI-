@@ -90,6 +90,33 @@ async def get_job(job_id: str, request: Request) -> JobProgressResponse:
     return snapshot
 
 
+@router.get("/jobs/{job_id}/result", response_model=TtsSynthesisResponse)
+async def get_job_result(job_id: str, request: Request) -> TtsSynthesisResponse:
+    manager = request.app.state.job_manager
+    snapshot = await manager.get(job_id)
+    if snapshot is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SOA-4010: 작업 상태를 찾지 못했습니다.",
+        )
+    if snapshot.phase != "completed":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"SOA-4011: 작업이 아직 완료되지 않았습니다. 현재 단계: {snapshot.phase}",
+        )
+    result = await manager.get_result(job_id)
+    if not isinstance(result, TtsSynthesisResponse):
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="SOA-4012: 완료 결과가 만료됐습니다. 다시 생성해 주세요.",
+        )
+    if result.audio_url and result.audio_url.startswith("/"):
+        return result.model_copy(
+            update={"audio_url": f"{str(request.base_url).rstrip('/')}{result.audio_url}"}
+        )
+    return result
+
+
 @router.delete("/jobs/{job_id}", response_model=JobCancelResponse)
 async def cancel_job(job_id: str, request: Request) -> JobCancelResponse:
     cancelled = await request.app.state.job_manager.cancel(job_id)

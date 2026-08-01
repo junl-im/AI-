@@ -68,9 +68,20 @@ export function useEngineCatalog() {
 
   useEffect(() => {
     void refresh()
-    const handleApiChange = () => void refresh()
-    window.addEventListener('sorion-api-change', handleApiChange)
-    return () => window.removeEventListener('sorion-api-change', handleApiChange)
+    const handleRefresh = () => void refresh()
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') void refresh()
+    }
+    window.addEventListener('sorion-api-change', handleRefresh)
+    window.addEventListener('sorion-engine-refresh', handleRefresh)
+    window.addEventListener('online', handleRefresh)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      window.removeEventListener('sorion-api-change', handleRefresh)
+      window.removeEventListener('sorion-engine-refresh', handleRefresh)
+      window.removeEventListener('online', handleRefresh)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [refresh])
 
   const selected = useMemo(

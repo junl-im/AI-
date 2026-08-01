@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**  
-현재 기준 버전: **0.8.0 Chat-to-Timeline Workspace**  
+현재 기준 버전: **0.8.1 Mobile Engine/API Reliability**  
 기준 버전: **0.7.3 Handover Memory Baseline**  
-최종 갱신: **2026-08-01 11:06 KST**  
+최종 갱신: **2026-08-01 11:44 KST**  
 제품 소유·디자인: **곰같은여우**  
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -138,6 +138,22 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
 - 타임라인의 첫 ready 블록부터 대기열에 추가한다.
 - 큐, 이전·다음, 반복, 속도, 탐색, 다운로드를 유지한다.
 - 설정은 Dock에 넣지 않는다.
+## 5-1. 0.8.1 모바일 엔진·API 신뢰성 기준
+- API 주소에 스킴이 없어도 LAN IP는 HTTP, 공개 도메인은 현재 페이지에 맞춰 정규화한다.
+- 저장 주소, 마지막 성공 주소, 최근 주소 5개를 분리 보관한다.
+- 모바일 자동 탐색은 저장 주소와 현재 호스트 후보만 사용하며 전체 LAN을 스캔하지 않는다.
+- HTTPS 페이지에서 HTTP LAN API가 차단되는 경우 생성 요청 전에 원인을 명확히 보여 준다.
+- 휴대폰에서 localhost는 휴대폰 자신이므로 PC LAN IP 또는 공개 HTTPS 주소를 안내한다.
+- API, 실제 TTS, Worker 프로세스, GPU·모델을 네 계층으로 분리해 표시한다.
+- 온라인 복귀, Wi-Fi·셀룰러 전환, PWA 포그라운드 복귀 시 단일 실행으로 재점검한다.
+- 재연결 간격은 5초, 12초, 30초, 60초로 늘리며 중복 점검을 만들지 않는다.
+- GET은 일시적 timeout·429·502·503·504에 한해 재시도한다. POST 생성은 중복 음성을
+  막기 위해 자동 재전송하지 않고 job ID로 결과를 복구한다.
+- `/tts/jobs/{job_id}/result`는 모바일 응답 단절 후 완료 음원을 다시 가져오는 계약이다.
+- 모든 Web 요청에 익명 client ID와 request ID를 보내고 API 응답 request ID를 진단에 표시한다.
+- 개발 LAN 연결은 허용 Origin과 Private Network preflight가 모두 맞아야 한다.
+- 모바일 입력은 16px 이상, 주요 터치 영역은 44px 이상, safe-area를 항상 반영한다.
+
 ## 6. 현재 아키텍처와 배포 현실
 ```text
 GitHub Pages / Mobile PWA
@@ -206,6 +222,7 @@ GET  /engines
 GET  /engines/strategy
 POST /tts/synthesize
 GET  /tts/jobs/{job_id}
+GET  /tts/jobs/{job_id}/result
 DELETE /tts/jobs/{job_id}
 GET  /audio/{filename}
 GET  /quality/diagnostics
@@ -235,18 +252,15 @@ GET  /v1/jobs/{job_id}/audio
 GET  /v1/jobs/{job_id}/segments/{index}/audio
 ```
 ## 10. API 주소와 자동 탐색
-Web 저장 키: `sorion-api-base-url`.
-우선순위:
-1. 사용자가 저장한 주소.
-2. `VITE_API_BASE_URL`.
-3. localhost 개발 환경의 `/api/v1` 프록시.
-4. 그 외에는 미설정.
-자동 탐색 후보:
-- 저장된 주소.
-- `/api/v1` 개발 프록시.
-- `http://127.0.0.1:8000/api/v1`.
-- `http://localhost:8000/api/v1`.
-- HTTP로 열린 현재 호스트의 `:8000/api/v1`.
+Web 저장 키:
+- `sorion-api-base-url`: 사용자가 선택한 주소.
+- `sorion-api-last-good-url`: 마지막 성공 주소.
+- `sorion-api-url-history`: 최근 주소 최대 5개.
+- `sorion-client-id`: 익명 연결·rate-limit 식별자.
+우선순위는 저장 주소, 마지막 성공 주소, 최근 주소, `VITE_API_BASE_URL`, 안전한 현재
+호스트 후보다. localhost 후보는 Web도 localhost일 때만 자동 추가한다. HTTP LAN Web은 현재
+호스트 8000을, HTTPS Web은 같은 Origin `/api/v1`과 8443 후보만 추가한다. 전체 LAN은
+스캔하지 않는다. 스킴 없는 LAN IP는 HTTP, 공개 도메인은 현재 페이지 프로토콜로 정규화한다.
 ## 11. 저장·개인정보·동의
 IndexedDB `sorion-ai`, schema v3:
 - `projects`: 프로젝트 메타데이터.
@@ -299,6 +313,9 @@ SORION_COSYVOICE_WORKER_URL
 SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS
 SORION_WORKER_SERVICE_TOKEN
 SORION_WORKER_SIGNATURE_SECRET
+SORION_PUBLIC_RATE_LIMIT_PER_MINUTE
+SORION_ALLOW_PRIVATE_NETWORK
+SORION_AUDIT_LOG_PATH
 ```
 Worker:
 ```text
@@ -313,7 +330,7 @@ SORION_WORKER_SERVICE_TOKEN
 SORION_WORKER_SIGNATURE_SECRET
 SORION_WORKER_AUTH_TTL_SECONDS
 SORION_WORKER_RATE_LIMIT_PER_MINUTE
-SORION_WORKER_JOB_TTL_SECONDS
+SORION_WORKER_JOB_TTL_MINUTES
 ```
 ## 14. 코딩 규칙
 - 소스 파일 500줄 이하.
@@ -334,10 +351,10 @@ SORION_WORKER_JOB_TTL_SECONDS
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.8.0-full.zip`.
-- 패치: `SoriON-AI-0.7.3-to-0.8.0-patch.zip`.
-- 체크섬: `SoriON-AI-0.8.0-artifacts.sha256`.
-- 패치 기준은 정확히 0.7.3.
+- 전체본: `SoriON-AI-0.8.1-full.zip`.
+- 패치: `SoriON-AI-0.8.0-to-0.8.1-patch.zip`.
+- 체크섬: `SoriON-AI-0.8.1-artifacts.sha256`.
+- 패치 기준은 정확히 0.8.0.
 - 삭제 파일은 현재 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
@@ -385,7 +402,7 @@ npm run build
 ```
 네트워크 제한 시 실행하지 못한 항목과 이유를 결과 보고서에 정확히 기록한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.8.1 Timeline Persistence & Real Script Model Bridge**.
+다음 목표 버전: **0.8.2 Timeline Persistence & Real Script Model Bridge**.
 우선순위:
 1. 실제 LLM Adapter와 대본 생성 API 계약.
 2. 타임라인 IndexedDB 저장·복원.
@@ -394,7 +411,7 @@ npm run build
 5. Worker segment SSE를 TTS 타임라인에도 통합.
 6. 모바일 타임라인 접기·확장과 편집 포커스 모드.
 7. 타임라인 undo·redo.
-8. API 연결 실패 원인별 안내 강화.
+8. 모바일 연결 진단 결과를 프로젝트별 운영 로그로 보존.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -420,3 +437,20 @@ npm run build
 9. 산출물: `SoriON-AI-0.8.0-full.zip`,
    `SoriON-AI-0.7.3-to-0.8.0-patch.zip`.
 10. 다음 예상 업데이트: `0.8.1 Timeline Persistence & Real Script Model Bridge`.
+## 24. 2026-08-01 11:44 KST · v0.8.1 릴리스 기록
+1. 작업 일시: 2026-08-01 11:44 KST.
+2. 대상·기준: `0.8.0 → 0.8.1`.
+3. 변경 내용: 모바일 API 주소·재연결·오류 분류·요청 ID·계층 상태를 강화하고,
+   TTS POST 응답이 끊겨도 job ID로 완료 결과를 복구하도록 했다.
+4. API 변경: `GET /api/v1/tts/jobs/{job_id}/result`, Worker·GPU 세부 상태,
+   Private Network preflight, client ID 기반 rate-limit 구분을 추가했다.
+5. 모바일 변경: 16px 입력, 44px 터치 영역, safe-area, 최근 주소 선택, API·TTS·Worker·GPU
+   4단계 바텀시트, 온라인·네트워크·포그라운드 자동 재검사를 추가했다.
+6. 실제 점검: Worker health 정상·model not-ready, API connectivity 정상, System TTS WAV
+   147,358 bytes 생성, 완료 결과 복구 API와 PNA preflight를 실제 HTTP로 확인했다.
+7. 검증 결과: API 60개, Worker 9개 테스트 통과. 프로젝트 규칙, compileall, Python 3.10
+   AST, 핵심 TypeScript strict 대체 검사, 104개 TS/TSX 구문, CSS 11개 파싱 통과.
+8. 알려진 제한: 실제 CosyVoice 모델·CUDA GPU와 실제 LLM은 릴리스에 포함되지 않는다.
+9. 산출물: `SoriON-AI-0.8.1-full.zip`, `SoriON-AI-0.8.0-to-0.8.1-patch.zip`.
+10. 다음 예상 업데이트: `0.8.2 Timeline Persistence & Real Script Model Bridge`.
+

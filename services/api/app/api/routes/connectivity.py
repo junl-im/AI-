@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Request
@@ -29,6 +30,21 @@ def _directory_check(path: Path) -> ConnectivityCheck:
         )
 
 
+def _gpu_check(diagnostics: dict[str, object]) -> ConnectivityCheck:
+    cuda_available = bool(diagnostics.get("cuda_available"))
+    gpu_name = str(diagnostics.get("gpu_name") or "CUDA GPU 정보 없음")
+    vram = diagnostics.get("vram_total_mb")
+    detail = gpu_name
+    if isinstance(vram, int):
+        detail = f"{gpu_name} · VRAM {vram}MB"
+    return ConnectivityCheck(
+        id="worker-gpu",
+        label="Worker GPU",
+        status="ready" if cuda_available else "warning",
+        detail=detail if cuda_available else "CUDA GPU가 준비되지 않았습니다.",
+    )
+
+
 @router.get("/connectivity", response_model=ConnectivityResponse)
 async def connectivity(request: Request) -> ConnectivityResponse:
     settings = request.app.state.settings
@@ -47,12 +63,17 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         clone_snapshot.get("reason") or "복제 Worker가 등록되지 않았습니다."
     )
     clone_latency = clone_snapshot.get("latency_ms")
+    raw_diagnostics = clone_snapshot.get("diagnostics")
+    diagnostics = raw_diagnostics if isinstance(raw_diagnostics, dict) else {}
+    gpu_ready = clone_health and bool(diagnostics.get("cuda_available"))
+    gpu_name = diagnostics.get("gpu_name")
+    vram_total_mb = diagnostics.get("vram_total_mb")
     checks = [
         ConnectivityCheck(
             id="api",
             label="FastAPI 게이트웨이",
             status="ready",
-            detail="웹 요청을 처리할 수 있습니다.",
+            detail="모바일 웹 요청을 처리할 수 있습니다.",
         ),
         _directory_check(settings.audio_path),
         ConnectivityCheck(
@@ -69,11 +90,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
             id="clone-worker-health",
             label="CosyVoice Worker 프로세스",
             status="ready" if clone_health else "warning",
-            detail=(
-                "Worker /health 응답을 확인했습니다."
-                if clone_health
-                else clone_reason
-            ),
+            detail="Worker /health 응답을 확인했습니다." if clone_health else clone_reason,
             latency_ms=int(clone_latency) if isinstance(clone_latency, int) else None,
         ),
         ConnectivityCheck(
@@ -83,6 +100,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
             detail=clone_reason,
             latency_ms=int(clone_latency) if isinstance(clone_latency, int) else None,
         ),
+        _gpu_check(diagnostics),
         ConnectivityCheck(
             id="worker-auth",
             label="API ↔ Worker 서명 인증",
@@ -99,6 +117,16 @@ async def connectivity(request: Request) -> ConnectivityResponse:
             status="ready" if settings.cors_origin_list else "missing",
             detail=", ".join(settings.cors_origin_list) or "허용 Origin이 비어 있습니다.",
         ),
+        ConnectivityCheck(
+            id="private-network",
+            label="모바일 사설망 접근",
+            status="ready" if settings.allow_private_network else "warning",
+            detail=(
+                "개발 환경의 Private Network preflight를 허용합니다."
+                if settings.allow_private_network
+                else "사설망 접근 응답 헤더가 비활성화됐습니다."
+            ),
+        ),
     ]
     required_ready = all(
         check.status == "ready"
@@ -106,7 +134,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.8.0",
+        version="0.8.1",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",
@@ -114,6 +142,15 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         tts_ready=bool(real_tts),
         voice_clone_ready=clone_ready,
         worker_configured=bool(settings.cosyvoice_worker_url),
+        worker_healthy=clone_health,
+        gpu_ready=gpu_ready,
+        gpu_name=str(gpu_name) if gpu_name else None,
+        vram_total_mb=(
+            int(vram_total_mb) if isinstance(vram_total_mb, int) else None
+        ),
+        request_id=getattr(request.state, "request_id", None),
+        server_time=datetime.now(timezone.utc).isoformat(),
+        recommended_recheck_seconds=15 if required_ready else 5,
         cors_origins=settings.cors_origin_list,
         tts_engines=tts_infos,
         voice_clone_engines=clone_infos,

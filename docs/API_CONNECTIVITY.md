@@ -1,91 +1,99 @@
 # API CONNECTIVITY
 
-## 핵심 결론
+현재 기준 버전: `0.8.1`
 
-GitHub Pages에는 Python API가 포함되지 않는다. Pages는 React 빌드 결과만 제공하고,
-FastAPI, MeloTTS, 시스템 음성, CosyVoice Worker는 별도 프로세스나 서버에서 실행해야 한다.
+## 배포 경계
 
-0.6.1까지는 공개 Pages가 `/api/v1`을 같은 사이트에서 찾다가 실패한 뒤 Demo WAV로
-조용히 전환될 수 있었다. 0.6.2부터는 공개 정적 배포에서 API 주소가 없으면
-`API 미설정`으로 명확히 표시하며 잘못된 GitHub Pages API 호출을 하지 않는다.
+```text
+GitHub Pages / Mobile PWA
+        │ HTTPS 또는 개발 LAN
+FastAPI Gateway :8000
+        │ 사설 HMAC 요청
+CosyVoice Worker :9000
+```
 
-## 로컬 PC 실행
+GitHub Pages에는 Python API가 포함되지 않는다. 정적 Web만 제공한다. TTS와 복제 기능을 사용하려면 별도 FastAPI가
+필요하며 실제 CosyVoice는 모델과 GPU가 준비된 Worker가 추가로 필요하다.
 
-프로젝트 루트에서 웹과 API를 각각 실행한다.
+로컬 API 실행:
 
 ```bash
-npm install
 npm run dev:api
 ```
 
-다른 터미널에서:
+## Web 진단 흐름
 
-```bash
-npm run dev
-```
-
-로컬 Vite는 `/api` 요청을 `http://localhost:8000`으로 프록시하므로 별도
-`VITE_API_BASE_URL`이 필요하지 않다.
-
-확인 주소:
-
-```text
-http://127.0.0.1:8000/api/v1/health
-http://127.0.0.1:8000/api/v1/connectivity
-http://127.0.0.1:8000/api/v1/engines
-http://127.0.0.1:8000/api/v1/voice-clones/capabilities
-```
-
-## GitHub Pages에서 PC 로컬 API 연결
-
-설정의 Voice API 주소에 다음을 입력한다.
-
-```text
-http://127.0.0.1:8000
-```
-
-이 방식은 같은 PC의 브라우저에서만 의미가 있다. 브라우저와 API가 같은 기기에서
-실행되어야 한다.
-
-## 휴대폰 연결
-
-휴대폰에서 `127.0.0.1`과 `localhost`는 PC가 아니라 휴대폰 자신을 뜻한다.
-개발 중 같은 Wi-Fi에서 연결하려면 API를 `0.0.0.0:8000`으로 실행하고 PC의 LAN IP를
-입력해야 한다.
-
-```text
-http://192.168.x.x:8000
-```
-
-공개 HTTPS 웹앱에서 로컬 HTTP API를 호출하는 방식은 브라우저의 로컬 네트워크 접근,
-혼합 콘텐츠, 방화벽 정책에 따라 차단될 수 있다. 실제 모바일 서비스는 공개 HTTPS
-FastAPI 게이트웨이를 사용한다.
-
-## 0.6.2 통합 점검
-
-설정 화면의 `전체 연결 검사`는 다음 경로를 각각 확인한다.
+연결 바텀시트는 다음 순서로 검사한다.
 
 1. `/api/v1/health`
-2. `/api/v1/setup`
-3. `/api/v1/engines`
-4. `/api/v1/voice-clones/capabilities`
-5. `/api/v1/connectivity`
+2. `/api/v1/connectivity`
+3. 깊은 검사에서 `/setup`, `/engines`, `/voice-clones/capabilities`
 
-결과에는 경로별 성공 여부, 응답 시간, 실제 TTS 준비 상태, CosyVoice Worker 상태,
-임시 음원 폴더와 CORS 허용 Origin이 표시된다.
+결과는 API·TTS·Worker·GPU 네 계층으로 표시한다. API가 응답해도 Mock만 준비된 경우
+실제 TTS 준비로 표시하지 않는다.
 
-## 엔진 상태 해석
+## 주소 정규화와 후보
 
-- `AI ENGINE`: 실제 AI TTS 패키지와 실행 조건이 준비됨
-- `LOCAL TTS`: 운영체제 한국어 음성 도구가 준비됨
-- `DEMO`: Mock 계약 또는 브라우저 테스트 WAV
-- `API 미설정`: 정적 웹만 배포되고 FastAPI 주소가 없음
-- `연결 실패`: 주소는 있지만 서버, CORS, 방화벽 또는 HTTPS 조건이 맞지 않음
-- `Worker 준비 필요`: FastAPI는 연결됐지만 CosyVoice 모델 Worker가 없음
+- `192.168.0.10:8000` → `http://192.168.0.10:8000/api/v1`
+- `voice.example.com`을 HTTPS 페이지에서 입력 → `https://voice.example.com/api/v1`
+- 이미 `/api/v1`이 있으면 중복 추가하지 않음
+- 저장 주소, 마지막 성공 주소, 최근 주소 5개를 사용
+- localhost 후보는 localhost에서 실행 중인 Web에만 자동 추가
+- HTTPS 환경은 같은 Origin `/api/v1`과 `:8443` 후보만 안전하게 추가
 
-## CORS 기본값
+전체 LAN 스캔은 하지 않는다.
 
-0.6.2의 기본 허용 Origin은 다음과 같다.
+## 모바일 오류 구분
+
+| 종류 | 사용자 안내 |
+|---|---|
+| unconfigured | API 주소 연결 필요 |
+| offline | 네트워크 복귀 후 자동 재검사 |
+| mobile-localhost | PC LAN IP 또는 공개 HTTPS 주소 사용 |
+| mixed-content | HTTPS API 필요 |
+| timeout | 느린 모바일 연결 또는 서버 응답 지연 |
+| cors-or-network | CORS·방화벽·주소·서버 상태 확인 |
+| rate-limit | 잠시 후 재시도 |
+| server | API 또는 Worker 내부 오류 확인 |
+
+## Connectivity 응답 핵심
+
+```json
+{
+  "version": "0.8.1",
+  "api_ready": true,
+  "tts_ready": true,
+  "worker_configured": true,
+  "worker_healthy": true,
+  "voice_clone_ready": false,
+  "gpu_ready": false,
+  "gpu_name": null,
+  "vram_total_mb": null,
+  "request_id": "request-uuid",
+  "recommended_recheck_seconds": 15
+}
+```
+
+`worker_healthy=true`, `gpu_ready=false`는 Worker 프로세스는 살아 있지만 CUDA·모델이
+실제 추론 준비 상태가 아니라는 의미다.
+
+## TTS 모바일 결과 복구
+
+Web은 음성 생성 POST를 자동 재전송하지 않는다. 응답이 끊기면 생성 전에 만든 job ID로
+상태를 조회한 뒤 완료 결과를 복구한다.
+
+```text
+GET /api/v1/tts/jobs/{job_id}
+GET /api/v1/tts/jobs/{job_id}/result
+```
+
+- 진행 중 결과 요청: 409
+- 알 수 없는 job: 404
+- 완료 결과가 메모리 TTL에서 사라짐: 410
+
+## CORS와 Private Network
+
+기본 개발 Origin:
 
 ```text
 http://localhost:5173
@@ -93,27 +101,19 @@ http://127.0.0.1:5173
 https://junl-im.github.io
 ```
 
-다른 도메인에 배포하면 `SORION_CORS_ORIGINS`에 정확한 Origin을 추가한다.
+환경 변수 `SORION_CORS_ORIGINS`에서 실제 배포 Origin만 허용한다. 개발 LAN 연결은
+`SORION_ALLOW_PRIVATE_NETWORK=true`일 때 Private Network preflight를 허용한다.
 
-## CosyVoice Worker
+## 실기기 점검
 
-`SORION_COSYVOICE_WORKER_URL`을 설정하면 FastAPI가 Worker의 `/health`를 실제로
-확인한다. URL 문자열만 존재한다고 준비 완료로 표시하지 않는다.
+- Android Chrome
+- iOS Safari
+- Android 설치형 PWA
+- iOS 홈 화면 Web App
+- Wi-Fi → 셀룰러 전환
+- 화면 잠금 → 포그라운드 복귀
+- 느린 3G 또는 데이터 절약 모드
+- HTTPS Web → HTTPS API
+- HTTP 로컬 Web → HTTP LAN API
 
-```env
-SORION_COSYVOICE_WORKER_URL=http://127.0.0.1:9000
-SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS=2.5
-```
-
-0.6.2는 Worker health 연결까지만 검증한다. 실제 스트리밍 생성과 제로샷 복제 실행은
-0.7.0에서 추가한다.
-
-## 0.7.0 Worker 상태 분리
-
-연결 진단은 다음 두 항목을 별도로 반환한다.
-
-- `clone-worker-health`: Worker 프로세스 `/health` 응답
-- `clone-worker-readiness`: adapter·모델·GPU 준비 상태 `/ready`
-
-프로세스가 살아 있어도 모델이 없으면 health는 ready, readiness는 warning이다.
-복제 작업 생성은 readiness가 ready일 때만 허용한다.
+세부 정책은 [`MOBILE_ENGINE_RELIABILITY.md`](MOBILE_ENGINE_RELIABILITY.md)를 따른다.

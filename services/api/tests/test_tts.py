@@ -78,3 +78,28 @@ def test_unknown_job_progress_returns_404(client):
     response = client.get(f"/api/v1/tts/jobs/{uuid4()}")
     assert response.status_code == 404
     assert "SOA-4010" in response.json()["detail"]
+
+
+def test_completed_job_result_can_be_recovered(client):
+    job_id = str(uuid4())
+    created = client.post(
+        "/api/v1/tts/synthesize",
+        json={
+            "text": "모바일 연결이 끊겨도 결과를 복구합니다.",
+            "voice_id": "sori-warm",
+            "engine_id": "mock",
+            "job_id": job_id,
+        },
+    )
+    assert created.status_code == 200
+
+    recovered = client.get(f"/api/v1/tts/jobs/{job_id}/result")
+    assert recovered.status_code == 200
+    assert recovered.json()["job_id"] == job_id
+    assert recovered.json()["status"] == "mock-complete"
+
+
+def test_unknown_job_result_returns_404(client):
+    response = client.get(f"/api/v1/tts/jobs/{uuid4()}/result")
+    assert response.status_code == 404
+    assert "SOA-4010" in response.json()["detail"]

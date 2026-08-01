@@ -17,8 +17,13 @@ interface ApiSetupStatus {
   steps: ApiSetupStep[]
 }
 
-export async function getSetupStatus(baseUrl?: string): Promise<SetupStatus> {
-  const result = await apiRequest<ApiSetupStatus>('/setup', undefined, { baseUrl, timeoutMs: 8_000 })
+export async function getSetupStatus(baseUrl?: string, signal?: AbortSignal): Promise<SetupStatus> {
+  const result = await apiRequest<ApiSetupStatus>('/setup', undefined, {
+    baseUrl,
+    signal,
+    timeoutMs: 8_000,
+    retries: 1,
+  })
   return {
     version: result.version,
     ready: result.ready,

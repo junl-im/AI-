@@ -101,3 +101,25 @@
 - 임시채팅 영구 HANDOVER 메모리 기준점
 - 제품 목표·UX 결정·아키텍처·엔진·보안·환경·CI·제한 통합 기록
 - 다음 기능 목표를 0.7.4로 이동
+
+
+## 0.8.0 완료
+
+- 초기 랜딩 유지와 Chat-to-Timeline 편집 작업공간
+- 세로 보이스 라이브러리, 채팅 composer, 문장·쉼 타임라인
+- 첫 ready 블록 Progressive Playback과 연결 바텀시트
+
+## 0.8.1 완료
+
+- 모바일 API 주소 정규화·last-good·최근 주소 복구
+- API·TTS·Worker·GPU 네 계층 상태
+- 네트워크 전환·PWA 복귀 자동 재점검
+- GET 제한 재시도와 TTS POST job 결과 복구
+- Private Network preflight와 모바일 safe-area·터치 영역 강화
+
+## 0.8.2 예정
+
+- 타임라인 IndexedDB 저장·복원
+- 실제 ScriptGenerationEngine과 외부 전송 동의
+- 편집 순서·쉼을 반영한 WAV Export
+- 모바일 실기기 복구 매트릭스와 Progressive Playback 2단계

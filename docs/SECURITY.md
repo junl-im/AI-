@@ -1,6 +1,6 @@
 # SoriON API · Worker 보안
 
-현재 기준 버전: `0.7.3`
+현재 기준 버전: `0.8.1`
 
 ## API와 Worker 인증
 
@@ -54,3 +54,14 @@ API와 Worker는 본문·음성 데이터 없이 다음 운영 메타데이터�
 - 방화벽 또는 사설 네트워크로 FastAPI에서만 접근한다.
 - `/health`에는 모델 경로·GPU 상세를 노출하지 않는다.
 - 상세 진단은 인증된 `/v1/diagnostics`에서만 제공한다.
+
+
+## 모바일 API 식별과 Private Network
+
+Web은 인증 토큰 대신 사용할 수 없는 익명 `X-SoriON-Client-ID`와 요청 추적용
+`X-Request-ID`를 보낸다. client ID는 공개 rate limit과 장애 진단에만 사용하며 사용자 문장,
+음성, 이메일과 결합하지 않는다. 사용자는 브라우저 저장소를 지워 ID를 초기화할 수 있다.
+
+개발 LAN 연결은 `SORION_ALLOW_PRIVATE_NETWORK=true`에서 Private Network preflight를
+허용한다. 이 헤더는 개발 편의를 위한 CORS 응답일 뿐 인증이나 암호화를 대신하지 않는다.
+공개 서비스는 HTTPS, 사용자 인증, Origin 제한, 방화벽과 Worker 사설망을 적용한다.

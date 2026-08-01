@@ -6,7 +6,7 @@ def test_connectivity_reports_api_and_engine_state(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.8.0"
+    assert body["version"] == "0.8.1"
     assert body["api_base_path"] == "/api/v1"
     assert body["api_ready"] is True
     assert isinstance(body["tts_ready"], bool)
@@ -42,3 +42,33 @@ def test_python_310_is_the_documented_minimum(client):
     )
     assert python_step["label"] == "Python 3.10 이상"
     assert get_settings().cors_origin_list
+
+
+def test_connectivity_exposes_mobile_engine_layers(client):
+    response = client.get(
+        "/api/v1/connectivity",
+        headers={"X-Request-ID": "mobile-engine-check"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["request_id"] == "mobile-engine-check"
+    assert isinstance(body["worker_healthy"], bool)
+    assert isinstance(body["gpu_ready"], bool)
+    assert body["recommended_recheck_seconds"] >= 1
+    assert any(check["id"] == "worker-gpu" for check in body["checks"])
+    assert any(check["id"] == "private-network" for check in body["checks"])
+
+
+def test_private_network_preflight_is_allowed_in_development(client):
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "https://junl-im.github.io",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Private-Network": "true",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-private-network"] == "true"

@@ -22,8 +22,11 @@ from app.storage.voice_clone_store import VoiceCloneStore
 
 def client_key(request: Request) -> str:
     user_id = request.headers.get("X-SoriON-User-ID", "").strip()
+    client_id = request.headers.get("X-SoriON-Client-ID", "").strip()
     if user_id:
         return f"user:{user_id[:80]}"
+    if client_id:
+        return f"client:{client_id[:80]}"
     forwarded = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
     host = forwarded or (request.client.host if request.client else "unknown")
     return f"ip:{host}"
@@ -75,7 +78,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.8.0",
+    version="0.8.1",
     lifespan=lifespan,
 )
 app.add_middleware(
@@ -84,12 +87,19 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=[
+        "X-Request-ID",
+        "X-RateLimit-Remaining",
+        "X-RateLimit-Reset",
+    ],
+    max_age=86400,
 )
 
 
 @app.middleware("http")
 async def govern_request(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid4()))
+    request.state.request_id = request_id
     actor = client_key(request)
     is_api = request.url.path.startswith("/api/v1/")
     exempt = request.url.path.endswith("/health") or request.method == "OPTIONS"
@@ -118,6 +128,11 @@ async def govern_request(request: Request, call_next):
         reset = 0
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id
+    if (
+        settings.allow_private_network
+        and request.headers.get("Access-Control-Request-Private-Network") == "true"
+    ):
+        response.headers["Access-Control-Allow-Private-Network"] = "true"
     if is_api:
         response.headers["X-RateLimit-Remaining"] = str(remaining)
         response.headers["X-RateLimit-Reset"] = str(reset)

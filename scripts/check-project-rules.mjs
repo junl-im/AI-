@@ -279,6 +279,13 @@ await requireText('docs/COSYVOICE_WORKER.md', [
   '실패하거나 취소된 구간만 다시 실행',
 ])
 
+await requireText('src/api/httpClient.ts', ['sorion-api-last-good-url', 'sorion-api-url-history', 'X-SoriON-Client-ID', 'mobile-localhost', 'mixed-content'])
+await requireText('src/tts/voiceApi.ts', ['recoverSpeechResult', '/result', 'retries: 0'])
+await requireText('services/api/app/api/routes/tts.py', ['@router.get("/jobs/{job_id}/result"', 'get_result'])
+await requireText('services/api/app/main.py', ['Access-Control-Allow-Private-Network', 'X-SoriON-Client-ID', 'X-Request-ID'])
+await requireText('src/settings/connectivityTypes.ts', ['workerHealthy', 'gpuReady', 'recommendedRecheckSeconds'])
+await requireText('docs/MOBILE_ENGINE_RELIABILITY.md', ['API·TTS·Worker·GPU', 'GET  /api/v1/tts/jobs/{job_id}/result', 'SORION_ALLOW_PRIVATE_NETWORK=true'])
+
 await requireText('src/pages/HomePage.tsx', [
   'soa-editor-workspace',
   'interpretComposerPrompt',

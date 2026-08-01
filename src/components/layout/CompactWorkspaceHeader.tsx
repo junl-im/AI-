@@ -9,15 +9,16 @@ const pageLabels: Record<AppPage, string> = {
 }
 
 function statusLabel(status: BackendStatus): string {
-  if (status === 'online') return '실제 엔진 준비'
-  if (status === 'degraded') return 'Demo 엔진'
-  if (status === 'checking') return '연결 확인 중'
-  return '엔진 연결'
+  if (status === 'online') return '엔진 준비'
+  if (status === 'degraded') return '부분 연결'
+  if (status === 'checking') return '확인 중'
+  return '연결 필요'
 }
 
 export function CompactWorkspaceHeader() {
   const page = useAppStore((state) => state.page)
   const backendStatus = useAppStore((state) => state.backendStatus)
+  const engineHealth = useAppStore((state) => state.engineHealth)
   const openConnectionSheet = useAppStore((state) => state.openConnectionSheet)
   const exitWorkspace = useAppStore((state) => state.exitWorkspace)
 
@@ -35,12 +36,19 @@ export function CompactWorkspaceHeader() {
           type="button"
           className={`soa-engine-chip is-${backendStatus}`}
           onClick={openConnectionSheet}
+          aria-label={`엔진 연결 상태: ${statusLabel(backendStatus)}`}
         >
-          <i aria-hidden="true" />
-          {statusLabel(backendStatus)}
+          <span className="soa-engine-chip__dots" aria-hidden="true">
+            <i className={`is-${engineHealth.api}`} />
+            <i className={`is-${engineHealth.tts}`} />
+            <i className={`is-${engineHealth.worker}`} />
+            <i className={`is-${engineHealth.gpu}`} />
+          </span>
+          <span>{statusLabel(backendStatus)}</span>
+          {engineHealth.latencyMs !== null ? <small>{engineHealth.latencyMs}ms</small> : null}
         </button>
         <button type="button" className="soa-intro-button" onClick={exitWorkspace}>
-          처음 화면
+          처음
         </button>
       </div>
     </header>

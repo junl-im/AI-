@@ -125,3 +125,36 @@ CosyVoice Worker
 `/api` 프록시를 기본으로 사용하고, 그 외 배포에서는 저장된 주소 또는
 `VITE_API_BASE_URL`이 없으면 API 미설정 상태가 된다. 상대 음원 URL은 현재 연결된
 API Origin으로 해석한다.
+
+
+## 0.8.0 Chat-to-Timeline 작업공간
+
+```text
+Brand Landing
+  → Compact Workspace Header
+  → Voice Library + Chat Composer
+  → sentence/pause Timeline Blocks
+  → Progressive Linked Player Dock
+```
+
+초기 랜딩은 브랜드 설명을 유지하고 Dock 진입 후에만 편집기 화면으로 전환한다. 메시지는
+문장별 음성 블록과 쉼 블록으로 변환되며 각 블록이 생성 당시 보이스·속도·감정·정규화
+옵션을 소유한다. 첫 ready 블록부터 Dock 대기열에 추가한다.
+
+## 0.8.1 모바일 연결·복구 계층
+
+```text
+Mobile Web
+  → normalized API URL + last-good/history
+  → adaptive timeout + GET retry
+  → request/client IDs
+  → FastAPI connectivity
+      → TTS registry
+      → Worker health/readiness
+      → GPU/model diagnostics
+```
+
+API, 실제 TTS, Worker 프로세스, GPU·모델 상태를 분리한다. 온라인 복귀, NetworkInformation
+변경, PWA 포그라운드 복귀에서 단일 연결 점검을 실행한다. 생성 POST는 재전송하지 않고
+UUID job의 상태와 완료 결과를 조회해 모바일 응답 단절을 복구한다. FastAPI는 완료 결과를
+제한된 메모리 스냅샷으로 보관하며 기존 TTL 정리와 함께 제거한다.
