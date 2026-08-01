@@ -1,7 +1,13 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ExitConfirmDialog } from '../components/ui/ExitConfirmDialog'
 import { useExitConfirmation } from './useExitConfirmation'
+
+function dispatchPopState() {
+  act(() => {
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  })
+}
 
 function Harness() {
   const confirmation = useExitConfirmation()
@@ -23,7 +29,7 @@ describe('useExitConfirmation', () => {
   it('첫 뒤로가기에는 커스텀 종료 확인창을 보여준다', () => {
     render(<Harness />)
 
-    window.dispatchEvent(new PopStateEvent('popstate'))
+    dispatchPopState()
 
     expect(screen.getByRole('alertdialog')).toBeInTheDocument()
     expect(screen.getByText('SoriON을 닫을까요?')).toBeInTheDocument()
@@ -35,8 +41,8 @@ describe('useExitConfirmation', () => {
     const back = vi.spyOn(window.history, 'back').mockImplementation(() => undefined)
     render(<Harness />)
 
-    window.dispatchEvent(new PopStateEvent('popstate'))
-    window.dispatchEvent(new PopStateEvent('popstate'))
+    dispatchPopState()
+    dispatchPopState()
 
     expect(back).toHaveBeenCalledTimes(1)
   })
@@ -45,7 +51,7 @@ describe('useExitConfirmation', () => {
     const go = vi.spyOn(window.history, 'go').mockImplementation(() => undefined)
     render(<Harness />)
 
-    window.dispatchEvent(new PopStateEvent('popstate'))
+    dispatchPopState()
     fireEvent.click(screen.getByRole('button', { name: '종료' }))
 
     expect(go).toHaveBeenCalledWith(-2)

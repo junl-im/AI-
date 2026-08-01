@@ -1,29 +1,29 @@
-# SoriON AI 0.8.7 CI Hotfix 3 Result Report
+# SoriON AI 0.8.7 CI Hotfix 4 Result Report
 
-작업 일시: 2026-08-01 20:32 KST
+작업 일시: 2026-08-01 20:47 KST
 
-결과 버전: **0.8.7 Dubbing Studio Workspace · CI Hotfix 3**
+결과 버전: **0.8.7 Dubbing Studio Workspace · CI Hotfix 4**
 
 ## 결과
 
-- `DubbingStudioHeader`의 네이티브 `details/summary` 메뉴가 JSDOM에서 열림 상태를 안정적으로 전환하지 않아 `현재 작업 비우기` 버튼 조회가 실패하던 문제를 수정했다.
-- 프로젝트 메뉴를 명시적 button, React 상태, `aria-expanded`와 조건부 렌더링으로 교체했다.
-- 같은 잠재 문제가 남아 있던 대사 블록 메뉴도 동일한 구조로 선제 교체했다.
-- 대사 메뉴는 대사 번호를 접근성 이름에 포함하고, 메뉴 동작 선택 뒤 즉시 닫힌다.
-- 프로젝트 규칙에서 제작 화면의 `details/summary` 재도입을 차단한다.
+- `useExitConfirmation` 테스트가 React 상태 갱신을 `act()` 밖에서 발생시켜 종료 확인창을 조회하기 전에 assertion이 실행되던 문제를 수정했다.
+- popstate 발생을 공통 helper에서 `act()`로 감싸 첫 뒤로가기, 두 번째 뒤로가기, 종료 버튼 흐름을 같은 방식으로 검증한다.
+- HomePage 테스트가 변경 가능한 placeholder 문구 `긴 원고`에 결합돼 새 `장문 원고` 안내와 충돌하던 문제를 제거했다.
+- placeholder 카피 대신 제품의 안정 계약인 최대 20,000자 입력 제한을 검증한다.
+- 별도 Web 테스트 계약 검사 스크립트를 추가해 popstate의 `act()` 누락과 placeholder 문구 결합이 다시 들어오면 CI 앞단에서 차단한다.
 
 ## 검증
 
-- 프로젝트 규칙과 작업공간 세션 규칙 통과
+- 프로젝트 규칙·Web 테스트 계약·작업공간 세션 규칙 통과
 - TypeScript·TSX 125개 파일 구문 검사 통과
 - 상대경로 import 267개 연결 통과
 - FastAPI 90개·Worker 9개 테스트 통과
-- Python compileall과 Python 3.10 AST 호환성 검사 통과
+- Python compileall과 Python 3.10 AST 93개 파일 통과
 - 기준본 패치 적용 동등성과 ZIP 무결성 검사 통과
 
 ## 알려진 현실
 
-현재 내부 npm 저장소가 `@tailwindcss/vite`와 Testing Library 패키지를 제공하지 않아 공식 ESLint, TypeScript project typecheck, Vitest와 Vite build를 로컬에서 실행하지 못했다. GitHub Actions Web quality가 최종 실행 관문이다. 공개 Voice API와 음성 엔진 동작은 이 UI 테스트 안정화 핫픽스에서 변경하지 않는다.
+현재 내부 npm 저장소가 `@tailwindcss/vite`와 Testing Library 패키지를 제공하지 않아 공식 ESLint, TypeScript project typecheck, Vitest와 Vite build를 로컬에서 실행하지 못했다. 이번 수정은 GitHub Actions가 보고한 실패 위치와 React Testing Library의 상태 갱신 계약을 직접 반영했으며, GitHub Actions Web quality가 최종 실행 관문이다.
 
 ## 다음 목표
 

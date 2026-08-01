@@ -390,3 +390,10 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 - 블록 메뉴 동작을 선택하면 메뉴가 닫히고 정확한 블록 ID로 callback을 전달한다.
 - 프로젝트 규칙은 두 제작 컴포넌트에 `<details`와 `<summary`가 다시 들어오면 실패한다.
 
+## 종료 확인·장문 입력 테스트 안정성 회귀
+
+- popstate로 React 상태를 변경할 때 `act()` 안에서 이벤트를 발생시킨다.
+- 첫 뒤로가기 확인창, 두 번째 뒤로가기의 `history.back()`, 종료 버튼의 `history.go(-2)`를 각각 검증한다.
+- HomePage 테스트는 변경 가능한 placeholder 카피에 결합하지 않는다.
+- 장문 입력기는 접근성 이름과 `maxlength=20000`이라는 안정적인 제품 계약을 검증한다.
+- `scripts/check-web-test-contracts.mjs`가 위 규칙의 누락을 프로젝트 규칙 단계에서 차단한다.

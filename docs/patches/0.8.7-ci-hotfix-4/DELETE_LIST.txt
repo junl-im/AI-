@@ -1,0 +1,2 @@
+# SoriON AI 0.8.7 CI Hotfix 4 delete list
+# 삭제 대상 없음

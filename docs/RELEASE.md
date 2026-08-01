@@ -267,3 +267,11 @@ Semantic Versioning을 사용한다.
 - 추가 보호: 프로젝트·대사 메뉴를 명시적 상태 버튼으로 통일하고 재도입 방지 규칙 추가
 - 삭제 파일: 없음
 
+## 0.8.7 Web quality CI 핫픽스 4
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.7-ci-hotfix-4-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.7-ci-hotfix-3-to-0.8.7-ci-hotfix-4-patch.zip`
+- 패치 기준 버전: `0.8.7-ci-hotfix-3`
+- 목적: popstate React 상태 갱신 타이밍과 장문 placeholder 카피 결합으로 인한 Vitest 실패 수정
+- 추가 보호: Web 테스트 계약 정적 검사 추가
+- 삭제 파일: 없음

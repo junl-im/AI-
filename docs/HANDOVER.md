@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.8.7 Dubbing Studio Workspace · CI Hotfix 3**
+현재 기준 버전: **0.8.7 Dubbing Studio Workspace · CI Hotfix 4**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-01 20:32 KST**
+최종 갱신: **2026-08-01 20:47 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -366,6 +366,10 @@ cd services/worker && uv run --python 3.10 pytest tests -q
 npm run build
 ```
 네트워크 제한 시 실행하지 못한 항목과 이유를 결과 보고서에 정확히 기록한다.
+CI Hotfix 4 테스트 규칙:
+- 브라우저 이벤트로 React 상태를 바꾸는 테스트는 `act()` 또는 Testing Library `fireEvent`로 감싼다.
+- placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
+- `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
 다음 목표 버전: **0.8.8 Korean Voice Quality Streaming**.
 우선순위:
