@@ -1,0 +1,11 @@
+SoriON AI 0.8.2 CI fix
+
+Changes:
+1. Fix Ruff I001 by normalizing the import-section spacing in
+   services/api/app/middleware/private_network_cors.py.
+2. Add a deterministic CI-only Vitest command:
+   npm run test:ci -> vitest run --fileParallelism=false
+3. Make GitHub Actions Web quality use npm run test:ci.
+
+Apply:
+Extract this ZIP over the repository root, preserving directories.

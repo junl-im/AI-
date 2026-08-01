@@ -2,7 +2,6 @@ from starlette.datastructures import Headers
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import PlainTextResponse, Response
 
-
 _PRIVATE_NETWORK_REQUEST_HEADER = "Access-Control-Request-Private-Network"
 _PRIVATE_NETWORK_REQUEST_HEADER_BYTES = _PRIVATE_NETWORK_REQUEST_HEADER.lower().encode()
 _PRIVATE_NETWORK_ALLOW_HEADER = "Access-Control-Allow-Private-Network"
