@@ -258,3 +258,12 @@ Semantic Versioning을 사용한다.
 - 패치 기준 버전: `0.8.7-ci-hotfix`
 - 목적: 현재 화자 선택과 미리듣기 버튼의 부분 접근성 이름 충돌 수정
 - 삭제 파일: 없음
+## 0.8.7 Web quality CI 핫픽스 3
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.7-ci-hotfix-3-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.7-ci-hotfix-2-to-0.8.7-ci-hotfix-3-patch.zip`
+- 패치 기준 버전: `0.8.7-ci-hotfix-2`
+- 목적: `details/summary` 메뉴의 JSDOM 열림 상태 불일치로 인한 Header Vitest 실패 수정
+- 추가 보호: 프로젝트·대사 메뉴를 명시적 상태 버튼으로 통일하고 재도입 방지 규칙 추가
+- 삭제 파일: 없음
+

@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.8.7 Dubbing Studio Workspace**
+현재 기준 버전: **0.8.7 Dubbing Studio Workspace · CI Hotfix 3**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-01 19:45 KST**
+최종 갱신: **2026-08-01 20:32 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -473,5 +473,7 @@ npm run build
 2. 현재 화자 선택과 같은 화자의 미리듣기 버튼이 `/혜린/` 조회에서 충돌한 문제를 수정했다.
 3. 이름을 `현재 목소리 혜린 선택`과 `혜린 목소리 미리듣기`로 분리하고 popup·expanded 상태를 추가했다.
 4. DubbingVoiceControls와 HomePage 테스트는 정확한 접근성 이름만 조회한다.
+5. 제작 화면의 팝업 메뉴는 네이티브 `details/summary`에 의존하지 않고 명시적 button, React 상태, `aria-expanded`를 사용한다.
+6. 프로젝트 메뉴와 대사 블록 메뉴는 선택 즉시 닫히며 대사 메뉴 이름에는 대사 번호를 포함한다.
 5. API 90개·Worker 9개, TS/TSX 구문·상대 import·패치 동등성을 확인한다.
 6. 다음 목표는 `0.8.8 Korean Voice Quality Streaming`이다.

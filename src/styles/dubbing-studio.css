@@ -53,7 +53,7 @@
 
 .soa-dubbing-toolbar__actions > button,
 .soa-dubbing-toolbar__actions > a,
-.soa-dubbing-more > summary {
+.soa-dubbing-more__trigger {
   display: grid;
   width: 46px;
   height: 46px;
@@ -97,11 +97,6 @@
   position: relative;
 }
 
-.soa-dubbing-more > summary {
-  list-style: none;
-}
-
-.soa-dubbing-more > summary::-webkit-details-marker { display: none; }
 
 .soa-dubbing-menu {
   position: absolute;

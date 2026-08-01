@@ -63,7 +63,7 @@
 
 .soa-dubbing-block__tools { display: flex; align-items: center; gap: 4px; }
 .soa-dubbing-block__tools > button,
-.soa-dubbing-block__tools summary {
+.soa-dubbing-block-menu__trigger {
   display: grid;
   width: 38px;
   height: 38px;
@@ -73,12 +73,10 @@
   color: rgba(255, 255, 255, 0.84);
   background: rgba(255, 255, 255, 0.045);
   font-size: 15px;
-  list-style: none;
   cursor: pointer;
 }
-.soa-dubbing-block__tools summary::-webkit-details-marker { display: none; }
-.soa-dubbing-block__tools details { position: relative; }
-.soa-dubbing-block__tools details > div {
+.soa-dubbing-block-menu { position: relative; }
+.soa-dubbing-block-menu__items {
   position: absolute;
   z-index: 12;
   top: 42px;
@@ -90,7 +88,7 @@
   background: #383838;
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.4);
 }
-.soa-dubbing-block__tools details button {
+.soa-dubbing-block-menu__items button {
   min-height: 38px;
   border: 0;
   border-radius: 8px;
@@ -101,8 +99,8 @@
   font-size: 9px;
   font-weight: 750;
 }
-.soa-dubbing-block__tools details button:disabled { opacity: 0.3; }
-.soa-dubbing-block__tools details button.is-danger { color: #ff968c; }
+.soa-dubbing-block-menu__items button:disabled { opacity: 0.3; }
+.soa-dubbing-block-menu__items button.is-danger { color: #ff968c; }
 
 .soa-dubbing-block > textarea {
   width: 100%;

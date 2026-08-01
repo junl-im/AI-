@@ -42,6 +42,7 @@ export function DubbingStudioHeader({
 }: DubbingStudioHeaderProps) {
   const titleRef = useRef<HTMLInputElement | null>(null)
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false)
+  const [projectMenuOpen, setProjectMenuOpen] = useState(false)
 
   return (
     <header className="soa-dubbing-header">
@@ -69,16 +70,68 @@ export function DubbingStudioHeader({
           ) : (
             <button type="button" disabled aria-label="완성된 음성이 없어 다운로드할 수 없음">⇩</button>
           )}
-          <details className="soa-dubbing-more">
-            <summary aria-label="프로젝트 메뉴">⋮</summary>
-            <div className="soa-dubbing-menu">
-              <button type="button" onClick={onOpenProjects}>프로젝트 목록</button>
-              <button type="button" onClick={onOpenClone}>내 목소리 만들기</button>
-              <button type="button" onClick={onOpenQuality}>음성 품질 확인</button>
-              <button type="button" onClick={onOpenSettings}>설정</button>
-              <button type="button" className="is-danger" onClick={() => setClearConfirmOpen(true)}>현재 작업 비우기</button>
-            </div>
-          </details>
+          <div className="soa-dubbing-more">
+            <button
+              type="button"
+              className="soa-dubbing-more__trigger"
+              aria-label="프로젝트 메뉴 열기"
+              aria-expanded={projectMenuOpen}
+              aria-controls="dubbing-project-menu"
+              onClick={() => setProjectMenuOpen((open) => !open)}
+            >
+              ⋮
+            </button>
+            {projectMenuOpen ? (
+              <div id="dubbing-project-menu" className="soa-dubbing-menu" aria-label="프로젝트 메뉴">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProjectMenuOpen(false)
+                    onOpenProjects()
+                  }}
+                >
+                  프로젝트 목록
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProjectMenuOpen(false)
+                    onOpenClone()
+                  }}
+                >
+                  내 목소리 만들기
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProjectMenuOpen(false)
+                    onOpenQuality()
+                  }}
+                >
+                  음성 품질 확인
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProjectMenuOpen(false)
+                    onOpenSettings()
+                  }}
+                >
+                  설정
+                </button>
+                <button
+                  type="button"
+                  className="is-danger"
+                  onClick={() => {
+                    setProjectMenuOpen(false)
+                    setClearConfirmOpen(true)
+                  }}
+                >
+                  현재 작업 비우기
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 

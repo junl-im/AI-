@@ -73,4 +73,32 @@ describe('TimelineEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: '2번 대사 음성 다시 생성' }))
     expect(onRetry).toHaveBeenCalledWith('voice-2')
   })
+
+  it('대사 블록 메뉴는 명시적 버튼으로 열리고 선택 뒤 닫힌다', () => {
+    const onRemove = vi.fn()
+    render(
+      <TimelineEditor
+        blocks={blocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={vi.fn()}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={onRemove}
+        onClear={vi.fn()}
+      />,
+    )
+
+    const menuButton = screen.getByRole('button', { name: '2번 대사 블록 메뉴 열기' })
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(menuButton)
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true')
+    fireEvent.click(screen.getByRole('button', { name: '블록 삭제' }))
+
+    expect(onRemove).toHaveBeenCalledWith('voice-2')
+    expect(screen.queryByRole('button', { name: '블록 삭제' })).not.toBeInTheDocument()
+  })
 })

@@ -35,7 +35,11 @@ describe('DubbingStudioHeader', () => {
     const onClear = vi.fn()
     renderHeader(onClear)
 
-    fireEvent.click(screen.getByRole('button', { name: '프로젝트 메뉴' }))
+    const menuButton = screen.getByRole('button', { name: '프로젝트 메뉴 열기' })
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(menuButton)
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true')
     fireEvent.click(screen.getByRole('button', { name: '현재 작업 비우기' }))
 
     expect(screen.getByRole('alertdialog', { name: '현재 작업을 비울까요?' })).toBeInTheDocument()

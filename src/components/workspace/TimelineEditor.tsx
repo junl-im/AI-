@@ -47,6 +47,8 @@ function VoiceBlock({
 }: VoiceBlockProps) {
   const selectTrack = usePlayerStore((state) => state.select)
   const [draft, setDraft] = useState(block.text)
+  const [blockMenuOpen, setBlockMenuOpen] = useState(false)
+  const blockMenuId = `dubbing-block-menu-${voiceIndex + 1}`
 
   useEffect(() => setDraft(block.text), [block.text])
 
@@ -109,15 +111,61 @@ function VoiceBlock({
               {block.status === 'generating' ? '…' : '▶'}
             </button>
           )}
-          <details>
-            <summary aria-label="대사 블록 메뉴">⋮</summary>
-            <div>
-              <button type="button" onClick={() => onSplit(block.id)}>문장 나누기</button>
-              <button type="button" disabled={index === 0} onClick={() => onMove(block.id, -1)}>위로 이동</button>
-              <button type="button" disabled={index === total - 1} onClick={() => onMove(block.id, 1)}>아래로 이동</button>
-              <button type="button" className="is-danger" onClick={() => onRemove(block.id)}>블록 삭제</button>
-            </div>
-          </details>
+          <div className="soa-dubbing-block-menu">
+            <button
+              type="button"
+              className="soa-dubbing-block-menu__trigger"
+              aria-label={`${voiceIndex + 1}번 대사 블록 메뉴 열기`}
+              aria-expanded={blockMenuOpen}
+              aria-controls={blockMenuId}
+              onClick={() => setBlockMenuOpen((open) => !open)}
+            >
+              ⋮
+            </button>
+            {blockMenuOpen ? (
+              <div id={blockMenuId} className="soa-dubbing-block-menu__items" aria-label={`${voiceIndex + 1}번 대사 블록 메뉴`}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBlockMenuOpen(false)
+                    onSplit(block.id)
+                  }}
+                >
+                  문장 나누기
+                </button>
+                <button
+                  type="button"
+                  disabled={index === 0}
+                  onClick={() => {
+                    setBlockMenuOpen(false)
+                    onMove(block.id, -1)
+                  }}
+                >
+                  위로 이동
+                </button>
+                <button
+                  type="button"
+                  disabled={index === total - 1}
+                  onClick={() => {
+                    setBlockMenuOpen(false)
+                    onMove(block.id, 1)
+                  }}
+                >
+                  아래로 이동
+                </button>
+                <button
+                  type="button"
+                  className="is-danger"
+                  onClick={() => {
+                    setBlockMenuOpen(false)
+                    onRemove(block.id)
+                  }}
+                >
+                  블록 삭제
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </header>
 
