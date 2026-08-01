@@ -102,3 +102,15 @@ build는 실행하지 못했다. Ruff 실행 파일도 없어 공식 Ruff 명령
 - `docs/CHANGELOG.md`
 - `docs/NEXT_UPDATE.md`
 - `docs/patches/0.8.2/`
+
+## 2026-08-01 API PNA CI 핫픽스 추가 보고
+
+GitHub Actions의 Python 3.10 의존성 조합에서 Private Network preflight가 400을 반환했다.
+기존 구조는 일반 CORS 미들웨어가 preflight를 먼저 종료한 뒤 애플리케이션 미들웨어가
+allow-private-network 헤더를 추가하려 했기 때문에 Starlette 버전 차이에 취약했다.
+
+전용 `PrivateNetworkCORSMiddleware`로 교체해 PNA 확장 헤더만 표준 CORS 검증 입력에서
+분리하고, 허용 Origin·Method·요청 헤더 검증이 성공한 경우에만 PNA 허용 헤더를 추가했다.
+잘못된 Origin과 설정 비활성화는 400으로 유지한다. 로컬 검증은 API 68개, Worker 9개,
+프로젝트 규칙, compileall, Python 3.10 AST가 통과했다. Python 3.10 실행 환경 다운로드는
+DNS 제한으로 수행하지 못했으므로 GitHub Actions 재실행 결과가 최종 판정이다.

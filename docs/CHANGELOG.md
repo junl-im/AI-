@@ -2,6 +2,14 @@
 
 ## 0.8.2 - 2026-08-01
 
+### API PNA CI Hotfix
+
+- Starlette 버전에 따라 `Access-Control-Request-Private-Network` preflight가 400이 되던 문제를 수정했습니다.
+- 표준 Origin·Method·요청 헤더 검증은 그대로 유지하면서 PNA 확장 헤더만 호환 처리하는 `PrivateNetworkCORSMiddleware`를 추가했습니다.
+- 허용된 GitHub Pages Origin은 200과 `Access-Control-Allow-Private-Network: true`를 반환합니다.
+- 잘못된 Origin 또는 `SORION_ALLOW_PRIVATE_NETWORK=false`에서는 계속 400으로 차단합니다.
+- 프로젝트 규칙에 PNA 전용 미들웨어 계약을 추가했습니다.
+
 ### CI Hotfix
 
 - VoicePresetSelector 테스트를 현재 접근성 이름인 `혜린 추천`·`도윤 또렷함`에 맞췄습니다.

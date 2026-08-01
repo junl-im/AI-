@@ -2,7 +2,7 @@
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**  
 현재 기준 버전: **0.8.2 Mobile Job Recovery/API Idempotency**  
 기준 버전: **0.7.3 Handover Memory Baseline**  
-최종 갱신: **2026-08-01 12:25 KST**  
+최종 갱신: **2026-08-01 14:09 KST**  
 제품 소유·디자인: **곰같은여우**  
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -351,10 +351,10 @@ SORION_WORKER_JOB_TTL_MINUTES
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.8.2-full.zip`.
-- 패치: `SoriON-AI-0.8.1-to-0.8.2-patch.zip`.
-- 체크섬: `SoriON-AI-0.8.2-artifacts.sha256`.
-- 패치 기준은 정확히 0.8.1.
+- 전체본: `SoriON-AI-0.8.2-full-pna-hotfix.zip`.
+- 패치: `SoriON-AI-0.8.2-pna-hotfix-patch.zip`.
+- 체크섬: `SoriON-AI-0.8.2-pna-hotfix-artifacts.sha256`.
+- 패치 기준은 첫 0.8.2 CI 핫픽스가 적용된 저장소다.
 - 삭제 파일은 현재 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
@@ -467,3 +467,13 @@ npm run build
 9. 제한: npm 의존성 저장소 404로 정식 Web test/lint/build, Ruff 미설치로 공식 Ruff는 실행하지 못했다. job은 아직 API 메모리 기반이다.
 10. 산출물: `SoriON-AI-0.8.2-full.zip`, `SoriON-AI-0.8.1-to-0.8.2-patch.zip`.
 11. 다음 예상 업데이트: `0.8.3 Mobile Session Persistence & Engine Operations`.
+
+## 26. 2026-08-01 14:09 KST · v0.8.2 API PNA CI 핫픽스
+1. GitHub Actions Python 3.10에서 PNA preflight가 400으로 실패한 로그를 기준으로 수정했다.
+2. 일반 `CORSMiddleware` 뒤에서 응답 헤더를 추가하던 방식을 제거했다.
+3. `PrivateNetworkCORSMiddleware`가 PNA 확장 헤더를 표준 CORS 검사에서만 분리하고,
+   Origin·Method·요청 헤더가 허용된 경우에만 allow-private-network 응답을 추가한다.
+4. 잘못된 Origin과 PNA 비활성화가 계속 400인지 회귀 테스트를 추가했다.
+5. 검증 결과: API 68개, Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST 통과.
+6. Python 3.10 실인터프리터 다운로드는 실행 환경 DNS 제한으로 불가했으며 CI 재실행이 최종 확인이다.
+7. 산출물: `SoriON-AI-0.8.2-full-pna-hotfix.zip`, `SoriON-AI-0.8.2-pna-hotfix-patch.zip`.

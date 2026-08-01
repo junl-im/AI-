@@ -1,0 +1,18 @@
+BASE: SoriON AI 0.8.2 with the first CI hotfix applied
+VERSION: 0.8.2
+DELETED: none
+FILES:
+FOUNDATION_REPORT.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/MOBILE_ENGINE_RELIABILITY.md
+docs/NEXT_UPDATE.md
+docs/RELEASE.md
+docs/patches/0.8.2/API_PNA_HOTFIX.md
+docs/patches/0.8.2/API_PNA_HOTFIX_MANIFEST.txt
+scripts/check-project-rules.mjs
+services/api/app/main.py
+services/api/app/middleware/__init__.py
+services/api/app/middleware/private_network_cors.py
+services/api/tests/test_connectivity.py
+services/api/tests/test_private_network_cors.py

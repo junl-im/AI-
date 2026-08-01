@@ -1,4 +1,8 @@
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
 from app.core.config import get_settings
+from app.middleware.private_network_cors import PrivateNetworkCORSMiddleware
 
 
 def test_connectivity_reports_api_and_engine_state(client):
@@ -72,3 +76,41 @@ def test_private_network_preflight_is_allowed_in_development(client):
 
     assert response.status_code == 200
     assert response.headers["access-control-allow-private-network"] == "true"
+
+
+def test_private_network_preflight_keeps_standard_cors_restrictions(client):
+    response = client.options(
+        "/api/v1/health",
+        headers={
+            "Origin": "https://invalid.example",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Private-Network": "true",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "access-control-allow-private-network" not in response.headers
+
+
+def test_private_network_preflight_is_rejected_when_disabled():
+    test_app = FastAPI()
+    test_app.add_middleware(
+        PrivateNetworkCORSMiddleware,
+        allow_origins=["https://junl-im.github.io"],
+        allow_methods=["GET"],
+        allow_headers=["*"],
+        allow_private_network=False,
+    )
+
+    with TestClient(test_app) as test_client:
+        response = test_client.options(
+            "/api/v1/health",
+            headers={
+                "Origin": "https://junl-im.github.io",
+                "Access-Control-Request-Method": "GET",
+                "Access-Control-Request-Private-Network": "true",
+            },
+        )
+
+    assert response.status_code == 400
+    assert "access-control-allow-private-network" not in response.headers

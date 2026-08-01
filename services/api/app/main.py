@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
@@ -12,6 +11,7 @@ from app.engines.registry import engine_registry
 from app.engines.tts.melo_tts import MeloTtsEngine
 from app.engines.tts.system_tts import SystemTtsEngine
 from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine
+from app.middleware.private_network_cors import PrivateNetworkCORSMiddleware
 from app.services.audit_log import AuditLogger
 from app.services.job_manager import JobManager
 from app.services.rate_limit import FixedWindowRateLimiter
@@ -82,7 +82,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.add_middleware(
-    CORSMiddleware,
+    PrivateNetworkCORSMiddleware,
     allow_origins=settings.cors_origin_list,
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
@@ -93,6 +93,7 @@ app.add_middleware(
         "X-RateLimit-Reset",
     ],
     max_age=86400,
+    allow_private_network=settings.allow_private_network,
 )
 
 
@@ -128,11 +129,6 @@ async def govern_request(request: Request, call_next):
         reset = 0
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id
-    if (
-        settings.allow_private_network
-        and request.headers.get("Access-Control-Request-Private-Network") == "true"
-    ):
-        response.headers["Access-Control-Allow-Private-Network"] = "true"
     if is_api:
         response.headers["X-RateLimit-Remaining"] = str(remaining)
         response.headers["X-RateLimit-Reset"] = str(reset)

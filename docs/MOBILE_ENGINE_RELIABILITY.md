@@ -62,6 +62,10 @@ SORION_ALLOW_PRIVATE_NETWORK=true
 이 설정은 인증을 대신하지 않는다. 공개 운영 환경에서는 HTTPS, 사용자 인증, rate limit,
 Origin 제한과 네트워크 방화벽을 함께 적용해야 한다.
 
+API는 전용 `PrivateNetworkCORSMiddleware`에서 먼저 표준 Origin·Method·요청 헤더를
+검증한 뒤 PNA 허용 헤더를 추가한다. PNA 요청이라는 이유만으로 CORS 실패를 200으로
+바꾸지 않으며, 잘못된 Origin과 설정 비활성화는 400으로 유지한다.
+
 ## 요청 정책
 
 ### GET·HEAD

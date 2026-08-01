@@ -176,3 +176,11 @@ Semantic Versioning을 사용한다.
 - 삭제 파일: 없음
 - Secret, 사용자 음성, 모델 가중치, `.git`, 캐시와 빌드 산출물은 포함하지 않는다.
 
+## 0.8.2 API PNA CI 핫픽스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.2-full-pna-hotfix.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.2-pna-hotfix-patch.zip`
+- 체크섬: `SoriON-AI-0.8.2-pna-hotfix-artifacts.sha256`
+- 패치 기준: 첫 0.8.2 CI 핫픽스 적용본
+- 핵심 확인: Python 3.10 PNA preflight 200, 잘못된 Origin·비활성화 400
+- 삭제 파일: 없음

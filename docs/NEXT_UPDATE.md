@@ -77,6 +77,7 @@ docs/
 
 - GitHub Actions Web·API·Worker quality 성공
 - 0.8.2 패치의 동일 job 단일 실행·결과 재사용·409 충돌 회귀 유지
+- Python 3.10 CI에서 허용 Origin의 Private Network preflight 200 회귀 유지
 - Android Chrome과 iOS Safari에서 최소 1회 실제 연결 단절 복구 확인
 - 영속 JobStore의 저장 위치, TTL, 정리 정책 결정
 - 공개 API 인증 방식과 사용자 소유권 모델 결정
