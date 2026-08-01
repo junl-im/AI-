@@ -37,7 +37,8 @@ describe('HomePage', () => {
     const textbox = scoped.getByRole('textbox', { name: '음성으로 만들 장문 원고' })
 
     expect(textbox.getAttribute('placeholder')).toContain('긴 원고')
-    expect(scoped.getByRole('button', { name: /혜린/ })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: '혜린 목소리 미리듣기' })).toBeInTheDocument()
     expect(scoped.getByText('음성 서버 연결 대기')).toBeInTheDocument()
 
     fireEvent.change(textbox, {

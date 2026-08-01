@@ -45,12 +45,27 @@ export function DubbingVoiceControls({
   return (
     <>
       <section className="soa-dubbing-voice-row" aria-label="현재 목소리와 음성 설정">
-        <button type="button" className="soa-dubbing-voice-choice" onClick={() => setPickerOpen(true)}>
+        <button
+          type="button"
+          className="soa-dubbing-voice-choice"
+          onClick={() => setPickerOpen(true)}
+          aria-label={`현재 목소리 ${voice.name} 선택`}
+          aria-haspopup="dialog"
+          aria-expanded={pickerOpen}
+        >
           <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
           <span><strong>{voice.name}</strong><small>{voice.tags.join(' · ')}</small></span>
           <b aria-hidden="true">⌄</b>
         </button>
-        <button type="button" onClick={() => setSettingsOpen(true)} aria-label="음성 설정 열기">☷</button>
+        <button
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+          aria-label="음성 설정 열기"
+          aria-haspopup="dialog"
+          aria-expanded={settingsOpen}
+        >
+          ☷
+        </button>
         <button
           type="button"
           onClick={() => onPreview(voiceId)}

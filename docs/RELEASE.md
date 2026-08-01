@@ -250,3 +250,11 @@ Semantic Versioning을 사용한다.
 - 패치 기준 버전: `0.8.7`
 - 목적: TimelineEditor의 중복 접근성 이름으로 인한 Vitest 단일 요소 조회 실패 수정
 - 삭제 파일: 없음
+
+## 0.8.7 Web quality CI 핫픽스 2
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.7-ci-hotfix-2-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.7-ci-hotfix-to-0.8.7-ci-hotfix-2-patch.zip`
+- 패치 기준 버전: `0.8.7-ci-hotfix`
+- 목적: 현재 화자 선택과 미리듣기 버튼의 부분 접근성 이름 충돌 수정
+- 삭제 파일: 없음

@@ -438,23 +438,10 @@ npm run build
 5. 검증 결과: API 68개, Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST 통과.
 6. Python 3.10 실인터프리터 다운로드는 실행 환경 DNS 제한으로 불가했으며 CI 재실행이 최종 확인이다.
 7. 산출물: `SoriON-AI-0.8.2-full-pna-hotfix.zip`, `SoriON-AI-0.8.2-pna-hotfix-patch.zip`.
-## 27. 2026-08-01 15:00 KST · v0.8.3 릴리스 기록
-1. `0.8.2 → 0.8.3`: SQLite JobStore, 재시작 결과 복구, 원자적 claim, TTL tombstone과 cross-process 취소.
-2. 검증: API 77개·Worker 9개와 프로젝트 규칙·compileall·Python 3.10 AST 통과.
-3. 산출물: `SoriON-AI-0.8.3-full.zip`, `SoriON-AI-0.8.2-to-0.8.3-patch.zip`.
-## 28. 2026-08-01 15:30 KST · v0.8.4 릴리스 기록
-1. `0.8.3 → 0.8.4`: 수동 API·엔진 연결 제거, 자동 bootstrap, 랜딩 Dock 숨김과 프로젝트 불러오기 복구.
-2. 검증: API 77개·Worker 9개, TS/TSX 구문과 대체 타입 검사 통과; 정식 Web 품질은 CI 확인.
-3. 산출물: `SoriON-AI-0.8.4-full.zip`, `SoriON-AI-0.8.3-to-0.8.4-patch.zip`.
-## 29. 2026-08-01 16:00 KST · v0.8.5 릴리스 기록
-1. `0.8.4 → 0.8.5`: 작성 세션 보존, 공통 작업공간 IA, 설정·프로젝트 상태 개선.
-2. EngineOrchestrator가 ready 순위, 자동 fallback, circuit cooldown과 runtime 진단을 담당한다.
-3. 검증: API 89개·Worker 9개, 규칙·compileall·Python 3.10 AST·TS 구문 110개·상대 import 82개 통과.
-4. 산출물: `SoriON-AI-0.8.5-full.zip`, `SoriON-AI-0.8.4-to-0.8.5-patch.zip`; 다음은 0.8.6 세션 영속화다.
-## 30. 2026-08-01 17:21 KST · v0.8.5 CI 핫픽스
-1. Ruff UP035, HomePage Effect 의존성과 누적 저장소의 잔존 연결 UI를 정리했다.
-2. API 89개·Worker 9개와 정적 검사를 통과했고 GitHub Actions 최종 성공을 확인했다.
-3. 기준 산출물은 `SoriON-AI-0.8.5-ci-hotfix-full.zip`이다.
+## 27. 2026-08-01 · v0.8.3~0.8.5 요약
+1. 0.8.3은 SQLite JobStore·재시작 복구·claim·TTL·프로세스 간 취소를 추가했다.
+2. 0.8.4는 자동 API bootstrap, 랜딩 Dock 숨김과 프로젝트 복원을 추가했다.
+3. 0.8.5는 공통 IA, 자동 엔진 fallback·circuit breaker를 추가했고 CI 핫픽스로 Ruff·잔존 UI를 정리했다.
 ## 31. 2026-08-01 18:30 KST · v0.8.6 릴리스 기록
 1. 작업 일시: 2026-08-01 18:30 KST.
 2. 대상·기준: `0.8.5 CI Hotfix → 0.8.6`.
@@ -477,19 +464,14 @@ npm run build
 9. 산출물: `SoriON-AI-0.8.6-full.zip`,
    `SoriON-AI-0.8.5-ci-hotfix-to-0.8.6-patch.zip`.
 10. 다음 예상 업데이트는 모바일 더빙 편집 IA 확정이다.
-## 32. 2026-08-01 19:45 KST · v0.8.7 릴리스 기록
-1. `0.8.6 → 0.8.7`: 프로젝트 제목·저장 상태, 화자/설정 Sheet, 세로형 대사 블록과 고정 플레이어를 추가했다.
-2. 채팅형 제작으로 돌아가지 않고 장문 원고 자동 분할과 문장별 직접 편집을 한 화면에 연결했다.
-3. 작업 비우기는 공통 reset token과 커스텀 확인창을 사용하며 세션·Player·타임라인이 함께 초기화된다.
-4. 다음 목표는 `0.8.8 Korean Voice Quality Streaming`이다.
-## 33. 2026-08-01 19:41 KST · v0.8.7 Web quality CI 핫픽스
-1. 작업 일시: 2026-08-01 19:41 KST.
-2. 대상·기준: `0.8.7 → 0.8.7 CI Hotfix`.
-3. 변경 내용: 생성·재생 버튼 이름에 대사 번호와 상태를 포함하고 실패 재시도 테스트를 수정했다.
-4. 변경 이유: 두 버튼이 `이 대사 음성 생성`으로 노출되어 Testing Library 단일 조회가 실패했다.
-5. 영향 범위: TimelineEditor 버튼 접근성 이름과 테스트만 변경하며 데이터·엔진·배치는 유지한다.
-6. 주요 파일: `TimelineEditor.tsx`, `TimelineEditor.test.tsx`, 핫픽스 문서와 manifest.
-7. 검증 결과: 규칙·TS 구문·접근성 이름·API·Worker·패치 동등성을 확인한다.
-8. 알려진 제한: 정식 Vitest는 npm 미러 제한으로 로컬 재실행하지 못하며 Actions가 최종 관문이다.
-9. 산출물: `SoriON-AI-0.8.7-ci-hotfix-full.zip`, `SoriON-AI-0.8.7-ci-hotfix-patch.zip`.
-10. 다음 예상 업데이트: `0.8.8 Korean Voice Quality Streaming`.
+## 32. 2026-08-01 · v0.8.7 릴리스와 CI 핫픽스
+1. 프로젝트 상단바, 화자·설정 Sheet, 세로형 대사 블록과 고정 플레이어를 추가했다.
+2. 첫 핫픽스는 TimelineEditor 대사 버튼의 중복 접근성 이름을 번호·상태별로 분리했다.
+
+## 33. 2026-08-01 20:05 KST · v0.8.7 Web quality CI 핫픽스 2
+1. 기준: `0.8.7-ci-hotfix → 0.8.7-ci-hotfix-2`.
+2. 현재 화자 선택과 같은 화자의 미리듣기 버튼이 `/혜린/` 조회에서 충돌한 문제를 수정했다.
+3. 이름을 `현재 목소리 혜린 선택`과 `혜린 목소리 미리듣기`로 분리하고 popup·expanded 상태를 추가했다.
+4. DubbingVoiceControls와 HomePage 테스트는 정확한 접근성 이름만 조회한다.
+5. API 90개·Worker 9개, TS/TSX 구문·상대 import·패치 동등성을 확인한다.
+6. 다음 목표는 `0.8.8 Korean Voice Quality Streaming`이다.

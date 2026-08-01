@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.8.7 Dubbing Studio Workspace · Web quality CI Hotfix`
+현재 기준: `0.8.7 Dubbing Studio Workspace · Web quality CI Hotfix 2`
 
 ## 목표 버전
 

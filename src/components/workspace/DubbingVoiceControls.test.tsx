@@ -23,8 +23,13 @@ describe('DubbingVoiceControls', () => {
   it('화자 선택과 읽기 설정을 별도 Sheet로 연다', () => {
     render(<DubbingVoiceControls {...baseProps} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /혜린/ }))
+    const voicePickerButton = screen.getByRole('button', { name: '현재 목소리 혜린 선택' })
+    expect(voicePickerButton).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('button', { name: '혜린 목소리 미리듣기' })).toBeInTheDocument()
+
+    fireEvent.click(voicePickerButton)
     expect(screen.getByRole('dialog', { name: '전체 목소리' })).toBeInTheDocument()
+    expect(voicePickerButton).toHaveAttribute('aria-expanded', 'true')
     fireEvent.click(screen.getByRole('button', { name: '목소리 선택 닫기' }))
 
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
