@@ -487,3 +487,13 @@ npm run build
 2. EngineOrchestrator가 ready 순위, 자동 fallback, circuit cooldown과 runtime 진단을 담당한다.
 3. 검증: API 89개·Worker 9개, 규칙·compileall·Python 3.10 AST·TS 구문 110개·상대 import 82개 통과.
 4. 산출물: `SoriON-AI-0.8.5-full.zip`, `SoriON-AI-0.8.4-to-0.8.5-patch.zip`; 다음은 0.8.6 세션 영속화다.
+## 30. 2026-08-01 17:21 KST · v0.8.5 CI 핫픽스
+1. 작업 일시: 2026-08-01 17:21 KST. 2. 대상·기준: `0.8.5 → 0.8.5 CI Hotfix`.
+3. 변경: Ruff UP035 import, HomePage Effect 의존성, 잔존 수동 연결 파일을 정리했다.
+4. 이유: GitHub Actions의 API 1건과 Web 4건 오류·경고를 제거하기 위해서다.
+5. 영향: EngineOrchestrator import, 프로젝트 복원 Effect, 오래된 연결 UI 파일만 해당한다.
+6. 주요 파일: `engine_orchestrator.py`, `HomePage.tsx`, `docs/patches/0.8.5-ci-hotfix/*`.
+7. 검증: API 89개·Worker 9개, 프로젝트 규칙·compileall·Python 3.10 AST·TS 구문 통과.
+8. 제한: npm 미러 404와 Python 3.10 다운로드 DNS 실패로 정식 CI 설치는 GitHub Actions 확인 대상이다.
+9. 산출물: `SoriON-AI-0.8.5-ci-hotfix-full.zip`, `SoriON-AI-0.8.5-ci-hotfix-patch.zip`.
+10. 다음: CI가 녹색인지 확인한 뒤 0.8.6 세션 영속화를 진행한다.

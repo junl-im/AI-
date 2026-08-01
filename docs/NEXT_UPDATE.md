@@ -2,6 +2,8 @@
 
 현재 기준 버전: `0.8.5 Unified Workspace UX & Engine Orchestration`
 
+CI 상태: `0.8.5 CI Hotfix`에서 Ruff·React Hook·잔존 연결 UI 파일 문제를 정리했다.
+
 ## 목표 버전
 
 `0.8.6 Mobile Workspace Session Persistence`

@@ -214,3 +214,12 @@ Semantic Versioning을 사용한다.
 - 체크섬: `SoriON-AI-0.8.5-artifacts.sha256`
 - 기준 버전: `0.8.4`
 - 주요 범위: 공통 작업공간 UX·IA, 엔진 자동 fallback, circuit breaker와 진단
+
+## 0.8.5 CI 핫픽스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.5-ci-hotfix-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.5-ci-hotfix-patch.zip`
+- 체크섬: `SoriON-AI-0.8.5-ci-hotfix-artifacts.sha256`
+- 기준 버전: `0.8.5`
+- 주요 변경: Ruff UP035, HomePage Effect 의존성, 누적 저장소의 수동 연결 UI 잔존 파일 정리
+- 삭제 대상: `ApiSetupWizard.tsx`, `ConnectionBottomSheet.tsx`, `EngineStatusCard.tsx`, `connection-sheet.css`

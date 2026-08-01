@@ -1,8 +1,8 @@
-# SoriON AI 0.8.5 Result Report
+# SoriON AI 0.8.5 CI Hotfix Result Report
 
-작업 일시: 2026-08-01 16:00 KST
+작업 일시: 2026-08-01 17:21 KST
 기준 버전: 0.8.4 Automatic Engine Bootstrap & Project Restore
-결과 버전: 0.8.5 Unified Workspace UX & Engine Orchestration
+결과 버전: 0.8.5 Unified Workspace UX & Engine Orchestration + CI Hotfix
 
 ## 1. 결과
 
@@ -15,6 +15,13 @@
 엔진을 운영 우선순위와 기능 적합성으로 정렬한다. 첫 엔진 실패 시 다음 후보로 자동 전환하고,
 반복 실패 엔진은 circuit breaker cooldown 동안 제외한다. 품질 진단에는 현재 자동 우선 엔진,
 성공·실패·연속 실패와 남은 cooldown이 표시된다.
+
+## 1.1 CI 핫픽스
+
+- Ruff UP035에 맞춰 `Awaitable`, `Callable`을 `collections.abc`로 이동했습니다.
+- HomePage 프로젝트 복원 Effect는 안정적인 함수 참조만 의존하도록 수정했습니다.
+- 누적 덮어쓰기 설치에 남은 수동 연결 UI 네 파일을 삭제 대상으로 고정했습니다.
+- 패치 ZIP은 삭제 전에도 CI가 실패하지 않도록 같은 경로에 무해한 stub을 제공합니다.
 
 ## 2. 구현 내용
 
@@ -82,13 +89,13 @@
 
 ## 6. 산출물
 
-- `SoriON-AI-0.8.5-full.zip`
-- `SoriON-AI-0.8.4-to-0.8.5-patch.zip`
-- `SoriON-AI-0.8.5-artifacts.sha256`
-- `SoriON-AI-0.8.5-verification-report.txt`
-- `docs/patches/0.8.5/PATCH_README.md`
-- `docs/patches/0.8.5/PATCH_MANIFEST.txt`
-- `docs/patches/0.8.5/DELETE_LIST.txt`
+- `SoriON-AI-0.8.5-ci-hotfix-full.zip`
+- `SoriON-AI-0.8.5-ci-hotfix-patch.zip`
+- `SoriON-AI-0.8.5-ci-hotfix-artifacts.sha256`
+- `SoriON-AI-0.8.5-ci-hotfix-verification-report.txt`
+- `docs/patches/0.8.5-ci-hotfix/PATCH_README.md`
+- `docs/patches/0.8.5-ci-hotfix/PATCH_MANIFEST.txt`
+- `docs/patches/0.8.5-ci-hotfix/DELETE_LIST.txt`
 
 ## 7. 다음 목표
 

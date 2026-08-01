@@ -80,6 +80,8 @@ export function HomePage() {
   const [pendingRecoveryIds, setPendingRecoveryIds] = useState<string[]>([])
   const engineCatalog = useEngineCatalog()
   const timeline = useTimelineGeneration()
+  const recoverBlocks = timeline.recoverBlocks
+  const restoreProject = timeline.restoreProject
   const selectedVoice = useMemo(() => getVoicePreset(voiceId), [voiceId])
   const busy = timeline.blocks.some((block) => (
     block.kind === 'voice' && block.status === 'generating'
@@ -107,7 +109,7 @@ export function HomePage() {
         text: `${activeProject.title} 작업을 타임라인에 복원했습니다.`,
       },
     ])
-    const recoverableIds = timeline.restoreProject(activeProject, {
+    const recoverableIds = restoreProject(activeProject, {
       voiceId: activeProject.voiceId,
       voiceName: voice.name,
       emotion: activeProject.emotion,
@@ -117,14 +119,14 @@ export function HomePage() {
     })
     setPendingRecoveryIds(recoverableIds)
     clearActiveProject()
-  }, [activeProject, clearActiveProject, timeline.restoreProject])
+  }, [activeProject, clearActiveProject, restoreProject])
 
   useEffect(() => {
     if (!engineAvailable || pendingRecoveryIds.length === 0) return
     const ids = pendingRecoveryIds
     setPendingRecoveryIds([])
-    void timeline.recoverBlocks(ids)
-  }, [engineAvailable, pendingRecoveryIds, timeline.recoverBlocks])
+    void recoverBlocks(ids)
+  }, [engineAvailable, pendingRecoveryIds, recoverBlocks])
 
   if (!workspaceEntered) return <LandingHome />
 

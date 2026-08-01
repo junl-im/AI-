@@ -1,7 +1,7 @@
 import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Awaitable, Callable
 
 from app.engines.base import TtsEngine
 from app.engines.registry import EngineRegistry

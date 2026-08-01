@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.8.5 CI Hotfix - 2026-08-01
+
+- Ruff UP035에 맞춰 `Awaitable`, `Callable`을 `collections.abc`에서 가져옵니다.
+- HomePage의 프로젝트 복원 Effect가 안정적인 함수 참조를 의존하도록 수정했습니다.
+- 누적 덮어쓰기 저장소에 남은 수동 연결 UI 파일을 삭제 대상으로 명시했습니다.
+- 삭제 전에도 CI가 깨지지 않도록 패치 ZIP에는 무해한 전환용 stub을 포함합니다.
+- API 89개와 Worker 9개 회귀 테스트를 다시 통과했습니다.
+
 ## 0.8.5 - 2026-08-01
 
 ### Unified Workspace UX & IA
