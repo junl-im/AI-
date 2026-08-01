@@ -1,0 +1,6 @@
+docs/patches/0.9.2-ci-hotfix/DELETE_LIST.txt
+docs/patches/0.9.2-ci-hotfix/PATCH_MANIFEST.txt
+docs/patches/0.9.2-ci-hotfix/PATCH_README.md
+services/api/app/api/routes/tts.py
+src/api/httpClient.test.ts
+src/hooks/useEngineBlueprint.ts

@@ -27,10 +27,13 @@ export function useEngineBlueprint() {
   }, [])
 
   useEffect(() => {
-    void refresh()
+    const initialRefresh = window.setTimeout(() => void refresh(), 0)
     const handleRefresh = () => void refresh()
     window.addEventListener('sorion-api-change', handleRefresh)
-    return () => window.removeEventListener('sorion-api-change', handleRefresh)
+    return () => {
+      window.clearTimeout(initialRefresh)
+      window.removeEventListener('sorion-api-change', handleRefresh)
+    }
   }, [refresh])
 
   return { blueprint, loading, error, refresh }

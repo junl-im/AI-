@@ -89,7 +89,10 @@ describe('API connection context', () => {
 
     await expect(discoverApiBaseUrl('https://voice-a.example.com/api/v1'))
       .resolves.toMatchObject({ baseUrl: 'https://voice-b.example.com/api/v1' })
-    expect(fetchMock.mock.calls.some(([input]) => String(input).startsWith(
+    const requestedUrls = fetchMock.mock.calls.map(
+      (call: [RequestInfo | URL]) => String(call[0]),
+    )
+    expect(requestedUrls.some((url) => url.startsWith(
       'https://voice-a.example.com/api/v1/health',
     ))).toBe(false)
   })
