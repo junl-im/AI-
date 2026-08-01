@@ -364,3 +364,13 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 - API 90개·Worker 9개 회귀 유지
 - Ruff, ESLint, TypeScript, Vitest와 Vite build는 CI 최종 관문
 
+## TimelineEditor 접근성 이름 회귀
+
+동일 화면에 여러 대사 생성 버튼이 있어도 각 버튼은 대사 번호와 상태를 포함한 고유한
+접근성 이름을 가져야 한다. 완료됐지만 track이 없는 블록과 실패 블록이 함께 있어도
+`getByRole` 단일 조회가 모호해지지 않아야 한다.
+
+```text
+1번 대사 음성 다시 생성
+2번 대사 음성 다시 생성
+```

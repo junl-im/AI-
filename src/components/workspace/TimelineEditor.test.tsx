@@ -69,7 +69,8 @@ describe('TimelineEditor', () => {
     expect(screen.getByText('0.5초')).toBeInTheDocument()
     expect(screen.getByText('엔진 연결 실패')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: '이 대사 음성 생성' }))
+    expect(screen.getByRole('button', { name: '1번 대사 음성 다시 생성' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '2번 대사 음성 다시 생성' }))
     expect(onRetry).toHaveBeenCalledWith('voice-2')
   })
 })

@@ -482,4 +482,14 @@ npm run build
 2. 채팅형 제작으로 돌아가지 않고 장문 원고 자동 분할과 문장별 직접 편집을 한 화면에 연결했다.
 3. 작업 비우기는 공통 reset token과 커스텀 확인창을 사용하며 세션·Player·타임라인이 함께 초기화된다.
 4. 다음 목표는 `0.8.8 Korean Voice Quality Streaming`이다.
-
+## 33. 2026-08-01 19:41 KST · v0.8.7 Web quality CI 핫픽스
+1. 작업 일시: 2026-08-01 19:41 KST.
+2. 대상·기준: `0.8.7 → 0.8.7 CI Hotfix`.
+3. 변경 내용: 생성·재생 버튼 이름에 대사 번호와 상태를 포함하고 실패 재시도 테스트를 수정했다.
+4. 변경 이유: 두 버튼이 `이 대사 음성 생성`으로 노출되어 Testing Library 단일 조회가 실패했다.
+5. 영향 범위: TimelineEditor 버튼 접근성 이름과 테스트만 변경하며 데이터·엔진·배치는 유지한다.
+6. 주요 파일: `TimelineEditor.tsx`, `TimelineEditor.test.tsx`, 핫픽스 문서와 manifest.
+7. 검증 결과: 규칙·TS 구문·접근성 이름·API·Worker·패치 동등성을 확인한다.
+8. 알려진 제한: 정식 Vitest는 npm 미러 제한으로 로컬 재실행하지 못하며 Actions가 최종 관문이다.
+9. 산출물: `SoriON-AI-0.8.7-ci-hotfix-full.zip`, `SoriON-AI-0.8.7-ci-hotfix-patch.zip`.
+10. 다음 예상 업데이트: `0.8.8 Korean Voice Quality Streaming`.

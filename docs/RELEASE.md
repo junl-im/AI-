@@ -243,3 +243,10 @@ Semantic Versioning을 사용한다.
 - 장문·세션·자동 엔진 연결 계약 유지
 - 삭제 대상 없음
 
+## 0.8.7 Web quality CI 핫픽스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.7-ci-hotfix-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.7-ci-hotfix-patch.zip`
+- 패치 기준 버전: `0.8.7`
+- 목적: TimelineEditor의 중복 접근성 이름으로 인한 Vitest 단일 요소 조회 실패 수정
+- 삭제 파일: 없음

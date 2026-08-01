@@ -63,6 +63,13 @@ function VoiceBlock({
       : block.status === 'failed'
         ? '생성 실패'
         : '생성 대기'
+  const actionLabel = block.status === 'ready' && block.trackId
+    ? `${voiceIndex + 1}번 대사 재생`
+    : block.status === 'generating'
+      ? `${voiceIndex + 1}번 대사 음성 생성 중`
+      : block.status === 'queued'
+        ? `${voiceIndex + 1}번 대사 음성 생성`
+        : `${voiceIndex + 1}번 대사 음성 다시 생성`
 
   return (
     <article
@@ -85,13 +92,19 @@ function VoiceBlock({
         </div>
         <div className="soa-dubbing-block__tools">
           {block.status === 'ready' && block.trackId ? (
-            <button type="button" onClick={() => selectTrack(block.trackId!)} aria-label="이 대사 재생">▶</button>
+            <button
+              type="button"
+              onClick={() => selectTrack(block.trackId!)}
+              aria-label={actionLabel}
+            >
+              ▶
+            </button>
           ) : (
             <button
               type="button"
               onClick={() => onRetry(block.id)}
               disabled={block.status === 'generating' || draft.trim().length === 0}
-              aria-label="이 대사 음성 생성"
+              aria-label={actionLabel}
             >
               {block.status === 'generating' ? '…' : '▶'}
             </button>

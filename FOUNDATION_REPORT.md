@@ -1,11 +1,14 @@
-# SoriON AI 0.8.7 Result Report
+# SoriON AI 0.8.7 CI Hotfix Result Report
 
 작업 일시: 2026-08-01 KST
 
-결과 버전: **0.8.7 Dubbing Studio Workspace**
+결과 버전: **0.8.7 Dubbing Studio Workspace · CI Hotfix**
 
 ## 결과
 
+- TimelineEditor의 여러 생성 버튼이 동일한 접근성 이름을 사용해 Vitest가 대상을 구분하지 못하던 Web quality 실패를 수정했다.
+- 대사 번호와 상태를 포함한 고유 버튼 이름으로 실제 스크린리더 탐색도 개선했다.
+- 실패 블록 재시도 테스트가 정확히 2번 대사를 선택하도록 회귀 기대값을 고정했다.
 - 장문 원고 중심 구조 위에 모바일 더빙 프로젝트 편집 IA를 적용했다.
 - 프로젝트 제목, 자동 저장 상태, 엔진 상태와 주요 작업을 상단에 통합했다.
 - 화자 선택과 읽기 설정을 각각 전용 Bottom Sheet로 분리했다.
@@ -24,6 +27,7 @@
 - Python compileall과 Python 3.10 AST 93개 파일 통과
 - CSS 13개, JSON 7개, GitHub Actions YAML 구조 검사 통과
 - 기준본 패치 적용 동등성과 ZIP 무결성 통과
+- TimelineEditor 접근성 이름 정적 회귀 검사 통과
 
 ## 알려진 현실
 
