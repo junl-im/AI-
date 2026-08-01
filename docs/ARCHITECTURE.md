@@ -266,3 +266,20 @@ GitHub Pages
 - `apiConnection.ts`가 후보·주소·이력을 관리하고 `httpClient.ts`가 실제 요청만 담당한다.
 - `*.github.io`는 정적 호스트로 분류해 same-origin과 8443 후보를 만들지 않는다.
 - `/connectivity`와 `/engines`는 동일한 EngineOrchestrator runtime 정보를 사용한다.
+
+## 0.8.7 Dubbing Studio Workspace
+
+```text
+HomePage
+  → DubbingStudioHeader
+  → DubbingVoiceControls
+     → VoicePickerSheet / VoiceSettingsSheet
+  → LongformComposer
+  → TimelineEditor
+  → LinkedPlayerDock
+```
+
+- `workspaceSessionRepository`가 프로젝트 제목·읽기 설정·블록 revision을 저장한다.
+- `useTimelineGeneration`이 블록 생성·편집·복구와 Player Queue 연결을 담당한다.
+- `startNewWorkspace` reset token이 세션·타임라인·Player의 원자적 초기화 경계다.
+

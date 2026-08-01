@@ -37,8 +37,8 @@ describe('HomePage', () => {
     const textbox = scoped.getByRole('textbox', { name: '음성으로 만들 장문 원고' })
 
     expect(textbox.getAttribute('placeholder')).toContain('긴 원고')
-    expect(scoped.getByRole('radio', { name: /혜린/ })).toBeInTheDocument()
-    expect(scoped.getByText('음성 서버 연결 대기 중')).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: /혜린/ })).toBeInTheDocument()
+    expect(scoped.getByText('음성 서버 연결 대기')).toBeInTheDocument()
 
     fireEvent.change(textbox, {
       target: { value: '첫 번째 문장입니다. 두 번째 문장입니다.' },
@@ -46,9 +46,9 @@ describe('HomePage', () => {
     fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
 
     expect(textbox).toHaveValue('첫 번째 문장입니다. 두 번째 문장입니다.')
-    expect(scoped.getByText('첫 번째 문장입니다.')).toBeInTheDocument()
-    expect(scoped.getByText('두 번째 문장입니다.')).toBeInTheDocument()
-    expect(scoped.getAllByText(/음성 · 혜린/)).toHaveLength(2)
+    expect(scoped.getByDisplayValue('첫 번째 문장입니다.')).toBeInTheDocument()
+    expect(scoped.getByDisplayValue('두 번째 문장입니다.')).toBeInTheDocument()
+    expect(scoped.getAllByText('혜린')).toHaveLength(3)
   })
 
   it('새로고침 뒤 전송 전 장문 원고와 작업공간을 자동 복원한다', async () => {
@@ -71,6 +71,7 @@ describe('HomePage', () => {
     await waitFor(() => expect(useAppStore.getState().workspaceEntered).toBe(true))
     expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 원고' }))
       .toHaveValue('아직 제작하지 않은 모바일 장문 원고')
-    expect(screen.getByRole('button', { name: '밝은 톤' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
+    expect(screen.getByRole('button', { name: '밝게' })).toHaveClass('is-active')
   })
 })

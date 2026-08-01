@@ -48,6 +48,7 @@ describe('useTimelineGeneration mobile recovery', () => {
         voiceName: '혜린',
         emotion: 'neutral',
         speed: 1,
+        pitch: 0,
         engineId: 'system',
         normalizeText: true,
       })
@@ -131,6 +132,7 @@ describe('useTimelineGeneration mobile recovery', () => {
         voiceName: '혜린',
         emotion: 'neutral',
         speed: 1,
+        pitch: 0,
         engineId: 'system',
         normalizeText: true,
       })
@@ -176,6 +178,7 @@ describe('useTimelineGeneration revision safety', () => {
         voiceName: '혜린',
         emotion: 'neutral',
         speed: 1,
+        pitch: 0,
         engineId: 'system',
         normalizeText: true,
       })
@@ -217,6 +220,7 @@ describe('useTimelineGeneration revision safety', () => {
           voiceName: '혜린',
           emotion: 'neutral',
           speed: 1,
+          pitch: 0,
           engineId: 'auto',
           normalizeText: true,
           jobId: 'saved-job',

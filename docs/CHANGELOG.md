@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.8.7 - 2026-08-01
+
+### Dubbing Studio Workspace
+
+- 프로젝트 제목·자동 저장 상태·음성 시스템 상태를 상단 제작 바에 통합
+- 화자 선택과 속도·피치·감정·숫자 발음 설정을 전용 Bottom Sheet로 분리
+- 문장별 직접 편집·생성·재생·분할·이동·삭제가 가능한 세로형 대사 블록
+- 새 대사·쉼 추가와 현재 음원 다운로드 동선 연결
+- 하단 전체 폭 플레이어에서 현재 트랙·진행률·이전·재생·다음을 항상 제공
+- 작업 비우기를 공통 workspace reset과 커스텀 확인창으로 보호
+
+### Compatibility
+
+- 0.8.6 장문 자동 분할, IndexedDB 복원, block revision과 recover-first 유지
+- 자동 API bootstrap과 EngineOrchestrator 계약 유지
+- 기존 프로젝트의 pitch 누락은 기본값 0으로 안전하게 복원
+
+### Verification
+
+- 프로젝트 규칙과 독립 TypeScript semantic 검사 통과
+- API 90개·Worker 9개 및 패치 적용 동등성 검사 대상
+
 ## 0.8.6 - 2026-08-01
 
 ### Longform Voice Studio

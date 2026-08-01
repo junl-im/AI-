@@ -4,9 +4,10 @@ import {
   getApiConnectionContext,
   requestAutomaticApiReconnect,
 } from '../api/httpClient'
+import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader'
+import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
 import { LongformComposer } from '../components/workspace/LongformComposer'
 import { TimelineEditor } from '../components/workspace/TimelineEditor'
-import { VoiceLibrary } from '../components/workspace/VoiceLibrary'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import {
   useTimelineGeneration,
@@ -15,7 +16,7 @@ import {
 import { useWorkspaceSessionPersistence } from '../hooks/useWorkspaceSessionPersistence'
 import { saveProject } from '../projects/projectRepository'
 import { useAppStore } from '../store/useAppStore'
-import { usePlayerStore } from '../store/usePlayerStore'
+import { getCurrentTrack, usePlayerStore } from '../store/usePlayerStore'
 import { buildAudioFilename } from '../tts/audioFile'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
@@ -26,22 +27,19 @@ import type { WorkspaceSession } from '../workspace/sessionTypes'
 import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import type { ComposerDirective, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { LandingHome } from './LandingHome'
-
 interface PendingLongformGeneration {
   text: string
   options: TimelineGenerationOptions
   blockIds: string[]
 }
-
 const initialMessages: WorkspaceMessage[] = [
   {
     id: 'welcome',
     role: 'assistant',
     badge: '장문 제작 준비',
-    text: '대본·오디오북·강의 원고를 붙여 넣으세요. 원문은 유지한 채 문장별 음성 블록으로 나눕니다.',
+    text: '원고를 입력하면 문장별 대사 블록으로 나누고 순서대로 음성을 생성합니다.',
   },
 ]
-
 function generatedPreview(
   result: Awaited<ReturnType<typeof synthesizeSpeech>>,
   text: string,
@@ -71,13 +69,17 @@ function generatedPreview(
     },
   }
 }
-
-function requestedEmotion(directives: ComposerDirective[]): VoiceEmotion {
-  if (directives.some((directive) => directive.id === 'commercial')) return 'commercial'
-  if (directives.some((directive) => directive.id === 'bright')) return 'happy'
-  return 'neutral'
+function formatSavedLabel(savedAt: string | null, hydrated: boolean, memoryOnly: boolean): string {
+  if (!hydrated) return '작업공간 불러오는 중'
+  if (!savedAt) return memoryOnly ? '이 탭에 임시 저장됨' : '자동 저장 준비됨'
+  const date = new Date(savedAt)
+  if (!Number.isFinite(date.getTime())) return '자동 저장됨'
+  const time = new Intl.DateTimeFormat('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+  return `${time} ${memoryOnly ? '임시 저장됨' : '자동 저장됨'}`
 }
-
 export function HomePage() {
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const page = useAppStore((state) => state.page)
@@ -85,13 +87,20 @@ export function HomePage() {
   const backendMessage = useAppStore((state) => state.backendMessage)
   const showNotice = useAppStore((state) => state.showNotice)
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
+  const exitWorkspace = useAppStore((state) => state.exitWorkspace)
   const activeProject = useAppStore((state) => state.activeProject)
   const workspaceResetToken = useAppStore((state) => state.workspaceResetToken)
   const clearActiveProject = useAppStore((state) => state.clearActiveProject)
+  const startNewWorkspace = useAppStore((state) => state.startNewWorkspace)
   const enqueue = usePlayerStore((state) => state.enqueue)
   const clearQueue = usePlayerStore((state) => state.clearQueue)
+  const currentTrack = usePlayerStore(getCurrentTrack)
+  const [projectTitle, setProjectTitle] = useState('새 프로젝트')
   const [messages, setMessages] = useState<WorkspaceMessage[]>(initialMessages)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
+  const [speechSpeed, setSpeechSpeed] = useState(1)
+  const [speechPitch, setSpeechPitch] = useState(0)
+  const [speechEmotion, setSpeechEmotion] = useState<VoiceEmotion>('neutral')
   const [composerDraft, setComposerDraft] = useState('')
   const [directiveIds, setDirectiveIds] = useState<ComposerDirective['id'][]>(['numbers'])
   const [previewingId, setPreviewingId] = useState<string | null>(null)
@@ -117,25 +126,44 @@ export function HomePage() {
     (backendStatus === 'online' || backendStatus === 'degraded')
     && engineCatalog.selected !== null
   )
-
+  const normalizeText = directiveIds.includes('numbers')
   const restoreWorkspaceSession = useCallback((session: WorkspaceSession) => {
     if (explicitWorkspaceActionRef.current || useAppStore.getState().activeProject) return
+    setProjectTitle(session.projectTitle || '새 프로젝트')
     setVoiceId(getVoicePreset(session.voiceId).id)
+    setSpeechSpeed(session.speechSpeed)
+    setSpeechPitch(session.speechPitch)
+    setSpeechEmotion(
+      session.speechEmotion !== 'neutral'
+        ? session.speechEmotion
+        : session.directiveIds.includes('commercial')
+          ? 'commercial'
+          : session.directiveIds.includes('bright')
+            ? 'happy'
+            : 'neutral',
+    )
     setComposerDraft(session.composerDraft)
-    setDirectiveIds(session.directiveIds.length > 0 ? session.directiveIds : ['numbers'])
+    setDirectiveIds(session.directiveIds.includes('numbers') ? ['numbers'] : [])
     setMessages(session.messages.length > 0 ? session.messages : initialMessages)
     setPendingRecoveryIds(restoreSession(session.blocks))
     if (session.workspaceEntered) enterWorkspace(session.page)
   }, [enterWorkspace, restoreSession])
-
   const notifyPersistenceUnavailable = useCallback(() => {
     showNotice('이 브라우저에서는 작업공간 자동 저장을 유지할 수 없습니다.')
   }, [showNotice])
-
-  const { saveNow: saveWorkspaceNow } = useWorkspaceSessionPersistence({
+  const {
+    hydrated,
+    storageMode,
+    lastSavedAt,
+    saveNow: saveWorkspaceNow,
+  } = useWorkspaceSessionPersistence({
     workspaceEntered,
     page,
+    projectTitle,
     voiceId,
+    speechSpeed,
+    speechPitch,
+    speechEmotion,
     composerDraft,
     directiveIds,
     messages,
@@ -143,38 +171,42 @@ export function HomePage() {
     onRestore: restoreWorkspaceSession,
     onPersistenceUnavailable: notifyPersistenceUnavailable,
   })
-
   useLayoutEffect(() => {
     if (activeProject || observedResetTokenRef.current !== workspaceResetToken) {
       explicitWorkspaceActionRef.current = true
     }
   }, [activeProject, workspaceResetToken])
-
   useLayoutEffect(() => {
     if (observedResetTokenRef.current === workspaceResetToken) return
     observedResetTokenRef.current = workspaceResetToken
     pendingResetSaveRef.current = workspaceResetToken
     clearTimeline()
     clearQueue()
+    setProjectTitle('새 프로젝트')
     setMessages(initialMessages)
     setVoiceId(voicePresets[0].id)
+    setSpeechSpeed(1)
+    setSpeechPitch(0)
+    setSpeechEmotion('neutral')
     setComposerDraft('')
     setDirectiveIds(['numbers'])
     setPendingRecoveryIds([])
     setPendingGeneration(null)
   }, [clearQueue, clearTimeline, workspaceResetToken])
-
   useEffect(() => {
     if (pendingResetSaveRef.current !== workspaceResetToken) return
     pendingResetSaveRef.current = null
     void clearWorkspaceSession().then(saveWorkspaceNow)
   }, [saveWorkspaceNow, workspaceResetToken])
-
   useEffect(() => {
     if (!activeProject) return
     setPendingGeneration(null)
     const voice = getVoicePreset(activeProject.voiceId)
+    setProjectTitle(activeProject.title || '새 프로젝트')
     setVoiceId(activeProject.voiceId)
+    setSpeechSpeed(activeProject.speed ?? 1)
+    setSpeechPitch(activeProject.pitch ?? 0)
+    setSpeechEmotion(activeProject.emotion)
     setComposerDraft(activeProject.text)
     setDirectiveIds(activeProject.normalizeText === false ? [] : ['numbers'])
     setMessages([
@@ -183,7 +215,7 @@ export function HomePage() {
         id: createRandomId(),
         role: 'assistant',
         badge: '프로젝트 불러옴',
-        text: `${activeProject.title} 원고와 타임라인을 복원했습니다.`,
+        text: `${activeProject.title} 원고와 음성 블록을 복원했습니다.`,
       },
     ])
     const recoverableIds = restoreProject(activeProject, {
@@ -191,39 +223,38 @@ export function HomePage() {
       voiceName: voice.name,
       emotion: activeProject.emotion,
       speed: activeProject.speed ?? 1,
+      pitch: activeProject.pitch ?? 0,
       engineId: 'auto',
       normalizeText: activeProject.normalizeText ?? true,
     })
     setPendingRecoveryIds(recoverableIds)
     clearActiveProject()
   }, [activeProject, clearActiveProject, restoreProject])
-
   useEffect(() => {
     if (!engineAvailable || pendingRecoveryIds.length === 0) return
     const ids = pendingRecoveryIds
     setPendingRecoveryIds([])
     void recoverBlocks(ids)
   }, [engineAvailable, pendingRecoveryIds, recoverBlocks])
-
   const appendMessage = useCallback((message: Omit<WorkspaceMessage, 'id'>) => {
     setMessages((current) => [...current, { ...message, id: createRandomId() }])
   }, [])
-
-  const buildOptions = useCallback((directives: ComposerDirective[]): TimelineGenerationOptions => {
-    const emotion = requestedEmotion(directives)
-    const speed = directives.some((directive) => directive.id === 'slow') ? 0.88 : 1
-    return {
-      voiceId,
-      voiceName: selectedVoice.name,
-      emotion: engineCatalog.selected && !engineCatalog.selected.supportsEmotion
-        ? 'neutral'
-        : emotion,
-      speed: engineCatalog.selected && !engineCatalog.selected.supportsSpeed ? 1 : speed,
-      engineId: 'auto',
-      normalizeText: directives.some((directive) => directive.id === 'numbers'),
-    }
-  }, [engineCatalog.selected, selectedVoice.name, voiceId])
-
+  const buildOptions = useCallback((): TimelineGenerationOptions => ({
+    voiceId,
+    voiceName: selectedVoice.name,
+    emotion: speechEmotion,
+    speed: speechSpeed,
+    pitch: speechPitch,
+    engineId: 'auto',
+    normalizeText,
+  }), [
+    normalizeText,
+    selectedVoice.name,
+    speechEmotion,
+    speechPitch,
+    speechSpeed,
+    voiceId,
+  ])
   const saveLongformProject = useCallback(async (
     text: string,
     options: TimelineGenerationOptions,
@@ -238,7 +269,7 @@ export function HomePage() {
     const now = new Date().toISOString()
     await saveProject({
       id: createRandomId(),
-      title: text.replace(/\s+/g, ' ').slice(0, 36),
+      title: projectTitle.trim() || text.replace(/\s+/g, ' ').slice(0, 36) || '새 프로젝트',
       text,
       voiceId: options.voiceId,
       emotion: options.emotion,
@@ -251,52 +282,46 @@ export function HomePage() {
       audioSource: first.source,
       outputFormat: 'wav',
       speed: options.speed,
+      pitch: options.pitch,
       normalizeText: options.normalizeText,
       jobIds: blockIds.map((blockId) => completedByBlock.get(blockId) ?? null),
     })
-  }, [])
-
+  }, [projectTitle])
   const generateLongform = useCallback(async (pending: PendingLongformGeneration) => {
     appendMessage({
       role: 'assistant',
       badge: backendStatus === 'degraded' ? '대체 엔진' : '순차 생성',
-      text: `${pending.blockIds.length}개 블록을 앞에서부터 생성합니다. 완성된 블록은 즉시 Dock에서 재생할 수 있습니다.`,
+      text: `${pending.blockIds.length}개 대사 블록을 앞에서부터 생성합니다.`,
     })
     const generated = await timeline.generateAll(pending.blockIds)
     if (generated.length === 0) {
       appendMessage({
         role: 'system',
         badge: '생성 실패',
-        text: '완성된 음성이 없습니다. 실패한 타임라인 블록에서 재시도해 주세요.',
+        text: '완성된 음성이 없습니다. 실패한 대사 블록에서 다시 생성해 주세요.',
       })
       return
     }
     appendMessage({
       role: 'assistant',
       badge: '제작 완료',
-      text: `${generated.length}개 음성 블록을 재생 대기열과 프로젝트에 연결했습니다.`,
+      text: `${generated.length}개 음성 블록을 하단 플레이어와 프로젝트에 연결했습니다.`,
     })
     try {
-      await saveLongformProject(
-        pending.text,
-        pending.options,
-        pending.blockIds,
-        generated,
-      )
+      await saveLongformProject(pending.text, pending.options, pending.blockIds, generated)
+      await saveWorkspaceNow()
     } catch {
       showNotice('음성은 완성됐지만 프로젝트 저장에는 실패했습니다.')
     }
-  }, [appendMessage, backendStatus, saveLongformProject, showNotice, timeline.generateAll])
-
+  }, [appendMessage, backendStatus, saveLongformProject, saveWorkspaceNow, showNotice, timeline.generateAll])
   useEffect(() => {
     if (!engineAvailable || !pendingGeneration || busy) return
     const pending = pendingGeneration
     setPendingGeneration(null)
     void generateLongform(pending)
   }, [busy, engineAvailable, generateLongform, pendingGeneration])
-
-  async function handleLongformSubmit(value: string, directives: ComposerDirective[]) {
-    const options = buildOptions(directives)
+  async function handleLongformSubmit(value: string) {
+    const options = buildOptions()
     setPendingGeneration(null)
     clearTimeline()
     clearQueue()
@@ -304,7 +329,7 @@ export function HomePage() {
     appendMessage({
       role: 'assistant',
       badge: '원고 분할 완료',
-      text: `${blockIds.length}개 문장 블록으로 정리했습니다. 원문은 편집기에 그대로 유지됩니다.`,
+      text: `${blockIds.length}개 대사 블록으로 정리했습니다. 원문은 위 편집기에 유지됩니다.`,
     })
     const pending = { text: value, options, blockIds }
     if (!getApiConnectionContext().configured || !engineAvailable) {
@@ -312,16 +337,14 @@ export function HomePage() {
       appendMessage({
         role: 'system',
         badge: '음성 서버 연결 대기',
-        text: '타임라인을 준비했습니다. 서버 연결이 복구되면 이 원고를 자동으로 이어서 생성합니다.',
+        text: '대사 블록을 준비했습니다. 서버 연결이 복구되면 자동으로 이어서 생성합니다.',
       })
       requestAutomaticApiReconnect()
       return
     }
     await generateLongform(pending)
   }
-
   async function previewVoice(nextVoiceId: string) {
-    setVoiceId(nextVoiceId)
     const voice = getVoicePreset(nextVoiceId)
     if (!engineAvailable || !engineCatalog.selected) {
       appendMessage({
@@ -338,12 +361,12 @@ export function HomePage() {
       const request: TtsSynthesisRequest = {
         text,
         voiceId: nextVoiceId,
-        emotion: 'neutral',
-        speed: 1,
-        pitch: 0,
+        emotion: speechEmotion,
+        speed: speechSpeed,
+        pitch: speechPitch,
         format: 'wav',
         engineId: 'auto',
-        normalizeText: true,
+        normalizeText,
       }
       const result = await synthesizeSpeech(request, createRandomId())
       const audio = generatedPreview(result, text, nextVoiceId, voice.name)
@@ -357,7 +380,7 @@ export function HomePage() {
             : '목소리 프리뷰',
         text: audio.result.fallbackUsed
           ? `${voice.name} 프리뷰를 사용 가능한 대체 엔진으로 완성했습니다.`
-          : `${voice.name} 목소리를 Dock 플레이어에 연결했습니다.`,
+          : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
       })
     } catch {
       appendMessage({
@@ -369,7 +392,6 @@ export function HomePage() {
       setPreviewingId(null)
     }
   }
-
   async function retryBlock(id: string) {
     if (!engineAvailable) {
       requestAutomaticApiReconnect()
@@ -378,44 +400,72 @@ export function HomePage() {
     }
     await timeline.retryBlock(id)
   }
-
+  function clearCurrentWork() {
+    setPendingGeneration(null)
+    startNewWorkspace()
+  }
   if (!workspaceEntered) return <LandingHome />
-
+  const savedLabel = formatSavedLabel(lastSavedAt, hydrated, storageMode === 'memory')
+  const engineLabel = engineCatalog.selected?.name ?? '자동 연결 확인 중'
   return (
-    <div className="soa-editor-workspace soa-editor-workspace--longform">
-      <VoiceLibrary
-        value={voiceId}
-        previewingId={previewingId}
-        onChange={(id) => void previewVoice(id)}
-        onCreateVoice={() => enterWorkspace('clone')}
+    <div className="soa-dubbing-workspace">
+      <DubbingStudioHeader
+        title={projectTitle}
+        savedLabel={savedLabel}
+        backendStatus={backendStatus}
+        engineLabel={engineLabel}
+        downloadHref={currentTrack?.audio.url ?? null}
+        downloadName={currentTrack?.audio.filename ?? 'sorion-voice.wav'}
+        onTitleChange={setProjectTitle}
+        onGoHome={exitWorkspace}
+        onOpenClone={() => enterWorkspace('clone')}
+        onOpenQuality={() => enterWorkspace('quality')}
+        onOpenProjects={() => enterWorkspace('projects')}
+        onOpenSettings={() => enterWorkspace('settings')}
+        onClear={clearCurrentWork}
       />
-      <main className="soa-script-stage">
+      <main className="soa-dubbing-main">
+        <DubbingVoiceControls
+          voiceId={voiceId}
+          previewingId={previewingId}
+          speed={speechSpeed}
+          pitch={speechPitch}
+          emotion={speechEmotion}
+          normalizeText={normalizeText}
+          engine={engineCatalog.selected}
+          onVoiceChange={setVoiceId}
+          onPreview={(id) => void previewVoice(id)}
+          onSpeedChange={setSpeechSpeed}
+          onPitchChange={setSpeechPitch}
+          onEmotionChange={setSpeechEmotion}
+          onNormalizeTextChange={(value) => setDirectiveIds(value ? ['numbers'] : [])}
+          onCreateVoice={() => enterWorkspace('clone')}
+        />
         <LongformComposer
           disabled={busy}
           value={composerDraft}
-          directiveIds={directiveIds}
           backendStatus={backendStatus}
           backendMessage={backendMessage}
           activity={activity}
           onValueChange={setComposerDraft}
-          onDirectiveIdsChange={setDirectiveIds}
-          onSubmit={(value, directives) => void handleLongformSubmit(value, directives)}
-          onVoiceUnavailable={() => showNotice('이 브라우저는 한국어 음성 입력을 지원하지 않습니다.')}
+          onSubmit={(value) => void handleLongformSubmit(value)}
+        />
+        <TimelineEditor
+          blocks={timeline.blocks}
+          onMove={timeline.moveBlock}
+          onReorder={timeline.reorderBlock}
+          onSplit={timeline.splitBlock}
+          onUpdateText={timeline.updateText}
+          onRetry={(id) => void retryBlock(id)}
+          onAddVoice={() => timeline.addVoiceBlock(buildOptions())}
+          onAddPause={timeline.addPause}
+          onRemove={timeline.removeBlock}
+          onClear={() => {
+            setPendingGeneration(null)
+            timeline.clear()
+          }}
         />
       </main>
-      <TimelineEditor
-        blocks={timeline.blocks}
-        onMove={timeline.moveBlock}
-        onReorder={timeline.reorderBlock}
-        onSplit={timeline.splitBlock}
-        onUpdateText={timeline.updateText}
-        onRetry={(id) => void retryBlock(id)}
-        onAddPause={timeline.addPause}
-        onClear={() => {
-          setPendingGeneration(null)
-          timeline.clear()
-        }}
-      />
     </div>
   )
 }

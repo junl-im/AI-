@@ -11,7 +11,11 @@ function makeSession(revision: number, draft: string) {
   return createWorkspaceSession({
     workspaceEntered: true,
     page: 'home',
+    projectTitle: '새 프로젝트',
     voiceId: 'sori-warm',
+    speechSpeed: 1,
+    speechPitch: 0,
+    speechEmotion: 'neutral',
     composerDraft: draft,
     directiveIds: ['numbers'],
     messages: [],

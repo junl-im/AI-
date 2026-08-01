@@ -101,6 +101,90 @@ export function LinkedPlayerDock() {
     }
   }
 
+  function seek(event: MouseEvent<HTMLButtonElement>) {
+    const element = ref.current
+    if (!element || !duration) return
+    const rect = event.currentTarget.getBoundingClientRect()
+    element.currentTime = ((event.clientX - rect.left) / rect.width) * duration
+  }
+
+  const audio = (
+    <audio
+      ref={ref}
+      src={track?.audio.url}
+      preload="metadata"
+      onLoadedMetadata={(event: SyntheticEvent<HTMLAudioElement>) => {
+        setDuration(event.currentTarget.duration)
+      }}
+      onTimeUpdate={(event: SyntheticEvent<HTMLAudioElement>) => {
+        setCurrent(event.currentTarget.currentTime)
+      }}
+      onPlay={() => setPlaying(true)}
+      onPause={() => setPlaying(false)}
+      onEnded={handleEnded}
+    />
+  )
+
+  if (page === 'home') {
+    return (
+      <aside className="soa-dubbing-player-dock" aria-label="더빙 재생 플레이어">
+        <div className="soa-dubbing-player-dock__inner">
+          <button
+            type="button"
+            className="soa-dubbing-player-progress"
+            onClick={seek}
+            disabled={!track}
+            aria-label="재생 위치 이동"
+          >
+            <i style={{ width: `${progress}%` }} />
+            <b style={{ left: `${progress}%` }} />
+          </button>
+          <div className="soa-dubbing-player-time">
+            <time>{formatTime(current)}</time>
+            <span>{track?.title ?? '완성된 음성을 선택하세요'}</span>
+            <time>{formatTime(duration)}</time>
+          </div>
+          <div className="soa-dubbing-player-controls">
+            <button type="button" onClick={() => move('previous')} disabled={!track} aria-label="이전 음성">|◀</button>
+            <button
+              type="button"
+              className="is-primary"
+              onClick={() => void toggle()}
+              disabled={!track}
+              aria-label={playing ? '일시정지' : '재생'}
+            >
+              {playing ? 'Ⅱ' : '▶'}
+            </button>
+            <button type="button" onClick={() => move('next')} disabled={!track} aria-label="다음 음성">▶|</button>
+          </div>
+          <div className="soa-dubbing-player-secondary">
+            <button
+              type="button"
+              onClick={cycleRepeatMode}
+              className={repeatMode !== 'off' ? 'is-active' : ''}
+            >
+              {repeatMode === 'one' ? '한 곡 반복' : '반복'}
+            </button>
+            <button type="button" onClick={() => setQueueOpen((open) => !open)} disabled={!track}>
+              대기열 {queue.length}
+            </button>
+            {track ? <a href={track.audio.url} download={track.audio.filename}>다운로드</a> : null}
+          </div>
+          {audio}
+          {track && queueOpen ? (
+            <PlayerQueuePanel
+              tracks={queue}
+              currentTrackId={currentTrackId}
+              onSelect={select}
+              onRemove={remove}
+              onClear={clearQueue}
+            />
+          ) : null}
+        </div>
+      </aside>
+    )
+  }
+
   return (
     <aside
       className={`soa-dock ${track ? 'soa-dock--has-player' : 'soa-dock--nav-only'}`}
@@ -110,13 +194,7 @@ export function LinkedPlayerDock() {
         {track ? (
           <section className="soa-linked-player" aria-label="연계형 오디오 플레이어">
             <div className="soa-player-transport">
-              <button
-                type="button"
-                onClick={() => move('previous')}
-                aria-label="이전 음성"
-              >
-                ‹
-              </button>
+              <button type="button" onClick={() => move('previous')} aria-label="이전 음성">‹</button>
               <button
                 type="button"
                 className="soa-player-toggle"
@@ -125,26 +203,14 @@ export function LinkedPlayerDock() {
               >
                 {playing ? 'Ⅱ' : '▶'}
               </button>
-              <button type="button" onClick={() => move('next')} aria-label="다음 음성">
-                ›
-              </button>
+              <button type="button" onClick={() => move('next')} aria-label="다음 음성">›</button>
             </div>
             <div className="soa-player-main">
               <div className="soa-player-title">
                 <strong>{track.title}</strong>
                 <span>{track.audio.result.engineId}</span>
               </div>
-              <button
-                type="button"
-                className="soa-player-wave"
-                onClick={(event: MouseEvent<HTMLButtonElement>) => {
-                  const element = ref.current
-                  if (!element || !duration) return
-                  const rect = event.currentTarget.getBoundingClientRect()
-                  element.currentTime = ((event.clientX - rect.left) / rect.width) * duration
-                }}
-                aria-label="재생 위치 이동"
-              >
+              <button type="button" className="soa-player-wave" onClick={seek} aria-label="재생 위치 이동">
                 <span className="soa-player-progress" style={{ width: `${progress}%` }} />
                 {bars.map((height, index) => (
                   <i key={`${height}-${index}`} style={{ height: `${height}%` }} />
@@ -171,27 +237,10 @@ export function LinkedPlayerDock() {
               >
                 {rates.map((rate) => <option key={rate} value={rate}>{rate}×</option>)}
               </select>
-              <a href={track.audio.url} download={track.audio.filename} aria-label="현재 음성 다운로드">
-                ↓
-              </a>
-              <button type="button" onClick={() => setQueueOpen((open) => !open)}>
-                대기열 {queue.length}
-              </button>
+              <a href={track.audio.url} download={track.audio.filename} aria-label="현재 음성 다운로드">↓</a>
+              <button type="button" onClick={() => setQueueOpen((open) => !open)}>대기열 {queue.length}</button>
             </div>
-            <audio
-              ref={ref}
-              src={track.audio.url}
-              preload="metadata"
-              onLoadedMetadata={(event: SyntheticEvent<HTMLAudioElement>) => {
-                setDuration(event.currentTarget.duration)
-              }}
-              onTimeUpdate={(event: SyntheticEvent<HTMLAudioElement>) => {
-                setCurrent(event.currentTarget.currentTime)
-              }}
-              onPlay={() => setPlaying(true)}
-              onPause={() => setPlaying(false)}
-              onEnded={handleEnded}
-            />
+            {audio}
           </section>
         ) : null}
 

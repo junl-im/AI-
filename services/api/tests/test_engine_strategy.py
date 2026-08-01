@@ -3,7 +3,7 @@ def test_engine_strategy_selects_korean_first_primary(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.8.6"
+    assert body["version"] == "0.8.7"
     assert body["primary_tts_engine"] == "cosyvoice3"
     assert body["primary_clone_engine"] == "cosyvoice3"
 

@@ -1,4 +1,4 @@
-import { useRef, useState, type DragEvent, type PointerEvent } from 'react'
+import { useEffect, useState, type DragEvent } from 'react'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 
@@ -9,16 +9,20 @@ interface TimelineEditorProps {
   onSplit: (id: string) => void
   onUpdateText: (id: string, text: string) => void
   onRetry: (id: string) => void
+  onAddVoice: () => void
   onAddPause: () => void
+  onRemove: (id: string) => void
   onClear: () => void
 }
 
 function formatDuration(seconds: number): string {
-  return `0:${Math.max(1, Math.round(seconds)).toString().padStart(2, '0')}`
+  const safe = Math.max(0, Math.round(seconds))
+  return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, '0')}`
 }
 
 interface VoiceBlockProps {
   block: TimelineVoiceBlock
+  voiceIndex: number
   index: number
   total: number
   onMove: TimelineEditorProps['onMove']
@@ -26,10 +30,12 @@ interface VoiceBlockProps {
   onSplit: TimelineEditorProps['onSplit']
   onUpdateText: TimelineEditorProps['onUpdateText']
   onRetry: TimelineEditorProps['onRetry']
+  onRemove: TimelineEditorProps['onRemove']
 }
 
 function VoiceBlock({
   block,
+  voiceIndex,
   index,
   total,
   onMove,
@@ -37,41 +43,32 @@ function VoiceBlock({
   onSplit,
   onUpdateText,
   onRetry,
+  onRemove,
 }: VoiceBlockProps) {
   const selectTrack = usePlayerStore((state) => state.select)
-  const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(block.text)
-  const holdTimer = useRef<number | null>(null)
 
-  function startHold(event: PointerEvent<HTMLDivElement>) {
-    if (event.pointerType === 'mouse') return
-    holdTimer.current = window.setTimeout(() => setEditing(true), 550)
-  }
+  useEffect(() => setDraft(block.text), [block.text])
 
-  function stopHold() {
-    if (holdTimer.current !== null) window.clearTimeout(holdTimer.current)
-    holdTimer.current = null
-  }
-
-  function saveEdit() {
+  function saveDraft() {
     const next = draft.trim()
     if (next && next !== block.text) onUpdateText(block.id, next)
-    setEditing(false)
+    if (!next) setDraft(block.text)
   }
 
   const statusLabel = block.status === 'ready'
     ? '완료'
     : block.status === 'generating'
-      ? `${Math.round(block.progress)}%`
+      ? `${Math.round(block.progress)}% 생성 중`
       : block.status === 'failed'
-        ? '실패'
-        : '대기'
+        ? '생성 실패'
+        : '생성 대기'
 
   return (
-    <div
-      className={`soa-timeline-block soa-timeline-block--voice is-${block.status}`}
-      draggable={!editing && block.status !== 'generating'}
-      onDragStart={(event: DragEvent<HTMLDivElement>) => {
+    <article
+      className={`soa-dubbing-block is-${block.status}`}
+      draggable={block.status !== 'generating'}
+      onDragStart={(event: DragEvent<HTMLElement>) => {
         event.dataTransfer.setData('text/plain', block.id)
       }}
       onDragOver={(event) => event.preventDefault()}
@@ -80,74 +77,62 @@ function VoiceBlock({
         const sourceId = event.dataTransfer.getData('text/plain')
         if (sourceId) onReorder(sourceId, block.id)
       }}
-      onPointerDown={startHold}
-      onPointerUp={stopHold}
-      onPointerCancel={stopHold}
-      onDoubleClick={() => setEditing(true)}
     >
-      <div className="soa-timeline-block__top">
-        <span>음성 · {block.voiceName}</span>
-        <b>{formatDuration(block.durationSeconds)}</b>
-      </div>
-      {editing ? (
-        <div className="soa-timeline-edit">
-          <textarea
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            aria-label="타임라인 문장 수정"
-            autoFocus
-          />
-          <div>
-            <button type="button" onClick={() => setEditing(false)}>취소</button>
-            <button type="button" onClick={saveEdit}>저장</button>
-          </div>
+      <header>
+        <div className="soa-dubbing-block__voice">
+          <span aria-hidden="true">{block.voiceName.slice(0, 1)}</span>
+          <div><strong>{block.voiceName}</strong><small>대사 {voiceIndex + 1}</small></div>
         </div>
-      ) : (
-        <p>{block.text}</p>
-      )}
-      <div className="soa-timeline-block__status">
-        <span className="soa-timeline-status-dot" aria-hidden="true" />
-        <strong>{statusLabel}</strong>
-        {block.status === 'generating' ? (
-          <i style={{ width: `${Math.max(4, block.progress)}%` }} />
-        ) : null}
-      </div>
-      {block.error ? <small>{block.error}</small> : null}
-      <div className="soa-timeline-actions">
-        <button
-          type="button"
-          disabled={index === 0}
-          onClick={() => onMove(block.id, -1)}
-          aria-label="블록 왼쪽 이동"
-        >
-          ←
-        </button>
-        <button
-          type="button"
-          disabled={index === total - 1}
-          onClick={() => onMove(block.id, 1)}
-          aria-label="블록 오른쪽 이동"
-        >
-          →
-        </button>
-        <button type="button" onClick={() => onSplit(block.id)} aria-label="블록 자르기">
-          ✂
-        </button>
-        <button type="button" onClick={() => setEditing(true)} aria-label="블록 텍스트 수정">
-          수정
-        </button>
-        {block.status === 'ready' && block.trackId ? (
-          <button type="button" onClick={() => selectTrack(block.trackId!)}>
-            듣기
-          </button>
-        ) : null}
-        {block.status === 'failed' || block.status === 'queued' ? (
-          <button type="button" className="is-primary" onClick={() => onRetry(block.id)}>
-            {block.status === 'failed' ? '재시도' : '생성'}
-          </button>
-        ) : null}
-      </div>
-    </div>
+        <div className="soa-dubbing-block__tools">
+          {block.status === 'ready' && block.trackId ? (
+            <button type="button" onClick={() => selectTrack(block.trackId!)} aria-label="이 대사 재생">▶</button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onRetry(block.id)}
+              disabled={block.status === 'generating' || draft.trim().length === 0}
+              aria-label="이 대사 음성 생성"
+            >
+              {block.status === 'generating' ? '…' : '▶'}
+            </button>
+          )}
+          <details>
+            <summary aria-label="대사 블록 메뉴">⋮</summary>
+            <div>
+              <button type="button" onClick={() => onSplit(block.id)}>문장 나누기</button>
+              <button type="button" disabled={index === 0} onClick={() => onMove(block.id, -1)}>위로 이동</button>
+              <button type="button" disabled={index === total - 1} onClick={() => onMove(block.id, 1)}>아래로 이동</button>
+              <button type="button" className="is-danger" onClick={() => onRemove(block.id)}>블록 삭제</button>
+            </div>
+          </details>
+        </div>
+      </header>
+
+      <textarea
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={saveDraft}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+            event.preventDefault()
+            saveDraft()
+            if (draft.trim()) onRetry(block.id)
+          }
+        }}
+        maxLength={2_000}
+        aria-label={`${voiceIndex + 1}번 대사 수정`}
+        placeholder="더빙할 문장을 입력해 주세요."
+      />
+
+      <footer>
+        <span className="soa-dubbing-block__status"><i aria-hidden="true" />{statusLabel}</span>
+        <time>{formatDuration(block.durationSeconds)}</time>
+      </footer>
+      {block.status === 'generating' ? (
+        <div className="soa-dubbing-block__progress"><i style={{ width: `${Math.max(4, block.progress)}%` }} /></div>
+      ) : null}
+      {block.error ? <p className="soa-dubbing-block__error">{block.error}</p> : null}
+    </article>
   )
 }
 
@@ -158,58 +143,71 @@ export function TimelineEditor({
   onSplit,
   onUpdateText,
   onRetry,
+  onAddVoice,
   onAddPause,
+  onRemove,
   onClear,
 }: TimelineEditorProps) {
+  let voiceIndex = -1
+
   return (
-    <section className="soa-timeline" aria-label="음성 타임라인">
-      <header className="soa-timeline__head">
+    <section className="soa-timeline soa-dubbing-timeline" aria-label="음성 블록 편집">
+      <header className="soa-dubbing-timeline__head">
+        <div><span>VOICE BLOCKS</span><strong>대사별 음성 편집</strong></div>
         <div>
-          <span>LONGFORM VOICE TIMELINE</span>
-          <strong>문장별 음성 편집</strong>
-        </div>
-        <div>
-          <button type="button" onClick={onAddPause}>＋ 쉼 0.5초</button>
-          <button type="button" onClick={onClear} disabled={blocks.length === 0}>비우기</button>
+          <button type="button" onClick={onAddPause}>쉼 추가</button>
+          <button type="button" onClick={onClear} disabled={blocks.length === 0}>전체 비우기</button>
         </div>
       </header>
+
       {blocks.length === 0 ? (
-        <div className="soa-timeline-empty">
-          원고를 제작하면 문장별 음성 블록이 여기에 쌓입니다.
+        <div className="soa-dubbing-timeline__empty">
+          <strong>아직 음성 블록이 없습니다.</strong>
+          <p>장문 원고를 제작하거나 아래 + 버튼으로 대사를 직접 추가하세요.</p>
         </div>
       ) : (
-        <div className="soa-timeline-track">
-          {blocks.map((block, index) => block.kind === 'pause' ? (
-            <div
-              key={block.id}
-              className="soa-timeline-block soa-timeline-block--pause"
-              draggable
-              onDragStart={(event) => event.dataTransfer.setData('text/plain', block.id)}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={(event) => {
-                event.preventDefault()
-                const sourceId = event.dataTransfer.getData('text/plain')
-                if (sourceId) onReorder(sourceId, block.id)
-              }}
-            >
-              <span>쉼</span>
-              <strong>{block.durationSeconds.toFixed(1)}초</strong>
-            </div>
-          ) : (
-            <VoiceBlock
-              key={block.id}
-              block={block}
-              index={index}
-              total={blocks.length}
-              onMove={onMove}
-              onReorder={onReorder}
-              onSplit={onSplit}
-              onUpdateText={onUpdateText}
-              onRetry={onRetry}
-            />
-          ))}
+        <div className="soa-dubbing-block-list">
+          {blocks.map((block, index) => {
+            if (block.kind === 'pause') {
+              return (
+                <div
+                  key={block.id}
+                  className="soa-dubbing-pause-block"
+                  draggable
+                  onDragStart={(event) => event.dataTransfer.setData('text/plain', block.id)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault()
+                    const sourceId = event.dataTransfer.getData('text/plain')
+                    if (sourceId) onReorder(sourceId, block.id)
+                  }}
+                >
+                  <span>쉼표 구간</span><strong>{block.durationSeconds.toFixed(1)}초</strong>
+                  <button type="button" onClick={() => onRemove(block.id)} aria-label="쉼 블록 삭제">×</button>
+                </div>
+              )
+            }
+            voiceIndex += 1
+            return (
+              <VoiceBlock
+                key={block.id}
+                block={block}
+                voiceIndex={voiceIndex}
+                index={index}
+                total={blocks.length}
+                onMove={onMove}
+                onReorder={onReorder}
+                onSplit={onSplit}
+                onUpdateText={onUpdateText}
+                onRetry={onRetry}
+                onRemove={onRemove}
+              />
+            )
+          })}
         </div>
       )}
+
+      <button type="button" className="soa-dubbing-add-block" onClick={onAddVoice} aria-label="새 대사 블록 추가">＋</button>
     </section>
   )
 }

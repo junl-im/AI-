@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.8.6 Longform Voice Studio & Session Persistence**
+현재 기준 버전: **0.8.7 Dubbing Studio Workspace**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-01 18:59 KST**
+최종 갱신: **2026-08-01 19:45 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -318,10 +318,10 @@ SORION_WORKER_JOB_TTL_MINUTES
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.8.6-full.zip`.
-- 패치: `SoriON-AI-0.8.5-ci-hotfix-to-0.8.6-patch.zip`.
-- 기준본: `SoriON-AI-0.8.5-ci-hotfix-full.zip`.
-- 삭제: ChatComposer, ConversationPanel, mobile-workspace.css, CHAT_TIMELINE_WORKSPACE.md.
+- 전체본: `SoriON-AI-0.8.7-full.zip`.
+- 패치: `SoriON-AI-0.8.6-to-0.8.7-patch.zip`.
+- 기준본: `SoriON-AI-0.8.6-full.zip`.
+- 삭제 대상: 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
 - 편집 진입 후 대형 헤더를 다시 노출하지 않는다.
@@ -367,7 +367,7 @@ npm run build
 ```
 네트워크 제한 시 실행하지 못한 항목과 이유를 결과 보고서에 정확히 기록한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.8.7 Korean Voice Quality Streaming**.
+다음 목표 버전: **0.8.8 Korean Voice Quality Streaming**.
 우선순위:
 1. 공개 HTTPS FastAPI와 사설 GPU Worker 운영 템플릿.
 2. Fun-CosyVoice 3 일반 TTS Adapter와 한국어 장문 품질 평가.
@@ -476,5 +476,10 @@ npm run build
    로컬 System Voice는 실제 WAV를 만들지만 AI 모델 음성이 아니며 CosyVoice·GPU는 미준비다.
 9. 산출물: `SoriON-AI-0.8.6-full.zip`,
    `SoriON-AI-0.8.5-ci-hotfix-to-0.8.6-patch.zip`.
-10. 다음 예상 업데이트: `0.8.7 Korean Voice Quality Streaming`; 공개 API 운영 템플릿,
-    Fun-CosyVoice 3 일반 TTS Adapter, 한국어 장문 품질 평가와 첫 문장 Progressive Playback.
+10. 다음 예상 업데이트는 모바일 더빙 편집 IA 확정이다.
+## 32. 2026-08-01 19:45 KST · v0.8.7 릴리스 기록
+1. `0.8.6 → 0.8.7`: 프로젝트 제목·저장 상태, 화자/설정 Sheet, 세로형 대사 블록과 고정 플레이어를 추가했다.
+2. 채팅형 제작으로 돌아가지 않고 장문 원고 자동 분할과 문장별 직접 편집을 한 화면에 연결했다.
+3. 작업 비우기는 공통 reset token과 커스텀 확인창을 사용하며 세션·Player·타임라인이 함께 초기화된다.
+4. 다음 목표는 `0.8.8 Korean Voice Quality Streaming`이다.
+

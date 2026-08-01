@@ -29,6 +29,11 @@ export type { ApiFailureKind } from './apiTypes'
 const DEFAULT_TIMEOUT_MS = 12_000
 const RETRYABLE_STATUS = new Set([408, 425, 429, 502, 503, 504])
 
+function dispatchConnectionEvent(name: string, detail: Record<string, unknown>): void {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(name, { detail }))
+}
+
 export interface ApiProbeResult {
   baseUrl: string
   version: string

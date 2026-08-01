@@ -33,6 +33,11 @@
   padding-bottom: 176px;
 }
 
+.soa-workspace-shell--dubbing,
+.soa-workspace-shell--dubbing.soa-workspace-shell--has-player {
+  padding-bottom: 190px;
+}
+
 .soa-primary-frame {
   min-height: 62dvh;
 }

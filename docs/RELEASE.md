@@ -233,3 +233,13 @@ Semantic Versioning을 사용한다.
 - 삭제 대상: ChatComposer, ConversationPanel, mobile-workspace.css, CHAT_TIMELINE_WORKSPACE.md
 - API 90개·Worker 9개 및 Web quality 통과 후 배포
 - 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP, 검증 보고서, SHA-256을 함께 전달
+
+## 0.8.7 릴리스
+
+- 기준: `SoriON-AI-0.8.6-full.zip`
+- 전체 통파일 ZIP: `SoriON-AI-0.8.7-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.6-to-0.8.7-patch.zip`
+- 프로젝트 상단바, 화자·설정 Sheet, 세로형 대사 블록과 하단 고정 플레이어
+- 장문·세션·자동 엔진 연결 계약 유지
+- 삭제 대상 없음
+

@@ -1,39 +1,36 @@
-# SoriON AI 0.8.6 Result Report
+# SoriON AI 0.8.7 Result Report
 
 작업 일시: 2026-08-01 KST
 
-결과 버전: **0.8.6 Longform Voice Studio & Session Persistence**
+결과 버전: **0.8.7 Dubbing Studio Workspace**
 
 ## 결과
 
-- 채팅형 음성 제작을 최대 20,000자 장문 원고 편집기 중심으로 교체했다.
-- 문단·문장 분할, 예상 블록 수·길이와 순차 생성 상태를 한 화면에서 확인한다.
-- 서버가 늦게 연결되면 사용자가 이미 요청한 원고 제작을 자동으로 이어서 실행한다.
-- 공식 SoriON 아이콘을 favicon, PWA, 첫 화면과 작업공간 상단에 통일했다.
-- 모든 상단 브랜드 클릭은 첫 페이지로 이동한다.
-- 첫 뒤로가기는 커스텀 종료 확인, 두 번째 뒤로가기는 즉시 이탈한다.
-- GitHub Pages same-origin과 `:8443` API 오탐을 차단했다.
-- 공개 Voice API는 Actions 변수에서 빌드에 주입하고 사용자 수동 연결 UI는 만들지 않았다.
-- `/connectivity`와 `/engines`의 추천·health 상태를 같은 Orchestrator 기준으로 통일했다.
-- IndexedDB 작업공간 저장, revision 보호와 recover-first 결과 복구를 유지했다.
+- 장문 원고 중심 구조 위에 모바일 더빙 프로젝트 편집 IA를 적용했다.
+- 프로젝트 제목, 자동 저장 상태, 엔진 상태와 주요 작업을 상단에 통합했다.
+- 화자 선택과 읽기 설정을 각각 전용 Bottom Sheet로 분리했다.
+- 문장별 음성 블록에서 직접 수정·생성·재생·분할·이동·삭제할 수 있다.
+- 화면 하단 전체 폭 플레이어가 현재 Queue와 트랙 진행 상태를 표시한다.
+- 새 대사·쉼 추가, 현재 음원 다운로드와 다른 작업 화면 이동을 연결했다.
+- 작업 초기화는 커스텀 확인창을 거치며 workspace reset 계약으로 안전하게 비운다.
+- 0.8.6의 장문 자동 분할, IndexedDB 세션 복원, revision 보호와 자동 API 연결을 유지했다.
 
 ## 검증
 
-- API 90 passed
-- Worker 9 passed
-- 프로젝트 규칙 통과
-- TypeScript·TSX 구문 변환 통과
-- 상대경로 import 연결 검사 통과
-- Python compileall 및 Python 3.10 AST 호환성 검사 대상
-- 패치 적용 동등성·ZIP 무결성 최종 패키징 단계에서 확인
+- 프로젝트 규칙 검사 통과
+- 독립 TypeScript semantic 검사 통과
+- TypeScript·TSX 125개 구문 검사와 상대경로 import 267개 연결 통과
+- API 90개·Worker 9개 회귀 통과
+- Python compileall과 Python 3.10 AST 93개 파일 통과
+- CSS 13개, JSON 7개, GitHub Actions YAML 구조 검사 통과
+- 기준본 패치 적용 동등성과 ZIP 무결성 통과
 
-## 현재 엔진 상태
+## 알려진 현실
 
-로컬 진단에서는 API와 `system` 한국어 TTS가 준비되고 Mock도 계약 검증용으로 등록됐다.
-MeloTTS, CosyVoice Worker, GPU·모델은 설치되지 않아 실제 AI 엔진 준비 상태가 아니다.
-GitHub Pages 공개 화면은 `SORION_PUBLIC_API_BASE_URL`과 실제 HTTPS API 배포가 없으면 음성을
-생성할 수 없다. 코드가 Pages 주소를 잘못 호출하는 문제는 제거했지만 인프라 배포는 별도다.
+공개 GitHub Pages에서 실제 음성을 만들려면 별도 HTTPS FastAPI와
+`SORION_PUBLIC_API_BASE_URL` 배포 변수가 필요하다. System Voice는 실제 WAV를 만들 수 있지만
+AI 모델 음성과 동일하지 않으며, CosyVoice 모델·GPU 준비 상태를 허위로 표시하지 않는다.
 
 ## 다음 목표
 
-`0.8.7 Korean Voice Quality Streaming`
+`0.8.8 Korean Voice Quality Streaming`

@@ -6,7 +6,6 @@ import { usePlayerStore } from '../store/usePlayerStore'
 import { buildAudioFilename } from '../tts/audioFile'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
-import { splitTextForUi } from '../tts/segmentText'
 import {
   getSpeechProgress,
   getSpeechResult,
@@ -15,16 +14,17 @@ import {
 } from '../tts/voiceApi'
 import type { PersistedTimelineBlock } from '../workspace/sessionTypes'
 import type { TimelineBlock, TimelineVoiceBlock } from '../workspace/workspaceTypes'
+import {
+  createTimelineVoiceBlock,
+  estimateTimelineDuration,
+  timelineBlocksFromText,
+  timelineOptionsFromBlock,
+  timelineSplitPoint,
+  type TimelineGenerationOptions,
+} from '../workspace/timelineBlocks'
 import { createRandomId } from '../utils/randomId'
 
-export interface TimelineGenerationOptions {
-  voiceId: string
-  voiceName: string
-  emotion: TtsSynthesisRequest['emotion']
-  speed: number
-  engineId?: string
-  normalizeText: boolean
-}
+export type { TimelineGenerationOptions } from '../workspace/timelineBlocks'
 
 export interface TimelineGenerationResult {
   blockId: string
@@ -32,69 +32,6 @@ export interface TimelineGenerationResult {
 }
 
 type BlocksUpdater = (current: TimelineBlock[]) => TimelineBlock[]
-
-function estimateDuration(text: string): number {
-  return Math.max(1.2, Math.round((text.length / 4.4) * 10) / 10)
-}
-
-function createVoiceBlock(
-  text: string,
-  options: TimelineGenerationOptions,
-): TimelineVoiceBlock {
-  return {
-    id: createRandomId(),
-    kind: 'voice',
-    text,
-    voiceId: options.voiceId,
-    voiceName: options.voiceName,
-    emotion: options.emotion,
-    speed: options.speed,
-    engineId: options.engineId,
-    normalizeText: options.normalizeText,
-    jobId: null,
-    durationSeconds: estimateDuration(text),
-    status: 'queued',
-    progress: 0,
-    audio: null,
-    trackId: null,
-    error: null,
-    revision: 1,
-  }
-}
-
-function optionsFromBlock(block: TimelineVoiceBlock): TimelineGenerationOptions {
-  return {
-    voiceId: block.voiceId,
-    voiceName: block.voiceName,
-    emotion: block.emotion,
-    speed: block.speed,
-    engineId: block.engineId,
-    normalizeText: block.normalizeText,
-  }
-}
-
-function blocksFromText(
-  text: string,
-  options: TimelineGenerationOptions,
-): TimelineBlock[] {
-  const segments = splitTextForUi(text)
-  return segments.flatMap((segment, index) => {
-    const block = createVoiceBlock(segment, options)
-    if (index === segments.length - 1) return [block]
-    return [
-      block,
-      { id: createRandomId(), kind: 'pause' as const, durationSeconds: 0.5 },
-    ]
-  })
-}
-
-function midpoint(text: string): number {
-  const center = Math.floor(text.length / 2)
-  const right = text.indexOf(' ', center)
-  const left = text.lastIndexOf(' ', center)
-  if (right >= 0 && (left < 0 || right - center < center - left)) return right
-  return left > 0 ? left : center
-}
 
 export function useTimelineGeneration() {
   const [blocks, setBlocks] = useState<TimelineBlock[]>([])
@@ -143,7 +80,7 @@ export function useTimelineGeneration() {
     text: string,
     options: TimelineGenerationOptions,
   ): string[] => {
-    const staged = blocksFromText(text, options)
+    const staged = timelineBlocksFromText(text, options)
     commit((current) => current.length === 0
       ? staged
       : [
@@ -152,6 +89,16 @@ export function useTimelineGeneration() {
           ...staged,
         ])
     return staged.filter((block) => block.kind === 'voice').map((block) => block.id)
+  }, [commit])
+
+
+  const addVoiceBlock = useCallback((
+    options: TimelineGenerationOptions,
+    text = '',
+  ): string => {
+    const block = createTimelineVoiceBlock(text, options)
+    commit((current) => [...current, block])
+    return block.id
   }, [commit])
 
   const pollProgress = useCallback((
@@ -200,7 +147,7 @@ export function useTimelineGeneration() {
       voiceId: block.voiceId,
       emotion: block.emotion,
       speed: block.speed,
-      pitch: 0,
+      pitch: block.pitch,
       format: 'wav',
       engineId: block.engineId,
       normalizeText: block.normalizeText,
@@ -384,7 +331,7 @@ export function useTimelineGeneration() {
         ? [project.lastJobId]
         : []
     let voiceIndex = 0
-    const restored = blocksFromText(project.text, options).map((block) => {
+    const restored = timelineBlocksFromText(project.text, options).map((block) => {
       if (block.kind !== 'voice') return block
       const jobId = jobIds[voiceIndex] ?? null
       voiceIndex += 1
@@ -432,7 +379,7 @@ export function useTimelineGeneration() {
       return {
         ...block,
         text,
-        durationSeconds: estimateDuration(text),
+        durationSeconds: estimateTimelineDuration(text),
         status: 'queued' as const,
         progress: 0,
         audio: null,
@@ -451,10 +398,10 @@ export function useTimelineGeneration() {
       const block = current[index]
       if (!block || block.kind !== 'voice' || block.text.length < 8) return current
       if (block.trackId) removeTrack(block.trackId)
-      const splitAt = midpoint(block.text)
-      const options = optionsFromBlock(block)
-      const left = createVoiceBlock(block.text.slice(0, splitAt).trim(), options)
-      const right = createVoiceBlock(block.text.slice(splitAt).trim(), options)
+      const splitAt = timelineSplitPoint(block.text)
+      const options = timelineOptionsFromBlock(block)
+      const left = createTimelineVoiceBlock(block.text.slice(0, splitAt).trim(), options)
+      const right = createTimelineVoiceBlock(block.text.slice(splitAt).trim(), options)
       return [
         ...current.slice(0, index),
         left,
@@ -472,6 +419,16 @@ export function useTimelineGeneration() {
     ])
   }, [commit])
 
+
+  const removeBlock = useCallback((id: string) => {
+    cancelActiveGeneration(id)
+    commit((current) => current.filter((block) => {
+      if (block.id !== id) return true
+      if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
+      return false
+    }))
+  }, [cancelActiveGeneration, commit, removeTrack])
+
   const clear = useCallback(() => {
     controllers.current.forEach((controller) => controller.abort())
     blocksRef.current.forEach((block) => {
@@ -483,6 +440,7 @@ export function useTimelineGeneration() {
   return {
     blocks,
     stageText,
+    addVoiceBlock,
     restoreProject,
     restoreSession,
     recoverBlocks,
@@ -493,6 +451,7 @@ export function useTimelineGeneration() {
     updateText,
     splitBlock,
     addPause,
+    removeBlock,
     clear,
   }
 }

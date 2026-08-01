@@ -63,8 +63,8 @@ describe('AppShell', () => {
     act(() => useAppStore.getState().enterWorkspace('home'))
 
     expect(view.container.querySelector('.soa-workspace-shell--editor')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /SoriON AI/ })).toBeInTheDocument()
-    expect(screen.getByRole('complementary', { name: 'SoriON 고정 Dock' })).toBeInTheDocument()
+    expect(view.container.querySelector('.soa-workspace-shell--dubbing')).toBeInTheDocument()
+    expect(screen.getByRole('complementary', { name: '더빙 재생 플레이어' })).toBeInTheDocument()
   })
 
 
@@ -79,9 +79,9 @@ describe('AppShell', () => {
     expect(screen.queryByRole('complementary', { name: 'SoriON 고정 Dock' })).not.toBeInTheDocument()
   })
 
-  it('설정 화면을 상단에서 항상 찾을 수 있다', () => {
+  it('보조 작업 화면에서 설정을 상단에서 항상 찾을 수 있다', () => {
     render(<AppShell><p>작업 화면</p></AppShell>)
-    act(() => useAppStore.getState().enterWorkspace('home'))
+    act(() => useAppStore.getState().enterWorkspace('quality'))
 
     const settings = screen.getByRole('button', { name: '설정' })
     fireEvent.click(settings)

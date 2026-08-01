@@ -4,6 +4,8 @@
 @import "./brand-navigation.css";
 @import "./workspace-editor.css";
 @import "./longform-studio.css";
+@import "./dubbing-studio.css";
+@import "./dubbing-overlays.css";
 @import "./timeline-editor.css";
 @import "./player-dock.css";
 @import "./voice-clone.css";

@@ -195,9 +195,9 @@ await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   '<nav className="soa-dock__nav"',
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.test.tsx', [
-  '음성이 없으면 메뉴 Dock만 표시한다',
-  '완성 음성이 생기면 플레이어를 메뉴 위에 표시한다',
-  'Node.DOCUMENT_POSITION_FOLLOWING',
+  '만들기 화면에서는 음성이 없어도 고정 재생바를 표시한다',
+  '완성 음성이 생기면 만들기 재생바에서 바로 재생할 수 있다',
+  '더빙 재생 플레이어',
 ])
 await requireText('src/components/layout/AppShell.tsx', [
   'soa-workspace-shell--has-player',
@@ -285,7 +285,9 @@ await requireText('.env.example', ['SORION_JOB_STORE_PATH=.sorion/jobs.sqlite3',
 await requireText('src/settings/connectivityTypes.ts', ['workerHealthy', 'gpuReady', 'recommendedRecheckSeconds'])
 await requireText('docs/MOBILE_ENGINE_RELIABILITY.md', ['API·TTS·Worker·GPU', 'GET  /api/v1/tts/jobs/{job_id}/result', 'SORION_ALLOW_PRIVATE_NETWORK=true', '0.8.3 서버 재시작·다중 프로세스 복구'])
 await requireText('src/pages/HomePage.tsx', [
-  'soa-editor-workspace--longform',
+  'soa-dubbing-workspace',
+  'DubbingStudioHeader',
+  'DubbingVoiceControls',
   'LongformComposer',
   'timeline.stageText',
   'requestAutomaticApiReconnect',
@@ -302,8 +304,8 @@ await requireText('src/pages/LandingHome.tsx', [
 await requireText('src/components/workspace/LongformComposer.tsx', [
   'MAX_SCRIPT_LENGTH = 20_000',
   '음성으로 만들 장문 원고',
-  '원고를 문장별 음성으로 제작',
-  'Ctrl/⌘+Enter',
+  '새 더빙을 입력해 주세요.',
+  '전체 원고 음성 제작',
 ])
 await requireText('src/components/workspace/VoiceLibrary.tsx', [
   '목소리 라이브러리',
@@ -311,14 +313,19 @@ await requireText('src/components/workspace/VoiceLibrary.tsx', [
   'previewingId',
 ])
 await requireText('src/components/workspace/TimelineEditor.tsx', [
-  '음성 타임라인',
-  '블록 자르기',
-  '재시도',
-  '＋ 쉼 0.5초',
+  '음성 블록 편집',
+  '문장 나누기',
+  '생성 실패',
+  '쉼 추가',
+  'onAddVoice',
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   "window.scrollTo({ top: 0, behavior: 'smooth' })",
 ])
+await requireText('src/components/workspace/DubbingStudioHeader.tsx', ['프로젝트 제목', '현재 음성 다운로드', '현재 작업 비우기'])
+await requireText('docs/DUBBING_STUDIO_UX.md', ['더빙 스튜디오', '하단 고정 플레이어', 'workspace reset'])
+await requireText('src/components/workspace/DubbingVoiceControls.tsx', ['VoicePickerSheet', 'VoiceSettingsSheet', '음성 설정 열기'])
+await requireText('src/styles/dubbing-overlays.css', ['.soa-dubbing-player-dock', '.soa-bottom-sheet', '.soa-dubbing-add-block'])
 await requireText('services/api/app/schemas/tts.py', [
   'normalize_text: bool = True',
 ])

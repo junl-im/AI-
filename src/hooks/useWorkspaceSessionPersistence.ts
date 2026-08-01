@@ -22,6 +22,7 @@ interface WorkspaceSessionPersistenceOptions extends WorkspaceSessionDraft {
 interface WorkspaceSessionPersistenceState {
   hydrated: boolean
   storageMode: WorkspaceStorageMode
+  lastSavedAt: string | null
   saveNow: () => Promise<void>
 }
 
@@ -30,7 +31,11 @@ const SAVE_DELAY_MS = 450
 export function useWorkspaceSessionPersistence({
   workspaceEntered,
   page,
+  projectTitle,
   voiceId,
+  speechSpeed,
+  speechPitch,
+  speechEmotion,
   composerDraft,
   directiveIds,
   messages,
@@ -40,6 +45,7 @@ export function useWorkspaceSessionPersistence({
 }: WorkspaceSessionPersistenceOptions): WorkspaceSessionPersistenceState {
   const [hydrated, setHydrated] = useState(false)
   const [storageMode, setStorageMode] = useState<WorkspaceStorageMode>('memory')
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const revisionRef = useRef(0)
   const saveTimerRef = useRef<number | null>(null)
   const loadStartedRef = useRef(false)
@@ -49,7 +55,11 @@ export function useWorkspaceSessionPersistence({
   const initialDraftRef = useRef<WorkspaceSessionDraft>({
     workspaceEntered,
     page,
+    projectTitle,
     voiceId,
+    speechSpeed,
+    speechPitch,
+    speechEmotion,
     composerDraft,
     directiveIds,
     messages,
@@ -58,7 +68,11 @@ export function useWorkspaceSessionPersistence({
   const latestDraftRef = useRef<WorkspaceSessionDraft>({
     workspaceEntered,
     page,
+    projectTitle,
     voiceId,
+    speechSpeed,
+    speechPitch,
+    speechEmotion,
     composerDraft,
     directiveIds,
     messages,
@@ -68,7 +82,11 @@ export function useWorkspaceSessionPersistence({
   latestDraftRef.current = {
     workspaceEntered,
     page,
+    projectTitle,
     voiceId,
+    speechSpeed,
+    speechPitch,
+    speechEmotion,
     composerDraft,
     directiveIds,
     messages,
@@ -81,13 +99,20 @@ export function useWorkspaceSessionPersistence({
     if (
       initial.workspaceEntered !== workspaceEntered
       || initial.page !== page
+      || initial.projectTitle !== projectTitle
       || initial.voiceId !== voiceId
+      || initial.speechSpeed !== speechSpeed
+      || initial.speechPitch !== speechPitch
+      || initial.speechEmotion !== speechEmotion
       || initial.composerDraft !== composerDraft
       || initial.directiveIds !== directiveIds
       || initial.messages !== messages
       || initial.blocks !== blocks
     ) dirtyBeforeHydrationRef.current = true
-  }, [blocks, composerDraft, directiveIds, hydrated, messages, page, voiceId, workspaceEntered])
+  }, [
+    blocks, composerDraft, directiveIds, hydrated, messages, page, projectTitle,
+    speechEmotion, speechPitch, speechSpeed, voiceId, workspaceEntered,
+  ])
 
   useEffect(() => {
     loadStartedRef.current = true
@@ -98,6 +123,7 @@ export function useWorkspaceSessionPersistence({
       setStorageMode(mode)
       if (session) {
         revisionRef.current = session.revision
+        setLastSavedAt(session.savedAt)
         if (
           !dirtyBeforeHydrationRef.current
           && hasMeaningfulWorkspaceSession(session)
@@ -132,6 +158,7 @@ export function useWorkspaceSessionPersistence({
     }
     const result = await saveWorkspaceSession(session)
     setStorageMode(result.mode)
+    if (result.persisted) setLastSavedAt(session.savedAt)
     if (!result.persisted && !persistenceWarningShownRef.current) {
       persistenceWarningShownRef.current = true
       onPersistenceUnavailable()
@@ -160,7 +187,11 @@ export function useWorkspaceSessionPersistence({
     hydrated,
     messages,
     page,
+    projectTitle,
     saveNow,
+    speechEmotion,
+    speechPitch,
+    speechSpeed,
     voiceId,
     workspaceEntered,
   ])
@@ -185,5 +216,5 @@ export function useWorkspaceSessionPersistence({
     }
   }, [hydrated, persistCurrentDraft])
 
-  return { hydrated, storageMode, saveNow }
+  return { hydrated, storageMode, lastSavedAt, saveNow }
 }

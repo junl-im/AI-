@@ -13,6 +13,7 @@ export function AppShell({ children }: PropsWithChildren) {
   useBackendBootstrap()
   const exitConfirmation = useExitConfirmation()
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
+  const page = useAppStore((state) => state.page)
   const hasPlayer = usePlayerStore((state) => (
     workspaceEntered && getCurrentTrack(state) !== null
   ))
@@ -20,11 +21,12 @@ export function AppShell({ children }: PropsWithChildren) {
     'soa-workspace-shell',
     workspaceEntered ? 'soa-workspace-shell--editor' : 'soa-workspace-shell--landing',
     hasPlayer ? 'soa-workspace-shell--has-player' : '',
+    workspaceEntered && page === 'home' ? 'soa-workspace-shell--dubbing' : '',
   ].filter(Boolean).join(' ')
 
   return (
     <div className={workspaceEntered ? 'soa-app-root is-editor' : 'soa-app-root is-landing'}>
-      {workspaceEntered ? <CompactWorkspaceHeader /> : <BrandMasthead />}
+      {workspaceEntered ? (page === 'home' ? null : <CompactWorkspaceHeader />) : <BrandMasthead />}
       <div className={shellClassName}>
         <section className="soa-primary-frame">{children}</section>
       </div>

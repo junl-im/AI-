@@ -8,7 +8,7 @@ import type {
 } from './workspaceTypes'
 
 export const ACTIVE_WORKSPACE_SESSION_ID = 'active-workspace'
-export const WORKSPACE_SESSION_SCHEMA_VERSION = 1
+export const WORKSPACE_SESSION_SCHEMA_VERSION = 2
 
 export type WorkspaceStorageMode = 'indexeddb' | 'localstorage' | 'memory'
 
@@ -20,6 +20,7 @@ export interface PersistedTimelineVoiceBlock {
   voiceName: string
   emotion: VoiceEmotion
   speed: number
+  pitch: number
   engineId?: string
   normalizeText: boolean
   jobId: string | null
@@ -47,7 +48,11 @@ export interface WorkspaceSession {
   savedAt: string
   workspaceEntered: boolean
   page: AppPage
+  projectTitle: string
   voiceId: string
+  speechSpeed: number
+  speechPitch: number
+  speechEmotion: VoiceEmotion
   composerDraft: string
   directiveIds: ComposerDirective['id'][]
   messages: WorkspaceMessage[]
@@ -57,7 +62,11 @@ export interface WorkspaceSession {
 export interface WorkspaceSessionDraft {
   workspaceEntered: boolean
   page: AppPage
+  projectTitle: string
   voiceId: string
+  speechSpeed: number
+  speechPitch: number
+  speechEmotion: VoiceEmotion
   composerDraft: string
   directiveIds: ComposerDirective['id'][]
   messages: WorkspaceMessage[]

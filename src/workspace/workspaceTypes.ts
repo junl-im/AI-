@@ -15,6 +15,7 @@ export interface TimelineVoiceBlock extends TimelineBaseBlock {
   voiceName: string
   emotion: VoiceEmotion
   speed: number
+  pitch: number
   engineId?: string
   normalizeText: boolean
   jobId: string | null

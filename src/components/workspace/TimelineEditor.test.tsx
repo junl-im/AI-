@@ -12,6 +12,7 @@ const blocks: TimelineBlock[] = [
     voiceName: '혜린',
     emotion: 'neutral',
     speed: 1,
+    pitch: 0,
     engineId: 'system',
     normalizeText: true,
     jobId: null,
@@ -32,6 +33,7 @@ const blocks: TimelineBlock[] = [
     voiceName: '혜린',
     emotion: 'neutral',
     speed: 1,
+    pitch: 0,
     engineId: 'system',
     normalizeText: true,
     jobId: null,
@@ -56,16 +58,18 @@ describe('TimelineEditor', () => {
         onSplit={vi.fn()}
         onUpdateText={vi.fn()}
         onRetry={onRetry}
+        onAddVoice={vi.fn()}
         onAddPause={vi.fn()}
+        onRemove={vi.fn()}
         onClear={vi.fn()}
       />,
     )
 
-    expect(screen.getByText('첫 번째 문장입니다.')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('첫 번째 문장입니다.')).toBeInTheDocument()
     expect(screen.getByText('0.5초')).toBeInTheDocument()
     expect(screen.getByText('엔진 연결 실패')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: '재시도' }))
+    fireEvent.click(screen.getByRole('button', { name: '이 대사 음성 생성' }))
     expect(onRetry).toHaveBeenCalledWith('voice-2')
   })
 })

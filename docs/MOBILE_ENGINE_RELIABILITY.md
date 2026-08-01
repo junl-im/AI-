@@ -1,6 +1,6 @@
 # MOBILE ENGINE/API RELIABILITY
 
-버전: `0.8.6`
+버전: `0.8.7`
 
 ## 목표
 

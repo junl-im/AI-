@@ -346,3 +346,21 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 - API Python 3.10 Ruff와 pytest, Worker Ruff와 pytest 통과
 
 현재 기준 테스트 수는 API 90개, Worker 9개다.
+
+## 0.8.7 더빙 스튜디오 회귀 검사
+
+### Web
+
+- 프로젝트 제목 변경과 자동 저장 시각 표시
+- 화자 선택·미리듣기·읽기 설정 Sheet 열기와 닫기
+- 장문 원고의 문장 블록 변환과 블록별 수정·생성·재생
+- 분할·순서 이동·삭제·새 대사·쉼 추가
+- 작업 비우기 확인창과 workspace reset
+- 하단 Player Queue의 현재 트랙·이전·재생·다음·진행률 연결
+- 세션 복원 시 pitch 기본값과 기존 프로젝트 호환
+
+### 공통
+
+- API 90개·Worker 9개 회귀 유지
+- Ruff, ESLint, TypeScript, Vitest와 Vite build는 CI 최종 관문
+

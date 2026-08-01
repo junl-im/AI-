@@ -46,26 +46,21 @@ describe('LinkedPlayerDock', () => {
     vi.restoreAllMocks()
   })
 
-  it('음성이 없으면 메뉴 Dock만 표시한다', () => {
+  it('만들기 화면에서는 음성이 없어도 고정 재생바를 표시한다', () => {
     render(<LinkedPlayerDock />)
 
-    expect(screen.getByRole('navigation', { name: '주요 메뉴' })).toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: '연계형 오디오 플레이어' }))
-      .not.toBeInTheDocument()
-    expect(screen.getByLabelText('SoriON 고정 Dock')).toHaveClass('soa-dock--nav-only')
+    expect(screen.getByRole('complementary', { name: '더빙 재생 플레이어' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '재생' })).toBeDisabled()
+    expect(screen.queryByRole('navigation', { name: '주요 메뉴' })).not.toBeInTheDocument()
   })
 
-  it('완성 음성이 생기면 플레이어를 메뉴 위에 표시한다', () => {
+  it('완성 음성이 생기면 만들기 재생바에서 바로 재생할 수 있다', () => {
     usePlayerStore.getState().enqueue(generatedAudio(), '완성 음성')
     render(<LinkedPlayerDock />)
 
-    const player = screen.getByRole('region', { name: '연계형 오디오 플레이어' })
-    const navigation = screen.getByRole('navigation', { name: '주요 메뉴' })
-    const relation = player.compareDocumentPosition(navigation)
-
     expect(screen.getByText('완성 음성')).toBeInTheDocument()
-    expect(relation & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(screen.getByLabelText('SoriON 고정 Dock')).toHaveClass('soa-dock--has-player')
+    expect(screen.getByRole('button', { name: '재생' })).toBeEnabled()
+    expect(screen.getByRole('link', { name: '다운로드' })).toBeInTheDocument()
   })
 
   it('Dock 메뉴를 누르면 페이지와 관계없이 화면 상단으로 이동한다', () => {

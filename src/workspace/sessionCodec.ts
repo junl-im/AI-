@@ -13,6 +13,7 @@ const MAX_MESSAGES = 100
 const MAX_BLOCKS = 240
 const MAX_MESSAGE_LENGTH = 4_000
 const MAX_COMPOSER_LENGTH = 20_000
+const MAX_PROJECT_TITLE_LENGTH = 80
 const MAX_BLOCK_TEXT_LENGTH = 2_000
 const MAX_SESSION_AGE_MS = 1000 * 60 * 60 * 24 * 45
 const pages: AppPage[] = ['home', 'clone', 'quality', 'projects', 'settings']
@@ -56,6 +57,7 @@ function normalizeBlock(value: unknown): PersistedTimelineBlock | null {
     voiceName: safeText(value.voiceName, 120),
     emotion,
     speed: Math.min(2, Math.max(0.5, finiteNumber(value.speed, 1))),
+    pitch: Math.min(12, Math.max(-12, Math.round(finiteNumber(value.pitch, 0)))),
     engineId: typeof value.engineId === 'string' ? value.engineId.slice(0, 120) : undefined,
     normalizeText: value.normalizeText !== false,
     jobId: typeof value.jobId === 'string' ? value.jobId.slice(0, 160) : null,
@@ -87,6 +89,7 @@ export function createWorkspaceSession(
       voiceName: block.voiceName,
       emotion: block.emotion,
       speed: block.speed,
+      pitch: block.pitch,
       engineId: block.engineId,
       normalizeText: block.normalizeText,
       jobId: block.jobId,
@@ -105,7 +108,11 @@ export function createWorkspaceSession(
     savedAt: new Date().toISOString(),
     workspaceEntered: draft.workspaceEntered,
     page: draft.page,
+    projectTitle: draft.projectTitle.slice(0, MAX_PROJECT_TITLE_LENGTH),
     voiceId: draft.voiceId.slice(0, 120),
+    speechSpeed: Math.min(2, Math.max(0.5, draft.speechSpeed)),
+    speechPitch: Math.min(12, Math.max(-12, Math.round(draft.speechPitch))),
+    speechEmotion: draft.speechEmotion,
     composerDraft: draft.composerDraft.slice(0, MAX_COMPOSER_LENGTH),
     directiveIds: draft.directiveIds.filter((id) => directiveIds.includes(id)),
     messages: draft.messages.slice(-MAX_MESSAGES).map((message) => ({
@@ -121,7 +128,7 @@ export function createWorkspaceSession(
 export function normalizeWorkspaceSession(value: unknown): WorkspaceSession | null {
   if (!isRecord(value)) return null
   if (value.id !== ACTIVE_WORKSPACE_SESSION_ID) return null
-  if (value.schemaVersion !== WORKSPACE_SESSION_SCHEMA_VERSION) return null
+  if (![1, WORKSPACE_SESSION_SCHEMA_VERSION].includes(Number(value.schemaVersion))) return null
   if (typeof value.savedAt !== 'string') return null
   const savedAt = Date.parse(value.savedAt)
   if (!Number.isFinite(savedAt) || Date.now() - savedAt > MAX_SESSION_AGE_MS) return null
@@ -150,7 +157,14 @@ export function normalizeWorkspaceSession(value: unknown): WorkspaceSession | nu
     savedAt: new Date(savedAt).toISOString(),
     workspaceEntered: value.workspaceEntered === true,
     page,
+    projectTitle: safeText(value.projectTitle, MAX_PROJECT_TITLE_LENGTH) || '새 프로젝트',
     voiceId: safeText(value.voiceId, 120),
+    speechSpeed: Math.min(2, Math.max(0.5, finiteNumber(value.speechSpeed, 1))),
+    speechPitch: Math.min(12, Math.max(-12, Math.round(finiteNumber(value.speechPitch, 0)))),
+    speechEmotion: ['neutral', 'happy', 'calm', 'sad', 'angry', 'commercial']
+      .includes(String(value.speechEmotion))
+      ? value.speechEmotion as VoiceEmotion
+      : 'neutral',
     composerDraft: safeText(value.composerDraft, MAX_COMPOSER_LENGTH),
     directiveIds: Array.isArray(value.directiveIds)
       ? value.directiveIds.filter((id): id is typeof directiveIds[number] => (
@@ -164,6 +178,10 @@ export function normalizeWorkspaceSession(value: unknown): WorkspaceSession | nu
 
 export function hasMeaningfulWorkspaceSession(session: WorkspaceSession): boolean {
   return session.workspaceEntered
+    || session.projectTitle !== '새 프로젝트'
+    || session.speechSpeed !== 1
+    || session.speechPitch !== 0
+    || session.speechEmotion !== 'neutral'
     || session.blocks.length > 0
     || session.messages.length > 1
     || session.composerDraft.trim().length > 0
