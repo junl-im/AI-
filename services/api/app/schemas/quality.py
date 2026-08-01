@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.schemas.engine import EngineHealth, EngineMode
+from app.schemas.engine import EngineHealth, EngineMode, EngineQualityTier
 from app.schemas.tts import Emotion
 
 
@@ -17,6 +17,10 @@ class EngineDiagnostic(BaseModel):
     mode: EngineMode
     ready: bool
     provider: str
+    quality_tier: EngineQualityTier = "basic"
+    korean_specialization: int = Field(default=0, ge=0, le=100)
+    long_form: bool = False
+    streaming: bool = False
     model_loaded: bool | None = None
     recommended: bool = False
     health: EngineHealth = "unavailable"

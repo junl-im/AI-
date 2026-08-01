@@ -1,16 +1,18 @@
 import type { TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
+import type { BrowserSpeechPlayback } from './browserSpeech'
 import type { SpeechJobProgress } from './voiceApi'
 
 export type GenerationPhase = 'idle' | 'preparing' | 'requesting' | 'rendering' | 'completed' | 'cancelled' | 'failed'
-export type AudioSource = 'api' | 'browser-demo'
+export type AudioSource = 'api' | 'browser-demo' | 'browser-speech'
 
 export interface GeneratedAudio {
-  url: string
+  url: string | null
   filename: string
   source: AudioSource
   durationSeconds: number
   result: TtsSynthesisResult
   revokeOnRemove?: boolean
+  browserSpeech?: BrowserSpeechPlayback
 }
 
 export interface GenerationAttempt {

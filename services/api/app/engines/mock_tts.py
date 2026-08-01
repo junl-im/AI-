@@ -21,6 +21,8 @@ class MockTtsEngine(TtsEngine):
             supports_voice_clone=False,
             ready=True,
             reason="기능 계약 검증용이며 사람의 음성을 생성하지 않습니다.",
+            quality_tier="basic",
+            korean_specialization=0,
         )
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:

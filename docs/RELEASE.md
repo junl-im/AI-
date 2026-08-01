@@ -275,3 +275,20 @@ Semantic Versioning을 사용한다.
 - 목적: popstate React 상태 갱신 타이밍과 장문 placeholder 카피 결합으로 인한 Vitest 실패 수정
 - 추가 보호: Web 테스트 계약 정적 검사 추가
 - 삭제 파일: 없음
+
+## 0.8.8 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.8-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.7-ci-hotfix-4-to-0.8.8-patch.zip`
+- 패치 기준 버전: `0.8.7-ci-hotfix-4`
+- 범위: 공통 상단 배너 복원, 사용자 제공 PNG 공식 로고, Browser Voice 자동 대체 재생
+- 삭제 파일: `public/sorion-icon.svg`
+- 실제 AI·WAV·복제 기능은 별도 공개 HTTPS Voice API가 필요
+
+## 0.8.9 릴리스
+
+- 기준: `SoriON-AI-0.8.8-full.zip`
+- 전체 통파일 ZIP: `SoriON-AI-0.8.9-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.8-to-0.8.9-patch.zip`
+- 범위: 공통 제품 셸, 한국어 Premium TTS Adapter Mesh, 자동 API 다중 후보 장애 전환
+- 삭제 파일: 없음

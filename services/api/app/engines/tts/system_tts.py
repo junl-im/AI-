@@ -193,6 +193,9 @@ class SystemTtsEngine(TtsEngine):
             supports_voice_clone=False,
             ready=backend is not None,
             reason=self.adapter.reason,
+            quality_tier="basic",
+            korean_specialization=45,
+            long_form=True,
         )
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:

@@ -1,6 +1,6 @@
 # MOBILE ENGINE/API RELIABILITY
 
-버전: `0.8.7`
+버전: `0.8.9`
 
 ## 목표
 
@@ -33,10 +33,13 @@ sorion-client-id
 
 후보 우선순위:
 
-1. 같은 Origin의 `/api/v1`
-2. 빌드 시 `VITE_API_BASE_URL`
+1. 배포 산출물의 `sorion-runtime-config.json` 다중 HTTPS 후보
+2. 빌드 시 `VITE_API_BASE_URLS`와 호환용 단일 `VITE_API_BASE_URL`
 3. 마지막 성공 주소와 최근 자동 발견 주소
-4. localhost 개발 후보 또는 현재 HTTP 호스트의 안전한 포트
+4. same-origin reverse proxy 또는 localhost 개발 후보
+
+GitHub Pages 같은 정적 호스트는 same-origin API 후보에서 제외한다. 런타임 후보를 순서대로
+probe하고 첫 정상 FastAPI를 자동 선택하므로 사용자가 주소나 엔진을 직접 연결하지 않는다.
 
 - 사용자가 API 주소를 입력하거나 저장하는 화면은 없다.
 - 성공 주소는 last-good과 최근 이력에 기록한다.

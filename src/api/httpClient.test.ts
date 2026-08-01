@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   apiRequest,
+  discoverApiBaseUrl,
   getApiDiscoveryCandidates,
   getApiConnectionContext,
   getLocationApiCandidates,
@@ -10,6 +11,7 @@ import {
   resetApiBaseUrl,
   saveApiBaseUrl,
 } from './httpClient'
+import { loadRuntimeApiCandidates } from './apiConnection'
 
 afterEach(() => {
   window.localStorage.clear()
@@ -38,6 +40,60 @@ describe('normalizeApiBaseUrl', () => {
 })
 
 describe('API connection context', () => {
+  it('loads multiple runtime API failover candidates without exposing a settings form', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      apiBaseUrls: [
+        'https://voice-a.example.com',
+        'https://voice-b.example.com/api/v1',
+        'invalid',
+      ],
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })))
+
+    await expect(loadRuntimeApiCandidates()).resolves.toEqual([
+      'https://voice-a.example.com/api/v1',
+      'https://voice-b.example.com/api/v1',
+    ])
+  })
+
+
+  it('skips a failed saved API and promotes the next runtime candidate', async () => {
+    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input)
+      if (url.endsWith('sorion-runtime-config.json')) {
+        return Promise.resolve(new Response(JSON.stringify({
+          apiBaseUrls: [
+            'https://voice-a.example.com',
+            'https://voice-b.example.com',
+          ],
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }))
+      }
+      if (url.startsWith('https://voice-b.example.com/api/v1/health')) {
+        return Promise.resolve(new Response(JSON.stringify({
+          status: 'ok',
+          version: '0.8.9',
+          default_engine: 'auto',
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }))
+      }
+      return Promise.reject(new TypeError(`unexpected candidate: ${url}`))
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(discoverApiBaseUrl('https://voice-a.example.com/api/v1'))
+      .resolves.toMatchObject({ baseUrl: 'https://voice-b.example.com/api/v1' })
+    expect(fetchMock.mock.calls.some(([input]) => String(input).startsWith(
+      'https://voice-a.example.com/api/v1/health',
+    ))).toBe(false)
+  })
+
   it('includes the current origin as an automatic API candidate', () => {
     expect(getApiDiscoveryCandidates()[0]).toBe(
       normalizeApiBaseUrl(`${window.location.origin}/api/v1`),

@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
-import {
-  getApiConnectionContext,
-  requestAutomaticApiReconnect,
-} from '../api/httpClient'
+import { requestAutomaticApiReconnect } from '../api/httpClient'
 import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader'
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
 import { LongformComposer } from '../components/workspace/LongformComposer'
@@ -18,6 +15,10 @@ import { saveProject } from '../projects/projectRepository'
 import { useAppStore } from '../store/useAppStore'
 import { getCurrentTrack, usePlayerStore } from '../store/usePlayerStore'
 import { buildAudioFilename } from '../tts/audioFile'
+import {
+  BROWSER_SPEECH_ENGINE_ID,
+  createBrowserSpeechPlayback,
+} from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import { synthesizeSpeech } from '../tts/voiceApi'
@@ -42,25 +43,34 @@ const initialMessages: WorkspaceMessage[] = [
 ]
 function generatedPreview(
   result: Awaited<ReturnType<typeof synthesizeSpeech>>,
-  text: string,
-  voiceId: string,
+  request: TtsSynthesisRequest,
   voiceName: string,
 ): GeneratedAudio {
   if (result.audioUrl) {
     return {
       url: result.audioUrl,
-      filename: buildAudioFilename(text, voiceName, 'wav'),
+      filename: buildAudioFilename(request.text, voiceName, 'wav'),
       source: 'api',
       durationSeconds: result.estimatedDurationSeconds,
       result,
     }
   }
-  const blob = createMockWave(text, voiceId)
+  if (result.engineId === BROWSER_SPEECH_ENGINE_ID) {
+    return {
+      url: null,
+      filename: buildAudioFilename(request.text, voiceName, 'wav'),
+      source: 'browser-speech',
+      durationSeconds: result.estimatedDurationSeconds,
+      browserSpeech: createBrowserSpeechPlayback(request),
+      result,
+    }
+  }
+  const blob = createMockWave(request.text, request.voiceId)
   return {
     url: URL.createObjectURL(blob),
-    filename: buildAudioFilename(text, voiceName, 'wav'),
+    filename: buildAudioFilename(request.text, voiceName, 'wav'),
     source: 'browser-demo',
-    durationSeconds: getMockWaveDuration(text),
+    durationSeconds: getMockWaveDuration(request.text),
     revokeOnRemove: true,
     result: {
       ...result,
@@ -87,7 +97,6 @@ export function HomePage() {
   const backendMessage = useAppStore((state) => state.backendMessage)
   const showNotice = useAppStore((state) => state.showNotice)
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
-  const exitWorkspace = useAppStore((state) => state.exitWorkspace)
   const activeProject = useAppStore((state) => state.activeProject)
   const workspaceResetToken = useAppStore((state) => state.workspaceResetToken)
   const clearActiveProject = useAppStore((state) => state.clearActiveProject)
@@ -264,7 +273,10 @@ export function HomePage() {
     const first = generated[0]?.audio
     if (!first) return
     const completedByBlock = new Map(
-      generated.map((item) => [item.blockId, item.audio.result.jobId]),
+      generated.map((item) => [
+        item.blockId,
+        item.audio.source === 'api' ? item.audio.result.jobId : null,
+      ]),
     )
     const now = new Date().toISOString()
     await saveProject({
@@ -276,11 +288,11 @@ export function HomePage() {
       createdAt: now,
       updatedAt: now,
       status: 'generated',
-      lastJobId: first.result.jobId,
+      lastJobId: first.source === 'api' ? first.result.jobId : undefined,
       engineId: first.result.engineId,
       engineMode: first.result.engineMode,
       audioSource: first.source,
-      outputFormat: 'wav',
+      ...(first.source === 'browser-speech' ? {} : { outputFormat: 'wav' as const }),
       speed: options.speed,
       pitch: options.pitch,
       normalizeText: options.normalizeText,
@@ -332,12 +344,12 @@ export function HomePage() {
       text: `${blockIds.length}개 대사 블록으로 정리했습니다. 원문은 위 편집기에 유지됩니다.`,
     })
     const pending = { text: value, options, blockIds }
-    if (!getApiConnectionContext().configured || !engineAvailable) {
+    if (!engineAvailable) {
       setPendingGeneration(pending)
       appendMessage({
         role: 'system',
-        badge: '음성 서버 연결 대기',
-        text: '대사 블록을 준비했습니다. 서버 연결이 복구되면 자동으로 이어서 생성합니다.',
+        badge: '음성 시스템 준비 중',
+        text: '대사 블록을 준비했습니다. 사용할 수 있는 음성이 준비되면 자동으로 이어서 생성합니다.',
       })
       requestAutomaticApiReconnect()
       return
@@ -369,18 +381,22 @@ export function HomePage() {
         normalizeText,
       }
       const result = await synthesizeSpeech(request, createRandomId())
-      const audio = generatedPreview(result, text, nextVoiceId, voice.name)
+      const audio = generatedPreview(result, request, voice.name)
       enqueue(audio, `${voice.name} 프리뷰`)
       appendMessage({
         role: 'assistant',
-        badge: audio.source === 'browser-demo'
-          ? 'Demo 프리뷰'
+        badge: audio.source === 'browser-speech'
+          ? '브라우저 음성'
+          : audio.source === 'browser-demo'
+            ? 'Demo 프리뷰'
+            : audio.result.fallbackUsed
+              ? '자동 엔진 전환'
+              : '목소리 프리뷰',
+        text: audio.source === 'browser-speech'
+          ? `${voice.name} 설정으로 브라우저 음성을 바로 재생할 수 있습니다.`
           : audio.result.fallbackUsed
-            ? '자동 엔진 전환'
-            : '목소리 프리뷰',
-        text: audio.result.fallbackUsed
-          ? `${voice.name} 프리뷰를 사용 가능한 대체 엔진으로 완성했습니다.`
-          : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
+            ? `${voice.name} 프리뷰를 사용 가능한 대체 엔진으로 완성했습니다.`
+            : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
       })
     } catch {
       appendMessage({
@@ -417,7 +433,6 @@ export function HomePage() {
         downloadHref={currentTrack?.audio.url ?? null}
         downloadName={currentTrack?.audio.filename ?? 'sorion-voice.wav'}
         onTitleChange={setProjectTitle}
-        onGoHome={exitWorkspace}
         onOpenClone={() => enterWorkspace('clone')}
         onOpenQuality={() => enterWorkspace('quality')}
         onOpenProjects={() => enterWorkspace('projects')}

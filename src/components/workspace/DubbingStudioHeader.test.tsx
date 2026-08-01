@@ -12,7 +12,6 @@ function renderHeader(onClear = vi.fn()) {
       downloadHref={null}
       downloadName="voice.wav"
       onTitleChange={vi.fn()}
-      onGoHome={vi.fn()}
       onOpenClone={vi.fn()}
       onOpenQuality={vi.fn()}
       onOpenProjects={vi.fn()}
@@ -28,7 +27,7 @@ describe('DubbingStudioHeader', () => {
 
     expect(screen.getByRole('textbox', { name: '프로젝트 제목' })).toHaveValue('오디오북 1장')
     expect(screen.getByText('오후 07:30 자동 저장됨')).toBeInTheDocument()
-    expect(screen.getByText(/음성 엔진 준비 · System Voice/)).toBeInTheDocument()
+    expect(screen.getByText(/AI 음성 엔진 준비 · System Voice/)).toBeInTheDocument()
   })
 
   it('작업 비우기는 앱 내부 확인 뒤에만 실행한다', () => {

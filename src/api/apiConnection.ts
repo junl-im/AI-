@@ -7,6 +7,8 @@ const API_LAST_GOOD_KEY = 'sorion-api-last-good-url'
 const API_HISTORY_KEY = 'sorion-api-url-history'
 const CLIENT_ID_KEY = 'sorion-client-id'
 const ENV_API_BASE = import.meta.env.VITE_API_BASE_URL?.trim() ?? ''
+const ENV_API_BASES = import.meta.env.VITE_API_BASE_URLS?.trim() ?? ''
+const RUNTIME_CONFIG_PATH = `${import.meta.env.BASE_URL}sorion-runtime-config.json`
 const volatileStorage = new Map<string, string>()
 
 export type ApiBaseSource = 'saved' | 'environment' | 'development-proxy' | 'unconfigured'
@@ -18,6 +20,47 @@ export interface ApiConnectionContext {
   warnings: string[]
   lastGoodUrl: string
   history: string[]
+}
+
+interface RuntimeApiConfig {
+  apiBaseUrls?: unknown
+}
+
+function splitApiCandidates(value: string): string[] {
+  return value
+    .split(/[\n,;]/)
+    .map((item) => normalizeApiBaseUrl(item))
+    .filter((item): item is string => Boolean(item) && !isStaticHostingApiCandidate(item))
+}
+
+function environmentApiCandidates(): string[] {
+  return [...new Set([
+    ...splitApiCandidates(ENV_API_BASES),
+    ...splitApiCandidates(ENV_API_BASE),
+  ])]
+}
+
+export async function loadRuntimeApiCandidates(): Promise<string[]> {
+  if (typeof window === 'undefined') return []
+  try {
+    const response = await fetch(RUNTIME_CONFIG_PATH, {
+      cache: 'no-store',
+      credentials: 'omit',
+      headers: { Accept: 'application/json' },
+    })
+    if (!response.ok) return []
+    const payload = await response.json() as RuntimeApiConfig
+    const values = Array.isArray(payload.apiBaseUrls)
+      ? payload.apiBaseUrls.filter((item): item is string => typeof item === 'string')
+      : []
+    return [...new Set(
+      values
+        .filter((item) => /^https?:\/\//i.test(item.trim()))
+        .flatMap(splitApiCandidates),
+    )]
+  } catch {
+    return []
+  }
 }
 
 function storageGet(key: string): string | null {
@@ -117,10 +160,8 @@ export function normalizeApiBaseUrl(value: string): string {
 }
 
 function developmentDefault(): string {
-  if (ENV_API_BASE) {
-    const configured = normalizeApiBaseUrl(ENV_API_BASE)
-    return configured && !isStaticHostingApiCandidate(configured) ? configured : ''
-  }
+  const configured = environmentApiCandidates()[0]
+  if (configured) return configured
   if (typeof window !== 'undefined' && isLoopbackHostname(window.location.hostname)) return API_PATH
   return ''
 }
@@ -195,7 +236,7 @@ export function getApiConnectionContext(): ApiConnectionContext {
     const baseUrl = developmentDefault()
     return {
       baseUrl,
-      source: ENV_API_BASE ? 'environment' : 'development-proxy',
+      source: environmentApiCandidates().length > 0 ? 'environment' : 'development-proxy',
       configured: Boolean(baseUrl),
       warnings: [],
       lastGoodUrl: '',
@@ -211,7 +252,7 @@ export function getApiConnectionContext(): ApiConnectionContext {
   const baseUrl = safeSaved || developmentDefault()
   const source: ApiBaseSource = safeSaved
     ? 'saved'
-    : ENV_API_BASE
+    : environmentApiCandidates().length > 0
       ? 'environment'
       : baseUrl
         ? 'development-proxy'
@@ -270,10 +311,7 @@ export function getLocationApiCandidates(location: BrowserLocationCandidate): st
 export function getApiDiscoveryCandidates(): string[] {
   const candidates = new Set<string>()
   const context = getApiConnectionContext()
-  const configuredEnvironment = normalizeApiBaseUrl(ENV_API_BASE)
-  if (configuredEnvironment && !isStaticHostingApiCandidate(configuredEnvironment)) {
-    candidates.add(configuredEnvironment)
-  }
+  environmentApiCandidates().forEach((item) => candidates.add(item))
   if (typeof window !== 'undefined') {
     getLocationApiCandidates(window.location).forEach((item) => candidates.add(item))
     ;[context.lastGoodUrl, context.baseUrl, ...context.history]

@@ -1,9 +1,10 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 EngineMode = Literal["mock", "local", "ai"]
 EngineHealth = Literal["ready", "cooldown", "unavailable"]
+EngineQualityTier = Literal["basic", "standard", "premium", "reference"]
 
 
 class EngineInfo(BaseModel):
@@ -20,6 +21,10 @@ class EngineInfo(BaseModel):
     supports_voice_clone: bool
     ready: bool
     reason: str | None = None
+    quality_tier: EngineQualityTier = "basic"
+    korean_specialization: int = Field(default=0, ge=0, le=100)
+    long_form: bool = False
+    streaming: bool = False
     recommended: bool = False
     health: EngineHealth = "unavailable"
     success_count: int = 0

@@ -1,5 +1,47 @@
 # CHANGELOG
 
+## 0.8.9 - 2026-08-01
+
+### Unified Product Shell
+
+- 프로젝트·품질·복제·설정 페이지를 공통 PageScaffold와 동일한 헤더·간격·상태 영역으로 통합했습니다.
+- 첫 화면과 더빙 작업공간의 고유 목적은 유지하면서 내부 페이지의 IA와 카드 리듬을 일관되게 맞췄습니다.
+
+### Korean Neural Engine Mesh
+
+- CosyVoice Worker 일반 TTS, NAVER CLOVA Voice, Google Chirp 3 HD, Azure Neural Voice, ElevenLabs v3 Adapter를 등록했습니다.
+- 자격 증명·Worker·동의된 기준 음성이 실제 준비된 엔진만 자동 후보로 사용합니다.
+- 한국어 특화도·품질 등급·요청 기능 적합성 기반 자동 순위와 장문·스트리밍 진단 메타데이터를 추가했습니다.
+- 연속 실패 circuit breaker와 로컬·브라우저 안전망을 유지합니다.
+
+### Automatic API Failover
+
+- 런타임 JSON과 `SORION_PUBLIC_API_BASE_URLS`로 여러 HTTPS API 후보를 자동 탐색합니다.
+- 현재 연결 주소가 실패하면 그 주소를 제외하고 다음 정상 API를 자동 승계합니다.
+- 사용자는 API 주소나 엔진을 직접 선택하지 않습니다.
+
+## 0.8.8 - 2026-08-01
+
+### Header Restore & Official Brand Asset
+
+- 만들기 화면에도 0.8.6 공통 상단 배너를 복원했습니다.
+- 모든 작업 페이지에서 작은 SoriON 프로그램명·공식 로고·페이지명을 유지합니다.
+- 사용자 제공 PNG를 원본 그대로 사용하고 근사 SVG 로고를 삭제했습니다.
+- favicon과 PWA 아이콘을 같은 원본에서 다시 생성했습니다.
+
+### Browser Voice Fallback
+
+- 공개 Voice API가 없거나 네트워크 연결에 실패하면 Web Speech API 한국어 음성을 자동 사용합니다.
+- 장문 문장 블록·플레이어 Queue·프로젝트 저장 흐름에서 브라우저 음성을 실제 재생합니다.
+- 실제 API 엔진이 준비되면 서버 엔진을 우선하며 브라우저 엔진은 추천 엔진을 가로채지 않습니다.
+- 브라우저 음성은 AI·WAV로 표시하지 않고 다운로드와 위치 탐색을 비활성화합니다.
+- API 백그라운드 자동 재연결은 계속 유지합니다.
+
+### Reliability
+
+- Browser Speech 단위 테스트와 Player Dock 재생 회귀를 추가했습니다.
+- 중복된 타임라인 polling 정리와 프로젝트 옵션 복원 호출을 정리했습니다.
+
 ## 0.8.7 CI Hotfix 4 - 2026-08-01
 
 - 종료 확인 훅 테스트의 popstate 상태 갱신을 `act()` 안에서 실행해 확인창 조회 타이밍을 안정화했습니다.

@@ -46,10 +46,11 @@ export function QualityDiagnosticsCard({ diagnostics, loading, error, onRefresh 
                   />
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-2 text-[10px] font-bold text-soa-muted">
-                  <span className="rounded-xl bg-[#f4f2ec] p-2">성공 {engine.successCount}</span>
-                  <span className="rounded-xl bg-[#f4f2ec] p-2">실패 {engine.failureCount}</span>
-                  <span className="rounded-xl bg-[#f4f2ec] p-2">{engine.health === 'cooldown' ? `${engine.cooldownRemainingSeconds}초 대기` : '자동 감시'}</span>
+                  <span className="rounded-xl bg-[#f4f2ec] p-2">한국어 {engine.koreanSpecialization}</span>
+                  <span className="rounded-xl bg-[#f4f2ec] p-2">{engine.qualityTier.toUpperCase()}</span>
+                  <span className="rounded-xl bg-[#f4f2ec] p-2">{engine.longForm ? '장문 최적화' : '단문 중심'}</span>
                 </div>
+                <p className="mt-2 text-[10px] font-bold text-soa-muted">성공 {engine.successCount} · 실패 {engine.failureCount} · {engine.streaming ? '스트리밍 지원' : '완성 후 재생'}</p>
                 <div className="mt-3 space-y-2">
                   {engine.checks.map((check) => (
                     <div key={check.id} className="flex gap-2 text-[11px] leading-5">

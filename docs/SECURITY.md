@@ -1,6 +1,6 @@
 # SoriON API · Worker 보안
 
-현재 기준 버전: `0.8.7`
+현재 기준 버전: `0.8.9`
 
 ## API와 Worker 인증
 
@@ -19,15 +19,13 @@ X-SoriON-Signature
 기본 유효 시간은 30초이며 만료 요청과 변조된 body를 거부한다.
 
 ```env
+# FastAPI와 Worker에 같은 값으로 주입
 SORION_WORKER_SERVICE_TOKEN=replace-with-random-token
 SORION_WORKER_SIGNATURE_SECRET=replace-with-random-secret
 SORION_WORKER_AUTH_TTL_SECONDS=30
-
-SORION_WORKER_SERVICE_TOKEN=replace-with-random-token
-SORION_WORKER_SIGNATURE_SECRET=replace-with-random-secret
 ```
 
-첫 두 값은 API `.env`, 뒤의 `SORION_WORKER_*` 값은 Worker `.env`에 둔다.
+서비스 토큰과 서명 비밀은 API와 Worker에 같은 값으로 주입하고 TTL은 Worker에서 적용한다.
 실제 배포에서는 저장소에 값을 커밋하지 않고 배포 플랫폼 Secret으로 주입한다.
 
 ## 요청 제한

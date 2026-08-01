@@ -1,30 +1,34 @@
-# SoriON AI 0.8.7 CI Hotfix 4 Result Report
+# SoriON AI 0.8.9 Result Report
 
-작업 일시: 2026-08-01 20:47 KST
+작업 일시: 2026-08-01 22:20 KST
 
-결과 버전: **0.8.7 Dubbing Studio Workspace · CI Hotfix 4**
+결과 버전: **0.8.9 Unified Product Shell & Korean Neural Engine Mesh**
 
 ## 결과
 
-- `useExitConfirmation` 테스트가 React 상태 갱신을 `act()` 밖에서 발생시켜 종료 확인창을 조회하기 전에 assertion이 실행되던 문제를 수정했다.
-- popstate 발생을 공통 helper에서 `act()`로 감싸 첫 뒤로가기, 두 번째 뒤로가기, 종료 버튼 흐름을 같은 방식으로 검증한다.
-- HomePage 테스트가 변경 가능한 placeholder 문구 `긴 원고`에 결합돼 새 `장문 원고` 안내와 충돌하던 문제를 제거했다.
-- placeholder 카피 대신 제품의 안정 계약인 최대 20,000자 입력 제한을 검증한다.
-- 별도 Web 테스트 계약 검사 스크립트를 추가해 popstate의 `act()` 누락과 placeholder 문구 결합이 다시 들어오면 CI 앞단에서 차단한다.
+- 프로젝트·품질·복제·설정 페이지를 공통 PageScaffold로 통일했다.
+- 모든 내부 페이지에 같은 제목 계층, 상태 영역, 여백과 카드 리듬을 적용했다.
+- CosyVoice Worker 일반 TTS와 네 개의 Premium Cloud TTS Adapter를 등록했다.
+- 한국어 특화도·품질 등급·요청 기능 적합성을 자동 순위에 반영하고 장문·스트리밍 역량을 진단에 공개했다.
+- 준비되지 않은 엔진은 추천하지 않고 실패 엔진은 circuit breaker로 자동 격리한다.
+- 런타임 JSON과 복수 Actions Variable로 공개 HTTPS API 후보를 자동 장애 전환한다.
+- 사용자는 API 주소나 엔진을 직접 연결하지 않는다.
 
-## 검증
+## 검증 범위
 
-- 프로젝트 규칙·Web 테스트 계약·작업공간 세션 규칙 통과
-- TypeScript·TSX 125개 파일 구문 검사 통과
-- 상대경로 import 267개 연결 통과
-- FastAPI 90개·Worker 9개 테스트 통과
-- Python compileall과 Python 3.10 AST 93개 파일 통과
-- 기준본 패치 적용 동등성과 ZIP 무결성 검사 통과
+- API 98개·Worker 9개 회귀 테스트
+- Python compileall, Python 3.10 AST·표시 폭 검사
+- 프로젝트 규칙, Web 테스트 계약, 세션 규칙
+- TypeScript·TSX 구문과 상대경로 import
+- 패치 적용 동등성, ZIP 무결성, SHA-256
 
-## 알려진 현실
+## 배포 현실
 
-현재 내부 npm 저장소가 `@tailwindcss/vite`와 Testing Library 패키지를 제공하지 않아 공식 ESLint, TypeScript project typecheck, Vitest와 Vite build를 로컬에서 실행하지 못했다. 이번 수정은 GitHub Actions가 보고한 실패 위치와 React Testing Library의 상태 갱신 계약을 직접 반영했으며, GitHub Actions Web quality가 최종 실행 관문이다.
+Premium 엔진은 각 공급자의 서버 측 자격 증명이 있을 때만 자동 등록된다. CosyVoice 일반 TTS는
+준비된 Worker와 명시적 동의를 받은 한국어 기준 음성 파일이 모두 있어야 한다. GitHub Pages에는
+비밀키를 넣지 않으며 별도 HTTPS FastAPI 배포가 필요하다. API가 없을 때는 브라우저 음성이
+안전망으로 동작하지만 Premium AI 음질이나 WAV 서버 결과로 표시하지 않는다.
 
 ## 다음 목표
 
-`0.8.8 Korean Voice Quality Streaming`
+`0.9.0 Progressive Korean Voice Streaming`

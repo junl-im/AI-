@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { QualityDiagnosticsCard } from '../components/evaluation/QualityDiagnosticsCard'
-import { WorkspacePageHeader } from '../components/layout/WorkspacePageHeader'
+import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { QualityResultCard } from '../components/evaluation/QualityResultCard'
 import { TextPreviewCard } from '../components/evaluation/TextPreviewCard'
 import {
@@ -96,7 +96,6 @@ export function QualityPage() {
     }
   }
 
-
   async function exportReviews(format: 'json' | 'csv') {
     const reviews = await listQualityReviews()
     if (!reviews.length) {
@@ -130,14 +129,12 @@ export function QualityPage() {
   }
 
   return (
-    <div className="soa-secondary-page">
-      <WorkspacePageHeader
-        eyebrow="QUALITY LAB · KOREAN FIRST"
-        title="한국어 음질 연구소"
-        description="같은 문장을 동일 조건으로 생성해 속도·파일 크기·발음·자연스러움을 비교하고, 자동 엔진 우선순위의 근거를 축적합니다."
-      />
-
-      <div className="mt-5 space-y-4">
+    <WorkspacePageScaffold
+      eyebrow="QUALITY LAB · KOREAN FIRST"
+      title="한국어 음질 연구소"
+      description="같은 문장을 동일 조건으로 생성해 속도·파일 크기·발음·자연스러움을 비교하고, 자동 엔진 우선순위의 근거를 축적합니다."
+    >
+      <div className="space-y-4">
         <QualityDiagnosticsCard
           diagnostics={diagnostics}
           loading={loadingDiagnostics}
@@ -211,6 +208,6 @@ export function QualityPage() {
           </div>
         </section>
       </div>
-    </div>
+    </WorkspacePageScaffold>
   )
 }

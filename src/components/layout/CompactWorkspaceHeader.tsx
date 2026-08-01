@@ -2,8 +2,9 @@ import { workspacePageLabels } from '../../navigation/navigationItems'
 import { useAppStore, type BackendStatus } from '../../store/useAppStore'
 import { BrandMark } from '../ui/BrandMark'
 
-function statusLabel(status: BackendStatus): string {
-  if (status === 'online') return '엔진 준비'
+function statusLabel(status: BackendStatus, browserTtsReady: boolean): string {
+  if (status === 'online') return 'AI 엔진 준비'
+  if (status === 'degraded' && browserTtsReady) return '브라우저 음성'
   if (status === 'degraded') return '제한 모드'
   if (status === 'checking') return '확인 중'
   if (status === 'offline') return '서버 미연결'
@@ -16,6 +17,9 @@ export function CompactWorkspaceHeader() {
   const engineHealth = useAppStore((state) => state.engineHealth)
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const exitWorkspace = useAppStore((state) => state.exitWorkspace)
+  const browserTtsReady = backendStatus === 'degraded'
+    && engineHealth.tts === 'ready'
+    && engineHealth.api !== 'ready'
 
   return (
     <header className="soa-compact-header">
@@ -32,7 +36,7 @@ export function CompactWorkspaceHeader() {
         <div
           className={`soa-engine-chip is-${backendStatus}`}
           role="status"
-          aria-label={`자동 엔진 상태: ${statusLabel(backendStatus)}`}
+          aria-label={`자동 엔진 상태: ${statusLabel(backendStatus, browserTtsReady)}`}
         >
           <span className="soa-engine-chip__dots" aria-hidden="true">
             <i className={`is-${engineHealth.api}`} />
@@ -40,7 +44,7 @@ export function CompactWorkspaceHeader() {
             <i className={`is-${engineHealth.worker}`} />
             <i className={`is-${engineHealth.gpu}`} />
           </span>
-          <span>{statusLabel(backendStatus)}</span>
+          <span>{statusLabel(backendStatus, browserTtsReady)}</span>
           {engineHealth.latencyMs !== null ? <small>{engineHealth.latencyMs}ms</small> : null}
         </div>
         <button

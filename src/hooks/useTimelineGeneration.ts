@@ -4,6 +4,11 @@ import { ApiError } from '../api/httpClient'
 import type { VoiceProject } from '../projects/projectTypes'
 import { usePlayerStore } from '../store/usePlayerStore'
 import { buildAudioFilename } from '../tts/audioFile'
+import {
+  BROWSER_SPEECH_ENGINE_ID,
+  createBrowserSpeechPlayback,
+  isBrowserSpeechSupported,
+} from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import {
@@ -170,16 +175,25 @@ export function useTimelineGeneration() {
           }
         } catch (error) {
           const expired = error instanceof ApiError && [404, 410].includes(error.status)
-          if (expired && !allowSynthesis) {
+          const browserFallback = error instanceof ApiError
+            && (
+              ['unconfigured', 'timeout', 'cors-or-network', 'offline', 'mixed-content', 'mobile-localhost']
+                .includes(error.kind)
+              || [502, 503, 504].includes(error.status)
+            )
+            && isBrowserSpeechSupported()
+          if ((expired || browserFallback) && !allowSynthesis) {
             updateVoiceBlock(blockId, {
               status: 'queued',
               progress: 0,
               jobId: null,
-              error: '저장된 음원 보관 기간이 끝났습니다. 다시 생성을 눌러 주세요.',
+              error: browserFallback
+                ? '서버 음원은 연결하지 못했습니다. 다시 생성을 누르면 브라우저 음성으로 재생합니다.'
+                : '저장된 음원 보관 기간이 끝났습니다. 다시 생성을 눌러 주세요.',
             }, revision)
             return null
           }
-          if (expired) jobId = null
+          if (expired || browserFallback) jobId = null
           else throw error
         }
       }
@@ -214,6 +228,15 @@ export function useTimelineGeneration() {
           filename: buildAudioFilename(block.text, block.voiceName, 'wav'),
           source: 'api',
           durationSeconds: result.estimatedDurationSeconds,
+          result,
+        }
+      } else if (result.engineId === BROWSER_SPEECH_ENGINE_ID) {
+        audio = {
+          url: null,
+          filename: buildAudioFilename(block.text, block.voiceName, 'wav'),
+          source: 'browser-speech',
+          durationSeconds: result.estimatedDurationSeconds,
+          browserSpeech: createBrowserSpeechPlayback(request),
           result,
         }
       } else {

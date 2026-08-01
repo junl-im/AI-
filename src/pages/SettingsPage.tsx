@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { WorkspacePageHeader } from '../components/layout/WorkspacePageHeader'
+import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { StatusPill } from '../components/ui/StatusPill'
 import { consumeGoogleSignInResult, isFirebaseConfigured, startGoogleSignIn } from '../firebase/firebaseClient'
 import { useAppStore } from '../store/useAppStore'
@@ -27,14 +27,12 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="soa-secondary-page">
-      <WorkspacePageHeader
-        eyebrow="SETTINGS · SIMPLE BY DEFAULT"
-        title="설정"
-        description="연결과 엔진 선택은 시스템이 자동으로 관리합니다. 여기에는 계정과 개인정보처럼 사용자가 결정해야 하는 항목만 둡니다."
-      />
-
-      <section className="mt-6 space-y-3">
+    <WorkspacePageScaffold
+      eyebrow="SETTINGS · SIMPLE BY DEFAULT"
+      title="설정"
+      description="연결과 엔진 선택은 시스템이 자동으로 관리합니다. 여기에는 계정과 개인정보처럼 사용자가 결정해야 하는 항목만 둡니다."
+    >
+      <section className="space-y-3">
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-black tracking-[-0.035em]">계정과 동기화</h2>
@@ -49,6 +47,6 @@ export function SettingsPage() {
           <p className="mt-2 text-sm leading-6 text-soa-muted">생성된 WAV는 로컬 API의 임시 폴더에만 보관되며 기본 30분 뒤 정리됩니다. 목소리 복제에는 소유권과 동의 확인 절차가 필수입니다.</p>
         </article>
       </section>
-    </div>
+    </WorkspacePageScaffold>
   )
 }

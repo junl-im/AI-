@@ -64,6 +64,7 @@ describe('AppShell', () => {
 
     expect(view.container.querySelector('.soa-workspace-shell--editor')).toBeInTheDocument()
     expect(view.container.querySelector('.soa-workspace-shell--dubbing')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'SoriON AI 첫 페이지로 이동' })).toBeInTheDocument()
     expect(screen.getByRole('complementary', { name: '더빙 재생 플레이어' })).toBeInTheDocument()
   })
 

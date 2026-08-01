@@ -15,10 +15,17 @@ from app.services.engine_orchestrator import (
 
 
 class FakeEngine(TtsEngine):
-    def __init__(self, engine_id: str, mode: str = "ai", ready: bool = True) -> None:
+    def __init__(
+        self,
+        engine_id: str,
+        mode: str = "ai",
+        ready: bool = True,
+        supports_emotion: bool = False,
+    ) -> None:
         self.engine_id = engine_id
         self.mode = mode
         self.ready = ready
+        self.supports_emotion = supports_emotion
 
     def info(self) -> EngineInfo:
         return EngineInfo(
@@ -29,7 +36,7 @@ class FakeEngine(TtsEngine):
             provider="test",
             languages=["ko-KR"],
             output_formats=["wav"],
-            supports_emotion=False,
+            supports_emotion=self.supports_emotion,
             supports_speed=True,
             supports_voice_clone=False,
             ready=self.ready,
@@ -234,3 +241,22 @@ def test_configured_order_is_authoritative_across_engine_modes():
 
     assert [item.id for item in info] == ["local", "ai"]
     assert info[0].recommended is True
+
+
+@pytest.mark.asyncio
+async def test_requested_emotion_prefers_capable_korean_engine():
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("reference", supports_emotion=False))
+    registry.register_tts(FakeEngine("korean-premium", supports_emotion=True))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["reference", "korean-premium"],
+    )
+    emotional = request().model_copy(update={"emotion": "happy"})
+
+    result = await orchestrator.synthesize(
+        emotional,
+        lambda engine, engine_request: engine.synthesize(engine_request),
+    )
+
+    assert result.engine_id == "korean-premium"

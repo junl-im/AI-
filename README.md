@@ -8,37 +8,39 @@ SoriON AI는 대본·오디오북·강의·광고처럼 긴 한국어 원고를 
 
 ## 현재 상태
 
-- 버전: `0.8.7 Dubbing Studio Workspace`
+- 버전: `0.8.9 Unified Product Shell & Korean Neural Engine Mesh`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 Fun-CosyVoice 3 Adapter
 - 기본 제작: 최대 20,000자 장문 원고 → 세로형 문장 음성 블록
-- 편집 IA: 프로젝트 제목·저장 상태 → 화자/읽기 설정 → 원고 → 블록 → 고정 플레이어
-- 엔진 운영: `engine_id=auto`, fallback과 circuit breaker
-- 로컬 대체: Windows·macOS·eSpeak 시스템 한국어 음성
+- 상단 IA: 모든 작업 페이지에 작은 SoriON 프로그램명·공식 로고·페이지명 유지
+- 엔진 운영: 실제 API 우선 `engine_id=auto`, 실패 시 브라우저 한국어 음성 자동 대체
 - 세션: IndexedDB 자동 저장, localStorage·memory fallback
 - 결과 복구: SQLite job ID 기반 recover-first
 - 프로젝트: 목록에서 원고·옵션·타임라인·완료 결과 복원
 
-## 0.8.7 핵심
+## 0.8.9 핵심
 
-### 모바일 더빙 스튜디오
+### 일관된 제품 셸
 
-- 프로젝트 제목과 자동 저장 시각을 제작 화면 상단에 고정
-- 화자 선택, 미리듣기와 속도·피치·감정 설정을 전용 Bottom Sheet로 분리
-- 문장마다 직접 수정·생성·재생·분할·순서 이동·삭제 가능한 세로형 대사 블록
-- 새 대사와 쉼 블록을 화면 하단의 빠른 추가 동작으로 삽입
-- 하단 전체 폭 플레이어에서 진행률, 이전·재생·다음과 현재 트랙을 항상 확인
-- 완성된 현재 음원 다운로드, 프로젝트 목록·복제·품질·설정 이동을 상단 메뉴에 통합
-- 작업 전체 초기화는 앱 디자인과 같은 확인창을 거쳐 실행
+- 프로젝트·품질·복제·설정 화면을 공통 PageScaffold로 통일
+- 동일한 제목 계층, 여백, 상태 영역, 카드 리듬과 모바일 폭 사용
+- 모든 내부 페이지에 작은 SoriON 프로그램명·공식 PNG 로고·현재 페이지명 유지
+- 만들기 화면은 장문 더빙 작업의 특수성을 유지하되 공통 상단 IA와 연결
 
-### 장문·세션·엔진 연계 유지
+### 한국어 Neural Engine Mesh
 
-- 전체 원고를 한 번에 문장 블록으로 나누는 장문 제작 흐름 유지
-- 편집 중 원고·화자·설정·타임라인·job ID 자동 저장 및 재시작 복원
-- 블록 revision으로 오래된 음성 결과가 최신 문장을 덮어쓰지 않도록 차단
-- GitHub Pages를 Voice API로 오인하지 않으며 공개 API 주소는 배포 변수로 주입
-- 사용자에게 API 주소나 엔진 수동 연결 화면을 노출하지 않음
+- 동의된 기준 음성을 사용하는 CosyVoice Worker 일반 TTS
+- NAVER CLOVA Voice Premium, Google Chirp 3 HD, Azure Neural Voice, ElevenLabs v3 REST Adapter
+- MeloTTS·System Voice·Browser Voice 안전망
+- 한국어 특화도·품질 등급·요청 기능 적합성 기반 자동 선택, 장문·스트리밍 역량 진단
+- 자격 증명과 readiness가 준비된 엔진만 후보가 되며, 연속 실패 엔진은 자동 격리
+
+### API 자동 다중 연결
+
+- `SORION_PUBLIC_API_BASE_URLS`와 런타임 JSON에서 여러 HTTPS API 후보를 읽음
+- 빠른 후보부터 자동 검사하고 실패하면 다음 API로 전환
+- 사용자는 API 주소나 엔진을 직접 선택하지 않음
 
 ## 개발 실행
 
@@ -47,36 +49,29 @@ cp .env.example .env
 npm install
 npm run dev:worker
 npm run dev:api
-```
-
-다른 터미널에서:
-
-```bash
 npm run dev
 ```
 
 기본 주소: Web `127.0.0.1:5173`, API `127.0.0.1:8000`, Worker `127.0.0.1:9000`.
 
-## 공개 배포에서 반드시 필요한 것
+## 공개 배포 경계
 
-GitHub Pages는 정적 Web만 제공하므로 Python Voice API를 별도 HTTPS 서버에 배포해야 합니다.
-저장소 `Settings → Secrets and variables → Actions → Variables`에서 다음 값을 설정합니다.
+GitHub Pages는 정적 Web만 제공합니다. 따라서 공개 페이지는 우선 브라우저 내장 한국어 음성으로
+작동하며, AI 음색·WAV 파일·복제 기능을 사용하려면 별도 HTTPS Voice API가 필요합니다.
+배포 관리자는 저장소 Actions Variable 한 곳에 API Origin을 설정합니다.
 
 ```text
-SORION_PUBLIC_API_BASE_URL=https://voice-api.example.com
+SORION_PUBLIC_API_BASE_URLS=https://voice-a.example.com,https://voice-b.example.com
 ```
 
-URL이 없으면 앱은 Pages 주소를 잘못 호출하지 않고 공개 음성 서버 배포 대기 상태에서 자동
-재검사합니다. 이 운영 값은 사용자 화면에 노출되지 않습니다.
+사용자에게 API 주소나 엔진 선택 화면을 보여주지 않습니다.
 
 ## 주요 문서
 
 - 인수인계: [`docs/HANDOVER.md`](docs/HANDOVER.md)
 - 시작 안내: [`START_HERE.md`](START_HERE.md)
-- 더빙 스튜디오 UX: [`docs/DUBBING_STUDIO_UX.md`](docs/DUBBING_STUDIO_UX.md)
-- 장문 작업공간: [`docs/LONGFORM_VOICE_WORKSPACE.md`](docs/LONGFORM_VOICE_WORKSPACE.md)
-- 세션 복원: [`docs/WORKSPACE_SESSION.md`](docs/WORKSPACE_SESSION.md)
 - API 연결: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
+- 더빙 UX: [`docs/DUBBING_STUDIO_UX.md`](docs/DUBBING_STUDIO_UX.md)
 - 엔진 전략: [`docs/ENGINE_STRATEGY.md`](docs/ENGINE_STRATEGY.md)
 - 전달 규칙: [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
 
@@ -84,8 +79,7 @@ URL이 없으면 앱은 Pages 주소를 잘못 호출하지 않고 공개 음성
 
 - 장문 원고와 문장 블록 편집이 기본 흐름이며 채팅형 입력으로 되돌리지 않습니다.
 - 모바일·한국어를 먼저 완성하고 PC는 정밀 편집 확장으로 사용합니다.
-- 실제 AI, Local/System, Mock, Browser Demo를 명확히 구분합니다.
-- 연결 실패나 모델 미설치를 성공으로 가장하지 않습니다.
+- 실제 AI, Local/System, Browser Voice, Mock을 UI와 데이터에서 명확히 구분합니다.
+- 브라우저 대체 음성을 실제 AI 또는 다운로드 가능한 음원으로 가장하지 않습니다.
 - 소스 파일은 500줄을 넘기지 않습니다.
 - 사용자에게 API 주소·엔진 수동 연결을 요구하지 않습니다.
-- 음성 원본은 명시적 동의 없이 외부로 전송하지 않습니다.

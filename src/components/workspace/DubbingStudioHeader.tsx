@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
 import type { BackendStatus } from '../../store/useAppStore'
-import { BrandIcon } from '../ui/BrandIcon'
 
 interface DubbingStudioHeaderProps {
   title: string
@@ -10,7 +9,6 @@ interface DubbingStudioHeaderProps {
   downloadHref: string | null
   downloadName: string
   onTitleChange: (value: string) => void
-  onGoHome: () => void
   onOpenClone: () => void
   onOpenQuality: () => void
   onOpenProjects: () => void
@@ -18,11 +16,12 @@ interface DubbingStudioHeaderProps {
   onClear: () => void
 }
 
-function engineStatusLabel(status: BackendStatus): string {
-  if (status === 'online') return '음성 엔진 준비'
+function engineStatusLabel(status: BackendStatus, engineLabel: string): string {
+  if (status === 'online') return 'AI 음성 엔진 준비'
+  if (status === 'degraded' && engineLabel.includes('브라우저')) return '브라우저 음성 준비'
   if (status === 'degraded') return '대체 음성 모드'
   if (status === 'checking') return '음성 시스템 확인 중'
-  return '음성 서버 연결 대기'
+  return '음성 서버 자동 재연결 중'
 }
 
 export function DubbingStudioHeader({
@@ -33,7 +32,6 @@ export function DubbingStudioHeader({
   downloadHref,
   downloadName,
   onTitleChange,
-  onGoHome,
   onOpenClone,
   onOpenQuality,
   onOpenProjects,
@@ -46,29 +44,36 @@ export function DubbingStudioHeader({
 
   return (
     <header className="soa-dubbing-header">
-      <div className="soa-dubbing-toolbar">
-        <button
-          type="button"
-          className="soa-dubbing-home-button"
-          onClick={onGoHome}
-          aria-label="SoriON AI 첫 페이지로 이동"
-        >
-          <span aria-hidden="true">‹</span>
-          <BrandIcon />
-        </button>
-        <div className="soa-dubbing-toolbar__actions">
+      <div className="soa-dubbing-project-title">
+        <div className="soa-dubbing-project-title__copy">
+          <input
+            ref={titleRef}
+            value={title}
+            maxLength={80}
+            onChange={(event) => onTitleChange(event.target.value)}
+            onBlur={() => {
+              if (!title.trim()) onTitleChange('새 프로젝트')
+            }}
+            aria-label="프로젝트 제목"
+          />
+          <button type="button" onClick={() => titleRef.current?.focus()} aria-label="프로젝트 제목 수정">✎</button>
+          <p>{savedLabel}</p>
+          <small>{engineStatusLabel(backendStatus, engineLabel)} · {engineLabel}</small>
+        </div>
+
+        <div className="soa-dubbing-toolbar__actions" aria-label="프로젝트 동작">
           <button
             type="button"
             className={`soa-dubbing-engine-button is-${backendStatus}`}
             onClick={onOpenQuality}
-            aria-label={`${engineStatusLabel(backendStatus)}. 품질 연구소 열기`}
+            aria-label={`${engineStatusLabel(backendStatus, engineLabel)}. 품질 연구소 열기`}
           >
             <i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" />
           </button>
           {downloadHref ? (
             <a href={downloadHref} download={downloadName} aria-label="현재 음성 다운로드">⇩</a>
           ) : (
-            <button type="button" disabled aria-label="완성된 음성이 없어 다운로드할 수 없음">⇩</button>
+            <button type="button" disabled aria-label="현재 음성은 파일 다운로드를 지원하지 않음">⇩</button>
           )}
           <div className="soa-dubbing-more">
             <button
@@ -133,22 +138,6 @@ export function DubbingStudioHeader({
             ) : null}
           </div>
         </div>
-      </div>
-
-      <div className="soa-dubbing-project-title">
-        <input
-          ref={titleRef}
-          value={title}
-          maxLength={80}
-          onChange={(event) => onTitleChange(event.target.value)}
-          onBlur={() => {
-            if (!title.trim()) onTitleChange('새 프로젝트')
-          }}
-          aria-label="프로젝트 제목"
-        />
-        <button type="button" onClick={() => titleRef.current?.focus()} aria-label="프로젝트 제목 수정">✎</button>
-        <p>{savedLabel}</p>
-        <small>{engineStatusLabel(backendStatus)} · {engineLabel}</small>
       </div>
 
       {clearConfirmOpen ? (

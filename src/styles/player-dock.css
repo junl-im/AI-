@@ -375,3 +375,15 @@
     min-height: 38px;
   }
 }
+
+.soa-browser-voice-label {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 10px;
+  color: #bfe8ff;
+  background: rgba(67, 179, 255, 0.12);
+  font-size: 9px;
+  font-weight: 850;
+}

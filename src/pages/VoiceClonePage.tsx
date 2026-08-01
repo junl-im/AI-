@@ -5,6 +5,7 @@ import { CloneReadyCard } from '../components/clone/CloneReadyCard'
 import { CloneStepIndicator } from '../components/clone/CloneStepIndicator'
 import { SampleQualityCard } from '../components/clone/SampleQualityCard'
 import { VoiceSampleCapture } from '../components/clone/VoiceSampleCapture'
+import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder'
 import { useAppStore } from '../store/useAppStore'
 import { usePlayerStore } from '../store/usePlayerStore'
@@ -305,13 +306,13 @@ export function VoiceClonePage() {
   }
 
   return (
-    <div className="soa-clone-page">
-      <header className="soa-page-intro">
-        <span>VOICE CLONE · WORKER EXECUTION</span>
-        <h1>내 목소리를<br /><b>실제 AI 음성으로 연결합니다.</b></h1>
-        <p>동의된 샘플만 별도 Worker에 전달하고, 문장별 생성 상태와 취소·재시도를 실시간으로 관리합니다.</p>
-        <small>{engineLabel}</small>
-      </header>
+    <WorkspacePageScaffold
+      eyebrow="VOICE CLONE · CONSENT FIRST"
+      title="내 목소리 복제"
+      description="동의된 샘플만 별도 Worker에 전달해 실제 AI 음성으로 연결합니다. 문장별 생성 상태와 취소·재시도를 실시간으로 관리합니다."
+      status={<span>{engineLabel}</span>}
+      className="soa-clone-page"
+    >
       <CloneStepIndicator current={currentStep} />
       <div className="soa-clone-grid">
         <VoiceSampleCapture
@@ -348,6 +349,6 @@ export function VoiceClonePage() {
           />
         ) : null}
       </div>
-    </div>
+    </WorkspacePageScaffold>
   )
 }

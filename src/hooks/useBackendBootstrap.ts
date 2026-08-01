@@ -7,6 +7,7 @@ import {
 import { getNetworkInformation, getMobileNetworkSnapshot } from '../network/mobileNetwork'
 import { runApiConnectivityAudit } from '../settings/connectivityApi'
 import { useAppStore } from '../store/useAppStore'
+import { isBrowserSpeechSupported } from '../tts/browserSpeech'
 
 const RETRY_DELAYS_MS = [5_000, 12_000, 30_000, 60_000]
 
@@ -37,6 +38,39 @@ export function useBackendBootstrap(): void {
       retryIndexRef.current += 1
     }
 
+    const failOverApi = async (currentBaseUrl: string): Promise<boolean> => {
+      try {
+        const discovered = await discoverApiBaseUrl(currentBaseUrl)
+        saveApiBaseUrl(discovered.baseUrl)
+        retryIndexRef.current = 0
+        setBackendStatus('checking', '다음 음성 서버로 자동 전환하고 있습니다.')
+        return true
+      } catch {
+        return false
+      }
+    }
+
+    const applyBrowserFallback = (detail: string) => {
+      const browserReady = isBrowserSpeechSupported()
+      setEngineHealth({
+        api: 'offline',
+        tts: browserReady ? 'ready' : 'offline',
+        worker: 'unknown',
+        gpu: 'unknown',
+        baseUrl: getApiConnectionContext().baseUrl,
+        latencyMs: null,
+        lastCheckedAt: new Date().toISOString(),
+        requestId: null,
+      })
+      setBackendStatus(
+        browserReady ? 'degraded' : 'offline',
+        browserReady
+          ? '브라우저 한국어 음성 준비 · AI 서버 자동 재연결 중'
+          : detail,
+      )
+      return browserReady
+    }
+
     async function inspect() {
       if (!aliveRef.current) return
       if (runningRef.current) {
@@ -47,15 +81,18 @@ export function useBackendBootstrap(): void {
       clearRetry()
       let context = getApiConnectionContext()
       if (!context.configured) {
-        resetEngineHealth()
-        setBackendStatus('checking', '음성 시스템을 자동으로 찾고 있습니다.')
+        if (isBrowserSpeechSupported()) {
+          applyBrowserFallback('음성 시스템을 자동으로 찾고 있습니다.')
+        } else {
+          resetEngineHealth()
+          setBackendStatus('checking', '음성 시스템을 자동으로 찾고 있습니다.')
+        }
         try {
           const discovered = await discoverApiBaseUrl()
           saveApiBaseUrl(discovered.baseUrl)
           context = getApiConnectionContext()
         } catch (error) {
-          setBackendStatus(
-            'offline',
+          applyBrowserFallback(
             error instanceof Error
               ? error.message
               : '음성 시스템을 자동으로 연결하지 못했습니다.',
@@ -77,9 +114,10 @@ export function useBackendBootstrap(): void {
       try {
         const report = await runApiConnectivityAudit(context.baseUrl, { mode: 'quick' })
         if (!aliveRef.current) return
+        const browserReady = isBrowserSpeechSupported()
         setEngineHealth({
           api: report.layers.api.state,
-          tts: report.layers.tts.state,
+          tts: report.ttsReady ? report.layers.tts.state : browserReady ? 'ready' : report.layers.tts.state,
           worker: report.layers.worker.state,
           gpu: report.layers.gpu.state,
           baseUrl: report.baseUrl,
@@ -91,6 +129,11 @@ export function useBackendBootstrap(): void {
         if (report.apiReady && report.ttsReady) {
           retryIndexRef.current = 0
           setBackendStatus('online', `실제 TTS 준비 · ${report.latencyMs}ms`)
+        } else if (!report.apiReady && await failOverApi(context.baseUrl)) {
+          queuedRef.current = true
+        } else if (browserReady) {
+          setBackendStatus('degraded', '브라우저 한국어 음성 준비 · AI 서버 자동 재연결 중')
+          scheduleRetry(inspect)
         } else if (report.apiReady) {
           setBackendStatus('degraded', report.layers.tts.detail)
           scheduleRetry(inspect)
@@ -100,9 +143,14 @@ export function useBackendBootstrap(): void {
         }
       } catch (error) {
         if (!aliveRef.current) return
-        setEngineHealth({ api: 'offline', tts: 'unknown', worker: 'unknown', gpu: 'unknown' })
-        setBackendStatus('offline', error instanceof Error ? error.message : 'Voice API에 연결할 수 없습니다.')
-        scheduleRetry(inspect)
+        if (await failOverApi(context.baseUrl)) {
+          queuedRef.current = true
+        } else {
+          applyBrowserFallback(
+            error instanceof Error ? error.message : 'Voice API에 연결할 수 없습니다.',
+          )
+          scheduleRetry(inspect)
+        }
       } finally {
         runningRef.current = false
         if (queuedRef.current && aliveRef.current) {

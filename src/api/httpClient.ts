@@ -5,6 +5,7 @@ import {
   getApiClientId,
   getApiConnectionProblem,
   getApiDiscoveryCandidates,
+  loadRuntimeApiCandidates,
   normalizeApiBaseUrl,
   rememberApiUrl,
 } from './apiConnection'
@@ -105,8 +106,12 @@ export async function probeApiBaseUrl(value: string, timeoutMs = 3_500): Promise
   }
 }
 
-export async function discoverApiBaseUrl(): Promise<ApiProbeResult> {
-  const candidates = getApiDiscoveryCandidates()
+export async function discoverApiBaseUrl(excludeBaseUrl = ''): Promise<ApiProbeResult> {
+  const excluded = normalizeApiBaseUrl(excludeBaseUrl)
+  const candidates = [...new Set([
+    ...(await loadRuntimeApiCandidates()),
+    ...getApiDiscoveryCandidates(),
+  ])].filter((candidate) => candidate !== excluded)
   const attempts: string[] = []
   for (const candidate of candidates) {
     try {

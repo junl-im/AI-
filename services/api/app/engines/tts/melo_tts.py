@@ -55,6 +55,9 @@ class MeloTtsEngine(TtsEngine):
                 if self._ready
                 else "MeloTTS 선택 설치가 필요합니다. docs/ENGINE_PILOT.md를 확인해 주세요."
             ),
+            quality_tier="standard",
+            korean_specialization=78,
+            long_form=True,
         )
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:

@@ -13,6 +13,10 @@ export interface EngineDiagnostic {
   mode: EngineMode
   ready: boolean
   provider: string
+  qualityTier: 'basic' | 'standard' | 'premium' | 'reference'
+  koreanSpecialization: number
+  longForm: boolean
+  streaming: boolean
   modelLoaded: boolean | null
   recommended: boolean
   health: 'ready' | 'cooldown' | 'unavailable'

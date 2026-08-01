@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { WorkspacePageHeader } from '../components/layout/WorkspacePageHeader'
+import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { StatusPill } from '../components/ui/StatusPill'
 import { listProjects } from '../projects/projectRepository'
 import type { VoiceProject } from '../projects/projectTypes'
@@ -31,45 +31,55 @@ export function ProjectsPage() {
   }, [loadProjects])
 
   return (
-    <div className="soa-secondary-page">
-      <WorkspacePageHeader
-        eyebrow="PROJECTS · LOCAL FIRST"
-        title="최근 프로젝트"
-        description="이 기기에 저장된 음성 작업을 이어서 편집하고, 서버에 남은 생성 결과를 자동으로 복구합니다."
-        actions={(
-          <button
-            type="button"
-            onClick={startNewWorkspace}
-            className="soa-page-action"
-          >
-            새로 만들기
-          </button>
-        )}
-      />
-
+    <WorkspacePageScaffold
+      eyebrow="PROJECTS · LOCAL FIRST"
+      title="최근 프로젝트"
+      description="이 기기에 저장된 음성 작업을 이어서 편집하고, 서버에 남은 생성 결과를 자동으로 복구합니다."
+      actions={(
+        <button
+          type="button"
+          onClick={startNewWorkspace}
+          className="soa-page-action"
+        >
+          새로 만들기
+        </button>
+      )}
+    >
       {loading ? (
-        <section className="mt-8 rounded-[28px] border border-soa-line bg-soa-card p-8 text-center" role="status">
+        <section className="rounded-[28px] border border-soa-line bg-soa-card p-8 text-center" role="status">
           <div className="mx-auto size-8 animate-pulse rounded-full bg-soa-violet/25" aria-hidden="true" />
           <p className="mt-4 text-sm font-bold text-soa-muted">프로젝트를 불러오는 중입니다.</p>
         </section>
       ) : loadError ? (
-        <section className="mt-8 rounded-[28px] border border-soa-coral/40 bg-soa-card p-8 text-center" role="alert">
+        <section className="rounded-[28px] border border-soa-coral/40 bg-soa-card p-8 text-center" role="alert">
           <h2 className="font-black tracking-[-0.035em]">프로젝트를 열 수 없습니다</h2>
           <p className="mt-2 text-sm leading-6 text-soa-muted">{loadError}</p>
           <button type="button" className="soa-page-action mt-4" onClick={() => void loadProjects()}>다시 확인</button>
         </section>
       ) : projects.length === 0 ? (
-        <section className="mt-8 rounded-[28px] border border-dashed border-soa-line bg-soa-card p-8 text-center">
+        <section className="rounded-[28px] border border-dashed border-soa-line bg-soa-card p-8 text-center">
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#ece9e1] text-2xl" aria-hidden="true">▣</div>
           <h2 className="mt-4 font-black tracking-[-0.035em]">아직 저장된 작업이 없습니다</h2>
           <p className="mt-2 text-sm leading-6 text-soa-muted">음성을 생성하면 이 기기의 IndexedDB에 프로젝트 정보가 자동 저장됩니다.</p>
         </section>
       ) : (
-        <ul className="mt-6 space-y-3">
+        <ul className="space-y-3">
           {projects.map((project) => {
             const voice = getVoicePreset(project.voiceId)
+            const isBrowser = project.audioSource === 'browser-speech' || project.engineMode === 'browser'
             const isDemo = project.audioSource === 'browser-demo' || project.engineMode === 'mock'
-            const modeLabel = isDemo ? '데모' : project.engineMode === 'ai' ? 'AI' : project.engineMode === 'local' ? '로컬' : project.status === 'generated' ? '완료' : '초안'
+            const isFallback = isBrowser || isDemo
+            const modeLabel = isBrowser
+              ? '브라우저 음성'
+              : isDemo
+                ? '데모'
+                : project.engineMode === 'ai'
+                  ? 'AI'
+                  : project.engineMode === 'local'
+                    ? '로컬'
+                    : project.status === 'generated'
+                      ? '완료'
+                      : '초안'
             return (
               <li key={project.id}>
                 <button
@@ -83,11 +93,11 @@ export function ProjectsPage() {
                       <h2 className="truncate font-black tracking-[-0.03em]">{project.title}</h2>
                       <p className="mt-1 line-clamp-2 text-sm leading-6 text-soa-muted">{project.text}</p>
                     </div>
-                    <StatusPill label={modeLabel} tone={isDemo ? 'warning' : project.status === 'generated' ? 'good' : 'neutral'} />
+                    <StatusPill label={modeLabel} tone={isFallback ? 'warning' : project.status === 'generated' ? 'good' : 'neutral'} />
                   </div>
                   <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-soa-muted">
                     <span>{voice.name}</span>
-                    <span>{project.outputFormat?.toUpperCase() ?? 'WAV'}</span>
+                    <span>{isBrowser ? '재생 전용' : project.outputFormat?.toUpperCase() ?? 'WAV'}</span>
                     <span>{new Date(project.updatedAt).toLocaleString('ko-KR')}</span>
                     <strong className="ml-auto text-soa-ink">불러오기 →</strong>
                   </div>
@@ -97,6 +107,6 @@ export function ProjectsPage() {
           })}
         </ul>
       )}
-    </div>
+    </WorkspacePageScaffold>
   )
 }

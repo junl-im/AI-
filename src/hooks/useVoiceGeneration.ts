@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiError } from '../api/httpClient'
 import { buildAudioFilename } from '../tts/audioFile'
+import {
+  BROWSER_SPEECH_ENGINE_ID,
+  createBrowserSpeechPlayback,
+} from '../tts/browserSpeech'
 import type { GeneratedAudio, GenerationAttempt, VoiceGenerationState } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import { cancelSpeech, getSpeechProgress, synthesizeSpeech } from '../tts/voiceApi'
@@ -113,6 +117,16 @@ export function useVoiceGeneration() {
           filename: buildAudioFilename(attempt.request.text, attempt.voiceName, attempt.request.format),
           source: 'api',
           durationSeconds: result.estimatedDurationSeconds,
+          result,
+        }
+      } else if (result.engineId === BROWSER_SPEECH_ENGINE_ID) {
+        releaseLocalUrl()
+        audio = {
+          url: null,
+          filename: buildAudioFilename(attempt.request.text, attempt.voiceName, attempt.request.format),
+          source: 'browser-speech',
+          durationSeconds: result.estimatedDurationSeconds,
+          browserSpeech: createBrowserSpeechPlayback(attempt.request),
           result,
         }
       } else {

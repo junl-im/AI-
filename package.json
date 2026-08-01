@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.8.7",
+  "version": "0.8.9",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,7 +22,8 @@
     "typecheck:web": "npm run typecheck",
     "dev:api": "node scripts/start-api.mjs",
     "test:worker": "python -m pytest services/worker/tests",
-    "dev:worker": "node scripts/start-worker.mjs"
+    "dev:worker": "node scripts/start-worker.mjs",
+    "runtime:config": "node scripts/write-runtime-config.mjs"
   },
   "engines": {
     "node": ">=22.0.0",

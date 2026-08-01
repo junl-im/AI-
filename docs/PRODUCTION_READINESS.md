@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.8.7`
+현재 기준 버전: `0.8.9`
 
 ## 목적
 
@@ -11,10 +11,11 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 ## 자동 연결 배포
 
 1. 로컬 Vite 개발은 `/api` proxy 또는 현재 호스트의 API 후보를 사용한다.
-2. GitHub Pages 등 정적 HTTPS 배포는 빌드 시 `VITE_API_BASE_URL`에 HTTPS API를 주입한다.
-3. same-origin 운영은 reverse proxy에서 `/api/v1`을 FastAPI로 전달한다.
-4. 앱은 same-origin, 환경변수, 마지막 성공 주소와 안전 후보를 순서대로 검사한다.
-5. 사용자가 주소를 입력하거나 저장하는 설정 화면은 제공하지 않는다.
+2. 정적 HTTPS 배포는 `SORION_PUBLIC_API_BASE_URLS`를 런타임 JSON과 Web build에 주입한다.
+3. 앱은 런타임 후보, 빌드 후보, last-good, same-origin 개발 후보를 순서대로 검사한다.
+4. 현재 API가 실패하면 그 주소를 제외하고 다음 정상 후보를 자동 승계한다.
+5. same-origin 운영은 reverse proxy에서 `/api/v1`을 FastAPI로 전달한다.
+6. 사용자가 주소를 입력하거나 엔진을 선택하는 설정 화면은 제공하지 않는다.
 
 비밀키와 Worker 인증 정보는 Web에 저장하지 않고 API·Worker 배포 Secret으로만 주입한다.
 

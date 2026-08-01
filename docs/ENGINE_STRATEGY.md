@@ -168,3 +168,25 @@ SORION_ENGINE_COOLDOWN_SECONDS=30
 
 이 구조는 이후 CosyVoice 3 일반 TTS Adapter와 GPT-SoVITS 전문가 Adapter가 추가돼도 UI를
 바꾸지 않고 운영 우선순위만 조정할 수 있게 한다.
+
+## 0.8.9 한국어 Neural Engine Mesh
+
+일반 합성은 UI가 아니라 FastAPI 오케스트레이터가 `auto`로 선택한다.
+
+```text
+CosyVoice 기준 음색
+→ NAVER CLOVA Voice Premium
+→ Google Chirp 3 HD Korean
+→ Azure Korean Neural Voice
+→ ElevenLabs v3 Korean
+→ MeloTTS
+→ System Voice
+→ Mock
+```
+
+- CosyVoice는 준비된 Worker와 동의된 기준 음성 파일이 모두 있을 때만 일반 TTS 후보가 된다.
+- Cloud Adapter는 서버 자격 증명이 있을 때만 ready가 된다.
+- 감정·피치·속도 요청은 해당 기능을 실제 지원하는 엔진을 앞당긴다.
+- 품질 등급과 한국어 특화도는 같은 운영 순위 안의 tie-breaker다.
+- 연속 실패는 circuit breaker로 격리하고 다음 엔진으로 자동 전환한다.
+- Secret과 공급자 API key는 Vite 환경변수나 GitHub Pages에 포함하지 않는다.

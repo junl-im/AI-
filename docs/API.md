@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.8.7",
+  "version": "0.8.9",
   "default_engine": "auto"
 }
 ```
@@ -20,19 +20,19 @@
 ```json
 [
   {
-    "id": "melo",
-    "name": "MeloTTS Korean",
+    "id": "naver-clova",
+    "name": "NAVER CLOVA Voice Premium",
     "kind": "tts",
     "mode": "ai",
-    "provider": "MyShell MeloTTS",
+    "provider": "NAVER Cloud",
     "languages": ["ko-KR"],
     "output_formats": ["wav"],
-    "supports_emotion": false,
+    "supports_emotion": true,
     "supports_speed": true,
-    "supports_pitch": false,
+    "supports_pitch": true,
     "supports_voice_clone": false,
-    "ready": false,
-    "reason": "MeloTTS 선택 설치가 필요합니다.",
+    "ready": true,
+    "reason": null,
     "recommended": false,
     "health": "unavailable",
     "success_count": 0,
@@ -50,15 +50,15 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.8.7",
-  "primary_tts_engine": "cosyvoice3",
+  "version": "0.8.9",
+  "primary_tts_engine": "auto",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
   "candidates": [
     {
       "id": "cosyvoice3",
       "role": "primary",
-      "status": "planned",
+      "status": "pilot",
       "languages": ["ko-KR", "en-US", "ja-JP", "zh-CN"]
     }
   ]
@@ -66,6 +66,11 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 ```
 
 라이선스와 선정 근거는 `docs/ENGINE_STRATEGY.md`를 확인합니다.
+
+`quality_tier`와 `korean_specialization`은 자동 순위와 품질 진단에 사용하며, `long_form`과
+`streaming`은 현재 Adapter가 제공하는 실행 역량을 진단에 표시한다. 인증 정보가 없는 Premium
+Adapter는 `ready=false`로 남으며,
+자동 모드는 준비된 후보만 선택하고 실패 시 다음 엔진으로 전환한다.
 
 ## POST /tts/synthesize
 
@@ -109,7 +114,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 }
 ```
 
-## 0.8.6 엔진 오케스트레이션
+## 0.8.9 한국어 Neural Engine Mesh
 
 `/engines`의 `recommended`는 현재 API 프로세스가 자동 요청에 가장 먼저 사용할 준비 엔진이다.
 `health=cooldown`은 반복 실패로 잠시 자동 후보에서 제외됐다는 의미이며 시간이 지나면 다시
@@ -186,7 +191,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.8.7",
+  "version": "0.8.9",
   "ready": true,
   "real_engine_count": 1,
   "steps": [

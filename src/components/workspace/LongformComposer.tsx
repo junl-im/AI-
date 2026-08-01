@@ -21,8 +21,9 @@ function formatDuration(seconds: number): string {
   return minutes > 0 ? `약 ${minutes}분 ${remainder}초` : `약 ${remainder}초`
 }
 
-function engineStatusText(status: BackendStatus): string {
+function engineStatusText(status: BackendStatus, message: string): string {
   if (status === 'online') return '실제 음성 엔진 준비됨'
+  if (status === 'degraded' && message.includes('브라우저')) return '브라우저 음성 준비됨'
   if (status === 'degraded') return '대체 음성 모드'
   if (status === 'checking') return '음성 시스템 확인 중'
   return '음성 서버 연결 대기'
@@ -97,7 +98,7 @@ export function LongformComposer({
 
       <div className={`soa-dubbing-engine-note is-${backendStatus}`} role="status">
         <i aria-hidden="true" />
-        <span><strong>{engineStatusText(backendStatus)}</strong><small>{backendMessage}</small></span>
+        <span><strong>{engineStatusText(backendStatus, backendMessage)}</strong><small>{backendMessage}</small></span>
       </div>
 
       <button

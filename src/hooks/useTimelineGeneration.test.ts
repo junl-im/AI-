@@ -158,6 +158,54 @@ describe('useTimelineGeneration mobile recovery', () => {
   })
 })
 
+
+describe('useTimelineGeneration browser voice fallback', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    usePlayerStore.getState().clearQueue()
+  })
+
+  it('stores a browser speech result as a playable queue item without a fake WAV URL', async () => {
+    voiceApiMocks.synthesizeSpeech.mockResolvedValueOnce({
+      ...completedResult,
+      jobId: 'browser-job',
+      engineId: 'browser-speech',
+      engineMode: 'browser',
+      audioUrl: null,
+      message: '브라우저 음성 준비',
+    })
+    const { result } = renderHook(() => useTimelineGeneration())
+    let blockId = ''
+
+    act(() => {
+      ;[blockId] = result.current.stageText('브라우저 음성 문장입니다.', {
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'auto',
+        normalizeText: true,
+      })
+    })
+
+    await act(async () => {
+      await result.current.retryBlock(blockId)
+    })
+
+    const block = result.current.blocks.find((item) => item.id === blockId)
+    expect(block?.kind).toBe('voice')
+    if (!block || block.kind !== 'voice') throw new Error('voice block missing')
+    expect(block.status).toBe('ready')
+    expect(block.audio).toMatchObject({
+      url: null,
+      source: 'browser-speech',
+      browserSpeech: { text: '브라우저 음성 문장입니다.', lang: 'ko-KR' },
+    })
+    expect(usePlayerStore.getState().queue[0]?.audio.source).toBe('browser-speech')
+  })
+})
+
 describe('useTimelineGeneration revision safety', () => {
   beforeEach(() => {
     vi.clearAllMocks()

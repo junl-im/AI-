@@ -56,13 +56,14 @@ https://junl-im.github.io:8443/api/v1/*
 
 ## PWA 아이콘과 캐시
 
-- `public/sorion-icon.svg`: Web 브랜드 원본
+- `public/sorion-logo.png`: 사용자 제공 Web 브랜드 PNG 원본
 - `favicon-64.png`: 브라우저 favicon fallback
 - `pwa-192.png`, `pwa-512.png`, `pwa-maskable-512.png`: 설치 아이콘
 - 아이콘·manifest 변경 후 이전 화면이 남으면 Site data와 설치 PWA를 제거한 뒤 다시 설치
 
 ## 공개 API가 없는 경우
 
-Web은 소개·원고 편집·로컬 세션 저장까지 동작하지만 실제 음성 생성은 할 수 없다.
-화면은 raw 후보 URL을 나열하지 않고 “공개 음성 서버 배포 대기” 상태를 표시하며 자동 재검사한다.
-이 상태를 실제 엔진 준비로 표시해서는 안 된다.
+Web Speech API를 지원하는 Chrome·Safari 계열 브라우저에서는 기기 내장 한국어 음성으로 문장
+블록을 실제 재생한다. 화면에는 `브라우저 음성`으로 표시하며 AI 엔진으로 가장하지 않는다.
+WAV 다운로드·일관된 성우 음색·음성 복제·정밀 감정 제어는 공개 Voice API가 필요하다. 앱은
+브라우저 음성을 사용하는 동안에도 공개 API를 백그라운드에서 자동 재검사한다.

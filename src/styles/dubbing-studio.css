@@ -5,64 +5,92 @@
 }
 
 .soa-dubbing-header {
-  position: sticky;
-  z-index: 35;
-  top: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
-  padding: max(10px, env(safe-area-inset-top)) 16px 18px;
-  background: rgba(18, 18, 18, 0.94);
-  backdrop-filter: blur(22px);
+  position: relative;
+  z-index: 24;
+  width: min(100%, 860px);
+  margin: 0 auto;
+  border-bottom: 0;
+  padding: 22px 16px 8px;
+  background: transparent;
 }
 
-.soa-dubbing-toolbar {
+.soa-dubbing-project-title {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
 }
 
-.soa-dubbing-home-button {
-  display: flex;
-  min-width: 54px;
-  min-height: 48px;
+.soa-dubbing-project-title__copy {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, auto) 32px;
+  justify-content: start;
   align-items: center;
-  gap: 5px;
+  gap: 2px 4px;
+}
+
+.soa-dubbing-project-title input {
+  width: min(64vw, 560px);
+  min-width: 0;
   border: 0;
   padding: 0;
   color: #fff;
   background: transparent;
+  font-size: clamp(28px, 7.5vw, 43px);
+  font-weight: 900;
+  letter-spacing: -0.055em;
 }
 
-.soa-dubbing-home-button > span {
-  font-size: 38px;
-  font-weight: 250;
-  line-height: 1;
+.soa-dubbing-project-title__copy > button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  color: rgba(255, 255, 255, 0.42);
+  background: transparent;
+  font-size: 16px;
 }
 
-.soa-dubbing-home-button svg {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
+.soa-dubbing-project-title p,
+.soa-dubbing-project-title small {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.soa-dubbing-project-title p {
+  margin-top: 7px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.soa-dubbing-project-title small {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 9px;
+  font-weight: 700;
 }
 
 .soa-dubbing-toolbar__actions {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .soa-dubbing-toolbar__actions > button,
 .soa-dubbing-toolbar__actions > a,
 .soa-dubbing-more__trigger {
   display: grid;
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border: 0;
   border-radius: 13px;
   color: rgba(255, 255, 255, 0.86);
-  background: transparent;
-  font-size: 25px;
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 22px;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -97,7 +125,6 @@
   position: relative;
 }
 
-
 .soa-dubbing-menu {
   position: absolute;
   z-index: 60;
@@ -128,55 +155,16 @@
 .soa-dubbing-menu button:hover { background: rgba(255, 255, 255, 0.08); }
 .soa-dubbing-menu button.is-danger { color: #ff9990; }
 
-.soa-dubbing-project-title {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, auto) 32px;
-  justify-content: start;
-  align-items: center;
-  gap: 2px 4px;
-  margin-top: 34px;
-}
-
-.soa-dubbing-project-title input {
-  width: min(72vw, 560px);
-  min-width: 0;
-  border: 0;
-  padding: 0;
-  color: #fff;
-  background: transparent;
-  font-size: clamp(28px, 7.5vw, 43px);
-  font-weight: 900;
-  letter-spacing: -0.055em;
-}
-
-.soa-dubbing-project-title > button {
-  width: 32px;
-  height: 32px;
-  border: 0;
-  color: rgba(255, 255, 255, 0.42);
-  background: transparent;
-  font-size: 16px;
-}
-
-.soa-dubbing-project-title p,
-.soa-dubbing-project-title small {
-  grid-column: 1 / -1;
-  margin: 0;
-}
-
-.soa-dubbing-project-title p {
-  margin-top: 7px;
-  color: rgba(255, 255, 255, 0.42);
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.soa-dubbing-project-title small {
-  margin-top: 5px;
-  color: rgba(255, 255, 255, 0.28);
-  font-size: 9px;
-  font-weight: 700;
+@media (max-width: 560px) {
+  .soa-dubbing-header { padding-top: 18px; }
+  .soa-dubbing-project-title { align-items: center; }
+  .soa-dubbing-project-title input { width: min(58vw, 360px); }
+  .soa-dubbing-toolbar__actions > button,
+  .soa-dubbing-toolbar__actions > a,
+  .soa-dubbing-more__trigger {
+    width: 38px;
+    height: 38px;
+  }
 }
 
 .soa-dubbing-main {

@@ -12,13 +12,17 @@ interface AudioResultCardProps {
 }
 
 function resultLabel(audio: GeneratedAudio) {
+  if (audio.source === 'browser-speech') return 'BROWSER VOICE'
   if (audio.source === 'browser-demo' || audio.result.engineMode === 'mock') return 'DEMO WAV'
   if (audio.result.engineMode === 'local') return 'LOCAL TTS'
   return 'AI AUDIO'
 }
 
 export function AudioResultCard({ audio, sourceText, onRetry, onReset }: AudioResultCardProps) {
-  const isDemo = audio.source === 'browser-demo' || audio.result.engineMode === 'mock'
+  const isDemo = audio.source === 'browser-demo'
+    || audio.source === 'browser-speech'
+    || audio.result.engineMode === 'mock'
+  const downloadable = Boolean(audio.url)
   const spokenText = audio.result.normalizedText || sourceText
 
   return (
@@ -45,10 +49,13 @@ export function AudioResultCard({ audio, sourceText, onRetry, onReset }: AudioRe
 
       <button
         type="button"
-        onClick={() => downloadAudioFile(audio.url, audio.filename)}
-        className="focus-ring mt-4 min-h-[52px] w-full rounded-2xl bg-soa-ink px-5 font-black text-white"
+        onClick={() => {
+          if (audio.url) downloadAudioFile(audio.url, audio.filename)
+        }}
+        disabled={!downloadable}
+        className="focus-ring mt-4 min-h-[52px] w-full rounded-2xl bg-soa-ink px-5 font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
       >
-        WAV 다운로드
+        {downloadable ? 'WAV 다운로드' : '브라우저 음성은 다운로드 불가'}
       </button>
       <div className="mt-2 grid grid-cols-2 gap-2">
         <button type="button" onClick={onRetry} className="focus-ring min-h-11 rounded-2xl border border-soa-ink/15 bg-white/70 text-xs font-black">다시 생성</button>

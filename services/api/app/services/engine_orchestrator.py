@@ -176,7 +176,7 @@ class EngineOrchestrator:
         self,
         info: EngineInfo,
         request: TtsSynthesisRequest | None,
-    ) -> tuple[int, int, int, str]:
+    ) -> tuple[int, int, int, int, int, str]:
         try:
             configured_rank = self.preferred_order.index(info.id)
         except ValueError:
@@ -185,14 +185,22 @@ class EngineOrchestrator:
         capability_penalty = 0
         if request is not None:
             if request.emotion != "neutral" and not info.supports_emotion:
-                capability_penalty += 2
+                capability_penalty += 20
             if request.pitch != 0 and not info.supports_pitch:
-                capability_penalty += 1
+                capability_penalty += 20
             if request.speed != 1 and not info.supports_speed:
-                capability_penalty += 1
+                capability_penalty += 20
+        quality_rank = {
+            "reference": 0,
+            "premium": 1,
+            "standard": 2,
+            "basic": 3,
+        }.get(info.quality_tier, 4)
         return (
             0 if info.ready else 1,
             configured_rank + capability_penalty,
+            quality_rank,
+            100 - info.korean_specialization,
             mode_rank,
             info.id,
         )

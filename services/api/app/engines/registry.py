@@ -31,7 +31,6 @@ class EngineRegistry:
     def list_tts(self) -> list[TtsEngine]:
         return list(self._tts_engines.values())
 
-
     def register_voice_clone(self, engine: CosyVoiceCloneEngine) -> None:
         engine_id = engine.info().id
         if engine_id in self._voice_clone_engines:

@@ -36,8 +36,8 @@ async function walk(directory) {
     }
     const path = relative(root, fullPath)
     const extension = extname(entry.name).toLowerCase()
-    if (extension === '.svg' && path !== 'public/sorion-icon.svg') {
-      failures.push(`${path}: 허용되지 않은 SVG 파일입니다.`)
+    if (extension === '.svg') {
+      failures.push(`${path}: 브랜드 원본은 PNG이며 SVG 파일은 허용하지 않습니다.`)
     }
     if (!sourceExtensions.has(extension)) continue
     const content = await readFile(fullPath, 'utf8')
@@ -95,8 +95,7 @@ async function requireText(relativePath, requiredTexts) {
   }
 }
 await walk(root)
-const packageJson = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
-const currentVersion = packageJson.version
+const packageJson = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')); const currentVersion = packageJson.version
 await requireText('DELIVERY_RULES.md', [
   '## 1. 결과',
   '## 2. 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP',
@@ -167,6 +166,7 @@ await requireText('src/tts/mockWave.test.ts', [
   "typeof blob.arrayBuffer === 'function'",
   'reader.readAsArrayBuffer(blob)',
 ])
+await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])
 await requireText('src/components/layout/BrandMasthead.tsx', [
   'BrandIcon',
   'SoriON AI 첫 페이지',

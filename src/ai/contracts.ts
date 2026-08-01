@@ -1,5 +1,5 @@
 export type VoiceEmotion = 'neutral' | 'happy' | 'calm' | 'sad' | 'angry' | 'commercial'
-export type EngineMode = 'mock' | 'local' | 'ai'
+export type EngineMode = 'mock' | 'local' | 'ai' | 'browser'
 
 export interface TtsSynthesisRequest {
   text: string
@@ -44,6 +44,10 @@ export interface EngineInfo {
   supportsVoiceClone: boolean
   ready: boolean
   reason: string | null
+  qualityTier?: 'basic' | 'standard' | 'premium' | 'reference'
+  koreanSpecialization?: number
+  longForm?: boolean
+  streaming?: boolean
   recommended?: boolean
   health?: 'ready' | 'cooldown' | 'unavailable'
   successCount?: number

@@ -12,7 +12,10 @@ class Settings(BaseSettings):
         "https://junl-im.github.io"
     )
     default_tts_engine: str = "auto"
-    tts_engine_order: str = "cosyvoice3,melo,system,mock"
+    tts_engine_order: str = (
+        "cosyvoice3,naver-clova,google-chirp3-hd,azure-speech,"
+        "elevenlabs-v3,melo,system,mock"
+    )
     engine_failure_threshold: int = Field(default=2, ge=1, le=10)
     engine_cooldown_seconds: float = Field(default=30.0, ge=1.0, le=600.0)
     allow_mock_engine: bool = True
@@ -36,8 +39,22 @@ class Settings(BaseSettings):
     cosyvoice_worker_url: str = ""
     cosyvoice_worker_timeout_seconds: float = 2.5
     cosyvoice_worker_job_timeout_seconds: float = 45.0
+    cosyvoice_tts_reference_path: str = ""
+    cosyvoice_tts_profile_id: str = "sorion-korean-reference"
     worker_service_token: str = ""
     worker_signature_secret: str = ""
+    naver_clova_client_id: str = ""
+    naver_clova_client_secret: str = ""
+    naver_clova_speaker: str = "nara"
+    google_tts_api_key: str = ""
+    google_tts_voice: str = "ko-KR-Chirp3-HD-Aoede"
+    azure_speech_key: str = ""
+    azure_speech_region: str = ""
+    azure_speech_voice: str = "ko-KR-SunHiNeural"
+    elevenlabs_api_key: str = ""
+    elevenlabs_voice_id: str = ""
+    elevenlabs_model_id: str = "eleven_v3"
+    cloud_tts_timeout_seconds: float = Field(default=45.0, ge=5.0, le=180.0)
     public_rate_limit_per_minute: int = Field(default=120, ge=10, le=5000)
     allow_private_network: bool = True
     audit_log_path: str = ".sorion/audit/api.jsonl"

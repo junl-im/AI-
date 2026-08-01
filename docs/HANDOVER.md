@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.8.7 Dubbing Studio Workspace · CI Hotfix 4**
+현재 기준 버전: **0.8.9 Unified Product Shell & Korean Neural Engine Mesh**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-01 20:47 KST**
+최종 갱신: **2026-08-01 22:20 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -90,17 +90,16 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
 
 ### 엔진 연결 UX
 - API 주소 입력과 엔진 수동 선택 화면을 만들지 않는다.
-- 공개 배포는 Actions 변수 `SORION_PUBLIC_API_BASE_URL`을 build에 주입한다.
+- 공개 배포는 `SORION_PUBLIC_API_BASE_URLS` 복수 후보를 런타임 JSON과 build에 주입한다.
 - `*.github.io`는 정적 호스트이므로 same-origin `/api/v1`과 `:8443`을 탐색하지 않는다.
 - API·TTS·Worker·GPU 상태를 분리하고 `/connectivity`와 `/engines`는 같은 추천 엔진을 사용한다.
-- 연결 실패 시 online, 포그라운드 복귀와 단계적 backoff에서 내부적으로 재탐색한다.
+- 연결 실패 주소는 제외하고 다음 HTTPS API를 승계하며 online·복귀·backoff에서 재탐색한다.
 
 ### Dock
 - 순서: `만들기 → 복제 → 품질 → 프로젝트`.
 - 음성이 없으면 메뉴만, 첫 ready 음성이 생기면 플레이어를 메뉴 위에 표시한다.
 - 큐, 이전·다음, 반복, 속도, 탐색과 다운로드를 유지한다.
 - 설정은 Dock에 넣지 않는다.
-
 ## 5-1. 0.8.1 모바일 엔진·API 신뢰성 기준
 - API 주소에 스킴이 없어도 LAN IP는 HTTP, 공개 도메인은 현재 페이지에 맞춰 정규화한다.
 - 배포 주소, 마지막 성공 주소와 최근 자동 발견 주소를 분리 보관한다.
@@ -116,7 +115,6 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
 - 모든 Web 요청에 익명 client ID와 request ID를 보내고 API 응답 request ID를 진단에 표시한다.
 - 개발 LAN 연결은 허용 Origin과 Private Network preflight가 모두 맞아야 한다.
 - 모바일 입력은 16px 이상, 주요 터치 영역은 44px 이상, safe-area를 항상 반영한다.
-
 ## 6. 현재 아키텍처와 배포 현실
 ```text
 GitHub Pages / Mobile PWA
@@ -162,14 +160,14 @@ health · readiness · GPU diagnostics · jobs · SSE · WAV
 - 서비스 토큰 + HMAC-SHA256 서명, rate limit, 감사 로그.
 ## 8. 엔진 전략과 실제 상태
 우선순위:
-1. Fun-CosyVoice 3: 주력 TTS·제로샷 복제·스트리밍.
-2. GPT-SoVITS: 전문가 복제·사용자별 미세조정 후보.
-3. MeloTTS: GPU 없는 개발·로컬 한국어 대체.
-4. System Voice: 설치 없는 최종 안전망.
-5. Fish Audio S2: 라이선스 계약 전 평가 전용.
-6. Kokoro: 공식 한국어 미지원으로 주력 제외.
+1. CosyVoice 3 기준 음색: 한국어 주력 TTS·복제·향후 스트리밍.
+2. NAVER CLOVA Voice Premium: 한국어 특화 상용 대체.
+3. Google Chirp 3 HD·Azure Neural·ElevenLabs v3: 품질·표현력별 자동 대체.
+4. MeloTTS·System Voice·Browser Speech: 로컬·공개 Web 안전망.
+5. GPT-SoVITS·Fish Audio는 라이선스·운영 검증 전 평가 후보이며 Kokoro는 주력에서 제외한다.
 현재 진실:
-- CosyVoice Worker 인터페이스와 공식 AutoModel adapter 경계는 구현됐다.
+- CosyVoice 일반 TTS와 NAVER·Google·Azure·ElevenLabs Adapter 경계가 구현됐다.
+- 자격 증명·Worker·동의된 기준 음성이 준비된 엔진만 자동 후보가 된다.
 - 릴리스 ZIP에는 모델 가중치, PyTorch, CUDA, CosyVoice 저장소가 없다.
 - 모델 미설치 시 `/health`는 정상이어도 `/ready`는 not-ready다.
 - 실제 한국어 자연스러움, 화자 유사도, 지연, VRAM 벤치마크는 미완료다.
@@ -253,56 +251,45 @@ X-SoriON-Signature
 - Secret은 저장소와 ZIP에 넣지 않는다.
 - production에서 Secret이 없으면 ready가 되지 않아야 한다.
 ## 13. 환경 변수
-Web:
+전체 기본값과 설명의 원본은 루트 `.env.example`이다. 릴리스 ZIP에 실제 `.env`를 넣지 않는다.
+Web·배포:
 ```text
-VITE_API_BASE_URL
-VITE_FIREBASE_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID
-VITE_FIREBASE_APP_ID
+VITE_API_BASE_URL, VITE_API_BASE_URLS, SORION_PUBLIC_API_BASE_URL, SORION_PUBLIC_API_BASE_URLS
+VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_APP_ID
 ```
-API:
+API core·job:
 ```text
-SORION_ENVIRONMENT
-SORION_CORS_ORIGINS
-SORION_DEFAULT_TTS_ENGINE
-SORION_ALLOW_MOCK_ENGINE
-SORION_ENABLE_MELO_TTS
-SORION_MELO_DEVICE
-SORION_ENABLE_SYSTEM_TTS
-SORION_SYSTEM_TTS_VOICE
-SORION_JOB_STORE_PATH
-SORION_JOB_CLAIM_TTL_SECONDS
-SORION_JOB_RESULT_TTL_MINUTES
-SORION_JOB_HISTORY_TTL_HOURS
-SORION_JOB_POLL_INTERVAL_SECONDS
-SORION_COSYVOICE_WORKER_URL
-SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS
-SORION_WORKER_SERVICE_TOKEN
-SORION_WORKER_SIGNATURE_SECRET
-SORION_PUBLIC_RATE_LIMIT_PER_MINUTE
-SORION_ALLOW_PRIVATE_NETWORK
-SORION_AUDIT_LOG_PATH
+SORION_ENVIRONMENT, SORION_CORS_ORIGINS, SORION_DEFAULT_TTS_ENGINE, SORION_TTS_ENGINE_ORDER
+SORION_ENGINE_FAILURE_THRESHOLD, SORION_ENGINE_COOLDOWN_SECONDS, SORION_GENERATION_TIMEOUT_SECONDS
+SORION_MAX_CONCURRENT_GENERATIONS, SORION_JOB_STORE_PATH, SORION_JOB_CLAIM_TTL_SECONDS
+SORION_JOB_RESULT_TTL_MINUTES, SORION_JOB_HISTORY_TTL_HOURS, SORION_JOB_POLL_INTERVAL_SECONDS
+SORION_AUDIO_TTL_MINUTES, SORION_AUDIO_DIRECTORY, SORION_MAX_SEGMENT_CHARS
 ```
-Worker:
+엔진·Worker proxy:
 ```text
-SORION_WORKER_ENVIRONMENT
-SORION_WORKER_MODEL_PATH
-SORION_WORKER_REQUIRED_MODEL_FILES
-SORION_WORKER_ADAPTER_MODULE
-SORION_WORKER_DEVICE
-SORION_WORKER_ALLOW_CPU
-SORION_WORKER_MIN_VRAM_MB
-SORION_WORKER_SERVICE_TOKEN
-SORION_WORKER_SIGNATURE_SECRET
-SORION_WORKER_AUTH_TTL_SECONDS
-SORION_WORKER_RATE_LIMIT_PER_MINUTE
-SORION_WORKER_JOB_TTL_MINUTES
+SORION_ENABLE_MELO_TTS, SORION_MELO_DEVICE, SORION_ENABLE_SYSTEM_TTS, SORION_SYSTEM_TTS_VOICE
+SORION_COSYVOICE_WORKER_URL, SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS
+SORION_COSYVOICE_WORKER_JOB_TIMEOUT_SECONDS, SORION_COSYVOICE_TTS_REFERENCE_PATH
+SORION_COSYVOICE_TTS_PROFILE_ID, SORION_WORKER_SERVICE_TOKEN, SORION_WORKER_SIGNATURE_SECRET
+SORION_NAVER_CLOVA_CLIENT_ID, SORION_NAVER_CLOVA_CLIENT_SECRET, SORION_NAVER_CLOVA_SPEAKER
+SORION_GOOGLE_TTS_API_KEY, SORION_GOOGLE_TTS_VOICE, SORION_AZURE_SPEECH_KEY
+SORION_AZURE_SPEECH_REGION, SORION_AZURE_SPEECH_VOICE, SORION_ELEVENLABS_API_KEY
+SORION_ELEVENLABS_VOICE_ID, SORION_ELEVENLABS_MODEL_ID, SORION_CLOUD_TTS_TIMEOUT_SECONDS
+```
+보안·저장·Worker:
+```text
+SORION_PUBLIC_RATE_LIMIT_PER_MINUTE, SORION_ALLOW_PRIVATE_NETWORK, SORION_AUDIT_LOG_PATH
+SORION_VOICE_CLONE_DIRECTORY, SORION_VOICE_CLONE_TTL_DAYS, SORION_VOICE_CLONE_MAX_FILE_BYTES
+SORION_WORKER_ENVIRONMENT, SORION_WORKER_OUTPUT_PATH, SORION_WORKER_MODEL_PATH
+SORION_WORKER_REQUIRED_MODEL_FILES, SORION_WORKER_ADAPTER_MODULE, SORION_WORKER_DEVICE
+SORION_WORKER_ALLOW_CPU, SORION_WORKER_MIN_VRAM_MB, SORION_WORKER_MAX_CONCURRENT_JOBS
+SORION_WORKER_MAX_SAMPLE_BYTES, SORION_WORKER_AUTH_TTL_SECONDS, SORION_WORKER_RATE_LIMIT_PER_MINUTE
+SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_PATH
 ```
 ## 14. 코딩 규칙
 - 소스 파일 500줄 이하.
 - 큰 함수 분리, 중복 제거, 하드코딩 최소화.
-- SVG는 검증된 공식 브랜드 원본 `public/sorion-icon.svg`만 허용한다.
+- 공식 브랜드 원본은 사용자 제공 `public/sorion-logo.png`이며 근사 SVG를 다시 만들지 않는다.
 - 폐기 라이브러리 사용 금지.
 - Python 최소 지원 버전 3.10.
 - Python은 Ruff 표시 폭 100칸 이하.
@@ -318,9 +305,9 @@ SORION_WORKER_JOB_TTL_MINUTES
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.8.7-full.zip`.
-- 패치: `SoriON-AI-0.8.6-to-0.8.7-patch.zip`.
-- 기준본: `SoriON-AI-0.8.6-full.zip`.
+- 전체본: `SoriON-AI-0.8.9-full.zip`.
+- 패치: `SoriON-AI-0.8.8-to-0.8.9-patch.zip`.
+- 기준본: `SoriON-AI-0.8.8-full.zip`.
 - 삭제 대상: 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
@@ -332,9 +319,9 @@ SORION_WORKER_JOB_TTL_MINUTES
 - 채팅형 한 문장 composer를 장문 기본 제작 화면으로 되돌리지 않는다.
 - HANDOVER를 단순 변경 목록으로 축소하지 않는다.
 ## 18. 알려진 제한과 위험
-- GitHub Pages만으로는 음성 생성이 작동하지 않으며 별도 HTTPS FastAPI가 필요하다.
-- `SORION_PUBLIC_API_BASE_URL`이 없으면 공개 Web은 편집·저장만 가능하고 엔진은 준비되지 않는다.
-- 로컬 진단의 system TTS는 실제 AI가 아니며 MeloTTS·CosyVoice·GPU 모델은 별도 설치다.
+- GitHub Pages만으로 서버 AI 합성은 불가능하며 별도 HTTPS FastAPI가 필요하다.
+- 공개 API가 없으면 Browser Speech만 재생되며 AI·WAV 다운로드·복제는 준비되지 않는다.
+- Premium Cloud는 서버 자격 증명, CosyVoice는 모델·GPU·동의된 기준 음성이 별도 필요하다.
 - Web Speech 받아쓰기는 브라우저 지원과 권한에 따라 동작하지 않을 수 있다.
 - 장문은 현재 블록 순차 생성이며 최종 WAV 재병합 Export는 미완료다.
 - 자동 탐색은 보안상 전체 LAN을 스캔하지 않는다.
@@ -371,12 +358,12 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.8.8 Korean Voice Quality Streaming**.
+다음 목표 버전: **0.9.0 Progressive Korean Voice Streaming**.
 우선순위:
-1. 공개 HTTPS FastAPI와 사설 GPU Worker 운영 템플릿.
-2. Fun-CosyVoice 3 일반 TTS Adapter와 한국어 장문 품질 평가.
+1. 공개 HTTPS FastAPI 다중 리전과 사설 GPU Worker 운영 템플릿.
+2. CosyVoice·Premium Cloud의 실제 자격 증명·비용·quota 모니터링.
 3. 첫 문장 Progressive Playback, SSE 진행률과 첫 오디오 지연 측정.
-4. 장문 실패 구간만 재생성하고 재생·생성 순서를 일치시키는 queue 계약.
+4. 실패 구간 재생성, 전체 WAV 병합과 생성·재생 queue 일치.
 5. Android Chrome·iOS Safari·설치형 PWA 실기기 매트릭스.
 금지: 수동 API·엔진 UI, github.io API 오탐, 채팅형 기본 제작 화면, 모델 없는 AI 성공 표시.
 ## 22. 변경 이력 보존 위치
@@ -457,7 +444,7 @@ CI Hotfix 4 테스트 규칙:
    PWA 아이콘, 브라우저 history, API 자동 탐색, 연결 진단, Pages workflow와 문서.
 6. 주요 파일: `LongformComposer.tsx`, `HomePage.tsx`, `useExitConfirmation.ts`,
    `workspaceSessionRepository.ts`, `apiConnection.ts`, `httpClient.ts`, `connectivity.py`,
-   `sorion-icon.svg`, `ci.yml`, `LONGFORM_VOICE_WORKSPACE.md`.
+   `sorion-logo.png`, `ci.yml`, `LONGFORM_VOICE_WORKSPACE.md`.
 7. 검증 결과: API 90개·Worker 9개, 프로젝트 규칙, Python compileall·3.10 AST,
    TS/TSX 120개 구문, 상대 import 250개, CSS·JSON·YAML 구조 검사를 통과했다.
    로컬 `system` 엔진으로 147,848-byte WAV 실제 생성도 확인했다.
@@ -471,7 +458,6 @@ CI Hotfix 4 테스트 규칙:
 ## 32. 2026-08-01 · v0.8.7 릴리스와 CI 핫픽스
 1. 프로젝트 상단바, 화자·설정 Sheet, 세로형 대사 블록과 고정 플레이어를 추가했다.
 2. 첫 핫픽스는 TimelineEditor 대사 버튼의 중복 접근성 이름을 번호·상태별로 분리했다.
-
 ## 33. 2026-08-01 20:05 KST · v0.8.7 Web quality CI 핫픽스 2
 1. 기준: `0.8.7-ci-hotfix → 0.8.7-ci-hotfix-2`.
 2. 현재 화자 선택과 같은 화자의 미리듣기 버튼이 `/혜린/` 조회에서 충돌한 문제를 수정했다.
@@ -481,3 +467,21 @@ CI Hotfix 4 테스트 규칙:
 6. 프로젝트 메뉴와 대사 블록 메뉴는 선택 즉시 닫히며 대사 메뉴 이름에는 대사 번호를 포함한다.
 5. API 90개·Worker 9개, TS/TSX 구문·상대 import·패치 동등성을 확인한다.
 6. 다음 목표는 `0.8.8 Korean Voice Quality Streaming`이다.
+## 34. 2026-08-01 21:35 KST · v0.8.8
+1. 만들기 포함 모든 내부 페이지에 기존 공통 상단 배너와 작은 SoriON 명칭을 복원했다.
+2. 사용자 제공 1254×1254 PNG를 공식 원본으로 사용하고 `sorion-icon.svg`를 삭제했다.
+3. 공개 API가 없으면 Web Speech API 한국어 음성을 자동 사용해 실제 재생을 가능하게 한다.
+4. 브라우저 음성은 AI·WAV로 가장하지 않으며 다운로드·복제·정밀 감정은 API가 필요하다.
+5. 실제 API 엔진은 항상 브라우저 대체 음성보다 우선하고 자동 재연결은 계속 유지한다.
+6. 다음 목표는 `0.8.9 Public Korean AI Voice Deployment & Streaming`이다.
+## 35. 2026-08-01 22:20 KST · v0.8.9
+1. 작업 일시: 2026-08-01 22:20 KST.
+2. 대상·기준: `0.8.8 → 0.8.9`.
+3. 변경 내용: 공통 PageScaffold, Premium Korean Engine Mesh와 복수 API 자동 장애 전환을 추가했다.
+4. 변경 이유: 페이지별 IA 편차와 실제 등록 엔진 부족, 실패 API 고정 재시도를 함께 해소하기 위해서다.
+5. 영향 범위: 내부 페이지 셸, 연결 bootstrap, 엔진 registry·orchestrator, 진단 API와 배포 workflow.
+6. 주요 파일: `WorkspacePageScaffold.tsx`, `apiConnection.ts`, `engine_orchestrator.py`, `engines/tts/*`.
+7. 검증 결과: API 98개·Worker 9개, 프로젝트 규칙, Python 3.10 AST, TS 구문·import 검사를 통과했다.
+8. 제한: 실제 Premium 합성은 서버 자격 증명, CosyVoice는 모델·GPU·동의된 기준 음성이 필요하다.
+9. 산출물: `SoriON-AI-0.8.9-full.zip`, `SoriON-AI-0.8.8-to-0.8.9-patch.zip`.
+10. 다음 예상 업데이트: `0.9.0 Progressive Korean Voice Streaming`.

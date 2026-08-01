@@ -15,7 +15,7 @@ describe('BrandMasthead', () => {
     expect(screen.getAllByText('곰같은여우').length).toBeGreaterThan(0)
     const brandButton = screen.getByRole('button', { name: 'SoriON AI 첫 페이지' })
     expect(brandButton).toBeInTheDocument()
-    expect(view.container.querySelector('img[src$="sorion-icon.svg"]')).toBeInTheDocument()
+    expect(view.container.querySelector('img[src$="sorion-logo.png"]')).toBeInTheDocument()
   })
 
   it('현재 장문 중심 소개 문구를 순환한다', () => {

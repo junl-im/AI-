@@ -6,7 +6,7 @@ import { createRandomId } from '../utils/randomId'
 const MAX_QUEUE_SIZE = 20
 
 function releaseTrack(track: PlayerTrack | undefined) {
-  if (!track?.audio.revokeOnRemove) return
+  if (!track?.audio.revokeOnRemove || !track.audio.url) return
   URL.revokeObjectURL(track.audio.url)
 }
 

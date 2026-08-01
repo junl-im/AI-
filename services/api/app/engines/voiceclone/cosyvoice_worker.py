@@ -60,6 +60,10 @@ class CosyVoiceCloneEngine:
             supports_voice_clone=True,
             ready=self._ready,
             reason=self._reason,
+            quality_tier="reference",
+            korean_specialization=96,
+            long_form=True,
+            streaming=True,
         )
 
     async def probe(self) -> bool:
@@ -127,7 +131,7 @@ class CosyVoiceCloneEngine:
                         files={
                             "sample": (sample_path.name, sample, "application/octet-stream")
                         },
-                        headers={"User-Agent": "SoriON-API/0.8.7"},
+                        headers={"User-Agent": "SoriON-API/0.8.9"},
                     )
                     body = await request.aread()
                     request.headers.update(self._auth_headers("POST", path, body))
@@ -206,7 +210,7 @@ class CosyVoiceCloneEngine:
         self._require_worker_url()
         headers = {
             "Accept": "application/json",
-            "User-Agent": "SoriON-API/0.8.7",
+            "User-Agent": "SoriON-API/0.8.9",
         }
         if authenticate:
             headers.update(self._auth_headers(method, path, b""))

@@ -26,7 +26,7 @@ export function AppShell({ children }: PropsWithChildren) {
 
   return (
     <div className={workspaceEntered ? 'soa-app-root is-editor' : 'soa-app-root is-landing'}>
-      {workspaceEntered ? (page === 'home' ? null : <CompactWorkspaceHeader />) : <BrandMasthead />}
+      {workspaceEntered ? <CompactWorkspaceHeader /> : <BrandMasthead />}
       <div className={shellClassName}>
         <section className="soa-primary-frame">{children}</section>
       </div>

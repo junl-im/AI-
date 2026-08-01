@@ -1,5 +1,14 @@
 import type { EngineInfo, HealthResult, TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
-import { ApiError, apiRequest, resolveApiAssetUrl } from '../api/httpClient'
+import {
+  ApiError,
+  apiRequest,
+  getApiConnectionContext,
+  resolveApiAssetUrl,
+} from '../api/httpClient'
+import {
+  createBrowserSpeechResult,
+  isBrowserSpeechSupported,
+} from './browserSpeech'
 
 export type JobProgressPhase = 'queued' | 'normalizing' | 'generating' | 'merging' | 'completed' | 'cancelled' | 'failed'
 
@@ -71,6 +80,10 @@ interface ApiEngineInfo {
   supports_voice_clone: boolean
   ready: boolean
   reason: string | null
+  quality_tier?: 'basic' | 'standard' | 'premium' | 'reference'
+  korean_specialization?: number
+  long_form?: boolean
+  streaming?: boolean
   recommended?: boolean
   health?: 'ready' | 'cooldown' | 'unavailable'
   success_count?: number
@@ -153,6 +166,10 @@ export async function listEngines(baseUrl?: string, signal?: AbortSignal): Promi
     supportsVoiceClone: engine.supports_voice_clone,
     ready: engine.ready,
     reason: engine.reason,
+    qualityTier: engine.quality_tier ?? 'basic',
+    koreanSpecialization: engine.korean_specialization ?? 0,
+    longForm: engine.long_form ?? false,
+    streaming: engine.streaming ?? false,
     recommended: engine.recommended ?? false,
     health: engine.health ?? (engine.ready ? 'ready' : 'unavailable'),
     successCount: engine.success_count ?? 0,
@@ -168,6 +185,11 @@ export async function synthesizeSpeech(
   jobId: string,
   signal?: AbortSignal,
 ): Promise<TtsSynthesisResult> {
+  const browserFallbackAvailable = isBrowserSpeechSupported()
+  if (!getApiConnectionContext().configured && browserFallbackAvailable) {
+    return createBrowserSpeechResult(request, jobId)
+  }
+
   const payload: ApiTtsRequest = {
     text: request.text,
     voice_id: request.voiceId,
@@ -186,8 +208,17 @@ export async function synthesizeSpeech(
     }, { signal, timeoutMs: 90_000, retries: 0 })
     return mapTtsResult(result)
   } catch (error) {
-    if (error instanceof ApiError && ['timeout', 'cors-or-network', 'offline'].includes(error.kind)) {
-      return recoverSpeechResult(jobId, signal)
+    if (error instanceof ApiError && error.kind === 'cancelled') throw error
+    if (
+      error instanceof ApiError
+      && (
+        ['unconfigured', 'timeout', 'cors-or-network', 'offline', 'mixed-content', 'mobile-localhost']
+          .includes(error.kind)
+        || [502, 503, 504].includes(error.status)
+      )
+      && browserFallbackAvailable
+    ) {
+      return createBrowserSpeechResult(request, jobId)
     }
     throw error
   }

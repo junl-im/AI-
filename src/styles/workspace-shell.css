@@ -319,6 +319,26 @@
   flex: 0 0 auto;
 }
 
+.soa-page-content {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.soa-page-status {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 12px;
+  border: 1px solid rgba(169, 156, 255, 0.2);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: rgba(238, 243, 255, 0.72);
+  background: rgba(169, 156, 255, 0.08);
+  font-size: 10px;
+  font-weight: 850;
+}
+
 .soa-page-action {
   color: #111827;
   background: #d8ff72;

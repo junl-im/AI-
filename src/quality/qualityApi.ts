@@ -22,6 +22,10 @@ interface ApiEngineDiagnostic {
   mode: EngineDiagnostic['mode']
   ready: boolean
   provider: string
+  quality_tier: 'basic' | 'standard' | 'premium' | 'reference'
+  korean_specialization: number
+  long_form: boolean
+  streaming: boolean
   model_loaded: boolean | null
   recommended: boolean
   health: 'ready' | 'cooldown' | 'unavailable'
@@ -92,6 +96,10 @@ export async function getQualityDiagnostics(): Promise<QualityDiagnostics> {
       mode: engine.mode,
       ready: engine.ready,
       provider: engine.provider,
+      qualityTier: engine.quality_tier,
+      koreanSpecialization: engine.korean_specialization,
+      longForm: engine.long_form,
+      streaming: engine.streaming,
       modelLoaded: engine.model_loaded,
       recommended: engine.recommended,
       health: engine.health,

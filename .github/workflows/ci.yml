@@ -57,16 +57,24 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           SORION_PUBLIC_API_BASE_URL: ${{ vars.SORION_PUBLIC_API_BASE_URL }}
+          SORION_PUBLIC_API_BASE_URLS: ${{ vars.SORION_PUBLIC_API_BASE_URLS }}
         run: |
-          if [ -z "$SORION_PUBLIC_API_BASE_URL" ]; then
-            echo "::warning title=Voice API not configured::Set the repository Actions variable SORION_PUBLIC_API_BASE_URL to the deployed HTTPS FastAPI origin."
+          if [ -z "$SORION_PUBLIC_API_BASE_URL" ] && [ -z "$SORION_PUBLIC_API_BASE_URLS" ]; then
+            echo "::warning title=Voice API not configured::Set SORION_PUBLIC_API_BASE_URLS or SORION_PUBLIC_API_BASE_URL to one or more deployed HTTPS FastAPI origins."
           fi
 
       - name: Build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
           VITE_API_BASE_URL: ${{ vars.SORION_PUBLIC_API_BASE_URL }}
+          VITE_API_BASE_URLS: ${{ vars.SORION_PUBLIC_API_BASE_URLS }}
         run: npm run build
+
+      - name: Write runtime Voice API candidates
+        env:
+          SORION_PUBLIC_API_BASE_URL: ${{ vars.SORION_PUBLIC_API_BASE_URL }}
+          SORION_PUBLIC_API_BASE_URLS: ${{ vars.SORION_PUBLIC_API_BASE_URLS }}
+        run: npm run runtime:config
 
       - name: Configure GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

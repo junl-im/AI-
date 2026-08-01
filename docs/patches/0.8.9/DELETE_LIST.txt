@@ -1,0 +1,2 @@
+# SoriON AI 0.8.9 delete list
+# No files need to be deleted for this patch.
