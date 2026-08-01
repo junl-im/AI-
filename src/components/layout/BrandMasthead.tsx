@@ -23,14 +23,14 @@ function LightningWave() {
 }
 
 export function BrandMasthead() {
-  const setPage = useAppStore((state) => state.setPage)
+  const enterWorkspace = useAppStore((state) => state.enterWorkspace)
 
   return (
     <header className="soa-masthead" aria-label="곰같은여우 SoriON AI 소개">
       <div className="soa-masthead__inner">
         <div className="soa-meta-bar">
           <div className="soa-meta-group">
-            <span className="soa-meta-label">BUILD</span><strong>v0.7.2</strong>
+            <span className="soa-meta-label">BUILD</span><strong>v0.8.0</strong>
             <span className="soa-meta-divider" aria-hidden="true" />
             <span className="soa-device-mark" aria-hidden="true"><i /><b /></span>
             <span>모바일 · PC 호환</span>
@@ -38,7 +38,7 @@ export function BrandMasthead() {
           <div className="soa-meta-group shrink-0">
             <span className="soa-meta-label hidden sm:inline">DESIGNED BY</span>
             <strong>곰같은여우</strong>
-            <button type="button" className="soa-settings-button" onClick={() => setPage('settings')} aria-label="설정 열기">⚙</button>
+            <button type="button" className="soa-settings-button" onClick={() => enterWorkspace('settings')} aria-label="설정 열기">⚙</button>
           </div>
         </div>
 

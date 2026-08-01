@@ -6,7 +6,7 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 
 ## 현재 상태
 
-- 버전: `0.7.2 CI Zero-Error Patch`
+- 버전: `0.7.3 Handover Memory Baseline`
 - 웹: React + Vite + TypeScript + Tailwind CSS + Motion + PWA
 - API: FastAPI + Python
 - 주력 AI 엔진: 선택 설치형 Fun-CosyVoice 3 `AutoModel` Worker adapter
@@ -18,9 +18,9 @@ SoriON AI는 텍스트 음성 생성, 음성 인식, 음성 변환, 목소리 �
 - 저장: IndexedDB v3 프로젝트·품질 평가·음성 프로필, Firebase는 선택적 동기화 계층
 - CI·배포: Web·API·Worker·Pages를 단일 GitHub Actions 실행으로 관리
 
-## 0.7.2에서 가능한 작업
+## 0.7.3에서 가능한 작업
 
-이번 패치는 GitHub Actions에서 확인된 Worker Ruff 4건, API Ruff 1건, Web 테스트 1건, React Hook 경고 1건을 수정하고 동일 회귀를 자동 검사합니다.
+기능 기준은 0.7.2와 동일하며, 이번 릴리스는 임시채팅에서도 목표·규칙·아키텍처·엔진 상태·다음 작업을 잃지 않도록 `docs/HANDOVER.md`를 영구 프로젝트 메모리로 확정합니다.
 
 1. 설정에서 Health·Setup·TTS·복제·통합 진단 API를 한 번에 점검합니다.
 2. GitHub Pages 정적 배포와 실제 Python API를 명확히 구분합니다.
@@ -73,6 +73,7 @@ npm run dev
 - 연계형 플레이어: [`docs/PLAYER_DOCK.md`](docs/PLAYER_DOCK.md)
 - API 연결 진단: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
 - CosyVoice Worker: [`docs/COSYVOICE_WORKER.md`](docs/COSYVOICE_WORKER.md)
+- 영구 인수인계 메모리: [`docs/HANDOVER.md`](docs/HANDOVER.md)
 - 전체 개발 규칙: [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
 
 ## GitHub Pages 배포
@@ -109,6 +110,6 @@ GitHub Pages는 정적 웹만 실행합니다. Python API와 TTS 모델은 별�
 각 업데이트마다 `docs/HANDOVER.md`, `docs/CHANGELOG.md`, `docs/NEXT_UPDATE.md`를 함께 갱신합니다.
 
 
-### 0.7.2 CI 안정화
+### 0.7.3 인수인계 메모리 기준점
 
-API↔Worker 보안 기능을 유지하면서 Ruff·문장 분할 UI·복제 polling Hook 계약을 안정화했다.
+다음 AI 또는 개발자는 코드 변경 전에 `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 끝까지 읽어야 한다. 기능 코드는 0.7.2와 동일하다.

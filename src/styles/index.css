@@ -1,5 +1,9 @@
 @import "tailwindcss";
 @import "./masthead.css";
+@import "./workspace-shell.css";
+@import "./workspace-editor.css";
+@import "./timeline-editor.css";
+@import "./connection-sheet.css";
 @import "./player-dock.css";
 @import "./voice-clone.css";
 @import "./clone-execution.css";
@@ -67,140 +71,11 @@ button {
   backdrop-filter: blur(18px);
 }
 
-.focus-ring:focus-visible {
-  outline: 3px solid color-mix(in srgb, #9d8cff 50%, transparent);
+.focus-ring:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid color-mix(in srgb, #9d8cff 48%, transparent);
   outline-offset: 2px;
-}
-
-.soa-workspace-shell {
-  position: relative;
-  width: min(100%, 1400px);
-  margin: 0 auto;
-  padding: 12px 12px 92px;
-  transition: padding-bottom 180ms ease;
-}
-
-.soa-workspace-shell--has-player {
-  padding-bottom: 176px;
-}
-
-.soa-primary-frame {
-  min-height: 62dvh;
-  border-radius: 28px;
-  padding: 0 16px 14px;
-  background: var(--color-soa-paper);
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.18);
-}
-
-.soa-context-frame {
-  display: none;
-}
-
-.soa-context-frame > div:first-child span {
-  display: block;
-  color: #9d8cff;
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: 0.16em;
-}
-
-.soa-context-frame > div:first-child strong {
-  display: block;
-  margin-top: 9px;
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.soa-context-orb {
-  position: relative;
-  height: 170px;
-  margin: 20px 0;
-  border-radius: 24px;
-  background: radial-gradient(circle, rgba(120, 98, 255, 0.4), transparent 55%);
-}
-
-.soa-context-orb i {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  border: 1px solid rgba(120, 220, 255, 0.35);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.soa-context-orb i:nth-child(1) {
-  width: 55px;
-  height: 55px;
-}
-
-.soa-context-orb i:nth-child(2) {
-  width: 95px;
-  height: 95px;
-}
-
-.soa-context-orb i:nth-child(3) {
-  width: 135px;
-  height: 135px;
-}
-
-.soa-context-frame dl {
-  display: grid;
-  gap: 8px;
-}
-
-.soa-context-frame dl div {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.soa-context-frame dt {
-  color: rgba(226, 235, 255, 0.45);
-  font-size: 10px;
-}
-
-.soa-context-frame dd {
-  margin: 0;
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.soa-context-frame button {
-  width: 100%;
-  min-height: 46px;
-  margin-top: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
-  font-weight: 800;
-}
-
-@media (min-width: 980px) {
-  .soa-workspace-shell {
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
-    gap: 12px;
-    padding-bottom: 96px;
-  }
-
-  .soa-workspace-shell--has-player {
-    padding-bottom: 168px;
-  }
-
-  .soa-primary-frame {
-    padding-inline: 22px;
-  }
-
-  .soa-context-frame {
-    display: block;
-    min-height: 62dvh;
-    border: 1px solid rgba(154, 177, 221, 0.13);
-    border-radius: 28px;
-    padding: 22px;
-    color: #eef3ff;
-    background: linear-gradient(155deg, rgba(17, 27, 46, 0.98), rgba(14, 16, 34, 0.96));
-    box-shadow: 0 20px 70px rgba(0, 0, 0, 0.18);
-  }
 }

@@ -218,3 +218,12 @@ npm run test:worker
 - API Worker 테스트에 사용하지 않는 `json` import가 없다.
 - `splitTextForUi`는 기본 길이에서도 마침표 문장 경계를 유지한다.
 - 복제 polling effect는 `activeJobId`, `activeJobStatus` 의존성을 사용한다.
+
+## 0.7.3 인수인계 메모리 회귀 검사
+
+- HANDOVER에 임시채팅 영구 메모리 상태가 있어야 한다.
+- 제품 목표, 사용자 UX 결정, 아키텍처, 제한, 전달 규칙, 다음 목표가 있어야 한다.
+- HANDOVER는 500줄을 초과하지 않아야 한다.
+- DELIVERY_RULES에 임시채팅 인수인계 메모리 절대 규칙이 있어야 한다.
+- START_HERE의 첫 절차가 HANDOVER 필독이어야 한다.
+

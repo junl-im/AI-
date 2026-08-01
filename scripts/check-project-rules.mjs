@@ -113,9 +113,24 @@ await requireText('DELIVERY_RULES.md', [
   '## 1. 결과',
   '## 2. 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP',
   '## 3. 다음 예상 업데이트 내역',
+  '## 임시채팅 인수인계 메모리 절대 규칙',
   'docs/HANDOVER.md',
 ])
-await requireText('docs/HANDOVER.md', [currentVersion, '다음 예상 업데이트'])
+await requireText('docs/HANDOVER.md', [
+  currentVersion,
+  '임시채팅 영구 메모리 원본',
+  '## 2. 프로젝트의 궁극적 목표',
+  '## 4. 사용자가 확정한 UX·디자인',
+  '## 6. 현재 아키텍처와 배포 현실',
+  '## 18. 알려진 제한과 위험',
+  '## 19. 절대 전달 규칙',
+  '## 21. 다음 목표',
+])
+const handoverContent = await readFile(join(root, 'docs/HANDOVER.md'), 'utf8')
+const handoverLineCount = handoverContent.split(/\r?\n/).length
+if (handoverLineCount > 500) {
+  failures.push(`docs/HANDOVER.md: ${handoverLineCount}줄로 500줄 제한을 초과했습니다.`)
+}
 await requireText('docs/CHANGELOG.md', [`## ${currentVersion}`])
 await requireText('docs/NEXT_UPDATE.md', ['# NEXT UPDATE', '## 목표 버전'])
 await requireText('docs/RELEASE.md', ['전체 통파일 ZIP', '덮어쓰기용 패치 ZIP'])
@@ -197,7 +212,10 @@ await requireText('src/components/navigation/LinkedPlayerDock.test.tsx', [
 ])
 await requireText('src/components/layout/AppShell.tsx', [
   'soa-workspace-shell--has-player',
-  'getCurrentTrack(state) !== null',
+  'soa-workspace-shell--editor',
+  'CompactWorkspaceHeader',
+  'BrandMasthead',
+  'ConnectionBottomSheet',
 ])
 await requireText('src/components/layout/AppShell.test.tsx', [
   '플레이어 유무에 따라 작업 화면의 하단 안전 여백을 바꾼다',
@@ -262,23 +280,40 @@ await requireText('docs/COSYVOICE_WORKER.md', [
 ])
 
 await requireText('src/pages/HomePage.tsx', [
-  'soa-creation-title',
-  'WAV로 생성하기 (약 3초)',
-  'normalizeText: pronunciationCorrection',
-  'maxLength={500}',
+  'soa-editor-workspace',
+  'interpretComposerPrompt',
+  'timeline.stageText',
+  'Progressive Playback',
+  'openConnectionSheet',
 ])
-await requireText('src/components/voice/TextComposer.tsx', [
-  '바로 여기에 변환할 문장을 입력하세요.',
-  '숫자·날짜 자동 변환',
-  '2026년 8월 1일 → 이천이십육년 팔월 일일',
+await requireText('src/pages/LandingHome.tsx', [
+  'AI 음성 스튜디오 시작',
+  '채팅으로 요청',
+  '타임라인 편집',
 ])
-await requireText('src/components/voice/VoicePresetSelector.tsx', [
-  'soa-voice-chip-row',
-  '옆으로 밀어 비교하세요',
+await requireText('src/components/workspace/ChatComposer.tsx', [
+  '메시지를 입력하세요…',
+  '마이크로 입력',
+  '광고톤으로',
+  '숫자 읽기 쉽게',
 ])
-await requireText('src/components/voice/SegmentResultList.tsx', [
-  '문장별 생성 구간',
-  '하단 Dock에서 이어집니다.',
+await requireText('src/components/workspace/VoiceLibrary.tsx', [
+  '목소리 라이브러리',
+  '새 보이스 만들기',
+  'previewingId',
+])
+await requireText('src/components/workspace/TimelineEditor.tsx', [
+  '음성 타임라인',
+  '블록 자르기',
+  '재시도',
+  '＋ 쉼 0.5초',
+])
+await requireText('src/components/settings/ConnectionBottomSheet.tsx', [
+  '음성 엔진 연결',
+  '이 기기에서 찾기',
+  'HealthDot label="API"',
+  'HealthDot label="Worker"',
+  'HealthDot label="GPU"',
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   "window.scrollTo({ top: 0, behavior: 'smooth' })",
@@ -290,17 +325,29 @@ await requireText('services/api/app/services/tts_pipeline.py', [
   'if request.normalize_text:',
   'NormalizationResult(',
 ])
-await requireText('src/styles/creation-workspace.css', [
-  'margin: -32px 10px 0',
-  'radial-gradient',
-  'color: #111',
-  'color: #7a7a7a',
+await requireText('src/styles/workspace-editor.css', [
+  '.soa-editor-workspace',
+  '.soa-voice-library',
+  '.soa-chat-stage',
+  '.soa-system-message',
+])
+await requireText('src/styles/timeline-editor.css', [
+  '.soa-timeline-block--voice.is-ready',
+  '.soa-timeline-block--voice.is-failed',
+  '.soa-timeline-block--pause',
+])
+await requireText('src/styles/workspace-shell.css', [
+  '.soa-workspace-shell--landing',
+  '.soa-workspace-shell--editor',
+  '.soa-compact-header',
 ])
 
 await requireText('src/api/httpClient.ts', [
   'getApiConnectionContext',
   "source: ApiBaseSource",
   'Voice API 주소가 설정되지 않았습니다.',
+  'discoverApiBaseUrl',
+  'probeApiBaseUrl',
   'resolveApiAssetUrl',
 ])
 await requireText('src/settings/connectivityApi.ts', [

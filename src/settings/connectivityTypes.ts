@@ -15,6 +15,10 @@ export interface ApiConnectivityReport {
   baseUrl: string
   status: ConnectivityStatus
   environment: string | null
+  apiReady: boolean
+  ttsReady: boolean
+  voiceCloneReady: boolean
+  workerConfigured: boolean
   checks: ConnectivityCheck[]
   warnings: string[]
   ttsEngines: EngineInfo[]

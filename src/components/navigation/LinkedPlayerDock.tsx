@@ -28,7 +28,7 @@ function formatTime(value: number) {
 
 export function LinkedPlayerDock() {
   const page = useAppStore((state) => state.page)
-  const setPage = useAppStore((state) => state.setPage)
+  const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const queue = usePlayerStore((state) => state.queue)
   const currentTrackId = usePlayerStore((state) => state.currentTrackId)
   const repeatMode = usePlayerStore((state) => state.repeatMode)
@@ -209,7 +209,7 @@ export function LinkedPlayerDock() {
               type="button"
               aria-current={page === item.page ? 'page' : undefined}
               onClick={() => {
-                setPage(item.page)
+                enterWorkspace(item.page)
                 window.scrollTo({ top: 0, behavior: 'smooth' })
               }}
               className={page === item.page ? 'is-active' : ''}

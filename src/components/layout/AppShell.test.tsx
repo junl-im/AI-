@@ -1,4 +1,4 @@
-import { act, render } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GeneratedAudio } from '../../tts/generationTypes'
 import { useAppStore } from '../../store/useAppStore'
@@ -31,9 +31,17 @@ function generatedAudio(): GeneratedAudio {
 
 describe('AppShell', () => {
   beforeEach(() => {
+    window.localStorage.clear()
     vi.restoreAllMocks()
     usePlayerStore.getState().clearQueue()
-    useAppStore.setState({ page: 'home', notice: null })
+    useAppStore.setState({
+      page: 'home',
+      workspaceEntered: false,
+      connectionSheetOpen: false,
+      backendStatus: 'unknown',
+      backendMessage: '상태 미확인',
+      notice: null,
+    })
     vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined)
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined)
     vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined)
@@ -42,6 +50,18 @@ describe('AppShell', () => {
   afterEach(() => {
     usePlayerStore.getState().clearQueue()
     vi.restoreAllMocks()
+  })
+
+  it('초기 화면과 작업공간의 상단 구조를 분리한다', () => {
+    const view = render(<AppShell><p>작업 화면</p></AppShell>)
+
+    expect(view.container.querySelector('.soa-workspace-shell--landing')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '곰같은여우 SoriON AI' })).toBeInTheDocument()
+
+    act(() => useAppStore.getState().enterWorkspace('home'))
+
+    expect(view.container.querySelector('.soa-workspace-shell--editor')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /SoriON AI/ })).toBeInTheDocument()
   })
 
   it('플레이어 유무에 따라 작업 화면의 하단 안전 여백을 바꾼다', () => {

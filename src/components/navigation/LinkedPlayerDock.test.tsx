@@ -33,7 +33,7 @@ describe('LinkedPlayerDock', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     usePlayerStore.getState().clearQueue()
-    useAppStore.setState({ page: 'home' })
+    useAppStore.setState({ page: 'home', workspaceEntered: false })
     vi.spyOn(HTMLMediaElement.prototype, 'load').mockImplementation(() => undefined)
     vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => undefined)
     vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined)
@@ -69,12 +69,13 @@ describe('LinkedPlayerDock', () => {
   })
 
   it('Dock 메뉴를 누르면 페이지와 관계없이 화면 상단으로 이동한다', () => {
-    useAppStore.setState({ page: 'quality' })
+    useAppStore.setState({ page: 'quality', workspaceEntered: true })
     render(<LinkedPlayerDock />)
 
     fireEvent.click(screen.getByRole('button', { name: /만들기/ }))
 
     expect(useAppStore.getState().page).toBe('home')
+    expect(useAppStore.getState().workspaceEntered).toBe(true)
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
   })
 

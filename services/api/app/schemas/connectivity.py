@@ -20,6 +20,10 @@ class ConnectivityResponse(BaseModel):
     status: ConnectivityStatus
     environment: str
     api_base_path: str
+    api_ready: bool
+    tts_ready: bool
+    voice_clone_ready: bool
+    worker_configured: bool
     cors_origins: list[str]
     tts_engines: list[EngineInfo]
     voice_clone_engines: list[EngineInfo]

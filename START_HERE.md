@@ -1,22 +1,35 @@
 # 곰같은여우 SoriON AI 시작 안내
 
+현재 버전: `0.7.3 Handover Memory Baseline`
+
+## 0. 가장 먼저 읽을 파일
+
+이 프로젝트는 임시채팅에서 개발되므로 대화 기억에 의존하지 않습니다.
+
+1. [`docs/HANDOVER.md`](docs/HANDOVER.md) 전체
+2. [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
+3. [`docs/NEXT_UPDATE.md`](docs/NEXT_UPDATE.md)
+
+다음 개발은 위 세 파일을 읽기 전에는 시작하지 않습니다.
+
 ## 1. GitHub Desktop에 추가
 
-기존 저장소를 유지하는 경우 `.git`은 그대로 두고 전체 파일 또는 패치 파일만 저장소 루트에 덮어씁니다.
+기존 저장소를 유지할 때 `.git`은 그대로 두고 전체 파일 또는 패치 파일만
+저장소 루트에 덮어씁니다.
 
-권장 작업 브랜치:
-
-```text
-fix/ci-zero-error
-```
-
-권장 커밋 메시지:
+권장 브랜치:
 
 ```text
-fix: clear Web API and Worker quality errors
+docs/handover-memory-baseline
 ```
 
-## 2. 기본 환경 설정
+권장 커밋:
+
+```text
+docs: establish permanent handover memory
+```
+
+## 2. 기본 환경
 
 ```bash
 cp .env.example .env
@@ -24,74 +37,14 @@ npm install
 uv --version
 ```
 
+요구 버전:
+
+- Node.js 22 이상
+- npm 10 이상
+- Python 3.10 이상 3.13 미만
+- uv
+
 ## 3. 실행
-
-웹:
-
-```bash
-npm run dev
-```
-
-API:
-
-```bash
-npm run dev:api
-```
-
-## 4. 0.7.2 첫 확인
-
-- 설정에서 `전체 연결 검사`를 실행합니다.
-- `/api/v1/health`, `/setup`, `/engines`, `/voice-clones/capabilities`가 각각 정상인지 확인합니다.
-- `/api/v1/connectivity`에 실제 TTS, 저장소, CORS, Worker 상태가 표시되는지 확인합니다.
-- GitHub Pages에서는 API 주소가 없을 때 `API 미설정`이 표시되는지 확인합니다.
-- 같은 PC의 API는 `http://127.0.0.1:8000`으로 연결합니다.
-- 휴대폰에서는 localhost가 아닌 PC LAN IP 또는 공개 HTTPS API를 사용합니다.
-- Python 3.10이 Setup 진단에서 지원 상태로 표시되는지 확인합니다.
-- CosyVoice Worker URL만 입력하고 Worker가 꺼져 있으면 준비 완료로 표시되지 않는지 확인합니다.
-- 실제 API 음원 URL이 설정한 API Origin으로 해석되는지 확인합니다.
-- 상단에 `BUILD v0.7.2`가 표시되는지 확인합니다.
-- 첫 화면 입력창이 잘리지 않고 `0 / 500`으로 표시되는지 확인합니다.
-- 숫자·날짜 자동 변환 토글과 예시 발음이 보이는지 확인합니다.
-- 문장 입력 후 CTA가 `WAV로 생성하기 (약 3초)`로 바뀌는지 확인합니다.
-- 생성 후 문장별 생성 구간 리스트가 표시되는지 확인합니다.
-- Dock 메뉴 클릭 시 어느 위치에서든 화면 상단으로 이동하는지 확인합니다.
-- API quality에서 pytest 56개 이상이 통과하는지 확인합니다.
-- Worker quality에서 Ruff 오류 0건과 pytest 9개 이상 통과를 확인합니다.
-- Web quality에서 문장별 완료 표시 2개와 React Hook 경고 0건을 확인합니다.
-
-## 5. 엔진 설치와 품질 평가
-
-MeloTTS는 별도 모델과 PyTorch 계열 의존성이 필요하므로 기본 API 설치에 강제하지 않습니다.
-
-- 전략: [`docs/ENGINE_STRATEGY.md`](docs/ENGINE_STRATEGY.md)
-- 설치: [`docs/ENGINE_PILOT.md`](docs/ENGINE_PILOT.md)
-- 진단·A/B 비교: [`docs/QUALITY_LAB.md`](docs/QUALITY_LAB.md)
-- 평가 문장: `docs/evaluation/KOREAN_TTS_SENTENCES.json`
-
-## 6. 업데이트 패치 적용
-
-1. GitHub Desktop에서 작업 중인 변경사항을 커밋하거나 백업합니다.
-2. `.git` 폴더는 유지합니다.
-3. 패치 ZIP의 `PATCH_README.md`에서 기준 버전을 확인합니다.
-4. 저장소 루트에 압축을 해제해 덮어씁니다.
-5. 삭제 목록이 있으면 정리 스크립트를 실행합니다.
-6. GitHub Desktop의 Changes와 `PATCH_MANIFEST.txt`를 비교합니다.
-7. 프로젝트 규칙, 웹 검사, API 테스트를 실행합니다.
-
-## 7. GitHub Pages 배포
-
-1. Pull Request를 `main`에 병합합니다.
-2. Actions에서 `SoriON CI & Pages` 실행 하나가 성공하는지 확인합니다.
-3. 공개 주소에서 `BUILD v0.7.2`을 확인합니다.
-4. 공개 Pages에는 Python TTS 엔진이 포함되지 않으므로 API 주소를 별도 설정하지 않으면 Demo WAV가 사용됩니다.
-
-
-## 0.7.2 프리미엄 생성 UX·적응형 Dock
-
-연결 원인과 실행 방식은 `docs/API_CONNECTIVITY.md`를 먼저 확인합니다. 목소리 복제 원칙은 `docs/VOICE_CLONE.md`, Dock 구조는 `docs/PLAYER_DOCK.md`를 확인합니다.
-
-
-## 0.7.0 Worker 실행
 
 ```bash
 npm run dev:worker
@@ -99,10 +52,89 @@ npm run dev:api
 npm run dev
 ```
 
-Worker 모델이 없으면 `/health`는 정상이어도 `/ready`는 `not-ready`입니다.
-실제 모델 설치 전에는 복제 실행 버튼이 잠기며 성공으로 표시하지 않습니다.
+기본 주소:
 
+- Web: `http://127.0.0.1:5173`
+- API: `http://127.0.0.1:8000`
+- Worker: `http://127.0.0.1:9000`
 
-## 0.7.2 Worker Secret
+실제 CosyVoice에는 별도 PyTorch, CUDA, 모델 가중치 설치가 필요합니다.
+모델이 없으면 Worker `/health`는 정상이어도 `/ready`는 not-ready입니다.
 
-공개 배포 전 `docs/SECURITY.md`에 따라 API와 Worker에 같은 서비스 토큰과 서명 비밀키를 Secret으로 주입한다.
+## 4. 0.7.3 첫 확인
+
+- 상단 `BUILD v0.7.3`
+- 설정의 전체 연결 검사
+- `/api/v1/health`, `/setup`, `/engines`, `/voice-clones/capabilities`
+- `/api/v1/connectivity`의 TTS·저장소·CORS·Worker 상태
+- GitHub Pages에서 API 주소가 없을 때 `API 미설정`
+- PC 로컬 API는 `http://127.0.0.1:8000`
+- 휴대폰은 PC LAN IP 또는 공개 HTTPS API
+- 500자 입력창, 발음 보정 토글, 목소리 가로 칩
+- 입력 후 `WAV로 생성하기 (약 3초)`
+- 생성 후 문장별 구간 리스트
+- 음성 준비 전 메뉴 전용 Dock
+- 음성 준비 후 메뉴 위 Linked Player
+- Dock 메뉴 클릭 시 화면 상단 이동
+- Worker 모델 미설치 상태를 준비 완료로 표시하지 않음
+
+## 5. 품질 검사
+
+```bash
+npm run quality:rules
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+```
+
+API:
+
+```bash
+cd services/api
+uv sync --dev --python 3.10
+uv run --python 3.10 ruff check app tests --output-format=github
+uv run --python 3.10 pytest tests -q
+```
+
+Worker:
+
+```bash
+cd services/worker
+uv sync --dev --python 3.10
+uv run --python 3.10 ruff check app tests --output-format=github
+uv run --python 3.10 pytest tests -q
+```
+
+기준 테스트 수는 API 56개, Worker 9개입니다.
+
+## 6. GitHub Pages
+
+1. Pull Request를 `main`에 병합합니다.
+2. `SoriON CI & Pages` 실행 하나만 생성되는지 확인합니다.
+3. Web·API·Worker quality가 모두 성공해야 배포됩니다.
+4. Pages Source는 `GitHub Actions`를 사용합니다.
+5. 공개 주소에서 `BUILD v0.7.3`을 확인합니다.
+
+GitHub Pages에는 Python API와 GPU Worker가 포함되지 않습니다.
+
+## 7. 패치 적용
+
+1. 현재 변경사항을 커밋하거나 백업합니다.
+2. `package.json` 버전과 패치 기준을 비교합니다.
+3. `.git`은 유지합니다.
+4. 저장소 루트에 패치 ZIP을 풀어 덮어씁니다.
+5. `PATCH_MANIFEST.txt`와 GitHub Desktop Changes를 비교합니다.
+6. `DELETE_LIST.txt`가 있으면 지시대로 삭제합니다.
+7. 품질 검사를 실행한 뒤 커밋합니다.
+
+## 8. 핵심 문서
+
+- 영구 인수인계 메모리: [`docs/HANDOVER.md`](docs/HANDOVER.md)
+- 엔진 전략: [`docs/ENGINE_STRATEGY.md`](docs/ENGINE_STRATEGY.md)
+- API 연결: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
+- Worker: [`docs/COSYVOICE_WORKER.md`](docs/COSYVOICE_WORKER.md)
+- 보안: [`docs/SECURITY.md`](docs/SECURITY.md)
+- 목소리 복제: [`docs/VOICE_CLONE.md`](docs/VOICE_CLONE.md)
+- Dock: [`docs/PLAYER_DOCK.md`](docs/PLAYER_DOCK.md)
+- 다음 작업: [`docs/NEXT_UPDATE.md`](docs/NEXT_UPDATE.md)

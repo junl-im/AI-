@@ -18,6 +18,10 @@ interface ApiConnectivityResponse {
   status: ConnectivityStatus
   environment: string
   api_base_path: string
+  api_ready: boolean
+  tts_ready: boolean
+  voice_clone_ready: boolean
+  worker_configured: boolean
   cors_origins: string[]
   tts_engines: ApiEngineInfo[]
   voice_clone_engines: ApiEngineInfo[]
@@ -118,6 +122,10 @@ export async function runApiConnectivityAudit(value: string): Promise<ApiConnect
       baseUrl,
       status: missing ? 'missing' : warning ? 'warning' : 'ready',
       environment: result.environment,
+      apiReady: result.api_ready,
+      ttsReady: result.tts_ready,
+      voiceCloneReady: result.voice_clone_ready,
+      workerConfigured: result.worker_configured,
       checks,
       warnings: result.cors_origins.length
         ? []
@@ -131,6 +139,10 @@ export async function runApiConnectivityAudit(value: string): Promise<ApiConnect
       baseUrl,
       status: 'missing',
       environment: null,
+      apiReady: routeChecks.some((check) => check.id === 'health-route' && check.status === 'ready'),
+      ttsReady: false,
+      voiceCloneReady: false,
+      workerConfigured: false,
       checks: [
         ...routeChecks,
         {

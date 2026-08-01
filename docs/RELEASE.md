@@ -136,3 +136,13 @@ Semantic Versioning을 사용한다.
 - 패치 기준 버전: `0.7.1`
 - 핵심 확인: Worker Ruff 4건, API Ruff 1건, Web test 1건, Hook warning 1건 수정
 - 삭제 파일: 없음
+
+## 0.7.3 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.7.3-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.7.2-to-0.7.3-patch.zip`
+- 체크섬: `SoriON-AI-0.7.3-artifacts.sha256`
+- 패치 기준 버전: `0.7.2`
+- 핵심 확인: MASTER HANDOVER 필독, 기능 코드는 0.7.2와 동일
+- 삭제 파일: 없음
+

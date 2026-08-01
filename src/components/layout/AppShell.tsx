@@ -1,24 +1,31 @@
 import type { PropsWithChildren } from 'react'
-import { LinkedPlayerDock } from '../navigation/LinkedPlayerDock'
-import { NoticeToast } from '../ui/NoticeToast'
+import { useBackendBootstrap } from '../../hooks/useBackendBootstrap'
 import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
+import { useAppStore } from '../../store/useAppStore'
+import { LinkedPlayerDock } from '../navigation/LinkedPlayerDock'
+import { ConnectionBottomSheet } from '../settings/ConnectionBottomSheet'
+import { NoticeToast } from '../ui/NoticeToast'
 import { BrandMasthead } from './BrandMasthead'
-import { DesktopContextFrame } from './DesktopContextFrame'
+import { CompactWorkspaceHeader } from './CompactWorkspaceHeader'
 
 export function AppShell({ children }: PropsWithChildren) {
+  useBackendBootstrap()
+  const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const hasPlayer = usePlayerStore((state) => getCurrentTrack(state) !== null)
-  const workspaceClassName = hasPlayer
-    ? 'soa-workspace-shell soa-workspace-shell--has-player'
-    : 'soa-workspace-shell'
+  const shellClassName = [
+    'soa-workspace-shell',
+    workspaceEntered ? 'soa-workspace-shell--editor' : 'soa-workspace-shell--landing',
+    hasPlayer ? 'soa-workspace-shell--has-player' : '',
+  ].filter(Boolean).join(' ')
 
   return (
-    <div className="min-h-dvh bg-[#070b14]">
-      <BrandMasthead />
-      <div className={workspaceClassName}>
+    <div className={workspaceEntered ? 'soa-app-root is-editor' : 'soa-app-root is-landing'}>
+      {workspaceEntered ? <CompactWorkspaceHeader /> : <BrandMasthead />}
+      <div className={shellClassName}>
         <section className="soa-primary-frame">{children}</section>
-        <DesktopContextFrame />
       </div>
       <LinkedPlayerDock />
+      <ConnectionBottomSheet />
       <NoticeToast />
     </div>
   )

@@ -6,8 +6,12 @@ def test_connectivity_reports_api_and_engine_state(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.7.2"
+    assert body["version"] == "0.8.0"
     assert body["api_base_path"] == "/api/v1"
+    assert body["api_ready"] is True
+    assert isinstance(body["tts_ready"], bool)
+    assert isinstance(body["voice_clone_ready"], bool)
+    assert isinstance(body["worker_configured"], bool)
     assert any(check["id"] == "api" for check in body["checks"])
     assert any(engine["id"] == "mock" for engine in body["tts_engines"])
     assert any(

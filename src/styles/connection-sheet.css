@@ -1,0 +1,227 @@
+.soa-sheet-layer {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(2, 5, 11, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.soa-connection-sheet {
+  width: min(680px, 100%);
+  max-height: min(82dvh, 760px);
+  overflow-y: auto;
+  border: 1px solid rgba(154, 177, 221, 0.14);
+  border-radius: 26px;
+  padding: 12px 18px 20px;
+  color: #eef3ff;
+  background: linear-gradient(155deg, rgba(18, 27, 45, 0.99), rgba(10, 14, 27, 0.99));
+  box-shadow: 0 -24px 90px rgba(0, 0, 0, 0.48);
+}
+
+.soa-sheet-handle {
+  width: 42px;
+  height: 4px;
+  margin: 0 auto 12px;
+  border-radius: 99px;
+  background: rgba(238, 243, 255, 0.18);
+}
+
+.soa-connection-sheet header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.soa-connection-sheet header span {
+  color: #8f82ec;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: 0.15em;
+}
+
+.soa-connection-sheet h2 {
+  margin: 5px 0 0;
+  font-size: 21px;
+  letter-spacing: -0.04em;
+}
+
+.soa-connection-sheet header button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 12px;
+  color: rgba(238, 243, 255, 0.56);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 18px;
+}
+
+.soa-health-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.soa-health-dot {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  border-radius: 13px;
+  padding: 0 11px;
+  color: rgba(238, 243, 255, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.soa-health-dot i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #697286;
+}
+
+.soa-health-dot.is-ready i {
+  background: #64f0ba;
+  box-shadow: 0 0 10px rgba(100, 240, 186, 0.4);
+}
+
+.soa-health-dot.is-pending i {
+  background: #ffe27b;
+  animation: soa-pulse 1s infinite alternate;
+}
+
+.soa-sheet-description {
+  margin: 14px 0;
+  color: rgba(226, 235, 255, 0.44);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+.soa-connection-sheet > label {
+  display: block;
+  color: rgba(238, 243, 255, 0.62);
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.soa-connection-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+.soa-connection-input input {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid rgba(154, 177, 221, 0.14);
+  border-radius: 14px;
+  padding: 0 13px;
+  color: #eef3ff;
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.soa-connection-input button {
+  border: 0;
+  border-radius: 14px;
+  padding: 0 12px;
+  color: rgba(238, 243, 255, 0.64);
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.soa-connection-sheet > small {
+  display: block;
+  margin-top: 6px;
+  color: rgba(226, 235, 255, 0.28);
+  font-size: 7px;
+}
+
+.soa-connection-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.soa-connection-actions button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 14px;
+  color: rgba(238, 243, 255, 0.65);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.soa-connection-actions button.is-primary {
+  color: #111620;
+  background: #d8ff72;
+}
+
+.soa-connection-error {
+  margin: 10px 0 0;
+  border-radius: 12px;
+  padding: 10px;
+  color: #ffc0b7;
+  background: rgba(255, 100, 87, 0.09);
+  font-size: 8px;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.soa-connection-result {
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.soa-connection-result > div {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px 3px;
+}
+
+.soa-connection-result i {
+  width: 7px;
+  height: 7px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: #ff7b6d;
+}
+
+.soa-connection-result i.is-ready {
+  background: #64f0ba;
+}
+
+.soa-connection-result i.is-warning {
+  background: #ffe27b;
+}
+
+.soa-connection-result strong,
+.soa-connection-result small {
+  display: block;
+}
+
+.soa-connection-result strong {
+  font-size: 8px;
+}
+
+.soa-connection-result small {
+  margin-top: 3px;
+  color: rgba(226, 235, 255, 0.38);
+  font-size: 7px;
+  line-height: 1.45;
+}

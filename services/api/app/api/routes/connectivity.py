@@ -106,10 +106,14 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.7.2",
+        version="0.8.0",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",
+        api_ready=True,
+        tts_ready=bool(real_tts),
+        voice_clone_ready=clone_ready,
+        worker_configured=bool(settings.cosyvoice_worker_url),
         cors_origins=settings.cors_origin_list,
         tts_engines=tts_infos,
         voice_clone_engines=clone_infos,

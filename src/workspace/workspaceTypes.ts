@@ -1,0 +1,43 @@
+import type { VoiceEmotion } from '../ai/contracts'
+import type { GeneratedAudio } from '../tts/generationTypes'
+
+export type TimelineBlockStatus = 'queued' | 'generating' | 'ready' | 'failed'
+
+interface TimelineBaseBlock {
+  id: string
+  durationSeconds: number
+}
+
+export interface TimelineVoiceBlock extends TimelineBaseBlock {
+  kind: 'voice'
+  text: string
+  voiceId: string
+  voiceName: string
+  emotion: VoiceEmotion
+  speed: number
+  engineId?: string
+  normalizeText: boolean
+  status: TimelineBlockStatus
+  progress: number
+  audio: GeneratedAudio | null
+  trackId: string | null
+  error: string | null
+}
+
+export interface TimelinePauseBlock extends TimelineBaseBlock {
+  kind: 'pause'
+}
+
+export type TimelineBlock = TimelineVoiceBlock | TimelinePauseBlock
+
+export interface WorkspaceMessage {
+  id: string
+  role: 'assistant' | 'user' | 'system'
+  text: string
+  badge?: string
+}
+
+export interface ComposerDirective {
+  id: 'commercial' | 'slow' | 'numbers' | 'bright'
+  label: string
+}
