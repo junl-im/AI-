@@ -4,7 +4,7 @@ from pathlib import Path
 from uuid import UUID, uuid4
 
 from app.engines.base import TtsEngine
-from app.engines.tts.cloud_common import validate_wave, wave_duration
+from app.engines.tts.audio_utils import validate_wave, wave_duration
 from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine, WorkerClientError
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest, TtsSynthesisResponse

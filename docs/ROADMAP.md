@@ -200,3 +200,17 @@
 - 무료 CosyVoice 로컬 모델 설치·체크섬·readiness 온보딩
 - 한국어 무료 엔진 블라인드 품질 벤치마크
 - 전체 WAV 병합·다운로드와 실패 문장 재생성
+
+## 0.9.1 완료
+
+- 외부 과금형 음성 Adapter와 Secret 설정 제거
+- CosyVoice·MeloTTS·System Voice·Browser Speech 무료 전용 경계
+- Firebase Hosting Spark 정적 배포 구성
+- 데스크톱 localhost 무료 API 자동 탐색
+- 허용 목록 밖 Adapter와 서버형 Firebase 설정 CI 차단
+
+## 0.9.2 예정
+
+- 무료 CosyVoice 모델 온보딩과 체크섬 검사
+- 한국어 발음·억양·장문 호흡 블라인드 벤치마크
+- 전체 프로젝트 WAV 병합과 실패 문장 재생성

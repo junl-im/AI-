@@ -41,7 +41,7 @@ def engine_diagnostic(
                 else (
                     "실패 시 자동 대체 후보로 대기합니다."
                     if info.auto_eligible
-                    else "현재 비용 정책에서 자동 호출하지 않습니다."
+                    else "테스트 전용 또는 현재 자동 후보가 아닙니다."
                 )
             ),
         )
@@ -122,7 +122,6 @@ def engine_diagnostic(
         ready=info.ready,
         provider=info.provider,
         quality_tier=info.quality_tier,
-        cost_tier=info.cost_tier,
         auto_eligible=info.auto_eligible,
         korean_specialization=info.korean_specialization,
         long_form=info.long_form,

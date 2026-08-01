@@ -21,13 +21,11 @@ class FakeEngine(TtsEngine):
         mode: str = "ai",
         ready: bool = True,
         supports_emotion: bool = False,
-        cost_tier: str = "free",
     ) -> None:
         self.engine_id = engine_id
         self.mode = mode
         self.ready = ready
         self.supports_emotion = supports_emotion
-        self.cost_tier = cost_tier
 
     def info(self) -> EngineInfo:
         return EngineInfo(
@@ -42,7 +40,6 @@ class FakeEngine(TtsEngine):
             supports_speed=True,
             supports_voice_clone=False,
             ready=self.ready,
-            cost_tier=self.cost_tier,
         )
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:
@@ -263,59 +260,3 @@ async def test_requested_emotion_prefers_capable_korean_engine():
     )
 
     assert result.engine_id == "korean-premium"
-
-
-@pytest.mark.asyncio
-async def test_free_only_policy_skips_ready_metered_engine():
-    registry = EngineRegistry()
-    registry.register_tts(FakeEngine("paid", cost_tier="metered"))
-    registry.register_tts(FakeEngine("local", mode="local"))
-    orchestrator = EngineOrchestrator(
-        registry,
-        preferred_order=["paid", "local"],
-        allow_metered=False,
-    )
-
-    result = await orchestrator.synthesize(
-        request(),
-        lambda engine, engine_request: engine.synthesize(engine_request),
-    )
-    info = {item.id: item for item in orchestrator.list_info()}
-
-    assert result.engine_id == "local"
-    assert result.attempted_engine_ids == ["local"]
-    assert info["paid"].auto_eligible is False
-    assert info["local"].recommended is True
-
-
-@pytest.mark.asyncio
-async def test_balanced_policy_can_use_metered_engine():
-    registry = EngineRegistry()
-    registry.register_tts(FakeEngine("paid", cost_tier="metered"))
-    registry.register_tts(FakeEngine("local", mode="local"))
-    orchestrator = EngineOrchestrator(
-        registry,
-        preferred_order=["paid", "local"],
-        allow_metered=True,
-    )
-
-    result = await orchestrator.synthesize(
-        request(),
-        lambda engine, engine_request: engine.synthesize(engine_request),
-    )
-
-    assert result.engine_id == "paid"
-    assert result.attempted_engine_ids == ["paid"]
-
-
-@pytest.mark.asyncio
-async def test_free_only_policy_explains_when_only_metered_engine_is_ready():
-    registry = EngineRegistry()
-    registry.register_tts(FakeEngine("paid", cost_tier="metered"))
-    orchestrator = EngineOrchestrator(registry, allow_metered=False)
-
-    with pytest.raises(EngineUnavailableError, match="무료 우선 정책"):
-        await orchestrator.synthesize(
-            request(),
-            lambda engine, engine_request: engine.synthesize(engine_request),
-        )

@@ -542,3 +542,11 @@
 
 - 0.2.0–0.5.8: `docs/archive/CHANGELOG_0.2.0-0.5.8.md`
 - 0.1.x: `docs/archive/CHANGELOG_0.1.x.md`
+
+## 0.9.1
+
+- 결제 계정이 필요한 음성 Adapter와 Secret 설정을 현재 제품 소스에서 제거했습니다.
+- CosyVoice·MeloTTS·System Voice·Browser Speech 무료 실행 경계를 고정했습니다.
+- Firebase Hosting Spark와 GitHub Pages를 정적 Web 전용으로 명시했습니다.
+- 데스크톱 정적 Web의 localhost 무료 런타임 자동 탐색을 추가했습니다.
+- CI에 허용 목록 밖 엔진과 서버형 Firebase 설정을 차단하는 검사를 추가했습니다.

@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 
 from app.schemas.engine import (
-    EngineCostTier,
     EngineHealth,
     EngineMode,
     EngineQualityTier,
@@ -23,7 +22,6 @@ class EngineDiagnostic(BaseModel):
     ready: bool
     provider: str
     quality_tier: EngineQualityTier = "basic"
-    cost_tier: EngineCostTier = "free"
     auto_eligible: bool = True
     korean_specialization: int = Field(default=0, ge=0, le=100)
     long_form: bool = False

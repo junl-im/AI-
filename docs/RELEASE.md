@@ -298,6 +298,15 @@ Semantic Versioning을 사용한다.
 - 전체 통파일 ZIP: `SoriON-AI-0.9.0-full.zip`
 - 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.9-to-0.9.0-patch.zip`
 - 패치 기준 버전: `0.8.9`
-- 핵심 확인: 무료 우선 엔진 정책, 과금형 Adapter opt-in, TTS job SSE와 polling fallback
+- 핵심 확인: 무료 전용 엔진 정책, 과금형 Adapter opt-in, TTS job SSE와 polling fallback
 - 삭제 파일: 없음
+- 모델 가중치, Secret, 사용자 음성, 실행 DB와 캐시는 포함하지 않는다.
+
+## 0.9.1 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.1-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.0-to-0.9.1-patch.zip`
+- 패치 기준 버전: `0.9.0`
+- 범위: 무료 전용 Adapter 허용 목록, Firebase Hosting Spark 경계, 데스크톱 localhost 자동 연결
+- 삭제 대상: 외부 음성 Adapter 5개, 관련 테스트 1개, 이전 무료 우선 정책 문서 1개
 - 모델 가중치, Secret, 사용자 음성, 실행 DB와 캐시는 포함하지 않는다.

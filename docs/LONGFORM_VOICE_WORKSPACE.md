@@ -1,6 +1,6 @@
 # LONGFORM VOICE WORKSPACE
 
-현재 기준 버전: `0.9.0`
+현재 기준 버전: `0.9.1`
 
 ## 제품 결정
 

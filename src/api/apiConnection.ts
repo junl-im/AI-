@@ -98,8 +98,12 @@ function isLoopbackHostname(hostname: string): boolean {
 }
 
 export function isKnownStaticHostingHostname(hostname: string): boolean {
-  return hostname.toLowerCase().endsWith('.github.io')
+  const normalized = hostname.toLowerCase()
+  return normalized.endsWith('.github.io')
+    || normalized.endsWith('.web.app')
+    || normalized.endsWith('.firebaseapp.com')
 }
+
 
 function isStaticHostingApiCandidate(value: string): boolean {
   if (typeof window === 'undefined') return false
@@ -295,7 +299,15 @@ interface BrowserLocationCandidate {
 
 export function getLocationApiCandidates(location: BrowserLocationCandidate): string[] {
   const { hostname, protocol, origin } = location
-  if (isKnownStaticHostingHostname(hostname)) return []
+  if (isKnownStaticHostingHostname(hostname)) {
+    if (typeof window !== 'undefined' && !isLikelyMobileDevice()) {
+      return [
+        normalizeApiBaseUrl('http://127.0.0.1:8000'),
+        normalizeApiBaseUrl('http://localhost:8000'),
+      ].filter(Boolean)
+    }
+    return []
+  }
   const candidates = [normalizeApiBaseUrl(`${origin}${API_PATH}`)]
   if (isLoopbackHostname(hostname)) {
     candidates.push(normalizeApiBaseUrl('http://127.0.0.1:8000'))

@@ -45,7 +45,6 @@ export interface EngineInfo {
   ready: boolean
   reason: string | null
   qualityTier?: 'basic' | 'standard' | 'premium' | 'reference'
-  costTier?: 'free' | 'metered'
   autoEligible?: boolean
   koreanSpecialization?: number
   longForm?: boolean

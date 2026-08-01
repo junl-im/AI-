@@ -14,7 +14,6 @@ export interface EngineDiagnostic {
   ready: boolean
   provider: string
   qualityTier: 'basic' | 'standard' | 'premium' | 'reference'
-  costTier: 'free' | 'metered'
   autoEligible: boolean
   koreanSpecialization: number
   longForm: boolean

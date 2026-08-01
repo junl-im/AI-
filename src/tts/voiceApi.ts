@@ -81,7 +81,6 @@ interface ApiEngineInfo {
   ready: boolean
   reason: string | null
   quality_tier?: 'basic' | 'standard' | 'premium' | 'reference'
-  cost_tier?: 'free' | 'metered'
   auto_eligible?: boolean
   korean_specialization?: number
   long_form?: boolean
@@ -169,7 +168,6 @@ export async function listEngines(baseUrl?: string, signal?: AbortSignal): Promi
     ready: engine.ready,
     reason: engine.reason,
     qualityTier: engine.quality_tier ?? 'basic',
-    costTier: engine.cost_tier ?? 'free',
     autoEligible: engine.auto_eligible ?? true,
     koreanSpecialization: engine.korean_specialization ?? 0,
     longForm: engine.long_form ?? false,

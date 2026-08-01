@@ -1,10 +1,10 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.0 Free-First Korean Progressive Voice`
+현재 기준: `0.9.1 Free-Only Local Runtime & Firebase Spark`
 
 ## 목표 버전
 
-`0.9.1 Free Local Model Onboarding & Korean Benchmark`
+`0.9.2 Free Local Model Onboarding & Korean Benchmark`
 
 ## 방향
 

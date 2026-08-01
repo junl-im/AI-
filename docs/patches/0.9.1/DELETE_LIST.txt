@@ -1,0 +1,7 @@
+docs/FREE_FIRST_ENGINE_POLICY.md
+services/api/app/engines/tts/azure_speech.py
+services/api/app/engines/tts/cloud_common.py
+services/api/app/engines/tts/elevenlabs.py
+services/api/app/engines/tts/google_chirp.py
+services/api/app/engines/tts/naver_clova.py
+services/api/tests/test_cloud_tts_engines.py

@@ -1,6 +1,5 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -13,11 +12,7 @@ class Settings(BaseSettings):
         "https://junl-im.github.io"
     )
     default_tts_engine: str = "auto"
-    engine_cost_policy: Literal["free-only", "balanced"] = "free-only"
-    tts_engine_order: str = (
-        "cosyvoice3,melo,system,naver-clova,google-chirp3-hd,"
-        "azure-speech,elevenlabs-v3,mock"
-    )
+    tts_engine_order: str = "cosyvoice3,melo,system,mock"
     engine_failure_threshold: int = Field(default=2, ge=1, le=10)
     engine_cooldown_seconds: float = Field(default=30.0, ge=1.0, le=600.0)
     allow_mock_engine: bool = True
@@ -45,18 +40,6 @@ class Settings(BaseSettings):
     cosyvoice_tts_profile_id: str = "sorion-korean-reference"
     worker_service_token: str = ""
     worker_signature_secret: str = ""
-    naver_clova_client_id: str = ""
-    naver_clova_client_secret: str = ""
-    naver_clova_speaker: str = "nara"
-    google_tts_api_key: str = ""
-    google_tts_voice: str = "ko-KR-Chirp3-HD-Aoede"
-    azure_speech_key: str = ""
-    azure_speech_region: str = ""
-    azure_speech_voice: str = "ko-KR-SunHiNeural"
-    elevenlabs_api_key: str = ""
-    elevenlabs_voice_id: str = ""
-    elevenlabs_model_id: str = "eleven_v3"
-    cloud_tts_timeout_seconds: float = Field(default=45.0, ge=5.0, le=180.0)
     public_rate_limit_per_minute: int = Field(default=120, ge=10, le=5000)
     allow_private_network: bool = True
     audit_log_path: str = ".sorion/audit/api.jsonl"
@@ -94,10 +77,6 @@ class Settings(BaseSettings):
     @property
     def worker_auth_enabled(self) -> bool:
         return bool(self.worker_service_token and self.worker_signature_secret)
-
-    @property
-    def metered_tts_enabled(self) -> bool:
-        return self.engine_cost_policy == "balanced"
 
 
 @lru_cache

@@ -38,10 +38,10 @@ export function SettingsPage() {
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-black tracking-[-0.035em]">음성 엔진 운영</h2>
-            <StatusPill label="무료 우선 자동" tone="good" />
+            <StatusPill label="무료 전용 자동" tone="good" />
           </div>
           <p className="mt-2 text-sm leading-6 text-soa-muted">
-            유료 API는 기본 자동 후보에서 제외합니다. CosyVoice·MeloTTS·시스템 음성·브라우저 음성을 순서대로 자동 연결합니다.
+            유료 API 코드는 포함하지 않습니다. CosyVoice·MeloTTS·시스템 음성·브라우저 음성만 자동 연결합니다.
           </p>
           <p className="mt-3 rounded-2xl bg-white p-3 text-xs font-bold text-soa-muted">
             현재 {engineCatalog.selected?.name ?? (engineCatalog.loading ? '엔진 확인 중' : '브라우저 대체 음성 대기')}

@@ -398,11 +398,21 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 - 장문 입력기는 접근성 이름과 `maxlength=20000`이라는 안정적인 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 위 규칙의 누락을 프로젝트 규칙 단계에서 차단한다.
 
-## 0.9.0 무료 우선·SSE 회귀 검사
+## 0.9.0 무료 전용·SSE 회귀 검사
 
 - 기본 설정이 `free-only`이고 과금형 Cloud Adapter를 registry에 등록하지 않는지 확인
-- free-only에서 명시 과금 엔진 요청을 거부하고 balanced에서만 사용할 수 있는지 확인
+- free-only에서 명시 과금 엔진 요청을 거부하고 과거 선택 정책에서만 사용할 수 있는지 확인
 - `/engines/strategy`가 비용 정책·유료 활성 여부·자동 순서를 반환하는지 확인
 - `/tts/jobs/{job_id}/events`가 progress 이벤트와 종료 상태를 전송하는지 확인
 - Web SSE 파서가 여러 frame을 처리하고 실패 시 polling으로 전환하는지 확인
 - 완료 블록 추가가 현재 Player 선택을 덮어쓰지 않는지 확인
+
+## 0.9.1 무료 전용 경계 회귀 검사
+
+- `scripts/check-free-only-boundary.mjs`가 허용 목록 밖 TTS Adapter를 차단하는지 확인
+- 환경 예시에 외부 음성 공급자 Secret이 없는지 확인
+- `/engines`가 CosyVoice·MeloTTS·System Voice·Mock만 반환하는지 확인
+- `/engines/strategy`가 `free_only=true`와 정적 Web+로컬 런타임 프로필을 반환하는지 확인
+- GitHub Pages와 Firebase Hosting 자체 `/api`를 검사하지 않는지 확인
+- 데스크톱 정적 Web의 localhost 후보와 모바일 Browser Speech 전환을 확인
+- Firebase 설정에 Functions 또는 Cloud Run rewrite가 없는지 확인

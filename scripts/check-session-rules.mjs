@@ -47,7 +47,7 @@ for (const [relativePath, texts] of requirements) {
 }
 
 if (failures.length > 0) {
-  console.error('0.9.0 세션 규칙 검사 실패')
+  console.error('0.9.1 세션 규칙 검사 실패')
   failures.forEach((failure) => console.error(`- ${failure}`))
   process.exit(1)
 }

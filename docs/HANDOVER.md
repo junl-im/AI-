@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.0 Free-First Korean Progressive Voice**
+현재 기준 버전: **0.9.1 Free-Only Local Runtime & Firebase Spark**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-01 23:49 KST**
 제품 소유·디자인: **곰같은여우**
@@ -26,7 +26,7 @@ SoriON AI는 단순한 웹 음성 변환기가 아니라 **한국인을 위한 �
 STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환으로 확장한다.
 제품 방향:
 - Voicebox보다 쉬운 사용성.
-- ElevenLabs보다 한국어 발음·숫자·날짜·존댓말에 친화적.
+- 외부 음성 서비스보다 한국어 발음·숫자·날짜·존댓말에 친화적.
 - 초보자는 긴 원고와 제작 버튼에 집중하고 전문가는 타임라인에서 정밀 편집.
 - 특정 모델이나 외부 API에 종속되지 않는 Engine Adapter.
 - 모바일이 주 제품이며 PC는 편집·비교·운영 확장 화면.
@@ -159,11 +159,11 @@ health · readiness · GPU diagnostics · jobs · SSE · WAV
 - 문장별 job, SSE revision, cancel, 실패 구간 retry.
 - 서비스 토큰 + HMAC-SHA256 서명, rate limit, 감사 로그.
 ## 8. 엔진 전략과 실제 상태
-기본 무료 우선순위:
+기본 무료 전용순위:
 1. CosyVoice 3 기준 음색: 준비된 로컬 Worker가 있을 때 주력 AI TTS.
 2. MeloTTS: 설치된 경우 로컬 무료 AI 대체.
 3. System Voice·Browser Speech: 운영체제·공개 Web 재생 안전망.
-4. NAVER·Google·Azure·ElevenLabs는 `balanced`를 서버 운영자가 명시한 경우에만 후보가 된다.
+4. 외부 과금형 음성 공급자는 과거 선택 정책를 서버 운영자가 명시한 경우에만 후보가 된다.
 5. GPT-SoVITS·Fish Audio는 라이선스·운영 검증 전 평가 후보이며 Kokoro는 주력에서 제외한다.
 현재 진실:
 - CosyVoice 일반 TTS와 Cloud Adapter 경계가 구현됐지만 기본 free-only에서는 과금형을 등록하지 않는다.
@@ -260,7 +260,7 @@ VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE
 ```
 API core·job:
 ```text
-SORION_ENVIRONMENT, SORION_CORS_ORIGINS, SORION_ENGINE_COST_POLICY, SORION_DEFAULT_TTS_ENGINE, SORION_TTS_ENGINE_ORDER
+SORION_ENVIRONMENT, SORION_CORS_ORIGINS, 삭제된 비용 정책 변수, SORION_DEFAULT_TTS_ENGINE, SORION_TTS_ENGINE_ORDER
 SORION_ENGINE_FAILURE_THRESHOLD, SORION_ENGINE_COOLDOWN_SECONDS, SORION_GENERATION_TIMEOUT_SECONDS
 SORION_MAX_CONCURRENT_GENERATIONS, SORION_JOB_STORE_PATH, SORION_JOB_CLAIM_TTL_SECONDS
 SORION_JOB_RESULT_TTL_MINUTES, SORION_JOB_HISTORY_TTL_HOURS, SORION_JOB_POLL_INTERVAL_SECONDS
@@ -272,10 +272,6 @@ SORION_ENABLE_MELO_TTS, SORION_MELO_DEVICE, SORION_ENABLE_SYSTEM_TTS, SORION_SYS
 SORION_COSYVOICE_WORKER_URL, SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS
 SORION_COSYVOICE_WORKER_JOB_TIMEOUT_SECONDS, SORION_COSYVOICE_TTS_REFERENCE_PATH
 SORION_COSYVOICE_TTS_PROFILE_ID, SORION_WORKER_SERVICE_TOKEN, SORION_WORKER_SIGNATURE_SECRET
-SORION_NAVER_CLOVA_CLIENT_ID, SORION_NAVER_CLOVA_CLIENT_SECRET, SORION_NAVER_CLOVA_SPEAKER
-SORION_GOOGLE_TTS_API_KEY, SORION_GOOGLE_TTS_VOICE, SORION_AZURE_SPEECH_KEY
-SORION_AZURE_SPEECH_REGION, SORION_AZURE_SPEECH_VOICE, SORION_ELEVENLABS_API_KEY
-SORION_ELEVENLABS_VOICE_ID, SORION_ELEVENLABS_MODEL_ID, SORION_CLOUD_TTS_TIMEOUT_SECONDS
 ```
 보안·저장·Worker:
 ```text
@@ -306,8 +302,8 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.9.0-full.zip`.
-- 패치: `SoriON-AI-0.8.9-to-0.9.0-patch.zip`.
+- 전체본: `SoriON-AI-0.9.1-full.zip`.
+- 패치: `SoriON-AI-0.9.0-to-0.9.1-patch.zip`.
 - 기준본: `SoriON-AI-0.8.9-full.zip`.
 - 삭제 대상: 없음.
 ## 17. 절대 변경 금지 결정
@@ -401,3 +397,12 @@ CI Hotfix 4 테스트 규칙:
    Ruff도 미설치다. CosyVoice 모델·GPU는 별도 준비 대상이다.
 9. 산출물: `SoriON-AI-0.9.0-full.zip`, `SoriON-AI-0.8.9-to-0.9.0-patch.zip`.
 10. 다음 예상 업데이트: `0.9.1 Free Local Model Onboarding & Korean Benchmark`.
+
+## 27. 2026-08-02 · v0.9.1 무료 전용 런타임
+
+1. 결제 계정이 필요한 일반 TTS Adapter와 Secret 설정을 현재 제품 소스에서 제거했다.
+2. 일반 TTS 허용 목록은 CosyVoice·MeloTTS·System Voice이며 Mock은 테스트 전용이다.
+3. Firebase Hosting Spark와 GitHub Pages는 정적 Web만 제공한다.
+4. 데스크톱 정적 Web은 localhost API를 자동 탐색하고 모바일은 Browser Speech를 사용한다.
+5. `npm run quality:free-only`가 허용 목록과 Firebase 정적 경계를 검사한다.
+6. 다음 목표는 0.9.2 무료 로컬 모델 온보딩과 한국어 품질 벤치마크다.

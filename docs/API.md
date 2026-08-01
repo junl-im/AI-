@@ -8,70 +8,54 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "default_engine": "auto"
 }
 ```
 
 ## GET /engines
 
-엔진 모드, 준비 여부, 실패 이유와 제어 기능 지원 여부를 반환합니다.
+현재 프로세스에 등록된 무료 로컬 엔진의 준비 상태와 실행 통계를 반환합니다.
 
 ```json
 [
   {
-    "id": "naver-clova",
-    "name": "NAVER CLOVA Voice Premium",
+    "id": "system",
+    "name": "System Voice",
     "kind": "tts",
-    "mode": "ai",
-    "provider": "NAVER Cloud",
+    "mode": "local",
+    "provider": "Operating System",
     "languages": ["ko-KR"],
     "output_formats": ["wav"],
-    "supports_emotion": true,
+    "supports_emotion": false,
     "supports_speed": true,
-    "supports_pitch": true,
+    "supports_pitch": false,
     "supports_voice_clone": false,
     "ready": true,
-    "reason": null,
-    "recommended": false,
-    "health": "unavailable",
+    "recommended": true,
+    "health": "ready",
     "success_count": 0,
-    "failure_count": 0,
-    "consecutive_failures": 0,
-    "cooldown_remaining_seconds": 0.0,
-    "last_error": null
+    "failure_count": 0
   }
 ]
 ```
 
-## GET /engines/strategy
+비용 정책 필드는 제공하지 않습니다. 제품에 등록 가능한 일반 TTS가 모두 무료 로컬 실행이기 때문입니다.
 
-SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다. 실제 설치 상태가 아니라 제품 엔진 방향을 제공하는 API입니다.
+## GET /engines/strategy
 
 ```json
 {
-  "version": "0.9.0",
+  "version": "0.9.1",
+  "free_only": true,
+  "deployment_profile": "firebase-static-plus-local-runtime",
   "primary_tts_engine": "auto",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
-  "candidates": [
-    {
-      "id": "cosyvoice3",
-      "role": "primary",
-      "status": "pilot",
-      "languages": ["ko-KR", "en-US", "ja-JP", "zh-CN"]
-    }
-  ]
+  "browser_fallback_engine": "browser-speech",
+  "auto_order": ["cosyvoice3", "melo", "system", "mock"]
 }
 ```
-
-라이선스와 선정 근거는 `docs/ENGINE_STRATEGY.md`를 확인합니다.
-
-`quality_tier`와 `korean_specialization`은 자동 순위와 품질 진단에 사용하며, `long_form`과
-`streaming`은 현재 Adapter가 제공하는 실행 역량을 진단에 표시한다. 인증 정보가 없는 Premium
-Adapter는 기본 `free-only` 정책에서 registry에 등록되지 않는다. `/engines`는 각 엔진의
-`cost_tier`와 `auto_eligible`을 반환한다. 서버 운영자가 `SORION_ENGINE_COST_POLICY=balanced`를
-명시한 경우에만 과금형 Adapter가 준비 후보가 된다.
 
 ## POST /tts/synthesize
 
@@ -89,39 +73,16 @@ Adapter는 기본 `free-only` 정책에서 registry에 등록되지 않는다. `
 }
 ```
 
-`engine_id`를 생략하거나 `auto`를 보내면 서버 오케스트레이터가 준비 상태와 운영 우선순위를
-기준으로 후보를 정렬하고 실패 시 다음 준비 엔진을 시도합니다. 일반 Web 흐름은 항상 `auto`를
-사용합니다. 명시 엔진 요청은 해당 엔진만 사용합니다. `normalize_text`가 참이면 숫자와 날짜를 한국어 읽기 형태로 바꿉니다. 거짓이면 공백만 정리하고 원문 표기를 유지합니다. API는 180자를 넘는 문장을 나누어 생성하고 같은 형식의 PCM WAV를 하나로 병합합니다.
+자동 모드는 CosyVoice·MeloTTS·System Voice 중 준비된 후보를 순서대로 시도합니다. 명시 엔진 요청은
+해당 엔진만 사용합니다. 180자를 넘는 문장은 구간으로 나누고 같은 형식의 WAV로 병합합니다.
 
-### 실제 음원 응답
+## GET /tts/jobs/{job_id}/events
 
-```json
-{
-  "job_id": "uuid",
-  "status": "completed",
-  "engine_id": "melo",
-  "engine_mode": "ai",
-  "requested_engine_id": "auto",
-  "attempted_engine_ids": ["melo"],
-  "fallback_used": false,
-  "audio_url": "http://localhost:8000/api/v1/audio/uuid.wav",
-  "estimated_duration_seconds": 8.4,
-  "message": "긴 문장을 3개 구간으로 나눠 하나의 WAV로 연결했습니다.",
-  "normalized_text": "회의는 이천이십육년 팔월 삼일 구시 삼십분에 시작합니다.",
-  "segment_count": 3,
-  "processing_ms": 4210,
-  "file_size_bytes": 372044,
-  "realtime_factor": 0.501
-}
-```
+작업 상태를 SSE로 전송합니다. Web은 SSE 연결 실패 시 polling으로 자동 전환합니다.
 
-## 0.9.0 무료 우선 Korean Engine Mesh
+## GET /tts/jobs/{job_id}/result
 
-`/engines`의 `recommended`는 현재 API 프로세스가 자동 요청에 가장 먼저 사용할 준비 엔진이다.
-`health=cooldown`은 반복 실패로 잠시 자동 후보에서 제외됐다는 의미이며 시간이 지나면 다시
-평가된다. TTS 응답의 `attempted_engine_ids`는 실제 실행 시도 순서이고 `fallback_used`는 첫
-후보 외 엔진이 사용됐는지 나타낸다. 회로 상태는 현재 프로세스 메모리에 있으며 완료 job과
-결과 영속성은 기존 SQLite JobStore가 담당한다.
+완료 결과를 SQLite JobStore에서 복구합니다. 결과 TTL이 끝난 작업은 410을 반환합니다.
 
 ## DELETE /tts/jobs/{job_id}
 
@@ -129,232 +90,11 @@ Adapter는 기본 `free-only` 정책에서 registry에 등록되지 않는다. `
 
 ## GET /audio/{filename}
 
-임시 WAV를 제공합니다. 경로 이동 문자열은 거부하며 `private, no-store` 응답을 사용합니다. 기본 보관 시간은 30분입니다.
+임시 WAV를 제공합니다. 기본 보관 시간은 30분이며 경로 이동 문자열을 거부합니다.
 
-## GET /quality/diagnostics
+## 품질 API
 
-Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태를 반환합니다.
-
-## GET /quality/sentences
-
-한국어 평가 문장 세트를 반환합니다.
-
-## POST /quality/text-preview
-
-```json
-{
-  "text": "결제는 38,500원이고 AI 정확도는 95%입니다.",
-  "max_chars": 180
-}
-```
-
-정규화된 문장, 변경 종류, 생성 구간을 반환합니다.
-
-## POST /quality/compare
-
-```json
-{
-  "text": "안녕하세요.",
-  "engine_ids": ["melo", "system"],
-  "voice_id": "sori-warm",
-  "emotion": "neutral",
-  "speed": 1.0,
-  "pitch": 0
-}
-```
-
-각 엔진 결과의 음원 URL, 생성 시간, 음원 길이, RTF, 파일 크기, 구간 수를 반환합니다. 한 엔진이 실패해도 다른 엔진 결과는 유지합니다.
-
-## 오류 코드
-
-- `SOA-4001`: 요청 엔진 사용 불가
-- `SOA-4002`: 엔진 실행 실패
-- `SOA-4007`: 사용자 취소
-- `SOA-4008`: 생성 제한 시간 초과
-- `SOA-4009`: 같은 작업 ID를 다른 요청 payload에 재사용
-- `SOA-4012`: 완료 결과 TTL 만료
-- `SOA-4013`: 자동 엔진 전환 후보가 모두 실패
-- `SOA-4104`: 음원 파일 없음 또는 만료
-
-## 공통 규칙
-
-- 원문 텍스트와 음성 파일은 애플리케이션 로그에 남기지 않습니다.
-- Mock, Demo, Local TTS, AI 상태를 같은 것으로 위장하지 않습니다.
-- 모든 응답에 `X-Request-ID`를 포함합니다.
-
-## 0.5.0 Setup 상태
-
-### `GET /api/v1/setup`
-
-웹 연결 전에 Python 버전, 임시 음원 폴더, 실제 한국어 엔진, FFmpeg, CORS 상태를 확인한다.
-
-주요 응답:
-
-```json
-{
-  "version": "0.9.0",
-  "ready": true,
-  "real_engine_count": 1,
-  "steps": [
-    {
-      "id": "real-engine",
-      "label": "실제 한국어 음성 엔진",
-      "status": "ready",
-      "required": true,
-      "detail": "SoriON Local Korean Voice",
-      "action": null
-    }
-  ]
-}
-```
-
-## 0.5.0 작업 진행률
-
-### `GET /api/v1/tts/jobs/{job_id}`
-
-생성 요청에 사용한 UUID로 현재 상태를 조회한다. 작업이 끝난 뒤에도 최근 스냅샷을 조회할 수 있다.
-
-```json
-{
-  "job_id": "UUID",
-  "status": "processing",
-  "phase": "generating",
-  "progress": 48,
-  "current_segment": 2,
-  "total_segments": 4,
-  "message": "4개 중 2번째 구간을 생성하고 있습니다.",
-  "error": null,
-  "updated_at": "2026-07-31T05:18:00+00:00"
-}
-```
-
-`phase`는 `queued`, `normalizing`, `generating`, `merging`, `completed`, `cancelled`, `failed` 중 하나다.
-
-### `GET /api/v1/tts/jobs/{job_id}/events`
-
-TTS 작업 진행 상태를 `text/event-stream`으로 전달한다. Web은 이 경로를 우선 사용하고 스트림이
-불가능하면 `/jobs/{job_id}` polling으로 자동 전환한다. 완료·실패·취소 이벤트 뒤 연결을 닫는다.
-
-### `GET /api/v1/tts/jobs/{job_id}/result`
-
-모바일에서 합성 POST 응답이 끊긴 뒤 같은 job ID의 완료 결과를 복구한다. 완료 전에는 409,
-알 수 없는 작업은 404, 완료 결과 TTL이 지난 경우 410을 반환한다. Web은 생성 POST를 자동
-재전송하지 않고 이 경로로 중복 음성을 방지한다.
-
-0.8.2부터 같은 job ID와 같은 요청은 실행 중 Task를 공유하고 완료 뒤 같은 결과를 반환한다.
-같은 job ID에 text, voice, speed, engine 등 다른 payload를 보내면 HTTP 409와 `SOA-4009`를
-반환한다. 클라이언트 연결이 취소돼도 서버 생성은 계속되며 명시적 DELETE만 작업을 취소한다.
-
-0.8.3부터 job snapshot, 요청 fingerprint와 완료 응답은 SQLite JobStore에 저장된다.
-API가 재시작돼도 완료 결과를 복구하며 여러 API 프로세스가 같은 DB를 사용할 때 원자적
-claim으로 동일 job을 한 번만 실행한다. 결과 TTL이 지나면 이력 tombstone이 남아 있는 동안
-POST와 `/result`는 HTTP 410과 `SOA-4012`를 반환한다. claim lease가 만료된 미완료 작업은
-다른 프로세스가 재획득할 수 있다.
-
-
-## GET /voice-clones/capabilities
-
-현재 복제 Worker 준비 상태, 최대 파일 크기, 권장 녹음 길이, 허용 확장자를 반환한다.
-
-```json
-{
-  "engine_id": "cosyvoice3-worker",
-  "engine_name": "Fun-CosyVoice 3 Worker",
-  "ready": false,
-  "reason": "SORION_COSYVOICE_WORKER_URL을 설정하면 별도 모델 Worker와 연결됩니다.",
-  "recommended_seconds": 10,
-  "max_file_bytes": 26214400,
-  "accepted_extensions": [".m4a", ".mp3", ".ogg", ".wav", ".webm"]
-}
-```
-
-## POST /voice-clones/profiles
-
-`multipart/form-data` 요청을 사용한다.
-
-- `sample`: 음성 파일
-- `display_name`: 프로필 표시 이름
-- `consent_json`: 권리, AI 고지, 금지 용도, 동의 시각, 사용 목적
-- `client_analysis_json`: 길이, 무음, 클리핑, 음량 분석
-
-세 가지 동의 확인이 모두 참이 아니면 `SOA-5001`로 거부한다. 차단된 품질은 `SOA-5007`로 거부한다. WAV는 서버에서 컨테이너와 5초 최소 길이를 다시 확인한다. 실제 Worker가 없으면 `engine-unavailable`이며 복제 성공으로 표시하지 않는다.
-
-## DELETE /voice-clones/profiles/{profile_id}
-
-UUID에 연결된 원본 샘플과 JSON 동의 메타데이터를 삭제한다. 원본 샘플은 공개 조회 API로 제공하지 않는다.
-
-## 음성 복제 오류 코드
-
-- `SOA-5001`: 권한·AI 고지·금지 용도 동의 누락
-- `SOA-5002`: 지원하지 않는 음성 확장자
-- `SOA-5003`: 25MB 파일 크기 초과
-- `SOA-5004`: 빈 파일
-- `SOA-5005`: 잘못된 동의 JSON
-- `SOA-5006`: 잘못된 품질 분석 JSON
-- `SOA-5007`: 클라이언트 품질 검사 차단
-- `SOA-5008`: 손상된 WAV
-- `SOA-5009`: 5초 미만 WAV
-
-## Engine connectivity
-
-```http
-GET /api/v1/connectivity
-```
-
-FastAPI 게이트웨이, 임시 음원 저장소, 실제 TTS 엔진, CORS Origin,
-CosyVoice Worker health를 한 번에 반환합니다. 웹 설정 화면은 이 경로와 health,
-setup, engines, voice-clones/capabilities를 함께 호출해 경로별 연결 실패를 구분합니다.
-
-GitHub Pages는 이 API를 실행하지 않습니다. 로컬 또는 공개 HTTPS FastAPI 주소를
-별도로 연결해야 합니다.
-
-
-## 0.7.0 Voice Clone Worker API
-
-### `GET /voice-clones/worker`
-
-Worker health/readiness 스냅샷, 버전, 지연 시간, GPU·CUDA·VRAM·모델 진단을 반환한다.
-
-### `POST /voice-clones/profiles/{profile_id}/jobs`
-
-```json
-{ "text": "내 목소리로 만들 문장입니다." }
-```
-
-동의된 프로필의 원본 샘플을 Worker에 전달해 문장별 복제 작업을 만든다. Worker가
-준비되지 않았으면 `SOA-5103`과 HTTP 503을 반환한다.
-
-### 작업 상태와 제어
-
-- `GET /voice-clones/jobs/{job_id}`
-- `GET /voice-clones/jobs/{job_id}/events`
-- `POST /voice-clones/jobs/{job_id}/cancel`
-- `POST /voice-clones/jobs/{job_id}/retry`
-- `GET /voice-clones/jobs/{job_id}/audio`
-- `GET /voice-clones/jobs/{job_id}/segments/{index}/audio`
-
-응답에는 전체 진행률, 첫 음성 지연, 문장별 상태와 구간 음원 URL이 포함된다.
-
-### 추가 오류 코드
-
-- `SOA-5100`: Worker 미등록
-- `SOA-5101`: Worker 요청 실패
-- `SOA-5102`: 음성 프로필 없음
-- `SOA-5103`: Worker 또는 모델 readiness 실패
-
-
-## 0.7.2 Worker 인증 헤더
-
-FastAPI는 Worker의 `/ready`와 `/v1/*` 호출에 다음 헤더를 자동으로 붙인다.
-
-```text
-X-SoriON-Service-Token
-X-SoriON-Timestamp
-X-SoriON-Signature
-```
-
-서명 입력은 HTTP method, path, timestamp, request body SHA-256이다. Worker는 기본 30초보다
-오래된 요청과 body가 바뀐 요청을 거부한다. `/health`는 로드밸런서 확인을 위해 공개한다.
-
-SSE 재연결 시 브라우저의 `Last-Event-ID`를 API가 Worker까지 전달한다. Worker는 각 이벤트에
-revision 기반 `id`를 넣어 이미 받은 상태를 중복 전송하지 않는다.
+- `GET /quality/diagnostics`: Python·운영체제·엔진 준비 상태
+- `GET /quality/sentences`: 한국어 평가 문장
+- `POST /quality/text-preview`: 숫자·날짜 정규화와 문장 분할 미리보기
+- `POST /quality/compare`: 최대 두 무료 엔진의 생성 시간·RTF·파일 크기 비교

@@ -121,12 +121,7 @@ if (handoverLineCount > 500) {
 await requireText('docs/CHANGELOG.md', [`## ${currentVersion}`])
 await requireText('docs/NEXT_UPDATE.md', ['# NEXT UPDATE', '## 목표 버전'])
 await requireText('docs/RELEASE.md', ['전체 통파일 ZIP', '덮어쓰기용 패치 ZIP'])
-await requireText('docs/ENGINE_STRATEGY.md', [
-  'Fun-CosyVoice 3',
-  'GPT-SoVITS',
-  'Fish Audio S2',
-  '왜 Python 백엔드인가',
-])
+await requireText('docs/ENGINE_STRATEGY.md', ['CosyVoice Worker', '무료 로컬', '품질 결정 방식'])
 await requireText('services/api/app/api/routes/engines.py', [
   '/strategy',
   'current_engine_strategy',
@@ -153,7 +148,8 @@ await requireText('.github/workflows/ci.yml', [
   'CosyVoice Worker quality · Python 3.10',
   'working-directory: services/worker',
   'Run Worker tests',
-  'SORION_PUBLIC_API_BASE_URL',
+  'Check free-only boundary',
+  'Write empty static-host runtime configuration',
 ])
 await requireText('src/test/setup.ts', [
   'afterEach',
@@ -281,7 +277,15 @@ await requireText('services/api/app/main.py', ['PrivateNetworkCORSMiddleware', '
 await requireText('services/api/app/middleware/private_network_cors.py', ['Access-Control-Request-Private-Network', 'Access-Control-Allow-Private-Network', 'Disallowed CORS private-network'])
 await requireText('services/api/app/services/sqlite_job_store.py', ['BEGIN IMMEDIATE', 'CREATE TABLE IF NOT EXISTS tts_jobs', 'claim_expires_at', 'cancel_requested'])
 await requireText('services/api/app/main.py', ['SQLiteJobStore', 'job_store_file'])
-await requireText('.env.example', ['SORION_JOB_STORE_PATH=.sorion/jobs.sqlite3', 'SORION_JOB_RESULT_TTL_MINUTES=30', 'SORION_JOB_HISTORY_TTL_HOURS=24']); await requireText('.env.example', ['SORION_ENGINE_COST_POLICY=free-only']); await requireText('services/api/app/services/engine_orchestrator.py', ['allow_metered', 'cost_tier']); await requireText('services/api/app/api/routes/tts.py', ['/jobs/{job_id}/events', 'text/event-stream']); await requireText('src/tts/jobProgressStream.ts', ['streamSpeechProgress', 'text/event-stream']); await requireText('src/pages/SettingsPage.tsx', ['무료 우선 자동']); await requireText('docs/FREE_FIRST_ENGINE_POLICY.md', ['free-only', 'balanced', 'CosyVoice Worker']); await requireText('docs/PROGRESSIVE_TTS_STREAMING.md', ['polling', 'X-Accel-Buffering'])
+await requireText('.env.example', ['SORION_JOB_STORE_PATH=.sorion/jobs.sqlite3', 'SORION_JOB_RESULT_TTL_MINUTES=30', 'SORION_JOB_HISTORY_TTL_HOURS=24'])
+await requireText('.env.example', ['SORION_TTS_ENGINE_ORDER=cosyvoice3,melo,system,mock'])
+await requireText('services/api/app/services/engine_strategy.py', ['free_only=True', 'firebase-static-plus-local-runtime'])
+await requireText('services/api/app/api/routes/tts.py', ['/jobs/{job_id}/events', 'text/event-stream'])
+await requireText('src/tts/jobProgressStream.ts', ['streamSpeechProgress', 'text/event-stream'])
+await requireText('src/pages/SettingsPage.tsx', ['무료 전용 자동'])
+await requireText('docs/FREE_ONLY_ENGINE_POLICY.md', ['FREE-ONLY', 'CosyVoice Worker'])
+await requireText('docs/FIREBASE_SPARK_FREE_DEPLOYMENT.md', ['hosting', 'localhost'])
+await requireText('docs/PROGRESSIVE_TTS_STREAMING.md', ['polling', 'X-Accel-Buffering'])
 await requireText('src/settings/connectivityTypes.ts', ['workerHealthy', 'gpuReady', 'recommendedRecheckSeconds'])
 await requireText('docs/MOBILE_ENGINE_RELIABILITY.md', ['API·TTS·Worker·GPU', 'GET  /api/v1/tts/jobs/{job_id}/result', 'SORION_ALLOW_PRIVATE_NETWORK=true', '0.8.3 서버 재시작·다중 프로세스 복구'])
 await requireText('src/pages/HomePage.tsx', [
@@ -395,11 +399,7 @@ await requireText('services/api/app/core/config.py', [
   'https://junl-im.github.io',
   'cosyvoice_worker_timeout_seconds',
 ])
-await requireText('docs/API_CONNECTIVITY.md', [
-  'GitHub Pages에는 Python API가 포함되지 않는다',
-  'npm run dev:api',
-  '/api/v1/connectivity',
-])
+await requireText('docs/API_CONNECTIVITY.md', ['정적 호스트 보호', 'npm run dev:free', '127.0.0.1:8000'])
 await requireText('docs/PLAYER_DOCK.md', [
   '재생 대기열',
   '이전·다음',

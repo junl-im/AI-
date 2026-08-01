@@ -43,7 +43,6 @@ export function getBrowserSpeechEngine(): EngineInfo | null {
     supportsVoiceClone: false,
     ready: true,
     reason: '브라우저 내장 음성으로 즉시 재생합니다. 파일 다운로드와 AI 음색은 Voice API 연결 후 사용할 수 있습니다.',
-    costTier: 'free',
     autoEligible: true,
     recommended: false,
     health: 'ready',

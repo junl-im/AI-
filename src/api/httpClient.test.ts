@@ -76,7 +76,7 @@ describe('API connection context', () => {
       if (url.startsWith('https://voice-b.example.com/api/v1/health')) {
         return Promise.resolve(new Response(JSON.stringify({
           status: 'ok',
-          version: '0.9.0',
+          version: '0.9.1',
           default_engine: 'auto',
         }), {
           status: 200,
@@ -101,13 +101,24 @@ describe('API connection context', () => {
   })
 
 
-  it('never probes GitHub Pages itself as a Voice API', () => {
+  it('treats GitHub Pages and Firebase Hosting as static and probes only desktop localhost', () => {
     expect(isKnownStaticHostingHostname('junl-im.github.io')).toBe(true)
+    expect(isKnownStaticHostingHostname('sorion.web.app')).toBe(true)
+    expect(isKnownStaticHostingHostname('sorion.firebaseapp.com')).toBe(true)
+    const localRuntime = [
+      'http://127.0.0.1:8000/api/v1',
+      'http://localhost:8000/api/v1',
+    ]
     expect(getLocationApiCandidates({
       hostname: 'junl-im.github.io',
       protocol: 'https:',
       origin: 'https://junl-im.github.io',
-    })).toEqual([])
+    })).toEqual(localRuntime)
+    expect(getLocationApiCandidates({
+      hostname: 'sorion.web.app',
+      protocol: 'https:',
+      origin: 'https://sorion.web.app',
+    })).toEqual(localRuntime)
     expect(getLocationApiCandidates({
       hostname: 'voice.example.com',
       protocol: 'https:',
@@ -116,6 +127,20 @@ describe('API connection context', () => {
       'https://voice.example.com/api/v1',
       'https://voice.example.com:8443/api/v1',
     ])
+  })
+
+  it('does not probe localhost from a mobile static host', () => {
+    vi.stubGlobal('navigator', {
+      maxTouchPoints: 5,
+      userAgent: 'iPhone',
+      onLine: true,
+    })
+
+    expect(getLocationApiCandidates({
+      hostname: 'sorion.web.app',
+      protocol: 'https:',
+      origin: 'https://sorion.web.app',
+    })).toEqual([])
   })
 
   it('uses a saved API address and resolves relative audio URLs', () => {
