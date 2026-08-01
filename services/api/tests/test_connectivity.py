@@ -6,7 +6,7 @@ def test_connectivity_reports_api_and_engine_state(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.8.1"
+    assert body["version"] == "0.8.2"
     assert body["api_base_path"] == "/api/v1"
     assert body["api_ready"] is True
     assert isinstance(body["tts_ready"], bool)

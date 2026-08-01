@@ -10,6 +10,7 @@ import { useAppStore } from '../store/useAppStore'
 import { usePlayerStore } from '../store/usePlayerStore'
 import { analyzeAudioFile } from '../voiceclone/audioAnalysis'
 import { deleteVoiceProfile, saveVoiceProfile } from '../voiceclone/profileRepository'
+import { createRandomId } from '../utils/randomId'
 import {
   cancelVoiceCloneJob,
   deleteRemoteVoiceCloneProfile,
@@ -43,7 +44,7 @@ function localProfile(input: {
 }): VoiceCloneProfile {
   const now = new Date().toISOString()
   return {
-    id: crypto.randomUUID(),
+    id: createRandomId(),
     displayName: input.displayName,
     status: 'engine-unavailable',
     engineId: 'cosyvoice3-worker',

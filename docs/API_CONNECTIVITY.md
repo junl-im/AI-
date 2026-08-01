@@ -1,6 +1,6 @@
 # API CONNECTIVITY
 
-현재 기준 버전: `0.8.1`
+현재 기준 버전: `0.8.2`
 
 ## 배포 경계
 
@@ -60,7 +60,7 @@ npm run dev:api
 
 ```json
 {
-  "version": "0.8.1",
+  "version": "0.8.2",
   "api_ready": true,
   "tts_ready": true,
   "worker_configured": true,

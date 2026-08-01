@@ -1,4 +1,5 @@
 import { adaptiveTimeoutMs, getMobileNetworkSnapshot } from '../network/mobileNetwork'
+import { createRandomId } from '../utils/randomId'
 
 const DEFAULT_TIMEOUT_MS = 12_000
 const API_PATH = '/api/v1'
@@ -8,6 +9,7 @@ const API_HISTORY_KEY = 'sorion-api-url-history'
 const CLIENT_ID_KEY = 'sorion-client-id'
 const ENV_API_BASE = import.meta.env.VITE_API_BASE_URL?.trim() ?? ''
 const RETRYABLE_STATUS = new Set([408, 425, 429, 502, 503, 504])
+const volatileStorage = new Map<string, string>()
 
 export type ApiBaseSource = 'saved' | 'environment' | 'development-proxy' | 'unconfigured'
 export type ApiFailureKind =
@@ -22,6 +24,37 @@ export type ApiFailureKind =
   | 'cancelled'
   | 'invalid-url'
   | 'unknown'
+
+
+function storageGet(key: string): string | null {
+  if (typeof window === 'undefined') return volatileStorage.get(key) ?? null
+  try {
+    return window.localStorage.getItem(key) ?? volatileStorage.get(key) ?? null
+  } catch {
+    return volatileStorage.get(key) ?? null
+  }
+}
+
+function storageSet(key: string, value: string): void {
+  volatileStorage.set(key, value)
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(key, value)
+    volatileStorage.delete(key)
+  } catch {
+    // iOS Safari private mode and quota errors fall back to in-memory state.
+  }
+}
+
+function storageRemove(key: string): void {
+  volatileStorage.delete(key)
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(key)
+  } catch {
+    // Storage may be unavailable; the volatile copy is already removed.
+  }
+}
 
 export interface ApiConnectionContext {
   baseUrl: string
@@ -168,7 +201,7 @@ export function getApiBaseWarnings(value: string): string[] {
 function readHistory(): string[] {
   if (typeof window === 'undefined') return []
   try {
-    const value = JSON.parse(window.localStorage.getItem(API_HISTORY_KEY) ?? '[]')
+    const value = JSON.parse(storageGet(API_HISTORY_KEY) ?? '[]')
     return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
   } catch {
     return []
@@ -180,8 +213,8 @@ function rememberApiUrl(value: string, lastGood: boolean): void {
   const normalized = normalizeApiBaseUrl(value)
   if (!normalized) return
   const history = [normalized, ...readHistory().filter((item) => item !== normalized)].slice(0, 5)
-  window.localStorage.setItem(API_HISTORY_KEY, JSON.stringify(history))
-  if (lastGood) window.localStorage.setItem(API_LAST_GOOD_KEY, normalized)
+  storageSet(API_HISTORY_KEY, JSON.stringify(history))
+  if (lastGood) storageSet(API_LAST_GOOD_KEY, normalized)
 }
 
 function errorDetail(value: unknown): string | null {
@@ -206,7 +239,7 @@ export function getApiConnectionContext(): ApiConnectionContext {
     }
   }
 
-  const saved = window.localStorage.getItem(API_BASE_STORAGE_KEY)?.trim() ?? ''
+  const saved = storageGet(API_BASE_STORAGE_KEY)?.trim() ?? ''
   const baseUrl = normalizeApiBaseUrl(saved || developmentDefault())
   const source: ApiBaseSource = saved
     ? 'saved'
@@ -220,7 +253,7 @@ export function getApiConnectionContext(): ApiConnectionContext {
     source,
     configured: Boolean(baseUrl),
     warnings: getApiBaseWarnings(baseUrl),
-    lastGoodUrl: window.localStorage.getItem(API_LAST_GOOD_KEY) ?? '',
+    lastGoodUrl: storageGet(API_LAST_GOOD_KEY) ?? '',
     history: readHistory(),
   }
 }
@@ -232,14 +265,14 @@ export function getApiBaseUrl(): string {
 export function saveApiBaseUrl(value: string): string {
   const normalized = normalizeApiBaseUrl(value)
   if (!normalized) throw new ApiError('저장할 Voice API 주소를 확인해 주세요.', 0, 'SOA-2004', 'invalid-url')
-  window.localStorage.setItem(API_BASE_STORAGE_KEY, normalized)
+  storageSet(API_BASE_STORAGE_KEY, normalized)
   rememberApiUrl(normalized, false)
   window.dispatchEvent(new Event('sorion-api-change'))
   return normalized
 }
 
 export function resetApiBaseUrl(): void {
-  window.localStorage.removeItem(API_BASE_STORAGE_KEY)
+  storageRemove(API_BASE_STORAGE_KEY)
   window.dispatchEvent(new Event('sorion-api-change'))
 }
 
@@ -270,10 +303,10 @@ export function getApiDiscoveryCandidates(): string[] {
 
 function clientId(): string {
   if (typeof window === 'undefined') return 'sorion-server-render'
-  const saved = window.localStorage.getItem(CLIENT_ID_KEY)
+  const saved = storageGet(CLIENT_ID_KEY)
   if (saved) return saved
-  const value = crypto.randomUUID()
-  window.localStorage.setItem(CLIENT_ID_KEY, value)
+  const value = createRandomId()
+  storageSet(CLIENT_ID_KEY, value)
   return value
 }
 
@@ -379,7 +412,7 @@ export async function apiRequest<T>(
 
   const method = (init?.method ?? 'GET').toUpperCase()
   const retries = options.retries ?? (method === 'GET' || method === 'HEAD' ? 2 : 0)
-  const requestId = crypto.randomUUID()
+  const requestId = createRandomId()
   let lastError: ApiError | null = null
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {

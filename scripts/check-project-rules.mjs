@@ -145,8 +145,10 @@ await requireText('services/api/app/api/routes/engines.py', [
   'current_engine_strategy',
 ])
 await requireText('services/api/app/services/job_manager.py', [
-  'except asyncio.TimeoutError as error:',
-  'await asyncio.gather(task, return_exceptions=True)',
+  'return cast(T, await asyncio.shield(task))',
+  'self._request_keys: dict[str, str] = {}',
+  'raise JobConflictError(job_id)',
+  'result = await asyncio.wait_for(',
   'raise GenerationTimeoutError(job_id) from error',
 ])
 await requireText('.github/workflows/ci.yml', [

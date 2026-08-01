@@ -1,7 +1,7 @@
 import asyncio
 from collections.abc import Awaitable, Callable
 from datetime import datetime, timezone
-from typing import TypeVar
+from typing import TypeVar, cast
 
 from app.schemas.tts import JobPhase, JobProgressResponse, JobStatus
 
@@ -9,7 +9,7 @@ T = TypeVar("T")
 JobFactory = Callable[[], Awaitable[T]]
 
 
-class JobAlreadyRunningError(RuntimeError):
+class JobConflictError(RuntimeError):
     pass
 
 
@@ -30,25 +30,51 @@ class JobManager:
         self._tasks: dict[str, asyncio.Task[object]] = {}
         self._snapshots: dict[str, JobProgressResponse] = {}
         self._results: dict[str, object] = {}
+        self._request_keys: dict[str, str] = {}
         self._lock = asyncio.Lock()
 
-    async def run(self, job_id: str, factory: JobFactory[T]) -> T:
+    async def run(
+        self,
+        job_id: str,
+        factory: JobFactory[T],
+        request_key: str = "",
+    ) -> T:
+        task: asyncio.Task[object]
         async with self._lock:
-            if job_id in self._tasks:
-                raise JobAlreadyRunningError(job_id)
-            self._snapshots[job_id] = self._snapshot(
-                job_id=job_id,
-                status="queued",
-                phase="queued",
-                progress=0,
-                message="음성 생성 대기열에 등록했습니다.",
-            )
-            self._trim_history()
-            task = asyncio.create_task(self._run_limited(job_id, factory))
-            self._tasks[job_id] = task
+            existing_key = self._request_keys.get(job_id)
+            if existing_key is not None and existing_key != request_key:
+                raise JobConflictError(job_id)
 
+            existing_result = self._results.get(job_id)
+            if existing_result is not None:
+                return cast(T, existing_result)
+
+            existing_task = self._tasks.get(job_id)
+            if existing_task is not None:
+                task = existing_task
+            else:
+                self._request_keys[job_id] = request_key
+                self._snapshots[job_id] = self._snapshot(
+                    job_id=job_id,
+                    status="queued",
+                    phase="queued",
+                    progress=0,
+                    message="음성 생성 대기열에 등록했습니다.",
+                )
+                self._trim_history()
+                task = asyncio.create_task(self._execute(job_id, factory))
+                self._tasks[job_id] = task
+
+        # HTTP 연결이 끊기거나 호출 코루틴이 취소되어도 실제 생성 Task는 계속 실행한다.
+        # 명시적 DELETE 취소만 _tasks의 Task를 직접 취소한다.
+        return cast(T, await asyncio.shield(task))
+
+    async def _execute(self, job_id: str, factory: JobFactory[T]) -> T:
         try:
-            result = await asyncio.wait_for(task, timeout=self._timeout_seconds)
+            result = await asyncio.wait_for(
+                self._run_limited(job_id, factory),
+                timeout=self._timeout_seconds,
+            )
             async with self._lock:
                 self._results[job_id] = result
             await self.update(
@@ -60,8 +86,6 @@ class JobManager:
             )
             return result
         except asyncio.TimeoutError as error:
-            task.cancel()
-            await asyncio.gather(task, return_exceptions=True)
             await self.update(
                 job_id,
                 status="failed",
@@ -89,7 +113,9 @@ class JobManager:
             raise
         finally:
             async with self._lock:
-                self._tasks.pop(job_id, None)
+                current = asyncio.current_task()
+                if self._tasks.get(job_id) is current:
+                    self._tasks.pop(job_id, None)
 
     async def _run_limited(self, job_id: str, factory: JobFactory[T]) -> T:
         async with self._semaphore:
@@ -180,6 +206,7 @@ class JobManager:
         for key in removable[:overflow]:
             self._snapshots.pop(key, None)
             self._results.pop(key, None)
+            self._request_keys.pop(key, None)
 
     @classmethod
     def _snapshot(

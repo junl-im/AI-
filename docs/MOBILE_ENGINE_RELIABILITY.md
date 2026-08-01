@@ -1,6 +1,6 @@
 # MOBILE ENGINE/API RELIABILITY
 
-버전: `0.8.1`
+버전: `0.8.2`
 
 ## 목표
 
@@ -139,3 +139,20 @@ X-SoriON-Client-ID
 - 브라우저가 mixed-content를 차단하면 Web 코드에서 우회할 수 없다.
 - 공개 사용자 인증과 토큰 갱신은 아직 구현되지 않았다.
 - 실제 CosyVoice GPU 모델은 릴리스 ZIP에 포함되지 않는다.
+
+## 0.8.2 job 수명과 멱등성
+
+- Web은 음성 블록에 job ID를 POST 전에 저장한다.
+- 실패 재시도는 새 POST보다 `GET /jobs/{job_id}`와 `/result`를 먼저 시도한다.
+- 네트워크 오류는 job ID를 유지하고, 404·410 또는 failed/cancelled 상태에서만 새 ID를 만든다.
+- 같은 블록의 생성 버튼을 반복해서 눌러도 클라이언트 single-flight가 추가 요청을 막는다.
+- FastAPI는 같은 job ID와 같은 요청 fingerprint를 하나의 Task로 합치고 완료 결과를 재사용한다.
+- 같은 job ID에 다른 요청이 들어오면 HTTP 409 `SOA-4009`를 반환한다.
+- HTTP 연결 취소는 생성 Task를 취소하지 않는다. 명시적 DELETE만 서버 작업을 취소한다.
+- snapshot, fingerprint와 결과는 제한된 메모리 history에 있으며 API 재시작 시 사라진다.
+
+## 모바일 브라우저 fallback
+
+- `localStorage.setItem()`이 private mode·quota 오류를 내면 API 주소와 client ID를 메모리에 유지한다.
+- `crypto.randomUUID()`가 없으면 `getRandomValues()` 기반 RFC 4122 형태 ID를 만든다.
+- 두 기능 모두 세션 중 기능 중단을 막기 위한 fallback이며 영구 저장이나 암호학적 인증 수단이 아니다.

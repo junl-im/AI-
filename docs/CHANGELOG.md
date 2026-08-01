@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.8.2 - 2026-08-01
+
+### Mobile Job Recovery/API Idempotency
+
+- HTTP 요청이 취소되어도 TTS 생성 Task가 계속 실행되도록 `asyncio.shield`를 적용했습니다.
+- 동일 job ID·동일 요청은 실행 중 Task를 공유하고 완료 결과를 재사용합니다.
+- 동일 job ID를 다른 payload에 재사용하면 `SOA-4009`와 HTTP 409로 차단합니다.
+- 요청 fingerprint와 완료 결과를 JobManager history 수명 동안 함께 보존합니다.
+- 타임라인 음성 블록에 job ID를 저장하고 재시도 시 기존 작업을 먼저 복구합니다.
+- 연결 오류에서는 job ID를 유지하고 404·410 또는 terminal 상태에서만 새 job을 만듭니다.
+- 블록별 single-flight와 편집·분할 시 Abort/polling 정리를 추가했습니다.
+- iOS private mode·quota 오류를 위한 localStorage 메모리 fallback을 추가했습니다.
+- `crypto.randomUUID()` 미지원 모바일 브라우저용 호환 ID 생성기를 추가했습니다.
+
+### Verification
+
+- FastAPI 테스트 65개 통과
+- CosyVoice Worker 테스트 9개 통과
+- Python compileall, 프로젝트 규칙, 108개 TypeScript·TSX 구문 검사 통과
+- npm 내부 저장소 404로 Web 의존성 설치·정식 test/lint/build는 실행하지 못함
+- Ruff 미설치로 공식 Ruff 명령은 실행하지 못함
+
 ## 0.8.1 - 2026-08-01
 
 ### Mobile Engine/API Reliability

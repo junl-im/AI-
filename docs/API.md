@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "default_engine": "auto"
 }
 ```
@@ -43,7 +43,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.8.1",
+  "version": "0.8.2",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -145,7 +145,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 - `SOA-4002`: 엔진 실행 실패
 - `SOA-4007`: 사용자 취소
 - `SOA-4008`: 생성 제한 시간 초과
-- `SOA-4009`: 중복 작업 ID
+- `SOA-4009`: 같은 작업 ID를 다른 요청 payload에 재사용
 - `SOA-4104`: 음원 파일 없음 또는 만료
 
 ## 공통 규칙
@@ -164,7 +164,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.8.1",
+  "version": "0.8.2",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
@@ -207,6 +207,10 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 모바일에서 합성 POST 응답이 끊긴 뒤 같은 job ID의 완료 결과를 복구한다. 완료 전에는 409,
 알 수 없는 작업은 404, 완료 결과 TTL이 지난 경우 410을 반환한다. Web은 생성 POST를 자동
 재전송하지 않고 이 경로로 중복 음성을 방지한다.
+
+0.8.2부터 같은 job ID와 같은 요청은 실행 중 Task를 공유하고 완료 뒤 같은 결과를 반환한다.
+같은 job ID에 text, voice, speed, engine 등 다른 payload를 보내면 HTTP 409와 `SOA-4009`를
+반환한다. 클라이언트 연결이 취소돼도 서버 생성은 계속되며 명시적 DELETE만 작업을 취소한다.
 
 
 ## GET /voice-clones/capabilities

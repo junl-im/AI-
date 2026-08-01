@@ -117,9 +117,19 @@
 - GET 제한 재시도와 TTS POST job 결과 복구
 - Private Network preflight와 모바일 safe-area·터치 영역 강화
 
-## 0.8.2 예정
+## 0.8.2 완료
 
-- 타임라인 IndexedDB 저장·복원
-- 실제 ScriptGenerationEngine과 외부 전송 동의
-- 편집 순서·쉼을 반영한 WAV Export
-- 모바일 실기기 복구 매트릭스와 Progressive Playback 2단계
+- 동일 TTS job·동일 요청의 실행 Task 공유와 완료 결과 재사용
+- 다른 payload의 job ID 재사용 409 차단
+- HTTP 호출 취소와 서버 생성 Task 수명 분리
+- 타임라인 job ID 보존과 recover-first 재시도
+- 모바일 localStorage 실패 fallback과 randomUUID 호환
+- 생성 중 편집·분할의 stale 결과 방지
+
+## 0.8.3 예정
+
+- API 재시작·다중 프로세스를 견디는 영속 JobStore
+- 타임라인·job ID·선택 엔진 IndexedDB 복원
+- 엔진 queue·지연·readiness 운영 진단
+- 공개 API 인증과 사용자별 job 접근 권한
+- Android Chrome·iOS Safari·PWA 단절 복구 실기기 매트릭스

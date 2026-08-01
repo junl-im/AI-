@@ -158,3 +158,22 @@ API, 실제 TTS, Worker 프로세스, GPU·모델 상태를 분리한다. 온라
 변경, PWA 포그라운드 복귀에서 단일 연결 점검을 실행한다. 생성 POST는 재전송하지 않고
 UUID job의 상태와 완료 결과를 조회해 모바일 응답 단절을 복구한다. FastAPI는 완료 결과를
 제한된 메모리 스냅샷으로 보관하며 기존 TTL 정리와 함께 제거한다.
+
+## 0.8.2 TTS job 멱등성 계층
+
+```text
+Timeline block(jobId)
+  → recover status/result first
+  → POST only when job is absent/expired/terminal
+  → FastAPI request fingerprint
+      → same job + same request: join/reuse
+      → same job + different request: 409 SOA-4009
+  → shielded generation Task
+      → caller disconnect does not cancel
+      → explicit DELETE cancels
+```
+
+현재 fingerprint, snapshot과 result는 한 API 프로세스의 제한된 메모리 history에 저장된다.
+따라서 연결 단절 복구와 같은 프로세스 내 중복 방지는 보장하지만 API 재시작·다중 프로세스
+영속성은 0.8.3 JobStore에서 해결한다.
+

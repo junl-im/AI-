@@ -4,6 +4,7 @@ import { buildAudioFilename } from '../tts/audioFile'
 import type { GeneratedAudio, GenerationAttempt, VoiceGenerationState } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import { cancelSpeech, getSpeechProgress, synthesizeSpeech } from '../tts/voiceApi'
+import { createRandomId } from '../utils/randomId'
 
 const initialState: VoiceGenerationState = {
   phase: 'idle',
@@ -72,7 +73,7 @@ export function useVoiceGeneration() {
       durationSeconds: getMockWaveDuration(attempt.request.text),
       revokeOnRemove: true,
       result: {
-        jobId: crypto.randomUUID(),
+        jobId: createRandomId(),
         status: 'mock-complete',
         engineId: 'browser-demo',
         engineMode: 'mock',
@@ -92,7 +93,7 @@ export function useVoiceGeneration() {
     controllerRef.current?.abort()
     stopPolling()
     const controller = new AbortController()
-    const jobId = crypto.randomUUID()
+    const jobId = createRandomId()
     controllerRef.current = controller
     jobIdRef.current = jobId
     setState({ phase: 'preparing', audio: null, error: null, lastAttempt: attempt, progress: null })

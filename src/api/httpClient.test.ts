@@ -4,11 +4,13 @@ import {
   getApiConnectionContext,
   normalizeApiBaseUrl,
   resolveApiAssetUrl,
+  resetApiBaseUrl,
   saveApiBaseUrl,
 } from './httpClient'
 
 afterEach(() => {
   window.localStorage.clear()
+  vi.restoreAllMocks()
   vi.unstubAllGlobals()
 })
 
@@ -40,6 +42,19 @@ describe('API connection context', () => {
     expect(resolveApiAssetUrl('/api/v1/audio/result.wav')).toBe(
       'https://voice.example.com/api/v1/audio/result.wav',
     )
+  })
+
+  it('keeps the API address usable when mobile storage writes fail', () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('quota exceeded', 'QuotaExceededError')
+    })
+
+    saveApiBaseUrl('https://mobile.example.com')
+    expect(getApiConnectionContext().baseUrl).toBe('https://mobile.example.com/api/v1')
+
+    setItem.mockRestore()
+    saveApiBaseUrl('https://cleanup.example.com')
+    resetApiBaseUrl()
   })
 })
 

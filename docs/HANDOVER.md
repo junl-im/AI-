@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**  
-현재 기준 버전: **0.8.1 Mobile Engine/API Reliability**  
+현재 기준 버전: **0.8.2 Mobile Job Recovery/API Idempotency**  
 기준 버전: **0.7.3 Handover Memory Baseline**  
-최종 갱신: **2026-08-01 11:44 KST**  
+최종 갱신: **2026-08-01 12:25 KST**  
 제품 소유·디자인: **곰같은여우**  
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -351,10 +351,10 @@ SORION_WORKER_JOB_TTL_MINUTES
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.8.1-full.zip`.
-- 패치: `SoriON-AI-0.8.0-to-0.8.1-patch.zip`.
-- 체크섬: `SoriON-AI-0.8.1-artifacts.sha256`.
-- 패치 기준은 정확히 0.8.0.
+- 전체본: `SoriON-AI-0.8.2-full.zip`.
+- 패치: `SoriON-AI-0.8.1-to-0.8.2-patch.zip`.
+- 체크섬: `SoriON-AI-0.8.2-artifacts.sha256`.
+- 패치 기준은 정확히 0.8.1.
 - 삭제 파일은 현재 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
@@ -376,6 +376,8 @@ SORION_WORKER_JOB_TTL_MINUTES
 - 타임라인 상태는 아직 새로고침 후 영구 복원되지 않는다.
 - 실제 LLM 대본 생성은 미연결이며 로컬 초안만 제공한다.
 - 정식 npm 테스트와 build는 패키지 저장소 가용성에 영향을 받는다.
+- 현재 TTS job 상태와 완료 결과는 API 프로세스 메모리에 있어 재시작 시 사라진다.
+- localStorage 실패 시 세션 메모리 fallback은 동작하지만 앱 종료 뒤 영구 복원되지는 않는다.
 ## 19. 절대 전달 규칙
 최종 응답 순서:
 1. 결과.
@@ -402,16 +404,16 @@ npm run build
 ```
 네트워크 제한 시 실행하지 못한 항목과 이유를 결과 보고서에 정확히 기록한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.8.2 Timeline Persistence & Real Script Model Bridge**.
+다음 목표 버전: **0.8.3 Mobile Session Persistence & Engine Operations**.
 우선순위:
-1. 실제 LLM Adapter와 대본 생성 API 계약.
-2. 타임라인 IndexedDB 저장·복원.
-3. 문장·쉼 블록 전체 WAV 재병합 Export.
-4. ready segment 자동 연속 재생.
-5. Worker segment SSE를 TTS 타임라인에도 통합.
-6. 모바일 타임라인 접기·확장과 편집 포커스 모드.
-7. 타임라인 undo·redo.
-8. 모바일 연결 진단 결과를 프로젝트별 운영 로그로 보존.
+1. 메모리 JobManager를 교체 가능한 영속 JobStore로 분리하고 API 재시작 복구.
+2. 다중 API 프로세스에서도 동일 job ID 단일 실행을 보장하는 원자적 claim.
+3. 타임라인·job ID·선택 엔진의 IndexedDB 저장과 PWA 종료 후 recover-first 복원.
+4. 엔진 readiness·queue·지연·최근 실패를 운영 schema와 진단 UI로 고정.
+5. 공개 HTTPS API 인증과 사용자별 job 접근 권한.
+6. Android Chrome·iOS Safari·설치형 PWA 실기기 단절 복구 매트릭스.
+7. 이후 WAV Export, 연속 재생, 실제 LLM Adapter 순으로 진행.
+금지: 서버 영속화 전 작업을 영구 job이라고 표현하거나 재연결 때 무조건 새 POST하지 않는다.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -453,4 +455,15 @@ npm run build
 8. 알려진 제한: 실제 CosyVoice 모델·CUDA GPU와 실제 LLM은 릴리스에 포함되지 않는다.
 9. 산출물: `SoriON-AI-0.8.1-full.zip`, `SoriON-AI-0.8.0-to-0.8.1-patch.zip`.
 10. 다음 예상 업데이트: `0.8.2 Timeline Persistence & Real Script Model Bridge`.
-
+## 25. 2026-08-01 12:25 KST · v0.8.2 릴리스 기록
+1. 작업 일시: 2026-08-01 12:25 KST.
+2. 대상·기준: `0.8.1 → 0.8.2`.
+3. 변경 내용: 동일 TTS job·동일 요청은 실행 Task와 완료 결과를 재사용하고, 다른 payload 재사용은 409로 차단했다.
+4. 모바일 변경: 타임라인 블록에 job ID를 보존하고 실패 재시도는 기존 상태·결과를 먼저 복구하도록 변경했다.
+5. 연결 안전성: HTTP 호출 취소가 서버 생성 Task를 취소하지 않도록 shield하고, 명시적 DELETE만 실제 작업을 취소한다.
+6. 호환성: localStorage 실패 시 메모리 fallback, `randomUUID` 미지원 브라우저용 ID 생성기를 추가했다.
+7. 편집 안전성: 생성 중 텍스트 수정·분할 시 클라이언트 요청과 polling을 중단하고 오래된 결과 덮어쓰기를 막았다.
+8. 검증 결과: API 65개, Worker 9개 테스트와 Python compileall, 프로젝트 규칙, 108개 TS/TSX 구문 검사를 통과했다.
+9. 제한: npm 의존성 저장소 404로 정식 Web test/lint/build, Ruff 미설치로 공식 Ruff는 실행하지 못했다. job은 아직 API 메모리 기반이다.
+10. 산출물: `SoriON-AI-0.8.2-full.zip`, `SoriON-AI-0.8.1-to-0.8.2-patch.zip`.
+11. 다음 예상 업데이트: `0.8.3 Mobile Session Persistence & Engine Operations`.

@@ -8,7 +8,7 @@ Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되�
 
 ## 현재 상태
 
-- 버전: `0.8.1 Mobile Engine/API Reliability`
+- 버전: `0.8.2 Mobile Job Recovery/API Idempotency`
 - 웹: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - GPU Worker: 선택 설치형 Fun-CosyVoice 3 Adapter
@@ -16,12 +16,13 @@ Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되�
 - 작업공간: ChatGPT형 입력 + CapCut형 문장·쉼 타임라인
 - 재생: 첫 완성 블록부터 나타나는 Linked Player Dock
 - 연결 상태: API·실제 TTS·Worker·GPU/모델 네 계층
-- 모바일 복구: 네트워크 전환·PWA 복귀 재검사, GET 재시도, TTS job 결과 복구
+- 모바일 복구: 타임라인 job ID 보존, recover-first 재시도, 저장소 실패 fallback
+- API 멱등성: 동일 job·동일 요청은 단일 실행/결과 재사용, payload 충돌은 409 차단
 - 한국어 처리: 숫자·날짜·시각·금액·퍼센트·단위·영문 약어 정규화
 - 저장: IndexedDB 프로젝트·품질 평가·동의된 음성 프로필
 - 배포: Web·API·Worker quality와 GitHub Pages를 하나의 Workflow로 관리
 
-## 0.8.1 핵심
+## 0.8.2 핵심
 
 ### 모바일 API 연결
 
@@ -48,8 +49,15 @@ GPU       CUDA·모델이 실제 추론 준비 상태인가
 
 Worker가 실행 중이어도 모델이나 GPU가 없으면 `준비 안 됨`으로 표시합니다.
 
-### 모바일 요청 복구
+### 모바일 요청 복구와 서버 멱등성
 
+- 동일 job ID와 동일 요청은 실행 중 Task를 공유하고 완료 결과를 재사용
+- 동일 job ID를 다른 요청에 재사용하면 `SOA-4009`와 HTTP 409로 차단
+- HTTP 호출이 취소되어도 서버 생성 Task는 계속 실행하고 `/result`로 복구
+- 타임라인 블록이 job ID를 보존해 재시도 시 새 POST보다 기존 결과를 먼저 조회
+- 편집·분할 시 기존 클라이언트 생성을 중단하고 오래된 결과가 블록을 덮지 않도록 보호
+- localStorage가 iOS private mode·quota로 실패하면 세션 메모리로 안전하게 대체
+- `crypto.randomUUID()`가 없는 모바일 브라우저에서도 호환 ID를 생성
 - GET·HEAD만 일시적 timeout, 429, 502, 503, 504에서 제한적으로 재시도
 - 음성 생성 POST는 중복 생성을 막기 위해 자동 재전송하지 않음
 - POST 응답이 끊겨도 동일 job ID의 상태와 `/result`를 조회해 완료 음원을 복구

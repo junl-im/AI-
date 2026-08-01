@@ -6,6 +6,7 @@ import { ConversationPanel } from '../components/workspace/ConversationPanel'
 import { TimelineEditor } from '../components/workspace/TimelineEditor'
 import { VoiceLibrary } from '../components/workspace/VoiceLibrary'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
+import { createRandomId } from '../utils/randomId'
 import {
   useTimelineGeneration,
   type TimelineGenerationOptions,
@@ -86,7 +87,7 @@ export function HomePage() {
   if (!workspaceEntered) return <LandingHome />
 
   function appendMessage(message: Omit<WorkspaceMessage, 'id'>) {
-    setMessages((current) => [...current, { ...message, id: crypto.randomUUID() }])
+    setMessages((current) => [...current, { ...message, id: createRandomId() }])
   }
 
   function buildOptions(
@@ -119,7 +120,7 @@ export function HomePage() {
     if (!first) return
     const now = new Date().toISOString()
     await saveProject({
-      id: crypto.randomUUID(),
+      id: createRandomId(),
       title: text.slice(0, 24),
       text,
       voiceId: options.voiceId,
@@ -208,7 +209,7 @@ export function HomePage() {
         engineId: engineCatalog.selected.id,
         normalizeText: true,
       }
-      const result = await synthesizeSpeech(request, crypto.randomUUID())
+      const result = await synthesizeSpeech(request, createRandomId())
       const audio = generatedPreview(result, text, nextVoiceId, voice.name)
       enqueue(audio, `${voice.name} 프리뷰`)
       appendMessage({

@@ -1,13 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { TtsSynthesisRequest } from '../ai/contracts'
+import type { TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
 import { ApiError } from '../api/httpClient'
 import { usePlayerStore } from '../store/usePlayerStore'
 import { buildAudioFilename } from '../tts/audioFile'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import { splitTextForUi } from '../tts/segmentText'
-import { getSpeechProgress, synthesizeSpeech } from '../tts/voiceApi'
+import {
+  getSpeechProgress,
+  getSpeechResult,
+  recoverSpeechResult,
+  synthesizeSpeech,
+} from '../tts/voiceApi'
 import type { TimelineBlock, TimelineVoiceBlock } from '../workspace/workspaceTypes'
+import { createRandomId } from '../utils/randomId'
 
 export interface TimelineGenerationOptions {
   voiceId: string
@@ -29,7 +35,7 @@ function createVoiceBlock(
   options: TimelineGenerationOptions,
 ): TimelineVoiceBlock {
   return {
-    id: crypto.randomUUID(),
+    id: createRandomId(),
     kind: 'voice',
     text,
     voiceId: options.voiceId,
@@ -38,6 +44,7 @@ function createVoiceBlock(
     speed: options.speed,
     engineId: options.engineId,
     normalizeText: options.normalizeText,
+    jobId: null,
     durationSeconds: estimateDuration(text),
     status: 'queued',
     progress: 0,
@@ -68,7 +75,7 @@ function blocksFromText(
     if (index === segments.length - 1) return [block]
     return [
       block,
-      { id: crypto.randomUUID(), kind: 'pause' as const, durationSeconds: 0.5 },
+      { id: createRandomId(), kind: 'pause' as const, durationSeconds: 0.5 },
     ]
   })
 }
@@ -101,6 +108,12 @@ export function useTimelineGeneration() {
     timers.current.delete(blockId)
   }, [])
 
+  const cancelActiveGeneration = useCallback((blockId: string) => {
+    controllers.current.get(blockId)?.abort()
+    controllers.current.delete(blockId)
+    stopPolling(blockId)
+  }, [stopPolling])
+
   useEffect(() => () => {
     controllers.current.forEach((controller) => controller.abort())
     timers.current.forEach((timer) => window.clearTimeout(timer))
@@ -121,7 +134,7 @@ export function useTimelineGeneration() {
       ? staged
       : [
           ...current,
-          { id: crypto.randomUUID(), kind: 'pause', durationSeconds: 0.8 },
+          { id: createRandomId(), kind: 'pause', durationSeconds: 0.8 },
           ...staged,
         ])
     return staged.filter((block) => block.kind === 'voice').map((block) => block.id)
@@ -131,7 +144,7 @@ export function useTimelineGeneration() {
     const poll = async () => {
       if (signal.aborted) return
       try {
-        const progress = await getSpeechProgress(jobId)
+        const progress = await getSpeechProgress(jobId, signal)
         updateVoiceBlock(blockId, { progress: Math.max(8, progress.progress) })
         if (['completed', 'failed', 'cancelled'].includes(progress.phase)) return
       } catch {
@@ -145,14 +158,13 @@ export function useTimelineGeneration() {
   const generateBlock = useCallback(async (
     blockId: string,
   ): Promise<GeneratedAudio | null> => {
+    if (controllers.current.has(blockId)) return null
     const block = blocksRef.current.find((item) => item.id === blockId)
     if (!block || block.kind !== 'voice') return null
 
     const controller = new AbortController()
-    const jobId = crypto.randomUUID()
     controllers.current.set(blockId, controller)
     updateVoiceBlock(blockId, { status: 'generating', progress: 6, error: null })
-    pollProgress(blockId, jobId, controller.signal)
 
     const request: TtsSynthesisRequest = {
       text: block.text,
@@ -166,7 +178,34 @@ export function useTimelineGeneration() {
     }
 
     try {
-      const result = await synthesizeSpeech(request, jobId, controller.signal)
+      let jobId = block.jobId
+      let result: TtsSynthesisResult | null = null
+
+      if (jobId) {
+        try {
+          const progress = await getSpeechProgress(jobId, controller.signal)
+          if (progress.phase === 'completed') {
+            result = await getSpeechResult(jobId, controller.signal)
+          } else if (progress.phase === 'failed' || progress.phase === 'cancelled') {
+            jobId = null
+          } else {
+            pollProgress(blockId, jobId, controller.signal)
+            result = await recoverSpeechResult(jobId, controller.signal)
+          }
+        } catch (error) {
+          const expired = error instanceof ApiError && [404, 410].includes(error.status)
+          if (expired) jobId = null
+          else throw error
+        }
+      }
+
+      if (!result) {
+        jobId = createRandomId()
+        updateVoiceBlock(blockId, { jobId })
+        pollProgress(blockId, jobId, controller.signal)
+        result = await synthesizeSpeech(request, jobId, controller.signal)
+      }
+
       let audio: GeneratedAudio
       if (result.audioUrl) {
         audio = {
@@ -202,6 +241,7 @@ export function useTimelineGeneration() {
       })
       return audio
     } catch (error) {
+      if (controller.signal.aborted) return null
       const message = error instanceof ApiError
         ? `${error.code} · ${error.message}`
         : error instanceof Error
@@ -248,6 +288,7 @@ export function useTimelineGeneration() {
   }, [commit])
 
   const updateText = useCallback((id: string, text: string) => {
+    cancelActiveGeneration(id)
     commit((current) => current.map((block) => {
       if (block.id !== id || block.kind !== 'voice') return block
       if (block.trackId) removeTrack(block.trackId)
@@ -259,12 +300,14 @@ export function useTimelineGeneration() {
         progress: 0,
         audio: null,
         trackId: null,
+        jobId: null,
         error: null,
       }
     }))
-  }, [commit, removeTrack])
+  }, [cancelActiveGeneration, commit, removeTrack])
 
   const splitBlock = useCallback((id: string) => {
+    cancelActiveGeneration(id)
     commit((current) => {
       const index = current.findIndex((block) => block.id === id)
       const block = current[index]
@@ -277,17 +320,17 @@ export function useTimelineGeneration() {
       return [
         ...current.slice(0, index),
         left,
-        { id: crypto.randomUUID(), kind: 'pause', durationSeconds: 0.5 },
+        { id: createRandomId(), kind: 'pause', durationSeconds: 0.5 },
         right,
         ...current.slice(index + 1),
       ]
     })
-  }, [commit, removeTrack])
+  }, [cancelActiveGeneration, commit, removeTrack])
 
   const addPause = useCallback(() => {
     commit((current) => [
       ...current,
-      { id: crypto.randomUUID(), kind: 'pause', durationSeconds: 0.5 },
+      { id: createRandomId(), kind: 'pause', durationSeconds: 0.5 },
     ])
   }, [commit])
 

@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Request, status
@@ -11,7 +12,7 @@ from app.schemas.tts import (
     TtsSynthesisRequest,
     TtsSynthesisResponse,
 )
-from app.services.job_manager import GenerationTimeoutError, JobAlreadyRunningError
+from app.services.job_manager import GenerationTimeoutError, JobConflictError
 
 router = APIRouter()
 
@@ -20,7 +21,8 @@ router = APIRouter()
 async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynthesisResponse:
     settings = get_settings()
     engine = engine_registry.resolve_tts(payload.engine_id or settings.default_tts_engine)
-    if engine is None or not engine.info().ready:
+    engine_info = engine.info() if engine is not None else None
+    if engine is None or engine_info is None or not engine_info.ready:
         engine_id = payload.engine_id or settings.default_tts_engine
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -28,7 +30,12 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
         )
 
     job_id = str(payload.job_id or uuid4())
-    normalized = payload.model_copy(update={"job_id": job_id})
+    normalized = payload.model_copy(
+        update={"job_id": job_id, "engine_id": engine_info.id}
+    )
+    request_key = hashlib.sha256(
+        normalized.model_dump_json(exclude={"job_id"}).encode("utf-8")
+    ).hexdigest()
     manager = request.app.state.job_manager
     pipeline = request.app.state.tts_pipeline
 
@@ -47,11 +54,12 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
         result = await manager.run(
             job_id,
             lambda: pipeline.synthesize(engine, normalized, report),
+            request_key=request_key,
         )
-    except JobAlreadyRunningError as error:
+    except JobConflictError as error:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="SOA-4009: 같은 작업 ID가 이미 실행 중입니다.",
+            detail="SOA-4009: 같은 작업 ID를 다른 음성 요청에 재사용할 수 없습니다.",
         ) from error
     except GenerationTimeoutError as error:
         raise HTTPException(

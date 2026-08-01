@@ -2,11 +2,62 @@ import asyncio
 
 import pytest
 
-from app.services.job_manager import GenerationTimeoutError, JobAlreadyRunningError, JobManager
+from app.services.job_manager import GenerationTimeoutError, JobConflictError, JobManager
 
 
 @pytest.mark.asyncio
-async def test_job_manager_rejects_duplicate_job_ids():
+async def test_job_manager_joins_duplicate_job_ids_with_same_request_key():
+    manager = JobManager(max_concurrent=1, timeout_seconds=1)
+    started = asyncio.Event()
+    release = asyncio.Event()
+    executions = 0
+
+    async def slow_job():
+        nonlocal executions
+        executions += 1
+        started.set()
+        await release.wait()
+        return "done"
+
+    first = asyncio.create_task(manager.run("same", slow_job, request_key="request-a"))
+    await started.wait()
+    second = asyncio.create_task(manager.run("same", slow_job, request_key="request-a"))
+    release.set()
+
+    assert await first == "done"
+    assert await second == "done"
+    assert executions == 1
+
+
+@pytest.mark.asyncio
+async def test_job_manager_rejects_job_id_reuse_for_different_request():
+    manager = JobManager(max_concurrent=1, timeout_seconds=1)
+
+    async def job():
+        return "done"
+
+    assert await manager.run("same", job, request_key="request-a") == "done"
+    with pytest.raises(JobConflictError):
+        await manager.run("same", job, request_key="request-b")
+
+
+@pytest.mark.asyncio
+async def test_job_manager_returns_completed_result_without_regeneration():
+    manager = JobManager(max_concurrent=1, timeout_seconds=1)
+    executions = 0
+
+    async def job():
+        nonlocal executions
+        executions += 1
+        return "done"
+
+    assert await manager.run("completed", job, request_key="request-a") == "done"
+    assert await manager.run("completed", job, request_key="request-a") == "done"
+    assert executions == 1
+
+
+@pytest.mark.asyncio
+async def test_caller_cancellation_does_not_cancel_background_generation():
     manager = JobManager(max_concurrent=1, timeout_seconds=1)
     started = asyncio.Event()
     release = asyncio.Event()
@@ -16,12 +67,27 @@ async def test_job_manager_rejects_duplicate_job_ids():
         await release.wait()
         return "done"
 
-    first = asyncio.create_task(manager.run("same", slow_job))
+    caller = asyncio.create_task(manager.run("mobile-drop", slow_job, request_key="request-a"))
     await started.wait()
-    with pytest.raises(JobAlreadyRunningError):
-        await manager.run("same", slow_job)
+    caller.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await caller
+
+    snapshot = await manager.get("mobile-drop")
+    assert snapshot is not None
+    assert snapshot.status == "processing"
+
     release.set()
-    assert await first == "done"
+    for _ in range(20):
+        result = await manager.get_result("mobile-drop")
+        if result is not None:
+            break
+        await asyncio.sleep(0)
+
+    assert await manager.get_result("mobile-drop") == "done"
+    completed = await manager.get("mobile-drop")
+    assert completed is not None
+    assert completed.status == "completed"
 
 
 @pytest.mark.asyncio

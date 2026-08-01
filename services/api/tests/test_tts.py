@@ -103,3 +103,46 @@ def test_unknown_job_result_returns_404(client):
     response = client.get(f"/api/v1/tts/jobs/{uuid4()}/result")
     assert response.status_code == 404
     assert "SOA-4010" in response.json()["detail"]
+
+
+def test_same_job_id_and_payload_returns_existing_result(client):
+    job_id = str(uuid4())
+    payload = {
+        "text": "같은 모바일 작업은 한 번만 생성합니다.",
+        "voice_id": "sori-warm",
+        "engine_id": "mock",
+        "job_id": job_id,
+    }
+
+    first = client.post("/api/v1/tts/synthesize", json=payload)
+    second = client.post("/api/v1/tts/synthesize", json=payload)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert second.json() == first.json()
+
+
+def test_same_job_id_rejects_different_payload(client):
+    job_id = str(uuid4())
+    first = client.post(
+        "/api/v1/tts/synthesize",
+        json={
+            "text": "첫 번째 요청입니다.",
+            "voice_id": "sori-warm",
+            "engine_id": "mock",
+            "job_id": job_id,
+        },
+    )
+    second = client.post(
+        "/api/v1/tts/synthesize",
+        json={
+            "text": "다른 문장으로 ID를 재사용합니다.",
+            "voice_id": "sori-warm",
+            "engine_id": "mock",
+            "job_id": job_id,
+        },
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 409
+    assert "SOA-4009" in second.json()["detail"]

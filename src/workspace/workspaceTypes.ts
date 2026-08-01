@@ -17,6 +17,7 @@ export interface TimelineVoiceBlock extends TimelineBaseBlock {
   speed: number
   engineId?: string
   normalizeText: boolean
+  jobId: string | null
   status: TimelineBlockStatus
   progress: number
   audio: GeneratedAudio | null

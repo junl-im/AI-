@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import type { PlayerTrack, RepeatMode } from '../player/playerTypes'
+import { createRandomId } from '../utils/randomId'
 
 const MAX_QUEUE_SIZE = 20
 
@@ -30,7 +31,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   repeatMode: 'off',
   playbackRate: 1,
   enqueue: (audio, title = 'SoriON 생성 음성') => {
-    const id = crypto.randomUUID()
+    const id = createRandomId()
     const track: PlayerTrack = {
       id,
       title,

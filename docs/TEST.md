@@ -256,3 +256,17 @@ npm run test:worker
 
 현재 기준 테스트 수는 API 60개, Worker 9개다. Web Vitest·ESLint·Vite build는
 GitHub Actions에서 최종 확인한다.
+
+## 0.8.2 모바일 job 멱등성 회귀 검사
+
+- 같은 job ID·같은 요청을 동시에 보내도 합성 factory가 한 번만 실행되는지 확인
+- 완료 뒤 같은 요청을 재전송해도 저장 결과를 반환하고 재생성하지 않는지 확인
+- 같은 job ID·다른 payload가 HTTP 409와 `SOA-4009`를 반환하는지 확인
+- HTTP 호출 코루틴 취소 뒤에도 서버 생성이 완료되고 결과가 남는지 확인
+- 타임라인 POST 실패 뒤 job ID를 유지하고 다음 재시도에서 GET/result를 먼저 호출하는지 확인
+- 생성 중 블록 수정·분할 시 Abort되고 오래된 결과가 새 텍스트를 덮지 않는지 확인
+- localStorage write 실패와 `randomUUID` 미지원 환경에서 fallback이 동작하는지 확인
+
+현재 기준 테스트 수는 API 65개, Worker 9개다. Web 테스트는 새 회귀 케이스를 포함했으나
+현재 실행 환경의 패키지 저장소 404 때문에 정식 Vitest 실행은 GitHub Actions에서 확인한다.
+

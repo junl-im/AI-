@@ -165,3 +165,14 @@ Semantic Versioning을 사용한다.
 - 핵심 확인: 모바일 API 주소 복구, 네 계층 엔진 상태, TTS job 결과 복구, PNA CORS
 - 패치 기준 버전: `0.8.0`
 - Secret, 사용자 음성, 모델 가중치, `.git`, 캐시와 빌드 산출물은 포함하지 않는다.
+
+## 0.8.2 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.2-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.1-to-0.8.2-patch.zip`
+- 체크섬: `SoriON-AI-0.8.2-artifacts.sha256`
+- 핵심 확인: job 단일 실행·완료 결과 재사용·payload 충돌 차단·모바일 recover-first
+- 패치 기준 버전: `0.8.1`
+- 삭제 파일: 없음
+- Secret, 사용자 음성, 모델 가중치, `.git`, 캐시와 빌드 산출물은 포함하지 않는다.
+

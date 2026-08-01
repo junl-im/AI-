@@ -1,88 +1,89 @@
 # NEXT UPDATE
 
-현재 기준 버전: `0.8.1 Mobile Engine/API Reliability`
+현재 기준 버전: `0.8.2 Mobile Job Recovery/API Idempotency`
 
 ## 목표 버전
 
-`0.8.2 Timeline Persistence & Real Script Model Bridge`
+`0.8.3 Mobile Session Persistence & Engine Operations`
 
-## 1. 모바일 편집 세션 영구 저장
+## 방향
 
-- IndexedDB에 채팅 메시지, 음성 블록, 쉼, 순서와 생성 상태 저장
-- 모바일 Safari·Chrome에서 새로고침, 화면 잠금, PWA 종료 후 세션 복원
-- 마지막 선택 보이스와 API 주소를 프로젝트 단위로 복원
-- Object URL이 사라진 음원은 서버 결과 URL 또는 저장 Blob으로 재연결
-- 저장 용량 부족, 브라우저 정리, 오래된 프로젝트 TTL을 사용자에게 표시
+다음 패치도 **모바일 엔진·API 신뢰성**을 최우선으로 한다. 실제 LLM 대본 연결과 편집
+기능 확장은 서버 작업 영속화·모바일 세션 복원·운영 보안이 먼저 안정된 뒤 진행한다.
 
-## 2. 실제 대본 생성 모델 연결
+## 1. 서버 작업 영속화
 
-- 교체 가능한 `ScriptGenerationEngine` 인터페이스
-- OpenAI 호환 API 또는 로컬 LLM Adapter 경계
-- 주제, 길이, 톤, 대상 매체를 자연어 요청에서 추출
-- 사용자가 직접 입력한 문장과 AI 생성 대본을 데이터에서 구분
-- 외부 LLM 전송 전 원문·개인정보 처리 동의
-- 모델 미연결·요금 제한·timeout을 TTS 엔진 오류와 별도로 표시
-- 실패 시 현재 `로컬 초안 · LLM 미연결` 상태로 안전하게 전환
+- 현재 메모리 기반 TTS job snapshot/result를 SQLite 또는 교체 가능한 JobStore로 분리
+- API 재시작 뒤에도 job ID, 요청 fingerprint, 상태, 결과 메타데이터 복원
+- 다중 API 프로세스에서도 동일 job ID가 한 번만 실행되도록 원자적 claim 적용
+- 결과 TTL, 음원 파일 정리, 실패·취소 보존 기간을 설정값으로 분리
+- 동일 job ID 충돌과 만료를 감사 로그·운영 지표에 기록
 
-## 3. 모바일 연결 복구 2단계
+## 2. 모바일 편집 세션 복원
 
-- Service Worker와 앱 포그라운드 복귀 후 마지막 작업 상태 재조회
-- API 주소별 성공 시각·지연·실패 원인을 저장해 가장 안정적인 주소 우선 선택
-- Wi-Fi에서 셀룰러로 바뀔 때 진행 중 POST를 재전송하지 않고 job 결과만 복구
-- API 인증 토큰 도입 전 익명 client ID 회전·삭제 정책 확정
-- 공개 HTTPS API용 reverse proxy·TLS·CORS 배포 예제
-- Android Chrome·iOS Safari·설치형 PWA 실기기 연결 매트릭스 작성
+- IndexedDB에 채팅 메시지, 음성·쉼 블록, 순서, job ID와 생성 상태 저장
+- 새로고침, 화면 잠금, PWA 종료 뒤 기존 job을 recover-first 방식으로 재연결
+- Object URL이 사라진 음원은 서버 결과 URL 또는 저장 Blob으로 복구
+- 저장 용량 부족, iOS 데이터 정리, 오래된 프로젝트 TTL을 사용자에게 표시
+- 프로젝트별 API 주소·선택 보이스·최근 성공 엔진을 함께 복원
 
-## 4. 편집 Export
+## 3. 엔진 운영 API 강화
 
-- 문장별 WAV와 쉼을 타임라인 순서대로 하나의 WAV로 병합
-- 수정된 순서, 쉼 길이, 음성 속도 반영
-- 실패·미생성 블록이 있으면 Export 차단하고 해당 블록으로 이동
-- 전체 예상 길이와 파일 크기 표시
-- 모바일 공유 시트와 파일 저장 동작 검증
+- 엔진별 readiness, 지연, 최근 실패, 모델 버전과 장치 정보를 운영용 schema로 고정
+- Worker heartbeat와 API gateway 상태를 분리하고 stale 상태를 명시
+- 엔진 circuit breaker와 제한된 자동 복구 정책
+- GPU queue depth, first-audio latency, realtime factor를 연결 바텀시트의 고급 진단에 표시
+- 실제 모델 미연결·CUDA 미지원 상태를 성공으로 표시하지 않는 회귀 테스트 확대
 
-## 5. Progressive Playback 2단계
+## 4. 인증·공개 배포 경계
 
-- ready 블록 자동 연속 재생
-- 다음 블록 생성이 늦으면 재생 위치를 보존하고 대기
-- Worker segment SSE와 일반 TTS job 결과 복구를 하나의 상태 모델로 통합
-- 연결 복구 후 누락 revision과 완료 블록 재조회
-- 첫 음성 지연, 블록별 처리 시간, 네트워크 복구 시간을 기록
+- 공개 HTTPS API용 access token과 만료·회전 계약
+- 익명 client ID는 진단·rate limit 용도로만 유지하고 인증 ID와 분리
+- 사용자별 job 조회·취소·결과 접근 권한 검사
+- reverse proxy, TLS, CORS, Private Network 설정 예제 분리
+- 음성 원문·사용자 음성을 로그와 오류 응답에 남기지 않는지 점검
 
-## 6. 편집 안전성
+## 5. 모바일 실기기 검증
 
-- undo·redo
-- 삭제 블록 복원
-- 모바일 드래그와 세로 스크롤 충돌 방지
-- 텍스트 수정 후 이전 음원 무효화와 재생성 안내
-- 타임라인과 Dock 대기열의 음원 소유권 정리
+- Android Chrome, iOS Safari, 설치형 PWA 매트릭스 작성
+- Wi-Fi→셀룰러, 화면 잠금, 탭 종료, API 재시작, Worker 재시작 시나리오
+- 동일 job 중복 POST 0회, 결과 복구 성공률, 복구 시간 측정
+- 저장소 차단·quota 초과·private mode에서 설정과 세션 fallback 확인
+- 느린 3G·데이터 절약 모드에서 timeout과 진행 표시 점검
+
+## 6. 이후 기능 순서
+
+1. 편집 순서·쉼을 반영한 WAV Export
+2. ready 블록 자동 연속 재생과 Worker segment SSE 통합
+3. 타임라인 undo·redo와 삭제 복원
+4. 실제 `ScriptGenerationEngine`과 외부 전송 동의
+5. 모바일 편집 포커스 모드
 
 ## 예상 변경 영역
 
 ```text
-src/workspace/
-src/components/workspace/
-src/hooks/useTimelineGeneration.ts
+services/api/app/services/job_store.py
+services/api/app/api/routes/tts.py
+services/api/app/core/config.py
+services/api/app/db/
 src/projects/
-src/storage/database.ts
-src/network/
-src/tts/
-services/api/app/api/routes/
-services/api/app/services/
+src/storage/
+src/hooks/useTimelineGeneration.ts
+src/settings/
+docs/
 ```
 
 ## 선행 조건
 
-- GitHub Actions Web·API·Worker quality 모두 성공
-- Android Chrome과 iOS Safari에서 0.8.1 API 연결·복구 실기기 확인
-- 공개 또는 로컬 FastAPI 주소 연결 확인
-- 실제 LLM 제공자와 데이터 처리 정책 결정
-- 오디오 Blob의 IndexedDB 용량과 TTL 정책 결정
+- GitHub Actions Web·API·Worker quality 성공
+- 0.8.2 패치의 동일 job 단일 실행·결과 재사용·409 충돌 회귀 유지
+- Android Chrome과 iOS Safari에서 최소 1회 실제 연결 단절 복구 확인
+- 영속 JobStore의 저장 위치, TTL, 정리 정책 결정
+- 공개 API 인증 방식과 사용자 소유권 모델 결정
 
-## 위험 요소
+## 금지 사항
 
-- 모바일 브라우저가 백그라운드 탭의 네트워크와 타이머를 중단할 수 있음
-- iOS가 저장 공간 압박 시 IndexedDB 데이터를 정리할 수 있음
-- 브라우저 Object URL은 새로고침 후 복원되지 않음
-- 외부 LLM 사용 시 원문 전송 동의와 개인정보 정책 필요
-- 여러 문장 동시 생성 시 GPU 작업 큐와 모바일 메모리 포화 가능
+- 재연결 실패를 이유로 같은 job을 무조건 새 POST하지 않는다.
+- 서버 재시작 복구가 없는 상태를 영구 job이라고 표현하지 않는다.
+- 실제 LLM·GPU 모델이 없는데 성공 상태를 만들지 않는다.
+- 모바일 저장소 실패를 앱 전체 오류로 전파하지 않는다.
