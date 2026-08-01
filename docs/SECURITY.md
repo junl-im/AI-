@@ -1,6 +1,6 @@
 # SoriON API · Worker 보안
 
-현재 기준 버전: `0.7.1`
+현재 기준 버전: `0.7.2`
 
 ## API와 Worker 인증
 

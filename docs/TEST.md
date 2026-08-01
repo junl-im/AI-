@@ -207,3 +207,14 @@ npm run test:worker
 - Worker health 공개와 readiness 인증 분리
 - SSE revision id와 Last-Event-ID 전달 계약
 - 종료 작업 TTL 정리 계약
+
+
+## 0.7.2 CI zero-error 회귀 검사
+
+- Worker `security.py`의 `Mapping`은 `collections.abc`에서 가져온다.
+- Worker `runtime.py`의 callable 타입은 `collections.abc`에서 가져온다.
+- Worker adapter factory는 상수 `getattr` 대신 `module.create_runtime`으로 접근한다.
+- FastAPI upload/form 인자는 `Annotated` 메타데이터를 사용한다.
+- API Worker 테스트에 사용하지 않는 `json` import가 없다.
+- `splitTextForUi`는 기본 길이에서도 마침표 문장 경계를 유지한다.
+- 복제 polling effect는 `activeJobId`, `activeJobStatus` 의존성을 사용한다.

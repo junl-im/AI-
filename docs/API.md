@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "default_engine": "auto"
 }
 ```
@@ -43,7 +43,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.7.1",
+  "version": "0.7.2",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -164,7 +164,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.7.1",
+  "version": "0.7.2",
   "ready": true,
   "real_engine_count": 1,
   "steps": [
@@ -294,7 +294,7 @@ Worker health/readiness 스냅샷, 버전, 지연 시간, GPU·CUDA·VRAM·모�
 - `SOA-5103`: Worker 또는 모델 readiness 실패
 
 
-## 0.7.1 Worker 인증 헤더
+## 0.7.2 Worker 인증 헤더
 
 FastAPI는 Worker의 `/ready`와 `/v1/*` 호출에 다음 헤더를 자동으로 붙인다.
 

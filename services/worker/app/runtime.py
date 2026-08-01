@@ -2,9 +2,10 @@ import asyncio
 import importlib
 import inspect
 import shutil
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Awaitable, Callable, Protocol
+from typing import Protocol
 
 from app.config import WorkerSettings
 
@@ -66,7 +67,7 @@ class CosyVoiceRuntime:
             return
         try:
             module = importlib.import_module(module_name)
-            factory = getattr(module, "create_runtime")
+            factory = module.create_runtime
             self._adapter = factory(
                 model_path=self.settings.model_path,
                 device=self.settings.device,

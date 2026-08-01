@@ -2,6 +2,7 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile, status
@@ -77,7 +78,7 @@ def create_app(
 
     app = FastAPI(
         title="SoriON CosyVoice Worker",
-        version="0.7.1",
+        version="0.7.2",
         description="인증·감사·TTL을 포함한 CosyVoice 음성 복제 실행 서비스",
         lifespan=lifespan,
     )
@@ -150,9 +151,9 @@ def create_app(
     )
     async def create_job(
         request: Request,
-        sample: UploadFile = File(),
-        profile_id: str = Form(min_length=1, max_length=80),
-        text: str = Form(min_length=1, max_length=500),
+        sample: Annotated[UploadFile, File()],
+        profile_id: Annotated[str, Form(min_length=1, max_length=80)],
+        text: Annotated[str, Form(min_length=1, max_length=500)],
     ) -> WorkerJobResponse:
         diagnostics = request.app.state.runtime.diagnostics()
         if not diagnostics.ready:

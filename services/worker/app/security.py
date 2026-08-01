@@ -1,8 +1,8 @@
 import hashlib
 import hmac
 import time
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping
 
 
 @dataclass(frozen=True)

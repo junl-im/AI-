@@ -82,3 +82,15 @@
 - 문장별 조기 재생
 - Worker 재시작 상태 복구
 - speaker prompt cache 수명주기
+
+
+## 0.7.2 완료
+
+- CI Ruff·Vitest·React Hooks 회귀 수정
+- 문장별 UI 분할 계약 안정화
+- 동일 오류 재유입 방지 규칙 추가
+
+## 0.7.3 예정
+
+- GPU 배포 템플릿과 progressive playback
+- Worker 재시작 복구와 prompt cache 수명주기

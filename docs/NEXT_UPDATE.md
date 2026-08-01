@@ -1,10 +1,10 @@
 # NEXT UPDATE
 
-현재 기준 버전: `0.7.1`
+현재 기준 버전: `0.7.2`
 
 ## 목표 버전
 
-`0.7.2 GPU Deployment & Progressive Playback`
+`0.7.3 GPU Deployment & Progressive Playback`
 
 ## 목표
 
@@ -20,8 +20,8 @@
 
 ## 완료 기준
 
-1. 공개 HTTPS API와 사설 Worker가 서명 인증으로 연결된다.
+1. Web·API·Worker CI가 오류와 경고 없이 통과한다.
 2. Worker 재시작 뒤 진행 중 작업을 안전하게 실패 또는 복구 처리한다.
 3. 첫 문장 완성 시 전체 작업 종료 전에도 Dock에서 재생할 수 있다.
 4. 동의 철회 시 샘플·prompt cache·생성 작업 복사본이 함께 삭제된다.
-5. Web·API·Worker CI가 모두 통과한다.
+5. 실제 GPU 환경의 음질·지연·VRAM 측정값을 문서화한다.

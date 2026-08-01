@@ -70,6 +70,23 @@ async function walk(directory) {
   }
 }
 
+async function requireAbsent(relativePath, forbiddenTexts) {
+  const fullPath = join(root, relativePath)
+  let content = ''
+  try {
+    content = await readFile(fullPath, 'utf8')
+  } catch {
+    failures.push(`${relativePath}: 필수 파일이 없습니다.`)
+    return
+  }
+
+  for (const forbiddenText of forbiddenTexts) {
+    if (content.includes(forbiddenText)) {
+      failures.push(`${relativePath}: 금지된 구문 "${forbiddenText}"가 남아 있습니다.`)
+    }
+  }
+}
+
 async function requireText(relativePath, requiredTexts) {
   const fullPath = join(root, relativePath)
   let content = ''
@@ -342,6 +359,39 @@ await requireText('docs/SECURITY.md', [
   'HMAC-SHA256',
   '서비스 토큰',
   '감사 로그',
+])
+
+await requireText('services/worker/app/security.py', [
+  'from collections.abc import Mapping',
+])
+await requireAbsent('services/worker/app/security.py', [
+  'from typing import Mapping',
+])
+await requireText('services/worker/app/runtime.py', [
+  'from collections.abc import Awaitable, Callable',
+  'factory = module.create_runtime',
+])
+await requireAbsent('services/worker/app/runtime.py', [
+  'from typing import Awaitable, Callable',
+  'getattr(module, "create_runtime")',
+])
+await requireText('services/worker/app/main.py', [
+  'Annotated[UploadFile, File()]',
+  'Annotated[str, Form(min_length=1, max_length=80)]',
+])
+await requireAbsent('services/worker/app/main.py', [
+  'sample: UploadFile = File()',
+])
+await requireAbsent('services/api/tests/test_cosyvoice_worker.py', [
+  'import json',
+])
+await requireText('src/tts/segmentText.ts', [
+  '.flatMap((sentence) => splitOversized(sentence, maxChars))',
+])
+await requireText('src/pages/VoiceClonePage.tsx', [
+  'const activeJobId = job?.id ?? null',
+  'const activeJobStatus = job?.status ?? null',
+  '[activeJobId, activeJobStatus]',
 ])
 
 try {

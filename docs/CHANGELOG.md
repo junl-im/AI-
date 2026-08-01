@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 0.7.2 - 2026-08-01
+
+### Fixed
+
+- Worker의 `Mapping`, `Awaitable`, `Callable` import를 `collections.abc`로 이동해 Ruff `UP035`를 해결했다.
+- 상수 이름을 사용하는 `getattr`를 직접 속성 접근으로 바꿔 Ruff `B009`를 해결했다.
+- FastAPI `File`·`Form` 기본값을 `Annotated` 메타데이터로 이동해 Ruff `B008`을 해결했다.
+- API Worker 테스트의 사용하지 않는 `json` import를 제거해 Ruff `F401`을 해결했다.
+- 짧은 여러 문장이 기본 180자 한도 안에서 하나의 UI 구간으로 합쳐지던 문제를 수정했다.
+- 복제 작업 polling effect가 전체 `job` 객체를 참조하면서 부분 의존성만 선언하던 Hook 경고를 수정했다.
+
+### Added
+
+- Ruff 회귀 패턴과 React Hook polling 계약을 검사하는 프로젝트 규칙을 추가했다.
+- 기본 길이에서도 문장 경계를 유지하는 `splitTextForUi` 회귀 테스트를 추가했다.
+
+### Verification
+
+- FastAPI 테스트 56개 통과
+- CosyVoice Worker 테스트 9개 통과
+- Python compileall 및 Python 3.10 AST 문법 검사 통과
+- 프로젝트 절대 규칙 검사 통과
+
 ## 0.7.1 - 2026-07-31
 
 - API와 CosyVoice Worker 사이 서비스 토큰·HMAC-SHA256 요청 서명을 추가했다.

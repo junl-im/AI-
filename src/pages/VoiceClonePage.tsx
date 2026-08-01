@@ -76,6 +76,8 @@ export function VoiceClonePage() {
   const [capabilityError, setCapabilityError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [job, setJob] = useState<VoiceCloneJob | null>(null)
+  const activeJobId = job?.id ?? null
+  const activeJobStatus = job?.status ?? null
   const [jobBusy, setJobBusy] = useState(false)
   const [jobError, setJobError] = useState<string | null>(null)
   const currentStep = profile ? 3 : analysis ? 2 : 1
@@ -128,10 +130,11 @@ export function VoiceClonePage() {
   }, [recorder.file])
 
   useEffect(() => {
-    if (!job || !['queued', 'running'].includes(job.status)) return undefined
+    if (!activeJobId || !activeJobStatus) return undefined
+    if (!['queued', 'running'].includes(activeJobStatus)) return undefined
     let active = true
     const timer = window.setInterval(() => {
-      void getVoiceCloneJob(job.id)
+      void getVoiceCloneJob(activeJobId)
         .then((nextJob) => {
           if (active) setJob(nextJob)
         })
@@ -143,7 +146,7 @@ export function VoiceClonePage() {
       active = false
       window.clearInterval(timer)
     }
-  }, [job?.id, job?.status])
+  }, [activeJobId, activeJobStatus])
 
   useEffect(() => {
     if (!job || job.status !== 'completed' || !job.audioUrl) return

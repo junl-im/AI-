@@ -1,5 +1,18 @@
 # HANDOVER
 
+## 2026-08-01 08:50 KST · v0.7.2
+
+1. 작업명: CI Zero-Error Patch.
+2. 대상·기준 버전: `0.7.1 → 0.7.2`.
+3. Worker Ruff `UP035`, `B009`, `B008` 오류를 Python 3.10 기준으로 수정했다.
+4. API 테스트의 사용하지 않는 `json` import를 제거해 `F401`을 수정했다.
+5. 문장별 결과 UI가 짧은 문장들을 한 구간으로 합치던 문제를 수정했다.
+6. `VoiceClonePage` polling effect를 안정적인 job id·status 의존성으로 변경했다.
+7. 동일 회귀를 프로젝트 규칙 검사에서 차단하도록 금지·필수 구문 검사를 추가했다.
+8. API 56개, Worker 9개 테스트와 compileall, 프로젝트 규칙 검사를 통과했다.
+9. 산출물: `SoriON-AI-0.7.2-full.zip`, `SoriON-AI-0.7.1-to-0.7.2-patch.zip`.
+10. 다음 예상 업데이트: `0.7.3 GPU Deployment & Progressive Playback`.
+
 ## 2026-07-31 23:36 KST · v0.7.1
 
 1. 작업명: Production CosyVoice Adapter & API Security.

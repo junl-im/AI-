@@ -20,19 +20,8 @@ export function splitTextForUi(text: string, maxChars = 180): string[] {
   const cleaned = text.replace(/\s+/g, ' ').trim()
   if (!cleaned) return []
 
-  const chunks: string[] = []
-  let current = ''
-  for (const sentence of cleaned.split(SENTENCE_BOUNDARY)) {
-    for (const candidate of splitOversized(sentence, maxChars)) {
-      const combined = `${current} ${candidate}`.trim()
-      if (current && combined.length > maxChars) {
-        chunks.push(current)
-        current = candidate
-      } else {
-        current = combined
-      }
-    }
-  }
-  if (current) chunks.push(current)
-  return chunks
+  return cleaned
+    .split(SENTENCE_BOUNDARY)
+    .flatMap((sentence) => splitOversized(sentence, maxChars))
+    .filter(Boolean)
 }

@@ -11,6 +11,13 @@ describe('splitTextForUi', () => {
     ])
   })
 
+  it('기본 길이에서도 문장 경계를 각각의 UI 구간으로 유지한다', () => {
+    expect(splitTextForUi('첫 번째 문장입니다. 두 번째 문장입니다.')).toEqual([
+      '첫 번째 문장입니다.',
+      '두 번째 문장입니다.',
+    ])
+  })
+
   it('빈 문장은 빈 구간을 반환한다', () => {
     expect(splitTextForUi('   ')).toEqual([])
   })

@@ -74,7 +74,7 @@ SORION_COSYVOICE_WORKER_URL=http://127.0.0.1:9000
 - 원본 음성, 생성 문장, 동의 정보는 일반 로그에 남기지 않는다.
 
 
-## 0.7.1 운영 보안과 복구
+## 0.7.2 운영 보안과 복구
 
 - `/health` 외 경로는 서비스 토큰과 HMAC-SHA256 요청 서명을 검증한다.
 - SSE는 `id`와 `Last-Event-ID`를 지원해 끊긴 위치 다음 revision부터 재개한다.
