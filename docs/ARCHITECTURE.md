@@ -238,3 +238,31 @@ Web engine_id=auto
 
 Web의 HomePage는 작업공간 세션 동안 언마운트하지 않는다. 다른 페이지는 공통 헤더와 단일
 내비게이션 정의를 사용하고, 돌아왔을 때 기존 입력·메시지·타임라인을 그대로 이어 간다.
+
+## 0.8.6 Longform Workspace와 Browser Session Store
+
+```text
+LongformComposer (20,000자 원고)
+  → splitTextForUi
+  → Timeline voice/pause blocks
+  → EngineOrchestrator auto request
+  → first-ready Linked Player Dock
+```
+
+- 채팅형 전송 대신 한 원고를 제작 snapshot으로 고정하고 타임라인을 새로 구성한다.
+- 서버가 연결되지 않았으면 block ID와 옵션을 보존하고 bootstrap 성공 뒤 자동 생성한다.
+- IndexedDB `workspaceSessions`가 원고, 옵션, block revision과 job ID를 저장한다.
+- pagehide 비상 체크포인트는 localStorage에 먼저 남기고 IndexedDB로 승격한다.
+- 오래된 세션 revision과 생성 응답의 block revision mismatch를 폐기한다.
+
+```text
+GitHub Pages
+  X same-origin /api/v1
+  X github.io:8443
+  → VITE_API_BASE_URL from SORION_PUBLIC_API_BASE_URL
+  → Public FastAPI
+```
+
+- `apiConnection.ts`가 후보·주소·이력을 관리하고 `httpClient.ts`가 실제 요청만 담당한다.
+- `*.github.io`는 정적 호스트로 분류해 same-origin과 8443 후보를 만들지 않는다.
+- `/connectivity`와 `/engines`는 동일한 EngineOrchestrator runtime 정보를 사용한다.

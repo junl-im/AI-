@@ -7,9 +7,8 @@ import { useAppStore } from '../store/useAppStore'
 import { getVoicePreset } from '../tts/voicePresets'
 
 export function ProjectsPage() {
-  const setPage = useAppStore((state) => state.setPage)
   const openProject = useAppStore((state) => state.openProject)
-  const clearActiveProject = useAppStore((state) => state.clearActiveProject)
+  const startNewWorkspace = useAppStore((state) => state.startNewWorkspace)
   const [projects, setProjects] = useState<VoiceProject[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -40,10 +39,7 @@ export function ProjectsPage() {
         actions={(
           <button
             type="button"
-            onClick={() => {
-              clearActiveProject()
-              setPage('home')
-            }}
+            onClick={startNewWorkspace}
             className="soa-page-action"
           >
             새로 만들기

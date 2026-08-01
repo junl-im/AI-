@@ -1,14 +1,11 @@
 import { useAppStore } from '../../store/useAppStore'
+import { BrandIcon } from '../ui/BrandIcon'
 
 const subtitles = [
-  '문장을 목소리로, 목소리를 새로운 가능성으로.',
+  '장문 원고를 문장별 음성으로 빠르게.',
   '한국어의 감정과 호흡을 더 자연스럽게.',
-  '생성부터 복제와 변환까지, 모바일에서 빠르게.',
+  '생성부터 복제와 편집까지 한 작업공간에서.',
 ]
-
-function TitleMicrophone() {
-  return <span className="soa-title-mic" aria-hidden="true" data-testid="brand-title-microphone"><i /><i /><i /><i /></span>
-}
 
 function LightningWave() {
   return (
@@ -24,13 +21,14 @@ function LightningWave() {
 
 export function BrandMasthead() {
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
+  const exitWorkspace = useAppStore((state) => state.exitWorkspace)
 
   return (
     <header className="soa-masthead" aria-label="곰같은여우 SoriON AI 소개">
       <div className="soa-masthead__inner">
         <div className="soa-meta-bar">
           <div className="soa-meta-group">
-            <span className="soa-meta-label">BUILD</span><strong>v0.8.5</strong>
+            <span className="soa-meta-label">BUILD</span><strong>v0.8.6</strong>
             <span className="soa-meta-divider" aria-hidden="true" />
             <span className="soa-device-mark" aria-hidden="true"><i /><b /></span>
             <span>모바일 · PC 호환</span>
@@ -44,20 +42,30 @@ export function BrandMasthead() {
 
         <div className="soa-hero-grid">
           <div className="soa-banner-copy">
-            <div className="soa-eyebrow"><span className="soa-eyebrow-mark" aria-hidden="true" />AI VOICE WORKSPACE</div>
-            <h1 className="soa-brand-heading" aria-label="곰같은여우 SoriON AI">
-              <span className="soa-brand-owner">곰같은여우</span>
-              <span className="soa-brand-gradient">SoriON A<TitleMicrophone /></span>
-            </h1>
+            <button
+              type="button"
+              className="soa-main-brand"
+              onClick={exitWorkspace}
+              aria-label="SoriON AI 첫 페이지"
+            >
+              <BrandIcon className="soa-main-brand__icon" />
+              <span>
+                <small>AI VOICE WORKSPACE</small>
+                <strong role="heading" aria-level={1} aria-label="곰같은여우 SoriON AI">
+                  <i>곰같은여우</i>
+                  SoriON AI
+                </strong>
+              </span>
+            </button>
             <div className="soa-subtitle-stage" aria-label="SoriON 소개 문장">
               {subtitles.map((text) => <p key={text}>{text}</p>)}
             </div>
           </div>
 
           <div className="soa-voice-console" aria-hidden="true">
-            <div className="soa-voice-console__topline"><span>VOICE CORE</span><span className="soa-live-dot">ONLINE</span></div>
-            <div className="soa-console-mic" data-testid="voice-core-microphone"><i /><i /><i /><i /></div>
-            <div className="soa-voice-console__copy"><strong>소리의 가능성을 켜다.</strong><span>SoriON Voice Engine</span></div>
+            <div className="soa-voice-console__topline"><span>VOICE CORE</span><span className="soa-live-dot">AUTO</span></div>
+            <BrandIcon className="soa-console-brand-icon" />
+            <div className="soa-voice-console__copy"><strong>목소리의 가능성을 켜다.</strong><span>SoriON Voice Engine</span></div>
             <LightningWave />
           </div>
         </div>

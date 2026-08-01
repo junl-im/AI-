@@ -13,6 +13,7 @@ import {
   recoverSpeechResult,
   synthesizeSpeech,
 } from '../tts/voiceApi'
+import type { PersistedTimelineBlock } from '../workspace/sessionTypes'
 import type { TimelineBlock, TimelineVoiceBlock } from '../workspace/workspaceTypes'
 import { createRandomId } from '../utils/randomId'
 
@@ -57,6 +58,7 @@ function createVoiceBlock(
     audio: null,
     trackId: null,
     error: null,
+    revision: 1,
   }
 }
 
@@ -125,10 +127,16 @@ export function useTimelineGeneration() {
     timers.current.forEach((timer) => window.clearTimeout(timer))
   }, [])
 
-  const updateVoiceBlock = useCallback((id: string, patch: Partial<TimelineVoiceBlock>) => {
-    commit((current) => current.map((block) => (
-      block.id === id && block.kind === 'voice' ? { ...block, ...patch } : block
-    )))
+  const updateVoiceBlock = useCallback((
+    id: string,
+    patch: Partial<TimelineVoiceBlock>,
+    expectedRevision?: number,
+  ) => {
+    commit((current) => current.map((block) => {
+      if (block.id !== id || block.kind !== 'voice') return block
+      if (expectedRevision !== undefined && block.revision !== expectedRevision) return block
+      return { ...block, ...patch }
+    }))
   }, [commit])
 
   const stageText = useCallback((
@@ -146,12 +154,21 @@ export function useTimelineGeneration() {
     return staged.filter((block) => block.kind === 'voice').map((block) => block.id)
   }, [commit])
 
-  const pollProgress = useCallback((blockId: string, jobId: string, signal: AbortSignal) => {
+  const pollProgress = useCallback((
+    blockId: string,
+    jobId: string,
+    revision: number,
+    signal: AbortSignal,
+  ) => {
     const poll = async () => {
       if (signal.aborted) return
       try {
         const progress = await getSpeechProgress(jobId, signal)
-        updateVoiceBlock(blockId, { progress: Math.max(8, progress.progress) })
+        updateVoiceBlock(
+          blockId,
+          { progress: Math.max(8, progress.progress) },
+          revision,
+        )
         if (['completed', 'failed', 'cancelled'].includes(progress.phase)) return
       } catch {
         // 생성 POST보다 진행 상태가 늦게 만들어지는 짧은 구간은 다음 주기에 다시 확인한다.
@@ -169,9 +186,14 @@ export function useTimelineGeneration() {
     const block = blocksRef.current.find((item) => item.id === blockId)
     if (!block || block.kind !== 'voice') return null
 
+    const revision = block.revision
     const controller = new AbortController()
     controllers.current.set(blockId, controller)
-    updateVoiceBlock(blockId, { status: 'generating', progress: 6, error: null })
+    updateVoiceBlock(
+      blockId,
+      { status: 'generating', progress: 6, error: null },
+      revision,
+    )
 
     const request: TtsSynthesisRequest = {
       text: block.text,
@@ -196,7 +218,7 @@ export function useTimelineGeneration() {
           } else if (progress.phase === 'failed' || progress.phase === 'cancelled') {
             jobId = null
           } else {
-            pollProgress(blockId, jobId, controller.signal)
+            pollProgress(blockId, jobId, revision, controller.signal)
             result = await recoverSpeechResult(jobId, controller.signal)
           }
         } catch (error) {
@@ -207,7 +229,7 @@ export function useTimelineGeneration() {
               progress: 0,
               jobId: null,
               error: '저장된 음원 보관 기간이 끝났습니다. 다시 생성을 눌러 주세요.',
-            })
+            }, revision)
             return null
           }
           if (expired) jobId = null
@@ -220,16 +242,23 @@ export function useTimelineGeneration() {
           status: 'queued',
           progress: 0,
           error: '저장된 음원 결과를 찾지 못했습니다. 다시 생성을 눌러 주세요.',
-        })
+        }, revision)
         return null
       }
 
       if (!result) {
         jobId = createRandomId()
-        updateVoiceBlock(blockId, { jobId })
-        pollProgress(blockId, jobId, controller.signal)
+        updateVoiceBlock(blockId, { jobId }, revision)
+        pollProgress(blockId, jobId, revision, controller.signal)
         result = await synthesizeSpeech(request, jobId, controller.signal)
       }
+
+      const latestBlock = blocksRef.current.find((item) => item.id === blockId)
+      if (
+        !latestBlock
+        || latestBlock.kind !== 'voice'
+        || latestBlock.revision !== revision
+      ) return null
 
       let audio: GeneratedAudio
       if (result.audioUrl) {
@@ -263,7 +292,7 @@ export function useTimelineGeneration() {
         audio,
         trackId,
         error: null,
-      })
+      }, revision)
       return audio
     } catch (error) {
       if (controller.signal.aborted) return null
@@ -272,11 +301,17 @@ export function useTimelineGeneration() {
         : error instanceof Error
           ? error.message
           : '이 문장을 생성하지 못했습니다.'
-      updateVoiceBlock(blockId, { status: 'failed', progress: 0, error: message })
+      updateVoiceBlock(
+        blockId,
+        { status: 'failed', progress: 0, error: message },
+        revision,
+      )
       return null
     } finally {
-      controllers.current.delete(blockId)
-      stopPolling(blockId)
+      if (controllers.current.get(blockId) === controller) {
+        controllers.current.delete(blockId)
+        stopPolling(blockId)
+      }
     }
   }, [enqueue, pollProgress, stopPolling, updateVoiceBlock])
 
@@ -302,7 +337,35 @@ export function useTimelineGeneration() {
     }
     return results
   }, [generateBlock])
+  const restoreSession = useCallback((savedBlocks: PersistedTimelineBlock[]): string[] => {
+    controllers.current.forEach((controller) => controller.abort())
+    timers.current.forEach((timer) => window.clearTimeout(timer))
+    controllers.current.clear()
+    timers.current.clear()
+    blocksRef.current.forEach((block) => {
+      if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
+    })
 
+    const restored: TimelineBlock[] = savedBlocks.map((block) => {
+      if (block.kind === 'pause') return block
+      const recoverable = Boolean(block.jobId)
+      return {
+        ...block,
+        status: recoverable ? 'queued' : block.status === 'failed' ? 'failed' : 'queued',
+        progress: 0,
+        audio: null,
+        trackId: null,
+        error: recoverable
+          ? '이전 작업의 음원 결과를 다시 연결하고 있습니다.'
+          : block.error,
+        revision: Math.max(1, block.revision),
+      }
+    })
+    commit(() => restored)
+    return restored
+      .filter((block): block is TimelineVoiceBlock => block.kind === 'voice' && Boolean(block.jobId))
+      .map((block) => block.id)
+  }, [commit, removeTrack])
   const restoreProject = useCallback((
     project: VoiceProject,
     options: TimelineGenerationOptions,
@@ -329,6 +392,7 @@ export function useTimelineGeneration() {
         ...block,
         jobId,
         error: jobId ? '저장된 음원 결과를 확인하고 있습니다.' : null,
+        revision: 1,
       }
     })
     commit(() => restored)
@@ -375,6 +439,7 @@ export function useTimelineGeneration() {
         trackId: null,
         jobId: null,
         error: null,
+        revision: block.revision + 1,
       }
     }))
   }, [cancelActiveGeneration, commit, removeTrack])
@@ -419,6 +484,7 @@ export function useTimelineGeneration() {
     blocks,
     stageText,
     restoreProject,
+    restoreSession,
     recoverBlocks,
     generateAll,
     retryBlock: generateBlock,

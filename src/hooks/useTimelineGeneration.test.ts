@@ -155,3 +155,90 @@ describe('useTimelineGeneration mobile recovery', () => {
     })
   })
 })
+
+describe('useTimelineGeneration revision safety', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    usePlayerStore.getState().clearQueue()
+  })
+
+  it('does not let an old generation result overwrite edited text', async () => {
+    let resolveSynthesis: ((value: TtsSynthesisResult) => void) | null = null
+    voiceApiMocks.synthesizeSpeech.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveSynthesis = resolve
+    }))
+    const { result } = renderHook(() => useTimelineGeneration())
+    let blockId = ''
+
+    act(() => {
+      ;[blockId] = result.current.stageText('수정 전 문장입니다.', {
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        engineId: 'system',
+        normalizeText: true,
+      })
+    })
+
+    let generation: Promise<unknown>
+    await act(async () => {
+      generation = result.current.retryBlock(blockId)
+      await Promise.resolve()
+    })
+    act(() => result.current.updateText(blockId, '수정 후 문장입니다.'))
+
+    await act(async () => {
+      resolveSynthesis?.({ ...completedResult, jobId: 'stale-job' })
+      await generation!
+    })
+
+    expect(usePlayerStore.getState().queue).toHaveLength(0)
+    expect(result.current.blocks[0]).toMatchObject({
+      kind: 'voice',
+      text: '수정 후 문장입니다.',
+      status: 'queued',
+      jobId: null,
+      revision: 2,
+    })
+  })
+
+  it('restores persisted blocks in order and reconnects only saved jobs', () => {
+    const { result } = renderHook(() => useTimelineGeneration())
+    let recoverableIds: string[] = []
+
+    act(() => {
+      recoverableIds = result.current.restoreSession([
+        {
+          id: 'saved-voice',
+          kind: 'voice',
+          text: '저장된 문장',
+          voiceId: 'sori-warm',
+          voiceName: '혜린',
+          emotion: 'neutral',
+          speed: 1,
+          engineId: 'auto',
+          normalizeText: true,
+          jobId: 'saved-job',
+          status: 'generating',
+          progress: 48,
+          durationSeconds: 2,
+          error: null,
+          revision: 3,
+        },
+        { id: 'saved-pause', kind: 'pause', durationSeconds: 0.5 },
+      ])
+    })
+
+    expect(recoverableIds).toEqual(['saved-voice'])
+    expect(result.current.blocks).toHaveLength(2)
+    expect(result.current.blocks[0]).toMatchObject({
+      id: 'saved-voice',
+      status: 'queued',
+      progress: 0,
+      revision: 3,
+      audio: null,
+      trackId: null,
+    })
+  })
+})

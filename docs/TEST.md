@@ -323,3 +323,26 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 - `/engines`에서 ready 우선 엔진 하나만 recommended인지 검사
 
 현재 기준은 API 89개, Worker 9개다. Web 정식 test는 의존성이 설치 가능한 CI에서 실행한다.
+
+## 0.8.6 장문·브랜드·연결·세션 회귀 검사
+
+### Web
+
+- 공식 아이콘이 favicon, PWA, 랜딩과 작업공간 상단에 연결되는지 확인
+- 상단 브랜드 클릭이 어느 작업 화면에서도 첫 페이지로 이동하는지 확인
+- 첫 popstate에서 커스텀 종료창, 두 번째 popstate에서 즉시 back 호출 확인
+- 20,000자 원고와 일반 Enter 줄바꿈, Ctrl/⌘+Enter 제작 계약
+- 생성 후 원고 유지와 문장별 타임라인 생성 확인
+- 서버 연결 대기 제작이 연결 복구 뒤 자동 재개되는지 확인
+- GitHub Pages location 후보가 빈 배열이고 자체 HTTPS 호스트만 8443 후보를 갖는지 확인
+- IndexedDB, localStorage, memory fallback과 세션 revision 확인
+- 프로젝트 불러오기와 Object URL 재구성, block revision mismatch 폐기 확인
+
+### API
+
+- `/connectivity` 추천 엔진 ID가 `/engines` 추천 엔진과 일치하는지 확인
+- cooldown 엔진이 실제 TTS ready로 계산되지 않는지 확인
+- SQLite job 복구·409 충돌·410 만료 계약 유지
+- API Python 3.10 Ruff와 pytest, Worker Ruff와 pytest 통과
+
+현재 기준 테스트 수는 API 90개, Worker 9개다.

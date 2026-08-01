@@ -1,14 +1,17 @@
 import type { PropsWithChildren } from 'react'
 import { useBackendBootstrap } from '../../hooks/useBackendBootstrap'
+import { useExitConfirmation } from '../../hooks/useExitConfirmation'
 import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
 import { useAppStore } from '../../store/useAppStore'
 import { LinkedPlayerDock } from '../navigation/LinkedPlayerDock'
+import { ExitConfirmDialog } from '../ui/ExitConfirmDialog'
 import { NoticeToast } from '../ui/NoticeToast'
 import { BrandMasthead } from './BrandMasthead'
 import { CompactWorkspaceHeader } from './CompactWorkspaceHeader'
 
 export function AppShell({ children }: PropsWithChildren) {
   useBackendBootstrap()
+  const exitConfirmation = useExitConfirmation()
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const hasPlayer = usePlayerStore((state) => (
     workspaceEntered && getCurrentTrack(state) !== null
@@ -27,6 +30,11 @@ export function AppShell({ children }: PropsWithChildren) {
       </div>
       {workspaceEntered ? <LinkedPlayerDock /> : null}
       <NoticeToast />
+      <ExitConfirmDialog
+        open={exitConfirmation.open}
+        onStay={exitConfirmation.stay}
+        onExit={exitConfirmation.exit}
+      />
     </div>
   )
 }

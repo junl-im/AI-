@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.8.5`
+현재 기준 버전: `0.8.6`
 
 ## 목적
 
@@ -52,7 +52,7 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - 모델 설치와 GPU provisioning은 자동화하지 않는다.
 - 공개 사용자 인증과 access token은 아직 구현되지 않았다.
 - MP3·FLAC 변환과 편집 순서를 반영한 최종 WAV Export는 미완료다.
-- 마지막 열린 작업공간 자동 저장·복원은 0.8.5 대상이다.
+- 공개 HTTPS Voice API와 GPU 모델 배포는 저장소 코드와 별도로 필요하다.
 
 ## 0.8.5 추가 게이트
 
@@ -61,3 +61,21 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - 반복 실패 엔진은 cooldown 동안 자동 제외되고 준비 엔진이 없으면 503을 명확히 반환한다.
 - 메뉴 이동으로 현재 만들기 세션이 사라지면 배포를 차단한다.
 - 품질·프로젝트·설정의 공통 헤더와 색상 대비가 모바일 360px에서도 유지돼야 한다.
+
+## 0.8.6 추가 게이트
+
+- IndexedDB schema upgrade 3→4 후 기존 프로젝트·품질·보이스 프로필 보존
+- iOS private mode IndexedDB 거부 시 localStorage fallback
+- pagehide·화면 잠금 뒤 마지막 입력과 job ID 보존
+- 오래된 generation response의 revision mismatch 폐기
+- 세션 45일 만료와 잘못된 schema record 안전 무시
+
+## 0.8.6 장문·공개 연결 게이트
+
+- GitHub Pages에서 github.io same-origin 또는 8443을 API 후보로 만들지 않는다.
+- main build는 `SORION_PUBLIC_API_BASE_URL`을 `VITE_API_BASE_URL`로 주입한다.
+- 공개 API 변수가 없으면 실제 음성 준비로 표시하지 않는다.
+- 장문 원고 생성 뒤 원문을 유지하고 첫 ready 블록부터 재생한다.
+- 상단 브랜드는 모든 작업 화면에서 첫 페이지로 이동한다.
+- 첫 뒤로가기 확인과 두 번째 뒤로가기 이탈을 모바일 실기기에서 검사한다.
+- `/connectivity`와 `/engines` 추천 엔진 상태가 일치해야 한다.

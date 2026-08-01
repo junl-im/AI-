@@ -1,32 +1,30 @@
 # 곰같은여우 SoriON AI 시작 안내
 
-현재 버전: `0.8.5 Unified Workspace UX & Engine Orchestration`
+현재 버전: `0.8.6 Longform Voice Studio & Session Persistence`
 
 ## 0. 가장 먼저 읽을 파일
 
-이 프로젝트는 임시채팅에서 개발되므로 대화 기억에 의존하지 않습니다.
-
-1. [`docs/HANDOVER.md`](docs/HANDOVER.md) 전체
+1. [`docs/HANDOVER.md`](docs/HANDOVER.md)
 2. [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
 3. [`docs/NEXT_UPDATE.md`](docs/NEXT_UPDATE.md)
-4. [`docs/ENGINE_STRATEGY.md`](docs/ENGINE_STRATEGY.md)
-5. [`docs/MOBILE_ENGINE_RELIABILITY.md`](docs/MOBILE_ENGINE_RELIABILITY.md)
+4. [`docs/LONGFORM_VOICE_WORKSPACE.md`](docs/LONGFORM_VOICE_WORKSPACE.md)
+5. [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
 
 ## 1. 패치 적용 원칙
 
-- 패치는 `package.json` 버전이 정확히 `0.8.4`일 때만 적용합니다.
-- 기존 `.git` 폴더는 유지합니다.
-- 저장소 루트에 패치 ZIP을 풀고 같은 이름의 파일을 덮어씁니다.
-- `DELETE_LIST.txt`에 경로가 있을 때만 해당 파일을 삭제합니다.
+- 기준본은 `SoriON-AI-0.8.5-ci-hotfix-full.zip`입니다.
+- 저장소 루트에 패치 ZIP을 풀어 같은 파일을 덮어씁니다.
+- `docs/patches/0.8.6/DELETE_LIST.txt`의 파일을 삭제합니다.
+- `.git`, `.env`, 모델, 실행 DB와 사용자 음원은 유지합니다.
 
 권장 브랜치와 커밋:
 
 ```text
-feat/unified-workspace-engine-orchestration
-feat: unify workspace UX and add engine orchestration
+feat/longform-voice-studio
+feat: redesign creation for longform voice production
 ```
 
-## 2. 기본 환경과 실행
+## 2. 로컬 실행
 
 ```bash
 cp .env.example .env
@@ -36,46 +34,36 @@ npm run dev:api
 npm run dev
 ```
 
-요구 버전은 Node.js 22 이상, npm 10 이상, Python 3.10 이상 3.13 미만과 uv입니다.
+Node.js 22+, npm 10+, Python 3.10~3.12와 uv를 사용합니다.
 
-기본 주소:
+## 3. 공개 Voice API 자동 연결
 
-- Web: `http://127.0.0.1:5173`
-- API: `http://127.0.0.1:8000`
-- Worker: `http://127.0.0.1:9000`
+사용자는 API 주소나 엔진을 입력하지 않습니다. GitHub Pages 배포 관리자가 저장소 Actions 변수에
+공개 HTTPS FastAPI Origin을 한 번 설정합니다.
 
-실제 CosyVoice에는 별도 PyTorch, CUDA와 모델 가중치가 필요합니다. Worker `/health`가
-정상이더라도 모델·GPU 조건이 충족되지 않으면 `/ready`는 준비 안 됨이어야 합니다.
-
-## 3. 자동 연결과 엔진 운영
-
-사용자는 API 주소나 엔진을 입력하지 않습니다. 앱은 같은 Origin, `VITE_API_BASE_URL`, 마지막
-성공 주소와 안전한 로컬 후보를 자동 확인합니다. 일반 합성은 항상 `engine_id=auto`로 요청하고
-서버가 준비 상태와 운영 우선순위를 기준으로 실행 엔진을 선택합니다.
-
-```env
-SORION_DEFAULT_TTS_ENGINE=auto
-SORION_TTS_ENGINE_ORDER=cosyvoice3,melo,system,mock
-SORION_ENGINE_FAILURE_THRESHOLD=2
-SORION_ENGINE_COOLDOWN_SECONDS=30
+```text
+Variable name: SORION_PUBLIC_API_BASE_URL
+Value: https://voice-api.example.com
 ```
 
-주 엔진이 실패하면 서버가 다음 준비 엔진을 시도합니다. 반복 실패 엔진은 cooldown 동안 자동
-제외되며 품질 연구소에서 우선 엔진, 성공·실패 횟수와 격리 상태를 확인할 수 있습니다.
+CI가 이를 `VITE_API_BASE_URL`로 주입합니다. GitHub Pages 자체는 Voice API 후보가 아니며
+`https://junl-im.github.io/api/v1`과 `:8443`을 탐색하지 않습니다.
 
-## 4. 0.8.5 첫 확인
+## 4. 0.8.6 확인 목록
 
-- 상단 `BUILD v0.8.5`
-- 초기 랜딩에는 Dock·메뉴가 없고 작업공간 진입 뒤에만 표시
-- 만들기에서 다른 메뉴로 이동한 뒤 돌아와도 입력·채팅·타임라인 유지
-- 품질·프로젝트·설정 화면의 헤더, 배경, 제목 계층과 뒤로가기 동작 일관성
-- 상단 설정 버튼으로 설정 화면 직접 접근
-- 프로젝트 목록의 로딩·실패·빈 상태와 재시도 동작
-- 일반 생성 요청의 `requested_engine_id=auto`
-- 주 엔진 실패 시 `attempted_engine_ids`와 `fallback_used=true`
-- 반복 실패 엔진의 `health=cooldown`과 cooldown 종료 후 재평가
-- 실제 모델 미설치 상태를 AI 성공으로 표시하지 않음
-- API 재시작 뒤에도 같은 job ID 결과 복구
+- 첫 화면과 PWA 아이콘이 공식 SoriON 아이콘인지 확인
+- 작업공간 상단 아이콘·이름 클릭 시 첫 페이지 이동
+- 첫 뒤로가기에서 커스텀 종료 확인창 표시
+- 확인창 상태에서 두 번째 뒤로가기 시 즉시 이탈
+- 첫 페이지에는 Dock이 없고 작업공간에만 표시
+- 20,000자 장문 원고 입력, 일반 Enter 줄바꿈, Ctrl/⌘+Enter 제작
+- 생성 후 원고가 편집기에 유지되는지 확인
+- 문자·문단·블록·예상 길이 통계 확인
+- 서버 미연결 상태에서 제작 후 연결 복구 시 자동 생성 재개
+- Pages 환경에서 same-origin과 `:8443` 오탐 후보가 없는지 확인
+- `/connectivity`와 `/engines`의 추천 엔진 ID 일치
+- 새로고침 뒤 원고·옵션·타임라인과 job ID 복원
+- 수정한 블록에 오래된 생성 결과가 적용되지 않는지 확인
 
 ## 5. 품질 검사
 
@@ -83,11 +71,9 @@ SORION_ENGINE_COOLDOWN_SECONDS=30
 npm run quality:rules
 npm run lint
 npm run typecheck
-npm run test
+npm run test:ci
 npm run build
 ```
-
-API와 Worker:
 
 ```bash
 cd services/api
@@ -101,18 +87,4 @@ uv run --python 3.10 ruff check app tests --output-format=github
 uv run --python 3.10 pytest tests -q
 ```
 
-현재 기준 테스트 수는 API 89개, Worker 9개입니다.
-
-## 6. 실제 연결 확인
-
-```text
-GET /api/v1/health
-GET /api/v1/connectivity
-GET /api/v1/engines
-GET /api/v1/quality/diagnostics
-POST /api/v1/tts/synthesize
-GET /api/v1/tts/jobs/{job_id}/result
-```
-
-GitHub Pages에는 Python API와 GPU Worker가 포함되지 않습니다. 공개 배포는 같은 Origin reverse
-proxy 또는 빌드 시 주입한 공개 HTTPS API가 필요합니다.
+현재 API 테스트 기준은 90개, Worker는 9개입니다.

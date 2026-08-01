@@ -1,8 +1,9 @@
 @import "tailwindcss";
 @import "./masthead.css";
 @import "./workspace-shell.css";
+@import "./brand-navigation.css";
 @import "./workspace-editor.css";
-@import "./mobile-workspace.css";
+@import "./longform-studio.css";
 @import "./timeline-editor.css";
 @import "./player-dock.css";
 @import "./voice-clone.css";

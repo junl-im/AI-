@@ -1,24 +1,39 @@
-import { render, screen, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { useAppStore } from '../../store/useAppStore'
 import { BrandMasthead } from './BrandMasthead'
 
 describe('BrandMasthead', () => {
-  it('shows the inherited product and creator naming', () => {
-    render(<BrandMasthead />)
-
-    expect(screen.getByRole('heading', { name: /곰같은여우 SoriON AI/i })).toBeInTheDocument()
-    expect(screen.getByText('모바일 · PC 호환')).toBeInTheDocument()
-    expect(screen.getAllByText('곰같은여우').length).toBeGreaterThan(0)
+  beforeEach(() => {
+    useAppStore.setState({ page: 'home', workspaceEntered: false })
   })
 
-  it('contains the current rotating copy and microphone identity', () => {
+  it('공식 아이콘과 제품·제작자 이름을 보여준다', () => {
+    const view = render(<BrandMasthead />)
+
+    expect(screen.getByLabelText('곰같은여우 SoriON AI')).toHaveTextContent('SoriON AI')
+    expect(screen.getAllByText('곰같은여우').length).toBeGreaterThan(0)
+    const brandButton = screen.getByRole('button', { name: 'SoriON AI 첫 페이지' })
+    expect(brandButton).toBeInTheDocument()
+    expect(view.container.querySelector('img[src$="sorion-icon.svg"]')).toBeInTheDocument()
+  })
+
+  it('현재 장문 중심 소개 문구를 순환한다', () => {
     render(<BrandMasthead />)
 
     const introduction = within(screen.getByLabelText('SoriON 소개 문장'))
-    expect(introduction.getByText('문장을 목소리로, 목소리를 새로운 가능성으로.')).toBeInTheDocument()
+    expect(introduction.getByText('장문 원고를 문장별 음성으로 빠르게.')).toBeInTheDocument()
     expect(introduction.getByText('한국어의 감정과 호흡을 더 자연스럽게.')).toBeInTheDocument()
-    expect(introduction.getByText('생성부터 복제와 변환까지, 모바일에서 빠르게.')).toBeInTheDocument()
-    expect(screen.getByTestId('brand-title-microphone')).toBeInTheDocument()
-    expect(screen.getByTestId('voice-core-microphone')).toBeInTheDocument()
+    expect(introduction.getByText('생성부터 복제와 편집까지 한 작업공간에서.')).toBeInTheDocument()
+  })
+
+  it('브랜드 영역을 누르면 첫 페이지 상태를 유지한다', () => {
+    useAppStore.setState({ page: 'quality', workspaceEntered: true })
+    render(<BrandMasthead />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'SoriON AI 첫 페이지' }))
+
+    expect(useAppStore.getState().workspaceEntered).toBe(false)
+    expect(useAppStore.getState().page).toBe('home')
   })
 })

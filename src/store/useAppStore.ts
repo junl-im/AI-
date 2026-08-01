@@ -31,6 +31,7 @@ interface AppState {
   page: AppPage
   workspaceEntered: boolean
   activeProject: VoiceProject | null
+  workspaceResetToken: number
   backendStatus: BackendStatus
   backendMessage: string
   engineHealth: EngineHealthSnapshot
@@ -38,6 +39,7 @@ interface AppState {
   setPage: (page: AppPage) => void
   enterWorkspace: (page?: AppPage) => void
   openProject: (project: VoiceProject) => void
+  startNewWorkspace: () => void
   clearActiveProject: () => void
   exitWorkspace: () => void
   setBackendStatus: (status: BackendStatus, message?: string) => void
@@ -51,6 +53,7 @@ export const useAppStore = create<AppState>((set) => ({
   page: 'home',
   workspaceEntered: false,
   activeProject: null,
+  workspaceResetToken: 0,
   backendStatus: 'unknown',
   backendMessage: '음성 시스템을 자동으로 확인하고 있습니다.',
   engineHealth: initialEngineHealth,
@@ -62,6 +65,12 @@ export const useAppStore = create<AppState>((set) => ({
     page: 'home',
     workspaceEntered: true,
   }),
+  startNewWorkspace: () => set((state) => ({
+    activeProject: null,
+    page: 'home',
+    workspaceEntered: true,
+    workspaceResetToken: state.workspaceResetToken + 1,
+  })),
   clearActiveProject: () => set({ activeProject: null }),
   exitWorkspace: () => set({ page: 'home', workspaceEntered: false }),
   setBackendStatus: (backendStatus, backendMessage) => set((state) => ({

@@ -223,3 +223,13 @@ Semantic Versioning을 사용한다.
 - 기준 버전: `0.8.5`
 - 주요 변경: Ruff UP035, HomePage Effect 의존성, 누적 저장소의 수동 연결 UI 잔존 파일 정리
 - 삭제 대상: `ApiSetupWizard.tsx`, `ConnectionBottomSheet.tsx`, `EngineStatusCard.tsx`, `connection-sheet.css`
+
+## 0.8.6 릴리스
+
+- 기준: `SoriON-AI-0.8.5-ci-hotfix-full.zip`
+- 장문 원고 편집기, 공식 아이콘, 상단 브랜드 홈 이동과 종료 확인 UX
+- GitHub Pages API 오탐 차단과 Actions 공개 API 변수 주입
+- IndexedDB 작업공간 세션·revision·recover-first 복원
+- 삭제 대상: ChatComposer, ConversationPanel, mobile-workspace.css, CHAT_TIMELINE_WORKSPACE.md
+- API 90개·Worker 9개 및 Web quality 통과 후 배포
+- 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP, 검증 보고서, SHA-256을 함께 전달

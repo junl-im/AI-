@@ -1,88 +1,68 @@
 # GitHub Pages 배포
 
-## 현재 저장소 주소
+현재 저장소: `junl-im/AI-`
 
-- 저장소: `junl-im/AI-`
-- 서비스 경로: `https://junl-im.github.io/AI-/`
-- Vite 배포 기준 경로: `/AI-/`
+Pages URL: `https://junl-im.github.io/AI-/`
 
-## 0.5.7 배포 구조
+## 배포 구조
 
-`.github/workflows/ci.yml` 하나가 다음 작업을 관리한다.
+GitHub Pages는 `dist`의 정적 Web/PWA만 제공한다. FastAPI와 CosyVoice Worker를 Pages에서
+실행할 수 없으므로 공개 HTTPS Voice API를 별도 서버에 배포한다.
 
-1. Web quality
-2. API quality · Python 3.10
-3. 두 품질 작업 성공 후 GitHub Pages 배포
-
-`main` Push는 하나의 `SoriON CI & Pages` 실행으로 검사와 배포가 이어진다. `develop`과 기능 브랜치는 `main` 또는 `develop` 대상 Pull Request에서 검사한다.
-
-별도 `.github/workflows/deploy-pages.yml`은 삭제했다. 품질 검사와 배포 워크플로를 각각 Push에 연결하면 같은 커밋이 All workflows에 두 번 나타날 수 있기 때문이다.
+```text
+GitHub Pages Web → HTTPS FastAPI → private CosyVoice Worker
+```
 
 ## 최초 1회 GitHub 설정
 
-1. GitHub 저장소에서 `Settings`를 연다.
-2. 왼쪽 `Pages`를 연다.
-3. `Build and deployment`의 `Source`를 **GitHub Actions**로 선택한다.
-4. `Deploy from a branch`를 사용하지 않는다.
-5. `main`에 패치를 병합한다.
-6. Actions에서 `SoriON CI & Pages` 실행 하나가 생성되는지 확인한다.
-
-Pages Source가 브랜치 배포로 남아 있으면 GitHub가 관리하는 `pages-build-deployment`가 별도로 생성된다. 이것은 `.git` 폴더 문제가 아니라 저장소 Pages 설정 문제다.
-
-## 정상 실행 형태
-
-`main` Push 한 번에 All workflows에는 프로젝트 실행 하나가 추가되고, 그 안에서 다음 작업이 보인다.
+1. 저장소 `Settings → Pages`에서 Source를 `GitHub Actions`로 선택한다.
+2. `Settings → Secrets and variables → Actions → Variables`를 연다.
+3. 다음 Repository Variable을 만든다.
 
 ```text
-Web quality
-API quality · Python 3.10
-Deploy GitHub Pages
+Name: SORION_PUBLIC_API_BASE_URL
+Value: https://voice-api.example.com
 ```
 
-Pull Request가 열린 `develop` 또는 기능 브랜치에 새 커밋을 Push해도 PR 이벤트 하나만 실행된다. 이 브랜치들을 Push 자동 트리거에서 제외해 같은 커밋의 Push·PR 중복 실행을 막는다.
+4. FastAPI의 `SORION_CORS_ORIGINS`에 `https://junl-im.github.io`를 포함한다.
+5. `main`에 push해 Web·API·Worker quality와 Pages deploy를 확인한다.
 
-## 배포 경로
+이 설정은 운영자가 한 번 수행하며 앱 사용자에게 API 주소를 묻지 않는다.
 
-워크플로는 저장소 이름을 사용해 Vite base를 자동 설정한다.
+## Workflow 동작
+
+- PR: lint, typecheck, test, build, API·Worker 검사
+- main push: 같은 검사 후 Pages artifact와 deploy
+- build 환경:
+  - `VITE_BASE_PATH=/${repository-name}/`
+  - `VITE_API_BASE_URL=${{ vars.SORION_PUBLIC_API_BASE_URL }}`
+- 공개 API 변수가 비어 있으면 Actions warning을 남기고 Web은 잘못된 Pages API를 탐색하지 않음
+
+## 정상 확인
+
+브라우저 Network에서 다음을 확인한다.
 
 ```text
-/${{ github.event.repository.name }}/
+https://voice-api.example.com/api/v1/health
+https://voice-api.example.com/api/v1/connectivity
 ```
 
-현재 저장소에서는 `/AI-/`가 된다. `dist/`만 Pages 아티팩트로 업로드한다.
-
-## 이전 화면이 남는 경우
-
-배포 성공 후에도 한 기기에서만 이전 화면이 보이면 기존 PWA 서비스워커 캐시일 수 있다.
-
-1. 강력 새로고침을 실행한다.
-2. 개발자 도구 `Application → Service Workers`에서 기존 워커를 해제한다.
-3. `Application → Storage → Clear site data`를 실행한다.
-4. 설치형 PWA가 있다면 제거한 뒤 다시 접속한다.
-
-## 0.5.7 확인
-
-- 공개 화면 상단에 `BUILD v0.5.7` 표시
-- 브랜드 문구와 마이크 배너 정상 표시
-- GitHub Pages에서는 API 미연결 시 `DEMO WAV` 표시
-- 로컬 Voice API를 연결하면 실제 엔진 상태와 진행률 표시
-
-## 0.5.7 Action 런타임 호환성
-
-Web·API 품질 Job의 JavaScript Action을 Node.js 24 기반 버전으로 올렸다.
+다음 요청은 발생하면 안 된다.
 
 ```text
-actions/checkout@v6
-actions/setup-node@v6
-astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+https://junl-im.github.io/api/v1/*
+https://junl-im.github.io:8443/api/v1/*
 ```
 
-Pages 액션도 Node.js 24 대응 stable major로 갱신했다.
+## PWA 아이콘과 캐시
 
-```text
-actions/configure-pages@v6
-actions/upload-pages-artifact@v5
-actions/deploy-pages@v5
-```
+- `public/sorion-icon.svg`: Web 브랜드 원본
+- `favicon-64.png`: 브라우저 favicon fallback
+- `pwa-192.png`, `pwa-512.png`, `pwa-maskable-512.png`: 설치 아이콘
+- 아이콘·manifest 변경 후 이전 화면이 남으면 Site data와 설치 PWA를 제거한 뒤 다시 설치
 
-`setup-uv`는 메이저 태그가 아니라 Astral 공식 문서가 제시한 불변 커밋 SHA로 고정한다. 액션 내부에서 설치할 uv도 `0.11.32`로 고정한다. 워크플로에는 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`를 방어적으로 유지한다.
+## 공개 API가 없는 경우
+
+Web은 소개·원고 편집·로컬 세션 저장까지 동작하지만 실제 음성 생성은 할 수 없다.
+화면은 raw 후보 URL을 나열하지 않고 “공개 음성 서버 배포 대기” 상태를 표시하며 자동 재검사한다.
+이 상태를 실제 엔진 준비로 표시해서는 안 된다.

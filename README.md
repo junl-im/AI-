@@ -1,67 +1,58 @@
 # 곰같은여우 SoriON AI
 
-**한국인을 위한 모바일 우선 AI Voice Platform**
+**한국인을 위한 모바일 우선 장문 AI Voice Platform**
 
-SoriON AI는 초보자는 채팅으로 음성을 만들고, 전문가는 CapCut형 문장 타임라인에서
-순서·쉼·문장을 편집하는 한국어 중심 음성 제작 플랫폼입니다. 실제 AI, 시스템 음성,
-Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되지 않는 Adapter 구조를 사용합니다.
+SoriON AI는 대본·오디오북·강의·광고 원고처럼 긴 한국어 문서를 붙여 넣고,
+문장별 음성 블록으로 나누어 순차 제작하는 음성 작업공간입니다. 첫 화면은 단순하게,
+실제 편집은 CapCut형 타임라인으로 제공하며 엔진 연결과 선택은 시스템이 자동 처리합니다.
 
 ## 현재 상태
 
-- 버전: `0.8.5 Unified Workspace UX & Engine Orchestration`
-- 웹: React + Vite + TypeScript + Zustand + PWA
+- 버전: `0.8.6 Longform Voice Studio & Session Persistence`
+- Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
-- GPU Worker: 선택 설치형 Fun-CosyVoice 3 Adapter
-- 무료 로컬 대체: Windows·macOS·eSpeak 시스템 한국어 음성
-- 작업공간: ChatGPT형 입력 + CapCut형 문장·쉼 타임라인
-- 재생: 첫 완성 블록부터 나타나는 Linked Player Dock
-- 연결 상태: API·실제 TTS·Worker·GPU/모델 네 계층
-- 모바일 복구: 타임라인 job ID 보존, recover-first 재시도, 저장소 실패 fallback
-- API 영속성: SQLite 결과 복구, 원자적 claim, payload 충돌 409, 결과 만료 410
-- 한국어 처리: 숫자·날짜·시각·금액·퍼센트·단위·영문 약어 정규화
-- 저장: IndexedDB 프로젝트·품질 평가·동의된 음성 프로필
-- 프로젝트 복원: 목록 클릭 시 채팅·보이스·타임라인과 저장된 job 결과 recover-first
-- 배포: Web·API·Worker quality와 GitHub Pages를 하나의 Workflow로 관리
+- Worker: 선택 설치형 Fun-CosyVoice 3 Adapter
+- 기본 제작: 최대 20,000자 장문 원고 → 문장별 음성 타임라인
+- 엔진 운영: `engine_id=auto`, fallback과 circuit breaker
+- 로컬 대체: Windows·macOS·eSpeak 시스템 한국어 음성
+- 세션: IndexedDB 자동 저장, localStorage·memory fallback
+- 결과 복구: SQLite job ID 기반 recover-first
+- 프로젝트: 목록에서 원고·옵션·타임라인·완료 결과 복원
+- 재생: 첫 완성 블록부터 Linked Player Dock에 연결
 
-## 0.8.5 핵심
+## 0.8.6 핵심
 
-### 작업공간 공통 UX·IA
+### 장문 중심 제작 화면
 
-- 만들기 화면을 메뉴 이동 중에도 마운트 상태로 유지해 작성 중 채팅·타임라인을 보존
-- 품질·프로젝트·설정에 동일한 작업공간 헤더와 다크 정보 계층 적용
-- 상단에서 설정에 직접 접근하고, 브랜드 클릭은 작성 작업공간으로 복귀
-- 프로젝트 로딩·실패·빈 상태를 구분하고 실패 시 같은 화면에서 다시 시도
-- 하단 메뉴·헤더가 하나의 공통 내비게이션 정의를 사용해 명칭과 순서 불일치 방지
+- 채팅형 입력을 제거하고 원고 편집기를 중심으로 재설계
+- 일반 Enter는 줄바꿈, `Ctrl/⌘+Enter`는 제작 시작
+- 문자 수, 문단 수, 예상 음성 블록 수와 예상 길이 표시
+- 원고는 생성 후에도 유지하고 문장별 타임라인만 새로 구성
+- 서버가 늦게 연결되면 눌러 둔 제작 요청을 연결 복구 뒤 자동 재개
 
-### 자동 엔진 오케스트레이션
+### 브랜드·이동·종료 UX
 
-사용자는 엔진을 선택하지 않습니다. Web은 모든 일반 합성을 `auto`로 요청하고 FastAPI의
-`EngineOrchestrator`가 실제 준비 상태, AI·Local·Mock 모드, 운영 우선순위와 요청 기능을
-기준으로 후보를 정렬합니다. 주 엔진이 실패하면 같은 요청 안에서 다음 엔진으로 전환하며,
-반복 실패 엔진은 일정 시간 자동 격리한 뒤 다시 평가합니다.
+- 제공된 SoriON 메인 아이콘을 favicon, PWA, 첫 화면과 상단 브랜드에 통일
+- 모든 작업 화면의 상단 아이콘·이름을 누르면 첫 페이지로 이동
+- 첫 브라우저 뒤로가기는 앱 내부 종료 확인창 표시
+- 확인창이 열린 상태에서 뒤로가기를 한 번 더 누르면 즉시 이탈
+- 첫 페이지에는 Dock을 렌더링하지 않고 작업공간 진입 뒤에만 표시
 
-- 실제 실행 시도 순서와 fallback 여부를 TTS 응답에 기록
-- 성공·실패·연속 실패·cooldown을 `/engines`와 품질 연구소에 연결
-- 준비되지 않은 모델을 성공으로 가장하지 않고 등록된 ready 엔진만 실행
-- 명시 엔진 요청은 다른 엔진으로 조용히 바꾸지 않으며 일반 UI는 자동 모드만 사용
-- 전략상 주력은 Fun-CosyVoice 3, 복제 전문 보조는 GPT-SoVITS, 로컬 대체는 MeloTTS 유지
+### 자동 Voice API 연결
 
-### 작업 연속성
+- GitHub Pages 주소 자체와 `:8443`을 Voice API로 잘못 탐색하지 않음
+- 공개 배포는 저장소 Actions 변수 `SORION_PUBLIC_API_BASE_URL`을 빌드에 자동 주입
+- 사용자에게 API 주소 입력이나 엔진 선택 UI를 제공하지 않음
+- API·TTS·Worker·GPU 상태를 분리하고 `/connectivity`와 `/engines`가 같은 추천 엔진을 표시
 
-- 만들기에서 복제·품질·프로젝트·설정으로 이동해도 현재 초안과 타임라인 유지
-- 첫 랜딩에서는 Dock을 숨기고 작업공간 진입 이후에만 공통 메뉴·Player 표시
-- 프로젝트 불러오기는 저장된 job 결과를 먼저 복구하고 만료 시 블록별 재생성을 안내
-- API job 상태와 완료 결과는 SQLite에 유지해 서버 재시작·다중 프로세스에서도 복구
+### 모바일 작업공간 복원
 
-### 현재 검증 기준
+- 전송 전 장문 원고, 보이스, 읽기 옵션, 타임라인과 job ID 자동 저장
+- 앱 종료·새로고침·화면 잠금 뒤 마지막 작업공간 복원
+- 세션 revision과 블록 revision으로 오래된 저장·생성 결과 차단
+- Object URL과 Player track ID는 저장하지 않고 서버 결과로 재구성
 
-- FastAPI 테스트 89개
-- CosyVoice Worker 테스트 9개
-- 프로젝트 규칙, Python compileall, Python 3.10 AST 호환성
-- TypeScript·TSX 구문, 상대 import와 shim 기반 의미·참조 검사
-- 정식 Web lint/type/test/build와 Ruff는 의존성 설치 가능한 CI에서 최종 확인
-
-## 바로 시작하기
+## 개발 실행
 
 ```bash
 cp .env.example .env
@@ -76,56 +67,37 @@ npm run dev:api
 npm run dev
 ```
 
-기본 주소:
+기본 주소: Web `127.0.0.1:5173`, API `127.0.0.1:8000`, Worker `127.0.0.1:9000`.
 
-- Web: `http://127.0.0.1:5173`
-- API: `http://127.0.0.1:8000`
-- Worker: `http://127.0.0.1:9000`
+## 공개 배포에서 반드시 필요한 것
 
-휴대폰 로컬 개발에서는 현재 Web 호스트의 API 후보를 앱이 자동 확인합니다. 공개 HTTPS Web은
-`VITE_API_BASE_URL`에 HTTPS API를 주입하거나 같은 Origin reverse proxy를 구성합니다.
+GitHub Pages는 정적 Web만 제공하므로 Python Voice API를 별도 HTTPS 서버에 배포해야 합니다.
+저장소 `Settings → Secrets and variables → Actions → Variables`에서 다음 값을 한 번 설정합니다.
 
-실제 CosyVoice에는 PyTorch, CUDA, 모델 가중치와 별도 GPU 환경이 필요합니다.
-모델이 없으면 Worker `/health`는 정상이어도 `/ready`는 not-ready입니다.
+```text
+SORION_PUBLIC_API_BASE_URL=https://voice-api.example.com
+```
+
+이 설정은 운영자 배포 설정이며 사용자 화면에는 노출되지 않습니다. URL이 없으면 앱은 Pages
+주소를 잘못 호출하지 않고 “공개 음성 서버 배포 대기” 상태에서 자동 재검사합니다.
 
 ## 주요 문서
 
-- 절대 필독 인수인계: [`docs/HANDOVER.md`](docs/HANDOVER.md)
+- 인수인계: [`docs/HANDOVER.md`](docs/HANDOVER.md)
 - 시작 안내: [`START_HERE.md`](START_HERE.md)
-- 모바일 엔진 신뢰성: [`docs/MOBILE_ENGINE_RELIABILITY.md`](docs/MOBILE_ENGINE_RELIABILITY.md)
-- API 연결 진단: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
-- Chat-to-Timeline: [`docs/CHAT_TIMELINE_WORKSPACE.md`](docs/CHAT_TIMELINE_WORKSPACE.md)
+- 장문 작업공간: [`docs/LONGFORM_VOICE_WORKSPACE.md`](docs/LONGFORM_VOICE_WORKSPACE.md)
+- API 연결: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
+- 세션 복원: [`docs/WORKSPACE_SESSION.md`](docs/WORKSPACE_SESSION.md)
 - 엔진 전략: [`docs/ENGINE_STRATEGY.md`](docs/ENGINE_STRATEGY.md)
-- CosyVoice Worker: [`docs/COSYVOICE_WORKER.md`](docs/COSYVOICE_WORKER.md)
-- 보안: [`docs/SECURITY.md`](docs/SECURITY.md)
-- 전체 전달 규칙: [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
-
-## GitHub Pages 배포 현실
-
-GitHub Pages는 정적 React Web만 실행합니다. Python API와 GPU Worker는 별도 PC 또는
-서버에서 실행해야 합니다. API 실패를 Demo 성공으로 숨기지 않으며, 수동 연결 화면 없이
-상태를 표시하고 안전한 후보를 자동으로 다시 탐색합니다.
+- GitHub Pages: [`docs/GITHUB_PAGES.md`](docs/GITHUB_PAGES.md)
+- 전달 규칙: [`DELIVERY_RULES.md`](DELIVERY_RULES.md)
 
 ## 개발 원칙
 
-- 모바일 화면과 실제 모바일 네트워크를 기준으로 먼저 완성합니다.
+- 장문 원고 제작이 기본 흐름이며 채팅형 입력으로 되돌리지 않습니다.
+- 모바일·한국어를 먼저 완성하고 PC는 정밀 편집 확장으로 사용합니다.
+- 실제 AI, Local/System, Mock, Browser Demo를 명확히 구분합니다.
+- 연결 실패나 모델 미설치를 성공으로 가장하지 않습니다.
 - 소스 파일은 500줄을 넘기지 않습니다.
-- Mock·Demo·Local TTS·실제 AI 결과를 명확히 구분합니다.
-- 실제 동작이 없는 버튼이나 성공 상태를 배포하지 않습니다.
+- 사용자에게 API 주소·엔진 수동 연결을 요구하지 않습니다.
 - 음성 원본은 명시적 동의 없이 외부로 전송하지 않습니다.
-- `main` 직접 커밋을 금지하고 기능 브랜치를 사용합니다.
-- 기능에는 테스트, HANDOVER, CHANGELOG, NEXT_UPDATE가 함께 포함되어야 합니다.
-
-## 브랜드
-
-- 공식 대문: **곰같은여우 SoriON AI**
-- 제품명: **SoriON AI**
-- 한국어 이름: **소리온 AI**
-- 내부 코드명: **SOA**
-- 슬로건: **목소리의 가능성을 켜다.**
-
-## 결과 전달 규칙
-
-1. 결과
-2. 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP
-3. 다음 예상 업데이트 내역

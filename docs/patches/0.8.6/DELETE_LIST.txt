@@ -1,0 +1,7 @@
+# SoriON AI 0.8.6 삭제 대상
+docs/CHAT_TIMELINE_WORKSPACE.md
+src/components/workspace/ChatComposer.tsx
+src/components/workspace/ConversationPanel.tsx
+src/styles/mobile-workspace.css
+src/workspace/promptParser.test.ts
+src/workspace/promptParser.ts

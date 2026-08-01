@@ -1,58 +1,34 @@
 # NEXT UPDATE
 
-현재 기준 버전: `0.8.5 Unified Workspace UX & Engine Orchestration`
-
-CI 상태: `0.8.5 CI Hotfix`에서 Ruff·React Hook·잔존 연결 UI 파일 문제를 정리했다.
+현재 기준: `0.8.6 Longform Voice Studio & Session Persistence`
 
 ## 목표 버전
 
-`0.8.6 Mobile Workspace Session Persistence`
+`0.8.7 Korean Voice Quality Streaming`
 
 ## 방향
 
-0.8.5에서 화면 간 작업 연속성과 서버 엔진 자동 전환을 고정했다. 다음 패치는 현재 열린
-채팅·타임라인 세션 전체를 IndexedDB에 저장해 새로고침과 PWA 종료 뒤에도 별도 프로젝트
-선택 없이 이어서 작업하게 한다. 서버가 선택한 엔진과 브라우저 편집 revision을 분리해 오래된
-합성 결과가 사용자의 최신 편집을 덮지 않도록 한다.
+장문 제작 IA와 자동 연결 경계를 유지하면서 실제 한국어 AI 음질과 첫 음성 체감 속도를 높인다.
+공개 API 배포가 먼저 준비되지 않으면 AI 엔진 성공으로 표시하지 않는다.
 
-## 1. 작업공간 자동 저장
+## 1. 실제 엔진 품질
 
-- 채팅 메시지, 음성·쉼 블록, 순서와 생성 옵션 저장
-- 선택 보이스, 블록별 job ID, status와 revision 저장
-- debounce 저장, schema version과 단계적 마이그레이션
-- 저장 실패를 생성·재생 오류와 분리한 degraded mode
+- 공개 HTTPS FastAPI와 GPU Worker 배포 템플릿
+- Fun-CosyVoice 3 일반 TTS Adapter 실제 등록
+- 한국어 숫자·고유명사·장문 호흡 평가 세트 확대
+- 시스템 음성, MeloTTS, CosyVoice 결과의 블라인드 비교
+- 장문 중간 문장 실패 시 해당 구간만 재생성
 
-## 2. 앱 재시작 자동 복원
+## 2. 스트리밍 체감 속도
 
-- 새로고침·화면 잠금·탭 종료 뒤 마지막 작업공간 자동 복원
-- queued·generating 블록은 서버 상태와 `/result`를 먼저 조회
-- Object URL은 저장하지 않고 서버 URL 또는 저장 Blob으로 재구성
-- 복원 중 오래된 결과가 최신 블록을 덮지 않도록 revision 검사
+- 첫 문장 음원부터 Progressive Playback
+- SSE 진행률과 첫 오디오 지연 측정
+- 장문 블록 선행 생성과 안전한 제한 병렬화 검토
+- 재생 순서와 생성 순서가 어긋나지 않는 queue 계약
 
-## 3. 저장 수명과 용량
+## 3. 운영 안정성
 
-- 최근 프로젝트 수 제한과 사용자가 고정한 프로젝트 구분
-- quota 초과, IndexedDB 차단, iOS 데이터 정리 감지
-- 프로젝트 삭제와 원본 음성 삭제를 별도 동작으로 유지
-- 만료 서버 음원은 자동 재생성하지 않고 블록별 재생성 안내
-
-## 4. 엔진 운영 연계
-
-- 복원된 블록도 `auto` 요청 원칙과 서버 결과의 실제 `engine_id`를 구분
-- circuit breaker 상태가 바뀌어도 기존 완료 음원을 재생성하지 않음
-- 다중 API 프로세스 공용 엔진 health 저장은 별도 운영 확장으로 설계
-- Worker queue·first-audio latency·최근 실패를 다음 진단 schema 후보로 유지
-
-## 5. 실기기 검증
-
-- Android Chrome, iOS Safari, 설치형 PWA
-- Wi-Fi→셀룰러, 화면 잠금, 탭 종료, API 재시작
-- 동일 job 중복 POST 0회와 결과 복구 시간 측정
-- private mode와 저장 용량 부족 fallback
-
-## 이번 패치에서 넘기는 결정
-
-- API와 엔진은 시스템이 자동 연결·선택하며 사용자 설정 화면을 만들지 않는다.
-- 메뉴 이동은 현재 작성 세션을 파괴하지 않는다.
-- 서버 job 결과는 SQLite, 브라우저 편집 세션은 IndexedDB가 담당한다.
-- 복원 실패를 이유로 같은 합성 POST를 무조건 다시 보내지 않는다.
+- 공개 API 인증과 rate-limit 정책
+- Worker GPU health·모델 버전·VRAM 운영 지표
+- Actions에서 공개 API URL 누락을 배포 전 명확히 표시
+- Android Chrome·iOS Safari·설치형 PWA 실기기 검증

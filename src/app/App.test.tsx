@@ -27,6 +27,7 @@ describe('App workspace continuity', () => {
       page: 'home',
       workspaceEntered: true,
       activeProject: null,
+      workspaceResetToken: 0,
       notice: null,
     })
   })

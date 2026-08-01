@@ -1,5 +1,38 @@
 # CHANGELOG
 
+## 0.8.6 - 2026-08-01
+
+### Longform Voice Studio
+
+- ChatGPT형 composer를 최대 20,000자 장문 원고 편집기로 교체
+- 문자·문단·블록 수와 예상 음성 길이 표시
+- 일반 Enter 줄바꿈, Ctrl/⌘+Enter 제작, 생성 후 원고 유지
+- 서버 연결 대기 중 누른 제작 요청을 연결 복구 뒤 자동 재개
+
+### Brand and Navigation
+
+- 공식 SoriON 아이콘을 favicon, PWA, 랜딩과 작업공간 상단에 통일
+- 모든 상단 브랜드 클릭을 첫 페이지 이동으로 연결
+- 첫 뒤로가기 커스텀 종료 확인, 두 번째 뒤로가기 즉시 이탈
+- 첫 페이지 Dock 비노출 유지
+
+### Automatic Voice API
+
+- `*.github.io` same-origin과 `:8443` Voice API 오탐 제거
+- Actions 변수 `SORION_PUBLIC_API_BASE_URL`을 build 환경에 자동 주입
+- `/connectivity`와 `/engines`가 같은 추천·health 정보를 사용
+- API 연결 모듈을 요청 모듈과 분리해 500줄 제한과 회귀 경계를 유지
+
+### Mobile Session
+
+- IndexedDB 작업공간 저장, localStorage·memory fallback
+- 세션·블록 revision, pagehide 체크포인트와 recover-first 결과 복구
+
+### Verification
+
+- API 90 passed, Worker 9 passed
+- 프로젝트 규칙, TypeScript 구문·상대 import, Python 회귀 검사
+
 ## 0.8.5 CI Hotfix - 2026-08-01
 
 - Ruff UP035에 맞춰 `Awaitable`, `Callable`을 `collections.abc`에서 가져옵니다.

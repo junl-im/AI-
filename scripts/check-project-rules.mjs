@@ -1,12 +1,10 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { extname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
-
 const root = fileURLToPath(new URL('..', import.meta.url))
 const ignored = new Set(['.git', '.venv', 'node_modules', 'dist', 'coverage', '__pycache__', '.pytest_cache', '.ruff_cache', '.sorion'])
 const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.py', '.css'])
 const failures = []
-
 function isWideCodePoint(codePoint) {
   return (
     (codePoint >= 0x1100 && codePoint <= 0x115f) ||
@@ -22,14 +20,12 @@ function isWideCodePoint(codePoint) {
     (codePoint >= 0x1f300 && codePoint <= 0x1faff)
   )
 }
-
 function ruffDisplayWidth(line) {
   return Array.from(line).reduce((width, character) => {
     const codePoint = character.codePointAt(0)
     return width + (isWideCodePoint(codePoint) ? 2 : 1)
   }, 0)
 }
-
 async function walk(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     if (ignored.has(entry.name)) continue
@@ -38,12 +34,12 @@ async function walk(directory) {
       await walk(fullPath)
       continue
     }
-
     const path = relative(root, fullPath)
     const extension = extname(entry.name).toLowerCase()
-    if (extension === '.svg') failures.push(`${path}: SVG 파일은 프로젝트 원칙상 금지됩니다.`)
+    if (extension === '.svg' && path !== 'public/sorion-icon.svg') {
+      failures.push(`${path}: 허용되지 않은 SVG 파일입니다.`)
+    }
     if (!sourceExtensions.has(extension)) continue
-
     const content = await readFile(fullPath, 'utf8')
     const lines = content.split(/\r?\n/)
     const lineCount = lines.length
@@ -58,7 +54,6 @@ async function walk(directory) {
         }
       })
     }
-
     const secretPatterns = [
       /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
       /AIza[0-9A-Za-z_-]{30,}/,
@@ -69,7 +64,6 @@ async function walk(directory) {
     }
   }
 }
-
 async function requireAbsent(relativePath, forbiddenTexts) {
   const fullPath = join(root, relativePath)
   let content = ''
@@ -79,14 +73,12 @@ async function requireAbsent(relativePath, forbiddenTexts) {
     failures.push(`${relativePath}: 필수 파일이 없습니다.`)
     return
   }
-
   for (const forbiddenText of forbiddenTexts) {
     if (content.includes(forbiddenText)) {
       failures.push(`${relativePath}: 금지된 구문 "${forbiddenText}"가 남아 있습니다.`)
     }
   }
 }
-
 async function requireText(relativePath, requiredTexts) {
   const fullPath = join(root, relativePath)
   let content = ''
@@ -96,19 +88,15 @@ async function requireText(relativePath, requiredTexts) {
     failures.push(`${relativePath}: 필수 파일이 없습니다.`)
     return
   }
-
   for (const requiredText of requiredTexts) {
     if (!content.includes(requiredText)) {
       failures.push(`${relativePath}: 필수 문구 "${requiredText}"가 없습니다.`)
     }
   }
 }
-
 await walk(root)
-
 const packageJson = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
 const currentVersion = packageJson.version
-
 await requireText('DELIVERY_RULES.md', [
   '## 1. 결과',
   '## 2. 전체 통파일 ZIP과 덮어쓰기용 패치 ZIP',
@@ -166,6 +154,7 @@ await requireText('.github/workflows/ci.yml', [
   'CosyVoice Worker quality · Python 3.10',
   'working-directory: services/worker',
   'Run Worker tests',
+  'SORION_PUBLIC_API_BASE_URL',
 ])
 await requireText('src/test/setup.ts', [
   'afterEach',
@@ -179,17 +168,15 @@ await requireText('src/tts/mockWave.test.ts', [
   'reader.readAsArrayBuffer(blob)',
 ])
 await requireText('src/components/layout/BrandMasthead.tsx', [
-  'data-testid="brand-title-microphone"',
-  'data-testid="voice-core-microphone"',
+  'BrandIcon',
+  'SoriON AI 첫 페이지',
+  '장문 원고를 문장별 음성으로 빠르게.',
 ])
 await requireText('src/components/layout/BrandMasthead.test.tsx', [
-  '문장을 목소리로, 목소리를 새로운 가능성으로.',
-  '한국어의 감정과 호흡을 더 자연스럽게.',
-  '생성부터 복제와 변환까지, 모바일에서 빠르게.',
-  "getByTestId('brand-title-microphone')",
-  "getByTestId('voice-core-microphone')",
+  '공식 아이콘과 제품·제작자 이름을 보여준다',
+  '현재 장문 중심 소개 문구를 순환한다',
+  'SoriON AI 첫 페이지',
 ])
-
 await requireText('src/pages/VoiceClonePage.tsx', [
   '실제 AI 음성으로 연결합니다.',
   'prepareVoiceCloneProfile',
@@ -246,7 +233,6 @@ await requireText('docs/VOICE_CLONE.md', [
   '명시적 동의',
   '실제 복제 성공으로 표시하지 않는다',
 ])
-
 await requireText('services/worker/app/main.py', [
   '@app.get("/health"',
   '@app.get("/ready"',
@@ -280,8 +266,15 @@ await requireText('docs/COSYVOICE_WORKER.md', [
   'SORION_WORKER_MODEL_PATH',
   '실패하거나 취소된 구간만 다시 실행',
 ])
-
-await requireText('src/api/httpClient.ts', ['sorion-api-last-good-url', 'sorion-api-url-history', 'X-SoriON-Client-ID', 'mobile-localhost', 'mixed-content'])
+await requireText('src/api/httpClient.ts', ['X-SoriON-Client-ID', 'getApiConnectionProblem', 'rememberApiUrl'])
+await requireText('src/api/apiConnection.ts', [
+  'sorion-api-last-good-url',
+  'sorion-api-url-history',
+  'mobile-localhost',
+  'mixed-content',
+  'source: ApiBaseSource',
+  'isKnownStaticHostingHostname',
+])
 await requireText('src/tts/voiceApi.ts', ['recoverSpeechResult', '/result', 'retries: 0'])
 await requireText('services/api/app/api/routes/tts.py', ['@router.get("/jobs/{job_id}/result"', 'get_result'])
 await requireText('services/api/app/main.py', ['PrivateNetworkCORSMiddleware', 'X-SoriON-Client-ID', 'X-Request-ID'])
@@ -291,25 +284,26 @@ await requireText('services/api/app/main.py', ['SQLiteJobStore', 'job_store_file
 await requireText('.env.example', ['SORION_JOB_STORE_PATH=.sorion/jobs.sqlite3', 'SORION_JOB_RESULT_TTL_MINUTES=30', 'SORION_JOB_HISTORY_TTL_HOURS=24'])
 await requireText('src/settings/connectivityTypes.ts', ['workerHealthy', 'gpuReady', 'recommendedRecheckSeconds'])
 await requireText('docs/MOBILE_ENGINE_RELIABILITY.md', ['API·TTS·Worker·GPU', 'GET  /api/v1/tts/jobs/{job_id}/result', 'SORION_ALLOW_PRIVATE_NETWORK=true', '0.8.3 서버 재시작·다중 프로세스 복구'])
-
 await requireText('src/pages/HomePage.tsx', [
-  'soa-editor-workspace',
-  'interpretComposerPrompt',
+  'soa-editor-workspace--longform',
+  'LongformComposer',
   'timeline.stageText',
-  'Progressive Playback',
   'requestAutomaticApiReconnect',
   'timeline.restoreProject',
+  'clearTimeline()',
+  'clearQueue()',
 ])
+await import('./check-session-rules.mjs')
 await requireText('src/pages/LandingHome.tsx', [
-  'AI 음성 스튜디오 시작',
-  '채팅으로 요청',
-  '타임라인 편집',
+  '장문 음성 스튜디오 시작',
+  '긴 원고도,',
+  '문장별 목소리로 완성합니다.',
 ])
-await requireText('src/components/workspace/ChatComposer.tsx', [
-  '메시지를 입력하세요…',
-  '마이크로 입력',
-  '광고톤으로',
-  '숫자 읽기 쉽게',
+await requireText('src/components/workspace/LongformComposer.tsx', [
+  'MAX_SCRIPT_LENGTH = 20_000',
+  '음성으로 만들 장문 원고',
+  '원고를 문장별 음성으로 제작',
+  'Ctrl/⌘+Enter',
 ])
 await requireText('src/components/workspace/VoiceLibrary.tsx', [
   '목소리 라이브러리',
@@ -335,8 +329,15 @@ await requireText('services/api/app/services/tts_pipeline.py', [
 await requireText('src/styles/workspace-editor.css', [
   '.soa-editor-workspace',
   '.soa-voice-library',
-  '.soa-chat-stage',
-  '.soa-system-message',
+])
+await requireText('src/styles/longform-studio.css', [
+  '.soa-script-stage',
+  '.soa-longform-studio',
+  '.soa-longform-submit',
+])
+await requireText('src/styles/brand-navigation.css', [
+  '.soa-brand-mark',
+  '.soa-exit-dialog',
 ])
 await requireText('src/styles/timeline-editor.css', [
   '.soa-timeline-block--voice.is-ready',
@@ -348,17 +349,24 @@ await requireText('src/styles/workspace-shell.css', [
   '.soa-workspace-shell--editor',
   '.soa-compact-header',
 ])
-
 await requireText('src/api/httpClient.ts', [
   'getApiConnectionContext',
-  "source: ApiBaseSource",
-  '음성 시스템을 자동으로 연결하지 못했습니다.',
+  '배포된 음성 서버 주소가 설정되지 않았습니다.',
   'discoverApiBaseUrl',
   'probeApiBaseUrl',
   'requestAutomaticApiReconnect',
   'resolveApiAssetUrl',
 ])
 await requireText('src/hooks/useBackendBootstrap.ts', ['discoverApiBaseUrl', 'saveApiBaseUrl', 'sorion-api-reconnect'])
+await requireText('src/hooks/useExitConfirmation.ts', [
+  'popstate',
+  'window.history.go(-2)',
+  'window.history.back()',
+])
+await requireText('src/components/ui/ExitConfirmDialog.tsx', [
+  'SoriON을 닫을까요?',
+  '뒤로가기를 한 번 더 누르면 바로 종료됩니다.',
+])
 await requireText('src/pages/ProjectsPage.tsx', ['openProject(project)', '프로젝트 불러오기', '불러오기 →'])
 await requireText('src/settings/connectivityApi.ts', [
   'runApiConnectivityAudit',
@@ -390,7 +398,6 @@ await requireText('docs/PLAYER_DOCK.md', [
   '반복',
   '재생 속도',
 ])
-
 await requireText('services/worker/app/security.py', [
   'X-SoriON-Service-Token'.toLowerCase(),
   'SOA-W7005',
@@ -417,7 +424,6 @@ await requireText('docs/SECURITY.md', [
   '서비스 토큰',
   '감사 로그',
 ])
-
 await requireText('services/worker/app/security.py', [
   'from collections.abc import Mapping',
 ])
@@ -450,7 +456,6 @@ await requireText('src/pages/VoiceClonePage.tsx', [
   'const activeJobStatus = job?.status ?? null',
   '[activeJobId, activeJobStatus]',
 ])
-
 try {
   const workflowFiles = await readdir(join(root, '.github', 'workflows'))
   const activeWorkflows = workflowFiles.filter((name) => /\.ya?ml$/i.test(name))
@@ -460,20 +465,15 @@ try {
 } catch {
   failures.push('.github/workflows: 워크플로 폴더를 읽을 수 없습니다.')
 }
-
-
 const workflowContent = await readFile(join(root, '.github/workflows/ci.yml'), 'utf8')
-
 if (/astral-sh\/setup-uv@v\d+(?:\.\d+){0,2}/.test(workflowContent)) {
   failures.push('.github/workflows/ci.yml: setup-uv는 존재 여부가 변할 수 있는 태그가 아니라 검증된 커밋 SHA로 고정해야 합니다.')
 }
-
 for (const legacyAction of ['actions/checkout@v4', 'actions/setup-node@v4', 'actions/setup-python@v4', 'astral-sh/setup-uv@v6', 'actions/configure-pages@v5', 'actions/upload-pages-artifact@v4', 'actions/deploy-pages@v4']) {
   if (workflowContent.includes(legacyAction)) {
     failures.push(`.github/workflows/ci.yml: Node.js 20 기반 액션 ${legacyAction}이 남아 있습니다.`)
   }
 }
-
 for (const relativePath of [
   'services/api/app/services/job_manager.py',
   'services/api/app/storage/audio_store.py',
@@ -483,11 +483,9 @@ for (const relativePath of [
     failures.push(`${relativePath}: Python 3.10과 호환되지 않는 datetime.UTC 사용이 있습니다.`)
   }
 }
-
 if (failures.length > 0) {
   console.error('프로젝트 규칙 검사 실패')
   failures.forEach((failure) => console.error(`- ${failure}`))
   process.exit(1)
 }
-
 console.log(`프로젝트 규칙 검사 통과 (v${currentVersion})`)

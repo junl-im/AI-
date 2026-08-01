@@ -21,6 +21,7 @@ const blocks: TimelineBlock[] = [
     audio: null,
     trackId: null,
     error: null,
+    revision: 1,
   },
   { id: 'pause-1', kind: 'pause', durationSeconds: 0.5 },
   {
@@ -40,6 +41,7 @@ const blocks: TimelineBlock[] = [
     audio: null,
     trackId: null,
     error: '엔진 연결 실패',
+    revision: 1,
   },
 ]
 

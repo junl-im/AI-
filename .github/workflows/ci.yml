@@ -53,9 +53,19 @@ jobs:
       - name: Test
         run: npm run test:ci
 
+      - name: Check public Voice API configuration
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          SORION_PUBLIC_API_BASE_URL: ${{ vars.SORION_PUBLIC_API_BASE_URL }}
+        run: |
+          if [ -z "$SORION_PUBLIC_API_BASE_URL" ]; then
+            echo "::warning title=Voice API not configured::Set the repository Actions variable SORION_PUBLIC_API_BASE_URL to the deployed HTTPS FastAPI origin."
+          fi
+
       - name: Build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_API_BASE_URL: ${{ vars.SORION_PUBLIC_API_BASE_URL }}
         run: npm run build
 
       - name: Configure GitHub Pages

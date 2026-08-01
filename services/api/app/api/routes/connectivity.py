@@ -52,9 +52,18 @@ async def connectivity(request: Request) -> ConnectivityResponse:
     for engine in clone_engines:
         await engine.probe()
 
-    tts_infos = [engine.info() for engine in engine_registry.list_tts()]
+    orchestrator = getattr(request.app.state, "engine_orchestrator", None)
+    tts_infos = (
+        orchestrator.list_info()
+        if orchestrator is not None
+        else [engine.info() for engine in engine_registry.list_tts()]
+    )
     clone_infos = [engine.info() for engine in clone_engines]
-    real_tts = [engine for engine in tts_infos if engine.ready and engine.mode != "mock"]
+    real_tts = [
+        engine
+        for engine in tts_infos
+        if engine.ready and engine.mode != "mock" and engine.health == "ready"
+    ]
     clone_engine = clone_engines[0] if clone_engines else None
     clone_snapshot = clone_engine.probe_snapshot() if clone_engine else {}
     clone_health = bool(clone_snapshot.get("health_ok"))
@@ -134,7 +143,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.8.5",
+        version="0.8.6",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",

@@ -30,6 +30,7 @@ describe('ProjectsPage', () => {
       page: 'projects',
       workspaceEntered: true,
       activeProject: null,
+      workspaceResetToken: 0,
       notice: null,
     })
   })
@@ -62,4 +63,18 @@ describe('ProjectsPage', () => {
     await waitFor(() => expect(projectMocks.listProjects).toHaveBeenCalledTimes(2))
     expect(await screen.findByText('아직 저장된 작업이 없습니다')).toBeInTheDocument()
   })
+
+  it('starts a truly empty workspace instead of returning to the old draft', async () => {
+    render(<ProjectsPage />)
+    await screen.findByRole('button', { name: '아침 안내 음성 프로젝트 불러오기' })
+    fireEvent.click(screen.getByRole('button', { name: '새로 만들기' }))
+
+    expect(useAppStore.getState()).toMatchObject({
+      page: 'home',
+      workspaceEntered: true,
+      activeProject: null,
+      workspaceResetToken: 1,
+    })
+  })
+
 })

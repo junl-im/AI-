@@ -165,7 +165,7 @@ export function TimelineEditor({
     <section className="soa-timeline" aria-label="음성 타임라인">
       <header className="soa-timeline__head">
         <div>
-          <span>CAPCUT STYLE TIMELINE</span>
+          <span>LONGFORM VOICE TIMELINE</span>
           <strong>문장별 음성 편집</strong>
         </div>
         <div>
@@ -175,7 +175,7 @@ export function TimelineEditor({
       </header>
       {blocks.length === 0 ? (
         <div className="soa-timeline-empty">
-          메시지를 보내면 문장별 음성 블록이 여기에 쌓입니다.
+          원고를 제작하면 문장별 음성 블록이 여기에 쌓입니다.
         </div>
       ) : (
         <div className="soa-timeline-track">

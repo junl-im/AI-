@@ -1,13 +1,17 @@
-export function BrandMark() {
+import { BrandIcon } from './BrandIcon'
+
+interface BrandMarkProps {
+  compact?: boolean
+}
+
+export function BrandMark({ compact = false }: BrandMarkProps) {
   return (
-    <div className="flex items-center gap-2.5" aria-label="SoriON AI">
-      <span className="grid size-10 place-items-center rounded-[15px] bg-soa-ink text-sm font-black tracking-[-0.08em] text-soa-lime shadow-sm">
-        SO
+    <span className={compact ? 'soa-brand-mark is-compact' : 'soa-brand-mark'}>
+      <BrandIcon className="soa-brand-mark__icon" />
+      <span className="soa-brand-mark__copy">
+        <strong>SoriON AI</strong>
+        <small>BY 곰같은여우</small>
       </span>
-      <span className="leading-none">
-        <strong className="block text-lg tracking-[-0.055em]">SoriON</strong>
-        <span className="mt-1 block text-[10px] font-bold tracking-[0.14em] text-soa-muted">BY 곰같은여우</span>
-      </span>
-    </div>
+    </span>
   )
 }

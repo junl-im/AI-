@@ -76,38 +76,6 @@
   background: transparent;
 }
 
-.soa-compact-brand > span:first-child {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border-radius: 12px;
-  color: #fff;
-  background: radial-gradient(circle at 35% 30%, #9eeaff, #705bff 48%, #261c4c 78%);
-  box-shadow: 0 0 22px rgba(112, 91, 255, 0.42);
-  font-size: 16px;
-  font-weight: 950;
-}
-
-.soa-compact-brand strong,
-.soa-compact-brand small {
-  display: block;
-}
-
-.soa-compact-brand strong {
-  font-size: 13px;
-  letter-spacing: -0.03em;
-}
-
-.soa-compact-brand small {
-  margin-top: 2px;
-  color: rgba(222, 231, 250, 0.44);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .soa-compact-header__actions {
   display: flex;
   align-items: center;

@@ -23,6 +23,7 @@ export interface TimelineVoiceBlock extends TimelineBaseBlock {
   audio: GeneratedAudio | null
   trackId: string | null
   error: string | null
+  revision: number
 }
 
 export interface TimelinePauseBlock extends TimelineBaseBlock {

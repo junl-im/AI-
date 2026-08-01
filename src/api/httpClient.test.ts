@@ -3,6 +3,8 @@ import {
   apiRequest,
   getApiDiscoveryCandidates,
   getApiConnectionContext,
+  getLocationApiCandidates,
+  isKnownStaticHostingHostname,
   normalizeApiBaseUrl,
   resolveApiAssetUrl,
   resetApiBaseUrl,
@@ -40,6 +42,24 @@ describe('API connection context', () => {
     expect(getApiDiscoveryCandidates()[0]).toBe(
       normalizeApiBaseUrl(`${window.location.origin}/api/v1`),
     )
+  })
+
+
+  it('never probes GitHub Pages itself as a Voice API', () => {
+    expect(isKnownStaticHostingHostname('junl-im.github.io')).toBe(true)
+    expect(getLocationApiCandidates({
+      hostname: 'junl-im.github.io',
+      protocol: 'https:',
+      origin: 'https://junl-im.github.io',
+    })).toEqual([])
+    expect(getLocationApiCandidates({
+      hostname: 'voice.example.com',
+      protocol: 'https:',
+      origin: 'https://voice.example.com',
+    })).toEqual([
+      'https://voice.example.com/api/v1',
+      'https://voice.example.com:8443/api/v1',
+    ])
   })
 
   it('uses a saved API address and resolves relative audio URLs', () => {

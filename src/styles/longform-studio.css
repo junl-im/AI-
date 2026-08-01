@@ -1,0 +1,356 @@
+.soa-script-stage {
+  min-width: 0;
+  background:
+    radial-gradient(circle at 52% 0%, rgba(105, 87, 220, 0.12), transparent 34%),
+    rgba(11, 17, 29, 0.72);
+}
+
+.soa-longform-studio {
+  width: min(100%, 980px);
+  margin: 0 auto;
+  padding: 28px clamp(16px, 4vw, 46px) 34px;
+}
+
+.soa-longform-studio__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.soa-longform-studio__head > div:first-child > span {
+  color: #9d90ff;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+}
+
+.soa-longform-studio__head h1 {
+  margin: 8px 0 0;
+  color: #f3f6ff;
+  font-size: clamp(26px, 4vw, 43px);
+  line-height: 1.02;
+  letter-spacing: -0.055em;
+}
+
+.soa-longform-studio__head p {
+  max-width: 600px;
+  margin: 11px 0 0;
+  color: rgba(226, 235, 255, 0.48);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+.soa-longform-engine {
+  display: grid;
+  min-width: 220px;
+  grid-template-columns: 10px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  border: 1px solid rgba(151, 171, 213, 0.12);
+  border-radius: 17px;
+  padding: 11px 12px;
+  color: #e7ebf6;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.soa-longform-engine > i {
+  width: 8px;
+  height: 8px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: #788297;
+}
+
+.soa-longform-engine.is-online > i {
+  background: #64f0ba;
+  box-shadow: 0 0 10px rgba(100, 240, 186, 0.55);
+}
+
+.soa-longform-engine.is-checking > i {
+  background: #a799ff;
+  animation: soa-pulse 1s infinite alternate;
+}
+
+.soa-longform-engine.is-degraded > i { background: #ffd56a; }
+.soa-longform-engine.is-offline > i { background: #ff7f70; }
+
+.soa-longform-engine strong,
+.soa-longform-engine small {
+  display: block;
+}
+
+.soa-longform-engine strong {
+  font-size: 9px;
+}
+
+.soa-longform-engine small {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 4px;
+  color: rgba(231, 235, 246, 0.44);
+  font-size: 7px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.soa-longform-card {
+  overflow: hidden;
+  margin-top: 22px;
+  border: 1px solid rgba(166, 181, 215, 0.15);
+  border-radius: 24px;
+  background: rgba(246, 248, 253, 0.98);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.27);
+}
+
+.soa-longform-card__toolbar {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e0e4ec;
+  padding: 10px 13px 10px 17px;
+  color: #171b26;
+  background: #f0f3f8;
+}
+
+.soa-longform-card__toolbar strong,
+.soa-longform-card__toolbar span {
+  display: block;
+}
+
+.soa-longform-card__toolbar strong { font-size: 11px; }
+.soa-longform-card__toolbar span {
+  margin-top: 3px;
+  color: #778092;
+  font-size: 8px;
+  font-weight: 650;
+}
+
+.soa-longform-card__toolbar > div:last-child {
+  display: flex;
+  gap: 6px;
+}
+
+.soa-longform-card__toolbar button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 10px;
+  color: #596274;
+  background: #e3e7ef;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.soa-longform-card__toolbar button.is-listening {
+  color: #fff;
+  background: #ef6b62;
+}
+
+.soa-longform-card__toolbar button:disabled { opacity: 0.4; }
+
+.soa-longform-card textarea {
+  display: block;
+  width: 100%;
+  min-height: 360px;
+  resize: vertical;
+  border: 0;
+  padding: 22px;
+  color: #171b26;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 560;
+  line-height: 1.8;
+  letter-spacing: -0.015em;
+  outline: none;
+}
+
+.soa-longform-card textarea::placeholder {
+  color: #a0a7b4;
+}
+
+.soa-longform-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-top: 1px solid #e5e8ef;
+  padding: 10px 13px;
+  color: #687184;
+  background: #f6f8fb;
+}
+
+.soa-longform-stats span {
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: #eaedf3;
+  font-size: 8px;
+  font-weight: 720;
+}
+
+.soa-longform-stats b { color: #272d39; }
+
+.soa-longform-options {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.25fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  border: 1px solid rgba(157, 144, 255, 0.13);
+  border-radius: 19px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.soa-longform-options > div:first-child span,
+.soa-longform-options > div:first-child strong {
+  display: block;
+}
+
+.soa-longform-options > div:first-child span {
+  color: #9d90ff;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: 0.13em;
+}
+
+.soa-longform-options > div:first-child strong {
+  margin-top: 5px;
+  color: rgba(238, 243, 255, 0.72);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.soa-longform-option-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.soa-longform-option-list button {
+  min-height: 38px;
+  border: 1px solid rgba(153, 173, 214, 0.13);
+  border-radius: 999px;
+  padding: 0 13px;
+  color: rgba(232, 238, 252, 0.6);
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.soa-longform-option-list button.is-active {
+  border-color: rgba(157, 144, 255, 0.5);
+  color: #f2efff;
+  background: rgba(133, 112, 236, 0.19);
+  box-shadow: inset 0 0 0 1px rgba(157, 144, 255, 0.08);
+}
+
+.soa-longform-activity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  margin-top: 12px;
+  border-radius: 16px;
+  padding: 11px 13px;
+  color: rgba(238, 243, 255, 0.67);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.soa-longform-activity.is-system {
+  color: #ffd8d2;
+  background: rgba(255, 111, 98, 0.075);
+}
+
+.soa-longform-activity > span {
+  border-radius: 999px;
+  padding: 5px 7px;
+  color: #d8d1ff;
+  background: rgba(157, 144, 255, 0.13);
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.soa-longform-activity p {
+  margin: 2px 0 0;
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.soa-longform-submit {
+  display: flex;
+  width: 100%;
+  min-height: 60px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 18px;
+  padding: 0 18px;
+  color: #121720;
+  text-align: left;
+  background: linear-gradient(105deg, #d8ff72, #8cecd8 58%, #a99bff);
+  box-shadow: 0 18px 34px rgba(79, 114, 78, 0.16);
+}
+
+.soa-longform-submit span,
+.soa-longform-submit small { display: block; }
+.soa-longform-submit span { font-size: 12px; font-weight: 950; }
+.soa-longform-submit small { color: rgba(18, 23, 32, 0.55); font-size: 8px; font-weight: 750; }
+.soa-longform-submit:disabled {
+  color: rgba(238, 243, 255, 0.36);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+}
+.soa-longform-submit:disabled small { color: rgba(238, 243, 255, 0.25); }
+
+@media (min-width: 920px) {
+  .soa-editor-workspace--longform {
+    grid-template-columns: 250px minmax(0, 1fr);
+    grid-template-rows: minmax(620px, auto) auto;
+  }
+  .soa-editor-workspace--longform .soa-voice-library {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .soa-script-stage {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .soa-editor-workspace--longform .soa-timeline {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .soa-longform-studio { padding: 20px 12px 26px; }
+  .soa-longform-studio__head { display: grid; }
+  .soa-longform-engine { min-width: 0; }
+  .soa-longform-card { margin-top: 16px; border-radius: 20px; }
+  .soa-longform-card__toolbar { align-items: flex-start; }
+  .soa-longform-card__toolbar > div:first-child span { display: none; }
+  .soa-longform-card__toolbar button { min-height: 40px; }
+  .soa-longform-card textarea {
+    min-height: 330px;
+    padding: 17px;
+    font-size: 16px;
+    line-height: 1.75;
+  }
+  .soa-longform-options { grid-template-columns: 1fr; }
+  .soa-longform-option-list { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; }
+  .soa-longform-option-list button { flex: 0 0 auto; min-height: 42px; }
+  .soa-longform-submit { min-height: 64px; }
+}
+
+@media (max-width: 430px) {
+  .soa-longform-card__toolbar > div:last-child { width: 100%; }
+  .soa-longform-card__toolbar { flex-wrap: wrap; }
+  .soa-longform-card__toolbar button { flex: 1; }
+  .soa-longform-stats span { flex: 1 1 42%; text-align: center; }
+}

@@ -1,10 +1,12 @@
 import { workspacePageLabels } from '../../navigation/navigationItems'
 import { useAppStore, type BackendStatus } from '../../store/useAppStore'
+import { BrandMark } from '../ui/BrandMark'
 
 function statusLabel(status: BackendStatus): string {
   if (status === 'online') return '엔진 준비'
   if (status === 'degraded') return '제한 모드'
   if (status === 'checking') return '확인 중'
+  if (status === 'offline') return '서버 미연결'
   return '준비 중'
 }
 
@@ -17,12 +19,14 @@ export function CompactWorkspaceHeader() {
 
   return (
     <header className="soa-compact-header">
-      <button type="button" className="soa-compact-brand" onClick={() => enterWorkspace('home')}>
-        <span aria-hidden="true">S</span>
-        <span>
-          <strong>SoriON AI</strong>
-          <small>{workspacePageLabels[page]}</small>
-        </span>
+      <button
+        type="button"
+        className="soa-compact-brand"
+        onClick={exitWorkspace}
+        aria-label="SoriON AI 첫 페이지로 이동"
+      >
+        <BrandMark compact />
+        <span className="soa-compact-brand__page">{workspacePageLabels[page]}</span>
       </button>
       <div className="soa-compact-header__actions">
         <div

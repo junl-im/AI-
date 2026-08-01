@@ -10,7 +10,7 @@ def test_connectivity_reports_api_and_engine_state(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.8.5"
+    assert body["version"] == "0.8.6"
     assert body["api_base_path"] == "/api/v1"
     assert body["api_ready"] is True
     assert isinstance(body["tts_ready"], bool)
@@ -21,6 +21,23 @@ def test_connectivity_reports_api_and_engine_state(client):
     assert any(
         engine["id"] == "cosyvoice3-worker"
         for engine in body["voice_clone_engines"]
+    )
+
+
+def test_connectivity_uses_the_same_recommended_engine_as_catalog(client):
+    connectivity = client.get("/api/v1/connectivity")
+    catalog = client.get("/api/v1/engines")
+
+    assert connectivity.status_code == 200
+    assert catalog.status_code == 200
+    connectivity_engines = connectivity.json()["tts_engines"]
+    catalog_engines = catalog.json()
+    assert [item["id"] for item in connectivity_engines if item["recommended"]] == [
+        item["id"] for item in catalog_engines if item["recommended"]
+    ]
+    assert all(
+        item["health"] in {"ready", "cooldown", "unavailable"}
+        for item in connectivity_engines
     )
 
 

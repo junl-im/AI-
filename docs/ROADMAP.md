@@ -150,10 +150,19 @@
 - 자동 엔진 순위화·fallback·실행 시도 메타데이터
 - 반복 실패 엔진 circuit breaker와 품질 진단 연결
 
-## 0.8.6 예정
+## 0.8.6 완료
 
-- 열린 채팅·타임라인 전체 IndexedDB 자동 저장
-- PWA 종료·새로고침 뒤 마지막 작업공간 자동 복원
-- Object URL 소실 시 서버 결과 또는 Blob 복구
-- 저장 quota·private mode·iOS 정리 fallback
-- Android Chrome·iOS Safari·PWA 단절 복구 실기기 매트릭스
+- 최대 20,000자 장문 원고 중심 Voice Studio
+- 원고 통계, 문장 분할, 순차 생성과 연결 복구 뒤 자동 재개
+- 공식 브랜드 아이콘과 모든 상단 브랜드의 첫 페이지 이동
+- 첫 뒤로가기 확인, 두 번째 뒤로가기 즉시 이탈
+- GitHub Pages same-origin·8443 API 오탐 차단
+- Actions 공개 API 변수 주입과 엔진 진단 일치
+- IndexedDB 세션 저장, revision 보호와 recover-first 복원
+
+## 0.8.7 예정
+
+- 공개 HTTPS API·GPU Worker 운영 템플릿
+- Fun-CosyVoice 3 일반 TTS Adapter
+- 한국어 장문 음질 평가와 Progressive Streaming
+- 첫 오디오 지연, 실패 구간 재생성과 실기기 검증

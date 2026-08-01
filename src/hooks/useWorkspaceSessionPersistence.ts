@@ -1,0 +1,189 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  createWorkspaceSession,
+  hasMeaningfulWorkspaceSession,
+} from '../workspace/sessionCodec'
+import {
+  checkpointWorkspaceSession,
+  loadWorkspaceSession,
+  saveWorkspaceSession,
+} from '../workspace/workspaceSessionRepository'
+import type {
+  WorkspaceSession,
+  WorkspaceSessionDraft,
+  WorkspaceStorageMode,
+} from '../workspace/sessionTypes'
+
+interface WorkspaceSessionPersistenceOptions extends WorkspaceSessionDraft {
+  onRestore: (session: WorkspaceSession) => void
+  onPersistenceUnavailable: () => void
+}
+
+interface WorkspaceSessionPersistenceState {
+  hydrated: boolean
+  storageMode: WorkspaceStorageMode
+  saveNow: () => Promise<void>
+}
+
+const SAVE_DELAY_MS = 450
+
+export function useWorkspaceSessionPersistence({
+  workspaceEntered,
+  page,
+  voiceId,
+  composerDraft,
+  directiveIds,
+  messages,
+  blocks,
+  onRestore,
+  onPersistenceUnavailable,
+}: WorkspaceSessionPersistenceOptions): WorkspaceSessionPersistenceState {
+  const [hydrated, setHydrated] = useState(false)
+  const [storageMode, setStorageMode] = useState<WorkspaceStorageMode>('memory')
+  const revisionRef = useRef(0)
+  const saveTimerRef = useRef<number | null>(null)
+  const loadStartedRef = useRef(false)
+  const loadPromiseRef = useRef<ReturnType<typeof loadWorkspaceSession> | null>(null)
+  const persistenceWarningShownRef = useRef(false)
+  const dirtyBeforeHydrationRef = useRef(false)
+  const initialDraftRef = useRef<WorkspaceSessionDraft>({
+    workspaceEntered,
+    page,
+    voiceId,
+    composerDraft,
+    directiveIds,
+    messages,
+    blocks,
+  })
+  const latestDraftRef = useRef<WorkspaceSessionDraft>({
+    workspaceEntered,
+    page,
+    voiceId,
+    composerDraft,
+    directiveIds,
+    messages,
+    blocks,
+  })
+
+  latestDraftRef.current = {
+    workspaceEntered,
+    page,
+    voiceId,
+    composerDraft,
+    directiveIds,
+    messages,
+    blocks,
+  }
+
+  useEffect(() => {
+    if (hydrated) return
+    const initial = initialDraftRef.current
+    if (
+      initial.workspaceEntered !== workspaceEntered
+      || initial.page !== page
+      || initial.voiceId !== voiceId
+      || initial.composerDraft !== composerDraft
+      || initial.directiveIds !== directiveIds
+      || initial.messages !== messages
+      || initial.blocks !== blocks
+    ) dirtyBeforeHydrationRef.current = true
+  }, [blocks, composerDraft, directiveIds, hydrated, messages, page, voiceId, workspaceEntered])
+
+  useEffect(() => {
+    loadStartedRef.current = true
+    loadPromiseRef.current ??= loadWorkspaceSession()
+    let active = true
+    void loadPromiseRef.current.then(({ session, mode }) => {
+      if (!active) return
+      setStorageMode(mode)
+      if (session) {
+        revisionRef.current = session.revision
+        if (
+          !dirtyBeforeHydrationRef.current
+          && hasMeaningfulWorkspaceSession(session)
+        ) onRestore(session)
+      }
+      setHydrated(true)
+    }).catch(() => {
+      if (!active) return
+      setStorageMode('memory')
+      setHydrated(true)
+      if (!persistenceWarningShownRef.current) {
+        persistenceWarningShownRef.current = true
+        onPersistenceUnavailable()
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [onPersistenceUnavailable, onRestore])
+
+  const persistCurrentDraft = useCallback(async (checkpoint: boolean) => {
+    if (!loadStartedRef.current) return
+    revisionRef.current += 1
+    const session = createWorkspaceSession(latestDraftRef.current, revisionRef.current)
+    if (checkpoint) {
+      const checkpointResult = checkpointWorkspaceSession(session)
+      setStorageMode(checkpointResult.mode)
+      if (!checkpointResult.persisted && !persistenceWarningShownRef.current) {
+        persistenceWarningShownRef.current = true
+        onPersistenceUnavailable()
+      }
+    }
+    const result = await saveWorkspaceSession(session)
+    setStorageMode(result.mode)
+    if (!result.persisted && !persistenceWarningShownRef.current) {
+      persistenceWarningShownRef.current = true
+      onPersistenceUnavailable()
+    }
+  }, [onPersistenceUnavailable])
+
+  const saveNow = useCallback(
+    () => persistCurrentDraft(false),
+    [persistCurrentDraft],
+  )
+
+  useEffect(() => {
+    if (!hydrated) return
+    if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = window.setTimeout(() => {
+      saveTimerRef.current = null
+      void saveNow()
+    }, SAVE_DELAY_MS)
+    return () => {
+      if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current)
+    }
+  }, [
+    blocks,
+    composerDraft,
+    directiveIds,
+    hydrated,
+    messages,
+    page,
+    saveNow,
+    voiceId,
+    workspaceEntered,
+  ])
+
+  useEffect(() => {
+    if (!hydrated) return
+    const flush = () => {
+      if (saveTimerRef.current !== null) {
+        window.clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+      }
+      void persistCurrentDraft(true)
+    }
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') flush()
+    }
+    window.addEventListener('pagehide', flush)
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => {
+      window.removeEventListener('pagehide', flush)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [hydrated, persistCurrentDraft])
+
+  return { hydrated, storageMode, saveNow }
+}

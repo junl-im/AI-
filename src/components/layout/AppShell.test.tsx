@@ -38,6 +38,7 @@ describe('AppShell', () => {
       page: 'home',
       workspaceEntered: false,
       activeProject: null,
+      workspaceResetToken: 0,
       backendStatus: 'unknown',
       backendMessage: '상태 미확인',
       notice: null,
@@ -64,6 +65,18 @@ describe('AppShell', () => {
     expect(view.container.querySelector('.soa-workspace-shell--editor')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /SoriON AI/ })).toBeInTheDocument()
     expect(screen.getByRole('complementary', { name: 'SoriON 고정 Dock' })).toBeInTheDocument()
+  })
+
+
+  it('상단 아이콘과 이름을 누르면 어느 작업 화면에서도 첫 페이지로 돌아간다', () => {
+    render(<AppShell><p>작업 화면</p></AppShell>)
+    act(() => useAppStore.getState().enterWorkspace('quality'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'SoriON AI 첫 페이지로 이동' }))
+
+    expect(useAppStore.getState().workspaceEntered).toBe(false)
+    expect(useAppStore.getState().page).toBe('home')
+    expect(screen.queryByRole('complementary', { name: 'SoriON 고정 Dock' })).not.toBeInTheDocument()
   })
 
   it('설정 화면을 상단에서 항상 찾을 수 있다', () => {

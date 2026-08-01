@@ -20,7 +20,7 @@ export default defineConfig(() => {
       VitePWA({
         base,
         registerType: 'autoUpdate',
-        includeAssets: ['favicon-64.png'],
+        includeAssets: ['sorion-icon.svg', 'favicon-64.png'],
         manifest: {
           name: '곰같은여우 SoriON AI',
           short_name: 'SoriON',
@@ -45,7 +45,7 @@ export default defineConfig(() => {
         },
         workbox: {
           navigateFallback: 'index.html',
-          globPatterns: ['**/*.{js,css,html,png,woff2}'],
+          globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,
