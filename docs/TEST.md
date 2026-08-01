@@ -416,3 +416,14 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 - GitHub Pages와 Firebase Hosting 자체 `/api`를 검사하지 않는지 확인
 - 데스크톱 정적 Web의 localhost 후보와 모바일 Browser Speech 전환을 확인
 - Firebase 설정에 Functions 또는 Cloud Run rewrite가 없는지 확인
+
+
+## 0.9.2 엔진 오케스트레이터·Director 회귀 검사
+
+- `/engines/catalog`가 `free_only=true`와 `product_identity=engine-orchestrator`를 반환하는지 확인
+- CosyVoice 3·MeloTTS·DeepFilterNet3가 채택 상태인지 확인
+- F5-TTS가 `research-only`, Kokoro가 `excluded`이며 자동 후보가 아닌지 확인
+- Seed-VC가 코어 번들이 아닌 `external-plugin`인지 확인
+- `/director/plan`이 오디오북·광고 용도와 속도·감정·호흡을 결정하는지 확인
+- 영문 약어 발음 힌트와 원문 보존 경고를 반환하는지 확인
+- `scripts/check-engine-blueprint.mjs`가 연구 엔진의 자동 순서 유입을 차단하는지 확인

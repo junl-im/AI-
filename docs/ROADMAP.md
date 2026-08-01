@@ -214,3 +214,20 @@
 - 무료 CosyVoice 모델 온보딩과 체크섬 검사
 - 한국어 발음·억양·장문 호흡 블라인드 벤치마크
 - 전체 프로젝트 WAV 병합과 실패 문장 재생성
+
+
+## 0.9.2 완료
+
+- 엔진 모음이 아닌 한국어 음성 오케스트레이터 제품 정체성 확정
+- 무료 엔진·선택 Adapter·벤치마크·연구·제외 카탈로그
+- F5-TTS 비상업 checkpoint와 Kokoro 한국어 경계 명시
+- OpenVoice V2 선택 Adapter와 Seed-VC 외부 플러그인 결정
+- Faster Whisper·DeepFilterNet3·Rule Director 채택
+- 원고 용도·발음·호흡·속도·감정 자동 계획 API
+
+## 0.9.3 예정
+
+- 무료 모델 온보딩과 하드웨어 자동 프로필
+- OpenVoice V2·Faster Whisper·DeepFilterNet3 실제 Adapter
+- STT 기반 한국어 발음 자동 검수와 실패 문장 재생성
+- 전체 WAV·MP3 병합과 자막 출력

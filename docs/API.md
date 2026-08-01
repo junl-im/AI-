@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "default_engine": "auto"
 }
 ```
@@ -46,7 +46,7 @@
 
 ```json
 {
-  "version": "0.9.1",
+  "version": "0.9.2",
   "free_only": true,
   "deployment_profile": "firebase-static-plus-local-runtime",
   "primary_tts_engine": "auto",
@@ -98,3 +98,31 @@
 - `GET /quality/sentences`: 한국어 평가 문장
 - `POST /quality/text-preview`: 숫자·날짜 정규화와 문장 분할 미리보기
 - `POST /quality/compare`: 최대 두 무료 엔진의 생성 시간·RTF·파일 크기 비교
+
+
+## GET /engines/catalog
+
+무료 한국어 음성 오케스트레이터의 채택 결정을 반환합니다. 실제 자동 엔진과 선택 Adapter, 벤치마크 후보, 연구 전용, 제외 항목을 분리합니다.
+
+주요 필드:
+
+- `decision`: adopted, optional, benchmark, external-plugin, research-only, excluded
+- `auto_eligible`: 자동 실행 경로 포함 여부
+- `korean_fit`: 한국어 제품 적합도
+- `license_policy`: 코드와 checkpoint의 배포 정책
+- `pipeline`: Director부터 검수까지의 단계별 기본 엔진
+
+## POST /director/plan
+
+외부 LLM 없이 한국어 원고 제작 계획을 생성합니다.
+
+```json
+{
+  "text": "제1장. AI 기술은 빠르게 발전하고 있습니다.",
+  "use_case": "auto",
+  "voice_id": "sori-warm",
+  "preserve_wording": true
+}
+```
+
+응답에는 감지된 용도, 생성 구간, 발음 힌트, 문장별 쉼, 권장 속도·피치·감정, 무료 엔진 순서와 후처리 계획이 포함됩니다.

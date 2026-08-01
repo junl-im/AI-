@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
+import { EngineBlueprintCard } from '../components/evaluation/EngineBlueprintCard'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { StatusPill } from '../components/ui/StatusPill'
 import { consumeGoogleSignInResult, isFirebaseConfigured, startGoogleSignIn } from '../firebase/firebaseClient'
+import { useEngineBlueprint } from '../hooks/useEngineBlueprint'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import { useAppStore } from '../store/useAppStore'
 
@@ -9,6 +11,7 @@ export function SettingsPage() {
   const showNotice = useAppStore((state) => state.showNotice)
   const firebaseReady = isFirebaseConfigured()
   const engineCatalog = useEngineCatalog()
+  const engineBlueprint = useEngineBlueprint()
 
   useEffect(() => {
     void consumeGoogleSignInResult().then((user) => {
@@ -47,6 +50,12 @@ export function SettingsPage() {
             현재 {engineCatalog.selected?.name ?? (engineCatalog.loading ? '엔진 확인 중' : '브라우저 대체 음성 대기')}
           </p>
         </article>
+        <EngineBlueprintCard
+          blueprint={engineBlueprint.blueprint}
+          loading={engineBlueprint.loading}
+          error={engineBlueprint.error}
+          onRefresh={() => void engineBlueprint.refresh()}
+        />
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-black tracking-[-0.035em]">계정과 동기화</h2>

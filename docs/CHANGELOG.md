@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.9.2 - 2026-08-02
+
+### Korean Voice Orchestrator Blueprint
+
+- TTS·음성 복제·변환·STT·정렬·노이즈 제거·향상 엔진을 하나의 무료 카탈로그로 분류했습니다.
+- CosyVoice 3, MeloTTS, Faster Whisper, DeepFilterNet3와 Rule Director를 코어 채택했습니다.
+- F5-TTS 공식 pretrained checkpoint는 비상업 모델 조건 때문에 연구 전용으로, Kokoro는 한국어 자동 경로에서 제외했습니다.
+- OpenVoice V2는 선택 Adapter, Seed-VC는 GPL 외부 프로세스 플러그인으로 분리했습니다.
+- `/api/v1/engines/catalog`와 엔진 blueprint CI 검사를 추가했습니다.
+
+### Rule-Based AI Director
+
+- 외부 LLM 없이 제작 용도, 생성 구간, 영문 발음, 문장 호흡, 속도·피치·감정과 무료 엔진 순서를 계산합니다.
+- 원문 보존을 기본으로 하며 문장 재작성은 수행하지 않습니다.
+- 설정 화면에서 자동 파이프라인과 채택 엔진을 읽기 전용으로 확인할 수 있습니다.
+
 ## 0.9.0 - 2026-08-01
 
 ### Free-First Engine Policy

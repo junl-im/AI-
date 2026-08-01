@@ -1,6 +1,6 @@
 # WORKSPACE SESSION PERSISTENCE
 
-현재 기준 버전: `0.9.1`
+현재 기준 버전: `0.9.2`
 
 ## 책임 분리
 

@@ -1,6 +1,6 @@
 # SoriON AI Engine Strategy
 
-현재 기준 버전: `0.9.1`
+현재 기준 버전: `0.9.2`
 
 ## 무료 로컬 고정 자동 순서
 
@@ -49,6 +49,19 @@ Firebase Hosting Spark / GitHub Pages
 - 첫 음성 지연과 전체 실시간 배율
 - 장문 중 실패율과 재시도 성공률
 - 사용자 익명 블라인드 선호도
+
+## 오케스트레이터 카탈로그
+
+`GET /api/v1/engines/catalog`는 실제 자동 엔진과 연구 후보를 분리한다.
+
+- 자동 채택: CosyVoice 3, MeloTTS, System Voice
+- 선택 후처리: OpenVoice V2, DeepFilterNet3, Resemble Enhance
+- STT·검수: Faster Whisper, 선택적 WhisperX, SenseVoice 벤치마크
+- 연구 전용: F5-TTS 공식 pretrained checkpoint
+- 한국어 자동 제외: Kokoro
+- 외부 프로세스 플러그인: Seed-VC
+
+세부 근거는 `docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md`를 따른다.
 
 ## 절대 조건
 

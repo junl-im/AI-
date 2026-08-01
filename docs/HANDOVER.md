@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.1 Free-Only Local Runtime & Firebase Spark**
+현재 기준 버전: **0.9.2 Korean Voice Orchestrator Blueprint & Rule Director**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-01 23:49 KST**
+최종 갱신: **2026-08-02 00:38 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -355,7 +355,7 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.9.1 Free Local Model Onboarding & Korean Benchmark**.
+다음 목표 버전: **0.9.3 Free Local Pipeline Adapters & Korean Verification**.
 우선순위:
 1. 무료 CosyVoice 모델 설치·체크섬·라이선스 동의와 readiness 자동 진단.
 2. CPU·GPU 프로필별 요구량과 중단·재개 가능한 명시적 모델 준비.
@@ -406,3 +406,14 @@ CI Hotfix 4 테스트 규칙:
 4. 데스크톱 정적 Web은 localhost API를 자동 탐색하고 모바일은 Browser Speech를 사용한다.
 5. `npm run quality:free-only`가 허용 목록과 Firebase 정적 경계를 검사한다.
 6. 다음 목표는 0.9.2 무료 로컬 모델 온보딩과 한국어 품질 벤치마크다.
+## 28. 2026-08-02 · v0.9.2 한국어 음성 오케스트레이터
+
+1. 엔진을 많이 노출하는 제품이 아니라 목적에 따라 자동 조합하는 오케스트레이터로 확정했다.
+2. `/engines/catalog`가 채택·선택·벤치마크·외부 플러그인·연구·제외 결정을 제공한다.
+3. CosyVoice 3·MeloTTS·Faster Whisper·DeepFilterNet3·Rule Director를 코어 채택했다.
+4. F5-TTS 공식 pretrained checkpoint는 비상업 조건 때문에 자동 경로에서 제외한다.
+5. Kokoro는 공식 한국어 기본 음성이 확인되기 전까지 한국어 경로에서 제외한다.
+6. OpenVoice V2는 선택 Adapter, Seed-VC는 GPL 독립 프로세스 플러그인으로만 허용한다.
+7. Rule Director는 외부 LLM 없이 원고 용도·발음·호흡·속도·감정과 엔진 요구를 계산한다.
+8. 다음 목표는 실제 무료 Adapter 온보딩과 STT 기반 한국어 자동 검수다.
+

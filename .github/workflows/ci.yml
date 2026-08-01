@@ -47,6 +47,9 @@ jobs:
       - name: Check free-only boundary
         run: npm run quality:free-only
 
+      - name: Check engine blueprint
+        run: npm run quality:engine-blueprint
+
       - name: Lint
         run: npm run lint
 

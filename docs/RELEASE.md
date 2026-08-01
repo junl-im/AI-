@@ -310,3 +310,13 @@ Semantic Versioning을 사용한다.
 - 범위: 무료 전용 Adapter 허용 목록, Firebase Hosting Spark 경계, 데스크톱 localhost 자동 연결
 - 삭제 대상: 외부 음성 Adapter 5개, 관련 테스트 1개, 이전 무료 우선 정책 문서 1개
 - 모델 가중치, Secret, 사용자 음성, 실행 DB와 캐시는 포함하지 않는다.
+
+
+## 0.9.2 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.2-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.1-to-0.9.2-patch.zip`
+- 패치 기준 버전: `0.9.1`
+- 범위: 무료 한국어 엔진 카탈로그, Rule Director, 설정 화면 blueprint, 라이선스·자동 후보 게이트
+- 삭제 파일: 없음
+- 모델 가중치, Secret, 사용자 음성, 실행 DB와 캐시는 포함하지 않는다.
