@@ -206,3 +206,11 @@ Semantic Versioning을 사용한다.
 - 삭제 대상: `ApiSetupWizard.tsx`, `ConnectionBottomSheet.tsx`, `EngineStatusCard.tsx`,
   `connection-sheet.css`
 - Secret, 사용자 음성, 모델 가중치, `.git`, 캐시, 실행 DB와 빌드 산출물은 포함하지 않는다.
+
+## 0.8.5 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.8.5-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.8.4-to-0.8.5-patch.zip`
+- 체크섬: `SoriON-AI-0.8.5-artifacts.sha256`
+- 기준 버전: `0.8.4`
+- 주요 범위: 공통 작업공간 UX·IA, 엔진 자동 fallback, circuit breaker와 진단

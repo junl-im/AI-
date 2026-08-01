@@ -14,6 +14,11 @@ export interface EngineDiagnostic {
   ready: boolean
   provider: string
   modelLoaded: boolean | null
+  recommended: boolean
+  health: 'ready' | 'cooldown' | 'unavailable'
+  successCount: number
+  failureCount: number
+  cooldownRemainingSeconds: number
   checks: DiagnosticCheck[]
 }
 

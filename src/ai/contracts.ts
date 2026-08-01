@@ -25,6 +25,9 @@ export interface TtsSynthesisResult {
   processingMs: number | null
   fileSizeBytes: number | null
   realtimeFactor: number | null
+  requestedEngineId?: string | null
+  attemptedEngineIds?: string[]
+  fallbackUsed?: boolean
 }
 
 export interface EngineInfo {
@@ -41,6 +44,13 @@ export interface EngineInfo {
   supportsVoiceClone: boolean
   ready: boolean
   reason: string | null
+  recommended?: boolean
+  health?: 'ready' | 'cooldown' | 'unavailable'
+  successCount?: number
+  failureCount?: number
+  consecutiveFailures?: number
+  cooldownRemainingSeconds?: number
+  lastError?: string | null
 }
 
 export interface HealthResult {

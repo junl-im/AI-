@@ -8,7 +8,7 @@
 {
   "status": "ok",
   "service": "sorion-api",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "default_engine": "auto"
 }
 ```
@@ -32,7 +32,14 @@
     "supports_pitch": false,
     "supports_voice_clone": false,
     "ready": false,
-    "reason": "MeloTTS 선택 설치가 필요합니다."
+    "reason": "MeloTTS 선택 설치가 필요합니다.",
+    "recommended": false,
+    "health": "unavailable",
+    "success_count": 0,
+    "failure_count": 0,
+    "consecutive_failures": 0,
+    "cooldown_remaining_seconds": 0.0,
+    "last_error": null
   }
 ]
 ```
@@ -43,7 +50,7 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
 
 ```json
 {
-  "version": "0.8.4",
+  "version": "0.8.5",
   "primary_tts_engine": "cosyvoice3",
   "primary_clone_engine": "cosyvoice3",
   "local_fallback_engine": "melo",
@@ -70,13 +77,15 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
   "speed": 1.0,
   "pitch": 0,
   "output_format": "wav",
-  "engine_id": "melo",
+  "engine_id": "auto",
   "normalize_text": true,
   "job_id": "client-generated-uuid"
 }
 ```
 
-`engine_id`를 생략하면 준비된 실제 엔진을 우선 선택합니다. `normalize_text`가 참이면 숫자와 날짜를 한국어 읽기 형태로 바꿉니다. 거짓이면 공백만 정리하고 원문 표기를 유지합니다. API는 180자를 넘는 문장을 나누어 생성하고 같은 형식의 PCM WAV를 하나로 병합합니다.
+`engine_id`를 생략하거나 `auto`를 보내면 서버 오케스트레이터가 준비 상태와 운영 우선순위를
+기준으로 후보를 정렬하고 실패 시 다음 준비 엔진을 시도합니다. 일반 Web 흐름은 항상 `auto`를
+사용합니다. 명시 엔진 요청은 해당 엔진만 사용합니다. `normalize_text`가 참이면 숫자와 날짜를 한국어 읽기 형태로 바꿉니다. 거짓이면 공백만 정리하고 원문 표기를 유지합니다. API는 180자를 넘는 문장을 나누어 생성하고 같은 형식의 PCM WAV를 하나로 병합합니다.
 
 ### 실제 음원 응답
 
@@ -86,6 +95,9 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
   "status": "completed",
   "engine_id": "melo",
   "engine_mode": "ai",
+  "requested_engine_id": "auto",
+  "attempted_engine_ids": ["melo"],
+  "fallback_used": false,
   "audio_url": "http://localhost:8000/api/v1/audio/uuid.wav",
   "estimated_duration_seconds": 8.4,
   "message": "긴 문장을 3개 구간으로 나눠 하나의 WAV로 연결했습니다.",
@@ -96,6 +108,14 @@ SoriON의 주력·보조·대체·평가 전용 엔진 결정을 반환합니다
   "realtime_factor": 0.501
 }
 ```
+
+## 0.8.5 엔진 오케스트레이션
+
+`/engines`의 `recommended`는 현재 API 프로세스가 자동 요청에 가장 먼저 사용할 준비 엔진이다.
+`health=cooldown`은 반복 실패로 잠시 자동 후보에서 제외됐다는 의미이며 시간이 지나면 다시
+평가된다. TTS 응답의 `attempted_engine_ids`는 실제 실행 시도 순서이고 `fallback_used`는 첫
+후보 외 엔진이 사용됐는지 나타낸다. 회로 상태는 현재 프로세스 메모리에 있으며 완료 job과
+결과 영속성은 기존 SQLite JobStore가 담당한다.
 
 ## DELETE /tts/jobs/{job_id}
 
@@ -146,6 +166,8 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 - `SOA-4007`: 사용자 취소
 - `SOA-4008`: 생성 제한 시간 초과
 - `SOA-4009`: 같은 작업 ID를 다른 요청 payload에 재사용
+- `SOA-4012`: 완료 결과 TTL 만료
+- `SOA-4013`: 자동 엔진 전환 후보가 모두 실패
 - `SOA-4104`: 음원 파일 없음 또는 만료
 
 ## 공통 규칙
@@ -164,7 +186,7 @@ Python, 운영체제, 프로세스 메모리와 엔진별 설치·로딩 상태�
 
 ```json
 {
-  "version": "0.8.4",
+  "version": "0.8.5",
   "ready": true,
   "real_engine_count": 1,
   "steps": [

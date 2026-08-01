@@ -1,33 +1,27 @@
-import { useAppStore, type AppPage, type BackendStatus } from '../../store/useAppStore'
-
-const pageLabels: Record<AppPage, string> = {
-  home: 'AI 음성 스튜디오',
-  clone: '목소리 복제',
-  quality: '품질 연구소',
-  projects: '프로젝트',
-  settings: '설정',
-}
+import { workspacePageLabels } from '../../navigation/navigationItems'
+import { useAppStore, type BackendStatus } from '../../store/useAppStore'
 
 function statusLabel(status: BackendStatus): string {
   if (status === 'online') return '엔진 준비'
-  if (status === 'degraded') return '부분 연결'
+  if (status === 'degraded') return '제한 모드'
   if (status === 'checking') return '확인 중'
-  return '연결 필요'
+  return '준비 중'
 }
 
 export function CompactWorkspaceHeader() {
   const page = useAppStore((state) => state.page)
   const backendStatus = useAppStore((state) => state.backendStatus)
   const engineHealth = useAppStore((state) => state.engineHealth)
+  const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const exitWorkspace = useAppStore((state) => state.exitWorkspace)
 
   return (
     <header className="soa-compact-header">
-      <button type="button" className="soa-compact-brand" onClick={exitWorkspace}>
+      <button type="button" className="soa-compact-brand" onClick={() => enterWorkspace('home')}>
         <span aria-hidden="true">S</span>
         <span>
           <strong>SoriON AI</strong>
-          <small>{pageLabels[page]}</small>
+          <small>{workspacePageLabels[page]}</small>
         </span>
       </button>
       <div className="soa-compact-header__actions">
@@ -45,6 +39,14 @@ export function CompactWorkspaceHeader() {
           <span>{statusLabel(backendStatus)}</span>
           {engineHealth.latencyMs !== null ? <small>{engineHealth.latencyMs}ms</small> : null}
         </div>
+        <button
+          type="button"
+          className="soa-settings-button"
+          aria-current={page === 'settings' ? 'page' : undefined}
+          onClick={() => enterWorkspace('settings')}
+        >
+          설정
+        </button>
         <button type="button" className="soa-intro-button" onClick={exitWorkspace}>
           처음
         </button>

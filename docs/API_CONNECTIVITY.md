@@ -1,6 +1,6 @@
 # API CONNECTIVITY
 
-현재 기준 버전: `0.8.4`
+현재 기준 버전: `0.8.5`
 
 ## 배포 경계
 
@@ -32,7 +32,7 @@ npm run dev:api
 4. localhost 개발 후보 또는 현재 HTTP 호스트의 안전한 API 포트
 
 후보의 `/api/v1/health`와 `/api/v1/connectivity`가 유효하면 주소를 내부 저장하고 엔진
-목록을 읽어 준비된 실제 TTS 엔진을 자동 선택한다. 필요 시 `/setup`, `/engines`,
+목록을 읽어 준비된 실제 TTS 엔진을 자동 선택한다. Web은 일반 합성을 `auto`로 보내며 최종 실행 순위와 fallback은 FastAPI가 결정한다. 필요 시 `/setup`, `/engines`,
 `/voice-clones/capabilities`로 상세 진단한다.
 
 연결 실패 시 주소 입력 UI를 열지 않는다. online, 네트워크 변경, 앱 포그라운드 복귀와
@@ -67,7 +67,7 @@ API·TTS·Worker·GPU 네 계층을 구분한다. API가 응답해도 Mock만 �
 
 ```json
 {
-  "version": "0.8.4",
+  "version": "0.8.5",
   "api_ready": true,
   "tts_ready": true,
   "worker_configured": true,

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { WorkspacePageHeader } from '../components/layout/WorkspacePageHeader'
 import { StatusPill } from '../components/ui/StatusPill'
 import { consumeGoogleSignInResult, isFirebaseConfigured, startGoogleSignIn } from '../firebase/firebaseClient'
 import { useAppStore } from '../store/useAppStore'
@@ -26,10 +27,12 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="pb-4 pt-7">
-      <StatusPill label="SETTINGS" />
-      <h1 className="mt-3 text-3xl font-black tracking-[-0.06em]">설정</h1>
-      <p className="mt-2 text-sm leading-6 text-soa-muted">초보자에게 필요한 설정만 먼저 보여주고, 전문 설정은 기능 화면 안에 숨깁니다.</p>
+    <div className="soa-secondary-page">
+      <WorkspacePageHeader
+        eyebrow="SETTINGS · SIMPLE BY DEFAULT"
+        title="설정"
+        description="연결과 엔진 선택은 시스템이 자동으로 관리합니다. 여기에는 계정과 개인정보처럼 사용자가 결정해야 하는 항목만 둡니다."
+      />
 
       <section className="mt-6 space-y-3">
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">

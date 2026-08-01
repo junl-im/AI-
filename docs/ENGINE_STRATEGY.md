@@ -1,6 +1,6 @@
 # SoriON AI Engine Strategy
 
-기준일: 2026-07-31
+기준일: 2026-08-01
 
 ## 1. 왜 Python 백엔드인가
 
@@ -144,3 +144,27 @@ CosyVoice Worker는 FastAPI와 분리된 GPU 실행 계층으로 유지한다. �
 Worker는 사설 네트워크에 둔다. 두 서비스는 서비스 토큰과 HMAC-SHA256 요청 서명으로 연결한다.
 모델 경로, 필수 파일, CUDA, VRAM, 디스크, CPU 저속 모드 정책을 readiness에 반영하며 조건이
 충족되지 않으면 복제 성공으로 표시하지 않는다.
+
+## 0.8.5 런타임 자동 오케스트레이션
+
+제품 전략의 주력 엔진과 현재 서버에서 실제 실행 가능한 엔진을 구분한다. Fun-CosyVoice 3가
+전략상 주력이더라도 Worker·모델·GPU가 ready가 아니면 일반 합성 후보로 가장하지 않는다. Web은
+엔진 선택 UI를 제공하지 않고 `auto`를 보내며 FastAPI가 등록된 ready Adapter만 순위화한다.
+
+기본 런타임 순서와 보호 정책은 환경변수로 조정한다.
+
+```env
+SORION_TTS_ENGINE_ORDER=cosyvoice3,melo,system,mock
+SORION_ENGINE_FAILURE_THRESHOLD=2
+SORION_ENGINE_COOLDOWN_SECONDS=30
+```
+
+- 준비된 AI 엔진을 Local·Mock보다 우선한다.
+- 같은 모드에서는 설정 순서와 요청 기능 적합성을 반영한다.
+- 실패하면 같은 요청에서 다음 후보로 전환한다.
+- 연속 실패 임계치를 넘으면 cooldown 동안 자동 후보에서 제외한다.
+- 명시 엔진 요청은 다른 엔진으로 조용히 대체하지 않는다.
+- 실제 시도 엔진과 fallback 여부를 결과 메타데이터에 남긴다.
+
+이 구조는 이후 CosyVoice 3 일반 TTS Adapter와 GPT-SoVITS 전문가 Adapter가 추가돼도 UI를
+바꾸지 않고 운영 우선순위만 조정할 수 있게 한다.

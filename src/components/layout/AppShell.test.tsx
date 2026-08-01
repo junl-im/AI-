@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { GeneratedAudio } from '../../tts/generationTypes'
 import { useAppStore } from '../../store/useAppStore'
@@ -64,6 +64,17 @@ describe('AppShell', () => {
     expect(view.container.querySelector('.soa-workspace-shell--editor')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /SoriON AI/ })).toBeInTheDocument()
     expect(screen.getByRole('complementary', { name: 'SoriON 고정 Dock' })).toBeInTheDocument()
+  })
+
+  it('설정 화면을 상단에서 항상 찾을 수 있다', () => {
+    render(<AppShell><p>작업 화면</p></AppShell>)
+    act(() => useAppStore.getState().enterWorkspace('home'))
+
+    const settings = screen.getByRole('button', { name: '설정' })
+    fireEvent.click(settings)
+
+    expect(useAppStore.getState().page).toBe('settings')
+    expect(settings).toHaveAttribute('aria-current', 'page')
   })
 
   it('플레이어 유무에 따라 작업 화면의 하단 안전 여백을 바꾼다', () => {

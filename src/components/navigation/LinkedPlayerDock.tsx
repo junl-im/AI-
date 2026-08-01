@@ -7,17 +7,10 @@ import {
   type MouseEvent,
   type SyntheticEvent,
 } from 'react'
-import type { AppPage } from '../../store/useAppStore'
+import { primaryNavigationItems } from '../../navigation/navigationItems'
 import { useAppStore } from '../../store/useAppStore'
 import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
 import { PlayerQueuePanel } from './PlayerQueuePanel'
-
-const items: Array<{ page: AppPage; label: string; icon: string }> = [
-  { page: 'home', label: '만들기', icon: '＋' },
-  { page: 'clone', label: '복제', icon: '◉' },
-  { page: 'quality', label: '품질', icon: '◎' },
-  { page: 'projects', label: '프로젝트', icon: '▣' },
-]
 
 const rates = [0.75, 1, 1.25, 1.5, 2]
 
@@ -203,7 +196,7 @@ export function LinkedPlayerDock() {
         ) : null}
 
         <nav className="soa-dock__nav" aria-label="주요 메뉴">
-          {items.map((item) => (
+          {primaryNavigationItems.map((item) => (
             <button
               key={item.page}
               type="button"

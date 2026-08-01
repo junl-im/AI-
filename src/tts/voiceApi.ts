@@ -40,6 +40,9 @@ interface ApiTtsResult {
   processing_ms: number | null
   file_size_bytes: number | null
   realtime_factor: number | null
+  requested_engine_id?: string | null
+  attempted_engine_ids?: string[]
+  fallback_used?: boolean
 }
 
 interface ApiJobProgress {
@@ -68,6 +71,13 @@ interface ApiEngineInfo {
   supports_voice_clone: boolean
   ready: boolean
   reason: string | null
+  recommended?: boolean
+  health?: 'ready' | 'cooldown' | 'unavailable'
+  success_count?: number
+  failure_count?: number
+  consecutive_failures?: number
+  cooldown_remaining_seconds?: number
+  last_error?: string | null
 }
 
 interface ApiHealthResult {
@@ -91,6 +101,9 @@ function mapTtsResult(result: ApiTtsResult): TtsSynthesisResult {
     processingMs: result.processing_ms,
     fileSizeBytes: result.file_size_bytes,
     realtimeFactor: result.realtime_factor,
+    requestedEngineId: result.requested_engine_id ?? null,
+    attemptedEngineIds: result.attempted_engine_ids ?? [],
+    fallbackUsed: result.fallback_used ?? false,
   }
 }
 
@@ -140,6 +153,13 @@ export async function listEngines(baseUrl?: string, signal?: AbortSignal): Promi
     supportsVoiceClone: engine.supports_voice_clone,
     ready: engine.ready,
     reason: engine.reason,
+    recommended: engine.recommended ?? false,
+    health: engine.health ?? (engine.ready ? 'ready' : 'unavailable'),
+    successCount: engine.success_count ?? 0,
+    failureCount: engine.failure_count ?? 0,
+    consecutiveFailures: engine.consecutive_failures ?? 0,
+    cooldownRemainingSeconds: engine.cooldown_remaining_seconds ?? 0,
+    lastError: engine.last_error ?? null,
   }))
 }
 

@@ -84,7 +84,8 @@ export function useEngineCatalog() {
   }, [refresh])
 
   const selected = useMemo(
-    () => engines.find((engine) => engine.ready && engine.mode !== 'mock')
+    () => engines.find((engine) => engine.ready && engine.recommended)
+      ?? engines.find((engine) => engine.ready && engine.mode !== 'mock')
       ?? engines.find((engine) => engine.ready)
       ?? null,
     [engines],

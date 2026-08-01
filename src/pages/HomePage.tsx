@@ -112,7 +112,7 @@ export function HomePage() {
       voiceName: voice.name,
       emotion: activeProject.emotion,
       speed: activeProject.speed ?? 1,
-      engineId: activeProject.engineId,
+      engineId: 'auto',
       normalizeText: activeProject.normalizeText ?? true,
     })
     setPendingRecoveryIds(recoverableIds)
@@ -147,7 +147,7 @@ export function HomePage() {
         voiceName: selectedVoice.name,
         emotion: engineCatalog.selected?.supportsEmotion ? prompt.emotion : 'neutral',
         speed: engineCatalog.selected?.supportsSpeed ? prompt.speed : 1,
-        engineId: engineCatalog.selected?.id,
+        engineId: engineCatalog.selected ? 'auto' : undefined,
         normalizeText: prompt.normalizeText,
       },
     }
@@ -255,7 +255,7 @@ export function HomePage() {
         speed: 1,
         pitch: 0,
         format: 'wav',
-        engineId: engineCatalog.selected.id,
+        engineId: 'auto',
         normalizeText: true,
       }
       const result = await synthesizeSpeech(request, createRandomId())
@@ -263,8 +263,14 @@ export function HomePage() {
       enqueue(audio, `${voice.name} 프리뷰`)
       appendMessage({
         role: 'assistant',
-        badge: audio.source === 'browser-demo' ? 'Demo 프리뷰' : '목소리 프리뷰',
-        text: `${voice.name} 목소리를 Dock 플레이어에 연결했습니다.`,
+        badge: audio.source === 'browser-demo'
+          ? 'Demo 프리뷰'
+          : audio.result.fallbackUsed
+            ? '자동 엔진 전환'
+            : '목소리 프리뷰',
+        text: audio.result.fallbackUsed
+          ? `${voice.name} 프리뷰를 사용 가능한 대체 엔진으로 완성했습니다.`
+          : `${voice.name} 목소리를 Dock 플레이어에 연결했습니다.`,
       })
     } catch (error) {
       appendMessage({

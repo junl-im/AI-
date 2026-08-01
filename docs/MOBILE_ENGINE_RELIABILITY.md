@@ -1,6 +1,6 @@
 # MOBILE ENGINE/API RELIABILITY
 
-버전: `0.8.4`
+버전: `0.8.5`
 
 ## 목표
 
@@ -158,3 +158,10 @@ GET  /api/v1/tts/jobs/{job_id}/result
 - localStorage write 실패 시 자동 발견 주소와 client ID를 세션 메모리에 유지한다.
 - `crypto.randomUUID()`가 없으면 `getRandomValues()` 기반 ID를 만든다.
 - 이는 세션 중 기능 중단 방지이며 영구 저장이나 인증 수단이 아니다.
+
+## 0.8.5 서버 엔진 자동 전환
+
+모바일 Web은 네트워크 재연결과 엔진 실행 fallback을 구분한다. API 주소 탐색은 Web bootstrap이
+담당하고, 연결된 API 내부에서 어떤 엔진을 실행할지는 `EngineOrchestrator`가 결정한다. 클라이언트는
+fallback을 위해 같은 POST를 재전송하지 않으며 한 job 안의 서버 시도 결과를 기다리거나 job ID로
+복구한다. 메뉴 이동 중에는 HomePage 상태를 유지해 네트워크 복구와 UI 탐색이 초안을 지우지 않는다.

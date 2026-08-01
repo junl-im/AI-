@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 0.8.5 - 2026-08-01
+
+### Unified Workspace UX & IA
+
+- 만들기 화면을 메뉴 이동 중에도 유지해 초안·채팅·타임라인 손실을 막았습니다.
+- 품질·프로젝트·설정에 공통 작업공간 헤더와 일관된 다크 정보 계층을 적용했습니다.
+- 설정 직접 진입, 프로젝트 loading/error/empty/retry와 공통 내비게이션 원본을 추가했습니다.
+
+### Automatic Engine Orchestration
+
+- 준비 상태와 운영 우선순위에 따라 실행 엔진을 자동 정렬합니다.
+- 주 엔진 실패 시 같은 요청 안에서 다음 준비 엔진으로 자동 전환합니다.
+- 반복 실패 엔진을 cooldown 동안 자동 제외하는 circuit breaker를 추가했습니다.
+- 실행 시도 순서, fallback 여부, 엔진 성공·실패와 cooldown을 API·품질 연구소에 연결했습니다.
+
+### Verification
+
+- FastAPI 테스트 89개 통과
+- CosyVoice Worker 테스트 9개 통과
+- 프로젝트 규칙, Python compileall, Python 3.10 AST 검사 통과
+- TypeScript·TSX 110개 구문, 상대 import 82개와 shim 기반 의미·참조 검사 통과
+- 공식 Web 품질과 Ruff는 의존성·DNS 제한으로 GitHub Actions 최종 확인 필요
+
 ## 0.8.4 - 2026-08-01
 
 ### Automatic Engine Bootstrap & Project Restore

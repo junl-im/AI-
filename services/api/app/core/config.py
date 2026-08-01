@@ -12,6 +12,9 @@ class Settings(BaseSettings):
         "https://junl-im.github.io"
     )
     default_tts_engine: str = "auto"
+    tts_engine_order: str = "cosyvoice3,melo,system,mock"
+    engine_failure_threshold: int = Field(default=2, ge=1, le=10)
+    engine_cooldown_seconds: float = Field(default=30.0, ge=1.0, le=600.0)
     allow_mock_engine: bool = True
     enable_melo_tts: bool = True
     melo_device: str = "auto"
@@ -64,6 +67,10 @@ class Settings(BaseSettings):
     @property
     def audit_path(self) -> Path:
         return Path(self.audit_log_path).expanduser().resolve()
+
+    @property
+    def tts_engine_order_list(self) -> list[str]:
+        return [item.strip() for item in self.tts_engine_order.split(",") if item.strip()]
 
     @property
     def worker_auth_enabled(self) -> bool:

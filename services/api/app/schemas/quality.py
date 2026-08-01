@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.schemas.engine import EngineMode
+from app.schemas.engine import EngineHealth, EngineMode
 from app.schemas.tts import Emotion
 
 
@@ -18,6 +18,11 @@ class EngineDiagnostic(BaseModel):
     ready: bool
     provider: str
     model_loaded: bool | None = None
+    recommended: bool = False
+    health: EngineHealth = "unavailable"
+    success_count: int = 0
+    failure_count: int = 0
+    cooldown_remaining_seconds: float = 0
     checks: list[DiagnosticCheck]
 
 

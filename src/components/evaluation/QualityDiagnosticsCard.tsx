@@ -34,7 +34,21 @@ export function QualityDiagnosticsCard({ diagnostics, loading, error, onRefresh 
               <article key={engine.engineId} className="rounded-2xl border border-soa-line bg-white/75 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0"><strong className="block truncate text-sm">{engine.name}</strong><span className="text-[10px] font-bold text-soa-muted">{engine.provider}</span></div>
-                  <StatusPill label={engine.ready ? '사용 가능' : '준비 필요'} tone={engine.ready ? 'good' : 'warning'} />
+                  <StatusPill
+                    label={engine.health === 'cooldown'
+                      ? '자동 제외'
+                      : engine.recommended
+                        ? '자동 우선'
+                        : engine.ready
+                          ? '대체 준비'
+                          : '준비 필요'}
+                    tone={engine.recommended ? 'good' : 'warning'}
+                  />
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-[10px] font-bold text-soa-muted">
+                  <span className="rounded-xl bg-[#f4f2ec] p-2">성공 {engine.successCount}</span>
+                  <span className="rounded-xl bg-[#f4f2ec] p-2">실패 {engine.failureCount}</span>
+                  <span className="rounded-xl bg-[#f4f2ec] p-2">{engine.health === 'cooldown' ? `${engine.cooldownRemainingSeconds}초 대기` : '자동 감시'}</span>
                 </div>
                 <div className="mt-3 space-y-2">
                   {engine.checks.map((check) => (

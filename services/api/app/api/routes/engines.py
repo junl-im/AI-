@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from app.engines.registry import engine_registry
 from app.schemas.engine import EngineInfo
@@ -10,9 +10,12 @@ router = APIRouter()
 
 @router.get("/strategy", response_model=EngineStrategyResponse)
 async def engine_strategy() -> EngineStrategyResponse:
-    return current_engine_strategy("0.8.4")
+    return current_engine_strategy("0.8.5")
 
 
 @router.get("", response_model=list[EngineInfo])
-async def list_engines() -> list[EngineInfo]:
-    return [engine.info() for engine in engine_registry.list_tts()]
+async def list_engines(request: Request) -> list[EngineInfo]:
+    orchestrator = getattr(request.app.state, "engine_orchestrator", None)
+    if orchestrator is None:
+        return [engine.info() for engine in engine_registry.list_tts()]
+    return orchestrator.list_info()

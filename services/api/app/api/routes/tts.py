@@ -5,12 +5,15 @@ from uuid import uuid4
 from fastapi import APIRouter, HTTPException, Request, status
 
 from app.core.config import get_settings
-from app.engines.registry import engine_registry
 from app.schemas.tts import (
     JobCancelResponse,
     JobProgressResponse,
     TtsSynthesisRequest,
     TtsSynthesisResponse,
+)
+from app.services.engine_orchestrator import (
+    EngineExhaustedError,
+    EngineUnavailableError,
 )
 from app.services.job_manager import (
     GenerationTimeoutError,
@@ -24,18 +27,10 @@ router = APIRouter()
 @router.post("/synthesize", response_model=TtsSynthesisResponse)
 async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynthesisResponse:
     settings = get_settings()
-    engine = engine_registry.resolve_tts(payload.engine_id or settings.default_tts_engine)
-    engine_info = engine.info() if engine is not None else None
-    if engine is None or engine_info is None or not engine_info.ready:
-        engine_id = payload.engine_id or settings.default_tts_engine
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"SOA-4001: '{engine_id}' 음성 엔진을 사용할 수 없습니다.",
-        )
-
+    preferred_engine = payload.engine_id or settings.default_tts_engine
     job_id = str(payload.job_id or uuid4())
     normalized = payload.model_copy(
-        update={"job_id": job_id, "engine_id": engine_info.id}
+        update={"job_id": job_id, "engine_id": preferred_engine}
     )
     request_key = hashlib.sha256(
         normalized.model_dump_json(exclude={"job_id"}).encode("utf-8")
@@ -57,7 +52,12 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
     try:
         result = await manager.run(
             job_id,
-            lambda: pipeline.synthesize(engine, normalized, report),
+            lambda: request.app.state.engine_orchestrator.synthesize(
+                normalized,
+                lambda engine, engine_request: pipeline.synthesize(
+                    engine, engine_request, report
+                ),
+            ),
             request_key=request_key,
         )
     except JobConflictError as error:
@@ -85,6 +85,24 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
         raise HTTPException(
             status_code=status.HTTP_410_GONE,
             detail="SOA-4012: 완료 결과가 만료됐습니다. 새 작업 ID로 다시 생성해 주세요.",
+        ) from error
+    except EngineUnavailableError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"SOA-4001: {error}",
+        ) from error
+    except EngineExhaustedError as error:
+        request.app.state.audit_logger.write(
+            event="tts-engine-fallback-exhausted",
+            method=request.method,
+            path=request.url.path,
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            request_id=request.state.request_id,
+            actor=";".join(error.attempts),
+        )
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="SOA-4013: 자동 엔진 전환을 모두 시도했지만 생성하지 못했습니다.",
         ) from error
     except GenerationTimeoutError as error:
         raise HTTPException(

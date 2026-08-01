@@ -275,3 +275,133 @@
     padding-inline: 10px;
   }
 }
+
+.soa-settings-button,
+.soa-page-action {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 14px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.soa-settings-button {
+  color: rgba(238, 243, 255, 0.72);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.soa-settings-button[aria-current="page"] {
+  color: #111827;
+  background: #d8ff72;
+}
+
+.soa-secondary-page {
+  width: min(100%, 980px);
+  min-height: calc(100dvh - 58px);
+  margin: 0 auto;
+  padding: 28px 18px 36px;
+  color: #eef3ff;
+}
+
+.soa-page-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 4px 2px 8px;
+}
+
+.soa-page-header > div:first-child {
+  min-width: 0;
+}
+
+.soa-page-header span,
+.soa-section-heading span {
+  color: #a99cff;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.16em;
+}
+
+.soa-page-header h1 {
+  margin: 8px 0 0;
+  color: #f7f9ff;
+  font-size: clamp(30px, 6vw, 46px);
+  font-weight: 930;
+  letter-spacing: -0.06em;
+  line-height: 1.04;
+}
+
+.soa-page-header p {
+  max-width: 680px;
+  margin: 10px 0 0;
+  color: rgba(222, 231, 250, 0.62);
+  font-size: 13px;
+  font-weight: 620;
+  line-height: 1.7;
+}
+
+.soa-page-header__actions {
+  flex: 0 0 auto;
+}
+
+.soa-page-action {
+  color: #111827;
+  background: #d8ff72;
+  box-shadow: 0 12px 28px rgba(216, 255, 114, 0.15);
+}
+
+.soa-secondary-page .bg-soa-card,
+.soa-secondary-page .bg-white,
+.soa-secondary-page .bg-white\/75,
+.soa-secondary-page .bg-\[\#f4f2ec\],
+.soa-secondary-page .bg-\[\#ece9e1\] {
+  color: #171714;
+}
+
+.soa-secondary-page .bg-soa-card {
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
+}
+
+.soa-section-heading {
+  margin-bottom: 12px;
+}
+
+.soa-section-heading h2 {
+  margin: 4px 0 0;
+  color: #f7f9ff;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+}
+
+@media (max-width: 640px) {
+  .soa-secondary-page {
+    padding: 22px 12px 28px;
+  }
+
+  .soa-page-header {
+    align-items: start;
+  }
+
+  .soa-page-header p {
+    font-size: 12px;
+  }
+
+  .soa-page-header__actions {
+    padding-top: 18px;
+  }
+
+  .soa-settings-button {
+    width: 44px;
+    padding: 0;
+    overflow: hidden;
+    font-size: 0;
+  }
+
+  .soa-settings-button::before {
+    content: "⚙";
+    font-size: 16px;
+  }
+}

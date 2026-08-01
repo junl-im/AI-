@@ -13,6 +13,7 @@ from app.engines.tts.system_tts import SystemTtsEngine
 from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine
 from app.middleware.private_network_cors import PrivateNetworkCORSMiddleware
 from app.services.audit_log import AuditLogger
+from app.services.engine_orchestrator import EngineOrchestrator
 from app.services.job_manager import JobManager
 from app.services.rate_limit import FixedWindowRateLimiter
 from app.services.sqlite_job_store import SQLiteJobStore
@@ -81,6 +82,12 @@ async def lifespan(app: FastAPI):
         engine_registry.register_tts(SystemTtsEngine(store, settings.system_tts_voice))
     if settings.allow_mock_engine:
         engine_registry.register_tts(MockTtsEngine())
+    app.state.engine_orchestrator = EngineOrchestrator(
+        engine_registry,
+        preferred_order=settings.tts_engine_order_list,
+        failure_threshold=settings.engine_failure_threshold,
+        cooldown_seconds=settings.engine_cooldown_seconds,
+    )
     engine_registry.register_voice_clone(
         CosyVoiceCloneEngine(
             settings.cosyvoice_worker_url,
@@ -98,7 +105,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.8.4",
+    version="0.8.5",
     lifespan=lifespan,
 )
 app.add_middleware(

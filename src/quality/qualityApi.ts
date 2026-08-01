@@ -23,6 +23,11 @@ interface ApiEngineDiagnostic {
   ready: boolean
   provider: string
   model_loaded: boolean | null
+  recommended: boolean
+  health: 'ready' | 'cooldown' | 'unavailable'
+  success_count: number
+  failure_count: number
+  cooldown_remaining_seconds: number
   checks: ApiDiagnosticCheck[]
 }
 
@@ -88,6 +93,11 @@ export async function getQualityDiagnostics(): Promise<QualityDiagnostics> {
       ready: engine.ready,
       provider: engine.provider,
       modelLoaded: engine.model_loaded,
+      recommended: engine.recommended,
+      health: engine.health,
+      successCount: engine.success_count,
+      failureCount: engine.failure_count,
+      cooldownRemainingSeconds: engine.cooldown_remaining_seconds,
       checks: engine.checks,
     })),
   }

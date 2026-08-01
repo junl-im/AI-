@@ -301,3 +301,25 @@ GitHub Actions에서 ESLint, TypeScript, Vitest 직렬 실행과 Vite build를 �
 현재 기준 테스트 수는 API 77개, Worker 9개다. Web 회귀 테스트는 추가했으며 108개
 TS/TSX 구문과 대체 strict 타입 검사는 통과했다. 정식 ESLint, TypeScript, Vitest와 Vite
 build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
+
+## 0.8.5 공통 UX·엔진 오케스트레이션 회귀 검사
+
+### Web
+
+- 만들기 입력 후 복제 페이지로 이동했다 돌아와도 입력 값이 유지되는지 검사
+- Compact Header에서 설정 버튼이 접근 가능하고 현재 페이지를 표시하는지 검사
+- 프로젝트 loading, error+retry, empty와 불러오기 상태를 구분하는지 검사
+- 하단 Dock과 Header가 공통 내비게이션 정의를 사용하는지 정적 검사
+- 일반 합성·프리뷰가 특정 엔진이 아니라 `auto`를 요청하는지 검사
+
+### API
+
+- 주 엔진 실패 시 다음 준비 엔진으로 fallback하고 시도 순서를 반환하는지 검사
+- 연속 실패 임계치 뒤 circuit가 열리고 해당 엔진을 건너뛰는지 검사
+- cooldown 종료 뒤 후보를 다시 평가하는지 검사
+- 명시한 알 수 없는 엔진을 다른 엔진으로 대체하지 않는지 검사
+- 준비 엔진이 요청 출력 형식을 지원하지 않을 때 422 계약을 유지하는지 검사
+- 모든 후보 실패 시 `SOA-4013`과 감사 이벤트를 반환하는지 검사
+- `/engines`에서 ready 우선 엔진 하나만 recommended인지 검사
+
+현재 기준은 API 89개, Worker 9개다. Web 정식 test는 의존성이 설치 가능한 CI에서 실행한다.

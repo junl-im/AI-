@@ -2,6 +2,7 @@ import importlib.util
 import shutil
 
 from app.engines.base import TtsEngine
+from app.schemas.engine import EngineInfo
 from app.schemas.quality import DiagnosticCheck, EngineDiagnostic, QualityDiagnosticsResponse
 from app.services.process_metrics import runtime_snapshot
 
@@ -10,8 +11,11 @@ def _status(ok: bool) -> str:
     return "ready" if ok else "missing"
 
 
-def engine_diagnostic(engine: TtsEngine) -> EngineDiagnostic:
-    info = engine.info()
+def engine_diagnostic(
+    engine: TtsEngine,
+    runtime_info: EngineInfo | None = None,
+) -> EngineDiagnostic:
+    info = runtime_info or engine.info()
     checks = [
         DiagnosticCheck(
             id="registered",
@@ -26,6 +30,30 @@ def engine_diagnostic(engine: TtsEngine) -> EngineDiagnostic:
             detail=info.reason or "현재 환경에서 음성 생성을 시작할 수 있습니다.",
         ),
     ]
+    checks.append(
+        DiagnosticCheck(
+            id="auto-orchestration",
+            label="자동 엔진 운영",
+            status="ready" if info.recommended else "idle",
+            detail=(
+                "현재 자동 생성의 최우선 엔진입니다."
+                if info.recommended
+                else "실패 시 자동 대체 후보로 대기합니다."
+            ),
+        )
+    )
+    if info.health == "cooldown":
+        checks.append(
+            DiagnosticCheck(
+                id="circuit-breaker",
+                label="장애 격리",
+                status="missing",
+                detail=(
+                    f"연속 실패로 {info.cooldown_remaining_seconds:.1f}초 동안 "
+                    "자동 선택에서 제외합니다."
+                ),
+            )
+        )
     model_loaded: bool | None = None
 
     if info.id == "melo":
@@ -90,17 +118,30 @@ def engine_diagnostic(engine: TtsEngine) -> EngineDiagnostic:
         ready=info.ready,
         provider=info.provider,
         model_loaded=model_loaded,
+        recommended=info.recommended,
+        health=info.health,
+        success_count=info.success_count,
+        failure_count=info.failure_count,
+        cooldown_remaining_seconds=info.cooldown_remaining_seconds,
         checks=checks,
     )
 
 
-def quality_diagnostics(version: str, engines: list[TtsEngine]) -> QualityDiagnosticsResponse:
+def quality_diagnostics(
+    version: str,
+    engines: list[TtsEngine],
+    runtime_info: list[EngineInfo] | None = None,
+) -> QualityDiagnosticsResponse:
     runtime = runtime_snapshot()
+    info_by_id = {item.id: item for item in runtime_info or []}
     return QualityDiagnosticsResponse(
         version=version,
         python_version=runtime.python_version,
         platform=runtime.platform,
         process_id=runtime.process_id,
         memory_mb=runtime.memory_mb,
-        engines=[engine_diagnostic(engine) for engine in engines],
+        engines=[
+            engine_diagnostic(engine, info_by_id.get(engine.info().id))
+            for engine in engines
+        ],
     )

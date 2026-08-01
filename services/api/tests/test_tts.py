@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
 from app.main import app
+from app.services.engine_orchestrator import EngineExhaustedError
 
 
 def test_mock_tts_validates_contract(client):
@@ -31,6 +32,56 @@ def test_mock_tts_validates_contract(client):
     assert body["engine_mode"] == "mock"
     assert body["audio_url"] is None
     assert body["estimated_duration_seconds"] >= 1
+
+
+def test_auto_engine_reports_orchestration_metadata(client):
+    response = client.post(
+        "/api/v1/tts/synthesize",
+        json={
+            "text": "사용 가능한 엔진을 시스템이 자동으로 선택합니다.",
+            "voice_id": "sori-warm",
+            "engine_id": "auto",
+            "job_id": str(uuid4()),
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["requested_engine_id"] == "auto"
+    assert body["attempted_engine_ids"]
+    assert body["engine_id"] == body["attempted_engine_ids"][-1]
+
+
+def test_engine_catalog_marks_one_ready_engine_as_recommended(client):
+    response = client.get("/api/v1/engines")
+
+    assert response.status_code == 200
+    ready = [item for item in response.json() if item["ready"]]
+    assert ready
+    assert sum(1 for item in ready if item["recommended"]) == 1
+
+
+def test_all_engine_failures_return_soa_4013(client, monkeypatch):
+    class FailingOrchestrator:
+        async def synthesize(self, request, runner):
+            raise EngineExhaustedError(
+                ["melo", "system"],
+                ["melo: failed", "system: failed"],
+            )
+
+    monkeypatch.setattr(app.state, "engine_orchestrator", FailingOrchestrator())
+    response = client.post(
+        "/api/v1/tts/synthesize",
+        json={
+            "text": "모든 자동 엔진이 실패한 상황을 확인합니다.",
+            "voice_id": "sori-warm",
+            "engine_id": "auto",
+            "job_id": str(uuid4()),
+        },
+    )
+
+    assert response.status_code == 503
+    assert "SOA-4013" in response.json()["detail"]
 
 
 def test_tts_rejects_empty_text(client):

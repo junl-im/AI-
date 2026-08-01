@@ -1,9 +1,10 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAppStore } from '../store/useAppStore'
 import { ProjectsPage } from './ProjectsPage'
 
 const projectMocks = vi.hoisted(() => ({
+  listProjects: vi.fn(),
   project: {
     id: 'project-1',
     title: '아침 안내 음성',
@@ -19,11 +20,12 @@ const projectMocks = vi.hoisted(() => ({
 }))
 
 vi.mock('../projects/projectRepository', () => ({
-  listProjects: vi.fn().mockResolvedValue([projectMocks.project]),
+  listProjects: projectMocks.listProjects,
 }))
 
 describe('ProjectsPage', () => {
   beforeEach(() => {
+    projectMocks.listProjects.mockReset().mockResolvedValue([projectMocks.project])
     useAppStore.setState({
       page: 'projects',
       workspaceEntered: true,
@@ -45,5 +47,19 @@ describe('ProjectsPage', () => {
       workspaceEntered: true,
       activeProject: projectMocks.project,
     })
+  })
+
+  it('shows a recoverable error state when local storage cannot be read', async () => {
+    projectMocks.listProjects
+      .mockRejectedValueOnce(new Error('indexeddb unavailable'))
+      .mockResolvedValueOnce([])
+
+    render(<ProjectsPage />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('프로젝트를 열 수 없습니다')
+    fireEvent.click(screen.getByRole('button', { name: '다시 확인' }))
+
+    await waitFor(() => expect(projectMocks.listProjects).toHaveBeenCalledTimes(2))
+    expect(await screen.findByText('아직 저장된 작업이 없습니다')).toBeInTheDocument()
   })
 })

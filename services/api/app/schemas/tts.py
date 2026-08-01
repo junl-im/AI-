@@ -51,6 +51,9 @@ class TtsSynthesisResponse(BaseModel):
     processing_ms: int | None = None
     file_size_bytes: int | None = None
     realtime_factor: float | None = None
+    requested_engine_id: str | None = None
+    attempted_engine_ids: list[str] = Field(default_factory=list)
+    fallback_used: bool = False
 
 
 class JobProgressResponse(BaseModel):

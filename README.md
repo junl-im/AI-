@@ -8,7 +8,7 @@ Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되�
 
 ## 현재 상태
 
-- 버전: `0.8.4 Automatic Engine Bootstrap & Project Restore`
+- 버전: `0.8.5 Unified Workspace UX & Engine Orchestration`
 - 웹: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - GPU Worker: 선택 설치형 Fun-CosyVoice 3 Adapter
@@ -23,56 +23,43 @@ Mock과 브라우저 Demo를 명확히 구분하며 특정 모델에 종속되�
 - 프로젝트 복원: 목록 클릭 시 채팅·보이스·타임라인과 저장된 job 결과 recover-first
 - 배포: Web·API·Worker quality와 GitHub Pages를 하나의 Workflow로 관리
 
-## 0.8.4 핵심
+## 0.8.5 핵심
 
-### 자동 음성 시스템 연결
+### 작업공간 공통 UX·IA
 
-사용자는 API 주소를 입력하거나 엔진을 고르지 않습니다. 앱이 시작되면 같은 Origin,
-`VITE_API_BASE_URL`, 마지막 성공 주소와 안전한 로컬 후보를 자동 확인하고 준비된 실제
-엔진을 자동 선택합니다. 전체 사설 네트워크를 무단 스캔하지 않으며, 연결 실패 시에도
-설정 창을 띄우지 않고 네트워크 복귀와 앱 복귀 시 내부적으로 다시 확인합니다.
+- 만들기 화면을 메뉴 이동 중에도 마운트 상태로 유지해 작성 중 채팅·타임라인을 보존
+- 품질·프로젝트·설정에 동일한 작업공간 헤더와 다크 정보 계층 적용
+- 상단에서 설정에 직접 접근하고, 브랜드 클릭은 작성 작업공간으로 복귀
+- 프로젝트 로딩·실패·빈 상태를 구분하고 실패 시 같은 화면에서 다시 시도
+- 하단 메뉴·헤더가 하나의 공통 내비게이션 정의를 사용해 명칭과 순서 불일치 방지
 
-### 네 계층 엔진 상태
+### 자동 엔진 오케스트레이션
 
-```text
-API       FastAPI가 응답하는가
-TTS       실제 한국어 음성을 생성할 엔진이 준비됐는가
-Worker    CosyVoice Worker 프로세스가 응답하는가
-GPU       CUDA·모델이 실제 추론 준비 상태인가
-```
+사용자는 엔진을 선택하지 않습니다. Web은 모든 일반 합성을 `auto`로 요청하고 FastAPI의
+`EngineOrchestrator`가 실제 준비 상태, AI·Local·Mock 모드, 운영 우선순위와 요청 기능을
+기준으로 후보를 정렬합니다. 주 엔진이 실패하면 같은 요청 안에서 다음 엔진으로 전환하며,
+반복 실패 엔진은 일정 시간 자동 격리한 뒤 다시 평가합니다.
 
-Worker가 실행 중이어도 모델이나 GPU가 없으면 `준비 안 됨`으로 표시합니다.
+- 실제 실행 시도 순서와 fallback 여부를 TTS 응답에 기록
+- 성공·실패·연속 실패·cooldown을 `/engines`와 품질 연구소에 연결
+- 준비되지 않은 모델을 성공으로 가장하지 않고 등록된 ready 엔진만 실행
+- 명시 엔진 요청은 다른 엔진으로 조용히 바꾸지 않으며 일반 UI는 자동 모드만 사용
+- 전략상 주력은 Fun-CosyVoice 3, 복제 전문 보조는 GPT-SoVITS, 로컬 대체는 MeloTTS 유지
 
-### 서버 작업 영속화
+### 작업 연속성
 
-- TTS job 상태·요청 fingerprint·완료 결과를 SQLite에 저장
-- API 재시작 뒤에도 같은 job ID의 상태와 완료 결과 복구
-- 여러 API 프로세스가 같은 SQLite를 사용할 때 원자적 claim으로 단일 실행
-- 실행 프로세스가 사라지면 claim TTL 뒤 다른 프로세스가 작업을 재획득
-- 결과 TTL과 job 이력 TTL을 분리해 완료 tombstone과 HTTP 410 계약 유지
-- 다른 API 프로세스로 전달된 취소 요청도 저장소를 통해 실행 Task에 반영
+- 만들기에서 복제·품질·프로젝트·설정으로 이동해도 현재 초안과 타임라인 유지
+- 첫 랜딩에서는 Dock을 숨기고 작업공간 진입 이후에만 공통 메뉴·Player 표시
+- 프로젝트 불러오기는 저장된 job 결과를 먼저 복구하고 만료 시 블록별 재생성을 안내
+- API job 상태와 완료 결과는 SQLite에 유지해 서버 재시작·다중 프로세스에서도 복구
 
-### 모바일 요청 복구와 서버 멱등성
+### 현재 검증 기준
 
-- 동일 job ID와 동일 요청은 실행 중 Task를 공유하고 완료 결과를 재사용
-- 동일 job ID를 다른 요청에 재사용하면 `SOA-4009`와 HTTP 409로 차단
-- HTTP 호출이 취소되어도 서버 생성 Task는 계속 실행하고 `/result`로 복구
-- 타임라인 블록이 job ID를 보존해 재시도 시 새 POST보다 기존 결과를 먼저 조회
-- 편집·분할 시 기존 클라이언트 생성을 중단하고 오래된 결과가 블록을 덮지 않도록 보호
-- localStorage가 iOS private mode·quota로 실패하면 세션 메모리로 안전하게 대체
-- `crypto.randomUUID()`가 없는 모바일 브라우저에서도 호환 ID를 생성
-- GET·HEAD만 일시적 timeout, 429, 502, 503, 504에서 제한적으로 재시도
-- 음성 생성 POST는 중복 생성을 막기 위해 자동 재전송하지 않음
-- POST 응답이 끊겨도 동일 job ID의 상태와 `/result`를 조회해 완료 음원을 복구
-- 모든 요청에 익명 client ID와 request ID를 포함해 진단 가능
-- Wi-Fi·셀룰러 전환, 온라인 복귀, PWA 포그라운드 복귀 시 연결 상태 재검사
-
-### 모바일 UI 기준
-
-- 주요 터치 영역 최소 44px
-- 입력 글자 16px 이상으로 iOS 자동 확대 방지
-- 하단 composer·작업공간 Dock에 safe-area 반영
-- 첫 랜딩에서는 Dock을 숨기고 작업공간 진입 뒤에만 표시
+- FastAPI 테스트 89개
+- CosyVoice Worker 테스트 9개
+- 프로젝트 규칙, Python compileall, Python 3.10 AST 호환성
+- TypeScript·TSX 구문, 상대 import와 shim 기반 의미·참조 검사
+- 정식 Web lint/type/test/build와 Ruff는 의존성 설치 가능한 CI에서 최종 확인
 
 ## 바로 시작하기
 

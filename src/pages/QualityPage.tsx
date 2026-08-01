@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { QualityDiagnosticsCard } from '../components/evaluation/QualityDiagnosticsCard'
+import { WorkspacePageHeader } from '../components/layout/WorkspacePageHeader'
 import { QualityResultCard } from '../components/evaluation/QualityResultCard'
 import { TextPreviewCard } from '../components/evaluation/TextPreviewCard'
 import {
@@ -129,12 +130,12 @@ export function QualityPage() {
   }
 
   return (
-    <div className="pb-4 pt-6">
-      <StatusPill label="QUALITY LAB" tone="good" />
-      <h1 className="mt-3 text-3xl font-black tracking-[-0.06em]">한국어 음질 연구소</h1>
-      <p className="mt-2 text-sm font-semibold leading-6 text-soa-muted">
-        같은 문장을 AI와 로컬 음성으로 생성해 속도, 파일 크기, 발음과 자연스러움을 비교합니다.
-      </p>
+    <div className="soa-secondary-page">
+      <WorkspacePageHeader
+        eyebrow="QUALITY LAB · KOREAN FIRST"
+        title="한국어 음질 연구소"
+        description="같은 문장을 동일 조건으로 생성해 속도·파일 크기·발음·자연스러움을 비교하고, 자동 엔진 우선순위의 근거를 축적합니다."
+      />
 
       <div className="mt-5 space-y-4">
         <QualityDiagnosticsCard
@@ -194,8 +195,8 @@ export function QualityPage() {
         {error ? <p className="rounded-2xl border border-soa-coral/40 bg-soa-coral/10 p-4 text-sm font-bold leading-6 text-soa-ink">{error}</p> : null}
 
         {comparison ? (
-          <section>
-            <div className="mb-3"><span className="text-[10px] font-black tracking-[0.15em] text-soa-muted">COMPARISON RESULT</span><h2 className="mt-1 text-2xl font-black tracking-[-0.05em]">청취 결과</h2></div>
+          <section className="soa-quality-results">
+            <div className="soa-section-heading"><span>COMPARISON RESULT</span><h2>청취 결과</h2></div>
             <div className="space-y-3">{comparison.results.map((result) => <QualityResultCard key={result.engineId} result={result} sentence={text} onSaved={refreshReviewCount} />)}</div>
           </section>
         ) : null}

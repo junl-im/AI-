@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.8.4 Automatic Engine Bootstrap & Project Restore**
+현재 기준 버전: **0.8.5 Unified Workspace UX & Engine Orchestration**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-01 15:30 KST**
+최종 갱신: **2026-08-01 16:00 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -403,14 +403,14 @@ npm run build
 ```
 네트워크 제한 시 실행하지 못한 항목과 이유를 결과 보고서에 정확히 기록한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.8.5 Mobile Workspace Session Persistence**.
+다음 목표 버전: **0.8.6 Mobile Workspace Session Persistence**.
 우선순위:
 1. 열린 채팅·타임라인·생성 옵션·job ID를 IndexedDB에 자동 저장.
 2. 새로고침·PWA 종료 뒤 서버 상태와 `/result`를 먼저 조회해 마지막 작업공간 복원.
 3. Object URL 소실, quota 초과, private mode와 iOS 데이터 정리 fallback.
 4. Android Chrome·iOS Safari·설치형 PWA 단절 복구 실기기 매트릭스.
-5. 이후 엔진 운영 진단, 공개 API 인증, WAV Export, 실제 LLM Adapter 순으로 진행.
-금지: 수동 API 연결 UI를 다시 만들거나 복원 실패 때 같은 POST를 무조건 재전송하지 않는다.
+5. 이후 공용 엔진 health 저장, 공개 API 인증, WAV Export, 실제 LLM Adapter 순으로 진행.
+금지: 수동 API·엔진 UI를 만들거나 메뉴 이동으로 초안을 지우고, 복원 실패 때 같은 POST를 무조건 재전송하지 않는다.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -475,20 +475,15 @@ npm run build
 6. Python 3.10 실인터프리터 다운로드는 실행 환경 DNS 제한으로 불가했으며 CI 재실행이 최종 확인이다.
 7. 산출물: `SoriON-AI-0.8.2-full-pna-hotfix.zip`, `SoriON-AI-0.8.2-pna-hotfix-patch.zip`.
 ## 27. 2026-08-01 15:00 KST · v0.8.3 릴리스 기록
-1. 작업 일시: 2026-08-01 15:00 KST.
-2. 대상·기준: `0.8.2 → 0.8.3`, 직전 CI 안정화 수정 포함.
-3. 변경 내용: SQLite JobStore, 재시작 결과 복구, 원자적 claim, stale claim 재획득, TTL tombstone과 cross-process 취소를 추가했다.
-4. 변경 이유: 메모리 JobManager는 API 재시작·다중 프로세스에서 job ID와 완료 결과를 잃었다.
-5. 영향 범위: FastAPI startup, TTS route, config, JobManager/JobStore, API 테스트, 환경 변수와 운영 문서.
-6. 주요 파일: `job_manager.py`, `job_store.py`, `sqlite_job_store.py`, `job_result_codec.py`, `main.py`, `test_job_store.py`.
-7. 검증 결과: API 75개, Worker 9개, 프로젝트 규칙, compileall, Python 3.10 AST와 diff whitespace 통과.
-8. 제한: Ruff·Web 정식 품질은 현재 패키지 저장소 미지원으로 실행하지 못했고 GitHub Actions 확인이 필요하다. SQLite는 모든 API 프로세스가 같은 로컬 파일을 공유해야 한다.
-9. 산출물: `SoriON-AI-0.8.3-full.zip`, `SoriON-AI-0.8.2-to-0.8.3-patch.zip`, `SoriON-AI-0.8.3-artifacts.sha256`.
-10. 다음 예상 업데이트: `0.8.4 Mobile Session Persistence`.
-
+1. `0.8.2 → 0.8.3`: SQLite JobStore, 재시작 결과 복구, 원자적 claim, TTL tombstone과 cross-process 취소.
+2. 검증: API 77개·Worker 9개와 프로젝트 규칙·compileall·Python 3.10 AST 통과.
+3. 산출물: `SoriON-AI-0.8.3-full.zip`, `SoriON-AI-0.8.2-to-0.8.3-patch.zip`.
 ## 28. 2026-08-01 15:30 KST · v0.8.4 릴리스 기록
-1. 작업 일시·대상: 2026-08-01 15:30 KST, `0.8.3 → 0.8.4`.
-2. 변경·이유: 수동 API/엔진 연결 UI를 제거하고 자동 탐색·자동 선택으로 바꿨으며, 첫 랜딩 Dock을 숨기고 프로젝트 클릭 복원을 구현했다.
-3. 영향·파일: `httpClient.ts`, `useBackendBootstrap.ts`, `AppShell.tsx`, `HomePage.tsx`, `ProjectsPage.tsx`, `useTimelineGeneration.ts`, Zustand store와 관련 테스트·문서. 수동 연결 컴포넌트 4개를 삭제했다.
-4. 검증: API 77개·Worker 9개, 프로젝트 규칙, 108개 TS/TSX 구문, 대체 strict 타입과 whitespace 검사 통과. npm registry 제한으로 정식 Web lint/type/test/build는 CI 확인이 필요하다.
-5. 산출물·다음: `SoriON-AI-0.8.4-full.zip`, `SoriON-AI-0.8.3-to-0.8.4-patch.zip`; 다음은 `0.8.5 Mobile Workspace Session Persistence`다.
+1. `0.8.3 → 0.8.4`: 수동 API·엔진 연결 제거, 자동 bootstrap, 랜딩 Dock 숨김과 프로젝트 불러오기 복구.
+2. 검증: API 77개·Worker 9개, TS/TSX 구문과 대체 타입 검사 통과; 정식 Web 품질은 CI 확인.
+3. 산출물: `SoriON-AI-0.8.4-full.zip`, `SoriON-AI-0.8.3-to-0.8.4-patch.zip`.
+## 29. 2026-08-01 16:00 KST · v0.8.5 릴리스 기록
+1. `0.8.4 → 0.8.5`: 작성 세션 보존, 공통 작업공간 IA, 설정·프로젝트 상태 개선.
+2. EngineOrchestrator가 ready 순위, 자동 fallback, circuit cooldown과 runtime 진단을 담당한다.
+3. 검증: API 89개·Worker 9개, 규칙·compileall·Python 3.10 AST·TS 구문 110개·상대 import 82개 통과.
+4. 산출물: `SoriON-AI-0.8.5-full.zip`, `SoriON-AI-0.8.4-to-0.8.5-patch.zip`; 다음은 0.8.6 세션 영속화다.

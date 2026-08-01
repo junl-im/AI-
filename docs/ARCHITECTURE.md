@@ -32,7 +32,9 @@ FastAPI
 
 ## 엔진 선택과 기능 표시
 
-`auto`는 준비된 비 Mock 엔진을 등록 순서대로 선택합니다. 현재 순서는 MeloTTS, Local TTS, Mock입니다. `EngineInfo`는 감정, 속도, 피치 지원 여부를 공개하고 웹은 지원하지 않는 설정을 비활성화합니다.
+`auto`는 `EngineOrchestrator`가 처리합니다. ready 상태, AI·Local·Mock 모드, 환경변수 순서와
+요청 기능 적합성으로 후보를 정렬하고 첫 실행이 실패하면 다음 엔진을 시도합니다. `EngineInfo`는
+기능 지원과 함께 recommended, health, 성공·실패, cooldown을 공개합니다.
 
 ## 한국어 전처리
 
@@ -216,3 +218,23 @@ API 주소 입력, 엔진 수동 선택과 연결 Bottom Sheet는 아키텍처�
 프로젝트 편집 상태는 IndexedDB가 담당하고 음성 작업 상태·완료 결과는 SQLite JobStore가
 담당한다. 브라우저는 전체 LAN을 스캔하지 않으며 정적 운영 배포는 HTTPS API 환경변수나
 same-origin reverse proxy가 선행 조건이다.
+
+## 0.8.5 Engine Orchestrator와 Workspace Continuity
+
+```text
+Web engine_id=auto
+  → EngineOrchestrator
+    → ready/capability/rank filter
+    → primary attempt
+    → fallback attempts
+    → success/failure runtime state
+    → circuit cooldown
+```
+
+오케스트레이터는 TTS Pipeline 앞에서 실행 엔진을 결정하며 Pipeline의 정규화·분할·병합 계약은
+바꾸지 않는다. job fingerprint에는 `auto` 요청이 저장되고 완료 응답에는 실제 engine ID와 시도
+순서를 남긴다. JobStore는 작업 결과를 영속화하고 엔진 회로 상태는 현재 프로세스의 빠른 운영
+보호 계층으로 유지한다.
+
+Web의 HomePage는 작업공간 세션 동안 언마운트하지 않는다. 다른 페이지는 공통 헤더와 단일
+내비게이션 정의를 사용하고, 돌아왔을 때 기존 입력·메시지·타임라인을 그대로 이어 간다.

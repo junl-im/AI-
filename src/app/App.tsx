@@ -21,18 +21,24 @@ export function App() {
 
   return (
     <AppShell>
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.main
-          key={page}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          className="min-h-0 flex-1"
-        >
-          <Page />
-        </motion.main>
-      </AnimatePresence>
+      <main className="min-h-0 flex-1">
+        <section hidden={page !== 'home'} aria-hidden={page !== 'home'}>
+          <HomePage />
+        </section>
+        <AnimatePresence mode="wait" initial={false}>
+          {page !== 'home' ? (
+            <motion.section
+              key={page}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+            >
+              <Page />
+            </motion.section>
+          ) : null}
+        </AnimatePresence>
+      </main>
     </AppShell>
   )
 }
