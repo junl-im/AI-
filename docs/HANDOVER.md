@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 3**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 4**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-02 16:58 KST**
 제품 소유·디자인: **곰같은여우**
@@ -506,3 +506,11 @@ CI Hotfix 4 테스트 규칙:
 - Setup API는 프리셋 준비 개수와 누락 파일을 반환하며 실제 음원은 저장소에 포함하지 않는다.
 - 검증: preflight 11개, API 123개, Worker 14개, 신규 Web strict semantic 검사, 800/1,200줄 정책 fixture를 통과했다.
 - 제한: 전체 npm 설치는 샌드박스 registry 404·외부 registry timeout으로 실행하지 못해 GitHub Actions가 ESLint·Vitest·Vite 최종 판정이다.
+
+## 41. 0.9.3-beta.3 Engine Heartbeat 4
+- 첫 화면 4단계를 한 화면 안의 2×2 또는 1×4 그리드로 정리했다.
+- PC 1180px 이상은 왼쪽 프로젝트 목록, 중앙 Chat Workspace, 오른쪽 Voice Drawer의 3단 편집 구조다.
+- 중앙 하단 Timeline Editor는 시간 눈금·플레이헤드·가로 클립·가위·삭제 도구를 표시한다.
+- 상단 엔진 상태는 API·Worker·GPU 3점으로 유지하고 실패 계층은 작업 메시지로 즉시 기록한다.
+- 검증: preflight 11개, API 123개, Worker 14개, compileall, 변경 TS/TSX transpile 및 전체 parser 154개 통과.
+- 제한: npm 의존성 부재로 ESLint·Vitest·Vite production build는 GitHub Actions에서 최종 확인한다.

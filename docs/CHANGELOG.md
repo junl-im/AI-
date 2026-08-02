@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 4 · Three-pane desktop studio and CapCut timeline
+
+- 첫 화면의 4단계 설명을 모바일 2×2, 넓은 화면 1×4로 배치해 가로 잘림을 제거
+- PC 편집 화면을 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 구조로 재편
+- 최근 로컬 프로젝트를 왼쪽에서 바로 열고, 음성 프리셋과 속도·높낮이·말투를 오른쪽에서 즉시 조정
+- 타임라인에 시간 눈금, 플레이헤드, 가로 음성 클립, 가위와 삭제 버튼을 직접 노출
+- API·Worker·GPU 상태를 상단 3점으로 상시 표시하고 실패를 작업 메시지로 자동 전달
+
 ## 0.9.3-beta.3 Engine Heartbeat 3 · Engine Doctor and preset autowiring
 
 - 설정에 API·TTS·Worker·GPU·설치 단계를 분리 진단하는 Engine Doctor를 추가

@@ -179,3 +179,10 @@ Dock은 설정 메뉴를 포함하지 않는다. 메뉴는 만들기, 복제, �
 프로젝트·품질·복제·설정은 `WorkspacePageScaffold`를 사용한다. 공통 요소는 eyebrow, 제목,
 설명, 선택적 주요 액션, 상태 pill, 16px 간격의 콘텐츠 영역이다. 만들기는 장문 편집 밀도 때문에
 전용 레이아웃을 유지하지만 같은 CompactWorkspaceHeader와 SoriON 홈 이동 계약을 사용한다.
+
+## Engine Heartbeat 4 PC 편집 가이드
+
+- 1180px 이상: 왼쪽 프로젝트 히스토리 / 중앙 Chat Workspace·내용 편집·Timeline / 오른쪽 Voice Drawer.
+- 1180px 미만: 기존 모바일 단일 열과 Sheet 기반 음성 선택을 유지합니다.
+- Timeline은 가로 클립, 시간 눈금, 플레이헤드, 가위·삭제 직접 도구를 우선 표시합니다.
+- API·Worker·GPU 실패는 상단 점 상태와 중앙 시스템 메시지에 동시에 표시합니다.

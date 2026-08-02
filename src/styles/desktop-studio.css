@@ -1,0 +1,532 @@
+.soa-project-rail,
+.soa-voice-drawer {
+  display: none;
+}
+
+.soa-workspace-conversation {
+  margin-bottom: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.soa-workspace-conversation > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.soa-workspace-conversation > header span {
+  color: #8f80ff;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+
+.soa-workspace-conversation > header strong {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+}
+
+.soa-workspace-conversation > div {
+  display: grid;
+  gap: 7px;
+  max-height: 170px;
+  overflow: auto;
+  margin-top: 10px;
+}
+
+.soa-workspace-conversation article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 8px;
+  border-radius: 11px;
+  padding: 9px 10px;
+  color: rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.soa-workspace-conversation article.is-user {
+  background: rgba(83, 146, 255, 0.08);
+}
+
+.soa-workspace-conversation article.is-system {
+  color: #ffd3ce;
+  background: rgba(255, 111, 98, 0.1);
+}
+
+.soa-workspace-conversation article > span {
+  border-radius: 999px;
+  padding: 4px 7px;
+  color: #d8d1ff;
+  background: rgba(157, 144, 255, 0.13);
+  font-size: 7px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.soa-workspace-conversation article.is-system > span {
+  color: #ffd3ce;
+  background: rgba(255, 111, 98, 0.14);
+}
+
+.soa-workspace-conversation p {
+  margin: 1px 0 0;
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.soa-capcut-timeline {
+  overflow: hidden;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: #11141b;
+}
+
+.soa-capcut-ruler {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin-left: 78px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 8px 12px 7px;
+  color: rgba(255, 255, 255, 0.28);
+  background: #171a22;
+  font-size: 7px;
+  font-weight: 750;
+}
+
+.soa-capcut-ruler span:not(:first-child) { text-align: right; }
+
+.soa-capcut-track-row {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  min-height: 178px;
+}
+
+.soa-capcut-track-label {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 14px 10px;
+  color: rgba(255, 255, 255, 0.46);
+  background: #171a22;
+}
+
+.soa-capcut-track-label strong { color: #ff9186; font-size: 8px; }
+.soa-capcut-track-label small { font-size: 7px; }
+
+.soa-capcut-track-lane {
+  position: relative;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 12px 14px 16px 22px;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 72px 100%;
+}
+
+.soa-capcut-playhead {
+  position: absolute;
+  z-index: 7;
+  top: 0;
+  bottom: 0;
+  left: 20px;
+  width: 2px;
+  background: #ff7064;
+  pointer-events: none;
+}
+
+.soa-capcut-playhead::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 10px;
+  height: 8px;
+  border-radius: 2px 2px 5px 5px;
+  background: #ff7064;
+  transform: translateX(-50%);
+}
+
+.soa-dubbing-block__direct-tool.is-danger {
+  color: #ff9a90;
+}
+
+@media (min-width: 1180px) {
+  .soa-workspace-shell--dubbing,
+  .soa-workspace-shell--dubbing.soa-workspace-shell--has-player {
+    padding-bottom: 152px;
+  }
+
+  .soa-desktop-studio {
+    display: grid;
+    grid-template-columns: 246px minmax(620px, 1fr) 304px;
+    min-height: calc(100dvh - 58px);
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+
+  .soa-desktop-studio__center {
+    min-width: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+    border-left: 1px solid rgba(255, 255, 255, 0.07);
+    background: #101218;
+  }
+
+  .soa-project-rail,
+  .soa-voice-drawer {
+    position: sticky;
+    top: 58px;
+    display: flex;
+    height: calc(100dvh - 58px);
+    flex-direction: column;
+    overflow: hidden;
+    color: #eef3ff;
+    background: #0b0e14;
+  }
+
+  .soa-project-rail {
+    padding: 16px 12px;
+  }
+
+  .soa-project-rail__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 4px 12px;
+  }
+
+  .soa-project-rail__head span,
+  .soa-voice-drawer > header span {
+    color: #9183ff;
+    font-size: 8px;
+    font-weight: 950;
+    letter-spacing: 0.14em;
+  }
+
+  .soa-project-rail__head button {
+    min-height: 32px;
+    border: 0;
+    border-radius: 10px;
+    padding: 0 10px;
+    color: #111620;
+    background: #d8ff72;
+    font-size: 8px;
+    font-weight: 900;
+  }
+
+  .soa-project-rail__current,
+  .soa-project-rail__list button {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 18px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 12px;
+    padding: 10px;
+    color: rgba(238, 243, 255, 0.68);
+    text-align: left;
+    background: transparent;
+  }
+
+  .soa-project-rail__current {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .soa-project-rail__current > span:first-child { color: #65e3c2; font-size: 8px; }
+  .soa-project-rail strong,
+  .soa-project-rail small { display: block; }
+  .soa-project-rail strong { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+  .soa-project-rail small { margin-top: 3px; color: rgba(238, 243, 255, 0.32); font-size: 7px; }
+
+  .soa-project-rail__list {
+    display: grid;
+    gap: 2px;
+    overflow-y: auto;
+    margin-top: 10px;
+    padding-right: 2px;
+  }
+
+  .soa-project-rail__list > p {
+    margin: 8px;
+    color: rgba(238, 243, 255, 0.3);
+    font-size: 8px;
+    line-height: 1.5;
+  }
+
+  .soa-project-rail__list button:hover { background: rgba(255, 255, 255, 0.045); }
+
+  .soa-project-rail__nav {
+    display: grid;
+    gap: 5px;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    padding-top: 10px;
+  }
+
+  .soa-project-rail__nav button {
+    min-height: 38px;
+    border: 0;
+    border-radius: 10px;
+    color: rgba(238, 243, 255, 0.48);
+    text-align: left;
+    background: transparent;
+    font-size: 9px;
+    font-weight: 800;
+  }
+
+  .soa-project-rail__nav button:hover { color: #fff; background: rgba(255, 255, 255, 0.045); }
+
+  .soa-dubbing-header,
+  .soa-dubbing-main {
+    width: 100%;
+    max-width: none;
+  }
+
+  .soa-dubbing-header {
+    position: sticky;
+    top: 58px;
+    z-index: 20;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 14px 20px 12px;
+    background: rgba(16, 18, 24, 0.94);
+    backdrop-filter: blur(18px);
+  }
+
+  .soa-dubbing-project-title input {
+    width: min(44vw, 560px);
+    font-size: clamp(25px, 2.2vw, 36px);
+  }
+
+  .soa-dubbing-main {
+    padding: 16px 20px 80px;
+  }
+
+  .soa-mobile-voice-controls { display: none; }
+
+  .soa-workspace-conversation > div { max-height: 136px; }
+  .soa-dubbing-script__editor textarea { min-height: 230px; }
+
+  .soa-dubbing-timeline {
+    margin-top: 18px;
+    padding-bottom: 36px;
+  }
+
+  .soa-dubbing-block-list {
+    display: flex;
+    min-width: max-content;
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 0;
+  }
+
+  .soa-dubbing-block {
+    width: 286px;
+    min-height: 152px;
+    flex: 0 0 286px;
+    border-radius: 12px;
+    padding: 10px;
+    background: #20242e;
+  }
+
+  .soa-dubbing-block > textarea {
+    min-height: 66px;
+    max-height: 96px;
+    resize: none;
+    padding: 9px;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .soa-dubbing-block__voice > span { width: 28px; height: 28px; font-size: 10px; }
+  .soa-dubbing-block__tools > button,
+  .soa-dubbing-block-menu__trigger { width: 30px; height: 30px; border-radius: 8px; font-size: 12px; }
+
+  .soa-dubbing-pause-block {
+    width: 82px;
+    min-height: 152px;
+    flex: 0 0 82px;
+    flex-direction: column;
+  }
+
+  .soa-dubbing-timeline__empty {
+    min-width: 520px;
+    min-height: 142px;
+    margin-top: 0;
+  }
+
+  .soa-dubbing-add-block {
+    position: static;
+    width: 46px;
+    height: 46px;
+    margin-top: 12px;
+    font-size: 26px;
+  }
+
+  .soa-voice-drawer {
+    overflow-y: auto;
+    padding: 18px 14px 28px;
+  }
+
+  .soa-voice-drawer > header strong {
+    display: block;
+    margin-top: 6px;
+    color: #fff;
+    font-size: 15px;
+  }
+
+  .soa-voice-drawer > header p {
+    margin: 6px 0 0;
+    color: rgba(238, 243, 255, 0.38);
+    font-size: 8px;
+    line-height: 1.5;
+  }
+
+  .soa-voice-drawer__presets {
+    display: grid;
+    gap: 7px;
+    margin-top: 14px;
+  }
+
+  .soa-voice-drawer__presets article {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 38px;
+    align-items: center;
+    gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 13px;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .soa-voice-drawer__presets article.is-selected {
+    border-color: rgba(216, 255, 114, 0.48);
+    background: rgba(216, 255, 114, 0.07);
+  }
+
+  .soa-voice-drawer__select {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    padding: 4px;
+    color: #fff;
+    text-align: left;
+    background: transparent;
+  }
+
+  .soa-voice-drawer .soa-voice-avatar {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+    color: #151923;
+    font-size: 11px;
+    font-weight: 950;
+  }
+
+  .soa-voice-drawer__select > span:last-child { min-width: 0; }
+  .soa-voice-drawer__select strong,
+  .soa-voice-drawer__select small { display: block; }
+  .soa-voice-drawer__select strong { font-size: 10px; }
+  .soa-voice-drawer__select small { overflow: hidden; margin-top: 3px; color: rgba(238, 243, 255, 0.36); font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+
+  .soa-voice-drawer__play {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 10px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .soa-voice-drawer__settings {
+    display: grid;
+    gap: 9px;
+    margin-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    padding-top: 14px;
+  }
+
+  .soa-voice-drawer__settings > label,
+  .soa-voice-drawer__emotion,
+  .soa-voice-drawer__normalize {
+    border-radius: 12px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .soa-voice-drawer__settings label > span {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .soa-voice-drawer__settings b { font-size: 9px; }
+  .soa-voice-drawer__settings strong,
+  .soa-voice-drawer__settings small { color: rgba(238, 243, 255, 0.4); font-size: 7px; }
+  .soa-voice-drawer__settings input[type='range'] { width: 100%; margin-top: 10px; accent-color: #d8ff72; }
+
+  .soa-voice-drawer__emotion > div {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .soa-voice-drawer__emotion button {
+    min-height: 30px;
+    border: 0;
+    border-radius: 8px;
+    color: rgba(238, 243, 255, 0.42);
+    background: rgba(255, 255, 255, 0.04);
+    font-size: 7px;
+    font-weight: 800;
+  }
+
+  .soa-voice-drawer__emotion button.is-active { color: #151923; background: #d8ff72; }
+
+  .soa-voice-drawer__normalize {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .soa-voice-drawer__normalize > span { display: block !important; }
+  .soa-voice-drawer__normalize b,
+  .soa-voice-drawer__normalize small { display: block; }
+  .soa-voice-drawer__normalize small { margin-top: 3px; }
+  .soa-voice-drawer__normalize input { width: 20px; height: 20px; accent-color: #d8ff72; }
+
+  .soa-voice-drawer__create {
+    min-height: 42px;
+    margin-top: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    color: rgba(238, 243, 255, 0.58);
+    background: transparent;
+    font-size: 9px;
+    font-weight: 850;
+  }
+}
+
+@media (min-width: 1500px) {
+  .soa-desktop-studio { grid-template-columns: 270px minmax(720px, 1fr) 330px; }
+}
+
+@media (min-width: 1180px) {
+  .soa-dubbing-activity { display: none; }
+}

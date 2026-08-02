@@ -39,10 +39,9 @@ export function CompactWorkspaceHeader() {
           aria-label={`자동 엔진 상태: ${statusLabel(backendStatus, browserTtsReady)}`}
         >
           <span className="soa-engine-chip__dots" aria-hidden="true">
-            <i className={`is-${engineHealth.api}`} />
-            <i className={`is-${engineHealth.tts}`} />
-            <i className={`is-${engineHealth.worker}`} />
-            <i className={`is-${engineHealth.gpu}`} />
+            <i className={`is-${engineHealth.api}`} title="API" />
+            <i className={`is-${engineHealth.worker}`} title="Worker" />
+            <i className={`is-${engineHealth.gpu}`} title="GPU" />
           </span>
           <span>{statusLabel(backendStatus, browserTtsReady)}</span>
           {engineHealth.latencyMs !== null ? <small>{engineHealth.latencyMs}ms</small> : null}

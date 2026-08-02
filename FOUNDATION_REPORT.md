@@ -1,6 +1,14 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 3**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 4**
+
+
+## Engine Heartbeat 4
+
+- 첫 화면의 1·2·3·4 작업 흐름을 모바일 2×2, 넓은 PC 1×4로 재배치해 마지막 단계가 잘리지 않게 했습니다.
+- PC 1180px 이상에서 왼쪽 프로젝트 히스토리, 가운데 Chat Workspace, 오른쪽 Voice Drawer의 3단 편집 화면을 제공합니다.
+- 타임라인을 가로 트랙·시간 눈금·플레이헤드·가위·삭제 도구가 보이는 CapCut형 편집 영역으로 변경했습니다.
+- 우측 상단 엔진 표시는 API·Worker·GPU 3점으로 단순화하고 계층 실패를 작업 메시지에 자동 기록합니다.
 
 ## Engine Heartbeat 3
 
@@ -48,7 +56,7 @@
 - API pytest 123개 통과
 - Worker pytest 14개 통과
 - Python compileall 통과
-- TypeScript·TSX 152개 파일 parser 검사 통과
+- TypeScript·TSX 154개 소스 파일 parser 검사 통과
 - Repository preflight 11개 통과
 - 신규 Engine Doctor TypeScript 핵심 파일 strict semantic 검사 통과
 - 802줄 fixture는 경고 후 통과, 1,202줄 fixture는 1,200줄 안전 상한으로 실패

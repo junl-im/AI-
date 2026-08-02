@@ -1,15 +1,14 @@
-SoriON AI 0.9.3-beta.3 Engine Heartbeat 2 -> Engine Heartbeat 3 Patch Manifest
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 3 -> Engine Heartbeat 4 Patch Manifest
 
-Purpose: remove the arbitrary 500-line development blocker, expose real engine readiness through Engine Doctor, and automatically connect the bundled voice preset directory to every local API launcher.
+Purpose: fit the four landing steps without clipping and deliver a responsive three-pane PC editing workspace with a CapCut-style timeline.
 
 Key changes:
-- 800-line non-blocking refactor guidance and 1,200-line safety ceiling
-- Settings Engine Doctor for API, TTS, Worker, GPU and setup diagnostics
-- API URL save, immediate deep recheck, automatic reconnect and privacy-safe diagnostic copy
-- Setup API voice preset readiness count and missing-file guidance
-- automatic voice-presets directory wiring in START_ENGINE, dev:free and dev:api launchers
-- API preset diagnostic regression tests
+- landing steps use 2x2 on compact screens and 1x4 on wide desktop screens
+- left recent-project history, center Chat Workspace, right Voice Drawer at 1180px and above
+- horizontal timeline ruler, playhead, voice clips, direct scissors and delete tools
+- top API / Worker / GPU status dots and automatic engine-failure system messages
+- mobile single-column editor and existing voice sheets remain unchanged
 
-Tracked files deleted relative to Engine Heartbeat 2: none
+Tracked files deleted relative to Engine Heartbeat 3: none
 Cumulative permanent cleanup list:
 public/sorion-icon.svg

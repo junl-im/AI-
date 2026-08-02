@@ -1,0 +1,33 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 3 -> Engine Heartbeat 4
+
+Changed or added files: 26
+
+APPLY_PATCH.cmd
+APPLY_PATCH.sh
+FOUNDATION_REPORT.md
+PATCH_MANIFEST.txt
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/DUBBING_STUDIO_UX.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/TEST.md
+docs/UI_GUIDE.md
+docs/patches/0.9.3-beta.3-engine-heartbeat-4/DELETE_LIST.txt
+docs/patches/0.9.3-beta.3-engine-heartbeat-4/PATCH_MANIFEST.txt
+docs/patches/0.9.3-beta.3-engine-heartbeat-4/PATCH_README.md
+src/components/layout/CompactWorkspaceHeader.tsx
+src/components/workspace/DesktopVoiceDrawer.tsx
+src/components/workspace/TimelineEditor.test.tsx
+src/components/workspace/TimelineEditor.tsx
+src/components/workspace/WorkspaceConversation.tsx
+src/components/workspace/WorkspaceProjectRail.tsx
+src/pages/HomePage.test.tsx
+src/pages/HomePage.tsx
+src/styles/desktop-studio.css
+src/styles/index.css
+src/styles/workspace-shell.css
+
+Tracked deletions: none
+Cumulative cleanup: public/sorion-icon.svg

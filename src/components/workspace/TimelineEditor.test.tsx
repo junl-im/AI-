@@ -72,6 +72,9 @@ describe('TimelineEditor', () => {
     expect(screen.getByRole('button', { name: '1번 대사 음성 다시 생성' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '2번 대사 음성 다시 생성' }))
     expect(onRetry).toHaveBeenCalledWith('voice-2')
+    expect(screen.getByText('00:30')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '1번 대사 가위로 나누기' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '1번 대사 삭제' })).toBeInTheDocument()
   })
 
   it('대사 블록 메뉴는 명시적 버튼으로 열리고 선택 뒤 닫힌다', () => {

@@ -3,12 +3,12 @@
 **무료 로컬 실행을 기준으로 설계한 한국어 장문 Voice Studio**
 
 SoriON AI는 대본·오디오북·강의·광고 내용을 문장별 음성 블록으로 편집하고 순차 제작하는
-모바일 우선 작업공간입니다. 엔진과 API는 시스템이 자동 연결하며 결제 계정이 필요한 음성
+모바일과 PC 편집을 함께 지원하는 작업공간입니다. 엔진과 API는 시스템이 자동 연결하며 결제 계정이 필요한 음성
 Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 3 · Engine Doctor + Preset Autowiring + Practical File Policy`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 4 · Three-pane Desktop Studio + CapCut Timeline`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -24,6 +24,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 재생 UX: 보이는 재생 버튼이 선택값을 자동 적용하고 생성·선택된 음성을 즉시 재생
 - 프리셋: Browser/System/Melo 운율 프로필과 CosyVoice 프리셋별 기준 음원 라우팅
 - Engine Doctor: API·TTS·Worker·GPU·프리셋 3종 상태 진단, 주소 저장, 자동 연결 복구와 개인정보 제외 진단 복사
+- PC 편집: 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
+- 엔진 표시: 우측 상단 API·Worker·GPU 3점 상태와 실패 시 작업 메시지 자동 알림
 
 ## 무료 실행
 

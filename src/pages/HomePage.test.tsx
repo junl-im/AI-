@@ -15,6 +15,16 @@ describe('HomePage', () => {
       workspaceResetToken: 0,
       backendStatus: 'offline',
       backendMessage: '배포된 음성 서버 주소가 설정되지 않았습니다.',
+      engineHealth: {
+        api: 'unknown',
+        tts: 'unknown',
+        worker: 'unknown',
+        gpu: 'unknown',
+        baseUrl: '',
+        latencyMs: null,
+        lastCheckedAt: null,
+        requestId: null,
+      },
       notice: null,
     })
     vi.restoreAllMocks()
@@ -49,7 +59,10 @@ describe('HomePage', () => {
     expect(textbox).toHaveValue('첫 번째 문장입니다. 두 번째 문장입니다.')
     expect(scoped.getByDisplayValue('첫 번째 문장입니다.')).toBeInTheDocument()
     expect(scoped.getByDisplayValue('두 번째 문장입니다.')).toBeInTheDocument()
-    expect(scoped.getAllByText('혜린')).toHaveLength(3)
+    expect(scoped.getAllByText('혜린').length).toBeGreaterThanOrEqual(3)
+    expect(scoped.getByRole('complementary', { name: '프로젝트 목록' })).toBeInTheDocument()
+    expect(scoped.getByRole('complementary', { name: '미니 보이스 라이브러리' })).toBeInTheDocument()
+    expect(scoped.getByRole('region', { name: '작업 메시지' })).toBeInTheDocument()
   })
 
   it('새로고침 뒤 전송 전 장문 내용과 작업공간을 자동 복원한다', async () => {
@@ -75,4 +88,26 @@ describe('HomePage', () => {
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
     expect(screen.getByRole('button', { name: '밝게' })).toHaveClass('is-active')
   })
+  it('엔진 계층 실패를 작업 메시지로 즉시 알린다', async () => {
+    useAppStore.setState({
+      workspaceEntered: true,
+      backendStatus: 'degraded',
+      backendMessage: '브라우저 음성으로 전환했습니다.',
+      engineHealth: {
+        api: 'offline',
+        tts: 'ready',
+        worker: 'offline',
+        gpu: 'offline',
+        baseUrl: 'http://127.0.0.1:8000',
+        latencyMs: null,
+        lastCheckedAt: new Date().toISOString(),
+        requestId: null,
+      },
+    })
+
+    render(<HomePage />)
+
+    await waitFor(() => expect(screen.getAllByText(/API 연결 실패 · Worker 연결 실패 · GPU 미연결/).length).toBeGreaterThan(0))
+  })
+
 })

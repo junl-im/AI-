@@ -112,7 +112,7 @@
 
 .soa-engine-chip__dots {
   display: grid;
-  grid-template-columns: repeat(2, 6px);
+  grid-template-columns: repeat(3, 6px);
   gap: 3px;
 }
 
@@ -133,8 +133,9 @@
 
 .soa-landing-overview {
   display: grid;
-  gap: 20px;
-  padding: 26px 4px 18px;
+  gap: 16px;
+  align-content: center;
+  padding: 20px 4px 16px;
 }
 
 .soa-landing-kicker {
@@ -153,33 +154,33 @@
 
 .soa-landing-overview h1 strong {
   color: #111;
-  font-size: clamp(38px, 9vw, 56px);
+  font-size: clamp(34px, 8vw, 54px);
   font-weight: 850;
   line-height: 0.98;
 }
 
 .soa-landing-overview h1 span {
   color: #7a7a7a;
-  font-size: clamp(30px, 7.5vw, 46px);
+  font-size: clamp(27px, 6.8vw, 43px);
   font-weight: 620;
   line-height: 1.02;
 }
 
 .soa-landing-overview p {
   max-width: 660px;
-  margin: 18px 0 0;
+  margin: 13px 0 0;
   color: #6f6d67;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 620;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 
 .soa-landing-overview button {
   display: inline-flex;
-  min-height: 52px;
+  min-height: 48px;
   align-items: center;
   gap: 18px;
-  margin-top: 20px;
+  margin-top: 15px;
   border: 0;
   border-radius: 18px;
   padding: 0 18px;
@@ -192,17 +193,16 @@
 
 .soa-landing-overview ol {
   display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  overflow-x: auto;
   margin: 0;
-  padding: 0 0 3px;
+  padding: 0;
   list-style: none;
 }
 
 .soa-landing-overview li {
-  min-width: 132px;
-  padding: 14px;
+  min-width: 0;
+  padding: 12px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.58);
 }
@@ -233,9 +233,13 @@
   }
 
   .soa-landing-overview {
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.7fr);
-    align-items: end;
-    padding: 38px 24px 28px;
+    grid-template-columns: minmax(0, 1fr) minmax(390px, 0.78fr);
+    align-items: center;
+    padding: 28px 24px 22px;
+  }
+
+  .soa-landing-overview ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -396,5 +400,21 @@
   .soa-settings-button::before {
     content: "⚙";
     font-size: 16px;
+  }
+}
+
+@media (min-width: 1180px) {
+  .soa-landing-overview {
+    grid-template-columns: minmax(0, 0.92fr) minmax(520px, 1.08fr);
+    gap: 34px;
+    padding: 24px 34px;
+  }
+
+  .soa-landing-overview ol {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .soa-landing-overview li {
+    padding: 12px 10px;
   }
 }

@@ -524,3 +524,10 @@ npm run build
 - `START_ENGINE.cmd`, `npm run dev:free`, `npm run dev:api`는 별도 설정이 없으면 프로젝트 `voice-presets` 폴더를 자동 연결한다.
 - Engine Doctor는 API·TTS·Worker·GPU를 분리 표시하고 주소 저장·재진단·자동 연결 복구를 제공한다.
 - 복사되는 진단 JSON에는 Setup 상세 경로, 음원 내용, 서비스 토큰을 넣지 않는다.
+
+## Engine Heartbeat 4 회귀 검사
+
+- 첫 화면 4단계가 가로 스크롤 없이 2×2 또는 1×4로 배치되는지 확인합니다.
+- HomePage에 프로젝트 rail, 작업 메시지 region, Voice Drawer가 함께 렌더링되는지 검사합니다.
+- 엔진 API·Worker·GPU offline 상태가 작업 메시지에 기록되는지 검사합니다.
+- Timeline에 시간 눈금, 가위, 삭제 직접 도구가 노출되는지 검사합니다.

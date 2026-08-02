@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
 import { requestAutomaticApiReconnect } from '../api/httpClient'
+import { DesktopVoiceDrawer } from '../components/workspace/DesktopVoiceDrawer'
 import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader'
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
 import { LongformComposer } from '../components/workspace/LongformComposer'
 import { TimelineEditor } from '../components/workspace/TimelineEditor'
+import { WorkspaceConversation } from '../components/workspace/WorkspaceConversation'
+import { WorkspaceProjectRail } from '../components/workspace/WorkspaceProjectRail'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import {
   useTimelineGeneration,
@@ -100,6 +103,8 @@ export function HomePage() {
   const showNotice = useAppStore((state) => state.showNotice)
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const activeProject = useAppStore((state) => state.activeProject)
+  const openProject = useAppStore((state) => state.openProject)
+  const engineHealth = useAppStore((state) => state.engineHealth)
   const workspaceResetToken = useAppStore((state) => state.workspaceResetToken)
   const clearActiveProject = useAppStore((state) => state.clearActiveProject)
   const startNewWorkspace = useAppStore((state) => state.startNewWorkspace)
@@ -120,6 +125,7 @@ export function HomePage() {
   const observedResetTokenRef = useRef(workspaceResetToken)
   const pendingResetSaveRef = useRef<number | null>(null)
   const explicitWorkspaceActionRef = useRef(false)
+  const lastEngineAlertRef = useRef<string | null>(null)
   const engineCatalog = useEngineCatalog()
   const timeline = useTimelineGeneration()
   const generateAllTimelineBlocks = timeline.generateAll
@@ -254,6 +260,26 @@ export function HomePage() {
   const appendMessage = useCallback((message: Omit<WorkspaceMessage, 'id'>) => {
     setMessages((current) => [...current, { ...message, id: createRandomId() }])
   }, [])
+  useEffect(() => {
+    if (!workspaceEntered) return
+    const failures = [
+      engineHealth.api === 'offline' ? 'API 연결 실패' : null,
+      engineHealth.worker === 'offline' ? 'Worker 연결 실패' : null,
+      engineHealth.gpu === 'offline' ? 'GPU 미연결' : null,
+    ].filter((item): item is string => Boolean(item))
+    if (failures.length === 0) {
+      lastEngineAlertRef.current = null
+      return
+    }
+    const signature = `${engineHealth.api}/${engineHealth.worker}/${engineHealth.gpu}/${backendMessage}`
+    if (lastEngineAlertRef.current === signature) return
+    lastEngineAlertRef.current = signature
+    appendMessage({
+      role: 'system',
+      badge: '엔진 연결 알림',
+      text: `${failures.join(' · ')}. ${backendMessage}`,
+    })
+  }, [appendMessage, backendMessage, engineHealth.api, engineHealth.gpu, engineHealth.worker, workspaceEntered])
   const sttVerification = useSelectiveSttRegeneration({ timeline, appendMessage, showNotice })
   const buildOptions = useCallback((): TimelineGenerationOptions => ({
     voiceId,
@@ -433,22 +459,81 @@ export function HomePage() {
   const engineLabel = engineCatalog.selected?.name ?? '자동 연결 확인 중'
   return (
     <div className="soa-dubbing-workspace">
-      <DubbingStudioHeader
-        title={projectTitle}
-        savedLabel={savedLabel}
-        backendStatus={backendStatus}
-        engineLabel={engineLabel}
-        downloadHref={currentTrack?.audio.url ?? null}
-        downloadName={currentTrack?.audio.filename ?? 'sorion-voice.wav'}
-        onTitleChange={setProjectTitle}
-        onOpenClone={() => enterWorkspace('clone')}
-        onOpenQuality={() => enterWorkspace('quality')}
-        onOpenProjects={() => enterWorkspace('projects')}
-        onOpenSettings={() => enterWorkspace('settings')}
-        onClear={clearCurrentWork}
-      />
-      <main className="soa-dubbing-main">
-        <DubbingVoiceControls
+      <div className="soa-desktop-studio">
+        <WorkspaceProjectRail
+          currentTitle={projectTitle}
+          refreshKey={messages.length + timeline.blocks.length}
+          onOpenProject={openProject}
+          onNewProject={clearCurrentWork}
+          onOpenProjects={() => enterWorkspace('projects')}
+          onOpenSettings={() => enterWorkspace('settings')}
+        />
+
+        <section className="soa-desktop-studio__center" aria-label="채팅 작업공간">
+          <DubbingStudioHeader
+            title={projectTitle}
+            savedLabel={savedLabel}
+            backendStatus={backendStatus}
+            engineLabel={engineLabel}
+            downloadHref={currentTrack?.audio.url ?? null}
+            downloadName={currentTrack?.audio.filename ?? 'sorion-voice.wav'}
+            onTitleChange={setProjectTitle}
+            onOpenClone={() => enterWorkspace('clone')}
+            onOpenQuality={() => enterWorkspace('quality')}
+            onOpenProjects={() => enterWorkspace('projects')}
+            onOpenSettings={() => enterWorkspace('settings')}
+            onClear={clearCurrentWork}
+          />
+          <main className="soa-dubbing-main">
+            <div className="soa-mobile-voice-controls">
+              <DubbingVoiceControls
+                voiceId={voiceId}
+                previewingId={previewingId}
+                speed={speechSpeed}
+                pitch={speechPitch}
+                emotion={speechEmotion}
+                normalizeText={normalizeText}
+                engine={engineCatalog.selected}
+                onVoiceChange={setVoiceId}
+                onPreview={(id) => void previewVoice(id)}
+                onSpeedChange={setSpeechSpeed}
+                onPitchChange={setSpeechPitch}
+                onEmotionChange={setSpeechEmotion}
+                onNormalizeTextChange={(value) => setDirectiveIds(value ? ['numbers'] : [])}
+                onCreateVoice={() => enterWorkspace('clone')}
+              />
+            </div>
+            <WorkspaceConversation messages={messages} />
+            <LongformComposer
+              disabled={busy}
+              value={composerDraft}
+              backendStatus={backendStatus}
+              backendMessage={backendMessage}
+              activity={activity}
+              onValueChange={setComposerDraft}
+              onSubmit={(value) => void handleLongformSubmit(value)}
+            />
+            <TimelineEditor
+              blocks={timeline.blocks}
+              onMove={timeline.moveBlock}
+              onReorder={timeline.reorderBlock}
+              onSplit={timeline.splitBlock}
+              onUpdateText={timeline.updateText}
+              onRetry={(id) => void retryBlock(id)}
+              onAddVoice={() => timeline.addVoiceBlock(buildOptions())}
+              onAddPause={timeline.addPause}
+              onRemove={timeline.removeBlock}
+              onClear={() => {
+                setPendingGeneration(null)
+                timeline.clear()
+              }}
+              onVerifyAndRegenerate={() => void sttVerification.run()}
+              sttBusy={sttVerification.busy}
+            />
+          </main>
+        </section>
+
+        <DesktopVoiceDrawer
           voiceId={voiceId}
           previewingId={previewingId}
           speed={speechSpeed}
@@ -464,33 +549,7 @@ export function HomePage() {
           onNormalizeTextChange={(value) => setDirectiveIds(value ? ['numbers'] : [])}
           onCreateVoice={() => enterWorkspace('clone')}
         />
-        <LongformComposer
-          disabled={busy}
-          value={composerDraft}
-          backendStatus={backendStatus}
-          backendMessage={backendMessage}
-          activity={activity}
-          onValueChange={setComposerDraft}
-          onSubmit={(value) => void handleLongformSubmit(value)}
-        />
-        <TimelineEditor
-          blocks={timeline.blocks}
-          onMove={timeline.moveBlock}
-          onReorder={timeline.reorderBlock}
-          onSplit={timeline.splitBlock}
-          onUpdateText={timeline.updateText}
-          onRetry={(id) => void retryBlock(id)}
-          onAddVoice={() => timeline.addVoiceBlock(buildOptions())}
-          onAddPause={timeline.addPause}
-          onRemove={timeline.removeBlock}
-          onClear={() => {
-            setPendingGeneration(null)
-            timeline.clear()
-          }}
-          onVerifyAndRegenerate={() => void sttVerification.run()}
-          sttBusy={sttVerification.busy}
-        />
-      </main>
+      </div>
     </div>
   )
 }

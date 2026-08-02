@@ -123,6 +123,22 @@ function VoiceBlock({
               {block.status === 'generating' ? '…' : '▶'}
             </button>
           )}
+          <button
+            type="button"
+            className="soa-dubbing-block__direct-tool"
+            onClick={() => onSplit(block.id)}
+            aria-label={`${voiceIndex + 1}번 대사 가위로 나누기`}
+          >
+            ✂
+          </button>
+          <button
+            type="button"
+            className="soa-dubbing-block__direct-tool is-danger"
+            onClick={() => onRemove(block.id)}
+            aria-label={`${voiceIndex + 1}번 대사 삭제`}
+          >
+            ⌫
+          </button>
           <div className="soa-dubbing-block-menu">
             <button
               type="button"
@@ -237,7 +253,7 @@ export function TimelineEditor({
   return (
     <section className="soa-timeline soa-dubbing-timeline" aria-label="음성 블록 편집">
       <header className="soa-dubbing-timeline__head">
-        <div><span>VOICE BLOCKS</span><strong>대사별 음성 편집</strong></div>
+        <div><span>TIMELINE EDITOR</span><strong>트랙 · 플레이헤드 · 클립 편집</strong></div>
         <div>
           <button
             type="button"
@@ -251,52 +267,64 @@ export function TimelineEditor({
         </div>
       </header>
 
-      {blocks.length === 0 ? (
-        <div className="soa-dubbing-timeline__empty">
-          <strong>아직 음성 블록이 없습니다.</strong>
-          <p>장문 내용을 제작하거나 아래 + 버튼으로 대사를 직접 추가하세요.</p>
+      <div className="soa-capcut-timeline">
+        <div className="soa-capcut-ruler" aria-hidden="true">
+          <span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span><span>01:00</span>
         </div>
-      ) : (
-        <div className="soa-dubbing-block-list">
-          {blocks.map((block, index) => {
-            if (block.kind === 'pause') {
-              return (
-                <div
-                  key={block.id}
-                  className="soa-dubbing-pause-block"
-                  draggable
-                  onDragStart={(event) => event.dataTransfer.setData('text/plain', block.id)}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) => {
-                    event.preventDefault()
-                    const sourceId = event.dataTransfer.getData('text/plain')
-                    if (sourceId) onReorder(sourceId, block.id)
-                  }}
-                >
-                  <span>쉼표 구간</span><strong>{block.durationSeconds.toFixed(1)}초</strong>
-                  <button type="button" onClick={() => onRemove(block.id)} aria-label="쉼 블록 삭제">×</button>
-                </div>
-              )
-            }
-            voiceIndex += 1
-            return (
-              <VoiceBlock
-                key={block.id}
-                block={block}
-                voiceIndex={voiceIndex}
-                index={index}
-                total={blocks.length}
-                onMove={onMove}
-                onReorder={onReorder}
-                onSplit={onSplit}
-                onUpdateText={onUpdateText}
-                onRetry={onRetry}
-                onRemove={onRemove}
-              />
-            )
-          })}
+        <div className="soa-capcut-track-row">
+          <div className="soa-capcut-track-label"><strong>VOICE 1</strong><small>대사 트랙</small></div>
+          <div className="soa-capcut-track-lane">
+            <i className="soa-capcut-playhead" aria-hidden="true" />
+            {blocks.length === 0 ? (
+              <div className="soa-dubbing-timeline__empty">
+                <strong>아직 음성 블록이 없습니다.</strong>
+                <p>장문 내용을 제작하거나 아래 + 버튼으로 대사를 직접 추가하세요.</p>
+              </div>
+            ) : (
+              <div className="soa-dubbing-block-list">
+                {blocks.map((block, index) => {
+                  if (block.kind === 'pause') {
+                    return (
+                      <div
+                        key={block.id}
+                        className="soa-dubbing-pause-block"
+                        draggable
+                        onDragStart={(event) => event.dataTransfer.setData('text/plain', block.id)}
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={(event) => {
+                          event.preventDefault()
+                          const sourceId = event.dataTransfer.getData('text/plain')
+                          if (sourceId) onReorder(sourceId, block.id)
+                        }}
+                      >
+                        <span>쉼</span><strong>{block.durationSeconds.toFixed(1)}초</strong>
+                        <button type="button" onClick={() => onRemove(block.id)} aria-label="쉼 블록 삭제">×</button>
+                      </div>
+                    )
+                  }
+                  voiceIndex += 1
+                  return (
+                    <VoiceBlock
+                      key={block.id}
+                      block={block}
+                      voiceIndex={voiceIndex}
+                      index={index}
+                      total={blocks.length}
+                      onMove={onMove}
+                      onReorder={onReorder}
+                      onSplit={onSplit}
+                      onUpdateText={onUpdateText}
+                      onRetry={onRetry}
+                      onRemove={onRemove}
+                    />
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
+
 
       <FinalExportControls blocks={blocks} />
 
