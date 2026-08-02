@@ -1,0 +1,16 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 5.1 -> Engine Heartbeat 5.2 UI/UX Polish
+
+Purpose: remove cross-breakpoint voice-setting inconsistencies, prevent invalid pitch requests, and improve dialog, keyboard and readability behavior.
+
+Key changes:
+- share voice speed, pitch and six emotion options across desktop and mobile
+- normalize restored speed and pitch values before preview or generation
+- add modal focus trap, Escape close, body scroll lock and focus restoration
+- disable duplicate preview requests while playback preparation is active
+- replace non-functional filter tabs with information tags
+- improve project menu dismissal, panel separator semantics and desktop readability
+- add UI/UX regression tests and dependency-free preflight contracts
+
+Tracked files deleted relative to Engine Heartbeat 5.1: none
+Cumulative permanent cleanup list:
+public/sorion-icon.svg

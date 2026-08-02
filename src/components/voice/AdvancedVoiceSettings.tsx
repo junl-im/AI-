@@ -1,5 +1,10 @@
 import { AnimatePresence, motion } from 'motion/react'
 import type { ChangeEvent } from 'react'
+import {
+  formatPitch,
+  VOICE_PITCH_CONTROL,
+  VOICE_SPEED_CONTROL,
+} from '../../voice/voiceControlOptions'
 
 interface AdvancedVoiceSettingsProps {
   open: boolean
@@ -29,6 +34,7 @@ export function AdvancedVoiceSettings({
         onClick={onToggle}
         className="focus-ring flex min-h-12 w-full items-center justify-between rounded-2xl border border-soa-line bg-[#f4f2ec] px-4 text-sm font-black"
         aria-expanded={open}
+        aria-controls="advanced-voice-settings"
       >
         <span>Advanced 설정</span>
         <span className="text-lg text-soa-muted" aria-hidden="true">{open ? '−' : '+'}</span>
@@ -36,6 +42,7 @@ export function AdvancedVoiceSettings({
       <AnimatePresence initial={false}>
         {open ? (
           <motion.div
+            id="advanced-voice-settings"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -43,29 +50,33 @@ export function AdvancedVoiceSettings({
           >
             <div className="mt-3 space-y-5 rounded-[22px] border border-soa-line bg-white p-4">
               <label className={`block text-xs font-black text-soa-muted ${supportsSpeed ? '' : 'opacity-45'}`}>
-                <span className="flex justify-between"><span>말하기 속도</span><strong className="text-soa-ink">{speed.toFixed(1)}배</strong></span>
+                <span className="flex justify-between"><span>말하기 속도</span><strong className="text-soa-ink">{speed.toFixed(2)}배</strong></span>
                 <input
                   type="range"
-                  min="0.7"
-                  max="1.4"
-                  step="0.1"
+                  min={VOICE_SPEED_CONTROL.min}
+                  max={VOICE_SPEED_CONTROL.max}
+                  step={VOICE_SPEED_CONTROL.step}
                   value={speed}
                   disabled={!supportsSpeed}
                   onChange={(event: ChangeEvent<HTMLInputElement>) => onSpeedChange(Number(event.target.value))}
                   className="mt-3 w-full accent-[#171714] disabled:cursor-not-allowed"
+                  aria-label="음성 속도"
+                  aria-valuetext={`${speed.toFixed(2)}배`}
                 />
               </label>
               <label className={`block text-xs font-black text-soa-muted ${supportsPitch ? '' : 'opacity-45'}`}>
-                <span className="flex justify-between"><span>피치</span><strong className="text-soa-ink">{pitch > 0 ? '+' : ''}{pitch}</strong></span>
+                <span className="flex justify-between"><span>높낮이</span><strong className="text-soa-ink">{formatPitch(pitch)}</strong></span>
                 <input
                   type="range"
-                  min="-6"
-                  max="6"
-                  step="1"
+                  min={VOICE_PITCH_CONTROL.min}
+                  max={VOICE_PITCH_CONTROL.max}
+                  step={VOICE_PITCH_CONTROL.step}
                   value={pitch}
                   disabled={!supportsPitch}
                   onChange={(event: ChangeEvent<HTMLInputElement>) => onPitchChange(Number(event.target.value))}
                   className="mt-3 w-full accent-[#171714] disabled:cursor-not-allowed"
+                  aria-label="음성 높낮이"
+                  aria-valuetext={formatPitch(pitch)}
                 />
               </label>
               <p className="rounded-2xl bg-[#f4f2ec] px-3 py-2 text-[11px] font-semibold leading-5 text-soa-muted">

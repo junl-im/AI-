@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 5.1 · Web Quality Hotfix**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 20:23 KST**
+최종 갱신: **2026-08-02 20:45 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -559,3 +559,13 @@ CI Hotfix 4 테스트 규칙:
 5. Repository preflight 11/11은 통과했다. 샌드박스 npm registry 404와 외부 DNS timeout으로 Vitest 전체 실행은 불가하며 GitHub Actions가 최종 판정한다.
 6. 런타임 제품 코드는 변경하지 않았고, 영향 범위는 Web 테스트와 dependency-free 회귀 게이트뿐이다.
 
+## 44. 2026-08-02 20:45 KST · 0.9.3-beta.3 Engine Heartbeat 5.2 UI/UX Polish
+1. PC와 모바일의 음성 속도·높낮이·말투 옵션을 `src/voice/voiceControlOptions.ts` 단일 계약으로 통합했다.
+2. 이전 PC 높낮이 0.5 단위가 FastAPI 정수 schema와 충돌해 422가 날 수 있어 정수 단위로 통일하고 복원·전송 전에 clamp·반올림한다.
+3. `useModalDialog`를 추가해 Voice Sheet, 종료·초기화 확인창에 초기 초점, Tab trap, Escape, body scroll lock과 초점 복귀를 적용했다.
+4. 미리듣기 준비 중 버튼 재실행을 막고, 가짜 필터 탭은 정보 태그로 바꾸며 목소리 radio의 방향키 이동을 추가했다.
+5. 프로젝트 메뉴는 바깥 클릭·Escape로 닫고, 동작 없는 현재 프로젝트 버튼을 상태 요소로 바꾸며 접힌 패널 separator를 비활성화했다.
+6. 데스크톱 보조 글자와 컨트롤 크기·대비를 높이고 reduced motion 환경에서 패널 전환을 제거했다.
+7. Repository preflight 11/11, API pytest 127개, Worker pytest 14개, Python compileall, TS/TSX parser 160개와 transpile 159개 구문 검사를 통과했다.
+8. npm 설치는 내부 registry의 패키지 404와 외부 registry timeout 때문에 완료하지 못했다. ESLint·Vitest·semantic typecheck·Vite build는 GitHub Actions에서 최종 판정한다.
+9. 남은 수동 확인은 360/390/430px Sheet·가상 키보드, 1180/1280/1440px 3단 레이아웃, NVDA·VoiceOver, Safari range와 실제 TTS 연속 미리듣기다.

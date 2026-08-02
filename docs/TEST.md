@@ -556,3 +556,18 @@ typecheck·Vitest·Vite build는 전달본에 npm lock과 설치 의존성이 �
 샌드박스에서는 Repository preflight 11개와 강화된 Web 테스트 계약을 통과했습니다. npm 설치는 내부 registry의
 미러 누락(404)과 외부 registry DNS timeout으로 실행되지 않아 Vitest 전체 재실행은 GitHub Actions에서 최종 확인합니다.
 
+## Engine Heartbeat 5.2 UI/UX Polish 회귀 검사
+
+- PC Voice Drawer와 모바일 Voice Settings Sheet가 속도 0.7~1.4, 높낮이 -6~6 정수 단위와 말투 6종을 공유하는지 확인합니다.
+- 과거 저장 속도·높낮이가 범위를 벗어나거나 소수 pitch여도 복원·미리듣기·생성 전에 보정되는지 확인합니다.
+- Sheet와 확인창이 열릴 때 안전한 첫 컨트롤로 초점이 이동하고 Tab이 dialog 안에서 순환하는지 확인합니다.
+- Escape·배경 닫기 뒤 원래 실행 버튼으로 초점이 돌아오고 열린 동안 body scroll이 잠기는지 확인합니다.
+- 미리듣기 준비 중 관련 버튼이 비활성화되어 중복 요청이 발생하지 않는지 확인합니다.
+- 목소리 radio가 방향키로 이동하고 비기능성 탭이 조작 가능한 tab으로 노출되지 않는지 확인합니다.
+- 프로젝트 메뉴가 바깥 클릭·Escape로 닫히고 현재 프로젝트가 동작 없는 버튼으로 노출되지 않는지 확인합니다.
+- 접힌 패널의 separator가 비활성화되고 제어 대상과 접힘 상태를 접근성 값으로 알리는지 확인합니다.
+- dependency-free preflight가 공통 음성 설정과 modal 계약이 빠지면 실패하는지 확인합니다.
+
+샌드박스 결과: Repository preflight 11/11, API pytest 127개, Worker pytest 14개, Python compileall,
+TypeScript·TSX parser 160개와 transpile 159개 구문 검사를 통과했습니다. npm registry 404·timeout으로 Web 전체 lint,
+semantic typecheck, Vitest, Vite production build는 실행하지 못했으며 GitHub Actions에서 최종 확인합니다.

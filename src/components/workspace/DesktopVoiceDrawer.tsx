@@ -1,6 +1,12 @@
 import type { VoiceEmotion } from '../../ai/contracts'
 import type { EngineInfo } from '../../ai/contracts'
 import { voicePresets } from '../../tts/voicePresets'
+import {
+  formatPitch,
+  VOICE_EMOTION_OPTIONS,
+  VOICE_PITCH_CONTROL,
+  VOICE_SPEED_CONTROL,
+} from '../../voice/voiceControlOptions'
 
 interface DesktopVoiceDrawerProps {
   voiceId: string
@@ -21,13 +27,6 @@ interface DesktopVoiceDrawerProps {
   onToggleCollapsed: () => void
 }
 
-const emotions: Array<{ id: VoiceEmotion; label: string }> = [
-  { id: 'neutral', label: '기본' },
-  { id: 'happy', label: '밝게' },
-  { id: 'commercial', label: '광고' },
-  { id: 'sad', label: '차분' },
-]
-
 export function DesktopVoiceDrawer({
   voiceId,
   previewingId,
@@ -47,12 +46,17 @@ export function DesktopVoiceDrawer({
   onToggleCollapsed,
 }: DesktopVoiceDrawerProps) {
   return (
-    <aside className={`soa-voice-drawer ${collapsed ? 'is-collapsed' : ''}`} aria-label="미니 보이스 라이브러리">
+    <aside
+      id="soa-voice-drawer"
+      className={`soa-voice-drawer ${collapsed ? 'is-collapsed' : ''}`}
+      aria-label="미니 보이스 라이브러리"
+    >
       <button
         type="button"
         className="soa-studio-panel-toggle"
         aria-label={collapsed ? '보이스 패널 펼치기' : '보이스 패널 접기'}
         aria-expanded={!collapsed}
+        aria-controls="soa-voice-drawer"
         onClick={onToggleCollapsed}
       >
         {collapsed ? '‹' : '›'}
@@ -61,92 +65,98 @@ export function DesktopVoiceDrawer({
         <span className="soa-studio-panel-monogram" aria-hidden="true">V</span>
       ) : (
         <>
-      <header>
-        <span>VOICE DRAWER</span>
-        <strong>목소리 라이브러리</strong>
-        <p>▶를 누르면 선택값이 바로 적용되고 재생됩니다.</p>
-      </header>
+          <header>
+            <span>VOICE DRAWER</span>
+            <strong>목소리 라이브러리</strong>
+            <p>목소리와 말투를 고른 뒤 ▶를 누르면 현재 설정으로 미리듣습니다.</p>
+          </header>
 
-      <div className="soa-voice-drawer__presets" role="radiogroup" aria-label="프리셋 목소리">
-        {voicePresets.map((voice) => {
-          const selected = voice.id === voiceId
-          return (
-            <article key={voice.id} className={selected ? 'is-selected' : ''}>
-              <button
-                type="button"
-                className="soa-voice-drawer__select"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => onVoiceChange(voice.id)}
-              >
-                <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
-                <span><strong>{voice.name}</strong><small>{voice.tags.join(' · ')}</small></span>
-              </button>
-              <button
-                type="button"
-                className="soa-voice-drawer__play"
-                aria-label={`${voice.name} 목소리 적용 후 재생`}
-                disabled={previewingId !== null}
-                onClick={() => onPreview(voice.id)}
-              >
-                {previewingId === voice.id ? '…' : '▶'}
-              </button>
-            </article>
-          )
-        })}
-      </div>
-
-      <section className="soa-voice-drawer__settings" aria-label="음성 세부 설정">
-        <label>
-          <span><b>속도</b><strong>{speed.toFixed(2)}×</strong></span>
-          <input
-            type="range"
-            min="0.75"
-            max="1.25"
-            step="0.05"
-            value={speed}
-            onChange={(event) => onSpeedChange(Number(event.target.value))}
-            aria-label="음성 속도"
-          />
-        </label>
-        <label>
-          <span><b>높낮이</b><strong>{pitch > 0 ? '+' : ''}{pitch.toFixed(1)}</strong></span>
-          <input
-            type="range"
-            min="-4"
-            max="4"
-            step="0.5"
-            value={pitch}
-            onChange={(event) => onPitchChange(Number(event.target.value))}
-            aria-label="음성 높낮이"
-          />
-        </label>
-        <div className="soa-voice-drawer__emotion">
-          <b>말투</b>
-          <div>
-            {emotions.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={emotion === item.id ? 'is-active' : ''}
-                onClick={() => onEmotionChange(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="soa-voice-drawer__presets" role="radiogroup" aria-label="프리셋 목소리">
+            {voicePresets.map((voice) => {
+              const selected = voice.id === voiceId
+              return (
+                <article key={voice.id} className={selected ? 'is-selected' : ''}>
+                  <button
+                    type="button"
+                    className="soa-voice-drawer__select"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => onVoiceChange(voice.id)}
+                  >
+                    <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
+                    <span><strong>{voice.name}</strong><small>{voice.tags.join(' · ')}</small></span>
+                  </button>
+                  <button
+                    type="button"
+                    className="soa-voice-drawer__play"
+                    aria-label={`${voice.name} 목소리 적용 후 재생`}
+                    aria-busy={previewingId === voice.id}
+                    disabled={previewingId !== null}
+                    onClick={() => onPreview(voice.id)}
+                  >
+                    {previewingId === voice.id ? '…' : '▶'}
+                  </button>
+                </article>
+              )
+            })}
           </div>
-        </div>
-        <label className="soa-voice-drawer__normalize">
-          <span><b>숫자·기호 읽기 보정</b><small>{engine?.name ?? '지원 엔진 자동 선택'}</small></span>
-          <input
-            type="checkbox"
-            checked={normalizeText}
-            onChange={(event) => onNormalizeTextChange(event.target.checked)}
-          />
-        </label>
-      </section>
 
-      <button type="button" className="soa-voice-drawer__create" onClick={onCreateVoice}>＋ 새 보이스 만들기</button>
+          <section className="soa-voice-drawer__settings" aria-label="음성 세부 설정">
+            <label>
+              <span><b>속도</b><strong>{speed.toFixed(2)}×</strong></span>
+              <input
+                type="range"
+                min={VOICE_SPEED_CONTROL.min}
+                max={VOICE_SPEED_CONTROL.max}
+                step={VOICE_SPEED_CONTROL.step}
+                value={speed}
+                onChange={(event) => onSpeedChange(Number(event.target.value))}
+                aria-label="음성 속도"
+                aria-valuetext={`${speed.toFixed(2)}배`}
+              />
+            </label>
+            <label>
+              <span><b>높낮이</b><strong>{formatPitch(pitch)}</strong></span>
+              <input
+                type="range"
+                min={VOICE_PITCH_CONTROL.min}
+                max={VOICE_PITCH_CONTROL.max}
+                step={VOICE_PITCH_CONTROL.step}
+                value={pitch}
+                onChange={(event) => onPitchChange(Number(event.target.value))}
+                aria-label="음성 높낮이"
+                aria-valuetext={formatPitch(pitch)}
+              />
+            </label>
+            <div className="soa-voice-drawer__emotion">
+              <b>말투</b>
+              <div role="radiogroup" aria-label="음성 말투">
+                {VOICE_EMOTION_OPTIONS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={emotion === item.id}
+                    className={emotion === item.id ? 'is-active' : ''}
+                    onClick={() => onEmotionChange(item.id)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="soa-voice-drawer__normalize">
+              <span><b>숫자·기호 읽기 보정</b><small>{engine?.name ?? '지원 엔진 자동 선택'}</small></span>
+              <input
+                type="checkbox"
+                checked={normalizeText}
+                onChange={(event) => onNormalizeTextChange(event.target.checked)}
+                aria-label="숫자와 기호 읽기 보정"
+              />
+            </label>
+          </section>
+
+          <button type="button" className="soa-voice-drawer__create" onClick={onCreateVoice}>＋ 새 보이스 만들기</button>
         </>
       )}
     </aside>

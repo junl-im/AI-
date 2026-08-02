@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 5.1 · Web Quality Hotfix`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -30,6 +30,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 프리셋 안전성: WAV 포맷·길이·샘플레이트·무음·클리핑을 Worker 요청 전에 검사
 - 지연 지표: 서버 첫 음성 파일 준비 시간과 전체 생성 시간을 분리 표시
 - PC 레이아웃: 좌우 패널 드래그·키보드 조절, 접기와 로컬 상태 저장
+- 설정 일관성: PC·모바일이 속도·높낮이·말투 6종을 같은 계약으로 사용
+- 접근성: Sheet·확인창 초점 이동·Tab 순환·Escape 닫기·초점 복귀와 배경 스크롤 잠금
 
 ## 무료 실행
 
@@ -64,6 +66,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - API 연결: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
 - 공개 HTTPS Bridge: [`docs/SECURE_MOBILE_BRIDGE.md`](docs/SECURE_MOBILE_BRIDGE.md)
 - 첫 음성 준비 지연: [`docs/FIRST_AUDIO_LATENCY.md`](docs/FIRST_AUDIO_LATENCY.md)
+- UI/UX 점검: [`docs/UI_UX_AUDIT_HEARTBEAT_5_2.md`](docs/UI_UX_AUDIT_HEARTBEAT_5_2.md)
 - lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
 
 ## 개발 원칙

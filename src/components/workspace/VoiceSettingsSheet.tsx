@@ -1,5 +1,11 @@
-import { useEffect } from 'react'
 import type { VoiceEmotion } from '../../ai/contracts'
+import { useModalDialog } from '../../hooks/useModalDialog'
+import {
+  formatPitch,
+  VOICE_EMOTION_OPTIONS,
+  VOICE_PITCH_CONTROL,
+  VOICE_SPEED_CONTROL,
+} from '../../voice/voiceControlOptions'
 
 interface VoiceSettingsSheetProps {
   open: boolean
@@ -10,6 +16,7 @@ interface VoiceSettingsSheetProps {
   supportsSpeed: boolean
   supportsPitch: boolean
   supportsEmotion: boolean
+  previewing: boolean
   onClose: () => void
   onSpeedChange: (value: number) => void
   onPitchChange: (value: number) => void
@@ -17,13 +24,6 @@ interface VoiceSettingsSheetProps {
   onNormalizeTextChange: (value: boolean) => void
   onPreview: () => void
 }
-
-const emotions: Array<{ value: VoiceEmotion; label: string }> = [
-  { value: 'neutral', label: '기본' },
-  { value: 'calm', label: '차분' },
-  { value: 'happy', label: '밝게' },
-  { value: 'commercial', label: '광고' },
-]
 
 export function VoiceSettingsSheet({
   open,
@@ -34,6 +34,7 @@ export function VoiceSettingsSheet({
   supportsSpeed,
   supportsPitch,
   supportsEmotion,
+  previewing,
   onClose,
   onSpeedChange,
   onPitchChange,
@@ -41,29 +42,31 @@ export function VoiceSettingsSheet({
   onNormalizeTextChange,
   onPreview,
 }: VoiceSettingsSheetProps) {
-  useEffect(() => {
-    if (!open) return undefined
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose, open])
+  const dialogRef = useModalDialog<HTMLElement>(open, onClose)
 
   if (!open) return null
 
   return (
     <div className="soa-sheet-backdrop" role="presentation" onMouseDown={onClose}>
       <section
+        ref={dialogRef}
         className="soa-bottom-sheet soa-voice-settings-sheet"
         role="dialog"
         aria-modal="true"
         aria-labelledby="voice-settings-title"
+        tabIndex={-1}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="soa-sheet-handle" aria-hidden="true" />
         <header className="soa-sheet-header">
-          <button type="button" onClick={onClose} aria-label="음성 설정 닫기">‹</button>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="음성 설정 닫기"
+            data-dialog-autofocus
+          >
+            ‹
+          </button>
           <h2 id="voice-settings-title">음성 설정</h2>
           <span />
         </header>
@@ -72,34 +75,40 @@ export function VoiceSettingsSheet({
           <span><b>속도</b><strong>{speed.toFixed(2)}× · {supportsSpeed ? '현재 엔진 적용' : '지원 엔진 자동 선택'}</strong></span>
           <input
             type="range"
-            min="0.7"
-            max="1.4"
-            step="0.05"
+            min={VOICE_SPEED_CONTROL.min}
+            max={VOICE_SPEED_CONTROL.max}
+            step={VOICE_SPEED_CONTROL.step}
             value={speed}
             onChange={(event) => onSpeedChange(Number(event.target.value))}
+            aria-label="음성 속도"
+            aria-valuetext={`${speed.toFixed(2)}배`}
           />
         </label>
         <label>
-          <span><b>높낮이</b><strong>{pitch > 0 ? '+' : ''}{pitch} · {supportsPitch ? '현재 엔진 적용' : '지원 엔진 자동 선택'}</strong></span>
+          <span><b>높낮이</b><strong>{formatPitch(pitch)} · {supportsPitch ? '현재 엔진 적용' : '지원 엔진 자동 선택'}</strong></span>
           <input
             type="range"
-            min="-6"
-            max="6"
-            step="1"
+            min={VOICE_PITCH_CONTROL.min}
+            max={VOICE_PITCH_CONTROL.max}
+            step={VOICE_PITCH_CONTROL.step}
             value={pitch}
             onChange={(event) => onPitchChange(Number(event.target.value))}
+            aria-label="음성 높낮이"
+            aria-valuetext={formatPitch(pitch)}
           />
         </label>
 
         <div className="soa-emotion-settings">
           <span><b>말투</b><strong>{supportsEmotion ? '현재 엔진 적용' : '지원 엔진 자동 선택'}</strong></span>
-          <div>
-            {emotions.map((item) => (
+          <div role="radiogroup" aria-label="음성 말투">
+            {VOICE_EMOTION_OPTIONS.map((item) => (
               <button
-                key={item.value}
+                key={item.id}
                 type="button"
-                className={emotion === item.value ? 'is-active' : ''}
-                onClick={() => onEmotionChange(item.value)}
+                role="radio"
+                aria-checked={emotion === item.id}
+                className={emotion === item.id ? 'is-active' : ''}
+                onClick={() => onEmotionChange(item.id)}
               >
                 {item.label}
               </button>
@@ -113,12 +122,19 @@ export function VoiceSettingsSheet({
             type="checkbox"
             checked={normalizeText}
             onChange={(event) => onNormalizeTextChange(event.target.checked)}
+            aria-label="한국어 숫자와 기호 읽기 보정"
           />
         </label>
 
         <div className="soa-sheet-actions is-single">
-          <button type="button" className="is-primary" onClick={onPreview}>
-            ▶ 현재 설정 적용 · 재생
+          <button
+            type="button"
+            className="is-primary"
+            onClick={onPreview}
+            disabled={previewing}
+            aria-busy={previewing}
+          >
+            {previewing ? '현재 설정으로 재생 준비 중…' : '▶ 현재 설정 적용 · 재생'}
           </button>
         </div>
       </section>

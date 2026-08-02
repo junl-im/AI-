@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 5.2 · UI/UX polish
+
+- PC·모바일 음성 설정의 속도·높낮이 범위와 말투 6종을 공통 계약으로 통합
+- 높낮이 소수 단위와 FastAPI 정수 계약 충돌을 제거하고 복원·전송 값을 안전 보정
+- Bottom Sheet·확인창에 초기 초점, Tab 순환, Escape 닫기, 초점 복귀, 배경 스크롤 잠금 적용
+- 미리듣기 중 중복 요청 차단, 목소리 radio 방향키 이동과 상태 안내 개선
+- 동작하지 않는 필터 탭 제거, 프로젝트 메뉴 닫기 동작과 현재 프로젝트 의미 개선
+- 데스크톱 보조 텍스트·컨트롤 가독성, 패널 separator 의미와 reduced-motion 동작 보강
+- UI/UX 컴포넌트 테스트와 dependency-free preflight 계약 추가
+
 ## 0.9.3-beta.3 Engine Heartbeat 5.1 · Web quality hotfix
 
 - `HomePage` 자동 복원 테스트의 `밝게` 버튼 조회를 `음성 설정` dialog 내부로 제한

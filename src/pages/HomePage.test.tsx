@@ -87,7 +87,7 @@ describe('HomePage', () => {
       .toHaveValue('아직 제작하지 않은 모바일 장문 내용')
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
     const voiceSettings = screen.getByRole('dialog', { name: '음성 설정' })
-    expect(within(voiceSettings).getByRole('button', { name: '밝게' })).toHaveClass('is-active')
+    expect(within(voiceSettings).getByRole('radio', { name: '밝게' })).toHaveClass('is-active')
   })
   it('엔진 계층 실패를 작업 메시지로 즉시 알린다', async () => {
     useAppStore.setState({

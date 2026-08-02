@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 5`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish`
 
 ## 목표 버전
 
@@ -13,7 +13,7 @@
 3. 신뢰 reverse proxy allowlist와 forwarded header 정규화를 추가해 공개 Bridge 진단의 spoofing 가능성을 줄인다.
 4. Caddy·Nginx·관리형 tunnel 배포 예시와 CORS·HMAC·rate-limit 운영 검사를 자동화한다.
 5. 실제 CosyVoice 모델·프리셋 3종으로 첫 구간 지연, 전체 RTF, 실패율과 모바일 재생 증거를 기록한다.
-6. PC 패널 조절·접기·좁은 데스크톱의 Web 컴포넌트·시각 회귀 테스트를 추가한다.
+6. 360~430px Sheet·가상 키보드와 1180~1440px 3단 레이아웃의 실브라우저 시각 회귀를 추가한다.
 
 ## 예상 변경 영역
 
@@ -31,6 +31,7 @@
 
 ## 넘기는 결정
 
+- Heartbeat 5.2의 공통 음성 설정 범위와 modal 초점 계약을 이후 화면에서도 재사용합니다.
 - Heartbeat 5의 `first_audio_ms`는 서버 첫 파일 준비 시간으로 고정합니다.
 - Browser Speech는 실제 `onstart`를 측정하기 전까지 `null`을 유지합니다.
 - forwarded header는 Heartbeat 5에서 진단 전용이며 권한 판정에 사용하지 않습니다.

@@ -94,6 +94,7 @@ export function DubbingVoiceControls({
         supportsSpeed={engine?.supportsSpeed ?? false}
         supportsPitch={engine?.supportsPitch ?? false}
         supportsEmotion={engine?.supportsEmotion ?? false}
+        previewing={previewingId !== null}
         onClose={() => setSettingsOpen(false)}
         onSpeedChange={onSpeedChange}
         onPitchChange={onPitchChange}

@@ -32,6 +32,7 @@ import { createRandomId } from '../utils/randomId'
 import type { WorkspaceSession } from '../workspace/sessionTypes'
 import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import type { ComposerDirective, WorkspaceMessage } from '../workspace/workspaceTypes'
+import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
 import { LandingHome } from './LandingHome'
 
 interface PendingLongformGeneration {
@@ -154,8 +155,8 @@ export function HomePage() {
     if (explicitWorkspaceActionRef.current || useAppStore.getState().activeProject) return
     setProjectTitle(session.projectTitle || '새 프로젝트')
     setVoiceId(getVoicePreset(session.voiceId).id)
-    setSpeechSpeed(session.speechSpeed)
-    setSpeechPitch(session.speechPitch)
+    setSpeechSpeed(normalizeVoiceSpeed(session.speechSpeed))
+    setSpeechPitch(normalizeVoicePitch(session.speechPitch))
     setSpeechEmotion(
       session.speechEmotion !== 'neutral'
         ? session.speechEmotion
@@ -227,8 +228,10 @@ export function HomePage() {
     const voice = getVoicePreset(activeProject.voiceId)
     setProjectTitle(activeProject.title || '새 프로젝트')
     setVoiceId(activeProject.voiceId)
-    setSpeechSpeed(activeProject.speed ?? 1)
-    setSpeechPitch(activeProject.pitch ?? 0)
+    const restoredSpeed = normalizeVoiceSpeed(activeProject.speed ?? 1)
+    const restoredPitch = normalizeVoicePitch(activeProject.pitch ?? 0)
+    setSpeechSpeed(restoredSpeed)
+    setSpeechPitch(restoredPitch)
     setSpeechEmotion(activeProject.emotion)
     setComposerDraft(activeProject.text)
     setDirectiveIds(activeProject.normalizeText === false ? [] : ['numbers'])
@@ -245,8 +248,8 @@ export function HomePage() {
       voiceId: activeProject.voiceId,
       voiceName: voice.name,
       emotion: activeProject.emotion,
-      speed: activeProject.speed ?? 1,
-      pitch: activeProject.pitch ?? 0,
+      speed: restoredSpeed,
+      pitch: restoredPitch,
       engineId: 'auto',
       normalizeText: activeProject.normalizeText ?? true,
     })
@@ -287,8 +290,8 @@ export function HomePage() {
     voiceId,
     voiceName: selectedVoice.name,
     emotion: speechEmotion,
-    speed: speechSpeed,
-    pitch: speechPitch,
+    speed: normalizeVoiceSpeed(speechSpeed),
+    pitch: normalizeVoicePitch(speechPitch),
     engineId: selectedEngineId,
     normalizeText,
   }), [normalizeText, selectedEngineId, selectedVoice.name, speechEmotion, speechPitch, speechSpeed, voiceId])
@@ -410,8 +413,8 @@ export function HomePage() {
         text,
         voiceId: nextVoiceId,
         emotion: speechEmotion,
-        speed: speechSpeed,
-        pitch: speechPitch,
+        speed: normalizeVoiceSpeed(speechSpeed),
+        pitch: normalizeVoicePitch(speechPitch),
         format: 'wav',
         engineId: selectedEngineId,
         normalizeText,
@@ -481,6 +484,9 @@ export function HomePage() {
           aria-valuemin={200}
           aria-valuemax={360}
           aria-valuenow={desktopLayout.leftWidth}
+          aria-valuetext={desktopLayout.leftCollapsed ? '접힘' : `${desktopLayout.leftWidth}픽셀`}
+          aria-controls="soa-project-rail"
+          disabled={desktopLayout.leftCollapsed}
           onPointerDown={desktopLayout.startLeftResize}
           onKeyDown={desktopLayout.onLeftSeparatorKeyDown}
         />
@@ -558,6 +564,9 @@ export function HomePage() {
           aria-valuemin={260}
           aria-valuemax={420}
           aria-valuenow={desktopLayout.rightWidth}
+          aria-valuetext={desktopLayout.rightCollapsed ? '접힘' : `${desktopLayout.rightWidth}픽셀`}
+          aria-controls="soa-voice-drawer"
+          disabled={desktopLayout.rightCollapsed}
           onPointerDown={desktopLayout.startRightResize}
           onKeyDown={desktopLayout.onRightSeparatorKeyDown}
         />

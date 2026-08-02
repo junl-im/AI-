@@ -1,7 +1,17 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 5.1 · Web Quality Hotfix**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish**
 
+
+## Engine Heartbeat 5.2 UI/UX Polish
+
+- PC와 모바일 음성 설정의 속도·높낮이 범위와 말투 6종을 하나의 설정 모듈로 통합했습니다.
+- 높낮이 0.5 단위가 FastAPI 정수 계약과 충돌해 422를 만들 수 있던 경로를 1단위와 안전 보정으로 수정했습니다.
+- Bottom Sheet·확인창에 초기 초점, Tab 순환, Escape 닫기, 초점 복귀와 배경 스크롤 잠금을 공통 적용했습니다.
+- 미리듣기 준비 중 중복 요청을 차단하고, 동작하지 않는 필터 탭을 비조작형 정보 태그로 변경했습니다.
+- 프로젝트 메뉴의 바깥 클릭·Escape 닫기, 현재 프로젝트의 비조작형 의미, 접힌 패널 리사이저 상태를 보강했습니다.
+- 7~9px 데스크톱 보조 글자를 10~12px 중심으로 높이고 터치·클릭 영역과 모션 감소 동작을 다듬었습니다.
+- 세부 발견 사항과 남은 실브라우저 확인 범위는 `docs/UI_UX_AUDIT_HEARTBEAT_5_2.md`에 기록했습니다.
 
 ## Engine Heartbeat 5.1 Web Quality Hotfix
 
@@ -72,9 +82,9 @@
 - API pytest 127개 통과
 - Worker pytest 14개 통과
 - Python compileall 통과
-- TypeScript·TSX 156개 소스 파일 parser 검사 통과
+- TypeScript·TSX 160개 소스 파일 parser 검사 통과
 - Repository preflight 11개 통과
-- 변경 TypeScript·TSX 156개 파일 transpile 구문 검사 통과
+- TypeScript·TSX 159개 파일 transpile 구문 검사 통과
 - 802줄 fixture는 경고 후 통과, 1,202줄 fixture는 1,200줄 안전 상한으로 실패
 - Setup API 프리셋 0/3·2/3·3/3 진단 테스트와 실제 3/3 응답 확인
 - 프로젝트 규칙, 폐기 파일, Web manifest, free-only, engine blueprint, 모델 onboarding 검사 통과
@@ -85,4 +95,4 @@
 
 합성 무음 soak는 파일 병합, FFmpeg, 컨테이너 길이와 자막 타임코드 안정성만 검증합니다. 실제 한국어 음질, CosyVoice 처리 속도, CUDA·MPS·모바일 메모리 성능을 증명하지 않습니다. 실제 장치·모델 증거는 `.sorion/quality`에 별도로 기록해야 합니다.
 
-전달받은 전체본에는 `package-lock.json`과 `node_modules`가 없어 전체 ESLint·Vitest·TypeScript semantic 검사·Vite production build를 실행하지 못했습니다. 대신 Repository preflight, 프로젝트 규칙, TypeScript·TSX 156개 파일 transpile 구문 검사, API 127개, Worker 14개와 Python compileall을 통과했습니다. 테스트 런타임은 Python 3.13.5였으며 프로젝트 지원 범위는 3.10~3.12입니다.
+전달받은 전체본에는 `package-lock.json`과 `node_modules`가 없어 전체 ESLint·Vitest·TypeScript semantic 검사·Vite production build를 실행하지 못했습니다. 대신 Repository preflight, 프로젝트 규칙, TypeScript·TSX 159개 파일 transpile 구문 검사, API 127개, Worker 14개와 Python compileall을 통과했습니다. 테스트 런타임은 Python 3.13.5였으며 프로젝트 지원 범위는 3.10~3.12입니다.

@@ -1,3 +1,5 @@
+import { useModalDialog } from '../../hooks/useModalDialog'
+
 interface ExitConfirmDialogProps {
   open: boolean
   onStay: () => void
@@ -5,15 +7,19 @@ interface ExitConfirmDialogProps {
 }
 
 export function ExitConfirmDialog({ open, onStay, onExit }: ExitConfirmDialogProps) {
+  const dialogRef = useModalDialog<HTMLElement>(open, onStay)
+
   if (!open) return null
 
   return (
     <div className="soa-exit-dialog" role="presentation" onMouseDown={onStay}>
       <section
+        ref={dialogRef}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="soa-exit-title"
         aria-describedby="soa-exit-description"
+        tabIndex={-1}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <span className="soa-exit-dialog__icon" aria-hidden="true">↩</span>
@@ -22,7 +28,7 @@ export function ExitConfirmDialog({ open, onStay, onExit }: ExitConfirmDialogPro
           작업 내용은 자동 저장됩니다. 뒤로가기를 한 번 더 누르면 바로 종료됩니다.
         </p>
         <div>
-          <button type="button" onClick={onStay} autoFocus>계속 만들기</button>
+          <button type="button" onClick={onStay} data-dialog-autofocus>계속 만들기</button>
           <button type="button" className="is-danger" onClick={onExit}>종료</button>
         </div>
       </section>

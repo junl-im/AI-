@@ -47,4 +47,34 @@ describe('DubbingStudioHeader', () => {
     fireEvent.click(screen.getByRole('button', { name: '작업 비우기' }))
     expect(onClear).toHaveBeenCalledTimes(1)
   })
+
+  it('프로젝트 메뉴는 Escape로 닫히고 실행 버튼으로 초점이 복귀한다', () => {
+    renderHeader()
+
+    const menuButton = screen.getByRole('button', { name: '프로젝트 메뉴 열기' })
+    fireEvent.click(menuButton)
+    expect(screen.getByLabelText('프로젝트 메뉴')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(screen.queryByLabelText('프로젝트 메뉴')).not.toBeInTheDocument()
+    expect(menuButton).toHaveFocus()
+  })
+
+  it('작업 비우기 확인창은 안전 동작에 초점을 두고 Escape로 닫힌다', () => {
+    renderHeader()
+
+    const menuButton = screen.getByRole('button', { name: '프로젝트 메뉴 열기' })
+    fireEvent.click(menuButton)
+    fireEvent.click(screen.getByRole('button', { name: '현재 작업 비우기' }))
+
+    expect(screen.getByRole('button', { name: '계속 편집' })).toHaveFocus()
+    expect(document.body.style.overflow).toBe('hidden')
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(screen.queryByRole('alertdialog', { name: '현재 작업을 비울까요?' })).not.toBeInTheDocument()
+    expect(document.body.style.overflow).toBe('')
+    expect(menuButton).toHaveFocus()
+  })
+
 })

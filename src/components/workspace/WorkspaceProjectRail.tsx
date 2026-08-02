@@ -56,12 +56,17 @@ export function WorkspaceProjectRail({
   }, [refreshKey])
 
   return (
-    <aside className={`soa-project-rail ${collapsed ? 'is-collapsed' : ''}`} aria-label="프로젝트 목록">
+    <aside
+      id="soa-project-rail"
+      className={`soa-project-rail ${collapsed ? 'is-collapsed' : ''}`}
+      aria-label="프로젝트 목록"
+    >
       <button
         type="button"
         className="soa-studio-panel-toggle"
         aria-label={collapsed ? '프로젝트 패널 펼치기' : '프로젝트 패널 접기'}
         aria-expanded={!collapsed}
+        aria-controls="soa-project-rail"
         onClick={onToggleCollapsed}
       >
         {collapsed ? '›' : '‹'}
@@ -75,10 +80,10 @@ export function WorkspaceProjectRail({
         <button type="button" onClick={onNewProject}>＋ 새 작업</button>
       </div>
 
-      <button type="button" className="soa-project-rail__current" aria-current="page">
+      <div className="soa-project-rail__current" aria-current="page">
         <span aria-hidden="true">●</span>
         <span><strong>{currentTitle || '새 프로젝트'}</strong><small>현재 편집 중</small></span>
-      </button>
+      </div>
 
       <div className="soa-project-rail__list" aria-live="polite">
         {loading ? <p>최근 작업을 불러오는 중…</p> : null}

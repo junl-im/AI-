@@ -21,14 +21,14 @@
 
 .soa-workspace-conversation > header span {
   color: #8f80ff;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 950;
   letter-spacing: 0.14em;
 }
 
 .soa-workspace-conversation > header strong {
   color: rgba(255, 255, 255, 0.62);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .soa-workspace-conversation > div {
@@ -64,7 +64,7 @@
   padding: 4px 7px;
   color: #d8d1ff;
   background: rgba(157, 144, 255, 0.13);
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 900;
   white-space: nowrap;
 }
@@ -76,7 +76,7 @@
 
 .soa-workspace-conversation p {
   margin: 1px 0 0;
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 650;
   line-height: 1.55;
 }
@@ -97,7 +97,7 @@
   padding: 8px 12px 7px;
   color: rgba(255, 255, 255, 0.28);
   background: #171a22;
-  font-size: 7px;
+  font-size: 10px;
   font-weight: 750;
 }
 
@@ -119,8 +119,8 @@
   background: #171a22;
 }
 
-.soa-capcut-track-label strong { color: #ff9186; font-size: 8px; }
-.soa-capcut-track-label small { font-size: 7px; }
+.soa-capcut-track-label strong { color: #ff9186; font-size: 10px; }
+.soa-capcut-track-label small { font-size: 10px; }
 
 .soa-capcut-track-lane {
   position: relative;
@@ -193,6 +193,11 @@
     background: rgba(216, 255, 114, 0.48);
   }
 
+  .soa-studio-resizer:disabled {
+    cursor: default;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
   .soa-desktop-studio__center {
     min-width: 0;
     border-right: 1px solid rgba(255, 255, 255, 0.07);
@@ -226,8 +231,8 @@
     top: 12px;
     right: 8px;
     display: grid;
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     place-items: center;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 10px;
@@ -277,19 +282,19 @@
   .soa-project-rail__head span,
   .soa-voice-drawer > header span {
     color: #9183ff;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 950;
     letter-spacing: 0.14em;
   }
 
   .soa-project-rail__head button {
-    min-height: 32px;
+    min-height: 36px;
     border: 0;
     border-radius: 10px;
     padding: 0 10px;
     color: #111620;
     background: #d8ff72;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 900;
   }
 
@@ -316,8 +321,8 @@
   .soa-project-rail__current > span:first-child { color: #65e3c2; font-size: 8px; }
   .soa-project-rail strong,
   .soa-project-rail small { display: block; }
-  .soa-project-rail strong { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-  .soa-project-rail small { margin-top: 3px; color: rgba(238, 243, 255, 0.32); font-size: 7px; }
+  .soa-project-rail strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+  .soa-project-rail small { margin-top: 3px; color: rgba(238, 243, 255, 0.48); font-size: 10px; }
 
   .soa-project-rail__list {
     display: grid;
@@ -330,7 +335,7 @@
   .soa-project-rail__list > p {
     margin: 8px;
     color: rgba(238, 243, 255, 0.3);
-    font-size: 8px;
+    font-size: 10px;
     line-height: 1.5;
   }
 
@@ -351,7 +356,7 @@
     color: rgba(238, 243, 255, 0.48);
     text-align: left;
     background: transparent;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 800;
   }
 
@@ -457,8 +462,8 @@
 
   .soa-voice-drawer > header p {
     margin: 6px 0 0;
-    color: rgba(238, 243, 255, 0.38);
-    font-size: 8px;
+    color: rgba(238, 243, 255, 0.56);
+    font-size: 10px;
     line-height: 1.5;
   }
 
@@ -511,12 +516,12 @@
   .soa-voice-drawer__select > span:last-child { min-width: 0; }
   .soa-voice-drawer__select strong,
   .soa-voice-drawer__select small { display: block; }
-  .soa-voice-drawer__select strong { font-size: 10px; }
-  .soa-voice-drawer__select small { overflow: hidden; margin-top: 3px; color: rgba(238, 243, 255, 0.36); font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+  .soa-voice-drawer__select strong { font-size: 12px; }
+  .soa-voice-drawer__select small { overflow: hidden; margin-top: 3px; color: rgba(238, 243, 255, 0.52); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 
   .soa-voice-drawer__play {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
     border: 0;
     border-radius: 10px;
     color: #fff;
@@ -546,25 +551,25 @@
     gap: 8px;
   }
 
-  .soa-voice-drawer__settings b { font-size: 9px; }
+  .soa-voice-drawer__settings b { font-size: 11px; }
   .soa-voice-drawer__settings strong,
-  .soa-voice-drawer__settings small { color: rgba(238, 243, 255, 0.4); font-size: 7px; }
-  .soa-voice-drawer__settings input[type='range'] { width: 100%; margin-top: 10px; accent-color: #d8ff72; }
+  .soa-voice-drawer__settings small { color: rgba(238, 243, 255, 0.55); font-size: 10px; }
+  .soa-voice-drawer__settings input[type='range'] { width: 100%; min-height: 28px; margin-top: 8px; accent-color: #d8ff72; }
 
   .soa-voice-drawer__emotion > div {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 4px;
     margin-top: 8px;
   }
 
   .soa-voice-drawer__emotion button {
-    min-height: 30px;
+    min-height: 36px;
     border: 0;
     border-radius: 8px;
     color: rgba(238, 243, 255, 0.42);
     background: rgba(255, 255, 255, 0.04);
-    font-size: 7px;
+    font-size: 10px;
     font-weight: 800;
   }
 
@@ -589,11 +594,18 @@
     border-radius: 12px;
     color: rgba(238, 243, 255, 0.58);
     background: transparent;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 850;
   }
 }
 
 @media (min-width: 1180px) {
   .soa-dubbing-activity { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soa-project-rail,
+  .soa-voice-drawer {
+    transition: none;
+  }
 }

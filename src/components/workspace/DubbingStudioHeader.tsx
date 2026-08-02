@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useModalDialog } from '../../hooks/useModalDialog'
 import type { BackendStatus } from '../../store/useAppStore'
 
 interface DubbingStudioHeaderProps {
@@ -39,8 +40,40 @@ export function DubbingStudioHeader({
   onClear,
 }: DubbingStudioHeaderProps) {
   const titleRef = useRef<HTMLInputElement | null>(null)
+  const projectMenuRef = useRef<HTMLDivElement | null>(null)
+  const projectMenuButtonRef = useRef<HTMLButtonElement | null>(null)
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false)
   const [projectMenuOpen, setProjectMenuOpen] = useState(false)
+  const clearDialogRef = useModalDialog<HTMLElement>(
+    clearConfirmOpen,
+    () => setClearConfirmOpen(false),
+    projectMenuButtonRef,
+  )
+
+  useEffect(() => {
+    if (!projectMenuOpen) return undefined
+
+    const closeMenu = () => {
+      setProjectMenuOpen(false)
+      projectMenuButtonRef.current?.focus({ preventScroll: true })
+    }
+    const handlePointerDown = (event: PointerEvent) => {
+      if (projectMenuRef.current?.contains(event.target as Node)) return
+      closeMenu()
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      closeMenu()
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [projectMenuOpen])
 
   return (
     <header className="soa-dubbing-header">
@@ -75,8 +108,9 @@ export function DubbingStudioHeader({
           ) : (
             <button type="button" disabled aria-label="현재 음성은 파일 다운로드를 지원하지 않음">⇩</button>
           )}
-          <div className="soa-dubbing-more">
+          <div ref={projectMenuRef} className="soa-dubbing-more">
             <button
+              ref={projectMenuButtonRef}
               type="button"
               className="soa-dubbing-more__trigger"
               aria-label="프로젝트 메뉴 열기"
@@ -143,17 +177,19 @@ export function DubbingStudioHeader({
       {clearConfirmOpen ? (
         <div className="soa-confirm-layer" role="presentation" onMouseDown={() => setClearConfirmOpen(false)}>
           <section
+            ref={clearDialogRef}
             className="soa-confirm-dialog"
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="clear-work-title"
             aria-describedby="clear-work-description"
+            tabIndex={-1}
             onMouseDown={(event) => event.stopPropagation()}
           >
             <strong id="clear-work-title">현재 작업을 비울까요?</strong>
             <p id="clear-work-description">내용과 생성된 음성 블록이 새 프로젝트 상태로 초기화됩니다.</p>
             <div>
-              <button type="button" onClick={() => setClearConfirmOpen(false)}>계속 편집</button>
+              <button type="button" onClick={() => setClearConfirmOpen(false)} data-dialog-autofocus>계속 편집</button>
               <button
                 type="button"
                 className="is-danger"

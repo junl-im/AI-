@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 5.1 · Web Quality Hotfix`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -21,3 +21,6 @@
 16. 프리셋 WAV는 1~30초, 16~48kHz, 모노·스테레오 PCM이어야 하며 과도한 무음·클리핑은 Worker 요청 전에 차단됩니다.
 17. `첫 음성 준비`는 서버의 첫 사용 가능 파일 준비 시간입니다. 브라우저 실제 재생 시작 시간은 다음 패치에서 별도 측정합니다.
 18. PC 3단 패널의 너비와 접기 상태는 브라우저 로컬 저장소에 보존됩니다.
+19. PC·모바일 음성 설정은 같은 속도·높낮이 범위와 말투 6종을 사용하며, 과거 저장값은 안전 범위로 보정됩니다.
+20. Sheet·확인창은 키보드 초점 순환, Escape 닫기, 닫힌 뒤 초점 복귀와 배경 스크롤 잠금을 제공합니다.
+21. 전체 Web lint·Vitest·semantic typecheck·production build는 검증된 npm lock이 있는 GitHub Actions에서 최종 확인합니다.

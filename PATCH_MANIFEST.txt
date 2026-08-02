@@ -1,13 +1,17 @@
-SoriON AI 0.9.3-beta.3 Engine Heartbeat 5 -> Engine Heartbeat 5.1 Web Quality Hotfix
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 5.1 -> Engine Heartbeat 5.2 UI/UX Polish
 
-Purpose: fix the HomePage session-restore test ambiguity caused by duplicate responsive voice-emotion controls in JSDOM, and prevent the global query from returning.
+Purpose: align desktop and mobile voice settings, prevent invalid pitch requests, and improve modal, keyboard, duplicate-action and desktop readability behavior.
 
 Key changes:
-- scope the restored `밝게` emotion assertion to the `음성 설정` dialog with Testing Library `within`
-- reject a future global single-element query for the duplicated emotion button during dependency-free preflight
-- document the CI failure, root cause, validation boundary and hotfix application steps
+- share voice speed, integer pitch and six emotion options across desktop and mobile
+- normalize restored speed and pitch values before preview or generation
+- add modal initial focus, focus trap, Escape close, body scroll lock and focus restoration
+- disable duplicate preview requests while playback preparation is active
+- replace non-functional filter tabs with information tags and add radio arrow navigation
+- improve project menu dismissal, current-project semantics and collapsed separator state
+- raise desktop helper-text readability and honor reduced motion
+- add UI/UX regression tests, audit documentation and dependency-free preflight contracts
 
-Runtime product code changed: none
-Tracked files deleted relative to Engine Heartbeat 5: none
+Tracked files deleted relative to Engine Heartbeat 5.1: none
 Cumulative permanent cleanup list:
 public/sorion-icon.svg
