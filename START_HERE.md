@@ -1,6 +1,6 @@
 # 곰같은여우 SoriON AI 시작 안내
 
-현재 버전: `0.9.3-alpha.2 Web Quality Toolchain Stabilization`
+현재 버전: `0.9.3-alpha.3 Reproducible CI Lock Evidence Gate`
 
 ## 가장 먼저 읽을 파일
 
@@ -10,7 +10,8 @@
 4. [`docs/PROGRESSIVE_TTS_STREAMING.md`](docs/PROGRESSIVE_TTS_STREAMING.md)
 5. [`docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md`](docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md)
 6. [`docs/AI_DIRECTOR.md`](docs/AI_DIRECTOR.md)
-7. [`docs/NEXT_UPDATE.md`](docs/NEXT_UPDATE.md)
+7. [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
+8. [`docs/NEXT_UPDATE.md`](docs/NEXT_UPDATE.md)
 
 ## 무료 로컬 실행
 
@@ -34,22 +35,25 @@ firebase deploy --only hosting
 정적 호스팅에는 Python API나 모델을 올리지 않습니다. 데스크톱에서는 로컬 API를 자동 탐색하고,
 모바일에서는 Browser Speech가 자동 안전망이 됩니다.
 
-## 0.9.3-alpha.2 확인 목록
+## 0.9.3-alpha.3 확인 목록
 
-- `npm run quality:web-manifest`가 정확한 직접 버전과 Vite 8 호환 조합을 검사하는지 확인
-- `npm install`이 strict peer dependency 모드에서 성공하는지 확인
-- 설치 뒤 `npm run quality:web-toolchain`과 `npm ls vite vitest typescript typescript-eslint --all`이 통과하는지 확인
-- Vitest 4.1.10, Tailwind 4.3.3, typescript-eslint 8.65.0이 정확히 설치되는지 확인
-- `@testing-library/dom`이 직접 설치되고 React 19 테스트가 유지되는지 확인
-- 기존 모델 온보딩, API 100개와 Worker 14개 회귀 검사가 유지되는지 확인
+- `.nvmrc`, `.node-version`, packageManager와 CI Node가 `22.18.0`/npm `10.9.3`으로 일치하는지 확인
+- Actions 수동 실행에서 `generate_lockfiles=true`로 검증된 lock artifact 생성
+- npm 설치 로그의 모든 warning과 전체 `npm ls --all` 트리에 peer·missing·invalid 문제가 없는지 확인
+- `vite-plugin-pwa 1.3.0`이 Vite 8 peer 범위를 실제 설치 package에서 선언하는지 확인
+- `package-lock.json`, `services/api/uv.lock`, `services/worker/uv.lock`을 커밋
+- 일반 CI가 `npm ci`, `uv sync --locked`만 사용해 Web·API·Worker를 통과하는지 확인
 
 ## 품질 검사
 
+lock 생성 전에는 `docs/LOCKFILE_BOOTSTRAP.md`의 GitHub Actions 절차를 먼저 수행합니다.
+lock을 커밋한 뒤 다음 명령을 사용합니다.
+
 ```bash
-npm run quality:web-manifest
-npm install --no-audit --no-fund
+npm run locks:check
+npm ci --no-audit --no-fund
 npm run quality:web-toolchain
-npm ls vite vitest typescript typescript-eslint --all
+npm run quality:dependency-tree
 npm run quality:rules
 npm run quality:free-only
 npm run quality:engine-blueprint
@@ -62,12 +66,12 @@ npm run build
 
 ```bash
 cd services/api
-uv sync --dev --python 3.10
-uv run --python 3.10 ruff check app tests --output-format=github
-uv run --python 3.10 pytest tests -q
+uv sync --locked --dev --python 3.10
+uv run --locked --python 3.10 ruff check app tests --output-format=github
+uv run --locked --python 3.10 pytest tests -q
 
 cd ../worker
-uv sync --dev --python 3.10
-uv run --python 3.10 ruff check app tests --output-format=github
-uv run --python 3.10 pytest tests -q
+uv sync --locked --dev --python 3.10
+uv run --locked --python 3.10 ruff check app tests --output-format=github
+uv run --locked --python 3.10 pytest tests -q
 ```

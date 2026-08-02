@@ -67,8 +67,18 @@ async function exists(path) {
 const packageJson = await readJson(join(root, 'package.json'))
 checkRuntime()
 
-if (packageJson.version !== '0.9.3-alpha.2') {
-  failures.push(`package.json 버전이 0.9.3-alpha.2가 아닙니다: ${packageJson.version}`)
+if (packageJson.version !== '0.9.3-alpha.3') {
+  failures.push(`package.json 버전이 0.9.3-alpha.3이 아닙니다: ${packageJson.version}`)
+}
+if (packageJson.packageManager !== 'npm@10.9.3') {
+  failures.push('packageManager는 npm@10.9.3이어야 합니다.')
+}
+if (packageJson.volta?.node !== '22.18.0' || packageJson.volta?.npm !== '10.9.3') {
+  failures.push('Volta Node/npm 버전은 22.18.0/10.9.3이어야 합니다.')
+}
+for (const versionFile of ['.nvmrc', '.node-version']) {
+  const pinned = (await readFile(join(root, versionFile), 'utf8')).trim()
+  if (pinned !== '22.18.0') failures.push(`${versionFile}는 22.18.0이어야 합니다.`)
 }
 if (packageJson.engines?.node !== '>=22.12.0 <25') {
   failures.push('package.json engines.node는 ">=22.12.0 <25"여야 합니다.')
@@ -115,13 +125,18 @@ if (!manifestOnly) {
         failures.push(`${name} 설치 버전은 ${version}여야 합니다: ${installed.version}`)
       }
     }
+    const pwaPackage = await readJson(join(nodeModules, 'vite-plugin-pwa', 'package.json'))
+    const pwaVitePeer = pwaPackage.peerDependencies?.vite ?? ''
+    if (!/(?:^|\|\s*)\^8(?:\.0\.0)?(?:\s|$|\|)/.test(pwaVitePeer)) {
+      failures.push(`vite-plugin-pwa의 Vite 8 peer 범위를 확인할 수 없습니다: ${pwaVitePeer || '누락'}`)
+    }
     const nestedVite = join(nodeModules, 'vitest', 'node_modules', 'vite', 'package.json')
     if (await exists(nestedVite)) {
       const nested = await readJson(nestedVite)
       failures.push(`Vitest 아래 별도 Vite ${nested.version}가 설치됐습니다. 단일 Vite 8 그래프가 필요합니다.`)
     }
     if (!(await exists(join(root, 'package-lock.json')))) {
-      warnings.push('package-lock.json이 없습니다. 이번 릴리스는 정확한 직접 버전과 Vite override로 상단 그래프를 고정합니다.')
+      warnings.push('package-lock.json이 없습니다. Actions의 Generate verified lockfiles 실행 뒤 artifact의 lock 파일을 커밋하세요.')
     }
   }
 }

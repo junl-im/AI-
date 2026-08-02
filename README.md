@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-alpha.2 Web Quality Toolchain Stabilization`
+- 버전: `0.9.3-alpha.3 Reproducible CI Lock Evidence Gate`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -46,6 +46,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 오케스트레이터 설계: [`docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md`](docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md)
 - AI Director: [`docs/AI_DIRECTOR.md`](docs/AI_DIRECTOR.md)
 - API 연결: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
+- lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
 
 ## 개발 원칙
 
@@ -58,12 +59,15 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 코드와 모델 checkpoint의 라이선스를 분리해 기록하고 비상업 모델은 자동 경로에서 제외합니다.
 
 
-## Web quality 안정화
+## 재현 가능한 CI 전환
 
-0.9.3-alpha.2는 Vite 8과 맞지 않던 Vitest 3, Tailwind Vite plugin 4.1.10,
-TypeScript 5.9와 맞지 않던 구형 typescript-eslint 조합을 정리했습니다. 모든 직접 npm 버전을
-정확히 고정하고 `npm run quality:web-manifest`와 설치 후 `npm run quality:web-toolchain`을
-순서대로 실행합니다. React Testing Library의 필수 peer인 `@testing-library/dom`도 직접 선언합니다.
+0.9.3-alpha.3은 Node 22.18.0과 npm 10.9.3을 `.nvmrc`, `.node-version`, `packageManager`,
+Volta에 동일하게 고정합니다. `vite-plugin-pwa 1.3.0`의 Vite 8 peer 선언과 전체 npm 트리를
+검사하며, 일반 CI는 검증된 lock이 있어야 `npm ci`와 `uv sync --locked`로 진행합니다.
+
+최초 lock은 GitHub Actions의 `generate_lockfiles=true` 수동 실행으로 생성합니다. 해당 실행은
+npm 설치 warning, 전체 의존성 트리, API·Worker uv lock과 locked sync를 검사한 뒤 세 lock 파일과
+감사 로그를 artifact로 제공합니다. 절차는 `docs/LOCKFILE_BOOTSTRAP.md`를 따릅니다.
 
 ## 검증된 로컬 모델 준비
 

@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.9.3-alpha.2`
+현재 기준 버전: `0.9.3-alpha.3`
 
 ## 목적
 
@@ -111,3 +111,11 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - React Testing Library 16의 `@testing-library/dom` peer를 직접 선언한다.
 - 설치 후 도구체인 실제 버전과 중첩 Vite 유무, npm dependency tree를 검사한다.
 - `strict-peer-deps=true`에서 설치되지 않으면 Web quality를 통과로 보지 않는다.
+
+
+## 0.9.3-alpha.3 lock 증거 게이트
+
+- Node 22.18.0/npm 10.9.3과 Python 3.10/uv 0.11.32에서만 lock을 생성한다.
+- npm warning과 전체 dependency tree, 두 uv lock의 check·locked sync를 통과해야 한다.
+- 세 lock이 커밋된 뒤 일반 CI는 `npm ci`와 `uv sync --locked`만 허용한다.
+- 최초 lock은 Actions 수동 `generate_lockfiles=true` 실행 artifact에서 가져온다.

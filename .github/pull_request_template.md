@@ -11,6 +11,8 @@
 - [ ] 모바일 360px 화면 확인
 - [ ] 테스트 추가 또는 수정
 - [ ] `npm run quality:rules` 통과
+- [ ] lock 변경 시 Actions 생성 로그의 ERESOLVE·UNMET·invalid·missing 없음
+- [ ] `package-lock.json`, API·Worker `uv.lock`과 manifest 변경이 함께 커밋됨
 - [ ] 관련 문서와 `docs/HANDOVER.md` 갱신
 - [ ] `docs/CHANGELOG.md`에 현재 버전 기록
 - [ ] `docs/NEXT_UPDATE.md`에 다음 작업 기록

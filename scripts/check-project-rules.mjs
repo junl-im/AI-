@@ -149,19 +149,12 @@ await requireText('.github/workflows/ci.yml', [
   'working-directory: services/worker',
   'Run Worker tests',
   'Check free-only boundary', 'Check web toolchain manifest', 'Check installed web toolchain',
-  'Validate dependency tree', "node-version: '22.18.0'", 'Write empty static-host runtime configuration',
+  'Validate full dependency tree', "node-version: '22.18.0'", 'Write empty static-host runtime configuration', 'Lockfiles · generate or verify', 'actions/upload-artifact@v4', 'actions/download-artifact@v4', 'npm ci --no-audit --no-fund', 'uv sync --locked', 'generate_lockfiles',
 ])
-await requireText('src/test/setup.ts', [
-  'afterEach',
-  'cleanup()',
-  'Object.defineProperty(Blob.prototype',
-  "reader.readAsArrayBuffer(this)",
-])
-await requireText('src/tts/mockWave.test.ts', [
-  'async function readBlob',
-  "typeof blob.arrayBuffer === 'function'",
-  'reader.readAsArrayBuffer(blob)',
-])
+await requireText('.nvmrc', ['22.18.0']); await requireText('.node-version', ['22.18.0'])
+await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'npm ci', 'uv sync --locked'])
+await requireText('src/test/setup.ts', ['afterEach', 'cleanup()', 'Object.defineProperty(Blob.prototype', "reader.readAsArrayBuffer(this)"])
+await requireText('src/tts/mockWave.test.ts', ['async function readBlob', "typeof blob.arrayBuffer === 'function'", 'reader.readAsArrayBuffer(blob)'])
 await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])
 await requireText('src/components/layout/BrandMasthead.tsx', [
   'BrandIcon',

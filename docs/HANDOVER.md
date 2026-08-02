@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-alpha.2 · Web Quality Toolchain Stabilization**
+현재 기준 버전: **0.9.3-alpha.3 · Reproducible CI Lock Evidence Gate**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 10:25 KST**
+최종 갱신: **2026-08-02 10:22 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -306,9 +306,9 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.9.3-alpha.2-full.zip`.
-- 패치: `SoriON-AI-0.9.3-alpha.1-to-0.9.3-alpha.2-patch.zip`.
-- 기준본: `SoriON-AI-0.9.3-alpha.1-full.zip`.
+- 전체 후보본: `SoriON-AI-0.9.3-alpha.3-lock-bootstrap-full.zip`.
+- 패치: `SoriON-AI-0.9.3-alpha.2-to-0.9.3-alpha.3-lock-bootstrap-patch.zip`.
+- 기준본: `SoriON-AI-0.9.3-alpha.2-full.zip`.
 - 삭제 대상: 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
@@ -326,8 +326,8 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 - Web Speech 받아쓰기는 브라우저 지원과 권한에 따라 동작하지 않을 수 있다.
 - 장문은 현재 블록 순차 생성이며 최종 WAV 재병합 Export는 미완료다.
 - 자동 탐색은 보안상 전체 LAN을 스캔하지 않는다.
-- 정식 npm 검사는 패키지 저장소 가용성에 영향을 받는다.
-- package-lock은 아직 없으며 공용 registry 환경에서 생성·커밋해야 한다.
+- 정식 npm·uv lock 생성은 패키지 저장소 가용성에 영향을 받는다.
+- 세 lock은 Actions `generate_lockfiles=true` 결과만 검토·커밋하며 임의 작성하지 않는다.
 - 모든 API 프로세스는 같은 SQLite job 파일을 공유해야 한다.
 - memory fallback은 앱 종료 뒤 영구 복원되지 않는다.
 ## 19. 절대 전달 규칙
@@ -360,13 +360,13 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.9.3-beta.1 Local STT Verification & Final Audio Export**.
+다음 목표 버전: **0.9.3-beta.1 Real Device Verification, STT Measurement & Final Export**.
 우선순위:
-1. Faster Whisper 로컬 Adapter와 원문 대비 CER·WER 검수.
-2. 숫자·날짜·금액·단위·고유명사 오류 분류와 실패 문장 재생성.
-3. 타임라인 순서·쉼을 반영한 WAV·MP3·SRT·VTT Export.
-4. DeepFilterNet3 선택 후처리와 OpenVoice V2 동의 기반 Adapter.
-5. Android·iOS·Windows·macOS·Linux 실제 장치 검증.
+1. Windows CUDA·Apple MPS·CPU와 Android·iOS 실제 장치 검증.
+2. Faster Whisper CER·WER와 숫자·날짜·금액·고유명사 오류율 실측.
+3. 타임라인·쉼·재생성 결과를 반영한 WAV·MP3·SRT·VTT Export.
+4. CosyVoice 새 모델은 병행 설치·동일 평가·canary·한 릴리스 rollback으로 전환.
+5. 새 엔진 추가는 위 세 축 완료 뒤로 미룬다.
 금지: 유료 API 기본 호출, 수동 엔진 UI, 모델 없는 AI 성공 표시.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
@@ -462,19 +462,14 @@ CI Hotfix 4 테스트 규칙:
 10. 다음 예상 업데이트: Faster Whisper 한국어 검수와 전체 WAV·MP3·자막 Export.
 
 
-## 31. 2026-08-02 10:25 KST · v0.9.3-alpha.2
+## 31. 2026-08-02 10:22 KST · v0.9.3-alpha.3 lock 전환
 
-1. 작업 일시: 2026-08-02 10:25 KST.
-2. 대상·기준: `0.9.3-alpha.1 → 0.9.3-alpha.2`.
-3. 변경 내용: Vite 8 기준 Vitest·Tailwind·TypeScript ESLint 호환 조합, exact pin,
-   strict peer dependency, 직접 peer 선언과 설치 전후 Web 도구체인 CI 검사를 추가했다.
-4. 변경 이유: lockfile 없는 범위 의존성과 잘못된 peer 조합이 Web quality 설치·lint·test를
-   시점별로 흔들 수 있었기 때문이다.
-5. 영향 범위: `package.json`, `.npmrc`, Web CI, 품질 스크립트, 테스트·릴리스 문서.
-6. 주요 파일: `scripts/check-web-toolchain.mjs`, `.github/workflows/ci.yml`, `package.json`.
-7. 검증 결과: manifest·정적 품질 4종, TS·TSX 136개 구문·상대 import, API 100개, Worker 14개 통과.
-8. 제한·주의: 현재 npm 미러 제한으로 실제 install·lint·typecheck·Vitest·build는 GitHub Actions
-   최종 확인이 필요하며 package-lock은 해당 환경에서 생성해야 한다.
-9. 산출물: `SoriON-AI-0.9.3-alpha.2-full.zip`,
-   `SoriON-AI-0.9.3-alpha.1-to-0.9.3-alpha.2-patch.zip`.
-10. 다음 예상 업데이트: Web quality 녹색과 lockfile을 먼저 확정한 뒤 Faster Whisper 검수와 Export.
+1. 대상·기준: `0.9.3-alpha.2 → 0.9.3-alpha.3`.
+2. Node 22.18.0, npm 10.9.3을 nvm·node-version·packageManager·Volta와 CI에 고정했다.
+3. 설치된 vite-plugin-pwa의 Vite 8 peer와 전체 npm ls 트리를 검사한다.
+4. Actions 수동 입력이 npm·API uv·Worker uv lock, 경고 로그를 artifact로 생성한다.
+5. 같은 실행의 Web·API·Worker는 artifact를 받아 npm ci와 uv sync --locked로 재검증한다.
+6. 일반 push·PR은 세 lock이 없거나 manifest와 다르면 품질 작업 전에 실패한다.
+7. 현재 실행 환경의 registry·DNS 제한 때문에 lock을 임의 생성하지 않았다.
+8. 산출물은 lock bootstrap 후보본과 alpha.2 기준 덮어쓰기 패치다.
+9. 다음 목표는 실기기 검증, STT 실측, 최종 Export 세 축만 완료하는 것이다.

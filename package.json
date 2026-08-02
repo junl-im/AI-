@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.9.3-alpha.2",
+  "version": "0.9.3-alpha.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,7 +17,7 @@
     "cleanup:stale-brand": "node scripts/remove-stale-brand-assets.mjs",
     "quality:web-manifest": "node scripts/check-web-toolchain.mjs --manifest-only",
     "quality:web-toolchain": "node scripts/check-web-toolchain.mjs",
-    "quality": "npm run quality:web-toolchain && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
+    "quality": "npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
@@ -31,7 +31,10 @@
     "dev:free": "node scripts/start-free-runtime.mjs",
     "quality:engine-blueprint": "node scripts/check-engine-blueprint.mjs",
     "model:manifest": "python services/worker/scripts/model_manifest.py",
-    "quality:model-onboarding": "node scripts/check-model-onboarding.mjs"
+    "quality:model-onboarding": "node scripts/check-model-onboarding.mjs",
+    "quality:dependency-tree": "node scripts/audit-npm-tree.mjs",
+    "locks:refresh": "node scripts/refresh-lockfiles.mjs",
+    "locks:check": "node scripts/check-lockfiles.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",
@@ -68,5 +71,10 @@
   },
   "overrides": {
     "vite": "8.2.0"
+  },
+  "packageManager": "npm@10.9.3",
+  "volta": {
+    "node": "22.18.0",
+    "npm": "10.9.3"
   }
 }

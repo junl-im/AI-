@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.9.3-alpha.3 - 2026-08-02
+
+### Reproducible CI Lock Evidence Gate
+
+- Node 22.18.0과 npm 10.9.3을 nvm, node-version, packageManager와 Volta에 동일하게 고정했습니다.
+- `vite-plugin-pwa 1.3.0`의 Vite 8 peer 선언과 전체 npm dependency tree를 설치 결과에서 검사합니다.
+- GitHub Actions가 npm·API uv·Worker uv lock을 생성하고 경고 로그와 함께 artifact로 제공합니다.
+- 검증된 lock을 Web·API·Worker가 같은 실행에서 내려받아 `npm ci`와 `uv sync --locked`로 재검증합니다.
+- 다음 기능 범위를 실기기 검증, STT 실측, 전체 WAV·MP3·SRT·VTT Export로 제한했습니다.
+- 생성된 lock 파일은 임의 작성하지 않으며 Actions artifact를 검토한 뒤 저장소에 커밋해야 합니다.
+
 ## 0.9.3-alpha.2 - 2026-08-02
 
 ### Web Quality Toolchain Stabilization

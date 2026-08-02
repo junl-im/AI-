@@ -476,3 +476,14 @@ npm run build
 - Tailwind 4.3.3과 TypeScript ESLint 8.65.0의 peer 범위가 유효해야 한다.
 - `@testing-library/dom`이 직접 설치돼야 한다.
 - Vitest 아래 중첩 Vite가 생기거나 npm tree가 invalid면 실패해야 한다.
+
+
+## 0.9.3-alpha.3 lock·전체 트리 검사
+
+- Node 22.18.0과 npm 10.9.3이 nvm, node-version, packageManager, Volta, CI에서 일치하는지 확인
+- `generate_lockfiles=true`가 package-lock과 API·Worker uv.lock을 생성하는지 확인
+- npm package-lock 생성과 `npm ci` 로그의 ERESOLVE·UNMET·invalid·missing을 전부 차단
+- `npm ls --all --json --long`에서 Vite 8.2.0과 Vitest 4.1.10이 단일 버전인지 확인
+- 설치된 `vite-plugin-pwa`의 peerDependencies가 Vite 8을 포함하는지 확인
+- 생성된 세 lock을 같은 workflow의 Web·API·Worker가 내려받아 frozen install로 재검증
+- 일반 push·PR은 lock이 없거나 manifest와 다르면 품질 작업 전에 실패

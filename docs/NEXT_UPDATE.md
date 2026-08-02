@@ -1,49 +1,47 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-alpha.2 · Web Quality Toolchain Stabilization`
+현재 기준: `0.9.3-alpha.3 · Reproducible CI Lock Evidence Gate`
 
 ## 목표 버전
 
-`0.9.3-beta.1 Local STT Verification & Final Audio Export`
+`0.9.3-beta.1 Real Device Verification, STT Measurement & Final Export`
 
 ## 방향
 
-검증된 로컬 모델 온보딩 기반 위에 Faster Whisper와 FFmpeg를 먼저 연결한다. 엔진 수를 늘리기보다
-원문 대비 한국어 정확도와 장문 최종 결과물이라는 사용자 가치가 확인되는 경로를 우선한다.
+엔진을 더 늘리지 않는다. 다음 업데이트는 **실기기 검증**, **STT 실측**, **최종 Export 완성**의
+세 축만 완료한다. CosyVoice, Faster Whisper, FFmpeg가 사용자 장치에서 실제로 연결되는 경로와
+측정값을 제품 판단 기준으로 삼는다.
 
-## 1. Faster Whisper 한국어 검수 Adapter
+## 1. 실기기 검증
 
-- 선택 설치형 로컬 Faster Whisper Adapter와 readiness 진단
-- 생성 음성 전사와 원문의 CER·WER 계산
-- 숫자·날짜·금액·단위·영문·고유명사 오류 분류
-- STT 모델이 없으면 검수 미실행으로 표시하고 합성 성공으로 위장하지 않음
+- Windows + NVIDIA CUDA, Apple Silicon MPS, CPU 저속 모드의 readiness와 생성 성공을 기록
+- Android Chrome·iOS Safari PWA의 API 자동 연결과 Browser Speech 안전망 확인
+- 10분·30분·60분 원고의 첫 음성 지연, RTF, 메모리, VRAM, 실패·재시도율 측정
+- 모델·FFmpeg·API가 없을 때 성공으로 위장하지 않고 정확한 복구 안내 제공
 
-## 2. 전체 WAV·MP3·자막 Export
+## 2. STT 실측
 
-- 현재 타임라인 순서와 쉼 블록을 반영한 WAV 병합
-- FFmpeg가 있을 때만 MP3 변환 제공
-- 문장별 시간 범위로 SRT·VTT 출력
-- 실패·취소 블록이 있으면 불완전 결과를 명시하고 사용자가 선택한 경우에만 내보냄
+- Faster Whisper 한국어 전사 Adapter와 모델 readiness 연결
+- 원문 대비 CER·WER, 숫자·날짜·금액·단위·영문·고유명사 오류율 기록
+- 오류 임계값을 넘은 문장만 제한 횟수로 재생성하고 완료 구간은 재사용
+- 평가 문장과 실제 장문 샘플의 결과를 엔진·장치·모델 버전별로 보존
 
-## 3. 실패 문장 자동 재생성
+## 3. 최종 Export 완성
 
-- STT 오류 임계값을 넘은 문장만 새 job ID로 재생성
-- 완료 음원과 사용자 수정 블록은 재사용
-- 재시도 횟수 상한과 엔진 circuit breaker 유지
-- 원문 재작성은 하지 않고 발음 사전·정규화 힌트만 적용
+- 타임라인 순서, 쉼 블록, 사용자 수정과 재생성 결과를 반영한 전체 WAV 병합
+- FFmpeg가 준비된 경우 MP3 변환, 준비되지 않으면 WAV만 명확히 제공
+- 문장별 실제 시간 범위 기반 SRT·VTT 생성
+- 실패·취소 구간이 있으면 불완전 Export를 기본 차단하고 명시적 선택만 허용
 
-## 4. 다음 Adapter
+## CosyVoice 모델 롤오버 원칙
 
-- DeepFilterNet3 선택적 노이즈 제거
-- OpenVoice V2 동의 기반 음색 변환
-- Resemble Enhance는 라이선스·성능 검증 전 연구 경로로 유지
+- 코드 버전과 모델 ID·버전·SHA-256·라이선스를 별도 관리한다.
+- 새 모델은 기존 모델을 덮어쓰지 않고 새 매니페스트와 경로로 병행 설치한다.
+- 동일 평가 세트와 실기기 표에서 품질·지연·메모리를 비교한 뒤 기본 모델을 전환한다.
+- 전환 뒤에도 이전 매니페스트를 한 릴리스 동안 유지해 즉시 rollback할 수 있어야 한다.
 
-## 선행 조건과 위험
+## 선행 조건
 
-- 실제 모델 가중치와 공식 체크섬은 저장소·릴리스 ZIP에 포함하지 않는다.
-- Faster Whisper·FFmpeg 설치 여부와 CPU·GPU 지연을 실제 장치에서 측정해야 한다.
-- 0.9.3-alpha.2의 Web 도구체인을 GitHub Actions에서 실제 설치·lint·typecheck·test·build까지 확인한 뒤 기능 작업을 시작한다.
-- 모델 매니페스트 생성값은 사용자가 확인한 모델 출처·버전·라이선스를 사용한다.
-- Web 정식 검사는 공용 npm registry가 가능한 GitHub Actions에서 반드시 녹색을 확인한다.
-- 녹색 확인 뒤 `package-lock.json`을 생성·커밋하고 CI 설치를 `npm ci`로 전환한다.
-- Python 3.10 uv·Ruff 검사는 네트워크가 가능한 CI에서 반드시 재확인한다.
+- GitHub Actions에서 검증 생성한 `package-lock.json`, API·Worker `uv.lock`을 커밋한다.
+- 일반 CI의 `npm ci`, `uv sync --locked`, 전체 npm tree, lint, typecheck, test, build가 녹색이어야 한다.
+- 실제 모델 가중치, 사용자 음성, 라이선스 동의값과 Secret은 저장소·릴리스 ZIP에 포함하지 않는다.

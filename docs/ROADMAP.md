@@ -252,3 +252,12 @@
 - CER·WER 및 숫자·날짜·금액·고유명사 오류 분류
 - 타임라인 순서·쉼을 반영한 전체 WAV·MP3·SRT·VTT Export
 - 품질 임계값 실패 문장만 제한적으로 재생성
+
+
+## 0.9.3-alpha.3 lock evidence gate
+
+- Node·npm 실행 버전을 개발 환경과 CI에 동일 고정
+- npm·API uv·Worker uv lock 생성과 경고 로그를 GitHub Actions artifact로 제공
+- 전체 npm tree와 vite-plugin-pwa Vite 8 peer 확인
+- lock 커밋 뒤 npm ci·uv sync --locked 강제
+- 다음 범위를 실기기 검증·STT 실측·최종 Export로 제한

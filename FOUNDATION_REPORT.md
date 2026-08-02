@@ -1,35 +1,36 @@
-# SoriON AI 0.9.3-alpha.2 Result Report
+# SoriON AI 0.9.3-alpha.3 Result Report
 
-작업 일시: 2026-08-02 10:25 KST  
-기준 버전: **0.9.3-alpha.1 · Verified Local Model Readiness Foundation**  
-결과 버전: **0.9.3-alpha.2 · Web Quality Toolchain Stabilization**
+작성 시각: 2026-08-02 10:22 KST
+결과 버전: **0.9.3-alpha.3 · Reproducible CI Lock Evidence Gate**
+기준: **0.9.3-alpha.2 · Web Quality Toolchain Stabilization**
 
-## 원인 진단
+## 결과
 
-- Vite 8.2.0과 Vitest 3.1.0의 지원 범위가 맞지 않았다.
-- Tailwind Vite plugin 4.1.10은 Vite 8을 peer dependency로 지원하지 않았다.
-- TypeScript 5.9.3은 typescript-eslint 8.26.0의 지원 상한 밖이었다.
-- React Testing Library 16의 peer dependency인 `@testing-library/dom`이 직접 선언되지 않았다.
-- lockfile 없이 caret·tilde 범위를 사용해 같은 커밋도 설치 시점에 따라 상단 의존성이 바뀔 수 있었다.
+- 프로젝트 Node 22.18.0과 npm 10.9.3을 nvm, node-version, packageManager, Volta, CI에 고정했다.
+- `vite-plugin-pwa 1.3.0`의 설치된 peer 범위가 Vite 8을 포함하는지 검사한다.
+- `npm ls --all --json --long`을 파싱해 missing, invalid, extraneous와 복수 Vite를 차단한다.
+- Actions 수동 입력으로 package-lock, API uv.lock, Worker uv.lock과 설치 감사 로그를 생성한다.
+- 생성 lock을 같은 workflow의 Web·API·Worker에 전달해 npm ci와 locked uv sync로 재검증한다.
+- 다음 기능 목표를 실기기 검증, STT 실측, 최종 Export 완성으로 제한했다.
+- CosyVoice 모델 업그레이드에 병행 설치, canary, rollback 절차를 문서화했다.
 
-## 완료
+## 확인 완료
 
-- 직접 npm 의존성을 정확한 버전으로 고정했다.
-- Vitest 4.1.10, Tailwind 4.3.3, typescript-eslint 8.65.0으로 호환 조합을 맞췄다.
-- `@eslint/js`와 `@testing-library/dom`을 직접 의존성으로 선언했다.
-- Node 22.18.0 CI, strict peer dependency, Vite override와 설치 그래프 검사를 추가했다.
-- Web 도구체인 manifest·설치 상태 검사 스크립트를 추가했다.
-- 136개 TypeScript·TSX 파일의 구문과 상대 import를 별도 검사했다.
+- 새 Node 스크립트 4개 구문 검사
+- GitHub Actions YAML 파싱
+- 프로젝트 정적 규칙, free-only, engine blueprint, model onboarding 검사
+- 기존 API와 Worker 회귀 테스트
+- 정상·오류 npm tree fixture를 이용한 dependency audit 양·음성 검사
 
-## 검증
+## 현재 환경 제한
 
-- Web 도구체인 manifest 검사 통과
-- 프로젝트 규칙·무료 전용·엔진 Blueprint·모델 온보딩 검사 통과
-- TypeScript·TSX 136개 구문 및 상대 import 검사 통과
-- API 100개, Worker 14개 테스트 통과
-- 현재 실행 환경의 npm 미러가 패키지를 제공하지 않아 실제 npm install·lint·typecheck·Vitest·Vite build는 GitHub Actions에서 최종 확인해야 한다.
+현재 실행 환경은 npm·PyPI 외부 registry DNS가 차단되고 캐시도 없어 실제 lock을 신뢰성 있게
+생성할 수 없다. 따라서 lock 파일을 조작하거나 추정하지 않았다. GitHub Actions에서
+`generate_lockfiles=true`로 생성한 artifact의 경고 로그를 검토한 뒤 세 lock을 커밋해야 한다.
+일반 push·PR은 그 전까지 의도적으로 lock 단계에서 실패한다.
 
-## 제한
+## 다음 목표
 
-- 완전한 transitive dependency 재현을 위한 `package-lock.json`은 네트워크 가능한 환경에서 생성·커밋해야 한다.
-- 이번 패치는 직접 의존성 exact pin과 `overrides.vite`로 상단 그래프를 고정하고, lockfile 부재를 CI 경고로 남긴다.
+1. 실제 장치별 CosyVoice·Faster Whisper·FFmpeg 실행 측정
+2. 한국어 CER·WER와 중요 토큰 오류율 실측
+3. WAV·MP3·SRT·VTT 최종 Export 완성

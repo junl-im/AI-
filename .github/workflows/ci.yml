@@ -2,6 +2,12 @@ name: SoriON CI & Pages
 
 on:
   workflow_dispatch:
+    inputs:
+      generate_lockfiles:
+        description: Generate, audit, and validate npm and uv lockfiles
+        required: false
+        default: false
+        type: boolean
   push:
     branches:
       - main
@@ -23,10 +29,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  web:
-    name: Web quality
+  lockfiles:
+    name: Lockfiles · generate or verify
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -38,17 +44,77 @@ jobs:
           node-version: '22.18.0'
           package-manager-cache: false
 
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: '0.11.32'
+          enable-cache: true
+
+      - name: Generate verified lockfiles
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
+        run: npm run locks:refresh
+
+      - name: Require committed lockfiles
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.generate_lockfiles != true }}
+        run: |
+          npm run locks:check
+          (cd services/api && uv lock --check)
+          (cd services/worker && uv lock --check)
+
+      - name: Upload verified lockfiles and audit logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sorion-verified-lockfiles
+          if-no-files-found: error
+          retention-days: 3
+          include-hidden-files: true
+          path: |
+            package-lock.json
+            services/api/uv.lock
+            services/worker/uv.lock
+            .sorion/lock-audit
+
+  web:
+    name: Web quality
+    needs: lockfiles
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download verified lockfiles
+        uses: actions/download-artifact@v4
+        with:
+          name: sorion-verified-lockfiles
+          path: .
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22.18.0'
+          package-manager-cache: false
+
       - name: Check web toolchain manifest
         run: npm run quality:web-manifest
 
-      - name: Install web dependencies
-        run: npm install --no-audit --no-fund
+      - name: Require verified lockfiles
+        run: npm run locks:check
+
+      - name: Install web dependencies from lock
+        run: npm ci --no-audit --no-fund
 
       - name: Check installed web toolchain
         run: npm run quality:web-toolchain
 
-      - name: Validate dependency tree
-        run: npm ls vite vitest typescript typescript-eslint --all
+      - name: Validate full dependency tree
+        run: npm run quality:dependency-tree
 
       - name: Check project rules
         run: npm run quality:rules
@@ -91,6 +157,7 @@ jobs:
 
   api:
     name: API quality · Python 3.10
+    needs: lockfiles
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -100,6 +167,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Download verified lockfiles
+        uses: actions/download-artifact@v4
+        with:
+          name: sorion-verified-lockfiles
+          path: .
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v6
@@ -114,19 +187,20 @@ jobs:
           enable-cache: true
 
       - name: Confirm Python version
-        run: uv run --python 3.10 python -c "import sys; assert sys.version_info[:2] == (3, 10), sys.version"
+        run: python -c "import sys; assert sys.version_info[:2] == (3, 10), sys.version"
 
-      - name: Install API dependencies
-        run: uv sync --dev --python 3.10
+      - name: Install API dependencies from lock
+        run: uv sync --locked --dev --python 3.10
 
       - name: Ruff
-        run: uv run --python 3.10 ruff check app tests --output-format=github
+        run: uv run --locked --python 3.10 ruff check app tests --output-format=github
 
       - name: Run API tests
-        run: uv run --python 3.10 pytest tests -q
+        run: uv run --locked --python 3.10 pytest tests -q
 
   worker:
     name: CosyVoice Worker quality · Python 3.10
+    needs: lockfiles
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -136,6 +210,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
+      - name: Download verified lockfiles
+        uses: actions/download-artifact@v4
+        with:
+          name: sorion-verified-lockfiles
+          path: .
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v6
@@ -149,14 +229,14 @@ jobs:
           working-directory: services/worker
           enable-cache: true
 
-      - name: Install Worker dependencies
-        run: uv sync --dev --python 3.10
+      - name: Install Worker dependencies from lock
+        run: uv sync --locked --dev --python 3.10
 
       - name: Ruff
-        run: uv run --python 3.10 ruff check app tests --output-format=github
+        run: uv run --locked --python 3.10 ruff check app tests --output-format=github
 
       - name: Run Worker tests
-        run: uv run --python 3.10 pytest tests -q
+        run: uv run --locked --python 3.10 pytest tests -q
 
   deploy:
     name: Deploy GitHub Pages

@@ -348,3 +348,14 @@ Semantic Versioning을 사용한다.
 - 목적: Vite 8 중심 Web quality 의존성·peer·CI 설치 그래프 안정화
 - 삭제 파일: 없음
 - 실제 npm install·lint·typecheck·Vitest·build는 공용 registry가 가능한 GitHub Actions에서 최종 확인
+
+
+## 0.9.3-alpha.3 lock 전환 패치
+
+- 전체 후보본 ZIP: `SoriON-AI-0.9.3-alpha.3-lock-bootstrap-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.3-alpha.2-to-0.9.3-alpha.3-lock-bootstrap-patch.zip`
+- 패치 기준 버전: `0.9.3-alpha.2`
+- 목적: 실제 registry 설치 증거로 npm·uv lock을 생성하고 일반 CI를 frozen install로 전환
+- 최초 적용 뒤 Actions에서 `generate_lockfiles=true` 수동 실행이 필요
+- 생성 artifact의 세 lock을 커밋하기 전 일반 push·PR 실패는 의도된 차단
+- 삭제 파일: 없음
