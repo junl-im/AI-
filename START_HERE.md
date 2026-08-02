@@ -1,6 +1,6 @@
 # 곰같은여우 SoriON AI 시작 안내
 
-현재 버전: `0.9.3-alpha.3 Reproducible CI Lock Evidence Gate`
+현재 버전: `0.9.3-beta.1 Device Verification, STT Measurement & Final Export`
 
 ## 가장 먼저 읽을 파일
 
@@ -11,7 +11,8 @@
 5. [`docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md`](docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md)
 6. [`docs/AI_DIRECTOR.md`](docs/AI_DIRECTOR.md)
 7. [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
-8. [`docs/NEXT_UPDATE.md`](docs/NEXT_UPDATE.md)
+8. [`docs/REAL_DEVICE_STT_EXPORT.md`](docs/REAL_DEVICE_STT_EXPORT.md)
+9. [`docs/NEXT_UPDATE.md`](docs/NEXT_UPDATE.md)
 
 ## 무료 로컬 실행
 
@@ -35,14 +36,14 @@ firebase deploy --only hosting
 정적 호스팅에는 Python API나 모델을 올리지 않습니다. 데스크톱에서는 로컬 API를 자동 탐색하고,
 모바일에서는 Browser Speech가 자동 안전망이 됩니다.
 
-## 0.9.3-alpha.3 확인 목록
+## 0.9.3-beta.1 확인 목록
 
-- `.nvmrc`, `.node-version`, packageManager와 CI Node가 `22.18.0`/npm `10.9.3`으로 일치하는지 확인
-- Actions 수동 실행에서 `generate_lockfiles=true`로 검증된 lock artifact 생성
-- npm 설치 로그의 모든 warning과 전체 `npm ls --all` 트리에 peer·missing·invalid 문제가 없는지 확인
-- `vite-plugin-pwa 1.3.0`이 Vite 8 peer 범위를 실제 설치 package에서 선언하는지 확인
-- `package-lock.json`, `services/api/uv.lock`, `services/worker/uv.lock`을 커밋
-- 일반 CI가 `npm ci`, `uv sync --locked`만 사용해 Web·API·Worker를 통과하는지 확인
+- `npm run cleanup:stale-brand` 후 Git 변경에 `public/sorion-icon.svg` 삭제가 있는지 확인
+- `npm run quality:stale-files`와 `npm run hooks:install` 실행
+- 실제 장치 측정값만 `/quality/device-benchmarks`에 기록
+- Faster Whisper가 없을 때 `/quality/stt/probe`가 준비되지 않음으로 정확히 표시되는지 확인
+- 완료 API WAV만으로 최종 WAV·SRT·VTT를 생성하고 미완료 블록은 차단되는지 확인
+- MP3는 FFmpeg가 준비된 장치에서만 검증
 
 ## 품질 검사
 
@@ -54,6 +55,7 @@ npm run locks:check
 npm ci --no-audit --no-fund
 npm run quality:web-toolchain
 npm run quality:dependency-tree
+npm run quality:stale-files
 npm run quality:rules
 npm run quality:free-only
 npm run quality:engine-blueprint

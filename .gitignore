@@ -44,3 +44,6 @@ outputs/
 
 # SoriON runtime
 .sorion/
+
+# Permanently retired brand artifact (PNG is the only source of truth)
+/public/sorion-icon.svg

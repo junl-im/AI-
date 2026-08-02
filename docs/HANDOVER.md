@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-alpha.3 · Reproducible CI Lock Evidence Gate**
+현재 기준 버전: **0.9.3-beta.1 · Device Verification, STT Measurement & Final Export**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 10:22 KST**
+최종 갱신: **2026-08-02 10:40 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -285,6 +285,8 @@ SORION_WORKER_ADAPTER_MODULE, SORION_WORKER_DEVICE, SORION_WORKER_ALLOW_CPU
 SORION_WORKER_MIN_VRAM_MB, SORION_WORKER_MIN_DISK_FREE_MB, SORION_WORKER_MAX_CONCURRENT_JOBS
 SORION_WORKER_MAX_SAMPLE_BYTES, SORION_WORKER_AUTH_TTL_SECONDS, SORION_WORKER_RATE_LIMIT_PER_MINUTE
 SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_PATH
+SORION_FASTER_WHISPER_MODEL, SORION_FASTER_WHISPER_DEVICE, SORION_FASTER_WHISPER_COMPUTE_TYPE
+SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
 ```
 ## 14. 코딩 규칙
 - 소스 파일 500줄 이하.
@@ -306,10 +308,10 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체 후보본: `SoriON-AI-0.9.3-alpha.3-lock-bootstrap-full.zip`.
-- 패치: `SoriON-AI-0.9.3-alpha.2-to-0.9.3-alpha.3-lock-bootstrap-patch.zip`.
-- 기준본: `SoriON-AI-0.9.3-alpha.2-full.zip`.
-- 삭제 대상: 없음.
+- 전체 후보본: `SoriON-AI-0.9.3-beta.1-full.zip`.
+- 누적 패치: `SoriON-AI-0.9.3-alpha.2-to-0.9.3-beta.1-patch.zip`.
+- 기준본: 사용자 CI 로그의 `0.9.3-alpha.2`.
+- 삭제 대상: `public/sorion-icon.svg`; APPLY_PATCH 스크립트로 실제 삭제한다.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
 - 편집 진입 후 대형 헤더를 다시 노출하지 않는다.
@@ -360,14 +362,14 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.9.3-beta.1 Real Device Verification, STT Measurement & Final Export**.
+다음 목표 버전: **0.9.3-beta.2 Real Device Evidence & Selective STT Regeneration**.
 우선순위:
-1. Windows CUDA·Apple MPS·CPU와 Android·iOS 실제 장치 검증.
-2. Faster Whisper CER·WER와 숫자·날짜·금액·고유명사 오류율 실측.
-3. 타임라인·쉼·재생성 결과를 반영한 WAV·MP3·SRT·VTT Export.
-4. CosyVoice 새 모델은 병행 설치·동일 평가·canary·한 릴리스 rollback으로 전환.
-5. 새 엔진 추가는 위 세 축 완료 뒤로 미룬다.
-금지: 유료 API 기본 호출, 수동 엔진 UI, 모델 없는 AI 성공 표시.
+1. Windows CUDA·Apple MPS·CPU와 Android·iOS 실제 측정표 완성.
+2. 10분·30분·60분 원고의 지연·RTF·RAM·VRAM·실패율 기록.
+3. Faster Whisper 결과에서 실패 문장만 제한 재생성.
+4. 대형 장문 WAV·MP3·SRT·VTT 싱크와 메모리 실측.
+5. CosyVoice 모델은 병행 설치·동일 평가·canary·rollback으로 전환.
+금지: 측정하지 않은 실기기 성능 보증, 유료 API 기본 호출, 모델 없는 성공 표시.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -473,3 +475,17 @@ CI Hotfix 4 테스트 규칙:
 7. 현재 실행 환경의 registry·DNS 제한 때문에 lock을 임의 생성하지 않았다.
 8. 산출물은 lock bootstrap 후보본과 alpha.2 기준 덮어쓰기 패치다.
 9. 다음 목표는 실기기 검증, STT 실측, 최종 Export 세 축만 완료하는 것이다.
+
+## 32. 2026-08-02 10:40 KST · v0.9.3-beta.1
+1. 대상·기준: 사용자 저장소 `0.9.3-alpha.2`에 alpha.3 lock 변경을 누적했다.
+2. 폐기 SVG를 ignore, Git 인덱스 정리, pre-push, CI, 패치 삭제 실행기로 차단했다.
+3. 실기기 지연·RTF·메모리·VRAM·재시도·실패 기록 API를 추가했다.
+4. Faster Whisper 선택 Adapter와 CER·WER·핵심 토큰 오류 측정을 추가했다.
+5. 완료 WAV와 쉼을 병합하고 frame 기반 SRT·VTT, 선택적 MP3를 생성한다.
+6. 미완료 구간과 Browser Speech·Demo 음원은 기본 최종 Export에서 차단한다.
+7. 주요 파일: stale-file scripts와 hook, verification·exports route, STT·export service,
+   FinalExportControls, `REAL_DEVICE_STT_EXPORT.md`.
+8. 검증: API 109개, Worker 14개, compileall, stale-file·프로젝트 규칙 검사 통과.
+9. 제한: 로컬 FFmpeg MP3·자막 생성은 검증했지만, 실제 CUDA·MPS·모바일과 Faster Whisper 모델 실측은 아직 필요하다.
+10. 산출물: beta.1 전체 ZIP, alpha.2 누적 패치 ZIP, SHA-256.
+11. 다음: beta.2에서 실제 장치 증거와 실패 문장 제한 재생성을 완성한다.

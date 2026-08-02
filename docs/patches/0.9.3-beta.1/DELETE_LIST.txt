@@ -1,0 +1,2 @@
+# Paths removed by 0.9.3-beta.1
+public/sorion-icon.svg

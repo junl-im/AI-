@@ -261,3 +261,11 @@
 - 전체 npm tree와 vite-plugin-pwa Vite 8 peer 확인
 - lock 커밋 뒤 npm ci·uv sync --locked 강제
 - 다음 범위를 실기기 검증·STT 실측·최종 Export로 제한
+
+
+## 0.9.3-beta.1 완료
+
+- 삭제 파일 재유입을 ignore·Git 인덱스·hook·CI·패치 실행기로 차단
+- 실기기 벤치마크 기록 API와 STT CER·WER 측정
+- WAV 병합, 실제 시간 SRT·VTT, 선택적 MP3와 Web 다운로드 동선
+- 실제 장치 성능 증거와 실패 문장 제한 재생성은 beta.2로 이관

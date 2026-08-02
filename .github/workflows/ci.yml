@@ -101,6 +101,9 @@ jobs:
           node-version: '22.18.0'
           package-manager-cache: false
 
+      - name: Check retired files before install
+        run: npm run quality:stale-files
+
       - name: Check web toolchain manifest
         run: npm run quality:web-manifest
 

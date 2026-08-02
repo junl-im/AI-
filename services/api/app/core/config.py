@@ -43,6 +43,12 @@ class Settings(BaseSettings):
     public_rate_limit_per_minute: int = Field(default=120, ge=10, le=5000)
     allow_private_network: bool = True
     audit_log_path: str = ".sorion/audit/api.jsonl"
+    device_benchmark_path: str = ".sorion/quality/device-benchmarks.jsonl"
+    stt_directory: str = ".sorion/stt"
+    stt_max_file_bytes: int = 100 * 1024 * 1024
+    faster_whisper_model: str = "small"
+    faster_whisper_device: str = "auto"
+    faster_whisper_compute_type: str = "default"
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../../.env"),
@@ -69,6 +75,14 @@ class Settings(BaseSettings):
     @property
     def audit_path(self) -> Path:
         return Path(self.audit_log_path).expanduser().resolve()
+
+    @property
+    def device_benchmark_file(self) -> Path:
+        return Path(self.device_benchmark_path).expanduser().resolve()
+
+    @property
+    def stt_path(self) -> Path:
+        return Path(self.stt_directory).expanduser().resolve()
 
     @property
     def tts_engine_order_list(self) -> list[str]:

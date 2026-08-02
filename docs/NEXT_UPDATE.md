@@ -1,47 +1,29 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-alpha.3 · Reproducible CI Lock Evidence Gate`
+현재 기준: `0.9.3-beta.1 · Device Verification, STT Measurement & Final Export`
 
 ## 목표 버전
 
-`0.9.3-beta.1 Real Device Verification, STT Measurement & Final Export`
+`0.9.3-beta.2 Real Device Evidence & Selective STT Regeneration`
 
-## 방향
+## 핵심 기능
 
-엔진을 더 늘리지 않는다. 다음 업데이트는 **실기기 검증**, **STT 실측**, **최종 Export 완성**의
-세 축만 완료한다. CosyVoice, Faster Whisper, FFmpeg가 사용자 장치에서 실제로 연결되는 경로와
-측정값을 제품 판단 기준으로 삼는다.
+1. Windows CUDA, Apple Silicon, CPU, Android Chrome, iOS Safari에서 실제 측정표를 채운다.
+2. 10분·30분·60분 원고의 첫 음성 지연, RTF, RAM·VRAM, 재시도·실패율을 비교한다.
+3. Faster Whisper 실제 전사를 연결하고 실패 문장만 최대 제한 횟수로 재생성한다.
+4. Export의 대형 장문 메모리 사용, FFmpeg MP3와 자막 싱크를 실기기에서 확인한다.
+5. CosyVoice 모델 롤오버는 병행 설치, 동일 평가, canary, 한 릴리스 rollback을 지킨다.
 
-## 1. 실기기 검증
+## 예상 변경 영역
 
-- Windows + NVIDIA CUDA, Apple Silicon MPS, CPU 저속 모드의 readiness와 생성 성공을 기록
-- Android Chrome·iOS Safari PWA의 API 자동 연결과 Browser Speech 안전망 확인
-- 10분·30분·60분 원고의 첫 음성 지연, RTF, 메모리, VRAM, 실패·재시도율 측정
-- 모델·FFmpeg·API가 없을 때 성공으로 위장하지 않고 정확한 복구 안내 제공
+- `services/api/app/engines/stt`, `services/api/app/services/stt_metrics.py`
+- 문장 재생성 오케스트레이션과 품질 기록 저장소
+- Web 품질 화면의 장치 측정표·STT 비교 UI
+- Windows·macOS·모바일 실기기 체크리스트와 결과 fixture
 
-## 2. STT 실측
+## 선행 조건과 위험
 
-- Faster Whisper 한국어 전사 Adapter와 모델 readiness 연결
-- 원문 대비 CER·WER, 숫자·날짜·금액·단위·영문·고유명사 오류율 기록
-- 오류 임계값을 넘은 문장만 제한 횟수로 재생성하고 완료 구간은 재사용
-- 평가 문장과 실제 장문 샘플의 결과를 엔진·장치·모델 버전별로 보존
-
-## 3. 최종 Export 완성
-
-- 타임라인 순서, 쉼 블록, 사용자 수정과 재생성 결과를 반영한 전체 WAV 병합
-- FFmpeg가 준비된 경우 MP3 변환, 준비되지 않으면 WAV만 명확히 제공
-- 문장별 실제 시간 범위 기반 SRT·VTT 생성
-- 실패·취소 구간이 있으면 불완전 Export를 기본 차단하고 명시적 선택만 허용
-
-## CosyVoice 모델 롤오버 원칙
-
-- 코드 버전과 모델 ID·버전·SHA-256·라이선스를 별도 관리한다.
-- 새 모델은 기존 모델을 덮어쓰지 않고 새 매니페스트와 경로로 병행 설치한다.
-- 동일 평가 세트와 실기기 표에서 품질·지연·메모리를 비교한 뒤 기본 모델을 전환한다.
-- 전환 뒤에도 이전 매니페스트를 한 릴리스 동안 유지해 즉시 rollback할 수 있어야 한다.
-
-## 선행 조건
-
-- GitHub Actions에서 검증 생성한 `package-lock.json`, API·Worker `uv.lock`을 커밋한다.
-- 일반 CI의 `npm ci`, `uv sync --locked`, 전체 npm tree, lint, typecheck, test, build가 녹색이어야 한다.
-- 실제 모델 가중치, 사용자 음성, 라이선스 동의값과 Secret은 저장소·릴리스 ZIP에 포함하지 않는다.
+- 검증된 npm·uv lock을 커밋하고 일반 CI를 녹색으로 만든다.
+- 실제 CosyVoice와 Faster Whisper 모델, FFmpeg, CUDA 또는 MPS 장치가 필요하다.
+- 모델·사용자 음성·실기기 개인 식별 정보는 저장소와 ZIP에 포함하지 않는다.
+- beta.1은 측정·Export 기능을 제공하지만 실제 장치 성능 수치를 보증하지 않는다.

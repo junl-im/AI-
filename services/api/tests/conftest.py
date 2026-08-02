@@ -15,6 +15,11 @@ def client(tmp_path_factory, monkeypatch):
         str(app_path / "voice-clones"),
     )
     monkeypatch.setenv("SORION_AUDIT_LOG_PATH", str(app_path / "audit.jsonl"))
+    monkeypatch.setenv(
+        "SORION_DEVICE_BENCHMARK_PATH",
+        str(app_path / "device-benchmarks.jsonl"),
+    )
+    monkeypatch.setenv("SORION_STT_DIRECTORY", str(app_path / "stt"))
     get_settings.cache_clear()
     try:
         with TestClient(app) as test_client:

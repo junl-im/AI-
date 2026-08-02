@@ -1,3 +1,4 @@
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -101,6 +102,8 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         clone_snapshot.get("reason") or "복제 Worker가 등록되지 않았습니다."
     )
     clone_latency = clone_snapshot.get("latency_ms")
+    stt_probe = request.app.state.stt_adapter.probe()
+    ffmpeg_path = shutil.which("ffmpeg")
     raw_diagnostics = clone_snapshot.get("diagnostics")
     diagnostics = raw_diagnostics if isinstance(raw_diagnostics, dict) else {}
     hardware_profile = diagnostics.get("hardware_profile")
@@ -148,6 +151,22 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         _hardware_check(diagnostics),
         _model_integrity_check(diagnostics),
         ConnectivityCheck(
+            id="stt-engine",
+            label="Faster Whisper STT",
+            status="ready" if stt_probe.ready else "warning",
+            detail=stt_probe.reason,
+        ),
+        ConnectivityCheck(
+            id="ffmpeg-export",
+            label="MP3 Export",
+            status="ready" if ffmpeg_path else "warning",
+            detail=(
+                f"FFmpeg 준비됨: {ffmpeg_path}"
+                if ffmpeg_path
+                else "FFmpeg가 없어 WAV·SRT·VTT만 사용할 수 있습니다."
+            ),
+        ),
+        ConnectivityCheck(
             id="worker-auth",
             label="API ↔ Worker 서명 인증",
             status="ready" if settings.worker_auth_enabled else "warning",
@@ -180,7 +199,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.9.3-alpha.1",
+        version="0.9.3-beta.1",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",

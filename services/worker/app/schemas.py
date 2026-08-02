@@ -20,7 +20,7 @@ WorkerSegmentStatus = Literal[
 
 class HealthResponse(BaseModel):
     status: Literal["ok"] = "ok"
-    version: str = "0.9.3-alpha.1"
+    version: str = "0.9.3-beta.1"
     service: str = "sorion-cosyvoice-worker"
 
 
@@ -67,7 +67,7 @@ class WorkerDiagnosticsResponse(BaseModel):
 
 class ReadinessResponse(BaseModel):
     status: Literal["ready", "not-ready"]
-    version: str = "0.9.3-alpha.1"
+    version: str = "0.9.3-beta.1"
     diagnostics: WorkerDiagnosticsResponse
 
 

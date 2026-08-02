@@ -359,3 +359,14 @@ Semantic Versioning을 사용한다.
 - 최초 적용 뒤 Actions에서 `generate_lockfiles=true` 수동 실행이 필요
 - 생성 artifact의 세 lock을 커밋하기 전 일반 push·PR 실패는 의도된 차단
 - 삭제 파일: 없음
+
+
+## 0.9.3-beta.1 릴리스 후보
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.3-beta.1-full.zip`
+- 누적 패치 ZIP: `SoriON-AI-0.9.3-alpha.2-to-0.9.3-beta.1-patch.zip`
+- 기준 버전: 사용자의 현재 CI 로그 기준 `0.9.3-alpha.2`
+- 범위: 삭제 파일 재발 차단, 실기기 측정 기록, STT CER·WER, WAV·MP3·SRT·VTT Export
+- 삭제 파일: `public/sorion-icon.svg`
+- 패치는 반드시 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`로 적용한다.
+- 실제 실기기 수치와 Faster Whisper 모델은 포함하지 않는다.

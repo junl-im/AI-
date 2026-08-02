@@ -487,3 +487,9 @@ npm run build
 - 설치된 `vite-plugin-pwa`의 peerDependencies가 Vite 8을 포함하는지 확인
 - 생성된 세 lock을 같은 workflow의 Web·API·Worker가 내려받아 frozen install로 재검증
 - 일반 push·PR은 lock이 없거나 manifest와 다르면 품질 작업 전에 실패
+
+## 0.9.3-beta.1 회귀 검사
+- `quality:stale-files`는 폐기 SVG의 파일·Git 추적·ignore·pre-push 계약을 검사한다.
+- API는 실기기 기록, STT CER·WER·핵심 토큰 오류, 최종 WAV·SRT·VTT를 검사한다.
+- 미완료 음성 구간이 있으면 기본 Export가 HTTP 409로 차단되어야 한다.
+- Web은 완료 API WAV 블록에서 최종 WAV와 자막 요청을 시작해야 한다.

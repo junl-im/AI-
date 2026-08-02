@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.9.3-beta.1 - 2026-08-02
+
+### Stale File Recurrence Prevention
+
+- `public/sorion-icon.svg`를 `.gitignore`, Git 인덱스 정리, pre-push 훅과 CI 조기 검사로 영구 차단했습니다.
+- 패치 적용 스크립트가 `DELETE_LIST.txt`를 실제 삭제한 뒤 변경 파일을 덮어쓰도록 전환했습니다.
+- 누적 ZIP 덮어쓰기만으로 삭제가 적용된다고 가정하지 않습니다.
+
+### Device Verification, STT Measurement & Final Export
+
+- 실제 장치의 첫 음성 지연, RTF, 메모리·VRAM, 재시도·실패를 JSONL로 기록하는 API를 추가했습니다.
+- Faster Whisper 선택 Adapter와 CER·WER·날짜·금액·퍼센트·단위·영문 오류 측정을 추가했습니다.
+- 완료 WAV와 쉼 블록을 병합하고 실제 frame 시간으로 SRT·VTT를 생성합니다.
+- FFmpeg가 있을 때 MP3를 만들며 미완료 구간은 기본적으로 Export를 차단합니다.
+- Web 타임라인에 최종 WAV·MP3와 자막 다운로드 동선을 추가했습니다.
+
 ## 0.9.3-alpha.3 - 2026-08-02
 
 ### Reproducible CI Lock Evidence Gate

@@ -11,7 +11,7 @@ class AudioStore:
 
     def output_path(self, job_id: UUID, extension: str = "wav") -> Path:
         safe_extension = extension.lower().lstrip(".")
-        if safe_extension not in {"wav", "mp3", "flac"}:
+        if safe_extension not in {"wav", "mp3", "flac", "srt", "vtt"}:
             raise ValueError("지원하지 않는 음원 확장자입니다.")
         return self.root / f"{job_id}.{safe_extension}"
 

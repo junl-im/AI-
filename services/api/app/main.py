@@ -11,9 +11,11 @@ from app.engines.registry import engine_registry
 from app.engines.tts.cosyvoice_worker_tts import CosyVoiceWorkerTtsEngine
 from app.engines.tts.melo_tts import MeloTtsEngine
 from app.engines.tts.system_tts import SystemTtsEngine
+from app.engines.stt.faster_whisper import FasterWhisperAdapter
 from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine
 from app.middleware.private_network_cors import PrivateNetworkCORSMiddleware
 from app.services.audit_log import AuditLogger
+from app.services.device_benchmark_store import DeviceBenchmarkStore
 from app.services.engine_orchestrator import EngineOrchestrator
 from app.services.job_manager import JobManager
 from app.services.rate_limit import FixedWindowRateLimiter
@@ -54,6 +56,14 @@ async def lifespan(app: FastAPI):
     clone_store.cleanup_expired()
     app.state.voice_clone_store = clone_store
     app.state.tts_pipeline = TtsPipeline(store, settings.max_segment_chars)
+    app.state.device_benchmark_store = DeviceBenchmarkStore(
+        settings.device_benchmark_file
+    )
+    app.state.stt_adapter = FasterWhisperAdapter(
+        settings.faster_whisper_model,
+        settings.faster_whisper_device,
+        settings.faster_whisper_compute_type,
+    )
     job_store = SQLiteJobStore(settings.job_store_file)
     app.state.job_manager = JobManager(
         max_concurrent=settings.max_concurrent_generations,
@@ -114,7 +124,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.9.3-alpha.1",
+    version="0.9.3-beta.1",
     lifespan=lifespan,
 )
 app.add_middleware(

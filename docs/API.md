@@ -138,3 +138,12 @@ Worker `GET /ready`와 `GET /v1/diagnostics`는 기존 필드에 다음 정보�
 - `hardware_profile`, `hardware_supported`, `hardware_reason`, `mps_available`
 
 API `GET /api/v1/connectivity`는 `worker-model-integrity` 검사로 이 상태를 전달한다.
+
+## 0.9.3-beta.1 검증·STT·Export
+
+- `POST /api/v1/quality/device-benchmarks`: 실기기 지연·RTF·메모리·VRAM 기록
+- `GET /api/v1/quality/device-benchmarks`: 최근 실기기 기록 조회
+- `GET /api/v1/quality/stt/probe`: Faster Whisper 선택 설치 상태
+- `POST /api/v1/quality/stt/measure`: 원문·전사문의 CER·WER·핵심 토큰 오류 측정
+- `POST /api/v1/quality/stt/transcribe`: 로컬 음원 전사와 측정
+- `POST /api/v1/exports`: 완료 WAV·쉼 병합, SRT·VTT, 선택적 MP3 생성

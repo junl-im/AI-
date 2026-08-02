@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-alpha.3 Reproducible CI Lock Evidence Gate`
+- 버전: `0.9.3-beta.1 Device Verification, STT Measurement & Final Export`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -58,6 +58,22 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 엔진과 API 선택은 사용자 설정이 아니라 자동 운영 계층에서 처리합니다.
 - 코드와 모델 checkpoint의 라이선스를 분리해 기록하고 비상업 모델은 자동 경로에서 제외합니다.
 
+
+## 삭제 파일 재발 방지
+
+```bash
+npm run cleanup:stale-brand
+npm run quality:stale-files
+npm run hooks:install
+```
+
+`public/sorion-icon.svg`는 영구 폐기 파일이며 Git 인덱스에서도 제거해야 합니다. 패치 ZIP은
+동봉된 `APPLY_PATCH` 스크립트로 적용합니다.
+
+## 실기기·STT·Export
+
+실기기 측정 기록, Faster Whisper CER·WER 측정과 최종 WAV·MP3·SRT·VTT Export를 제공합니다.
+세부 계약과 제한은 [`docs/REAL_DEVICE_STT_EXPORT.md`](docs/REAL_DEVICE_STT_EXPORT.md)를 따릅니다.
 
 ## 재현 가능한 CI 전환
 

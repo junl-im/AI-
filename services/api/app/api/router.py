@@ -5,10 +5,12 @@ from app.api.routes import (
     connectivity,
     director,
     engines,
+    exports,
     health,
     quality,
     setup,
     tts,
+    verification,
     voice_clones,
 )
 
@@ -19,6 +21,8 @@ api_router.include_router(engines.router, prefix="/engines", tags=["engines"])
 api_router.include_router(director.router, prefix="/director", tags=["director"])
 api_router.include_router(tts.router, prefix="/tts", tags=["tts"])
 api_router.include_router(quality.router, prefix="/quality", tags=["quality"])
+api_router.include_router(verification.router, prefix="/quality", tags=["quality"])
+api_router.include_router(exports.router, prefix="/exports", tags=["exports"])
 api_router.include_router(setup.router, prefix="/setup", tags=["setup"])
 api_router.include_router(audio.router, prefix="/audio", tags=["audio"])
 api_router.include_router(

@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.9.3-alpha.3`
+현재 기준 버전: `0.9.3-beta.1`
 
 ## 목적
 
@@ -119,3 +119,12 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - npm warning과 전체 dependency tree, 두 uv lock의 check·locked sync를 통과해야 한다.
 - 세 lock이 커밋된 뒤 일반 CI는 `npm ci`와 `uv sync --locked`만 허용한다.
 - 최초 lock은 Actions 수동 `generate_lockfiles=true` 실행 artifact에서 가져온다.
+
+
+## 0.9.3-beta.1 실기기·STT·Export 게이트
+
+- 폐기 SVG가 파일과 Git 인덱스 모두에서 없어야 한다.
+- 실기기 기록은 측정값만 저장하며 추정 수치를 성공으로 기록하지 않는다.
+- STT는 CER·WER와 핵심 토큰 오류를 함께 판단한다.
+- 최종 Export는 완료 API WAV만 사용하고 미완료 구간을 기본 차단한다.
+- MP3는 FFmpeg가 실제 준비된 환경에서만 ready로 본다.
