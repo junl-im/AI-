@@ -2,6 +2,14 @@
 
 ## 0.9.3-beta.2 - 2026-08-02
 
+### CI Failure-Domain Hardening
+
+- npm, API uv, Worker uv lock 생성을 독립 작업으로 분리해 npm 장애가 Python 품질 결과를 가리지 않게 했습니다.
+- cache-only 우선, 제한된 online retry, 명령 hard timeout으로 중첩 재시도와 장시간 정지를 제거했습니다.
+- lock과 manifest SHA-256 증명을 추가해 설치·트리 검증을 통과한 lock만 품질 작업과 main 자동 커밋에 사용합니다.
+- 전역 권한은 contents read로 축소하고 main 전용 lock 커밋 작업과 Pages 배포 작업에만 필요한 쓰기 권한을 부여합니다.
+- 재실행 artifact 이름 충돌과 run-attempt 다운로드 불일치를 고정 이름+overwrite 방식으로 방지합니다.
+
 ### Resilient Lock Bootstrap
 
 - npm registry의 ETIMEDOUT, EAI_AGAIN, ECONNRESET, 429·502·503·504를 일시 장애로 분류해 lock 생성과 `npm ci`를 자동 재시도합니다.
@@ -22,7 +30,7 @@
 - API `main.py`의 엔진 import 순서를 Ruff 규칙에 맞게 정렬했습니다.
 - Vitest fetch mock의 호출 인자 타입을 함수 선언에서 보존해 TypeScript 오류를 제거했습니다.
 - 장문 생성 callback이 안정적인 `generateAll` 함수에 의존하도록 바꿔 React Hook 경고를 제거했습니다.
-- Artifact Action을 Node 24 네이티브 `upload-artifact@v6`, `download-artifact@v8`로 올리고 강제 런타임 환경 변수를 제거했습니다.
+- Artifact Action을 Node 24 네이티브 `upload-artifact@v6`, `download-artifact@v7`로 올리고 강제 런타임 환경 변수를 제거했습니다.
 - 프로젝트 규칙이 구형 Artifact Action과 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` 재유입을 차단합니다.
 
 ## 0.9.3-beta.1 CI Hotfix 1 - 2026-08-02

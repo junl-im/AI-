@@ -495,20 +495,23 @@ npm run build
 - Web은 완료 API WAV 블록에서 최종 WAV와 자막 요청을 시작해야 한다.
 
 
-## 0.9.3-beta.1 CI Hotfix 1 · lock 모드 회귀 검사
+## 0.9.3-beta.1 CI Hotfix 1 · 이전 lock 모드 기록
 
-- 세 lock이 모두 없으면 `npm run locks:mode`가 `generate`를 반환하는지 확인
-- 세 lock이 모두 있으면 `verify`를 반환하는지 확인
-- 하나만 누락되어도 전체 세트를 다시 생성하는 경로가 선택되는지 확인
-- 기존 lock이 존재하지만 잘못된 경우 자동 재생성하지 않고 verify 단계에서 실패하는지 확인
-- generate 모드가 만든 artifact를 Web·API·Worker가 같은 실행에서 내려받는지 확인
-- 일반 push·PR이 lock 누락만으로 `npm run locks:check`에서 조기 종료되지 않는지 확인
+- 이 절의 단일 lock 모드 selector는 beta.2 CI hardening에서 제거됐다. 현재 계약은 아래 component별 failure-domain 회귀 검사를 따른다.
 
 ## 0.9.3-beta.2 회귀 검사
 
 - `npm run quality:lock-network`: ETIMEDOUT·EAI_AGAIN·429·503 등의 재시도 분류와 ERESOLVE 비재시도를 확인한다.
-- lock 생성과 Web `npm ci`는 최대 4회 재시도하며 실패 실행도 npm cache와 시도별 로그를 보존한다.
+- npm은 cache-only 우선 후 online 최대 2회, uv는 component별 최대 2회 재시도하며 모든 명령에 hard timeout을 둔다.
 - 장치 summary는 5개 프로필 × 10·30·60분의 누락 시나리오를 계산한다.
 - STT 일괄 검수는 정상 문장을 제외하고 금액·CER·WER 오류 문장만 재생성 대상으로 고른다.
 - 재생성 횟수가 최대값에 도달한 문장은 blocked로 반환한다.
 - 타임라인 재생성 준비는 기존 jobId, trackId, audio를 제거하고 revision과 시도 횟수를 증가시킨다.
+
+## 0.9.3-beta.2 CI failure-domain regression
+
+- npm lock, API uv lock, Worker uv lock job이 서로 독립적인지 확인한다.
+- npm ETIMEDOUT fixture가 제한 재시도 후 실패하고 API·Worker job dependency를 막지 않는지 확인한다.
+- ERESOLVE fixture는 재시도 없이 즉시 실패하는지 확인한다.
+- lock proof의 lock 또는 manifest SHA-256을 바꾸면 검증이 실패하는지 확인한다.
+- main 전용 자동 커밋 job만 contents write를 가지며 PR에서는 실행되지 않는지 확인한다.

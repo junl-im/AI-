@@ -7,12 +7,15 @@ const NETWORK_PATTERNS = [
   /EAI_AGAIN/i,
   /ENETUNREACH/i,
   /ENOTFOUND/i,
+  /ERR_SOCKET_TIMEOUT/i,
   /network request .* failed/i,
   /network connectivity/i,
   /fetch failed/i,
   /socket hang up/i,
   /TLS handshake timeout/i,
-  /\b(?:429|502|503|504)\b/,
+  /operation timed out/i,
+  /timed out/i,
+  /\b(?:408|425|429|500|502|503|504)\b/,
 ]
 
 export function isRetryableNetworkFailure(output) {
@@ -20,7 +23,7 @@ export function isRetryableNetworkFailure(output) {
 }
 
 export function retryDelayMs(attempt) {
-  return [5_000, 15_000, 30_000, 60_000][Math.max(0, attempt - 1)] ?? 60_000
+  return [5_000, 15_000, 30_000][Math.max(0, attempt - 1)] ?? 30_000
 }
 
 function sleep(ms) {
@@ -33,6 +36,7 @@ export function runCommandWithRetry({
   cwd,
   env,
   attempts = 1,
+  timeoutMs = 90_000,
   onAttempt,
 }) {
   let lastResult = null
@@ -41,13 +45,20 @@ export function runCommandWithRetry({
       cwd,
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,
+      timeout: timeoutMs,
+      killSignal: 'SIGTERM',
       env,
     })
-    const output = [result.stdout, result.stderr].filter(Boolean).join('\n')
-    const retryable = (result.status ?? 1) !== 0 && isRetryableNetworkFailure(output)
+    const output = [
+      result.stdout,
+      result.stderr,
+      result.error ? `${result.error.name}: ${result.error.message}` : '',
+    ].filter(Boolean).join('\n')
+    const failed = (result.status ?? 1) !== 0
+    const retryable = failed && isRetryableNetworkFailure(output)
     onAttempt?.({ attempt, attempts, result, output, retryable })
     lastResult = result
-    if ((result.status ?? 1) === 0) return result
+    if (!failed) return result
     if (!retryable || attempt === attempts) return result
     sleep(retryDelayMs(attempt))
   }

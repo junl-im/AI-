@@ -4,228 +4,305 @@ on:
   workflow_dispatch:
     inputs:
       generate_lockfiles:
-        description: Force regeneration, audit, and validation of npm and uv lockfiles
+        description: Force regeneration of all npm and uv lockfiles
         required: false
         default: false
         type: boolean
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: sorion-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  SORION_NODE_VERSION: '22.18.0'
+  SORION_UV_VERSION: '0.11.32'
+
 jobs:
-  lockfiles:
-    name: Lockfiles · generate or verify
+  preflight:
+    name: Repository preflight · no dependency install
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-
+    timeout-minutes: 8
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22.18.0'
           package-manager-cache: false
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.10'
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
-        with:
-          version: '0.11.32'
-          enable-cache: true
-
-      - name: Check lock bootstrap selector
-        run: npm run quality:lock-bootstrap
-
-      - name: Detect lockfile mode
-        id: lock-mode
-        env:
-          SORION_FORCE_LOCK_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
-        run: npm run locks:mode -- --github-output "$GITHUB_OUTPUT"
-
-      - name: Check lock network retry contract
+      - name: Check retired files before install
+        run: npm run quality:stale-files
+      - name: Check web toolchain manifest
+        run: npm run quality:web-manifest
+      - name: Check lock retry contract
         run: npm run quality:lock-network
+      - name: Check CI failure domains and lock proofs
+        run: npm run quality:ci-architecture
+      - name: Check project rules
+        run: npm run quality:rules
+      - name: Check free-only boundary
+        run: npm run quality:free-only
+      - name: Check engine blueprint
+        run: npm run quality:engine-blueprint
+      - name: Check model onboarding
+        run: npm run quality:model-onboarding
 
-      - name: Restore npm bootstrap cache
-        if: ${{ steps.lock-mode.outputs.mode == 'generate' }}
+  npm_lock:
+    name: npm lock · generate or verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.18.0'
+          package-manager-cache: false
+      - name: Detect npm lock mode
+        id: mode
+        shell: bash
+        env:
+          FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
+        run: |
+          if [[ "$FORCE_REFRESH" == "true" || ! -f package-lock.json ]]; then
+            echo 'mode=generate' >> "$GITHUB_OUTPUT"
+          else
+            echo 'mode=verify' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Record npm registry diagnostics
+        if: steps.mode.outputs.mode == 'generate'
+        shell: bash
+        run: |
+          mkdir -p .sorion/lock-audit/npm
+          {
+            echo "registry=$(npm config get registry)"
+            echo "proxy=$(npm config get proxy)"
+            echo "https-proxy=$(npm config get https-proxy)"
+            getent hosts registry.npmjs.org || true
+            curl --silent --show-error --location --head --max-time 15 https://registry.npmjs.org/firebase || true
+          } 2>&1 | tee .sorion/lock-audit/npm/registry-diagnostics.log
+      - name: Restore npm registry cache
         uses: actions/cache/restore@v5
         with:
           path: ~/.npm
-          key: sorion-npm-bootstrap-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: sorion-npm-${{ runner.os }}-node-22.18.0-${{ hashFiles('package-lock.json', 'package.json') }}
           restore-keys: |
-            sorion-npm-bootstrap-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-
-
-      - name: Generate and audit missing or explicitly refreshed lockfiles
-        id: refresh-locks
-        if: ${{ steps.lock-mode.outputs.mode == 'generate' }}
+            sorion-npm-${{ runner.os }}-node-22.18.0-
+      - name: Generate npm lock with bounded retry
+        id: generate
+        if: steps.mode.outputs.mode == 'generate'
         continue-on-error: true
-        run: npm run locks:refresh
-
-      - name: Save partial npm bootstrap cache
-        if: ${{ always() && steps.lock-mode.outputs.mode == 'generate' }}
+        run: npm run locks:refresh:npm
+      - name: Verify committed npm lock and install
+        if: steps.mode.outputs.mode == 'verify'
+        run: |
+          npm run locks:check -- --component npm
+          npm run deps:ci
+      - name: Save npm cache, including partial downloads
+        if: always()
         uses: actions/cache/save@v5
         with:
           path: ~/.npm
-          key: sorion-npm-bootstrap-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
-
-      - name: Upload lock bootstrap diagnostics
-        if: ${{ always() && steps.lock-mode.outputs.mode == 'generate' }}
+          key: sorion-npm-${{ runner.os }}-node-22.18.0-${{ hashFiles('package-lock.json', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Upload npm diagnostics
+        if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: sorion-lock-bootstrap-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          name: sorion-npm-lock-diagnostics
+          overwrite: true
           if-no-files-found: warn
           retention-days: 7
           include-hidden-files: true
-          path: |
-            package-lock.json
-            services/api/uv.lock
-            services/worker/uv.lock
-            .sorion/lock-audit
-
-      - name: Fail after preserving lock bootstrap evidence
-        if: ${{ steps.lock-mode.outputs.mode == 'generate' && steps.refresh-locks.outcome == 'failure' }}
+          path: .sorion/lock-audit/npm
+      - name: Fail after preserving npm evidence
+        if: steps.mode.outputs.mode == 'generate' && steps.generate.outcome == 'failure'
         run: |
-          echo 'Lock 생성이 registry/network 오류 뒤에도 완료되지 않았습니다.'
-          echo '부분 npm cache와 상세 로그를 보존했습니다. Re-run failed jobs를 실행하면 저장된 cache를 재사용합니다.'
+          echo 'npm registry 연결 또는 의존성 해석이 실패했습니다.'
+          echo '진단 artifact와 부분 cache를 보존했습니다. 실패 작업 재실행 시 cache를 재사용합니다.'
           exit 1
-
-      - name: Verify committed lockfiles
-        if: ${{ steps.lock-mode.outputs.mode == 'verify' }}
+      - name: Validate installed web toolchain
         run: |
-          npm run locks:check
-          (cd services/api && uv lock --check)
-          (cd services/worker && uv lock --check)
-
-      - name: Record lockfile bootstrap summary
-        if: ${{ steps.lock-mode.outputs.mode == 'generate' }}
-        env:
-          LOCK_REASON: ${{ steps.lock-mode.outputs.reason }}
-        run: |
-          {
-            echo '## Lockfiles generated for this run'
-            echo
-            echo "Reason: \`$LOCK_REASON\`"
-            echo
-            echo 'The generated lockfiles are used by Web, API, and Worker jobs in this workflow.'
-            echo 'Download the `sorion-verified-lockfiles` artifact and commit these files so later runs use verify-only mode:'
-            echo '- `package-lock.json`'
-            echo '- `services/api/uv.lock`'
-            echo '- `services/worker/uv.lock`'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload verified lockfiles and audit logs
-        if: ${{ steps.lock-mode.outputs.mode == 'verify' || steps.refresh-locks.outcome == 'success' }}
+          npm run quality:web-toolchain
+          npm run quality:dependency-tree
+          npm run locks:check -- --component npm
+      - name: Write npm lock proof
+        run: node scripts/write-lock-proof.mjs npm
+      - name: Upload verified npm lock
         uses: actions/upload-artifact@v6
         with:
-          name: sorion-verified-lockfiles
+          name: sorion-npm-lock
+          overwrite: true
           if-no-files-found: error
           retention-days: 7
           include-hidden-files: true
           path: |
             package-lock.json
-            services/api/uv.lock
-            services/worker/uv.lock
-            .sorion/lock-audit
+            .sorion/lock-proof/npm.json
 
-  web:
-    name: Web quality
-    needs: lockfiles
+  api_lock:
+    name: API uv lock · generate or verify
     runs-on: ubuntu-latest
     timeout-minutes: 20
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Download verified lockfiles
-        uses: actions/download-artifact@v7
-        with:
-          name: sorion-verified-lockfiles
-          path: .
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22.18.0'
           package-manager-cache: false
-
-      - name: Check retired files before install
-        run: npm run quality:stale-files
-
-      - name: Check web toolchain manifest
-        run: npm run quality:web-manifest
-
-      - name: Require verified lockfiles
-        run: npm run locks:check
-
-      - name: Restore npm bootstrap cache
-        uses: actions/cache/restore@v5
+      - uses: actions/setup-python@v6
         with:
-          path: ~/.npm
-          key: sorion-npm-web-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: |
-            sorion-npm-bootstrap-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-
+          python-version: '3.10'
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: '0.11.32'
+          working-directory: services/api
+          enable-cache: true
+      - name: Detect API lock mode
+        id: mode
+        shell: bash
+        env:
+          FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
+        run: |
+          if [[ "$FORCE_REFRESH" == "true" || ! -f services/api/uv.lock ]]; then echo 'mode=generate' >> "$GITHUB_OUTPUT"; else echo 'mode=verify' >> "$GITHUB_OUTPUT"; fi
+      - name: Generate API uv lock with bounded retry
+        id: generate
+        if: steps.mode.outputs.mode == 'generate'
+        continue-on-error: true
+        run: npm run locks:refresh:api
+      - name: Verify committed API lock
+        if: steps.mode.outputs.mode == 'verify'
+        working-directory: services/api
+        run: |
+          uv lock --check
+          uv sync --locked --dev --python 3.10
+      - name: Upload API lock diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sorion-api-lock-diagnostics
+          overwrite: true
+          if-no-files-found: warn
+          retention-days: 7
+          include-hidden-files: true
+          path: .sorion/lock-audit/api
+      - name: Fail after preserving API lock evidence
+        if: steps.mode.outputs.mode == 'generate' && steps.generate.outcome == 'failure'
+        run: exit 1
+      - run: npm run locks:check -- --component api
+      - run: node scripts/write-lock-proof.mjs api
+      - uses: actions/upload-artifact@v6
+        with:
+          name: sorion-api-lock
+          overwrite: true
+          if-no-files-found: error
+          retention-days: 7
+          include-hidden-files: true
+          path: |
+            services/api/uv.lock
+            .sorion/lock-proof/api.json
 
-      - name: Install web dependencies from lock
-        run: npm run deps:ci
+  worker_lock:
+    name: Worker uv lock · generate or verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.18.0'
+          package-manager-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: '0.11.32'
+          working-directory: services/worker
+          enable-cache: true
+      - name: Detect Worker lock mode
+        id: mode
+        shell: bash
+        env:
+          FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
+        run: |
+          if [[ "$FORCE_REFRESH" == "true" || ! -f services/worker/uv.lock ]]; then echo 'mode=generate' >> "$GITHUB_OUTPUT"; else echo 'mode=verify' >> "$GITHUB_OUTPUT"; fi
+      - name: Generate Worker uv lock with bounded retry
+        id: generate
+        if: steps.mode.outputs.mode == 'generate'
+        continue-on-error: true
+        run: npm run locks:refresh:worker
+      - name: Verify committed Worker lock
+        if: steps.mode.outputs.mode == 'verify'
+        working-directory: services/worker
+        run: |
+          uv lock --check
+          uv sync --locked --dev --python 3.10
+      - name: Upload Worker lock diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sorion-worker-lock-diagnostics
+          overwrite: true
+          if-no-files-found: warn
+          retention-days: 7
+          include-hidden-files: true
+          path: .sorion/lock-audit/worker
+      - name: Fail after preserving Worker lock evidence
+        if: steps.mode.outputs.mode == 'generate' && steps.generate.outcome == 'failure'
+        run: exit 1
+      - run: npm run locks:check -- --component worker
+      - run: node scripts/write-lock-proof.mjs worker
+      - uses: actions/upload-artifact@v6
+        with:
+          name: sorion-worker-lock
+          overwrite: true
+          if-no-files-found: error
+          retention-days: 7
+          include-hidden-files: true
+          path: |
+            services/worker/uv.lock
+            .sorion/lock-proof/worker.json
 
-      - name: Check installed web toolchain
-        run: npm run quality:web-toolchain
-
-      - name: Validate full dependency tree
-        run: npm run quality:dependency-tree
-
-      - name: Check project rules
-        run: npm run quality:rules
-
-      - name: Check free-only boundary
-        run: npm run quality:free-only
-
-      - name: Check engine blueprint
-        run: npm run quality:engine-blueprint
-
-      - name: Check model onboarding
-        run: npm run quality:model-onboarding
-
+  web:
+    name: Web quality
+    needs: [preflight, npm_lock]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v7
+        with:
+          name: sorion-npm-lock
+          path: .
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.18.0'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: node scripts/verify-lock-proof.mjs npm
+      - run: npm run locks:check -- --component npm
+      - run: npm run deps:ci
+      - run: npm run quality:web-toolchain
+      - run: npm run quality:dependency-tree
       - name: Lint
         run: npm run lint
-
       - name: Type check
         run: npm run typecheck
-
       - name: Test
         run: npm run test:ci
-
       - name: Build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
         run: npm run build
-
       - name: Write empty static-host runtime configuration
         run: npm run runtime:config
-
       - name: Configure GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v6
-
       - name: Upload Pages artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
@@ -234,100 +311,130 @@ jobs:
 
   api:
     name: API quality · Python 3.10
-    needs: lockfiles
+    needs: [preflight, api_lock]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
       run:
         working-directory: services/api
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Download verified lockfiles
-        uses: actions/download-artifact@v7
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v7
         with:
-          name: sorion-verified-lockfiles
+          name: sorion-api-lock
           path: .
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.18.0'
+          package-manager-cache: false
+      - name: Verify API lock proof
+        working-directory: .
+        run: node scripts/verify-lock-proof.mjs api
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.10'
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           version: '0.11.32'
           working-directory: services/api
           enable-cache: true
-
-      - name: Confirm Python version
-        run: python -c "import sys; assert sys.version_info[:2] == (3, 10), sys.version"
-
-      - name: Install API dependencies from lock
-        run: uv sync --locked --dev --python 3.10
-
+      - run: uv sync --locked --dev --python 3.10
       - name: Ruff
         run: uv run --locked --python 3.10 ruff check app tests --output-format=github
-
       - name: Run API tests
         run: uv run --locked --python 3.10 pytest tests -q
 
   worker:
     name: CosyVoice Worker quality · Python 3.10
-    needs: lockfiles
+    needs: [preflight, worker_lock]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
       run:
         working-directory: services/worker
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Download verified lockfiles
-        uses: actions/download-artifact@v7
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v7
         with:
-          name: sorion-verified-lockfiles
+          name: sorion-worker-lock
           path: .
-
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.18.0'
+          package-manager-cache: false
+      - name: Verify Worker lock proof
+        working-directory: .
+        run: node scripts/verify-lock-proof.mjs worker
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.10'
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           version: '0.11.32'
           working-directory: services/worker
           enable-cache: true
-
-      - name: Install Worker dependencies from lock
-        run: uv sync --locked --dev --python 3.10
-
+      - run: uv sync --locked --dev --python 3.10
       - name: Ruff
         run: uv run --locked --python 3.10 ruff check app tests --output-format=github
-
       - name: Run Worker tests
         run: uv run --locked --python 3.10 pytest tests -q
+
+  commit_verified_locks:
+    name: Commit verified lockfiles · main only
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [npm_lock, api_lock, worker_lock]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: actions/download-artifact@v7
+        with:
+          name: sorion-npm-lock
+          path: .
+      - uses: actions/download-artifact@v7
+        with:
+          name: sorion-api-lock
+          path: .
+      - uses: actions/download-artifact@v7
+        with:
+          name: sorion-worker-lock
+          path: .
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.18.0'
+          package-manager-cache: false
+      - run: node scripts/verify-lock-proof.mjs all
+      - name: Commit changed lockfiles
+        shell: bash
+        run: |
+          git add package-lock.json services/api/uv.lock services/worker/uv.lock
+          if git diff --cached --quiet; then
+            echo '검증된 lock 파일이 이미 저장소와 같습니다.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: commit verified lockfiles [skip ci]'
+          if ! git push origin HEAD:main; then
+            echo '::warning::branch protection 또는 권한 때문에 자동 lock 커밋을 건너뜁니다. lock artifact는 유지됩니다.'
+          fi
 
   deploy:
     name: Deploy GitHub Pages
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs:
-      - web
-      - api
-      - worker
+    needs: [web, api, worker]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy Pages artifact
         id: deployment

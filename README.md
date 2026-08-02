@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.2 · Resilient Lock Bootstrap & Selective STT Regeneration`
+- 버전: `0.9.3-beta.2 · CI Failure-Domain Hardening & Selective STT Regeneration`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -81,10 +81,10 @@ npm run hooks:install
 Volta에 동일하게 고정합니다. `vite-plugin-pwa 1.3.0`의 Vite 8 peer 선언과 전체 npm 트리를
 검사하며, 일반 CI는 검증된 lock이 있어야 `npm ci`와 `uv sync --locked`로 진행합니다.
 
-세 lock이 없으면 GitHub Actions가 첫 push에서 자동 bootstrap하여 같은 실행의 Web·API·Worker에
-전달합니다. 성공한 실행의 `sorion-verified-lockfiles` artifact에서 `package-lock.json`과 두
-`uv.lock`을 내려받아 커밋하면 이후 실행은 검증 전용 `npm ci`·`uv sync --locked` 경로를 사용합니다.
-의도적인 의존성 갱신은 수동 `generate_lockfiles=true`로 강제할 수 있습니다. 자세한 절차는
+npm, API uv, Worker uv lock은 독립 작업에서 생성·검증합니다. npm registry 장애가 API·Worker
+결과를 가리지 않으며, 설치와 dependency tree를 통과한 lock만 SHA-256 증명과 함께 전달됩니다.
+main에서는 별도 최소 권한 작업이 검증된 세 lock만 자동 커밋하고, branch protection이 막으면
+artifact를 유지합니다. 강제 갱신은 `generate_lockfiles=true`를 사용합니다. 자세한 절차는
 `docs/LOCKFILE_BOOTSTRAP.md`를 따릅니다.
 
 ## 검증된 로컬 모델 준비

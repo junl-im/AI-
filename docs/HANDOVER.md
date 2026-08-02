@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.2 · Resilient Lock Bootstrap & Selective STT Regeneration**
+현재 기준 버전: **0.9.3-beta.2 · CI Failure-Domain Hardening & Selective STT Regeneration**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-02 12:45 KST**
 제품 소유·디자인: **곰같은여우**
@@ -322,8 +322,8 @@ SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
 - Web Speech 받아쓰기는 브라우저 지원과 권한에 따라 동작하지 않을 수 있다.
 - 장문은 현재 블록 순차 생성이며 최종 WAV 재병합 Export는 미완료다.
 - 자동 탐색은 보안상 전체 LAN을 스캔하지 않는다.
-- 정식 npm·uv lock 생성은 패키지 저장소 가용성에 영향을 받는다.
-- 세 lock이 없으면 Actions가 자동 bootstrap하며, 성공 artifact를 검토·커밋한다. 의도적인 재생성은 `generate_lockfiles=true`를 사용한다.
+- 정식 npm·uv lock 생성은 패키지 저장소 가용성에 영향을 받지만 component별 실패 범위로 격리한다.
+- 검증된 lock만 SHA-256 증명 후 main 전용 최소 권한 job이 자동 커밋하며 강제 갱신은 `generate_lockfiles=true`를 사용한다.
 - 모든 API 프로세스는 같은 SQLite job 파일을 공유해야 한다.
 - memory fallback은 앱 종료 뒤 영구 복원되지 않는다.
 ## 19. 절대 전달 규칙
@@ -487,9 +487,9 @@ CI Hotfix 4 테스트 규칙:
 3. 정적 게이트, API 109개, Worker 14개와 compileall을 통과했다.
 4. npm 의존성 실행은 GitHub Actions가 최종 판정한다.
 5. 산출물은 CI Hotfix 2 전체본과 Hotfix 1 기준 패치다.
-## 35. 2026-08-02 12:45 KST · v0.9.3-beta.2
-1. registry 일시 장애를 최대 4회 재시도하고 실패 실행의 npm cache·시도별 로그를 보존한다.
-2. 실기기 5개 프로필 × 10·30·60분 측정 summary와 Quality 화면을 추가했다.
-3. 서버 WAV를 STT 검수해 실패 문장만 새 job으로 최대 2회 재생성한다.
-4. 검증은 API 112개, Worker 14개, YAML·정적 게이트·TS parser를 통과했다.
-5. 다음은 실제 장치 측정, STT 개선율, 30·60분 Export soak와 lock artifact 커밋이다.
+## 35. 2026-08-02 13:27 KST · v0.9.3-beta.2 CI hardening
+1. npm·API uv·Worker uv lock을 독립 job으로 분리하고 cache-only 우선·제한 재시도·hard timeout을 적용했다.
+2. lock·manifest SHA-256 증명, stable artifact overwrite, main 전용 최소 권한 자동 커밋을 추가했다.
+3. npm 장애는 Web lock에만 한정되고 preflight·API·Worker 결과는 독립적으로 확인된다.
+4. API 112개, Worker 14개, YAML·정적 게이트·lock proof 손상 fixture를 통과했다.
+5. 기능 목표는 실기기 측정, STT 개선율, 30·60분 Export soak를 그대로 유지한다.

@@ -12,7 +12,7 @@
 2. Faster Whisper 선택 재생성 전후 CER·WER와 핵심 토큰 개선율을 같은 문장 ID로 비교한다.
 3. 30·60분 WAV·MP3·SRT·VTT Export의 메모리, 처리 시간, 자막 싱크를 soak test로 기록한다.
 4. CosyVoice 신규 모델은 병행 설치, 동일 평가, canary, 한 릴리스 rollback 절차로만 전환한다.
-5. 성공한 Actions의 npm·uv lock artifact를 검토해 저장소에 커밋하고 verify-only 경로를 고정한다.
+5. main에서 자동 커밋된 npm·uv lock을 확인하고 이후 verify-only 경로를 고정한다.
 
 ## 선행 조건과 위험
 

@@ -17,7 +17,7 @@
     "cleanup:stale-brand": "node scripts/remove-stale-brand-assets.mjs",
     "quality:web-manifest": "node scripts/check-web-toolchain.mjs --manifest-only",
     "quality:web-toolchain": "node scripts/check-web-toolchain.mjs",
-    "quality": "npm run quality:lock-network && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
+    "quality": "npm run quality:lock-network && npm run quality:ci-architecture && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
@@ -33,8 +33,6 @@
     "model:manifest": "python services/worker/scripts/model_manifest.py",
     "quality:model-onboarding": "node scripts/check-model-onboarding.mjs",
     "quality:dependency-tree": "node scripts/audit-npm-tree.mjs",
-    "locks:mode": "node scripts/resolve-lock-mode.mjs",
-    "quality:lock-bootstrap": "node scripts/check-lock-mode.mjs",
     "locks:refresh": "node scripts/refresh-lockfiles.mjs",
     "locks:check": "node scripts/check-lockfiles.mjs",
     "prepare": "node scripts/install-git-hooks.mjs",
@@ -42,7 +40,13 @@
     "quality:stale-files": "node scripts/check-stale-files.mjs",
     "locks:sync-metadata": "node scripts/sync-lock-metadata.mjs",
     "quality:lock-network": "node scripts/check-lock-network-retry.mjs",
-    "deps:ci": "node scripts/install-web-dependencies.mjs"
+    "deps:ci": "node scripts/install-web-dependencies.mjs",
+    "locks:refresh:npm": "node scripts/refresh-npm-lock.mjs",
+    "locks:refresh:api": "node scripts/refresh-uv-lock.mjs api",
+    "locks:refresh:worker": "node scripts/refresh-uv-lock.mjs worker",
+    "locks:proof": "node scripts/write-lock-proof.mjs",
+    "locks:proof:verify": "node scripts/verify-lock-proof.mjs",
+    "quality:ci-architecture": "node scripts/check-ci-failure-domains.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",

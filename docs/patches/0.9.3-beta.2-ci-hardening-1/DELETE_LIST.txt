@@ -1,0 +1,4 @@
+# Permanently retired by 0.9.3-beta.2 CI hardening 1
+public/sorion-icon.svg
+scripts/check-lock-mode.mjs
+scripts/resolve-lock-mode.mjs

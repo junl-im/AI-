@@ -116,30 +116,32 @@ await requireText('services/api/app/services/job_manager.py', [
   'raise GenerationTimeoutError(job_id) from error',
 ])
 await requireText('.github/workflows/ci.yml', [
-  'name: SoriON CI & Pages',
-  'branches:',
+  'name: SoriON CI & Pages', 'permissions:', 'contents: read',
+  'Repository preflight · no dependency install', 'npm lock · generate or verify',
+  'API uv lock · generate or verify', 'Worker uv lock · generate or verify',
+  'needs: [preflight, npm_lock]', 'needs: [preflight, api_lock]', 'needs: [preflight, worker_lock]',
+  'Commit verified lockfiles · main only', 'contents: write', "github.ref == 'refs/heads/main'",
+  'node scripts/verify-lock-proof.mjs all', "chore: commit verified lockfiles [skip ci]",
   'astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b',
-  "version: '0.11.32'",
-  "python-version: '3.10'",
-  'actions/checkout@v6',
-  'actions/setup-node@v6',
-  'actions/setup-python@v6',
-  'actions/configure-pages@v6',
-  'actions/upload-pages-artifact@v5',
-  'actions/deploy-pages@v5',
-  'CosyVoice Worker quality · Python 3.10',
-  'working-directory: services/worker',
-  'Run Worker tests',
-  'Check free-only boundary', 'Check web toolchain manifest', 'Check installed web toolchain',
-  'Validate full dependency tree', "node-version: '22.18.0'", 'Write empty static-host runtime configuration', 'Lockfiles · generate or verify', 'actions/upload-artifact@v6', 'actions/download-artifact@v7', 'npm run deps:ci', 'uv sync --locked', 'generate_lockfiles', 'Check lock bootstrap selector', 'Detect lockfile mode', 'Generate and audit missing or explicitly refreshed lockfiles', "steps.lock-mode.outputs.mode == 'generate'", "steps.lock-mode.outputs.mode == 'verify'", 'npm run locks:mode', 'npm run quality:lock-network', 'actions/cache/restore@v5', 'actions/cache/save@v5',
+  "version: '0.11.32'", "python-version: '3.10'", "node-version: '22.18.0'",
+  'actions/checkout@v6', 'actions/setup-node@v6', 'actions/setup-python@v6',
+  'actions/upload-artifact@v6', 'actions/download-artifact@v7',
+  'actions/cache/restore@v5', 'actions/cache/save@v5', 'overwrite: true',
+  'npm run locks:refresh:npm', 'npm run locks:refresh:api', 'npm run locks:refresh:worker',
+  'npm run deps:ci', 'uv sync --locked', 'generate_lockfiles',
+  'sorion-npm-lock', 'sorion-api-lock', 'sorion-worker-lock',
+  'actions/configure-pages@v6', 'actions/upload-pages-artifact@v5', 'actions/deploy-pages@v5',
+  'CosyVoice Worker quality · Python 3.10', 'Run Worker tests',
+  'Write empty static-host runtime configuration',
 ])
 await requireAbsent('.github/workflows/ci.yml', [
-  'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24',
-  'actions/upload-artifact@v4',
-  'actions/download-artifact@v4',
+  'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24', 'actions/upload-artifact@v4', 'actions/download-artifact@v4',
+])
+await requireAbsent('.github/workflows/ci.yml', [
+  'needs: lockfiles', 'sorion-verified-lockfiles', 'npm_config_fetch_retries: 5',
 ])
 await requireText('.nvmrc', ['22.18.0']); await requireText('.node-version', ['22.18.0'])
-await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['자동 bootstrap', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'npm ci', 'uv sync --locked'])
+await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '자동 커밋', 'npm ci', 'uv sync --locked'])
 await requireText('src/test/setup.ts', ['afterEach', 'cleanup()', 'Object.defineProperty(Blob.prototype', "reader.readAsArrayBuffer(this)"])
 await requireText('src/tts/mockWave.test.ts', ['async function readBlob', "typeof blob.arrayBuffer === 'function'", 'reader.readAsArrayBuffer(blob)'])
 await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])
@@ -444,12 +446,10 @@ await requireText('src/pages/VoiceClonePage.tsx', [
   'const activeJobStatus = job?.status ?? null',
   '[activeJobId, activeJobStatus]',
 ])
-await requireText('scripts/refresh-lockfiles.mjs', [
-  'runCommandWithRetry',
-  "'npm package lock'",
-  "'npm clean install'",
-  'attempts',
-])
+await requireText('scripts/refresh-npm-lock.mjs', ['package-lock-offline', 'package-lock-online', 'npm-ci', 'attempts: 2', 'timeoutMs'])
+await requireText('scripts/refresh-uv-lock.mjs', ['api|worker', 'UV_HTTP_TIMEOUT', 'lock-check', 'sync-locked'])
+await requireText('scripts/write-lock-proof.mjs', ['lockSha256', 'manifestSha256', '.sorion', 'lock-proof'])
+await requireText('scripts/verify-lock-proof.mjs', ['lock SHA-256 불일치', 'manifest SHA-256 불일치'])
 await requireText('scripts/lock-retry.mjs', [
   'ETIMEDOUT',
   'EAI_AGAIN',
