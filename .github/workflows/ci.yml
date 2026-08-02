@@ -90,6 +90,7 @@ jobs:
             getent hosts registry.npmjs.org || true
             curl --silent --show-error --location --head --max-time 15 https://registry.npmjs.org/firebase || true
             curl --silent --show-error --location --head --max-time 15 https://registry.npmjs.com/firebase || true
+            curl --silent --show-error --location --head --max-time 15 https://registry.yarnpkg.com/firebase || true
           } 2>&1 | tee .sorion/lock-audit/npm/registry-diagnostics.log
       - name: Restore npm registry cache
         uses: actions/cache/restore@v5
@@ -128,7 +129,8 @@ jobs:
         if: steps.mode.outputs.mode == 'generate' && steps.generate.outcome == 'failure'
         run: |
           echo 'npm registry 연결 또는 의존성 해석이 실패했습니다.'
-          echo '진단 artifact와 부분 cache를 보존했습니다. 실패 작업 재실행 시 cache를 재사용합니다.'
+          echo '진단 artifact와 부분 cache를 보존했습니다. registry-probe.json과 package-lock-online 로그를 확인하세요.'
+          find .sorion/lock-audit/npm -maxdepth 1 -type f -print -exec tail -n 30 {} \; || true
           exit 1
       - name: Validate installed web toolchain
         run: |

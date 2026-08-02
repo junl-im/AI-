@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 CI Hardening 3 · Overlay-safe preflight and registry probing
+
+- 누적 덮어쓰기에서 남는 구형 lock selector를 최신 호환 shim으로 덮어써 삭제 커밋 없이도 preflight가 복구됩니다.
+- API verification/router import를 Ruff 기준으로 정렬했습니다.
+- npm bootstrap은 registry 후보를 병렬 probe하고 응답 가능한 endpoint부터 사용합니다.
+- lock 파일은 registry별 resolved URL을 생략해 다음 설치가 단일 host에 고정되지 않게 했습니다.
+
 ## 0.9.3-beta.3 CI Hardening 2 · Lock Bootstrap Isolation
 
 - Repository preflight의 모든 검사를 끝까지 실행하고 JSON·로그 artifact와 정확한 annotation을 남김

@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 import { isRetryableNetworkFailure, retryDelayMs } from './lock-retry.mjs'
+import { rankRegistryCandidates } from './npm-registry-probe.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const retryable = [
@@ -21,6 +22,10 @@ const terminal = [
   'package-lock root version mismatch',
 ]
 const failures = []
+const npmrc = await readFile(join(root, '.npmrc'), 'utf8')
+if (!npmrc.split(/\r?\n/).includes('omit-lockfile-registry-resolved=true')) {
+  failures.push('.npmrc가 lock을 단일 registry tarball URL에 고정하지 않도록 설정되지 않았습니다.')
+}
 for (const sample of retryable) {
   if (!isRetryableNetworkFailure(sample)) failures.push(`재시도 누락: ${sample}`)
 }
@@ -31,12 +36,38 @@ if (retryDelayMs(1) !== 5000 || retryDelayMs(3) !== 30000) {
   failures.push('재시도 지연 정책이 5/15/30초 계약과 다릅니다.')
 }
 
+const ranked = await rankRegistryCandidates(
+  ['https://slow.invalid/', 'https://fast.invalid/'],
+  {
+    packageName: 'firebase',
+    packageVersion: '11.4.0',
+    timeoutMs: 50,
+    fetchImpl: async (url) => {
+      if (String(url).includes('slow.invalid')) throw new Error('ETIMEDOUT')
+      return {
+        ok: true,
+        status: 200,
+        async json() {
+          return { name: 'firebase', version: '11.4.0', dist: { integrity: 'sha512-fixture' } }
+        },
+      }
+    },
+  },
+)
+if (ranked.ordered[0] !== 'https://fast.invalid/') {
+  failures.push('응답 가능한 registry를 먼저 선택하지 못했습니다.')
+}
+
 const fixture = await mkdtemp(join(tmpdir(), 'sorion-npm-fallback-'))
 try {
   const bin = join(fixture, 'bin')
   await mkdir(bin, { recursive: true })
   const fakeNpm = join(bin, 'npm')
   await writeFile(fakeNpm, `#!/bin/sh
+if [ "$FAKE_NPM_MODE" = "fail" ] && echo "$*" | grep -q -- "--registry="; then
+  echo "npm error code ETIMEDOUT" >&2
+  exit 1
+fi
 case "$*" in
   *"--offline"*)
     if echo "$*" | grep -q "package-lock-only"; then

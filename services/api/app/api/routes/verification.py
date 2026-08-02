@@ -18,10 +18,12 @@ from app.schemas.verification import (
     SttProbeResponse,
     SttSegmentVerificationResponse,
 )
-from app.services.stt_evaluation import measure_stt as evaluate_stt, regeneration_reasons
+from app.services.stt_evaluation import (
+    measure_stt as evaluate_stt,
+    regeneration_reasons,
+)
 
 router = APIRouter()
-
 
 
 def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkSummaryResponse:

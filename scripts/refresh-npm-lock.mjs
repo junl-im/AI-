@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 import { isRetryableNetworkFailure, runCommandWithRetry } from './lock-retry.mjs'
+import { rankRegistryCandidates } from './npm-registry-probe.mjs'
 
 const root = process.env.SORION_LOCK_ROOT || fileURLToPath(new URL('..', import.meta.url))
 const lockPath = join(root, 'package-lock.json')
@@ -41,16 +42,35 @@ const baseEnv = {
   npm_config_fetch_retry_mintimeout: '5000',
   npm_config_fetch_retry_maxtimeout: '30000',
   npm_config_fetch_timeout: '45000',
-  npm_config_maxsockets: '6',
+  npm_config_maxsockets: '12',
+  npm_config_omit_lockfile_registry_resolved: 'true',
   npm_config_replace_registry_host: 'always',
 }
 const registryCandidates = (process.env.SORION_NPM_REGISTRIES || [
   'https://registry.npmjs.org/',
   'https://registry.npmjs.com/',
+  'https://registry.yarnpkg.com/',
 ].join(','))
   .split(',')
   .map((value) => value.trim())
   .filter(Boolean)
+
+const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
+const probeEntries = Object.entries({ ...(manifest.dependencies || {}), ...(manifest.devDependencies || {}) })
+const [probePackageName, probePackageVersion] = probeEntries.find(([name]) => name === 'firebase') || probeEntries[0] || []
+let orderedRegistryCandidates = registryCandidates
+if (process.env.SORION_LOCK_TEST_MODE !== '1') {
+  const ranking = await rankRegistryCandidates(registryCandidates, {
+    packageName: probePackageName,
+    packageVersion: probePackageVersion,
+  })
+  orderedRegistryCandidates = ranking.ordered
+  await writeFile(
+    join(logDirectory, 'registry-probe.json'),
+    `${JSON.stringify({ package: `${probePackageName}@${probePackageVersion}`, ...ranking }, null, 2)}\n`,
+    'utf8',
+  )
+}
 
 async function execute(label, args, {
   attempts = 1,
@@ -86,7 +106,7 @@ function hasDangerousWarning(output) {
 
 async function generateOnlineLock() {
   let last = null
-  for (const [index, registry] of registryCandidates.entries()) {
+  for (const [index, registry] of orderedRegistryCandidates.entries()) {
     const label = `package-lock-online-${index + 1}`
     const run = await execute(label, [
       'install', '--package-lock-only', '--ignore-scripts', '--no-audit', '--no-fund',
@@ -113,7 +133,7 @@ async function installFromLock(preferredRegistry) {
   if (!isOfflineMiss(offline.output) && !isRetryableNetworkFailure(offline.output)) {
     throw new Error('offline npm ci가 의존성 또는 lock 오류로 실패했습니다.')
   }
-  const ordered = [preferredRegistry, ...registryCandidates].filter((value, index, values) =>
+  const ordered = [preferredRegistry, ...orderedRegistryCandidates].filter((value, index, values) =>
     value && values.indexOf(value) === index)
   let last = null
   for (const [index, registry] of ordered.entries()) {

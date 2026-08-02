@@ -3,12 +3,13 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
-const retiredPaths = [
-  'public/sorion-icon.svg',
+const retiredPaths = ['public/sorion-icon.svg']
+const compatibilityShims = [
   'scripts/check-lock-mode.mjs',
   'scripts/resolve-lock-mode.mjs',
 ]
 const ignoredRetiredPaths = ['public/sorion-icon.svg']
+const compatibilityMarker = 'SoriON legacy compatibility shim'
 const failures = []
 
 async function exists(path) {
@@ -22,6 +23,16 @@ async function exists(path) {
 
 for (const path of retiredPaths) {
   if (await exists(path)) failures.push(`${path}: 삭제된 파일이 작업 폴더에 다시 생겼습니다.`)
+}
+for (const path of compatibilityShims) {
+  if (!await exists(path)) {
+    failures.push(`${path}: 누적 ZIP 덮어쓰기용 호환 shim이 없습니다.`)
+    continue
+  }
+  const content = await readFile(`${root}/${path}`, 'utf8')
+  if (!content.includes(compatibilityMarker)) {
+    failures.push(`${path}: 오래된 selector가 남았습니다. 최신 패치를 다시 덮어쓰세요.`)
+  }
 }
 
 const gitCheck = spawnSync('git', ['rev-parse', '--is-inside-work-tree'], {
@@ -43,7 +54,7 @@ const hook = await readFile(`${root}/.githooks/pre-push`, 'utf8')
 const cleanup = await readFile(`${root}/scripts/remove-stale-brand-assets.mjs`, 'utf8')
 const patchScript = await readFile(`${root}/APPLY_PATCH.sh`, 'utf8')
 const deleteList = await readFile(
-  `${root}/docs/patches/0.9.3-beta.3-ci-hardening-2/DELETE_LIST.txt`,
+  `${root}/docs/patches/0.9.3-beta.3-ci-hardening-3/DELETE_LIST.txt`,
   'utf8',
 )
 if (!hook.includes('npm run quality:preflight')) {
@@ -57,6 +68,9 @@ if (!patchScript.includes('apply-delete-list.mjs')) {
 }
 for (const path of retiredPaths) {
   if (!deleteList.includes(path)) failures.push(`DELETE_LIST에 누적 폐기 경로가 없습니다: ${path}`)
+}
+for (const path of compatibilityShims) {
+  if (deleteList.includes(path)) failures.push(`호환 shim을 DELETE_LIST로 다시 삭제하면 안 됩니다: ${path}`)
 }
 for (const path of ignoredRetiredPaths) {
   if (!ignore.split(/\r?\n/).includes(`/${path}`)) {

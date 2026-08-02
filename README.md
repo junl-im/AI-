@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 2`
+- 버전: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 3`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -17,7 +17,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 진행 상태: SSE 우선, polling 자동 대체
 - 세션: IndexedDB 자동 저장과 SQLite 결과 복구
 - 배포: GitHub Pages 또는 Firebase Hosting Spark 정적 Web
-- CI: preflight 전체 진단, 구성요소별 lock 보존, npm 공식 registry endpoint 순차 fallback
+- CI: preflight 전체 진단, 구성요소별 lock 보존, 응답 가능한 npm registry 우선 선택
 
 ## 무료 실행
 
@@ -68,8 +68,8 @@ npm run quality:stale-files
 npm run hooks:install
 ```
 
-`public/sorion-icon.svg`는 영구 폐기 파일이며 Git 인덱스에서도 제거해야 합니다. 패치 ZIP은
-동봉된 `APPLY_PATCH` 스크립트로 적용합니다.
+`public/sorion-icon.svg`는 영구 폐기 파일이며 Git 인덱스에서도 제거해야 합니다. 구형 lock selector는
+삭제 대신 최신 호환 shim으로 덮어써 GitHub Desktop 복사 방식에서도 재발을 막습니다.
 
 ## 실기기·STT·Export
 

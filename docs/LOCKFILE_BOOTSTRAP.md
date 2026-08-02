@@ -57,3 +57,11 @@ main push에서 검증된 세 component lock이 모두 준비되면 별도 `Comm
 - npm 갱신이 실패하면 시작 전 package-lock을 복원한다.
 - API·Worker lock이 먼저 성공하면 npm 결과와 무관하게 검증 후 main에 반영한다.
 - 각 lock job은 시작 즉시 audit status 파일을 만들어 artifact 경로를 보장한다.
+
+## CI Hardening 3
+
+- lock 생성 전 registry 후보를 병렬 probe해 응답 가능한 endpoint부터 사용합니다.
+- 공식 npm endpoint가 모두 불안정할 때만 Yarn 호환 registry를 마지막 fallback으로 사용합니다.
+- `omit-lockfile-registry-resolved=true`로 lock을 특정 registry tarball URL에 묶지 않습니다.
+- 누적 ZIP에서 남은 이전 selector 파일은 호환 shim으로 덮어쓰므로 GitHub Desktop 복사만으로 preflight가 복구됩니다.
+

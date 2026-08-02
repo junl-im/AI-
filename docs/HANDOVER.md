@@ -471,16 +471,11 @@ CI Hotfix 4 테스트 규칙:
 10. 산출물: beta.1 전체 ZIP, alpha.2 누적 패치 ZIP, SHA-256.
 11. 다음: beta.2에서 실제 장치 증거와 실패 문장 제한 재생성을 완성한다.
 ## 33. 2026-08-02 12:18 KST · v0.9.3-beta.1 CI Hotfix 1
-1. 작업 일시: 2026-08-02 12:18 KST.
-2. 대상·기준: `0.9.3-beta.1 → 0.9.3-beta.1 CI Hotfix 1`.
-3. 변경 내용: lock 존재 여부를 먼저 판별해 누락 시 자동 생성·감사하고, 존재 시 strict verify하는 CI 분기를 추가했다.
-4. 변경 이유: 일반 push가 `npm run locks:check`에서 먼저 실패해 lock 생성 workflow까지 도달하지 못하는 bootstrap deadlock이 발생했다.
-5. 영향 범위: GitHub Actions lockfiles 작업, lock 모드 판별 스크립트, 프로젝트 규칙과 lock 운영 문서.
-6. 주요 파일: `.github/workflows/ci.yml`, `scripts/resolve-lock-mode.mjs`, `package.json`, `docs/LOCKFILE_BOOTSTRAP.md`.
-7. 검증 결과: missing·present·partial lock fixture에서 generate/verify 모드 분기, YAML 파싱, 프로젝트 정적 품질 게이트를 확인했다. 실제 registry 기반 lock 생성은 GitHub Actions가 최종 판정한다.
-8. 제한·주의: 자동 생성 artifact를 커밋하기 전까지 다음 실행도 generate 모드다. 기존 lock이 잘못된 경우에는 자동 치유하지 않고 실패한다.
-9. 산출물: `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-full.zip`, `SoriON-AI-0.9.3-beta.1-to-0.9.3-beta.1-ci-hotfix-1-patch.zip`.
-10. 다음 예상 업데이트: artifact의 세 lock을 커밋해 verify-only CI를 확인한 뒤 beta.2 실기기 증거와 선택적 STT 재생성을 진행한다.
+1. 누락 lock은 생성·감사하고 기존 lock은 strict verify하는 CI 분기로 bootstrap deadlock을 해소했다.
+2. 범위는 Actions lock 작업, 판별 스크립트, 프로젝트 규칙과 lock 운영 문서다.
+3. missing·partial·present fixture와 YAML·정적 게이트를 검증했고 실제 registry 실행은 Actions가 판정한다.
+4. 생성 artifact를 커밋하기 전까지 generate 모드이며 잘못된 기존 lock은 자동 치유하지 않는다.
+5. 다음 단계는 세 lock 커밋 후 beta.2 실기기 증거와 선택 STT 재생성이었다.
 ## 34. 2026-08-02 12:31 KST · v0.9.3-beta.1 CI Hotfix 2
 1. Ruff I001, Web fetch mock 타입, Hook 의존성과 Node 20 Artifact Action 경고를 수정했다.
 2. Artifact 전달은 Node 24 네이티브 upload v6·download v7을 사용한다.
@@ -497,3 +492,7 @@ CI Hotfix 4 테스트 규칙:
 - 65,536-frame 원자적 Export, 10·30·60분 soak, STT 전후 증거와 개인정보 제거 bundle을 구현했으며 합성 soak는 실제 음질 증거가 아니다.
 ## 37. 0.9.3-beta.3 CI Hardening 2
 - preflight 전체 보고서, npm 공식 endpoint fallback·lock 복구, 구성요소별 lock 부분 커밋으로 npm 장애가 Python 결과와 성공 lock 보존을 막지 않는다.
+
+## 38. 0.9.3-beta.3 CI Hardening 3
+- 구형 lock selector는 누적 덮어쓰기 호환 shim으로 유지하고, Ruff I001 두 건을 정렬했다.
+- npm bootstrap은 응답 가능한 registry부터 사용하며 lock에 특정 registry tarball URL을 고정하지 않는다.
