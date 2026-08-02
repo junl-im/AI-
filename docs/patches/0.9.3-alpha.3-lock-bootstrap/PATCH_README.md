@@ -1,5 +1,7 @@
 # SoriON AI 0.9.3-alpha.3 Lock Bootstrap Patch
 
+> 참고: 이 문서의 수동 bootstrap 절차는 `0.9.3-beta.1 CI Hotfix 1`에서 자동 bootstrap으로 대체되었습니다.
+
 기준 버전: `0.9.3-alpha.2`
 목표 버전: `0.9.3-alpha.3 Reproducible CI Lock Evidence Gate`
 

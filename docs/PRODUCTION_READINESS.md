@@ -118,7 +118,7 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - Node 22.18.0/npm 10.9.3과 Python 3.10/uv 0.11.32에서만 lock을 생성한다.
 - npm warning과 전체 dependency tree, 두 uv lock의 check·locked sync를 통과해야 한다.
 - 세 lock이 커밋된 뒤 일반 CI는 `npm ci`와 `uv sync --locked`만 허용한다.
-- 최초 lock은 Actions 수동 `generate_lockfiles=true` 실행 artifact에서 가져온다.
+- 세 lock이 없으면 Actions가 자동 bootstrap하고, 성공 artifact를 검토·커밋한다. 수동 `generate_lockfiles=true`는 강제 갱신 전용이다.
 
 
 ## 0.9.3-beta.1 실기기·STT·Export 게이트

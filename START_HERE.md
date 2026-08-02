@@ -47,8 +47,8 @@ firebase deploy --only hosting
 
 ## 품질 검사
 
-lock 생성 전에는 `docs/LOCKFILE_BOOTSTRAP.md`의 GitHub Actions 절차를 먼저 수행합니다.
-lock을 커밋한 뒤 다음 명령을 사용합니다.
+세 lock이 아직 없으면 첫 GitHub Actions 실행이 자동 bootstrap하고 검증 artifact를 만듭니다.
+artifact의 lock을 커밋한 뒤 로컬과 CI에서 다음 명령을 사용합니다.
 
 ```bash
 npm run locks:check

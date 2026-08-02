@@ -33,6 +33,8 @@
     "model:manifest": "python services/worker/scripts/model_manifest.py",
     "quality:model-onboarding": "node scripts/check-model-onboarding.mjs",
     "quality:dependency-tree": "node scripts/audit-npm-tree.mjs",
+    "locks:mode": "node scripts/resolve-lock-mode.mjs",
+    "quality:lock-bootstrap": "node scripts/check-lock-mode.mjs",
     "locks:refresh": "node scripts/refresh-lockfiles.mjs",
     "locks:check": "node scripts/check-lockfiles.mjs",
     "prepare": "node scripts/install-git-hooks.mjs",

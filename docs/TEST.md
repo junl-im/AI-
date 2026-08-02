@@ -486,10 +486,20 @@ npm run build
 - `npm ls --all --json --long`에서 Vite 8.2.0과 Vitest 4.1.10이 단일 버전인지 확인
 - 설치된 `vite-plugin-pwa`의 peerDependencies가 Vite 8을 포함하는지 확인
 - 생성된 세 lock을 같은 workflow의 Web·API·Worker가 내려받아 frozen install로 재검증
-- 일반 push·PR은 lock이 없거나 manifest와 다르면 품질 작업 전에 실패
+- 일반 push·PR은 lock이 없으면 자동 bootstrap하고, 기존 lock이 manifest와 다르면 품질 작업 전에 실패
 
 ## 0.9.3-beta.1 회귀 검사
 - `quality:stale-files`는 폐기 SVG의 파일·Git 추적·ignore·pre-push 계약을 검사한다.
 - API는 실기기 기록, STT CER·WER·핵심 토큰 오류, 최종 WAV·SRT·VTT를 검사한다.
 - 미완료 음성 구간이 있으면 기본 Export가 HTTP 409로 차단되어야 한다.
 - Web은 완료 API WAV 블록에서 최종 WAV와 자막 요청을 시작해야 한다.
+
+
+## 0.9.3-beta.1 CI Hotfix 1 · lock 모드 회귀 검사
+
+- 세 lock이 모두 없으면 `npm run locks:mode`가 `generate`를 반환하는지 확인
+- 세 lock이 모두 있으면 `verify`를 반환하는지 확인
+- 하나만 누락되어도 전체 세트를 다시 생성하는 경로가 선택되는지 확인
+- 기존 lock이 존재하지만 잘못된 경우 자동 재생성하지 않고 verify 단계에서 실패하는지 확인
+- generate 모드가 만든 artifact를 Web·API·Worker가 같은 실행에서 내려받는지 확인
+- 일반 push·PR이 lock 누락만으로 `npm run locks:check`에서 조기 종료되지 않는지 확인

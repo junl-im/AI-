@@ -329,7 +329,7 @@ SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
 - 장문은 현재 블록 순차 생성이며 최종 WAV 재병합 Export는 미완료다.
 - 자동 탐색은 보안상 전체 LAN을 스캔하지 않는다.
 - 정식 npm·uv lock 생성은 패키지 저장소 가용성에 영향을 받는다.
-- 세 lock은 Actions `generate_lockfiles=true` 결과만 검토·커밋하며 임의 작성하지 않는다.
+- 세 lock이 없으면 Actions가 자동 bootstrap하며, 성공 artifact를 검토·커밋한다. 의도적인 재생성은 `generate_lockfiles=true`를 사용한다.
 - 모든 API 프로세스는 같은 SQLite job 파일을 공유해야 한다.
 - memory fallback은 앱 종료 뒤 영구 복원되지 않는다.
 ## 19. 절대 전달 규칙
@@ -463,7 +463,6 @@ CI Hotfix 4 테스트 규칙:
    `SoriON-AI-0.9.2-ci-hotfix-2-to-0.9.3-alpha.1-patch.zip`.
 10. 다음 예상 업데이트: Faster Whisper 한국어 검수와 전체 WAV·MP3·자막 Export.
 
-
 ## 31. 2026-08-02 10:22 KST · v0.9.3-alpha.3 lock 전환
 
 1. 대상·기준: `0.9.3-alpha.2 → 0.9.3-alpha.3`.
@@ -475,7 +474,6 @@ CI Hotfix 4 테스트 규칙:
 7. 현재 실행 환경의 registry·DNS 제한 때문에 lock을 임의 생성하지 않았다.
 8. 산출물은 lock bootstrap 후보본과 alpha.2 기준 덮어쓰기 패치다.
 9. 다음 목표는 실기기 검증, STT 실측, 최종 Export 세 축만 완료하는 것이다.
-
 ## 32. 2026-08-02 10:40 KST · v0.9.3-beta.1
 1. 대상·기준: 사용자 저장소 `0.9.3-alpha.2`에 alpha.3 lock 변경을 누적했다.
 2. 폐기 SVG를 ignore, Git 인덱스 정리, pre-push, CI, 패치 삭제 실행기로 차단했다.
@@ -483,9 +481,19 @@ CI Hotfix 4 테스트 규칙:
 4. Faster Whisper 선택 Adapter와 CER·WER·핵심 토큰 오류 측정을 추가했다.
 5. 완료 WAV와 쉼을 병합하고 frame 기반 SRT·VTT, 선택적 MP3를 생성한다.
 6. 미완료 구간과 Browser Speech·Demo 음원은 기본 최종 Export에서 차단한다.
-7. 주요 파일: stale-file scripts와 hook, verification·exports route, STT·export service,
-   FinalExportControls, `REAL_DEVICE_STT_EXPORT.md`.
+7. 주요 파일: stale-file scripts와 hook, verification·exports route, STT·export service, FinalExportControls, `REAL_DEVICE_STT_EXPORT.md`.
 8. 검증: API 109개, Worker 14개, compileall, stale-file·프로젝트 규칙 검사 통과.
 9. 제한: 로컬 FFmpeg MP3·자막 생성은 검증했지만, 실제 CUDA·MPS·모바일과 Faster Whisper 모델 실측은 아직 필요하다.
 10. 산출물: beta.1 전체 ZIP, alpha.2 누적 패치 ZIP, SHA-256.
 11. 다음: beta.2에서 실제 장치 증거와 실패 문장 제한 재생성을 완성한다.
+## 33. 2026-08-02 12:18 KST · v0.9.3-beta.1 CI Hotfix 1
+1. 작업 일시: 2026-08-02 12:18 KST.
+2. 대상·기준: `0.9.3-beta.1 → 0.9.3-beta.1 CI Hotfix 1`.
+3. 변경 내용: lock 존재 여부를 먼저 판별해 누락 시 자동 생성·감사하고, 존재 시 strict verify하는 CI 분기를 추가했다.
+4. 변경 이유: 일반 push가 `npm run locks:check`에서 먼저 실패해 lock 생성 workflow까지 도달하지 못하는 bootstrap deadlock이 발생했다.
+5. 영향 범위: GitHub Actions lockfiles 작업, lock 모드 판별 스크립트, 프로젝트 규칙과 lock 운영 문서.
+6. 주요 파일: `.github/workflows/ci.yml`, `scripts/resolve-lock-mode.mjs`, `package.json`, `docs/LOCKFILE_BOOTSTRAP.md`.
+7. 검증 결과: missing·present·partial lock fixture에서 generate/verify 모드 분기, YAML 파싱, 프로젝트 정적 품질 게이트를 확인했다. 실제 registry 기반 lock 생성은 GitHub Actions가 최종 판정한다.
+8. 제한·주의: 자동 생성 artifact를 커밋하기 전까지 다음 실행도 generate 모드다. 기존 lock이 잘못된 경우에는 자동 치유하지 않고 실패한다.
+9. 산출물: `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-full.zip`, `SoriON-AI-0.9.3-beta.1-to-0.9.3-beta.1-ci-hotfix-1-patch.zip`.
+10. 다음 예상 업데이트: artifact의 세 lock을 커밋해 verify-only CI를 확인한 뒤 beta.2 실기기 증거와 선택적 STT 재생성을 진행한다.

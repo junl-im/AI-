@@ -1,7 +1,8 @@
 # LOCKFILE BOOTSTRAP
 
-`0.9.3-alpha.3`은 lock 파일을 임의로 작성하지 않는다. 실제 registry와 Python 3.10을 사용할 수
-있는 GitHub Actions에서 의존성을 해석하고, 설치 경고와 전체 트리를 검사한 결과만 채택한다.
+SoriON CI는 세 lock 파일이 없다는 이유만으로 일반 push·PR을 즉시 실패시키지 않는다.
+`Lockfiles · generate or verify` 작업이 먼저 존재 여부를 판별하고, 누락 시 **자동 bootstrap**,
+모두 존재할 때는 엄격 검증을 수행한다.
 
 ## 고정 런타임
 
@@ -10,35 +11,60 @@
 - API·Worker Python: `3.10`
 - uv: `0.11.32`
 
-`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`는 GitHub Action 자체의 실행 런타임 설정이다. SoriON Web을
-설치·빌드하는 Node 버전은 `actions/setup-node`와 `.nvmrc`의 `22.18.0`이다.
+`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`는 GitHub Action 자체의 실행 런타임이다. SoriON Web의
+설치·빌드는 `actions/setup-node`, `.nvmrc`, `.node-version`의 Node `22.18.0`을 사용한다.
 
-## 최초 생성 절차
+## 자동 bootstrap 흐름
 
-1. 이 전환 패치를 기능 브랜치에 커밋하고 GitHub에 push한다.
-2. Actions에서 `SoriON CI & Pages`를 수동 실행한다.
-3. `generate_lockfiles`를 `true`로 선택한다.
-4. `Lockfiles · generate or verify`가 다음 순서를 완료하는지 확인한다.
-   - `npm install --package-lock-only`
-   - `npm ci`
-   - npm warning과 전체 `npm ls --all --json --long` 검사
-   - API와 Worker의 `uv lock`, `uv lock --check`, `uv sync --locked`
-5. 실행 artifact `sorion-verified-lockfiles`를 내려받는다.
-6. 다음 세 파일을 같은 경로에 복사해 커밋한다.
+1. `npm run locks:mode`가 다음 파일의 존재를 확인한다.
    - `package-lock.json`
    - `services/api/uv.lock`
    - `services/worker/uv.lock`
-7. `.sorion/lock-audit` 로그에서 `ERESOLVE`, `UNMET`, `invalid`, `missing`, `EBADENGINE`이 없는지 마지막으로 본다.
-8. 다시 push한다. 이후 일반 CI는 `npm ci`와 `uv sync --locked`만 사용한다.
+2. 하나라도 없으면 `generate` 모드가 선택된다.
+3. CI가 다음 순서를 실행한다.
+   - `npm install --package-lock-only`
+   - `npm ci`
+   - npm warning과 전체 `npm ls --all --json --long` 검사
+   - API·Worker `uv lock`, `uv lock --check`, `uv sync --locked`
+4. 생성·검증된 세 lock과 `.sorion/lock-audit` 로그를
+   `sorion-verified-lockfiles` artifact로 업로드한다.
+5. 같은 workflow의 Web·API·Worker가 artifact를 내려받아 각각 `npm ci`와
+   `uv sync --locked`로 품질 검사를 계속한다.
+
+따라서 첫 push는 lock 누락만으로 멈추지 않는다. 다만 이후 실행을 완전히 재현 가능하게 만들려면
+성공한 실행의 artifact에서 세 lock을 내려받아 동일 경로에 커밋해야 한다.
+
+## 기존 lock 검증 흐름
+
+세 lock이 모두 존재하면 CI는 자동 재생성하지 않는다. 다음 검증에서 하나라도 실패하면 원인을
+숨기지 않고 즉시 중단한다.
+
+- `npm run locks:check`
+- API·Worker `uv lock --check`
+- Web `npm ci`
+- API·Worker `uv sync --locked`
+
+manifest와 lock이 불일치한 상태는 자동 갱신으로 덮지 않는다. 의존성을 의도적으로 변경한 경우에만
+Actions 수동 실행에서 `generate_lockfiles=true`를 선택해 강제 재생성한다.
+
+## artifact 커밋 절차
+
+1. 성공한 Actions 실행의 `sorion-verified-lockfiles` artifact를 내려받는다.
+2. 다음 파일을 저장소의 같은 경로에 복사한다.
+   - `package-lock.json`
+   - `services/api/uv.lock`
+   - `services/worker/uv.lock`
+3. `.sorion/lock-audit`에서 `ERESOLVE`, `UNMET`, `invalid`, `missing`, `EBADENGINE`을 확인한다.
+4. 세 lock만 검토해 커밋하고 push한다.
+5. 다음 실행의 lock 작업이 `verify` 모드인지 확인한다.
 
 ## 차단 기준
 
-- lock 파일이 없거나 `package.json`·`pyproject.toml`과 맞지 않음
+- 기존 lock과 `package.json`·`pyproject.toml` 불일치
 - npm install·ci 로그의 `ERESOLVE`, `UNMET`, `invalid`, `missing`, `EBADENGINE`
-- 전체 트리에 Vite가 `8.2.0` 외 버전으로 중복 설치됨
-- Vitest가 `4.1.10` 외 버전으로 설치됨
+- 전체 트리에 Vite `8.2.0` 외 버전이 설치됨
+- Vitest `4.1.10` 외 버전이 설치됨
 - `vite-plugin-pwa`가 Vite 8 peer 범위를 선언하지 않음
-- API·Worker lock이 Python 3.10 환경에서 `uv lock --check` 또는 locked sync에 실패함
+- Python 3.10에서 `uv lock --check` 또는 locked sync 실패
 
-정상 lock이 커밋되기 전의 일반 push·PR CI 실패는 의도된 차단이다. 수동 lock 생성 실행은 생성된
-lock을 Web·API·Worker 작업에 전달해 같은 실행에서 lint, typecheck, test, build까지 검증한다.
+lock 누락은 자동 bootstrap 대상이고, 존재하지만 잘못된 lock은 실패 대상이다.

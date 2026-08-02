@@ -81,9 +81,11 @@ npm run hooks:install
 Volta에 동일하게 고정합니다. `vite-plugin-pwa 1.3.0`의 Vite 8 peer 선언과 전체 npm 트리를
 검사하며, 일반 CI는 검증된 lock이 있어야 `npm ci`와 `uv sync --locked`로 진행합니다.
 
-최초 lock은 GitHub Actions의 `generate_lockfiles=true` 수동 실행으로 생성합니다. 해당 실행은
-npm 설치 warning, 전체 의존성 트리, API·Worker uv lock과 locked sync를 검사한 뒤 세 lock 파일과
-감사 로그를 artifact로 제공합니다. 절차는 `docs/LOCKFILE_BOOTSTRAP.md`를 따릅니다.
+세 lock이 없으면 GitHub Actions가 첫 push에서 자동 bootstrap하여 같은 실행의 Web·API·Worker에
+전달합니다. 성공한 실행의 `sorion-verified-lockfiles` artifact에서 `package-lock.json`과 두
+`uv.lock`을 내려받아 커밋하면 이후 실행은 검증 전용 `npm ci`·`uv sync --locked` 경로를 사용합니다.
+의도적인 의존성 갱신은 수동 `generate_lockfiles=true`로 강제할 수 있습니다. 자세한 절차는
+`docs/LOCKFILE_BOOTSTRAP.md`를 따릅니다.
 
 ## 검증된 로컬 모델 준비
 

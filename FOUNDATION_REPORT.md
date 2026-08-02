@@ -3,6 +3,14 @@
 결과 버전: **0.9.3-beta.1 · Device Verification, STT Measurement & Final Export**
 기준: **0.9.3-alpha.2 사용자 저장소 + alpha.3 lock 안정화 누적**
 
+## CI Hotfix 1 · Lock 누락 자동 bootstrap
+
+- 일반 push·PR에서 세 lock이 없으면 CI가 실패하기 전에 실제 registry에서 자동 생성·감사합니다.
+- 생성된 lock은 같은 실행의 Web·API·Worker에 artifact로 전달되어 frozen install을 수행합니다.
+- 기존 lock이 있으면 자동 재생성하지 않고 manifest·uv lock 일치 여부를 엄격 검증합니다.
+- 성공 artifact의 세 lock은 저장소에 커밋해야 이후 실행이 완전한 verify-only 경로가 됩니다.
+- 현재 샌드박스의 내부 npm mirror 404 때문에 실제 lock 생성은 GitHub Actions에서 최종 검증해야 합니다.
+
 ## 완료
 
 - 폐기 SVG의 파일·Git 추적·push·패치 적용 재유입을 다중 차단

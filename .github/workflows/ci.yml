@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       generate_lockfiles:
-        description: Generate, audit, and validate npm and uv lockfiles
+        description: Force regeneration, audit, and validation of npm and uv lockfiles
         required: false
         default: false
         type: boolean
@@ -55,23 +55,49 @@ jobs:
           version: '0.11.32'
           enable-cache: true
 
-      - name: Generate verified lockfiles
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
+      - name: Check lock bootstrap selector
+        run: npm run quality:lock-bootstrap
+
+      - name: Detect lockfile mode
+        id: lock-mode
+        env:
+          SORION_FORCE_LOCK_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
+        run: npm run locks:mode -- --github-output "$GITHUB_OUTPUT"
+
+      - name: Generate and audit missing or explicitly refreshed lockfiles
+        if: ${{ steps.lock-mode.outputs.mode == 'generate' }}
         run: npm run locks:refresh
 
-      - name: Require committed lockfiles
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.generate_lockfiles != true }}
+      - name: Verify committed lockfiles
+        if: ${{ steps.lock-mode.outputs.mode == 'verify' }}
         run: |
           npm run locks:check
           (cd services/api && uv lock --check)
           (cd services/worker && uv lock --check)
+
+      - name: Record lockfile bootstrap summary
+        if: ${{ steps.lock-mode.outputs.mode == 'generate' }}
+        env:
+          LOCK_REASON: ${{ steps.lock-mode.outputs.reason }}
+        run: |
+          {
+            echo '## Lockfiles generated for this run'
+            echo
+            echo "Reason: \`$LOCK_REASON\`"
+            echo
+            echo 'The generated lockfiles are used by Web, API, and Worker jobs in this workflow.'
+            echo 'Download the `sorion-verified-lockfiles` artifact and commit these files so later runs use verify-only mode:'
+            echo '- `package-lock.json`'
+            echo '- `services/api/uv.lock`'
+            echo '- `services/worker/uv.lock`'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload verified lockfiles and audit logs
         uses: actions/upload-artifact@v4
         with:
           name: sorion-verified-lockfiles
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 7
           include-hidden-files: true
           path: |
             package-lock.json

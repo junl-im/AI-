@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.9.3-beta.1 CI Hotfix 1 - 2026-08-02
+
+### Lockfile Bootstrap Deadlock Fix
+
+- 일반 push·PR에서 lock 파일이 없으면 `locks:check`로 먼저 실패하던 CI 모순을 제거했습니다.
+- 세 lock 중 하나라도 누락되면 자동으로 생성·감사하고 같은 실행의 Web·API·Worker에 전달합니다.
+- 세 lock이 모두 있으면 자동 갱신하지 않고 `locks:check`와 `uv lock --check`만 수행합니다.
+- 의도적인 강제 갱신은 기존 `generate_lockfiles=true` 수동 입력으로 유지합니다.
+- 생성된 lock과 감사 로그의 artifact 보존 기간을 7일로 늘리고 커밋 절차를 Job Summary에 표시합니다.
+
 ## 0.9.3-beta.1 - 2026-08-02
 
 ### Stale File Recurrence Prevention

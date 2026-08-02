@@ -356,8 +356,8 @@ Semantic Versioning을 사용한다.
 - 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.3-alpha.2-to-0.9.3-alpha.3-lock-bootstrap-patch.zip`
 - 패치 기준 버전: `0.9.3-alpha.2`
 - 목적: 실제 registry 설치 증거로 npm·uv lock을 생성하고 일반 CI를 frozen install로 전환
-- 최초 적용 뒤 Actions에서 `generate_lockfiles=true` 수동 실행이 필요
-- 생성 artifact의 세 lock을 커밋하기 전 일반 push·PR 실패는 의도된 차단
+- 당시 최초 적용은 `generate_lockfiles=true` 수동 실행을 요구했다.
+- 이 동작은 `0.9.3-beta.1 CI Hotfix 1`에서 누락 lock 자동 bootstrap으로 대체됐다.
 - 삭제 파일: 없음
 
 
@@ -370,3 +370,14 @@ Semantic Versioning을 사용한다.
 - 삭제 파일: `public/sorion-icon.svg`
 - 패치는 반드시 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`로 적용한다.
 - 실제 실기기 수치와 Faster Whisper 모델은 포함하지 않는다.
+
+
+## 0.9.3-beta.1 CI Hotfix 1
+
+- 전체 후보본 ZIP: `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.3-beta.1-to-0.9.3-beta.1-ci-hotfix-1-patch.zip`
+- 기준 버전: `0.9.3-beta.1`
+- 목적: lock 파일이 없는 최초 push에서 CI가 생성 전에 실패하는 bootstrap deadlock 제거
+- 누락 lock은 Actions에서 자동 생성·감사해 같은 workflow에 전달
+- 기존 lock은 자동 재작성하지 않고 strict verify
+- 삭제 파일: 없음
