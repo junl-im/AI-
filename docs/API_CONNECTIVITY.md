@@ -1,6 +1,6 @@
 # API 자동 연결
 
-현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 3`
+현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 5`
 
 ## 사용자 원칙
 
@@ -59,3 +59,16 @@ Worker를 추가합니다. 연결 성공 주소는 브라우저 저장소에 기
 
 데스크톱 정적 Web이 로컬 API를 호출할 때 브라우저가 private-network preflight를 보낼 수 있습니다.
 FastAPI의 `PrivateNetworkCORSMiddleware`가 허용 Origin과 헤더를 검증한 뒤 응답합니다.
+
+## Engine Heartbeat 5 공개 HTTPS Bridge
+
+`/connectivity`는 현재 요청의 유효 Origin을 기준으로 `public_https_ready`,
+`public_api_origin`, `public-https-bridge` 검사를 반환합니다. 공개 HTTPS만 ready이고, 공개 HTTP는
+missing, localhost·사설망은 warning입니다. 상세 배포 경계는 `docs/SECURE_MOBILE_BRIDGE.md`를
+따릅니다.
+
+Forwarded header는 진단에만 사용하며 인증·권한 판정에는 사용하지 않습니다. reverse proxy는
+외부에서 들어온 forwarded header를 제거하고 자신의 값을 다시 설정해야 합니다.
+
+Engine Doctor의 프리셋 영역은 파일명과 길이·샘플레이트·채널·비트·무음·클리핑 비율을 표시하지만
+음원 본문과 로컬 절대 경로는 진단 복사 JSON에 포함하지 않습니다.

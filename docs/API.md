@@ -156,3 +156,21 @@ POST /api/v1/quality/stt/verify-segments
 ```
 
 `device-benchmarks/summary`는 CUDA, Apple Silicon, CPU, Android, iOS와 10·30·60분 조합의 기록 여부와 최신 상태를 반환한다. `stt/verify-segments`는 서버 audio store의 완료 음원을 Faster Whisper로 전사하고 CER·WER·핵심 토큰 오류를 계산해 `regeneration_segment_ids`와 한도 도달 `blocked_segment_ids`를 반환한다.
+
+## 0.9.3-beta.3 Engine Heartbeat 5 연결·프리셋·지연 계약
+
+`GET /connectivity` 추가 필드:
+
+```json
+{
+  "public_https_ready": true,
+  "public_api_origin": "https://voice.example.com"
+}
+```
+
+`GET /setup`의 `voice_preset_diagnostics`는 프리셋별 `status`, `usable`, 길이, 샘플레이트,
+채널, 비트 깊이, 무음·클리핑 비율과 조치 사유를 반환합니다. 1~30초, 16~48kHz, 모노·스테레오
+8·16·24·32비트 PCM WAV가 기본 허용 범위입니다.
+
+TTS 완료 응답의 `first_audio_ms`는 첫 사용 가능 서버 음성 파일 준비 시간입니다. 여러 구간은 첫
+구간 준비, 한 구간은 최종 파일 준비 시점이며 실제 브라우저 재생 시작을 의미하지 않습니다.

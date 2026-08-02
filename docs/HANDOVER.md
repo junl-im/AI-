@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 4**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 5**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 16:58 KST**
+최종 갱신: **2026-08-02 19:51 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -139,12 +139,16 @@ health · readiness · GPU diagnostics · jobs · SSE · WAV
 - API·실제 TTS·Demo 상태를 구분하고 Worker·GPU 3단계 상태를 표시.
 - 초기 랜딩에서는 숨고 작업공간 진입 뒤 나타나는 Linked Player Dock과 최대 20개 큐.
 - 목소리 복제, 품질 연구소와 클릭 시 편집 상태를 복원하는 프로젝트 저장소.
+- PC 1180px 이상 좌우 패널의 너비 조절·접기와 `sorion.desktop-studio-layout.v1` 로컬 저장.
+- Engine Doctor의 공개 HTTPS Bridge, 프리셋 WAV 세부 진단과 첫 음성 파일 준비 지표 표시.
 ### FastAPI Gateway
 - Health, Setup, Connectivity, Engine Registry.
-- Connectivity 응답에 `api_ready`, `tts_ready`, `voice_clone_ready`,
-  `worker_configured` 포함.
+- Connectivity 응답에 `api_ready`, `public_https_ready`, `public_api_origin`, `tts_ready`,
+  `voice_clone_ready`, `worker_configured` 포함.
 - 숫자·날짜·시각·금액·퍼센트·단위·약어 정규화.
 - PCM WAV 생성·병합, UUID 작업, timeout·cancel·동시 제한.
+- 첫 사용 가능 서버 음성 파일 준비 시간 `first_audio_ms`와 전체 처리 시간을 분리.
+- CosyVoice 프리셋 WAV의 포맷·길이·샘플레이트·채널·무음·클리핑 사전 검증.
 - 복제 동의·샘플 검증과 Worker proxy.
 - 공개 rate limit과 JSONL 감사 로그.
 ### CosyVoice Worker
@@ -244,6 +248,9 @@ X-SoriON-Signature
 - 서명은 method + path + timestamp + body SHA-256의 HMAC-SHA256.
 - `/health`만 무인증, `/ready`와 `/v1/*`는 인증.
 - Worker는 인터넷에 직접 공개하지 않는다.
+- 공개 FastAPI는 TLS reverse proxy 뒤에 두고 Worker와 같은 포트를 직접 노출하지 않는다.
+- `X-Forwarded-*`는 Heartbeat 5에서 공개 Origin 진단 전용이며 인증·권한 판정에 사용하지 않는다.
+- reverse proxy는 외부 forwarded header를 제거한 뒤 자신의 값만 전달한다.
 - Secret은 저장소와 ZIP에 넣지 않는다.
 - production에서 Secret이 없으면 ready가 되지 않아야 한다.
 ## 13. 환경 변수
@@ -266,7 +273,8 @@ SORION_AUDIO_TTL_MINUTES, SORION_AUDIO_DIRECTORY, SORION_MAX_SEGMENT_CHARS
 SORION_ENABLE_MELO_TTS, SORION_MELO_DEVICE, SORION_ENABLE_SYSTEM_TTS, SORION_SYSTEM_TTS_VOICE
 SORION_COSYVOICE_WORKER_URL, SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS
 SORION_COSYVOICE_WORKER_JOB_TIMEOUT_SECONDS, SORION_COSYVOICE_TTS_REFERENCE_PATH
-SORION_COSYVOICE_TTS_PROFILE_ID, SORION_WORKER_SERVICE_TOKEN, SORION_WORKER_SIGNATURE_SECRET
+SORION_COSYVOICE_TTS_PROFILE_ID, SORION_COSYVOICE_PRESET_DIRECTORY
+SORION_WORKER_SERVICE_TOKEN, SORION_WORKER_SIGNATURE_SECRET
 ```
 보안·저장·Worker:
 ```text
@@ -302,10 +310,11 @@ SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체 후보본: `SoriON-AI-0.9.3-beta.1-full.zip`.
-- 누적 패치: `SoriON-AI-0.9.3-alpha.2-to-0.9.3-beta.1-patch.zip`.
-- 기준본: 사용자 CI 로그의 `0.9.3-alpha.2`.
-- 삭제 대상: `public/sorion-icon.svg`; APPLY_PATCH 스크립트로 실제 삭제한다.
+- 전체 후보본: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-5-full.zip`.
+- 덮어쓰기 패치: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-4-to-0.9.3-beta.3-engine-heartbeat-5-patch.zip`.
+- 정확한 패치 기준: `0.9.3-beta.3 · Engine Heartbeat 4` 전체본.
+- 추적 파일 삭제: 없음.
+- 누적 영구 삭제 대상: `public/sorion-icon.svg`; APPLY_PATCH 스크립트로 실제 삭제한다.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
 - 편집 진입 후 대형 헤더를 다시 노출하지 않는다.
@@ -320,7 +329,10 @@ SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
 - 공개 API가 없으면 Browser Speech만 재생되며 AI·WAV 다운로드·복제는 준비되지 않는다.
 - CosyVoice는 모델·GPU·동의된 기준 음성이 별도 필요하고 free-only는 과금형 API를 호출하지 않는다.
 - Web Speech 받아쓰기는 브라우저 지원과 권한에 따라 동작하지 않을 수 있다.
-- 장문은 현재 블록 순차 생성이며 최종 WAV 재병합 Export는 미완료다.
+- 장문 TTS는 첫 구간 파일 준비 시간을 측정하지만 해당 구간을 Web에 즉시 전달·재생하는 partial-ready 경로는 아직 없다.
+- `first_audio_ms`는 서버 파일 준비 시간이며 브라우저 decode·`playing`·실제 스피커 출력 시작을 포함하지 않는다.
+- Browser Speech의 실제 `onstart` 지표는 아직 수집하지 않으며 `null`을 유지한다.
+- 공개 Bridge 진단은 프록시 forwarded header를 사용하므로 신뢰 프록시 allowlist 강화가 필요하다.
 - 자동 탐색은 보안상 전체 LAN을 스캔하지 않는다.
 - 정식 npm·uv lock 생성은 패키지 저장소 가용성에 영향을 받지만 component별 실패 범위로 격리한다.
 - 검증된 lock만 SHA-256 증명 후 main 전용 최소 권한 job이 자동 커밋하며 강제 갱신은 `generate_lockfiles=true`를 사용한다.
@@ -356,14 +368,15 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.9.3-beta.2 Real Device Evidence & Selective STT Regeneration**.
+다음 목표 버전: **0.9.3-beta.3 · Engine Heartbeat 6 · Partial Audio Delivery & Bridge Hardening**.
 우선순위:
-1. Windows CUDA·Apple MPS·CPU와 Android·iOS 실제 측정표 완성.
-2. 10분·30분·60분 내용의 지연·RTF·RAM·VRAM·실패율 기록.
-3. Faster Whisper 결과에서 실패 문장만 제한 재생성.
-4. 대형 장문 WAV·MP3·SRT·VTT 싱크와 메모리 실측.
-5. CosyVoice 모델은 병행 설치·동일 평가·canary·rollback으로 전환.
-금지: 측정하지 않은 실기기 성능 보증, 유료 API 기본 호출, 모델 없는 성공 표시.
+1. 첫 문장 WAV의 segment-ready SSE와 만료되는 제한 audio URL을 Web 재생에 연결.
+2. 서버 준비, 첫 byte, `HTMLAudioElement.playing`, Browser Speech `onstart` 지표를 분리.
+3. 신뢰 reverse proxy allowlist와 forwarded header 정규화.
+4. 실제 CosyVoice 모델·프리셋 3종·모바일에서 첫 구간 지연과 RTF 증거 기록.
+5. 패널 조절·접기와 좁은 PC 폭의 Web 테스트·시각 회귀 추가.
+금지: partial-ready 미연결 상태를 스트리밍 성공으로 표시, forwarded header를 인증에 사용,
+측정하지 않은 실기기 성능 보증, 유료 API 기본 호출, 모델 없는 성공 표시.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -514,3 +527,26 @@ CI Hotfix 4 테스트 규칙:
 - 상단 엔진 상태는 API·Worker·GPU 3점으로 유지하고 실패 계층은 작업 메시지로 즉시 기록한다.
 - 검증: preflight 11개, API 123개, Worker 14개, compileall, 변경 TS/TSX transpile 및 전체 parser 154개 통과.
 - 제한: npm 의존성 부재로 ESLint·Vitest·Vite production build는 GitHub Actions에서 최종 확인한다.
+
+## 42. 2026-08-02 19:51 KST · 0.9.3-beta.3 Engine Heartbeat 5
+1. 작업 일시: 2026-08-02 19:51 KST.
+2. 대상/기준: `0.9.3-beta.3 · Engine Heartbeat 5`, 기준은 `Engine Heartbeat 4` 전체본.
+3. 변경 내용: 공개 HTTPS Bridge 진단, 프리셋 WAV 사전검증, 서버 첫 음성 파일 준비 지표,
+   PC 좌우 패널 조절·접기·로컬 저장을 추가했다.
+4. 변경 이유: 모바일 정적 Web과 실제 Voice API의 연결 현실을 준비됨/미준비로 구분하고,
+   손상·무음·클리핑 기준 음성을 Worker에 보내기 전에 차단하며, 장문 첫 결과 대기 시간을
+   전체 병합 시간과 분리하기 위해서다.
+5. 영향 범위: Web Engine Doctor·결과 카드·타임라인·PC 스튜디오, FastAPI connectivity·setup·TTS
+   pipeline, CosyVoice TTS readiness, API/Web 계약과 운영 문서.
+6. 주요 파일: `services/api/app/services/voice_preset_validation.py`, connectivity/setup/TTS schema와
+   pipeline, `src/hooks/useDesktopStudioLayout.ts`, Engine Doctor·타임라인·결과 카드,
+   `docs/SECURE_MOBILE_BRIDGE.md`, `docs/FIRST_AUDIO_LATENCY.md`.
+7. 검증 결과: Repository preflight 11/11, API pytest 127개, Worker pytest 14개, Python compileall,
+   프로젝트 규칙, TypeScript·TSX 156개 transpile 구문 검사를 통과했다.
+8. 제한/주의: 전달본에 npm lock과 설치 의존성이 없어 ESLint·Vitest·semantic typecheck·Vite build는
+   실행하지 못했다. 테스트 Python 3.13.5는 지원 상한 3.12 밖이다. `first_audio_ms`는 서버 파일
+   준비 시간이며 실제 재생 시작이 아니다. forwarded header는 진단 전용이고 partial-ready 재생은 미구현이다.
+9. 산출물: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-5-full.zip`,
+   `SoriON-AI-0.9.3-beta.3-engine-heartbeat-4-to-0.9.3-beta.3-engine-heartbeat-5-patch.zip`, SHA-256 목록.
+10. 다음 예상 업데이트: Engine Heartbeat 6에서 segment-ready 실제 전달·재생, 브라우저 audible-start
+    측정, 신뢰 프록시 allowlist와 실제 모델·모바일 증거를 완성한다.

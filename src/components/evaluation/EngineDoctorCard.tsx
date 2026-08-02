@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react'
 import type { ConnectionLayer, ConnectivityStatus } from '../../settings/connectivityTypes'
-import type { SetupStepStatus } from '../../settings/setupTypes'
+import type { SetupStepStatus, VoicePresetStatus } from '../../settings/setupTypes'
 import { useEngineDoctor } from '../../hooks/useEngineDoctor'
 import { StatusPill } from '../ui/StatusPill'
 
@@ -11,13 +11,13 @@ const layerLabels = {
   gpu: '가속 장치',
 } as const
 
-function toneForStatus(status: ConnectivityStatus | SetupStepStatus | ConnectionLayer['state']) {
+function toneForStatus(status: ConnectivityStatus | SetupStepStatus | VoicePresetStatus | ConnectionLayer['state']) {
   if (status === 'ready') return 'good' as const
   if (status === 'warning' || status === 'checking') return 'warning' as const
   return 'neutral' as const
 }
 
-function labelForStatus(status: ConnectivityStatus | SetupStepStatus | ConnectionLayer['state']) {
+function labelForStatus(status: ConnectivityStatus | SetupStepStatus | VoicePresetStatus | ConnectionLayer['state']) {
   const labels: Record<string, string> = {
     ready: '준비됨',
     warning: '확인 필요',
@@ -25,6 +25,7 @@ function labelForStatus(status: ConnectivityStatus | SetupStepStatus | Connectio
     offline: '연결 안 됨',
     checking: '확인 중',
     unknown: '미확인',
+    blocked: '사용 차단',
   }
   return labels[status] ?? status
 }
@@ -108,6 +109,28 @@ export function EngineDoctorCard() {
         </p>
       ) : null}
 
+      <div className="mt-4 rounded-2xl border border-soa-line bg-white p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <strong className="text-sm">모바일 공개 HTTPS Bridge</strong>
+            <p className="mt-1 text-xs text-soa-muted">카카오톡·외부 브라우저에서 PC 엔진에 연결하는 경로</p>
+          </div>
+          <StatusPill
+            label={doctor.report?.publicHttpsReady ? '공개 연결 준비' : '로컬 전용'}
+            tone={doctor.report?.publicHttpsReady ? 'good' : 'warning'}
+          />
+        </div>
+        <p className="mt-3 text-xs leading-5 text-soa-muted">
+          {doctor.report?.checks.find((check) => check.id === 'public-https-bridge')?.detail
+            ?? '공개 HTTPS API에서 진단하면 TLS와 외부 접근 가능 여부를 확인합니다.'}
+        </p>
+        {doctor.report?.publicApiOrigin ? (
+          <code className="mt-2 block break-all rounded-xl bg-[#f4f2ec] p-2 text-[11px] font-bold">
+            {doctor.report.publicApiOrigin}
+          </code>
+        ) : null}
+      </div>
+
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {Object.entries(layerLabels).map(([key, label]) => {
           const layer = doctor.report?.layers[key as keyof typeof layerLabels]
@@ -149,6 +172,26 @@ export function EngineDoctorCard() {
           {doctor.setup?.steps.find((step) => step.id === 'voice-presets')?.detail
             ?? 'START_ENGINE.cmd 실행 후 프리셋 폴더 연결 상태를 확인합니다.'}
         </p>
+        {doctor.setup?.voicePresetDiagnostics.length ? (
+          <div className="mt-3 grid gap-2">
+            {doctor.setup.voicePresetDiagnostics.map((item) => (
+              <div key={item.voiceId} className="rounded-xl bg-[#f7f5ef] p-3 text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <strong>{item.filename}</strong>
+                  <StatusPill label={labelForStatus(item.status)} tone={toneForStatus(item.status)} />
+                </div>
+                <p className="mt-1 leading-5 text-soa-muted">
+                  {item.durationSeconds !== null ? `${item.durationSeconds.toFixed(1)}초 · ` : ''}
+                  {item.sampleRate ? `${Math.round(item.sampleRate / 1000)}kHz · ` : ''}
+                  {item.channelCount ? `${item.channelCount}채널 · ` : ''}
+                  무음 {item.silenceRatio !== null ? `${Math.round(item.silenceRatio * 100)}%` : '-'} ·
+                  클리핑 {item.clippingRatio !== null ? `${Math.round(item.clippingRatio * 1000) / 10}%` : '-'}
+                </p>
+                {item.issues.length ? <p className="mt-1 font-bold leading-5">{item.issues.join(' ')}</p> : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {doctor.setup ? (

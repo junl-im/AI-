@@ -47,6 +47,7 @@ interface ApiTtsResult {
   message: string
   normalized_text: string | null
   segment_count: number
+  first_audio_ms?: number | null
   processing_ms: number | null
   file_size_bytes: number | null
   realtime_factor: number | null
@@ -113,6 +114,7 @@ function mapTtsResult(result: ApiTtsResult): TtsSynthesisResult {
     message: result.message,
     normalizedText: result.normalized_text,
     segmentCount: result.segment_count,
+    firstAudioMs: result.first_audio_ms ?? result.processing_ms,
     processingMs: result.processing_ms,
     fileSizeBytes: result.file_size_bytes,
     realtimeFactor: result.realtime_factor,

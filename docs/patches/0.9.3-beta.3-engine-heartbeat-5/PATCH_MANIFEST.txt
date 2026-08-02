@@ -1,0 +1,56 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 4 -> Engine Heartbeat 5
+
+Changed or added files: 48
+
+APPLY_PATCH.cmd
+APPLY_PATCH.sh
+FOUNDATION_REPORT.md
+PATCH_MANIFEST.txt
+README.md
+START_HERE.md
+docs/API.md
+docs/API_CONNECTIVITY.md
+docs/CHANGELOG.md
+docs/FIRST_AUDIO_LATENCY.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/SECURE_MOBILE_BRIDGE.md
+docs/TEST.md
+docs/UI_GUIDE.md
+docs/patches/0.9.3-beta.3-engine-heartbeat-5/DELETE_LIST.txt
+docs/patches/0.9.3-beta.3-engine-heartbeat-5/PATCH_MANIFEST.txt
+docs/patches/0.9.3-beta.3-engine-heartbeat-5/PATCH_README.md
+services/api/app/api/routes/connectivity.py
+services/api/app/engines/tts/cosyvoice_worker_tts.py
+services/api/app/schemas/connectivity.py
+services/api/app/schemas/setup.py
+services/api/app/schemas/tts.py
+services/api/app/services/setup_diagnostics.py
+services/api/app/services/tts_pipeline.py
+services/api/app/services/voice_preset_validation.py
+services/api/tests/test_connectivity.py
+services/api/tests/test_cosyvoice_worker_tts.py
+services/api/tests/test_setup.py
+services/api/tests/test_tts_pipeline.py
+src/ai/contracts.ts
+src/components/evaluation/EngineDoctorCard.tsx
+src/components/voice/AudioResultCard.tsx
+src/components/workspace/DesktopVoiceDrawer.tsx
+src/components/workspace/TimelineEditor.tsx
+src/components/workspace/WorkspaceProjectRail.tsx
+src/hooks/useDesktopStudioLayout.test.ts
+src/hooks/useDesktopStudioLayout.ts
+src/hooks/useEngineDoctor.ts
+src/pages/HomePage.tsx
+src/settings/connectivityApi.ts
+src/settings/connectivityTypes.ts
+src/settings/setupApi.ts
+src/settings/setupTypes.ts
+src/styles/desktop-studio.css
+src/tts/browserSpeech.test.ts
+src/tts/browserSpeech.ts
+src/tts/voiceApi.ts
+
+Tracked deletions: 0
+none
+Cumulative cleanup: public/sorion-icon.svg

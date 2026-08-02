@@ -69,6 +69,7 @@ class TtsPipeline:
         paths: list[Path] = []
         try:
             first_result: TtsSynthesisResponse | None = None
+            first_audio_ms: int | None = None
             for index, segment in enumerate(segments, start=1):
                 start_progress = 12 + round(((index - 1) / total_segments) * 70)
                 await self._report(
@@ -92,6 +93,7 @@ class TtsPipeline:
                 paths.append(path)
                 if first_result is None:
                     first_result = child_result
+                    first_audio_ms = round((time.perf_counter() - started) * 1000)
 
             assert first_result is not None
             await self._report(
@@ -123,6 +125,7 @@ class TtsPipeline:
                 message=f"긴 문장을 {total_segments}개 구간으로 나눠 하나의 WAV로 연결했습니다.",
                 normalized_text=normalization.normalized,
                 segment_count=total_segments,
+                first_audio_ms=first_audio_ms,
                 processing_ms=elapsed_ms,
                 file_size_bytes=output.stat().st_size,
                 realtime_factor=self._realtime_factor(elapsed_ms, duration),
@@ -159,10 +162,12 @@ class TtsPipeline:
         duration = result.estimated_duration_seconds
         if path is not None:
             duration = wav_duration_seconds(path)
+        first_audio_ms = result.first_audio_ms if result.first_audio_ms is not None else elapsed_ms
         return result.model_copy(
             update={
                 "normalized_text": normalized_text,
                 "segment_count": max(1, segment_count),
+                "first_audio_ms": first_audio_ms,
                 "processing_ms": elapsed_ms,
                 "file_size_bytes": path.stat().st_size if path is not None else None,
                 "realtime_factor": self._realtime_factor(elapsed_ms, duration),

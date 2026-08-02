@@ -48,6 +48,7 @@ class TtsSynthesisResponse(BaseModel):
     message: str
     normalized_text: str | None = None
     segment_count: int = 1
+    first_audio_ms: int | None = None
     processing_ms: int | None = None
     file_size_bytes: int | None = None
     realtime_factor: float | None = None

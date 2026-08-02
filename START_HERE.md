@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 4`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 5`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -17,3 +17,7 @@
 13. 실제 모델·실기기 수치를 준비하지 않았다면 성공 또는 성능을 가장하지 않습니다.
 
 14. PC 1180px 이상에서는 프로젝트 목록·Chat Workspace·Voice Drawer 3단 편집 화면과 가로 타임라인을 사용합니다.
+15. Engine Doctor의 `모바일 공개 HTTPS Bridge`는 현재 요청 Origin이 공개 HTTPS인지 진단하며 인증 수단은 아닙니다.
+16. 프리셋 WAV는 1~30초, 16~48kHz, 모노·스테레오 PCM이어야 하며 과도한 무음·클리핑은 Worker 요청 전에 차단됩니다.
+17. `첫 음성 준비`는 서버의 첫 사용 가능 파일 준비 시간입니다. 브라우저 실제 재생 시작 시간은 다음 패치에서 별도 측정합니다.
+18. PC 3단 패널의 너비와 접기 상태는 브라우저 로컬 저장소에 보존됩니다.

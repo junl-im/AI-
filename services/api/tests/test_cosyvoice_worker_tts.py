@@ -16,7 +16,7 @@ def wav_bytes() -> bytes:
         audio.setnchannels(1)
         audio.setsampwidth(2)
         audio.setframerate(24000)
-        audio.writeframes(b"\x00\x00" * 2400)
+        audio.writeframes(b"\xe8\x03" * 28800)
     return stream.getvalue()
 
 

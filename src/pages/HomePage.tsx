@@ -8,6 +8,7 @@ import { LongformComposer } from '../components/workspace/LongformComposer'
 import { TimelineEditor } from '../components/workspace/TimelineEditor'
 import { WorkspaceConversation } from '../components/workspace/WorkspaceConversation'
 import { WorkspaceProjectRail } from '../components/workspace/WorkspaceProjectRail'
+import { useDesktopStudioLayout } from '../hooks/useDesktopStudioLayout'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import {
   useTimelineGeneration,
@@ -111,6 +112,7 @@ export function HomePage() {
   const enqueueAndPlay = usePlayerStore((state) => state.enqueueAndPlay)
   const clearQueue = usePlayerStore((state) => state.clearQueue)
   const currentTrack = usePlayerStore(getCurrentTrack)
+  const desktopLayout = useDesktopStudioLayout()
   const [projectTitle, setProjectTitle] = useState('새 프로젝트')
   const [messages, setMessages] = useState<WorkspaceMessage[]>(initialMessages)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
@@ -459,7 +461,7 @@ export function HomePage() {
   const engineLabel = engineCatalog.selected?.name ?? '자동 연결 확인 중'
   return (
     <div className="soa-dubbing-workspace">
-      <div className="soa-desktop-studio">
+      <div className="soa-desktop-studio" style={desktopLayout.style}>
         <WorkspaceProjectRail
           currentTitle={projectTitle}
           refreshKey={messages.length + timeline.blocks.length}
@@ -467,6 +469,20 @@ export function HomePage() {
           onNewProject={clearCurrentWork}
           onOpenProjects={() => enterWorkspace('projects')}
           onOpenSettings={() => enterWorkspace('settings')}
+          collapsed={desktopLayout.leftCollapsed}
+          onToggleCollapsed={desktopLayout.toggleLeft}
+        />
+        <button
+          type="button"
+          className="soa-studio-resizer"
+          role="separator"
+          aria-label="프로젝트 패널 너비 조절"
+          aria-orientation="vertical"
+          aria-valuemin={200}
+          aria-valuemax={360}
+          aria-valuenow={desktopLayout.leftWidth}
+          onPointerDown={desktopLayout.startLeftResize}
+          onKeyDown={desktopLayout.onLeftSeparatorKeyDown}
         />
 
         <section className="soa-desktop-studio__center" aria-label="채팅 작업공간">
@@ -533,6 +549,18 @@ export function HomePage() {
           </main>
         </section>
 
+        <button
+          type="button"
+          className="soa-studio-resizer"
+          role="separator"
+          aria-label="보이스 패널 너비 조절"
+          aria-orientation="vertical"
+          aria-valuemin={260}
+          aria-valuemax={420}
+          aria-valuenow={desktopLayout.rightWidth}
+          onPointerDown={desktopLayout.startRightResize}
+          onKeyDown={desktopLayout.onRightSeparatorKeyDown}
+        />
         <DesktopVoiceDrawer
           voiceId={voiceId}
           previewingId={previewingId}
@@ -548,6 +576,8 @@ export function HomePage() {
           onEmotionChange={setSpeechEmotion}
           onNormalizeTextChange={(value) => setDirectiveIds(value ? ['numbers'] : [])}
           onCreateVoice={() => enterWorkspace('clone')}
+          collapsed={desktopLayout.rightCollapsed}
+          onToggleCollapsed={desktopLayout.toggleRight}
         />
       </div>
     </div>

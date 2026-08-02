@@ -22,6 +22,7 @@ export interface TtsSynthesisResult {
   message: string
   normalizedText: string | null
   segmentCount: number
+  firstAudioMs?: number | null
   processingMs: number | null
   fileSizeBytes: number | null
   realtimeFactor: number | null

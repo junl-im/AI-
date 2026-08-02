@@ -68,6 +68,8 @@ async def test_pipeline_normalizes_splits_and_merges_long_text(tmp_path):
     assert len(engine.seen_texts) == result.segment_count
     assert result.audio_url == f"/api/v1/audio/{parent_id}.wav"
     assert result.file_size_bytes and result.file_size_bytes > 44
+    assert result.first_audio_ms is not None
+    assert result.first_audio_ms <= result.processing_ms
     assert result.processing_ms is not None
     assert "이천이십육년" in (result.normalized_text or "")
     assert all(

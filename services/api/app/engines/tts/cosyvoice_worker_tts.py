@@ -8,6 +8,7 @@ from app.engines.tts.audio_utils import validate_wave, wave_duration
 from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine, WorkerClientError
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest, TtsSynthesisResponse
+from app.services.voice_preset_validation import inspect_voice_preset
 from app.storage.audio_store import AudioStore
 
 
@@ -34,7 +35,10 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
 
     def info(self) -> EngineInfo:
         worker_info = self.worker.info()
-        reference_ready = bool(self.reference_path and self.reference_path.is_file())
+        reference_ready = bool(
+            self.reference_path
+            and inspect_voice_preset(self.reference_path, "default-reference").usable
+        )
         preset_ready = bool(self._available_preset_references())
         ready = worker_info.ready and (reference_ready or preset_ready)
         if not worker_info.ready:
@@ -73,15 +77,20 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
         return [
             path
             for voice_id in ("sori-warm", "on-clear", "dam-calm")
-            if (path := self.preset_directory / f"{voice_id}.wav").is_file()
+            if inspect_voice_preset(
+                path := self.preset_directory / f"{voice_id}.wav", voice_id
+            ).usable
         ]
 
     def _reference_for(self, voice_id: str) -> tuple[Path, str, bool]:
         if self.preset_directory is not None:
             preset_path = self.preset_directory / f"{voice_id}.wav"
-            if preset_path.is_file():
+            if inspect_voice_preset(preset_path, voice_id).usable:
                 return preset_path, f"{self.profile_id}-{voice_id}", True
-        if self.reference_path is not None and self.reference_path.is_file():
+        if (
+            self.reference_path is not None
+            and inspect_voice_preset(self.reference_path, "default-reference").usable
+        ):
             return self.reference_path, self.profile_id, False
         raise RuntimeError(
             f"{voice_id} 프리셋 기준 음성과 기본 CosyVoice 기준 음성이 없습니다."

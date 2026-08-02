@@ -21,6 +21,8 @@ class ConnectivityResponse(BaseModel):
     environment: str
     api_base_path: str
     api_ready: bool
+    public_https_ready: bool
+    public_api_origin: str | None = None
     tts_ready: bool
     voice_clone_ready: bool
     worker_configured: bool

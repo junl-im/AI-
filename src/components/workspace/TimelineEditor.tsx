@@ -215,6 +215,9 @@ function VoiceBlock({
 
       <footer>
         <span className="soa-dubbing-block__status"><i aria-hidden="true" />{statusLabel}</span>
+        {block.audio?.result.firstAudioMs != null ? (
+          <small>첫 음성 준비 {block.audio.result.firstAudioMs}ms</small>
+        ) : null}
         <time>{formatDuration(block.durationSeconds)}</time>
       </footer>
       {block.status === 'generating' ? (

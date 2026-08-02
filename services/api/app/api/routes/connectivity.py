@@ -1,6 +1,8 @@
+import ipaddress
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Request
 
@@ -8,6 +10,82 @@ from app.engines.registry import engine_registry
 from app.schemas.connectivity import ConnectivityCheck, ConnectivityResponse
 
 router = APIRouter()
+
+
+def _effective_origin(request: Request) -> str:
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
+    scheme = scheme.split(",", 1)[0].strip().lower()
+    host = host.split(",", 1)[0].strip()
+    return f"{scheme}://{host}" if scheme and host else str(request.base_url).rstrip("/")
+
+
+def _is_public_hostname(hostname: str | None) -> bool:
+    normalized = (hostname or "").rstrip(".").lower()
+    private_suffixes = (
+        ".localhost",
+        ".local",
+        ".internal",
+        ".lan",
+        ".home.arpa",
+        ".test",
+        ".invalid",
+    )
+    if not normalized or normalized == "localhost" or normalized.endswith(private_suffixes):
+        return False
+    try:
+        address = ipaddress.ip_address(normalized)
+    except ValueError:
+        return "." in normalized
+    return not (
+        address.is_private
+        or address.is_loopback
+        or address.is_link_local
+        or address.is_reserved
+        or address.is_unspecified
+    )
+
+
+def _public_bridge_check(request: Request) -> tuple[ConnectivityCheck, bool, str | None]:
+    origin = _effective_origin(request)
+    parsed = urlsplit(origin)
+    public_host = _is_public_hostname(parsed.hostname)
+    https_ready = parsed.scheme == "https" and public_host
+    if https_ready:
+        return (
+            ConnectivityCheck(
+                id="public-https-bridge",
+                label="모바일 공개 HTTPS Bridge",
+                status="ready",
+                detail=f"외부 브라우저에서 사용할 HTTPS Voice API를 확인했습니다: {origin}",
+            ),
+            True,
+            origin,
+        )
+    if public_host:
+        return (
+            ConnectivityCheck(
+                id="public-https-bridge",
+                label="모바일 공개 HTTPS Bridge",
+                status="missing",
+                detail="공개 호스트가 HTTP로 노출됐습니다. TLS reverse proxy를 구성하세요.",
+            ),
+            False,
+            origin,
+        )
+    return (
+        ConnectivityCheck(
+            id="public-https-bridge",
+            label="모바일 공개 HTTPS Bridge",
+            status="warning",
+            detail=(
+                "현재 주소는 로컬 또는 사설망입니다. 카카오톡·외부 모바일에서는 "
+                "공개 HTTPS Voice API가 별도로 필요합니다."
+            ),
+        ),
+        False,
+        None,
+    )
 
 
 def _directory_check(path: Path) -> ConnectivityCheck:
@@ -20,7 +98,7 @@ def _directory_check(path: Path) -> ConnectivityCheck:
             id="audio-store",
             label="임시 음원 저장소",
             status="ready",
-            detail=f"WAV를 저장할 수 있습니다: {path}",
+            detail="WAV 임시 저장소에 쓸 수 있습니다.",
         )
     except OSError as error:
         return ConnectivityCheck(
@@ -116,6 +194,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
     gpu_ready = clone_health and accelerator_ready
     gpu_name = diagnostics.get("gpu_name")
     vram_total_mb = diagnostics.get("vram_total_mb")
+    bridge_check, public_https_ready, public_api_origin = _public_bridge_check(request)
     checks = [
         ConnectivityCheck(
             id="api",
@@ -123,6 +202,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
             status="ready",
             detail="모바일 웹 요청을 처리할 수 있습니다.",
         ),
+        bridge_check,
         _directory_check(settings.audio_path),
         ConnectivityCheck(
             id="tts-engine",
@@ -204,6 +284,8 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         environment=settings.environment,
         api_base_path="/api/v1",
         api_ready=True,
+        public_https_ready=public_https_ready,
+        public_api_origin=public_api_origin,
         tts_ready=bool(real_tts),
         voice_clone_ready=clone_ready,
         worker_configured=bool(settings.cosyvoice_worker_url),

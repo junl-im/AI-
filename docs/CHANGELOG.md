@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 5 · Secure mobile bridge and first-audio readiness
+
+- `/connectivity`와 Engine Doctor가 공개 HTTPS Voice API Bridge를 로컬·공개 HTTP와 분리 진단
+- CosyVoice 프리셋 WAV 3종을 Worker 요청 전에 포맷·길이·샘플레이트·무음·클리핑 기준으로 검사
+- 장문 TTS의 첫 구간 파일 준비 시간 `first_audio_ms`를 전체 생성 시간과 분리해 결과·타임라인에 표시
+- PC 3단 스튜디오의 좌우 패널 너비 조절·접기와 로컬 상태 저장 추가
+- 공개 Bridge·지연 지표의 보안 경계와 해석 제한 문서화
+
 ## 0.9.3-beta.3 Engine Heartbeat 4 · Three-pane desktop studio and CapCut timeline
 
 - 첫 화면의 4단계 설명을 모바일 2×2, 넓은 화면 1×4로 배치해 가로 잘림을 제거

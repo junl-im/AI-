@@ -30,6 +30,8 @@ interface ApiConnectivityResponse {
   environment: string
   api_base_path: string
   api_ready: boolean
+  public_https_ready?: boolean
+  public_api_origin?: string | null
   tts_ready: boolean
   voice_clone_ready: boolean
   worker_configured: boolean
@@ -173,6 +175,8 @@ function failedReport(
     status: 'missing',
     environment: null,
     apiReady: health.status === 'ready',
+    publicHttpsReady: false,
+    publicApiOrigin: null,
     ttsReady: false,
     voiceCloneReady: false,
     workerConfigured: false,
@@ -265,6 +269,8 @@ export async function runApiConnectivityAudit(
     status: missing ? 'missing' : warning ? 'warning' : 'ready',
     environment: result.environment,
     apiReady: result.api_ready,
+    publicHttpsReady: result.public_https_ready ?? false,
+    publicApiOrigin: result.public_api_origin ?? null,
     ttsReady: result.tts_ready,
     voiceCloneReady: result.voice_clone_ready,
     workerConfigured: result.worker_configured,

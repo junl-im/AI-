@@ -9,6 +9,8 @@ interface WorkspaceProjectRailProps {
   onNewProject: () => void
   onOpenProjects: () => void
   onOpenSettings: () => void
+  collapsed: boolean
+  onToggleCollapsed: () => void
 }
 
 function projectTime(value: string): string {
@@ -29,6 +31,8 @@ export function WorkspaceProjectRail({
   onNewProject,
   onOpenProjects,
   onOpenSettings,
+  collapsed,
+  onToggleCollapsed,
 }: WorkspaceProjectRailProps) {
   const [projects, setProjects] = useState<VoiceProject[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,7 +56,20 @@ export function WorkspaceProjectRail({
   }, [refreshKey])
 
   return (
-    <aside className="soa-project-rail" aria-label="프로젝트 목록">
+    <aside className={`soa-project-rail ${collapsed ? 'is-collapsed' : ''}`} aria-label="프로젝트 목록">
+      <button
+        type="button"
+        className="soa-studio-panel-toggle"
+        aria-label={collapsed ? '프로젝트 패널 펼치기' : '프로젝트 패널 접기'}
+        aria-expanded={!collapsed}
+        onClick={onToggleCollapsed}
+      >
+        {collapsed ? '›' : '‹'}
+      </button>
+      {collapsed ? (
+        <span className="soa-studio-panel-monogram" aria-hidden="true">P</span>
+      ) : (
+        <>
       <div className="soa-project-rail__head">
         <span>PROJECTS</span>
         <button type="button" onClick={onNewProject}>＋ 새 작업</button>
@@ -86,6 +103,8 @@ export function WorkspaceProjectRail({
         <button type="button" onClick={onOpenProjects}>전체 프로젝트</button>
         <button type="button" onClick={onOpenSettings}>엔진 · 설정</button>
       </nav>
+        </>
+      )}
     </aside>
   )
 }

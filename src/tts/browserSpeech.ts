@@ -73,6 +73,7 @@ export function createBrowserSpeechResult(
     message: '브라우저 내장 한국어 음성으로 재생합니다. AI 음색·WAV 다운로드는 공개 Voice API 연결 후 사용할 수 있습니다.',
     normalizedText: request.text,
     segmentCount: 1,
+    firstAudioMs: null,
     processingMs: 0,
     fileSizeBytes: null,
     realtimeFactor: 0,

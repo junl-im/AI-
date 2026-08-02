@@ -41,7 +41,8 @@ export function AudioResultCard({ audio, sourceText, onRetry, onReset }: AudioRe
       <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] font-bold text-soa-muted">
         <span className="rounded-xl bg-white/45 p-2">엔진 {audio.result.engineId}</span>
         <span className="rounded-xl bg-white/45 p-2">음원 {audio.durationSeconds.toFixed(1)}초</span>
-        <span className="rounded-xl bg-white/45 p-2">생성 {formatMilliseconds(audio.result.processingMs)}</span>
+        <span className="rounded-xl bg-white/45 p-2">첫 음성 준비 {formatMilliseconds(audio.result.firstAudioMs ?? null)}</span>
+        <span className="rounded-xl bg-white/45 p-2">전체 생성 {formatMilliseconds(audio.result.processingMs)}</span>
         <span className="rounded-xl bg-white/45 p-2">크기 {formatBytes(audio.result.fileSizeBytes)}</span>
         <span className="rounded-xl bg-white/45 p-2">구간 {audio.result.segmentCount}개</span>
         <span className="rounded-xl bg-white/45 p-2">RTF {audio.result.realtimeFactor ?? '-'}</span>

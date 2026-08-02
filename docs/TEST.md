@@ -531,3 +531,17 @@ npm run build
 - HomePage에 프로젝트 rail, 작업 메시지 region, Voice Drawer가 함께 렌더링되는지 검사합니다.
 - 엔진 API·Worker·GPU offline 상태가 작업 메시지에 기록되는지 검사합니다.
 - Timeline에 시간 눈금, 가위, 삭제 직접 도구가 노출되는지 검사합니다.
+
+## Engine Heartbeat 5 회귀 검사
+
+- forwarded public HTTPS 요청이 `public_https_ready=true`와 공개 Origin을 반환하는지 확인
+- localhost·사설 주소는 공개 Bridge ready로 오인하지 않는지 확인
+- 프리셋 WAV의 유효 PCM, 누락, 과도한 무음이 각각 ready·missing·blocked인지 확인
+- 준비되지 않은 프리셋 WAV가 CosyVoice 일반 TTS readiness를 만들지 않는지 확인
+- 장문 TTS의 `first_audio_ms`가 존재하고 `processing_ms`보다 크지 않은지 확인
+- Browser Speech가 측정하지 않은 첫 발화 시간을 0ms로 가장하지 않는지 확인
+- 저장된 PC 패널 너비가 안전 범위로 clamp되고 접기 상태가 보존되는지 확인
+
+Heartbeat 5 샌드박스 결과: API 127개, Worker 14개, compileall, Repository preflight 11개,
+프로젝트 규칙, TypeScript·TSX 156개 transpile 구문 검사를 통과했습니다. 전체 Web lint·semantic
+typecheck·Vitest·Vite build는 전달본에 npm lock과 설치 의존성이 없어 실행하지 못했습니다.

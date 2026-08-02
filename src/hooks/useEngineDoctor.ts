@@ -20,6 +20,8 @@ interface EngineDoctorDiagnostics {
   connectivity: {
     status: ApiConnectivityReport['status'] | null
     latencyMs: number | null
+    publicHttpsReady: boolean | null
+    publicApiOrigin: string | null
     layers: ApiConnectivityReport['layers'] | null
     checks: Array<{ id: string; status: string }>
   }
@@ -106,6 +108,8 @@ export function useEngineDoctor() {
       connectivity: {
         status: report?.status ?? null,
         latencyMs: report?.latencyMs ?? null,
+        publicHttpsReady: report?.publicHttpsReady ?? null,
+        publicApiOrigin: report?.publicApiOrigin ?? null,
         layers: report?.layers ?? null,
         checks: report?.checks.map(({ id, status }) => ({ id, status })) ?? [],
       },

@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 4 · Three-pane Desktop Studio + CapCut Timeline`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 5 · Secure Mobile Bridge + First-Audio Readiness`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -26,6 +26,10 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - Engine Doctor: API·TTS·Worker·GPU·프리셋 3종 상태 진단, 주소 저장, 자동 연결 복구와 개인정보 제외 진단 복사
 - PC 편집: 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
 - 엔진 표시: 우측 상단 API·Worker·GPU 3점 상태와 실패 시 작업 메시지 자동 알림
+- 모바일 Bridge: 공개 HTTPS Origin을 `/connectivity`와 Engine Doctor에서 별도 진단
+- 프리셋 안전성: WAV 포맷·길이·샘플레이트·무음·클리핑을 Worker 요청 전에 검사
+- 지연 지표: 서버 첫 음성 파일 준비 시간과 전체 생성 시간을 분리 표시
+- PC 레이아웃: 좌우 패널 드래그·키보드 조절, 접기와 로컬 상태 저장
 
 ## 무료 실행
 
@@ -58,6 +62,8 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 오케스트레이터 설계: [`docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md`](docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md)
 - AI Director: [`docs/AI_DIRECTOR.md`](docs/AI_DIRECTOR.md)
 - API 연결: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
+- 공개 HTTPS Bridge: [`docs/SECURE_MOBILE_BRIDGE.md`](docs/SECURE_MOBILE_BRIDGE.md)
+- 첫 음성 준비 지연: [`docs/FIRST_AUDIO_LATENCY.md`](docs/FIRST_AUDIO_LATENCY.md)
 - lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
 
 ## 개발 원칙

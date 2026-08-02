@@ -17,6 +17,8 @@ interface DesktopVoiceDrawerProps {
   onEmotionChange: (value: VoiceEmotion) => void
   onNormalizeTextChange: (value: boolean) => void
   onCreateVoice: () => void
+  collapsed: boolean
+  onToggleCollapsed: () => void
 }
 
 const emotions: Array<{ id: VoiceEmotion; label: string }> = [
@@ -41,9 +43,24 @@ export function DesktopVoiceDrawer({
   onEmotionChange,
   onNormalizeTextChange,
   onCreateVoice,
+  collapsed,
+  onToggleCollapsed,
 }: DesktopVoiceDrawerProps) {
   return (
-    <aside className="soa-voice-drawer" aria-label="미니 보이스 라이브러리">
+    <aside className={`soa-voice-drawer ${collapsed ? 'is-collapsed' : ''}`} aria-label="미니 보이스 라이브러리">
+      <button
+        type="button"
+        className="soa-studio-panel-toggle"
+        aria-label={collapsed ? '보이스 패널 펼치기' : '보이스 패널 접기'}
+        aria-expanded={!collapsed}
+        onClick={onToggleCollapsed}
+      >
+        {collapsed ? '‹' : '›'}
+      </button>
+      {collapsed ? (
+        <span className="soa-studio-panel-monogram" aria-hidden="true">V</span>
+      ) : (
+        <>
       <header>
         <span>VOICE DRAWER</span>
         <strong>목소리 라이브러리</strong>
@@ -130,6 +147,8 @@ export function DesktopVoiceDrawer({
       </section>
 
       <button type="button" className="soa-voice-drawer__create" onClick={onCreateVoice}>＋ 새 보이스 만들기</button>
+        </>
+      )}
     </aside>
   )
 }

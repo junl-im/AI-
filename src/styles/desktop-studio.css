@@ -1,5 +1,6 @@
 .soa-project-rail,
-.soa-voice-drawer {
+.soa-voice-drawer,
+.soa-studio-resizer {
   display: none;
 }
 
@@ -166,10 +167,30 @@
 
   .soa-desktop-studio {
     display: grid;
-    grid-template-columns: 246px minmax(620px, 1fr) 304px;
+    grid-template-columns: var(--soa-project-rail-width, 246px) 6px minmax(0, 1fr) 6px var(--soa-voice-drawer-width, 304px);
     min-height: calc(100dvh - 58px);
     max-width: 1800px;
     margin: 0 auto;
+  }
+
+  .soa-studio-resizer {
+    position: sticky;
+    top: 58px;
+    z-index: 24;
+    display: block;
+    width: 6px;
+    height: calc(100dvh - 58px);
+    border: 0;
+    padding: 0;
+    cursor: col-resize;
+    background: rgba(255, 255, 255, 0.035);
+    touch-action: none;
+  }
+
+  .soa-studio-resizer:hover,
+  .soa-studio-resizer:focus-visible {
+    outline: 0;
+    background: rgba(216, 255, 114, 0.48);
   }
 
   .soa-desktop-studio__center {
@@ -188,11 +209,61 @@
     flex-direction: column;
     overflow: hidden;
     color: #eef3ff;
+    transition: padding 160ms ease;
     background: #0b0e14;
   }
 
   .soa-project-rail {
+    position: sticky;
     padding: 16px 12px;
+  }
+
+  .soa-voice-drawer { position: sticky; }
+
+  .soa-studio-panel-toggle {
+    position: absolute;
+    z-index: 4;
+    top: 12px;
+    right: 8px;
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: rgba(238, 243, 255, 0.7);
+    background: #171b24;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .soa-voice-drawer .soa-studio-panel-toggle {
+    right: auto;
+    left: 8px;
+  }
+
+  .soa-project-rail.is-collapsed,
+  .soa-voice-drawer.is-collapsed {
+    align-items: center;
+    padding: 12px 6px;
+  }
+
+  .soa-project-rail.is-collapsed .soa-studio-panel-toggle,
+  .soa-voice-drawer.is-collapsed .soa-studio-panel-toggle {
+    position: static;
+  }
+
+  .soa-studio-panel-monogram {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    margin-top: 14px;
+    place-items: center;
+    border-radius: 11px;
+    color: #151923;
+    background: #d8ff72;
+    font-size: 11px;
+    font-weight: 950;
   }
 
   .soa-project-rail__head {
@@ -521,10 +592,6 @@
     font-size: 9px;
     font-weight: 850;
   }
-}
-
-@media (min-width: 1500px) {
-  .soa-desktop-studio { grid-template-columns: 270px minmax(720px, 1fr) 330px; }
 }
 
 @media (min-width: 1180px) {

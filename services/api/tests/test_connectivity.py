@@ -14,6 +14,8 @@ def test_connectivity_reports_api_and_engine_state(client):
     assert body["api_base_path"] == "/api/v1"
     assert body["api_ready"] is True
     assert isinstance(body["tts_ready"], bool)
+    assert isinstance(body["public_https_ready"], bool)
+    assert any(check["id"] == "public-https-bridge" for check in body["checks"])
     assert isinstance(body["voice_clone_ready"], bool)
     assert isinstance(body["worker_configured"], bool)
     assert any(check["id"] == "api" for check in body["checks"])
@@ -61,7 +63,7 @@ def test_python_310_is_the_documented_minimum(client):
     python_step = next(
         item for item in response.json()["steps"] if item["id"] == "python"
     )
-    assert python_step["label"] == "Python 3.10 이상"
+    assert python_step["label"] == "Python 3.10 이상 · 지원 상한 3.12"
     assert get_settings().cors_origin_list
 
 
@@ -136,3 +138,55 @@ def test_private_network_preflight_is_rejected_when_disabled():
 
     assert response.status_code == 400
     assert "access-control-allow-private-network" not in response.headers
+
+
+def test_connectivity_recognizes_forwarded_public_https_bridge(client):
+    response = client.get(
+        "/api/v1/connectivity",
+        headers={
+            "X-Forwarded-Proto": "https",
+            "X-Forwarded-Host": "voice.example.com",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["public_https_ready"] is True
+    assert body["public_api_origin"] == "https://voice.example.com"
+    bridge = next(item for item in body["checks"] if item["id"] == "public-https-bridge")
+    assert bridge["status"] == "ready"
+
+
+def test_connectivity_does_not_mark_private_dns_as_public_bridge(client):
+    response = client.get(
+        "/api/v1/connectivity",
+        headers={
+            "X-Forwarded-Proto": "https",
+            "X-Forwarded-Host": "voice.sorion.local",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["public_https_ready"] is False
+    assert body["public_api_origin"] is None
+    bridge = next(item for item in body["checks"] if item["id"] == "public-https-bridge")
+    assert bridge["status"] == "warning"
+
+
+def test_connectivity_requires_tls_for_public_bridge(client):
+    response = client.get(
+        "/api/v1/connectivity",
+        headers={
+            "X-Forwarded-Proto": "http",
+            "X-Forwarded-Host": "voice.example.com",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["public_https_ready"] is False
+    assert body["public_api_origin"] == "http://voice.example.com"
+    bridge = next(item for item in body["checks"] if item["id"] == "public-https-bridge")
+    assert bridge["status"] == "missing"
+

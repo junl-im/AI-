@@ -101,6 +101,7 @@ describe('browserSpeech', () => {
       engineMode: 'browser',
       audioUrl: null,
       fallbackUsed: true,
+      firstAudioMs: null,
     })
     expect(result.estimatedDurationSeconds).toBeGreaterThan(0)
     expect(playback).toMatchObject({ text: request.text, lang: 'ko-KR', voiceId: 'sori-warm' })

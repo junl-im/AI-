@@ -1,14 +1,14 @@
-SoriON AI 0.9.3-beta.3 Engine Heartbeat 3 -> Engine Heartbeat 4 Patch Manifest
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 4 -> Engine Heartbeat 5 Patch Manifest
 
-Purpose: fit the four landing steps without clipping and deliver a responsive three-pane PC editing workspace with a CapCut-style timeline.
+Purpose: diagnose a public HTTPS mobile Voice API bridge, validate preset WAV files before Worker use, expose honest first-audio readiness latency, and persist resizable desktop studio panels.
 
 Key changes:
-- landing steps use 2x2 on compact screens and 1x4 on wide desktop screens
-- left recent-project history, center Chat Workspace, right Voice Drawer at 1180px and above
-- horizontal timeline ruler, playhead, voice clips, direct scissors and delete tools
-- top API / Worker / GPU status dots and automatic engine-failure system messages
-- mobile single-column editor and existing voice sheets remain unchanged
+- public HTTPS bridge fields and Engine Doctor card
+- preset PCM WAV duration/sample-rate/channel/silence/clipping validation
+- first server audio-file readiness latency separated from total processing time
+- left/right desktop panel resize, collapse, keyboard control and local persistence
+- deployment, latency interpretation and next partial-delivery plan documented
 
-Tracked files deleted relative to Engine Heartbeat 3: none
+Tracked files deleted relative to Engine Heartbeat 4: none
 Cumulative permanent cleanup list:
 public/sorion-icon.svg

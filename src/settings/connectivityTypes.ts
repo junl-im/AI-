@@ -22,6 +22,8 @@ export interface ApiConnectivityReport {
   status: ConnectivityStatus
   environment: string | null
   apiReady: boolean
+  publicHttpsReady: boolean
+  publicApiOrigin: string | null
   ttsReady: boolean
   voiceCloneReady: boolean
   workerConfigured: boolean

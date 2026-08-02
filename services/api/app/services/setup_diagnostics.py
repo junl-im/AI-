@@ -5,7 +5,8 @@ from pathlib import Path
 
 from app.core.config import Settings
 from app.engines.base import TtsEngine
-from app.schemas.setup import SetupStatusResponse, SetupStep
+from app.schemas.setup import SetupStatusResponse, SetupStep, VoicePresetDiagnostic
+from app.services.voice_preset_validation import inspect_voice_preset
 
 PRESET_VOICE_IDS = ("sori-warm", "on-clear", "dam-calm")
 
@@ -21,7 +22,7 @@ def _audio_directory_check(path: Path) -> SetupStep:
             label="임시 음원 폴더",
             status="ready",
             required=True,
-            detail=f"WAV 파일을 저장할 수 있습니다: {path}",
+            detail="WAV 파일을 저장할 수 있습니다.",
         )
     except OSError as error:
         return SetupStep(
@@ -34,69 +35,105 @@ def _audio_directory_check(path: Path) -> SetupStep:
         )
 
 
-def _voice_preset_check(path: Path | None) -> tuple[SetupStep, int]:
+def _voice_preset_check(
+    path: Path | None,
+) -> tuple[SetupStep, int, list[VoicePresetDiagnostic]]:
     if path is None:
+        diagnostics = [
+            VoicePresetDiagnostic(
+                voice_id=voice_id,
+                filename=f"{voice_id}.wav",
+                status="missing",
+                usable=False,
+                issues=["프리셋 폴더가 연결되지 않았습니다."],
+            )
+            for voice_id in PRESET_VOICE_IDS
+        ]
         return (
             SetupStep(
                 id="voice-presets",
                 label="CosyVoice 프리셋 음색",
                 status="warning",
                 required=False,
-                detail="프리셋 폴더가 연결되지 않았습니다. 0/3 준비",
+                detail="프리셋 폴더가 연결되지 않았습니다. 0/3 사용 가능",
                 action=(
                     "START_ENGINE.cmd로 실행하거나 "
                     "SORION_COSYVOICE_PRESET_DIRECTORY를 설정하세요."
                 ),
             ),
             0,
+            diagnostics,
         )
-    ready_ids = [
-        voice_id for voice_id in PRESET_VOICE_IDS
-        if (path / f"{voice_id}.wav").is_file()
+
+    inspections = [
+        inspect_voice_preset(path / f"{voice_id}.wav", voice_id)
+        for voice_id in PRESET_VOICE_IDS
     ]
-    missing_ids = [voice_id for voice_id in PRESET_VOICE_IDS if voice_id not in ready_ids]
-    ready_count = len(ready_ids)
-    if ready_count == len(PRESET_VOICE_IDS):
-        return (
-            SetupStep(
-                id="voice-presets",
-                label="CosyVoice 프리셋 음색",
-                status="ready",
-                required=False,
-                detail=f"3/3 준비 · {path}",
-            ),
-            ready_count,
+    diagnostics = [
+        VoicePresetDiagnostic(
+            voice_id=item.voice_id,
+            filename=item.filename,
+            status=item.status,
+            usable=item.usable,
+            duration_seconds=item.duration_seconds,
+            sample_rate=item.sample_rate,
+            channel_count=item.channel_count,
+            sample_width_bits=item.sample_width_bits,
+            silence_ratio=item.silence_ratio,
+            clipping_ratio=item.clipping_ratio,
+            issues=list(item.issues),
         )
-    detail = f"{ready_count}/3 준비 · 누락: {', '.join(missing_ids)} · {path}"
+        for item in inspections
+    ]
+    ready_count = sum(1 for item in inspections if item.usable)
+    blocked = [item.voice_id for item in inspections if item.status == "blocked"]
+    missing = [item.voice_id for item in inspections if item.status == "missing"]
+    warnings = [item.voice_id for item in inspections if item.status == "warning"]
+    if ready_count == len(PRESET_VOICE_IDS) and not warnings:
+        detail = "3/3 사용 가능 · 포맷·길이·샘플레이트·무음·클리핑 검사 통과"
+        status = "ready"
+        action = None
+    else:
+        parts = [f"{ready_count}/3 사용 가능"]
+        if missing:
+            parts.append(f"누락: {', '.join(missing)}")
+        if blocked:
+            parts.append(f"차단: {', '.join(blocked)}")
+        if warnings:
+            parts.append(f"품질 경고: {', '.join(warnings)}")
+        detail = " · ".join(parts)
+        status = "warning"
+        action = "각 WAV 진단을 확인한 뒤 동의받은 기준 음성을 교체하세요."
     return (
         SetupStep(
             id="voice-presets",
             label="CosyVoice 프리셋 음색",
-            status="warning",
+            status=status,
             required=False,
             detail=detail,
-            action="동의받은 WAV를 voice-presets 폴더에 지정된 이름으로 추가하세요.",
+            action=action,
         ),
         ready_count,
+        diagnostics,
     )
 
 
 def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> SetupStatusResponse:
     real_engines = [engine.info() for engine in engines if engine.info().mode != "mock"]
     ready_real = [engine for engine in real_engines if engine.ready]
-    python_ready = sys.version_info >= (3, 10)
+    python_ready = sys.version_info >= (3, 10) and sys.version_info < (3, 13)
     ffmpeg = shutil.which("ffmpeg")
-    preset_step, preset_ready_count = _voice_preset_check(
+    preset_step, preset_ready_count, preset_diagnostics = _voice_preset_check(
         settings.cosyvoice_preset_path
     )
     steps = [
         SetupStep(
             id="python",
-            label="Python 3.10 이상",
+            label="Python 3.10 이상 · 지원 상한 3.12",
             status="ready" if python_ready else "missing",
             required=True,
             detail=sys.version.split()[0],
-            action=None if python_ready else "Python 3.10 이상을 설치하세요.",
+            action=None if python_ready else "Python 3.10~3.12를 설치하세요.",
         ),
         _audio_directory_check(settings.audio_path),
         SetupStep(
@@ -151,5 +188,6 @@ def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> 
         real_engine_count=len(ready_real),
         voice_preset_ready_count=preset_ready_count,
         voice_preset_expected_count=len(PRESET_VOICE_IDS),
+        voice_preset_diagnostics=preset_diagnostics,
         steps=steps,
     )
