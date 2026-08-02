@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 CI Hardening 6 · Firebase public config and PWA logo budget
+
+- Firebase Web 공개 설정 6개를 development·production Vite 환경에 등록하고 `.firebaserc`를 실제 프로젝트에 연결했습니다.
+- Firestore와 Storage 규칙을 deny-by-default로 추가해 현재 Authentication 전용 범위를 강제했습니다.
+- `sorion-logo.png`를 1024px 약 1.01MB로 최적화하고 1.5MiB PWA asset budget 검사를 추가했습니다.
+- Repository preflight와 Web build가 Firebase 설정·PWA asset 크기를 모두 검증합니다.
+
 ## 0.9.3-beta.3 CI Hardening 5 · Deterministic Ruff import and automatic npm bootstrap
 
 - verification route가 STT 모듈을 한 번만 import하도록 바꿔 반복 Ruff I001 원인을 제거했습니다.

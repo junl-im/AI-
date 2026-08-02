@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 5`
+- 버전: `0.9.3-beta.3 · Firebase Public Config + PWA Asset Budget + CI Hardening 6`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -18,6 +18,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 세션: IndexedDB 자동 저장과 SQLite 결과 복구
 - 배포: GitHub Pages 또는 Firebase Hosting Spark 정적 Web
 - CI: preflight 전체 진단, 구성요소별 lock 보존, 누락 npm lock의 검증된 자동 bootstrap
+- Firebase: `device-streaming-96b2272c` Web Auth 공개 설정 연결, Firestore·Storage 기본 전면 차단
+- PWA: 1024px 최적화 로고와 1.5MiB 사전 캐시 예산 검사
 
 ## 무료 실행
 

@@ -1,0 +1,33 @@
+SoriON AI 0.9.3-beta.3 CI Hardening 5 -> CI Hardening 6 Patch Manifest
+
+Changed or added files:
+.env.development
+.env.example
+.env.production
+.firebaserc
+.github/workflows/ci.yml
+.gitignore
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/FIREBASE_SPARK_FREE_DEPLOYMENT.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/patches/0.9.3-beta.3-ci-hardening-6/DELETE_LIST.txt
+docs/patches/0.9.3-beta.3-ci-hardening-6/PATCH_MANIFEST.txt
+docs/patches/0.9.3-beta.3-ci-hardening-6/PATCH_README.md
+firebase.json
+firestore.rules
+package.json
+public/sorion-logo.png
+scripts/check-firebase-config.mjs
+scripts/check-project-rules.mjs
+scripts/check-pwa-assets.mjs
+scripts/run-preflight.mjs
+src/firebase/firebaseClient.ts
+src/vite-env.d.ts
+storage.rules
+
+Deleted files:
+(none)

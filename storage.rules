@@ -1,0 +1,10 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Audio and project data remain local until a reviewed cloud-storage feature exists.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -15,13 +15,15 @@ __pycache__/
 .env
 .env.*
 !.env.example
+!.env.development
+!.env.production
 *.pem
 *.key
 *service-account*.json
 
 # Firebase
 .firebase/
-.firebaserc
+# .firebaserc contains only the public Firebase project alias and is tracked.
 
 # Editors and OS
 .vscode/

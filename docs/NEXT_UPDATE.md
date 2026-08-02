@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 5`
+현재 기준: `0.9.3-beta.3 · Firebase Public Config + PWA Asset Budget + CI Hardening 6`
 
 ## 목표 버전
 

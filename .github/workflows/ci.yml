@@ -316,6 +316,10 @@ jobs:
         run: npm run typecheck
       - name: Test
         run: npm run test:ci
+      - name: Verify Firebase public web configuration
+        run: npm run quality:firebase
+      - name: Verify PWA asset budget
+        run: npm run quality:pwa-assets
       - name: Build
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/

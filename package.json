@@ -17,7 +17,7 @@
     "cleanup:stale-brand": "node scripts/remove-stale-brand-assets.mjs",
     "quality:web-manifest": "node scripts/check-web-toolchain.mjs --manifest-only",
     "quality:web-toolchain": "node scripts/check-web-toolchain.mjs",
-    "quality": "npm run quality:lock-network && npm run quality:ci-architecture && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:evidence && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
+    "quality": "npm run quality:lock-network && npm run quality:ci-architecture && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:evidence && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
@@ -51,7 +51,9 @@
     "quality:export-soak:wav": "cd services/api && python -m scripts.run_export_soak --formats wav",
     "quality:evidence": "node scripts/check-verification-evidence.mjs",
     "quality:preflight": "node scripts/run-preflight.mjs",
-    "locks:bootstrap:web": "npm run locks:refresh:npm && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run locks:check -- --component npm"
+    "locks:bootstrap:web": "npm run locks:refresh:npm && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run locks:check -- --component npm",
+    "quality:pwa-assets": "node scripts/check-pwa-assets.mjs",
+    "quality:firebase": "node scripts/check-firebase-config.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",

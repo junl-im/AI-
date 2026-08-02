@@ -1,6 +1,13 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 5**
+결과 버전: **0.9.3-beta.3 · Firebase Public Config + PWA Asset Budget + CI Hardening 6**
+
+## CI Hardening 6
+
+- `sorion-logo.png`를 1254px RGBA 2.46MB에서 1024px RGB 약 1.01MB로 최적화해 Workbox 2MiB 제한 아래로 낮췄습니다.
+- `.env.development`와 `.env.production`에 공개 Firebase Web 설정을 등록해 로컬 개발과 GitHub Pages production build에서 자동 로드합니다.
+- `.firebaserc`를 `device-streaming-96b2272c`에 연결하고 Firestore·Storage는 deny-by-default 규칙으로 잠갔습니다.
+- preflight와 Web build가 PWA asset budget 및 Firebase 설정 일관성을 검사합니다.
 
 ## CI Hardening 5
 

@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 5**
+현재 기준 버전: **0.9.3-beta.3 · Firebase Public Config + PWA Asset Budget + CI Hardening 6**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 15:49 KST**
+최종 갱신: **2026-08-02 16:58 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -492,7 +492,8 @@ CI Hotfix 4 테스트 규칙:
 - 65,536-frame 원자적 Export, 10·30·60분 soak, STT 전후 증거와 개인정보 제거 bundle을 구현했으며 합성 soak는 실제 음질 증거가 아니다.
 ## 37. 0.9.3-beta.3 CI Hardening 2
 - preflight 전체 보고서, npm 공식 endpoint fallback·lock 복구, 구성요소별 lock 부분 커밋으로 npm 장애가 Python 결과와 성공 lock 보존을 막지 않는다.
-
 ## 38. 0.9.3-beta.3 CI Hardening 5
 - verification은 STT 모듈을 한 번만 import해 Ruff I001 재발을 제거했다.
 - 누락 npm lock은 검증된 CI bootstrap으로 복구하고 Firebase SDK는 browser ESM 런타임 로드로 npm 그래프에서 제거했다.
+## 39. 0.9.3-beta.3 CI Hardening 6
+- Firebase 공개 Web 설정과 프로젝트 alias를 연결하고 Firestore·Storage를 기본 차단했으며, PWA 로고를 약 1.01MB로 최적화해 1.5MiB 예산 검사로 재발을 막았다.

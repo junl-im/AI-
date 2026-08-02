@@ -10,6 +10,8 @@ await mkdir(reportDirectory, { recursive: true })
 const checks = [
   ['retired files', 'check-stale-files.mjs'],
   ['web manifest', 'check-web-toolchain.mjs', '--manifest-only'],
+  ['PWA assets', 'check-pwa-assets.mjs'],
+  ['Firebase web config', 'check-firebase-config.mjs'],
   ['lock retry contract', 'check-lock-network-retry.mjs'],
   ['CI architecture', 'check-ci-failure-domains.mjs'],
   ['project rules', 'check-project-rules.mjs'],
