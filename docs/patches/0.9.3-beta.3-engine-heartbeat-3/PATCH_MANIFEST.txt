@@ -1,0 +1,39 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 2 -> Engine Heartbeat 3
+
+Changed or added files: 32
+
+.env.example
+APPLY_PATCH.cmd
+APPLY_PATCH.sh
+FOUNDATION_REPORT.md
+PATCH_MANIFEST.txt
+README.md
+START_HERE.md
+docs/API_CONNECTIVITY.md
+docs/CHANGELOG.md
+docs/CODING_RULE.md
+docs/DUBBING_STUDIO_UX.md
+docs/ENGINE_STRATEGY.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/TEST.md
+docs/patches/0.9.3-beta.3-engine-heartbeat-3/DELETE_LIST.txt
+docs/patches/0.9.3-beta.3-engine-heartbeat-3/PATCH_README.md
+scripts/check-project-rules.mjs
+scripts/start-api.mjs
+scripts/start-engine.mjs
+scripts/start-free-runtime.mjs
+services/api/app/core/config.py
+services/api/app/schemas/setup.py
+services/api/app/services/setup_diagnostics.py
+services/api/tests/test_setup.py
+src/components/evaluation/EngineDoctorCard.tsx
+src/hooks/useEngineDoctor.ts
+src/pages/SettingsPage.tsx
+src/settings/setupApi.ts
+src/settings/setupTypes.ts
+voice-presets/README.md
+docs/patches/0.9.3-beta.3-engine-heartbeat-3/PATCH_MANIFEST.txt
+
+Tracked deletions: none
+Cumulative cleanup: public/sorion-icon.svg

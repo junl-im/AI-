@@ -18,4 +18,6 @@ class SetupStatusResponse(BaseModel):
     version: str
     ready: bool
     real_engine_count: int
+    voice_preset_ready_count: int = 0
+    voice_preset_expected_count: int = 3
     steps: list[SetupStep]

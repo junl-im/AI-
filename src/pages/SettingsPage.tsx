@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { EngineBlueprintCard } from '../components/evaluation/EngineBlueprintCard'
+import { EngineDoctorCard } from '../components/evaluation/EngineDoctorCard'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { StatusPill } from '../components/ui/StatusPill'
 import { consumeGoogleSignInResult, isFirebaseConfigured, startGoogleSignIn } from '../firebase/firebaseClient'
@@ -50,6 +51,7 @@ export function SettingsPage() {
             현재 {engineCatalog.selected?.name ?? (engineCatalog.loading ? '엔진 확인 중' : '브라우저 대체 음성 대기')}
           </p>
         </article>
+        <EngineDoctorCard />
         <EngineBlueprintCard
           blueprint={engineBlueprint.blueprint}
           loading={engineBlueprint.loading}

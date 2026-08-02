@@ -6,4 +6,4 @@
 - `on-clear.wav` — 도윤
 - `dam-calm.wav` — 소리
 
-API 환경변수 `SORION_COSYVOICE_PRESET_DIRECTORY`에 폴더 경로를 설정합니다. 음성 파일은 권리와 동의를 확인한 뒤 로컬에서만 관리하며 저장소에는 커밋하지 않습니다.
+`START_ENGINE.cmd`는 이 폴더를 자동 연결합니다. API를 직접 실행할 때만 환경변수 `SORION_COSYVOICE_PRESET_DIRECTORY`에 폴더 경로를 설정합니다. 음성 파일은 권리와 동의를 확인한 뒤 로컬에서만 관리하며 저장소에는 커밋하지 않습니다.

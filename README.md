@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 2 · Kakao Browser Guard + Auto Apply/Play + Real Preset Routing`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 3 · Engine Doctor + Preset Autowiring + Practical File Policy`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -23,6 +23,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 모바일: 카카오톡 WebView를 감지해 로컬 PC 엔진 제한과 외부 브라우저 전환을 즉시 안내
 - 재생 UX: 보이는 재생 버튼이 선택값을 자동 적용하고 생성·선택된 음성을 즉시 재생
 - 프리셋: Browser/System/Melo 운율 프로필과 CosyVoice 프리셋별 기준 음원 라우팅
+- Engine Doctor: API·TTS·Worker·GPU·프리셋 3종 상태 진단, 주소 저장, 자동 연결 복구와 개인정보 제외 진단 복사
 
 ## 무료 실행
 
@@ -43,7 +44,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 `127.0.0.1:8000` 무료 API를 자동 탐색하고, 모바일은 기기 내장 Browser Speech를 자동 사용합니다.
 카카오톡 인앱 브라우저에서 연 링크는 휴대폰 자체 WebView이므로 PC의 localhost 엔진에 연결하지 않고,
 브라우저 음성을 즉시 사용하면서 외부 브라우저 전환과 공개 HTTPS Voice API 사용을 안내합니다.
-사용자에게 API 주소나 엔진 선택 화면을 보여주지 않습니다.
+기본 흐름에서는 주소 입력을 요구하지 않으며, 설정의 Engine Doctor에서만 고급 진단·복구용 API 주소를 제공합니다.
 
 ## 주요 문서
 
@@ -63,7 +64,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 모바일·한국어를 먼저 완성합니다.
 - 실제 AI, Local/System, Browser Voice, Mock을 명확히 구분합니다.
 - 결제 수단과 외부 음성 공급자 Secret을 요구하지 않습니다.
-- 소스 파일은 500줄을 넘기지 않습니다.
+- 소스 파일은 800줄부터 분리 권고를 표시하고 1,200줄 안전 상한만 배포를 차단합니다.
 - 엔진과 API 선택은 사용자 설정이 아니라 자동 운영 계층에서 처리합니다.
 - 코드와 모델 checkpoint의 라이선스를 분리해 기록하고 비상업 모델은 자동 경로에서 제외합니다.
 

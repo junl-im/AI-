@@ -1,13 +1,15 @@
-SoriON AI 0.9.3-beta.3 Engine Heartbeat 1 -> Engine Heartbeat 2 Patch Manifest
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 2 -> Engine Heartbeat 3 Patch Manifest
 
-Purpose: make mobile connection limits explicit, remove separate apply steps from playback, and ensure preset IDs affect actual engine behavior.
+Purpose: remove the arbitrary 500-line development blocker, expose real engine readiness through Engine Doctor, and automatically connect the bundled voice preset directory to every local API launcher.
 
 Key changes:
-- KakaoTalk WebView detection with browser-speech fallback and external-browser guidance
-- every visible play action applies the current selection and requests immediate playback
-- Browser Speech, System Voice and MeloTTS preset prosody
-- CosyVoice preset reference WAV routing through the Worker
-- focused frontend/API regression tests
+- 800-line non-blocking refactor guidance and 1,200-line safety ceiling
+- Settings Engine Doctor for API, TTS, Worker, GPU and setup diagnostics
+- API URL save, immediate deep recheck, automatic reconnect and privacy-safe diagnostic copy
+- Setup API voice preset readiness count and missing-file guidance
+- automatic voice-presets directory wiring in START_ENGINE, dev:free and dev:api launchers
+- API preset diagnostic regression tests
 
-Permanent delete list:
+Tracked files deleted relative to Engine Heartbeat 2: none
+Cumulative permanent cleanup list:
 public/sorion-icon.svg

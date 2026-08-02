@@ -1,6 +1,6 @@
 # DUBBING STUDIO UX
 
-현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 2`
+현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 3`
 
 ## 목적
 

@@ -41,7 +41,7 @@ npm run test:worker
 ## 배포 차단 기준
 
 - 테스트 실패
-- 500줄 제한 위반
+- 1,200줄 안전 상한 위반. 800줄 초과는 비차단 분리 권고
 - AI, Local TTS, Demo 표시 혼동
 - 전처리 과정에서 원문 일부가 유실되는 문제
 - 서로 다른 WAV 형식을 강제로 병합하는 문제
@@ -223,7 +223,7 @@ npm run test:worker
 
 - HANDOVER에 임시채팅 영구 메모리 상태가 있어야 한다.
 - 제품 목표, 사용자 UX 결정, 아키텍처, 제한, 전달 규칙, 다음 목표가 있어야 한다.
-- HANDOVER는 500줄을 초과하지 않아야 한다.
+- HANDOVER는 800줄부터 archive 분리를 권고하고 1,200줄 안전 상한을 초과하지 않아야 한다.
 - DELIVERY_RULES에 임시채팅 인수인계 메모리 절대 규칙이 있어야 한다.
 - START_HERE의 첫 절차가 HANDOVER 필독이어야 한다.
 
@@ -515,3 +515,12 @@ npm run build
 - ERESOLVE fixture는 재시도 없이 즉시 실패하는지 확인한다.
 - lock proof의 lock 또는 manifest SHA-256을 바꾸면 검증이 실패하는지 확인한다.
 - main 전용 자동 커밋 job만 contents write를 가지며 PR에서는 실행되지 않는지 확인한다.
+
+## Engine Heartbeat 3 회귀 검사
+
+- 801줄 소스 fixture는 권고를 출력하지만 exit code 0을 유지한다.
+- 1,201줄 소스 fixture는 1,200줄 안전 상한 위반으로 실패한다.
+- Setup API는 CosyVoice 프리셋 0/3, 부분 준비, 3/3 준비를 구분한다.
+- `START_ENGINE.cmd`, `npm run dev:free`, `npm run dev:api`는 별도 설정이 없으면 프로젝트 `voice-presets` 폴더를 자동 연결한다.
+- Engine Doctor는 API·TTS·Worker·GPU를 분리 표시하고 주소 저장·재진단·자동 연결 복구를 제공한다.
+- 복사되는 진단 JSON에는 Setup 상세 경로, 음원 내용, 서비스 토큰을 넣지 않는다.

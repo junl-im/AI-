@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 3 · Engine Doctor and preset autowiring
+
+- 설정에 API·TTS·Worker·GPU·설치 단계를 분리 진단하는 Engine Doctor를 추가
+- Voice API 주소 저장·즉시 재진단·자동 연결 복구와 개인정보 제외 상태 복사 추가
+- `START_ENGINE.cmd`가 프로젝트 `voice-presets` 폴더를 자동 연결
+- Setup API가 CosyVoice 프리셋 WAV 3종의 준비 개수와 누락 파일을 반환
+- 소스 500줄 하드 제한을 800줄 권고·1,200줄 안전 상한으로 완화
+
 ## 0.9.3-beta.3 Engine Heartbeat 2 · Kakao guard, auto apply/play and preset routing
 
 - 카카오톡 인앱 브라우저를 감지해 PC localhost 엔진 제한, 브라우저 음성 대체와 외부 브라우저 전환을 즉시 안내합니다.

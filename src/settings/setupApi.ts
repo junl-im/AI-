@@ -14,6 +14,8 @@ interface ApiSetupStatus {
   version: string
   ready: boolean
   real_engine_count: number
+  voice_preset_ready_count?: number
+  voice_preset_expected_count?: number
   steps: ApiSetupStep[]
 }
 
@@ -28,6 +30,8 @@ export async function getSetupStatus(baseUrl?: string, signal?: AbortSignal): Pr
     version: result.version,
     ready: result.ready,
     realEngineCount: result.real_engine_count,
+    voicePresetReadyCount: result.voice_preset_ready_count ?? 0,
+    voicePresetExpectedCount: result.voice_preset_expected_count ?? 3,
     steps: result.steps,
   }
 }

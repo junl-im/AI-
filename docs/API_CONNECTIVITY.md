@@ -1,6 +1,6 @@
 # API 자동 연결
 
-현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 2`
+현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 3`
 
 ## 사용자 원칙
 
@@ -44,6 +44,16 @@ Worker를 추가합니다. 연결 성공 주소는 브라우저 저장소에 기
 - 서버가 없으면 Browser Speech로 즉시 재생 가능 상태 유지
 - 카카오톡 모바일 WebView는 PC localhost를 가리키지 않으므로 로컬 엔진 후보에서 제외하고 외부 브라우저·공개 HTTPS API를 안내
 - 외부 브라우저 열기 버튼은 사용자 클릭으로 실행하고 주소 복사와 수동 열기 안내를 함께 제공
+
+## Engine Doctor
+
+설정 화면의 Engine Doctor는 저장된 Voice API 주소로 `/health`, `/connectivity`, `/setup`,
+`/engines`, 목소리 복제 capability를 검사합니다. API·TTS·Worker·GPU를 분리 표시하고
+`voice-presets`의 3개 기준 WAV 준비 개수도 보여 줍니다. 주소 저장·즉시 재진단·자동 연결
+복구를 제공하며 복사되는 진단 JSON에는 개인 음원과 로컬 파일 경로를 넣지 않습니다.
+
+`START_ENGINE.cmd`는 별도 환경변수가 없으면 프로젝트 루트의 `voice-presets` 폴더를
+`SORION_COSYVOICE_PRESET_DIRECTORY`로 자동 연결합니다.
 
 ## Private Network Access
 

@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 2`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 3`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -13,4 +13,5 @@
 9. Firebase Web 공개 설정은 `.env.development`·`.env.production`에서 자동 로드되며 Firestore·Storage는 기본 차단 상태입니다.
 10. 카카오톡에서 연 모바일 링크는 PC localhost 엔진을 사용하지 않으며 외부 브라우저 또는 공개 HTTPS API가 필요합니다.
 11. 모든 재생 버튼은 선택한 목소리·설정을 먼저 적용하고 즉시 재생하며, CosyVoice 프리셋 음원은 `voice-presets` 안내를 따릅니다.
-12. 실제 모델·실기기 수치를 준비하지 않았다면 성공 또는 성능을 가장하지 않습니다.
+12. 설정의 Engine Doctor에서 API·TTS·Worker·GPU와 프리셋 3종 준비 상태를 한 번에 확인하고 연결 주소를 복구할 수 있습니다.
+13. 실제 모델·실기기 수치를 준비하지 않았다면 성공 또는 성능을 가장하지 않습니다.

@@ -96,6 +96,11 @@ class Settings(BaseSettings):
         return Path(self.stt_directory).expanduser().resolve()
 
     @property
+    def cosyvoice_preset_path(self) -> Path | None:
+        value = self.cosyvoice_preset_directory.strip()
+        return Path(value).expanduser().resolve() if value else None
+
+    @property
     def tts_engine_order_list(self) -> list[str]:
         return [item.strip() for item in self.tts_engine_order.split(",") if item.strip()]
 

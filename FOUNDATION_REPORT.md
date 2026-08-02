@@ -1,6 +1,14 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 2**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 3**
+
+## Engine Heartbeat 3
+
+- 설정에 Engine Doctor를 추가해 API·실제 TTS·CosyVoice Worker·GPU와 설치 단계를 한 번에 진단합니다.
+- 음성 시스템 주소 저장·즉시 재진단·자동 연결 복구와 개인 음원·로컬 경로를 제외한 상태 복사를 제공합니다.
+- `START_ENGINE.cmd` 실행 시 프로젝트의 `voice-presets` 폴더를 API에 자동 연결합니다.
+- Setup API가 프리셋 WAV 3종의 준비 개수와 누락 파일을 명시적으로 반환합니다.
+- 500줄 하드 제한을 폐기하고 800줄 분리 권고, 1,200줄 안전 상한으로 완화했습니다.
 
 ## Engine Heartbeat 2
 
@@ -37,11 +45,14 @@
 
 ## 검증
 
-- API pytest 121개 통과
+- API pytest 123개 통과
 - Worker pytest 14개 통과
 - Python compileall 통과
-- TypeScript·TSX 150개 파일 parser 검사 통과
+- TypeScript·TSX 152개 파일 parser 검사 통과
 - Repository preflight 11개 통과
+- 신규 Engine Doctor TypeScript 핵심 파일 strict semantic 검사 통과
+- 802줄 fixture는 경고 후 통과, 1,202줄 fixture는 1,200줄 안전 상한으로 실패
+- Setup API 프리셋 0/3·2/3·3/3 진단 테스트와 실제 3/3 응답 확인
 - 프로젝트 규칙, 폐기 파일, Web manifest, free-only, engine blueprint, 모델 onboarding 검사 통과
 - 합성 무음 10·30·60분 WAV·MP3 6개 시나리오 완료
 - WAV 길이·자막 드리프트 0ms, MP3 ffprobe 길이와 자막 차이 192ms 이내
@@ -50,4 +61,4 @@
 
 합성 무음 soak는 파일 병합, FFmpeg, 컨테이너 길이와 자막 타임코드 안정성만 검증합니다. 실제 한국어 음질, CosyVoice 처리 속도, CUDA·MPS·모바일 메모리 성능을 증명하지 않습니다. 실제 장치·모델 증거는 `.sorion/quality`에 별도로 기록해야 합니다.
 
-현재 샌드박스에는 프로젝트 npm 의존성이 없어 ESLint, semantic TypeScript typecheck, Vitest, Vite build는 GitHub Actions에서 최종 확인해야 합니다.
+현재 샌드박스의 기본 npm registry에는 고정된 `@eslint/js@9.22.0`이 없었고 공식 npm registry 직접 설치도 제한 시간 안에 끝나지 않아 전체 ESLint·Vitest·Vite build는 GitHub Actions에서 최종 확인해야 합니다. 신규 Engine Doctor 파일은 별도 strict TypeScript semantic 검사까지 통과했습니다.

@@ -1,6 +1,6 @@
 # SoriON AI Engine Strategy
 
-현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 2`
+현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 3`
 
 ## 무료 로컬 고정 자동 순서
 
@@ -39,6 +39,13 @@ Firebase Hosting Spark / GitHub Pages
 - GPU 또는 운영자가 허용한 CPU 프로필
 
 조건이 충족되지 않으면 준비됨이나 추천 상태로 표시하지 않는다.
+
+## 프리셋 자동 연결
+
+`START_ENGINE.cmd`는 프로젝트 루트의 `voice-presets` 폴더를 API에 자동 연결합니다.
+Engine Doctor와 Setup API는 `sori-warm.wav`, `on-clear.wav`, `dam-calm.wav`의 준비 개수를
+표시합니다. 직접 API를 실행하는 운영자는 같은 폴더를
+`SORION_COSYVOICE_PRESET_DIRECTORY`에 지정합니다.
 
 ## 품질 결정 방식
 

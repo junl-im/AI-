@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 2**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 3**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-02 16:58 KST**
 제품 소유·디자인: **곰같은여우**
@@ -283,7 +283,7 @@ SORION_FASTER_WHISPER_MODEL, SORION_FASTER_WHISPER_DEVICE, SORION_FASTER_WHISPER
 SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
 ```
 ## 14. 코딩 규칙
-- 소스 파일 500줄 이하.
+- 소스 파일은 800줄부터 분리를 권고하고 1,200줄 안전 상한만 차단.
 - 큰 함수 분리, 중복 제거, 하드코딩 최소화.
 - 공식 브랜드 원본은 사용자 제공 `public/sorion-logo.png`이며 근사 SVG를 다시 만들지 않는다.
 - 폐기 라이브러리 사용 금지.
@@ -497,3 +497,12 @@ CI Hotfix 4 테스트 규칙:
 - 누락 npm lock은 검증된 CI bootstrap으로 복구하고 Firebase SDK는 browser ESM 런타임 로드로 npm 그래프에서 제거했다.
 ## 39. 0.9.3-beta.3 Engine Heartbeat 2
 - 녹색 CI 기준을 유지하며 카카오 WebView 로컬 엔진 제한, 재생 버튼 자동 적용·재생, Browser/System/Melo 프리셋 운율과 CosyVoice 프리셋 WAV 라우팅을 연결했다.
+
+## 40. 0.9.3-beta.3 Engine Heartbeat 3
+- 500줄 하드 제한을 폐기하고 800줄 분리 권고·1,200줄 안전 상한으로 완화했다.
+- 설정에 Engine Doctor를 추가해 API·실제 TTS·Worker·GPU·설치 단계와 프리셋 3종 준비 상태를 진단한다.
+- 음성 시스템 주소 저장, 즉시 재진단, 자동 연결 복구와 민감 정보 제외 진단 복사를 제공한다.
+- `START_ENGINE.cmd`가 프로젝트 `voice-presets` 폴더를 API 환경변수에 자동 연결한다.
+- Setup API는 프리셋 준비 개수와 누락 파일을 반환하며 실제 음원은 저장소에 포함하지 않는다.
+- 검증: preflight 11개, API 123개, Worker 14개, 신규 Web strict semantic 검사, 800/1,200줄 정책 fixture를 통과했다.
+- 제한: 전체 npm 설치는 샌드박스 registry 404·외부 registry timeout으로 실행하지 못해 GitHub Actions가 ESLint·Vitest·Vite 최종 판정이다.

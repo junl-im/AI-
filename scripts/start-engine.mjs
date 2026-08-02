@@ -4,6 +4,7 @@ import process from 'node:process'
 
 const apiDirectory = fileURLToPath(new URL('../services/api/', import.meta.url))
 const workerDirectory = fileURLToPath(new URL('../services/worker/', import.meta.url))
+const presetDirectory = fileURLToPath(new URL('../voice-presets/', import.meta.url))
 const uv = process.platform === 'win32' ? 'uv.exe' : 'uv'
 const webUrl = process.env.SORION_WEB_URL?.trim() || 'https://junl-im.github.io/AI-/'
 const withWorker = process.argv.includes('--worker') || Boolean(process.env.SORION_WORKER_MODEL_PATH)
@@ -80,6 +81,8 @@ function openBrowser(url) {
 const apiEnv = {
   ...process.env,
   SORION_ALLOW_MOCK_ENGINE: process.env.SORION_ALLOW_MOCK_ENGINE || 'false',
+  SORION_COSYVOICE_PRESET_DIRECTORY:
+    process.env.SORION_COSYVOICE_PRESET_DIRECTORY || presetDirectory,
 }
 if (withWorker) {
   if (!process.env.SORION_WORKER_MODEL_PATH) {
@@ -102,6 +105,7 @@ try {
   await waitForApi()
   apiReady = true
   await reportEngine()
+  console.log(`[SoriON] 프리셋 음색 폴더: ${apiEnv.SORION_COSYVOICE_PRESET_DIRECTORY}`)
   console.log(`[SoriON] 웹 열기: ${webUrl}`)
   openBrowser(webUrl)
   console.log('[SoriON] 이 창을 닫으면 로컬 음성 엔진도 종료됩니다.')

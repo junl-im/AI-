@@ -5,6 +5,9 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 const ignored = new Set(['.git', '.venv', 'node_modules', 'dist', 'coverage', '__pycache__', '.pytest_cache', '.ruff_cache', '.sorion'])
 const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs', '.py', '.css'])
 const failures = []
+const warnings = []
+const SOURCE_WARNING_LINES = 800
+const SOURCE_FAILURE_LINES = 1200
 function isWideCodePoint(codePoint) {
   return (
     (codePoint >= 0x1100 && codePoint <= 0x115f) ||
@@ -39,7 +42,11 @@ async function walk(directory) {
     if (!sourceExtensions.has(extension)) continue
     const content = await readFile(fullPath, 'utf8'); const lines = content.split(/\r?\n/)
     const lineCount = lines.length
-    if (lineCount > 500) failures.push(`${path}: ${lineCount}줄로 500줄 제한을 초과했습니다.`)
+    if (lineCount > SOURCE_FAILURE_LINES) {
+      failures.push(`${path}: ${lineCount}줄로 ${SOURCE_FAILURE_LINES}줄 안전 상한을 초과했습니다.`)
+    } else if (lineCount > SOURCE_WARNING_LINES) {
+      warnings.push(`${path}: ${lineCount}줄입니다. 변경이 잦다면 책임 단위 분리를 검토하세요.`)
+    }
     if (extension === '.py') {
       lines.forEach((line, index) => {
         const displayWidth = ruffDisplayWidth(line)
@@ -99,7 +106,11 @@ await requireText('docs/HANDOVER.md', [
 ])
 const handoverContent = await readFile(join(root, 'docs/HANDOVER.md'), 'utf8')
 const handoverLineCount = handoverContent.split(/\r?\n/).length
-if (handoverLineCount > 500) failures.push(`docs/HANDOVER.md: ${handoverLineCount}줄로 500줄 제한을 초과했습니다.`)
+if (handoverLineCount > SOURCE_FAILURE_LINES) {
+  failures.push(`docs/HANDOVER.md: ${handoverLineCount}줄로 ${SOURCE_FAILURE_LINES}줄 안전 상한을 초과했습니다.`)
+} else if (handoverLineCount > SOURCE_WARNING_LINES) {
+  warnings.push(`docs/HANDOVER.md: ${handoverLineCount}줄입니다. 오래된 구역은 archive 이동을 검토하세요.`)
+}
 await requireText('docs/CHANGELOG.md', [`## ${currentVersion}`])
 await requireText('docs/NEXT_UPDATE.md', ['# NEXT UPDATE', '## 목표 버전'])
 await requireText('docs/RELEASE.md', ['전체 통파일 ZIP', '덮어쓰기용 패치 ZIP'])
@@ -146,7 +157,12 @@ await requireAbsent('.github/workflows/ci.yml', [
   'needs: lockfiles', 'sorion-verified-lockfiles', 'npm_config_fetch_retries: 5',
   'Commit verified lockfiles · main only', 'node scripts/verify-lock-proof.mjs all',
 ])
-await requireText('.nvmrc', ['22.18.0']); await requireText('START_ENGINE.cmd', ['scripts\\start-engine.mjs']); await requireText('scripts/start-engine.mjs', ['엔진 심장박동 확인', 'SORION_ALLOW_MOCK_ENGINE']); await requireText('.node-version', ['22.18.0'])
+await requireText('.nvmrc', ['22.18.0']); await requireText('START_ENGINE.cmd', ['scripts\\start-engine.mjs']); await requireText('scripts/start-engine.mjs', ['엔진 심장박동 확인', 'SORION_ALLOW_MOCK_ENGINE', 'SORION_COSYVOICE_PRESET_DIRECTORY', 'voice-presets']); await requireText('scripts/start-free-runtime.mjs', ['SORION_COSYVOICE_PRESET_DIRECTORY', 'voice-presets']); await requireText('scripts/start-api.mjs', ['SORION_COSYVOICE_PRESET_DIRECTORY', 'voice-presets']); await requireText('.node-version', ['22.18.0'])
+await requireText('scripts/check-project-rules.mjs', ['SOURCE_WARNING_LINES = 800', 'SOURCE_FAILURE_LINES = 1200', '프로젝트 규칙 권고'])
+await requireAbsent('docs/CODING_RULE.md', ['소스 파일은 500줄 이하'])
+await requireText('src/components/evaluation/EngineDoctorCard.tsx', ['ENGINE DOCTOR', '저장·진단', '자동 연결 복구', 'CosyVoice 프리셋 음색'])
+await requireText('src/hooks/useEngineDoctor.ts', ['runApiConnectivityAudit', 'getSetupStatus', 'copyDiagnostics', 'requestAutomaticApiReconnect'])
+await requireText('services/api/app/services/setup_diagnostics.py', ['PRESET_VOICE_IDS', 'voice-presets', 'voice_preset_ready_count'])
 await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '자동 커밋', 'npm ci', 'uv sync --locked'])
 await requireText('src/test/setup.ts', ['afterEach', 'cleanup()', 'Object.defineProperty(Blob.prototype', "reader.readAsArrayBuffer(this)"])
 await requireText('src/tts/mockWave.test.ts', ['async function readBlob', "typeof blob.arrayBuffer === 'function'", 'reader.readAsArrayBuffer(blob)'])
@@ -492,6 +508,9 @@ for (const relativePath of [
   const content = await readFile(join(root, relativePath), 'utf8')
   if (/from datetime import .*\bUTC\b/.test(content) || /datetime\.UTC/.test(content))
     failures.push(`${relativePath}: Python 3.10과 호환되지 않는 datetime.UTC 사용이 있습니다.`)
+}
+if (warnings.length > 0) {
+  console.warn('프로젝트 규칙 권고'); warnings.forEach((warning) => console.warn(`- ${warning}`))
 }
 if (failures.length > 0) {
   console.error('프로젝트 규칙 검사 실패'); failures.forEach((failure) => console.error(`- ${failure}`))

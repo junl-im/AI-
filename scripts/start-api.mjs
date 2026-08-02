@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const apiDirectory = fileURLToPath(new URL('../services/api/', import.meta.url))
+const presetDirectory = fileURLToPath(new URL('../voice-presets/', import.meta.url))
 const command = process.platform === 'win32' ? 'uv.exe' : 'uv'
 const child = spawn(
   command,
@@ -17,7 +18,15 @@ const child = spawn(
     '8000',
     '--reload',
   ],
-  { cwd: apiDirectory, stdio: 'inherit' },
+  {
+    cwd: apiDirectory,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      SORION_COSYVOICE_PRESET_DIRECTORY:
+        process.env.SORION_COSYVOICE_PRESET_DIRECTORY || presetDirectory,
+    },
+  },
 )
 
 child.on('error', (error) => {

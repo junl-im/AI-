@@ -13,5 +13,7 @@ export interface SetupStatus {
   version: string
   ready: boolean
   realEngineCount: number
+  voicePresetReadyCount: number
+  voicePresetExpectedCount: number
   steps: SetupStep[]
 }
