@@ -10,7 +10,7 @@ def test_connectivity_reports_api_and_engine_state(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.9.2"
+    assert body["version"] == "0.9.3-alpha.1"
     assert body["api_base_path"] == "/api/v1"
     assert body["api_ready"] is True
     assert isinstance(body["tts_ready"], bool)
@@ -78,6 +78,9 @@ def test_connectivity_exposes_mobile_engine_layers(client):
     assert isinstance(body["gpu_ready"], bool)
     assert body["recommended_recheck_seconds"] >= 1
     assert any(check["id"] == "worker-gpu" for check in body["checks"])
+    assert any(
+        check["id"] == "worker-model-integrity" for check in body["checks"]
+    )
     assert any(check["id"] == "private-network" for check in body["checks"])
 
 

@@ -1,0 +1,7 @@
+SoriON AI 0.9.2 CI Hotfix 2 -> 0.9.3-alpha.1 Patch Manifest
+
+Base version: 0.9.2 CI Hotfix 2
+Target version: 0.9.3-alpha.1
+Delete files: 0
+
+See the repository root PATCH_MANIFEST.txt for the complete changed-file list.

@@ -329,3 +329,22 @@ Semantic Versioning을 사용한다.
 - 목적: 누적 저장소에 남은 `public/sorion-icon.svg`로 인한 Web quality 규칙 실패 제거
 - 삭제 파일: `public/sorion-icon.svg`
 - 적용 스크립트: `docs/patches/0.9.2-ci-hotfix-2/APPLY_HOTFIX.cmd` 또는 `.sh`
+
+## 0.9.3-alpha.1 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.3-alpha.1-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.2-ci-hotfix-2-to-0.9.3-alpha.1-patch.zip`
+- 패치 기준 버전: `0.9.2 CI Hotfix 2`
+- 범위: 모델 매니페스트·라이선스 동의·SHA-256·하드웨어 프로필 기반 Worker readiness
+- 삭제 파일: 없음
+- 실제 모델 가중치, 사용자 동의값, Secret, 사용자 음성, 실행 DB와 캐시는 포함하지 않는다.
+- alpha 단계에서는 모델 다운로드를 자동 실행하지 않으며 사용자가 확인한 로컬 파일만 검증한다.
+
+## 0.9.3-alpha.2 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.3-alpha.2-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.3-alpha.1-to-0.9.3-alpha.2-patch.zip`
+- 패치 기준 버전: `0.9.3-alpha.1`
+- 목적: Vite 8 중심 Web quality 의존성·peer·CI 설치 그래프 안정화
+- 삭제 파일: 없음
+- 실제 npm install·lint·typecheck·Vitest·build는 공용 registry가 가능한 GitHub Actions에서 최종 확인

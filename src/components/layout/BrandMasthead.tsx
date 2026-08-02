@@ -28,7 +28,7 @@ export function BrandMasthead() {
       <div className="soa-masthead__inner">
         <div className="soa-meta-bar">
           <div className="soa-meta-group">
-            <span className="soa-meta-label">BUILD</span><strong>v0.9.2</strong>
+            <span className="soa-meta-label">BUILD</span><strong>v0.9.3-alpha.1</strong>
             <span className="soa-meta-divider" aria-hidden="true" />
             <span className="soa-device-mark" aria-hidden="true"><i /><b /></span>
             <span>모바일 · PC 호환</span>

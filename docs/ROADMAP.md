@@ -231,3 +231,24 @@
 - OpenVoice V2·Faster Whisper·DeepFilterNet3 실제 Adapter
 - STT 기반 한국어 발음 자동 검수와 실패 문장 재생성
 - 전체 WAV·MP3 병합과 자막 출력
+
+## 0.9.3-alpha.1 완료
+
+- 모델 로딩 전 매니페스트 schema·안전 경로·파일 크기·SHA-256 검증
+- 사용자가 확인한 모델 라이선스 동의 없이는 readiness 차단
+- CUDA·Apple Silicon MPS·CPU 저속 모드와 VRAM·디스크 프로필 진단
+- 모델 매니페스트 생성·검증 CLI와 API 연결 상태 노출
+
+## 0.9.3-alpha.2 완료
+
+- Vite 8과 Vitest·Tailwind·TypeScript ESLint 호환 조합 정렬
+- 직접 npm 의존성 exact pin과 Vite override
+- React Testing Library peer dependency 명시
+- 설치 전 manifest·설치 후 실제 버전·dependency tree CI 검사
+
+## 0.9.3-beta.1 예정
+
+- Faster Whisper 한국어 STT 검수 Adapter
+- CER·WER 및 숫자·날짜·금액·고유명사 오류 분류
+- 타임라인 순서·쉼을 반영한 전체 WAV·MP3·SRT·VTT Export
+- 품질 임계값 실패 문장만 제한적으로 재생성

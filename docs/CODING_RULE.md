@@ -54,6 +54,14 @@ npm run quality:rules
 - 오디오 자동 재생을 기본값으로 사용하지 않는다.
 - 다운로드 파일명은 운영체제 금지 문자를 제거한다.
 
+## Web 도구체인 규칙
+
+- 직접 npm 의존성은 정확한 버전으로 고정하고 caret·tilde 범위를 사용하지 않는다.
+- 직접 import하는 패키지는 transitive dependency에 기대지 않고 `package.json`에 선언한다.
+- Vite, Vitest, Tailwind Vite plugin, TypeScript, typescript-eslint의 peer 범위를 함께 확인한다.
+- CI는 설치 전 manifest와 설치 후 실제 패키지 버전·dependency tree를 모두 검사한다.
+- 네트워크 가능한 환경에서 `package-lock.json`을 생성하면 이후 설치는 `npm ci`로 전환한다.
+
 ## 최소 런타임 호환성
 
 - API의 지원 최소 버전은 Python 3.10이다.

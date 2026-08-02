@@ -142,10 +142,10 @@ function deriveLayers(result: ApiConnectivityResponse): ApiConnectivityReport['l
         ? 'Worker 주소는 있으나 응답하지 않음'
         : 'Worker 주소가 설정되지 않음'),
     gpu: gpuReady
-      ? layer('ready', result.gpu_name ?? 'CUDA GPU 준비됨')
+      ? layer('ready', result.gpu_name ?? 'Worker 가속 장치 준비됨')
       : layer(workerHealthy ? 'warning' : 'offline', workerHealthy
-        ? 'Worker는 연결됐지만 CUDA GPU가 준비되지 않음'
-        : 'Worker 연결 후 GPU 상태를 확인할 수 있음'),
+        ? 'Worker는 연결됐지만 가속 장치가 준비되지 않음'
+        : 'Worker 연결 후 실행 장치 상태를 확인할 수 있음'),
   }
 }
 

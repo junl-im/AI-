@@ -78,7 +78,7 @@ def create_app(
 
     app = FastAPI(
         title="SoriON CosyVoice Worker",
-        version="0.9.2",
+        version="0.9.3-alpha.1",
         description="인증·감사·TTL을 포함한 CosyVoice 음성 복제 실행 서비스",
         lifespan=lifespan,
     )

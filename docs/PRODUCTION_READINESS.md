@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.9.2`
+현재 기준 버전: `0.9.3-alpha.2`
 
 ## 목적
 
@@ -91,3 +91,23 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - 모바일 정적 Web은 localhost를 시도하지 않고 Browser Speech로 전환해야 한다.
 - System·Browser 음성을 AI 모델 음질로 표시하지 않아야 한다.
 - SSE가 실패하면 polling 결과 복구가 유지돼야 한다.
+
+## 0.9.3-alpha.1 검증된 모델 게이트
+
+- Worker는 모델 adapter import 전에 모델 경로·매니페스트·라이선스 동의·SHA-256을 검사한다.
+- `SORION_WORKER_REQUIRE_MODEL_MANIFEST=true`가 기본이며 매니페스트 없는 모델은 ready가 아니다.
+- 매니페스트의 모델 버전과 라이선스는 사용자가 확인한 출처를 기반으로 직접 생성한다.
+- 체크섬 불일치·모델 루트 밖 경로·필수 파일 누락은 `model_install_state`로 명확히 반환한다.
+- CUDA·Apple Silicon MPS·CPU 저속 모드와 최소 VRAM·디스크 여유를 구분한다.
+- `/connectivity`의 모델 무결성 검사가 warning이면 실제 모델 준비 완료로 홍보하지 않는다.
+- 모델 가중치·매니페스트에 포함된 실제 모델 digest·동의값은 제품 저장소에 자동 수집하지 않는다.
+
+## 0.9.3-alpha.2 Web quality 도구체인 게이트
+
+- Node 22.18.0에서 manifest 검사 후 npm 설치를 수행한다.
+- 직접 npm 의존성은 caret·tilde 없이 정확한 버전으로 선언한다.
+- Vite 8은 Vitest 4.1.10, Tailwind 4.3.3과 함께 사용한다.
+- TypeScript 5.9.3은 typescript-eslint 8.65.0과 함께 사용한다.
+- React Testing Library 16의 `@testing-library/dom` peer를 직접 선언한다.
+- 설치 후 도구체인 실제 버전과 중첩 Vite 유무, npm dependency tree를 검사한다.
+- `strict-peer-deps=true`에서 설치되지 않으면 Web quality를 통과로 보지 않는다.

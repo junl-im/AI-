@@ -1,46 +1,49 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.2 CI Hotfix 2 · Stale Brand Asset Cleanup`
+현재 기준: `0.9.3-alpha.2 · Web Quality Toolchain Stabilization`
 
 ## 목표 버전
 
-`0.9.3 Free Local Pipeline Adapters & Korean Verification`
+`0.9.3-beta.1 Local STT Verification & Final Audio Export`
 
 ## 방향
 
-0.9.2에서 확정한 카탈로그를 실제 무료 로컬 Adapter로 연결한다. 엔진 수를 늘리는 것이 아니라 한국어 품질과 저사양 안정성을 통과한 단계만 제품 파이프라인에 승격한다.
+검증된 로컬 모델 온보딩 기반 위에 Faster Whisper와 FFmpeg를 먼저 연결한다. 엔진 수를 늘리기보다
+원문 대비 한국어 정확도와 장문 최종 결과물이라는 사용자 가치가 확인되는 경로를 우선한다.
 
-## 1. 무료 모델 온보딩
+## 1. Faster Whisper 한국어 검수 Adapter
 
-- CosyVoice 3 모델 존재·체크섬·모델 카드 확인
-- CPU·CUDA·Apple Silicon 프로필과 예상 메모리 진단
-- 모델 다운로드는 사용자 명시 실행, 중단·재개와 저장 위치 선택
-- 준비되지 않은 모델은 정상·추천으로 표시하지 않음
-
-## 2. 실제 파이프라인 Adapter
-
-- OpenVoice V2 동의 기반 음색 변환 Worker
-- Faster Whisper 한국어 전사·발음 검수
-- DeepFilterNet3 선택적 노이즈 제거
-- Resemble Enhance 고품질 오프라인 후처리 실험
-- FFmpeg WAV·MP3 병합과 자막 출력
-
-## 3. 한국어 자동 품질 검수
-
-- 원문과 생성 음성 STT 결과의 CER·WER 계산
+- 선택 설치형 로컬 Faster Whisper Adapter와 readiness 진단
+- 생성 음성 전사와 원문의 CER·WER 계산
 - 숫자·날짜·금액·단위·영문·고유명사 오류 분류
-- 문장 끝 억양과 문단 호흡의 블라인드 평가
-- 실패 문장만 자동 재생성하고 완료 결과 재사용
+- STT 모델이 없으면 검수 미실행으로 표시하고 합성 성공으로 위장하지 않음
 
-## 4. AI Director 연결
+## 2. 전체 WAV·MP3·자막 Export
 
-- Rule Director 계획을 장문 제작 화면에 적용
-- 사용자 발음 사전 저장과 프로젝트별 override
-- 로컬 LLM은 선택 기능이며 없으면 규칙 기반으로 완전 동작
-- 원고 재작성은 사용자가 명시적으로 허용한 경우에만 실행
+- 현재 타임라인 순서와 쉼 블록을 반영한 WAV 병합
+- FFmpeg가 있을 때만 MP3 변환 제공
+- 문장별 시간 범위로 SRT·VTT 출력
+- 실패·취소 블록이 있으면 불완전 결과를 명시하고 사용자가 선택한 경우에만 내보냄
 
-## 0.9.2 CI 안정화 선행 조건
+## 3. 실패 문장 자동 재생성
 
-- 다음 기능 개발 전 `public/sorion-icon.svg` 삭제가 Git 변경사항에 포함됐는지 확인한다.
-- `npm run quality:rules`와 GitHub Actions Web quality가 모두 녹색인 상태에서만 0.9.3을 시작한다.
-- 전체 ZIP을 기존 폴더에 덮어쓸 때는 삭제 파일이 자동 제거되지 않으므로 새 폴더 사용 또는 적용 스크립트 실행을 원칙으로 한다.
+- STT 오류 임계값을 넘은 문장만 새 job ID로 재생성
+- 완료 음원과 사용자 수정 블록은 재사용
+- 재시도 횟수 상한과 엔진 circuit breaker 유지
+- 원문 재작성은 하지 않고 발음 사전·정규화 힌트만 적용
+
+## 4. 다음 Adapter
+
+- DeepFilterNet3 선택적 노이즈 제거
+- OpenVoice V2 동의 기반 음색 변환
+- Resemble Enhance는 라이선스·성능 검증 전 연구 경로로 유지
+
+## 선행 조건과 위험
+
+- 실제 모델 가중치와 공식 체크섬은 저장소·릴리스 ZIP에 포함하지 않는다.
+- Faster Whisper·FFmpeg 설치 여부와 CPU·GPU 지연을 실제 장치에서 측정해야 한다.
+- 0.9.3-alpha.2의 Web 도구체인을 GitHub Actions에서 실제 설치·lint·typecheck·test·build까지 확인한 뒤 기능 작업을 시작한다.
+- 모델 매니페스트 생성값은 사용자가 확인한 모델 출처·버전·라이선스를 사용한다.
+- Web 정식 검사는 공용 npm registry가 가능한 GitHub Actions에서 반드시 녹색을 확인한다.
+- 녹색 확인 뒤 `package-lock.json`을 생성·커밋하고 CI 설치를 `npm ci`로 전환한다.
+- Python 3.10 uv·Ruff 검사는 네트워크가 가능한 CI에서 반드시 재확인한다.

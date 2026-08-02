@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.2 CI Hotfix 2 · Stale Brand Asset Cleanup**
+현재 기준 버전: **0.9.3-alpha.2 · Web Quality Toolchain Stabilization**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 01:35 KST**
+최종 갱신: **2026-08-02 10:25 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -169,6 +169,7 @@ health · readiness · GPU diagnostics · jobs · SSE · WAV
 - CosyVoice 일반 TTS와 Cloud Adapter 경계가 구현됐지만 기본 free-only에서는 과금형을 등록하지 않는다.
 - 자격 증명·Worker·동의된 기준 음성이 준비된 엔진만 자동 후보가 된다.
 - 릴리스 ZIP에는 모델 가중치, PyTorch, CUDA, CosyVoice 저장소가 없다.
+- Worker는 매니페스트·라이선스 동의·SHA-256·하드웨어 검증 전 모델 adapter를 로딩하지 않는다.
 - 모델 미설치 시 `/health`는 정상이어도 `/ready`는 not-ready다.
 - 실제 한국어 자연스러움, 화자 유사도, 지연, VRAM 벤치마크는 미완료다.
 - 현재 기본 제작 흐름은 사용자가 작성한 장문 원고를 정확히 음성화하는 데 집중한다.
@@ -278,8 +279,10 @@ SORION_COSYVOICE_TTS_PROFILE_ID, SORION_WORKER_SERVICE_TOKEN, SORION_WORKER_SIGN
 SORION_PUBLIC_RATE_LIMIT_PER_MINUTE, SORION_ALLOW_PRIVATE_NETWORK, SORION_AUDIT_LOG_PATH
 SORION_VOICE_CLONE_DIRECTORY, SORION_VOICE_CLONE_TTL_DAYS, SORION_VOICE_CLONE_MAX_FILE_BYTES
 SORION_WORKER_ENVIRONMENT, SORION_WORKER_OUTPUT_PATH, SORION_WORKER_MODEL_PATH
-SORION_WORKER_REQUIRED_MODEL_FILES, SORION_WORKER_ADAPTER_MODULE, SORION_WORKER_DEVICE
-SORION_WORKER_ALLOW_CPU, SORION_WORKER_MIN_VRAM_MB, SORION_WORKER_MAX_CONCURRENT_JOBS
+SORION_WORKER_MODEL_MANIFEST_PATH, SORION_WORKER_REQUIRE_MODEL_MANIFEST
+SORION_WORKER_MODEL_LICENSE_ACCEPTED, SORION_WORKER_REQUIRED_MODEL_FILES
+SORION_WORKER_ADAPTER_MODULE, SORION_WORKER_DEVICE, SORION_WORKER_ALLOW_CPU
+SORION_WORKER_MIN_VRAM_MB, SORION_WORKER_MIN_DISK_FREE_MB, SORION_WORKER_MAX_CONCURRENT_JOBS
 SORION_WORKER_MAX_SAMPLE_BYTES, SORION_WORKER_AUTH_TTL_SECONDS, SORION_WORKER_RATE_LIMIT_PER_MINUTE
 SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_PATH
 ```
@@ -291,6 +294,7 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 - Python 최소 지원 버전 3.10.
 - Python은 Ruff 표시 폭 100칸 이하.
 - React Hook dependency 경고 0건.
+- 직접 npm 의존성 exact pin과 Web peer compatibility gate를 유지한다.
 - 테스트 간 DOM을 명시적으로 cleanup.
 - 새 기능에는 Web 또는 API·Worker 테스트를 추가한다.
 - 실제 기능 미연결 상태를 Demo 성공으로 숨기지 않는다.
@@ -302,9 +306,9 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체본: `SoriON-AI-0.9.1-full.zip`.
-- 패치: `SoriON-AI-0.9.0-to-0.9.1-patch.zip`.
-- 기준본: `SoriON-AI-0.8.9-full.zip`.
+- 전체본: `SoriON-AI-0.9.3-alpha.2-full.zip`.
+- 패치: `SoriON-AI-0.9.3-alpha.1-to-0.9.3-alpha.2-patch.zip`.
+- 기준본: `SoriON-AI-0.9.3-alpha.1-full.zip`.
 - 삭제 대상: 없음.
 ## 17. 절대 변경 금지 결정
 - 초기 브랜드 랜딩을 제거하지 않는다.
@@ -323,6 +327,7 @@ SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_P
 - 장문은 현재 블록 순차 생성이며 최종 WAV 재병합 Export는 미완료다.
 - 자동 탐색은 보안상 전체 LAN을 스캔하지 않는다.
 - 정식 npm 검사는 패키지 저장소 가용성에 영향을 받는다.
+- package-lock은 아직 없으며 공용 registry 환경에서 생성·커밋해야 한다.
 - 모든 API 프로세스는 같은 SQLite job 파일을 공유해야 한다.
 - memory fallback은 앱 종료 뒤 영구 복원되지 않는다.
 ## 19. 절대 전달 규칙
@@ -355,13 +360,13 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.9.3 Free Local Pipeline Adapters & Korean Verification**.
+다음 목표 버전: **0.9.3-beta.1 Local STT Verification & Final Audio Export**.
 우선순위:
-1. 무료 CosyVoice 모델 설치·체크섬·라이선스 동의와 readiness 자동 진단.
-2. CPU·GPU 프로필별 요구량과 중단·재개 가능한 명시적 모델 준비.
-3. 한국어 발음·억양·문단 호흡·지연의 익명 블라인드 벤치마크.
-4. 전체 WAV 병합, 실패 문장만 재생성, SSE 장시간 재연결 강화.
-5. Android·iOS·설치형 PWA와 Windows·macOS·Linux 무료 음성 매트릭스.
+1. Faster Whisper 로컬 Adapter와 원문 대비 CER·WER 검수.
+2. 숫자·날짜·금액·단위·고유명사 오류 분류와 실패 문장 재생성.
+3. 타임라인 순서·쉼을 반영한 WAV·MP3·SRT·VTT Export.
+4. DeepFilterNet3 선택 후처리와 OpenVoice V2 동의 기반 Adapter.
+5. Android·iOS·Windows·macOS·Linux 실제 장치 검증.
 금지: 유료 API 기본 호출, 수동 엔진 UI, 모델 없는 AI 성공 표시.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
@@ -437,3 +442,39 @@ CI Hotfix 4 테스트 규칙:
    `SoriON-AI-0.9.2-ci-hotfix-to-0.9.2-ci-hotfix-2-patch.zip`.
 10. 다음 예상 업데이트: Web·API·Worker CI가 모두 녹색인 것을 확인한 뒤
     `0.9.3 Free Local Pipeline Adapters & Korean Verification`을 진행한다.
+
+## 30. 2026-08-02 10:20 KST · v0.9.3-alpha.1
+
+1. 작업 일시: 2026-08-02 10:20 KST.
+2. 대상·기준: `0.9.2 CI Hotfix 2 → 0.9.3-alpha.1`.
+3. 변경 내용: Worker 모델 매니페스트 schema, 라이선스 동의, 파일 크기·SHA-256,
+   CUDA·MPS·CPU·VRAM·디스크 readiness와 생성·검증 CLI를 추가했다.
+4. 변경 이유: 모델 경로만 존재하거나 출처·무결성이 확인되지 않은 가중치를 ready로 표시하지
+   않고, adapter가 대형 모델을 로딩하기 전에 안전하게 차단하기 위해서다.
+5. 영향 범위: Worker 설정·runtime·diagnostics·schema, API connectivity, 환경 변수, 테스트와 문서.
+6. 주요 파일: `model_manifest.py`, `runtime.py`, `scripts/model_manifest.py`,
+   `test_model_manifest.py`, `connectivity.py`, `.env.example`, `COSYVOICE_WORKER.md`.
+7. 검증 결과: 정적 품질 4종, API 100개, Worker 14개 테스트 통과.
+8. 제한·주의: 실제 모델·공식 체크섬·라이선스 값은 제공하지 않는다. Web npm 설치와 Python
+   3.10 uv·Ruff는 현재 네트워크 제약으로 실행하지 못했다.
+9. 산출물: `SoriON-AI-0.9.3-alpha.1-full.zip`,
+   `SoriON-AI-0.9.2-ci-hotfix-2-to-0.9.3-alpha.1-patch.zip`.
+10. 다음 예상 업데이트: Faster Whisper 한국어 검수와 전체 WAV·MP3·자막 Export.
+
+
+## 31. 2026-08-02 10:25 KST · v0.9.3-alpha.2
+
+1. 작업 일시: 2026-08-02 10:25 KST.
+2. 대상·기준: `0.9.3-alpha.1 → 0.9.3-alpha.2`.
+3. 변경 내용: Vite 8 기준 Vitest·Tailwind·TypeScript ESLint 호환 조합, exact pin,
+   strict peer dependency, 직접 peer 선언과 설치 전후 Web 도구체인 CI 검사를 추가했다.
+4. 변경 이유: lockfile 없는 범위 의존성과 잘못된 peer 조합이 Web quality 설치·lint·test를
+   시점별로 흔들 수 있었기 때문이다.
+5. 영향 범위: `package.json`, `.npmrc`, Web CI, 품질 스크립트, 테스트·릴리스 문서.
+6. 주요 파일: `scripts/check-web-toolchain.mjs`, `.github/workflows/ci.yml`, `package.json`.
+7. 검증 결과: manifest·정적 품질 4종, TS·TSX 136개 구문·상대 import, API 100개, Worker 14개 통과.
+8. 제한·주의: 현재 npm 미러 제한으로 실제 install·lint·typecheck·Vitest·build는 GitHub Actions
+   최종 확인이 필요하며 package-lock은 해당 환경에서 생성해야 한다.
+9. 산출물: `SoriON-AI-0.9.3-alpha.2-full.zip`,
+   `SoriON-AI-0.9.3-alpha.1-to-0.9.3-alpha.2-patch.zip`.
+10. 다음 예상 업데이트: Web quality 녹색과 lockfile을 먼저 확정한 뒤 Faster Whisper 검수와 Export.

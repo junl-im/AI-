@@ -441,3 +441,38 @@ npm run cleanup:stale-brand
 2. 오류 메시지는 `npm run cleanup:stale-brand` 복구 명령을 안내한다.
 3. 정리 명령은 해당 파일을 삭제하고 다른 SVG가 남으면 실패한다.
 4. 정리 뒤 `quality:rules`가 통과하며 Git 변경사항에 파일 삭제가 표시된다.
+
+## 0.9.3-alpha.1 모델 온보딩 회귀 검사
+
+- 매니페스트의 schema version, 모델 ID·버전, 라이선스와 한 개 이상의 파일을 요구하는지 확인
+- `..`, 절대 경로, 역슬래시와 모델 루트 밖 symlink 경로를 거부하는지 확인
+- 라이선스 동의 전에는 모델 파일을 해싱하거나 adapter를 로딩하지 않는지 확인
+- 파일 크기·SHA-256 불일치와 누락 파일을 `checksum-failed`로 보고하는지 확인
+- 매니페스트가 필수인데 경로가 없으면 `manifest-required`로 readiness를 차단하는지 확인
+- CUDA·MPS·CPU 저속 모드와 최소 VRAM·디스크 여유 상태를 진단하는지 확인
+- `/connectivity`가 `worker-model-integrity`와 실행 장치 상태를 전달하는지 확인
+- 매니페스트 생성·검증 CLI가 작은 로컬 fixture에서 동일 digest를 재현하는지 확인
+
+현재 로컬 실행 결과는 API 100개, Worker 14개 통과다. Python 3.10 uv·Ruff는 외부 네트워크가
+차단된 환경이라 실행하지 못했으며, Web 의존성 설치는 내부 npm 미러 404로 완료하지 못했다.
+
+## 0.9.3-alpha.2 Web 도구체인 회귀 검사
+
+```bash
+npm run quality:web-manifest
+npm install --no-audit --no-fund
+npm run quality:web-toolchain
+npm ls vite vitest typescript typescript-eslint --all
+npm run lint
+npm run typecheck
+npm run test:ci
+npm run build
+```
+
+검사 기준:
+
+- 직접 의존성에 caret·tilde가 없어야 한다.
+- Vitest 4.1.10과 Vite 8.2.0이 하나의 그래프에 설치돼야 한다.
+- Tailwind 4.3.3과 TypeScript ESLint 8.65.0의 peer 범위가 유효해야 한다.
+- `@testing-library/dom`이 직접 설치돼야 한다.
+- Vitest 아래 중첩 Vite가 생기거나 npm tree가 invalid면 실패해야 한다.

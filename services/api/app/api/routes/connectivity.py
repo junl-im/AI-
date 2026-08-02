@@ -30,18 +30,47 @@ def _directory_check(path: Path) -> ConnectivityCheck:
         )
 
 
-def _gpu_check(diagnostics: dict[str, object]) -> ConnectivityCheck:
-    cuda_available = bool(diagnostics.get("cuda_available"))
-    gpu_name = str(diagnostics.get("gpu_name") or "CUDA GPU 정보 없음")
-    vram = diagnostics.get("vram_total_mb")
-    detail = gpu_name
-    if isinstance(vram, int):
-        detail = f"{gpu_name} · VRAM {vram}MB"
+def _hardware_check(diagnostics: dict[str, object]) -> ConnectivityCheck:
+    profile_value = diagnostics.get("hardware_profile")
+    if profile_value is None:
+        cuda_available = bool(diagnostics.get("cuda_available"))
+        gpu_name = str(diagnostics.get("gpu_name") or "CUDA GPU 정보 없음")
+        vram = diagnostics.get("vram_total_mb")
+        detail = f"{gpu_name} · VRAM {vram}MB" if isinstance(vram, int) else gpu_name
+        return ConnectivityCheck(
+            id="worker-gpu",
+            label="Worker 실행 장치",
+            status="ready" if cuda_available else "warning",
+            detail=detail if cuda_available else "Worker 실행 장치 정보가 없습니다.",
+        )
+    profile = str(profile_value)
+    supported = bool(diagnostics.get("hardware_supported"))
+    reason = str(diagnostics.get("hardware_reason") or "실행 장치 정보가 없습니다.")
+    status = "ready" if supported and profile != "cpu" else "warning"
     return ConnectivityCheck(
         id="worker-gpu",
-        label="Worker GPU",
-        status="ready" if cuda_available else "warning",
-        detail=detail if cuda_available else "CUDA GPU가 준비되지 않았습니다.",
+        label="Worker 실행 장치",
+        status=status,
+        detail=f"{profile} · {reason}",
+    )
+
+
+def _model_integrity_check(diagnostics: dict[str, object]) -> ConnectivityCheck:
+    state = str(diagnostics.get("model_install_state") or "unknown")
+    verified = bool(diagnostics.get("model_checksum_verified"))
+    model_id = str(diagnostics.get("model_id") or "CosyVoice 모델")
+    model_version = str(diagnostics.get("model_version") or "버전 미확인")
+    reason = str(diagnostics.get("reason") or "모델 준비 상태를 확인하지 못했습니다.")
+    detail = (
+        f"{model_id} {model_version} · SHA-256 검증 완료"
+        if verified
+        else f"{state} · {reason}"
+    )
+    return ConnectivityCheck(
+        id="worker-model-integrity",
+        label="모델 무결성·라이선스",
+        status="ready" if verified else "warning",
+        detail=detail,
     )
 
 
@@ -74,7 +103,14 @@ async def connectivity(request: Request) -> ConnectivityResponse:
     clone_latency = clone_snapshot.get("latency_ms")
     raw_diagnostics = clone_snapshot.get("diagnostics")
     diagnostics = raw_diagnostics if isinstance(raw_diagnostics, dict) else {}
-    gpu_ready = clone_health and bool(diagnostics.get("cuda_available"))
+    hardware_profile = diagnostics.get("hardware_profile")
+    if hardware_profile is None:
+        accelerator_ready = bool(diagnostics.get("cuda_available"))
+    else:
+        accelerator_ready = bool(diagnostics.get("hardware_supported")) and str(
+            hardware_profile
+        ) in {"cuda", "apple-silicon"}
+    gpu_ready = clone_health and accelerator_ready
     gpu_name = diagnostics.get("gpu_name")
     vram_total_mb = diagnostics.get("vram_total_mb")
     checks = [
@@ -109,7 +145,8 @@ async def connectivity(request: Request) -> ConnectivityResponse:
             detail=clone_reason,
             latency_ms=int(clone_latency) if isinstance(clone_latency, int) else None,
         ),
-        _gpu_check(diagnostics),
+        _hardware_check(diagnostics),
+        _model_integrity_check(diagnostics),
         ConnectivityCheck(
             id="worker-auth",
             label="API ↔ Worker 서명 인증",
@@ -143,7 +180,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.9.2",
+        version="0.9.3-alpha.1",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",

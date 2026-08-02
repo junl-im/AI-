@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.2 Korean Voice Orchestrator Blueprint & Rule Director`
+- 버전: `0.9.3-alpha.2 Web Quality Toolchain Stabilization`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -56,3 +56,29 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 소스 파일은 500줄을 넘기지 않습니다.
 - 엔진과 API 선택은 사용자 설정이 아니라 자동 운영 계층에서 처리합니다.
 - 코드와 모델 checkpoint의 라이선스를 분리해 기록하고 비상업 모델은 자동 경로에서 제외합니다.
+
+
+## Web quality 안정화
+
+0.9.3-alpha.2는 Vite 8과 맞지 않던 Vitest 3, Tailwind Vite plugin 4.1.10,
+TypeScript 5.9와 맞지 않던 구형 typescript-eslint 조합을 정리했습니다. 모든 직접 npm 버전을
+정확히 고정하고 `npm run quality:web-manifest`와 설치 후 `npm run quality:web-toolchain`을
+순서대로 실행합니다. React Testing Library의 필수 peer인 `@testing-library/dom`도 직접 선언합니다.
+
+## 검증된 로컬 모델 준비
+
+0.9.3-alpha.1부터 Worker는 모델 로딩 전에 매니페스트, 라이선스 동의와 SHA-256을 확인합니다.
+실제 모델 파일과 라이선스를 확인한 뒤 Worker 루트에서 다음 명령으로 매니페스트를 만듭니다.
+
+```bash
+python scripts/model_manifest.py create \
+  --model-path /models/Fun-CosyVoice3-0.5B \
+  --output /models/Fun-CosyVoice3-0.5B/sorion-model-manifest.json \
+  --model-id Fun-CosyVoice3-0.5B \
+  --model-version <확인한-버전> \
+  --license-name <확인한-라이선스>
+```
+
+`.env`에는 `SORION_WORKER_MODEL_MANIFEST_PATH`와 사용자가 직접 확인한
+`SORION_WORKER_MODEL_LICENSE_ACCEPTED=true`를 설정합니다. 모델 체크섬과 동의값을 임의로
+채우거나 저장소에 모델 가중치를 포함하지 않습니다.

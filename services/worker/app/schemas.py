@@ -20,7 +20,7 @@ WorkerSegmentStatus = Literal[
 
 class HealthResponse(BaseModel):
     status: Literal["ok"] = "ok"
-    version: str = "0.9.2"
+    version: str = "0.9.3-alpha.1"
     service: str = "sorion-cosyvoice-worker"
 
 
@@ -42,11 +42,32 @@ class WorkerDiagnosticsResponse(BaseModel):
     disk_free_mb: int | None
     security_enabled: bool
     security_ready: bool
+    mps_available: bool = False
+    hardware_profile: str = "unavailable"
+    hardware_supported: bool = False
+    hardware_reason: str = "실행 장치 진단이 없습니다."
+    model_manifest_required: bool = True
+    model_manifest_path: str | None = None
+    model_manifest_exists: bool = False
+    model_manifest_valid: bool = False
+    model_id: str | None = None
+    model_version: str | None = None
+    model_license_name: str | None = None
+    model_license_url: str | None = None
+    model_license_requires_acceptance: bool = False
+    model_license_accepted: bool = False
+    model_checksum_verified: bool = False
+    model_checksum_failures: list[str] = Field(default_factory=list)
+    model_declared_file_count: int = 0
+    model_verified_file_count: int = 0
+    model_size_mb: int | None = None
+    model_install_state: str = "unknown"
+    min_disk_free_mb: int = 0
 
 
 class ReadinessResponse(BaseModel):
     status: Literal["ready", "not-ready"]
-    version: str = "0.9.2"
+    version: str = "0.9.3-alpha.1"
     diagnostics: WorkerDiagnosticsResponse
 
 

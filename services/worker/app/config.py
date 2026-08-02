@@ -15,10 +15,14 @@ class WorkerSettings(BaseSettings):
     environment: str = "development"
     output_path: Path = Path(".sorion/worker")
     model_path: Path | None = None
+    model_manifest_path: Path | None = None
+    require_model_manifest: bool = True
+    model_license_accepted: bool = False
     adapter_module: str = "app.adapters.cosyvoice3"
     device: str = "auto"
     allow_cpu: bool = False
     min_vram_mb: int = Field(default=8192, ge=0, le=262144)
+    min_disk_free_mb: int = Field(default=1024, ge=0, le=1048576)
     required_model_files: str = ""
     max_concurrent_jobs: int = Field(default=1, ge=1, le=4)
     max_sample_bytes: int = Field(default=25 * 1024 * 1024, ge=1024)

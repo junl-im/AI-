@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.9.3-alpha.2 - 2026-08-02
+
+### Web Quality Toolchain Stabilization
+
+- Vite 8과 맞지 않던 Vitest 3을 4.1.10으로 교체했습니다.
+- Vite 8 peer 지원이 없는 Tailwind 4.1.10을 4.3.3으로 교체했습니다.
+- TypeScript 5.9 지원 범위 밖이던 typescript-eslint 8.26.0을 8.65.0으로 교체했습니다.
+- `@eslint/js`, `@testing-library/dom`을 직접 선언하고 모든 직접 npm 버전을 정확히 고정했습니다.
+- Node 22.18.0, strict peer dependency, Vite override, manifest·설치 그래프 CI 검사를 추가했습니다.
+- 136개 TypeScript·TSX 파일의 구문·상대 import 검사와 기존 API 100개·Worker 14개 회귀 검사를 통과했습니다.
+
+## 0.9.3-alpha.1 - 2026-08-02
+
+### Verified Local Model Readiness Foundation
+
+- Worker가 모델 로딩 전에 모델 경로, 매니페스트 schema, 라이선스 동의와 SHA-256을 검증합니다.
+- 모델 루트 밖 경로, 중복 파일, 잘못된 digest, 크기·체크섬 불일치를 readiness 단계에서 차단합니다.
+- 변경되지 않은 모델 파일의 digest를 재사용해 반복 상태 조회의 대형 파일 재해싱을 줄였습니다.
+- CUDA, Apple Silicon MPS, 명시적 CPU 저속 모드와 최소 VRAM·디스크 여유를 진단합니다.
+- 모델 매니페스트 생성·검증 CLI와 API 연결 상태의 무결성·하드웨어 검사를 추가했습니다.
+- API 100개와 Worker 14개 테스트를 통과했습니다.
+
 ## 0.9.2 CI Hotfix 2 - 2026-08-02
 
 ### Stale Brand Asset Cleanup

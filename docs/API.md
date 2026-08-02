@@ -126,3 +126,15 @@
 ```
 
 응답에는 감지된 용도, 생성 구간, 발음 힌트, 문장별 쉼, 권장 속도·피치·감정, 무료 엔진 순서와 후처리 계획이 포함됩니다.
+
+## 0.9.3-alpha.1 Worker 모델 진단
+
+Worker `GET /ready`와 `GET /v1/diagnostics`는 기존 필드에 다음 정보를 추가한다.
+
+- `model_install_state`: 경로·매니페스트·라이선스·체크섬·장치·adapter 단계 상태
+- `model_id`, `model_version`, `model_license_name`, `model_license_url`
+- `model_checksum_verified`, `model_checksum_failures`
+- `model_declared_file_count`, `model_verified_file_count`, `model_size_mb`
+- `hardware_profile`, `hardware_supported`, `hardware_reason`, `mps_available`
+
+API `GET /api/v1/connectivity`는 `worker-model-integrity` 검사로 이 상태를 전달한다.

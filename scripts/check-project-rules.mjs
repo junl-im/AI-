@@ -148,8 +148,8 @@ await requireText('.github/workflows/ci.yml', [
   'CosyVoice Worker quality · Python 3.10',
   'working-directory: services/worker',
   'Run Worker tests',
-  'Check free-only boundary',
-  'Write empty static-host runtime configuration',
+  'Check free-only boundary', 'Check web toolchain manifest', 'Check installed web toolchain',
+  'Validate dependency tree', "node-version: '22.18.0'", 'Write empty static-host runtime configuration',
 ])
 await requireText('src/test/setup.ts', [
   'afterEach',
