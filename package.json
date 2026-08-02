@@ -50,7 +50,8 @@
     "quality:export-soak": "cd services/api && python -m scripts.run_export_soak",
     "quality:export-soak:wav": "cd services/api && python -m scripts.run_export_soak --formats wav",
     "quality:evidence": "node scripts/check-verification-evidence.mjs",
-    "quality:preflight": "node scripts/run-preflight.mjs"
+    "quality:preflight": "node scripts/run-preflight.mjs",
+    "locks:bootstrap:web": "npm run locks:refresh:npm && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run locks:check -- --component npm"
   },
   "engines": {
     "node": ">=22.12.0 <25",

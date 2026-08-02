@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak**
+현재 기준 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 4**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 14:20 KST**
+최종 갱신: **2026-08-02 15:49 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -493,6 +493,6 @@ CI Hotfix 4 테스트 규칙:
 ## 37. 0.9.3-beta.3 CI Hardening 2
 - preflight 전체 보고서, npm 공식 endpoint fallback·lock 복구, 구성요소별 lock 부분 커밋으로 npm 장애가 Python 결과와 성공 lock 보존을 막지 않는다.
 
-## 38. 0.9.3-beta.3 CI Hardening 3
-- 구형 lock selector는 누적 덮어쓰기 호환 shim으로 유지하고, Ruff I001 두 건을 정렬했다.
-- npm bootstrap은 응답 가능한 registry부터 사용하며 lock에 특정 registry tarball URL을 고정하지 않는다.
+## 38. 0.9.3-beta.3 CI Hardening 4
+- verification alias import를 Ruff canonical form으로 분리하고 workflow 중복 env 키를 제거했다.
+- 일반 CI의 npm 자동 bootstrap을 중단하고 `GENERATE_WEB_LOCK.cmd`로 검증 lock을 먼저 커밋한다.

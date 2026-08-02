@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 CI Hardening 4 · Committed npm lock gate and Ruff import fix
+
+- API verification의 일반 import와 alias import를 Ruff I001 기준대로 분리했습니다.
+- 일반 push·PR은 누락된 npm lock을 네트워크에서 자동 생성하지 않고 즉시 정확한 조치 방법을 안내합니다.
+- `GENERATE_WEB_LOCK.cmd`·`.sh`로 로컬에서 package-lock 생성, npm ci, 도구체인·전체 트리 검증을 한 번에 수행합니다.
+- workflow 중복 `env` 키를 제거하고 preflight가 canonical import와 local lock bootstrap 파일을 검사합니다.
+
 ## 0.9.3-beta.3 CI Hardening 3 · Overlay-safe preflight and registry probing
 
 - 누적 덮어쓰기에서 남는 구형 lock selector를 최신 호환 shim으로 덮어써 삭제 커밋 없이도 preflight가 복구됩니다.

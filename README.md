@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 3`
+- 버전: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 4`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -17,7 +17,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 진행 상태: SSE 우선, polling 자동 대체
 - 세션: IndexedDB 자동 저장과 SQLite 결과 복구
 - 배포: GitHub Pages 또는 Firebase Hosting Spark 정적 Web
-- CI: preflight 전체 진단, 구성요소별 lock 보존, 응답 가능한 npm registry 우선 선택
+- CI: preflight 전체 진단, 구성요소별 lock 보존, 커밋된 npm lock의 verify-only 실행
 
 ## 무료 실행
 
@@ -82,11 +82,10 @@ npm run hooks:install
 Volta에 동일하게 고정합니다. `vite-plugin-pwa 1.3.0`의 Vite 8 peer 선언과 전체 npm 트리를
 검사하며, 일반 CI는 검증된 lock이 있어야 `npm ci`와 `uv sync --locked`로 진행합니다.
 
-npm, API uv, Worker uv lock은 독립 작업에서 생성·검증합니다. npm registry 장애가 API·Worker
-결과를 가리지 않으며, 설치와 dependency tree를 통과한 lock만 SHA-256 증명과 함께 전달됩니다.
-main에서는 별도 최소 권한 작업이 검증된 세 lock만 자동 커밋하고, branch protection이 막으면
-artifact를 유지합니다. 강제 갱신은 `generate_lockfiles=true`를 사용합니다. 자세한 절차는
-`docs/LOCKFILE_BOOTSTRAP.md`를 따릅니다.
+일반 push·PR의 npm 작업은 커밋된 `package-lock.json`만 검증하며 registry에서 새 lock을 만들지
+않습니다. 최초 한 번은 Windows의 `GENERATE_WEB_LOCK.cmd` 또는 macOS·Linux의
+`GENERATE_WEB_LOCK.sh`로 생성·설치·트리 검증을 끝낸 뒤 GitHub Desktop으로 lock을 커밋합니다.
+API·Worker uv lock은 독립 작업을 유지하며 자세한 절차는 `docs/LOCKFILE_BOOTSTRAP.md`를 따릅니다.
 
 ## 검증된 로컬 모델 준비
 

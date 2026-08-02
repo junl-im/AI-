@@ -18,10 +18,8 @@ from app.schemas.verification import (
     SttProbeResponse,
     SttSegmentVerificationResponse,
 )
-from app.services.stt_evaluation import (
-    measure_stt as evaluate_stt,
-    regeneration_reasons,
-)
+from app.services.stt_evaluation import regeneration_reasons
+from app.services.stt_evaluation import measure_stt as evaluate_stt
 
 router = APIRouter()
 

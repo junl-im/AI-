@@ -11,11 +11,11 @@ API·Worker 품질 결과가 함께 가려지지 않으며, 각 품질 작업은
 
 ## 독립 생성과 검증
 
-- lock이 없거나 수동 `generate_lockfiles=true`이면 해당 component만 생성한다.
-- lock이 있으면 자동 갱신하지 않고 manifest 일치와 locked install을 검증한다.
-- npm은 cache-only 시도를 먼저 하고, 부족할 때만 bounded online retry를 수행한다.
-- npm 내부 재시도와 외부 재시도를 중첩하지 않으며 각 명령에는 hard timeout이 있다.
-- API와 Worker는 별도 `uv lock`, `uv lock --check`, `uv sync --locked` 경로를 사용한다.
+- 일반 push·PR에서 npm은 **커밋된 package-lock 검증만** 수행하며 누락 lock을 자동 생성하지 않는다.
+- 최초 npm lock은 `GENERATE_WEB_LOCK.cmd` 또는 `GENERATE_WEB_LOCK.sh`로 로컬에서 한 번 생성·검증한다.
+- 수동 Actions의 `generate_lockfiles=true`는 의도적인 원격 갱신 때만 사용한다.
+- lock이 있으면 manifest 일치, `npm ci`, 전체 dependency tree를 검증한다.
+- API와 Worker는 별도 `uv lock`, `uv lock --check`, `uv sync --locked` 경로를 유지한다.
 
 ## lock 증명
 
@@ -65,3 +65,10 @@ main push에서 검증된 세 component lock이 모두 준비되면 별도 `Comm
 - `omit-lockfile-registry-resolved=true`로 lock을 특정 registry tarball URL에 묶지 않습니다.
 - 누적 ZIP에서 남은 이전 selector 파일은 호환 shim으로 덮어쓰므로 GitHub Desktop 복사만으로 preflight가 복구됩니다.
 
+
+## CI Hardening 4
+
+- 반복된 npm registry bootstrap 실패를 일반 CI 경로에서 제거했습니다.
+- package-lock이 없으면 장시간 기다리지 않고 local bootstrap 파일을 안내하며 즉시 실패합니다.
+- Windows 사용자는 `GENERATE_WEB_LOCK.cmd`를 더블클릭하고, 성공 후 GitHub Desktop에서 `package-lock.json`을 Commit·Push합니다.
+- 로컬 bootstrap은 Node 22.18.0·npm 10.9.3, clean install, 도구체인과 전체 npm tree를 모두 확인합니다.

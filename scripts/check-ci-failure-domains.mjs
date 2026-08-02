@@ -13,8 +13,13 @@ for (const token of [
   'Commit available verified lockfiles · main only', 'contents: write',
   "needs.npm_lock.result == 'success'", "needs.api_lock.result == 'success'",
   "needs.worker_lock.result == 'success'", 'npm run quality:preflight',
-  'sorion-repository-preflight-${{ github.run_attempt }}',
+  'sorion-repository-preflight-${{ github.run_attempt }}', 'mode=missing',
+  'GENERATE_WEB_LOCK.cmd', 'Fail fast when package-lock is not committed',
 ]) if (!workflow.includes(token)) failures.push(`workflow 계약 누락: ${token}`)
+if (/FORCE_REFRESH.*\|\| ! -f package-lock\.json/s.test(workflow)) {
+  failures.push('일반 push에서 package-lock을 자동 생성하는 이전 bootstrap 조건이 남아 있습니다.')
+}
+if (workflow.includes('env:\n        env:')) failures.push('workflow에 중복 env 키가 있습니다.')
 for (const forbidden of [
   'needs: lockfiles', 'sorion-verified-lockfiles',
   'Commit verified lockfiles · main only', 'node scripts/verify-lock-proof.mjs all',

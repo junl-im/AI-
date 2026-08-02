@@ -73,10 +73,16 @@ jobs:
         env:
           FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
         run: |
-          if [[ "$FORCE_REFRESH" == "true" || ! -f package-lock.json ]]; then
+          if [[ "$FORCE_REFRESH" == "true" ]]; then
             echo 'mode=generate' >> "$GITHUB_OUTPUT"
-          else
+          elif [[ -f package-lock.json ]]; then
             echo 'mode=verify' >> "$GITHUB_OUTPUT"
+          else
+            echo 'mode=missing' >> "$GITHUB_OUTPUT"
+            {
+              echo 'package-lock.json is missing.'
+              echo 'Run GENERATE_WEB_LOCK.cmd once, then commit package-lock.json with GitHub Desktop.'
+            } > .sorion/lock-audit/npm/missing-lock.txt
           fi
       - name: Record npm registry diagnostics
         if: steps.mode.outputs.mode == 'generate'
@@ -93,6 +99,7 @@ jobs:
             curl --silent --show-error --location --head --max-time 15 https://registry.yarnpkg.com/firebase || true
           } 2>&1 | tee .sorion/lock-audit/npm/registry-diagnostics.log
       - name: Restore npm registry cache
+        if: steps.mode.outputs.mode != 'missing'
         uses: actions/cache/restore@v5
         with:
           path: ~/.npm
@@ -110,7 +117,7 @@ jobs:
           npm run locks:check -- --component npm
           npm run deps:ci
       - name: Save npm cache, including partial downloads
-        if: always()
+        if: always() && steps.mode.outputs.mode != 'missing'
         uses: actions/cache/save@v5
         with:
           path: ~/.npm
@@ -125,6 +132,12 @@ jobs:
           retention-days: 7
           include-hidden-files: true
           path: .sorion/lock-audit/npm
+      - name: Fail fast when package-lock is not committed
+        if: steps.mode.outputs.mode == 'missing'
+        run: |
+          echo '::error title=package-lock.json missing::Double-click GENERATE_WEB_LOCK.cmd, then commit package-lock.json with GitHub Desktop.'
+          cat .sorion/lock-audit/npm/missing-lock.txt
+          exit 1
       - name: Fail after preserving npm evidence
         if: steps.mode.outputs.mode == 'generate' && steps.generate.outcome == 'failure'
         run: |

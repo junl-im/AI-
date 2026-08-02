@@ -1,14 +1,14 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 3**
+결과 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 4**
 
-## CI Hardening 3
+## CI Hardening 4
 
-- 구형 lock selector 두 파일을 삭제 대상에서 호환 shim으로 전환해 누적 ZIP 덮어쓰기만으로도 preflight가 복구됩니다.
-- API `verification.py`와 `router.py`의 Ruff I001 import 정렬 오류를 수정했습니다.
-- npm lock 생성 전 registry 후보를 병렬 probe하고 응답 가능한 endpoint부터 사용합니다.
-- 공식 npm endpoint가 모두 불안정할 때만 Yarn 호환 registry를 마지막 fallback으로 사용합니다.
-- lock의 registry `resolved` URL을 생략해 이후 설치가 한 host에 고정되지 않도록 했습니다.
+- `verification.py`의 일반 import와 alias import를 Ruff 정렬 규칙대로 분리했습니다.
+- 일반 push·PR에서 누락 npm lock을 registry로 자동 생성하던 반복 실패 경로를 제거했습니다.
+- `GENERATE_WEB_LOCK.cmd`·`.sh`가 로컬에서 package-lock 생성, clean install, 도구체인·전체 트리 검증을 한 번에 수행합니다.
+- package-lock이 없으면 CI는 장시간 재시도하지 않고 생성 방법을 명확히 annotation으로 남깁니다.
+- workflow의 중복 `env` 키를 제거하고, import·lock bootstrap 계약을 preflight 재발 방지 규칙으로 고정했습니다.
 
 ## 완료
 
