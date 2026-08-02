@@ -1,26 +1,29 @@
-# SoriON AI 0.9.3-beta.2 CI Hardening Report
+# SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.2 · CI Failure-Domain Hardening & Selective STT Regeneration**
+결과 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak**
 
 ## 완료
 
-- npm, API uv, Worker uv lock을 독립 job으로 분리해 하나의 registry 장애가 전체 품질 결과를 가리지 않습니다.
-- cache-only 우선, 최대 2회 online retry, 명령 hard timeout으로 중첩 재시도와 장시간 정지를 제거했습니다.
-- lock과 manifest SHA-256 증명을 통과한 파일만 품질 job과 main 자동 커밋에 사용합니다.
-- 전역 권한은 read-only이며 lock 커밋과 Pages 배포에만 최소 쓰기 권한을 부여합니다.
-- 실기기 5개 프로필 × 10·30·60분의 측정 증거 진행률 API와 Quality 화면을 추가했습니다.
-- 서버 WAV를 Faster Whisper로 검수하고 CER·WER·핵심 토큰 기준에 실패한 문장 ID만 재생성합니다.
-- 문장별 재생성 횟수를 작업공간에 보존하며 기본 최대 2회 이후에는 자동 재생성을 차단합니다.
+- 장문 WAV 병합을 청크 스트리밍으로 바꿔 구간 전체와 긴 쉼을 한 번에 메모리에 올리지 않습니다.
+- WAV·SRT·VTT·MP3를 임시 파일로 완성한 뒤 최종 이름으로 교체하며 오류 시 부분 산출물을 삭제합니다.
+- FFmpeg에 hard timeout을 추가하고 ffprobe로 실제 MP3 컨테이너 길이를 측정합니다.
+- 10·30·60분 WAV·MP3 soak 6개 시나리오의 RTF, 메모리, 길이, 자막 드리프트를 JSONL로 기록합니다.
+- 선택 재생성 후 두 번째 STT 검수에서 같은 문장 ID의 전후 CER·WER와 핵심 토큰 개선량을 자동 저장합니다.
+- Quality Lab에서 STT 개선 기록과 Export soak 진행률을 표시하고, 장치 이름과 메모가 제거된 증거 JSON을 내려받습니다.
+- 기존 CI failure-domain 분리, lock SHA-256 proof, 최소 권한과 누적 삭제 차단을 유지합니다.
 
 ## 검증
 
-- API pytest 112개 통과
+- API pytest 117개 통과
 - Worker pytest 14개 통과
 - Python compileall 통과
+- TypeScript·TSX 145개 파일 parser 검사 통과
 - 프로젝트 규칙, 폐기 파일, Web manifest, free-only, engine blueprint, 모델 onboarding 검사 통과
-- GitHub Actions YAML, CI failure-domain, lock proof 손상 fixture와 네트워크 재시도 계약 검사 통과
-- TypeScript·TSX 144개 파일 parser 검사 통과
+- 합성 무음 10·30·60분 WAV·MP3 6개 시나리오 완료
+- WAV 길이·자막 드리프트 0ms, MP3 ffprobe 길이와 자막 차이 192ms 이내
 
-## 제한
+## 해석 제한
 
-현재 샌드박스는 npm registry에 연결할 수 없어 실제 lock 생성, `npm ci`, ESLint, TypeScript semantic typecheck, Vitest, Vite build는 GitHub Actions에서 최종 확인해야 합니다. 실제 장치 성능 수치와 Faster Whisper 모델 결과는 포함하지 않았습니다.
+합성 무음 soak는 파일 병합, FFmpeg, 컨테이너 길이와 자막 타임코드 안정성만 검증합니다. 실제 한국어 음질, CosyVoice 처리 속도, CUDA·MPS·모바일 메모리 성능을 증명하지 않습니다. 실제 장치·모델 증거는 `.sorion/quality`에 별도로 기록해야 합니다.
+
+현재 샌드박스에는 프로젝트 npm 의존성이 없어 ESLint, semantic TypeScript typecheck, Vitest, Vite build는 GitHub Actions에서 최종 확인해야 합니다.

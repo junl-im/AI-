@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { verifyTimelineSegments } from '../stt/verificationApi'
+import { recordSttRegenerationComparisons, verifyTimelineSegments } from '../stt/verificationApi'
 import type { WorkspaceMessage } from '../workspace/workspaceTypes'
 import type { useTimelineGeneration } from './useTimelineGeneration'
 
@@ -22,7 +22,12 @@ export function useSelectiveSttRegeneration({
     if (busy) return
     setBusy(true)
     try {
-      const report = await verifyTimelineSegments(timeline.blocks)
+      const blocksBeforeVerification = timeline.blocks
+      const report = await verifyTimelineSegments(blocksBeforeVerification)
+      const comparisonCount = await recordSttRegenerationComparisons(
+        blocksBeforeVerification,
+        report,
+      )
       timeline.applySttVerification(report.results)
       if (!report.regenerationSegmentIds.length) {
         appendMessage({
@@ -30,7 +35,7 @@ export function useSelectiveSttRegeneration({
           badge: report.blockedSegmentIds.length ? 'STT 한도 확인' : 'STT 검수 통과',
           text: report.blockedSegmentIds.length
             ? `${report.blockedSegmentIds.length}개 문장이 재생성 한도에 도달했습니다.`
-            : `${report.results.length}개 문장이 STT 기준을 통과했습니다.`,
+            : `${report.results.length}개 문장이 STT 기준을 통과했습니다.${comparisonCount ? ` 재생성 전후 ${comparisonCount}건의 개선 증거를 저장했습니다.` : ""}`,
         })
         return
       }

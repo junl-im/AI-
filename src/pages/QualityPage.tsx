@@ -1,18 +1,22 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
+import { VerificationEvidenceCard } from '../components/evaluation/VerificationEvidenceCard'
 import { QualityDiagnosticsCard } from '../components/evaluation/QualityDiagnosticsCard'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { QualityResultCard } from '../components/evaluation/QualityResultCard'
 import { TextPreviewCard } from '../components/evaluation/TextPreviewCard'
 import {
   compareQualityEngines,
+  downloadQualityEvidenceBundle,
   getDeviceBenchmarkSummary,
+  getQualityEvidenceSummary,
   getEvaluationSentences,
   getQualityDiagnostics,
   previewQualityText,
 } from '../quality/qualityApi'
 import type {
   DeviceBenchmarkSummary,
+  QualityEvidenceSummary,
   EvaluationSentence,
   QualityComparison,
   QualityDiagnostics,
@@ -32,6 +36,7 @@ const FALLBACK_SENTENCE: EvaluationSentence = {
 export function QualityPage() {
   const [diagnostics, setDiagnostics] = useState<QualityDiagnostics | null>(null)
   const [deviceSummary, setDeviceSummary] = useState<DeviceBenchmarkSummary | null>(null)
+  const [evidenceSummary, setEvidenceSummary] = useState<QualityEvidenceSummary | null>(null)
   const [sentences, setSentences] = useState<EvaluationSentence[]>([FALLBACK_SENTENCE])
   const [text, setText] = useState(FALLBACK_SENTENCE.text)
   const [selectedEngines, setSelectedEngines] = useState<string[]>([])
@@ -39,6 +44,7 @@ export function QualityPage() {
   const [comparison, setComparison] = useState<QualityComparison | null>(null)
   const [loadingDiagnostics, setLoadingDiagnostics] = useState(true)
   const [loadingDeviceSummary, setLoadingDeviceSummary] = useState(true)
+  const [loadingEvidenceSummary, setLoadingEvidenceSummary] = useState(true)
   const [loadingPreview, setLoadingPreview] = useState(false)
   const [comparing, setComparing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -72,6 +78,17 @@ export function QualityPage() {
     }
   }, [])
 
+  const refreshEvidenceSummary = useCallback(async () => {
+    setLoadingEvidenceSummary(true)
+    try {
+      setEvidenceSummary(await getQualityEvidenceSummary())
+    } catch {
+      setEvidenceSummary(null)
+    } finally {
+      setLoadingEvidenceSummary(false)
+    }
+  }, [])
+
   const refreshReviewCount = useCallback(() => {
     void listQualityReviews().then((items) => setReviewCount(items.length)).catch(() => undefined)
   }, [])
@@ -79,6 +96,7 @@ export function QualityPage() {
   useEffect(() => {
     void refreshDiagnostics()
     void refreshDeviceSummary()
+    void refreshEvidenceSummary()
     refreshReviewCount()
     void getEvaluationSentences().then((items) => {
       if (items.length) {
@@ -86,7 +104,7 @@ export function QualityPage() {
         setText(items[0].text)
       }
     }).catch(() => undefined)
-  }, [refreshDeviceSummary, refreshDiagnostics, refreshReviewCount])
+  }, [refreshDeviceSummary, refreshDiagnostics, refreshEvidenceSummary, refreshReviewCount])
 
   const comparableEngines = useMemo(
     () => diagnostics?.engines.filter((engine) => engine.ready && engine.mode !== 'mock') ?? [],
@@ -157,6 +175,13 @@ export function QualityPage() {
           summary={deviceSummary}
           loading={loadingDeviceSummary}
           onRefresh={() => void refreshDeviceSummary()}
+        />
+
+        <VerificationEvidenceCard
+          summary={evidenceSummary}
+          loading={loadingEvidenceSummary}
+          onRefresh={() => void refreshEvidenceSummary()}
+          onDownload={() => void downloadQualityEvidenceBundle()}
         />
 
         <QualityDiagnosticsCard

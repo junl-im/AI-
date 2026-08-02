@@ -44,6 +44,8 @@ class Settings(BaseSettings):
     allow_private_network: bool = True
     audit_log_path: str = ".sorion/audit/api.jsonl"
     device_benchmark_path: str = ".sorion/quality/device-benchmarks.jsonl"
+    stt_comparison_path: str = ".sorion/quality/stt-regeneration-comparisons.jsonl"
+    export_soak_path: str = ".sorion/quality/export-soak.jsonl"
     stt_directory: str = ".sorion/stt"
     stt_max_file_bytes: int = 100 * 1024 * 1024
     faster_whisper_model: str = "small"
@@ -79,6 +81,14 @@ class Settings(BaseSettings):
     @property
     def device_benchmark_file(self) -> Path:
         return Path(self.device_benchmark_path).expanduser().resolve()
+
+    @property
+    def stt_comparison_file(self) -> Path:
+        return Path(self.stt_comparison_path).expanduser().resolve()
+
+    @property
+    def export_soak_file(self) -> Path:
+        return Path(self.export_soak_path).expanduser().resolve()
 
     @property
     def stt_path(self) -> Path:

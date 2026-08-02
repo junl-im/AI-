@@ -92,3 +92,53 @@ export async function verifyTimelineSegments(
     processingSeconds: result.processing_seconds,
   }
 }
+
+
+export interface SttRegenerationComparisonRequest {
+  segment_id: string
+  reference_text: string
+  before_transcript: string
+  after_transcript: string
+  engine_id: string
+  model_id: string
+  device_profile: string
+}
+
+export function buildSttComparisonRequests(
+  blocks: TimelineBlock[],
+  report: SttBatchVerificationResult,
+): SttRegenerationComparisonRequest[] {
+  const previousById = new Map(
+    blocks.flatMap((block) => {
+      if (block.kind !== 'voice') return []
+      const verification = block.sttVerification
+      if (!verification || verification.regenerationAttempts < 1 || !verification.transcriptText) return []
+      return [[block.id, { text: block.text, transcript: verification.transcriptText }] as const]
+    }),
+  )
+  return report.results.flatMap((result) => {
+    const previous = previousById.get(result.segmentId)
+    if (!previous || previous.transcript === result.transcriptText) return []
+    return [{
+      segment_id: result.segmentId,
+      reference_text: previous.text,
+      before_transcript: previous.transcript,
+      after_transcript: result.transcriptText,
+      engine_id: report.engineId,
+      model_id: report.modelId,
+      device_profile: report.deviceProfile,
+    }]
+  })
+}
+
+export async function recordSttRegenerationComparisons(
+  blocks: TimelineBlock[],
+  report: SttBatchVerificationResult,
+): Promise<number> {
+  const requests = buildSttComparisonRequests(blocks, report)
+  const settled = await Promise.allSettled(requests.map((body) => apiRequest(
+    '/quality/stt/regeneration-comparisons',
+    { method: 'POST', body: JSON.stringify(body) },
+  )))
+  return settled.filter((item) => item.status === 'fulfilled').length
+}

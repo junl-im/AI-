@@ -20,6 +20,14 @@ def client(tmp_path_factory, monkeypatch):
         str(app_path / "device-benchmarks.jsonl"),
     )
     monkeypatch.setenv("SORION_STT_DIRECTORY", str(app_path / "stt"))
+    monkeypatch.setenv(
+        "SORION_STT_COMPARISON_PATH",
+        str(app_path / "stt-comparisons.jsonl"),
+    )
+    monkeypatch.setenv(
+        "SORION_EXPORT_SOAK_PATH",
+        str(app_path / "export-soak.jsonl"),
+    )
     get_settings.cache_clear()
     try:
         with TestClient(app) as test_client:

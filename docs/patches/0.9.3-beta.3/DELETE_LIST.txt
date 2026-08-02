@@ -1,0 +1,4 @@
+# Permanently retired by or before 0.9.3-beta.3
+public/sorion-icon.svg
+scripts/check-lock-mode.mjs
+scripts/resolve-lock-mode.mjs

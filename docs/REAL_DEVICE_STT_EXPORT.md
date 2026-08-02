@@ -1,6 +1,6 @@
 # 실기기 검증, STT 실측, 최종 Export
 
-현재 기준: `0.9.3-beta.2`
+현재 기준: `0.9.3-beta.3`
 
 ## 삭제 파일 재발 방지
 
@@ -53,3 +53,16 @@ WAV는 Python 표준 라이브러리만으로 생성한다. MP3는 로컬 `ffmpe
 ## 선택 재생성
 
 타임라인의 `STT 검수 · 실패만 재생성`은 완료된 서버 WAV만 보낸다. API는 CER 8%, WER 15%, 날짜·금액·퍼센트·단위·영문 오류를 기준으로 실패 ID를 고른다. Web은 해당 블록의 기존 job·track·audio 연결을 제거한 뒤 새 TTS job을 만든다. 재생성 횟수는 작업공간 세션에 보존되며 기본 최대 2회다. 한도 도달 블록은 `blocked`로 표시하고 자동 반복을 멈춘다.
+
+## beta.3 검증 증거와 장문 soak
+
+`POST /api/v1/quality/stt/regeneration-comparisons`는 같은 문장 ID의 재생성 전후 전사문을 비교해 CER·WER·핵심 토큰 개선량을 저장한다. `GET /api/v1/quality/evidence-summary`는 STT 개선 기록과 10·30·60분 WAV·MP3 soak 6개 시나리오를 반환한다.
+
+```bash
+cd services/api
+uv run python -m scripts.run_export_soak --minutes 10 30 60 --formats wav mp3
+```
+
+Export는 WAV와 긴 쉼을 청크 단위로 기록하고 임시 파일 완성 후 최종 이름으로 교체한다. 오류나 FFmpeg timeout이면 부분 WAV·MP3·자막을 삭제한다. soak 결과는 `.sorion/quality/export-soak.jsonl`에 저장되며 실제 음원은 기본 삭제된다.
+
+`GET /api/v1/quality/evidence-bundle`은 장치 이름과 메모를 기본 제거한다. 실제 음원, 모델 파일, 로컬 경로는 포함하지 않는다. 합성 무음 soak는 구조 검증이며 실제 음질·장치 성능 증거가 아니다.

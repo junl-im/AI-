@@ -276,3 +276,11 @@
 - 실기기 15개 시나리오의 증거 진행률을 API와 Quality 화면에서 확인한다.
 - Faster Whisper 일괄 검수 결과를 타임라인에 연결하고 실패한 문장만 제한 재생성한다.
 - 다음은 실제 장치 수치, 재생성 전후 개선율, 30·60분 Export soak다.
+
+## 0.9.3-beta.3 완료
+
+- STT 선택 재생성 전후 개선 증거 저장·요약·redacted JSON bundle
+- 장문 Export 청크 스트리밍, 원자적 파일 교체, FFmpeg timeout·부분 파일 정리
+- 10·30·60분 WAV·MP3 soak 6개 시나리오 실행기와 실제 컨테이너·자막 길이 검증
+- 다음: 실제 장치 15개 시나리오와 실제 Faster Whisper·CosyVoice 증거를 채워 RC gate를 통과
+

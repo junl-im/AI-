@@ -51,6 +51,8 @@ jobs:
         run: npm run quality:engine-blueprint
       - name: Check model onboarding
         run: npm run quality:model-onboarding
+      - name: Check verification evidence and export soak contracts
+        run: npm run quality:evidence
 
   npm_lock:
     name: npm lock · generate or verify

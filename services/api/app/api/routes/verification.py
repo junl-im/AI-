@@ -18,47 +18,10 @@ from app.schemas.verification import (
     SttProbeResponse,
     SttSegmentVerificationResponse,
 )
-from app.services.stt_metrics import character_error, critical_token_errors, word_error
+from app.services.stt_evaluation import measure_stt as evaluate_stt, regeneration_reasons
 
 router = APIRouter()
 
-
-def _measure(payload: SttMeasurementRequest) -> SttMeasurementResponse:
-    character = character_error(payload.reference_text, payload.transcript_text)
-    word = word_error(payload.reference_text, payload.transcript_text)
-    critical = critical_token_errors(payload.reference_text, payload.transcript_text)
-    critical_failed = any(item["error_count"] for item in critical.values())
-    realtime_factor = None
-    if payload.audio_duration_seconds and payload.processing_seconds:
-        realtime_factor = payload.processing_seconds / payload.audio_duration_seconds
-    return SttMeasurementResponse(
-        **payload.model_dump(),
-        character_error_rate=character.rate,
-        character_errors=character.distance,
-        character_reference_length=character.reference_length,
-        word_error_rate=word.rate,
-        word_errors=word.distance,
-        word_reference_length=word.reference_length,
-        critical_tokens=critical,
-        realtime_factor=realtime_factor,
-        needs_regeneration=character.rate > 0.08 or word.rate > 0.15 or critical_failed,
-    )
-
-
-def _regeneration_reasons(
-    measurement: SttMeasurementResponse,
-    character_threshold: float,
-    word_threshold: float,
-) -> list[str]:
-    reasons: list[str] = []
-    if measurement.character_error_rate > character_threshold:
-        reasons.append("character_error_rate")
-    if measurement.word_error_rate > word_threshold:
-        reasons.append("word_error_rate")
-    for category, metric in measurement.critical_tokens.items():
-        if metric.error_count:
-            reasons.append(f"critical_token:{category}")
-    return reasons
 
 
 def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkSummaryResponse:
@@ -135,7 +98,7 @@ async def summarize_device_benchmarks(request: Request) -> DeviceBenchmarkSummar
 
 @router.post("/stt/measure", response_model=SttMeasurementResponse)
 async def measure_stt(payload: SttMeasurementRequest) -> SttMeasurementResponse:
-    return _measure(payload)
+    return evaluate_stt(payload)
 
 
 @router.get("/stt/probe", response_model=SttProbeResponse)
@@ -153,7 +116,7 @@ async def probe_stt(request: Request) -> SttProbeResponse:
 
 
 @router.post("/stt/transcribe", response_model=SttMeasurementResponse)
-async def transcribe_and_measure(
+async def transcribe_andmeasure_stt(
     request: Request,
     audio: Annotated[UploadFile, File()],
     reference_text: Annotated[str, Form(min_length=1, max_length=20000)],
@@ -194,7 +157,7 @@ async def transcribe_and_measure(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="SOA-6203: STT 결과가 비어 있습니다.",
         )
-    return _measure(SttMeasurementRequest(
+    return measure_stt(SttMeasurementRequest(
         reference_text=reference_text,
         transcript_text=transcript,
         engine_id=adapter.probe().engine_id,
@@ -234,7 +197,7 @@ async def verify_stt_segments(
         transcribe_started = perf_counter()
         transcript, duration = await run_in_threadpool(adapter.transcribe, path)
         elapsed = perf_counter() - transcribe_started
-        measurement = _measure(SttMeasurementRequest(
+        measurement = evaluate_stt(SttMeasurementRequest(
             reference_text=segment.reference_text,
             transcript_text=transcript,
             engine_id=probe.engine_id,
@@ -243,7 +206,7 @@ async def verify_stt_segments(
             audio_duration_seconds=duration,
             processing_seconds=elapsed,
         ))
-        reasons = _regeneration_reasons(
+        reasons = regeneration_reasons(
             measurement,
             payload.character_error_threshold,
             payload.word_error_threshold,

@@ -3,7 +3,12 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
-const retiredPaths = ['public/sorion-icon.svg']
+const retiredPaths = [
+  'public/sorion-icon.svg',
+  'scripts/check-lock-mode.mjs',
+  'scripts/resolve-lock-mode.mjs',
+]
+const ignoredRetiredPaths = ['public/sorion-icon.svg']
 const failures = []
 
 async function exists(path) {
@@ -38,7 +43,7 @@ const hook = await readFile(`${root}/.githooks/pre-push`, 'utf8')
 const cleanup = await readFile(`${root}/scripts/remove-stale-brand-assets.mjs`, 'utf8')
 const patchScript = await readFile(`${root}/APPLY_PATCH.sh`, 'utf8')
 const deleteList = await readFile(
-  `${root}/docs/patches/0.9.3-beta.2/DELETE_LIST.txt`,
+  `${root}/docs/patches/0.9.3-beta.3/DELETE_LIST.txt`,
   'utf8',
 )
 if (!hook.includes('npm run quality:stale-files') || !hook.includes('npm run quality:rules')) {
@@ -47,10 +52,13 @@ if (!hook.includes('npm run quality:stale-files') || !hook.includes('npm run qua
 if (!cleanup.includes("'rm', '--cached', '--ignore-unmatch'")) {
   failures.push('cleanup:stale-brand가 Git 인덱스를 정리하지 않습니다.')
 }
-if (!patchScript.includes('apply-delete-list.mjs') || !deleteList.includes(retiredPaths[0])) {
-  failures.push('패치 적용기가 DELETE_LIST의 폐기 SVG를 실제 삭제하지 않습니다.')
+if (!patchScript.includes('apply-delete-list.mjs')) {
+  failures.push('패치 적용기가 DELETE_LIST를 실행하지 않습니다.')
 }
 for (const path of retiredPaths) {
+  if (!deleteList.includes(path)) failures.push(`DELETE_LIST에 누적 폐기 경로가 없습니다: ${path}`)
+}
+for (const path of ignoredRetiredPaths) {
   if (!ignore.split(/\r?\n/).includes(`/${path}`)) {
     failures.push(`.gitignore: /${path} 영구 차단 규칙이 없습니다.`)
   }

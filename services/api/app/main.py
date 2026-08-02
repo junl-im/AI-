@@ -18,6 +18,7 @@ from app.services.audit_log import AuditLogger
 from app.services.device_benchmark_store import DeviceBenchmarkStore
 from app.services.engine_orchestrator import EngineOrchestrator
 from app.services.job_manager import JobManager
+from app.services.quality_evidence_store import QualityEvidenceStore
 from app.services.rate_limit import FixedWindowRateLimiter
 from app.services.sqlite_job_store import SQLiteJobStore
 from app.services.tts_pipeline import TtsPipeline
@@ -59,6 +60,10 @@ async def lifespan(app: FastAPI):
     app.state.device_benchmark_store = DeviceBenchmarkStore(
         settings.device_benchmark_file
     )
+    app.state.stt_comparison_store = QualityEvidenceStore(
+        settings.stt_comparison_file
+    )
+    app.state.export_soak_store = QualityEvidenceStore(settings.export_soak_file)
     app.state.stt_adapter = FasterWhisperAdapter(
         settings.faster_whisper_model,
         settings.faster_whisper_device,
@@ -124,7 +129,7 @@ settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.9.3-beta.2",
+    version="0.9.3-beta.3",
     lifespan=lifespan,
 )
 app.add_middleware(

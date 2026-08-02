@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 · Verified Evidence & Long-form Export Soak
+
+- 장문 WAV 병합을 청크 스트리밍과 원자적 임시 파일 교체 방식으로 변경
+- FFmpeg hard timeout, 부분 산출물 정리와 ffprobe 실제 MP3 길이 측정 추가
+- 10·30·60분 WAV·MP3 soak 실행기와 자막 드리프트·RTF·메모리 기록 추가
+- 두 번째 STT 검수에서 같은 문장 ID의 재생성 전후 CER·WER·핵심 토큰 개선 증거 자동 저장
+- 장치 이름과 메모를 기본 제거하는 품질 증거 JSON 내보내기와 Quality Lab 진행률 카드 추가
+- 장문 Export·STT 증거·개인정보 제거·누적 폐기 경로 계약을 CI preflight에서 검사
+
 ## 0.9.3-beta.2 - 2026-08-02
 
 ### CI Failure-Domain Hardening

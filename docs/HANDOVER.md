@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.2 · CI Failure-Domain Hardening & Selective STT Regeneration**
+현재 기준 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 12:45 KST**
+최종 갱신: **2026-08-02 14:20 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -493,3 +493,7 @@ CI Hotfix 4 테스트 규칙:
 3. npm 장애는 Web lock에만 한정되고 preflight·API·Worker 결과는 독립적으로 확인된다.
 4. API 112개, Worker 14개, YAML·정적 게이트·lock proof 손상 fixture를 통과했다.
 5. 기능 목표는 실기기 측정, STT 개선율, 30·60분 Export soak를 그대로 유지한다.
+## 36. 0.9.3-beta.3 검증 증거와 장문 Export
+- WAV·긴 쉼은 65,536 frame 청크와 `.part` 원자 교체를 사용한다. 오류·FFmpeg timeout 시 부분 파일을 삭제하며 WAV 100ms, MP3 padding 250ms 이내를 요구한다.
+- 합성 무음 10·30·60분 WAV·MP3 soak는 구조 검증일 뿐 실제 음질·엔진 성능 증거가 아니다. 두 번째 STT 검수만 같은 segment ID의 전후 개선량을 JSONL에 저장한다.
+- 증거 bundle은 장치명·메모·음원·모델·로컬 경로를 제외한다. uv manifest는 유지하고 npm lock은 dependency 일치 때 루트 버전만 동기화한다.

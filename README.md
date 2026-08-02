@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.2 · CI Failure-Domain Hardening & Selective STT Regeneration`
+- 버전: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -72,7 +72,7 @@ npm run hooks:install
 
 ## 실기기·STT·Export
 
-실기기 측정 기록, Faster Whisper CER·WER 측정과 최종 WAV·MP3·SRT·VTT Export를 제공합니다.
+실기기 측정 기록, Faster Whisper 재생성 전후 CER·WER 증거와 10·30·60분 WAV·MP3·SRT·VTT soak 검증을 제공합니다.
 세부 계약과 제한은 [`docs/REAL_DEVICE_STT_EXPORT.md`](docs/REAL_DEVICE_STT_EXPORT.md)를 따릅니다.
 
 ## 재현 가능한 CI 전환

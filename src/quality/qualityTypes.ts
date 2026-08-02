@@ -96,3 +96,35 @@ export interface DeviceBenchmarkSummary {
   coverage: DeviceBenchmarkCoverage[]
   missingScenarios: string[]
 }
+
+
+export interface SttComparisonSummary {
+  totalRecords: number
+  improvedRecords: number
+  passedAfterRecords: number
+  averageCharacterErrorImprovement: number
+  averageWordErrorImprovement: number
+}
+
+export interface ExportSoakCoverage {
+  sampleMinutes: number
+  outputFormat: 'wav' | 'mp3'
+  recorded: boolean
+  latestStatus: 'ready' | 'warning' | 'failed' | null
+  latestRealtimeFactor: number | null
+  latestSubtitleDriftMs: number | null
+}
+
+export interface ExportSoakSummary {
+  totalRecords: number
+  readyRecords: number
+  warningRecords: number
+  failedRecords: number
+  coverage: ExportSoakCoverage[]
+  missingScenarios: string[]
+}
+
+export interface QualityEvidenceSummary {
+  stt: SttComparisonSummary
+  exportSoak: ExportSoakSummary
+}

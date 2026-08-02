@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.9.3-beta.2`
+현재 기준 버전: `0.9.3-beta.3`
 
 ## 목적
 
@@ -138,3 +138,10 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - [ ] 세 npm·uv lock artifact를 검토해 저장소에 커밋한다.
 - [ ] 실제 CUDA·MPS·CPU·Android·iOS 측정값을 채운다.
 - [ ] 30·60분 Export soak와 자막 싱크를 실기기로 검증한다.
+
+## 0.9.3-beta.3 검증 증거 Gate
+
+- RC 승격 전 실기기 5개 프로필 × 10·30·60분 15개 기록과 Export soak WAV·MP3 6개 기록을 채운다.
+- STT 재생성 전후 비교는 개선 여부와 재검수 통과를 같은 segment ID로 저장한다.
+- 합성 무음 soak는 파일 구조 검증이며 실제 음질·GPU·모바일 성능 승인 근거로 사용하지 않는다.
+- 증거 bundle은 기본 redacted 상태여야 하며 사용자 음원·모델·로컬 경로를 포함하면 출시를 차단한다.

@@ -101,3 +101,36 @@ def test_final_export_converts_mp3_with_local_ffmpeg(client):
         assert path is not None
         assert path.suffix == suffix
         assert path.stat().st_size > 0
+
+
+def test_final_export_removes_partial_outputs_on_format_mismatch(client):
+    store = client.app.state.audio_store
+    first = store.output_path(uuid4(), "wav")
+    second = store.output_path(uuid4(), "wav")
+    _write_wave(first, 0.1, sample_rate=8000)
+    _write_wave(second, 0.1, sample_rate=16000)
+    before = {path.name for path in store.root.iterdir()}
+
+    response = client.post(
+        "/api/v1/exports",
+        json={
+            "segments": [
+                {
+                    "kind": "voice",
+                    "text": "첫째",
+                    "audio_filename": first.name,
+                    "status": "ready",
+                },
+                {
+                    "kind": "voice",
+                    "text": "둘째",
+                    "audio_filename": second.name,
+                    "status": "ready",
+                },
+            ],
+        },
+    )
+
+    assert response.status_code == 422
+    assert {path.name for path in store.root.iterdir()} == before
+    assert not list(store.root.glob(".*.part.*"))

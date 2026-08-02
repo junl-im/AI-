@@ -7,6 +7,7 @@ import type {
   QualityDiagnostics,
   QualityResult,
   TextPreview,
+  QualityEvidenceSummary,
 } from './qualityTypes'
 
 interface ApiDiagnosticCheck {
@@ -183,4 +184,67 @@ export async function getDeviceBenchmarkSummary() {
     })),
     missingScenarios: result.missing_scenarios,
   }
+}
+
+
+export async function getQualityEvidenceSummary(): Promise<QualityEvidenceSummary> {
+  const result = await apiRequest<{
+    stt: {
+      total_records: number
+      improved_records: number
+      passed_after_records: number
+      average_character_error_improvement: number
+      average_word_error_improvement: number
+    }
+    export_soak: {
+      total_records: number
+      ready_records: number
+      warning_records: number
+      failed_records: number
+      coverage: Array<{
+        sample_minutes: number
+        output_format: 'wav' | 'mp3'
+        recorded: boolean
+        latest_status: 'ready' | 'warning' | 'failed' | null
+        latest_realtime_factor: number | null
+        latest_subtitle_drift_ms: number | null
+      }>
+      missing_scenarios: string[]
+    }
+  }>('/quality/evidence-summary')
+  return {
+    stt: {
+      totalRecords: result.stt.total_records,
+      improvedRecords: result.stt.improved_records,
+      passedAfterRecords: result.stt.passed_after_records,
+      averageCharacterErrorImprovement: result.stt.average_character_error_improvement,
+      averageWordErrorImprovement: result.stt.average_word_error_improvement,
+    },
+    exportSoak: {
+      totalRecords: result.export_soak.total_records,
+      readyRecords: result.export_soak.ready_records,
+      warningRecords: result.export_soak.warning_records,
+      failedRecords: result.export_soak.failed_records,
+      coverage: result.export_soak.coverage.map((item) => ({
+        sampleMinutes: item.sample_minutes,
+        outputFormat: item.output_format,
+        recorded: item.recorded,
+        latestStatus: item.latest_status,
+        latestRealtimeFactor: item.latest_realtime_factor,
+        latestSubtitleDriftMs: item.latest_subtitle_drift_ms,
+      })),
+      missingScenarios: result.export_soak.missing_scenarios,
+    },
+  }
+}
+
+export async function downloadQualityEvidenceBundle() {
+  const payload = await apiRequest<Record<string, unknown>>('/quality/evidence-bundle')
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = `sorion-quality-evidence-${new Date().toISOString().slice(0, 10)}.json`
+  anchor.click()
+  URL.revokeObjectURL(url)
 }

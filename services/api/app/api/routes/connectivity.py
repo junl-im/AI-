@@ -199,7 +199,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.9.3-beta.2",
+        version="0.9.3-beta.3",
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",
