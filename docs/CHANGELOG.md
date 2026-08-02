@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.9.3-beta.1 CI Hotfix 2 - 2026-08-02
+
+### CI Quality Findings Fix
+
+- API `main.py`의 엔진 import 순서를 Ruff 규칙에 맞게 정렬했습니다.
+- Vitest fetch mock의 호출 인자 타입을 함수 선언에서 보존해 TypeScript 오류를 제거했습니다.
+- 장문 생성 callback이 안정적인 `generateAll` 함수에 의존하도록 바꿔 React Hook 경고를 제거했습니다.
+- Artifact Action을 Node 24 네이티브 `upload-artifact@v6`, `download-artifact@v8`로 올리고 강제 런타임 환경 변수를 제거했습니다.
+- 프로젝트 규칙이 구형 Artifact Action과 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` 재유입을 차단합니다.
+
 ## 0.9.3-beta.1 CI Hotfix 1 - 2026-08-02
 
 ### Lockfile Bootstrap Deadlock Fix

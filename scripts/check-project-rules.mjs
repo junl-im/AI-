@@ -149,7 +149,12 @@ await requireText('.github/workflows/ci.yml', [
   'working-directory: services/worker',
   'Run Worker tests',
   'Check free-only boundary', 'Check web toolchain manifest', 'Check installed web toolchain',
-  'Validate full dependency tree', "node-version: '22.18.0'", 'Write empty static-host runtime configuration', 'Lockfiles · generate or verify', 'actions/upload-artifact@v4', 'actions/download-artifact@v4', 'npm ci --no-audit --no-fund', 'uv sync --locked', 'generate_lockfiles', 'Check lock bootstrap selector', 'Detect lockfile mode', 'Generate and audit missing or explicitly refreshed lockfiles', "steps.lock-mode.outputs.mode == 'generate'", "steps.lock-mode.outputs.mode == 'verify'", 'npm run locks:mode',
+  'Validate full dependency tree', "node-version: '22.18.0'", 'Write empty static-host runtime configuration', 'Lockfiles · generate or verify', 'actions/upload-artifact@v6', 'actions/download-artifact@v7', 'npm ci --no-audit --no-fund', 'uv sync --locked', 'generate_lockfiles', 'Check lock bootstrap selector', 'Detect lockfile mode', 'Generate and audit missing or explicitly refreshed lockfiles', "steps.lock-mode.outputs.mode == 'generate'", "steps.lock-mode.outputs.mode == 'verify'", 'npm run locks:mode',
+])
+await requireAbsent('.github/workflows/ci.yml', [
+  'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24',
+  'actions/upload-artifact@v4',
+  'actions/download-artifact@v4',
 ])
 await requireText('.nvmrc', ['22.18.0']); await requireText('.node-version', ['22.18.0'])
 await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['자동 bootstrap', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'npm ci', 'uv sync --locked'])

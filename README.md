@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.1 Device Verification, STT Measurement & Final Export`
+- 버전: `0.9.3-beta.1 CI Hotfix 2 · CI Quality Findings Fix`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter

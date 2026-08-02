@@ -1,7 +1,15 @@
-# SoriON AI 0.9.3-beta.1 Result Report
+# SoriON AI 0.9.3-beta.1 CI Hotfix 2 Result Report
 
-결과 버전: **0.9.3-beta.1 · Device Verification, STT Measurement & Final Export**
+결과 버전: **0.9.3-beta.1 CI Hotfix 2 · CI Quality Findings Fix**
 기준: **0.9.3-alpha.2 사용자 저장소 + alpha.3 lock 안정화 누적**
+
+
+## CI Hotfix 2 · 실제 품질 로그 수정
+
+- API `main.py` import 순서를 Ruff I001 기준으로 정렬했습니다.
+- fetch mock 타입을 `vi.fn` 구현 함수에서 보존해 TypeScript 호출 배열 오류를 제거했습니다.
+- 장문 생성 callback은 안정적인 `generateAll` 함수 자체에 의존해 React Hook 경고를 제거했습니다.
+- Artifact Action을 Node 24 네이티브 버전으로 교체하고 강제 런타임 환경 변수를 제거했습니다.
 
 ## CI Hotfix 1 · Lock 누락 자동 bootstrap
 

@@ -11,8 +11,9 @@ SoriON CI는 세 lock 파일이 없다는 이유만으로 일반 push·PR을 즉
 - API·Worker Python: `3.10`
 - uv: `0.11.32`
 
-`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`는 GitHub Action 자체의 실행 런타임이다. SoriON Web의
-설치·빌드는 `actions/setup-node`, `.nvmrc`, `.node-version`의 Node `22.18.0`을 사용한다.
+GitHub Action 자체는 Node 24 런타임을 선언한 `actions/upload-artifact@v6`와
+`actions/download-artifact@v7`을 사용한다. 강제 환경 변수로 구형 Action을 가리지 않으며,
+SoriON Web 설치·빌드는 `actions/setup-node`, `.nvmrc`, `.node-version`의 Node `22.18.0`을 사용한다.
 
 ## 자동 bootstrap 흐름
 

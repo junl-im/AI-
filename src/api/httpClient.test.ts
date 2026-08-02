@@ -60,7 +60,7 @@ describe('API connection context', () => {
 
 
   it('skips a failed saved API and promotes the next runtime candidate', async () => {
-    const fetchMock = vi.fn().mockImplementation((input: RequestInfo | URL) => {
+    const fetchMock = vi.fn((input: RequestInfo | URL): Promise<Response> => {
       const url = String(input)
       if (url.endsWith('sorion-runtime-config.json')) {
         return Promise.resolve(new Response(JSON.stringify({
@@ -89,9 +89,7 @@ describe('API connection context', () => {
 
     await expect(discoverApiBaseUrl('https://voice-a.example.com/api/v1'))
       .resolves.toMatchObject({ baseUrl: 'https://voice-b.example.com/api/v1' })
-    const requestedUrls = fetchMock.mock.calls.map(
-      (call: [RequestInfo | URL]) => String(call[0]),
-    )
+    const requestedUrls = fetchMock.mock.calls.map(([input]) => String(input))
     expect(requestedUrls.some((url) => url.startsWith(
       'https://voice-a.example.com/api/v1/health',
     ))).toBe(false)

@@ -381,3 +381,13 @@ Semantic Versioning을 사용한다.
 - 누락 lock은 Actions에서 자동 생성·감사해 같은 workflow에 전달
 - 기존 lock은 자동 재작성하지 않고 strict verify
 - 삭제 파일: 없음
+
+
+## 0.9.3-beta.1 CI Hotfix 2
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.3-beta.1-ci-hotfix-2-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-to-ci-hotfix-2-patch.zip`
+- 기준 버전: `0.9.3-beta.1 CI Hotfix 1`
+- 목적: Ruff I001, Web TypeScript mock 호출 타입, React Hook 의존성과 Node 20 Artifact Action 경고 수정
+- Artifact Action: `actions/upload-artifact@v6`, `actions/download-artifact@v7`
+- 삭제 파일: 없음

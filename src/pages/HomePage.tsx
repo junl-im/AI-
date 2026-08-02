@@ -120,6 +120,7 @@ export function HomePage() {
   const explicitWorkspaceActionRef = useRef(false)
   const engineCatalog = useEngineCatalog()
   const timeline = useTimelineGeneration()
+  const generateAllTimelineBlocks = timeline.generateAll
   const recoverBlocks = timeline.recoverBlocks
   const restoreProject = timeline.restoreProject
   const restoreSession = timeline.restoreSession
@@ -305,7 +306,7 @@ export function HomePage() {
       badge: backendStatus === 'degraded' ? '대체 엔진' : '순차 생성',
       text: `${pending.blockIds.length}개 대사 블록을 앞에서부터 생성합니다.`,
     })
-    const generated = await timeline.generateAll(pending.blockIds)
+    const generated = await generateAllTimelineBlocks(pending.blockIds)
     if (generated.length === 0) {
       appendMessage({
         role: 'system',
@@ -325,7 +326,14 @@ export function HomePage() {
     } catch {
       showNotice('음성은 완성됐지만 프로젝트 저장에는 실패했습니다.')
     }
-  }, [appendMessage, backendStatus, saveLongformProject, saveWorkspaceNow, showNotice, timeline.generateAll])
+  }, [
+    appendMessage,
+    backendStatus,
+    generateAllTimelineBlocks,
+    saveLongformProject,
+    saveWorkspaceNow,
+    showNotice,
+  ])
   useEffect(() => {
     if (!engineAvailable || !pendingGeneration || busy) return
     const pending = pendingGeneration

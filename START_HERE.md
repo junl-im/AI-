@@ -1,6 +1,6 @@
 # 곰같은여우 SoriON AI 시작 안내
 
-현재 버전: `0.9.3-beta.1 Device Verification, STT Measurement & Final Export`
+현재 버전: `0.9.3-beta.1 CI Hotfix 2 · CI Quality Findings Fix`
 
 ## 가장 먼저 읽을 파일
 

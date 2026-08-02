@@ -56,7 +56,6 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
 ## 5. 0.8.6에서 확정된 제작 UX
 ### 핵심 개념
 **장문 원고가 중심, 문장 타임라인이 편집 엔진**이다.
-
 기본 흐름:
 ```text
 긴 원고 붙여넣기
@@ -65,14 +64,12 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
 → 앞 블록부터 순차 생성
 → Dock에서 즉시 재생
 ```
-
 ### 초기 화면과 브랜드
 - 첫 화면은 제품 설명과 `장문 음성 스튜디오 시작` 동선에 집중한다.
 - 공식 SoriON 아이콘을 favicon, PWA, 첫 화면과 작업공간 상단에 통일한다.
 - 첫 화면에는 Dock과 플레이어를 렌더링하지 않는다.
 - 어느 작업 화면에서든 상단 아이콘·제품명을 누르면 첫 페이지로 이동한다.
 - 첫 브라우저 뒤로가기는 커스텀 종료 확인창을 띄우고 두 번째 뒤로가기는 즉시 이탈한다.
-
 ### 장문 제작 화면
 - 채팅형 composer와 대화 버블을 기본 제작 UI로 사용하지 않는다.
 - 최대 20,000자 원고 편집기, 일반 Enter 줄바꿈, Ctrl/⌘+Enter 제작을 제공한다.
@@ -80,21 +77,18 @@ STT 편집을 시작하고 더빙·성우 마켓·팟캐스트·실시간 변환
 - 생성 뒤에도 원고를 유지하고 타임라인만 새 제작본으로 교체한다.
 - 광고 톤, 밝은 톤, 느린 읽기와 숫자 발음 보정을 단순 옵션으로 제공한다.
 - 서버가 늦게 연결되면 사용자가 이미 누른 제작 요청을 보존해 연결 복구 뒤 자동 재개한다.
-
 ### 목소리와 타임라인
 - 목소리는 세로 라이브러리로 제공하고 프리뷰는 실제 API 준비 상태에서 생성한다.
 - 문장 사이에 기본 0.5초 쉼 블록을 넣는다.
 - 첫 ready 블록부터 Dock에 연결한다.
 - 순서 변경, 쉼 추가, 문장 분할·수정과 실패 블록 재시도를 제공한다.
 - 수정·분할 시 기존 음원은 무효화하고 block revision이 과거 결과 적용을 차단한다.
-
 ### 엔진 연결 UX
 - API 주소 입력과 엔진 수동 선택 화면을 만들지 않는다.
 - 공개 배포는 `SORION_PUBLIC_API_BASE_URLS` 복수 후보를 런타임 JSON과 build에 주입한다.
 - `*.github.io`는 정적 호스트이므로 same-origin `/api/v1`과 `:8443`을 탐색하지 않는다.
 - API·TTS·Worker·GPU 상태를 분리하고 `/connectivity`와 `/engines`는 같은 추천 엔진을 사용한다.
 - 연결 실패 주소는 제외하고 다음 HTTPS API를 승계하며 online·복귀·backoff에서 재탐색한다.
-
 ### Dock
 - 순서: `만들기 → 복제 → 품질 → 프로젝트`.
 - 음성이 없으면 메뉴만, 첫 ready 음성이 생기면 플레이어를 메뉴 위에 표시한다.
@@ -404,9 +398,7 @@ CI Hotfix 4 테스트 규칙:
    Ruff도 미설치다. CosyVoice 모델·GPU는 별도 준비 대상이다.
 9. 산출물: `SoriON-AI-0.9.0-full.zip`, `SoriON-AI-0.8.9-to-0.9.0-patch.zip`.
 10. 다음 예상 업데이트: `0.9.1 Free Local Model Onboarding & Korean Benchmark`.
-
 ## 27. 2026-08-02 · v0.9.1 무료 전용 런타임
-
 1. 결제 계정이 필요한 일반 TTS Adapter와 Secret 설정을 현재 제품 소스에서 제거했다.
 2. 일반 TTS 허용 목록은 CosyVoice·MeloTTS·System Voice이며 Mock은 테스트 전용이다.
 3. Firebase Hosting Spark와 GitHub Pages는 정적 Web만 제공한다.
@@ -414,7 +406,6 @@ CI Hotfix 4 테스트 규칙:
 5. `npm run quality:free-only`가 허용 목록과 Firebase 정적 경계를 검사한다.
 6. 다음 목표는 0.9.2 무료 로컬 모델 온보딩과 한국어 품질 벤치마크다.
 ## 28. 2026-08-02 · v0.9.2 한국어 음성 오케스트레이터
-
 1. 엔진을 많이 노출하는 제품이 아니라 목적에 따라 자동 조합하는 오케스트레이터로 확정했다.
 2. `/engines/catalog`가 채택·선택·벤치마크·외부 플러그인·연구·제외 결정을 제공한다.
 3. CosyVoice 3·MeloTTS·Faster Whisper·DeepFilterNet3·Rule Director를 코어 채택했다.
@@ -423,10 +414,7 @@ CI Hotfix 4 테스트 규칙:
 6. OpenVoice V2는 선택 Adapter, Seed-VC는 GPL 독립 프로세스 플러그인으로만 허용한다.
 7. Rule Director는 외부 LLM 없이 원고 용도·발음·호흡·속도·감정과 엔진 요구를 계산한다.
 8. 다음 목표는 실제 무료 Adapter 온보딩과 STT 기반 한국어 자동 검수다.
-
-
 ## 29. 2026-08-02 01:35 KST · v0.9.2 CI Hotfix 2
-
 1. 작업 일시: 2026-08-02 01:35 KST.
 2. 대상·기준: `0.9.2 CI Hotfix → 0.9.2 CI Hotfix 2`.
 3. 변경 내용: 누적 덮어쓰기 저장소에 남은 `public/sorion-icon.svg`를 삭제 목록에
@@ -444,9 +432,7 @@ CI Hotfix 4 테스트 규칙:
    `SoriON-AI-0.9.2-ci-hotfix-to-0.9.2-ci-hotfix-2-patch.zip`.
 10. 다음 예상 업데이트: Web·API·Worker CI가 모두 녹색인 것을 확인한 뒤
     `0.9.3 Free Local Pipeline Adapters & Korean Verification`을 진행한다.
-
 ## 30. 2026-08-02 10:20 KST · v0.9.3-alpha.1
-
 1. 작업 일시: 2026-08-02 10:20 KST.
 2. 대상·기준: `0.9.2 CI Hotfix 2 → 0.9.3-alpha.1`.
 3. 변경 내용: Worker 모델 매니페스트 schema, 라이선스 동의, 파일 크기·SHA-256,
@@ -462,9 +448,7 @@ CI Hotfix 4 테스트 규칙:
 9. 산출물: `SoriON-AI-0.9.3-alpha.1-full.zip`,
    `SoriON-AI-0.9.2-ci-hotfix-2-to-0.9.3-alpha.1-patch.zip`.
 10. 다음 예상 업데이트: Faster Whisper 한국어 검수와 전체 WAV·MP3·자막 Export.
-
 ## 31. 2026-08-02 10:22 KST · v0.9.3-alpha.3 lock 전환
-
 1. 대상·기준: `0.9.3-alpha.2 → 0.9.3-alpha.3`.
 2. Node 22.18.0, npm 10.9.3을 nvm·node-version·packageManager·Volta와 CI에 고정했다.
 3. 설치된 vite-plugin-pwa의 Vite 8 peer와 전체 npm ls 트리를 검사한다.
@@ -497,3 +481,14 @@ CI Hotfix 4 테스트 규칙:
 8. 제한·주의: 자동 생성 artifact를 커밋하기 전까지 다음 실행도 generate 모드다. 기존 lock이 잘못된 경우에는 자동 치유하지 않고 실패한다.
 9. 산출물: `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-full.zip`, `SoriON-AI-0.9.3-beta.1-to-0.9.3-beta.1-ci-hotfix-1-patch.zip`.
 10. 다음 예상 업데이트: artifact의 세 lock을 커밋해 verify-only CI를 확인한 뒤 beta.2 실기기 증거와 선택적 STT 재생성을 진행한다.
+## 34. 2026-08-02 12:31 KST · v0.9.3-beta.1 CI Hotfix 2
+1. 작업 일시: 2026-08-02 12:31 KST.
+2. 대상·기준: `0.9.3-beta.1 CI Hotfix 1 → CI Hotfix 2`.
+3. 변경 내용: API Ruff import 순서, Vitest fetch mock 호출 타입, 장문 생성 Hook 의존성을 수정하고 Artifact Action을 Node 24 네이티브 버전으로 교체했다.
+4. 변경 이유: 실제 GitHub Actions에서 Ruff I001, TypeScript callback 불일치, React Hook 경고와 Node 20 Action deprecation이 동시에 확인됐다.
+5. 영향 범위: API 진입점 import, Web API 테스트, HomePage 장문 callback, CI artifact 전달과 프로젝트 규칙.
+6. 주요 파일: `services/api/app/main.py`, `src/api/httpClient.test.ts`, `src/pages/HomePage.tsx`, `.github/workflows/ci.yml`, `scripts/check-project-rules.mjs`.
+7. 검증 결과: 정적 품질 게이트, API 109개, Worker 14개, Python compileall, 수정 TS/TSX 구문 검사를 통과했다.
+8. 알려진 제한과 주의사항: 현재 샌드박스에는 프로젝트 npm 의존성이 없어 공식 ESLint·TypeScript·Vitest·Vite 실행은 GitHub Actions가 최종 판정한다.
+9. 산출물: `SoriON-AI-0.9.3-beta.1-ci-hotfix-2-full.zip`, `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-to-ci-hotfix-2-patch.zip`.
+10. 다음 예상 업데이트: Web·API·Worker가 모두 녹색인지 확인한 뒤 `0.9.3-beta.2` 실기기 증거와 선택적 STT 재생성을 진행한다.

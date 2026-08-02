@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.1 · Device Verification, STT Measurement & Final Export`
+현재 기준: `0.9.3-beta.1 CI Hotfix 2 · CI Quality Findings Fix`
 
 ## 목표 버전
 
@@ -23,7 +23,7 @@
 
 ## 선행 조건과 위험
 
-- 첫 Actions 실행이 자동 생성한 npm·uv lock artifact를 검토·커밋하고 verify-only CI를 녹색으로 만든다.
+- CI Hotfix 2 적용 후 Web·API·Worker를 모두 녹색으로 만들고, 자동 생성한 npm·uv lock artifact를 검토·커밋해 verify-only 경로를 확인한다.
 - 실제 CosyVoice와 Faster Whisper 모델, FFmpeg, CUDA 또는 MPS 장치가 필요하다.
 - 모델·사용자 음성·실기기 개인 식별 정보는 저장소와 ZIP에 포함하지 않는다.
 - beta.1은 측정·Export 기능을 제공하지만 실제 장치 성능 수치를 보증하지 않는다.

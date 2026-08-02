@@ -8,10 +8,10 @@ from app.api.router import api_router
 from app.core.config import get_settings
 from app.engines.mock_tts import MockTtsEngine
 from app.engines.registry import engine_registry
+from app.engines.stt.faster_whisper import FasterWhisperAdapter
 from app.engines.tts.cosyvoice_worker_tts import CosyVoiceWorkerTtsEngine
 from app.engines.tts.melo_tts import MeloTtsEngine
 from app.engines.tts.system_tts import SystemTtsEngine
-from app.engines.stt.faster_whisper import FasterWhisperAdapter
 from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine
 from app.middleware.private_network_cors import PrivateNetworkCORSMiddleware
 from app.services.audit_log import AuditLogger
