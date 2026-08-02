@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Firebase Public Config + PWA Asset Budget + CI Hardening 6**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 2**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-02 16:58 KST**
 제품 소유·디자인: **곰같은여우**
@@ -495,5 +495,5 @@ CI Hotfix 4 테스트 규칙:
 ## 38. 0.9.3-beta.3 CI Hardening 5
 - verification은 STT 모듈을 한 번만 import해 Ruff I001 재발을 제거했다.
 - 누락 npm lock은 검증된 CI bootstrap으로 복구하고 Firebase SDK는 browser ESM 런타임 로드로 npm 그래프에서 제거했다.
-## 39. 0.9.3-beta.3 CI Hardening 6
-- Firebase 공개 Web 설정과 프로젝트 alias를 연결하고 Firestore·Storage를 기본 차단했으며, PWA 로고를 약 1.01MB로 최적화해 1.5MiB 예산 검사로 재발을 막았다.
+## 39. 0.9.3-beta.3 Engine Heartbeat 2
+- 녹색 CI 기준을 유지하며 카카오 WebView 로컬 엔진 제한, 재생 버튼 자동 적용·재생, Browser/System/Melo 프리셋 운율과 CosyVoice 프리셋 WAV 라우팅을 연결했다.

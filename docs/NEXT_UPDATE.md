@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Firebase Public Config + PWA Asset Budget + CI Hardening 6`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 2`
 
 ## 목표 버전
 
@@ -12,7 +12,8 @@
 2. 실제 Faster Whisper 모델로 선택 재생성 전후 CER·WER와 핵심 토큰 개선율을 기록한다.
 3. `npm run quality:export-soak`로 10·30·60분 WAV·MP3·SRT·VTT를 실행하고 6개 시나리오를 모두 통과시킨다.
 4. CI bootstrap 또는 선택적 로컬 복구로 생성·검증한 package-lock과 API·Worker uv lock을 저장소에 고정한다.
-5. CosyVoice 모델은 병행 설치, 동일 평가 세트, canary, 한 릴리스 rollback 조건을 충족한 경우에만 기본값을 바꾼다.
+5. CosyVoice 프리셋별 기준 음성 3종을 동의·해시·평가 세트와 함께 검증한 뒤 canary와 한 릴리스 rollback 조건으로 기본값을 바꾼다.
+6. 모바일 실제 기기에서 카카오톡 WebView → 외부 브라우저 전환과 Browser Speech 대체를 Android·iOS 각각 확인한다.
 
 ## 출시 차단 조건
 

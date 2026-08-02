@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 from app.engines.base import TtsEngine
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest, TtsSynthesisResponse
+from app.services.voice_presets import get_voice_preset
 from app.storage.audio_store import AudioStore
 
 
@@ -111,8 +112,9 @@ class SystemSpeechAdapter:
 
     async def _espeak(self, request: TtsSynthesisRequest, output_path: Path) -> None:
         assert self.backend is not None
-        speed = max(80, min(360, round(175 * request.speed)))
-        pitch = max(0, min(99, 50 + request.pitch * 3))
+        preset = get_voice_preset(request.voice_id)
+        speed = max(80, min(360, round(175 * request.speed * preset.rate_multiplier)))
+        pitch = max(0, min(99, round(50 + (request.pitch + preset.pitch_offset) * 3)))
         command = [
             self.backend.executable,
             "-v",
@@ -130,7 +132,11 @@ class SystemSpeechAdapter:
     async def _macos(self, request: TtsSynthesisRequest, output_path: Path) -> None:
         assert self.backend is not None
         aiff_path = output_path.with_suffix(".aiff")
-        words_per_minute = max(90, min(360, round(180 * request.speed)))
+        preset = get_voice_preset(request.voice_id)
+        words_per_minute = max(
+            90,
+            min(360, round(180 * request.speed * preset.rate_multiplier)),
+        )
         try:
             await self._run([
                 self.backend.executable,
@@ -159,7 +165,9 @@ class SystemSpeechAdapter:
         script = Path(__file__).with_name("scripts") / "windows_speech.ps1"
         text_path = output_path.with_suffix(".txt")
         text_path.write_text(request.text, encoding="utf-8")
-        rate = max(-10, min(10, round((request.speed - 1) * 8)))
+        preset = get_voice_preset(request.voice_id)
+        effective_speed = request.speed * preset.rate_multiplier
+        rate = max(-10, min(10, round((effective_speed - 1) * 8)))
         try:
             await self._run([
                 self.backend.executable,
@@ -177,6 +185,8 @@ class SystemSpeechAdapter:
                 str(rate),
                 "-VoiceName",
                 self.backend.voice,
+                "-VoicePreset",
+                preset.id,
             ])
         finally:
             text_path.unlink(missing_ok=True)
@@ -257,7 +267,8 @@ class SystemTtsEngine(TtsEngine):
             audio_url=f"/api/v1/audio/{output_path.name}",
             estimated_duration_seconds=round(duration, 1),
             message=(
-                "기기에 설치된 한국어 시스템 음성으로 WAV를 생성했습니다. "
+                f"{get_voice_preset(request.voice_id).display_name} 프리셋을 "
+                "기기의 한국어 시스템 음성에 적용해 WAV를 생성했습니다. "
                 "AI 모델 음성은 아닙니다."
             ),
         )

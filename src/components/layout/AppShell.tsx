@@ -5,6 +5,7 @@ import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
 import { useAppStore } from '../../store/useAppStore'
 import { LinkedPlayerDock } from '../navigation/LinkedPlayerDock'
 import { ExitConfirmDialog } from '../ui/ExitConfirmDialog'
+import { InAppBrowserEngineNotice } from './InAppBrowserEngineNotice'
 import { NoticeToast } from '../ui/NoticeToast'
 import { BrandMasthead } from './BrandMasthead'
 import { CompactWorkspaceHeader } from './CompactWorkspaceHeader'
@@ -27,6 +28,7 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <div className={workspaceEntered ? 'soa-app-root is-editor' : 'soa-app-root is-landing'}>
       {workspaceEntered ? <CompactWorkspaceHeader /> : <BrandMasthead />}
+      {workspaceEntered ? <InAppBrowserEngineNotice /> : null}
       <div className={shellClassName}>
         <section className="soa-primary-frame">{children}</section>
       </div>

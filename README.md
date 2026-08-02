@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Firebase Public Config + PWA Asset Budget + CI Hardening 6`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 2 · Kakao Browser Guard + Auto Apply/Play + Real Preset Routing`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -20,6 +20,9 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - CI: preflight 전체 진단, 구성요소별 lock 보존, 누락 npm lock의 검증된 자동 bootstrap
 - Firebase: `device-streaming-96b2272c` Web Auth 공개 설정 연결, Firestore·Storage 기본 전면 차단
 - PWA: 1024px 최적화 로고와 1.5MiB 사전 캐시 예산 검사
+- 모바일: 카카오톡 WebView를 감지해 로컬 PC 엔진 제한과 외부 브라우저 전환을 즉시 안내
+- 재생 UX: 보이는 재생 버튼이 선택값을 자동 적용하고 생성·선택된 음성을 즉시 재생
+- 프리셋: Browser/System/Melo 운율 프로필과 CosyVoice 프리셋별 기준 음원 라우팅
 
 ## 무료 실행
 
@@ -38,6 +41,8 @@ npm run dev:free
 
 Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크톱 정적 Web은 사용자 PC의
 `127.0.0.1:8000` 무료 API를 자동 탐색하고, 모바일은 기기 내장 Browser Speech를 자동 사용합니다.
+카카오톡 인앱 브라우저에서 연 링크는 휴대폰 자체 WebView이므로 PC의 localhost 엔진에 연결하지 않고,
+브라우저 음성을 즉시 사용하면서 외부 브라우저 전환과 공개 HTTPS Voice API 사용을 안내합니다.
 사용자에게 API 주소나 엔진 선택 화면을 보여주지 않습니다.
 
 ## 주요 문서

@@ -19,6 +19,7 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
         reference_path: str,
         profile_id: str = "sorion-korean-reference",
         poll_interval_seconds: float = 0.2,
+        preset_directory: str = "",
     ) -> None:
         self.store = store
         self.worker = worker
@@ -27,16 +28,21 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
         )
         self.profile_id = profile_id.strip() or "sorion-korean-reference"
         self.poll_interval_seconds = max(0.05, poll_interval_seconds)
+        self.preset_directory = (
+            Path(preset_directory).expanduser().resolve() if preset_directory else None
+        )
 
     def info(self) -> EngineInfo:
         worker_info = self.worker.info()
         reference_ready = bool(self.reference_path and self.reference_path.is_file())
-        ready = worker_info.ready and reference_ready
+        preset_ready = bool(self._available_preset_references())
+        ready = worker_info.ready and (reference_ready or preset_ready)
         if not worker_info.ready:
             reason = worker_info.reason
-        elif not reference_ready:
+        elif not reference_ready and not preset_ready:
             reason = (
-                "SORION_COSYVOICE_TTS_REFERENCE_PATH에 동의받은 한국어 기준 음성을 "
+                "SORION_COSYVOICE_TTS_REFERENCE_PATH 또는 "
+                "SORION_COSYVOICE_PRESET_DIRECTORY에 동의받은 한국어 기준 음성을 "
                 "설정하면 일반 TTS로 자동 등록됩니다."
             )
         else:
@@ -61,14 +67,35 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             streaming=False,
         )
 
+    def _available_preset_references(self) -> list[Path]:
+        if self.preset_directory is None or not self.preset_directory.is_dir():
+            return []
+        return [
+            path
+            for voice_id in ("sori-warm", "on-clear", "dam-calm")
+            if (path := self.preset_directory / f"{voice_id}.wav").is_file()
+        ]
+
+    def _reference_for(self, voice_id: str) -> tuple[Path, str, bool]:
+        if self.preset_directory is not None:
+            preset_path = self.preset_directory / f"{voice_id}.wav"
+            if preset_path.is_file():
+                return preset_path, f"{self.profile_id}-{voice_id}", True
+        if self.reference_path is not None and self.reference_path.is_file():
+            return self.reference_path, self.profile_id, False
+        raise RuntimeError(
+            f"{voice_id} 프리셋 기준 음성과 기본 CosyVoice 기준 음성이 없습니다."
+        )
+
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:
         if request.output_format != "wav":
             raise ValueError("CosyVoice Worker 일반 TTS는 현재 WAV만 지원합니다.")
-        if not self.info().ready or self.reference_path is None:
+        if not self.info().ready:
             raise RuntimeError(
                 self.info().reason
                 or "CosyVoice Worker 일반 TTS가 준비되지 않았습니다."
             )
+        reference_path, profile_id, preset_applied = self._reference_for(request.voice_id)
 
         started = time.perf_counter()
         local_job_id = request.job_id or uuid4()
@@ -76,9 +103,9 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
         output_path = self.store.output_path(UUID(str(local_job_id)), "wav")
         try:
             created = await self.worker.create_job(
-                self.profile_id,
+                profile_id,
                 request.text,
-                self.reference_path,
+                reference_path,
             )
             worker_job_id = str(created.get("id") or "")
             if not worker_job_id:
@@ -113,7 +140,11 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             engine_mode="ai",
             audio_url=f"/api/v1/audio/{output_path.name}",
             estimated_duration_seconds=round(duration, 1),
-            message="SoriON CosyVoice 한국어 기준 음색으로 WAV를 생성했습니다.",
+            message=(
+                f"{request.voice_id} 전용 기준 음색으로 WAV를 생성했습니다."
+                if preset_applied
+                else "SoriON CosyVoice 기본 한국어 기준 음색으로 WAV를 생성했습니다."
+            ),
             processing_ms=processing_ms,
             file_size_bytes=output_path.stat().st_size,
             realtime_factor=round((processing_ms / 1000) / max(duration, 0.001), 3),

@@ -10,13 +10,46 @@ function releaseTrack(track: PlayerTrack | undefined) {
   URL.revokeObjectURL(track.audio.url)
 }
 
+function createTrack(audio: GeneratedAudio, title: string): PlayerTrack {
+  return {
+    id: createRandomId(),
+    title,
+    audio,
+    createdAt: new Date().toISOString(),
+  }
+}
+
+function appendTrack(
+  state: PlayerState,
+  track: PlayerTrack,
+  autoplay: boolean,
+): Pick<PlayerState, 'queue' | 'currentTrackId' | 'playRequestId'> {
+  const nextQueue = [...state.queue, track]
+  const overflow = Math.max(0, nextQueue.length - MAX_QUEUE_SIZE)
+  nextQueue.slice(0, overflow).forEach(releaseTrack)
+  const queue = nextQueue.slice(overflow)
+  const currentTrackId = autoplay
+    ? track.id
+    : queue.some((item) => item.id === state.currentTrackId)
+      ? state.currentTrackId
+      : queue[0]?.id ?? null
+  return {
+    queue,
+    currentTrackId,
+    playRequestId: autoplay ? state.playRequestId + 1 : state.playRequestId,
+  }
+}
+
 export interface PlayerState {
   queue: PlayerTrack[]
   currentTrackId: string | null
+  playRequestId: number
   repeatMode: RepeatMode
   playbackRate: number
   enqueue: (audio: GeneratedAudio, title?: string) => string
+  enqueueAndPlay: (audio: GeneratedAudio, title?: string) => string
   select: (trackId: string) => void
+  selectAndPlay: (trackId: string) => void
   remove: (trackId: string) => void
   clearQueue: () => void
   selectNext: () => string | null
@@ -28,34 +61,30 @@ export interface PlayerState {
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   queue: [],
   currentTrackId: null,
+  playRequestId: 0,
   repeatMode: 'off',
   playbackRate: 1,
   enqueue: (audio, title = 'SoriON 생성 음성') => {
-    const id = createRandomId()
-    const track: PlayerTrack = {
-      id,
-      title,
-      audio,
-      createdAt: new Date().toISOString(),
-    }
-    set((state: PlayerState) => {
-      const nextQueue = [...state.queue, track]
-      const overflow = Math.max(0, nextQueue.length - MAX_QUEUE_SIZE)
-      nextQueue.slice(0, overflow).forEach(releaseTrack)
-      const queue = nextQueue.slice(overflow)
-      const currentTrackId = queue.some((item) => item.id === state.currentTrackId)
-        ? state.currentTrackId
-        : queue[0]?.id ?? null
-      return { queue, currentTrackId }
-    })
-    return id
+    const track = createTrack(audio, title)
+    set((state) => appendTrack(state, track, false))
+    return track.id
   },
-  select: (currentTrackId) => set((state: PlayerState) => (
+  enqueueAndPlay: (audio, title = 'SoriON 생성 음성') => {
+    const track = createTrack(audio, title)
+    set((state) => appendTrack(state, track, true))
+    return track.id
+  },
+  select: (currentTrackId) => set((state) => (
     state.queue.some((track) => track.id === currentTrackId)
       ? { currentTrackId }
       : state
   )),
-  remove: (trackId) => set((state: PlayerState) => {
+  selectAndPlay: (currentTrackId) => set((state) => (
+    state.queue.some((track) => track.id === currentTrackId)
+      ? { currentTrackId, playRequestId: state.playRequestId + 1 }
+      : state
+  )),
+  remove: (trackId) => set((state) => {
     const index = state.queue.findIndex((track) => track.id === trackId)
     if (index < 0) return state
     releaseTrack(state.queue[index])
@@ -66,7 +95,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
     return { queue, currentTrackId }
   }),
-  clearQueue: () => set((state: PlayerState) => {
+  clearQueue: () => set((state) => {
     state.queue.forEach(releaseTrack)
     return { queue: [], currentTrackId: null }
   }),
@@ -90,7 +119,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set({ currentTrackId: previous.id })
     return previous.id
   },
-  cycleRepeatMode: () => set((state: PlayerState) => ({
+  cycleRepeatMode: () => set((state) => ({
     repeatMode: state.repeatMode === 'off'
       ? 'all'
       : state.repeatMode === 'all'

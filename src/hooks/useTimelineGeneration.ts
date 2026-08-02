@@ -46,6 +46,7 @@ export function useTimelineGeneration() {
   const controllers = useRef(new Map<string, AbortController>())
   const timers = useRef(new Map<string, number>())
   const enqueue = usePlayerStore((state) => state.enqueue)
+  const enqueueAndPlay = usePlayerStore((state) => state.enqueueAndPlay)
   const removeTrack = usePlayerStore((state) => state.remove)
   const commit = useCallback((updater: BlocksUpdater) => {
     const next = updater(blocksRef.current)
@@ -91,8 +92,6 @@ export function useTimelineGeneration() {
         ])
     return staged.filter((block) => block.kind === 'voice').map((block) => block.id)
   }, [commit])
-
-
   const addVoiceBlock = useCallback((
     options: TimelineGenerationOptions,
     text = '',
@@ -101,7 +100,6 @@ export function useTimelineGeneration() {
     commit((current) => [...current, block])
     return block.id
   }, [commit])
-
   const pollProgress = useCallback((
     blockId: string,
     jobId: string,
@@ -130,15 +128,14 @@ export function useTimelineGeneration() {
       if (!streamed && !signal.aborted) void poll()
     })
   }, [updateVoiceBlock])
-
   const runBlock = useCallback(async (
     blockId: string,
     allowSynthesis = true,
+    autoplay = false,
   ): Promise<GeneratedAudio | null> => {
     if (controllers.current.has(blockId)) return null
     const block = blocksRef.current.find((item) => item.id === blockId)
     if (!block || block.kind !== 'voice') return null
-
     const revision = block.revision
     const controller = new AbortController()
     controllers.current.set(blockId, controller)
@@ -147,7 +144,6 @@ export function useTimelineGeneration() {
       { status: 'generating', progress: 6, error: null },
       revision,
     )
-
     const request: TtsSynthesisRequest = {
       text: block.text,
       voiceId: block.voiceId,
@@ -158,11 +154,9 @@ export function useTimelineGeneration() {
       engineId: block.engineId,
       normalizeText: block.normalizeText,
     }
-
     try {
       let jobId = block.jobId
       let result: TtsSynthesisResult | null = null
-
       if (jobId) {
         try {
           const progress = await getSpeechProgress(jobId, controller.signal)
@@ -198,7 +192,6 @@ export function useTimelineGeneration() {
           else throw error
         }
       }
-
       if (!result && !allowSynthesis) {
         updateVoiceBlock(blockId, {
           status: 'queued',
@@ -207,7 +200,6 @@ export function useTimelineGeneration() {
         }, revision)
         return null
       }
-
       if (!result) {
         jobId = createRandomId()
         updateVoiceBlock(blockId, { jobId }, revision)
@@ -255,7 +247,10 @@ export function useTimelineGeneration() {
           },
         }
       }
-      const trackId = enqueue(audio, `${block.voiceName} · ${block.text.slice(0, 22)}`)
+      const trackTitle = `${block.voiceName} · ${block.text.slice(0, 22)}`
+      const trackId = autoplay
+        ? enqueueAndPlay(audio, trackTitle)
+        : enqueue(audio, trackTitle)
       updateVoiceBlock(blockId, {
         status: 'ready',
         progress: 100,
@@ -284,10 +279,14 @@ export function useTimelineGeneration() {
         stopPolling(blockId)
       }
     }
-  }, [enqueue, pollProgress, stopPolling, updateVoiceBlock])
+  }, [enqueue, enqueueAndPlay, pollProgress, stopPolling, updateVoiceBlock])
 
   const generateBlock = useCallback(
-    (blockId: string) => runBlock(blockId, true),
+    (blockId: string) => runBlock(blockId, true, false),
+    [runBlock],
+  )
+  const retryBlock = useCallback(
+    (blockId: string) => runBlock(blockId, true, true),
     [runBlock],
   )
 
@@ -484,7 +483,7 @@ export function useTimelineGeneration() {
     generateAll,
     applySttVerification,
     regenerateBlocks,
-    retryBlock: generateBlock,
+    retryBlock,
     moveBlock,
     reorderBlock,
     updateText,

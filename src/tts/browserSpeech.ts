@@ -1,4 +1,5 @@
 import type { EngineInfo, TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
+import { getVoicePreset } from './voicePresets'
 
 export const BROWSER_SPEECH_ENGINE_ID = 'browser-speech'
 
@@ -65,7 +66,10 @@ export function createBrowserSpeechResult(
     engineId: BROWSER_SPEECH_ENGINE_ID,
     engineMode: 'browser',
     audioUrl: null,
-    estimatedDurationSeconds: estimateBrowserSpeechDuration(request.text, request.speed),
+    estimatedDurationSeconds: estimateBrowserSpeechDuration(
+      request.text,
+      createBrowserSpeechPlayback(request).rate,
+    ),
     message: '브라우저 내장 한국어 음성으로 재생합니다. AI 음색·WAV 다운로드는 공개 Voice API 연결 후 사용할 수 있습니다.',
     normalizedText: request.text,
     segmentCount: 1,
@@ -79,12 +83,13 @@ export function createBrowserSpeechResult(
 }
 
 export function createBrowserSpeechPlayback(request: TtsSynthesisRequest): BrowserSpeechPlayback {
+  const preset = getVoicePreset(request.voiceId)
   return {
     text: request.text,
     lang: 'ko-KR',
-    rate: Math.min(2, Math.max(0.5, request.speed)),
-    pitch: Math.min(2, Math.max(0, 1 + request.pitch / 12)),
-    voiceId: request.voiceId,
+    rate: Math.min(2, Math.max(0.5, request.speed * preset.rateMultiplier)),
+    pitch: Math.min(2, Math.max(0, 1 + (request.pitch + preset.pitchOffset) / 12)),
+    voiceId: preset.id,
   }
 }
 
@@ -101,7 +106,12 @@ export function selectBrowserSpeechVoice(
   const korean = voices.filter((voice) => voice.lang.toLowerCase().startsWith('ko'))
   const candidates = korean.length > 0 ? korean : voices
   if (candidates.length === 0) return null
-  return candidates[stableVoiceIndex(voiceId, candidates.length)] ?? candidates[0]
+  const preset = getVoicePreset(voiceId)
+  const preferred = candidates.find((voice) => {
+    const identity = `${voice.name} ${voice.voiceURI}`.toLowerCase()
+    return preset.preferredVoiceTokens.some((token) => identity.includes(token))
+  })
+  return preferred ?? candidates[stableVoiceIndex(preset.id, candidates.length)] ?? candidates[0]
 }
 
 export function createBrowserSpeechUtterance(

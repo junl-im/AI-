@@ -1,0 +1,7 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 1 -> Engine Heartbeat 2
+
+- KakaoTalk in-app browser detection and external-browser guidance
+- apply-and-play player requests across presets, settings, timeline and queue
+- browser/system/Melo preset prosody and CosyVoice preset reference routing
+- frontend and backend regression tests
+- no deleted files

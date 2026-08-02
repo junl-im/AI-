@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 2 · Kakao guard, auto apply/play and preset routing
+
+- 카카오톡 인앱 브라우저를 감지해 PC localhost 엔진 제한, 브라우저 음성 대체와 외부 브라우저 전환을 즉시 안내합니다.
+- 프리셋·설정·타임라인·대기열의 모든 재생 버튼이 선택값을 먼저 적용하고 생성 또는 선택된 음성을 즉시 재생합니다.
+- Browser Speech, System Voice와 MeloTTS에 프리셋별 운율을 적용하고 가능한 경우 서로 다른 한국어 시스템 음성을 선택합니다.
+- CosyVoice는 `voice-presets`의 프리셋별 WAV를 실제 Worker 기준 음성으로 전달하며 기본 기준 음성 폴백을 유지합니다.
+- Player 자동 재생, 카카오 감지, 브라우저 음성 선택과 API 프리셋 라우팅 회귀 테스트를 추가했습니다.
+
 ## 0.9.3-beta.3 CI Hardening 6 · Firebase public config and PWA logo budget
 
 - Firebase Web 공개 설정 6개를 development·production Vite 환경에 등록하고 `.firebaserc`를 실제 프로젝트에 연결했습니다.

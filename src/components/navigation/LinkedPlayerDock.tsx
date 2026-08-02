@@ -28,9 +28,10 @@ export function LinkedPlayerDock() {
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const queue = usePlayerStore((state) => state.queue)
   const currentTrackId = usePlayerStore((state) => state.currentTrackId)
+  const playRequestId = usePlayerStore((state) => state.playRequestId)
   const repeatMode = usePlayerStore((state) => state.repeatMode)
   const playbackRate = usePlayerStore((state) => state.playbackRate)
-  const select = usePlayerStore((state) => state.select)
+  const selectAndPlay = usePlayerStore((state) => state.selectAndPlay)
   const remove = usePlayerStore((state) => state.remove)
   const clearQueue = usePlayerStore((state) => state.clearQueue)
   const selectNext = usePlayerStore((state) => state.selectNext)
@@ -40,6 +41,7 @@ export function LinkedPlayerDock() {
   const track = usePlayerStore(getCurrentTrack)
   const ref = useRef<HTMLAudioElement | null>(null)
   const resumeAfterTrackChange = useRef(false)
+  const handledPlayRequestRef = useRef(0)
   const playbackRateRef = useRef(playbackRate)
   const speechTimerRef = useRef<number | null>(null)
   const speechStartedAtRef = useRef(0)
@@ -132,7 +134,9 @@ export function LinkedPlayerDock() {
   }
 
   useEffect(() => {
-    const shouldResume = resumeAfterTrackChange.current
+    const explicitPlay = playRequestId !== handledPlayRequestRef.current
+    handledPlayRequestRef.current = playRequestId
+    const shouldResume = resumeAfterTrackChange.current || explicitPlay
     cancelBrowserSpeech()
     setCurrent(0)
     setDuration(browserPlayback ? track?.audio.durationSeconds ?? 0 : 0)
@@ -142,8 +146,10 @@ export function LinkedPlayerDock() {
       element.load()
       element.playbackRate = playbackRateRef.current
       if (shouldResume && currentTrackId && !browserPlayback) {
-        const resume = () => void element.play().catch(() => undefined)
-        element.addEventListener('canplay', resume, { once: true })
+        void element.play().catch(() => {
+          const resume = () => void element.play().catch(() => undefined)
+          element.addEventListener('canplay', resume, { once: true })
+        })
       }
     }
     if (shouldResume && currentTrackId && browserPlayback) {
@@ -152,7 +158,7 @@ export function LinkedPlayerDock() {
     resumeAfterTrackChange.current = false
     // Track identity is the synchronization boundary for native audio and browser speech.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTrackId])
+  }, [currentTrackId, playRequestId])
 
   useEffect(() => {
     playbackRateRef.current = playbackRate
@@ -273,7 +279,7 @@ export function LinkedPlayerDock() {
             <PlayerQueuePanel
               tracks={queue}
               currentTrackId={currentTrackId}
-              onSelect={select}
+              onSelect={selectAndPlay}
               onRemove={remove}
               onClear={clearQueue}
             />
@@ -371,7 +377,7 @@ export function LinkedPlayerDock() {
           <PlayerQueuePanel
             tracks={queue}
             currentTrackId={currentTrackId}
-            onSelect={select}
+            onSelect={selectAndPlay}
             onRemove={remove}
             onClear={clearQueue}
           />

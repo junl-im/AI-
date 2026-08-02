@@ -1,3 +1,4 @@
+import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
 import { createRandomId } from '../utils/randomId'
 import { ApiError } from './apiTypes'
 
@@ -189,7 +190,9 @@ export function getApiConnectionProblem(value: string): ApiError | null {
   const browserIsRemote = !isLoopbackHostname(window.location.hostname)
   if (browserIsRemote && isLoopbackHostname(apiUrl.hostname) && isLikelyMobileDevice()) {
     return new ApiError(
-      '휴대폰에서는 localhost 후보를 사용할 수 없습니다. 배포된 HTTPS 음성 시스템이 필요합니다.',
+      isKakaoInAppBrowser()
+        ? '카카오톡 인앱 브라우저에서는 PC localhost 엔진에 연결할 수 없습니다. 외부 브라우저 또는 공개 HTTPS Voice API를 사용해 주세요.'
+        : '휴대폰에서는 localhost 후보를 사용할 수 없습니다. 배포된 HTTPS 음성 시스템이 필요합니다.',
       0,
       'SOA-2006',
       'mobile-localhost',

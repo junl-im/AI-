@@ -70,7 +70,10 @@ export function VoicePickerSheet({
                 <button
                   type="button"
                   className="soa-voice-sheet-preview"
-                  onClick={() => onPreview(voice.id)}
+                  onClick={() => {
+                    onSelect(voice.id)
+                    onPreview(voice.id)
+                  }}
                   aria-label={`${voice.name} 목소리 미리듣기`}
                 >
                   {previewingId === voice.id ? '…' : '▶'}

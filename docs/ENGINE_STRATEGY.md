@@ -1,6 +1,6 @@
 # SoriON AI Engine Strategy
 
-현재 기준 버전: `0.9.2`
+현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 2`
 
 ## 무료 로컬 고정 자동 순서
 
@@ -41,6 +41,8 @@ Firebase Hosting Spark / GitHub Pages
 조건이 충족되지 않으면 준비됨이나 추천 상태로 표시하지 않는다.
 
 ## 품질 결정 방식
+
+프리셋 ID는 이름표가 아니라 엔진 입력이다. Browser/System/Melo는 프리셋별 운율을 적용하고 CosyVoice는 프리셋별 동의받은 기준 WAV를 Worker에 전달한다. 운영체제에 한국어 음성이 하나뿐이면 Browser/System의 음색 차이는 보장하지 않고 운율 차이만 표시한다.
 
 “최고”라는 문구 대신 동일한 한국어 내용으로 다음 값을 측정한다.
 

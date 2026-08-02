@@ -12,10 +12,14 @@ from app.storage.audio_store import AudioStore
 class FakeMeloModel:
     hps = SimpleNamespace(data=SimpleNamespace(spk2id={"KR": 0}))
 
+    def __init__(self):
+        self.speed = 0.0
+
     def tts_to_file(self, text, speaker_id, output_path, speed):
         assert text
         assert speaker_id == 0
         assert speed > 0
+        self.speed = speed
         with wave.open(output_path, "wb") as audio:
             audio.setnchannels(1)
             audio.setsampwidth(2)
@@ -26,7 +30,8 @@ class FakeMeloModel:
 @pytest.mark.asyncio
 async def test_melo_adapter_generates_wave_with_injected_model(tmp_path):
     store = AudioStore(tmp_path, ttl_minutes=30)
-    engine = MeloTtsEngine(store, model_factory=FakeMeloModel, ready_override=True)
+    model = FakeMeloModel()
+    engine = MeloTtsEngine(store, model_factory=lambda: model, ready_override=True)
     job_id = uuid4()
 
     result = await engine.synthesize(
@@ -42,3 +47,4 @@ async def test_melo_adapter_generates_wave_with_injected_model(tmp_path):
     assert result.engine_mode == "ai"
     assert result.status == "completed"
     assert store.output_path(job_id).stat().st_size > 44
+    assert model.speed == pytest.approx(1.1 * 0.96)

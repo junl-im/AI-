@@ -6,6 +6,9 @@ export interface VoicePreset {
   tone: string
   badge: string
   tags: [string, string, string]
+  rateMultiplier: number
+  pitchOffset: number
+  preferredVoiceTokens: string[]
 }
 
 export const voicePresets: VoicePreset[] = [
@@ -17,6 +20,9 @@ export const voicePresets: VoicePreset[] = [
     tone: 'bg-[#ffe5dc]',
     badge: '추천',
     tags: ['차분', '여성', '한국어'],
+    rateMultiplier: 0.96,
+    pitchOffset: 1.5,
+    preferredVoiceTokens: ['sunhi', 'yuna', 'heami', 'seoyeon', 'female', '여성', 'korean a'],
   },
   {
     id: 'on-clear',
@@ -26,6 +32,9 @@ export const voicePresets: VoicePreset[] = [
     tone: 'bg-[#dff5ff]',
     badge: '또렷함',
     tags: ['명료', '남성', '한국어'],
+    rateMultiplier: 1.04,
+    pitchOffset: -1.5,
+    preferredVoiceTokens: ['injoon', 'hyunsu', 'male', '남성', 'korean b'],
   },
   {
     id: 'dam-calm',
@@ -35,6 +44,9 @@ export const voicePresets: VoicePreset[] = [
     tone: 'bg-[#ebe5ff]',
     badge: '차분함',
     tags: ['따뜻', '중성', '한국어'],
+    rateMultiplier: 0.9,
+    pitchOffset: -0.5,
+    preferredVoiceTokens: ['sora', 'jimin', 'natural', 'korean c'],
   },
 ]
 

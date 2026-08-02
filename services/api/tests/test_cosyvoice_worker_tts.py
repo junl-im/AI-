@@ -91,3 +91,43 @@ def test_cosyvoice_reference_tts_requires_reference_sample(tmp_path):
 
     assert engine.info().ready is False
     assert "REFERENCE_PATH" in (engine.info().reason or "")
+
+
+class PresetWorker(FakeWorker):
+    def __init__(self):
+        self.profile_id = ""
+        self.sample_path = None
+
+    async def create_job(self, profile_id, text, sample_path):
+        self.profile_id = profile_id
+        self.sample_path = sample_path
+        return {"id": "worker-job", "status": "queued"}
+
+
+@pytest.mark.asyncio
+async def test_cosyvoice_uses_voice_id_named_preset_reference(tmp_path):
+    preset_directory = tmp_path / "presets"
+    preset_directory.mkdir()
+    preset = preset_directory / "on-clear.wav"
+    preset.write_bytes(wav_bytes())
+    worker = PresetWorker()
+    engine = CosyVoiceWorkerTtsEngine(
+        AudioStore(tmp_path / "audio", 30),
+        worker,
+        "",
+        "sorion-reference",
+        poll_interval_seconds=0.01,
+        preset_directory=str(preset_directory),
+    )
+
+    result = await engine.synthesize(
+        TtsSynthesisRequest(
+            text="도윤 프리셋 기준 음색을 확인합니다.",
+            voice_id="on-clear",
+            job_id=uuid4(),
+        )
+    )
+
+    assert worker.profile_id == "sorion-reference-on-clear"
+    assert worker.sample_path == preset.resolve()
+    assert "on-clear 전용" in result.message

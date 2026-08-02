@@ -1,6 +1,14 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Firebase Public Config + PWA Asset Budget + CI Hardening 6**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 2**
+
+## Engine Heartbeat 2
+
+- 카카오톡 인앱 브라우저를 User-Agent로 감지해 PC localhost 엔진 연결 불가를 즉시 안내하고 외부 브라우저 전환 버튼을 제공합니다.
+- 프리셋·설정·타임라인·대기열의 재생 버튼은 선택값을 자동 적용한 뒤 생성 또는 선택된 트랙을 즉시 재생합니다.
+- Browser Speech는 프리셋별 한국어 음성 후보, 속도와 높낮이를 적용하고 System·Melo도 같은 프리셋 운율을 사용합니다.
+- CosyVoice는 `sori-warm.wav`, `on-clear.wav`, `dam-calm.wav`를 실제 Worker 기준 음성으로 라우팅하며 없는 경우 기본 기준 음성으로 폴백합니다.
+- 기기에 한국어 음성이 하나뿐이면 Browser/System 프리셋 차이는 음색이 아니라 속도·높낮이 중심으로 제한됩니다.
 
 ## CI Hardening 6
 
@@ -29,10 +37,11 @@
 
 ## 검증
 
-- API pytest 117개 통과
+- API pytest 121개 통과
 - Worker pytest 14개 통과
 - Python compileall 통과
-- TypeScript·TSX 145개 파일 parser 검사 통과
+- TypeScript·TSX 150개 파일 parser 검사 통과
+- Repository preflight 11개 통과
 - 프로젝트 규칙, 폐기 파일, Web manifest, free-only, engine blueprint, 모델 onboarding 검사 통과
 - 합성 무음 10·30·60분 WAV·MP3 6개 시나리오 완료
 - WAV 길이·자막 드리프트 0ms, MP3 ffprobe 길이와 자막 차이 192ms 이내

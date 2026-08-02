@@ -140,6 +140,15 @@ describe('LinkedPlayerDock', () => {
     expect(screen.getByRole('link', { name: '다운로드' })).toBeInTheDocument()
   })
 
+  it('재생 요청이 포함된 트랙은 선택 즉시 재생한다', async () => {
+    const play = vi.mocked(HTMLMediaElement.prototype.play)
+    render(<LinkedPlayerDock />)
+
+    usePlayerStore.getState().enqueueAndPlay(generatedAudio(), '자동 재생 음성')
+
+    await vi.waitFor(() => expect(play).toHaveBeenCalled())
+  })
+
   it('Voice API가 없어도 브라우저 한국어 음성을 재생한다', () => {
     const synthesis = installSpeechSynthesis()
     usePlayerStore.getState().enqueue(browserSpeechAudio(), '브라우저 완성 음성')

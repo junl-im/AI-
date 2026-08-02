@@ -106,6 +106,7 @@ async def lifespan(app: FastAPI):
             cosyvoice_worker,
             settings.cosyvoice_tts_reference_path,
             settings.cosyvoice_tts_profile_id,
+            preset_directory=settings.cosyvoice_preset_directory,
         )
     )
     if settings.enable_melo_tts:

@@ -103,7 +103,7 @@ export function HomePage() {
   const workspaceResetToken = useAppStore((state) => state.workspaceResetToken)
   const clearActiveProject = useAppStore((state) => state.clearActiveProject)
   const startNewWorkspace = useAppStore((state) => state.startNewWorkspace)
-  const enqueue = usePlayerStore((state) => state.enqueue)
+  const enqueueAndPlay = usePlayerStore((state) => state.enqueueAndPlay)
   const clearQueue = usePlayerStore((state) => state.clearQueue)
   const currentTrack = usePlayerStore(getCurrentTrack)
   const [projectTitle, setProjectTitle] = useState('새 프로젝트')
@@ -365,6 +365,7 @@ export function HomePage() {
   }
   async function previewVoice(nextVoiceId: string) {
     const voice = getVoicePreset(nextVoiceId)
+    setVoiceId(voice.id)
     if (!engineAvailable || !engineCatalog.selected) {
       appendMessage({
         role: 'assistant',
@@ -389,7 +390,7 @@ export function HomePage() {
       }
       const result = await synthesizeSpeech(request, createRandomId())
       const audio = generatedPreview(result, request, voice.name)
-      enqueue(audio, `${voice.name} 프리뷰`)
+      enqueueAndPlay(audio, `${voice.name} 프리뷰`)
       appendMessage({
         role: 'assistant',
         badge: audio.source === 'browser-speech'

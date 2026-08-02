@@ -2,17 +2,26 @@ param(
   [Parameter(Mandatory = $true)][string]$TextPath,
   [Parameter(Mandatory = $true)][string]$OutputPath,
   [int]$Rate = 0,
-  [string]$VoiceName = ""
+  [string]$VoiceName = "",
+  [string]$VoicePreset = "sori-warm"
 )
 
 Add-Type -AssemblyName System.Speech
 $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
-$voices = $synth.GetInstalledVoices() | Where-Object { $_.Enabled }
+$voices = @($synth.GetInstalledVoices() | Where-Object { $_.Enabled })
 
 if ($VoiceName) {
   $selected = $voices | Where-Object { $_.VoiceInfo.Name -eq $VoiceName } | Select-Object -First 1
 } else {
-  $selected = $voices | Where-Object { $_.VoiceInfo.Culture.Name -like "ko-*" } | Select-Object -First 1
+  $koreanVoices = @($voices | Where-Object { $_.VoiceInfo.Culture.Name -like "ko-*" })
+  if ($koreanVoices.Count -gt 0) {
+    $voiceIndex = switch ($VoicePreset) {
+      "on-clear" { 1 }
+      "dam-calm" { [Math]::Max(0, $koreanVoices.Count - 1) }
+      default { 0 }
+    }
+    $selected = $koreanVoices[$voiceIndex % $koreanVoices.Count]
+  }
 }
 
 if (-not $selected) {

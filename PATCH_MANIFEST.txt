@@ -1,28 +1,13 @@
-SoriON AI 0.9.3-beta.3 CI Hardening 3 -> CI Hardening 4 Patch Manifest
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 1 -> Engine Heartbeat 2 Patch Manifest
 
-Purpose: fix the remaining Ruff I001 import ordering error and remove registry-dependent npm lock bootstrap from ordinary CI runs.
+Purpose: make mobile connection limits explicit, remove separate apply steps from playback, and ensure preset IDs affect actual engine behavior.
 
-Changed or added files:
-.github/workflows/ci.yml
-APPLY_PATCH.cmd
-APPLY_PATCH.sh
-FOUNDATION_REPORT.md
-GENERATE_WEB_LOCK.cmd
-GENERATE_WEB_LOCK.sh
-PATCH_MANIFEST.txt
-README.md
-START_HERE.md
-docs/CHANGELOG.md
-docs/HANDOVER.md
-docs/LOCKFILE_BOOTSTRAP.md
-docs/NEXT_UPDATE.md
-docs/patches/0.9.3-beta.3-ci-hardening-4/DELETE_LIST.txt
-docs/patches/0.9.3-beta.3-ci-hardening-4/PATCH_MANIFEST.txt
-docs/patches/0.9.3-beta.3-ci-hardening-4/PATCH_README.md
-package.json
-scripts/check-ci-failure-domains.mjs
-scripts/check-project-rules.mjs
-services/api/app/api/routes/verification.py
+Key changes:
+- KakaoTalk WebView detection with browser-speech fallback and external-browser guidance
+- every visible play action applies the current selection and requests immediate playback
+- Browser Speech, System Voice and MeloTTS preset prosody
+- CosyVoice preset reference WAV routing through the Worker
+- focused frontend/API regression tests
 
 Permanent delete list:
 public/sorion-icon.svg

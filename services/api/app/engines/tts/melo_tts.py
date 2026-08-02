@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 from app.engines.base import TtsEngine
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest, TtsSynthesisResponse
+from app.services.voice_presets import get_voice_preset
 from app.storage.audio_store import AudioStore
 
 ModelFactory = Callable[[], Any]
@@ -83,7 +84,10 @@ class MeloTtsEngine(TtsEngine):
             engine_mode="ai",
             audio_url=f"/api/v1/audio/{output_path.name}",
             estimated_duration_seconds=round(duration, 1),
-            message="MeloTTS 한국어 AI 엔진으로 WAV를 생성했습니다.",
+            message=(
+                f"{get_voice_preset(request.voice_id).display_name} 프리셋 속성을 "
+                "MeloTTS 한국어 AI 엔진에 적용했습니다."
+            ),
         )
 
     async def _get_model(self) -> Any:
@@ -105,7 +109,9 @@ class MeloTtsEngine(TtsEngine):
     def _synthesize_sync(model: Any, request: TtsSynthesisRequest, output_path: Path) -> None:
         speaker_ids = model.hps.data.spk2id
         speaker_id = speaker_ids["KR"]
-        model.tts_to_file(request.text, speaker_id, str(output_path), speed=request.speed)
+        preset = get_voice_preset(request.voice_id)
+        effective_speed = max(0.5, min(2.0, request.speed * preset.rate_multiplier))
+        model.tts_to_file(request.text, speaker_id, str(output_path), speed=effective_speed)
         if not output_path.is_file() or output_path.stat().st_size <= 44:
             raise RuntimeError("MeloTTS가 유효한 WAV 파일을 만들지 못했습니다.")
 

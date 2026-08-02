@@ -4,6 +4,7 @@ import {
   getApiConnectionContext,
   saveApiBaseUrl,
 } from '../api/httpClient'
+import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
 import { getNetworkInformation, getMobileNetworkSnapshot } from '../network/mobileNetwork'
 import { runApiConnectivityAudit } from '../settings/connectivityApi'
 import { useAppStore } from '../store/useAppStore'
@@ -65,7 +66,9 @@ export function useBackendBootstrap(): void {
       setBackendStatus(
         browserReady ? 'degraded' : 'offline',
         browserReady
-          ? '브라우저 한국어 음성 준비 · AI 서버 자동 재연결 중'
+          ? isKakaoInAppBrowser()
+            ? '카카오톡 브라우저 음성 준비 · 로컬 PC 엔진은 외부 브라우저에서 연결'
+            : '브라우저 한국어 음성 준비 · AI 서버 자동 재연결 중'
           : detail,
       )
       return browserReady

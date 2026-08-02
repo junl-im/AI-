@@ -37,5 +37,19 @@ describe('DubbingVoiceControls', () => {
     expect(screen.getByText('한국어 숫자·기호 읽기 보정')).toBeInTheDocument()
     expect(screen.getAllByRole('slider').every((slider) => !slider.hasAttribute('disabled'))).toBe(true)
     expect(screen.getAllByText('지원 엔진 자동 선택').length).toBeGreaterThan(0)
+    expect(screen.queryByRole('button', { name: '적용하기' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /현재 설정 적용 · 재생/ })).toBeInTheDocument()
+  })
+
+  it('프리셋 재생 버튼이 선택과 프리뷰를 동시에 적용한다', () => {
+    const onVoiceChange = vi.fn()
+    const onPreview = vi.fn()
+    render(<DubbingVoiceControls {...baseProps} onVoiceChange={onVoiceChange} onPreview={onPreview} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    fireEvent.click(screen.getByRole('button', { name: '도윤 목소리 미리듣기' }))
+
+    expect(onVoiceChange).toHaveBeenCalledWith('on-clear')
+    expect(onPreview).toHaveBeenCalledWith('on-clear')
   })
 })

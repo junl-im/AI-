@@ -48,7 +48,7 @@ function VoiceBlock({
   onRetry,
   onRemove,
 }: VoiceBlockProps) {
-  const selectTrack = usePlayerStore((state) => state.select)
+  const selectAndPlay = usePlayerStore((state) => state.selectAndPlay)
   const [draft, setDraft] = useState(block.text)
   const [blockMenuOpen, setBlockMenuOpen] = useState(false)
   const blockMenuId = `dubbing-block-menu-${voiceIndex + 1}`
@@ -108,7 +108,7 @@ function VoiceBlock({
           {block.status === 'ready' && block.trackId ? (
             <button
               type="button"
-              onClick={() => selectTrack(block.trackId!)}
+              onClick={() => selectAndPlay(block.trackId!)}
               aria-label={actionLabel}
             >
               ▶

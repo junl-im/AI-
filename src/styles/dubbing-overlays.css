@@ -230,6 +230,7 @@
 .soa-sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
 .soa-sheet-actions button { min-height: 52px; border: 0; border-radius: 12px; color: #fff; background: #303030; font-size: 11px; font-weight: 850; }
 .soa-sheet-actions button.is-primary { background: #2d8df2; }
+.soa-sheet-actions.is-single { grid-template-columns: 1fr; }
 
 .soa-dubbing-player-dock {
   position: fixed;

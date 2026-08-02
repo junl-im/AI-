@@ -116,9 +116,10 @@ export function VoiceSettingsSheet({
           />
         </label>
 
-        <div className="soa-sheet-actions">
-          <button type="button" onClick={onPreview}>▶ 미리듣기</button>
-          <button type="button" className="is-primary" onClick={onClose}>적용하기</button>
+        <div className="soa-sheet-actions is-single">
+          <button type="button" className="is-primary" onClick={onPreview}>
+            ▶ 현재 설정 적용 · 재생
+          </button>
         </div>
       </section>
     </div>

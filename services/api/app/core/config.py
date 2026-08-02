@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     cosyvoice_worker_job_timeout_seconds: float = 45.0
     cosyvoice_tts_reference_path: str = ""
     cosyvoice_tts_profile_id: str = "sorion-korean-reference"
+    cosyvoice_preset_directory: str = ""
     worker_service_token: str = ""
     worker_signature_secret: str = ""
     public_rate_limit_per_minute: int = Field(default=120, ge=10, le=5000)

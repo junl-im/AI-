@@ -103,7 +103,8 @@ describe('browserSpeech', () => {
       fallbackUsed: true,
     })
     expect(result.estimatedDurationSeconds).toBeGreaterThan(0)
-    expect(playback).toMatchObject({ text: request.text, lang: 'ko-KR', rate: 1.1 })
+    expect(playback).toMatchObject({ text: request.text, lang: 'ko-KR', voiceId: 'sori-warm' })
+    expect(playback.rate).toBeLessThan(request.speed)
     expect(playback.pitch).toBeGreaterThan(1)
   })
 
@@ -114,10 +115,22 @@ describe('browserSpeech', () => {
     const utterance = createBrowserSpeechUtterance(playback)
 
     expect(selected?.lang).toBe('ko-KR')
+    expect(selected?.name).toBe('Korean A')
     expect(utterance.text).toBe(request.text)
     expect(utterance.lang).toBe('ko-KR')
     expect(utterance.rate).toBe(playback.rate)
     expect(utterance.voice?.lang).toBe('ko-KR')
+  })
+
+  it('프리셋마다 브라우저 음성과 운율을 다르게 적용한다', () => {
+    const voices = installBrowserSpeech()
+    const warm = createBrowserSpeechPlayback(request)
+    const clear = createBrowserSpeechPlayback({ ...request, voiceId: 'on-clear' })
+
+    expect(selectBrowserSpeechVoice(voices, 'sori-warm')?.name).toBe('Korean A')
+    expect(selectBrowserSpeechVoice(voices, 'on-clear')?.name).toBe('Korean B')
+    expect(clear.rate).not.toBe(warm.rate)
+    expect(clear.pitch).not.toBe(warm.pitch)
   })
 
   it('긴 내용일수록 예상 재생시간이 늘고 빠른 속도에서는 줄어든다', () => {

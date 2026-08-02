@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { EngineInfo } from '../ai/contracts'
+import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
 import { ApiError, getApiConnectionContext } from '../api/httpClient'
 import { useAppStore } from '../store/useAppStore'
 import { getBrowserSpeechEngine } from '../tts/browserSpeech'
@@ -24,7 +25,9 @@ function readyEngineMessage(engines: EngineInfo[]): {
   if (browser) {
     return {
       status: 'degraded',
-      message: '브라우저 한국어 음성을 사용할 수 있습니다. AI 서버는 백그라운드에서 다시 연결합니다.',
+      message: isKakaoInAppBrowser()
+        ? '카카오톡에서는 브라우저 음성을 사용합니다. 로컬 PC 엔진은 외부 브라우저에서 연결하세요.'
+        : '브라우저 한국어 음성을 사용할 수 있습니다. AI 서버는 백그라운드에서 다시 연결합니다.',
     }
   }
   const demo = engines.find((engine) => engine.ready && engine.mode === 'mock')
