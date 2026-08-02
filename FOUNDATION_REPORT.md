@@ -1,7 +1,14 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 5.2.1 · Focus Return Hotfix**
 
+
+## Engine Heartbeat 5.2.1 Focus Return Hotfix
+
+- 프로젝트 메뉴의 `현재 작업 비우기` 항목이 사라진 뒤 브라우저 초점이 `body`로 이동해, 확인창을 Escape로 닫아도 메뉴 실행 버튼으로 돌아오지 않던 문제를 수정했습니다.
+- modal 훅은 명시된 `returnFocusRef` DOM 노드를 effect 시작 시 캡처하고, cleanup에서 이전 활성 요소보다 우선해 복귀합니다.
+- cleanup에서 `returnFocusRef.current`를 다시 읽지 않아 React Hooks의 mutable-ref 경고를 제거했습니다.
+- 기존 `DubbingStudioHeader` 회귀 테스트가 이 동작을 직접 검증하며, preflight가 캡처·우선순위 계약을 정적으로 강제합니다.
 
 ## Engine Heartbeat 5.2 UI/UX Polish
 

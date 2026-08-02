@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 5.2.1 · Focus Return Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 20:45 KST**
+최종 갱신: **2026-08-02 21:32 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -569,3 +569,12 @@ CI Hotfix 4 테스트 규칙:
 7. Repository preflight 11/11, API pytest 127개, Worker pytest 14개, Python compileall, TS/TSX parser 160개와 transpile 159개 구문 검사를 통과했다.
 8. npm 설치는 내부 registry의 패키지 404와 외부 registry timeout 때문에 완료하지 못했다. ESLint·Vitest·semantic typecheck·Vite build는 GitHub Actions에서 최종 판정한다.
 9. 남은 수동 확인은 360/390/430px Sheet·가상 키보드, 1180/1280/1440px 3단 레이아웃, NVDA·VoiceOver, Safari range와 실제 TTS 연속 미리듣기다.
+
+## 45. 2026-08-02 21:32 KST · 0.9.3-beta.3 Engine Heartbeat 5.2.1 Focus Return Hotfix
+1. GitHub Actions Web quality에서 `DubbingStudioHeader`의 초기화 확인창을 Escape로 닫은 뒤 프로젝트 메뉴 버튼에 초점이 복귀하지 않는 테스트가 실패했다.
+2. 메뉴 항목 unmount 뒤 `document.activeElement`가 연결된 `body`가 되어, 기존 훅이 명시적 `returnFocusRef`보다 `body`를 우선한 것이 원인이었다.
+3. `useModalDialog`는 effect 시작 시 이전 활성 요소와 명시적 복귀 DOM 노드를 지역 변수로 캡처한다.
+4. cleanup은 연결된 명시적 복귀 대상을 먼저 선택하고, 없을 때만 이전 활성 요소를 사용한다.
+5. cleanup에서 mutable `returnFocusRef.current`를 직접 읽지 않아 React Hooks annotation 경고를 제거했다.
+6. `check-web-test-contracts.mjs`가 캡처·우선순위 계약과 cleanup의 ref 직접 읽기 금지를 강제한다.
+7. 샌드박스 npm registry의 `@eslint/js@9.22.0` 404로 전체 Web lint·Vitest·typecheck·build는 재실행하지 못했으며 GitHub Actions가 최종 판정한다.

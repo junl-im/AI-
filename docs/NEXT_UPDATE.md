@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 5.2.1 · Focus Return Hotfix`
 
 ## 목표 버전
 
@@ -31,7 +31,7 @@
 
 ## 넘기는 결정
 
-- Heartbeat 5.2의 공통 음성 설정 범위와 modal 초점 계약을 이후 화면에서도 재사용합니다.
+- Heartbeat 5.2.1의 공통 음성 설정 범위와 명시적 복귀 대상을 우선하는 modal 초점 계약을 이후 화면에서도 재사용합니다.
 - Heartbeat 5의 `first_audio_ms`는 서버 첫 파일 준비 시간으로 고정합니다.
 - Browser Speech는 실제 `onstart`를 측정하기 전까지 `null`을 유지합니다.
 - forwarded header는 Heartbeat 5에서 진단 전용이며 권한 판정에 사용하지 않습니다.

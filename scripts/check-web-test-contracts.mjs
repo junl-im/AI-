@@ -56,11 +56,18 @@ for (const required of [
   "event.key === 'Escape'",
   "event.key !== 'Tab'",
   "document.body.style.overflow = 'hidden'",
-  'previousFocus?.isConnected',
+  'const previousFocus = document.activeElement instanceof HTMLElement',
+  'const explicitReturnTarget = returnFocusRef?.current ?? null',
+  'const returnTarget = explicitReturnTarget?.isConnected',
+  ': previousFocus?.isConnected',
 ]) {
   if (!modalDialog.includes(required)) {
     failures.push(`useModalDialog.ts: ${required} 누락`)
   }
+}
+const modalCleanup = modalDialog.slice(modalDialog.indexOf('return () =>'))
+if (modalCleanup.includes('returnFocusRef?.current')) {
+  failures.push('useModalDialog.ts: effect cleanup에서 mutable returnFocusRef.current를 직접 읽습니다.')
 }
 
 const voiceSettingsSheet = await read('src/components/workspace/VoiceSettingsSheet.tsx')

@@ -571,3 +571,14 @@ typecheck·Vitest·Vite build는 전달본에 npm lock과 설치 의존성이 �
 샌드박스 결과: Repository preflight 11/11, API pytest 127개, Worker pytest 14개, Python compileall,
 TypeScript·TSX parser 160개와 transpile 159개 구문 검사를 통과했습니다. npm registry 404·timeout으로 Web 전체 lint,
 semantic typecheck, Vitest, Vite production build는 실행하지 못했으며 GitHub Actions에서 최종 확인합니다.
+
+## Engine Heartbeat 5.2.1 Focus Return Hotfix 회귀 검사
+
+- 프로젝트 메뉴에서 초기화 확인창을 열 때 메뉴 항목이 unmount되어도 복귀 대상은 프로젝트 메뉴 실행 버튼으로 유지되어야 합니다.
+- 확인창의 안전 버튼에 초기 초점이 있고 Escape로 닫은 뒤 `document.body`가 아니라 명시된 실행 버튼에 초점이 돌아와야 합니다.
+- modal effect는 `returnFocusRef.current`를 setup 시점에 지역 변수로 캡처하고 cleanup에서는 해당 ref를 직접 다시 읽지 않아야 합니다.
+- 명시적 복귀 대상이 연결되어 있으면 이전 활성 요소보다 우선하고, 대상이 없거나 끊겼을 때만 이전 활성 요소를 fallback으로 사용해야 합니다.
+- dependency-free preflight는 cleanup의 mutable ref 직접 읽기와 복귀 우선순위 계약 제거를 실패로 처리해야 합니다.
+
+샌드박스에서는 Repository preflight 11/11과 TypeScript 구문 검사를 통과했습니다. npm 내부 registry에서
+`@eslint/js@9.22.0`이 404로 반환되어 ESLint·Vitest·semantic typecheck·Vite build는 GitHub Actions에서 최종 확인합니다.

@@ -25,7 +25,6 @@ export function useModalDialog<T extends HTMLElement>(
 ): RefObject<T | null> {
   const dialogRef = useRef<T | null>(null)
   const onCloseRef = useRef(onClose)
-  const previousFocusRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     onCloseRef.current = onClose
@@ -34,9 +33,10 @@ export function useModalDialog<T extends HTMLElement>(
   useEffect(() => {
     if (!open) return undefined
 
-    previousFocusRef.current = document.activeElement instanceof HTMLElement
+    const previousFocus = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null
+    const explicitReturnTarget = returnFocusRef?.current ?? null
 
     if (openDialogCount === 0) {
       bodyOverflowBeforeDialogs = document.body.style.overflow
@@ -85,8 +85,11 @@ export function useModalDialog<T extends HTMLElement>(
       if (openDialogCount === 0) {
         document.body.style.overflow = bodyOverflowBeforeDialogs
       }
-      const previousFocus = previousFocusRef.current
-      const returnTarget = previousFocus?.isConnected ? previousFocus : returnFocusRef?.current
+      const returnTarget = explicitReturnTarget?.isConnected
+        ? explicitReturnTarget
+        : previousFocus?.isConnected
+          ? previousFocus
+          : null
       returnTarget?.focus({ preventScroll: true })
     }
   }, [open, returnFocusRef])

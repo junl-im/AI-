@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 5.2 · UI/UX Polish`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 5.2.1 · Focus Return Hotfix`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -31,7 +31,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 지연 지표: 서버 첫 음성 파일 준비 시간과 전체 생성 시간을 분리 표시
 - PC 레이아웃: 좌우 패널 드래그·키보드 조절, 접기와 로컬 상태 저장
 - 설정 일관성: PC·모바일이 속도·높낮이·말투 6종을 같은 계약으로 사용
-- 접근성: Sheet·확인창 초점 이동·Tab 순환·Escape 닫기·초점 복귀와 배경 스크롤 잠금
+- 접근성: Sheet·확인창 초점 이동·Tab 순환·Escape 닫기·명시적 실행 버튼 복귀와 배경 스크롤 잠금
 
 ## 무료 실행
 

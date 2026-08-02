@@ -1,0 +1,13 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 5.2 -> Engine Heartbeat 5.2.1 Focus Return Hotfix
+
+Purpose: make modal focus restoration deterministic when the menu item that launched the dialog unmounts.
+
+Key changes:
+- capture the explicit return-focus node during effect setup
+- prioritize the explicit return target over document.body or another transient previous focus
+- remove cleanup-time mutable ref reads that trigger React Hooks warnings
+- add preflight contracts that prevent the same regression
+
+Tracked files deleted relative to Engine Heartbeat 5.2: none
+Cumulative permanent cleanup list:
+public/sorion-icon.svg

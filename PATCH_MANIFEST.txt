@@ -1,17 +1,14 @@
-SoriON AI 0.9.3-beta.3 Engine Heartbeat 5.1 -> Engine Heartbeat 5.2 UI/UX Polish
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 5.2 -> Engine Heartbeat 5.2.1 Focus Return Hotfix
 
-Purpose: align desktop and mobile voice settings, prevent invalid pitch requests, and improve modal, keyboard, duplicate-action and desktop readability behavior.
+Purpose: restore focus to the explicit project-menu trigger after modal dismissal and remove the React Hooks mutable-ref cleanup warning.
 
 Key changes:
-- share voice speed, integer pitch and six emotion options across desktop and mobile
-- normalize restored speed and pitch values before preview or generation
-- add modal initial focus, focus trap, Escape close, body scroll lock and focus restoration
-- disable duplicate preview requests while playback preparation is active
-- replace non-functional filter tabs with information tags and add radio arrow navigation
-- improve project menu dismissal, current-project semantics and collapsed separator state
-- raise desktop helper-text readability and honor reduced motion
-- add UI/UX regression tests, audit documentation and dependency-free preflight contracts
+- capture previous focus and the explicit return-focus DOM node when the modal effect opens
+- prefer a connected explicit return target over the transient previous active element
+- avoid reading returnFocusRef.current inside effect cleanup
+- preserve the existing Escape, focus trap and body-scroll-lock behavior
+- add dependency-free regression contracts for focus-return priority and ref capture
 
-Tracked files deleted relative to Engine Heartbeat 5.1: none
+Tracked files deleted relative to Engine Heartbeat 5.2: none
 Cumulative permanent cleanup list:
 public/sorion-icon.svg

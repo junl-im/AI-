@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 5.2.1 · Focus return hotfix
+
+- 확인창을 연 메뉴 항목이 unmount되며 활성 요소가 `body`로 바뀌어 초점 복귀가 실패하던 문제 수정
+- `returnFocusRef`가 지정되면 이전 활성 요소보다 명시적 복귀 대상을 우선하도록 modal cleanup 계약 변경
+- effect 시작 시 복귀 DOM 노드를 지역 변수에 캡처해 React Hooks mutable-ref cleanup 경고 제거
+- 동일한 ref 직접 읽기와 복귀 우선순위 회귀를 dependency-free preflight에서 차단
+
 ## 0.9.3-beta.3 Engine Heartbeat 5.2 · UI/UX polish
 
 - PC·모바일 음성 설정의 속도·높낮이 범위와 말투 6종을 공통 계약으로 통합
