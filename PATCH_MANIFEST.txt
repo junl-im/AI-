@@ -1,14 +1,13 @@
-SoriON AI 0.9.3-beta.3 Engine Heartbeat 4 -> Engine Heartbeat 5 Patch Manifest
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 5 -> Engine Heartbeat 5.1 Web Quality Hotfix
 
-Purpose: diagnose a public HTTPS mobile Voice API bridge, validate preset WAV files before Worker use, expose honest first-audio readiness latency, and persist resizable desktop studio panels.
+Purpose: fix the HomePage session-restore test ambiguity caused by duplicate responsive voice-emotion controls in JSDOM, and prevent the global query from returning.
 
 Key changes:
-- public HTTPS bridge fields and Engine Doctor card
-- preset PCM WAV duration/sample-rate/channel/silence/clipping validation
-- first server audio-file readiness latency separated from total processing time
-- left/right desktop panel resize, collapse, keyboard control and local persistence
-- deployment, latency interpretation and next partial-delivery plan documented
+- scope the restored `밝게` emotion assertion to the `음성 설정` dialog with Testing Library `within`
+- reject a future global single-element query for the duplicated emotion button during dependency-free preflight
+- document the CI failure, root cause, validation boundary and hotfix application steps
 
-Tracked files deleted relative to Engine Heartbeat 4: none
+Runtime product code changed: none
+Tracked files deleted relative to Engine Heartbeat 5: none
 Cumulative permanent cleanup list:
 public/sorion-icon.svg

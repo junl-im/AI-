@@ -27,6 +27,15 @@ if (!homeTest.includes("toHaveAttribute('maxlength', '20000')")) {
 if (homeTest.includes("toContain('긴 내용')")) {
   failures.push('HomePage.test.tsx: 변경 가능한 placeholder 문구에 결합돼 있습니다.')
 }
+if (!homeTest.includes("const voiceSettings = screen.getByRole('dialog', { name: '음성 설정' })")) {
+  failures.push('HomePage.test.tsx: 음성 설정 Sheet 조회 범위가 dialog로 고정되지 않았습니다.')
+}
+if (!homeTest.includes("within(voiceSettings).getByRole('button', { name: '밝게' })")) {
+  failures.push('HomePage.test.tsx: 중복 말투 버튼을 음성 설정 dialog 내부에서 검증하지 않습니다.')
+}
+if (homeTest.includes("screen.getByRole('button', { name: '밝게' })")) {
+  failures.push('HomePage.test.tsx: 데스크톱 Drawer와 모바일 Sheet의 중복 버튼을 전역 조회합니다.')
+}
 
 if (failures.length > 0) {
   console.error('Web 테스트 계약 검사 실패')

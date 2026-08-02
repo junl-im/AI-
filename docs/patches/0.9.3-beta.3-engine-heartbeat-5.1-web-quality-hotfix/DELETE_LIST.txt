@@ -1,0 +1,2 @@
+# Cumulative permanent cleanup list. Missing paths are allowed.
+public/sorion-icon.svg

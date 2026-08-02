@@ -1,6 +1,13 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 5**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 5.1 · Web Quality Hotfix**
+
+
+## Engine Heartbeat 5.1 Web Quality Hotfix
+
+- `HomePage` 세션 복원 테스트가 데스크톱 Voice Drawer와 모바일 Voice Settings Sheet의 동일한 `밝게` 버튼을 전역 조회하던 문제를 수정했습니다.
+- 복원 검증 대상을 `음성 설정` dialog 내부로 제한해 반응형 UI가 동시에 DOM에 존재해도 단일 요소를 안정적으로 선택합니다.
+- 의존성 설치 전 preflight에서도 전역 중복 조회가 다시 들어오지 않도록 Web 테스트 계약 검사를 추가했습니다.
 
 
 ## Engine Heartbeat 5

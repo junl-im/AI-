@@ -545,3 +545,14 @@ npm run build
 Heartbeat 5 샌드박스 결과: API 127개, Worker 14개, compileall, Repository preflight 11개,
 프로젝트 규칙, TypeScript·TSX 156개 transpile 구문 검사를 통과했습니다. 전체 Web lint·semantic
 typecheck·Vitest·Vite build는 전달본에 npm lock과 설치 의존성이 없어 실행하지 못했습니다.
+
+## Engine Heartbeat 5.1 Web Quality Hotfix 회귀 검사
+
+- 세션 복원 뒤 `음성 설정` dialog가 열리는지 확인합니다.
+- `밝게` 활성 상태는 전역 `screen`이 아니라 해당 dialog에 `within`을 적용해 검증합니다.
+- 데스크톱 Voice Drawer와 모바일 Voice Settings Sheet가 동시에 DOM에 존재해도 중복 요소 오류가 없어야 합니다.
+- `scripts/check-web-test-contracts.mjs`는 동일 버튼의 전역 단일 조회가 다시 들어오면 preflight를 실패시킵니다.
+
+샌드박스에서는 Repository preflight 11개와 강화된 Web 테스트 계약을 통과했습니다. npm 설치는 내부 registry의
+미러 누락(404)과 외부 registry DNS timeout으로 실행되지 않아 Vitest 전체 재실행은 GitHub Actions에서 최종 확인합니다.
+

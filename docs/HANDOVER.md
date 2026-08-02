@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 5**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 5.1 · Web Quality Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 19:51 KST**
+최종 갱신: **2026-08-02 20:23 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -550,3 +550,12 @@ CI Hotfix 4 테스트 규칙:
    `SoriON-AI-0.9.3-beta.3-engine-heartbeat-4-to-0.9.3-beta.3-engine-heartbeat-5-patch.zip`, SHA-256 목록.
 10. 다음 예상 업데이트: Engine Heartbeat 6에서 segment-ready 실제 전달·재생, 브라우저 audible-start
     측정, 신뢰 프록시 allowlist와 실제 모델·모바일 증거를 완성한다.
+
+## 43. 2026-08-02 20:23 KST · 0.9.3-beta.3 Engine Heartbeat 5.1 Web Quality Hotfix
+1. GitHub Actions Web quality에서 `HomePage.test.tsx`의 세션 복원 테스트가 동일 이름의 `밝게` 버튼 두 개를 전역 조회해 실패했다.
+2. 원인은 데스크톱 Voice Drawer와 모바일 Voice Settings Sheet가 반응형 CSS와 무관하게 JSDOM에 함께 존재하는 구조였다.
+3. 실제 검증 대상인 `음성 설정` dialog를 먼저 찾고 `within(dialog)`으로 활성 말투 버튼을 조회하도록 수정했다.
+4. `check-web-test-contracts.mjs`에 dialog 범위 조회 필수와 전역 중복 조회 금지 계약을 추가했다.
+5. Repository preflight 11/11은 통과했다. 샌드박스 npm registry 404와 외부 DNS timeout으로 Vitest 전체 실행은 불가하며 GitHub Actions가 최종 판정한다.
+6. 런타임 제품 코드는 변경하지 않았고, 영향 범위는 Web 테스트와 dependency-free 회귀 게이트뿐이다.
+

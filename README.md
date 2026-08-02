@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 5 · Secure Mobile Bridge + First-Audio Readiness`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 5.1 · Web Quality Hotfix`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter

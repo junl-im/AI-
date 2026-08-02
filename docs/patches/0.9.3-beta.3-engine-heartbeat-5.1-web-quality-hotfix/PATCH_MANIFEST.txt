@@ -1,0 +1,21 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 5 -> Engine Heartbeat 5.1 Web Quality Hotfix
+
+Modified files:
+APPLY_PATCH.cmd
+APPLY_PATCH.sh
+FOUNDATION_REPORT.md
+PATCH_MANIFEST.txt
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/TEST.md
+scripts/check-web-test-contracts.mjs
+src/pages/HomePage.test.tsx
+
+Added files:
+docs/patches/0.9.3-beta.3-engine-heartbeat-5.1-web-quality-hotfix/DELETE_LIST.txt
+docs/patches/0.9.3-beta.3-engine-heartbeat-5.1-web-quality-hotfix/PATCH_MANIFEST.txt
+docs/patches/0.9.3-beta.3-engine-heartbeat-5.1-web-quality-hotfix/PATCH_README.md
+
+Tracked files deleted: none

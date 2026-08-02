@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 5.1 · Web quality hotfix
+
+- `HomePage` 자동 복원 테스트의 `밝게` 버튼 조회를 `음성 설정` dialog 내부로 제한
+- 데스크톱 Voice Drawer와 모바일 Voice Settings Sheet가 함께 렌더링될 때 발생한 Testing Library 중복 요소 실패 제거
+- 같은 전역 조회가 재도입되면 dependency-free preflight에서 차단하는 테스트 계약 추가
+
 ## 0.9.3-beta.3 Engine Heartbeat 5 · Secure mobile bridge and first-audio readiness
 
 - `/connectivity`와 Engine Doctor가 공개 HTTPS Voice API Bridge를 로컬·공개 HTTP와 분리 진단
