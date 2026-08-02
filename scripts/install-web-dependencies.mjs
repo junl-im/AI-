@@ -26,7 +26,7 @@ const registryCandidates = (process.env.SORION_NPM_REGISTRIES || [
   .filter(Boolean)
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
 const probeEntries = Object.entries({ ...(manifest.dependencies || {}), ...(manifest.devDependencies || {}) })
-const [probePackageName, probePackageVersion] = probeEntries.find(([name]) => name === 'firebase') || probeEntries[0] || []
+const [probePackageName, probePackageVersion] = probeEntries.find(([name]) => name === 'react') || probeEntries[0] || []
 const ranking = await rankRegistryCandidates(registryCandidates, {
   packageName: probePackageName,
   packageVersion: probePackageVersion,

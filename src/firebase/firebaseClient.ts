@@ -1,13 +1,51 @@
-import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app'
-import {
-  getAuth,
-  getRedirectResult,
-  GoogleAuthProvider,
-  signInWithRedirect,
-  type User,
-} from 'firebase/auth'
+const FIREBASE_VERSION = '11.4.0'
+const FIREBASE_APP_MODULE_URL = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`
+const FIREBASE_AUTH_MODULE_URL = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`
 
-function readFirebaseConfig() {
+interface FirebaseConfig {
+  apiKey: string | undefined
+  authDomain: string | undefined
+  projectId: string | undefined
+  appId: string | undefined
+}
+
+interface FirebaseApp {
+  readonly name: string
+}
+
+interface FirebaseUser {
+  readonly displayName: string | null
+}
+
+interface FirebaseAppModule {
+  getApp(): FirebaseApp
+  getApps(): FirebaseApp[]
+  initializeApp(config: FirebaseConfig): FirebaseApp
+}
+
+interface FirebaseAuth {
+  readonly app: FirebaseApp
+}
+
+interface FirebaseAuthResult {
+  readonly user: FirebaseUser
+}
+
+interface FirebaseAuthModule {
+  GoogleAuthProvider: new () => object
+  getAuth(app: FirebaseApp): FirebaseAuth
+  getRedirectResult(auth: FirebaseAuth): Promise<FirebaseAuthResult | null>
+  signInWithRedirect(auth: FirebaseAuth, provider: object): Promise<void>
+}
+
+interface FirebaseModules {
+  readonly app: FirebaseAppModule
+  readonly auth: FirebaseAuthModule
+}
+
+let modulesPromise: Promise<FirebaseModules> | null = null
+
+function readFirebaseConfig(): FirebaseConfig {
   return {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -16,24 +54,34 @@ function readFirebaseConfig() {
   }
 }
 
+async function loadFirebaseModules(): Promise<FirebaseModules> {
+  modulesPromise ??= Promise.all([
+    import(/* @vite-ignore */ FIREBASE_APP_MODULE_URL) as Promise<FirebaseAppModule>,
+    import(/* @vite-ignore */ FIREBASE_AUTH_MODULE_URL) as Promise<FirebaseAuthModule>,
+  ]).then(([app, auth]) => ({ app, auth }))
+  return modulesPromise
+}
+
 export function isFirebaseConfigured(): boolean {
   return Object.values(readFirebaseConfig()).every(Boolean)
 }
 
-export function getFirebaseApp(): FirebaseApp {
+export async function getFirebaseApp(): Promise<FirebaseApp> {
   if (!isFirebaseConfigured()) {
     throw new Error('SOA-3001: Firebase 환경 변수가 설정되지 않았습니다.')
   }
-  return getApps().length > 0 ? getApp() : initializeApp(readFirebaseConfig())
+  const { app } = await loadFirebaseModules()
+  return app.getApps().length > 0 ? app.getApp() : app.initializeApp(readFirebaseConfig())
 }
 
 export async function startGoogleSignIn(): Promise<void> {
-  const auth = getAuth(getFirebaseApp())
-  await signInWithRedirect(auth, new GoogleAuthProvider())
+  const { auth } = await loadFirebaseModules()
+  await auth.signInWithRedirect(auth.getAuth(await getFirebaseApp()), new auth.GoogleAuthProvider())
 }
 
-export async function consumeGoogleSignInResult(): Promise<User | null> {
+export async function consumeGoogleSignInResult(): Promise<FirebaseUser | null> {
   if (!isFirebaseConfigured()) return null
-  const result = await getRedirectResult(getAuth(getFirebaseApp()))
+  const { auth } = await loadFirebaseModules()
+  const result = await auth.getRedirectResult(auth.getAuth(await getFirebaseApp()))
   return result?.user ?? null
 }

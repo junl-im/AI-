@@ -1,0 +1,27 @@
+SoriON AI 0.9.3-beta.3 CI Hardening 4 -> CI Hardening 5 Patch Manifest
+
+Changed or added files:
+.github/workflows/ci.yml
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/LOCKFILE_BOOTSTRAP.md
+docs/NEXT_UPDATE.md
+docs/patches/0.9.3-beta.3-ci-hardening-5/DELETE_LIST.txt
+docs/patches/0.9.3-beta.3-ci-hardening-5/PATCH_MANIFEST.txt
+docs/patches/0.9.3-beta.3-ci-hardening-5/PATCH_README.md
+package.json
+scripts/check-ci-failure-domains.mjs
+scripts/check-lock-network-retry.mjs
+scripts/check-lockfiles.mjs
+scripts/check-project-rules.mjs
+scripts/check-web-toolchain.mjs
+scripts/install-web-dependencies.mjs
+scripts/refresh-npm-lock.mjs
+services/api/app/api/routes/verification.py
+src/firebase/firebaseClient.ts
+
+Deleted files:
+(none)

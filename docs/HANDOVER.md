@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 4**
+현재 기준 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 5**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-02 15:49 KST**
 제품 소유·디자인: **곰같은여우**
@@ -493,6 +493,6 @@ CI Hotfix 4 테스트 규칙:
 ## 37. 0.9.3-beta.3 CI Hardening 2
 - preflight 전체 보고서, npm 공식 endpoint fallback·lock 복구, 구성요소별 lock 부분 커밋으로 npm 장애가 Python 결과와 성공 lock 보존을 막지 않는다.
 
-## 38. 0.9.3-beta.3 CI Hardening 4
-- verification alias import를 Ruff canonical form으로 분리하고 workflow 중복 env 키를 제거했다.
-- 일반 CI의 npm 자동 bootstrap을 중단하고 `GENERATE_WEB_LOCK.cmd`로 검증 lock을 먼저 커밋한다.
+## 38. 0.9.3-beta.3 CI Hardening 5
+- verification은 STT 모듈을 한 번만 import해 Ruff I001 재발을 제거했다.
+- 누락 npm lock은 검증된 CI bootstrap으로 복구하고 Firebase SDK는 browser ESM 런타임 로드로 npm 그래프에서 제거했다.

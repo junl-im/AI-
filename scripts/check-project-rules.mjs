@@ -453,6 +453,8 @@ await requireText('src/pages/VoiceClonePage.tsx', [
   '[activeJobId, activeJobStatus]',
 ])
 await requireText('scripts/refresh-npm-lock.mjs', ['package-lock-offline', 'package-lock-online', 'npm-ci', 'timeoutMs', 'https://registry.npmjs.org/', 'https://registry.npmjs.com/', 'restoreLock(previousLock)', 'npm_config_replace_registry_host'])
+await requireText('src/firebase/firebaseClient.ts', ['https://www.gstatic.com/firebasejs/', '/* @vite-ignore */', 'FIREBASE_VERSION'])
+await requireAbsent('src/firebase/firebaseClient.ts', ["from 'firebase/", 'from \"firebase/'])
 await requireText('GENERATE_WEB_LOCK.cmd', ['locks:bootstrap:web', 'package-lock.json', 'GitHub Desktop'])
 await requireText('GENERATE_WEB_LOCK.sh', ['locks:bootstrap:web', 'package-lock.json'])
 await requireText('scripts/run-preflight.mjs', ['Repository preflight 실패', 'preflight.json', 'GITHUB_STEP_SUMMARY'])
@@ -461,11 +463,8 @@ await requireText('scripts/write-lock-proof.mjs', ['lockSha256', 'manifestSha256
 await requireText('scripts/verify-lock-proof.mjs', ['lock SHA-256 불일치', 'manifest SHA-256 불일치'])
 await requireText('scripts/lock-retry.mjs', ['ETIMEDOUT', 'EAI_AGAIN', 'retryDelayMs'])
 await requireText('services/api/app/api/routes/verification.py', ['/device-benchmarks/summary', '/stt/verify-segments', 'max_regeneration_attempts'])
-await requireText('services/api/app/api/routes/verification.py', [
-  'from app.services.stt_evaluation import regeneration_reasons',
-  'from app.services.stt_evaluation import measure_stt as evaluate_stt',
-])
-await requireAbsent('services/api/app/api/routes/verification.py', ['from app.services.stt_evaluation import ('])
+await requireText('services/api/app/api/routes/verification.py', ['from app.services import stt_evaluation', 'stt_evaluation.measure_stt(payload)', 'stt_evaluation.regeneration_reasons('])
+await requireAbsent('services/api/app/api/routes/verification.py', ['from app.services.stt_evaluation import', 'measure_stt as evaluate_stt'])
 await requireText('src/components/workspace/TimelineEditor.tsx', ['STT 검수 · 실패만 재생성', 'sttVerification'])
 await requireText('src/workspace/sttTimeline.ts', ['prepareBlockForSttRegeneration', 'regenerationAttempts'])
 try {

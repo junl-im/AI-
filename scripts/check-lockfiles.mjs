@@ -29,9 +29,14 @@ if (component === 'all' || component === 'npm') {
     if (!rootEntry) failures.push('package-lock.json에 루트 packages[""] 항목이 없습니다.')
     if (rootEntry?.version !== packageJson.version) failures.push(`package-lock 루트 버전 불일치: ${rootEntry?.version ?? '누락'}`)
     for (const section of ['dependencies', 'devDependencies']) {
-      for (const [name, version] of Object.entries(packageJson[section] ?? {})) {
-        if (rootEntry?.[section]?.[name] !== version) failures.push(`package-lock ${section}.${name} 불일치`)
+      const declared = packageJson[section] ?? {}
+      const locked = rootEntry?.[section] ?? {}
+      for (const [name, version] of Object.entries(declared)) {
+        if (locked[name] !== version) failures.push(`package-lock ${section}.${name} 불일치`)
         if (!lock.packages?.[`node_modules/${name}`]) failures.push(`package-lock에 node_modules/${name}가 없습니다.`)
+      }
+      for (const name of Object.keys(locked)) {
+        if (!(name in declared)) failures.push(`package-lock ${section}.${name}는 package.json에 없는 잔여 항목입니다.`)
       }
     }
   }

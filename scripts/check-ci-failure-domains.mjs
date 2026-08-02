@@ -13,11 +13,15 @@ for (const token of [
   'Commit available verified lockfiles · main only', 'contents: write',
   "needs.npm_lock.result == 'success'", "needs.api_lock.result == 'success'",
   "needs.worker_lock.result == 'success'", 'npm run quality:preflight',
-  'sorion-repository-preflight-${{ github.run_attempt }}', 'mode=missing',
-  'GENERATE_WEB_LOCK.cmd', 'Fail fast when package-lock is not committed',
+  'sorion-repository-preflight-${{ github.run_attempt }}', 'mode=generate',
+  'npm run locks:refresh:npm', 'npm run locks:check -- --component npm',
+  'lock-structure-check.log', 'Fail after preserving npm evidence',
 ]) if (!workflow.includes(token)) failures.push(`workflow 계약 누락: ${token}`)
-if (/FORCE_REFRESH.*\|\| ! -f package-lock\.json/s.test(workflow)) {
-  failures.push('일반 push에서 package-lock을 자동 생성하는 이전 bootstrap 조건이 남아 있습니다.')
+if (!/FORCE_REFRESH.*\|\| ! -f package-lock\.json/s.test(workflow)) {
+  failures.push('package-lock이 없을 때 검증된 npm bootstrap을 실행하는 조건이 없습니다.')
+}
+if (workflow.includes('mode=missing') || workflow.includes('Fail fast when package-lock is not committed')) {
+  failures.push('package-lock 부재만으로 CI를 중단하는 bootstrap deadlock이 남아 있습니다.')
 }
 if (workflow.includes('env:\n        env:')) failures.push('workflow에 중복 env 키가 있습니다.')
 for (const forbidden of [
@@ -54,6 +58,10 @@ try {
   await writeFile(join(fixture, 'package.json'), '{"name":"fixture","version":"1.0.1"}\n')
   const corrupt = spawnSync(process.execPath, [join(root, 'scripts', 'verify-lock-proof.mjs'), 'npm'], { env, encoding: 'utf8' })
   if (corrupt.status === 0) failures.push('manifest가 바뀐 손상 lock 증명을 허용했습니다.')
+  await writeFile(join(fixture, 'package.json'), '{"name":"fixture","version":"1.0.0","dependencies":{"react":"19.2.8"}}\n')
+  await writeFile(join(fixture, 'package-lock.json'), '{"lockfileVersion":3,"packages":{"":{"version":"1.0.0","dependencies":{"react":"19.2.8","firebase":"11.4.0"}},"node_modules/react":{"version":"19.2.8"}}}\n')
+  const stale = spawnSync(process.execPath, [join(root, 'scripts', 'check-lockfiles.mjs'), '--component', 'npm'], { env, encoding: 'utf8' })
+  if (stale.status === 0) failures.push('package.json에 없는 npm root dependency가 남은 stale lock을 허용했습니다.')
 } finally {
   await rm(fixture, { recursive: true, force: true })
 }

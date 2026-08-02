@@ -10,7 +10,7 @@ import { rankRegistryCandidates } from './npm-registry-probe.mjs'
 const root = fileURLToPath(new URL('..', import.meta.url))
 const retryable = [
   'npm error code ETIMEDOUT',
-  'npm error network request to https://registry.npmjs.org/firebase failed',
+  'npm error network request to https://registry.npmjs.org/react failed',
   'error: EAI_AGAIN registry.npmjs.org',
   'HTTP 503 Service Unavailable',
   'ERR_SOCKET_TIMEOUT',
@@ -39,8 +39,8 @@ if (retryDelayMs(1) !== 5000 || retryDelayMs(3) !== 30000) {
 const ranked = await rankRegistryCandidates(
   ['https://slow.invalid/', 'https://fast.invalid/'],
   {
-    packageName: 'firebase',
-    packageVersion: '11.4.0',
+    packageName: 'react',
+    packageVersion: '19.2.8',
     timeoutMs: 50,
     fetchImpl: async (url) => {
       if (String(url).includes('slow.invalid')) throw new Error('ETIMEDOUT')
@@ -48,7 +48,7 @@ const ranked = await rankRegistryCandidates(
         ok: true,
         status: 200,
         async json() {
-          return { name: 'firebase', version: '11.4.0', dist: { integrity: 'sha512-fixture' } }
+          return { name: 'react', version: '19.2.8', dist: { integrity: 'sha512-fixture' } }
         },
       }
     },

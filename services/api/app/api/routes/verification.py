@@ -18,8 +18,7 @@ from app.schemas.verification import (
     SttProbeResponse,
     SttSegmentVerificationResponse,
 )
-from app.services.stt_evaluation import regeneration_reasons
-from app.services.stt_evaluation import measure_stt as evaluate_stt
+from app.services import stt_evaluation
 
 router = APIRouter()
 
@@ -98,7 +97,7 @@ async def summarize_device_benchmarks(request: Request) -> DeviceBenchmarkSummar
 
 @router.post("/stt/measure", response_model=SttMeasurementResponse)
 async def measure_stt(payload: SttMeasurementRequest) -> SttMeasurementResponse:
-    return evaluate_stt(payload)
+    return stt_evaluation.measure_stt(payload)
 
 
 @router.get("/stt/probe", response_model=SttProbeResponse)
@@ -197,7 +196,7 @@ async def verify_stt_segments(
         transcribe_started = perf_counter()
         transcript, duration = await run_in_threadpool(adapter.transcribe, path)
         elapsed = perf_counter() - transcribe_started
-        measurement = evaluate_stt(SttMeasurementRequest(
+        measurement = stt_evaluation.measure_stt(SttMeasurementRequest(
             reference_text=segment.reference_text,
             transcript_text=transcript,
             engine_id=probe.engine_id,
@@ -206,7 +205,7 @@ async def verify_stt_segments(
             audio_duration_seconds=duration,
             processing_seconds=elapsed,
         ))
-        reasons = regeneration_reasons(
+        reasons = stt_evaluation.regeneration_reasons(
             measurement,
             payload.character_error_threshold,
             payload.word_error_threshold,

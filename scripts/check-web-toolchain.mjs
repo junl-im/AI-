@@ -136,7 +136,7 @@ if (!manifestOnly) {
       failures.push(`Vitest 아래 별도 Vite ${nested.version}가 설치됐습니다. 단일 Vite 8 그래프가 필요합니다.`)
     }
     if (!(await exists(join(root, 'package-lock.json')))) {
-      warnings.push('package-lock.json이 없습니다. Actions의 Generate verified lockfiles 실행 뒤 artifact의 lock 파일을 커밋하세요.')
+      warnings.push('package-lock.json이 없습니다. CI가 검증된 bootstrap을 시도하며, 성공한 lock은 main에 자동 반영합니다.')
     }
   }
 }

@@ -1,14 +1,14 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 4**
+결과 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 5**
 
-## CI Hardening 4
+## CI Hardening 5
 
-- `verification.py`의 일반 import와 alias import를 Ruff 정렬 규칙대로 분리했습니다.
-- 일반 push·PR에서 누락 npm lock을 registry로 자동 생성하던 반복 실패 경로를 제거했습니다.
-- `GENERATE_WEB_LOCK.cmd`·`.sh`가 로컬에서 package-lock 생성, clean install, 도구체인·전체 트리 검증을 한 번에 수행합니다.
-- package-lock이 없으면 CI는 장시간 재시도하지 않고 생성 방법을 명확히 annotation으로 남깁니다.
-- workflow의 중복 `env` 키를 제거하고, import·lock bootstrap 계약을 preflight 재발 방지 규칙으로 고정했습니다.
+- Ruff 0.15.22 기준으로 verification route가 `app.services.stt_evaluation` 모듈을 한 번만 import하도록 정리했습니다.
+- 누락되거나 manifest와 불일치한 package-lock은 CI가 cache 우선·제한 registry fallback으로 자동 bootstrap하고, 정상 lock은 verify-only로 처리합니다.
+- npm Firebase SDK 의존성을 제거하고 고정 버전 공식 browser ESM을 로그인 시점에만 동적으로 로드합니다.
+- lock 생성 실패 로그와 기존 lock 복원, 설치·전체 트리·SHA-256 proof 계약을 유지합니다.
+- local `GENERATE_WEB_LOCK`은 필수 단계가 아니라 registry 장애 시 사용할 수 있는 복구 수단입니다.
 
 ## 완료
 

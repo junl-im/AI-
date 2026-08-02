@@ -11,9 +11,10 @@ API·Worker 품질 결과가 함께 가려지지 않으며, 각 품질 작업은
 
 ## 독립 생성과 검증
 
-- 일반 push·PR에서 npm은 **커밋된 package-lock 검증만** 수행하며 누락 lock을 자동 생성하지 않는다.
-- 최초 npm lock은 `GENERATE_WEB_LOCK.cmd` 또는 `GENERATE_WEB_LOCK.sh`로 로컬에서 한 번 생성·검증한다.
-- 수동 Actions의 `generate_lockfiles=true`는 의도적인 원격 갱신 때만 사용한다.
+- 일반 push·PR은 package-lock이 manifest와 일치하면 verify-only, 없거나 stale이면 cache 우선의 검증된 bootstrap을 수행한다.
+- 자동 bootstrap은 설치·전체 트리·lock proof를 통과한 결과만 artifact와 main 반영 대상으로 사용한다.
+- 수동 Actions의 `generate_lockfiles=true`는 의도적인 전체 갱신에만 사용한다.
+- `GENERATE_WEB_LOCK.cmd`·`.sh`는 registry 장애 시 선택적으로 사용하는 로컬 복구 수단이다.
 - lock이 있으면 manifest 일치, `npm ci`, 전체 dependency tree를 검증한다.
 - API와 Worker는 별도 `uv lock`, `uv lock --check`, `uv sync --locked` 경로를 유지한다.
 
@@ -68,7 +69,11 @@ main push에서 검증된 세 component lock이 모두 준비되면 별도 `Comm
 
 ## CI Hardening 4
 
-- 반복된 npm registry bootstrap 실패를 일반 CI 경로에서 제거했습니다.
-- package-lock이 없으면 장시간 기다리지 않고 local bootstrap 파일을 안내하며 즉시 실패합니다.
-- Windows 사용자는 `GENERATE_WEB_LOCK.cmd`를 더블클릭하고, 성공 후 GitHub Desktop에서 `package-lock.json`을 Commit·Push합니다.
-- 로컬 bootstrap은 Node 22.18.0·npm 10.9.3, clean install, 도구체인과 전체 npm tree를 모두 확인합니다.
+- package-lock 부재를 즉시 실패시키는 운영을 시험했지만 사용자 PC의 별도 생성 단계가 누락되어 반복 실패했습니다.
+
+## CI Hardening 5
+
+- package-lock이 없으면 CI가 자동 bootstrap하고, 있으면 `npm ci` 기반 verify-only로 동작합니다.
+- Firebase Auth는 고정 버전 gstatic browser ESM을 로그인 시점에 로드해 npm lock 그래프에서 Firebase SDK를 제외합니다.
+- registry probe는 실제 잔존 의존성인 React를 사용하고, 실패 시 기존 lock을 복원합니다.
+- 로컬 bootstrap 스크립트는 선택 사항이며 CI 성공에 필요한 숨은 수동 단계를 두지 않습니다.

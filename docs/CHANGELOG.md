@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 CI Hardening 5 · Deterministic Ruff import and automatic npm bootstrap
+
+- verification route가 STT 모듈을 한 번만 import하도록 바꿔 반복 Ruff I001 원인을 제거했습니다.
+- package-lock 부재를 즉시 실패시키던 수동 전제 대신 검증된 CI 자동 bootstrap을 복구했습니다.
+- npm Firebase SDK를 제거하고 고정 버전 browser ESM을 로그인 시점에만 로드해 lock 해석 그래프를 축소했습니다.
+- registry 진단과 probe 대상을 실제 잔존 패키지인 React로 변경하고 기존 lock 복원·proof 검증을 유지했습니다.
+
 ## 0.9.3-beta.3 CI Hardening 4 · Committed npm lock gate and Ruff import fix
 
 - API verification의 일반 import와 alias import를 Ruff I001 기준대로 분리했습니다.
