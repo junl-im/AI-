@@ -2,7 +2,7 @@ import { access, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const root = fileURLToPath(new URL('..', import.meta.url))
+const root = process.env.SORION_LOCK_ROOT || fileURLToPath(new URL('..', import.meta.url))
 const allowMissing = process.argv.includes('--allow-missing')
 const componentIndex = process.argv.indexOf('--component')
 const component = componentIndex >= 0 ? process.argv[componentIndex + 1] : 'all'

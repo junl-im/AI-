@@ -29,6 +29,7 @@ import type { WorkspaceSession } from '../workspace/sessionTypes'
 import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import type { ComposerDirective, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { LandingHome } from './LandingHome'
+
 interface PendingLongformGeneration {
   text: string
   options: TimelineGenerationOptions
@@ -271,7 +272,7 @@ export function HomePage() {
     text: string,
     options: TimelineGenerationOptions,
     blockIds: string[],
-    generated: Awaited<ReturnType<typeof timeline.generateAll>>,
+    generated: Array<{ blockId: string; audio: GeneratedAudio }>,
   ) => {
     const first = generated[0]?.audio
     if (!first) return
@@ -426,7 +427,6 @@ export function HomePage() {
     }
     await timeline.retryBlock(id)
   }
-
   function clearCurrentWork() {
     setPendingGeneration(null)
     startNewWorkspace()
