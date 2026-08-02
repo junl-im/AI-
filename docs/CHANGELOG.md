@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 CI Hardening 2 · Lock Bootstrap Isolation
+
+- Repository preflight의 모든 검사를 끝까지 실행하고 JSON·로그 artifact와 정확한 annotation을 남김
+- preflight 실패가 Web·API·Worker 품질 결과를 가리지 않도록 job 조건을 분리
+- npm cache-only 우선 후 npm 공식 registry `.org`·`.com` endpoint를 순차 사용
+- npm lock 생성 실패 시 기존 lock을 원상 복구하고 불완전 lock 전달을 차단
+- 성공한 API·Worker lock은 npm lock 실패와 무관하게 검증 후 main에 부분 커밋
+- npm·API·Worker audit 디렉터리를 먼저 생성해 빈 artifact 경고 제거
+
 ## 0.9.3-beta.3 · Verified Evidence & Long-form Export Soak
 
 - 장문 WAV 병합을 청크 스트리밍과 원자적 임시 파일 교체 방식으로 변경

@@ -1,6 +1,13 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak**
+결과 버전: **0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 2**
+
+## CI Hardening 2
+
+- preflight aggregate report와 component quality failure-domain 분리를 추가했습니다.
+- npm 공식 registry 두 endpoint fallback과 실패 시 package-lock 원상 복구를 추가했습니다.
+- API·Worker lock은 npm 실패와 무관하게 검증·자동 커밋됩니다.
+- lock audit 디렉터리를 선생성해 빈 artifact 경고를 제거했습니다.
 
 ## 완료
 

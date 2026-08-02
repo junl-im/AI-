@@ -10,12 +10,32 @@ const failures = []
 for (const token of [
   'npm_lock:', 'api_lock:', 'worker_lock:',
   'needs: [preflight, npm_lock]', 'needs: [preflight, api_lock]', 'needs: [preflight, worker_lock]',
-  'Commit verified lockfiles · main only', 'contents: write', 'node scripts/verify-lock-proof.mjs all',
+  'Commit available verified lockfiles · main only', 'contents: write',
+  "needs.npm_lock.result == 'success'", "needs.api_lock.result == 'success'",
+  "needs.worker_lock.result == 'success'", 'npm run quality:preflight',
+  'sorion-repository-preflight-${{ github.run_attempt }}',
 ]) if (!workflow.includes(token)) failures.push(`workflow 계약 누락: ${token}`)
-for (const forbidden of ['needs: lockfiles', 'sorion-verified-lockfiles']) {
+for (const forbidden of [
+  'needs: lockfiles', 'sorion-verified-lockfiles',
+  'Commit verified lockfiles · main only', 'node scripts/verify-lock-proof.mjs all',
+]) {
   if (workflow.includes(forbidden)) failures.push(`단일 장애점 재유입: ${forbidden}`)
 }
 if (!/permissions:\n  contents: read/.test(workflow)) failures.push('전역 권한이 contents read가 아닙니다.')
+if (!workflow.includes("if: ${{ always() && needs.npm_lock.result == 'success' }}")) {
+  failures.push('Web quality가 preflight 실패와 독립적으로 실행되지 않습니다.')
+}
+if (!workflow.includes("if: ${{ always() && needs.api_lock.result == 'success' }}")) {
+  failures.push('API quality가 preflight 실패와 독립적으로 실행되지 않습니다.')
+}
+if (!workflow.includes("if: ${{ always() && needs.worker_lock.result == 'success' }}")) {
+  failures.push('Worker quality가 preflight 실패와 독립적으로 실행되지 않습니다.')
+}
+for (const component of ['npm', 'api', 'worker']) {
+  if (!workflow.includes(`.sorion/lock-audit/${component}/status.txt`)) {
+    failures.push(`${component} lock 진단 디렉터리 초기화가 없습니다.`)
+  }
+}
 
 const fixture = await mkdtemp(join(tmpdir(), 'sorion-lock-proof-'))
 try {

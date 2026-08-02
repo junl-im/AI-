@@ -35,24 +35,22 @@ jobs:
         with:
           node-version: '22.18.0'
           package-manager-cache: false
-      - name: Check retired files before install
-        run: npm run quality:stale-files
-      - name: Check web toolchain manifest
-        run: npm run quality:web-manifest
-      - name: Check lock retry contract
-        run: npm run quality:lock-network
-      - name: Check CI failure domains and lock proofs
-        run: npm run quality:ci-architecture
-      - name: Check project rules
-        run: npm run quality:rules
-      - name: Check free-only boundary
-        run: npm run quality:free-only
-      - name: Check engine blueprint
-        run: npm run quality:engine-blueprint
-      - name: Check model onboarding
-        run: npm run quality:model-onboarding
-      - name: Check verification evidence and export soak contracts
-        run: npm run quality:evidence
+      - name: Run all repository preflight checks
+        id: checks
+        continue-on-error: true
+        run: npm run quality:preflight
+      - name: Upload repository preflight report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sorion-repository-preflight-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 7
+          include-hidden-files: true
+          path: .sorion/ci-report
+      - name: Fail after preserving preflight evidence
+        if: steps.checks.outcome == 'failure'
+        run: exit 1
 
   npm_lock:
     name: npm lock · generate or verify
@@ -64,6 +62,11 @@ jobs:
         with:
           node-version: '22.18.0'
           package-manager-cache: false
+      - name: Initialize npm lock diagnostics
+        shell: bash
+        run: |
+          mkdir -p .sorion/lock-audit/npm
+          printf '%s\n' 'npm lock job initialized' > .sorion/lock-audit/npm/status.txt
       - name: Detect npm lock mode
         id: mode
         shell: bash
@@ -86,6 +89,7 @@ jobs:
             echo "https-proxy=$(npm config get https-proxy)"
             getent hosts registry.npmjs.org || true
             curl --silent --show-error --location --head --max-time 15 https://registry.npmjs.org/firebase || true
+            curl --silent --show-error --location --head --max-time 15 https://registry.npmjs.com/firebase || true
           } 2>&1 | tee .sorion/lock-audit/npm/registry-diagnostics.log
       - name: Restore npm registry cache
         uses: actions/cache/restore@v5
@@ -116,7 +120,7 @@ jobs:
         with:
           name: sorion-npm-lock-diagnostics
           overwrite: true
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 7
           include-hidden-files: true
           path: .sorion/lock-audit/npm
@@ -163,6 +167,11 @@ jobs:
           version: '0.11.32'
           working-directory: services/api
           enable-cache: true
+      - name: Initialize API lock diagnostics
+        shell: bash
+        run: |
+          mkdir -p .sorion/lock-audit/api
+          printf '%s\n' 'api lock job initialized' > .sorion/lock-audit/api/status.txt
       - name: Detect API lock mode
         id: mode
         shell: bash
@@ -187,7 +196,7 @@ jobs:
         with:
           name: sorion-api-lock-diagnostics
           overwrite: true
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 7
           include-hidden-files: true
           path: .sorion/lock-audit/api
@@ -225,6 +234,11 @@ jobs:
           version: '0.11.32'
           working-directory: services/worker
           enable-cache: true
+      - name: Initialize Worker lock diagnostics
+        shell: bash
+        run: |
+          mkdir -p .sorion/lock-audit/worker
+          printf '%s\n' 'worker lock job initialized' > .sorion/lock-audit/worker/status.txt
       - name: Detect Worker lock mode
         id: mode
         shell: bash
@@ -249,7 +263,7 @@ jobs:
         with:
           name: sorion-worker-lock-diagnostics
           overwrite: true
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 7
           include-hidden-files: true
           path: .sorion/lock-audit/worker
@@ -272,6 +286,7 @@ jobs:
   web:
     name: Web quality
     needs: [preflight, npm_lock]
+    if: ${{ always() && needs.npm_lock.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -314,6 +329,7 @@ jobs:
   api:
     name: API quality · Python 3.10
     needs: [preflight, api_lock]
+    if: ${{ always() && needs.api_lock.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -349,6 +365,7 @@ jobs:
   worker:
     name: CosyVoice Worker quality · Python 3.10
     needs: [preflight, worker_lock]
+    if: ${{ always() && needs.worker_lock.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -382,26 +399,35 @@ jobs:
         run: uv run --locked --python 3.10 pytest tests -q
 
   commit_verified_locks:
-    name: Commit verified lockfiles · main only
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Commit available verified lockfiles · main only
+    if: >-
+      ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      (needs.npm_lock.result == 'success' || needs.api_lock.result == 'success' ||
+      needs.worker_lock.result == 'success') }}
     needs: [npm_lock, api_lock, worker_lock]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v6
         with:
           ref: main
-      - uses: actions/download-artifact@v7
+      - name: Download verified npm lock
+        if: needs.npm_lock.result == 'success'
+        uses: actions/download-artifact@v7
         with:
           name: sorion-npm-lock
           path: .
-      - uses: actions/download-artifact@v7
+      - name: Download verified API lock
+        if: needs.api_lock.result == 'success'
+        uses: actions/download-artifact@v7
         with:
           name: sorion-api-lock
           path: .
-      - uses: actions/download-artifact@v7
+      - name: Download verified Worker lock
+        if: needs.worker_lock.result == 'success'
+        uses: actions/download-artifact@v7
         with:
           name: sorion-worker-lock
           path: .
@@ -409,26 +435,42 @@ jobs:
         with:
           node-version: '22.18.0'
           package-manager-cache: false
-      - run: node scripts/verify-lock-proof.mjs all
-      - name: Commit changed lockfiles
+      - name: Verify downloaded lock proofs
         shell: bash
         run: |
-          git add package-lock.json services/api/uv.lock services/worker/uv.lock
+          components=()
+          [[ "${{ needs.npm_lock.result }}" == "success" ]] && components+=(npm)
+          [[ "${{ needs.api_lock.result }}" == "success" ]] && components+=(api)
+          [[ "${{ needs.worker_lock.result }}" == "success" ]] && components+=(worker)
+          for component in "${components[@]}"; do
+            node scripts/verify-lock-proof.mjs "$component"
+          done
+      - name: Commit available changed lockfiles
+        shell: bash
+        run: |
+          files=()
+          [[ "${{ needs.npm_lock.result }}" == "success" ]] && files+=(package-lock.json)
+          [[ "${{ needs.api_lock.result }}" == "success" ]] && files+=(services/api/uv.lock)
+          [[ "${{ needs.worker_lock.result }}" == "success" ]] && files+=(services/worker/uv.lock)
+          git add -- "${files[@]}"
           if git diff --cached --quiet; then
-            echo '검증된 lock 파일이 이미 저장소와 같습니다.'
+            echo '사용 가능한 검증 lock 파일이 이미 저장소와 같습니다.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'chore: commit verified lockfiles [skip ci]'
+          git commit -m 'chore: commit available verified lockfiles [skip ci]'
           if ! git push origin HEAD:main; then
-            echo '::warning::branch protection 또는 권한 때문에 자동 lock 커밋을 건너뜁니다. lock artifact는 유지됩니다.'
+            echo '::warning::branch protection 또는 권한 때문에 자동 lock 커밋을 건너뜁니다. component artifact는 유지됩니다.'
           fi
 
   deploy:
     name: Deploy GitHub Pages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [web, api, worker]
+    if: >-
+      ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.preflight.result == 'success' && needs.web.result == 'success' &&
+      needs.api.result == 'success' && needs.worker.result == 'success' }}
+    needs: [preflight, web, api, worker]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

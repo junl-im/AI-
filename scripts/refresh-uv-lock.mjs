@@ -10,6 +10,7 @@ if (!['api', 'worker'].includes(service)) throw new Error('사용법: node scrip
 const cwd = join(root, 'services', service)
 const logDirectory = join(root, '.sorion', 'lock-audit', service)
 await mkdir(logDirectory, { recursive: true })
+await writeFile(join(logDirectory, 'status.txt'), `${service} lock bootstrap started\n`, 'utf8')
 
 const env = {
   ...process.env,
@@ -35,4 +36,5 @@ async function execute(label, args, attempts = 1, timeoutMs = 120_000) {
 await execute('lock', ['lock', '--python', '3.10'], 2, 90_000)
 await execute('lock-check', ['lock', '--check'])
 await execute('sync-locked', ['sync', '--locked', '--dev', '--python', '3.10'], 2, 120_000)
+await writeFile(join(logDirectory, 'status.txt'), `${service} lock bootstrap completed\n`, 'utf8')
 console.log(`${service} uv lock 생성 및 locked sync 완료`)

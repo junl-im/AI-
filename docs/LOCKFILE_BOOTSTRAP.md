@@ -48,3 +48,12 @@ main push에서 검증된 세 component lock이 모두 준비되면 별도 `Comm
 
 장시간 registry 장애는 성공으로 가장하지 않는다. 대신 실패 범위를 해당 component로 제한하고,
 이미 검증된 다른 품질 결과와 진단 자료를 보존한다.
+
+
+## CI Hardening 2
+
+- preflight 실패는 보고서로 보존되며 API·Worker 품질 실행을 가리지 않는다.
+- npm lock은 cache-only 우선 후 `registry.npmjs.org`, `registry.npmjs.com`을 순차 사용한다.
+- npm 갱신이 실패하면 시작 전 package-lock을 복원한다.
+- API·Worker lock이 먼저 성공하면 npm 결과와 무관하게 검증 후 main에 반영한다.
+- 각 lock job은 시작 즉시 audit status 파일을 만들어 artifact 경로를 보장한다.

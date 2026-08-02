@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak`
+- 버전: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 2`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -17,6 +17,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 진행 상태: SSE 우선, polling 자동 대체
 - 세션: IndexedDB 자동 저장과 SQLite 결과 복구
 - 배포: GitHub Pages 또는 Firebase Hosting Spark 정적 Web
+- CI: preflight 전체 진단, 구성요소별 lock 보존, npm 공식 registry endpoint 순차 fallback
 
 ## 무료 실행
 

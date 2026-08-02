@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak`
+현재 기준: `0.9.3-beta.3 · Verified Evidence & Long-form Export Soak + CI Hardening 2`
 
 ## 목표 버전
 

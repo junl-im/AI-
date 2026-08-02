@@ -120,14 +120,19 @@ await requireText('.github/workflows/ci.yml', [
   'Repository preflight · no dependency install', 'npm lock · generate or verify',
   'API uv lock · generate or verify', 'Worker uv lock · generate or verify',
   'needs: [preflight, npm_lock]', 'needs: [preflight, api_lock]', 'needs: [preflight, worker_lock]',
-  'Commit verified lockfiles · main only', 'contents: write', "github.ref == 'refs/heads/main'",
-  'node scripts/verify-lock-proof.mjs all', "chore: commit verified lockfiles [skip ci]",
+  'Commit available verified lockfiles · main only', 'contents: write', "github.ref == 'refs/heads/main'",
+  'Verify downloaded lock proofs', "chore: commit available verified lockfiles [skip ci]",
+  'npm run quality:preflight', 'sorion-repository-preflight-${{ github.run_attempt }}',
+  "needs.npm_lock.result == 'success'", "needs.api_lock.result == 'success'",
+  "needs.worker_lock.result == 'success'",
   'astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b',
   "version: '0.11.32'", "python-version: '3.10'", "node-version: '22.18.0'",
   'actions/checkout@v6', 'actions/setup-node@v6', 'actions/setup-python@v6',
   'actions/upload-artifact@v6', 'actions/download-artifact@v7',
   'actions/cache/restore@v5', 'actions/cache/save@v5', 'overwrite: true',
   'npm run locks:refresh:npm', 'npm run locks:refresh:api', 'npm run locks:refresh:worker',
+  '.sorion/lock-audit/npm/status.txt', '.sorion/lock-audit/api/status.txt',
+  '.sorion/lock-audit/worker/status.txt',
   'npm run deps:ci', 'uv sync --locked', 'generate_lockfiles',
   'sorion-npm-lock', 'sorion-api-lock', 'sorion-worker-lock',
   'actions/configure-pages@v6', 'actions/upload-pages-artifact@v5', 'actions/deploy-pages@v5',
@@ -139,6 +144,7 @@ await requireAbsent('.github/workflows/ci.yml', [
 ])
 await requireAbsent('.github/workflows/ci.yml', [
   'needs: lockfiles', 'sorion-verified-lockfiles', 'npm_config_fetch_retries: 5',
+  'Commit verified lockfiles · main only', 'node scripts/verify-lock-proof.mjs all',
 ])
 await requireText('.nvmrc', ['22.18.0']); await requireText('.node-version', ['22.18.0'])
 await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '자동 커밋', 'npm ci', 'uv sync --locked'])
@@ -446,28 +452,15 @@ await requireText('src/pages/VoiceClonePage.tsx', [
   'const activeJobStatus = job?.status ?? null',
   '[activeJobId, activeJobStatus]',
 ])
-await requireText('scripts/refresh-npm-lock.mjs', ['package-lock-offline', 'package-lock-online', 'npm-ci', 'attempts: 2', 'timeoutMs'])
+await requireText('scripts/refresh-npm-lock.mjs', ['package-lock-offline', 'package-lock-online', 'npm-ci', 'timeoutMs', 'https://registry.npmjs.org/', 'https://registry.npmjs.com/', 'restoreLock(previousLock)', 'npm_config_replace_registry_host'])
+await requireText('scripts/run-preflight.mjs', ['Repository preflight 실패', 'preflight.json', 'GITHUB_STEP_SUMMARY'])
 await requireText('scripts/refresh-uv-lock.mjs', ['api|worker', 'UV_HTTP_TIMEOUT', 'lock-check', 'sync-locked'])
 await requireText('scripts/write-lock-proof.mjs', ['lockSha256', 'manifestSha256', '.sorion', 'lock-proof'])
 await requireText('scripts/verify-lock-proof.mjs', ['lock SHA-256 불일치', 'manifest SHA-256 불일치'])
-await requireText('scripts/lock-retry.mjs', [
-  'ETIMEDOUT',
-  'EAI_AGAIN',
-  'retryDelayMs',
-])
-await requireText('services/api/app/api/routes/verification.py', [
-  '/device-benchmarks/summary',
-  '/stt/verify-segments',
-  'max_regeneration_attempts',
-])
-await requireText('src/components/workspace/TimelineEditor.tsx', [
-  'STT 검수 · 실패만 재생성',
-  'sttVerification',
-])
-await requireText('src/workspace/sttTimeline.ts', [
-  'prepareBlockForSttRegeneration',
-  'regenerationAttempts',
-])
+await requireText('scripts/lock-retry.mjs', ['ETIMEDOUT', 'EAI_AGAIN', 'retryDelayMs'])
+await requireText('services/api/app/api/routes/verification.py', ['/device-benchmarks/summary', '/stt/verify-segments', 'max_regeneration_attempts'])
+await requireText('src/components/workspace/TimelineEditor.tsx', ['STT 검수 · 실패만 재생성', 'sttVerification'])
+await requireText('src/workspace/sttTimeline.ts', ['prepareBlockForSttRegeneration', 'regenerationAttempts'])
 try {
   const workflowFiles = await readdir(join(root, '.github', 'workflows'))
   const activeWorkflows = workflowFiles.filter((name) => /\.ya?ml$/i.test(name))

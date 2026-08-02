@@ -494,6 +494,6 @@ CI Hotfix 4 테스트 규칙:
 4. API 112개, Worker 14개, YAML·정적 게이트·lock proof 손상 fixture를 통과했다.
 5. 기능 목표는 실기기 측정, STT 개선율, 30·60분 Export soak를 그대로 유지한다.
 ## 36. 0.9.3-beta.3 검증 증거와 장문 Export
-- WAV·긴 쉼은 65,536 frame 청크와 `.part` 원자 교체를 사용한다. 오류·FFmpeg timeout 시 부분 파일을 삭제하며 WAV 100ms, MP3 padding 250ms 이내를 요구한다.
-- 합성 무음 10·30·60분 WAV·MP3 soak는 구조 검증일 뿐 실제 음질·엔진 성능 증거가 아니다. 두 번째 STT 검수만 같은 segment ID의 전후 개선량을 JSONL에 저장한다.
-- 증거 bundle은 장치명·메모·음원·모델·로컬 경로를 제외한다. uv manifest는 유지하고 npm lock은 dependency 일치 때 루트 버전만 동기화한다.
+- 65,536-frame 원자적 Export, 10·30·60분 soak, STT 전후 증거와 개인정보 제거 bundle을 구현했으며 합성 soak는 실제 음질 증거가 아니다.
+## 37. 0.9.3-beta.3 CI Hardening 2
+- preflight 전체 보고서, npm 공식 endpoint fallback·lock 복구, 구성요소별 lock 부분 커밋으로 npm 장애가 Python 결과와 성공 lock 보존을 막지 않는다.

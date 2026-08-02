@@ -1,6 +1,5 @@
 #!/bin/sh
 set -eu
 
-printf '%s\n' 'SoriON pre-push: stale files and project rules'
-npm run quality:stale-files
-npm run quality:rules
+printf '%s\n' 'SoriON pre-push: repository preflight'
+npm run quality:preflight
