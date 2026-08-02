@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.1 · Device Verification, STT Measurement & Final Export**
+현재 기준 버전: **0.9.3-beta.2 · Resilient Lock Bootstrap & Selective STT Regeneration**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 10:40 KST**
+최종 갱신: **2026-08-02 12:45 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -482,13 +482,14 @@ CI Hotfix 4 테스트 규칙:
 9. 산출물: `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-full.zip`, `SoriON-AI-0.9.3-beta.1-to-0.9.3-beta.1-ci-hotfix-1-patch.zip`.
 10. 다음 예상 업데이트: artifact의 세 lock을 커밋해 verify-only CI를 확인한 뒤 beta.2 실기기 증거와 선택적 STT 재생성을 진행한다.
 ## 34. 2026-08-02 12:31 KST · v0.9.3-beta.1 CI Hotfix 2
-1. 작업 일시: 2026-08-02 12:31 KST.
-2. 대상·기준: `0.9.3-beta.1 CI Hotfix 1 → CI Hotfix 2`.
-3. 변경 내용: API Ruff import 순서, Vitest fetch mock 호출 타입, 장문 생성 Hook 의존성을 수정하고 Artifact Action을 Node 24 네이티브 버전으로 교체했다.
-4. 변경 이유: 실제 GitHub Actions에서 Ruff I001, TypeScript callback 불일치, React Hook 경고와 Node 20 Action deprecation이 동시에 확인됐다.
-5. 영향 범위: API 진입점 import, Web API 테스트, HomePage 장문 callback, CI artifact 전달과 프로젝트 규칙.
-6. 주요 파일: `services/api/app/main.py`, `src/api/httpClient.test.ts`, `src/pages/HomePage.tsx`, `.github/workflows/ci.yml`, `scripts/check-project-rules.mjs`.
-7. 검증 결과: 정적 품질 게이트, API 109개, Worker 14개, Python compileall, 수정 TS/TSX 구문 검사를 통과했다.
-8. 알려진 제한과 주의사항: 현재 샌드박스에는 프로젝트 npm 의존성이 없어 공식 ESLint·TypeScript·Vitest·Vite 실행은 GitHub Actions가 최종 판정한다.
-9. 산출물: `SoriON-AI-0.9.3-beta.1-ci-hotfix-2-full.zip`, `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-to-ci-hotfix-2-patch.zip`.
-10. 다음 예상 업데이트: Web·API·Worker가 모두 녹색인지 확인한 뒤 `0.9.3-beta.2` 실기기 증거와 선택적 STT 재생성을 진행한다.
+1. Ruff I001, Web fetch mock 타입, Hook 의존성과 Node 20 Artifact Action 경고를 수정했다.
+2. Artifact 전달은 Node 24 네이티브 upload v6·download v7을 사용한다.
+3. 정적 게이트, API 109개, Worker 14개와 compileall을 통과했다.
+4. npm 의존성 실행은 GitHub Actions가 최종 판정한다.
+5. 산출물은 CI Hotfix 2 전체본과 Hotfix 1 기준 패치다.
+## 35. 2026-08-02 12:45 KST · v0.9.3-beta.2
+1. registry 일시 장애를 최대 4회 재시도하고 실패 실행의 npm cache·시도별 로그를 보존한다.
+2. 실기기 5개 프로필 × 10·30·60분 측정 summary와 Quality 화면을 추가했다.
+3. 서버 WAV를 STT 검수해 실패 문장만 새 job으로 최대 2회 재생성한다.
+4. 검증은 API 112개, Worker 14개, YAML·정적 게이트·TS parser를 통과했다.
+5. 다음은 실제 장치 측정, STT 개선율, 30·60분 Export soak와 lock artifact 커밋이다.

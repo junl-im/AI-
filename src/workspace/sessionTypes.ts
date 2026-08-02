@@ -4,6 +4,7 @@ import type {
   ComposerDirective,
   TimelineBlock,
   TimelineBlockStatus,
+  TimelineSttVerification,
   WorkspaceMessage,
 } from './workspaceTypes'
 
@@ -29,6 +30,7 @@ export interface PersistedTimelineVoiceBlock {
   durationSeconds: number
   error: string | null
   revision: number
+  sttVerification?: TimelineSttVerification
 }
 
 export interface PersistedTimelinePauseBlock {

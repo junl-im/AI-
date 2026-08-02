@@ -147,3 +147,12 @@ API `GET /api/v1/connectivity`는 `worker-model-integrity` 검사로 이 상태�
 - `POST /api/v1/quality/stt/measure`: 원문·전사문의 CER·WER·핵심 토큰 오류 측정
 - `POST /api/v1/quality/stt/transcribe`: 로컬 음원 전사와 측정
 - `POST /api/v1/exports`: 완료 WAV·쉼 병합, SRT·VTT, 선택적 MP3 생성
+
+## 0.9.3-beta.2 실기기 summary와 선택 STT 재생성
+
+```text
+GET  /api/v1/quality/device-benchmarks/summary
+POST /api/v1/quality/stt/verify-segments
+```
+
+`device-benchmarks/summary`는 CUDA, Apple Silicon, CPU, Android, iOS와 10·30·60분 조합의 기록 여부와 최신 상태를 반환한다. `stt/verify-segments`는 서버 audio store의 완료 음원을 Faster Whisper로 전사하고 CER·WER·핵심 토큰 오류를 계산해 `regeneration_segment_ids`와 한도 도달 `blocked_segment_ids`를 반환한다.

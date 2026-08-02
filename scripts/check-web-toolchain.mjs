@@ -67,8 +67,8 @@ async function exists(path) {
 const packageJson = await readJson(join(root, 'package.json'))
 checkRuntime()
 
-if (packageJson.version !== '0.9.3-beta.1') {
-  failures.push(`package.json 버전이 0.9.3-beta.1이 아닙니다: ${packageJson.version}`)
+if (packageJson.version !== '0.9.3-beta.2') {
+  failures.push(`package.json 버전이 0.9.3-beta.2이 아닙니다: ${packageJson.version}`)
 }
 if (packageJson.packageManager !== 'npm@10.9.3') {
   failures.push('packageManager는 npm@10.9.3이어야 합니다.')

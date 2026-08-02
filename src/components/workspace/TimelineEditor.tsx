@@ -14,6 +14,8 @@ interface TimelineEditorProps {
   onAddPause: () => void
   onRemove: (id: string) => void
   onClear: () => void
+  onVerifyAndRegenerate?: () => void
+  sttBusy?: boolean
 }
 
 function formatDuration(seconds: number): string {
@@ -66,6 +68,15 @@ function VoiceBlock({
       : block.status === 'failed'
         ? '생성 실패'
         : '생성 대기'
+  const sttLabel = block.sttVerification?.status === 'passed'
+    ? 'STT 통과'
+    : block.sttVerification?.status === 'failed'
+      ? 'STT 재생성 필요'
+      : block.sttVerification?.status === 'blocked'
+        ? 'STT 재생성 한도'
+        : block.sttVerification?.status === 'unchecked'
+          ? 'STT 재검수 대기'
+          : null
   const actionLabel = block.status === 'ready' && block.trackId
     ? `${voiceIndex + 1}번 대사 재생`
     : block.status === 'generating'
@@ -194,6 +205,15 @@ function VoiceBlock({
         <div className="soa-dubbing-block__progress"><i style={{ width: `${Math.max(4, block.progress)}%` }} /></div>
       ) : null}
       {block.error ? <p className="soa-dubbing-block__error">{block.error}</p> : null}
+      {block.sttVerification ? (
+        <p className="soa-dubbing-block__error">
+          {sttLabel} · CER {(block.sttVerification.characterErrorRate * 100).toFixed(1)}%
+          {' · '}WER {(block.sttVerification.wordErrorRate * 100).toFixed(1)}%
+          {block.sttVerification.regenerationAttempts
+            ? ` · 재생성 ${block.sttVerification.regenerationAttempts}회`
+            : ''}
+        </p>
+      ) : null}
     </article>
   )
 }
@@ -209,6 +229,8 @@ export function TimelineEditor({
   onAddPause,
   onRemove,
   onClear,
+  onVerifyAndRegenerate = () => undefined,
+  sttBusy = false,
 }: TimelineEditorProps) {
   let voiceIndex = -1
 
@@ -217,6 +239,13 @@ export function TimelineEditor({
       <header className="soa-dubbing-timeline__head">
         <div><span>VOICE BLOCKS</span><strong>대사별 음성 편집</strong></div>
         <div>
+          <button
+            type="button"
+            onClick={onVerifyAndRegenerate}
+            disabled={sttBusy || !blocks.some((block) => block.kind === 'voice' && block.status === 'ready')}
+          >
+            {sttBusy ? 'STT 검수 중…' : 'STT 검수 · 실패만 재생성'}
+          </button>
           <button type="button" onClick={onAddPause}>쉼 추가</button>
           <button type="button" onClick={onClear} disabled={blocks.length === 0}>전체 비우기</button>
         </div>

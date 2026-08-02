@@ -4,25 +4,64 @@ import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
+import { runCommandWithRetry } from './lock-retry.mjs'
+
 const root = fileURLToPath(new URL('..', import.meta.url))
 const logDirectory = join(root, '.sorion', 'lock-audit')
 await mkdir(logDirectory, { recursive: true })
 
-function run(label, command, args, cwd = root) {
-  const result = spawnSync(command, args, {
+const resilientEnvironment = {
+  ...process.env,
+  npm_config_fetch_retries: process.env.npm_config_fetch_retries ?? '5',
+  npm_config_fetch_retry_factor: process.env.npm_config_fetch_retry_factor ?? '2',
+  npm_config_fetch_retry_mintimeout: process.env.npm_config_fetch_retry_mintimeout ?? '10000',
+  npm_config_fetch_retry_maxtimeout: process.env.npm_config_fetch_retry_maxtimeout ?? '120000',
+  npm_config_fetch_timeout: process.env.npm_config_fetch_timeout ?? '300000',
+  npm_config_maxsockets: process.env.npm_config_maxsockets ?? '8',
+  npm_config_prefer_online: process.env.npm_config_prefer_online ?? 'true',
+  UV_HTTP_TIMEOUT: process.env.UV_HTTP_TIMEOUT ?? '300',
+  UV_HTTP_RETRIES: process.env.UV_HTTP_RETRIES ?? '5',
+}
+
+function safeLabel(value) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+}
+
+function run(label, command, args, cwd = root, attempts = 1) {
+  const attemptOutputs = []
+  const result = runCommandWithRetry({
+    command,
+    args,
     cwd,
-    encoding: 'utf8',
-    maxBuffer: 64 * 1024 * 1024,
-    env: process.env,
+    attempts,
+    env: resilientEnvironment,
+    onAttempt: ({ attempt, attempts: total, output, retryable }) => {
+      const heading = `=== ${label} · attempt ${attempt}/${total} ===`
+      const body = `${heading}\n${output}`
+      attemptOutputs.push(body)
+      writeFileSync(join(logDirectory, `${safeLabel(label)}-attempt-${attempt}.log`), `${body}\n`)
+      process.stdout.write(`\n${body}\n`)
+      if (retryable && attempt < total) {
+        process.stdout.write('일시적 registry/network 오류로 분류되어 자동 재시도합니다.\n')
+      }
+    },
   })
-  const output = [result.stdout, result.stderr].filter(Boolean).join('\n')
-  const safeLabel = label.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-  writeFileSync(join(logDirectory, `${safeLabel}.log`), output)
-  process.stdout.write(`\n=== ${label} ===\n${output}`)
-  if ((result.status ?? 1) !== 0) {
-    throw new Error(`${label} 실패 · 종료 코드 ${result.status ?? 1}`)
+  writeFileSync(
+    join(logDirectory, `${safeLabel(label)}.log`),
+    `${attemptOutputs.join('\n\n')}\n`,
+  )
+  if ((result?.status ?? 1) !== 0) {
+    throw new Error(`${label} 실패 · 종료 코드 ${result?.status ?? 1}`)
   }
-  return output
+  return attemptOutputs.join('\n')
+}
+
+function runBestEffort(label, command, args, cwd = root) {
+  try {
+    run(label, command, args, cwd)
+  } catch (error) {
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
+  }
 }
 
 function requireExactRuntime() {
@@ -46,21 +85,37 @@ function auditWarnings(label, output) {
 }
 
 requireExactRuntime()
+runBestEffort('npm cache verify', 'npm', ['cache', 'verify'])
 const lockOutput = run(
   'npm package lock',
   'npm',
-  ['install', '--package-lock-only', '--ignore-scripts', '--no-audit', '--no-fund'],
+  [
+    'install',
+    '--package-lock-only',
+    '--ignore-scripts',
+    '--no-audit',
+    '--no-fund',
+    '--prefer-online',
+  ],
+  root,
+  4,
 )
 auditWarnings('npm-package-lock', lockOutput)
-const ciOutput = run('npm clean install', 'npm', ['ci', '--no-audit', '--no-fund'])
+const ciOutput = run(
+  'npm clean install',
+  'npm',
+  ['ci', '--no-audit', '--no-fund', '--prefer-offline'],
+  root,
+  4,
+)
 auditWarnings('npm-ci', ciOutput)
 run('npm dependency tree', 'node', ['scripts/audit-npm-tree.mjs'])
 
 for (const service of ['api', 'worker']) {
   const cwd = join(root, 'services', service)
-  run(`${service} uv lock`, 'uv', ['lock', '--python', '3.10'], cwd)
+  run(`${service} uv lock`, 'uv', ['lock', '--python', '3.10'], cwd, 3)
   run(`${service} uv lock check`, 'uv', ['lock', '--check'], cwd)
-  run(`${service} uv sync locked`, 'uv', ['sync', '--locked', '--dev', '--python', '3.10'], cwd)
+  run(`${service} uv sync locked`, 'uv', ['sync', '--locked', '--dev', '--python', '3.10'], cwd, 3)
 }
 run('lock structure check', 'node', ['scripts/check-lockfiles.mjs'])
 console.log(`\n검증된 lock 파일 생성 완료. 감사 로그: ${logDirectory}`)

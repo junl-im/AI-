@@ -21,10 +21,8 @@ function isWideCodePoint(codePoint) {
   )
 }
 function ruffDisplayWidth(line) {
-  return Array.from(line).reduce((width, character) => {
-    const codePoint = character.codePointAt(0)
-    return width + (isWideCodePoint(codePoint) ? 2 : 1)
-  }, 0)
+  return Array.from(line).reduce((width, character) =>
+    width + (isWideCodePoint(character.codePointAt(0)) ? 2 : 1), 0)
 }
 async function walk(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -34,31 +32,21 @@ async function walk(directory) {
       await walk(fullPath)
       continue
     }
-    const path = relative(root, fullPath)
-    const extension = extname(entry.name).toLowerCase()
+    const path = relative(root, fullPath); const extension = extname(entry.name).toLowerCase()
     if (extension === '.svg') {
       failures.push(`${path}: 브랜드 원본은 PNG이며 SVG 파일은 허용하지 않습니다.${path === 'public/sorion-icon.svg' ? ' npm run cleanup:stale-brand 실행 후 Git 삭제를 커밋하세요.' : ''}`)
     }
     if (!sourceExtensions.has(extension)) continue
-    const content = await readFile(fullPath, 'utf8')
-    const lines = content.split(/\r?\n/)
+    const content = await readFile(fullPath, 'utf8'); const lines = content.split(/\r?\n/)
     const lineCount = lines.length
     if (lineCount > 500) failures.push(`${path}: ${lineCount}줄로 500줄 제한을 초과했습니다.`)
     if (extension === '.py') {
       lines.forEach((line, index) => {
         const displayWidth = ruffDisplayWidth(line)
-        if (displayWidth > 100) {
-          failures.push(
-            `${path}:${index + 1}: Ruff 표시 폭 100자를 초과했습니다. (${displayWidth}칸)`,
-          )
-        }
+        if (displayWidth > 100) failures.push(`${path}:${index + 1}: Ruff 표시 폭 100자를 초과했습니다. (${displayWidth}칸)`)
       })
     }
-    const secretPatterns = [
-      /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
-      /AIza[0-9A-Za-z_-]{30,}/,
-      /sk-[A-Za-z0-9_-]{20,}/,
-    ]
+    const secretPatterns = [/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/, /AIza[0-9A-Za-z_-]{30,}/, /sk-[A-Za-z0-9_-]{20,}/]
     if (secretPatterns.some((pattern) => pattern.test(content))) {
       failures.push(`${path}: 비밀키로 의심되는 문자열이 발견되었습니다.`)
     }
@@ -74,9 +62,7 @@ async function requireAbsent(relativePath, forbiddenTexts) {
     return
   }
   for (const forbiddenText of forbiddenTexts) {
-    if (content.includes(forbiddenText)) {
-      failures.push(`${relativePath}: 금지된 구문 "${forbiddenText}"가 남아 있습니다.`)
-    }
+    if (content.includes(forbiddenText)) failures.push(`${relativePath}: 금지된 구문 "${forbiddenText}"가 남아 있습니다.`)
   }
 }
 async function requireText(relativePath, requiredTexts) {
@@ -89,9 +75,7 @@ async function requireText(relativePath, requiredTexts) {
     return
   }
   for (const requiredText of requiredTexts) {
-    if (!content.includes(requiredText)) {
-      failures.push(`${relativePath}: 필수 문구 "${requiredText}"가 없습니다.`)
-    }
+    if (!content.includes(requiredText)) failures.push(`${relativePath}: 필수 문구 "${requiredText}"가 없습니다.`)
   }
 }
 await walk(root)
@@ -115,9 +99,7 @@ await requireText('docs/HANDOVER.md', [
 ])
 const handoverContent = await readFile(join(root, 'docs/HANDOVER.md'), 'utf8')
 const handoverLineCount = handoverContent.split(/\r?\n/).length
-if (handoverLineCount > 500) {
-  failures.push(`docs/HANDOVER.md: ${handoverLineCount}줄로 500줄 제한을 초과했습니다.`)
-}
+if (handoverLineCount > 500) failures.push(`docs/HANDOVER.md: ${handoverLineCount}줄로 500줄 제한을 초과했습니다.`)
 await requireText('docs/CHANGELOG.md', [`## ${currentVersion}`])
 await requireText('docs/NEXT_UPDATE.md', ['# NEXT UPDATE', '## 목표 버전'])
 await requireText('docs/RELEASE.md', ['전체 통파일 ZIP', '덮어쓰기용 패치 ZIP'])
@@ -149,7 +131,7 @@ await requireText('.github/workflows/ci.yml', [
   'working-directory: services/worker',
   'Run Worker tests',
   'Check free-only boundary', 'Check web toolchain manifest', 'Check installed web toolchain',
-  'Validate full dependency tree', "node-version: '22.18.0'", 'Write empty static-host runtime configuration', 'Lockfiles · generate or verify', 'actions/upload-artifact@v6', 'actions/download-artifact@v7', 'npm ci --no-audit --no-fund', 'uv sync --locked', 'generate_lockfiles', 'Check lock bootstrap selector', 'Detect lockfile mode', 'Generate and audit missing or explicitly refreshed lockfiles', "steps.lock-mode.outputs.mode == 'generate'", "steps.lock-mode.outputs.mode == 'verify'", 'npm run locks:mode',
+  'Validate full dependency tree', "node-version: '22.18.0'", 'Write empty static-host runtime configuration', 'Lockfiles · generate or verify', 'actions/upload-artifact@v6', 'actions/download-artifact@v7', 'npm run deps:ci', 'uv sync --locked', 'generate_lockfiles', 'Check lock bootstrap selector', 'Detect lockfile mode', 'Generate and audit missing or explicitly refreshed lockfiles', "steps.lock-mode.outputs.mode == 'generate'", "steps.lock-mode.outputs.mode == 'verify'", 'npm run locks:mode', 'npm run quality:lock-network', 'actions/cache/restore@v5', 'actions/cache/save@v5',
 ])
 await requireAbsent('.github/workflows/ci.yml', [
   'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24',
@@ -462,12 +444,35 @@ await requireText('src/pages/VoiceClonePage.tsx', [
   'const activeJobStatus = job?.status ?? null',
   '[activeJobId, activeJobStatus]',
 ])
+await requireText('scripts/refresh-lockfiles.mjs', [
+  'runCommandWithRetry',
+  "'npm package lock'",
+  "'npm clean install'",
+  'attempts',
+])
+await requireText('scripts/lock-retry.mjs', [
+  'ETIMEDOUT',
+  'EAI_AGAIN',
+  'retryDelayMs',
+])
+await requireText('services/api/app/api/routes/verification.py', [
+  '/device-benchmarks/summary',
+  '/stt/verify-segments',
+  'max_regeneration_attempts',
+])
+await requireText('src/components/workspace/TimelineEditor.tsx', [
+  'STT 검수 · 실패만 재생성',
+  'sttVerification',
+])
+await requireText('src/workspace/sttTimeline.ts', [
+  'prepareBlockForSttRegeneration',
+  'regenerationAttempts',
+])
 try {
   const workflowFiles = await readdir(join(root, '.github', 'workflows'))
   const activeWorkflows = workflowFiles.filter((name) => /\.ya?ml$/i.test(name))
-  if (activeWorkflows.length !== 1 || activeWorkflows[0] !== 'ci.yml') {
+  if (activeWorkflows.length !== 1 || activeWorkflows[0] !== 'ci.yml')
     failures.push(`.github/workflows: 활성 워크플로는 ci.yml 하나여야 합니다. 현재: ${activeWorkflows.join(', ')}`)
-  }
 } catch {
   failures.push('.github/workflows: 워크플로 폴더를 읽을 수 없습니다.')
 }
@@ -476,22 +481,18 @@ if (/astral-sh\/setup-uv@v\d+(?:\.\d+){0,2}/.test(workflowContent)) {
   failures.push('.github/workflows/ci.yml: setup-uv는 존재 여부가 변할 수 있는 태그가 아니라 검증된 커밋 SHA로 고정해야 합니다.')
 }
 for (const legacyAction of ['actions/checkout@v4', 'actions/setup-node@v4', 'actions/setup-python@v4', 'astral-sh/setup-uv@v6', 'actions/configure-pages@v5', 'actions/upload-pages-artifact@v4', 'actions/deploy-pages@v4']) {
-  if (workflowContent.includes(legacyAction)) {
-    failures.push(`.github/workflows/ci.yml: Node.js 20 기반 액션 ${legacyAction}이 남아 있습니다.`)
-  }
+  if (workflowContent.includes(legacyAction)) failures.push(`.github/workflows/ci.yml: Node.js 20 기반 액션 ${legacyAction}이 남아 있습니다.`)
 }
 for (const relativePath of [
   'services/api/app/services/job_manager.py',
   'services/api/app/storage/audio_store.py',
 ]) {
   const content = await readFile(join(root, relativePath), 'utf8')
-  if (/from datetime import .*\bUTC\b/.test(content) || /datetime\.UTC/.test(content)) {
+  if (/from datetime import .*\bUTC\b/.test(content) || /datetime\.UTC/.test(content))
     failures.push(`${relativePath}: Python 3.10과 호환되지 않는 datetime.UTC 사용이 있습니다.`)
-  }
 }
 if (failures.length > 0) {
-  console.error('프로젝트 규칙 검사 실패')
-  failures.forEach((failure) => console.error(`- ${failure}`))
+  console.error('프로젝트 규칙 검사 실패'); failures.forEach((failure) => console.error(`- ${failure}`))
   process.exit(1)
 }
 console.log(`프로젝트 규칙 검사 통과 (v${currentVersion})`)

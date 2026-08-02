@@ -38,7 +38,7 @@ const hook = await readFile(`${root}/.githooks/pre-push`, 'utf8')
 const cleanup = await readFile(`${root}/scripts/remove-stale-brand-assets.mjs`, 'utf8')
 const patchScript = await readFile(`${root}/APPLY_PATCH.sh`, 'utf8')
 const deleteList = await readFile(
-  `${root}/docs/patches/0.9.3-beta.1/DELETE_LIST.txt`,
+  `${root}/docs/patches/0.9.3-beta.2/DELETE_LIST.txt`,
   'utf8',
 )
 if (!hook.includes('npm run quality:stale-files') || !hook.includes('npm run quality:rules')) {

@@ -29,7 +29,7 @@ jobs:
   lockfiles:
     name: Lockfiles · generate or verify
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
@@ -61,9 +61,51 @@ jobs:
           SORION_FORCE_LOCK_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
         run: npm run locks:mode -- --github-output "$GITHUB_OUTPUT"
 
-      - name: Generate and audit missing or explicitly refreshed lockfiles
+      - name: Check lock network retry contract
+        run: npm run quality:lock-network
+
+      - name: Restore npm bootstrap cache
         if: ${{ steps.lock-mode.outputs.mode == 'generate' }}
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.npm
+          key: sorion-npm-bootstrap-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            sorion-npm-bootstrap-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-
+
+      - name: Generate and audit missing or explicitly refreshed lockfiles
+        id: refresh-locks
+        if: ${{ steps.lock-mode.outputs.mode == 'generate' }}
+        continue-on-error: true
         run: npm run locks:refresh
+
+      - name: Save partial npm bootstrap cache
+        if: ${{ always() && steps.lock-mode.outputs.mode == 'generate' }}
+        uses: actions/cache/save@v5
+        with:
+          path: ~/.npm
+          key: sorion-npm-bootstrap-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Upload lock bootstrap diagnostics
+        if: ${{ always() && steps.lock-mode.outputs.mode == 'generate' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: sorion-lock-bootstrap-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 7
+          include-hidden-files: true
+          path: |
+            package-lock.json
+            services/api/uv.lock
+            services/worker/uv.lock
+            .sorion/lock-audit
+
+      - name: Fail after preserving lock bootstrap evidence
+        if: ${{ steps.lock-mode.outputs.mode == 'generate' && steps.refresh-locks.outcome == 'failure' }}
+        run: |
+          echo 'Lock 생성이 registry/network 오류 뒤에도 완료되지 않았습니다.'
+          echo '부분 npm cache와 상세 로그를 보존했습니다. Re-run failed jobs를 실행하면 저장된 cache를 재사용합니다.'
+          exit 1
 
       - name: Verify committed lockfiles
         if: ${{ steps.lock-mode.outputs.mode == 'verify' }}
@@ -90,6 +132,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload verified lockfiles and audit logs
+        if: ${{ steps.lock-mode.outputs.mode == 'verify' || steps.refresh-locks.outcome == 'success' }}
         uses: actions/upload-artifact@v6
         with:
           name: sorion-verified-lockfiles
@@ -133,8 +176,16 @@ jobs:
       - name: Require verified lockfiles
         run: npm run locks:check
 
+      - name: Restore npm bootstrap cache
+        uses: actions/cache/restore@v5
+        with:
+          path: ~/.npm
+          key: sorion-npm-web-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            sorion-npm-bootstrap-${{ runner.os }}-node-22.18.0-${{ hashFiles('package.json') }}-
+
       - name: Install web dependencies from lock
-        run: npm ci --no-audit --no-fund
+        run: npm run deps:ci
 
       - name: Check installed web toolchain
         run: npm run quality:web-toolchain

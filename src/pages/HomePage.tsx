@@ -10,6 +10,7 @@ import {
   useTimelineGeneration,
   type TimelineGenerationOptions,
 } from '../hooks/useTimelineGeneration'
+import { useSelectiveSttRegeneration } from '../hooks/useSelectiveSttRegeneration'
 import { useWorkspaceSessionPersistence } from '../hooks/useWorkspaceSessionPersistence'
 import { saveProject } from '../projects/projectRepository'
 import { useAppStore } from '../store/useAppStore'
@@ -249,6 +250,7 @@ export function HomePage() {
   const appendMessage = useCallback((message: Omit<WorkspaceMessage, 'id'>) => {
     setMessages((current) => [...current, { ...message, id: createRandomId() }])
   }, [])
+  const sttVerification = useSelectiveSttRegeneration({ timeline, appendMessage, showNotice })
   const buildOptions = useCallback((): TimelineGenerationOptions => ({
     voiceId,
     voiceName: selectedVoice.name,
@@ -424,6 +426,7 @@ export function HomePage() {
     }
     await timeline.retryBlock(id)
   }
+
   function clearCurrentWork() {
     setPendingGeneration(null)
     startNewWorkspace()
@@ -487,6 +490,8 @@ export function HomePage() {
             setPendingGeneration(null)
             timeline.clear()
           }}
+          onVerifyAndRegenerate={() => void sttVerification.run()}
+          sttBusy={sttVerification.busy}
         />
       </main>
     </div>

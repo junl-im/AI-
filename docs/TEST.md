@@ -503,3 +503,12 @@ npm run build
 - 기존 lock이 존재하지만 잘못된 경우 자동 재생성하지 않고 verify 단계에서 실패하는지 확인
 - generate 모드가 만든 artifact를 Web·API·Worker가 같은 실행에서 내려받는지 확인
 - 일반 push·PR이 lock 누락만으로 `npm run locks:check`에서 조기 종료되지 않는지 확인
+
+## 0.9.3-beta.2 회귀 검사
+
+- `npm run quality:lock-network`: ETIMEDOUT·EAI_AGAIN·429·503 등의 재시도 분류와 ERESOLVE 비재시도를 확인한다.
+- lock 생성과 Web `npm ci`는 최대 4회 재시도하며 실패 실행도 npm cache와 시도별 로그를 보존한다.
+- 장치 summary는 5개 프로필 × 10·30·60분의 누락 시나리오를 계산한다.
+- STT 일괄 검수는 정상 문장을 제외하고 금액·CER·WER 오류 문장만 재생성 대상으로 고른다.
+- 재생성 횟수가 최대값에 도달한 문장은 blocked로 반환한다.
+- 타임라인 재생성 준비는 기존 jobId, trackId, audio를 제거하고 revision과 시도 횟수를 증가시킨다.

@@ -8,4 +8,4 @@ router = APIRouter()
 
 @router.post("/plan", response_model=DirectorPlanResponse)
 async def plan_voice_project(request: DirectorRequest) -> DirectorPlanResponse:
-    return build_director_plan(request, "0.9.3-beta.1")
+    return build_director_plan(request, "0.9.3-beta.2")

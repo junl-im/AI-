@@ -79,3 +79,20 @@ export interface QualityComparison {
   changes: string[]
   results: QualityResult[]
 }
+
+export interface DeviceBenchmarkCoverage {
+  profile: 'cuda' | 'apple-silicon' | 'cpu' | 'android' | 'ios'
+  sampleMinutes: number
+  recorded: boolean
+  latestStatus: 'ready' | 'warning' | 'failed' | null
+  latestRealtimeFactor: number | null
+}
+
+export interface DeviceBenchmarkSummary {
+  totalRecords: number
+  readyRecords: number
+  warningRecords: number
+  failedRecords: number
+  coverage: DeviceBenchmarkCoverage[]
+  missingScenarios: string[]
+}

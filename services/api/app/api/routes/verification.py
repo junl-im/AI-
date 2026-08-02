@@ -10,9 +10,13 @@ from starlette.concurrency import run_in_threadpool
 from app.schemas.verification import (
     DeviceBenchmarkRequest,
     DeviceBenchmarkResponse,
+    DeviceBenchmarkSummaryResponse,
+    SttBatchVerificationRequest,
+    SttBatchVerificationResponse,
     SttMeasurementRequest,
     SttMeasurementResponse,
     SttProbeResponse,
+    SttSegmentVerificationResponse,
 )
 from app.services.stt_metrics import character_error, critical_token_errors, word_error
 
@@ -38,6 +42,52 @@ def _measure(payload: SttMeasurementRequest) -> SttMeasurementResponse:
         critical_tokens=critical,
         realtime_factor=realtime_factor,
         needs_regeneration=character.rate > 0.08 or word.rate > 0.15 or critical_failed,
+    )
+
+
+def _regeneration_reasons(
+    measurement: SttMeasurementResponse,
+    character_threshold: float,
+    word_threshold: float,
+) -> list[str]:
+    reasons: list[str] = []
+    if measurement.character_error_rate > character_threshold:
+        reasons.append("character_error_rate")
+    if measurement.word_error_rate > word_threshold:
+        reasons.append("word_error_rate")
+    for category, metric in measurement.critical_tokens.items():
+        if metric.error_count:
+            reasons.append(f"critical_token:{category}")
+    return reasons
+
+
+def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkSummaryResponse:
+    required_profiles = ["cuda", "apple-silicon", "cpu", "android", "ios"]
+    required_minutes = [10, 30, 60]
+    latest: dict[tuple[str, int], DeviceBenchmarkResponse] = {}
+    for item in sorted(items, key=lambda value: value.recorded_at):
+        latest[(item.device_profile, item.sample_minutes)] = item
+    coverage = []
+    missing = []
+    for profile in required_profiles:
+        for minutes in required_minutes:
+            item = latest.get((profile, minutes))
+            coverage.append({
+                "profile": profile,
+                "sample_minutes": minutes,
+                "recorded": item is not None,
+                "latest_status": item.status if item else None,
+                "latest_realtime_factor": item.realtime_factor if item else None,
+            })
+            if item is None:
+                missing.append(f"{profile}:{minutes}m")
+    return DeviceBenchmarkSummaryResponse(
+        total_records=len(items),
+        ready_records=sum(item.status == "ready" for item in items),
+        warning_records=sum(item.status == "warning" for item in items),
+        failed_records=sum(item.status == "failed" for item in items),
+        coverage=coverage,
+        missing_scenarios=missing,
     )
 
 
@@ -72,6 +122,15 @@ async def list_device_benchmarks(request: Request) -> list[DeviceBenchmarkRespon
         DeviceBenchmarkResponse.model_validate(item)
         for item in request.app.state.device_benchmark_store.list()
     ]
+
+
+@router.get("/device-benchmarks/summary", response_model=DeviceBenchmarkSummaryResponse)
+async def summarize_device_benchmarks(request: Request) -> DeviceBenchmarkSummaryResponse:
+    items = [
+        DeviceBenchmarkResponse.model_validate(item)
+        for item in request.app.state.device_benchmark_store.list(limit=1000)
+    ]
+    return _benchmark_summary(items)
 
 
 @router.post("/stt/measure", response_model=SttMeasurementResponse)
@@ -144,3 +203,80 @@ async def transcribe_and_measure(
         audio_duration_seconds=duration,
         processing_seconds=elapsed,
     ))
+
+
+@router.post("/stt/verify-segments", response_model=SttBatchVerificationResponse)
+async def verify_stt_segments(
+    payload: SttBatchVerificationRequest,
+    request: Request,
+) -> SttBatchVerificationResponse:
+    adapter = request.app.state.stt_adapter
+    probe = adapter.probe()
+    if not probe.ready:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"SOA-6201: {probe.reason}",
+        )
+    started = perf_counter()
+    results: list[SttSegmentVerificationResponse] = []
+    candidates: list[str] = []
+    blocked: list[str] = []
+    for segment in payload.segments:
+        path = request.app.state.audio_store.resolve(segment.audio_filename)
+        if path is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=(
+                    "SOA-6205: STT 검수 음원을 찾을 수 없습니다: "
+                    f"{segment.segment_id}"
+                ),
+            )
+        transcribe_started = perf_counter()
+        transcript, duration = await run_in_threadpool(adapter.transcribe, path)
+        elapsed = perf_counter() - transcribe_started
+        measurement = _measure(SttMeasurementRequest(
+            reference_text=segment.reference_text,
+            transcript_text=transcript,
+            engine_id=probe.engine_id,
+            model_id=adapter.model_name,
+            device_profile=adapter.device,
+            audio_duration_seconds=duration,
+            processing_seconds=elapsed,
+        ))
+        reasons = _regeneration_reasons(
+            measurement,
+            payload.character_error_threshold,
+            payload.word_error_threshold,
+        )
+        needs_regeneration = bool(reasons)
+        regeneration_allowed = (
+            needs_regeneration
+            and segment.regeneration_attempts < payload.max_regeneration_attempts
+        )
+        if regeneration_allowed:
+            candidates.append(segment.segment_id)
+        elif needs_regeneration:
+            blocked.append(segment.segment_id)
+        results.append(SttSegmentVerificationResponse(
+            segment_id=segment.segment_id,
+            audio_filename=segment.audio_filename,
+            transcript_text=transcript,
+            character_error_rate=measurement.character_error_rate,
+            word_error_rate=measurement.word_error_rate,
+            critical_tokens=measurement.critical_tokens,
+            realtime_factor=measurement.realtime_factor,
+            needs_regeneration=needs_regeneration,
+            regeneration_allowed=regeneration_allowed,
+            reasons=reasons,
+        ))
+    selected = candidates[:payload.max_regenerations_per_run]
+    blocked.extend(candidates[payload.max_regenerations_per_run:])
+    return SttBatchVerificationResponse(
+        engine_id=probe.engine_id,
+        model_id=adapter.model_name,
+        device_profile=adapter.device,
+        results=results,
+        regeneration_segment_ids=selected,
+        blocked_segment_ids=blocked,
+        processing_seconds=perf_counter() - started,
+    )

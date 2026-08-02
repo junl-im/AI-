@@ -74,3 +74,122 @@ def test_stt_transcribe_rejects_oversized_upload(client):
 
     assert response.status_code == 413
     assert "크기 제한" in response.json()["detail"]
+
+
+def test_device_benchmark_summary_reports_missing_scenarios(client):
+    payload = {
+        "device_profile": "cpu",
+        "device_name": "Test CPU",
+        "engine_id": "cosyvoice3",
+        "model_id": "cosyvoice3-local",
+        "model_version": "1",
+        "sample_minutes": 10,
+        "processing_seconds": 60,
+        "audio_duration_seconds": 120,
+        "succeeded": True,
+    }
+    client.post("/api/v1/quality/device-benchmarks", json=payload)
+
+    response = client.get("/api/v1/quality/device-benchmarks/summary")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total_records"] == 1
+    assert body["ready_records"] == 1
+    assert "cpu:10m" not in body["missing_scenarios"]
+    assert "cuda:10m" in body["missing_scenarios"]
+
+
+def test_stt_segment_verification_selects_only_failed_segments(client):
+    class ReadyProbe:
+        engine_id = "faster-whisper"
+        ready = True
+        reason = "ready"
+
+    class ReadyAdapter:
+        model_name = "small"
+        device = "cpu"
+        compute_type = "int8"
+
+        def probe(self):
+            return ReadyProbe()
+
+        def transcribe(self, path):
+            if path.name == "good.wav":
+                return "결제 금액은 38,500원입니다.", 10.0
+            return "결제 금액은 35,800원입니다.", 10.0
+
+    client.app.state.stt_adapter = ReadyAdapter()
+    for filename in ["good.wav", "bad.wav"]:
+        (client.app.state.settings.audio_path / filename).write_bytes(b"test")
+
+    response = client.post(
+        "/api/v1/quality/stt/verify-segments",
+        json={
+            "segments": [
+                {
+                    "segment_id": "good",
+                    "audio_filename": "good.wav",
+                    "reference_text": "결제 금액은 38,500원입니다.",
+                },
+                {
+                    "segment_id": "bad",
+                    "audio_filename": "bad.wav",
+                    "reference_text": "결제 금액은 38,500원입니다.",
+                },
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["regeneration_segment_ids"] == ["bad"]
+    assert body["blocked_segment_ids"] == []
+    assert body["results"][0]["needs_regeneration"] is False
+    assert body["results"][1]["reasons"] == [
+        "character_error_rate",
+        "word_error_rate",
+        "critical_token:money",
+    ]
+
+
+def test_stt_segment_verification_blocks_attempt_limit(client):
+    class ReadyProbe:
+        engine_id = "faster-whisper"
+        ready = True
+        reason = "ready"
+
+    class ReadyAdapter:
+        model_name = "small"
+        device = "cpu"
+        compute_type = "int8"
+
+        def probe(self):
+            return ReadyProbe()
+
+        def transcribe(self, path):
+            return "완전히 다른 문장", 10.0
+
+    client.app.state.stt_adapter = ReadyAdapter()
+    (client.app.state.settings.audio_path / "bad.wav").write_bytes(b"test")
+
+    response = client.post(
+        "/api/v1/quality/stt/verify-segments",
+        json={
+            "max_regeneration_attempts": 2,
+            "segments": [
+                {
+                    "segment_id": "bad",
+                    "audio_filename": "bad.wav",
+                    "reference_text": "원래 문장 123개",
+                    "regeneration_attempts": 2,
+                },
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["regeneration_segment_ids"] == []
+    assert body["blocked_segment_ids"] == ["bad"]
+    assert body["results"][0]["regeneration_allowed"] is False

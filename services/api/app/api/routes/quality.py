@@ -31,7 +31,7 @@ def _absolute_audio_url(request: Request, audio_url: str | None) -> str | None:
 @router.get("/diagnostics", response_model=QualityDiagnosticsResponse)
 async def diagnostics(request: Request) -> QualityDiagnosticsResponse:
     runtime_info = request.app.state.engine_orchestrator.list_info()
-    return quality_diagnostics("0.9.3-beta.1", engine_registry.list_tts(), runtime_info)
+    return quality_diagnostics("0.9.3-beta.2", engine_registry.list_tts(), runtime_info)
 
 
 @router.get("/sentences", response_model=list[EvaluationSentence])

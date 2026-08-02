@@ -3,6 +3,16 @@ import type { GeneratedAudio } from '../tts/generationTypes'
 
 export type TimelineBlockStatus = 'queued' | 'generating' | 'ready' | 'failed'
 
+
+export interface TimelineSttVerification {
+  status: 'passed' | 'failed' | 'blocked' | 'unchecked'
+  transcriptText: string
+  characterErrorRate: number
+  wordErrorRate: number
+  reasons: string[]
+  regenerationAttempts: number
+}
+
 interface TimelineBaseBlock {
   id: string
   durationSeconds: number
@@ -25,6 +35,7 @@ export interface TimelineVoiceBlock extends TimelineBaseBlock {
   trackId: string | null
   error: string | null
   revision: number
+  sttVerification?: TimelineSttVerification
 }
 
 export interface TimelinePauseBlock extends TimelineBaseBlock {

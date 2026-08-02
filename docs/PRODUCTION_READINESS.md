@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.9.3-beta.1`
+현재 기준 버전: `0.9.3-beta.2`
 
 ## 목적
 
@@ -128,3 +128,13 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - STT는 CER·WER와 핵심 토큰 오류를 함께 판단한다.
 - 최종 Export는 완료 API WAV만 사용하고 미완료 구간을 기본 차단한다.
 - MP3는 FFmpeg가 실제 준비된 환경에서만 ready로 본다.
+
+## 0.9.3-beta.2 선택 재생성·CI 네트워크 게이트
+
+- [x] npm lock과 locked install이 일시 registry 오류를 재시도한다.
+- [x] 실패 실행도 npm cache와 lock 감사 로그를 보존한다.
+- [x] 실기기 5개 프로필 × 10·30·60분 증거 진행률을 표시한다.
+- [x] STT 실패 문장만 새 TTS job으로 재생성하고 최대 횟수를 제한한다.
+- [ ] 세 npm·uv lock artifact를 검토해 저장소에 커밋한다.
+- [ ] 실제 CUDA·MPS·CPU·Android·iOS 측정값을 채운다.
+- [ ] 30·60분 Export soak와 자막 싱크를 실기기로 검증한다.

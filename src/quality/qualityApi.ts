@@ -153,3 +153,34 @@ export async function compareQualityEngines(request: QualityCompareRequest): Pro
     results: result.results.map(mapResult),
   }
 }
+
+export async function getDeviceBenchmarkSummary() {
+  const result = await apiRequest<{
+    total_records: number
+    ready_records: number
+    warning_records: number
+    failed_records: number
+    coverage: Array<{
+      profile: 'cuda' | 'apple-silicon' | 'cpu' | 'android' | 'ios'
+      sample_minutes: number
+      recorded: boolean
+      latest_status: 'ready' | 'warning' | 'failed' | null
+      latest_realtime_factor: number | null
+    }>
+    missing_scenarios: string[]
+  }>('/quality/device-benchmarks/summary')
+  return {
+    totalRecords: result.total_records,
+    readyRecords: result.ready_records,
+    warningRecords: result.warning_records,
+    failedRecords: result.failed_records,
+    coverage: result.coverage.map((item) => ({
+      profile: item.profile,
+      sampleMinutes: item.sample_minutes,
+      recorded: item.recorded,
+      latestStatus: item.latest_status,
+      latestRealtimeFactor: item.latest_realtime_factor,
+    })),
+    missingScenarios: result.missing_scenarios,
+  }
+}

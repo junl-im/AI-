@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
 import { QualityDiagnosticsCard } from '../components/evaluation/QualityDiagnosticsCard'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { QualityResultCard } from '../components/evaluation/QualityResultCard'
 import { TextPreviewCard } from '../components/evaluation/TextPreviewCard'
 import {
   compareQualityEngines,
+  getDeviceBenchmarkSummary,
   getEvaluationSentences,
   getQualityDiagnostics,
   previewQualityText,
 } from '../quality/qualityApi'
 import type {
+  DeviceBenchmarkSummary,
   EvaluationSentence,
   QualityComparison,
   QualityDiagnostics,
@@ -28,12 +31,14 @@ const FALLBACK_SENTENCE: EvaluationSentence = {
 
 export function QualityPage() {
   const [diagnostics, setDiagnostics] = useState<QualityDiagnostics | null>(null)
+  const [deviceSummary, setDeviceSummary] = useState<DeviceBenchmarkSummary | null>(null)
   const [sentences, setSentences] = useState<EvaluationSentence[]>([FALLBACK_SENTENCE])
   const [text, setText] = useState(FALLBACK_SENTENCE.text)
   const [selectedEngines, setSelectedEngines] = useState<string[]>([])
   const [preview, setPreview] = useState<TextPreview | null>(null)
   const [comparison, setComparison] = useState<QualityComparison | null>(null)
   const [loadingDiagnostics, setLoadingDiagnostics] = useState(true)
+  const [loadingDeviceSummary, setLoadingDeviceSummary] = useState(true)
   const [loadingPreview, setLoadingPreview] = useState(false)
   const [comparing, setComparing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -55,12 +60,25 @@ export function QualityPage() {
     }
   }, [])
 
+
+  const refreshDeviceSummary = useCallback(async () => {
+    setLoadingDeviceSummary(true)
+    try {
+      setDeviceSummary(await getDeviceBenchmarkSummary())
+    } catch {
+      setDeviceSummary(null)
+    } finally {
+      setLoadingDeviceSummary(false)
+    }
+  }, [])
+
   const refreshReviewCount = useCallback(() => {
     void listQualityReviews().then((items) => setReviewCount(items.length)).catch(() => undefined)
   }, [])
 
   useEffect(() => {
     void refreshDiagnostics()
+    void refreshDeviceSummary()
     refreshReviewCount()
     void getEvaluationSentences().then((items) => {
       if (items.length) {
@@ -68,7 +86,7 @@ export function QualityPage() {
         setText(items[0].text)
       }
     }).catch(() => undefined)
-  }, [refreshDiagnostics, refreshReviewCount])
+  }, [refreshDeviceSummary, refreshDiagnostics, refreshReviewCount])
 
   const comparableEngines = useMemo(
     () => diagnostics?.engines.filter((engine) => engine.ready && engine.mode !== 'mock') ?? [],
@@ -135,6 +153,12 @@ export function QualityPage() {
       description="같은 문장을 동일 조건으로 생성해 속도·파일 크기·발음·자연스러움을 비교하고, 자동 엔진 우선순위의 근거를 축적합니다."
     >
       <div className="space-y-4">
+        <DeviceEvidenceCard
+          summary={deviceSummary}
+          loading={loadingDeviceSummary}
+          onRefresh={() => void refreshDeviceSummary()}
+        />
+
         <QualityDiagnosticsCard
           diagnostics={diagnostics}
           loading={loadingDiagnostics}

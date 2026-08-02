@@ -29,16 +29,17 @@ import {
   type TimelineGenerationOptions,
 } from '../workspace/timelineBlocks'
 import { createRandomId } from '../utils/randomId'
-
+import type { SttSegmentVerificationResult } from '../stt/verificationApi'
+import {
+  applySttResultsToBlocks,
+  regenerateSttBlocks,
+} from '../workspace/sttTimeline'
 export type { TimelineGenerationOptions } from '../workspace/timelineBlocks'
-
 export interface TimelineGenerationResult {
   blockId: string
   audio: GeneratedAudio
 }
-
 type BlocksUpdater = (current: TimelineBlock[]) => TimelineBlock[]
-
 export function useTimelineGeneration() {
   const [blocks, setBlocks] = useState<TimelineBlock[]>([])
   const blocksRef = useRef<TimelineBlock[]>([])
@@ -46,30 +47,25 @@ export function useTimelineGeneration() {
   const timers = useRef(new Map<string, number>())
   const enqueue = usePlayerStore((state) => state.enqueue)
   const removeTrack = usePlayerStore((state) => state.remove)
-
   const commit = useCallback((updater: BlocksUpdater) => {
     const next = updater(blocksRef.current)
     blocksRef.current = next
     setBlocks(next)
   }, [])
-
   const stopPolling = useCallback((blockId: string) => {
     const timer = timers.current.get(blockId)
     if (timer !== undefined) window.clearTimeout(timer)
     timers.current.delete(blockId)
   }, [])
-
   const cancelActiveGeneration = useCallback((blockId: string) => {
     controllers.current.get(blockId)?.abort()
     controllers.current.delete(blockId)
     stopPolling(blockId)
   }, [stopPolling])
-
   useEffect(() => () => {
     controllers.current.forEach((controller) => controller.abort())
     timers.current.forEach((timer) => window.clearTimeout(timer))
   }, [])
-
   const updateVoiceBlock = useCallback((
     id: string,
     patch: Partial<TimelineVoiceBlock>,
@@ -81,7 +77,6 @@ export function useTimelineGeneration() {
       return { ...block, ...patch }
     }))
   }, [commit])
-
   const stageText = useCallback((
     text: string,
     options: TimelineGenerationOptions,
@@ -313,6 +308,18 @@ export function useTimelineGeneration() {
     }
     return results
   }, [generateBlock])
+
+  const applySttVerification = useCallback((results: SttSegmentVerificationResult[]) => {
+    commit((current) => applySttResultsToBlocks(current, results))
+  }, [commit])
+
+  const regenerateBlocks = useCallback((ids: string[]) => regenerateSttBlocks(ids, {
+    cancel: cancelActiveGeneration,
+    update: commit,
+    removeTrack,
+    generate: generateBlock,
+  }), [cancelActiveGeneration, commit, generateBlock, removeTrack])
+
   const restoreSession = useCallback((savedBlocks: PersistedTimelineBlock[]): string[] => {
     controllers.current.forEach((controller) => controller.abort())
     timers.current.forEach((timer) => window.clearTimeout(timer))
@@ -416,6 +423,7 @@ export function useTimelineGeneration() {
         jobId: null,
         error: null,
         revision: block.revision + 1,
+        sttVerification: undefined,
       }
     }))
   }, [cancelActiveGeneration, commit, removeTrack])
@@ -474,6 +482,8 @@ export function useTimelineGeneration() {
     restoreSession,
     recoverBlocks,
     generateAll,
+    applySttVerification,
+    regenerateBlocks,
     retryBlock: generateBlock,
     moveBlock,
     reorderBlock,

@@ -73,3 +73,58 @@ class SttProbeResponse(BaseModel):
     model_name: str
     device: str
     compute_type: str
+
+
+class DeviceBenchmarkCoverage(BaseModel):
+    profile: DeviceProfile
+    sample_minutes: int
+    recorded: bool
+    latest_status: Literal["ready", "warning", "failed"] | None = None
+    latest_realtime_factor: float | None = None
+
+
+class DeviceBenchmarkSummaryResponse(BaseModel):
+    total_records: int
+    ready_records: int
+    warning_records: int
+    failed_records: int
+    coverage: list[DeviceBenchmarkCoverage]
+    missing_scenarios: list[str]
+
+
+class SttSegmentVerificationRequest(BaseModel):
+    segment_id: str = Field(min_length=1, max_length=120)
+    audio_filename: str = Field(min_length=1, max_length=255)
+    reference_text: str = Field(min_length=1, max_length=5000)
+    regeneration_attempts: int = Field(default=0, ge=0, le=10)
+
+
+class SttBatchVerificationRequest(BaseModel):
+    segments: list[SttSegmentVerificationRequest] = Field(min_length=1, max_length=500)
+    character_error_threshold: float = Field(default=0.08, ge=0, le=1)
+    word_error_threshold: float = Field(default=0.15, ge=0, le=1)
+    max_regeneration_attempts: int = Field(default=2, ge=0, le=5)
+    max_regenerations_per_run: int = Field(default=20, ge=0, le=100)
+
+
+class SttSegmentVerificationResponse(BaseModel):
+    segment_id: str
+    audio_filename: str
+    transcript_text: str
+    character_error_rate: float
+    word_error_rate: float
+    critical_tokens: dict[str, CriticalTokenMetric]
+    realtime_factor: float | None
+    needs_regeneration: bool
+    regeneration_allowed: bool
+    reasons: list[str]
+
+
+class SttBatchVerificationResponse(BaseModel):
+    engine_id: str
+    model_id: str
+    device_profile: str
+    results: list[SttSegmentVerificationResponse]
+    regeneration_segment_ids: list[str]
+    blocked_segment_ids: list[str]
+    processing_seconds: float

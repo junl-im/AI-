@@ -1,6 +1,6 @@
 import type { VoiceEmotion } from '../ai/contracts'
 import type { AppPage } from '../store/useAppStore'
-import type { TimelineBlockStatus } from './workspaceTypes'
+import type { TimelineBlockStatus, TimelineSttVerification } from './workspaceTypes'
 import {
   ACTIVE_WORKSPACE_SESSION_ID,
   WORKSPACE_SESSION_SCHEMA_VERSION,
@@ -30,6 +30,27 @@ function safeText(value: unknown, limit: number): string {
 
 function finiteNumber(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
+}
+
+
+function normalizeSttVerification(value: unknown): TimelineSttVerification | undefined {
+  if (!isRecord(value)) return undefined
+  const status = ['passed', 'failed', 'blocked', 'unchecked'].includes(String(value.status))
+    ? value.status as TimelineSttVerification['status']
+    : 'unchecked'
+  return {
+    status,
+    transcriptText: safeText(value.transcriptText, MAX_BLOCK_TEXT_LENGTH),
+    characterErrorRate: Math.min(1, Math.max(0, finiteNumber(value.characterErrorRate, 0))),
+    wordErrorRate: Math.min(1, Math.max(0, finiteNumber(value.wordErrorRate, 0))),
+    reasons: Array.isArray(value.reasons)
+      ? value.reasons.filter((item): item is string => typeof item === 'string').slice(0, 20)
+      : [],
+    regenerationAttempts: Math.min(
+      10,
+      Math.max(0, Math.floor(finiteNumber(value.regenerationAttempts, 0))),
+    ),
+  }
 }
 
 function normalizeBlock(value: unknown): PersistedTimelineBlock | null {
@@ -66,6 +87,7 @@ function normalizeBlock(value: unknown): PersistedTimelineBlock | null {
     durationSeconds: Math.max(0.1, finiteNumber(value.durationSeconds, 1.2)),
     error: typeof value.error === 'string' ? value.error.slice(0, 500) : null,
     revision: Math.max(1, Math.floor(finiteNumber(value.revision, 1))),
+    sttVerification: normalizeSttVerification(value.sttVerification),
   }
 }
 
@@ -98,6 +120,7 @@ export function createWorkspaceSession(
       durationSeconds: block.durationSeconds,
       error: block.error?.slice(0, 500) ?? null,
       revision: block.revision,
+      sttVerification: block.sttVerification,
     }
   })
 

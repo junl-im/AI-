@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.9.3-beta.1",
+  "version": "0.9.3-beta.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,7 +17,7 @@
     "cleanup:stale-brand": "node scripts/remove-stale-brand-assets.mjs",
     "quality:web-manifest": "node scripts/check-web-toolchain.mjs --manifest-only",
     "quality:web-toolchain": "node scripts/check-web-toolchain.mjs",
-    "quality": "npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
+    "quality": "npm run quality:lock-network && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
@@ -40,7 +40,9 @@
     "prepare": "node scripts/install-git-hooks.mjs",
     "hooks:install": "node scripts/install-git-hooks.mjs",
     "quality:stale-files": "node scripts/check-stale-files.mjs",
-    "locks:sync-metadata": "node scripts/sync-lock-metadata.mjs"
+    "locks:sync-metadata": "node scripts/sync-lock-metadata.mjs",
+    "quality:lock-network": "node scripts/check-lock-network-retry.mjs",
+    "deps:ci": "node scripts/install-web-dependencies.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",

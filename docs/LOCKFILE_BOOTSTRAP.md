@@ -23,13 +23,15 @@ SoriON Web 설치·빌드는 `actions/setup-node`, `.nvmrc`, `.node-version`의 
    - `services/worker/uv.lock`
 2. 하나라도 없으면 `generate` 모드가 선택된다.
 3. CI가 다음 순서를 실행한다.
-   - `npm install --package-lock-only`
-   - `npm ci`
+   - npm cache 복원과 lock network 재시도 계약 검사
+   - `npm install --package-lock-only` 최대 4회 재시도
+   - `npm ci` 최대 4회 재시도
    - npm warning과 전체 `npm ls --all --json --long` 검사
    - API·Worker `uv lock`, `uv lock --check`, `uv sync --locked`
-4. 생성·검증된 세 lock과 `.sorion/lock-audit` 로그를
+4. 실패한 실행도 `~/.npm`의 부분 cache와 시도별 `.sorion/lock-audit` 로그를 보존한다.
+5. 생성·검증된 세 lock과 `.sorion/lock-audit` 로그를
    `sorion-verified-lockfiles` artifact로 업로드한다.
-5. 같은 workflow의 Web·API·Worker가 artifact를 내려받아 각각 `npm ci`와
+6. 같은 workflow의 Web·API·Worker가 artifact를 내려받아 각각 `npm ci`와
    `uv sync --locked`로 품질 검사를 계속한다.
 
 따라서 첫 push는 lock 누락만으로 멈추지 않는다. 다만 이후 실행을 완전히 재현 가능하게 만들려면
@@ -69,3 +71,7 @@ Actions 수동 실행에서 `generate_lockfiles=true`를 선택해 강제 재생
 - Python 3.10에서 `uv lock --check` 또는 locked sync 실패
 
 lock 누락은 자동 bootstrap 대상이고, 존재하지만 잘못된 lock은 실패 대상이다.
+
+## registry 일시 장애 처리
+
+`ETIMEDOUT`, `EAI_AGAIN`, `ECONNRESET`, `ECONNREFUSED`, `ENETUNREACH`, HTTP 429·502·503·504는 최대 4회 재시도한다. 각 시도는 독립 로그로 남고 5·15·30초 간격 뒤 다시 실행한다. 모든 시도가 실패하면 오류를 성공으로 가리지 않고 job은 실패하지만, `sorion-lock-bootstrap-diagnostics-*` artifact와 npm cache를 먼저 보존한다. 같은 Actions 실행에서 **Re-run failed jobs**를 누르면 앞선 cache를 복원한다. 의존성 충돌인 ERESOLVE는 네트워크 오류로 재시도하지 않는다.

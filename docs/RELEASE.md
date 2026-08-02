@@ -391,3 +391,11 @@ Semantic Versioning을 사용한다.
 - 목적: Ruff I001, Web TypeScript mock 호출 타입, React Hook 의존성과 Node 20 Artifact Action 경고 수정
 - Artifact Action: `actions/upload-artifact@v6`, `actions/download-artifact@v7`
 - 삭제 파일: 없음
+
+## 0.9.3-beta.2
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.3-beta.2-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.3-beta.1-ci-hotfix-2-to-0.9.3-beta.2-patch.zip`
+- 기준 버전: `0.9.3-beta.1 CI Hotfix 2`
+- 핵심: registry 일시 장애 재시도·부분 npm cache 보존, 실기기 측정표, 실패 문장 선택 STT 재생성.
+- 패치에는 stale SVG 삭제 목록과 Windows·macOS/Linux 적용 스크립트를 포함한다.

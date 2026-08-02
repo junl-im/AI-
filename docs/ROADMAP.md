@@ -269,3 +269,10 @@
 - 실기기 벤치마크 기록 API와 STT CER·WER 측정
 - WAV 병합, 실제 시간 SRT·VTT, 선택적 MP3와 Web 다운로드 동선
 - 실제 장치 성능 증거와 실패 문장 제한 재생성은 beta.2로 이관
+
+## 0.9.3-beta.2 완료
+
+- npm registry 일시 장애의 재시도, cache 보존, 시도별 진단 artifact를 추가했다.
+- 실기기 15개 시나리오의 증거 진행률을 API와 Quality 화면에서 확인한다.
+- Faster Whisper 일괄 검수 결과를 타임라인에 연결하고 실패한 문장만 제한 재생성한다.
+- 다음은 실제 장치 수치, 재생성 전후 개선율, 30·60분 Export soak다.

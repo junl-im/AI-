@@ -2,7 +2,7 @@
 set -eu
 cd "$(dirname "$0")"
 npm run locks:sync-metadata
-node scripts/apply-delete-list.mjs docs/patches/0.9.3-beta.1/DELETE_LIST.txt
+node scripts/apply-delete-list.mjs docs/patches/0.9.3-beta.2/DELETE_LIST.txt
 npm run cleanup:stale-brand
 npm run hooks:install
 npm run quality:stale-files

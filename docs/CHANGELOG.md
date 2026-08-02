@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.9.3-beta.2 - 2026-08-02
+
+### Resilient Lock Bootstrap
+
+- npm registry의 ETIMEDOUT, EAI_AGAIN, ECONNRESET, 429·502·503·504를 일시 장애로 분류해 lock 생성과 `npm ci`를 자동 재시도합니다.
+- 실패 실행에서도 npm cache와 시도별 lock 감사 로그를 artifact로 보존해 재실행이 앞선 다운로드를 재사용합니다.
+- Web quality의 locked install도 같은 cache와 재시도 정책을 사용합니다.
+
+### Real Device Evidence & Selective STT Regeneration
+
+- Windows CUDA, Apple Silicon, CPU, Android, iOS의 10·30·60분 측정 진행률 summary API와 Quality 화면을 추가했습니다.
+- 서버 WAV를 Faster Whisper로 검수하고 CER·WER·핵심 토큰 기준에 실패한 문장 ID만 새 TTS job으로 재생성합니다.
+- 문장별 재생성 횟수를 작업공간에 저장하며 기본 2회 이후 자동 재생성을 차단합니다.
+- API 테스트 112개와 Worker 테스트 14개를 통과했습니다.
+
 ## 0.9.3-beta.1 CI Hotfix 2 - 2026-08-02
 
 ### CI Quality Findings Fix
