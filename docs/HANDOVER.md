@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.2 Korean Voice Orchestrator Blueprint & Rule Director**
+현재 기준 버전: **0.9.2 CI Hotfix 2 · Stale Brand Asset Cleanup**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 00:38 KST**
+최종 갱신: **2026-08-02 01:35 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -417,3 +417,23 @@ CI Hotfix 4 테스트 규칙:
 7. Rule Director는 외부 LLM 없이 원고 용도·발음·호흡·속도·감정과 엔진 요구를 계산한다.
 8. 다음 목표는 실제 무료 Adapter 온보딩과 STT 기반 한국어 자동 검수다.
 
+
+## 29. 2026-08-02 01:35 KST · v0.9.2 CI Hotfix 2
+
+1. 작업 일시: 2026-08-02 01:35 KST.
+2. 대상·기준: `0.9.2 CI Hotfix → 0.9.2 CI Hotfix 2`.
+3. 변경 내용: 누적 덮어쓰기 저장소에 남은 `public/sorion-icon.svg`를 삭제 목록에
+   다시 명시하고 Windows·macOS·Linux 적용 스크립트와 npm 정리 명령을 추가했다.
+4. 변경 이유: ZIP 덮어쓰기는 기존 파일을 삭제하지 않으므로 0.8.8에서 폐기한 SVG가
+   저장소에 잔존해 `quality:rules`가 실패했다.
+5. 영향 범위: 프로젝트 규칙, 패치 적용 절차, 브랜드 정적 파일 정리와 릴리스 문서.
+6. 주요 파일: `scripts/remove-stale-brand-assets.mjs`, `package.json`,
+   `scripts/check-project-rules.mjs`, `docs/patches/0.9.2-ci-hotfix-2/*`.
+7. 검증 결과: 잔존 SVG가 있는 누적 저장소에서 실패를 재현하고 정리 스크립트 실행 뒤
+   `npm run quality:rules` 통과와 전체본·패치 적용본 해시 일치를 확인했다.
+8. 제한·주의: 패치 ZIP을 덮어쓰기만 하면 기존 SVG는 삭제되지 않는다. 반드시
+   `APPLY_HOTFIX.cmd` 또는 `.sh`를 실행하고 GitHub Desktop에서 삭제 변경을 커밋한다.
+9. 산출물: `SoriON-AI-0.9.2-ci-hotfix-2-full.zip`,
+   `SoriON-AI-0.9.2-ci-hotfix-to-0.9.2-ci-hotfix-2-patch.zip`.
+10. 다음 예상 업데이트: Web·API·Worker CI가 모두 녹색인 것을 확인한 뒤
+    `0.9.3 Free Local Pipeline Adapters & Korean Verification`을 진행한다.

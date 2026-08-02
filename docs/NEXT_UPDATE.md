@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.2 Korean Voice Orchestrator Blueprint & Rule Director`
+현재 기준: `0.9.2 CI Hotfix 2 · Stale Brand Asset Cleanup`
 
 ## 목표 버전
 
@@ -38,3 +38,9 @@
 - 사용자 발음 사전 저장과 프로젝트별 override
 - 로컬 LLM은 선택 기능이며 없으면 규칙 기반으로 완전 동작
 - 원고 재작성은 사용자가 명시적으로 허용한 경우에만 실행
+
+## 0.9.2 CI 안정화 선행 조건
+
+- 다음 기능 개발 전 `public/sorion-icon.svg` 삭제가 Git 변경사항에 포함됐는지 확인한다.
+- `npm run quality:rules`와 GitHub Actions Web quality가 모두 녹색인 상태에서만 0.9.3을 시작한다.
+- 전체 ZIP을 기존 폴더에 덮어쓸 때는 삭제 파일이 자동 제거되지 않으므로 새 폴더 사용 또는 적용 스크립트 실행을 원칙으로 한다.

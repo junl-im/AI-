@@ -37,7 +37,7 @@ async function walk(directory) {
     const path = relative(root, fullPath)
     const extension = extname(entry.name).toLowerCase()
     if (extension === '.svg') {
-      failures.push(`${path}: 브랜드 원본은 PNG이며 SVG 파일은 허용하지 않습니다.`)
+      failures.push(`${path}: 브랜드 원본은 PNG이며 SVG 파일은 허용하지 않습니다.${path === 'public/sorion-icon.svg' ? ' npm run cleanup:stale-brand 실행 후 Git 삭제를 커밋하세요.' : ''}`)
     }
     if (!sourceExtensions.has(extension)) continue
     const content = await readFile(fullPath, 'utf8')

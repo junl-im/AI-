@@ -1,11 +1,14 @@
-# SoriON AI 0.9.2 Result Report
+# SoriON AI 0.9.2 CI Hotfix 2 Result Report
 
 작업 일시: 2026-08-02 KST
 
-결과 버전: **0.9.2 Korean Voice Orchestrator Blueprint & Rule Director**
+결과 버전: **0.9.2 CI Hotfix 2 · Stale Brand Asset Cleanup**
 
 ## 결과
 
+- 이전 패치에서 삭제 지시만 남고 저장소에 잔존한 `public/sorion-icon.svg`를 실제 삭제 대상으로 고정했다.
+- Windows·macOS·Linux에서 삭제와 규칙 검사를 함께 실행하는 적용 스크립트를 추가했다.
+- 프로젝트 규칙 오류 메시지에 정확한 정리 명령을 표시해 같은 CI 실패의 재발을 막았다.
 - SoriON을 엔진 모음이 아닌 한국어 음성 제작 오케스트레이터로 명문화했다.
 - `/engines/catalog`에 TTS·복제·변환·STT·노이즈 제거·향상·Director의 채택 결정을 추가했다.
 - CosyVoice 3·MeloTTS·Faster Whisper·DeepFilterNet3를 코어 후보로 고정했다.

@@ -427,3 +427,17 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 - `/director/plan`이 오디오북·광고 용도와 속도·감정·호흡을 결정하는지 확인
 - 영문 약어 발음 힌트와 원문 보존 경고를 반환하는지 확인
 - `scripts/check-engine-blueprint.mjs`가 연구 엔진의 자동 순서 유입을 차단하는지 확인
+
+## 0.9.2 CI Hotfix 2 · 잔존 브랜드 파일 회귀
+
+```sh
+npm run quality:rules
+npm run cleanup:stale-brand
+```
+
+검증 시나리오:
+
+1. 누적 저장소에 `public/sorion-icon.svg`가 있으면 `quality:rules`가 실패한다.
+2. 오류 메시지는 `npm run cleanup:stale-brand` 복구 명령을 안내한다.
+3. 정리 명령은 해당 파일을 삭제하고 다른 SVG가 남으면 실패한다.
+4. 정리 뒤 `quality:rules`가 통과하며 Git 변경사항에 파일 삭제가 표시된다.

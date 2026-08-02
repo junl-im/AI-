@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.9.2 CI Hotfix 2 - 2026-08-02
+
+### Stale Brand Asset Cleanup
+
+- 누적 덮어쓰기 저장소에 남은 `public/sorion-icon.svg`를 삭제 대상으로 다시 고정했습니다.
+- Windows용 `APPLY_HOTFIX.cmd`, macOS·Linux용 `APPLY_HOTFIX.sh`를 추가했습니다.
+- `npm run cleanup:stale-brand`로 삭제와 잔존 SVG 검사를 재현할 수 있습니다.
+- 프로젝트 규칙 오류에 정확한 복구 명령을 표시합니다.
+
 ## 0.9.2 - 2026-08-02
 
 ### Korean Voice Orchestrator Blueprint
