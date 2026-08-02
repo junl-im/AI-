@@ -331,8 +331,8 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 - 공식 아이콘이 favicon, PWA, 랜딩과 작업공간 상단에 연결되는지 확인
 - 상단 브랜드 클릭이 어느 작업 화면에서도 첫 페이지로 이동하는지 확인
 - 첫 popstate에서 커스텀 종료창, 두 번째 popstate에서 즉시 back 호출 확인
-- 20,000자 원고와 일반 Enter 줄바꿈, Ctrl/⌘+Enter 제작 계약
-- 생성 후 원고 유지와 문장별 타임라인 생성 확인
+- 20,000자 내용과 일반 Enter 줄바꿈, Ctrl/⌘+Enter 제작 계약
+- 생성 후 내용 유지와 문장별 타임라인 생성 확인
 - 서버 연결 대기 제작이 연결 복구 뒤 자동 재개되는지 확인
 - GitHub Pages location 후보가 빈 배열이고 자체 HTTPS 호스트만 8443 후보를 갖는지 확인
 - IndexedDB, localStorage, memory fallback과 세션 revision 확인
@@ -353,7 +353,7 @@ build는 npm registry 제한 때문에 GitHub Actions에서 최종 확인한다.
 
 - 프로젝트 제목 변경과 자동 저장 시각 표시
 - 화자 선택·미리듣기·읽기 설정 Sheet 열기와 닫기
-- 장문 원고의 문장 블록 변환과 블록별 수정·생성·재생
+- 장문 내용의 문장 블록 변환과 블록별 수정·생성·재생
 - 분할·순서 이동·삭제·새 대사·쉼 추가
 - 작업 비우기 확인창과 workspace reset
 - 하단 Player Queue의 현재 트랙·이전·재생·다음·진행률 연결

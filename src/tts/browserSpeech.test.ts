@@ -120,7 +120,7 @@ describe('browserSpeech', () => {
     expect(utterance.voice?.lang).toBe('ko-KR')
   })
 
-  it('긴 원고일수록 예상 재생시간이 늘고 빠른 속도에서는 줄어든다', () => {
+  it('긴 내용일수록 예상 재생시간이 늘고 빠른 속도에서는 줄어든다', () => {
     const short = estimateBrowserSpeechDuration('짧은 문장입니다.', 1)
     const long = estimateBrowserSpeechDuration('짧은 문장입니다. '.repeat(12), 1)
     const fast = estimateBrowserSpeechDuration('짧은 문장입니다. '.repeat(12), 1.5)

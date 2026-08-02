@@ -6,7 +6,7 @@ const activity = {
   id: 'activity',
   role: 'assistant' as const,
   badge: '준비',
-  text: '원고를 입력해 주세요.',
+  text: '내용을 입력해 주세요.',
 }
 
 describe('LongformComposer', () => {
@@ -27,7 +27,7 @@ describe('LongformComposer', () => {
     expect(screen.queryByText('음성 서버 연결 대기')).not.toBeInTheDocument()
   })
 
-  it('Ctrl+Enter로 현재 장문 원고를 제작 요청한다', () => {
+  it('Ctrl+Enter로 현재 장문 내용을 제작 요청한다', () => {
     const onSubmit = vi.fn()
     render(
       <LongformComposer
@@ -41,11 +41,31 @@ describe('LongformComposer', () => {
       />,
     )
 
-    fireEvent.keyDown(screen.getByRole('textbox', { name: '음성으로 만들 장문 원고' }), {
+    fireEvent.keyDown(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' }), {
       key: 'Enter',
       ctrlKey: true,
     })
 
     expect(onSubmit).toHaveBeenCalledWith('첫 문장입니다. 두 번째 문장입니다.')
+  })
+  it('화면에서 바로 타이핑하면 내용 편집기로 이동한다', () => {
+    const onValueChange = vi.fn()
+    render(
+      <LongformComposer
+        disabled={false}
+        value=""
+        backendStatus="degraded"
+        backendMessage="브라우저 한국어 음성 준비"
+        activity={activity}
+        onValueChange={onValueChange}
+        onSubmit={vi.fn()}
+      />,
+    )
+
+    fireEvent.keyDown(document.body, { key: '가' })
+
+    const editor = screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })
+    expect(editor).toHaveFocus()
+    expect(onValueChange).toHaveBeenCalledWith('가')
   })
 })

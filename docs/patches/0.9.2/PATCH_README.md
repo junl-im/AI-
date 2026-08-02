@@ -20,7 +20,7 @@
 - F5-TTS pretrained model의 비상업 조건과 Kokoro 한국어 경계 명시
 - OpenVoice V2 선택 Adapter, Seed-VC 독립 프로세스 플러그인 결정
 - Faster Whisper·DeepFilterNet3·Rule Director 코어 채택
-- 원고 용도·발음·호흡·속도·감정·엔진 요구를 계산하는 Rule Director API
+- 내용 용도·발음·호흡·속도·감정·엔진 요구를 계산하는 Rule Director API
 - 설정 화면의 읽기 전용 오케스트레이터 설계 카드
 - 연구 엔진이 무료 자동 경로로 들어오는 것을 차단하는 CI 검사
 

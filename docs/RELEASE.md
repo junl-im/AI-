@@ -227,7 +227,7 @@ Semantic Versioning을 사용한다.
 ## 0.8.6 릴리스
 
 - 기준: `SoriON-AI-0.8.5-ci-hotfix-full.zip`
-- 장문 원고 편집기, 공식 아이콘, 상단 브랜드 홈 이동과 종료 확인 UX
+- 장문 내용 편집기, 공식 아이콘, 상단 브랜드 홈 이동과 종료 확인 UX
 - GitHub Pages API 오탐 차단과 Actions 공개 API 변수 주입
 - IndexedDB 작업공간 세션·revision·recover-first 복원
 - 삭제 대상: ChatComposer, ConversationPanel, mobile-workspace.css, CHAT_TIMELINE_WORKSPACE.md

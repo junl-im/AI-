@@ -2,7 +2,7 @@ import { useAppStore } from '../../store/useAppStore'
 import { BrandIcon } from '../ui/BrandIcon'
 
 const subtitles = [
-  '장문 원고를 문장별 음성으로 빠르게.',
+  '장문 내용을 문장별 음성으로 빠르게.',
   '한국어의 감정과 호흡을 더 자연스럽게.',
   '생성부터 복제와 편집까지 한 작업공간에서.',
 ]

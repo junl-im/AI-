@@ -274,9 +274,9 @@
 
 ### Longform Voice Studio
 
-- ChatGPT형 composer를 최대 20,000자 장문 원고 편집기로 교체
+- ChatGPT형 composer를 최대 20,000자 장문 내용 편집기로 교체
 - 문자·문단·블록 수와 예상 음성 길이 표시
-- 일반 Enter 줄바꿈, Ctrl/⌘+Enter 제작, 생성 후 원고 유지
+- 일반 Enter 줄바꿈, Ctrl/⌘+Enter 제작, 생성 후 내용 유지
 - 서버 연결 대기 중 누른 제작 요청을 연결 복구 뒤 자동 재개
 
 ### Brand and Navigation

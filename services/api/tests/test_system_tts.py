@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 
 from app.core.config import Settings
-from app.engines.tts.system_tts import SystemTtsEngine
+from app.engines.tts.system_tts import SystemSpeechAdapter, SystemTtsEngine
 from app.schemas.tts import TtsSynthesisRequest
 from app.storage.audio_store import AudioStore
 
@@ -42,3 +42,53 @@ def test_settings_resolves_audio_directory(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     settings = Settings(audio_directory=".audio")
     assert settings.audio_path == (tmp_path / ".audio").resolve()
+
+
+def test_windows_backend_requires_an_installed_korean_voice(monkeypatch):
+    monkeypatch.setattr(
+        "app.engines.tts.system_tts.platform.system",
+        lambda: "Windows",
+    )
+    monkeypatch.setattr(
+        "app.engines.tts.system_tts.shutil.which",
+        lambda name: "powershell.exe" if name == "powershell" else None,
+    )
+
+    class Result:
+        returncode = 0
+        stdout = "Microsoft David Desktop|en-US\n"
+
+    monkeypatch.setattr(
+        "app.engines.tts.system_tts.subprocess.run",
+        lambda *args, **kwargs: Result(),
+    )
+
+    adapter = SystemSpeechAdapter()
+
+    assert adapter.backend is None
+    assert "한국어 시스템 음성 도구" in (adapter.reason or "")
+
+
+def test_windows_backend_accepts_korean_voice(monkeypatch):
+    monkeypatch.setattr(
+        "app.engines.tts.system_tts.platform.system",
+        lambda: "Windows",
+    )
+    monkeypatch.setattr(
+        "app.engines.tts.system_tts.shutil.which",
+        lambda name: "powershell.exe" if name == "powershell" else None,
+    )
+
+    class Result:
+        returncode = 0
+        stdout = "Microsoft Heami Desktop|ko-KR\n"
+
+    monkeypatch.setattr(
+        "app.engines.tts.system_tts.subprocess.run",
+        lambda *args, **kwargs: Result(),
+    )
+
+    adapter = SystemSpeechAdapter()
+
+    assert adapter.backend is not None
+    assert adapter.backend.kind == "windows"

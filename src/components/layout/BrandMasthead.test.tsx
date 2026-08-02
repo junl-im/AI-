@@ -22,7 +22,7 @@ describe('BrandMasthead', () => {
     render(<BrandMasthead />)
 
     const introduction = within(screen.getByLabelText('SoriON 소개 문장'))
-    expect(introduction.getByText('장문 원고를 문장별 음성으로 빠르게.')).toBeInTheDocument()
+    expect(introduction.getByText('장문 내용을 문장별 음성으로 빠르게.')).toBeInTheDocument()
     expect(introduction.getByText('한국어의 감정과 호흡을 더 자연스럽게.')).toBeInTheDocument()
     expect(introduction.getByText('생성부터 복제와 편집까지 한 작업공간에서.')).toBeInTheDocument()
   })

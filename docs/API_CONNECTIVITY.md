@@ -40,7 +40,7 @@ Worker를 추가합니다. 연결 성공 주소는 브라우저 저장소에 기
 - 현재 API 실패 시 같은 주소만 무한 재시도하지 않음
 - 실패 주소를 제외하고 다음 후보 탐색
 - 온라인 복귀·네트워크 변경·PWA 복귀 시 재탐색
-- TTS 요청은 사용자 원고와 job ID를 유지
+- TTS 요청은 사용자 내용과 job ID를 유지
 - 서버가 없으면 Browser Speech로 즉시 재생 가능 상태 유지
 
 ## Private Network Access

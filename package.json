@@ -29,6 +29,7 @@
     "runtime:config": "node scripts/write-runtime-config.mjs",
     "quality:free-only": "node scripts/check-free-only-boundary.mjs",
     "dev:free": "node scripts/start-free-runtime.mjs",
+    "start:engine": "node scripts/start-engine.mjs",
     "quality:engine-blueprint": "node scripts/check-engine-blueprint.mjs",
     "model:manifest": "python services/worker/scripts/model_manifest.py",
     "quality:model-onboarding": "node scripts/check-model-onboarding.mjs",

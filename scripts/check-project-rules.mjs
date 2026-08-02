@@ -146,15 +146,15 @@ await requireAbsent('.github/workflows/ci.yml', [
   'needs: lockfiles', 'sorion-verified-lockfiles', 'npm_config_fetch_retries: 5',
   'Commit verified lockfiles · main only', 'node scripts/verify-lock-proof.mjs all',
 ])
-await requireText('.nvmrc', ['22.18.0']); await requireText('.node-version', ['22.18.0'])
+await requireText('.nvmrc', ['22.18.0']); await requireText('START_ENGINE.cmd', ['scripts\\start-engine.mjs']); await requireText('scripts/start-engine.mjs', ['엔진 심장박동 확인', 'SORION_ALLOW_MOCK_ENGINE']); await requireText('.node-version', ['22.18.0'])
 await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '자동 커밋', 'npm ci', 'uv sync --locked'])
 await requireText('src/test/setup.ts', ['afterEach', 'cleanup()', 'Object.defineProperty(Blob.prototype', "reader.readAsArrayBuffer(this)"])
 await requireText('src/tts/mockWave.test.ts', ['async function readBlob', "typeof blob.arrayBuffer === 'function'", 'reader.readAsArrayBuffer(blob)'])
-await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])
+await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/voiceApi.ts', ['request.engineId === BROWSER_SPEECH_ENGINE_ID', 'timeoutMs: 3_500']); await requireText('src/hooks/useEngineCatalog.ts', ['브라우저 한국어 음성 즉시 준비']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])
 await requireText('src/components/layout/BrandMasthead.tsx', [
   'BrandIcon',
   'SoriON AI 첫 페이지',
-  '장문 원고를 문장별 음성으로 빠르게.',
+  '장문 내용을 문장별 음성으로 빠르게.',
 ])
 await requireText('src/components/layout/BrandMasthead.test.tsx', [
   '공식 아이콘과 제품·제작자 이름을 보여준다',
@@ -290,14 +290,15 @@ await requireText('src/pages/HomePage.tsx', [
 await import('./check-session-rules.mjs')
 await requireText('src/pages/LandingHome.tsx', [
   '장문 음성 스튜디오 시작',
-  '긴 원고도,',
+  '긴 내용도,',
   '문장별 목소리로 완성합니다.',
 ])
 await requireText('src/components/workspace/LongformComposer.tsx', [
   'MAX_SCRIPT_LENGTH = 20_000',
-  '음성으로 만들 장문 원고',
-  '새 더빙을 입력해 주세요.',
-  '전체 원고 음성 제작',
+  '음성으로 만들 장문 내용',
+  '새 더빙 내용을 입력해 주세요.',
+  '전체 내용 음성 제작',
+  '화면 어디서든 타이핑하면 이 글쓰기 구간으로 이동합니다.',
 ])
 await requireText('src/components/workspace/VoiceLibrary.tsx', [
   '목소리 라이브러리',

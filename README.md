@@ -2,7 +2,7 @@
 
 **무료 로컬 실행을 기준으로 설계한 한국어 장문 Voice Studio**
 
-SoriON AI는 대본·오디오북·강의·광고 원고를 문장별 음성 블록으로 편집하고 순차 제작하는
+SoriON AI는 대본·오디오북·강의·광고 내용을 문장별 음성 블록으로 편집하고 순차 제작하는
 모바일 우선 작업공간입니다. 엔진과 API는 시스템이 자동 연결하며 결제 계정이 필요한 음성
 Adapter는 프로젝트에 포함하지 않습니다.
 
@@ -12,7 +12,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
-- 장문 제작: 최대 20,000자 원고와 문장별 재생성
+- 장문 제작: 최대 20,000자 내용과 문장별 재생성
 - 자동 순서: CosyVoice → MeloTTS → System Voice → Browser Speech
 - 진행 상태: SSE 우선, polling 자동 대체
 - 세션: IndexedDB 자동 저장과 SQLite 결과 복구
@@ -29,7 +29,8 @@ npm install
 npm run dev:free
 ```
 
-Windows에서는 `start-sorion-free.cmd`를 사용할 수 있습니다. CosyVoice 모델을 준비한 경우
+배포된 웹에서 로컬 음성 엔진만 빠르게 연결하려면 Windows에서 `START_ENGINE.cmd`를 더블클릭합니다.
+개발용 전체 Web·API 실행은 `start-sorion-free.cmd`를 사용할 수 있습니다. CosyVoice 모델을 준비한 경우
 `npm run dev:free -- --worker`로 Worker까지 실행합니다. 모델 가중치와 GPU 런타임은 저장소와
 릴리스 ZIP에 포함하지 않습니다.
 
@@ -53,7 +54,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 
 ## 개발 원칙
 
-- 장문 원고와 문장 블록 편집을 기본 흐름으로 유지합니다.
+- 장문 내용과 문장 블록 편집을 기본 흐름으로 유지합니다.
 - 모바일·한국어를 먼저 완성합니다.
 - 실제 AI, Local/System, Browser Voice, Mock을 명확히 구분합니다.
 - 결제 수단과 외부 음성 공급자 Secret을 요구하지 않습니다.

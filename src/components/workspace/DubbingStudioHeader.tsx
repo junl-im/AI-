@@ -151,7 +151,7 @@ export function DubbingStudioHeader({
             onMouseDown={(event) => event.stopPropagation()}
           >
             <strong id="clear-work-title">현재 작업을 비울까요?</strong>
-            <p id="clear-work-description">원고와 생성된 음성 블록이 새 프로젝트 상태로 초기화됩니다.</p>
+            <p id="clear-work-description">내용과 생성된 음성 블록이 새 프로젝트 상태로 초기화됩니다.</p>
             <div>
               <button type="button" onClick={() => setClearConfirmOpen(false)}>계속 편집</button>
               <button

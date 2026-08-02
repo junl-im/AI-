@@ -249,7 +249,7 @@ def current_engine_catalog(version: str) -> EngineCatalogResponse:
             license_name="FunASR model license",
             license_policy="model-review-required",
             reason=(
-                "한국어 정확도와 CPU 속도를 Faster Whisper와 동일 원고로 "
+                "한국어 정확도와 CPU 속도를 Faster Whisper와 동일 내용으로 "
                 "비교한 뒤 승격합니다."
             ),
             requirements=["model attribution", "Korean WER benchmark"],
@@ -346,7 +346,7 @@ def current_engine_catalog(version: str) -> EngineCatalogResponse:
         free_only=True,
         product_identity="engine-orchestrator",
         principles=[
-            "사용자는 엔진 이름을 선택하지 않고 목적과 원고만 "
+            "사용자는 엔진 이름을 선택하지 않고 목적과 내용만 "
             "입력합니다.",
             "한국어 품질, 라이선스, 하드웨어, 최근 실패 상태로 자동 "
             "경로를 결정합니다.",

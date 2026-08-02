@@ -152,8 +152,8 @@
 
 ## 0.8.6 완료
 
-- 최대 20,000자 장문 원고 중심 Voice Studio
-- 원고 통계, 문장 분할, 순차 생성과 연결 복구 뒤 자동 재개
+- 최대 20,000자 장문 내용 중심 Voice Studio
+- 내용 통계, 문장 분할, 순차 생성과 연결 복구 뒤 자동 재개
 - 공식 브랜드 아이콘과 모든 상단 브랜드의 첫 페이지 이동
 - 첫 뒤로가기 확인, 두 번째 뒤로가기 즉시 이탈
 - GitHub Pages same-origin·8443 API 오탐 차단
@@ -223,7 +223,7 @@
 - F5-TTS 비상업 checkpoint와 Kokoro 한국어 경계 명시
 - OpenVoice V2 선택 Adapter와 Seed-VC 외부 플러그인 결정
 - Faster Whisper·DeepFilterNet3·Rule Director 채택
-- 원고 용도·발음·호흡·속도·감정 자동 계획 API
+- 내용 용도·발음·호흡·속도·감정 자동 계획 API
 
 ## 0.9.3 예정
 

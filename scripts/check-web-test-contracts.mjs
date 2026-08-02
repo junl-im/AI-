@@ -24,7 +24,7 @@ const homeTest = await read('src/pages/HomePage.test.tsx')
 if (!homeTest.includes("toHaveAttribute('maxlength', '20000')")) {
   failures.push('HomePage.test.tsx: 장문 입력 계약 검사가 없습니다.')
 }
-if (homeTest.includes("toContain('긴 원고')")) {
+if (homeTest.includes("toContain('긴 내용')")) {
   failures.push('HomePage.test.tsx: 변경 가능한 placeholder 문구에 결합돼 있습니다.')
 }
 

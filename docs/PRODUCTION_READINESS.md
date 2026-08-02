@@ -76,7 +76,7 @@ SoriON Web은 정적 배포와 Python 음성 시스템을 분리한다. 사용�
 - GitHub Pages에서 github.io same-origin 또는 8443을 API 후보로 만들지 않는다.
 - main build는 `SORION_PUBLIC_API_BASE_URL`을 `VITE_API_BASE_URL`로 주입한다.
 - 공개 API 변수가 없으면 실제 음성 준비로 표시하지 않는다.
-- 장문 원고 생성 뒤 원문을 유지하고 첫 ready 블록부터 재생한다.
+- 장문 내용 생성 뒤 원문을 유지하고 첫 ready 블록부터 재생한다.
 - 상단 브랜드는 모든 작업 화면에서 첫 페이지로 이동한다.
 - 첫 뒤로가기 확인과 두 번째 뒤로가기 이탈을 모바일 실기기에서 검사한다.
 - `/connectivity`와 `/engines` 추천 엔진 상태가 일치해야 한다.

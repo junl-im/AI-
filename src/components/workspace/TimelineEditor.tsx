@@ -254,7 +254,7 @@ export function TimelineEditor({
       {blocks.length === 0 ? (
         <div className="soa-dubbing-timeline__empty">
           <strong>아직 음성 블록이 없습니다.</strong>
-          <p>장문 원고를 제작하거나 아래 + 버튼으로 대사를 직접 추가하세요.</p>
+          <p>장문 내용을 제작하거나 아래 + 버튼으로 대사를 직접 추가하세요.</p>
         </div>
       ) : (
         <div className="soa-dubbing-block-list">

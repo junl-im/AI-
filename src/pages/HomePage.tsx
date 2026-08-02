@@ -40,7 +40,7 @@ const initialMessages: WorkspaceMessage[] = [
     id: 'welcome',
     role: 'assistant',
     badge: '장문 제작 준비',
-    text: '원고를 입력하면 문장별 대사 블록으로 나누고 순서대로 음성을 생성합니다.',
+    text: '내용을 입력하면 문장별 대사 블록으로 나누고 순서대로 음성을 생성합니다.',
   },
 ]
 function generatedPreview(
@@ -138,6 +138,9 @@ export function HomePage() {
     (backendStatus === 'online' || backendStatus === 'degraded')
     && engineCatalog.selected !== null
   )
+  const selectedEngineId = engineCatalog.selected?.mode === 'browser'
+    ? engineCatalog.selected.id
+    : 'auto'
   const normalizeText = directiveIds.includes('numbers')
   const restoreWorkspaceSession = useCallback((session: WorkspaceSession) => {
     if (explicitWorkspaceActionRef.current || useAppStore.getState().activeProject) return
@@ -227,7 +230,7 @@ export function HomePage() {
         id: createRandomId(),
         role: 'assistant',
         badge: '프로젝트 불러옴',
-        text: `${activeProject.title} 원고와 음성 블록을 복원했습니다.`,
+        text: `${activeProject.title} 내용과 음성 블록을 복원했습니다.`,
       },
     ])
     const recoverableIds = restoreProject(activeProject, {
@@ -258,16 +261,9 @@ export function HomePage() {
     emotion: speechEmotion,
     speed: speechSpeed,
     pitch: speechPitch,
-    engineId: 'auto',
+    engineId: selectedEngineId,
     normalizeText,
-  }), [
-    normalizeText,
-    selectedVoice.name,
-    speechEmotion,
-    speechPitch,
-    speechSpeed,
-    voiceId,
-  ])
+  }), [normalizeText, selectedEngineId, selectedVoice.name, speechEmotion, speechPitch, speechSpeed, voiceId])
   const saveLongformProject = useCallback(async (
     text: string,
     options: TimelineGenerationOptions,
@@ -351,8 +347,8 @@ export function HomePage() {
     const blockIds = timeline.stageText(value, options)
     appendMessage({
       role: 'assistant',
-      badge: '원고 분할 완료',
-      text: `${blockIds.length}개 대사 블록으로 정리했습니다. 원문은 위 편집기에 유지됩니다.`,
+      badge: '내용 분할 완료',
+      text: `${blockIds.length}개 대사 블록으로 정리했습니다. 내용은 위 편집기에 유지됩니다.`,
     })
     const pending = { text: value, options, blockIds }
     if (!engineAvailable) {
@@ -388,7 +384,7 @@ export function HomePage() {
         speed: speechSpeed,
         pitch: speechPitch,
         format: 'wav',
-        engineId: 'auto',
+        engineId: selectedEngineId,
         normalizeText,
       }
       const result = await synthesizeSpeech(request, createRandomId())

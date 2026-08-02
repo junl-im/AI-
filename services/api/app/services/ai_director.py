@@ -111,7 +111,7 @@ def build_director_plan(request: DirectorRequest, version: str) -> DirectorPlanR
         )
     if len(request.text) >= 10_000:
         warnings.append(
-            "매우 긴 원고입니다. 장면 또는 문단 단위 프로젝트 분리를 "
+            "매우 긴 내용입니다. 장면 또는 문단 단위 프로젝트 분리를 "
             "권장합니다."
         )
     if request.preserve_wording:

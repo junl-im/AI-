@@ -23,18 +23,18 @@ describe('HomePage', () => {
   it('초기 화면에서는 장문 스튜디오 시작 동선을 유지한다', () => {
     render(<HomePage />)
 
-    expect(screen.getByRole('heading', { name: /긴 원고도/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /긴 내용도/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /장문 음성 스튜디오 시작/ }))
       .toBeInTheDocument()
-    expect(screen.queryByRole('textbox', { name: '음성으로 만들 장문 원고' }))
+    expect(screen.queryByRole('textbox', { name: '음성으로 만들 장문 내용' }))
       .not.toBeInTheDocument()
   })
 
-  it('작업공간에서는 장문 원고를 문장별 타임라인 블록으로 만든다', () => {
+  it('작업공간에서는 장문 내용을 문장별 타임라인 블록으로 만든다', () => {
     useAppStore.setState({ workspaceEntered: true })
     const view = render(<HomePage />)
     const scoped = within(view.container)
-    const textbox = scoped.getByRole('textbox', { name: '음성으로 만들 장문 원고' })
+    const textbox = scoped.getByRole('textbox', { name: '음성으로 만들 장문 내용' })
 
     expect(textbox).toHaveAttribute('maxlength', '20000')
     expect(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' })).toBeInTheDocument()
@@ -52,7 +52,7 @@ describe('HomePage', () => {
     expect(scoped.getAllByText('혜린')).toHaveLength(3)
   })
 
-  it('새로고침 뒤 전송 전 장문 원고와 작업공간을 자동 복원한다', async () => {
+  it('새로고침 뒤 전송 전 장문 내용과 작업공간을 자동 복원한다', async () => {
     window.localStorage.setItem('sorion-active-workspace-session', JSON.stringify({
       id: 'active-workspace',
       schemaVersion: 1,
@@ -61,7 +61,7 @@ describe('HomePage', () => {
       workspaceEntered: true,
       page: 'home',
       voiceId: 'sori-warm',
-      composerDraft: '아직 제작하지 않은 모바일 장문 원고',
+      composerDraft: '아직 제작하지 않은 모바일 장문 내용',
       directiveIds: ['numbers', 'bright'],
       messages: [{ id: 'welcome', role: 'assistant', text: '장문 제작 준비' }],
       blocks: [],
@@ -70,8 +70,8 @@ describe('HomePage', () => {
     render(<HomePage />)
 
     await waitFor(() => expect(useAppStore.getState().workspaceEntered).toBe(true))
-    expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 원고' }))
-      .toHaveValue('아직 제작하지 않은 모바일 장문 원고')
+    expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' }))
+      .toHaveValue('아직 제작하지 않은 모바일 장문 내용')
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
     expect(screen.getByRole('button', { name: '밝게' })).toHaveClass('is-active')
   })

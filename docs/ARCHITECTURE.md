@@ -242,16 +242,16 @@ Web의 HomePage는 작업공간 세션 동안 언마운트하지 않는다. 다�
 ## 0.8.6 Longform Workspace와 Browser Session Store
 
 ```text
-LongformComposer (20,000자 원고)
+LongformComposer (20,000자 내용)
   → splitTextForUi
   → Timeline voice/pause blocks
   → EngineOrchestrator auto request
   → first-ready Linked Player Dock
 ```
 
-- 채팅형 전송 대신 한 원고를 제작 snapshot으로 고정하고 타임라인을 새로 구성한다.
+- 채팅형 전송 대신 한 내용을 제작 snapshot으로 고정하고 타임라인을 새로 구성한다.
 - 서버가 연결되지 않았으면 block ID와 옵션을 보존하고 bootstrap 성공 뒤 자동 생성한다.
-- IndexedDB `workspaceSessions`가 원고, 옵션, block revision과 job ID를 저장한다.
+- IndexedDB `workspaceSessions`가 내용, 옵션, block revision과 job ID를 저장한다.
 - pagehide 비상 체크포인트는 localStorage에 먼저 남기고 IndexedDB로 승격한다.
 - 오래된 세션 revision과 생성 응답의 block revision mismatch를 폐기한다.
 

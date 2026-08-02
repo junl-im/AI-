@@ -36,7 +36,7 @@ class SystemSpeechAdapter:
         system = platform.system().lower()
         if system == "windows":
             executable = shutil.which("powershell") or shutil.which("pwsh")
-            if executable:
+            if executable and self._has_windows_korean_voice(executable, configured_voice):
                 return SystemBackend("windows", executable, configured_voice)
         if system == "darwin":
             say = shutil.which("say")
@@ -47,6 +47,42 @@ class SystemSpeechAdapter:
         if executable and self._has_korean_espeak_voice(executable):
             return SystemBackend("espeak", executable, configured_voice or "ko")
         return None
+
+    @staticmethod
+    def _has_windows_korean_voice(executable: str, configured_voice: str) -> bool:
+        command = (
+            "Add-Type -AssemblyName System.Speech; "
+            "$synth = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
+            "$synth.GetInstalledVoices() | Where-Object { $_.Enabled } | "
+            "ForEach-Object { Write-Output ($_.VoiceInfo.Name + '|' + "
+            "$_.VoiceInfo.Culture.Name) }; $synth.Dispose()"
+        )
+        try:
+            result = subprocess.run(
+                [
+                    executable,
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-Command",
+                    command,
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode != 0:
+                return False
+            voices = [
+                line.strip().split("|", maxsplit=1)
+                for line in result.stdout.splitlines()
+                if "|" in line
+            ]
+            if configured_voice:
+                return any(name == configured_voice for name, _ in voices)
+            return any(culture.lower().startswith("ko-") for _, culture in voices)
+        except (OSError, subprocess.SubprocessError):
+            return False
 
     @staticmethod
     def _has_korean_espeak_voice(executable: str) -> bool:

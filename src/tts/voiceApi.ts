@@ -6,6 +6,7 @@ import {
   resolveApiAssetUrl,
 } from '../api/httpClient'
 import {
+  BROWSER_SPEECH_ENGINE_ID,
   createBrowserSpeechResult,
   isBrowserSpeechSupported,
 } from './browserSpeech'
@@ -152,7 +153,12 @@ export async function checkHealth(baseUrl?: string, signal?: AbortSignal): Promi
 }
 
 export async function listEngines(baseUrl?: string, signal?: AbortSignal): Promise<EngineInfo[]> {
-  const engines = await apiRequest<ApiEngineInfo[]>('/engines', undefined, { baseUrl, signal, retries: 1 })
+  const engines = await apiRequest<ApiEngineInfo[]>('/engines', undefined, {
+    baseUrl,
+    signal,
+    retries: 0,
+    timeoutMs: 3_500,
+  })
   return engines.map((engine) => ({
     id: engine.id,
     name: engine.name,
@@ -188,6 +194,9 @@ export async function synthesizeSpeech(
   signal?: AbortSignal,
 ): Promise<TtsSynthesisResult> {
   const browserFallbackAvailable = isBrowserSpeechSupported()
+  if (request.engineId === BROWSER_SPEECH_ENGINE_ID && browserFallbackAvailable) {
+    return createBrowserSpeechResult(request, jobId, false)
+  }
   if (!getApiConnectionContext().configured && browserFallbackAvailable) {
     return createBrowserSpeechResult(request, jobId)
   }

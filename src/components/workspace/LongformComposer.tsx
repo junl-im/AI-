@@ -1,4 +1,4 @@
-import { useMemo, type KeyboardEvent } from 'react'
+import { useEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { BackendStatus } from '../../store/useAppStore'
 import { splitTextForUi } from '../../tts/segmentText'
 import type { WorkspaceMessage } from '../../workspace/workspaceTypes'
@@ -21,6 +21,12 @@ function formatDuration(seconds: number): string {
   return minutes > 0 ? `약 ${minutes}분 ${remainder}초` : `약 ${remainder}초`
 }
 
+function isEditableTarget(target: EventTarget | null): boolean {
+  return target instanceof HTMLElement && Boolean(
+    target.closest('input, textarea, select, button, a, [contenteditable="true"]'),
+  )
+}
+
 function engineStatusText(status: BackendStatus, message: string): string {
   if (status === 'online') return '실제 음성 엔진 준비됨'
   if (status === 'degraded' && message.includes('브라우저')) return '브라우저 음성 준비됨'
@@ -38,6 +44,7 @@ export function LongformComposer({
   onValueChange,
   onSubmit,
 }: LongformComposerProps) {
+  const editorRef = useRef<HTMLTextAreaElement>(null)
   const stats = useMemo(() => {
     const trimmed = value.trim()
     const segments = trimmed ? splitTextForUi(trimmed) : []
@@ -49,13 +56,43 @@ export function LongformComposer({
     }
   }, [value])
 
+
+  useEffect(() => {
+    function focusEditorFromTyping(event: KeyboardEvent) {
+      if (
+        disabled
+        || event.defaultPrevented
+        || event.ctrlKey
+        || event.metaKey
+        || event.altKey
+        || isEditableTarget(event.target)
+      ) return
+      const isCompositionStart = event.key === 'Process'
+      if (!isCompositionStart && event.key.length !== 1) return
+      const editor = editorRef.current
+      if (!editor) return
+      editor.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+      editor.focus({ preventScroll: true })
+      if (isCompositionStart) return
+      event.preventDefault()
+      const start = editor.selectionStart ?? value.length
+      const end = editor.selectionEnd ?? start
+      const next = `${value.slice(0, start)}${event.key}${value.slice(end)}`.slice(0, MAX_SCRIPT_LENGTH)
+      onValueChange(next)
+      const caret = Math.min(start + event.key.length, next.length)
+      window.requestAnimationFrame?.(() => editor.setSelectionRange(caret, caret))
+    }
+    window.addEventListener('keydown', focusEditorFromTyping)
+    return () => window.removeEventListener('keydown', focusEditorFromTyping)
+  }, [disabled, onValueChange, value])
+
   function submit() {
     const trimmed = value.trim()
     if (!trimmed || disabled) return
     onSubmit(trimmed)
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyDown(event: ReactKeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
       event.preventDefault()
       submit()
@@ -66,24 +103,27 @@ export function LongformComposer({
     <section className="soa-dubbing-script" aria-labelledby="dubbing-script-title">
       <div className="soa-dubbing-script__label">
         <div>
-          <span>LONGFORM SCRIPT</span>
-          <h1 id="dubbing-script-title">더빙 원고</h1>
+          <span>LONGFORM CONTENT</span>
+          <h1 id="dubbing-script-title">더빙 내용</h1>
+          <small>화면 어디서든 타이핑하면 이 글쓰기 구간으로 이동합니다.</small>
         </div>
         <button type="button" onClick={() => onValueChange('')} disabled={!value}>전체 지우기</button>
       </div>
 
       <div className="soa-dubbing-script__editor">
         <textarea
+          ref={editorRef}
+          id="sorion-content-editor"
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={'새 더빙을 입력해 주세요.\n\n장문 원고를 붙여 넣으면 문장별 음성 블록으로 자동 분할합니다.'}
-          aria-label="음성으로 만들 장문 원고"
+          placeholder={'새 더빙 내용을 입력해 주세요.\n\n장문 내용을 붙여 넣으면 문장별 음성 블록으로 자동 분할합니다.'}
+          aria-label="음성으로 만들 장문 내용"
           rows={11}
           maxLength={MAX_SCRIPT_LENGTH}
           spellCheck="true"
         />
-        <div className="soa-dubbing-script__stats" aria-label="원고 통계">
+        <div className="soa-dubbing-script__stats" aria-label="내용 통계">
           <span>{value.length.toLocaleString()} / {MAX_SCRIPT_LENGTH.toLocaleString()}자</span>
           <span>{stats.paragraphs}개 문단</span>
           <span>{stats.segments}개 블록</span>
@@ -107,8 +147,8 @@ export function LongformComposer({
         disabled={disabled || value.trim().length === 0}
         onClick={submit}
       >
-        <span>{disabled ? '음성 제작 중…' : '전체 원고 음성 제작'}</span>
-        <small>{stats.segments > 0 ? `${stats.segments}개 블록을 순서대로 생성` : '원고를 입력해 주세요'}</small>
+        <span>{disabled ? '음성 제작 중…' : '전체 내용 음성 제작'}</span>
+        <small>{stats.segments > 0 ? `${stats.segments}개 블록을 순서대로 생성` : '내용을 입력해 주세요'}</small>
       </button>
     </section>
   )

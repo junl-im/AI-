@@ -64,9 +64,15 @@ export function useEngineCatalog() {
       setLoading(false)
       return
     }
+    const browserEngine = getBrowserSpeechEngine()
+    if (browserEngine) {
+      setEngines((current) => current.some((engine) => (
+        engine.ready && !['mock', 'browser'].includes(engine.mode)
+      )) ? current : [browserEngine])
+      setBackendStatus('degraded', '브라우저 한국어 음성 즉시 준비 · 로컬 AI 엔진 빠른 확인 중')
+    }
     try {
       const apiEngines = await listEngines()
-      const browserEngine = getBrowserSpeechEngine()
       const nextEngines = browserEngine
         ? [...apiEngines.filter((engine) => engine.id !== browserEngine.id), browserEngine]
         : apiEngines
