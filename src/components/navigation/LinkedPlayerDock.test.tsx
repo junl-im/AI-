@@ -190,17 +190,15 @@ describe('LinkedPlayerDock', () => {
     const timedAudio = generatedAudio()
     timedAudio.telemetry = { requestStartedAtMs: 1_000 }
     const id = usePlayerStore.getState().enqueue(timedAudio, '파일 지연 측정')
-    const now = vi.spyOn(Date, 'now')
-      .mockReturnValueOnce(1_420)
-      .mockReturnValueOnce(1_680)
+    const now = vi.spyOn(Date, 'now').mockReturnValue(1_420)
     const { container } = render(<LinkedPlayerDock />)
     const element = container.querySelector('audio')
     if (!element) throw new Error('audio element missing')
 
     fireEvent.loadedData(element)
+    now.mockReturnValue(1_680)
     fireEvent.playing(element)
 
-    expect(now).toHaveBeenCalledTimes(2)
     expect(usePlayerStore.getState().queue.find((item) => item.id === id)?.audio.telemetry)
       .toMatchObject({ firstByteMs: 420, playingMs: 680 })
   })

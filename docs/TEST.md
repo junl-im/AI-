@@ -664,3 +664,14 @@ ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지
 - dependency-free `quality:device-soak-archive`가 recorder·집계·archive 정책·테스트 계약 누락을 차단하는지 확인합니다.
 
 샌드박스 결과: `Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사`를 통과했습니다. 전체 ESLint·Vitest·semantic typecheck·Vite build는 검증된 npm lock 환경에서 최종 확인합니다.
+
+## Engine Heartbeat 6.5.1 CI Regression Hotfix 검사
+
+- `segment_audio.py`가 Ruff UP012를 유발하는 `.encode("utf-8")`를 사용하지 않는지 확인합니다.
+- 플레이어가 현재 `playRequestId`를 초기 기준으로 캡처해 새로고침 복원 트랙을 자동 재생하지 않는지 확인합니다.
+- `play`·`playing`·`pause` 이벤트가 `playingRef`를 즉시 갱신하고, 부분→최종 WAV 교체 시 최신 UI 위치와 native 위치 중 안전한 값을 승계하는지 확인합니다.
+- `progressiveSegments`가 memoized되어 Hooks dependency 경고가 발생하지 않는지 확인합니다.
+- SSE 테스트 mock이 `resolveApiAssetUrl`을 제공하고, 부분 WAV 테스트 fixture가 jsdom Blob 대신 Undici 호환 byte body를 사용하는지 확인합니다.
+- visibility 측정 테스트가 주입 시계로 정확히 3,500ms를 계산하는지 확인합니다.
+- 샌드박스 결과: Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사를 통과했습니다.
+- 제한: npm registry의 scoped package 404로 전체 ESLint·Vitest·semantic typecheck·Vite build는 로컬 재실행하지 못했으며 GitHub Actions에서 최종 확인합니다.

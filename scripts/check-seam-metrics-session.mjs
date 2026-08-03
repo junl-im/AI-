@@ -51,6 +51,7 @@ await requireText('src/quality/browserPlaybackEvidence.ts', [
   'networkTransitions',
   'backgroundReturnCount',
   'startBrowserPlaybackEvidenceMonitor',
+  'nowMs: () => number = Date.now',
   "window.addEventListener('offline', handleNetwork)",
 ])
 await requireText('src/components/evaluation/PlaybackSeamEvidenceCard.tsx', [
@@ -72,6 +73,7 @@ await requireText('src/player/playerSession.test.ts', [
 ])
 await requireText('src/quality/browserPlaybackEvidence.test.ts', [
   '탭 숨김·복귀와 네트워크 전환을 관찰 세션에 누적한다',
+  '}, () => now)',
   'totalHiddenMs: 3_500',
 ])
 await requireText('docs/SEAM_METRICS_AND_SESSION_RESTORE.md', [

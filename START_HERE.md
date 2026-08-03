@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5.1 · CI Regression Hotfix`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -48,3 +48,5 @@
 39. 복구 시나리오는 boolean 성공과 세 가지 복구 시간이 모두 있어야 READY 후보가 되며 목표 시간의 98% 미만 기록은 warning입니다.
 40. 최종 Export는 서버에 기본 30분만 임시 보관됩니다. 장기 보존은 음원·SRT·VTT를 사용자 기기로 내려받는 방식만 지원합니다.
 41. 로컬 보존 기록은 파일명·형식·기록 시각만 저장하며 음성 바이트, 원문, 전체 URL을 저장하지 않습니다.
+
+42. Heartbeat 6.5.1은 복원 음원의 자동재생을 차단하고 부분→최종 WAV 교체 위치·상태 및 CI Web fixture를 안정화한 Hotfix입니다.

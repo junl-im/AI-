@@ -76,16 +76,15 @@ describe('browserPlaybackEvidence', () => {
       get: () => visibility,
     })
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
-    const now = vi.spyOn(Date, 'now')
-      .mockReturnValueOnce(1_000)
-      .mockReturnValueOnce(4_500)
+    let now = 1_000
     let latest = collectBrowserPlaybackEvidence()
     const stop = startBrowserPlaybackEvidenceMonitor((evidence) => {
       latest = evidence
-    })
+    }, () => now)
 
     visibility = 'hidden'
     document.dispatchEvent(new Event('visibilitychange'))
+    now = 4_500
     visibility = 'visible'
     document.dispatchEvent(new Event('visibilitychange'))
     window.dispatchEvent(new Event('offline'))
@@ -99,7 +98,6 @@ describe('browserPlaybackEvidence', () => {
       longestHiddenMs: 3_500,
       networkTransitions: 1,
     })
-    expect(now).toHaveBeenCalledTimes(2)
   })
 
 })

@@ -33,10 +33,13 @@ await requireText('src/hooks/useTimelineGeneration.ts', [
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   'progressiveOffsetRef',
+  'progressiveNativePosition',
   'waitingForSegment',
   '다음 구간 대기',
   'activeSegment.index + 1',
-  'progressiveOffsetRef.current + nativePosition',
+  'progressiveOffsetRef.current + progressiveNativePosition',
+  'const handledPlayRequestRef = useRef(playRequestId)',
+  'playingRef.current = true',
 ])
 await requireText('src/hooks/useTimelineGeneration.test.ts', [
   '뒤섞여 도착한 구간을 번호 순서대로 준비해 하나의 트랙에 누적한다',

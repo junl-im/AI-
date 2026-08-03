@@ -1,14 +1,23 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5.1 · CI Regression Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-03 14:40 KST**
+최종 갱신: **2026-08-03 15:04 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+## Engine Heartbeat 6.5.1 CI Regression Hotfix
+
+- GitHub Actions에서 보고된 API Ruff UP012와 Web 테스트 8건, Hooks 경고 1건을 우선 안정화했습니다.
+- 플레이어는 마운트 전에 존재하던 `playRequestId`를 새 자동재생 요청으로 오인하지 않습니다.
+- 부분 음원에서 최종 WAV로 교체할 때 DOM source 교체가 `currentTime`을 먼저 초기화해도 React에 저장된 최신 위치를 함께 사용합니다.
+- `play`/`playing`/`pause` 이벤트가 재생 상태 ref를 즉시 갱신해 교체 직전 상태를 잃지 않습니다.
+- visibility 시간 측정은 주입 가능한 시계를 사용하고, SSE·부분 WAV 테스트는 CI의 jsdom/Undici 모듈·Blob 차이를 명시적으로 처리합니다.
+- 전체 Web quality 최종 판정은 이 Hotfix를 Push한 뒤 GitHub Actions 재실행으로 확인해야 합니다.
+
 ## 1. 다음 세션 시작 절차
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 끝까지 읽는다.
 2. `package.json` 버전과 현재 로컬 버전을 확인한다.

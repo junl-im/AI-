@@ -37,6 +37,13 @@ const completedResult: TtsSynthesisResult = {
   realtimeFactor: 0.4,
 }
 
+function audioResponse(value: string): Response {
+  return new Response(new TextEncoder().encode(value), {
+    status: 200,
+    headers: { 'Content-Type': 'audio/wav' },
+  })
+}
+
 describe('useTimelineGeneration mobile recovery', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -318,10 +325,7 @@ describe('useTimelineGeneration partial audio delivery', () => {
   it('만료된 첫 구간 URL은 작업 상태에서 새 서명을 받아 한 번 다시 요청한다', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(null, { status: 410 }))
-      .mockResolvedValueOnce(new Response(
-        new Blob(['renewed-wave'], { type: 'audio/wav' }),
-        { status: 200, headers: { 'Content-Type': 'audio/wav' } },
-      ))
+      .mockResolvedValueOnce(audioResponse('renewed-wave'))
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:renewed-segment')
     voiceApiMocks.refreshSpeechReadySegment.mockResolvedValueOnce({
       index: 1,
@@ -407,10 +411,7 @@ describe('useTimelineGeneration partial audio delivery', () => {
   })
 
   it('첫 구간을 즉시 큐에 넣고 최종 WAV를 같은 트랙으로 교체한다', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(
-      new Blob(['partial-wave'], { type: 'audio/wav' }),
-      { status: 200, headers: { 'Content-Type': 'audio/wav' } },
-    ))
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(audioResponse('partial-wave'))
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:partial-segment')
     streamMocks.streamSpeechProgress.mockImplementationOnce(
       async (
@@ -496,9 +497,9 @@ describe('useTimelineGeneration partial audio delivery', () => {
   })
   it('뒤섞여 도착한 구간을 번호 순서대로 준비해 하나의 트랙에 누적한다', async () => {
     vi.spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(new Response(new Blob(['one']), { status: 200, headers: { 'Content-Type': 'audio/wav' } }))
-      .mockResolvedValueOnce(new Response(new Blob(['two']), { status: 200, headers: { 'Content-Type': 'audio/wav' } }))
-      .mockResolvedValueOnce(new Response(new Blob(['three']), { status: 200, headers: { 'Content-Type': 'audio/wav' } }))
+      .mockResolvedValueOnce(audioResponse('one'))
+      .mockResolvedValueOnce(audioResponse('two'))
+      .mockResolvedValueOnce(audioResponse('three'))
     vi.spyOn(URL, 'createObjectURL')
       .mockReturnValueOnce('blob:ordered-1')
       .mockReturnValueOnce('blob:ordered-2')

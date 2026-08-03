@@ -192,9 +192,10 @@ export function resetBrowserSoakEvidence(
 
 export function startBrowserPlaybackEvidenceMonitor(
   onUpdate: (evidence: BrowserPlaybackEvidence) => void,
+  nowMs: () => number = Date.now,
 ): () => void {
   let evidence = loadBrowserPlaybackEvidence() ?? collectBrowserPlaybackEvidence()
-  let hiddenAt = document.visibilityState === 'hidden' ? Date.now() : null
+  let hiddenAt = document.visibilityState === 'hidden' ? nowMs() : null
 
   const readCurrent = () => loadBrowserPlaybackEvidence() ?? evidence
   const commit = (
@@ -216,7 +217,7 @@ export function startBrowserPlaybackEvidenceMonitor(
   }
   const handleVisibility = () => {
     const base = readCurrent()
-    const now = Date.now()
+    const now = nowMs()
     const next = {
       ...base.soak,
       visibilityTransitions: base.soak.visibilityTransitions + 1,

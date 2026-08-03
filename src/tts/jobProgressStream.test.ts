@@ -3,6 +3,9 @@ import { streamSpeechProgress } from './jobProgressStream'
 
 vi.mock('../api/httpClient', () => ({
   getApiBaseUrl: () => 'https://voice.example/api/v1',
+  resolveApiAssetUrl: (value: string | null) => value
+    ? new URL(value, 'https://voice.example').toString()
+    : null,
 }))
 
 vi.mock('../api/apiConnection', () => ({

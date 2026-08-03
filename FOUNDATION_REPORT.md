@@ -1,6 +1,12 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5.1 · CI Regression Hotfix**
+
+## Engine Heartbeat 6.5.1 CI Regression Hotfix
+
+GitHub Actions가 보고한 Ruff 1건, Web 테스트 8건과 Hooks 경고 1건을 원인 단위로 수정했습니다. 제품 기능 범위는 6.5와 동일하며 자동재생 초기값, 부분→최종 음원 위치·상태 승계, visibility 시간 측정, SSE/WAV 테스트 fixture 안정성만 보강했습니다.
+
+검증: Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사 통과. 전체 npm 기반 Web quality는 sandbox registry 제한으로 GitHub Actions 재실행이 필요합니다.
 
 ## Engine Heartbeat 6.5 Device Soak Recorder & Audio Archive Policy
 

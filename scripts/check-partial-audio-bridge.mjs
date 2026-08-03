@@ -67,9 +67,11 @@ await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
 await requireText('src/tts/jobProgressStream.test.ts', [
   'publishes signed segment-ready events separately from progress',
   'readyAfterMs: 640',
+  'resolveApiAssetUrl:',
 ])
 await requireText('src/hooks/useTimelineGeneration.test.ts', [
   '첫 구간을 즉시 큐에 넣고 최종 WAV를 같은 트랙으로 교체한다',
+  'function audioResponse(value: string): Response',
   "mockReturnValue('blob:partial-segment')",
   'serverSegmentReadyMs: 650',
   '만료된 첫 구간 URL은 작업 상태에서 새 서명을 받아 한 번 다시 요청한다',

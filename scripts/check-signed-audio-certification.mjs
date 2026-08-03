@@ -16,6 +16,7 @@ await requireText('services/api/app/services/segment_audio.py', [
   'issue_final',
   'verify_final',
   '"final"',
+  '.encode()',
 ])
 await requireText('services/api/app/api/routes/tts.py', [
   '_signed_final_result',

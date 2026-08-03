@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.5.1 · CI regression hotfix
+
+- Ruff UP012가 지적한 불필요한 UTF-8 `encode` 인자를 제거했습니다.
+- 플레이어가 기존 `playRequestId`를 새 요청으로 오인해 복원 음원을 자동 재생하던 문제를 수정했습니다.
+- 부분→최종 WAV 교체 시 재생 상태 ref와 최신 재생 위치를 동기적으로 보존합니다.
+- progressive segment 배열을 `useMemo`로 안정화해 Hooks 의존성 경고를 제거했습니다.
+- visibility 관찰 시계를 주입 가능하게 만들어 숨김 시간 테스트가 전역 시계 호출에 영향받지 않게 했습니다.
+- SSE asset resolver mock과 WAV Response fixture를 실제 모듈·Undici 계약에 맞춰 Web 테스트를 안정화했습니다.
+- dependency-free preflight가 새 자동재생·위치 승계·시계·테스트 fixture 계약을 강제하도록 갱신했습니다.
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.5 · Device soak recorder and audio archive policy
 
 - Quality Lab에 Android/iOS 10·30·60분 실기기 recorder와 JSON 내보내기를 추가합니다.

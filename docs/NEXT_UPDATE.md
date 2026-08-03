@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.5.1 · CI Regression Hotfix`
 
 ## 목표 버전
 
@@ -8,6 +8,7 @@
 
 ## 핵심 기능
 
+0. 선행 게이트: Heartbeat 6.5.1을 Push해 API Ruff와 전체 Web quality가 모두 통과하는지 확인한다.
 1. 검증된 `package-lock.json`을 생성해 ESLint, 전체 Vitest, semantic typecheck와 Vite production build를 재현 가능하게 확정한다.
 2. Android Chrome·iOS Safari·설치형 PWA의 실제 10·30·60분 recorder 결과를 증거 bundle로 가져오고 서명·중복·기기 식별 최소화 규칙을 추가한다.
 3. 실제 CosyVoice 모델과 동의받은 프리셋 5종의 first audio, RTF, 생성 대기 seam, decode seam, handoff error와 실패율을 기록한다.

@@ -81,5 +81,5 @@ class SegmentAudioSigner:
         filename: str,
         expires: int,
     ) -> str:
-        payload = f"{kind}:{job_id}:{index}:{filename}:{expires}".encode("utf-8")
+        payload = f"{kind}:{job_id}:{index}:{filename}:{expires}".encode()
         return hmac.new(self._secret, payload, hashlib.sha256).hexdigest()

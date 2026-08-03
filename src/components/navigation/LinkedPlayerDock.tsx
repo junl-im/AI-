@@ -58,7 +58,7 @@ export function LinkedPlayerDock() {
   const segmentWaitedRef = useRef(false)
   const lastSeamKeyRef = useRef<string | null>(null)
   const lastSavedPositionRef = useRef(0)
-  const handledPlayRequestRef = useRef(0)
+  const handledPlayRequestRef = useRef(playRequestId)
   const rehydrationAttemptRef = useRef<string | null>(null)
   const playbackRateRef = useRef(playbackRate)
   const speechTimerRef = useRef<number | null>(null)
@@ -73,7 +73,10 @@ export function LinkedPlayerDock() {
   const [playbackError, setPlaybackError] = useState<string | null>(null)
   const browserPlayback = track?.audio.browserSpeech ?? null
   const progressiveSequence = track?.audio.progressive ?? null
-  const progressiveSegments = progressiveSequence?.segments ?? []
+  const progressiveSegments = useMemo(
+    () => progressiveSequence?.segments ?? [],
+    [progressiveSequence],
+  )
   const activeSegment = progressiveSegments.find((segment) => segment.index === activeSegmentIndex)
     ?? progressiveSegments[0]
     ?? null
@@ -250,10 +253,14 @@ export function LinkedPlayerDock() {
     const renewedFinalPosition = renewedFinalAudio
       ? Math.max(nativePosition, track?.resumePositionSeconds ?? 0)
       : 0
+    const progressiveNativePosition = Math.max(
+      nativePosition,
+      Math.max(0, currentTimeRef.current - progressiveOffsetRef.current),
+    )
     const handoffPosition = finalReplacedProgressive
       ? waitingForSegmentRef.current
         ? progressiveOffsetRef.current
-        : progressiveOffsetRef.current + nativePosition
+        : progressiveOffsetRef.current + progressiveNativePosition
       : progressiveSegmentAdvanced
         ? progressiveOffsetRef.current
         : renewedFinalAudio
@@ -470,19 +477,27 @@ export function LinkedPlayerDock() {
         const nextCurrent = progressiveActive
           ? progressiveOffsetRef.current + event.currentTarget.currentTime
           : event.currentTarget.currentTime
+        currentTimeRef.current = nextCurrent
         setCurrent(nextCurrent)
         if (!progressiveActive && currentTrackId && Math.abs(nextCurrent - lastSavedPositionRef.current) >= 0.75) {
           lastSavedPositionRef.current = nextCurrent
           updateResumePosition(currentTrackId, nextCurrent)
         }
       }}
-      onPlay={() => setPlaying(true)}
+      onPlay={() => {
+        playingRef.current = true
+        setPlaying(true)
+      }}
       onPlaying={() => {
         recordPlaybackMetric('playingMs')
         recordProgressiveSeam()
+        playingRef.current = true
         setPlaying(true)
       }}
-      onPause={() => setPlaying(false)}
+      onPause={() => {
+        playingRef.current = false
+        setPlaying(false)
+      }}
       onEnded={handleEnded}
       onError={() => { void recoverFinalAudio() }}
     />
