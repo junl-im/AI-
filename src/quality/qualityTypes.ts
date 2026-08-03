@@ -189,7 +189,23 @@ export interface ExportSoakSummary {
   missingScenarios: string[]
 }
 
+export interface QualityEvidenceRecordDigest {
+  category: string
+  id: string
+  sha256: string
+}
+
+export interface QualityEvidenceManifest {
+  schemaVersion: string
+  recordCount: number
+  categoryCounts: Record<string, number>
+  recordsSha256: string
+  records: QualityEvidenceRecordDigest[]
+  bundleSha256: string
+}
+
 export interface QualityEvidenceSummary {
   stt: SttComparisonSummary
   exportSoak: ExportSoakSummary
+  manifest: QualityEvidenceManifest | null
 }

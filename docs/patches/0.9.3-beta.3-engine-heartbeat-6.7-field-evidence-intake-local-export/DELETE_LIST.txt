@@ -1,0 +1,1 @@
+# Engine Heartbeat 6.7 removes no tracked files.

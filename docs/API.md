@@ -223,3 +223,11 @@ GET /api/v1/tts/jobs/{job_id}/segments/{index}/audio?file=...&expires=...&signat
 ## POST /exports · archive policy
 
 응답에는 `server_expires_at`, `server_retention_minutes`, `preservation_mode: download-only`가 포함됩니다. 서버 파일은 임시 보관만 하며 사용자 보존은 음원·SRT·VTT 다운로드로 수행합니다.
+
+## Heartbeat 6.7 Evidence Intake
+
+- `POST /api/v1/quality/evidence-intake/preview`: 최대 5MiB의 field evidence v2 또는 Web quality run report를 검증하고 중복 bundle·record 수를 반환한다.
+- `POST /api/v1/quality/evidence-intake/import`: preview와 같은 검증을 다시 수행한 뒤 checksum 원본과 출처 metadata를 등록한다.
+- `GET /api/v1/quality/evidence-intake`: 최근 등록된 evidence bundle 목록을 반환한다.
+
+Web quality report JSON 가져오기는 report 내부 SHA와 7개 phase 계약을 검증한다. 실제 log·dist 파일 자체의 검증은 원 artifact에서 `npm run quality:web-report:verify`를 실행해야 한다.

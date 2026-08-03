@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.7 · Field evidence intake and local export bundle
+
+- field evidence v2와 완료된 Web quality run report를 서버 checksum으로 preview·등록합니다.
+- bundle/report SHA와 record/evidence SHA 기준으로 중복 증거를 차단합니다.
+- 가져온 원본 JSON은 checksum 파일명으로 원자 저장하고 출처 metadata를 index에 기록합니다.
+- Quality Lab에 증거 가져오기 이력과 WAV·MP3·SRT·VTT·JSON 브라우저 로컬 ZIP을 추가합니다.
+- ZIP은 파일별 SHA-256 manifest, 20개/250MiB 상한, 진행률·취소와 100MiB 초과 모바일 경고를 제공합니다.
+- npm lock 검사를 repository preflight 필수 단계로 올리고 제품 버전은 `0.9.3-beta.3`으로 유지합니다.
+
+## 0.9.3-beta.3 Engine Heartbeat 6.6 · Field evidence and reproducible Web quality
+
+- 일반 Push·PR에서 누락 lock을 만들거나 검증 lock을 자동 커밋하던 CI 경로를 제거했습니다.
+- lint, TypeScript, Vitest와 Vite build를 동일한 7단계 Web quality runner로 실행합니다.
+- 입력 package manifest·lock, 단계별 로그와 dist 파일에 SHA-256을 기록하고 artifact로 보존합니다.
+- verifier가 report JSON, 실제 로그, 현재 lock과 dist manifest를 다시 대조하며 변조 fixture를 preflight에서 검사합니다.
+- Quality evidence bundle schema v2에 레코드별 SHA-256, category count, 정규화 records hash와 bundle hash를 추가했습니다.
+- 장치 이름·브라우저 상세 버전·메모를 기본 제거하고 다운로드 전에 서버 검증 endpoint를 호출합니다.
+- checksum은 변조 감지용이며 실제 측정 진실성이나 발행자 신원을 보증하는 전자서명으로 표현하지 않습니다.
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.5.2 · Stream handoff CI hotfix
 
 - Fixed a Web Streams deadlock risk by consuming the playback branch before awaiting cancellation of the tee probe branch.

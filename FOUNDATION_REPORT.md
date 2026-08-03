@@ -1,6 +1,25 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5.2 · Stream Handoff CI Hotfix**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.7 · Field Evidence Intake & Local Export Bundle**
+
+
+## Engine Heartbeat 6.7 Field Evidence Intake & Local Export Bundle
+
+- SoriON field evidence v2와 Heartbeat 6.6·6.7 Web quality run report를 서버에서 구분 검증합니다.
+- 5MiB 상한, schema·제품 버전·허용 필드·phase 명령·결과·SHA-256을 preview 단계에서 재계산합니다.
+- bundle/report SHA와 record/evidence SHA를 함께 사용해 동일 파일과 동일 실행 내용의 중복 등록을 차단합니다.
+- 원본 JSON은 checksum 파일명으로 원자 저장하고 출처·commit SHA·run ID·등록 시각을 별도 index에 남깁니다.
+- 브라우저 로컬 ZIP은 WAV·MP3·SRT·VTT·JSON 최대 20개/250MiB, 안전 파일명, 파일별 SHA-256 manifest, 진행률·취소와 대용량 경고를 제공합니다.
+- repository preflight에 npm lock 무결성과 Evidence Intake/Local Bundle 계약을 포함해 총 20개 검사를 수행합니다.
+- 제품 버전은 `0.9.3-beta.3`으로 유지합니다.
+
+## Engine Heartbeat 6.6 Field Evidence & Reproducible Web Quality
+
+일반 Push·PR에서 lock을 자동 생성·커밋하던 경계를 제거하고 커밋된 `package-lock.json`만 검증하도록 CI를 변경했습니다. lint, semantic typecheck, Vitest와 Vite build는 하나의 7단계 실행기가 수행하며 입력 lock, 단계별 로그와 dist 파일의 SHA-256을 `.sorion/web-quality` report로 보존합니다. report verifier는 JSON checksum만 보는 것이 아니라 실제 로그·lock·dist 파일을 다시 대조합니다.
+
+Quality evidence bundle은 schema v2 manifest를 사용합니다. 장치 이름, 브라우저 상세 버전과 메모를 기본 제거하고 각 레코드와 정규화된 전체 묶음에 SHA-256을 부여합니다. Web은 다운로드 직전에 서버 검증 endpoint를 호출합니다. checksum은 우발적 또는 비인가 변경 탐지용이며 발행자 신원이나 측정 진실성을 보증하는 전자서명은 아닙니다.
+
+검증: Repository preflight 18/18, API pytest 143개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사, Web quality plan·report·로그 변조 역검증과 CI YAML parse 통과. Ruff와 전체 npm Web quality는 현재 sandbox에 설치된 의존성이 없어 실행하지 못했으며 커밋된 lock을 사용하는 GitHub Actions가 최종 판정합니다.
 
 ## Engine Heartbeat 6.5.2 Stream Handoff CI Hotfix
 
@@ -146,7 +165,7 @@ GitHub Actions가 보고한 Ruff 1건, Web 테스트 8건과 Hooks 경고 1건�
 ## CI Hardening 5
 
 - Ruff 0.15.22 기준으로 verification route가 `app.services.stt_evaluation` 모듈을 한 번만 import하도록 정리했습니다.
-- 누락되거나 manifest와 불일치한 package-lock은 CI가 cache 우선·제한 registry fallback으로 자동 bootstrap하고, 정상 lock은 verify-only로 처리합니다.
+- Heartbeat 6.6부터 일반 Push·PR은 커밋된 package-lock만 verify-only로 처리하며 누락·stale lock은 자동 생성 없이 실패합니다.
 - npm Firebase SDK 의존성을 제거하고 고정 버전 공식 browser ESM을 로그인 시점에만 동적으로 로드합니다.
 - lock 생성 실패 로그와 기존 lock 복원, 설치·전체 트리·SHA-256 proof 계약을 유지합니다.
 - local `GENERATE_WEB_LOCK`은 필수 단계가 아니라 registry 장애 시 사용할 수 있는 복구 수단입니다.

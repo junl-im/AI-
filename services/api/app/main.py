@@ -17,6 +17,7 @@ from app.middleware.private_network_cors import PrivateNetworkCORSMiddleware
 from app.services.audit_log import AuditLogger
 from app.services.device_benchmark_store import DeviceBenchmarkStore
 from app.services.engine_orchestrator import EngineOrchestrator
+from app.services.evidence_intake_store import EvidenceIntakeStore
 from app.services.job_manager import JobManager
 from app.services.proxy_headers import client_address
 from app.services.quality_evidence_store import QualityEvidenceStore
@@ -74,6 +75,7 @@ async def lifespan(app: FastAPI):
         settings.stt_comparison_file
     )
     app.state.export_soak_store = QualityEvidenceStore(settings.export_soak_file)
+    app.state.evidence_intake_store = EvidenceIntakeStore(settings.evidence_intake_file)
     app.state.stt_adapter = FasterWhisperAdapter(
         settings.faster_whisper_model,
         settings.faster_whisper_device,

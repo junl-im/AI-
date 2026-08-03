@@ -65,7 +65,7 @@ uv run python -m scripts.run_export_soak --minutes 10 30 60 --formats wav mp3
 
 Export는 WAV와 긴 쉼을 청크 단위로 기록하고 임시 파일 완성 후 최종 이름으로 교체한다. 오류나 FFmpeg timeout이면 부분 WAV·MP3·자막을 삭제한다. soak 결과는 `.sorion/quality/export-soak.jsonl`에 저장되며 실제 음원은 기본 삭제된다.
 
-`GET /api/v1/quality/evidence-bundle`은 장치 이름과 메모를 기본 제거한다. 실제 음원, 모델 파일, 로컬 경로는 포함하지 않는다. 합성 무음 soak는 구조 검증이며 실제 음질·장치 성능 증거가 아니다.
+`GET /api/v1/quality/evidence-bundle`은 장치 이름·브라우저 상세 버전·메모를 기본 제거하고 schema v2 manifest에 레코드별·전체 SHA-256을 포함한다. `POST /api/v1/quality/evidence-bundle/verify`는 다운로드 직전 내용과 manifest를 다시 계산한다. 실제 음원, 모델 파일, 원문과 로컬 경로는 포함하지 않는다. checksum은 전자서명이 아니며 합성 무음 soak는 구조 검증일 뿐 실제 음질·장치 성능 증거가 아니다.
 
 
 ## Engine Heartbeat 6.4 모바일 인증 확장

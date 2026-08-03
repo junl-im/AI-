@@ -10,36 +10,35 @@ const failures = []
 for (const token of [
   'npm_lock:', 'api_lock:', 'worker_lock:',
   'needs: [preflight, npm_lock]', 'needs: [preflight, api_lock]', 'needs: [preflight, worker_lock]',
-  'Commit available verified lockfiles · main only', 'contents: write',
-  "needs.npm_lock.result == 'success'", "needs.api_lock.result == 'success'",
-  "needs.worker_lock.result == 'success'", 'npm run quality:preflight',
-  'sorion-repository-preflight-${{ github.run_attempt }}', 'mode=generate',
-  'npm run locks:refresh:npm', 'npm run locks:check -- --component npm',
-  'lock-structure-check.log', 'Fail after preserving npm evidence',
+  "needs.preflight.result == 'success'", "needs.npm_lock.result == 'success'",
+  "needs.api_lock.result == 'success'", "needs.worker_lock.result == 'success'",
+  'npm run quality:preflight', 'sorion-repository-preflight-${{ github.run_attempt }}',
+  'Committed npm lock required', 'npm run locks:refresh:npm',
+  'npm run locks:check -- --component npm', 'lock-structure-check.log',
+  'Run reproducible Web quality', 'npm run quality:web-repro',
+  'npm run quality:web-report:verify', 'sorion-web-quality-${{ github.run_attempt }}',
+  'Fail after preserving Web evidence',
 ]) if (!workflow.includes(token)) failures.push(`workflow 계약 누락: ${token}`)
-if (!/FORCE_REFRESH.*\|\| ! -f package-lock\.json/s.test(workflow)) {
-  failures.push('package-lock이 없을 때 검증된 npm bootstrap을 실행하는 조건이 없습니다.')
+
+for (const forbidden of [
+  'commit_verified_locks:',
+  'Commit available verified lockfiles · main only',
+  'contents: write',
+  'git push origin HEAD:main',
+  'if [[ "$FORCE_REFRESH" == "true" || ! -f package-lock.json ]]',
+  'needs: lockfiles',
+  'sorion-verified-lockfiles',
+]) {
+  if (workflow.includes(forbidden)) failures.push(`비재현 자동 변경 또는 단일 장애점 재유입: ${forbidden}`)
 }
-if (workflow.includes('mode=missing') || workflow.includes('Fail fast when package-lock is not committed')) {
-  failures.push('package-lock 부재만으로 CI를 중단하는 bootstrap deadlock이 남아 있습니다.')
+if (!workflow.includes('if [[ ! -f package-lock.json ]]; then')) {
+  failures.push('일반 push/PR에서 누락 package-lock을 명확히 차단하지 않습니다.')
+}
+if (!workflow.includes("if [[ \"$FORCE_REFRESH\" == \"true\" ]]; then")) {
+  failures.push('명시적 workflow_dispatch lock 생성 경로가 없습니다.')
 }
 if (workflow.includes('env:\n        env:')) failures.push('workflow에 중복 env 키가 있습니다.')
-for (const forbidden of [
-  'needs: lockfiles', 'sorion-verified-lockfiles',
-  'Commit verified lockfiles · main only', 'node scripts/verify-lock-proof.mjs all',
-]) {
-  if (workflow.includes(forbidden)) failures.push(`단일 장애점 재유입: ${forbidden}`)
-}
 if (!/permissions:\n  contents: read/.test(workflow)) failures.push('전역 권한이 contents read가 아닙니다.')
-if (!workflow.includes("if: ${{ always() && needs.npm_lock.result == 'success' }}")) {
-  failures.push('Web quality가 preflight 실패와 독립적으로 실행되지 않습니다.')
-}
-if (!workflow.includes("if: ${{ always() && needs.api_lock.result == 'success' }}")) {
-  failures.push('API quality가 preflight 실패와 독립적으로 실행되지 않습니다.')
-}
-if (!workflow.includes("if: ${{ always() && needs.worker_lock.result == 'success' }}")) {
-  failures.push('Worker quality가 preflight 실패와 독립적으로 실행되지 않습니다.')
-}
 for (const component of ['npm', 'api', 'worker']) {
   if (!workflow.includes(`.sorion/lock-audit/${component}/status.txt`)) {
     failures.push(`${component} lock 진단 디렉터리 초기화가 없습니다.`)

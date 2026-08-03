@@ -4,6 +4,8 @@ import { PlaybackSeamEvidenceCard } from '../components/evaluation/PlaybackSeamE
 import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
 import { DeviceSoakRecorderCard } from '../components/evaluation/DeviceSoakRecorderCard'
 import { VerificationEvidenceCard } from '../components/evaluation/VerificationEvidenceCard'
+import { EvidenceIntakeCard } from '../components/evaluation/EvidenceIntakeCard'
+import { LocalExportBundleCard } from '../components/evaluation/LocalExportBundleCard'
 import { QualityDiagnosticsCard } from '../components/evaluation/QualityDiagnosticsCard'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { QualityResultCard } from '../components/evaluation/QualityResultCard'
@@ -96,6 +98,15 @@ export function QualityPage() {
     void listQualityReviews().then((items) => setReviewCount(items.length)).catch(() => undefined)
   }, [])
 
+  const handleEvidenceDownload = useCallback(async () => {
+    setError(null)
+    try {
+      await downloadQualityEvidenceBundle()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '증거 묶음을 검증하지 못했습니다.')
+    }
+  }, [])
+
   useEffect(() => {
     void refreshDiagnostics()
     void refreshDeviceSummary()
@@ -186,11 +197,15 @@ export function QualityPage() {
 
         <PlaybackSeamEvidenceCard />
 
+        <EvidenceIntakeCard />
+
+        <LocalExportBundleCard />
+
         <VerificationEvidenceCard
           summary={evidenceSummary}
           loading={loadingEvidenceSummary}
           onRefresh={() => void refreshEvidenceSummary()}
-          onDownload={() => void downloadQualityEvidenceBundle()}
+          onDownload={() => void handleEvidenceDownload()}
         />
 
         <QualityDiagnosticsCard

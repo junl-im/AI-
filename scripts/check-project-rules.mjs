@@ -131,8 +131,9 @@ await requireText('.github/workflows/ci.yml', [
   'Repository preflight · no dependency install', 'npm lock · generate or verify',
   'API uv lock · generate or verify', 'Worker uv lock · generate or verify',
   'needs: [preflight, npm_lock]', 'needs: [preflight, api_lock]', 'needs: [preflight, worker_lock]',
-  'Commit available verified lockfiles · main only', 'contents: write', "github.ref == 'refs/heads/main'",
-  'Verify downloaded lock proofs', "chore: commit available verified lockfiles [skip ci]",
+  'Committed npm lock required', 'Run reproducible Web quality',
+  'npm run quality:web-report:verify', 'sorion-web-quality-${{ github.run_attempt }}',
+  'Fail after preserving Web evidence',
   'npm run quality:preflight', 'sorion-repository-preflight-${{ github.run_attempt }}',
   "needs.npm_lock.result == 'success'", "needs.api_lock.result == 'success'",
   "needs.worker_lock.result == 'success'",
@@ -156,6 +157,7 @@ await requireAbsent('.github/workflows/ci.yml', [
 await requireAbsent('.github/workflows/ci.yml', [
   'needs: lockfiles', 'sorion-verified-lockfiles', 'npm_config_fetch_retries: 5',
   'Commit verified lockfiles · main only', 'node scripts/verify-lock-proof.mjs all',
+  'commit_verified_locks:', 'contents: write', 'git push',
 ])
 await requireText('.nvmrc', ['22.18.0']); await requireText('START_ENGINE.cmd', ['scripts\\start-engine.mjs']); await requireText('scripts/start-engine.mjs', ['엔진 심장박동 확인', 'SORION_ALLOW_MOCK_ENGINE', 'SORION_COSYVOICE_PRESET_DIRECTORY', 'voice-presets']); await requireText('scripts/start-free-runtime.mjs', ['SORION_COSYVOICE_PRESET_DIRECTORY', 'voice-presets']); await requireText('scripts/start-api.mjs', ['SORION_COSYVOICE_PRESET_DIRECTORY', 'voice-presets']); await requireText('.node-version', ['22.18.0'])
 await requireText('scripts/check-project-rules.mjs', ['SOURCE_WARNING_LINES = 800', 'SOURCE_FAILURE_LINES = 1200', '프로젝트 규칙 권고'])
@@ -163,7 +165,7 @@ await requireAbsent('docs/CODING_RULE.md', ['소스 파일은 500줄 이하'])
 await requireText('src/components/evaluation/EngineDoctorCard.tsx', ['ENGINE DOCTOR', '저장·진단', '자동 연결 복구', 'CosyVoice 프리셋 음색'])
 await requireText('src/hooks/useEngineDoctor.ts', ['runApiConnectivityAudit', 'getSetupStatus', 'copyDiagnostics', 'requestAutomaticApiReconnect'])
 await requireText('services/api/app/services/setup_diagnostics.py', ['PRESET_VOICE_IDS', 'voice-presets', 'voice_preset_ready_count'])
-await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '자동 커밋', 'npm ci', 'uv sync --locked'])
+await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '수동 검토', 'npm ci', 'uv sync --locked'])
 await requireText('src/test/setup.ts', ['afterEach', 'cleanup()', 'Object.defineProperty(Blob.prototype', "reader.readAsArrayBuffer(this)"])
 await requireText('src/tts/mockWave.test.ts', ['async function readBlob', "typeof blob.arrayBuffer === 'function'", 'reader.readAsArrayBuffer(blob)'])
 await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/voiceApi.ts', ['request.engineId === BROWSER_SPEECH_ENGINE_ID', 'timeoutMs: 3_500']); await requireText('src/hooks/useEngineCatalog.ts', ['브라우저 한국어 음성 즉시 준비']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])

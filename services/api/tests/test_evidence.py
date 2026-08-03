@@ -72,3 +72,254 @@ def test_evidence_bundle_redacts_device_name_and_notes(client):
     assert body["redacted"] is True
     assert body["device_benchmarks"][0]["device_name"] == "cpu"
     assert body["device_benchmarks"][0]["notes"] == ""
+
+
+def test_evidence_bundle_has_stable_manifest_and_verifies(client):
+    client.post(
+        "/api/v1/quality/device-benchmarks",
+        json={
+            "device_profile": "android",
+            "device_name": "Pixel Private Alias",
+            "engine_id": "cosyvoice3",
+            "model_id": "local",
+            "model_version": "1",
+            "preset_id": "on-clear",
+            "sample_minutes": 10,
+            "soak_elapsed_seconds": 605,
+            "scenario": "baseline",
+            "browser_version": "Chrome full version",
+            "processing_seconds": 60,
+            "audio_duration_seconds": 120,
+            "playback_completed": True,
+            "succeeded": True,
+            "notes": "private device note",
+        },
+    )
+
+    first = client.get("/api/v1/quality/evidence-bundle").json()
+    second = client.get("/api/v1/quality/evidence-bundle").json()
+
+    assert first["schema_version"] == "2"
+    assert first["manifest"]["record_count"] == 1
+    assert len(first["manifest"]["bundle_sha256"]) == 64
+    assert first["manifest"]["bundle_sha256"] == second["manifest"]["bundle_sha256"]
+    assert first["device_benchmarks"][0]["device_name"] == "android"
+    assert first["device_benchmarks"][0]["browser_version"] == ""
+    assert first["device_benchmarks"][0]["notes"] == ""
+
+    verified = client.post(
+        "/api/v1/quality/evidence-bundle/verify",
+        json=first,
+    )
+    assert verified.status_code == 200
+    assert verified.json() == {
+        "valid": True,
+        "provided_sha256": first["manifest"]["bundle_sha256"],
+        "expected_sha256": first["manifest"]["bundle_sha256"],
+        "record_count": 1,
+        "reason": "검증 통과",
+    }
+
+
+def test_evidence_bundle_verifier_rejects_tampered_record(client):
+    client.post(
+        "/api/v1/quality/export-soak-records",
+        json={
+            "sample_minutes": 10,
+            "output_format": "wav",
+            "segment_count": 10,
+            "expected_duration_seconds": 600,
+            "actual_duration_seconds": 600,
+            "processing_seconds": 2,
+            "output_bytes": 1000,
+            "subtitle_end_seconds": 600,
+            "succeeded": True,
+        },
+    )
+    bundle = client.get("/api/v1/quality/evidence-bundle").json()
+    bundle["export_soak_records"][0]["actual_duration_seconds"] = 599
+
+    response = client.post(
+        "/api/v1/quality/evidence-bundle/verify",
+        json=bundle,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["valid"] is False
+    assert response.json()["provided_sha256"] != response.json()["expected_sha256"]
+
+
+def test_evidence_summary_exposes_redacted_manifest(client):
+    response = client.get("/api/v1/quality/evidence-summary")
+
+    assert response.status_code == 200
+    manifest = response.json()["manifest"]
+    assert manifest["schema_version"] == "2"
+    assert manifest["record_count"] == 0
+    assert len(manifest["bundle_sha256"]) == 64
+
+
+def test_evidence_bundle_verifier_rejects_unknown_fields(client):
+    bundle = client.get("/api/v1/quality/evidence-bundle").json()
+    bundle["unexpected_note"] = "not covered by the manifest"
+
+    response = client.post(
+        "/api/v1/quality/evidence-bundle/verify",
+        json=bundle,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["valid"] is False
+    assert "허용되지 않은 필드" in response.json()["reason"]
+
+
+def test_evidence_intake_previews_imports_and_blocks_duplicate_bundle(client):
+    bundle = client.get("/api/v1/quality/evidence-bundle").json()
+    payload = {
+        "bundle": bundle,
+        "source": {
+            "name": "web-quality-evidence.json",
+            "kind": "github-actions",
+            "commit_sha": "abc123",
+            "run_id": "run-77",
+        },
+    }
+
+    preview = client.post("/api/v1/quality/evidence-intake/preview", json=payload)
+    assert preview.status_code == 200
+    assert preview.json()["valid"] is True
+    assert preview.json()["importable"] is True
+
+    imported = client.post("/api/v1/quality/evidence-intake/import", json=payload)
+    assert imported.status_code == 200
+    body = imported.json()
+    assert body["imported"] is True
+    assert body["record"]["source_kind"] == "github-actions"
+    assert body["record"]["commit_sha"] == "abc123"
+
+    duplicate = client.post("/api/v1/quality/evidence-intake/preview", json=payload)
+    assert duplicate.status_code == 200
+    assert duplicate.json()["duplicate_bundle"] is True
+    assert duplicate.json()["importable"] is False
+
+    conflict = client.post("/api/v1/quality/evidence-intake/import", json=payload)
+    assert conflict.status_code == 409
+
+    listed = client.get("/api/v1/quality/evidence-intake")
+    assert listed.status_code == 200
+    assert listed.json()[0]["bundle_sha256"] == bundle["manifest"]["bundle_sha256"]
+
+
+def test_evidence_intake_rejects_tampered_and_local_duplicate_records(client):
+    client.post(
+        "/api/v1/quality/export-soak-records",
+        json={
+            "sample_minutes": 10,
+            "output_format": "wav",
+            "segment_count": 10,
+            "expected_duration_seconds": 600,
+            "actual_duration_seconds": 600,
+            "processing_seconds": 2,
+            "output_bytes": 1000,
+            "subtitle_end_seconds": 600,
+            "succeeded": True,
+        },
+    )
+    bundle = client.get("/api/v1/quality/evidence-bundle").json()
+    payload = {"bundle": bundle, "source": {"name": "device.json", "kind": "device"}}
+
+    duplicate = client.post("/api/v1/quality/evidence-intake/preview", json=payload)
+    assert duplicate.status_code == 200
+    assert duplicate.json()["duplicate_record_count"] == 1
+    assert duplicate.json()["importable"] is False
+
+    bundle["export_soak_records"][0]["actual_duration_seconds"] = 599
+    tampered = client.post(
+        "/api/v1/quality/evidence-intake/preview",
+        json={"bundle": bundle, "source": {"name": "tampered.json", "kind": "manual"}},
+    )
+    assert tampered.status_code == 200
+    assert tampered.json()["valid"] is False
+    assert tampered.json()["importable"] is False
+
+
+
+def test_evidence_intake_accepts_verified_web_quality_report(client):
+    from app.services.web_quality_report import _evidence_payload, _sha256
+
+    phase_specs = [
+        ("lock-structure", "npm run locks:check -- --component npm"),
+        ("web-toolchain", "npm run quality:web-toolchain"),
+        ("dependency-tree", "npm run quality:dependency-tree"),
+        ("lint", "npm run lint"),
+        ("typecheck", "npm run typecheck"),
+        ("test", "npm run test:ci"),
+        ("build", "npm run build"),
+    ]
+    report = {
+        "schemaVersion": 1,
+        "mode": "run",
+        "appVersion": "0.9.3-beta.3",
+        "heartbeat": "6.7",
+        "startedAt": "2026-08-03T09:00:00.000Z",
+        "completedAt": "2026-08-03T09:01:00.000Z",
+        "runtime": {
+            "node": "22.18.0",
+            "npm": "10.9.3",
+            "platform": "linux",
+            "architecture": "x64",
+        },
+        "source": {
+            "repository": "example/sorion",
+            "commitSha": "abc123",
+            "runId": "77",
+            "runAttempt": "1",
+        },
+        "inputs": {
+            "packageJsonSha256": "1" * 64,
+            "packageLockSha256": "2" * 64,
+        },
+        "phases": [
+            {
+                "id": phase_id,
+                "label": phase_id,
+                "command": command,
+                "status": "passed",
+                "exitCode": 0,
+                "durationMs": 100,
+                "logSha256": f"{index:x}" * 64,
+            }
+            for index, (phase_id, command) in enumerate(phase_specs, start=3)
+        ],
+        "dist": [{"path": "dist/index.html", "bytes": 100, "sha256": "a" * 64}],
+        "passed": True,
+    }
+    report["evidenceSha256"] = _sha256(_evidence_payload(report))
+    report["reportSha256"] = _sha256(report)
+    payload = {
+        "bundle": report,
+        "source": {
+            "name": "web-quality-report.json",
+            "kind": "github-actions",
+            "commit_sha": "abc123",
+            "run_id": "77",
+        },
+    }
+
+    preview = client.post("/api/v1/quality/evidence-intake/preview", json=payload)
+    assert preview.status_code == 200
+    assert preview.json()["valid"] is True
+    assert preview.json()["schema_version"] == "web-quality/1"
+    assert preview.json()["record_count"] == 1
+
+    imported = client.post("/api/v1/quality/evidence-intake/import", json=payload)
+    assert imported.status_code == 200
+    assert imported.json()["record"]["source_kind"] == "github-actions"
+
+    report["phases"][3]["status"] = "failed"
+    tampered = client.post(
+        "/api/v1/quality/evidence-intake/preview",
+        json={"bundle": report, "source": {"name": "tampered-report.json"}},
+    )
+    assert tampered.status_code == 200
+    assert tampered.json()["valid"] is False

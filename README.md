@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5.2 · Stream Handoff CI Hotfix`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.7 · Field Evidence Intake & Local Export Bundle`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -17,7 +17,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 진행 상태: SSE 우선, polling 자동 대체
 - 세션: IndexedDB 자동 저장과 SQLite 결과 복구
 - 배포: GitHub Pages 또는 Firebase Hosting Spark 정적 Web
-- CI: preflight 전체 진단, 구성요소별 lock 보존, 누락 npm lock의 검증된 자동 bootstrap
+- CI: 커밋된 lock 검증, lint·typecheck·Vitest·build 단일 실행기와 로그·dist SHA-256 증거 보고서
 - Firebase: `device-streaming-96b2272c` Web Auth 공개 설정 연결, Firestore·Storage 기본 전면 차단
 - PWA: 1024px 최적화 로고와 1.5MiB 사전 캐시 예산 검사
 - 모바일: 카카오톡 WebView를 감지해 로컬 PC 엔진 제한과 외부 브라우저 전환을 즉시 안내
@@ -43,6 +43,11 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - Export 보존: 서버 임시 만료 시각을 표시하고 사용자가 내려받은 음원·SRT·VTT만 보존본으로 취급
 - CI 안정화: 복원 자동재생 차단, 부분→최종 음원 위치·상태 승계, visibility 시계와 SSE/WAV 테스트 fixture를 GitHub Actions 계약에 맞게 보강
 - Stream 안정화: `ReadableStream.tee()` probe 취소를 재생 분기 소비 뒤 완료해 첫 구간 준비 교착을 차단하고, 최종 WAV 교체 테스트는 실제 DOM source 반영 순서를 따름
+- Web 품질 증거: 동일한 7단계 실행 계획, 단계별 로그 SHA-256, package lock 입력 해시와 dist 파일 manifest를 CI artifact로 보존
+- 필드 증거 manifest: 개인정보 최소 레코드별 SHA-256과 묶음 SHA-256을 만들고 다운로드 직전 서버에서 다시 검증
+- 증거 Intake: field evidence v2와 Web quality run report를 5MiB 제한·서버 checksum 재검증·bundle/record 중복 차단 뒤 등록
+- 로컬 Export ZIP: WAV·MP3·SRT·VTT·JSON 최대 20개/250MiB를 서버 업로드 없이 SHA-256 manifest, 진행률과 취소를 포함해 묶음
+- Lock gate: repository preflight가 package-lock 존재와 package.json 직접 의존성 일치를 필수 검사하며 패치는 기존 검증 lock을 보존
 
 ## 무료 실행
 
@@ -88,6 +93,9 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 음성 프리셋: [`docs/VOICE_PRESETS.md`](docs/VOICE_PRESETS.md)
 - UI/UX 점검: [`docs/UI_UX_AUDIT_HEARTBEAT_5_2.md`](docs/UI_UX_AUDIT_HEARTBEAT_5_2.md)
 - lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
+- 재현 가능한 Web 품질: [`docs/REPRODUCIBLE_WEB_QUALITY.md`](docs/REPRODUCIBLE_WEB_QUALITY.md)
+- 필드 증거 manifest: [`docs/FIELD_EVIDENCE_MANIFEST.md`](docs/FIELD_EVIDENCE_MANIFEST.md)
+- 증거 가져오기·로컬 ZIP: [`docs/EVIDENCE_INTAKE_AND_LOCAL_BUNDLE.md`](docs/EVIDENCE_INTAKE_AND_LOCAL_BUNDLE.md)
 
 ## 개발 원칙
 
@@ -122,8 +130,8 @@ npm run hooks:install
 Volta에 동일하게 고정합니다. `vite-plugin-pwa 1.3.0`의 Vite 8 peer 선언과 전체 npm 트리를
 검사하며, 일반 CI는 검증된 lock이 있어야 `npm ci`와 `uv sync --locked`로 진행합니다.
 
-일반 push·PR은 `package-lock.json`이 manifest와 일치하면 `npm ci`로만 검증하고, 없거나 stale이면 CI가 cache 우선·제한
-registry fallback으로 한 번 bootstrap해 설치·트리 검증을 통과한 lock만 main에 반영합니다. 공식
+일반 push·PR은 커밋된 `package-lock.json`이 manifest와 일치할 때만 `npm ci`로 검증합니다. lock이 없거나 stale이면
+즉시 실패하며 CI는 source branch를 수정하거나 자동 커밋하지 않습니다. 공식
 Firebase 브라우저 ESM은 고정 버전 URL로 런타임 로드해 npm의 대형 Firebase 의존성 그래프를 제거했습니다.
 로컬 `GENERATE_WEB_LOCK` 스크립트는 선택적 복구 수단이며 API·Worker uv lock은 독립 작업을 유지합니다.
 

@@ -1,3 +1,12 @@
+# Heartbeat 6.7 추가 검증
+
+- npm lock integrity와 Evidence Intake/Local Bundle을 포함한 repository preflight 20개
+- field evidence v2 preview·import·list·동일 bundle·동일 local record 차단
+- Web quality run report 7 phase, package lock SHA, evidence/report SHA 검증과 변조 차단
+- Evidence Intake 원본 checksum 파일 원자 저장과 JSONL index
+- 로컬 ZIP PK signature, manifest 파일, 파일별 SHA-256, 지원 확장자·용량·취소·진행률
+- 전체 API·Worker pytest, Python compileall, TS/TSX transpile 구문 검사
+
 # TEST
 
 ## 계층
@@ -685,3 +694,16 @@ ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지
 - 부분→최종 WAV 테스트가 Store 교체를 `act()`로 처리하고 새 audio `src` 반영 뒤 metadata와 재생 재개를 검증하는지 확인합니다.
 - 샌드박스 결과: Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사와 Web Streams tee/cancel runtime smoke를 통과했습니다.
 - 제한: sandbox npm registry가 `@eslint/js@9.22.0`을 404로 반환해 전체 Vitest·ESLint·semantic typecheck·Vite build는 GitHub Actions에서 최종 확인합니다.
+
+## Engine Heartbeat 6.6 Field Evidence & Reproducible Web Quality 검사
+
+- `npm run quality:preflight`: 18/18
+- `python -m pytest services/api/tests -q`: 143 passed
+- `python -m pytest services/worker/tests -q`: 14 passed
+- `python -m compileall -q services/api/app services/worker/app`: 통과
+- TypeScript `transpileModule`: TS/TSX 171개 통과
+- `node scripts/check-reproducible-web-quality.mjs`: plan report 생성, 실제 로그 hash 검증, report·로그 변조 차단 확인
+- `node scripts/verify-web-quality-report.mjs --allow-plan`: 통과
+- `.github/workflows/ci.yml` YAML parse: 통과
+- 전체 ESLint·Vitest·semantic typecheck·Vite build는 설치된 Web dependency가 없는 sandbox에서는 실행하지 못했습니다. 커밋된 lock을 사용하는 GitHub Actions에서 최종 확인합니다.
+- Ruff는 현재 실행 환경에 설치돼 있지 않아 API·Worker CI에서 최종 확인합니다.

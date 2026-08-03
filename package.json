@@ -17,7 +17,7 @@
     "cleanup:stale-brand": "node scripts/remove-stale-brand-assets.mjs",
     "quality:web-manifest": "node scripts/check-web-toolchain.mjs --manifest-only",
     "quality:web-toolchain": "node scripts/check-web-toolchain.mjs",
-    "quality": "npm run quality:lock-network && npm run quality:ci-architecture && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:partial-audio-bridge && npm run quality:ordered-segment-playback && npm run quality:seam-metrics && npm run quality:signed-audio-certification && npm run quality:device-soak-archive && npm run quality:voice-presets && npm run quality:evidence && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
+    "quality": "npm run quality:lock-network && npm run quality:ci-architecture && npm run quality:reproducible-web && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:partial-audio-bridge && npm run quality:ordered-segment-playback && npm run quality:seam-metrics && npm run quality:signed-audio-certification && npm run quality:device-soak-archive && npm run quality:voice-presets && npm run quality:evidence && npm run quality:evidence-intake && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
@@ -60,7 +60,11 @@
     "quality:ordered-segment-playback": "node scripts/check-ordered-segment-playback.mjs",
     "quality:seam-metrics": "node scripts/check-seam-metrics-session.mjs",
     "quality:signed-audio-certification": "node scripts/check-signed-audio-certification.mjs",
-    "quality:device-soak-archive": "node scripts/check-device-soak-archive.mjs"
+    "quality:device-soak-archive": "node scripts/check-device-soak-archive.mjs",
+    "quality:web-repro": "node scripts/run-web-quality.mjs",
+    "quality:web-report:verify": "node scripts/verify-web-quality-report.mjs",
+    "quality:reproducible-web": "node scripts/check-reproducible-web-quality.mjs",
+    "quality:evidence-intake": "node scripts/check-evidence-intake-bundle.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",

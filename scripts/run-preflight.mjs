@@ -9,11 +9,13 @@ await mkdir(reportDirectory, { recursive: true })
 
 const checks = [
   ['retired files', 'check-stale-files.mjs'],
+  ['npm lock integrity', 'check-lockfiles.mjs', '--component', 'npm'],
   ['web manifest', 'check-web-toolchain.mjs', '--manifest-only'],
   ['PWA assets', 'check-pwa-assets.mjs'],
   ['Firebase web config', 'check-firebase-config.mjs'],
   ['lock retry contract', 'check-lock-network-retry.mjs'],
   ['CI architecture', 'check-ci-failure-domains.mjs'],
+  ['reproducible Web quality', 'check-reproducible-web-quality.mjs'],
   ['project rules', 'check-project-rules.mjs'],
   ['free-only boundary', 'check-free-only-boundary.mjs'],
   ['engine blueprint', 'check-engine-blueprint.mjs'],
@@ -25,6 +27,7 @@ const checks = [
   ['device soak / audio archive policy', 'check-device-soak-archive.mjs'],
   ['voice presets', 'check-voice-preset-contracts.mjs'],
   ['verification evidence', 'check-verification-evidence.mjs'],
+  ['evidence intake / local bundle', 'check-evidence-intake-bundle.mjs'],
 ]
 
 function annotationValue(value) {

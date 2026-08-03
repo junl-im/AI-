@@ -305,6 +305,14 @@ export async function getQualityEvidenceSummary(): Promise<QualityEvidenceSummar
       }>
       missing_scenarios: string[]
     }
+    manifest: {
+      schema_version: string
+      record_count: number
+      category_counts: Record<string, number>
+      records_sha256: string
+      records: Array<{ category: string; id: string; sha256: string }>
+      bundle_sha256: string
+    } | null
   }>('/quality/evidence-summary')
   return {
     stt: {
@@ -329,16 +337,40 @@ export async function getQualityEvidenceSummary(): Promise<QualityEvidenceSummar
       })),
       missingScenarios: result.export_soak.missing_scenarios,
     },
+    manifest: result.manifest ? {
+      schemaVersion: result.manifest.schema_version,
+      recordCount: result.manifest.record_count,
+      categoryCounts: result.manifest.category_counts,
+      recordsSha256: result.manifest.records_sha256,
+      records: result.manifest.records,
+      bundleSha256: result.manifest.bundle_sha256,
+    } : null,
   }
 }
 
 export async function downloadQualityEvidenceBundle() {
   const payload = await apiRequest<Record<string, unknown>>('/quality/evidence-bundle')
+  const verification = await apiRequest<{
+    valid: boolean
+    expected_sha256: string | null
+    record_count: number
+    reason: string
+  }>('/quality/evidence-bundle/verify', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  if (!verification.valid || !verification.expected_sha256) {
+    throw new Error(`증거 묶음 무결성 검사 실패: ${verification.reason}`)
+  }
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `sorion-quality-evidence-${new Date().toISOString().slice(0, 10)}.json`
+  anchor.download = `sorion-quality-evidence-${verification.expected_sha256.slice(0, 12)}.json`
   anchor.click()
   URL.revokeObjectURL(url)
+  return {
+    sha256: verification.expected_sha256,
+    recordCount: verification.record_count,
+  }
 }

@@ -28,6 +28,10 @@ def client(tmp_path_factory, monkeypatch):
         "SORION_EXPORT_SOAK_PATH",
         str(app_path / "export-soak.jsonl"),
     )
+    monkeypatch.setenv(
+        "SORION_EVIDENCE_INTAKE_PATH",
+        str(app_path / "imported-evidence.jsonl"),
+    )
     get_settings.cache_clear()
     try:
         with TestClient(app, client=("127.0.0.1", 50000)) as test_client:

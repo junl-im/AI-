@@ -1,12 +1,12 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5.2 · Stream Handoff CI Hotfix`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.7 · Field Evidence Intake & Local Export Bundle`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
-4. `package-lock.json`이 없으면 CI가 검증된 bootstrap을 수행하며, 로컬 `GENERATE_WEB_LOCK.cmd`는 네트워크 장애 시 선택적으로 사용합니다.
-5. 생성·설치·트리 검증을 통과한 npm lock만 main에 반영되고 API·Worker lock은 독립적으로 보존됩니다.
+4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.
+5. lock 갱신은 `generate_lockfiles=true` 수동 실행 또는 로컬 스크립트로 만든 뒤 사람이 변경과 lock 증명을 검토해 커밋합니다.
 6. Quality 화면은 실기기 15개 시나리오의 측정 진행률을 표시합니다.
 7. 타임라인의 `STT 검수 · 실패만 재생성`은 서버 WAV만 검수하고 실패 문장만 최대 2회 다시 생성합니다.
 8. `npm run quality:export-soak`는 합성 무음으로 Export 구조만 검증하며 실제 음질·장치 성능으로 해석하지 않습니다.
@@ -52,3 +52,11 @@
 42. Heartbeat 6.5.1은 복원 음원의 자동재생을 차단하고 부분→최종 WAV 교체 위치·상태 및 CI Web fixture를 안정화한 Hotfix입니다.
 
 43. Heartbeat 6.5.2는 Web Streams tee 분기의 cancel 교착을 제거하고, 최종 WAV source 교체 테스트가 DOM 반영 뒤 metadata를 검증하도록 동기화한 Hotfix입니다. 제품 버전은 `0.9.3-beta.3`으로 유지됩니다.
+
+44. Heartbeat 6.6은 lint·typecheck·Vitest·build를 동일한 7단계 Web 품질 실행기로 묶고 단계별 로그, package lock과 dist 파일의 SHA-256을 artifact로 남깁니다.
+45. Web 품질 report 검증은 JSON 자체뿐 아니라 실제 로그 파일, 현재 package.json·package-lock.json과 dist 산출물 manifest까지 대조합니다.
+46. 필드 증거 JSON은 장치 별칭·브라우저 상세 버전·메모를 기본 제거하고 레코드별·전체 묶음 SHA-256을 포함합니다. 이 checksum은 변조 감지용이며 발행자 전자서명은 아닙니다.
+
+47. Heartbeat 6.7은 field evidence v2와 완료된 Web quality run report를 preview 후 등록하며 bundle·record/evidence SHA-256 중복을 차단합니다.
+48. Quality Lab의 로컬 ZIP은 WAV·MP3·SRT·VTT·JSON 최대 20개, 250MiB 이하만 브라우저에서 묶고 파일별 SHA-256 manifest, 진행률과 취소를 제공합니다.
+49. Repository preflight는 npm lock을 필수 검사합니다. 덮어쓰기 패치는 저장소의 기존 검증 `package-lock.json`을 보존하며 lock이 없는 독립 ZIP은 검증 lock을 먼저 추가해야 합니다.

@@ -73,14 +73,16 @@ jobs:
         env:
           FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
         run: |
-          if [[ "$FORCE_REFRESH" == "true" || ! -f package-lock.json ]]; then
+          if [[ "$FORCE_REFRESH" == "true" ]]; then
             echo 'mode=generate' >> "$GITHUB_OUTPUT"
-          elif npm run locks:check -- --component npm > .sorion/lock-audit/npm/lock-structure-check.log 2>&1; then
-            echo 'mode=verify' >> "$GITHUB_OUTPUT"
-          else
-            echo 'mode=generate' >> "$GITHUB_OUTPUT"
-            cat .sorion/lock-audit/npm/lock-structure-check.log
+            exit 0
           fi
+          if [[ ! -f package-lock.json ]]; then
+            echo '::error title=Committed npm lock required::package-lock.json이 없습니다. workflow_dispatch의 generate_lockfiles로 생성한 뒤 검토하여 커밋하세요.'
+            exit 1
+          fi
+          npm run locks:check -- --component npm | tee .sorion/lock-audit/npm/lock-structure-check.log
+          echo 'mode=verify' >> "$GITHUB_OUTPUT"
       - name: Record npm registry diagnostics
         if: steps.mode.outputs.mode == 'generate'
         shell: bash
@@ -291,9 +293,9 @@ jobs:
   web:
     name: Web quality
     needs: [preflight, npm_lock]
-    if: ${{ always() && needs.npm_lock.result == 'success' }}
+    if: ${{ always() && needs.preflight.result == 'success' && needs.npm_lock.result == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 24
     steps:
       - uses: actions/checkout@v6
       - uses: actions/download-artifact@v7
@@ -308,22 +310,27 @@ jobs:
       - run: node scripts/verify-lock-proof.mjs npm
       - run: npm run locks:check -- --component npm
       - run: npm run deps:ci
-      - run: npm run quality:web-toolchain
-      - run: npm run quality:dependency-tree
-      - name: Lint
-        run: npm run lint
-      - name: Type check
-        run: npm run typecheck
-      - name: Test
-        run: npm run test:ci
-      - name: Verify Firebase public web configuration
-        run: npm run quality:firebase
-      - name: Verify PWA asset budget
-        run: npm run quality:pwa-assets
-      - name: Build
+      - name: Run reproducible Web quality
+        id: web_quality
+        continue-on-error: true
         env:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
-        run: npm run build
+        run: npm run quality:web-repro
+      - name: Verify Web quality report
+        if: steps.web_quality.outcome == 'success'
+        run: npm run quality:web-report:verify
+      - name: Upload Web quality evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sorion-web-quality-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          include-hidden-files: true
+          path: .sorion/web-quality
+      - name: Fail after preserving Web evidence
+        if: steps.web_quality.outcome == 'failure'
+        run: exit 1
       - name: Write empty static-host runtime configuration
         run: npm run runtime:config
       - name: Configure GitHub Pages
@@ -406,72 +413,6 @@ jobs:
         run: uv run --locked --python 3.10 ruff check app tests --output-format=github
       - name: Run Worker tests
         run: uv run --locked --python 3.10 pytest tests -q
-
-  commit_verified_locks:
-    name: Commit available verified lockfiles · main only
-    if: >-
-      ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' &&
-      (needs.npm_lock.result == 'success' || needs.api_lock.result == 'success' ||
-      needs.worker_lock.result == 'success') }}
-    needs: [npm_lock, api_lock, worker_lock]
-    runs-on: ubuntu-latest
-    timeout-minutes: 6
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: main
-      - name: Download verified npm lock
-        if: needs.npm_lock.result == 'success'
-        uses: actions/download-artifact@v7
-        with:
-          name: sorion-npm-lock
-          path: .
-      - name: Download verified API lock
-        if: needs.api_lock.result == 'success'
-        uses: actions/download-artifact@v7
-        with:
-          name: sorion-api-lock
-          path: .
-      - name: Download verified Worker lock
-        if: needs.worker_lock.result == 'success'
-        uses: actions/download-artifact@v7
-        with:
-          name: sorion-worker-lock
-          path: .
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22.18.0'
-          package-manager-cache: false
-      - name: Verify downloaded lock proofs
-        shell: bash
-        run: |
-          components=()
-          [[ "${{ needs.npm_lock.result }}" == "success" ]] && components+=(npm)
-          [[ "${{ needs.api_lock.result }}" == "success" ]] && components+=(api)
-          [[ "${{ needs.worker_lock.result }}" == "success" ]] && components+=(worker)
-          for component in "${components[@]}"; do
-            node scripts/verify-lock-proof.mjs "$component"
-          done
-      - name: Commit available changed lockfiles
-        shell: bash
-        run: |
-          files=()
-          [[ "${{ needs.npm_lock.result }}" == "success" ]] && files+=(package-lock.json)
-          [[ "${{ needs.api_lock.result }}" == "success" ]] && files+=(services/api/uv.lock)
-          [[ "${{ needs.worker_lock.result }}" == "success" ]] && files+=(services/worker/uv.lock)
-          git add -- "${files[@]}"
-          if git diff --cached --quiet; then
-            echo '사용 가능한 검증 lock 파일이 이미 저장소와 같습니다.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'chore: commit available verified lockfiles [skip ci]'
-          if ! git push origin HEAD:main; then
-            echo '::warning::branch protection 또는 권한 때문에 자동 lock 커밋을 건너뜁니다. component artifact는 유지됩니다.'
-          fi
 
   deploy:
     name: Deploy GitHub Pages

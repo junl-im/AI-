@@ -1,0 +1,43 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.5.2 -> Engine Heartbeat 6.6 Field Evidence & Reproducible Web Quality
+Changed or added files: 35
+Deleted tracked files: 0
+
+Changed or added:
+- .github/workflows/ci.yml
+- APPLY_PATCH.cmd
+- APPLY_PATCH.sh
+- FOUNDATION_REPORT.md
+- PATCH_MANIFEST.txt
+- README.md
+- START_HERE.md
+- docs/CHANGELOG.md
+- docs/FIELD_EVIDENCE_MANIFEST.md
+- docs/HANDOVER.md
+- docs/LOCKFILE_BOOTSTRAP.md
+- docs/NEXT_UPDATE.md
+- docs/REAL_DEVICE_STT_EXPORT.md
+- docs/REPRODUCIBLE_WEB_QUALITY.md
+- docs/TEST.md
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.6-field-evidence-reproducible-web-quality/DELETE_LIST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.6-field-evidence-reproducible-web-quality/PATCH_MANIFEST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.6-field-evidence-reproducible-web-quality/PATCH_README.md
+- package.json
+- scripts/check-ci-failure-domains.mjs
+- scripts/check-project-rules.mjs
+- scripts/check-reproducible-web-quality.mjs
+- scripts/run-preflight.mjs
+- scripts/run-web-quality.mjs
+- scripts/verify-web-quality-report.mjs
+- scripts/web-quality-plan.mjs
+- scripts/web-quality-report.mjs
+- services/api/app/api/routes/evidence.py
+- services/api/app/schemas/evidence.py
+- services/api/app/services/evidence_bundle.py
+- services/api/tests/test_evidence.py
+- src/components/evaluation/VerificationEvidenceCard.tsx
+- src/pages/QualityPage.tsx
+- src/quality/qualityApi.ts
+- src/quality/qualityTypes.ts
+
+Deleted tracked files:
+- none

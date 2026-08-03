@@ -1,14 +1,34 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5.2 · Stream Handoff CI Hotfix**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.7 · Field Evidence Intake & Local Export Bundle**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-03 15:04 KST**
+최종 갱신: **2026-08-03 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+## Engine Heartbeat 6.7 Field Evidence Intake & Local Export Bundle
+
+- 제품 버전은 `0.9.3-beta.3`으로 유지하고 내부 patch identifier만 Heartbeat 6.7로 올렸습니다.
+- Evidence Intake는 field evidence v2와 Web quality run report v1을 구분해 서버에서 checksum을 재계산합니다.
+- 동일 bundle/report 또는 동일 record/evidence digest는 등록하지 않습니다.
+- 가져온 JSON은 `.sorion/quality/imported-evidence`에 checksum 파일명으로 보존하고 index는 JSONL append 방식입니다.
+- Local Export Bundle은 서버 업로드 없이 20개/250MiB 이하의 음원·자막·JSON을 stored ZIP으로 만들고 SHA-256 manifest, 진행률과 취소를 제공합니다.
+- preflight는 npm lock과 6.7 계약을 포함해 20개입니다. 패치는 저장소의 기존 package-lock을 덮어쓰지 않습니다.
+- 다음 목표는 Heartbeat 6.8 Evidence Review, Retention & CosyVoice Benchmarks입니다.
+
+## Engine Heartbeat 6.6 Field Evidence & Reproducible Web Quality
+
+- 제품 버전은 `0.9.3-beta.3`으로 유지하고 내부 patch identifier만 Heartbeat 6.6으로 올렸습니다.
+- 일반 Push·PR은 커밋된 package-lock을 verify-only로 사용합니다. CI가 lock 또는 소스를 자동 커밋하지 않습니다.
+- Web quality는 lock structure, toolchain, dependency tree, ESLint, TypeScript, Vitest, Vite build의 고정 7단계입니다.
+- `.sorion/web-quality`에는 입력 SHA-256, 단계별 로그 SHA-256, dist 파일 manifest와 전체 report hash가 남습니다. verifier는 실제 파일도 다시 비교합니다.
+- evidence bundle v2는 개인정보 최소 레코드별 digest와 전체 bundle digest를 포함하며 Web 다운로드 전에 서버에서 재검증합니다.
+- checksum은 변조 감지이며 전자서명·측정값 진실성 보증이 아닙니다. 실제 Android/iOS/CosyVoice 결과를 임의 생성하지 않습니다.
+- 검증은 preflight 18/18, API 143, Worker 14, Python compileall, TS/TSX 171, plan/report 변조 역검증을 통과했습니다. 전체 npm quality와 Ruff는 설치 의존성 제약으로 GitHub Actions 최종 판정이 필요합니다.
+
 ## Engine Heartbeat 6.5.2 Stream Handoff CI Hotfix
 
 - 제품 버전은 `0.9.3-beta.3`으로 고정하고 내부 패치 식별자만 Heartbeat 6.5.2로 올렸습니다.
@@ -352,7 +372,7 @@ SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
 - 공개 Bridge 진단은 프록시 forwarded header를 사용하므로 신뢰 프록시 allowlist 강화가 필요하다.
 - 자동 탐색은 보안상 전체 LAN을 스캔하지 않는다.
 - 정식 npm·uv lock 생성은 패키지 저장소 가용성에 영향을 받지만 component별 실패 범위로 격리한다.
-- 검증된 lock만 SHA-256 증명 후 main 전용 최소 권한 job이 자동 커밋하며 강제 갱신은 `generate_lockfiles=true`를 사용한다.
+- Heartbeat 6.6부터 CI는 lock을 자동 커밋하지 않는다. `generate_lockfiles=true` 결과는 artifact로 검토한 뒤 사람이 커밋한다.
 - 모든 API 프로세스는 같은 SQLite job 파일을 공유해야 한다.
 - memory fallback은 앱 종료 뒤 영구 복원되지 않는다.
 ## 19. 절대 전달 규칙
@@ -660,7 +680,7 @@ CI Hotfix 4 테스트 규칙:
     - 기기·엔진·프리셋별 first audio·복구·seam P95와 실패율을 서버가 집계한다.
     - Export 서버 파일은 30분 임시이며 사용자 다운로드만 보존으로 인정한다.
     - 로컬 보존 기록에는 파일명 메타데이터만 남고 음성 바이트·원문·전체 URL은 저장하지 않는다.
-12. 다음 목표는 Heartbeat 6.6 Field Evidence & Reproducible Web Quality다.
+12. Heartbeat 6.6 Field Evidence & Reproducible Web Quality를 완료했으며 다음 목표는 Heartbeat 6.7 Field Evidence Intake & Local Export Bundle이다.
 
 
 ## 52. 2026-08-03 15:19 KST · 0.9.3-beta.3 Engine Heartbeat 6.5.2 Stream Handoff CI Hotfix
@@ -668,4 +688,12 @@ CI Hotfix 4 테스트 규칙:
 2. CI의 부분 구간 3건 실패는 tee probe의 cancel promise를 playback branch 소비 전에 await한 교착 가능성이 원인이었다.
 3. probe cancel은 비동기로 시작하고 playback stream을 Blob으로 소비한 뒤 완료를 기다리도록 수정했다.
 4. 최종 WAV 승계 테스트는 외부 Store 갱신과 DOM source 반영을 동기화한 뒤 metadata·play를 검증한다.
-5. 다음 기능 목표는 Heartbeat 6.6 Field Evidence & Reproducible Web Quality다.
+5. 다음 기능 목표는 Heartbeat 6.7 Field Evidence Intake & Local Export Bundle이다.
+
+## 53. 2026-08-03 18:27 KST · 0.9.3-beta.3 Engine Heartbeat 6.7 Field Evidence Intake & Local Export Bundle
+1. 기준 버전은 Heartbeat 6.6이며 제품 버전은 변경하지 않았다.
+2. evidence v2와 Web quality run report를 preview/import/list API로 가져온다.
+3. SHA-256 재계산, 허용 schema·phase 계약, bundle·record 중복 차단을 등록 전에 수행한다.
+4. 브라우저 로컬 ZIP은 최대 20개/250MiB, 파일별 SHA-256 manifest, 진행률과 취소를 제공한다.
+5. npm lock 검사를 preflight에 포함하되 패치가 기존 검증 lock을 덮어쓰거나 임의 생성하지 않는다.
+6. 다음 목표는 가져온 증거 보존·검토와 CosyVoice 5종 실제 benchmark schema다.

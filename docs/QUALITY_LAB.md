@@ -52,3 +52,9 @@ RTF는 품질 점수가 아닙니다. 자연스러움과 발음 평가는 반드
 - GitHub Pages만 실행하면 진단과 A/B 생성 API를 사용할 수 없습니다.
 - MeloTTS 설치 성공 여부와 실제 모델 다운로드 용량은 환경마다 다릅니다.
 - 엔진별 샘플레이트가 다를 경우 서로 다른 결과 파일은 비교할 수 있지만 하나로 병합하지 않습니다.
+
+## Heartbeat 6.7 Evidence Intake와 로컬 ZIP
+
+Quality Lab은 SoriON evidence v2와 완료된 Heartbeat 6.6·6.7 Web quality run report를 파일로 선택해 preview한 뒤 등록한다. checksum이나 schema가 틀리거나 동일 bundle·record가 이미 있으면 등록 버튼을 비활성화한다. Web quality report의 source commit SHA와 run ID는 파일에서 자동 채운다.
+
+Local Export Bundle 카드는 WAV·MP3·SRT·VTT·JSON 최대 20개, 250MiB 이하를 서버 전송 없이 ZIP으로 만든다. 파일별 SHA-256 manifest, 진행률, 취소와 100MiB 초과 모바일 메모리 경고를 제공한다.
