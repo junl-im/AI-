@@ -16,8 +16,10 @@ function percentile95(values: number[]): number | null {
 
 function downloadEvidence(rows: SeamEvidenceRow[], handoffErrors: number[]) {
   const gaps = rows.map((row) => row.gapMs)
+  const waitedGaps = rows.filter((row) => row.waitedForSegment).map((row) => row.gapMs)
+  const decodeGaps = rows.filter((row) => !row.waitedForSegment).map((row) => row.gapMs)
   const payload = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt: new Date().toISOString(),
     definition: 'previous-ended to next-playing',
     count: rows.length,
@@ -25,6 +27,10 @@ function downloadEvidence(rows: SeamEvidenceRow[], handoffErrors: number[]) {
     p95GapMs: percentile95(gaps),
     maximumGapMs: gaps.length ? Math.max(...gaps) : null,
     waitedTransitions: rows.filter((row) => row.waitedForSegment).length,
+    seamGroups: {
+      generationWaitP95Ms: percentile95(waitedGaps),
+      decodeTransitionP95Ms: percentile95(decodeGaps),
+    },
     finalHandoff: {
       count: handoffErrors.length,
       p95ErrorMs: percentile95(handoffErrors),
@@ -62,6 +68,8 @@ export function PlaybackSeamEvidenceCard() {
   const p95 = percentile95(gaps)
   const maximum = gaps.length ? Math.max(...gaps) : null
   const waited = rows.filter((row) => row.waitedForSegment).length
+  const waitedP95 = percentile95(rows.filter((row) => row.waitedForSegment).map((row) => row.gapMs))
+  const decodeP95 = percentile95(rows.filter((row) => !row.waitedForSegment).map((row) => row.gapMs))
   const handoffP95 = percentile95(handoffErrors)
   const recent = rows.slice(-5).reverse()
 
@@ -84,6 +92,10 @@ export function PlaybackSeamEvidenceCard() {
             <span className="rounded-2xl bg-white p-3">P95<br /><b className="text-base">{p95}ms</b></span>
             <span className="rounded-2xl bg-white p-3">최대<br /><b className="text-base">{maximum}ms</b></span>
             <span className="rounded-2xl bg-white p-3">대기 포함<br /><b className="text-base">{waited}회</b></span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-center text-[11px] font-black">
+            <span className="rounded-2xl bg-amber-50 p-3 text-amber-800">생성 대기 P95<br /><b className="text-base">{waitedP95 != null ? `${waitedP95}ms` : '미측정'}</b></span>
+            <span className="rounded-2xl bg-emerald-50 p-3 text-emerald-700">순수 전환 P95<br /><b className="text-base">{decodeP95 != null ? `${decodeP95}ms` : '미측정'}</b></span>
           </div>
           <p className="rounded-2xl bg-white px-4 py-3 text-xs font-bold text-soa-muted">
             최종 WAV 교체 위치 오차 P95: {handoffP95 != null ? `${handoffP95}ms` : '미측정'}

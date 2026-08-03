@@ -87,6 +87,27 @@ export function DeviceEvidenceCard({ summary, loading, onRefresh }: DeviceEviden
               ))}
             </div>
           </div>
+          <div className="rounded-2xl border border-soa-line bg-white p-3">
+            <div className="flex items-center justify-between gap-3">
+              <strong className="text-xs">엔진·프리셋·기기 P95</strong>
+              <span className="text-[10px] font-black text-soa-muted">최근 그룹 {summary.metricGroups.length}개</span>
+            </div>
+            {summary.metricGroups.length ? (
+              <div className="mt-2 space-y-2">
+                {summary.metricGroups.slice(0, 6).map((group) => (
+                  <div key={`${group.deviceProfile}-${group.engineId}-${group.presetId}`} className="rounded-xl bg-[#f7f5ef] p-3 text-[10px] font-bold leading-5 text-soa-muted">
+                    <strong className="text-xs text-soa-ink">{labels[group.deviceProfile]} · {group.engineId} · {group.presetId} · n={group.records}</strong>
+                    <p>
+                      first {group.p95FirstAudioMs ?? '-'}ms · SSE {group.p95SseReconnectMs ?? '-'}ms · fetch {group.p95AudioFetchRecoveryMs ?? '-'}ms · 중단 {group.p95PlaybackInterruptionMs ?? '-'}ms
+                    </p>
+                    <p>
+                      seam 대기 {group.p95SeamWaitedMs ?? '-'}ms · decode {group.p95SeamDecodeMs ?? '-'}ms · 실패율 {(group.failureRate * 100).toFixed(0)}%
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : <p className="mt-2 text-[10px] font-bold text-soa-muted">새 recorder에서 저장한 실기기 기록이 아직 없습니다.</p>}
+          </div>
           <p className="text-[10px] font-bold text-soa-muted">
             기록 {summary.totalRecords} · 통과 {summary.readyRecords} · 경고 {summary.warningRecords} · 실패 {summary.failedRecords}
           </p>

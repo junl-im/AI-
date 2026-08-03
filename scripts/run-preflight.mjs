@@ -22,6 +22,7 @@ const checks = [
   ['ordered segment / device evidence', 'check-ordered-segment-playback.mjs'],
   ['seam metrics / session restore', 'check-seam-metrics-session.mjs'],
   ['signed audio / device certification', 'check-signed-audio-certification.mjs'],
+  ['device soak / audio archive policy', 'check-device-soak-archive.mjs'],
   ['voice presets', 'check-voice-preset-contracts.mjs'],
   ['verification evidence', 'check-verification-evidence.mjs'],
 ]

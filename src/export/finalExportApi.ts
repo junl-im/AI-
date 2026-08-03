@@ -9,6 +9,9 @@ export interface FinalExportResult {
   durationSeconds: number
   skippedSegments: number
   message: string
+  serverExpiresAt: string
+  serverRetentionMinutes: number
+  preservationMode: 'download-only'
 }
 
 function audioFilename(block: Extract<TimelineBlock, { kind: 'voice' }>): string | null {
@@ -34,6 +37,9 @@ export async function createFinalExport(
     duration_seconds: number
     skipped_segments: number
     message: string
+    server_expires_at: string
+    server_retention_minutes: number
+    preservation_mode: 'download-only'
   }>('/exports', {
     method: 'POST',
     body: JSON.stringify({
@@ -60,5 +66,8 @@ export async function createFinalExport(
     durationSeconds: result.duration_seconds,
     skippedSegments: result.skipped_segments,
     message: result.message,
+    serverExpiresAt: result.server_expires_at,
+    serverRetentionMinutes: result.server_retention_minutes,
+    preservationMode: result.preservation_mode,
   }
 }

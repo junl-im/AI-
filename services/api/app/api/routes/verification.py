@@ -23,6 +23,13 @@ from app.services import stt_evaluation
 router = APIRouter()
 
 
+def _percentile95(values: list[int]) -> int | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    return ordered[max(0, ((len(ordered) * 95 + 99) // 100) - 1)]
+
+
 def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkSummaryResponse:
     required_profiles = ["cuda", "apple-silicon", "cpu", "android", "ios"]
     required_minutes = [10, 30, 60]
@@ -74,6 +81,45 @@ def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkS
                     missing_certifications.append(
                         f"{profile}:{scenario}:{minutes}m"
                     )
+    grouped: dict[tuple[str, str, str], list[DeviceBenchmarkResponse]] = {}
+    for item in items:
+        grouped.setdefault(
+            (item.device_profile, item.engine_id, item.preset_id),
+            [],
+        ).append(item)
+    metric_groups = []
+    for (profile, engine_id, preset_id), records in sorted(grouped.items()):
+        metric_groups.append({
+            "device_profile": profile,
+            "engine_id": engine_id,
+            "preset_id": preset_id,
+            "records": len(records),
+            "ready_records": sum(item.status == "ready" for item in records),
+            "failure_rate": sum(item.status == "failed" for item in records) / len(records),
+            "average_realtime_factor": sum(item.realtime_factor for item in records) / len(records),
+            "p95_first_audio_ms": _percentile95([
+                item.first_audio_ms for item in records if item.first_audio_ms is not None
+            ]),
+            "p95_sse_reconnect_ms": _percentile95([
+                item.sse_reconnect_ms for item in records if item.sse_reconnect_ms is not None
+            ]),
+            "p95_audio_fetch_recovery_ms": _percentile95([
+                item.audio_fetch_recovery_ms
+                for item in records if item.audio_fetch_recovery_ms is not None
+            ]),
+            "p95_playback_interruption_ms": _percentile95([
+                item.playback_interruption_ms
+                for item in records if item.playback_interruption_ms is not None
+            ]),
+            "p95_seam_waited_ms": _percentile95([
+                item.seam_p95_waited_ms
+                for item in records if item.seam_p95_waited_ms is not None
+            ]),
+            "p95_seam_decode_ms": _percentile95([
+                item.seam_p95_decode_ms
+                for item in records if item.seam_p95_decode_ms is not None
+            ]),
+        })
     return DeviceBenchmarkSummaryResponse(
         total_records=len(items),
         ready_records=sum(item.status == "ready" for item in items),
@@ -83,6 +129,7 @@ def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkS
         missing_scenarios=missing,
         certification_coverage=certification_coverage,
         missing_certifications=missing_certifications,
+        metric_groups=metric_groups,
     )
 
 
@@ -105,6 +152,19 @@ async def record_device_benchmark(
         payload.sse_reconnected is None
         or payload.audio_fetch_recovered is None
     )
+    recovery_timing_unverified = scenario_requires_recovery and (
+        payload.sse_reconnect_ms is None
+        or payload.audio_fetch_recovery_ms is None
+        or payload.playback_interruption_ms is None
+    )
+    soak_duration_incomplete = (
+        payload.soak_elapsed_seconds is not None
+        and payload.soak_elapsed_seconds < payload.sample_minutes * 60 * 0.98
+    )
+    soak_duration_unverified = (
+        payload.device_profile in {"android", "ios"}
+        and payload.soak_elapsed_seconds is None
+    )
     if (
         not payload.succeeded
         or not payload.playback_completed
@@ -116,8 +176,24 @@ async def record_device_benchmark(
         realtime_factor > 1.0
         or payload.retry_count
         or recovery_unverified
+        or recovery_timing_unverified
+        or soak_duration_incomplete
+        or soak_duration_unverified
         or (payload.first_audio_ms is not None and payload.first_audio_ms > 5000)
         or (payload.seam_p95_ms is not None and payload.seam_p95_ms > 250)
+        or (
+            payload.seam_p95_decode_ms is not None
+            and payload.seam_p95_decode_ms > 250
+        )
+        or (payload.sse_reconnect_ms is not None and payload.sse_reconnect_ms > 5000)
+        or (
+            payload.audio_fetch_recovery_ms is not None
+            and payload.audio_fetch_recovery_ms > 5000
+        )
+        or (
+            payload.playback_interruption_ms is not None
+            and payload.playback_interruption_ms > 2000
+        )
         or (
             payload.final_handoff_error_ms is not None
             and payload.final_handoff_error_ms > 250

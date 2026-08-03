@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.4 · Signed Audio Rehydration & Device Certification`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -39,6 +39,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 재생 복원: 작업 ID로 만료된 최종 HMAC URL을 재발급하고 대기열·위치를 새로고침 또는 재생 오류 뒤 복원
 - Bridge 보안: 신뢰 CIDR의 직접 proxy만 전달 헤더를 사용하고 공개 rate-limit은 실제 client IP로 고정
 - 실기기 인증: 단순 기록과 Android/iOS의 기본 재생·네트워크 전환·백그라운드 복귀·설치형 PWA 시나리오 READY를 분리
+- 실기기 recorder: 10·30·60분 wall-clock 측정과 SSE·fetch·재생 중단 시간을 저장하고 기기·엔진·프리셋별 P95를 집계
+- Export 보존: 서버 임시 만료 시각을 표시하고 사용자가 내려받은 음원·SRT·VTT만 보존본으로 취급
 
 ## 무료 실행
 
@@ -79,6 +81,8 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - seam·재생 복원: [`docs/SEAM_METRICS_AND_SESSION_RESTORE.md`](docs/SEAM_METRICS_AND_SESSION_RESTORE.md)
 - 서명 음원 재발급: [`docs/SIGNED_AUDIO_REHYDRATION.md`](docs/SIGNED_AUDIO_REHYDRATION.md)
 - 실기기 인증 계약: [`docs/REAL_DEVICE_CERTIFICATION.md`](docs/REAL_DEVICE_CERTIFICATION.md)
+- 실기기 soak recorder: [`docs/DEVICE_SOAK_RECORDER.md`](docs/DEVICE_SOAK_RECORDER.md)
+- 음원 보존 정책: [`docs/AUDIO_ARCHIVE_POLICY.md`](docs/AUDIO_ARCHIVE_POLICY.md)
 - 음성 프리셋: [`docs/VOICE_PRESETS.md`](docs/VOICE_PRESETS.md)
 - UI/UX 점검: [`docs/UI_UX_AUDIT_HEARTBEAT_5_2.md`](docs/UI_UX_AUDIT_HEARTBEAT_5_2.md)
 - lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)

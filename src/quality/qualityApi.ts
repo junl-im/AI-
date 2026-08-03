@@ -8,6 +8,8 @@ import type {
   QualityResult,
   TextPreview,
   QualityEvidenceSummary,
+  DeviceSoakRecordInput,
+  DeviceSoakRecordResult,
 } from './qualityTypes'
 
 interface ApiDiagnosticCheck {
@@ -177,6 +179,21 @@ export async function getDeviceBenchmarkSummary() {
       latest_status: 'ready' | 'warning' | 'failed' | null
     }>
     missing_certifications: string[]
+    metric_groups: Array<{
+      device_profile: 'cuda' | 'apple-silicon' | 'cpu' | 'android' | 'ios'
+      engine_id: string
+      preset_id: string
+      records: number
+      ready_records: number
+      failure_rate: number
+      average_realtime_factor: number
+      p95_first_audio_ms: number | null
+      p95_sse_reconnect_ms: number | null
+      p95_audio_fetch_recovery_ms: number | null
+      p95_playback_interruption_ms: number | null
+      p95_seam_waited_ms: number | null
+      p95_seam_decode_ms: number | null
+    }>
   }>('/quality/device-benchmarks/summary')
   return {
     totalRecords: result.total_records,
@@ -199,6 +216,67 @@ export async function getDeviceBenchmarkSummary() {
       latestStatus: item.latest_status,
     })),
     missingCertifications: result.missing_certifications ?? [],
+    metricGroups: (result.metric_groups ?? []).map((item) => ({
+      deviceProfile: item.device_profile,
+      engineId: item.engine_id,
+      presetId: item.preset_id,
+      records: item.records,
+      readyRecords: item.ready_records,
+      failureRate: item.failure_rate,
+      averageRealtimeFactor: item.average_realtime_factor,
+      p95FirstAudioMs: item.p95_first_audio_ms,
+      p95SseReconnectMs: item.p95_sse_reconnect_ms,
+      p95AudioFetchRecoveryMs: item.p95_audio_fetch_recovery_ms,
+      p95PlaybackInterruptionMs: item.p95_playback_interruption_ms,
+      p95SeamWaitedMs: item.p95_seam_waited_ms,
+      p95SeamDecodeMs: item.p95_seam_decode_ms,
+    })),
+  }
+}
+
+export async function recordDeviceSoak(input: DeviceSoakRecordInput): Promise<DeviceSoakRecordResult> {
+  const result = await apiRequest<{
+    id: string
+    recorded_at: string
+    realtime_factor: number
+    status: DeviceSoakRecordResult['status']
+  }>('/quality/device-benchmarks', {
+    method: 'POST',
+    body: JSON.stringify({
+      device_profile: input.deviceProfile,
+      device_name: input.deviceName,
+      engine_id: input.engineId,
+      model_id: input.modelId,
+      model_version: input.modelVersion,
+      preset_id: input.presetId,
+      sample_minutes: input.sampleMinutes,
+      soak_elapsed_seconds: input.soakElapsedSeconds,
+      scenario: input.scenario,
+      browser_version: input.browserVersion,
+      first_audio_ms: input.firstAudioMs,
+      processing_seconds: input.processingSeconds,
+      audio_duration_seconds: input.audioDurationSeconds,
+      retry_count: input.retryCount,
+      failure_count: input.failureCount,
+      playback_completed: input.playbackCompleted,
+      sse_reconnected: input.sseReconnected,
+      audio_fetch_recovered: input.audioFetchRecovered,
+      sse_reconnect_ms: input.sseReconnectMs,
+      audio_fetch_recovery_ms: input.audioFetchRecoveryMs,
+      playback_interruption_ms: input.playbackInterruptionMs,
+      seam_p95_waited_ms: input.seamP95WaitedMs,
+      seam_p95_decode_ms: input.seamP95DecodeMs,
+      final_handoff_error_ms: input.finalHandoffErrorMs,
+      succeeded: input.succeeded,
+      notes: input.notes,
+    }),
+  })
+  return {
+    ...input,
+    id: result.id,
+    recordedAt: result.recorded_at,
+    realtimeFactor: result.realtime_factor,
+    status: result.status,
   }
 }
 

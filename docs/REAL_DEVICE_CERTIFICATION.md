@@ -1,6 +1,6 @@
 # Real Device Certification Contract
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.4`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.5`
 
 ## 인증 조합
 
@@ -21,4 +21,6 @@ Quality Lab은 단순 장치 기록 15개와 모바일 인증 24개를 분리해
 
 ## 요청 확장 필드
 
-`POST /api/v1/quality/device-benchmarks`는 기존 필드 외에 `scenario`, `browser_version`, `playback_completed`, `sse_reconnected`, `audio_fetch_recovered`, `seam_p95_ms`, `final_handoff_error_ms`를 받습니다. 기존 클라이언트는 기본 `baseline`으로 계속 동작합니다.
+`POST /api/v1/quality/device-benchmarks`는 `scenario`, `browser_version`, `preset_id`, `soak_elapsed_seconds`, `playback_completed`, `sse_reconnected`, `audio_fetch_recovered`, `sse_reconnect_ms`, `audio_fetch_recovery_ms`, `playback_interruption_ms`, `seam_p95_waited_ms`, `seam_p95_decode_ms`, `final_handoff_error_ms`를 받습니다. 복구 시나리오는 boolean과 시간 필드가 모두 필요하고 기존 클라이언트는 기본 `baseline`으로 계속 동작합니다.
+
+상세 recorder 계약은 `DEVICE_SOAK_RECORDER.md`를 따릅니다.

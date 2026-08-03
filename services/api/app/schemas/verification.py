@@ -13,7 +13,9 @@ class DeviceBenchmarkRequest(BaseModel):
     engine_id: str = Field(min_length=1, max_length=80)
     model_id: str = Field(min_length=1, max_length=120)
     model_version: str = Field(min_length=1, max_length=80)
+    preset_id: str = Field(default="unknown", min_length=1, max_length=80)
     sample_minutes: int = Field(ge=1, le=120)
+    soak_elapsed_seconds: float | None = Field(default=None, ge=0, le=43200)
     scenario: DeviceScenario = "baseline"
     browser_version: str = Field(default="", max_length=120)
     first_audio_ms: int | None = Field(default=None, ge=0)
@@ -26,7 +28,12 @@ class DeviceBenchmarkRequest(BaseModel):
     playback_completed: bool = True
     sse_reconnected: bool | None = None
     audio_fetch_recovered: bool | None = None
+    sse_reconnect_ms: int | None = Field(default=None, ge=0, le=600000)
+    audio_fetch_recovery_ms: int | None = Field(default=None, ge=0, le=600000)
+    playback_interruption_ms: int | None = Field(default=None, ge=0, le=600000)
     seam_p95_ms: int | None = Field(default=None, ge=0)
+    seam_p95_waited_ms: int | None = Field(default=None, ge=0)
+    seam_p95_decode_ms: int | None = Field(default=None, ge=0)
     final_handoff_error_ms: int | None = Field(default=None, ge=0)
     succeeded: bool
     notes: str = Field(default="", max_length=1000)
@@ -99,6 +106,22 @@ class DeviceCertificationCoverage(BaseModel):
     latest_status: Literal["ready", "warning", "failed"] | None = None
 
 
+class DeviceMetricAggregate(BaseModel):
+    device_profile: DeviceProfile
+    engine_id: str
+    preset_id: str
+    records: int
+    ready_records: int
+    failure_rate: float
+    average_realtime_factor: float
+    p95_first_audio_ms: int | None = None
+    p95_sse_reconnect_ms: int | None = None
+    p95_audio_fetch_recovery_ms: int | None = None
+    p95_playback_interruption_ms: int | None = None
+    p95_seam_waited_ms: int | None = None
+    p95_seam_decode_ms: int | None = None
+
+
 class DeviceBenchmarkSummaryResponse(BaseModel):
     total_records: int
     ready_records: int
@@ -108,6 +131,7 @@ class DeviceBenchmarkSummaryResponse(BaseModel):
     missing_scenarios: list[str]
     certification_coverage: list[DeviceCertificationCoverage] = Field(default_factory=list)
     missing_certifications: list[str] = Field(default_factory=list)
+    metric_groups: list[DeviceMetricAggregate] = Field(default_factory=list)
 
 
 class SttSegmentVerificationRequest(BaseModel):

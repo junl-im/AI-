@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.4 · Signed Audio Rehydration & Device Certification`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -44,3 +44,7 @@
 35. 최종 음원 파일과 작업 결과의 기본 보관 시간은 30분입니다. 파일 자체가 삭제된 뒤에는 URL만 재발급할 수 없으며 다시 생성해야 합니다.
 36. Quality의 seam P95와 최종 WAV 교체 오차는 브라우저 이벤트 기반 측정값이며 실제 무음 파형 분석이나 gapless 인증을 대신하지 않습니다.
 37. 모바일 인증표는 Android Chrome·iOS Safari에서 기본 재생, 네트워크 전환, 백그라운드 복귀, 설치형 PWA의 10·30·60분 READY 기록을 모두 분리합니다.
+38. Quality Lab의 실기기 recorder는 10·30·60분 wall-clock을 직접 측정하고 SSE 재연결, 음원 fetch 복구, 재생 중단 시간을 별도 저장합니다.
+39. 복구 시나리오는 boolean 성공과 세 가지 복구 시간이 모두 있어야 READY 후보가 되며 목표 시간의 98% 미만 기록은 warning입니다.
+40. 최종 Export는 서버에 기본 30분만 임시 보관됩니다. 장기 보존은 음원·SRT·VTT를 사용자 기기로 내려받는 방식만 지원합니다.
+41. 로컬 보존 기록은 파일명·형식·기록 시각만 저장하며 음성 바이트, 원문, 전체 URL을 저장하지 않습니다.

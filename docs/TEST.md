@@ -651,3 +651,16 @@ ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지
 샌드박스 결과: Repository preflight 16/16, API pytest 137개, Worker pytest 14개, Python compileall,
 TypeScript·TSX 166개 transpile 구문 검사를 통과했습니다. 전달본에 `package-lock.json`과 설치 의존성이 없어
 ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지 못했으며 GitHub Actions에서 최종 확인합니다.
+
+## Engine Heartbeat 6.5 검사
+
+- Device benchmark가 `preset_id`, wall-clock soak 시간과 세 가지 복구 지연을 저장하는지 확인합니다.
+- 복구 boolean이 true여도 지연 필드가 없으면 warning인지 확인합니다.
+- 목표 시간의 98% 미만 기록이 READY로 분류되지 않는지 확인합니다.
+- 기기·엔진·프리셋별 first audio, SSE, fetch, interruption, waited/decode seam P95가 nearest-rank로 집계되는지 확인합니다.
+- Quality Lab recorder가 진행 세션을 localStorage에서 복원하고 현재 기록 JSON을 저장하는지 확인합니다.
+- Export 응답에 서버 만료 시각, 보관 분, `download-only` 정책이 포함되는지 확인합니다.
+- 로컬 archive receipt가 파일명만 저장하고 전체 URL·음성 바이트·원문을 저장하지 않는지 확인합니다.
+- dependency-free `quality:device-soak-archive`가 recorder·집계·archive 정책·테스트 계약 누락을 차단하는지 확인합니다.
+
+샌드박스 결과: `Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사`를 통과했습니다. 전체 ESLint·Vitest·semantic typecheck·Vite build는 검증된 npm lock 환경에서 최종 확인합니다.

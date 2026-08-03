@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi import APIRouter, HTTPException, Request, status
 
 from app.schemas.export import FinalExportRequest, FinalExportResponse
@@ -77,5 +79,13 @@ async def final_export(
         duration_seconds=result.duration_seconds,
         ffmpeg_used=result.ffmpeg_used,
         skipped_segments=len(incomplete),
-        message="최종 음원과 실제 시간 기반 자막을 만들었습니다.",
+        message=(
+            "최종 음원과 실제 시간 기반 자막을 만들었습니다. "
+            "서버 파일은 임시이며 보존하려면 내려받아야 합니다."
+        ),
+        server_expires_at=(
+            datetime.now(timezone.utc)
+            + timedelta(minutes=request.app.state.settings.audio_ttl_minutes)
+        ),
+        server_retention_minutes=request.app.state.settings.audio_ttl_minutes,
     )

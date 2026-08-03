@@ -48,6 +48,9 @@ describe('FinalExportControls', () => {
       durationSeconds: 1.2,
       skippedSegments: 0,
       message: '완료',
+      serverExpiresAt: '2026-08-03T06:00:00Z',
+      serverRetentionMinutes: 30,
+      preservationMode: 'download-only',
     })
 
     render(<FinalExportControls blocks={[readyBlock]} />)
@@ -60,5 +63,7 @@ describe('FinalExportControls', () => {
     )
     expect(screen.getByRole('link', { name: 'SRT' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'VTT' })).toBeInTheDocument()
+    expect(screen.getByText('서버 임시 보관 30분')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '음원·SRT·VTT를 내 기기에 보존' })).toBeInTheDocument()
   })
 })

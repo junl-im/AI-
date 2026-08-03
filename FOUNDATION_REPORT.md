@@ -1,6 +1,17 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.4 · Signed Audio Rehydration & Device Certification**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy**
+
+## Engine Heartbeat 6.5 Device Soak Recorder & Audio Archive Policy
+
+- Quality Lab에 Android Chrome·iOS Safari 10·30·60분 wall-clock recorder를 추가했습니다.
+- SSE 재연결, 음원 fetch 복구, 실제 재생 중단 시간을 별도 필드로 저장합니다.
+- seam P95를 생성 대기 포함과 순수 decode 전환으로 분리하고 기기·엔진·프리셋별 P95·평균 RTF·실패율을 집계합니다.
+- 목표 시간 98% 미만 또는 복구 시간 미입력은 warning, 명시 복구 실패는 failed로 처리합니다.
+- 최종 Export 응답에 서버 임시 만료 시각·보관 분·download-only 정책을 추가했습니다.
+- 보존 버튼은 음원·SRT·VTT를 사용자 기기로 다운로드하고 파일명 메타데이터만 로컬에 남깁니다. 서버 장기 archive는 만들지 않습니다.
+- 검증: `Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사`를 통과했습니다.
+- 제한: 실제 10·30·60분 모바일 측정과 CosyVoice 모델 수치는 운영 기기에서 입력해야 하며 전체 ESLint·Vitest·semantic typecheck·Vite build는 검증된 npm lock 환경이 필요합니다.
 
 ## Engine Heartbeat 6.4 Signed Audio Rehydration & Device Certification
 

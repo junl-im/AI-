@@ -219,7 +219,18 @@ def test_mobile_certification_requires_recovery_evidence(client):
     )
     ready = client.post(
         "/api/v1/quality/device-benchmarks",
-        json={**base, "sse_reconnected": True, "audio_fetch_recovered": True},
+        json={
+            **base,
+            "preset_id": "on-clear",
+            "soak_elapsed_seconds": 605,
+            "sse_reconnected": True,
+            "audio_fetch_recovered": True,
+            "sse_reconnect_ms": 900,
+            "audio_fetch_recovery_ms": 1200,
+            "playback_interruption_ms": 650,
+            "seam_p95_waited_ms": 850,
+            "seam_p95_decode_ms": 140,
+        },
     )
 
     assert warning.json()["status"] == "warning"
@@ -236,3 +247,63 @@ def test_mobile_certification_requires_recovery_evidence(client):
     assert row["recorded"] is True
     assert row["latest_status"] == "ready"
     assert "android:network-switch:10m" not in summary["missing_certifications"]
+    metrics = next(
+        item for item in summary["metric_groups"]
+        if item["device_profile"] == "android"
+        and item["engine_id"] == "cosyvoice3"
+        and item["preset_id"] == "on-clear"
+    )
+    assert metrics["records"] == 1
+    assert metrics["p95_sse_reconnect_ms"] == 900
+    assert metrics["p95_audio_fetch_recovery_ms"] == 1200
+    assert metrics["p95_playback_interruption_ms"] == 650
+    assert metrics["p95_seam_waited_ms"] == 850
+    assert metrics["p95_seam_decode_ms"] == 140
+
+
+def test_mobile_certification_warns_when_recovery_timings_are_missing(client):
+    response = client.post(
+        "/api/v1/quality/device-benchmarks",
+        json={
+            "device_profile": "ios",
+            "device_name": "iPhone Test",
+            "engine_id": "cosyvoice3",
+            "model_id": "cosyvoice3-local",
+            "model_version": "1",
+            "preset_id": "sori-warm",
+            "sample_minutes": 10,
+            "scenario": "background-resume",
+            "processing_seconds": 60,
+            "audio_duration_seconds": 120,
+            "playback_completed": True,
+            "sse_reconnected": True,
+            "audio_fetch_recovered": True,
+            "succeeded": True,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "warning"
+
+
+def test_device_soak_warns_when_wall_clock_is_shorter_than_target(client):
+    response = client.post(
+        "/api/v1/quality/device-benchmarks",
+        json={
+            "device_profile": "android",
+            "device_name": "Pixel Short Soak",
+            "engine_id": "cosyvoice3",
+            "model_id": "cosyvoice3-local",
+            "model_version": "1",
+            "preset_id": "min-energetic",
+            "sample_minutes": 10,
+            "soak_elapsed_seconds": 300,
+            "processing_seconds": 300,
+            "audio_duration_seconds": 300,
+            "playback_completed": True,
+            "succeeded": True,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "warning"

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'rea
 import { BrowserPlaybackEvidenceCard } from '../components/evaluation/BrowserPlaybackEvidenceCard'
 import { PlaybackSeamEvidenceCard } from '../components/evaluation/PlaybackSeamEvidenceCard'
 import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
+import { DeviceSoakRecorderCard } from '../components/evaluation/DeviceSoakRecorderCard'
 import { VerificationEvidenceCard } from '../components/evaluation/VerificationEvidenceCard'
 import { QualityDiagnosticsCard } from '../components/evaluation/QualityDiagnosticsCard'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
@@ -178,6 +179,8 @@ export function QualityPage() {
           loading={loadingDeviceSummary}
           onRefresh={() => void refreshDeviceSummary()}
         />
+
+        <DeviceSoakRecorderCard onRecorded={() => void refreshDeviceSummary()} />
 
         <BrowserPlaybackEvidenceCard />
 

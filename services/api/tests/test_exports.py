@@ -45,6 +45,9 @@ def test_final_export_merges_wav_and_creates_subtitles(client):
     assert body["duration_seconds"] == 2.0
     assert body["audio_url"].endswith(".wav")
     assert body["srt_url"].endswith(".srt")
+    assert body["server_retention_minutes"] == 30
+    assert body["preservation_mode"] == "download-only"
+    assert body["server_expires_at"]
     srt_name = body["srt_url"].rsplit("/", 1)[-1]
     srt = store.resolve(srt_name).read_text(encoding="utf-8")
     assert "00:00:01,500 --> 00:00:02,000" in srt

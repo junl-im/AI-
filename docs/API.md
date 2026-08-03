@@ -196,3 +196,30 @@ GET /api/v1/tts/jobs/{job_id}/segments/{index}/audio?file=...&expires=...&signat
 - URL 만료 시 완료 결과 TTL 안에서 `GET /tts/jobs/{job_id}/result`를 다시 호출하면 새 URL을 받습니다. 실제 파일이나 결과가 만료되면 410입니다.
 - `POST /quality/device-benchmarks`는 `scenario`, `playback_completed`, `sse_reconnected`, `audio_fetch_recovered`, `seam_p95_ms`, `final_handoff_error_ms`를 추가로 받습니다.
 - summary는 기존 `coverage` 외에 Android/iOS 4개 시나리오 × 10·30·60분의 `certification_coverage`와 `missing_certifications`를 반환합니다.
+
+## POST /quality/device-benchmarks · Heartbeat 6.5
+
+실기기 recorder는 기존 benchmark 필드에 다음 값을 추가합니다.
+
+```json
+{
+  "device_profile": "android",
+  "preset_id": "on-clear",
+  "sample_minutes": 10,
+  "soak_elapsed_seconds": 603,
+  "scenario": "network-switch",
+  "sse_reconnected": true,
+  "audio_fetch_recovered": true,
+  "sse_reconnect_ms": 900,
+  "audio_fetch_recovery_ms": 1200,
+  "playback_interruption_ms": 650,
+  "seam_p95_waited_ms": 850,
+  "seam_p95_decode_ms": 140
+}
+```
+
+`GET /quality/device-benchmarks/summary`의 `metric_groups`는 device profile·engine ID·preset ID별 P95, 평균 RTF와 실패율을 반환합니다.
+
+## POST /exports · archive policy
+
+응답에는 `server_expires_at`, `server_retention_minutes`, `preservation_mode: download-only`가 포함됩니다. 서버 파일은 임시 보관만 하며 사용자 보존은 음원·SRT·VTT 다운로드로 수행합니다.

@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.4 · Signed Audio Rehydration & Device Certification**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-03 13:17 KST**
+최종 갱신: **2026-08-03 14:40 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -637,4 +637,10 @@ CI Hotfix 4 테스트 규칙:
 8. 주요 변경 파일은 TTS signer/routes/tests, player session/persistence/dock, seam/device cards, verification schema/routes/tests와 운영 문서다.
 9. 검증은 preflight 16/16, API 137개, Worker 14개, Python compileall, TS/TSX 166개 구문 검사를 통과했다. npm 설치 의존성 부재로 전체 ESLint·Vitest·semantic typecheck·Vite build는 CI 최종 판정이다.
 10. 전체 ZIP은 `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.4-signed-audio-device-certification-full.zip`, 패치는 `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.3-to-0.9.3-beta.3-engine-heartbeat-6.4-signed-audio-device-certification-patch.zip`으로 전달한다.
-11. 다음 목표는 Heartbeat 6.5 Device Soak Recorder & Audio Archive Policy다.
+11. Heartbeat 6.5 Device Soak Recorder & Audio Archive Policy 완료:
+    - Quality Lab에서 Android/iOS 10·30·60분 측정 세션을 직접 시작·종료한다.
+    - SSE reconnect, audio fetch recovery, playback interruption을 개별 밀리초로 기록한다.
+    - 기기·엔진·프리셋별 first audio·복구·seam P95와 실패율을 서버가 집계한다.
+    - Export 서버 파일은 30분 임시이며 사용자 다운로드만 보존으로 인정한다.
+    - 로컬 보존 기록에는 파일명 메타데이터만 남고 음성 바이트·원문·전체 URL은 저장하지 않는다.
+12. 다음 목표는 Heartbeat 6.6 Field Evidence & Reproducible Web Quality다.

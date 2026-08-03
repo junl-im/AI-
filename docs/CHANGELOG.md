@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.5 · Device soak recorder and audio archive policy
+
+- Quality Lab에 Android/iOS 10·30·60분 실기기 recorder와 JSON 내보내기를 추가합니다.
+- SSE 재연결·음원 fetch 복구·재생 중단 시간을 분리하고 기기·엔진·프리셋별 P95를 집계합니다.
+- seam을 생성 대기 포함과 순수 decode 전환으로 분리합니다.
+- Export 서버 임시 만료 시각과 download-only 보존 정책을 응답·UI에 표시합니다.
+- 음원·SRT·VTT 다운로드 보존 기록은 파일명 메타데이터만 로컬에 저장하며 삭제 UI를 제공합니다.
+- device soak/archive dependency-free preflight와 API·Web helper 회귀 테스트를 추가합니다.
+
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.4 · Signed audio rehydration and device certification
 
 - 최종 TTS WAV를 작업 전용 HMAC URL로 제공하고 작업 결과 조회로 새 URL을 재발급합니다.

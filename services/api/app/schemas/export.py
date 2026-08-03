@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
@@ -32,3 +33,6 @@ class FinalExportResponse(BaseModel):
     ffmpeg_used: bool
     skipped_segments: int
     message: str
+    server_expires_at: datetime
+    server_retention_minutes: int
+    preservation_mode: Literal["download-only"] = "download-only"
