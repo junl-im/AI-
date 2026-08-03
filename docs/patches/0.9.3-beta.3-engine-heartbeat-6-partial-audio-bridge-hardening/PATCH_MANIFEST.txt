@@ -1,0 +1,17 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 5.2.1 -> Engine Heartbeat 6 Partial Audio Delivery & Bridge Hardening
+
+Purpose: expose the first completed long-form WAV segment before final merge while hardening signed media URLs, forwarded-header trust and public rate limiting.
+
+Key changes:
+- persist ready segment metadata and emit segment-ready SSE events
+- issue short-lived HMAC-SHA256 URLs bound to job, segment, filename and expiry
+- connect the first segment to Web playback and replace it with the final WAV under the same track ID
+- separate server-ready, first-byte, playing and Browser Speech onstart telemetry
+- trust forwarded headers only from configured direct proxy CIDRs
+- keep public rate-limit buckets tied to effective client IP rather than a rotatable client ID
+- document Caddy, Nginx, Secret and current file-level partial-delivery boundaries
+
+Tracked files deleted relative to Engine Heartbeat 5.2.1: none
+Changed or added files in this overwrite patch: 55
+Cumulative permanent cleanup list:
+public/sorion-icon.svg

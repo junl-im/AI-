@@ -57,6 +57,19 @@ class TtsSynthesisResponse(BaseModel):
     fallback_used: bool = False
 
 
+class JobSegmentAudio(BaseModel):
+    index: int = Field(ge=1)
+    total_segments: int = Field(ge=1)
+    filename: str = Field(min_length=1, max_length=255)
+    audio_url: str = ""
+    engine_id: str
+    engine_mode: EngineMode
+    estimated_duration_seconds: float = Field(ge=0)
+    file_size_bytes: int = Field(ge=0)
+    ready_after_ms: int = Field(ge=0)
+    ready_at: str
+
+
 class JobProgressResponse(BaseModel):
     job_id: str
     status: JobStatus
@@ -66,6 +79,7 @@ class JobProgressResponse(BaseModel):
     total_segments: int = 0
     message: str
     error: str | None = None
+    ready_segments: list[JobSegmentAudio] = Field(default_factory=list)
     updated_at: str
 
 

@@ -18,6 +18,11 @@ const checks = [
   ['free-only boundary', 'check-free-only-boundary.mjs'],
   ['engine blueprint', 'check-engine-blueprint.mjs'],
   ['model onboarding', 'check-model-onboarding.mjs'],
+  ['partial audio / bridge', 'check-partial-audio-bridge.mjs'],
+  ['ordered segment / device evidence', 'check-ordered-segment-playback.mjs'],
+  ['seam metrics / session restore', 'check-seam-metrics-session.mjs'],
+  ['signed audio / device certification', 'check-signed-audio-certification.mjs'],
+  ['voice presets', 'check-voice-preset-contracts.mjs'],
   ['verification evidence', 'check-verification-evidence.mjs'],
 ]
 

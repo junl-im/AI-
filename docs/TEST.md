@@ -520,7 +520,7 @@ npm run build
 
 - 801줄 소스 fixture는 권고를 출력하지만 exit code 0을 유지한다.
 - 1,201줄 소스 fixture는 1,200줄 안전 상한 위반으로 실패한다.
-- Setup API는 CosyVoice 프리셋 0/3, 부분 준비, 3/3 준비를 구분한다.
+- Setup API는 CosyVoice 프리셋 0/5, 부분 준비, 5/5 준비를 구분한다.
 - `START_ENGINE.cmd`, `npm run dev:free`, `npm run dev:api`는 별도 설정이 없으면 프로젝트 `voice-presets` 폴더를 자동 연결한다.
 - Engine Doctor는 API·TTS·Worker·GPU를 분리 표시하고 주소 저장·재진단·자동 연결 복구를 제공한다.
 - 복사되는 진단 JSON에는 Setup 상세 경로, 음원 내용, 서비스 토큰을 넣지 않는다.
@@ -582,3 +582,72 @@ semantic typecheck, Vitest, Vite production build는 실행하지 못했으며 G
 
 샌드박스에서는 Repository preflight 11/11과 TypeScript 구문 검사를 통과했습니다. npm 내부 registry에서
 `@eslint/js@9.22.0`이 404로 반환되어 ESLint·Vitest·semantic typecheck·Vite build는 GitHub Actions에서 최종 확인합니다.
+
+## Engine Heartbeat 6 Partial Audio Delivery & Bridge Hardening 회귀 검사
+
+- 장문 각 구간 WAV가 작업 상태 `ready_segments`에 저장되고 SSE가 `segment-ready`를 한 번씩 발행하는지 확인합니다.
+- 서명 URL이 작업 ID·구간 번호·파일명·만료에 결합되고 변조·만료·다른 작업 파일 접근을 거부하는지 확인합니다.
+- 성공한 구간은 음원 TTL 동안 유지하고 실패·취소 시 부분 파일을 제거하는지 확인합니다.
+- 신뢰 CIDR 밖의 `X-Forwarded-*`는 무시하고 신뢰 proxy가 설정한 공개 HTTPS Origin만 결과 URL에 사용되는지 확인합니다.
+- rate-limit bucket이 회전 가능한 `X-SoriON-Client-ID`가 아니라 유효 client IP에 고정되는지 확인합니다.
+- Web이 SSE와 polling의 같은 첫 구간을 중복 등록하지 않고 최종 WAV를 같은 Player Queue 트랙 ID로 교체하는지 확인합니다.
+- 첫 응답 chunk, `HTMLAudioElement.playing`, Browser Speech `onstart`가 별도 telemetry 필드에 기록되는지 확인합니다.
+- dependency-free `quality:partial-audio-bridge`가 백엔드·프런트·테스트·운영 문서 계약 누락을 실패로 처리하는지 확인합니다.
+
+샌드박스 결과: Repository preflight 12/12, API pytest 133개, Worker pytest 14개, Python compileall,
+TypeScript·TSX 159개 transpile 구문 검사를 통과했습니다. 내부 npm registry의 `@eslint/js@9.22.0`
+404로 ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지 못했으며 GitHub Actions에서 최종 확인합니다.
+
+
+## Engine Heartbeat 6.1 Progressive Playback & Male Presets 회귀 검사
+
+- `voicePresets.ts`와 FastAPI canonical 목록에 5개 ID가 있고 남성 프리셋이 3종인지 확인합니다.
+- Setup API가 0/5, 일부 준비, 5/5와 누락·차단 WAV를 구분하는지 확인합니다.
+- CosyVoice가 도윤·준호·민준 ID별 WAV를 같은 이름으로 Worker에 전달하는지 확인합니다.
+- Voice Picker의 남성 필터가 도윤·준호·민준만 표시하고 방향키 이동이 필터 목록을 따르는지 확인합니다.
+- 첫 구간 URL이 410이면 새 서명 URL을 받아 두 번째 fetch로 복구하는지 확인합니다.
+- partial 트랙이 final WAV로 교체될 때 트랙 ID, 현재 위치, 재생 상태와 telemetry가 유지되는지 확인합니다.
+- dependency-free preflight는 프리셋 ID·성별·필터·공통 backend 목록과 부분 재생 handoff 계약을 검사합니다.
+
+## Engine Heartbeat 6.2 Ordered Segment Queue & Device Evidence 회귀 검사
+
+- SSE와 polling 구간이 2·1·3처럼 뒤섞여 와도 Player Store에는 1·2·3 순서로 한 번씩 등록되는지 확인합니다.
+- 앞 번호 구간이 없을 때 뒤 구간을 먼저 재생하지 않고, 현재 구간 종료 뒤 `다음 구간 대기` 상태를 유지하는지 확인합니다.
+- 대기 중 다음 구간이 추가되면 같은 트랙에서 자동 재생하고 최종 WAV 교체 시 누적 완료 시간과 현재 구간 위치를 승계하는지 확인합니다.
+- 부분 구간 중 전체 seek·다운로드가 비활성화되고 중복·교체·삭제 시 소유 Blob URL이 해제되는지 확인합니다.
+- 브라우저 증거가 Android Chrome·iOS Safari·PWA·Desktop 수준으로만 정규화되고 전체 User-Agent를 저장하지 않는지 확인합니다.
+- 사용자 제스처 재생이 `passed`·`blocked`·`failed`를 구분하며 자동 감지가 백그라운드 복귀 통과로 기록되지 않는지 확인합니다.
+- dependency-free `quality:ordered-segment-playback`이 coordinator, Player handoff, 기기 증거, 테스트와 운영 문서 계약 누락을 실패로 처리하는지 확인합니다.
+
+샌드박스 결과: Repository preflight 14/14, API pytest 135개, Worker pytest 14개, Python compileall,
+TypeScript·TSX 164개 transpile 구문 검사를 통과했습니다. 전달본에 `package-lock.json`과 설치 의존성이 없어
+ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지 못했으며 GitHub Actions에서 최종 확인합니다.
+
+
+
+## Engine Heartbeat 6.3 Seam Metrics & Device Soak 회귀 검사
+
+- 구간 1의 `ended`와 구간 2의 `playing` 사이 시간이 seam으로 기록되고 생성 대기 포함 플래그가 유지되는지 확인합니다.
+- 같은 전환의 중복 `playing` 이벤트가 seam을 중복 기록하지 않고 트랙별 최근 20개 한도를 지키는지 확인합니다.
+- Quality Lab이 평균·최대·최근 seam을 표시하고 사용자 문장 없이 JSON을 내보내는지 확인합니다.
+- 원격 최종 API 음원과 Browser Speech만 플레이어 세션에 저장되고 부분 음원·Blob·revoke 대상은 제외되는지 확인합니다.
+- 25분이 지난 세션은 폐기하고, 유효 세션은 자동 재생 없이 저장된 위치·반복 모드·재생 속도를 복원하는지 확인합니다.
+- online/offline, visibility hidden→visible, BFCache pageshow가 관찰 세션 카운터와 숨김 시간에 반영되는지 확인합니다.
+- dependency-free `quality:seam-metrics`가 seam, persistence, device soak, 테스트와 운영 문서 계약 누락을 실패로 처리하는지 확인합니다.
+
+샌드박스 결과: `Repository preflight 15/15, API pytest 135개, Worker pytest 14개, Python compileall, TS/TSX 166개 transpile 구문 검사, 핵심 비-React 모듈 strict semantic 검사와 player session·browser evidence runtime smoke를 통과했습니다`. 실제 Android Chrome·iOS Safari·PWA 장시간 음성 재생과 네트워크 전환은 별도 실기기 증거가 필요합니다.
+
+
+## Engine Heartbeat 6.4 Signed Audio Rehydration & Device Certification 회귀 검사
+
+- 최종 TTS URL이 작업 ID·파일명·만료 시각과 final 서명 도메인에 결합되고 segment 서명과 서로 대체되지 않는지 확인합니다.
+- 완료 작업 결과를 다시 조회할 때 새 만료 시각의 최종 음원 URL이 발급되고, 변조된 작업 ID·파일명·서명을 거부하는지 확인합니다.
+- 새로고침 복원은 저장된 작업 ID로 URL을 갱신한 뒤 대기열을 복원하며, 갱신 실패한 트랙만 제외하는지 확인합니다.
+- 재생 중 서명 URL 오류가 발생하면 동일 트랙 ID·재생 위치·재생 의도를 유지한 채 한 번만 복구하는지 확인합니다.
+- Quality Lab이 seam 평균·P95·최대와 최종 WAV handoff 위치 오차 P95를 사용자 문장 없이 내보내는지 확인합니다.
+- Android Chrome·iOS Safari의 baseline·network-switch·background-resume·installed-pwa를 10·30·60분 조합으로 분리하고, 실제 기록이 없으면 READY를 생성하지 않는지 확인합니다.
+- dependency-free `quality:signed-audio-certification`이 signer, API, player rehydration, P95, 인증 schema·UI와 문서 계약 누락을 실패로 처리하는지 확인합니다.
+
+샌드박스 결과: Repository preflight 16/16, API pytest 137개, Worker pytest 14개, Python compileall,
+TypeScript·TSX 166개 transpile 구문 검사를 통과했습니다. 전달본에 `package-lock.json`과 설치 의존성이 없어
+ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지 못했으며 GitHub Actions에서 최종 확인합니다.

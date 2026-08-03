@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 5.2.1 · Focus Return Hotfix`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.4 · Signed Audio Rehydration & Device Certification`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -22,8 +22,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - PWA: 1024px 최적화 로고와 1.5MiB 사전 캐시 예산 검사
 - 모바일: 카카오톡 WebView를 감지해 로컬 PC 엔진 제한과 외부 브라우저 전환을 즉시 안내
 - 재생 UX: 보이는 재생 버튼이 선택값을 자동 적용하고 생성·선택된 음성을 즉시 재생
-- 프리셋: Browser/System/Melo 운율 프로필과 CosyVoice 프리셋별 기준 음원 라우팅
-- Engine Doctor: API·TTS·Worker·GPU·프리셋 3종 상태 진단, 주소 저장, 자동 연결 복구와 개인정보 제외 진단 복사
+- 프리셋: 여성 1종·남성 3종·중성 1종의 Browser/System/Melo 운율 프로필과 CosyVoice 기준 음원 라우팅
+- Engine Doctor: API·TTS·Worker·GPU·프리셋 5종 상태 진단, 주소 저장, 자동 연결 복구와 개인정보 제외 진단 복사
 - PC 편집: 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
 - 엔진 표시: 우측 상단 API·Worker·GPU 3점 상태와 실패 시 작업 메시지 자동 알림
 - 모바일 Bridge: 공개 HTTPS Origin을 `/connectivity`와 Engine Doctor에서 별도 진단
@@ -32,6 +32,13 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - PC 레이아웃: 좌우 패널 드래그·키보드 조절, 접기와 로컬 상태 저장
 - 설정 일관성: PC·모바일이 속도·높낮이·말투 6종을 같은 계약으로 사용
 - 접근성: Sheet·확인창 초점 이동·Tab 순환·Escape 닫기·명시적 실행 버튼 복귀와 배경 스크롤 잠금
+- 부분 음원: 준비된 WAV 구간을 번호순으로 이어 재생하고 대기·URL 재발급·최종 WAV 위치 승계를 처리
+- 재생 지연: 서버 첫 구간·브라우저 첫 바이트·실제 재생·Browser Speech 시작을 분리 기록
+- 기기 증거: HTTPS·EventSource·PWA·사용자 제스처 재생과 탭·네트워크 전환을 개인정보 최소 JSON으로 저장
+- seam 실측: 이전 구간 ended부터 다음 구간 playing까지 평균·P95·최대·대기 포함을 기록하고 최종 WAV 위치 교체 오차를 분리
+- 재생 복원: 작업 ID로 만료된 최종 HMAC URL을 재발급하고 대기열·위치를 새로고침 또는 재생 오류 뒤 복원
+- Bridge 보안: 신뢰 CIDR의 직접 proxy만 전달 헤더를 사용하고 공개 rate-limit은 실제 client IP로 고정
+- 실기기 인증: 단순 기록과 Android/iOS의 기본 재생·네트워크 전환·백그라운드 복귀·설치형 PWA 시나리오 READY를 분리
 
 ## 무료 실행
 
@@ -66,6 +73,13 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - API 연결: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
 - 공개 HTTPS Bridge: [`docs/SECURE_MOBILE_BRIDGE.md`](docs/SECURE_MOBILE_BRIDGE.md)
 - 첫 음성 준비 지연: [`docs/FIRST_AUDIO_LATENCY.md`](docs/FIRST_AUDIO_LATENCY.md)
+- 부분 음원 전달: [`docs/PARTIAL_AUDIO_DELIVERY.md`](docs/PARTIAL_AUDIO_DELIVERY.md)
+- 순차 구간 재생: [`docs/ORDERED_SEGMENT_PLAYBACK.md`](docs/ORDERED_SEGMENT_PLAYBACK.md)
+- 브라우저 기기 증거: [`docs/BROWSER_DEVICE_EVIDENCE.md`](docs/BROWSER_DEVICE_EVIDENCE.md)
+- seam·재생 복원: [`docs/SEAM_METRICS_AND_SESSION_RESTORE.md`](docs/SEAM_METRICS_AND_SESSION_RESTORE.md)
+- 서명 음원 재발급: [`docs/SIGNED_AUDIO_REHYDRATION.md`](docs/SIGNED_AUDIO_REHYDRATION.md)
+- 실기기 인증 계약: [`docs/REAL_DEVICE_CERTIFICATION.md`](docs/REAL_DEVICE_CERTIFICATION.md)
+- 음성 프리셋: [`docs/VOICE_PRESETS.md`](docs/VOICE_PRESETS.md)
 - UI/UX 점검: [`docs/UI_UX_AUDIT_HEARTBEAT_5_2.md`](docs/UI_UX_AUDIT_HEARTBEAT_5_2.md)
 - lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
 

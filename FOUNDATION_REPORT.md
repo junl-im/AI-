@@ -1,6 +1,60 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 5.2.1 · Focus Return Hotfix**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.4 · Signed Audio Rehydration & Device Certification**
+
+## Engine Heartbeat 6.4 Signed Audio Rehydration & Device Certification
+
+- TTS 최종 음원을 작업 ID·파일명·만료 시각에 바인딩한 HMAC-SHA256 URL로 제공하고 구간 URL과 서명 도메인을 분리했습니다.
+- 새로고침 복원과 media element 오류에서 저장된 작업 ID로 `GET /tts/jobs/{job_id}/result`를 다시 조회해 새 최종 음원 URL을 발급합니다.
+- 재발급은 작업 결과와 실제 파일이 서버 TTL 안에 모두 남아 있을 때만 성공하며 만료된 파일을 복구한 것처럼 표시하지 않습니다.
+- seam 증거에 평균·P95·최대와 최종 WAV 교체 위치 오차를 추가했습니다.
+- Android/iOS 실기기 기록은 기본 재생·네트워크 전환·백그라운드 복귀·설치형 PWA 시나리오와 10·30·60분 조합을 별도 인증 행으로 계산합니다.
+- 복구 시나리오는 재생 완료와 SSE 재연결·음원 fetch 복구가 확인돼야 READY이며, 누락은 warning, 명시 실패는 failed입니다.
+- 검증: `Repository preflight 16/16, API pytest 137개, Worker pytest 14개, Python compileall, TS/TSX 166개 transpile 구문 검사`를 통과했습니다.
+- 제한: 실제 Android Chrome·iOS Safari·설치형 PWA 장시간 측정값은 저장소에서 생성하지 않으며, npm 설치 의존성 부재로 전체 ESLint·Vitest·semantic typecheck·Vite build는 GitHub Actions가 최종 판정합니다.
+
+## Engine Heartbeat 6.3 Seam Metrics & Device Soak
+
+- 이전 WAV의 `ended`부터 다음 WAV의 실제 `playing`까지 구간 seam을 밀리초로 측정하고 생성 대기 포함 여부를 분리합니다.
+- 트랙별 최근 20개 전환을 보존하고 Quality Lab에서 평균·최대·최근 전환과 개인정보 최소 JSON을 제공합니다.
+- 25분 이내의 안전한 최종 원격 음원과 Browser Speech 대기열·재생 위치를 새로고침 뒤 복원하며 자동 재생은 하지 않습니다.
+- 부분 음원, Blob URL, 소유권 해제가 필요한 미리듣기와 만료 서명 URL은 복원 대상에서 제외합니다.
+- 브라우저 기기 증거는 online/offline, visibility, 백그라운드 복귀 시간과 BFCache 복원을 관찰 세션으로 누적합니다.
+- 자동 이벤트 관찰은 실제 장시간 재생·SSE 성공 또는 gapless 인증으로 해석하지 않습니다.
+- 검증: `Repository preflight 15/15, API pytest 135개, Worker pytest 14개, Python compileall, TS/TSX 166개 transpile 구문 검사, 핵심 비-React 모듈 strict semantic 검사와 player session·browser evidence runtime smoke를 통과했습니다`
+- 제한: 실제 Android Chrome·iOS Safari·PWA와 CosyVoice 프리셋 5종 soak는 별도 실기기·모델 환경이 필요합니다.
+
+## Engine Heartbeat 6.2 Ordered Segment Queue & Device Evidence
+
+- SSE·polling에서 뒤섞여 도착한 준비 구간을 작업별 coordinator가 번호순으로 정렬해 같은 Player Queue 트랙에 누적합니다.
+- 현재 구간이 끝났는데 다음 구간이 늦으면 이전 구간을 반복하지 않고 `다음 구간 대기` 상태로 멈춘 뒤, 새 구간 도착 즉시 자동 재생합니다.
+- 최종 WAV가 준비되면 완료한 구간 누적 시간과 현재 구간 재생 위치를 합산해 같은 트랙의 최종 파일 위치로 승계합니다.
+- 부분 구간 재생 중 전체 파일 seek와 다운로드를 차단하고, 트랙 교체·삭제 시 모든 구간 Blob URL을 해제합니다.
+- Quality Lab에 HTTPS·EventSource·Service Worker·PWA 표시 모드·사용자 제스처 재생을 분리 기록하는 현재 기기 재생 점검 카드를 추가했습니다.
+- 자동 기능 감지는 실기기 인증이나 gapless 증거가 아니며, 백그라운드 복귀·장시간 SSE·네트워크 전환은 수동 증거로 남깁니다.
+- 검증: Repository preflight 14/14, API pytest 135개, Worker pytest 14개, Python compileall, TS/TSX 164개 transpile 구문 검사를 통과했습니다.
+- 제한: 전달본에 npm lock과 설치 의존성이 없어 ESLint·Vitest·semantic typecheck·Vite production build는 GitHub Actions에서 최종 확인해야 합니다. 실제 Android Chrome·iOS Safari·PWA 장시간 측정은 아직 수행하지 않았습니다.
+
+## Engine Heartbeat 6.1 Progressive Playback Stability & Male Presets
+
+- 기존 도윤에 준호 저음·민준 활력 프리셋을 추가해 전체 5종, 남성 3종으로 확장했습니다.
+- Web·FastAPI·CosyVoice setup 진단이 공통 프리셋 ID 목록을 사용해 화면과 Worker WAV 파일명이 어긋나지 않습니다.
+- 모바일 목소리 선택 Sheet에 실제 동작하는 전체·남성·여성·중성 필터와 방향키 이동을 제공합니다.
+- 첫 구간 서명 URL이 403·410으로 만료되면 작업 상태를 다시 조회해 새 서명 URL로 한 번 재시도합니다.
+- 첫 구간을 재생하던 같은 트랙이 최종 WAV로 교체될 때 현재 위치와 재생 상태를 승계합니다.
+- 프리셋 계약 preflight를 추가해 5개 ID, 남성 3종, UI 필터, API·Worker 공통 목록과 문서를 정적으로 검사합니다.
+- 검증: Repository preflight 13/13, API pytest 135개, Worker pytest 14개, Python compileall, TS/TSX 159개 transpile 구문 검사를 통과했습니다.
+- 제한: npm 의존성이 없어 ESLint·Vitest·semantic typecheck·Vite production build는 GitHub Actions에서 최종 확인해야 합니다. 실제 프리셋 WAV와 모델은 릴리스에 포함하지 않습니다.
+
+## Engine Heartbeat 6 Partial Audio Delivery & Bridge Hardening
+
+- 장문 TTS가 각 WAV 구간을 완성할 때 작업 스냅샷의 `ready_segments`에 기록하고 SSE `segment-ready` 이벤트로 즉시 알립니다.
+- 작업 ID·구간 번호·파일명·만료 시각을 HMAC-SHA256으로 묶은 단기 URL만 구간 음원에 접근할 수 있으며 응답은 private no-store입니다.
+- Web은 첫 구간을 기존 Player Queue에 넣고 최종 병합 WAV가 도착하면 같은 트랙 ID를 유지한 채 교체합니다.
+- 서버 첫 구간 준비, 브라우저 첫 바이트, `HTMLAudioElement.playing`, Browser Speech `onstart` 지연을 별도 기록합니다.
+- FastAPI가 직접 보는 peer가 신뢰 CIDR 안에 있을 때만 `X-Forwarded-*`를 사용하며 공개 rate-limit bucket은 사용자 제공 client ID가 아닌 실제 client IP로 고정합니다.
+- 공개 HTTPS Origin은 신뢰된 proxy 헤더에서만 만들고 내부 host가 최종 음원 URL에 노출되지 않도록 했습니다.
+- 파일 단위 첫 구간 전달이며 후속 구간 gapless 재생과 PCM/WebSocket 스트리밍은 아직 제공하지 않습니다. 최종 WAV 위치 승계와 만료 URL 1회 재발급은 Heartbeat 6.1에서 보강했습니다.
 
 
 ## Engine Heartbeat 5.2.1 Focus Return Hotfix
@@ -86,14 +140,13 @@
 
 ## 검증
 
-- API pytest 127개 통과
+- API pytest 135개 통과
 - Worker pytest 14개 통과
 - Python compileall 통과
-- TypeScript·TSX 160개 소스 파일 parser 검사 통과
-- Repository preflight 11개 통과
-- TypeScript·TSX 159개 파일 transpile 구문 검사 통과
+- Repository preflight 14개 통과
+- TypeScript·TSX 164개 파일 transpile 구문 검사 통과
 - 802줄 fixture는 경고 후 통과, 1,202줄 fixture는 1,200줄 안전 상한으로 실패
-- Setup API 프리셋 0/3·2/3·3/3 진단 테스트와 실제 3/3 응답 확인
+- Setup API 프리셋 0/5·부분 준비·5/5 진단 테스트와 남성 3종 canonical 계약 확인
 - 프로젝트 규칙, 폐기 파일, Web manifest, free-only, engine blueprint, 모델 onboarding 검사 통과
 - 합성 무음 10·30·60분 WAV·MP3 6개 시나리오 완료
 - WAV 길이·자막 드리프트 0ms, MP3 ffprobe 길이와 자막 차이 192ms 이내
@@ -102,4 +155,4 @@
 
 합성 무음 soak는 파일 병합, FFmpeg, 컨테이너 길이와 자막 타임코드 안정성만 검증합니다. 실제 한국어 음질, CosyVoice 처리 속도, CUDA·MPS·모바일 메모리 성능을 증명하지 않습니다. 실제 장치·모델 증거는 `.sorion/quality`에 별도로 기록해야 합니다.
 
-전달받은 전체본에는 `package-lock.json`과 `node_modules`가 없어 전체 ESLint·Vitest·TypeScript semantic 검사·Vite production build를 실행하지 못했습니다. 대신 Repository preflight, 프로젝트 규칙, TypeScript·TSX 159개 파일 transpile 구문 검사, API 127개, Worker 14개와 Python compileall을 통과했습니다. 테스트 런타임은 Python 3.13.5였으며 프로젝트 지원 범위는 3.10~3.12입니다.
+전달받은 전체본에는 `package-lock.json`과 정상 설치된 `node_modules`가 없어 전체 ESLint·Vitest·TypeScript semantic 검사·Vite production build를 실행하지 못했습니다. `tsc -b`는 Vite·Vitest·Node 타입 패키지 부재만 보고했습니다. 대신 Repository preflight 14개, 부분 음원·Bridge·프리셋·ordered playback 계약, TypeScript·TSX 164개 파일 transpile 구문 검사, API 135개, Worker 14개와 Python compileall을 통과했습니다. 테스트 런타임은 Python 3.13.5였으며 프로젝트 지원 범위는 3.10~3.12입니다. 자동 브라우저 기능 감지는 실제 Android Chrome·iOS Safari·PWA 장시간 검증을 대체하지 않습니다.

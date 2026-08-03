@@ -174,3 +174,25 @@ POST /api/v1/quality/stt/verify-segments
 
 TTS 완료 응답의 `first_audio_ms`는 첫 사용 가능 서버 음성 파일 준비 시간입니다. 여러 구간은 첫
 구간 준비, 한 구간은 최종 파일 준비 시점이며 실제 브라우저 재생 시작을 의미하지 않습니다.
+
+## 0.9.3-beta.3 Engine Heartbeat 6 부분 음원 계약
+
+```text
+GET /api/v1/tts/jobs/{job_id}
+GET /api/v1/tts/jobs/{job_id}/events
+GET /api/v1/tts/jobs/{job_id}/segments/{index}/audio?file=...&expires=...&signature=...
+```
+
+작업 상태의 `ready_segments`와 SSE `segment-ready`는 구간 번호, 전체 구간 수, 엔진, 길이,
+크기, 서버 준비 시간과 단기 서명 URL을 반환합니다. URL은 작업 ID·구간 번호·실제 파일명·만료
+시각에 결합되며 같은 파일이 해당 작업 스냅샷에 등록돼 있어야 합니다. 구간 응답은
+`Cache-Control: private, no-store`이고 만료 뒤 작업 상태를 다시 조회하면 새 URL이 발급됩니다.
+
+
+## Engine Heartbeat 6.4 서명 최종 음원과 실기기 인증
+
+- `POST /tts/synthesize`와 `GET /tts/jobs/{job_id}/result`의 최종 `audio_url`은 `/tts/jobs/{job_id}/audio?file=...&expires=...&signature=...` 형식입니다.
+- `GET /tts/jobs/{job_id}/audio`는 작업 결과의 실제 파일명, 만료 시각과 HMAC 서명을 모두 확인하고 `private, no-store`로 반환합니다.
+- URL 만료 시 완료 결과 TTL 안에서 `GET /tts/jobs/{job_id}/result`를 다시 호출하면 새 URL을 받습니다. 실제 파일이나 결과가 만료되면 410입니다.
+- `POST /quality/device-benchmarks`는 `scenario`, `playback_completed`, `sse_reconnected`, `audio_fetch_recovered`, `seam_p95_ms`, `final_handoff_error_ms`를 추가로 받습니다.
+- summary는 기존 `coverage` 외에 Android/iOS 4개 시나리오 × 10·30·60분의 `certification_coverage`와 `missing_certifications`를 반환합니다.

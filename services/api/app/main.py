@@ -18,8 +18,10 @@ from app.services.audit_log import AuditLogger
 from app.services.device_benchmark_store import DeviceBenchmarkStore
 from app.services.engine_orchestrator import EngineOrchestrator
 from app.services.job_manager import JobManager
+from app.services.proxy_headers import client_address
 from app.services.quality_evidence_store import QualityEvidenceStore
 from app.services.rate_limit import FixedWindowRateLimiter
+from app.services.segment_audio import SegmentAudioSigner
 from app.services.sqlite_job_store import SQLiteJobStore
 from app.services.tts_pipeline import TtsPipeline
 from app.storage.audio_store import AudioStore
@@ -27,15 +29,19 @@ from app.storage.voice_clone_store import VoiceCloneStore
 
 
 def client_key(request: Request) -> str:
+    settings = getattr(request.app.state, "settings", get_settings())
+    return f"ip:{client_address(request, settings.trusted_proxy_cidr_list)}"
+
+
+def request_actor(request: Request) -> str:
+    address = client_key(request)
     user_id = request.headers.get("X-SoriON-User-ID", "").strip()
     client_id = request.headers.get("X-SoriON-Client-ID", "").strip()
     if user_id:
-        return f"user:{user_id[:80]}"
+        return f"{address};user:{user_id[:80]}"
     if client_id:
-        return f"client:{client_id[:80]}"
-    forwarded = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
-    host = forwarded or (request.client.host if request.client else "unknown")
-    return f"ip:{host}"
+        return f"{address};client:{client_id[:80]}"
+    return address
 
 
 @asynccontextmanager
@@ -46,6 +52,10 @@ async def lifespan(app: FastAPI):
     store = AudioStore(settings.audio_path, settings.audio_ttl_minutes)
     store.cleanup_expired()
     app.state.audio_store = store
+    app.state.segment_audio_signer = SegmentAudioSigner(
+        settings.segment_url_signing_secret,
+        settings.segment_url_ttl_seconds,
+    )
     app.state.rate_limiter = FixedWindowRateLimiter(
         settings.public_rate_limit_per_minute
     )
@@ -153,12 +163,15 @@ app.add_middleware(
 async def govern_request(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid4()))
     request.state.request_id = request_id
-    actor = client_key(request)
+    rate_limit_key = client_key(request)
+    actor = request_actor(request)
     request.state.actor = actor
     is_api = request.url.path.startswith("/api/v1/")
     exempt = request.url.path.endswith("/health") or request.method == "OPTIONS"
     if is_api and not exempt:
-        allowed, remaining, reset = request.app.state.rate_limiter.check(actor)
+        allowed, remaining, reset = request.app.state.rate_limiter.check(
+            rate_limit_key
+        )
         if not allowed:
             request.app.state.audit_logger.write(
                 event="rate-limit",

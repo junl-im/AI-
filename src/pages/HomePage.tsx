@@ -59,6 +59,7 @@ function generatedPreview(
       filename: buildAudioFilename(request.text, voiceName, 'wav'),
       source: 'api',
       durationSeconds: result.estimatedDurationSeconds,
+      rehydration: { kind: 'tts-final', jobId: result.jobId },
       result,
     }
   }

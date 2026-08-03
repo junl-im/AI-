@@ -26,9 +26,23 @@ router = APIRouter()
 def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkSummaryResponse:
     required_profiles = ["cuda", "apple-silicon", "cpu", "android", "ios"]
     required_minutes = [10, 30, 60]
+    certification_profiles = ["android", "ios"]
+    certification_scenarios = [
+        "baseline",
+        "network-switch",
+        "background-resume",
+        "installed-pwa",
+    ]
     latest: dict[tuple[str, int], DeviceBenchmarkResponse] = {}
+    latest_certification: dict[tuple[str, str, int], DeviceBenchmarkResponse] = {}
     for item in sorted(items, key=lambda value: value.recorded_at):
         latest[(item.device_profile, item.sample_minutes)] = item
+        if item.device_profile in certification_profiles:
+            latest_certification[(
+                item.device_profile,
+                item.scenario,
+                item.sample_minutes,
+            )] = item
     coverage = []
     missing = []
     for profile in required_profiles:
@@ -43,6 +57,23 @@ def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkS
             })
             if item is None:
                 missing.append(f"{profile}:{minutes}m")
+    certification_coverage = []
+    missing_certifications = []
+    for profile in certification_profiles:
+        for scenario in certification_scenarios:
+            for minutes in required_minutes:
+                item = latest_certification.get((profile, scenario, minutes))
+                certification_coverage.append({
+                    "profile": profile,
+                    "scenario": scenario,
+                    "sample_minutes": minutes,
+                    "recorded": item is not None,
+                    "latest_status": item.status if item else None,
+                })
+                if item is None:
+                    missing_certifications.append(
+                        f"{profile}:{scenario}:{minutes}m"
+                    )
     return DeviceBenchmarkSummaryResponse(
         total_records=len(items),
         ready_records=sum(item.status == "ready" for item in items),
@@ -50,6 +81,8 @@ def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkS
         failed_records=sum(item.status == "failed" for item in items),
         coverage=coverage,
         missing_scenarios=missing,
+        certification_coverage=certification_coverage,
+        missing_certifications=missing_certifications,
     )
 
 
@@ -59,10 +92,36 @@ async def record_device_benchmark(
     request: Request,
 ) -> DeviceBenchmarkResponse:
     realtime_factor = payload.processing_seconds / payload.audio_duration_seconds
-    if not payload.succeeded or payload.failure_count:
+    scenario_requires_recovery = payload.scenario in {
+        "network-switch",
+        "background-resume",
+        "installed-pwa",
+    }
+    recovery_failed = scenario_requires_recovery and (
+        payload.sse_reconnected is False
+        or payload.audio_fetch_recovered is False
+    )
+    recovery_unverified = scenario_requires_recovery and (
+        payload.sse_reconnected is None
+        or payload.audio_fetch_recovered is None
+    )
+    if (
+        not payload.succeeded
+        or not payload.playback_completed
+        or payload.failure_count
+        or recovery_failed
+    ):
         benchmark_status = "failed"
-    elif realtime_factor > 1.0 or payload.retry_count or (
-        payload.first_audio_ms is not None and payload.first_audio_ms > 5000
+    elif (
+        realtime_factor > 1.0
+        or payload.retry_count
+        or recovery_unverified
+        or (payload.first_audio_ms is not None and payload.first_audio_ms > 5000)
+        or (payload.seam_p95_ms is not None and payload.seam_p95_ms > 250)
+        or (
+            payload.final_handoff_error_ms is not None
+            and payload.final_handoff_error_ms > 250
+        )
     ):
         benchmark_status = "warning"
     else:

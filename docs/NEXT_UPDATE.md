@@ -1,38 +1,31 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 5.2.1 · Focus Return Hotfix`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.4 · Signed Audio Rehydration & Device Certification`
 
 ## 목표 버전
 
-`0.9.3-beta.3 · Engine Heartbeat 6 · Partial Audio Delivery & Bridge Hardening`
+`0.9.3-beta.3 · Engine Heartbeat 6.5 · Device Soak Recorder & Audio Archive Policy`
 
 ## 핵심 기능
 
-1. 첫 문장 WAV가 준비되면 최종 병합을 기다리지 않고 segment-ready 이벤트와 제한된 audio URL로 Web에 전달한다.
-2. `HTMLAudioElement.playing`, 첫 byte, Browser Speech `onstart`를 수집해 서버 준비와 실제 재생 시작을 분리한다.
-3. 신뢰 reverse proxy allowlist와 forwarded header 정규화를 추가해 공개 Bridge 진단의 spoofing 가능성을 줄인다.
-4. Caddy·Nginx·관리형 tunnel 배포 예시와 CORS·HMAC·rate-limit 운영 검사를 자동화한다.
-5. 실제 CosyVoice 모델·프리셋 3종으로 첫 구간 지연, 전체 RTF, 실패율과 모바일 재생 증거를 기록한다.
-6. 360~430px Sheet·가상 키보드와 1180~1440px 3단 레이아웃의 실브라우저 시각 회귀를 추가한다.
-
-## 예상 변경 영역
-
-- API job/SSE/result schema와 임시 segment audio 접근 정책
-- Web generation queue, Linked Player Dock, Browser Speech playback telemetry
-- connectivity middleware, proxy trust 설정과 배포 문서
-- API·Web 테스트, 실기기 evidence와 CI npm lock 검증
+1. Android Chrome·iOS Safari·설치형 PWA에서 10·30·60분 시나리오를 입력·검증·내보내는 전용 soak recorder를 추가한다.
+2. 네트워크 전환과 백그라운드 복귀의 SSE 재연결 시간, 음원 fetch 복구 시간, 재생 중단 시간을 개별 필드로 기록한다.
+3. seam P95를 엔진·프리셋·기기별로 집계하고 생성 대기 포함/미포함을 분리한다.
+4. 30분 임시 음원과 사용자가 명시적으로 보존한 Export 파일의 수명·삭제 정책을 분리한다.
+5. 실제 CosyVoice 모델과 동의받은 프리셋 5종에서 first audio, seam P95, handoff error, RTF, 실패율을 측정한다.
+6. 검증된 npm lock을 생성해 ESLint, Vitest, semantic typecheck와 Vite production build를 확정한다.
 
 ## 선행 조건과 위험
 
-- 공개 HTTPS 도메인과 reverse proxy, 실제 CosyVoice 모델·GPU, 동의받은 프리셋 WAV가 필요합니다.
-- segment URL은 만료·권한·작업 ID 경계를 지켜야 하며 사용자 원문이나 로컬 경로를 노출하면 안 됩니다.
-- 모바일 autoplay 정책 때문에 파일 준비와 자동 재생은 다를 수 있습니다.
-- 전달본에는 npm lock과 설치 의존성이 없으므로 Web 전체 품질은 검증된 lock이 준비된 CI에서 확정합니다.
+- 실제 Android·iPhone/iPad와 설치형 PWA, 공개 HTTPS Voice API가 필요합니다.
+- 모바일 OS의 백그라운드 정지와 메모리 회수는 브라우저 API만으로 통제할 수 없습니다.
+- 작업 결과와 임시 음원 TTL이 지난 뒤에는 URL 재발급만으로 파일을 복구할 수 없습니다.
+- 장기 보존 기능은 사용자 동의, 저장 용량, 삭제 UI와 개인정보 정책이 함께 설계돼야 합니다.
+- gapless 주장은 실제 파형 또는 오디오 출력 측정 기준을 통과하기 전 금지합니다.
 
 ## 넘기는 결정
 
-- Heartbeat 5.2.1의 공통 음성 설정 범위와 명시적 복귀 대상을 우선하는 modal 초점 계약을 이후 화면에서도 재사용합니다.
-- Heartbeat 5의 `first_audio_ms`는 서버 첫 파일 준비 시간으로 고정합니다.
-- Browser Speech는 실제 `onstart`를 측정하기 전까지 `null`을 유지합니다.
-- forwarded header는 Heartbeat 5에서 진단 전용이며 권한 판정에 사용하지 않습니다.
-- partial-ready 실제 재생은 구현된 것으로 표시하지 않고 Heartbeat 6 출시 차단 항목으로 유지합니다.
+- Heartbeat 6.4의 재발급은 30분 임시 보관 창 안의 최종 TTS 음원만 대상으로 합니다.
+- 실기기 인증표는 READY 기록을 표시하는 계약이며 저장소나 CI가 인증 값을 자동 생성하지 않습니다.
+- seam P95는 `ended → playing` 이벤트 값이며 생성 대기와 decode 지연을 포함할 수 있습니다.
+- 부분 음원과 Blob URL은 계속 세션 복원 대상에서 제외합니다.

@@ -1,0 +1,18 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.1 -> Engine Heartbeat 6.2 Ordered Segment Queue & Device Evidence
+
+Purpose: play every ready long-form WAV segment in job order while collecting privacy-minimized browser playback evidence without overstating device certification or gapless playback.
+
+Key changes:
+- buffer out-of-order SSE and polling segment notifications until the next required segment is ready
+- append prepared WAV segments to one Player Queue track and automatically continue after a waiting gap
+- preserve cumulative playback position when the progressive track becomes the final WAV
+- disable whole-file seek and download while the final duration is not available
+- release owned segment Blob URLs on duplicate, replacement, removal and queue cleanup paths
+- add a Quality Lab card for secure-context, EventSource, PWA, service-worker and gesture-playback evidence
+- store only normalized browser/device categories and omit the full User-Agent, text and audio data
+- add dependency-free ordered-playback and device-evidence regression contracts and operating documentation
+
+Tracked files deleted relative to Engine Heartbeat 6.1: none
+Changed or added files in this overwrite patch: 40
+Cumulative permanent cleanup list:
+public/sorion-icon.svg

@@ -117,6 +117,7 @@ export function useVoiceGeneration() {
           filename: buildAudioFilename(attempt.request.text, attempt.voiceName, attempt.request.format),
           source: 'api',
           durationSeconds: result.estimatedDurationSeconds,
+          rehydration: { kind: 'tts-final', jobId: result.jobId },
           result,
         }
       } else if (result.engineId === BROWSER_SPEECH_ENGINE_ID) {

@@ -1,0 +1,18 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.2 -> Engine Heartbeat 6.3 Seam Metrics & Device Soak
+
+Purpose: measure real WAV-to-WAV transition delay, restore only safe final playback sessions after refresh, and collect privacy-minimized background/network soak observations without claiming device certification.
+
+Key changes:
+- record each progressive WAV seam from the previous `ended` event to the next segment's actual `playing` event
+- distinguish transitions that include next-segment generation wait and retain the most recent 20 metrics per track
+- add Quality Lab average, maximum and recent seam evidence with privacy-minimized JSON export
+- persist final remote API tracks and Browser Speech sessions for up to 25 minutes without autoplay
+- exclude partial audio, Blob URLs, revocable previews and expiring signed segment URLs from session persistence
+- restore queue selection, repeat mode, playback rate and safe final-audio position after refresh
+- observe online/offline, visibility, background return duration and BFCache restore events in browser evidence schema v2
+- add dependency-free seam/session/device-soak regression contracts and operating documentation
+
+Tracked files deleted relative to Engine Heartbeat 6.2: none
+Changed or added files in this overwrite patch: 46
+Cumulative permanent cleanup list:
+public/sorion-icon.svg

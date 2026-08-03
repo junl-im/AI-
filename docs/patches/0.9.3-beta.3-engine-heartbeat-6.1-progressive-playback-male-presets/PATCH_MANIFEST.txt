@@ -1,0 +1,17 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6 -> Engine Heartbeat 6.1 Progressive Playback Stability & Male Presets
+
+Purpose: expand the canonical preset catalog with two additional male options while making first-segment playback resilient to signed-URL expiry and final-file replacement.
+
+Key changes:
+- expand the shared Web/API/Worker preset catalog to five entries, including three male presets
+- add functional all/male/female/neutral filtering to the mobile voice picker
+- validate all five CosyVoice reference WAV filenames through Engine Doctor and Worker readiness
+- refresh an expired 403/410 first-segment URL once from the job snapshot
+- preserve playback position and play/pause state when a partial track becomes the final WAV
+- add dependency-free preset and progressive-playback regression contracts
+- document consent, licensing, WAV validation and the current file-level delivery boundary
+
+Tracked files deleted relative to Engine Heartbeat 6: none
+Changed or added files in this overwrite patch: 44
+Cumulative permanent cleanup list:
+public/sorion-icon.svg

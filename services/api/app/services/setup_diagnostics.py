@@ -7,8 +7,7 @@ from app.core.config import Settings
 from app.engines.base import TtsEngine
 from app.schemas.setup import SetupStatusResponse, SetupStep, VoicePresetDiagnostic
 from app.services.voice_preset_validation import inspect_voice_preset
-
-PRESET_VOICE_IDS = ("sori-warm", "on-clear", "dam-calm")
+from app.services.voice_presets import PRESET_VOICE_IDS
 
 
 def _audio_directory_check(path: Path) -> SetupStep:
@@ -55,7 +54,7 @@ def _voice_preset_check(
                 label="CosyVoice 프리셋 음색",
                 status="warning",
                 required=False,
-                detail="프리셋 폴더가 연결되지 않았습니다. 0/3 사용 가능",
+                detail=f"프리셋 폴더가 연결되지 않았습니다. 0/{len(PRESET_VOICE_IDS)} 사용 가능",
                 action=(
                     "START_ENGINE.cmd로 실행하거나 "
                     "SORION_COSYVOICE_PRESET_DIRECTORY를 설정하세요."
@@ -90,11 +89,14 @@ def _voice_preset_check(
     missing = [item.voice_id for item in inspections if item.status == "missing"]
     warnings = [item.voice_id for item in inspections if item.status == "warning"]
     if ready_count == len(PRESET_VOICE_IDS) and not warnings:
-        detail = "3/3 사용 가능 · 포맷·길이·샘플레이트·무음·클리핑 검사 통과"
+        detail = (
+            f"{len(PRESET_VOICE_IDS)}/{len(PRESET_VOICE_IDS)} 사용 가능 · "
+            "포맷·길이·샘플레이트·무음·클리핑 검사 통과"
+        )
         status = "ready"
         action = None
     else:
-        parts = [f"{ready_count}/3 사용 가능"]
+        parts = [f"{ready_count}/{len(PRESET_VOICE_IDS)} 사용 가능"]
         if missing:
             parts.append(f"누락: {', '.join(missing)}")
         if blocked:

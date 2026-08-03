@@ -14,6 +14,7 @@ import {
   createBrowserSpeechUtterance,
   isBrowserSpeechSupported,
 } from '../../tts/browserSpeech'
+import { refreshSpeechFinalAudio } from '../../tts/voiceApi'
 import { PlayerQueuePanel } from './PlayerQueuePanel'
 
 const rates = [0.75, 1, 1.25, 1.5, 2]
@@ -32,16 +33,33 @@ export function LinkedPlayerDock() {
   const repeatMode = usePlayerStore((state) => state.repeatMode)
   const playbackRate = usePlayerStore((state) => state.playbackRate)
   const selectAndPlay = usePlayerStore((state) => state.selectAndPlay)
+  const replaceTrack = usePlayerStore((state) => state.replace)
   const remove = usePlayerStore((state) => state.remove)
   const clearQueue = usePlayerStore((state) => state.clearQueue)
   const selectNext = usePlayerStore((state) => state.selectNext)
   const selectPrevious = usePlayerStore((state) => state.selectPrevious)
   const cycleRepeatMode = usePlayerStore((state) => state.cycleRepeatMode)
   const setPlaybackRate = usePlayerStore((state) => state.setPlaybackRate)
+  const updateTelemetry = usePlayerStore((state) => state.updateTelemetry)
+  const recordSeamMetric = usePlayerStore((state) => state.recordSeamMetric)
+  const updateResumePosition = usePlayerStore((state) => state.updateResumePosition)
   const track = usePlayerStore(getCurrentTrack)
   const ref = useRef<HTMLAudioElement | null>(null)
   const resumeAfterTrackChange = useRef(false)
+  const previousTrackIdRef = useRef<string | null>(null)
+  const previousPlaybackUrlRef = useRef<string | null>(null)
+  const previousWasProgressiveRef = useRef(false)
+  const progressiveOffsetRef = useRef(0)
+  const currentTimeRef = useRef(0)
+  const playingRef = useRef(false)
+  const waitingForSegmentRef = useRef(false)
+  const segmentEndedAtRef = useRef<number | null>(null)
+  const segmentEndedIndexRef = useRef<number | null>(null)
+  const segmentWaitedRef = useRef(false)
+  const lastSeamKeyRef = useRef<string | null>(null)
+  const lastSavedPositionRef = useRef(0)
   const handledPlayRequestRef = useRef(0)
+  const rehydrationAttemptRef = useRef<string | null>(null)
   const playbackRateRef = useRef(playbackRate)
   const speechTimerRef = useRef<number | null>(null)
   const speechStartedAtRef = useRef(0)
@@ -50,12 +68,56 @@ export function LinkedPlayerDock() {
   const [current, setCurrent] = useState(0)
   const [duration, setDuration] = useState(0)
   const [queueOpen, setQueueOpen] = useState(false)
+  const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null)
+  const [waitingForSegment, setWaitingForSegment] = useState(false)
+  const [playbackError, setPlaybackError] = useState<string | null>(null)
   const browserPlayback = track?.audio.browserSpeech ?? null
+  const progressiveSequence = track?.audio.progressive ?? null
+  const progressiveSegments = progressiveSequence?.segments ?? []
+  const activeSegment = progressiveSegments.find((segment) => segment.index === activeSegmentIndex)
+    ?? progressiveSegments[0]
+    ?? null
+  const progressiveActive = Boolean(track?.audio.partial && progressiveSequence && activeSegment)
+  const playbackUrl = progressiveActive ? activeSegment?.url ?? null : track?.audio.url ?? null
   const progress = duration > 0 ? Math.min(100, (current / duration) * 100) : 0
+  currentTimeRef.current = current
+  playingRef.current = playing
+  waitingForSegmentRef.current = waitingForSegment
   const bars = useMemo(
     () => [18, 34, 58, 28, 74, 42, 86, 38, 68, 30, 52, 22, 44, 70, 36, 56, 26, 48],
     [],
   )
+
+
+  function recordPlaybackMetric(
+    field: 'firstByteMs' | 'playingMs' | 'browserSpeechStartMs',
+  ) {
+    if (!track || !currentTrackId || !track.audio.telemetry) return
+    if (track.audio.telemetry[field] != null) return
+    updateTelemetry(currentTrackId, {
+      [field]: Math.max(0, Date.now() - track.audio.telemetry.requestStartedAtMs),
+    })
+  }
+
+  function recordProgressiveSeam() {
+    if (!track || !currentTrackId || !progressiveActive || !activeSegment) return
+    const endedAt = segmentEndedAtRef.current
+    const fromSegment = segmentEndedIndexRef.current
+    if (endedAt === null || fromSegment === null || activeSegment.index <= fromSegment) return
+    const key = `${currentTrackId}:${fromSegment}:${activeSegment.index}`
+    if (lastSeamKeyRef.current === key) return
+    lastSeamKeyRef.current = key
+    recordSeamMetric(currentTrackId, {
+      fromSegment,
+      toSegment: activeSegment.index,
+      gapMs: Math.max(0, Math.round(performance.now() - endedAt)),
+      waitedForSegment: segmentWaitedRef.current,
+      recordedAt: new Date().toISOString(),
+    })
+    segmentEndedAtRef.current = null
+    segmentEndedIndexRef.current = null
+    segmentWaitedRef.current = false
+  }
 
   function clearSpeechTimer() {
     if (speechTimerRef.current !== null) window.clearInterval(speechTimerRef.current)
@@ -89,6 +151,26 @@ export function LinkedPlayerDock() {
 
   function handleEnded() {
     const element = ref.current
+    if (progressiveActive && activeSegment) {
+      const playedDuration = Number.isFinite(element?.duration) && (element?.duration ?? 0) > 0
+        ? element?.duration ?? activeSegment.durationSeconds
+        : activeSegment.durationSeconds
+      const nextSegment = progressiveSegments.find((segment) => segment.index === activeSegment.index + 1)
+      progressiveOffsetRef.current += playedDuration
+      segmentEndedAtRef.current = performance.now()
+      segmentEndedIndexRef.current = activeSegment.index
+      segmentWaitedRef.current = !nextSegment
+      setCurrent(progressiveOffsetRef.current)
+      resumeAfterTrackChange.current = true
+      if (nextSegment) {
+        setWaitingForSegment(false)
+        setActiveSegmentIndex(nextSegment.index)
+      } else {
+        setWaitingForSegment(true)
+        setPlaying(false)
+      }
+      return
+    }
     if (repeatMode === 'one') {
       if (browserPlayback) {
         speechElapsedRef.current = 0
@@ -115,6 +197,7 @@ export function LinkedPlayerDock() {
     })
     setDuration(track?.audio.durationSeconds ?? 0)
     utterance.onstart = () => {
+      recordPlaybackMetric('browserSpeechStartMs')
       setPlaying(true)
       startSpeechTimer()
     }
@@ -136,29 +219,122 @@ export function LinkedPlayerDock() {
   useEffect(() => {
     const explicitPlay = playRequestId !== handledPlayRequestRef.current
     handledPlayRequestRef.current = playRequestId
-    const shouldResume = resumeAfterTrackChange.current || explicitPlay
-    cancelBrowserSpeech()
-    setCurrent(0)
-    setDuration(browserPlayback ? track?.audio.durationSeconds ?? 0 : 0)
+    const trackChanged = previousTrackIdRef.current !== currentTrackId
+    const sourceChangedInSameTrack = (
+      !trackChanged
+      && previousPlaybackUrlRef.current !== playbackUrl
+    )
+    const finalReplacedProgressive = (
+      sourceChangedInSameTrack
+      && previousWasProgressiveRef.current
+      && !progressiveActive
+    )
+    const progressiveSegmentAdvanced = (
+      sourceChangedInSameTrack
+      && previousWasProgressiveRef.current
+      && progressiveActive
+    )
     const element = ref.current
+    const nativePosition = element && Number.isFinite(element.currentTime)
+      ? element.currentTime
+      : 0
+    const restoredPosition = trackChanged && !progressiveActive && !browserPlayback
+      ? track?.resumePositionSeconds ?? 0
+      : 0
+    const renewedFinalAudio = (
+      sourceChangedInSameTrack
+      && !previousWasProgressiveRef.current
+      && !progressiveActive
+      && track?.audio.rehydration?.kind === 'tts-final'
+    )
+    const renewedFinalPosition = renewedFinalAudio
+      ? Math.max(nativePosition, track?.resumePositionSeconds ?? 0)
+      : 0
+    const handoffPosition = finalReplacedProgressive
+      ? waitingForSegmentRef.current
+        ? progressiveOffsetRef.current
+        : progressiveOffsetRef.current + nativePosition
+      : progressiveSegmentAdvanced
+        ? progressiveOffsetRef.current
+        : renewedFinalAudio
+          ? renewedFinalPosition
+          : restoredPosition
+    const wasPlaying = sourceChangedInSameTrack && (
+      playingRef.current || Boolean(element && !element.paused)
+    )
+    const shouldResume = resumeAfterTrackChange.current || explicitPlay || wasPlaying
+
+    if (trackChanged) {
+      progressiveOffsetRef.current = 0
+      segmentEndedAtRef.current = null
+      segmentEndedIndexRef.current = null
+      segmentWaitedRef.current = false
+      lastSeamKeyRef.current = null
+      lastSavedPositionRef.current = restoredPosition
+      setActiveSegmentIndex(progressiveSegments[0]?.index ?? null)
+      setWaitingForSegment(false)
+    } else if (finalReplacedProgressive) {
+      setWaitingForSegment(false)
+    }
+    cancelBrowserSpeech(false)
+    setPlaybackError(null)
+    setCurrent(handoffPosition)
+    setDuration(progressiveActive
+      ? progressiveSegments.reduce((total, segment) => total + segment.durationSeconds, 0)
+      : browserPlayback
+        ? track?.audio.durationSeconds ?? 0
+        : 0)
     if (element) {
       element.pause()
       element.load()
       element.playbackRate = playbackRateRef.current
-      if (shouldResume && currentTrackId && !browserPlayback) {
-        void element.play().catch(() => {
-          const resume = () => void element.play().catch(() => undefined)
-          element.addEventListener('canplay', resume, { once: true })
-        })
+      const shouldRestoreNativePosition = !progressiveActive && !browserPlayback && handoffPosition > 0
+      const resumeNativeAudio = () => {
+        if (shouldRestoreNativePosition && Number.isFinite(element.duration)) {
+          const targetPosition = Math.min(handoffPosition, Math.max(0, element.duration - 0.05))
+          element.currentTime = targetPosition
+          if (finalReplacedProgressive && currentTrackId) {
+            window.requestAnimationFrame(() => {
+              updateTelemetry(currentTrackId, {
+                finalHandoffErrorMs: Math.max(0, Math.round(Math.abs(element.currentTime - targetPosition) * 1_000)),
+              })
+            })
+          }
+        }
+        if (shouldResume && currentTrackId && !browserPlayback && playbackUrl) {
+          void element.play().catch(() => {
+            const resume = () => void element.play().catch(() => undefined)
+            element.addEventListener('canplay', resume, { once: true })
+          })
+        }
+      }
+      if (shouldRestoreNativePosition && element.readyState < 1) {
+        element.addEventListener('loadedmetadata', resumeNativeAudio, { once: true })
+      } else {
+        resumeNativeAudio()
       }
     }
     if (shouldResume && currentTrackId && browserPlayback) {
       window.setTimeout(startBrowserSpeech, 0)
     }
+    previousTrackIdRef.current = currentTrackId
+    previousPlaybackUrlRef.current = playbackUrl
+    previousWasProgressiveRef.current = progressiveActive
     resumeAfterTrackChange.current = false
-    // Track identity is the synchronization boundary for native audio and browser speech.
+    // Track id and actual playback URL are synchronization boundaries.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTrackId, playRequestId])
+  }, [currentTrackId, playRequestId, playbackUrl, progressiveActive])
+
+  useEffect(() => {
+    if (!progressiveActive) return
+    setDuration(progressiveSegments.reduce((total, segment) => total + segment.durationSeconds, 0))
+    if (!waitingForSegment || !activeSegment) return
+    const nextSegment = progressiveSegments.find((segment) => segment.index === activeSegment.index + 1)
+    if (!nextSegment) return
+    resumeAfterTrackChange.current = true
+    setWaitingForSegment(false)
+    setActiveSegmentIndex(nextSegment.index)
+  }, [activeSegment, progressiveActive, progressiveSegments, waitingForSegment])
 
   useEffect(() => {
     playbackRateRef.current = playbackRate
@@ -174,8 +350,39 @@ export function LinkedPlayerDock() {
     if (isBrowserSpeechSupported()) window.speechSynthesis.cancel()
   }, [])
 
+  async function recoverFinalAudio() {
+    if (!track || !currentTrackId || track.audio.rehydration?.kind !== 'tts-final') {
+      setPlaybackError('음원 주소를 다시 발급할 수 없습니다. 음성을 다시 생성해 주세요.')
+      return
+    }
+    const attemptKey = `${currentTrackId}:${track.audio.url ?? ''}`
+    if (rehydrationAttemptRef.current === attemptKey) return
+    rehydrationAttemptRef.current = attemptKey
+    const shouldResume = playingRef.current || Boolean(ref.current && !ref.current.paused)
+    resumeAfterTrackChange.current = shouldResume
+    setPlaybackError('만료된 음원 주소를 다시 발급하고 있습니다.')
+    try {
+      const result = await refreshSpeechFinalAudio(track.audio.rehydration.jobId)
+      if (!result.audioUrl) throw new Error('새 음원 주소가 없습니다.')
+      replaceTrack(currentTrackId, {
+        ...track.audio,
+        url: result.audioUrl,
+        result: { ...track.audio.result, ...result },
+        rehydration: {
+          kind: 'tts-final',
+          jobId: track.audio.rehydration.jobId,
+          renewedAt: new Date().toISOString(),
+        },
+      }, undefined, shouldResume)
+      setPlaybackError(null)
+    } catch {
+      resumeAfterTrackChange.current = false
+      setPlaybackError('최종 음원 보관 시간이 끝났습니다. 음성을 다시 생성해 주세요.')
+    }
+  }
+
   async function toggle() {
-    if (!track) return
+    if (!track || waitingForSegment) return
     if (browserPlayback) {
       if (!isBrowserSpeechSupported()) return
       if (window.speechSynthesis.paused) {
@@ -194,7 +401,13 @@ export function LinkedPlayerDock() {
     const element = ref.current
     if (!element) return
     if (element.paused) await element.play()
-    else element.pause()
+    else {
+      if (!progressiveActive && currentTrackId) {
+        lastSavedPositionRef.current = element.currentTime
+        updateResumePosition(currentTrackId, element.currentTime)
+      }
+      element.pause()
+    }
   }
 
   function move(direction: 'next' | 'previous') {
@@ -206,25 +419,72 @@ export function LinkedPlayerDock() {
 
   function seek(event: MouseEvent<HTMLButtonElement>) {
     const element = ref.current
-    if (!element || !duration || browserPlayback) return
+    if (!element || !duration || browserPlayback || progressiveActive) return
     const rect = event.currentTarget.getBoundingClientRect()
     element.currentTime = ((event.clientX - rect.left) / rect.width) * duration
   }
 
-  const audio = track?.audio.url ? (
+  const telemetry = track?.audio.telemetry
+  const latencyMetrics = telemetry
+    ? [
+        telemetry.serverSegmentReadyMs != null
+          ? `서버 첫 구간 ${telemetry.serverSegmentReadyMs}ms`
+          : null,
+        telemetry.firstByteMs != null ? `첫 바이트 ${telemetry.firstByteMs}ms` : null,
+        telemetry.playingMs != null ? `실제 재생 ${telemetry.playingMs}ms` : null,
+        telemetry.browserSpeechStartMs != null
+          ? `브라우저 시작 ${telemetry.browserSpeechStartMs}ms`
+          : null,
+        telemetry.finalHandoffErrorMs != null
+          ? `최종 교체 오차 ${telemetry.finalHandoffErrorMs}ms`
+          : null,
+      ].filter((value): value is string => Boolean(value))
+    : []
+  const seamMetrics = telemetry?.seams ?? []
+  const latestSeam = seamMetrics.at(-1)
+  const playbackDetail = progressiveActive && activeSegment
+    ? `${activeSegment.totalSegments}개 중 ${activeSegment.index}번째 구간${waitingForSegment ? ' · 다음 구간 대기' : ''}${latestSeam ? ` · 전환 ${latestSeam.gapMs}ms${latestSeam.waitedForSegment ? ' (대기 포함)' : ''}` : ''}`
+    : playbackError ?? latencyMetrics.join(' · ')
+  const seekBlockedLabel = browserPlayback
+    ? '브라우저 음성은 위치 이동을 지원하지 않음'
+    : progressiveActive
+      ? '부분 구간 연속 재생 중에는 위치 이동을 지원하지 않음'
+      : '재생 위치 이동'
+
+  const audio = playbackUrl ? (
     <audio
       ref={ref}
-      src={track.audio.url}
-      preload="metadata"
+      src={playbackUrl}
+      preload="auto"
       onLoadedMetadata={(event: SyntheticEvent<HTMLAudioElement>) => {
-        setDuration(event.currentTarget.duration)
+        setDuration(progressiveActive
+          ? progressiveSegments.reduce((total, segment) => total + segment.durationSeconds, 0)
+          : event.currentTarget.duration)
+      }}
+      onLoadedData={() => {
+        setPlaybackError(null)
+        rehydrationAttemptRef.current = null
+        recordPlaybackMetric('firstByteMs')
       }}
       onTimeUpdate={(event: SyntheticEvent<HTMLAudioElement>) => {
-        setCurrent(event.currentTarget.currentTime)
+        const nextCurrent = progressiveActive
+          ? progressiveOffsetRef.current + event.currentTarget.currentTime
+          : event.currentTarget.currentTime
+        setCurrent(nextCurrent)
+        if (!progressiveActive && currentTrackId && Math.abs(nextCurrent - lastSavedPositionRef.current) >= 0.75) {
+          lastSavedPositionRef.current = nextCurrent
+          updateResumePosition(currentTrackId, nextCurrent)
+        }
       }}
       onPlay={() => setPlaying(true)}
+      onPlaying={() => {
+        recordPlaybackMetric('playingMs')
+        recordProgressiveSeam()
+        setPlaying(true)
+      }}
       onPause={() => setPlaying(false)}
       onEnded={handleEnded}
+      onError={() => { void recoverFinalAudio() }}
     />
   ) : null
 
@@ -236,15 +496,18 @@ export function LinkedPlayerDock() {
             type="button"
             className="soa-dubbing-player-progress"
             onClick={seek}
-            disabled={!track || Boolean(browserPlayback)}
-            aria-label={browserPlayback ? '브라우저 음성은 위치 이동을 지원하지 않음' : '재생 위치 이동'}
+            disabled={!track || Boolean(browserPlayback) || progressiveActive}
+            aria-label={seekBlockedLabel}
           >
             <i style={{ width: `${progress}%` }} />
             <b style={{ left: `${progress}%` }} />
           </button>
           <div className="soa-dubbing-player-time">
             <time>{formatTime(current)}</time>
-            <span>{track?.title ?? '완성된 음성을 선택하세요'}</span>
+            <span>
+              {track?.title ?? '완성된 음성을 선택하세요'}
+              {playbackDetail ? <small>{playbackDetail}</small> : null}
+            </span>
             <time>{formatTime(duration)}</time>
           </div>
           <div className="soa-dubbing-player-controls">
@@ -253,8 +516,8 @@ export function LinkedPlayerDock() {
               type="button"
               className="is-primary"
               onClick={() => void toggle()}
-              disabled={!track}
-              aria-label={playing ? '일시정지' : '재생'}
+              disabled={!track || waitingForSegment}
+              aria-label={waitingForSegment ? '다음 구간 대기' : playing ? '일시정지' : '재생'}
             >
               {playing ? 'Ⅱ' : '▶'}
             </button>
@@ -271,7 +534,7 @@ export function LinkedPlayerDock() {
             <button type="button" onClick={() => setQueueOpen((open) => !open)} disabled={!track}>
               대기열 {queue.length}
             </button>
-            {track?.audio.url ? <a href={track.audio.url} download={track.audio.filename}>다운로드</a> : null}
+            {track?.audio.url && !track.audio.partial ? <a href={track.audio.url} download={track.audio.filename}>다운로드</a> : null}
             {browserPlayback ? <span className="soa-browser-voice-label">브라우저 재생</span> : null}
           </div>
           {audio}
@@ -303,7 +566,8 @@ export function LinkedPlayerDock() {
                 type="button"
                 className="soa-player-toggle"
                 onClick={() => void toggle()}
-                aria-label={playing ? '일시정지' : '재생'}
+                aria-label={waitingForSegment ? '다음 구간 대기' : playing ? '일시정지' : '재생'}
+                disabled={waitingForSegment}
               >
                 {playing ? 'Ⅱ' : '▶'}
               </button>
@@ -313,13 +577,14 @@ export function LinkedPlayerDock() {
               <div className="soa-player-title">
                 <strong>{track.title}</strong>
                 <span>{track.audio.result.engineId}</span>
+                {playbackDetail ? <small>{playbackDetail}</small> : null}
               </div>
               <button
                 type="button"
                 className="soa-player-wave"
                 onClick={seek}
-                disabled={Boolean(browserPlayback)}
-                aria-label={browserPlayback ? '브라우저 음성은 위치 이동을 지원하지 않음' : '재생 위치 이동'}
+                disabled={Boolean(browserPlayback) || progressiveActive}
+                aria-label={seekBlockedLabel}
               >
                 <span className="soa-player-progress" style={{ width: `${progress}%` }} />
                 {bars.map((height, index) => (
@@ -347,7 +612,7 @@ export function LinkedPlayerDock() {
               >
                 {rates.map((rate) => <option key={rate} value={rate}>{rate}×</option>)}
               </select>
-              {track.audio.url ? (
+              {track.audio.url && !track.audio.partial ? (
                 <a href={track.audio.url} download={track.audio.filename} aria-label="현재 음성 다운로드">↓</a>
               ) : null}
               <button type="button" onClick={() => setQueueOpen((open) => !open)}>대기열 {queue.length}</button>

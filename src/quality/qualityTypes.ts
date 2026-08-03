@@ -88,6 +88,16 @@ export interface DeviceBenchmarkCoverage {
   latestRealtimeFactor: number | null
 }
 
+export type DeviceCertificationScenario = 'baseline' | 'network-switch' | 'background-resume' | 'installed-pwa'
+
+export interface DeviceCertificationCoverage {
+  profile: 'android' | 'ios'
+  scenario: DeviceCertificationScenario
+  sampleMinutes: number
+  recorded: boolean
+  latestStatus: 'ready' | 'warning' | 'failed' | null
+}
+
 export interface DeviceBenchmarkSummary {
   totalRecords: number
   readyRecords: number
@@ -95,6 +105,8 @@ export interface DeviceBenchmarkSummary {
   failedRecords: number
   coverage: DeviceBenchmarkCoverage[]
   missingScenarios: string[]
+  certificationCoverage: DeviceCertificationCoverage[]
+  missingCertifications: string[]
 }
 
 

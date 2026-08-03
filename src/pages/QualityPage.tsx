@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
+import { BrowserPlaybackEvidenceCard } from '../components/evaluation/BrowserPlaybackEvidenceCard'
+import { PlaybackSeamEvidenceCard } from '../components/evaluation/PlaybackSeamEvidenceCard'
 import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
 import { VerificationEvidenceCard } from '../components/evaluation/VerificationEvidenceCard'
 import { QualityDiagnosticsCard } from '../components/evaluation/QualityDiagnosticsCard'
@@ -176,6 +178,10 @@ export function QualityPage() {
           loading={loadingDeviceSummary}
           onRefresh={() => void refreshDeviceSummary()}
         />
+
+        <BrowserPlaybackEvidenceCard />
+
+        <PlaybackSeamEvidenceCard />
 
         <VerificationEvidenceCard
           summary={evidenceSummary}

@@ -169,6 +169,14 @@ export async function getDeviceBenchmarkSummary() {
       latest_realtime_factor: number | null
     }>
     missing_scenarios: string[]
+    certification_coverage: Array<{
+      profile: 'android' | 'ios'
+      scenario: 'baseline' | 'network-switch' | 'background-resume' | 'installed-pwa'
+      sample_minutes: number
+      recorded: boolean
+      latest_status: 'ready' | 'warning' | 'failed' | null
+    }>
+    missing_certifications: string[]
   }>('/quality/device-benchmarks/summary')
   return {
     totalRecords: result.total_records,
@@ -183,6 +191,14 @@ export async function getDeviceBenchmarkSummary() {
       latestRealtimeFactor: item.latest_realtime_factor,
     })),
     missingScenarios: result.missing_scenarios,
+    certificationCoverage: (result.certification_coverage ?? []).map((item) => ({
+      profile: item.profile,
+      scenario: item.scenario,
+      sampleMinutes: item.sample_minutes,
+      recorded: item.recorded,
+      latestStatus: item.latest_status,
+    })),
+    missingCertifications: result.missing_certifications ?? [],
   }
 }
 

@@ -101,6 +101,20 @@ describe('DubbingVoiceControls', () => {
     expect(screen.getByRole('radio', { name: /도윤/ })).toHaveFocus()
   })
 
+
+  it('남성 필터에서 세 가지 남성 프리셋을 비교한다', () => {
+    render(<DubbingVoiceControls {...baseProps} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    fireEvent.click(screen.getByRole('button', { name: '남성' }))
+
+    expect(screen.getAllByRole('radio')).toHaveLength(3)
+    expect(screen.getByRole('radio', { name: /도윤/ })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /준호/ })).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: /민준/ })).toBeInTheDocument()
+    expect(screen.queryByRole('radio', { name: /혜린/ })).not.toBeInTheDocument()
+  })
+
   it('프리셋 재생 버튼이 선택과 프리뷰를 동시에 적용한다', () => {
     const onVoiceChange = vi.fn()
     const onPreview = vi.fn()

@@ -106,9 +106,9 @@
 }
 
 .soa-player-title {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 8px;
   font-size: 9px;
 }
 
@@ -120,7 +120,16 @@
 
 .soa-player-title span {
   color: rgba(220, 231, 252, 0.42);
-  font-size: 7px;
+  font-size: 8px;
+}
+
+.soa-player-title small {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: rgba(194, 224, 255, 0.58);
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .soa-player-wave {

@@ -1,5 +1,50 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.4 · Signed audio rehydration and device certification
+
+- 최종 TTS WAV를 작업 전용 HMAC URL로 제공하고 작업 결과 조회로 새 URL을 재발급합니다.
+- 새로고침 세션과 재생 오류에서 동일 트랙·재생 위치를 보존하며 만료 URL을 한 번 복구합니다.
+- seam 평균·P95·최대와 최종 WAV handoff 위치 오차를 Quality Lab JSON에 기록합니다.
+- Android/iOS의 기본·네트워크 전환·백그라운드 복귀·설치형 PWA 10·30·60분 인증 coverage를 추가합니다.
+- signed audio/device certification dependency-free preflight와 API·세션 회귀 테스트를 추가합니다.
+
+## 0.9.3-beta.3 Engine Heartbeat 6.3 · Seam metrics and device soak
+
+- WAV 구간 `ended → playing` 전환 시간을 생성 대기 포함 여부와 함께 트랙별로 기록
+- Quality Lab에 평균·최대·최근 seam과 개인정보 최소 JSON 내보내기 추가
+- 25분 이내 안전한 최종 원격 음원·Browser Speech 대기열과 재생 위치를 새로고침 뒤 복원
+- 부분 음원·Blob·만료 서명 URL을 플레이어 persistence에서 제외하고 복원 뒤 자동 재생 차단
+- online/offline, visibility, 숨김 누적 시간, 백그라운드 복귀와 BFCache 관찰 세션 추가
+- seam·복원·기기 soak 계약을 dependency-free preflight와 Web 단위 테스트에 추가
+
+## 0.9.3-beta.3 Engine Heartbeat 6.2 · Ordered segment queue and device evidence
+
+- SSE·polling에서 뒤섞여 도착한 준비 구간을 번호순으로 처리하는 Web coordinator를 추가했습니다.
+- 다음 구간이 늦으면 대기 상태를 표시하고 도착 즉시 같은 트랙에서 자동 재생합니다.
+- 최종 WAV 교체 시 완료 구간 누적 시간과 현재 구간 위치를 합산해 재생 위치를 승계합니다.
+- 부분 재생 중 전체 seek·다운로드를 차단하고 모든 구간 Blob URL의 수명을 Player Store가 관리합니다.
+- Quality Lab에 HTTPS·EventSource·PWA·Service Worker·사용자 제스처 재생을 분리 기록하는 브라우저 기기 증거 카드를 추가했습니다.
+- 자동 감지 결과를 gapless 또는 실기기 인증으로 과장하지 않는 문서·preflight 계약을 추가했습니다.
+
+## 0.9.3-beta.3 Engine Heartbeat 6.1 · Progressive playback stability and male presets
+
+- 준호 저음·민준 활력 남성 프리셋을 추가해 전체 5종, 남성 3종으로 확장
+- 모바일 목소리 Sheet에 전체·남성·여성·중성 실제 필터와 공통 성별 메타데이터 추가
+- Web·FastAPI·CosyVoice가 하나의 5개 프리셋 ID 계약을 사용하고 Setup 진단을 0/5~5/5로 확장
+- 만료된 첫 구간 서명 URL을 작업 상태 재조회로 한 번 갱신한 뒤 재요청
+- 첫 구간에서 최종 WAV로 같은 트랙이 교체될 때 재생 위치와 재생 상태 승계
+- 프리셋·부분 재생 회귀 계약, API 135개, Worker 14개, preflight 13개, TS/TSX 159개 구문 검사 통과
+
+## 0.9.3-beta.3 Engine Heartbeat 6 · Partial audio delivery and bridge hardening
+
+- 장문 구간 WAV 준비 상태를 `ready_segments`와 `segment-ready` SSE로 공개하고 첫 구간을 최종 병합 전에 재생
+- 작업·구간·파일·만료를 결합한 HMAC-SHA256 단기 URL과 private no-store 음원 응답 추가
+- 첫 구간 트랙을 최종 WAV로 같은 ID에서 교체해 대기열 선택과 순서를 유지
+- 서버 준비·첫 바이트·실제 재생·Browser Speech 시작 지연을 분리 기록
+- 신뢰 proxy CIDR 밖의 전달 헤더 무시, 공개 Origin 정규화와 client IP 기반 rate-limit 강화
+- Caddy·Nginx 경계, 운영 Secret, URL 만료와 현재 파일 단위 전달 제한 문서화
+- API 133개, Worker 14개와 dependency-free preflight 12개 회귀 검사 통과
+
 ## 0.9.3-beta.3 Engine Heartbeat 5.2.1 · Focus return hotfix
 
 - 확인창을 연 메뉴 항목이 unmount되며 활성 요소가 `body`로 바뀌어 초점 복귀가 실패하던 문제 수정

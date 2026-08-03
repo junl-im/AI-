@@ -1,6 +1,6 @@
 # SoriON API · Worker 보안
 
-현재 기준 버전: `0.9.2`
+현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 6.4`
 
 ## API와 Worker 인증
 
@@ -30,8 +30,9 @@ SORION_WORKER_AUTH_TTL_SECONDS=30
 
 ## 요청 제한
 
-FastAPI는 사용자 ID 또는 IP 기준으로 분당 요청을 제한한다. Worker도 서비스 토큰 기준으로
-별도 제한한다. 제한을 넘으면 HTTP 429와 재시도 시각을 반환한다.
+FastAPI 공개 요청은 신뢰 proxy 경계에서 계산한 client IP 기준으로 분당 요청을 제한한다.
+사용자가 회전할 수 있는 client ID나 user ID는 bucket key로 사용하지 않습니다. Worker는 서비스
+토큰 기준으로 별도 제한하며 제한을 넘으면 HTTP 429와 재시도 시각을 반환합니다.
 
 ## 감사 로그
 
@@ -57,12 +58,21 @@ API와 Worker는 본문·음성 데이터 없이 다음 운영 메타데이터�
 ## 모바일 API 식별과 Private Network
 
 Web은 인증 토큰 대신 사용할 수 없는 익명 `X-SoriON-Client-ID`와 요청 추적용
-`X-Request-ID`를 보낸다. client ID는 공개 rate limit과 장애 진단에만 사용하며 사용자 문장,
-음성, 이메일과 결합하지 않는다. 사용자는 브라우저 저장소를 지워 ID를 초기화할 수 있다.
+`X-Request-ID`를 보냅니다. client ID는 감사 로그의 보조 actor와 장애 진단에만 사용하며 공개
+rate-limit 우회가 가능한 bucket key나 인증 수단으로 사용하지 않습니다. 사용자 문장·음성·이메일과
+결합하지 않으며 사용자는 브라우저 저장소를 지워 ID를 초기화할 수 있습니다.
 
 개발 LAN 연결은 `SORION_ALLOW_PRIVATE_NETWORK=true`에서 Private Network preflight를
 허용한다. 이 헤더는 개발 편의를 위한 CORS 응답일 뿐 인증이나 암호화를 대신하지 않는다.
 공개 서비스는 HTTPS, 사용자 인증, Origin 제한, 방화벽과 Worker 사설망을 적용한다.
+
+## Engine Heartbeat 6 구간 음원과 reverse proxy 경계
+
+- 구간 WAV URL은 작업 ID·구간 번호·파일명·만료 시각 HMAC을 검증하는 단기 bearer URL입니다.
+- 운영 Secret은 Web 변수나 저장소에 넣지 않고 모든 API 인스턴스에 동일하게 주입합니다.
+- FastAPI가 직접 보는 peer가 `SORION_TRUSTED_PROXY_CIDRS` 안에 있을 때만 전달 헤더를 사용합니다.
+- proxy는 외부 요청의 기존 `X-Forwarded-*`를 제거하고 자신이 계산한 값으로 다시 설정합니다.
+- 구간 응답은 private no-store이고 공개 CDN이나 영구 다운로드 주소로 사용하지 않습니다.
 
 ## 0.8.3 JobStore 데이터 경계
 

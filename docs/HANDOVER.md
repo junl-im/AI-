@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 5.2.1 · Focus Return Hotfix**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.4 · Signed Audio Rehydration & Device Certification**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-02 21:32 KST**
+최종 갱신: **2026-08-03 13:17 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -368,15 +368,15 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.9.3-beta.3 · Engine Heartbeat 6 · Partial Audio Delivery & Bridge Hardening**.
+다음 목표 버전: **0.9.3-beta.3 · Engine Heartbeat 6.3 · Seam Metrics & Device Soak**.
 우선순위:
-1. 첫 문장 WAV의 segment-ready SSE와 만료되는 제한 audio URL을 Web 재생에 연결.
-2. 서버 준비, 첫 byte, `HTMLAudioElement.playing`, Browser Speech `onstart` 지표를 분리.
-3. 신뢰 reverse proxy allowlist와 forwarded header 정규화.
-4. 실제 CosyVoice 모델·프리셋 3종·모바일에서 첫 구간 지연과 RTF 증거 기록.
-5. 패널 조절·접기와 좁은 PC 폭의 Web 테스트·시각 회귀 추가.
-금지: partial-ready 미연결 상태를 스트리밍 성공으로 표시, forwarded header를 인증에 사용,
-측정하지 않은 실기기 성능 보증, 유료 API 기본 호출, 모델 없는 성공 표시.
+1. 두 번째 이후 준비 구간을 순서대로 이어 재생하고 decode gap을 기록.
+2. 페이지 복원·네트워크 전환 뒤 만료 URL 재발급과 queue 복구를 검증.
+3. 실제 CosyVoice 모델·프리셋 5종·모바일에서 첫 구간 지연과 RTF 증거 기록.
+4. Android Chrome·iOS Safari·PWA의 autoplay, SSE, CORS 실기기 검증.
+5. 검증된 npm lock으로 ESLint·Vitest·semantic typecheck·production build 확정.
+금지: 파일 단위 부분 전달을 PCM 스트리밍으로 표시, forwarded header를 인증에 사용,
+측정하지 않은 실기기 성능 보증, 동의·권리 없는 프리셋 WAV 포함, 모델 없는 성공 표시.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.
@@ -578,3 +578,63 @@ CI Hotfix 4 테스트 규칙:
 5. cleanup에서 mutable `returnFocusRef.current`를 직접 읽지 않아 React Hooks annotation 경고를 제거했다.
 6. `check-web-test-contracts.mjs`가 캡처·우선순위 계약과 cleanup의 ref 직접 읽기 금지를 강제한다.
 7. 샌드박스 npm registry의 `@eslint/js@9.22.0` 404로 전체 Web lint·Vitest·typecheck·build는 재실행하지 못했으며 GitHub Actions가 최종 판정한다.
+
+## 46. 2026-08-03 02:20 KST · 0.9.3-beta.3 Engine Heartbeat 6 Partial Audio Delivery & Bridge Hardening
+1. 장문 Pipeline은 각 구간 WAV가 준비될 때 `JobSegmentAudio`를 작업 저장소에 기록하고 SSE에서 `segment-ready`를 별도 발행한다.
+2. 성공한 구간 파일은 일반 음원 TTL 동안 보존하고 실패·취소 시 생성된 부분 파일을 제거한다.
+3. 구간 URL은 작업 ID·번호·파일명·만료 시각 HMAC을 검증하고 작업 스냅샷에 같은 파일이 등록됐을 때만 반환한다.
+4. 운영은 `SORION_SEGMENT_URL_SIGNING_SECRET`을 모든 API 인스턴스에 동일하게 배포해야 하며 비어 있으면 재시작 때 URL이 무효가 되는 임시 Secret을 쓴다.
+5. Web은 첫 구간만 조기 재생하고 최종 WAV를 같은 Player Queue 트랙 ID로 교체한다. 후속 구간 gapless queue와 재생 위치 승계는 미구현이다.
+6. 지연 지표는 서버 `ready_after_ms`, 실제 첫 응답 chunk, `playing`, Browser Speech `onstart`로 분리한다.
+7. 전달 헤더는 FastAPI가 직접 보는 peer가 `SORION_TRUSTED_PROXY_CIDRS` 안에 있을 때만 사용하고 proxy는 기존 외부 헤더를 반드시 덮어써야 한다.
+8. 공개 rate-limit key는 회전 가능한 `X-SoriON-Client-ID`가 아니라 유효 client IP로 고정하며 client ID는 audit actor에만 보조 기록한다.
+9. Repository preflight 12/12, API pytest 133개, Worker pytest 14개, Python compileall과 TS/TSX 159개 transpile 검사를 통과했다.
+10. 내부 npm registry 404로 전체 Web lint·Vitest·semantic typecheck·Vite build는 실행하지 못했으므로 GitHub Actions가 최종 Web 판정이다.
+
+
+## 47. 2026-08-03 08:47 KST · 0.9.3-beta.3 Engine Heartbeat 6.1 Progressive Playback Stability & Male Presets
+1. 기존 도윤 남성 프리셋에 준호 저음·민준 활력을 추가해 전체 5종, 남성 3종으로 확장했다.
+2. `src/tts/voicePresets.ts`는 성별 메타데이터와 필터 함수를 제공하고 모바일 Voice Picker는 전체·남성·여성·중성 실제 필터를 사용한다.
+3. FastAPI `voice_presets.py`가 canonical ID 목록을 소유하고 Setup 진단과 CosyVoice preset 탐색이 같은 목록을 import한다.
+4. 실제 음성 WAV는 저장소에 포함하지 않으며 `jun-deep.wav`, `min-energetic.wav`도 기존 검사·동의·권리 규칙을 따른다.
+5. 첫 구간 URL이 403·410이면 작업 상태에서 새 서명을 받아 한 번 다시 fetch하고, 갱신 불가 시 만료 URL을 Player에 넣지 않는다.
+6. Player는 같은 트랙의 partial URL이 final URL로 바뀌면 현재 시간과 재생 상태를 캡처해 metadata 준비 후 복원한다.
+7. 검증: preflight 13/13, API pytest 135개, Worker pytest 14개, Python compileall, TS/TSX 159개 transpile 구문 통과.
+8. npm 의존성은 전달본에 없어 ESLint·Vitest·semantic typecheck·Vite build는 GitHub Actions가 최종 판정한다.
+9. 다음 목표는 두 번째 이후 구간의 ordered queue, 실기기 decode gap 측정과 프리셋 5종 실제 모델 증거다.
+
+## 48. 2026-08-03 10:47 KST · 0.9.3-beta.3 Engine Heartbeat 6.2 Ordered Segment Queue & Device Evidence
+1. 장문 구간은 SSE·polling 도착 순서와 무관하게 `nextSegmentIndex` 기준으로 정렬하고 같은 Player Queue 트랙의 `progressive.segments`에 누적한다.
+2. 앞 번호 구간이 빠지면 뒤 구간을 건너뛰지 않으며, 현재 구간 종료 뒤 다음 구간이 없으면 반복 대신 `다음 구간 대기` 상태로 멈춘다.
+3. 대기 중 새 구간이 도착하면 사용자 선택·트랙 ID를 유지하고 자동 재생하며, 최종 WAV가 도착하면 누적 완료 시간과 현재 구간 위치를 합산해 handoff한다.
+4. 부분 재생 중 전체 seek·다운로드는 차단하고, 중복·교체·삭제된 구간 Blob URL은 Player Store가 해제한다.
+5. Quality Lab의 현재 기기 재생 점검은 Secure Context, online, EventSource, Service Worker, Media Session, PWA 표시 모드와 사용자 제스처 재생을 개인정보 최소 JSON으로 저장한다.
+6. 자동 감지 결과는 gapless·백그라운드 복귀·장시간 SSE·네트워크 전환의 실기기 통과 증거가 아니며 해당 항목은 수동 측정으로 남긴다.
+7. 검증: preflight 14/14, API pytest 135개, Worker pytest 14개, Python compileall, TS/TSX 164개 transpile 구문 검사를 통과했다.
+8. 전달본에 npm lock과 설치 의존성이 없어 ESLint·전체 Vitest·semantic typecheck·Vite build는 GitHub Actions가 최종 판정한다. `tsc -b`는 누락된 Vite·Vitest·Node 타입 패키지만 보고했다.
+9. 다음 목표는 seam gap 실측, 새로고침 복구, Android Chrome·iOS Safari·PWA soak와 실제 CosyVoice 프리셋 5종 증거다.
+
+
+## 49. 2026-08-03 12:17 KST · 0.9.3-beta.3 Engine Heartbeat 6.3 Seam Metrics & Device Soak
+1. Player는 현재 구간 `ended` 시각과 다음 구간 `playing` 시각의 차이를 seam gap으로 기록하고 다음 구간 생성 대기 포함 여부를 별도 플래그로 남긴다.
+2. seam은 트랙별 최근 20개만 보존하며 Quality Lab에서 평균·최대·최근 전환을 표시하고 사용자 문장 없이 JSON으로 내보낸다.
+3. `playerSession`은 25분 이내의 원격 최종 API 음원과 Browser Speech만 localStorage에 저장한다. 부분 음원·progressive segment·Blob·revoke 대상은 제외한다.
+4. 새로고침 뒤 대기열, 선택 트랙, 반복 모드, 재생 속도와 최종 음원 위치를 복원하지만 autoplay 정책과 사용자 의도를 위해 자동 재생하지 않는다.
+5. Browser evidence v2는 online/offline, visibility, 숨김 누적·최장 시간, 백그라운드 복귀와 BFCache pageshow를 관찰 세션으로 누적한다.
+6. 관찰 이벤트는 실제 음성 재생·SSE 유지 성공을 인증하지 않으며 Android Chrome·iOS Safari·PWA 수동 soak가 여전히 필요하다.
+7. 검증: `Repository preflight 15/15, API pytest 135개, Worker pytest 14개, Python compileall, TS/TSX 166개 transpile 구문 검사, 핵심 비-React 모듈 strict semantic 검사와 player session·browser evidence runtime smoke를 통과했습니다`.
+8. 다음 목표는 만료된 최종 음원을 작업 ID로 재발급하고 실제 기기 10·30·60분 soak와 seam P95를 확보하는 Heartbeat 6.4다.
+
+
+## 50. 2026-08-03 13:17 KST · 0.9.3-beta.3 Engine Heartbeat 6.4 Signed Audio Rehydration & Device Certification
+1. 기준 버전은 Engine Heartbeat 6.3이며 목표는 만료 URL 재발급, seam P95·handoff 오차, 모바일 인증 시나리오 분리다.
+2. 최종 TTS URL을 `job_id + final + filename + expires` HMAC으로 서명하고 segment 서명과 도메인을 분리했다.
+3. Web API 음원은 `rehydration.kind=tts-final`과 작업 ID를 저장하며 새로고침 또는 audio error에서 완료 결과를 재조회한다.
+4. 재발급은 작업 결과와 실제 음원 파일이 30분 TTL 안에 남아 있을 때만 성공하며 삭제된 파일을 복원하지 않는다.
+5. Player는 부분→최종 교체 목표 위치와 실제 위치 차이를 기록하고 Quality Lab은 seam 평균·P95·최대와 handoff P95를 내보낸다.
+6. 실기기 benchmark는 baseline, network-switch, background-resume, installed-pwa 시나리오와 재생 완료·SSE·fetch 복구 필드를 지원한다.
+7. Quality summary는 기존 15개 장치 coverage와 Android/iOS 모바일 인증 24개 coverage를 분리한다.
+8. 주요 변경 파일은 TTS signer/routes/tests, player session/persistence/dock, seam/device cards, verification schema/routes/tests와 운영 문서다.
+9. 검증은 preflight 16/16, API 137개, Worker 14개, Python compileall, TS/TSX 166개 구문 검사를 통과했다. npm 설치 의존성 부재로 전체 ESLint·Vitest·semantic typecheck·Vite build는 CI 최종 판정이다.
+10. 전체 ZIP은 `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.4-signed-audio-device-certification-full.zip`, 패치는 `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.3-to-0.9.3-beta.3-engine-heartbeat-6.4-signed-audio-device-certification-patch.zip`으로 전달한다.
+11. 다음 목표는 Heartbeat 6.5 Device Soak Recorder & Audio Archive Policy다.

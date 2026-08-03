@@ -48,6 +48,42 @@ describe('streamSpeechProgress', () => {
     }))
   })
 
+
+  it('publishes signed segment-ready events separately from progress', async () => {
+    const segment = JSON.stringify({
+      index: 1,
+      total_segments: 3,
+      filename: 'part.wav',
+      audio_url: '/api/v1/tts/jobs/job-1/segments/1/audio?signature=test',
+      engine_id: 'cosyvoice3',
+      engine_mode: 'ai',
+      estimated_duration_seconds: 1.2,
+      file_size_bytes: 2048,
+      ready_after_ms: 640,
+      ready_at: '2026-08-03T00:00:00Z',
+    })
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(
+      `event: segment-ready\ndata: ${segment}\n\n`,
+      { status: 200, headers: { 'Content-Type': 'text/event-stream' } },
+    ))
+    const ready = vi.fn()
+
+    const streamed = await streamSpeechProgress(
+      'job-1',
+      vi.fn(),
+      new AbortController().signal,
+      ready,
+    )
+
+    expect(streamed).toBe(true)
+    expect(ready).toHaveBeenCalledWith(expect.objectContaining({
+      index: 1,
+      totalSegments: 3,
+      readyAfterMs: 640,
+      audioUrl: 'https://voice.example/api/v1/tts/jobs/job-1/segments/1/audio?signature=test',
+    }))
+  })
+
   it('returns false so the caller can fall back to polling', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('', { status: 404 }))
 

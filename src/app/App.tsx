@@ -6,6 +6,7 @@ import { ProjectsPage } from '../pages/ProjectsPage'
 import { QualityPage } from '../pages/QualityPage'
 import { SettingsPage } from '../pages/SettingsPage'
 import { useAppStore } from '../store/useAppStore'
+import { usePlayerSessionPersistence } from '../hooks/usePlayerSessionPersistence'
 
 const pages = {
   home: HomePage,
@@ -16,6 +17,7 @@ const pages = {
 }
 
 export function App() {
+  usePlayerSessionPersistence()
   const page = useAppStore((state) => state.page)
   const Page = pages[page]
 

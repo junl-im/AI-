@@ -193,3 +193,46 @@ def test_stt_segment_verification_blocks_attempt_limit(client):
     assert body["regeneration_segment_ids"] == []
     assert body["blocked_segment_ids"] == ["bad"]
     assert body["results"][0]["regeneration_allowed"] is False
+
+
+def test_mobile_certification_requires_recovery_evidence(client):
+    base = {
+        "device_profile": "android",
+        "device_name": "Pixel Test",
+        "engine_id": "cosyvoice3",
+        "model_id": "cosyvoice3-local",
+        "model_version": "1",
+        "sample_minutes": 10,
+        "scenario": "network-switch",
+        "processing_seconds": 60,
+        "audio_duration_seconds": 120,
+        "playback_completed": True,
+        "succeeded": True,
+    }
+    warning = client.post(
+        "/api/v1/quality/device-benchmarks",
+        json=base,
+    )
+    failed = client.post(
+        "/api/v1/quality/device-benchmarks",
+        json={**base, "sse_reconnected": False, "audio_fetch_recovered": True},
+    )
+    ready = client.post(
+        "/api/v1/quality/device-benchmarks",
+        json={**base, "sse_reconnected": True, "audio_fetch_recovered": True},
+    )
+
+    assert warning.json()["status"] == "warning"
+    assert failed.json()["status"] == "failed"
+    assert ready.json()["status"] == "ready"
+
+    summary = client.get("/api/v1/quality/device-benchmarks/summary").json()
+    row = next(
+        item for item in summary["certification_coverage"]
+        if item["profile"] == "android"
+        and item["scenario"] == "network-switch"
+        and item["sample_minutes"] == 10
+    )
+    assert row["recorded"] is True
+    assert row["latest_status"] == "ready"
+    assert "android:network-switch:10m" not in summary["missing_certifications"]

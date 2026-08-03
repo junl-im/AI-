@@ -3,20 +3,24 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../api/httpClient'
 import { usePlayerStore } from '../store/usePlayerStore'
 import type { TtsSynthesisResult } from '../ai/contracts'
+import type { SpeechJobProgress, SpeechReadySegment } from '../tts/voiceApi'
 import { useTimelineGeneration } from './useTimelineGeneration'
+
+const streamMocks = vi.hoisted(() => ({
+  streamSpeechProgress: vi.fn(),
+}))
 
 const voiceApiMocks = vi.hoisted(() => ({
   getSpeechProgress: vi.fn(),
   getSpeechResult: vi.fn(),
   recoverSpeechResult: vi.fn(),
+  refreshSpeechReadySegment: vi.fn(),
   synthesizeSpeech: vi.fn(),
 }))
 
 vi.mock('../tts/voiceApi', () => voiceApiMocks)
 
-vi.mock('../tts/jobProgressStream', () => ({
-  streamSpeechProgress: vi.fn().mockResolvedValue(true),
-}))
+vi.mock('../tts/jobProgressStream', () => streamMocks)
 
 const completedResult: TtsSynthesisResult = {
   jobId: 'mobile-job',
@@ -36,6 +40,7 @@ const completedResult: TtsSynthesisResult = {
 describe('useTimelineGeneration mobile recovery', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    streamMocks.streamSpeechProgress.mockResolvedValue(true)
     usePlayerStore.getState().clearQueue()
   })
 
@@ -166,6 +171,7 @@ describe('useTimelineGeneration mobile recovery', () => {
 describe('useTimelineGeneration browser voice fallback', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    streamMocks.streamSpeechProgress.mockResolvedValue(true)
     usePlayerStore.getState().clearQueue()
   })
 
@@ -213,6 +219,7 @@ describe('useTimelineGeneration browser voice fallback', () => {
 describe('useTimelineGeneration revision safety', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    streamMocks.streamSpeechProgress.mockResolvedValue(true)
     usePlayerStore.getState().clearQueue()
   })
 
@@ -297,4 +304,274 @@ describe('useTimelineGeneration revision safety', () => {
       trackId: null,
     })
   })
+})
+
+
+describe('useTimelineGeneration partial audio delivery', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    streamMocks.streamSpeechProgress.mockResolvedValue(true)
+    usePlayerStore.getState().clearQueue()
+  })
+
+
+  it('만료된 첫 구간 URL은 작업 상태에서 새 서명을 받아 한 번 다시 요청한다', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(null, { status: 410 }))
+      .mockResolvedValueOnce(new Response(
+        new Blob(['renewed-wave'], { type: 'audio/wav' }),
+        { status: 200, headers: { 'Content-Type': 'audio/wav' } },
+      ))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:renewed-segment')
+    voiceApiMocks.refreshSpeechReadySegment.mockResolvedValueOnce({
+      index: 1,
+      totalSegments: 2,
+      filename: 'segment-1.wav',
+      audioUrl: 'https://voice.example.com/segment-1-renewed.wav',
+      engineId: 'cosyvoice3',
+      engineMode: 'ai',
+      estimatedDurationSeconds: 1.2,
+      fileSizeBytes: 2048,
+      readyAfterMs: 500,
+      readyAt: new Date().toISOString(),
+    })
+    streamMocks.streamSpeechProgress.mockImplementationOnce(
+      async (
+        jobId: string,
+        _onProgress: (progress: SpeechJobProgress) => void,
+        _signal: AbortSignal,
+        onSegmentReady: (segment: SpeechReadySegment) => void,
+      ) => {
+        onSegmentReady({
+          index: 1,
+          totalSegments: 2,
+          filename: 'segment-1.wav',
+          audioUrl: 'https://voice.example.com/segment-1-expired.wav',
+          engineId: 'cosyvoice3',
+          engineMode: 'ai',
+          estimatedDurationSeconds: 1.2,
+          fileSizeBytes: 2048,
+          readyAfterMs: 500,
+          readyAt: new Date().toISOString(),
+        })
+        expect(jobId).toBeTruthy()
+        return true
+      },
+    )
+    let resolveSynthesis: ((value: TtsSynthesisResult) => void) | null = null
+    voiceApiMocks.synthesizeSpeech.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveSynthesis = resolve
+    }))
+    const { result } = renderHook(() => useTimelineGeneration())
+    let blockId = ''
+
+    act(() => {
+      ;[blockId] = result.current.stageText('만료 URL 복구를 검증합니다.', {
+        voiceId: 'jun-deep',
+        voiceName: '준호',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'cosyvoice3',
+        normalizeText: true,
+      })
+    })
+
+    let generation: Promise<unknown>
+    await act(async () => {
+      generation = result.current.retryBlock(blockId)
+      await Promise.resolve()
+    })
+    await vi.waitFor(() => expect(usePlayerStore.getState().queue[0]?.audio.url).toBe('blob:renewed-segment'))
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      'https://voice.example.com/segment-1-renewed.wav',
+      expect.objectContaining({ cache: 'no-store' }),
+    )
+    expect(voiceApiMocks.refreshSpeechReadySegment).toHaveBeenCalledWith(
+      expect.any(String),
+      1,
+      expect.any(AbortSignal),
+    )
+
+    await act(async () => {
+      resolveSynthesis?.({
+        ...completedResult,
+        jobId: 'renewed-job',
+        audioUrl: 'https://voice.example.com/final.wav',
+        segmentCount: 2,
+      })
+      await generation!
+    })
+  })
+
+  it('첫 구간을 즉시 큐에 넣고 최종 WAV를 같은 트랙으로 교체한다', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(
+      new Blob(['partial-wave'], { type: 'audio/wav' }),
+      { status: 200, headers: { 'Content-Type': 'audio/wav' } },
+    ))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:partial-segment')
+    streamMocks.streamSpeechProgress.mockImplementationOnce(
+      async (
+        _jobId: string,
+        _onProgress: (progress: SpeechJobProgress) => void,
+        _signal: AbortSignal,
+        onSegmentReady: (segment: SpeechReadySegment) => void,
+      ) => {
+        onSegmentReady({
+          index: 1,
+          totalSegments: 3,
+          filename: 'segment-1.wav',
+          audioUrl: 'https://voice.example.com/segment-1.wav',
+          engineId: 'cosyvoice3',
+          engineMode: 'ai',
+          estimatedDurationSeconds: 1.4,
+          fileSizeBytes: 4096,
+          readyAfterMs: 650,
+          readyAt: new Date().toISOString(),
+        })
+        return true
+      },
+    )
+    let resolveSynthesis: ((value: TtsSynthesisResult) => void) | null = null
+    voiceApiMocks.synthesizeSpeech.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveSynthesis = resolve
+    }))
+    const { result } = renderHook(() => useTimelineGeneration())
+    let blockId = ''
+
+    act(() => {
+      ;[blockId] = result.current.stageText('첫 구간 전달을 검증하는 장문입니다.', {
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'cosyvoice3',
+        normalizeText: true,
+      })
+    })
+
+    let generation: Promise<unknown>
+    await act(async () => {
+      generation = result.current.retryBlock(blockId)
+      await Promise.resolve()
+    })
+    await vi.waitFor(() => {
+      expect(usePlayerStore.getState().queue[0]?.audio.partial).toMatchObject({
+        index: 1,
+        totalSegments: 3,
+      })
+    })
+    const partialTrackId = usePlayerStore.getState().queue[0].id
+
+    await act(async () => {
+      resolveSynthesis?.({
+        ...completedResult,
+        jobId: 'partial-job',
+        audioUrl: 'https://voice.example.com/final.wav',
+        segmentCount: 3,
+      })
+      await generation!
+    })
+
+    const state = usePlayerStore.getState()
+    expect(state.queue).toHaveLength(1)
+    expect(state.queue[0]).toMatchObject({
+      id: partialTrackId,
+      audio: {
+        url: 'https://voice.example.com/final.wav',
+        telemetry: { serverSegmentReadyMs: 650 },
+      },
+    })
+    expect(state.queue[0].audio.telemetry?.firstByteMs).toEqual(expect.any(Number))
+    expect(state.queue[0].audio.partial).toBeUndefined()
+    expect(result.current.blocks[0]).toMatchObject({
+      kind: 'voice',
+      status: 'ready',
+      trackId: partialTrackId,
+      audio: { telemetry: { serverSegmentReadyMs: 650 } },
+    })
+  })
+  it('뒤섞여 도착한 구간을 번호 순서대로 준비해 하나의 트랙에 누적한다', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(new Blob(['one']), { status: 200, headers: { 'Content-Type': 'audio/wav' } }))
+      .mockResolvedValueOnce(new Response(new Blob(['two']), { status: 200, headers: { 'Content-Type': 'audio/wav' } }))
+      .mockResolvedValueOnce(new Response(new Blob(['three']), { status: 200, headers: { 'Content-Type': 'audio/wav' } }))
+    vi.spyOn(URL, 'createObjectURL')
+      .mockReturnValueOnce('blob:ordered-1')
+      .mockReturnValueOnce('blob:ordered-2')
+      .mockReturnValueOnce('blob:ordered-3')
+    const segment = (index: number): SpeechReadySegment => ({
+      index,
+      totalSegments: 3,
+      filename: `segment-${index}.wav`,
+      audioUrl: `https://voice.example.com/segment-${index}.wav`,
+      engineId: 'cosyvoice3',
+      engineMode: 'ai',
+      estimatedDurationSeconds: index,
+      fileSizeBytes: 1024 * index,
+      readyAfterMs: 300 * index,
+      readyAt: new Date().toISOString(),
+    })
+    streamMocks.streamSpeechProgress.mockImplementationOnce(
+      async (
+        _jobId: string,
+        _onProgress: (progress: SpeechJobProgress) => void,
+        _signal: AbortSignal,
+        onSegmentReady: (segment: SpeechReadySegment) => void,
+      ) => {
+        onSegmentReady(segment(2))
+        onSegmentReady(segment(1))
+        onSegmentReady(segment(3))
+        return true
+      },
+    )
+    let resolveSynthesis: ((value: TtsSynthesisResult) => void) | null = null
+    voiceApiMocks.synthesizeSpeech.mockImplementationOnce(() => new Promise((resolve) => {
+      resolveSynthesis = resolve
+    }))
+    const { result } = renderHook(() => useTimelineGeneration())
+    let blockId = ''
+
+    act(() => {
+      ;[blockId] = result.current.stageText('순서가 뒤섞인 구간을 검증합니다.', {
+        voiceId: 'jun-deep',
+        voiceName: '준호',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'cosyvoice3',
+        normalizeText: true,
+      })
+    })
+
+    let generation: Promise<unknown>
+    await act(async () => {
+      generation = result.current.retryBlock(blockId)
+      await Promise.resolve()
+    })
+
+    await vi.waitFor(() => {
+      expect(usePlayerStore.getState().queue[0]?.audio.progressive?.segments)
+        .toHaveLength(3)
+    })
+    expect(usePlayerStore.getState().queue[0]?.audio.progressive?.segments.map((item) => item.index))
+      .toEqual([1, 2, 3])
+    expect(usePlayerStore.getState().queue[0]?.audio.progressive?.segments.map((item) => item.url))
+      .toEqual(['blob:ordered-1', 'blob:ordered-2', 'blob:ordered-3'])
+
+    await act(async () => {
+      resolveSynthesis?.({
+        ...completedResult,
+        jobId: 'ordered-job',
+        audioUrl: 'https://voice.example.com/ordered-final.wav',
+        segmentCount: 3,
+        estimatedDurationSeconds: 6,
+      })
+      await generation!
+    })
+  })
+
 })

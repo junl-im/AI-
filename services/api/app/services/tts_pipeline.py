@@ -1,17 +1,24 @@
 import time
 from collections.abc import Awaitable, Callable
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 from uuid import UUID, uuid4
 
 from app.engines.base import TtsEngine
-from app.schemas.tts import JobPhase, TtsSynthesisRequest, TtsSynthesisResponse
+from app.schemas.tts import (
+    JobPhase,
+    JobSegmentAudio,
+    TtsSynthesisRequest,
+    TtsSynthesisResponse,
+)
 from app.services.text_normalizer import NormalizationResult, normalize_korean_text
 from app.services.text_segmenter import split_korean_text
 from app.services.wav_tools import merge_wav_files, wav_duration_seconds
 from app.storage.audio_store import AudioStore
 
 ProgressReporter = Callable[[JobPhase, int, int, int, str], Awaitable[None]]
+SegmentReporter = Callable[[JobSegmentAudio], Awaitable[None]]
 
 
 class TtsPipeline:
@@ -24,6 +31,7 @@ class TtsPipeline:
         engine: TtsEngine,
         request: TtsSynthesisRequest,
         progress: ProgressReporter | None = None,
+        segment_ready: SegmentReporter | None = None,
     ) -> TtsSynthesisResponse:
         started = time.perf_counter()
         await self._report(
@@ -67,6 +75,7 @@ class TtsPipeline:
             return self._enrich(result, normalization.normalized, total_segments, started)
 
         paths: list[Path] = []
+        completed = False
         try:
             first_result: TtsSynthesisResponse | None = None
             first_audio_ms: int | None = None
@@ -91,9 +100,27 @@ class TtsPipeline:
                 if path is None:
                     raise RuntimeError(f"{index}번째 구간 WAV를 임시 저장소에서 찾지 못했습니다.")
                 paths.append(path)
+                ready_after_ms = round((time.perf_counter() - started) * 1000)
                 if first_result is None:
                     first_result = child_result
-                    first_audio_ms = round((time.perf_counter() - started) * 1000)
+                    first_audio_ms = ready_after_ms
+                await self._report_segment(
+                    segment_ready,
+                    JobSegmentAudio(
+                        index=index,
+                        total_segments=total_segments,
+                        filename=path.name,
+                        engine_id=child_result.engine_id,
+                        engine_mode=child_result.engine_mode,
+                        estimated_duration_seconds=round(
+                            wav_duration_seconds(path),
+                            3,
+                        ),
+                        file_size_bytes=path.stat().st_size,
+                        ready_after_ms=ready_after_ms,
+                        ready_at=datetime.now(timezone.utc).isoformat(),
+                    ),
+                )
 
             assert first_result is not None
             await self._report(
@@ -115,6 +142,7 @@ class TtsPipeline:
                 total_segments,
                 "최종 WAV 파일을 점검합니다.",
             )
+            completed = True
             return TtsSynthesisResponse(
                 job_id=str(parent_id),
                 status="completed",
@@ -131,8 +159,9 @@ class TtsPipeline:
                 realtime_factor=self._realtime_factor(elapsed_ms, duration),
             )
         finally:
-            for path in paths:
-                self.store.remove(path)
+            if not completed:
+                for path in paths:
+                    self.store.remove(path)
 
     @staticmethod
     def _normalize(request: TtsSynthesisRequest) -> NormalizationResult:
@@ -190,6 +219,14 @@ class TtsPipeline:
     ) -> None:
         if reporter is not None:
             await reporter(phase, progress, current_segment, total_segments, message)
+
+    @staticmethod
+    async def _report_segment(
+        reporter: SegmentReporter | None,
+        segment: JobSegmentAudio,
+    ) -> None:
+        if reporter is not None:
+            await reporter(segment)
 
     @staticmethod
     def _realtime_factor(elapsed_ms: int, duration_seconds: float) -> float | None:

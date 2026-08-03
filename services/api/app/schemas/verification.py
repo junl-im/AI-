@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 DeviceProfile = Literal["cuda", "apple-silicon", "cpu", "android", "ios"]
+DeviceScenario = Literal["baseline", "network-switch", "background-resume", "installed-pwa"]
 
 
 class DeviceBenchmarkRequest(BaseModel):
@@ -13,6 +14,8 @@ class DeviceBenchmarkRequest(BaseModel):
     model_id: str = Field(min_length=1, max_length=120)
     model_version: str = Field(min_length=1, max_length=80)
     sample_minutes: int = Field(ge=1, le=120)
+    scenario: DeviceScenario = "baseline"
+    browser_version: str = Field(default="", max_length=120)
     first_audio_ms: int | None = Field(default=None, ge=0)
     processing_seconds: float = Field(gt=0)
     audio_duration_seconds: float = Field(gt=0)
@@ -20,6 +23,11 @@ class DeviceBenchmarkRequest(BaseModel):
     peak_vram_mb: float | None = Field(default=None, ge=0)
     retry_count: int = Field(default=0, ge=0)
     failure_count: int = Field(default=0, ge=0)
+    playback_completed: bool = True
+    sse_reconnected: bool | None = None
+    audio_fetch_recovered: bool | None = None
+    seam_p95_ms: int | None = Field(default=None, ge=0)
+    final_handoff_error_ms: int | None = Field(default=None, ge=0)
     succeeded: bool
     notes: str = Field(default="", max_length=1000)
 
@@ -83,6 +91,14 @@ class DeviceBenchmarkCoverage(BaseModel):
     latest_realtime_factor: float | None = None
 
 
+class DeviceCertificationCoverage(BaseModel):
+    profile: Literal["android", "ios"]
+    scenario: DeviceScenario
+    sample_minutes: int
+    recorded: bool
+    latest_status: Literal["ready", "warning", "failed"] | None = None
+
+
 class DeviceBenchmarkSummaryResponse(BaseModel):
     total_records: int
     ready_records: int
@@ -90,6 +106,8 @@ class DeviceBenchmarkSummaryResponse(BaseModel):
     failed_records: int
     coverage: list[DeviceBenchmarkCoverage]
     missing_scenarios: list[str]
+    certification_coverage: list[DeviceCertificationCoverage] = Field(default_factory=list)
+    missing_certifications: list[str] = Field(default_factory=list)
 
 
 class SttSegmentVerificationRequest(BaseModel):

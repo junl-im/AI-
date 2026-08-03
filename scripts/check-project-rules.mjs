@@ -471,7 +471,7 @@ await requireText('src/pages/VoiceClonePage.tsx', [
 ])
 await requireText('scripts/refresh-npm-lock.mjs', ['package-lock-offline', 'package-lock-online', 'npm-ci', 'timeoutMs', 'https://registry.npmjs.org/', 'https://registry.npmjs.com/', 'restoreLock(previousLock)', 'npm_config_replace_registry_host'])
 await requireText('src/firebase/firebaseClient.ts', ['https://www.gstatic.com/firebasejs/', '/* @vite-ignore */', 'FIREBASE_VERSION'])
-await requireText('scripts/run-preflight.mjs', ['check-pwa-assets.mjs', 'check-firebase-config.mjs'])
+await requireText('scripts/run-preflight.mjs', ['check-pwa-assets.mjs', 'check-firebase-config.mjs', 'check-partial-audio-bridge.mjs'])
 await requireText('firebase.json', ['hosting', 'dist'])
 await requireAbsent('src/firebase/firebaseClient.ts', ["from 'firebase/", 'from \"firebase/'])
 await requireText('GENERATE_WEB_LOCK.cmd', ['locks:bootstrap:web', 'package-lock.json', 'GitHub Desktop'])

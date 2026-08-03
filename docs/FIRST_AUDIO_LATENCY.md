@@ -1,6 +1,6 @@
 # First-Audio Readiness Latency
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 5`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.4`
 
 ## 지표 정의
 
@@ -36,9 +36,9 @@ Heartbeat 5의 `first_audio_ms`는 요청 처리를 시작한 시점부터 **첫
 - 타임라인: 준비된 블록에 첫 음성 준비 시간을 표시
 - 장문 API: 첫 구간 파일 준비와 최종 병합 완료의 차이를 측정
 
-## 다음 단계
+## Heartbeat 6 Web 지표
 
-Heartbeat 6에서는 다음을 분리 측정합니다.
+Heartbeat 6은 다음을 분리 측정합니다.
 
 1. 서버 첫 구간 준비
 2. Web 첫 바이트 수신
@@ -46,5 +46,7 @@ Heartbeat 6에서는 다음을 분리 측정합니다.
 4. Browser Speech의 `SpeechSynthesisUtterance.onstart`
 5. 사용자가 누른 시점부터 실제 발화 이벤트까지의 end-to-end 지연
 
-실제 partial audio URL 또는 segment-ready 이벤트가 연결되기 전에는 첫 구간이 준비돼도 Web이
-그 파일을 바로 재생하지 않습니다.
+여러 구간 장문은 `segment-ready`와 단기 서명 URL로 첫 WAV 파일을 최종 병합 전에 Web Player
+Queue에 연결합니다. `첫 바이트`는 부분 음원 fetch의 첫 response chunk를 기준으로 하며 직접 URL
+fallback은 `loadeddata` 근사값입니다. `실제 재생`과 Browser Speech 시작은 각각 브라우저 이벤트를
+기준으로 하므로 autoplay 정책과 사용자 제스처 대기 시간이 포함될 수 있습니다.

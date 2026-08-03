@@ -188,7 +188,10 @@
 .soa-sheet-header button:first-child { text-align: left; font-size: 30px; }
 .soa-sheet-header button:last-child { text-align: right; }
 .soa-sheet-tags { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 2px 0 12px; }
-.soa-sheet-tags span { display: inline-flex; min-height: 30px; align-items: center; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 0 10px; color: rgba(255, 255, 255, 0.55); background: rgba(255, 255, 255, 0.035); font-size: 10px; font-weight: 800; }
+.soa-sheet-tags span,
+.soa-sheet-tags button { display: inline-flex; min-height: 30px; align-items: center; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 0 10px; color: rgba(255, 255, 255, 0.55); background: rgba(255, 255, 255, 0.035); font-size: 10px; font-weight: 800; }
+.soa-sheet-tags button { cursor: pointer; }
+.soa-sheet-tags button[aria-pressed="true"] { border-color: rgba(83, 164, 255, 0.7); color: #fff; background: rgba(83, 164, 255, 0.18); }
 .soa-voice-sheet-list { display: grid; padding-top: 8px; }
 .soa-voice-sheet-list > div { display: grid; grid-template-columns: minmax(0, 1fr) 46px 28px; align-items: center; gap: 4px; border-radius: 12px; }
 .soa-voice-sheet-list > div.is-selected { background: rgba(255, 255, 255, 0.05); }
@@ -263,7 +266,8 @@
 .soa-dubbing-player-progress > b { position: absolute; z-index: 2; top: 3px; width: 4px; height: 14px; border-radius: 4px; background: #fff; transform: translateX(-2px); }
 .soa-dubbing-player-progress:disabled > b { opacity: 0.7; }
 .soa-dubbing-player-time { display: grid; grid-template-columns: 54px minmax(0, 1fr) 54px; align-items: center; gap: 8px; color: rgba(255, 255, 255, 0.48); font-size: 10px; }
-.soa-dubbing-player-time span { overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.soa-dubbing-player-time span { display: grid; overflow: hidden; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.soa-dubbing-player-time span small { overflow: hidden; color: rgba(191, 224, 255, 0.58); font-size: 8px; text-overflow: ellipsis; }
 .soa-dubbing-player-time time:last-child { text-align: right; }
 .soa-dubbing-player-controls { display: grid; grid-template-columns: 64px 82px 64px; justify-content: center; align-items: center; gap: 16px; margin-top: 8px; }
 .soa-dubbing-player-controls button { height: 52px; border: 0; color: #fff; background: transparent; font-size: 21px; }

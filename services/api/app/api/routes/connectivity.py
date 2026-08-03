@@ -8,16 +8,9 @@ from fastapi import APIRouter, Request
 
 from app.engines.registry import engine_registry
 from app.schemas.connectivity import ConnectivityCheck, ConnectivityResponse
+from app.services.proxy_headers import effective_origin, trusted_proxy_networks
 
 router = APIRouter()
-
-
-def _effective_origin(request: Request) -> str:
-    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
-    host = request.headers.get("x-forwarded-host", request.headers.get("host", ""))
-    scheme = scheme.split(",", 1)[0].strip().lower()
-    host = host.split(",", 1)[0].strip()
-    return f"{scheme}://{host}" if scheme and host else str(request.base_url).rstrip("/")
 
 
 def _is_public_hostname(hostname: str | None) -> bool:
@@ -46,8 +39,12 @@ def _is_public_hostname(hostname: str | None) -> bool:
     )
 
 
-def _public_bridge_check(request: Request) -> tuple[ConnectivityCheck, bool, str | None]:
-    origin = _effective_origin(request)
+def _public_bridge_check(
+    request: Request,
+    trusted_proxy_cidrs: list[str],
+) -> tuple[ConnectivityCheck, bool, str | None]:
+    origin_context = effective_origin(request, trusted_proxy_cidrs)
+    origin = origin_context.origin
     parsed = urlsplit(origin)
     public_host = _is_public_hostname(parsed.hostname)
     https_ready = parsed.scheme == "https" and public_host
@@ -57,7 +54,14 @@ def _public_bridge_check(request: Request) -> tuple[ConnectivityCheck, bool, str
                 id="public-https-bridge",
                 label="모바일 공개 HTTPS Bridge",
                 status="ready",
-                detail=f"외부 브라우저에서 사용할 HTTPS Voice API를 확인했습니다: {origin}",
+                detail=(
+                    f"외부 브라우저에서 사용할 HTTPS Voice API를 확인했습니다: {origin}"
+                    + (
+                        " · 신뢰 프록시 헤더 적용"
+                        if origin_context.forwarded_headers_trusted
+                        else " · 직접 연결 기준"
+                    )
+                ),
             ),
             True,
             origin,
@@ -194,7 +198,10 @@ async def connectivity(request: Request) -> ConnectivityResponse:
     gpu_ready = clone_health and accelerator_ready
     gpu_name = diagnostics.get("gpu_name")
     vram_total_mb = diagnostics.get("vram_total_mb")
-    bridge_check, public_https_ready, public_api_origin = _public_bridge_check(request)
+    bridge_check, public_https_ready, public_api_origin = _public_bridge_check(
+        request,
+        settings.trusted_proxy_cidr_list,
+    )
     checks = [
         ConnectivityCheck(
             id="api",
@@ -203,6 +210,37 @@ async def connectivity(request: Request) -> ConnectivityResponse:
             detail="모바일 웹 요청을 처리할 수 있습니다.",
         ),
         bridge_check,
+        ConnectivityCheck(
+            id="trusted-proxy",
+            label="신뢰 reverse proxy",
+            status=(
+                "ready"
+                if trusted_proxy_networks(settings.trusted_proxy_cidr_list)
+                else "warning"
+            ),
+            detail=(
+                ", ".join(settings.trusted_proxy_cidr_list)
+                if trusted_proxy_networks(settings.trusted_proxy_cidr_list)
+                else "신뢰할 proxy CIDR이 없어 X-Forwarded-*를 모두 무시합니다."
+            ),
+        ),
+        ConnectivityCheck(
+            id="segment-audio-signing",
+            label="구간 음원 서명 URL",
+            status=(
+                "ready"
+                if request.app.state.segment_audio_signer.persistent_secret_configured
+                else "warning"
+            ),
+            detail=(
+                f"만료 {settings.segment_url_ttl_seconds}초 · 고정 HMAC Secret 사용"
+                if request.app.state.segment_audio_signer.persistent_secret_configured
+                else (
+                    f"만료 {settings.segment_url_ttl_seconds}초 · 시작 시 임시 Secret 사용. "
+                    "다중 인스턴스·재시작 배포는 SORION_SEGMENT_URL_SIGNING_SECRET이 필요합니다."
+                )
+            ),
+        ),
         _directory_check(settings.audio_path),
         ConnectivityCheck(
             id="tts-engine",

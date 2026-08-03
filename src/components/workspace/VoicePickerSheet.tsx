@@ -1,7 +1,12 @@
-import { useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { useModalDialog } from '../../hooks/useModalDialog'
-import { voicePresets } from '../../tts/voicePresets'
+import {
+  filterVoicePresets,
+  voiceGenderLabels,
+  voicePresets,
+  type VoiceGender,
+} from '../../tts/voicePresets'
 
 interface VoicePickerSheetProps {
   open: boolean
@@ -12,6 +17,15 @@ interface VoicePickerSheetProps {
   onPreview: (voiceId: string) => void
   onCreateVoice: () => void
 }
+
+type VoiceFilter = VoiceGender | 'all'
+
+const filterOptions: Array<{ id: VoiceFilter; label: string }> = [
+  { id: 'all', label: '전체' },
+  { id: 'male', label: voiceGenderLabels.male },
+  { id: 'female', label: voiceGenderLabels.female },
+  { id: 'neutral', label: voiceGenderLabels.neutral },
+]
 
 export function VoicePickerSheet({
   open,
@@ -24,7 +38,9 @@ export function VoicePickerSheet({
 }: VoicePickerSheetProps) {
   const dialogRef = useModalDialog<HTMLElement>(open, onClose)
   const choiceRefs = useRef<Array<HTMLButtonElement | null>>([])
-  const hasSelectedVoice = voicePresets.some((voice) => voice.id === selectedId)
+  const [filter, setFilter] = useState<VoiceFilter>('all')
+  const visibleVoices = useMemo(() => filterVoicePresets(filter), [filter])
+  const hasSelectedVoice = visibleVoices.some((voice) => voice.id === selectedId)
 
   function handleChoiceKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const movingForward = event.key === 'ArrowDown' || event.key === 'ArrowRight'
@@ -33,9 +49,9 @@ export function VoicePickerSheet({
 
     event.preventDefault()
     const nextIndex = movingForward
-      ? (index + 1) % voicePresets.length
-      : (index - 1 + voicePresets.length) % voicePresets.length
-    const nextVoice = voicePresets[nextIndex]
+      ? (index + 1) % visibleVoices.length
+      : (index - 1 + visibleVoices.length) % visibleVoices.length
+    const nextVoice = visibleVoices[nextIndex]
     onSelect(nextVoice.id)
     choiceRefs.current[nextIndex]?.focus({ preventScroll: true })
   }
@@ -74,13 +90,24 @@ export function VoicePickerSheet({
             내 목소리
           </button>
         </header>
-        <div className="soa-sheet-tags" aria-label="목소리 라이브러리 특성">
-          <span>한국어</span>
-          <span>장문 추천</span>
+        <div className="soa-sheet-tags" role="group" aria-label="목소리 성별 필터">
+          {filterOptions.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              aria-pressed={filter === option.id}
+              onClick={() => {
+                setFilter(option.id)
+                choiceRefs.current = []
+              }}
+            >
+              {option.label}
+            </button>
+          ))}
           <span>{voicePresets.length}개 프리셋</span>
         </div>
         <div className="soa-voice-sheet-list" role="radiogroup" aria-label="목소리 선택">
-          {voicePresets.map((voice, index) => {
+          {visibleVoices.map((voice, index) => {
             const selected = voice.id === selectedId
             return (
               <div key={voice.id} className={selected ? 'is-selected' : ''}>
@@ -100,7 +127,10 @@ export function VoicePickerSheet({
                   }}
                 >
                   <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
-                  <span><strong>{voice.name}</strong><small>{voice.description}</small></span>
+                  <span>
+                    <strong>{voice.name} · {voiceGenderLabels[voice.gender]}</strong>
+                    <small>{voice.description}</small>
+                  </span>
                 </button>
                 <button
                   type="button"

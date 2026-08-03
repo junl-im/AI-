@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     job_history_ttl_hours: int = 24
     job_poll_interval_seconds: float = 0.1
     audio_ttl_minutes: int = 30
+    segment_url_ttl_seconds: int = Field(default=900, ge=30, le=3600)
+    segment_url_signing_secret: str = ""
     max_segment_chars: int = 180
     audio_directory: str = ".sorion/audio"
     voice_clone_directory: str = ".sorion/voice-clones"
@@ -42,6 +44,7 @@ class Settings(BaseSettings):
     worker_service_token: str = ""
     worker_signature_secret: str = ""
     public_rate_limit_per_minute: int = Field(default=120, ge=10, le=5000)
+    trusted_proxy_cidrs: str = "127.0.0.1/32,::1/128"
     allow_private_network: bool = True
     audit_log_path: str = ".sorion/audit/api.jsonl"
     device_benchmark_path: str = ".sorion/quality/device-benchmarks.jsonl"
@@ -62,6 +65,14 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [item.strip() for item in self.cors_origins.split(",") if item.strip()]
+
+    @property
+    def trusted_proxy_cidr_list(self) -> list[str]:
+        return [
+            item.strip()
+            for item in self.trusted_proxy_cidrs.split(",")
+            if item.strip()
+        ]
 
     @property
     def audio_path(self) -> Path:

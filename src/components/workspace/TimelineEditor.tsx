@@ -215,8 +215,10 @@ function VoiceBlock({
 
       <footer>
         <span className="soa-dubbing-block__status"><i aria-hidden="true" />{statusLabel}</span>
-        {block.audio?.result.firstAudioMs != null ? (
-          <small>첫 음성 준비 {block.audio.result.firstAudioMs}ms</small>
+        {block.audio?.partial ? (
+          <small>구간 {block.audio.partial.index}/{block.audio.partial.totalSegments} 준비 · 첫 구간 {block.audio.telemetry?.serverSegmentReadyMs ?? block.audio.partial.readyAfterMs}ms</small>
+        ) : block.audio?.result.firstAudioMs != null ? (
+          <small>첫 음성 파일 준비 {block.audio.result.firstAudioMs}ms</small>
         ) : null}
         <time>{formatDuration(block.durationSeconds)}</time>
       </footer>

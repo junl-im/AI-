@@ -9,14 +9,16 @@ import {
   createBrowserSpeechPlayback,
   isBrowserSpeechSupported,
 } from '../tts/browserSpeech'
-import type { GeneratedAudio } from '../tts/generationTypes'
+import type { GeneratedAudio, ProgressiveAudioSegment } from '../tts/generationTypes'
 import { streamSpeechProgress } from '../tts/jobProgressStream'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import {
   getSpeechProgress,
   getSpeechResult,
   recoverSpeechResult,
+  refreshSpeechReadySegment,
   synthesizeSpeech,
+  type SpeechReadySegment,
 } from '../tts/voiceApi'
 import type { PersistedTimelineBlock } from '../workspace/sessionTypes'
 import type { TimelineBlock, TimelineVoiceBlock } from '../workspace/workspaceTypes'
@@ -47,6 +49,8 @@ export function useTimelineGeneration() {
   const timers = useRef(new Map<string, number>())
   const enqueue = usePlayerStore((state) => state.enqueue)
   const enqueueAndPlay = usePlayerStore((state) => state.enqueueAndPlay)
+  const replaceTrack = usePlayerStore((state) => state.replace)
+  const appendProgressiveSegment = usePlayerStore((state) => state.appendProgressiveSegment)
   const removeTrack = usePlayerStore((state) => state.remove)
   const commit = useCallback((updater: BlocksUpdater) => {
     const next = updater(blocksRef.current)
@@ -105,8 +109,16 @@ export function useTimelineGeneration() {
     jobId: string,
     revision: number,
     signal: AbortSignal,
+    onSegmentReady?: (segment: SpeechReadySegment) => void,
   ) => {
+    const deliveredSegments = new Set<number>()
+    const applySegment = (segment: SpeechReadySegment) => {
+      if (deliveredSegments.has(segment.index)) return
+      deliveredSegments.add(segment.index)
+      onSegmentReady?.(segment)
+    }
     const applyProgress = (progress: Awaited<ReturnType<typeof getSpeechProgress>>) => {
+      for (const segment of progress.readySegments ?? []) applySegment(segment)
       updateVoiceBlock(
         blockId,
         { progress: Math.max(8, progress.progress) },
@@ -124,7 +136,12 @@ export function useTimelineGeneration() {
       }
       timers.current.set(blockId, window.setTimeout(() => void poll(), 650))
     }
-    void streamSpeechProgress(jobId, applyProgress, signal).then((streamed) => {
+    void streamSpeechProgress(
+      jobId,
+      applyProgress,
+      signal,
+      applySegment,
+    ).then((streamed) => {
       if (!streamed && !signal.aborted) void poll()
     })
   }, [updateVoiceBlock])
@@ -154,18 +171,235 @@ export function useTimelineGeneration() {
       engineId: block.engineId,
       normalizeText: block.normalizeText,
     }
+    const requestStartedAtMs = Date.now()
+    let partialTrackId: string | null = null
+    let partialReadyAfterMs: number | null = null
+    let partialFirstByteMs: number | null = null
+    let activeJobId = block.jobId
+    let acceptingProgressiveSegments = true
+    let nextSegmentIndex = 1
+    let drainingSegments = false
+    const pendingSegments = new Map<number, SpeechReadySegment>()
+    const processedSegments = new Set<number>()
+
+    const preparePlayableSegment = async (segment: SpeechReadySegment): Promise<ProgressiveAudioSegment | null> => {
+      let playableSegment = segment
+      let previewUrl = playableSegment.audioUrl
+      let revokeOnRemove = false
+      let allowDirectUrlFallback = true
+      try {
+        let response = await fetch(playableSegment.audioUrl, {
+          signal: controller.signal,
+          cache: 'no-store',
+          credentials: 'omit',
+        })
+        if ([403, 410].includes(response.status) && activeJobId) {
+          allowDirectUrlFallback = false
+          const refreshed = await refreshSpeechReadySegment(
+            activeJobId,
+            playableSegment.index,
+            controller.signal,
+          )
+          if (refreshed) {
+            playableSegment = refreshed
+            previewUrl = refreshed.audioUrl
+            allowDirectUrlFallback = true
+            response = await fetch(refreshed.audioUrl, {
+              signal: controller.signal,
+              cache: 'no-store',
+              credentials: 'omit',
+            })
+          }
+        }
+        if (!response.ok) {
+          if ([403, 410].includes(response.status)) allowDirectUrlFallback = false
+          throw new Error(`segment audio ${response.status}`)
+        }
+        let blob: Blob
+        if (response.body) {
+          const [probeStream, playbackStream] = response.body.tee()
+          const probe = probeStream.getReader()
+          const firstChunk = await probe.read()
+          if (!firstChunk.done && playableSegment.index === 1 && partialFirstByteMs === null) {
+            partialFirstByteMs = Math.max(0, Date.now() - requestStartedAtMs)
+          }
+          await probe.cancel()
+          blob = await new Response(playbackStream, {
+            headers: { 'Content-Type': response.headers.get('Content-Type') ?? 'audio/wav' },
+          }).blob()
+        } else {
+          if (playableSegment.index === 1 && partialFirstByteMs === null) {
+            partialFirstByteMs = Math.max(0, Date.now() - requestStartedAtMs)
+          }
+          blob = await response.blob()
+        }
+        previewUrl = URL.createObjectURL(blob)
+        revokeOnRemove = true
+      } catch {
+        if (controller.signal.aborted || !allowDirectUrlFallback) return null
+        // fetch 자체가 실패한 경우에는 audio 요소가 단기 서명 URL을 직접 읽도록 복구한다.
+      }
+      return {
+        index: playableSegment.index,
+        totalSegments: playableSegment.totalSegments,
+        url: previewUrl,
+        filename: playableSegment.filename,
+        durationSeconds: playableSegment.estimatedDurationSeconds,
+        readyAfterMs: playableSegment.readyAfterMs,
+        revokeOnRemove,
+      }
+    }
+
+    const publishPreparedSegment = (
+      segment: SpeechReadySegment,
+      prepared: ProgressiveAudioSegment,
+    ) => {
+      const latestBlock = blocksRef.current.find((item) => item.id === blockId)
+      if (
+        !acceptingProgressiveSegments
+        || !latestBlock
+        || latestBlock.kind !== 'voice'
+        || latestBlock.revision !== revision
+        || latestBlock.status !== 'generating'
+      ) {
+        if (prepared.revokeOnRemove) URL.revokeObjectURL(prepared.url)
+        return
+      }
+
+      if (!partialTrackId) {
+        partialReadyAfterMs = segment.readyAfterMs
+        const partialAudio: GeneratedAudio = {
+          url: prepared.url,
+          filename: `${buildAudioFilename(block.text, block.voiceName, 'wav').replace(/\.wav$/i, '')}-part-1.wav`,
+          source: 'api',
+          durationSeconds: prepared.durationSeconds,
+          partial: {
+            index: prepared.index,
+            totalSegments: prepared.totalSegments,
+            readyAfterMs: prepared.readyAfterMs,
+          },
+          progressive: {
+            jobId: activeJobId ?? '',
+            totalSegments: prepared.totalSegments,
+            segments: [prepared],
+          },
+          telemetry: {
+            requestStartedAtMs,
+            serverSegmentReadyMs: prepared.readyAfterMs,
+            firstByteMs: partialFirstByteMs,
+          },
+          result: {
+            jobId: activeJobId ?? '',
+            status: 'processing',
+            engineId: segment.engineId,
+            engineMode: segment.engineMode,
+            audioUrl: segment.audioUrl,
+            estimatedDurationSeconds: prepared.durationSeconds,
+            message: `${prepared.totalSegments}개 구간을 준비되는 순서대로 이어 재생합니다.`,
+            normalizedText: null,
+            segmentCount: prepared.totalSegments,
+            firstAudioMs: prepared.readyAfterMs,
+            processingMs: null,
+            fileSizeBytes: segment.fileSizeBytes,
+            realtimeFactor: null,
+          },
+        }
+        const title = `${block.voiceName} · 구간 연속 재생`
+        partialTrackId = autoplay
+          ? enqueueAndPlay(partialAudio, title)
+          : enqueue(partialAudio, title)
+        updateVoiceBlock(blockId, {
+          audio: partialAudio,
+          trackId: partialTrackId,
+          durationSeconds: prepared.durationSeconds,
+          progress: Math.max(12, Math.round((prepared.index / prepared.totalSegments) * 82)),
+        }, revision)
+        return
+      }
+
+      const targetTrackId = partialTrackId
+      if (!targetTrackId) {
+        if (prepared.revokeOnRemove) URL.revokeObjectURL(prepared.url)
+        return
+      }
+      appendProgressiveSegment(targetTrackId, prepared)
+      const currentAudio = latestBlock.audio
+      const currentSegments = currentAudio?.progressive?.segments ?? []
+      const nextSegments = [...currentSegments, prepared]
+        .filter((item, index, items) => items.findIndex((candidate) => candidate.index === item.index) === index)
+        .sort((left, right) => left.index - right.index)
+      const nextAudio = currentAudio?.progressive
+        ? {
+            ...currentAudio,
+            durationSeconds: nextSegments.reduce((total, item) => total + item.durationSeconds, 0),
+            partial: {
+              index: prepared.index,
+              totalSegments: prepared.totalSegments,
+              readyAfterMs: prepared.readyAfterMs,
+            },
+            progressive: {
+              ...currentAudio.progressive,
+              totalSegments: prepared.totalSegments,
+              segments: nextSegments,
+            },
+          }
+        : currentAudio
+      updateVoiceBlock(blockId, {
+        audio: nextAudio,
+        durationSeconds: nextAudio?.durationSeconds ?? latestBlock.durationSeconds,
+        progress: Math.max(12, Math.round((prepared.index / prepared.totalSegments) * 82)),
+      }, revision)
+    }
+
+    const drainReadySegments = async () => {
+      if (drainingSegments || !acceptingProgressiveSegments) return
+      drainingSegments = true
+      try {
+        while (acceptingProgressiveSegments) {
+          const segment = pendingSegments.get(nextSegmentIndex)
+          if (!segment) break
+          pendingSegments.delete(nextSegmentIndex)
+          const prepared = await preparePlayableSegment(segment)
+          if (!prepared) {
+            acceptingProgressiveSegments = false
+            break
+          }
+          if (!acceptingProgressiveSegments) {
+            if (prepared.revokeOnRemove) URL.revokeObjectURL(prepared.url)
+            break
+          }
+          processedSegments.add(segment.index)
+          publishPreparedSegment(segment, prepared)
+          nextSegmentIndex += 1
+        }
+      } finally {
+        drainingSegments = false
+      }
+    }
+
+    const previewReadySegment = (segment: SpeechReadySegment) => {
+      if (
+        !acceptingProgressiveSegments
+        || segment.index < 1
+        || processedSegments.has(segment.index)
+        || pendingSegments.has(segment.index)
+      ) return
+      pendingSegments.set(segment.index, segment)
+      void drainReadySegments()
+    }
     try {
       let jobId = block.jobId
       let result: TtsSynthesisResult | null = null
       if (jobId) {
         try {
           const progress = await getSpeechProgress(jobId, controller.signal)
+          for (const segment of progress.readySegments ?? []) previewReadySegment(segment)
           if (progress.phase === 'completed') {
             result = await getSpeechResult(jobId, controller.signal)
           } else if (progress.phase === 'failed' || progress.phase === 'cancelled') {
             jobId = null
           } else {
-            pollProgress(blockId, jobId, revision, controller.signal)
+            pollProgress(blockId, jobId, revision, controller.signal, previewReadySegment)
             result = await recoverSpeechResult(jobId, controller.signal)
           }
         } catch (error) {
@@ -202,11 +436,19 @@ export function useTimelineGeneration() {
       }
       if (!result) {
         jobId = createRandomId()
+        activeJobId = jobId
         updateVoiceBlock(blockId, { jobId }, revision)
-        pollProgress(blockId, jobId, revision, controller.signal)
+        pollProgress(
+          blockId,
+          jobId,
+          revision,
+          controller.signal,
+          previewReadySegment,
+        )
         result = await synthesizeSpeech(request, jobId, controller.signal)
       }
 
+      acceptingProgressiveSegments = false
       const latestBlock = blocksRef.current.find((item) => item.id === blockId)
       if (
         !latestBlock
@@ -221,6 +463,12 @@ export function useTimelineGeneration() {
           filename: buildAudioFilename(block.text, block.voiceName, 'wav'),
           source: 'api',
           durationSeconds: result.estimatedDurationSeconds,
+          rehydration: { kind: 'tts-final', jobId: result.jobId },
+          telemetry: {
+            requestStartedAtMs,
+            serverSegmentReadyMs: partialReadyAfterMs,
+            firstByteMs: partialFirstByteMs,
+          },
           result,
         }
       } else if (result.engineId === BROWSER_SPEECH_ENGINE_ID) {
@@ -230,6 +478,11 @@ export function useTimelineGeneration() {
           source: 'browser-speech',
           durationSeconds: result.estimatedDurationSeconds,
           browserSpeech: createBrowserSpeechPlayback(request),
+          telemetry: {
+            requestStartedAtMs,
+            serverSegmentReadyMs: partialReadyAfterMs,
+            firstByteMs: partialFirstByteMs,
+          },
           result,
         }
       } else {
@@ -240,6 +493,11 @@ export function useTimelineGeneration() {
           source: 'browser-demo',
           durationSeconds: getMockWaveDuration(block.text),
           revokeOnRemove: true,
+          telemetry: {
+            requestStartedAtMs,
+            serverSegmentReadyMs: partialReadyAfterMs,
+            firstByteMs: partialFirstByteMs,
+          },
           result: {
             ...result,
             message: 'Mock 엔진 결과입니다. 실제 AI 음성이 아닙니다.',
@@ -248,9 +506,15 @@ export function useTimelineGeneration() {
         }
       }
       const trackTitle = `${block.voiceName} · ${block.text.slice(0, 22)}`
-      const trackId = autoplay
-        ? enqueueAndPlay(audio, trackTitle)
-        : enqueue(audio, trackTitle)
+      let trackId: string
+      if (partialTrackId) {
+        replaceTrack(partialTrackId, audio, trackTitle, autoplay)
+        trackId = partialTrackId
+      } else {
+        trackId = autoplay
+          ? enqueueAndPlay(audio, trackTitle)
+          : enqueue(audio, trackTitle)
+      }
       updateVoiceBlock(blockId, {
         status: 'ready',
         progress: 100,
@@ -261,6 +525,8 @@ export function useTimelineGeneration() {
       }, revision)
       return audio
     } catch (error) {
+      acceptingProgressiveSegments = false
+      if (partialTrackId) removeTrack(partialTrackId)
       if (controller.signal.aborted) return null
       const message = error instanceof ApiError
         ? `${error.code} · ${error.message}`
@@ -274,12 +540,13 @@ export function useTimelineGeneration() {
       )
       return null
     } finally {
+      acceptingProgressiveSegments = false
       if (controllers.current.get(blockId) === controller) {
         controllers.current.delete(blockId)
         stopPolling(blockId)
       }
     }
-  }, [enqueue, enqueueAndPlay, pollProgress, stopPolling, updateVoiceBlock])
+  }, [appendProgressiveSegment, enqueue, enqueueAndPlay, pollProgress, removeTrack, replaceTrack, stopPolling, updateVoiceBlock])
 
   const generateBlock = useCallback(
     (blockId: string) => runBlock(blockId, true, false),

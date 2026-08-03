@@ -1,0 +1,1 @@
+public/sorion-icon.svg

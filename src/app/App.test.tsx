@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAppStore } from '../store/useAppStore'
+import { usePlayerStore } from '../store/usePlayerStore'
 import { App } from './App'
 
 vi.mock('../components/layout/AppShell', () => ({
@@ -23,6 +24,8 @@ vi.mock('../pages/SettingsPage', () => ({ SettingsPage: () => <p>설정 화면</
 
 describe('App workspace continuity', () => {
   beforeEach(() => {
+    window.localStorage.clear()
+    usePlayerStore.getState().clearQueue()
     useAppStore.setState({
       page: 'home',
       workspaceEntered: true,

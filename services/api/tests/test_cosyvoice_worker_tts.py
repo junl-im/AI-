@@ -105,10 +105,20 @@ class PresetWorker(FakeWorker):
 
 
 @pytest.mark.asyncio
-async def test_cosyvoice_uses_voice_id_named_preset_reference(tmp_path):
+@pytest.mark.parametrize(
+    ("voice_id", "voice_name"),
+    [
+        ("on-clear", "도윤"),
+        ("jun-deep", "준호"),
+        ("min-energetic", "민준"),
+    ],
+)
+async def test_cosyvoice_uses_voice_id_named_preset_reference(
+    tmp_path, voice_id, voice_name
+):
     preset_directory = tmp_path / "presets"
     preset_directory.mkdir()
-    preset = preset_directory / "on-clear.wav"
+    preset = preset_directory / f"{voice_id}.wav"
     preset.write_bytes(wav_bytes())
     worker = PresetWorker()
     engine = CosyVoiceWorkerTtsEngine(
@@ -122,12 +132,12 @@ async def test_cosyvoice_uses_voice_id_named_preset_reference(tmp_path):
 
     result = await engine.synthesize(
         TtsSynthesisRequest(
-            text="도윤 프리셋 기준 음색을 확인합니다.",
-            voice_id="on-clear",
+            text=f"{voice_name} 프리셋 기준 음색을 확인합니다.",
+            voice_id=voice_id,
             job_id=uuid4(),
         )
     )
 
-    assert worker.profile_id == "sorion-reference-on-clear"
+    assert worker.profile_id == f"sorion-reference-{voice_id}"
     assert worker.sample_path == preset.resolve()
-    assert "on-clear 전용" in result.message
+    assert f"{voice_id} 전용" in result.message

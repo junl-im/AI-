@@ -30,7 +30,7 @@ def client(tmp_path_factory, monkeypatch):
     )
     get_settings.cache_clear()
     try:
-        with TestClient(app) as test_client:
+        with TestClient(app, client=("127.0.0.1", 50000)) as test_client:
             yield test_client
     finally:
         get_settings.cache_clear()

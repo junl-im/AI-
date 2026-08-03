@@ -4,7 +4,12 @@ from datetime import datetime, timezone
 from typing import TypeVar, cast
 from uuid import uuid4
 
-from app.schemas.tts import JobPhase, JobProgressResponse, JobStatus
+from app.schemas.tts import (
+    JobPhase,
+    JobProgressResponse,
+    JobSegmentAudio,
+    JobStatus,
+)
 from app.services.job_store import JobCleanupStats, JobStore, MemoryJobStore
 
 T = TypeVar("T")
@@ -271,6 +276,7 @@ class JobManager:
         total_segments: int | None = None,
         message: str | None = None,
         error: str | None = None,
+        ready_segment: JobSegmentAudio | None = None,
     ) -> JobProgressResponse:
         await self._ensure_initialized()
         current = await self._store.get_snapshot(job_id) or self._snapshot(
@@ -291,6 +297,15 @@ class JobManager:
             if total_segments is not None
             else current.total_segments
         )
+        ready_segments = list(current.ready_segments)
+        if ready_segment is not None:
+            ready_segments = [
+                segment
+                for segment in ready_segments
+                if segment.index != ready_segment.index
+            ]
+            ready_segments.append(ready_segment)
+            ready_segments.sort(key=lambda segment: segment.index)
         updated = current.model_copy(
             update={
                 "status": status or current.status,
@@ -300,6 +315,7 @@ class JobManager:
                 "total_segments": next_total_segments,
                 "message": message or current.message,
                 "error": error,
+                "ready_segments": ready_segments,
                 "updated_at": self._now(),
             }
         )

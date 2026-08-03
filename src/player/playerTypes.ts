@@ -7,4 +7,5 @@ export interface PlayerTrack {
   title: string
   audio: GeneratedAudio
   createdAt: string
+  resumePositionSeconds?: number
 }

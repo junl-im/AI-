@@ -13,6 +13,19 @@ import {
 
 export type JobProgressPhase = 'queued' | 'normalizing' | 'generating' | 'merging' | 'completed' | 'cancelled' | 'failed'
 
+export interface SpeechReadySegment {
+  index: number
+  totalSegments: number
+  filename: string
+  audioUrl: string
+  engineId: string
+  engineMode: TtsSynthesisResult['engineMode']
+  estimatedDurationSeconds: number
+  fileSizeBytes: number
+  readyAfterMs: number
+  readyAt: string
+}
+
 export interface SpeechJobProgress {
   jobId: string
   status: TtsSynthesisResult['status']
@@ -22,6 +35,7 @@ export interface SpeechJobProgress {
   totalSegments: number
   message: string
   error: string | null
+  readySegments?: SpeechReadySegment[]
   updatedAt: string
 }
 
@@ -56,6 +70,19 @@ interface ApiTtsResult {
   fallback_used?: boolean
 }
 
+interface ApiReadySegment {
+  index: number
+  total_segments: number
+  filename: string
+  audio_url: string
+  engine_id: string
+  engine_mode: TtsSynthesisResult['engineMode']
+  estimated_duration_seconds: number
+  file_size_bytes: number
+  ready_after_ms: number
+  ready_at: string
+}
+
 interface ApiJobProgress {
   job_id: string
   status: TtsSynthesisResult['status']
@@ -65,6 +92,7 @@ interface ApiJobProgress {
   total_segments: number
   message: string
   error: string | null
+  ready_segments?: ApiReadySegment[]
   updated_at: string
 }
 
@@ -101,6 +129,21 @@ interface ApiHealthResult {
   service: string
   version: string
   default_engine: string
+}
+
+export function mapReadySegment(value: ApiReadySegment): SpeechReadySegment {
+  return {
+    index: value.index,
+    totalSegments: value.total_segments,
+    filename: value.filename,
+    audioUrl: resolveApiAssetUrl(value.audio_url) ?? value.audio_url,
+    engineId: value.engine_id,
+    engineMode: value.engine_mode,
+    estimatedDurationSeconds: value.estimated_duration_seconds,
+    fileSizeBytes: value.file_size_bytes,
+    readyAfterMs: value.ready_after_ms,
+    readyAt: value.ready_at,
+  }
 }
 
 function mapTtsResult(result: ApiTtsResult): TtsSynthesisResult {
@@ -249,6 +292,22 @@ export async function getSpeechResult(
   return mapTtsResult(result)
 }
 
+export async function refreshSpeechFinalAudio(
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<TtsSynthesisResult> {
+  const result = await getSpeechResult(jobId, signal)
+  if (!result.audioUrl) {
+    throw new ApiError(
+      '복원할 최종 음원 주소가 없습니다.',
+      410,
+      'SOA-4021',
+      'server',
+    )
+  }
+  return result
+}
+
 export async function recoverSpeechResult(
   jobId: string,
   signal?: AbortSignal,
@@ -307,8 +366,18 @@ export async function getSpeechProgress(
     totalSegments: result.total_segments,
     message: result.message,
     error: result.error,
+    readySegments: (result.ready_segments ?? []).map(mapReadySegment),
     updatedAt: result.updated_at,
   }
+}
+
+export async function refreshSpeechReadySegment(
+  jobId: string,
+  index: number,
+  signal?: AbortSignal,
+): Promise<SpeechReadySegment | null> {
+  const progress = await getSpeechProgress(jobId, signal)
+  return progress.readySegments?.find((segment) => segment.index === index) ?? null
 }
 
 export async function cancelSpeech(jobId: string): Promise<void> {

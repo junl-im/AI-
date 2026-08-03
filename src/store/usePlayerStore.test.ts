@@ -59,10 +59,129 @@ describe('usePlayerStore', () => {
     expect(usePlayerStore.getState().playRequestId).toBe(before + 1)
   })
 
+
+  it('첫 구간 트랙을 같은 ID의 최종 음원으로 교체하고 지연 지표를 보존한다', () => {
+    const partial = audio('partial')
+    partial.partial = { index: 1, totalSegments: 3, readyAfterMs: 420 }
+    partial.telemetry = { requestStartedAtMs: 1_000, serverSegmentReadyMs: 420 }
+    const id = usePlayerStore.getState().enqueue(partial, '첫 구간')
+
+    usePlayerStore.getState().updateTelemetry(id, { firstByteMs: 510 })
+    usePlayerStore.getState().replace(id, audio('final'), '최종 음원', true)
+
+    const state = usePlayerStore.getState()
+    expect(state.queue).toHaveLength(1)
+    expect(state.queue[0]).toMatchObject({
+      id,
+      title: '최종 음원',
+      audio: {
+        filename: 'final.wav',
+        telemetry: {
+          requestStartedAtMs: 1_000,
+          serverSegmentReadyMs: 420,
+          firstByteMs: 510,
+        },
+      },
+    })
+    expect(state.currentTrackId).toBe(id)
+  })
+
+  it('준비된 후속 구간을 번호 순서로 정렬하고 중복 구간을 무시한다', () => {
+    const revoke = vi.spyOn(URL, 'revokeObjectURL')
+    const progressive = audio('segment-1')
+    progressive.partial = { index: 1, totalSegments: 3, readyAfterMs: 300 }
+    progressive.progressive = {
+      jobId: 'ordered-job',
+      totalSegments: 3,
+      segments: [{
+        index: 1,
+        totalSegments: 3,
+        url: 'blob:segment-1',
+        filename: 'segment-1.wav',
+        durationSeconds: 1,
+        readyAfterMs: 300,
+        revokeOnRemove: true,
+      }],
+    }
+    const id = usePlayerStore.getState().enqueue(progressive, '연속 구간')
+
+    usePlayerStore.getState().appendProgressiveSegment(id, {
+      index: 3,
+      totalSegments: 3,
+      url: 'blob:segment-3',
+      filename: 'segment-3.wav',
+      durationSeconds: 1.4,
+      readyAfterMs: 900,
+      revokeOnRemove: true,
+    })
+    usePlayerStore.getState().appendProgressiveSegment(id, {
+      index: 2,
+      totalSegments: 3,
+      url: 'blob:segment-2',
+      filename: 'segment-2.wav',
+      durationSeconds: 1.2,
+      readyAfterMs: 600,
+      revokeOnRemove: true,
+    })
+    usePlayerStore.getState().appendProgressiveSegment(id, {
+      index: 2,
+      totalSegments: 3,
+      url: 'blob:segment-2-duplicate',
+      filename: 'segment-2.wav',
+      durationSeconds: 1.2,
+      readyAfterMs: 610,
+      revokeOnRemove: true,
+    })
+
+    const track = usePlayerStore.getState().queue[0]
+    expect(track.audio.progressive?.segments.map((segment) => segment.index)).toEqual([1, 2, 3])
+    expect(track.audio.durationSeconds).toBeCloseTo(3.6)
+    expect(revoke).toHaveBeenCalledWith('blob:segment-2-duplicate')
+  })
+
   it('revokes an owned object URL when a track is removed', () => {
     const revoke = vi.spyOn(URL, 'revokeObjectURL')
     const id = usePlayerStore.getState().enqueue(audio('owned'), '샘플')
     usePlayerStore.getState().remove(id)
     expect(revoke).toHaveBeenCalledWith('blob:owned')
   })
+  it('구간 전환 지표를 트랙에 누적한다', () => {
+    const id = usePlayerStore.getState().enqueue(audio('seam'), '구간 전환')
+
+    usePlayerStore.getState().recordSeamMetric(id, {
+      fromSegment: 1,
+      toSegment: 2,
+      gapMs: 84,
+      waitedForSegment: true,
+      recordedAt: '2026-08-03T00:00:00.000Z',
+    })
+
+    expect(usePlayerStore.getState().queue[0].audio.telemetry?.seams).toEqual([{
+      fromSegment: 1,
+      toSegment: 2,
+      gapMs: 84,
+      waitedForSegment: true,
+      recordedAt: '2026-08-03T00:00:00.000Z',
+    }])
+  })
+
+  it('안전하게 저장된 대기열과 재생 위치를 빈 store에 복원한다', () => {
+    const restored = {
+      id: 'restored-track',
+      title: '복원 음원',
+      audio: { ...audio('restored'), url: 'https://voice.example/final.wav', source: 'api' as const, revokeOnRemove: false },
+      createdAt: '2026-08-03T00:00:00.000Z',
+      resumePositionSeconds: 3.5,
+    }
+
+    usePlayerStore.getState().restoreSession([restored], restored.id, 'all', 1.25)
+
+    expect(usePlayerStore.getState()).toMatchObject({
+      currentTrackId: restored.id,
+      repeatMode: 'all',
+      playbackRate: 1.25,
+      queue: [{ resumePositionSeconds: 3.5 }],
+    })
+  })
+
 })

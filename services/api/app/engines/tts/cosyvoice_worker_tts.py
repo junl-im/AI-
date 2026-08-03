@@ -9,6 +9,7 @@ from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine, Worker
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest, TtsSynthesisResponse
 from app.services.voice_preset_validation import inspect_voice_preset
+from app.services.voice_presets import PRESET_VOICE_IDS
 from app.storage.audio_store import AudioStore
 
 
@@ -76,7 +77,7 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             return []
         return [
             path
-            for voice_id in ("sori-warm", "on-clear", "dam-calm")
+            for voice_id in PRESET_VOICE_IDS
             if inspect_voice_preset(
                 path := self.preset_directory / f"{voice_id}.wav", voice_id
             ).usable

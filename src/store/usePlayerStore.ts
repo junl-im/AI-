@@ -1,13 +1,22 @@
 import { create } from 'zustand'
-import type { GeneratedAudio } from '../tts/generationTypes'
+import type { GeneratedAudio, PlaybackSeamMetric, PlaybackTelemetry, ProgressiveAudioSegment } from '../tts/generationTypes'
 import type { PlayerTrack, RepeatMode } from '../player/playerTypes'
 import { createRandomId } from '../utils/randomId'
 
 const MAX_QUEUE_SIZE = 20
 
+function releaseAudio(audio: GeneratedAudio | undefined) {
+  if (!audio) return
+  const urls = new Set<string>()
+  if (audio.revokeOnRemove && audio.url) urls.add(audio.url)
+  for (const segment of audio.progressive?.segments ?? []) {
+    if (segment.revokeOnRemove) urls.add(segment.url)
+  }
+  urls.forEach((url) => URL.revokeObjectURL(url))
+}
+
 function releaseTrack(track: PlayerTrack | undefined) {
-  if (!track?.audio.revokeOnRemove || !track.audio.url) return
-  URL.revokeObjectURL(track.audio.url)
+  releaseAudio(track?.audio)
 }
 
 function createTrack(audio: GeneratedAudio, title: string): PlayerTrack {
@@ -16,6 +25,7 @@ function createTrack(audio: GeneratedAudio, title: string): PlayerTrack {
     title,
     audio,
     createdAt: new Date().toISOString(),
+    resumePositionSeconds: 0,
   }
 }
 
@@ -48,6 +58,12 @@ export interface PlayerState {
   playbackRate: number
   enqueue: (audio: GeneratedAudio, title?: string) => string
   enqueueAndPlay: (audio: GeneratedAudio, title?: string) => string
+  replace: (trackId: string, audio: GeneratedAudio, title?: string, autoplay?: boolean) => void
+  appendProgressiveSegment: (trackId: string, segment: ProgressiveAudioSegment) => void
+  recordSeamMetric: (trackId: string, metric: PlaybackSeamMetric) => void
+  updateTelemetry: (trackId: string, patch: Partial<PlaybackTelemetry>) => void
+  updateResumePosition: (trackId: string, seconds: number) => void
+  restoreSession: (tracks: PlayerTrack[], currentTrackId: string | null, repeatMode: RepeatMode, playbackRate: number) => void
   select: (trackId: string) => void
   selectAndPlay: (trackId: string) => void
   remove: (trackId: string) => void
@@ -74,6 +90,103 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     set((state) => appendTrack(state, track, true))
     return track.id
   },
+  replace: (trackId, audio, title, autoplay = false) => set((state) => {
+    const index = state.queue.findIndex((track) => track.id === trackId)
+    if (index < 0) return state
+    const previous = state.queue[index]
+    if (previous.audio !== audio) releaseTrack(previous)
+    const mergedAudio = {
+      ...audio,
+      telemetry: previous.audio.telemetry || audio.telemetry
+        ? {
+            ...previous.audio.telemetry,
+            ...audio.telemetry,
+            requestStartedAtMs: previous.audio.telemetry?.requestStartedAtMs
+              ?? audio.telemetry?.requestStartedAtMs
+              ?? Date.now(),
+          }
+        : undefined,
+    }
+    const queue = state.queue.map((track) => track.id === trackId
+      ? { ...track, title: title ?? track.title, audio: mergedAudio }
+      : track)
+    return {
+      queue,
+      currentTrackId: autoplay ? trackId : state.currentTrackId,
+      playRequestId: autoplay ? state.playRequestId + 1 : state.playRequestId,
+    }
+  }),
+  appendProgressiveSegment: (trackId, segment) => set((state) => ({
+    queue: state.queue.map((track) => {
+      if (track.id !== trackId || !track.audio.progressive) return track
+      const existing = track.audio.progressive.segments.find((item) => item.index === segment.index)
+      if (existing) {
+        if (segment.revokeOnRemove && segment.url !== existing.url) URL.revokeObjectURL(segment.url)
+        return track
+      }
+      const segments = [...track.audio.progressive.segments, segment]
+        .sort((left, right) => left.index - right.index)
+      return {
+        ...track,
+        audio: {
+          ...track.audio,
+          durationSeconds: segments.reduce((total, item) => total + item.durationSeconds, 0),
+          progressive: {
+            ...track.audio.progressive,
+            totalSegments: Math.max(track.audio.progressive.totalSegments, segment.totalSegments),
+            segments,
+          },
+        },
+      }
+    }),
+  })),
+  recordSeamMetric: (trackId, metric) => set((state) => ({
+    queue: state.queue.map((track) => {
+      if (track.id !== trackId) return track
+      const telemetry = track.audio.telemetry ?? { requestStartedAtMs: Date.now() }
+      const seams = [...(telemetry.seams ?? []), metric].slice(-20)
+      return {
+        ...track,
+        audio: {
+          ...track.audio,
+          telemetry: { ...telemetry, seams },
+        },
+      }
+    }),
+  })),
+  updateTelemetry: (trackId, patch) => set((state) => ({
+    queue: state.queue.map((track) => track.id === trackId
+      ? {
+          ...track,
+          audio: {
+            ...track.audio,
+            telemetry: {
+              requestStartedAtMs: track.audio.telemetry?.requestStartedAtMs ?? Date.now(),
+              ...track.audio.telemetry,
+              ...patch,
+            },
+          },
+        }
+      : track),
+  })),
+  updateResumePosition: (trackId, seconds) => set((state) => ({
+    queue: state.queue.map((track) => track.id === trackId
+      ? { ...track, resumePositionSeconds: Math.max(0, Number.isFinite(seconds) ? seconds : 0) }
+      : track),
+  })),
+  restoreSession: (tracks, currentTrackId, repeatMode, playbackRate) => set((state) => {
+    if (state.queue.length > 0 || tracks.length === 0) return state
+    const queue = tracks.slice(-MAX_QUEUE_SIZE)
+    const selected = currentTrackId && queue.some((track) => track.id === currentTrackId)
+      ? currentTrackId
+      : queue[0]?.id ?? null
+    return {
+      queue,
+      currentTrackId: selected,
+      repeatMode,
+      playbackRate: Math.min(2, Math.max(0.75, playbackRate)),
+    }
+  }),
   select: (currentTrackId) => set((state) => (
     state.queue.some((track) => track.id === currentTrackId)
       ? { currentTrackId }

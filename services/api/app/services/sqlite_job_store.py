@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import sqlite3
 import time
 from contextlib import closing
@@ -129,6 +130,7 @@ class SQLiteJobStore:
                     total_segments INTEGER NOT NULL,
                     message TEXT NOT NULL,
                     error TEXT,
+                    ready_segments_json TEXT NOT NULL DEFAULT '[]',
                     updated_at TEXT NOT NULL,
                     result_type TEXT,
                     result_json TEXT,
@@ -144,6 +146,15 @@ class SQLiteJobStore:
                     ON tts_jobs(record_expires_at);
                 """
             )
+            columns = {
+                row["name"]
+                for row in connection.execute("PRAGMA table_info(tts_jobs)")
+            }
+            if "ready_segments_json" not in columns:
+                connection.execute(
+                    "ALTER TABLE tts_jobs "
+                    "ADD COLUMN ready_segments_json TEXT NOT NULL DEFAULT '[]'"
+                )
 
     def _claim_sync(
         self,
@@ -168,8 +179,8 @@ class SQLiteJobStore:
                     INSERT INTO tts_jobs (
                         job_id, request_key, status, phase, progress,
                         current_segment, total_segments, message, error,
-                        updated_at, owner_id, claim_expires_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ready_segments_json, updated_at, owner_id, claim_expires_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     self._snapshot_insert_values(
                         job_id,
@@ -218,7 +229,8 @@ class SQLiteJobStore:
                 """
                 UPDATE tts_jobs
                 SET status = ?, phase = ?, progress = ?, current_segment = ?,
-                    total_segments = ?, message = ?, error = ?, updated_at = ?,
+                    total_segments = ?, message = ?, error = ?,
+                    ready_segments_json = ?, updated_at = ?,
                     result_type = NULL, result_json = NULL, owner_id = ?,
                     claim_expires_at = ?, result_expires_at = NULL,
                     record_expires_at = NULL, cancel_requested = 0
@@ -249,7 +261,8 @@ class SQLiteJobStore:
                 """
                 UPDATE tts_jobs
                 SET status = ?, phase = ?, progress = ?, current_segment = ?,
-                    total_segments = ?, message = ?, error = ?, updated_at = ?
+                    total_segments = ?, message = ?, error = ?,
+                    ready_segments_json = ?, updated_at = ?
                 WHERE job_id = ? AND owner_id = ? AND cancel_requested = 0
                 """,
                 self._snapshot_values(snapshot) + (job_id, owner_id),
@@ -272,7 +285,8 @@ class SQLiteJobStore:
                 """
                 UPDATE tts_jobs
                 SET status = ?, phase = ?, progress = ?, current_segment = ?,
-                    total_segments = ?, message = ?, error = ?, updated_at = ?,
+                    total_segments = ?, message = ?, error = ?,
+                    ready_segments_json = ?, updated_at = ?,
                     result_type = ?, result_json = ?, owner_id = NULL,
                     claim_expires_at = NULL, result_expires_at = ?,
                     record_expires_at = ?, cancel_requested = 0
@@ -302,7 +316,8 @@ class SQLiteJobStore:
                 """
                 UPDATE tts_jobs
                 SET status = ?, phase = ?, progress = ?, current_segment = ?,
-                    total_segments = ?, message = ?, error = ?, updated_at = ?,
+                    total_segments = ?, message = ?, error = ?,
+                    ready_segments_json = ?, updated_at = ?,
                     result_type = NULL, result_json = NULL, owner_id = NULL,
                     claim_expires_at = NULL, result_expires_at = NULL,
                     record_expires_at = ?, cancel_requested = 0
@@ -429,6 +444,11 @@ class SQLiteJobStore:
             snapshot.total_segments,
             snapshot.message,
             snapshot.error,
+            json.dumps(
+                [segment.model_dump() for segment in snapshot.ready_segments],
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ),
             snapshot.updated_at,
         )
 
@@ -475,6 +495,7 @@ class SQLiteJobStore:
             total_segments=row["total_segments"],
             message=row["message"],
             error=row["error"],
+            ready_segments=json.loads(row["ready_segments_json"] or "[]"),
             updated_at=row["updated_at"],
         )
 
