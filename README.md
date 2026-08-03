@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5.1 · CI Regression Hotfix`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5.2 · Stream Handoff CI Hotfix`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -42,6 +42,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 실기기 recorder: 10·30·60분 wall-clock 측정과 SSE·fetch·재생 중단 시간을 저장하고 기기·엔진·프리셋별 P95를 집계
 - Export 보존: 서버 임시 만료 시각을 표시하고 사용자가 내려받은 음원·SRT·VTT만 보존본으로 취급
 - CI 안정화: 복원 자동재생 차단, 부분→최종 음원 위치·상태 승계, visibility 시계와 SSE/WAV 테스트 fixture를 GitHub Actions 계약에 맞게 보강
+- Stream 안정화: `ReadableStream.tee()` probe 취소를 재생 분기 소비 뒤 완료해 첫 구간 준비 교착을 차단하고, 최종 WAV 교체 테스트는 실제 DOM source 반영 순서를 따름
 
 ## 무료 실행
 

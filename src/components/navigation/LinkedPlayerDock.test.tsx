@@ -232,15 +232,19 @@ describe('LinkedPlayerDock', () => {
     play.mockClear()
 
     const finalAudio = generatedAudio()
-    finalAudio.url = 'https://voice.example/final.wav'
+    const finalUrl = 'https://voice.example/final.wav'
+    finalAudio.url = finalUrl
     finalAudio.revokeOnRemove = false
-    usePlayerStore.getState().replace(trackId, finalAudio, '최종 음원')
+    act(() => {
+      usePlayerStore.getState().replace(trackId, finalAudio, '최종 음원')
+    })
 
+    await vi.waitFor(() => expect(element).toHaveAttribute('src', finalUrl))
     Object.defineProperty(element, 'duration', { configurable: true, value: 6 })
     fireEvent.loadedMetadata(element)
 
     await vi.waitFor(() => expect(element.currentTime).toBeCloseTo(1.25, 2))
-    expect(play).toHaveBeenCalled()
+    await vi.waitFor(() => expect(play).toHaveBeenCalled())
     expect(screen.getByText('최종 음원')).toBeInTheDocument()
   })
 

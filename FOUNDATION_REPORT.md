@@ -1,6 +1,12 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5.1 · CI Regression Hotfix**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5.2 · Stream Handoff CI Hotfix**
+
+## Engine Heartbeat 6.5.2 Stream Handoff CI Hotfix
+
+GitHub Actions가 추가로 보고한 Web 테스트 4건을 수정했습니다. 부분 WAV 준비 경로에서 `ReadableStream.tee()`의 probe 분기를 다른 분기 소비 전에 `await cancel()`해 표준 Web Streams 구현에서 교착될 수 있던 실제 런타임 문제를 제거했습니다. 최종 WAV 교체 테스트는 Zustand 외부 상태 변경 후 새 `src`가 DOM에 반영된 시점에 metadata 이벤트를 검증하도록 동기화했습니다. 제품 버전은 계속 `0.9.3-beta.3`입니다.
+
+검증: Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사, Web Streams tee/cancel 런타임 스모크 통과. 전체 npm 기반 Web quality는 sandbox registry의 `@eslint/js@9.22.0` 404로 GitHub Actions 재실행이 필요합니다.
 
 ## Engine Heartbeat 6.5.1 CI Regression Hotfix
 

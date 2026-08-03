@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5.1 · CI Regression Hotfix**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.5.2 · Stream Handoff CI Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-03 15:04 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,14 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+## Engine Heartbeat 6.5.2 Stream Handoff CI Hotfix
+
+- 제품 버전은 `0.9.3-beta.3`으로 고정하고 내부 패치 식별자만 Heartbeat 6.5.2로 올렸습니다.
+- 부분 구간 fetch의 `ReadableStream.tee()` probe 분기는 cancel promise를 먼저 만들되 playback 분기를 Blob으로 모두 소비한 뒤 await합니다.
+- `await probe.cancel()`을 playback 분기 소비 전에 수행하면 Undici·브라우저 표준 구현에서 상호 대기할 수 있으므로 preflight가 해당 패턴을 차단합니다.
+- 최종 WAV 교체 테스트는 Player Store 교체를 `act()`로 감싸고 실제 audio `src` 변경을 기다린 뒤 `loadedmetadata`를 발생시킵니다.
+- 검증은 preflight 17/17, API 139, Worker 14, Python compileall, TS/TSX 171, tee/cancel runtime smoke를 통과했습니다. 전체 Vitest는 sandbox npm registry 404로 CI 재실행이 필요합니다.
+
 ## Engine Heartbeat 6.5.1 CI Regression Hotfix
 
 - GitHub Actions에서 보고된 API Ruff UP012와 Web 테스트 8건, Hooks 경고 1건을 우선 안정화했습니다.
@@ -653,3 +661,11 @@ CI Hotfix 4 테스트 규칙:
     - Export 서버 파일은 30분 임시이며 사용자 다운로드만 보존으로 인정한다.
     - 로컬 보존 기록에는 파일명 메타데이터만 남고 음성 바이트·원문·전체 URL은 저장하지 않는다.
 12. 다음 목표는 Heartbeat 6.6 Field Evidence & Reproducible Web Quality다.
+
+
+## 52. 2026-08-03 15:19 KST · 0.9.3-beta.3 Engine Heartbeat 6.5.2 Stream Handoff CI Hotfix
+1. 기준 버전은 Heartbeat 6.5.1이며 제품 버전 `0.9.3-beta.3`은 변경하지 않았다.
+2. CI의 부분 구간 3건 실패는 tee probe의 cancel promise를 playback branch 소비 전에 await한 교착 가능성이 원인이었다.
+3. probe cancel은 비동기로 시작하고 playback stream을 Blob으로 소비한 뒤 완료를 기다리도록 수정했다.
+4. 최종 WAV 승계 테스트는 외부 Store 갱신과 DOM source 반영을 동기화한 뒤 metadata·play를 검증한다.
+5. 다음 기능 목표는 Heartbeat 6.6 Field Evidence & Reproducible Web Quality다.

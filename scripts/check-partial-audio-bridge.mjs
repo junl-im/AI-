@@ -48,14 +48,19 @@ await requireText('src/tts/jobProgressStream.ts', [
   "event === 'segment-ready'",
   'onSegmentReady(mapSegment',
 ])
-await requireText('src/hooks/useTimelineGeneration.ts', [
+const timelineGenerationSource = await requireText('src/hooks/useTimelineGeneration.ts', [
   'previewReadySegment',
   'const targetTrackId = partialTrackId',
   'appendProgressiveSegment(targetTrackId, prepared)',
   'replaceTrack(partialTrackId',
   'serverSegmentReadyMs',
   'refreshSpeechReadySegment',
+  'const probeCancellation = probe.cancel()',
+  'await probeCancellation',
 ])
+if (timelineGenerationSource.includes('await probe.cancel()')) {
+  failures.push('src/hooks/useTimelineGeneration.ts: tee 분기 소비 전에 probe.cancel()을 await하면 교착될 수 있음')
+}
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   "recordPlaybackMetric('firstByteMs')",
   "recordPlaybackMetric('playingMs')",
@@ -84,6 +89,7 @@ await requireText('src/components/navigation/LinkedPlayerDock.test.tsx', [
   '브라우저 음성의 실제 시작 지연을 재생 이벤트에서 기록한다',
   'browserSpeechStartMs: 780',
   '첫 구간이 최종 WAV로 교체되어도 재생 위치와 재생 상태를 이어간다',
+  "expect(element).toHaveAttribute('src', finalUrl)",
 ])
 await requireText('services/api/tests/test_partial_audio.py', [
   'test_long_tts_publishes_signed_segment_audio',

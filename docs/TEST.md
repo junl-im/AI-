@@ -675,3 +675,13 @@ ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지
 - visibility 측정 테스트가 주입 시계로 정확히 3,500ms를 계산하는지 확인합니다.
 - 샌드박스 결과: Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사를 통과했습니다.
 - 제한: npm registry의 scoped package 404로 전체 ESLint·Vitest·semantic typecheck·Vite build는 로컬 재실행하지 못했으며 GitHub Actions에서 최종 확인합니다.
+
+
+## Engine Heartbeat 6.5.2 Stream Handoff CI Hotfix 검사
+
+- 첫 WAV fetch의 `ReadableStream.tee()`에서 probe 첫 chunk를 읽은 뒤 cancel promise를 생성하되 playback branch를 완전히 소비한 다음 cancel 완료를 기다리는지 확인합니다.
+- 코드에 playback 소비 전 `await probe.cancel()` 패턴이 다시 들어오면 dependency-free preflight가 실패하는지 확인합니다.
+- 만료 URL 복구, 첫 구간 즉시 큐 등록, 뒤섞인 1·2·3 구간 정렬 테스트가 stream 교착 없이 부분 트랙을 관찰할 수 있는지 확인합니다.
+- 부분→최종 WAV 테스트가 Store 교체를 `act()`로 처리하고 새 audio `src` 반영 뒤 metadata와 재생 재개를 검증하는지 확인합니다.
+- 샌드박스 결과: Repository preflight 17/17, API pytest 139개, Worker pytest 14개, Python compileall, TS/TSX 171개 transpile 구문 검사와 Web Streams tee/cancel runtime smoke를 통과했습니다.
+- 제한: sandbox npm registry가 `@eslint/js@9.22.0`을 404로 반환해 전체 Vitest·ESLint·semantic typecheck·Vite build는 GitHub Actions에서 최종 확인합니다.

@@ -223,10 +223,11 @@ export function useTimelineGeneration() {
           if (!firstChunk.done && playableSegment.index === 1 && partialFirstByteMs === null) {
             partialFirstByteMs = Math.max(0, Date.now() - requestStartedAtMs)
           }
-          await probe.cancel()
+          const probeCancellation = probe.cancel().catch(() => undefined)
           blob = await new Response(playbackStream, {
             headers: { 'Content-Type': response.headers.get('Content-Type') ?? 'audio/wav' },
           }).blob()
+          await probeCancellation
         } else {
           if (playableSegment.index === 1 && partialFirstByteMs === null) {
             partialFirstByteMs = Math.max(0, Date.now() - requestStartedAtMs)

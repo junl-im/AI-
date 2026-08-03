@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5.1 · CI Regression Hotfix`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.5.2 · Stream Handoff CI Hotfix`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -50,3 +50,5 @@
 41. 로컬 보존 기록은 파일명·형식·기록 시각만 저장하며 음성 바이트, 원문, 전체 URL을 저장하지 않습니다.
 
 42. Heartbeat 6.5.1은 복원 음원의 자동재생을 차단하고 부분→최종 WAV 교체 위치·상태 및 CI Web fixture를 안정화한 Hotfix입니다.
+
+43. Heartbeat 6.5.2는 Web Streams tee 분기의 cancel 교착을 제거하고, 최종 WAV source 교체 테스트가 DOM 반영 뒤 metadata를 검증하도록 동기화한 Hotfix입니다. 제품 버전은 `0.9.3-beta.3`으로 유지됩니다.

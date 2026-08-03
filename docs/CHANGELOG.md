@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.5.2 · Stream handoff CI hotfix
+
+- Fixed a Web Streams deadlock risk by consuming the playback branch before awaiting cancellation of the tee probe branch.
+- Kept first-byte telemetry while allowing partial WAV blobs to complete under standards-compliant stream implementations.
+- Synchronized the final-WAV handoff test with the actual DOM `src` update before dispatching `loadedmetadata`.
+- Added a dependency-free guard that rejects the unsafe `await probe.cancel()` pattern.
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.5.1 · CI regression hotfix
 
 - Ruff UP012가 지적한 불필요한 UTF-8 `encode` 인자를 제거했습니다.
