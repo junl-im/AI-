@@ -214,7 +214,7 @@ export function QualityPage() {
       refreshReviewCount()
       setError(null)
       setReviewSyncNotice(result.migrated
-        ? `구형 품질 보고서를 6.8.2 schema로 변환해 ${result.imported}개 로컬 평가로 가져왔습니다.`
+        ? `구형 품질 보고서를 6.8.3 schema로 변환해 ${result.imported}개 로컬 평가로 가져왔습니다.`
         : `검수 묶음 SHA-256를 확인하고 ${result.imported}개 로컬 평가를 병합했습니다.`)
     } catch (caught) {
       setReviewSyncNotice(null)

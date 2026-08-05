@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.8.3 · CI quality unblock and approval operator gate
+
+- GitHub Actions가 보고한 Ruff import 정렬 3건과 Web lint·Hooks 4건을 수정합니다.
+- 프리셋 승인 preview·apply·history·rollback 전체에 loopback 또는 운영자 토큰 인증을 요구합니다.
+- 원격 토큰은 32자 이상이어야 하며 잘못된 토큰·미설정 원격 접근·짧은 서버 토큰을 서로 다른 오류 코드로 거부합니다.
+- 브라우저 토큰은 탭 sessionStorage에만 보존하고 승인 API 요청 헤더에만 사용합니다.
+- 승인 apply·rollback의 최종 WAV·manifest 재검사와 파일 쓰기를 동일 잠금 안에서 수행해 동시 요청 덮어쓰기를 차단합니다.
+- manifest 원자 교체와 approval history append에 flush·fsync를 적용하고 WAV 변경 뒤 위험한 rollback을 거부합니다.
+- 인증·경합·CI 오류 재유입을 막는 dependency-free preflight를 추가해 총 24개 검사를 수행합니다.
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.8.2 · Signed review approval and benchmark dashboard
 
 - 현재 WAV·manifest·검수 묶음 checksum을 재계산하는 승인 diff 미리보기와 명시적 apply confirmation을 추가합니다.

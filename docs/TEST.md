@@ -1,3 +1,17 @@
+# Heartbeat 6.8.3 CI 품질·승인 운영자 게이트 검증
+
+- GitHub Actions Ruff I001 대상 3개 import block 재정렬
+- Web unused variable, no-control-regex, React Hooks 참조 안정성 오류 4건 제거
+- loopback 무토큰 허용과 원격 무토큰·오류 토큰 차단
+- 32자 미만 서버 운영자 토큰을 안전하지 않은 설정으로 거부
+- 승인 preview·apply·history·rollback 전체 인증 적용과 거부 감사 로그
+- apply·rollback 동일 잠금 재검사, 적용 직전 WAV·manifest 변경 차단
+- 승인 이후 WAV 변경 시 과거 manifest rollback 거부
+- manifest 원자 교체와 JSONL append flush·fsync
+- Repository preflight 24개, API pytest 171개, Worker pytest 14개 통과
+- TS/TSX transpile 구문 182개와 Python compileall 통과
+- 전체 Ruff·ESLint·semantic typecheck·Vitest·Vite build는 GitHub Actions 최종 판정
+
 # Heartbeat 6.8.2 서명 승인·benchmark 대시보드 검증
 
 - 현재 WAV·manifest·검수 묶음 checksum 재계산과 승인 diff preview

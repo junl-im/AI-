@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     voice_review_approval_path: str = ".sorion/quality/voice-review-approvals.jsonl"
     voice_review_signing_secret: str = ""
     voice_review_signing_key_id: str = "local-review-key"
+    voice_review_operator_token: str = ""
+    voice_review_allow_loopback_without_token: bool = True
     worker_telemetry_path: str = ".sorion/quality/worker-synthesis-telemetry.jsonl"
     stt_directory: str = ".sorion/stt"
     stt_max_file_bytes: int = 100 * 1024 * 1024

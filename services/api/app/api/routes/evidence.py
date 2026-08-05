@@ -32,7 +32,6 @@ from app.services.evidence_metrics import (
 )
 from app.services.web_quality_report import verify_web_quality_report
 
-
 router = APIRouter()
 
 

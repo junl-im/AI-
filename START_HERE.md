@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -71,6 +71,17 @@
 56. Quality Lab은 5개 프리셋을 직접 선택해 같은 문장·같은 엔진으로 A/B 비교하며, 로컬 검수 기록과 CSV에 프리셋 ID·표시 이름·선언 성별을 함께 저장합니다.
 57. Engine Doctor 진단 복사본에는 WAV·로컬 경로·원문을 넣지 않고 프리셋별 인증 상태, checksum 일치 여부와 중복 ID만 포함합니다.
 58. 전달 ZIP의 5개 manifest는 안전한 `pending` 템플릿입니다. 실제 동의·권리·검수 증거와 WAV가 없으므로 기본 상태는 사용 불가가 정상입니다.
+
+
+## Heartbeat 6.8.3 필수 확인
+
+- GitHub Actions가 표시한 Ruff 3건과 Web quality 4건을 수정했으며 같은 패턴의 재유입은 repository preflight에서 차단한다.
+- 로컬 PC의 `127.0.0.1`·`::1` 승인 작업은 기존처럼 운영자 토큰 없이 사용할 수 있다.
+- LAN·외부 브라우저에서 승인 이력·미리보기·적용·롤백을 사용하려면 API `.env`에 32자 이상 `SORION_VOICE_REVIEW_OPERATOR_TOKEN`을 설정하고 Quality Lab의 원격 운영자 토큰에 같은 값을 입력한다.
+- 운영자 토큰은 Git·ZIP·manifest·감사 로그에 넣지 않는다. 브라우저에서는 현재 탭의 sessionStorage에만 저장한다.
+- `X-SoriON-User-ID`나 client ID는 인증 수단이 아니며 actor 보조 표시에만 사용한다.
+- apply와 rollback은 같은 잠금 안에서 WAV·manifest를 재검사한다. 파일이 바뀌었으면 미리보기나 과거 승인을 재사용하지 않는다.
+- 현재 manifest와 WAV가 승인 기록과 다르면 자동 rollback하지 않는다.
 
 
 ## Heartbeat 6.8.2 필수 확인

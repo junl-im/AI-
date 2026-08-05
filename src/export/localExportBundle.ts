@@ -35,7 +35,11 @@ function extension(name: string): string {
 
 function safeName(name: string): string {
   const base = name.replaceAll('\\', '/').split('/').pop() ?? 'file'
-  return base.replace(/[\u0000-\u001f<>:"|?*]/g, '_').slice(0, 180) || 'file'
+  const sanitized = Array.from(base, (character) => {
+    const codePoint = character.codePointAt(0) ?? 0
+    return codePoint <= 0x1f || '<>:"|?*'.includes(character) ? '_' : character
+  }).join('')
+  return sanitized.slice(0, 180) || 'file'
 }
 
 function u16(value: number): Uint8Array {

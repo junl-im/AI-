@@ -1,0 +1,68 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.8.2 -> Engine Heartbeat 6.8.3 CI Quality Unblock & Approval Operator Gate
+Changed or added files: 39
+Deleted tracked files: 0
+
+Applied scope:
+- Fix the three Ruff I001 import blocks and four reported Web quality errors/warnings.
+- Protect approval preview, apply, history, and rollback with loopback policy or a 32+ character operator token.
+- Treat user/client IDs as audit declarations, not authentication, and compare operator tokens in constant time.
+- Revalidate and serialize approval apply/rollback inside one process lock; reject changed WAV or manifest state.
+- Flush/fsync manifest replacement and approval history writes, and add dependency-free regression guards.
+- Keep permanent handover, security, error-code, test, and GitHub Desktop overwrite instructions current.
+
+Validation:
+- Repository preflight: 24 passed
+- API pytest: 171 passed
+- Worker pytest: 14 passed
+- TS/TSX transpile syntax: 182 files passed
+- Python compileall: passed
+- Local Ruff/ESLint/semantic TypeScript/Vitest/Vite execution: unavailable because Ruff and Web node_modules are not installed; GitHub Actions must make the final toolchain decision
+
+Important limitations:
+- Real speaker WAV files, consent/right source documents, operator tokens, HMAC secrets, CosyVoice model weights, and real-device measurements are not included.
+- Loopback no-token access is configurable; LAN/remote approval access requires the operator token.
+- The approval lock serializes one API process. Multi-process or multi-node deployments require a single writer or a future cross-process lock.
+
+Changed or added:
+- .env.example
+- FOUNDATION_REPORT.md
+- PATCH_MANIFEST.txt
+- README.md
+- START_HERE.md
+- docs/BENCHMARK_DASHBOARD.md
+- docs/CHANGELOG.md
+- docs/ERROR_CODES.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/SECURITY.md
+- docs/TEST.md
+- docs/VOICE_PRESETS.md
+- docs/VOICE_PRESET_EVIDENCE.md
+- docs/VOICE_PRESET_FIDELITY.md
+- docs/VOICE_REVIEW_APPROVAL.md
+- docs/VOICE_REVIEW_SYNC.md
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3-ci-quality-approval-gate/DELETE_LIST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3-ci-quality-approval-gate/PATCH_MANIFEST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3-ci-quality-approval-gate/PATCH_README.md
+- package.json
+- scripts/check-voice-review-operator-gate.mjs
+- scripts/run-preflight.mjs
+- services/api/app/api/routes/evidence.py
+- services/api/app/api/routes/voice_preset_approvals.py
+- services/api/app/core/config.py
+- services/api/app/engines/tts/cosyvoice_worker_tts.py
+- services/api/app/services/voice_preset_approval.py
+- services/api/app/services/voice_review_operator.py
+- services/api/tests/test_voice_preset_approval.py
+- services/api/tests/test_voice_preset_approval_routes.py
+- services/api/tests/test_voice_review_operator.py
+- src/components/evaluation/BenchmarkDashboardCard.tsx
+- src/components/evaluation/VoicePresetApprovalCard.tsx
+- src/export/localExportBundle.ts
+- src/pages/QualityPage.tsx
+- src/quality/voicePresetApprovalApi.ts
+- src/quality/voicePresetReviewBundle.test.ts
+- src/quality/voicePresetReviewBundle.ts
+
+Deleted tracked files:
+- none

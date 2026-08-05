@@ -29,6 +29,7 @@ const checks = [
   ['voice preset evidence', 'check-voice-preset-evidence.mjs'],
   ['voice review sync / telemetry', 'check-voice-review-sync.mjs'],
   ['signed review approval / benchmark dashboard', 'check-signed-review-benchmark.mjs'],
+  ['voice review operator gate / CI unblock', 'check-voice-review-operator-gate.mjs'],
   ['verification evidence', 'check-verification-evidence.mjs'],
   ['evidence intake / local bundle', 'check-evidence-intake-bundle.mjs'],
 ]

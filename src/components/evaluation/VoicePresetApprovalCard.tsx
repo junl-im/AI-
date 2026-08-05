@@ -5,8 +5,10 @@ import { voiceGenderLabels, voicePresets } from '../../tts/voicePresets'
 import {
   applyVoicePresetApproval,
   listVoicePresetApprovalHistory,
+  loadVoiceReviewOperatorToken,
   previewVoicePresetApproval,
   rollbackVoicePresetApproval,
+  saveVoiceReviewOperatorToken,
   type VoicePresetApprovalInput,
   type VoicePresetApprovalPreview,
   type VoicePresetApprovalRecord,
@@ -21,6 +23,7 @@ function shortHash(value: string | null | undefined) {
 
 export function VoicePresetApprovalCard() {
   const [diagnostics, setDiagnostics] = useState<VoicePresetDiagnostic[]>([])
+  const [operatorToken, setOperatorToken] = useState(loadVoiceReviewOperatorToken)
   const [history, setHistory] = useState<VoicePresetApprovalRecord[]>([])
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
   const [reviewer, setReviewer] = useState('')
@@ -34,13 +37,18 @@ export function VoicePresetApprovalCard() {
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const refresh = useCallback(async () => {
-    const [setup, records] = await Promise.all([getSetupStatus(), listVoicePresetApprovalHistory()])
+  const refresh = useCallback(async (token: string) => {
+    const setup = await getSetupStatus()
     setDiagnostics(setup.voicePresetDiagnostics)
+    const records = await listVoicePresetApprovalHistory(token)
     setHistory(records)
   }, [])
 
-  useEffect(() => { void refresh().catch(() => undefined) }, [refresh])
+  useEffect(() => {
+    void refresh(loadVoiceReviewOperatorToken()).catch((caught) => {
+      setError(caught instanceof Error ? caught.message : '승인 이력을 불러오지 못했습니다.')
+    })
+  }, [refresh])
 
   const diagnostic = useMemo(
     () => diagnostics.find((item) => item.voiceId === voiceId) ?? null,
@@ -71,7 +79,7 @@ export function VoicePresetApprovalCard() {
   async function handlePreview() {
     setBusy(true); setError(null); setNotice(null)
     try {
-      setPreview(await previewVoicePresetApproval(approvalInput()))
+      setPreview(await previewVoicePresetApproval(approvalInput(), operatorToken))
       setNotice('현재 WAV·manifest·검수 묶음을 다시 계산한 승인 미리보기를 만들었습니다.')
     } catch (caught) {
       setPreview(null)
@@ -83,10 +91,10 @@ export function VoicePresetApprovalCard() {
     if (!preview) return
     setBusy(true); setError(null); setNotice(null)
     try {
-      await applyVoicePresetApproval(approvalInput(), preview.previewId)
+      await applyVoicePresetApproval(approvalInput(), preview.previewId, operatorToken)
       setNotice('승인을 적용하고 이전 manifest snapshot을 감사 기록에 보존했습니다.')
       setPreview(null)
-      await refresh()
+      await refresh(operatorToken)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '승인을 적용하지 못했습니다.')
     } finally { setBusy(false) }
@@ -99,10 +107,14 @@ export function VoicePresetApprovalCard() {
     }
     setBusy(true); setError(null); setNotice(null)
     try {
-      await rollbackVoicePresetApproval(record.approvalId, rollbackReason.trim())
+      await rollbackVoicePresetApproval(
+        record.approvalId,
+        rollbackReason.trim(),
+        operatorToken,
+      )
       setNotice('승인 이전 manifest로 롤백하고 롤백 이력을 별도 기록했습니다.')
       setRollbackReason('')
-      await refresh()
+      await refresh(operatorToken)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '승인을 롤백하지 못했습니다.')
     } finally { setBusy(false) }
@@ -122,6 +134,34 @@ export function VoicePresetApprovalCard() {
       <p className="mt-2 text-xs font-semibold leading-5 text-soa-muted">
         A/B 기록만으로 자동 승인하지 않습니다. 현재 WAV checksum, 동의·권리, 중복 여부와 manifest diff를 다시 확인한 뒤 명시적으로 적용합니다.
       </p>
+
+      <div className="mt-4 rounded-2xl border border-soa-line bg-white p-3">
+        <label className="text-xs font-black">원격 운영자 토큰
+          <input
+            type="password"
+            value={operatorToken}
+            onChange={(event) => setOperatorToken(event.target.value)}
+            autoComplete="off"
+            className="mt-1 min-h-11 w-full rounded-xl border border-soa-line px-3 font-mono text-xs"
+            placeholder="로컬 PC에서는 비워도 됨 · LAN/외부는 32자 이상 토큰"
+          />
+        </label>
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <p className="text-[10px] font-bold leading-4 text-soa-muted">토큰은 이 탭의 sessionStorage에만 저장되며 검수 API 요청 헤더에만 사용됩니다.</p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              saveVoiceReviewOperatorToken(operatorToken)
+              setError(null)
+              void refresh(operatorToken).catch((caught) => {
+                setError(caught instanceof Error ? caught.message : '승인 이력을 불러오지 못했습니다.')
+              })
+            }}
+            className="min-h-10 shrink-0 rounded-xl border border-soa-line px-3 text-xs font-black disabled:opacity-40"
+          >토큰 저장·재연결</button>
+        </div>
+      </div>
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <label className="text-xs font-black">프리셋

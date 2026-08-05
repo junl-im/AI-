@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -63,6 +63,9 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 선택적 신뢰 서명: 로컬 HMAC 키가 설정된 경우 승인 payload를 서명·검증하며 키가 없으면 명시적으로 unsigned 처리
 - Worker 자동 텔레메트리: 짧은 합성의 모델 digest·GPU·first audio·RTF·handoff를 실기기 soak와 별도 저장
 - benchmark 대시보드: Worker 자동 측정과 10·30·60분 soak를 분리하고 모델·GPU·프리셋별 P50/P95 표시
+- 승인 접근 제어: loopback은 기존처럼 토큰 없이 사용하고 LAN·외부는 32자 이상 운영자 토큰을 요구
+- 승인 경합 차단: apply·rollback의 상태 재검사와 manifest·WAV 쓰기를 같은 잠금 안에서 수행
+- CI 품질 복구: Ruff import 3건, Web unused/control-regex/Hooks 4건을 수정하고 재유입 preflight를 추가
 
 ## 무료 실행
 

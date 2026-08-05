@@ -1,6 +1,6 @@
 # SoriON API · Worker 보안
 
-현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 6.4`
+현재 기준 버전: `0.9.3-beta.3 Engine Heartbeat 6.8.3`
 
 ## API와 Worker 인증
 
@@ -27,6 +27,19 @@ SORION_WORKER_AUTH_TTL_SECONDS=30
 
 서비스 토큰과 서명 비밀은 API와 Worker에 같은 값으로 주입하고 TTL은 Worker에서 적용한다.
 실제 배포에서는 저장소에 값을 커밋하지 않고 배포 플랫폼 Secret으로 주입한다.
+
+
+## Heartbeat 6.8.3 프리셋 승인 운영자 게이트
+
+프리셋 승인 관련 네 endpoint는 공개 품질 API와 분리된 운영 경계로 취급한다.
+
+- loopback 요청은 `SORION_VOICE_REVIEW_ALLOW_LOOPBACK_WITHOUT_TOKEN=true`일 때만 무토큰 허용한다.
+- LAN·외부 요청은 32자 이상 `SORION_VOICE_REVIEW_OPERATOR_TOKEN`과 `X-SoriON-Operator-Token` 헤더가 모두 필요하다.
+- 토큰 비교는 `hmac.compare_digest`를 사용하며 토큰·본문·WAV는 감사 로그에 남기지 않는다.
+- 사용자 ID와 client ID는 선언값일 뿐 인증 신원으로 표현하지 않는다.
+- reverse proxy 환경에서는 `SORION_TRUSTED_PROXY_CIDRS`에 등록된 직접 peer만 전달 client IP를 제공할 수 있다.
+- 브라우저 토큰은 영구 localStorage가 아니라 현재 탭 sessionStorage에만 보관한다.
+
 
 ## 요청 제한
 

@@ -1,29 +1,27 @@
-SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.8.1 -> Engine Heartbeat 6.8.2 Signed Review Approval & Benchmark Dashboard
-Changed or added files: 52
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.8.2 -> Engine Heartbeat 6.8.3 CI Quality Unblock & Approval Operator Gate
+Changed or added files: 39
 Deleted tracked files: 0
 
 Applied scope:
-- Recompute current WAV, manifest, review bundle, consent, rights, expiry, and duplicate state before explicit approval.
-- Bind apply to a deterministic preview and reject stale audio or manifest changes.
-- Store manifest v3 approval IDs, payload digests, optional HMAC-SHA256 metadata, and before/after audit snapshots.
-- Verify approval/signature status in Engine Doctor and the actual CosyVoice synthesis path.
-- Record separate Worker auto telemetry with model manifest digest, GPU, first audio, RTF, handoff error, and failures.
-- Keep short Worker telemetry separate from 10/30/60-minute device soak and show model/GPU/preset P50/P95 groups.
-- Add regression tests, preflight contracts, environment examples, operations docs, and permanent handover records.
+- Fix the three Ruff I001 import blocks and four reported Web quality errors/warnings.
+- Protect approval preview, apply, history, and rollback with loopback policy or a 32+ character operator token.
+- Treat user/client IDs as audit declarations, not authentication, and compare operator tokens in constant time.
+- Revalidate and serialize approval apply/rollback inside one process lock; reject changed WAV or manifest state.
+- Flush/fsync manifest replacement and approval history writes, and add dependency-free regression guards.
+- Keep permanent handover, security, error-code, test, and GitHub Desktop overwrite instructions current.
 
 Validation:
-- Repository preflight: 23 passed
-- API pytest: 164 passed
+- Repository preflight: 24 passed
+- API pytest: 171 passed
 - Worker pytest: 14 passed
 - TS/TSX transpile syntax: 182 files passed
 - Python compileall: passed
-- Full npm lint/semantic typecheck/Vitest/Vite build: not completed because required Web packages are unavailable in this environment; GitHub Actions must make the final decision
+- Local Ruff/ESLint/semantic TypeScript/Vitest/Vite execution: unavailable because Ruff and Web node_modules are not installed; GitHub Actions must make the final toolchain decision
 
 Important limitations:
-- Real speaker WAV files, consent/right source documents, HMAC secrets, CosyVoice model weights, and real-device performance values are not included.
-- Unsigned is the safe default when no signing secret is configured; the release does not ship a default secret.
-- SHA-256 detects file changes and HMAC checks possession of a shared local secret; neither proves identity, rights, consent, or measurement truth.
-- Worker auto telemetry is not long-duration soak or mobile certification evidence.
+- Real speaker WAV files, consent/right source documents, operator tokens, HMAC secrets, CosyVoice model weights, and real-device measurements are not included.
+- Loopback no-token access is configurable; LAN/remote approval access requires the operator token.
+- The approval lock serializes one API process. Multi-process or multi-node deployments require a single writer or a future cross-process lock.
 
 Changed or added:
 - .env.example
@@ -33,51 +31,38 @@ Changed or added:
 - START_HERE.md
 - docs/BENCHMARK_DASHBOARD.md
 - docs/CHANGELOG.md
+- docs/ERROR_CODES.md
 - docs/HANDOVER.md
 - docs/NEXT_UPDATE.md
+- docs/SECURITY.md
 - docs/TEST.md
 - docs/VOICE_PRESETS.md
 - docs/VOICE_PRESET_EVIDENCE.md
 - docs/VOICE_PRESET_FIDELITY.md
 - docs/VOICE_REVIEW_APPROVAL.md
 - docs/VOICE_REVIEW_SYNC.md
-- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.2-signed-review-benchmark-dashboard/DELETE_LIST.txt
-- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.2-signed-review-benchmark-dashboard/PATCH_MANIFEST.txt
-- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.2-signed-review-benchmark-dashboard/PATCH_README.md
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3-ci-quality-approval-gate/DELETE_LIST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3-ci-quality-approval-gate/PATCH_MANIFEST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3-ci-quality-approval-gate/PATCH_README.md
 - package.json
-- scripts/check-signed-review-benchmark.mjs
+- scripts/check-voice-review-operator-gate.mjs
 - scripts/run-preflight.mjs
-- services/api/app/api/router.py
-- services/api/app/api/routes/verification.py
+- services/api/app/api/routes/evidence.py
 - services/api/app/api/routes/voice_preset_approvals.py
 - services/api/app/core/config.py
 - services/api/app/engines/tts/cosyvoice_worker_tts.py
-- services/api/app/main.py
-- services/api/app/schemas/setup.py
-- services/api/app/schemas/verification.py
-- services/api/app/schemas/voice_preset_approval.py
-- services/api/app/schemas/voice_preset_evidence.py
-- services/api/app/services/setup_diagnostics.py
 - services/api/app/services/voice_preset_approval.py
-- services/api/app/services/voice_preset_evidence.py
-- services/api/tests/conftest.py
-- services/api/tests/test_verification.py
+- services/api/app/services/voice_review_operator.py
 - services/api/tests/test_voice_preset_approval.py
-- services/worker/app/model_manifest.py
-- services/worker/app/runtime.py
-- services/worker/app/schemas.py
+- services/api/tests/test_voice_preset_approval_routes.py
+- services/api/tests/test_voice_review_operator.py
 - src/components/evaluation/BenchmarkDashboardCard.tsx
-- src/components/evaluation/EngineDoctorCard.tsx
 - src/components/evaluation/VoicePresetApprovalCard.tsx
-- src/hooks/useEngineDoctor.ts
+- src/export/localExportBundle.ts
 - src/pages/QualityPage.tsx
-- src/quality/qualityApi.ts
-- src/quality/qualityTypes.ts
 - src/quality/voicePresetApprovalApi.ts
+- src/quality/voicePresetReviewBundle.test.ts
 - src/quality/voicePresetReviewBundle.ts
-- src/settings/setupApi.ts
-- src/settings/setupTypes.ts
-- voice-presets/README.md
 
 Deleted tracked files:
 - none

@@ -10,19 +10,31 @@ from app.schemas.voice_preset_approval import (
     VoicePresetApprovalRollbackResponse,
 )
 from app.services.voice_preset_approval import VoicePresetApprovalError
+from app.services.voice_review_operator import (
+    VoiceReviewOperatorAuthorizationError,
+    VoiceReviewOperatorPrincipal,
+    authorize_voice_review_operator,
+)
 
 router = APIRouter()
 
 
-def _actor(request: Request) -> str:
-    user = request.headers.get("X-SoriON-User-ID", "").strip()
-    client = request.headers.get("X-SoriON-Client-ID", "").strip()
-    host = request.client.host if request.client else "unknown"
-    if user:
-        return f"ip:{host};user:{user[:80]}"
-    if client:
-        return f"ip:{host};client:{client[:80]}"
-    return f"ip:{host}"
+def _principal(request: Request) -> VoiceReviewOperatorPrincipal:
+    try:
+        return authorize_voice_review_operator(request, request.app.state.settings)
+    except VoiceReviewOperatorAuthorizationError as error:
+        request.app.state.audit_logger.write(
+            event="voice-review-authorization-denied",
+            method=request.method,
+            path=request.url.path,
+            status_code=error.status_code,
+            request_id=getattr(request.state, "request_id", "unknown"),
+            actor=getattr(request.state, "actor", "unknown"),
+        )
+        raise HTTPException(
+            status_code=error.status_code,
+            detail=f"{error.code}: {error}",
+        ) from error
 
 
 def _raise(error: VoicePresetApprovalError) -> None:
@@ -37,6 +49,7 @@ async def preview_voice_preset_approval(
     payload: VoicePresetApprovalInput,
     request: Request,
 ) -> VoicePresetApprovalPreviewResponse:
+    _principal(request)
     try:
         return request.app.state.voice_preset_approval_service.preview(payload)
     except VoicePresetApprovalError as error:
@@ -51,10 +64,11 @@ async def apply_voice_preset_approval(
     payload: VoicePresetApprovalApplyRequest,
     request: Request,
 ) -> VoicePresetApprovalApplyResponse:
+    principal = _principal(request)
     try:
         record, manifest = request.app.state.voice_preset_approval_service.apply(
             payload,
-            _actor(request),
+            principal.actor,
         )
     except VoicePresetApprovalError as error:
         _raise(error)
@@ -81,6 +95,7 @@ async def list_voice_preset_approval_history(
     request: Request,
     limit: int = Query(default=100, ge=1, le=500),
 ) -> list[VoicePresetApprovalRecord]:
+    _principal(request)
     return request.app.state.voice_preset_approval_service.list_history(limit)
 
 
@@ -93,12 +108,13 @@ async def rollback_voice_preset_approval(
     payload: VoicePresetApprovalRollbackRequest,
     request: Request,
 ) -> VoicePresetApprovalRollbackResponse:
+    principal = _principal(request)
     try:
         record, manifest = request.app.state.voice_preset_approval_service.rollback(
             approval_id,
             payload.confirmation,
             payload.reason,
-            _actor(request),
+            principal.actor,
         )
     except VoicePresetApprovalError as error:
         _raise(error)

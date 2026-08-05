@@ -38,7 +38,8 @@ describe('voice preset review bundle', () => {
 
   it('rejects a modern bundle without a checksum', async () => {
     const bundle = await buildVoicePresetReviewBundle([review])
-    const { payloadSha256: _checksum, ...unsigned } = bundle
+    const unsigned: Partial<typeof bundle> = { ...bundle }
+    delete unsigned.payloadSha256
     await expect(parseAndImportVoicePresetReviewBundle(JSON.stringify(unsigned)))
       .rejects.toThrow('SHA-256가 없거나')
   })

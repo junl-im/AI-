@@ -17,7 +17,7 @@
     "cleanup:stale-brand": "node scripts/remove-stale-brand-assets.mjs",
     "quality:web-manifest": "node scripts/check-web-toolchain.mjs --manifest-only",
     "quality:web-toolchain": "node scripts/check-web-toolchain.mjs",
-    "quality": "npm run quality:lock-network && npm run quality:ci-architecture && npm run quality:reproducible-web && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:partial-audio-bridge && npm run quality:ordered-segment-playback && npm run quality:seam-metrics && npm run quality:signed-audio-certification && npm run quality:device-soak-archive && npm run quality:voice-presets && npm run quality:voice-preset-evidence && npm run quality:voice-review-sync && npm run quality:signed-review-benchmark && npm run quality:evidence && npm run quality:evidence-intake && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
+    "quality": "npm run quality:lock-network && npm run quality:ci-architecture && npm run quality:reproducible-web && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:partial-audio-bridge && npm run quality:ordered-segment-playback && npm run quality:seam-metrics && npm run quality:signed-audio-certification && npm run quality:device-soak-archive && npm run quality:voice-presets && npm run quality:voice-preset-evidence && npm run quality:voice-review-sync && npm run quality:signed-review-benchmark && npm run quality:voice-review-operator && npm run quality:evidence && npm run quality:evidence-intake && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
@@ -67,7 +67,8 @@
     "quality:evidence-intake": "node scripts/check-evidence-intake-bundle.mjs",
     "quality:voice-preset-evidence": "node scripts/check-voice-preset-evidence.mjs",
     "quality:voice-review-sync": "node scripts/check-voice-review-sync.mjs",
-    "quality:signed-review-benchmark": "node scripts/check-signed-review-benchmark.mjs"
+    "quality:signed-review-benchmark": "node scripts/check-signed-review-benchmark.mjs",
+    "quality:voice-review-operator": "node scripts/check-voice-review-operator-gate.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",

@@ -1,10 +1,29 @@
 # Voice Preset Review Approval, Signature & Rollback
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
 
 ## 목적
 
 검수 묶음의 로컬 판정을 실제 프리셋 승인으로 자동 승격하지 않고, 운영자가 현재 WAV·manifest·동의·권리·중복 상태를 다시 확인한 뒤에만 승인한다. 승인 이후 파일 변경과 롤백을 추적하며 선택적으로 로컬 신뢰 키의 HMAC을 연결한다.
+
+
+## 운영자 접근 제어
+
+승인 preview·apply·history·rollback은 모두 같은 인증 게이트를 사용한다.
+
+```env
+# loopback(127.0.0.1, ::1)은 기본적으로 토큰 없이 허용
+SORION_VOICE_REVIEW_ALLOW_LOOPBACK_WITHOUT_TOKEN=true
+# LAN·외부 사용 시 32자 이상의 임의 문자열을 secret store 또는 로컬 .env에만 설정
+SORION_VOICE_REVIEW_OPERATOR_TOKEN=
+```
+
+- 로컬 PC에서 API와 Web을 함께 실행하면 기존처럼 토큰 입력 없이 사용할 수 있다.
+- LAN·외부 브라우저는 Quality Lab의 `원격 운영자 토큰`에 같은 값을 입력해야 한다.
+- 브라우저 값은 현재 탭의 sessionStorage에만 저장되며 승인 API 헤더에만 실린다.
+- `X-SoriON-User-ID`, `X-SoriON-Client-ID`와 화면의 검수자 이름은 인증 수단이 아니다.
+- 토큰이 없거나 다르면 `SOA-6831` 또는 `SOA-6832`, 서버 토큰이 32자 미만이면 `SOA-6833`으로 거부한다.
+- 거부 이벤트는 요청 본문·토큰 없이 감사 로그에 남긴다.
 
 ## 승인 순서
 

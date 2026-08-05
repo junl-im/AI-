@@ -1,14 +1,33 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-05 18:15 KST**
+최종 갱신: **2026-08-05 18:42 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+## Engine Heartbeat 6.8.3 CI Quality Unblock & Approval Operator Gate
+
+1. **작업 일시(KST)**: 2026-08-05 18:42
+2. **대상·기준 버전**: 6.8.2 Signed Review Approval & Benchmark Dashboard → 6.8.3 CI Quality Unblock & Approval Operator Gate
+3. **변경 내용**:
+   - GitHub Actions가 보고한 Ruff import 정렬 3건과 Web 품질 오류·경고 4건을 수정했습니다.
+   - 검수 승인 preview·apply·history·rollback 전체에 운영자 접근 게이트를 추가했습니다. 로컬 loopback은 설정에 따라 토큰 없이 사용할 수 있고, LAN·외부는 32자 이상의 `SORION_VOICE_REVIEW_OPERATOR_TOKEN`이 필수입니다.
+   - `X-SoriON-User-ID`와 `X-SoriON-Client-ID`는 인증 수단으로 사용하지 않고 감사용 선언 값으로만 보존합니다. 토큰은 constant-time 비교하고 Web에서는 sessionStorage에만 보관합니다.
+   - 승인 apply와 rollback의 최종 파일 재검증·쓰기·이력 추가를 동일한 프로세스 잠금 안에서 수행해 동시 요청의 lost update를 막았습니다.
+   - manifest 원자적 쓰기와 승인 JSONL append에 flush·fsync를 추가하고, 롤백 직전 WAV checksum도 다시 확인합니다.
+   - 6.8.3 접근 제어·경합·CI 회귀를 강제하는 dependency-free preflight 검사를 추가했습니다.
+4. **변경 이유**: CI 실패로 배포가 차단된 문제를 먼저 해소하고, API가 LAN이나 외부에 노출됐을 때 임의 승인·이력 열람·롤백이 가능한 운영 보안 문제와 동시 승인 경합을 막기 위함입니다.
+5. **영향 범위**: API 설정, approval routes/service, 운영자 인증 서비스, Quality Lab 토큰 입력, GitHub Actions 품질 대상 파일, preflight와 문서.
+6. **주요 파일**: `services/api/app/services/voice_review_operator.py`, `services/api/app/api/routes/voice_preset_approvals.py`, `services/api/app/services/voice_preset_approval.py`, `src/quality/voicePresetApprovalApi.ts`, `src/components/evaluation/VoicePresetApprovalCard.tsx`, `scripts/check-voice-review-operator-gate.mjs`.
+7. **검증 결과**: Repository preflight 24/24, API pytest 171, Worker pytest 14, TS/TSX transpile 182와 Python compileall 통과. 로컬 환경에는 Ruff와 Web node_modules가 없어 실제 Ruff·ESLint·semantic typecheck·Vitest·Vite build의 최종 판정은 GitHub Actions 재실행이 필요합니다.
+8. **제한·주의사항**: 운영자 토큰과 서명 secret은 ZIP에 포함하지 않습니다. loopback 무토큰 허용은 기본 로컬 사용성을 위한 설정이며 운영 환경에서는 `SORION_VOICE_REVIEW_ALLOW_LOOPBACK_WITHOUT_TOKEN=false`로 강제할 수 있습니다. 현재 잠금은 단일 API 프로세스 내부 동시 요청을 직렬화하며, 다중 프로세스·다중 노드 배포는 외부 잠금 또는 단일 writer 구성이 필요합니다.
+9. **산출물**: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.3-ci-quality-approval-gate-full.zip`, `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.2-to-6.8.3-ci-quality-approval-gate-patch.zip`, `SHA256SUMS-6.8.3.txt`.
+10. **다음 예상 업데이트**: Heartbeat 6.8.4 Trust Key Rotation & Evidence Renewal Queue. 복수 신뢰 키, 증거 갱신 대기열, 프로세스 간 승인 잠금과 benchmark 기준선·회귀 경고를 우선합니다.
+
 ## Engine Heartbeat 6.8.2 Signed Review Approval & Benchmark Dashboard
 
 1. **작업 일시(KST)**: 2026-08-05 18:15

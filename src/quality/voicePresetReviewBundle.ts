@@ -25,7 +25,7 @@ export interface VoicePresetReviewBundle {
   schemaVersion: typeof VOICE_REVIEW_BUNDLE_SCHEMA
   app: '곰같은여우 SoriON AI'
   appVersion: '0.9.3-beta.3'
-  engineHeartbeat: '6.8.2'
+  engineHeartbeat: '6.8.3'
   exportedAt: string
   reviewCount: number
   reviews: QualityReview[]
@@ -71,7 +71,7 @@ export async function buildVoicePresetReviewBundle(reviews: QualityReview[]): Pr
     schemaVersion: VOICE_REVIEW_BUNDLE_SCHEMA,
     app: '곰같은여우 SoriON AI' as const,
     appVersion: '0.9.3-beta.3' as const,
-    engineHeartbeat: '6.8.2' as const,
+    engineHeartbeat: '6.8.3' as const,
     exportedAt: new Date().toISOString(),
     reviewCount: reviews.length,
     reviews,

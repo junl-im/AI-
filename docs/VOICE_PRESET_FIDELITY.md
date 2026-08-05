@@ -1,6 +1,6 @@
 # Voice Preset Fidelity Contract
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
 
 ## 목적
 

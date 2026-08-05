@@ -1,6 +1,20 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate**
+
+
+## Engine Heartbeat 6.8.3 CI Quality Unblock & Approval Operator Gate
+
+- GitHub Actions가 보고한 Ruff I001 3건을 import block 재정렬로 수정했습니다.
+- Web quality의 미사용 `_checksum`, 제어문자 정규식, 불안정한 `groups` Hook 의존성 2건을 수정했습니다.
+- 프리셋 승인 preview·apply·history·rollback 전체에 운영자 인증 게이트를 추가했습니다. loopback은 기본적으로 토큰 없이 허용하고 LAN·외부는 32자 이상 `SORION_VOICE_REVIEW_OPERATOR_TOKEN`이 필요합니다.
+- 브라우저 운영자 토큰은 해당 탭의 `sessionStorage`에만 두고 승인 API의 `X-SoriON-Operator-Token` 헤더에만 전송합니다.
+- 단순 `X-SoriON-User-ID` 문자열을 인증으로 취급하지 않고 actor 기록에 인증 방식과 선언 ID를 구분합니다. 거부된 접근은 본문 없이 감사 로그에 남깁니다.
+- 승인 apply와 rollback은 동일 잠금 안에서 WAV·manifest·history를 다시 검증해 동시 요청의 lost update를 차단합니다.
+- manifest 원자 교체와 approval JSONL append에 flush·fsync를 추가하고 WAV가 승인 후 변경된 경우 과거 manifest 롤백을 거부합니다.
+- 재유입 방지용 `voice review operator gate / CI unblock` 검사를 추가해 repository preflight를 24개로 확장했습니다.
+- 검증: Repository preflight 24/24, API pytest 171개, Worker pytest 14개, TS/TSX transpile 182개와 Python compileall을 통과했습니다.
+- 제한: 현재 환경에는 Python 3.10 Ruff와 프로젝트 Web 의존성이 설치되지 않아 전체 Ruff·ESLint·semantic typecheck·Vitest·Vite build는 GitHub Actions 재실행이 최종 판정합니다.
 
 
 ## Engine Heartbeat 6.8.2 Signed Review Approval & Benchmark Dashboard

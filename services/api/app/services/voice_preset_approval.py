@@ -284,18 +284,29 @@ class VoicePresetApprovalService:
         actor: str,
     ) -> tuple[VoicePresetApprovalRecord, dict[str, object]]:
         if payload.confirmation != _CONFIRM_APPROVAL:
-            raise VoicePresetApprovalError(f"확인 문구는 '{_CONFIRM_APPROVAL}'이어야 합니다.")
-        prepared = self._prepare(VoicePresetApprovalInput.model_validate(payload.model_dump()))
-        if prepared.response.preview_id != payload.preview_id:
             raise VoicePresetApprovalError(
-                "미리보기 이후 WAV 또는 manifest 상태가 달라졌습니다. 다시 미리보기 하세요."
+                f"확인 문구는 '{_CONFIRM_APPROVAL}'이어야 합니다."
             )
-        if not prepared.response.can_apply:
-            raise VoicePresetApprovalError("차단 사유가 남아 있어 승인할 수 없습니다.")
-        manifest_path, current = self._load_manifest(payload.voice_id)
-        if _manifest_digest(current) != prepared.response.current_manifest_sha256:
-            raise VoicePresetApprovalError("적용 직전 manifest가 변경되어 승인을 중단했습니다.")
+        base_payload = VoicePresetApprovalInput.model_validate(payload.model_dump())
         with self._lock:
+            prepared = self._prepare(base_payload)
+            if prepared.response.preview_id != payload.preview_id:
+                raise VoicePresetApprovalError(
+                    "미리보기 이후 WAV 또는 manifest 상태가 달라졌습니다. "
+                    "다시 미리보기 하세요."
+                )
+            if not prepared.response.can_apply:
+                raise VoicePresetApprovalError("차단 사유가 남아 있어 승인할 수 없습니다.")
+            manifest_path, current = self._load_manifest(payload.voice_id)
+            if _manifest_digest(current) != prepared.response.current_manifest_sha256:
+                raise VoicePresetApprovalError(
+                    "적용 직전 manifest가 변경되어 승인을 중단했습니다."
+                )
+            audio_path = self._require_directory() / f"{payload.voice_id}.wav"
+            if sha256_file(audio_path) != prepared.response.current_audio_sha256:
+                raise VoicePresetApprovalError(
+                    "적용 직전 WAV가 변경되어 승인을 중단했습니다."
+                )
             self._atomic_write(manifest_path, prepared.proposed_manifest)
             record = VoicePresetApprovalRecord(
                 approval_id=prepared.response.approval_id,
@@ -321,15 +332,17 @@ class VoicePresetApprovalService:
                 ),
                 signature=(
                     str(
-                        prepared.proposed_manifest.get("approval", {}).get(
-                            "signature"
-                        )
+                        prepared.proposed_manifest.get("approval", {}).get("signature")
                         or ""
                     )
                     or None
                 ),
             )
-            self._append_history(record, prepared.current_manifest, prepared.proposed_manifest)
+            self._append_history(
+                record,
+                prepared.current_manifest,
+                prepared.proposed_manifest,
+            )
         return record, prepared.proposed_manifest
 
     def list_history(self, limit: int = 100) -> list[VoicePresetApprovalRecord]:
@@ -347,61 +360,87 @@ class VoicePresetApprovalService:
         actor: str,
     ) -> tuple[VoicePresetApprovalRecord, dict[str, object]]:
         if confirmation != _CONFIRM_ROLLBACK:
-            raise VoicePresetApprovalError(f"확인 문구는 '{_CONFIRM_ROLLBACK}'이어야 합니다.")
-        source = next(
-            (
-                item
-                for item in reversed(self._read_history())
-                if item.get("record", {}).get("approval_id") == approval_id
-                and item.get("record", {}).get("event") == "approved"
-            ),
-            None,
-        )
-        if source is None:
-            raise VoicePresetApprovalError("롤백할 승인 기록을 찾지 못했습니다.")
-        record = VoicePresetApprovalRecord.model_validate(source["record"])
-        before = source.get("before_manifest")
-        after = source.get("after_manifest")
-        if not isinstance(before, dict) or not isinstance(after, dict):
-            raise VoicePresetApprovalError("승인 기록에 복원 가능한 manifest snapshot이 없습니다.")
-        manifest_path, current = self._load_manifest(record.voice_id)
-        current_digest = _manifest_digest(current)
-        if current_digest != record.after_manifest_sha256:
             raise VoicePresetApprovalError(
-                "승인 이후 manifest가 변경되었습니다. 최신 변경을 자동 덮어쓰지 않습니다."
+                f"확인 문구는 '{_CONFIRM_ROLLBACK}'이어야 합니다."
             )
-        rollback_id = str(uuid4())
-        rollback_manifest = json.loads(json.dumps(before, ensure_ascii=False))
-        notes = rollback_manifest.setdefault("human_review", {}).get("notes", "")
-        rollback_manifest["human_review"]["notes"] = (
-            f"{notes}\n롤백 사유: {reason.strip()}".strip()
-        )
-        rollback_record = VoicePresetApprovalRecord(
-            approval_id=rollback_id,
-            event="rolled-back",
-            voice_id=record.voice_id,
-            actor=actor,
-            reviewer=record.reviewer,
-            at=datetime.now(timezone.utc),
-            audio_sha256=record.audio_sha256,
-            before_manifest_sha256=current_digest,
-            after_manifest_sha256=_manifest_digest(rollback_manifest),
-            review_bundle_sha256=record.review_bundle_sha256,
-            signature_mode="unsigned",
-            related_approval_id=approval_id,
-        )
         with self._lock:
+            source = next(
+                (
+                    item
+                    for item in reversed(self._read_history())
+                    if item.get("record", {}).get("approval_id") == approval_id
+                    and item.get("record", {}).get("event") == "approved"
+                ),
+                None,
+            )
+            if source is None:
+                raise VoicePresetApprovalError("롤백할 승인 기록을 찾지 못했습니다.")
+            record = VoicePresetApprovalRecord.model_validate(source["record"])
+            before = source.get("before_manifest")
+            after = source.get("after_manifest")
+            if not isinstance(before, dict) or not isinstance(after, dict):
+                raise VoicePresetApprovalError(
+                    "승인 기록에 복원 가능한 manifest snapshot이 없습니다."
+                )
+            manifest_path, current = self._load_manifest(record.voice_id)
+            current_digest = _manifest_digest(current)
+            if current_digest != record.after_manifest_sha256:
+                raise VoicePresetApprovalError(
+                    "승인 이후 manifest가 변경되었습니다. "
+                    "최신 변경을 자동 덮어쓰지 않습니다."
+                )
+            audio_path = self._require_directory() / f"{record.voice_id}.wav"
+            if sha256_file(audio_path) != record.audio_sha256:
+                raise VoicePresetApprovalError(
+                    "승인 이후 WAV가 변경되었습니다. 과거 manifest를 자동 복원하지 않습니다."
+                )
+            rollback_id = str(uuid4())
+            rollback_manifest = json.loads(json.dumps(before, ensure_ascii=False))
+            notes = rollback_manifest.setdefault("human_review", {}).get("notes", "")
+            rollback_manifest["human_review"]["notes"] = (
+                f"{notes}\n롤백 사유: {reason.strip()}".strip()
+            )
+            rollback_record = VoicePresetApprovalRecord(
+                approval_id=rollback_id,
+                event="rolled-back",
+                voice_id=record.voice_id,
+                actor=actor,
+                reviewer=record.reviewer,
+                at=datetime.now(timezone.utc),
+                audio_sha256=record.audio_sha256,
+                before_manifest_sha256=current_digest,
+                after_manifest_sha256=_manifest_digest(rollback_manifest),
+                review_bundle_sha256=record.review_bundle_sha256,
+                signature_mode="unsigned",
+                related_approval_id=approval_id,
+            )
             self._atomic_write(manifest_path, rollback_manifest)
             self._append_history(rollback_record, current, rollback_manifest)
         return rollback_record, rollback_manifest
 
     def _atomic_write(self, path: Path, payload: dict[str, object]) -> None:
         temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-        temporary.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
-        temporary.replace(path)
+        try:
+            with temporary.open("w", encoding="utf-8", newline="\n") as output:
+                output.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
+                output.flush()
+                os.fsync(output.fileno())
+            temporary.replace(path)
+            self._fsync_directory(path.parent)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    @staticmethod
+    def _fsync_directory(directory: Path) -> None:
+        flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+        try:
+            descriptor = os.open(directory, flags)
+        except OSError:
+            return
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
 
     def _append_history(
         self,
@@ -414,8 +453,12 @@ class VoicePresetApprovalService:
             "before_manifest": before,
             "after_manifest": after,
         }
-        with self.history_path.open("a", encoding="utf-8") as output:
-            output.write(json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n")
+        with self.history_path.open("a", encoding="utf-8", newline="\n") as output:
+            output.write(
+                json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n"
+            )
+            output.flush()
+            os.fsync(output.fileno())
 
     def _read_history(self) -> list[dict[str, object]]:
         if not self.history_path.is_file():

@@ -20,7 +20,7 @@ function metric(value: number | null, suffix = '') {
 export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, onRefresh }: BenchmarkDashboardCardProps) {
   const [presetFilter, setPresetFilter] = useState('all')
   const [digestFilter, setDigestFilter] = useState('all')
-  const groups = workerSummary?.metricGroups ?? []
+  const groups = useMemo(() => workerSummary?.metricGroups ?? [], [workerSummary?.metricGroups])
   const presets = useMemo(() => [...new Set(groups.map((item) => item.presetId))].sort(), [groups])
   const digests = useMemo(() => [...new Set(groups.map((item) => item.modelDigest || 'missing'))].sort(), [groups])
   const filtered = groups.filter((item) => (

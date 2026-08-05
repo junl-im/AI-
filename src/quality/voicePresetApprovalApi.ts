@@ -1,5 +1,32 @@
 import { apiRequest } from '../api/httpClient'
 
+export const VOICE_REVIEW_OPERATOR_TOKEN_SESSION_KEY = 'sorion.voice-review.operator-token'
+
+export function loadVoiceReviewOperatorToken(): string {
+  if (typeof window === 'undefined') return ''
+  try {
+    return window.sessionStorage.getItem(VOICE_REVIEW_OPERATOR_TOKEN_SESSION_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+export function saveVoiceReviewOperatorToken(value: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const normalized = value.trim()
+    if (normalized) window.sessionStorage.setItem(VOICE_REVIEW_OPERATOR_TOKEN_SESSION_KEY, normalized)
+    else window.sessionStorage.removeItem(VOICE_REVIEW_OPERATOR_TOKEN_SESSION_KEY)
+  } catch {
+    // Private browsing or browser policy can disable sessionStorage.
+  }
+}
+
+function operatorHeaders(operatorToken: string): HeadersInit | undefined {
+  const normalized = operatorToken.trim()
+  return normalized ? { 'X-SoriON-Operator-Token': normalized } : undefined
+}
+
 export interface VoicePresetApprovalInput {
   voiceId: string
   reviewer: string
@@ -125,9 +152,13 @@ function mapRecord(value: VoicePresetApprovalRecordResponse): VoicePresetApprova
   }
 }
 
-export async function previewVoicePresetApproval(input: VoicePresetApprovalInput): Promise<VoicePresetApprovalPreview> {
+export async function previewVoicePresetApproval(
+  input: VoicePresetApprovalInput,
+  operatorToken = '',
+): Promise<VoicePresetApprovalPreview> {
   const value = await apiRequest<VoicePresetApprovalPreviewResponse>('/quality/voice-preset-approvals/preview', {
     method: 'POST',
+    headers: operatorHeaders(operatorToken),
     body: JSON.stringify(payload(input)),
   })
   return {
@@ -148,22 +179,37 @@ export async function previewVoicePresetApproval(input: VoicePresetApprovalInput
   }
 }
 
-export async function applyVoicePresetApproval(input: VoicePresetApprovalInput, previewId: string) {
+export async function applyVoicePresetApproval(
+  input: VoicePresetApprovalInput,
+  previewId: string,
+  operatorToken = '',
+) {
   const value = await apiRequest<VoicePresetApprovalMutationResponse>('/quality/voice-preset-approvals/apply', {
     method: 'POST',
+    headers: operatorHeaders(operatorToken),
     body: JSON.stringify({ ...payload(input), preview_id: previewId, confirmation: '현재 WAV 승인' }),
   })
   return { record: mapRecord(value.record), manifest: value.manifest as Record<string, unknown> }
 }
 
-export async function listVoicePresetApprovalHistory(): Promise<VoicePresetApprovalRecord[]> {
-  const value = await apiRequest<VoicePresetApprovalRecordResponse[]>('/quality/voice-preset-approvals/history?limit=100')
+export async function listVoicePresetApprovalHistory(
+  operatorToken = '',
+): Promise<VoicePresetApprovalRecord[]> {
+  const value = await apiRequest<VoicePresetApprovalRecordResponse[]>(
+    '/quality/voice-preset-approvals/history?limit=100',
+    { headers: operatorHeaders(operatorToken) },
+  )
   return value.map(mapRecord)
 }
 
-export async function rollbackVoicePresetApproval(approvalId: string, reason: string) {
+export async function rollbackVoicePresetApproval(
+  approvalId: string,
+  reason: string,
+  operatorToken = '',
+) {
   const value = await apiRequest<VoicePresetApprovalMutationResponse>(`/quality/voice-preset-approvals/${encodeURIComponent(approvalId)}/rollback`, {
     method: 'POST',
+    headers: operatorHeaders(operatorToken),
     body: JSON.stringify({ confirmation: '승인 롤백', reason }),
   })
   return { record: mapRecord(value.record), manifest: value.manifest as Record<string, unknown> }
