@@ -1,0 +1,75 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.7.1 -> Engine Heartbeat 6.8.0 Preset Evidence Review
+Changed or added files: 43
+Deleted tracked files: 0
+
+Applied scope:
+- Add one evidence manifest per person preset for consent, rights, integrity, and human listening review.
+- Require same-ID WAV plus verified manifest before a known CosyVoice person preset can synthesize.
+- Block checksum mismatch and the same actual WAV registered under multiple person presets.
+- Split Engine Doctor counts into WAV-ready, manifest-certified, and finally usable states.
+- Show current-device Browser Speech voice assignment, gender inference basis, and shortage reason.
+- Expand Quality Lab A/B review from one fixed preset to all five presets and preserve preset metadata.
+- Extend privacy-safe diagnostics, regression tests, operating documentation, and handover memory.
+
+Validation:
+- Repository preflight: 21 passed
+- API pytest: 158 passed
+- Worker pytest: 14 passed
+- CosyVoice preset regression: 8 passed
+- TS/TSX transpile syntax: 177 files passed
+- Python compileall: passed
+- Voice preset evidence and fidelity contract checks: passed
+- Full npm lint/typecheck/Vitest/Vite: not run because the internal registry returned 404 for zustand@5.0.8
+
+Important limitations:
+- Real speaker WAV files, consent/right source documents, and CosyVoice model weights are not included.
+- The five bundled manifests are intentionally pending templates and do not make any preset READY.
+- Browser/System voices remain device-specific approximations, not certified person-specific voices.
+
+Changed or added:
+- FOUNDATION_REPORT.md
+- PATCH_MANIFEST.txt
+- README.md
+- START_HERE.md
+- docs/CHANGELOG.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/TEST.md
+- docs/VOICE_PRESETS.md
+- docs/VOICE_PRESET_EVIDENCE.md
+- docs/VOICE_PRESET_FIDELITY.md
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.0-preset-evidence-review/DELETE_LIST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.0-preset-evidence-review/PATCH_MANIFEST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.0-preset-evidence-review/PATCH_README.md
+- package.json
+- scripts/check-voice-preset-contracts.mjs
+- scripts/check-voice-preset-evidence.mjs
+- scripts/run-preflight.mjs
+- services/api/app/engines/tts/cosyvoice_worker_tts.py
+- services/api/app/schemas/setup.py
+- services/api/app/schemas/voice_preset_evidence.py
+- services/api/app/services/setup_diagnostics.py
+- services/api/app/services/voice_preset_evidence.py
+- services/api/tests/test_cosyvoice_worker_tts.py
+- services/api/tests/test_setup.py
+- src/components/evaluation/EngineDoctorCard.tsx
+- src/components/evaluation/QualityResultCard.tsx
+- src/hooks/useEngineDoctor.ts
+- src/pages/QualityPage.tsx
+- src/quality/qualityReport.test.ts
+- src/quality/qualityReport.ts
+- src/quality/qualityReviewRepository.ts
+- src/quality/qualityReviewTypes.ts
+- src/settings/setupApi.ts
+- src/settings/setupTypes.ts
+- src/tts/browserSpeech.test.ts
+- src/tts/browserSpeech.ts
+- voice-presets/README.md
+- voice-presets/dam-calm.manifest.json
+- voice-presets/jun-deep.manifest.json
+- voice-presets/min-energetic.manifest.json
+- voice-presets/on-clear.manifest.json
+- voice-presets/sori-warm.manifest.json
+
+Deleted tracked files:
+- none

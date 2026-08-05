@@ -5,6 +5,9 @@ import type { QualityReview } from './qualityReviewTypes'
 const review: QualityReview = {
   id: 'melo-1',
   sentence: '안녕, "소리온"',
+  voiceId: 'on-clear',
+  voiceName: '도윤',
+  voiceGender: 'male',
   engineId: 'melo',
   engineName: 'MeloTTS Korean',
   engineMode: 'ai',
@@ -29,5 +32,7 @@ describe('quality report export', () => {
     expect(csv.startsWith('\ufeff')).toBe(true)
     expect(csv).toContain('"안녕, ""소리온"""')
     expect(csv).toContain('"MeloTTS Korean"')
+    expect(csv).toContain('"on-clear"')
+    expect(csv).toContain('"도윤"')
   })
 })

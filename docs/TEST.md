@@ -1,3 +1,45 @@
+# Heartbeat 6.8.2 서명 승인·benchmark 대시보드 검증
+
+- 현재 WAV·manifest·검수 묶음 checksum 재계산과 승인 diff preview
+- preview 뒤 WAV 또는 manifest 변경 시 stale apply 거부
+- manifest v3 approval ID·signed payload digest·선택적 HMAC-SHA256 생성과 검증
+- signing secret 미설정 시 unsigned 상태 유지, 잘못된 key·signature 차단
+- 승인 전후 manifest snapshot 감사 기록, 현재 manifest 변경 뒤 위험한 rollback 거부
+- Engine Doctor와 실제 CosyVoice 합성 경로의 승인·서명 상태 일치
+- Worker model manifest SHA-256 digest 진단과 성공·실패 자동 telemetry 저장
+- 자동 Worker telemetry와 10·30·60분 실기기 soak의 저장소·API·UI 분리
+- 모델 digest·GPU·프리셋별 표본 수, 실패율, first audio·RTF·handoff P50/P95 집계
+- Repository preflight 23개, API pytest 164개, Worker pytest 14개 통과
+- TS/TSX transpile 구문 182개와 Python compileall 통과
+- 전체 npm lint·semantic typecheck·Vitest·Vite build는 설치 의존성 부재와 이전 내부 registry 제약으로 GitHub Actions 최종 판정
+
+# Heartbeat 6.8.1 검수 동기화·화자 텔레메트리 검증
+
+- manifest v2와 승인 당시 `human_review.audio_sha256` 계약 검사
+- WAV 교체·checksum 변경 시 승인 검수를 `stale`로 전환하고 CosyVoice 사용 차단
+- 동의·권리 만료 30일 전 경고와 만료 후 차단
+- 검수 묶음 schema, canonical payload SHA-256, 변조 거부와 구형 품질 JSON migration
+- 가져오기 시 로컬 평가만 병합하고 manifest 승인 상태·검수자·checksum 자동 변경 금지
+- Windows System.Speech와 MeloTTS 실제 화자 선택 진단 계약
+- 모델 digest·가속 장치·GPU·프리셋별 benchmark 그룹과 final handoff P95
+- Repository preflight 22개, API pytest 161개, Worker pytest 14개 통과
+- TS/TSX transpile 구문 179개, 검수 묶음 runtime smoke와 Python compileall 통과
+- 전체 npm lint·semantic typecheck·Vitest·Vite build는 내부 registry의 `zustand@5.0.8` 404로 GitHub Actions 최종 판정
+
+# Heartbeat 6.8.0 프리셋 증거 검증
+
+- 5개 manifest schema와 프리셋 ID·이름·성별·WAV 파일명 일치 검사
+- 동의 confirmed, `tts-inference` 권리, 사람 approved, 64자리 SHA-256과 실제 파일 크기 검사
+- 실제 WAV checksum 불일치와 같은 WAV의 여러 인물 프리셋 중복 등록 차단
+- Engine Doctor의 WAV/manifest/최종 사용 가능 집계와 프리셋별 증거 진단 계약
+- CosyVoice 합성 경로에서 manifest 누락·미승인·중복 WAV 우회 차단
+- Browser Speech 5종 실제 배정 진단과 후보 선택 근거 검사
+- Quality Lab 프리셋별 A/B, IndexedDB 키 분리, CSV 프리셋 메타데이터 검사
+- Repository preflight 21개 통과
+- API pytest 158개 통과, Worker pytest 14개 통과, CosyVoice 전용 회귀 8개 통과
+- TS/TSX transpile 구문 177개와 Python compileall 통과
+- 전체 npm lint·semantic typecheck·Vitest·Vite build는 내부 registry의 `zustand@5.0.8` 404로 GitHub Actions 최종 판정
+
 # Heartbeat 6.7.1 음성 프리셋 정합성 추가 검증
 
 - 알 수 없는 프리셋 ID를 첫 여성 프리셋으로 대체하지 않는지 검사

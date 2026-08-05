@@ -5,6 +5,7 @@ import {
   createBrowserSpeechPlayback,
   createBrowserSpeechResult,
   createBrowserSpeechUtterance,
+  diagnoseBrowserSpeechVoices,
   estimateBrowserSpeechDuration,
   getBrowserSpeechEngine,
   isBrowserSpeechSupported,
@@ -170,6 +171,24 @@ describe('browserSpeech', () => {
     const voices = installBrowserSpeech()
 
     expect(() => selectBrowserSpeechVoice(voices, 'unknown-preset')).toThrow('지원하지 않는 음성 프리셋')
+  })
+
+
+  it('브라우저 음성 실제 배정 근거를 5개 프리셋별로 노출한다', () => {
+    const voices = installBrowserSpeech()
+    const diagnostics = diagnoseBrowserSpeechVoices(voices)
+
+    expect(diagnostics).toHaveLength(5)
+    expect(diagnostics.find((item) => item.voiceId === 'on-clear')).toMatchObject({
+      status: 'ready',
+      selectedVoiceName: 'Microsoft InJoon Male',
+      inferredGender: 'male',
+      selectionBasis: 'preferred-token',
+    })
+    expect(diagnostics.find((item) => item.voiceId === 'jun-deep')).toMatchObject({
+      status: 'ready',
+      selectedVoiceName: 'Korean Minsu Male',
+    })
   })
 
   it('긴 내용일수록 예상 재생시간이 늘고 빠른 속도에서는 줄어든다', () => {

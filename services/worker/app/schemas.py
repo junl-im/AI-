@@ -52,6 +52,7 @@ class WorkerDiagnosticsResponse(BaseModel):
     model_manifest_valid: bool = False
     model_id: str | None = None
     model_version: str | None = None
+    model_digest: str | None = None
     model_license_name: str | None = None
     model_license_url: str | None = None
     model_license_requires_acceptance: bool = False

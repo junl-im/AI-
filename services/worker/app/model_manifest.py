@@ -46,6 +46,7 @@ class ModelVerification:
     manifest_valid: bool = False
     model_id: str | None = None
     model_version: str | None = None
+    model_digest: str | None = None
     license_name: str | None = None
     license_url: str | None = None
     license_requires_acceptance: bool = False
@@ -65,6 +66,7 @@ class ModelVerification:
             "manifest_valid": self.manifest_valid,
             "model_id": self.model_id,
             "model_version": self.model_version,
+            "model_digest": self.model_digest,
             "license_name": self.license_name,
             "license_url": self.license_url,
             "license_requires_acceptance": self.license_requires_acceptance,
@@ -208,6 +210,7 @@ def verify_model_manifest(
         "manifest_valid": True,
         "model_id": manifest.model_id,
         "model_version": manifest.model_version,
+        "model_digest": _sha256(manifest_path, hash_cache),
         "license_name": manifest.license_name,
         "license_url": manifest.license_url,
         "license_requires_acceptance": manifest.license_requires_acceptance,

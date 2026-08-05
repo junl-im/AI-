@@ -1,5 +1,10 @@
 import type { EngineInfo, TtsSynthesisRequest, TtsSynthesisResult } from '../ai/contracts'
-import { requireVoicePreset, type VoiceGender } from './voicePresets'
+import {
+  requireVoicePreset,
+  voicePresets,
+  type VoiceGender,
+  type VoicePreset,
+} from './voicePresets'
 
 export const BROWSER_SPEECH_ENGINE_ID = 'browser-speech'
 
@@ -10,6 +15,20 @@ export interface BrowserSpeechPlayback {
   pitch: number
   voiceId: string
   expectedGender?: VoiceGender
+}
+
+export interface BrowserVoiceSelectionDiagnostic {
+  voiceId: string
+  presetName: string
+  expectedGender: VoiceGender
+  status: 'ready' | 'missing'
+  selectedVoiceName: string | null
+  selectedVoiceUri: string | null
+  inferredGender: VoiceGender | 'unknown' | null
+  selectionBasis: 'preferred-token' | 'variant-index' | 'none'
+  koreanCandidateCount: number
+  compatibleCandidateCount: number
+  reason: string
 }
 
 const femaleVoiceTokens = [
@@ -93,6 +112,113 @@ function availableBrowserVoices(): SpeechSynthesisVoice[] {
   return window.speechSynthesis.getVoices()
 }
 
+function compatibleVoices(
+  voices: SpeechSynthesisVoice[],
+  preset: VoicePreset,
+): { korean: SpeechSynthesisVoice[]; compatible: SpeechSynthesisVoice[] } {
+  const korean = voices.filter((voice) => voice.lang.toLowerCase().startsWith('ko'))
+  const compatible = korean.filter((voice) => {
+    const inferredGender = inferBrowserVoiceGender(voice)
+    return preset.gender === 'neutral'
+      ? inferredGender === 'unknown'
+      : inferredGender === preset.gender
+  })
+  return { korean, compatible }
+}
+
+function selectBrowserSpeechVoiceWithEvidence(
+  voices: SpeechSynthesisVoice[],
+  preset: VoicePreset,
+): { voice: SpeechSynthesisVoice | null; diagnostic: BrowserVoiceSelectionDiagnostic } {
+  const { korean, compatible } = compatibleVoices(voices, preset)
+  if (korean.length === 0) {
+    return {
+      voice: null,
+      diagnostic: {
+        voiceId: preset.id,
+        presetName: preset.name,
+        expectedGender: preset.gender,
+        status: 'missing',
+        selectedVoiceName: null,
+        selectedVoiceUri: null,
+        inferredGender: null,
+        selectionBasis: 'none',
+        koreanCandidateCount: 0,
+        compatibleCandidateCount: 0,
+        reason: '설치된 한국어 브라우저 음성이 없습니다.',
+      },
+    }
+  }
+  if (compatible.length === 0) {
+    return {
+      voice: null,
+      diagnostic: {
+        voiceId: preset.id,
+        presetName: preset.name,
+        expectedGender: preset.gender,
+        status: 'missing',
+        selectedVoiceName: null,
+        selectedVoiceUri: null,
+        inferredGender: null,
+        selectionBasis: 'none',
+        koreanCandidateCount: korean.length,
+        compatibleCandidateCount: 0,
+        reason: '성별이 확인되는 호환 한국어 음성이 없습니다. 반대 성별은 사용하지 않습니다.',
+      },
+    }
+  }
+
+  const preferred = compatible.find((voice) => {
+    const identity = voiceIdentity(voice)
+    return preset.preferredVoiceTokens.some((token) => identityIncludesToken(identity, token))
+  })
+  const selected = preferred ?? compatible[preset.voiceVariantIndex] ?? null
+  if (!selected) {
+    return {
+      voice: null,
+      diagnostic: {
+        voiceId: preset.id,
+        presetName: preset.name,
+        expectedGender: preset.gender,
+        status: 'missing',
+        selectedVoiceName: null,
+        selectedVoiceUri: null,
+        inferredGender: null,
+        selectionBasis: 'none',
+        koreanCandidateCount: korean.length,
+        compatibleCandidateCount: compatible.length,
+        reason: `호환 후보가 ${compatible.length}개뿐이라 프리셋 순번 ${preset.voiceVariantIndex + 1}을 배정할 수 없습니다. 같은 음성을 중복 사용하지 않습니다.`,
+      },
+    }
+  }
+
+  const selectionBasis = preferred ? 'preferred-token' : 'variant-index'
+  return {
+    voice: selected,
+    diagnostic: {
+      voiceId: preset.id,
+      presetName: preset.name,
+      expectedGender: preset.gender,
+      status: 'ready',
+      selectedVoiceName: selected.name,
+      selectedVoiceUri: selected.voiceURI,
+      inferredGender: inferBrowserVoiceGender(selected),
+      selectionBasis,
+      koreanCandidateCount: korean.length,
+      compatibleCandidateCount: compatible.length,
+      reason: selectionBasis === 'preferred-token'
+        ? '프리셋 선호 토큰과 성별이 일치하는 음성을 선택했습니다.'
+        : `성별 호환 후보 중 프리셋 전용 순번 ${preset.voiceVariantIndex + 1}을 선택했습니다.`,
+    },
+  }
+}
+
+export function diagnoseBrowserSpeechVoices(
+  voices: SpeechSynthesisVoice[] = availableBrowserVoices(),
+): BrowserVoiceSelectionDiagnostic[] {
+  return voicePresets.map((preset) => selectBrowserSpeechVoiceWithEvidence(voices, preset).diagnostic)
+}
+
 export function createBrowserSpeechResult(
   request: TtsSynthesisRequest,
   jobId: string,
@@ -148,25 +274,8 @@ export function selectBrowserSpeechVoice(
   voices: SpeechSynthesisVoice[],
   voiceId: string,
 ): SpeechSynthesisVoice | null {
-  const korean = voices.filter((voice) => voice.lang.toLowerCase().startsWith('ko'))
-  if (korean.length === 0) return null
-
   const preset = requireVoicePreset(voiceId)
-  const compatible = korean.filter((voice) => {
-    const inferredGender = inferBrowserVoiceGender(voice)
-    return preset.gender === 'neutral'
-      ? inferredGender === 'unknown'
-      : inferredGender === preset.gender
-  })
-  if (compatible.length === 0) return null
-
-  const preferred = compatible.find((voice) => {
-    const identity = voiceIdentity(voice)
-    return preset.preferredVoiceTokens.some((token) => identityIncludesToken(identity, token))
-  })
-  if (preferred) return preferred
-
-  return compatible[preset.voiceVariantIndex] ?? null
+  return selectBrowserSpeechVoiceWithEvidence(voices, preset).voice
 }
 
 export function createBrowserSpeechUtterance(

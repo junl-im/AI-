@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.7.1 · Voice Preset Fidelity Hotfix`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -65,3 +65,21 @@
 51. 도윤·준호·민준에 필요한 별도 남성 후보가 부족하면 같은 시스템·브라우저·Melo 화자를 순환 재사용하지 않고 해당 프리셋을 미지원 처리합니다.
 52. 알려진 5개 CosyVoice 프리셋은 동일 ID의 전용 WAV만 사용합니다. 기본 기준 WAV와 다른 인물 WAV는 대체재가 아닙니다.
 53. Browser/System 음성은 기기별 근사 음성입니다. 정확한 인물별 음색은 동의받은 5개 전용 WAV와 실제 청취 검토가 필요합니다.
+
+54. Heartbeat 6.8.0은 전용 WAV만으로 준비 완료 처리하지 않습니다. 동일 ID manifest의 동의 확인, `tts-inference` 권리, 사람 청취 승인, 실제 파일 SHA-256 일치가 모두 필요합니다.
+55. 같은 WAV SHA-256을 두 개 이상의 인물 프리셋에 등록하면 모든 관련 프리셋을 차단합니다. 파일명만 복사하거나 이름만 바꾸는 방식은 통과하지 않습니다.
+56. Quality Lab은 5개 프리셋을 직접 선택해 같은 문장·같은 엔진으로 A/B 비교하며, 로컬 검수 기록과 CSV에 프리셋 ID·표시 이름·선언 성별을 함께 저장합니다.
+57. Engine Doctor 진단 복사본에는 WAV·로컬 경로·원문을 넣지 않고 프리셋별 인증 상태, checksum 일치 여부와 중복 ID만 포함합니다.
+58. 전달 ZIP의 5개 manifest는 안전한 `pending` 템플릿입니다. 실제 동의·권리·검수 증거와 WAV가 없으므로 기본 상태는 사용 불가가 정상입니다.
+
+
+## Heartbeat 6.8.2 필수 확인
+
+- Quality Lab의 검수 JSON은 승인 근거 후보이며 가져오기만으로 manifest를 자동 승인하지 않는다.
+- 프리셋 승인은 현재 WAV SHA-256, 현재 manifest digest, 검수 묶음 checksum, 동의·권리·중복 상태를 다시 계산한 diff 미리보기 뒤에만 적용한다.
+- 미리보기 뒤 WAV나 manifest가 달라지면 승인 적용을 거부한다. 승인 전후 snapshot은 감사 JSONL에 남고, 현재 manifest가 승인 후 상태와 다르면 자동 롤백하지 않는다.
+- `SORION_VOICE_REVIEW_SIGNING_SECRET`이 비어 있으면 승인은 명시적으로 unsigned이다. 키를 설정한 환경만 HMAC-SHA256을 만들고 같은 신뢰 키로 검증한다.
+- HMAC은 로컬 키 보유 확인 수단이며 화자 신원·동의·법적 권리를 대신 증명하지 않는다. 비밀키는 저장소·ZIP·진단 복사본에 넣지 않는다.
+- CosyVoice Worker의 짧은 자동 합성 telemetry는 10·30·60분 실기기 soak와 별도 JSONL·별도 표로 유지한다.
+- benchmark는 모델 digest·GPU·프리셋별 표본 수와 first audio·RTF·handoff P50/P95를 표시하되 표본이 없으면 수치를 만들지 않는다.
+- 동의·권리 만료 경고, WAV 교체 시 `stale`, 반대 성별·중복 화자 폴백 차단은 계속 유지한다.

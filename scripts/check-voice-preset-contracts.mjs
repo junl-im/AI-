@@ -44,7 +44,7 @@ for (const relativePath of [
   'services/api/app/engines/tts/cosyvoice_worker_tts.py',
 ]) {
   const source = await read(relativePath)
-  if (!source.includes('from app.services.voice_presets import PRESET_VOICE_IDS')) {
+  if (!source.includes('PRESET_VOICE_IDS') || !source.includes('app.services.voice_presets')) {
     failures.push(`${relativePath}: 공통 PRESET_VOICE_IDS를 사용하지 않습니다.`)
   }
 }
@@ -54,6 +54,8 @@ for (const required of [
   'if voice_id in PRESET_VOICE_IDS',
   'VoicePresetUnavailableError',
   '다른 프리셋 또는 기본 음성으로 자동 대체하지 않습니다',
+  'inspect_voice_preset_evidence',
+  '동의·권리·사람 검수·SHA-256',
 ]) {
   if (!cosy.includes(required)) failures.push(`cosyvoice_worker_tts.py: ${required} 누락`)
 }
@@ -143,6 +145,23 @@ for (const required of [
   if (!apiTests.includes(required)) failures.push(`API regression test 누락: ${required}`)
 }
 
+
+const evidence = await read('services/api/app/services/voice_preset_evidence.py')
+for (const required of [
+  'VoicePresetEvidenceInspection',
+  'mark_duplicate_checksums',
+  'tts-inference',
+  '한 사람 음성을 여러 인물 프리셋에 중복 등록하지 않습니다',
+]) {
+  if (!evidence.includes(required)) failures.push(`voice_preset_evidence.py: ${required} 누락`)
+}
+for (const voiceId of requiredIds) {
+  const manifest = await read(`voice-presets/${voiceId}.manifest.json`)
+  for (const required of ['"schema_version": 2', `"voice_id": "${voiceId}"`, '"tts-inference"']) {
+    if (!manifest.includes(required)) failures.push(`${voiceId}.manifest.json: ${required} 누락`)
+  }
+}
+
 const presetReadme = await read('voice-presets/README.md')
 const presetGuide = await read('docs/VOICE_PRESETS.md')
 for (const filename of ['jun-deep.wav', 'min-energetic.wav']) {
@@ -159,4 +178,4 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log('Voice preset 계약 검사 통과 · 5종/남성 3종 · 반대 성별 및 기본 음성 묵시적 폴백 차단')
+console.log('Voice preset 계약 검사 통과 · 5종/남성 3종 · 성별 폴백 및 미인증·중복 WAV 차단')

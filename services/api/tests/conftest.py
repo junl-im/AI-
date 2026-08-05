@@ -32,6 +32,14 @@ def client(tmp_path_factory, monkeypatch):
         "SORION_EVIDENCE_INTAKE_PATH",
         str(app_path / "imported-evidence.jsonl"),
     )
+    monkeypatch.setenv(
+        "SORION_WORKER_TELEMETRY_PATH",
+        str(app_path / "worker-telemetry.jsonl"),
+    )
+    monkeypatch.setenv(
+        "SORION_VOICE_REVIEW_APPROVAL_PATH",
+        str(app_path / "voice-review-approvals.jsonl"),
+    )
     get_settings.cache_clear()
     try:
         with TestClient(app, client=("127.0.0.1", 50000)) as test_client:

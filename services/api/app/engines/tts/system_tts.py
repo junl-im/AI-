@@ -15,6 +15,7 @@ from app.services.voice_presets import (
     VoicePresetProfile,
     VoicePresetUnavailableError,
     get_voice_preset,
+    list_voice_presets,
 )
 from app.storage.audio_store import AudioStore
 
@@ -87,43 +88,49 @@ class SystemSpeechAdapter:
         return None
 
     @staticmethod
-    def _has_windows_korean_voice(executable: str, configured_voice: str) -> bool:
+    def _windows_voice_inventory(executable: str) -> list[dict[str, str]]:
         command = (
             "Add-Type -AssemblyName System.Speech; "
             "$synth = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
             "$synth.GetInstalledVoices() | Where-Object { $_.Enabled } | "
             "ForEach-Object { Write-Output ($_.VoiceInfo.Name + '|' + "
-            "$_.VoiceInfo.Culture.Name) }; $synth.Dispose()"
+            "$_.VoiceInfo.Culture.Name + '|' + $_.VoiceInfo.Gender.ToString()) }; "
+            "$synth.Dispose()"
         )
         try:
             result = subprocess.run(
-                [
-                    executable,
-                    "-NoProfile",
-                    "-NonInteractive",
-                    "-Command",
-                    command,
-                ],
+                [executable, "-NoProfile", "-NonInteractive", "-Command", command],
                 check=False,
                 capture_output=True,
                 text=True,
                 timeout=5,
             )
-            if result.returncode != 0:
-                return False
-            voices = [
-                line.strip().split("|", maxsplit=1)
-                for line in result.stdout.splitlines()
-                if "|" in line
-            ]
-            if configured_voice:
-                return any(
-                    name == configured_voice and culture.lower().startswith("ko-")
-                    for name, culture in voices
-                )
-            return any(culture.lower().startswith("ko-") for _, culture in voices)
         except (OSError, subprocess.SubprocessError):
-            return False
+            return []
+        if result.returncode != 0:
+            return []
+        voices: list[dict[str, str]] = []
+        for line in result.stdout.splitlines():
+            parts = [part.strip() for part in line.strip().split("|")]
+            if len(parts) < 2:
+                continue
+            voices.append({
+                "name": parts[0],
+                "culture": parts[1],
+                "gender": parts[2].lower() if len(parts) > 2 else "unknown",
+            })
+        return voices
+
+    @classmethod
+    def _has_windows_korean_voice(cls, executable: str, configured_voice: str) -> bool:
+        voices = cls._windows_voice_inventory(executable)
+        if configured_voice:
+            return any(
+                item["name"] == configured_voice
+                and item["culture"].lower().startswith("ko-")
+                for item in voices
+            )
+        return any(item["culture"].lower().startswith("ko-") for item in voices)
 
     @staticmethod
     def _has_korean_espeak_voice(executable: str) -> bool:
@@ -236,6 +243,97 @@ class SystemSpeechAdapter:
         if preset.gender == "female":
             return f"{base}+f{(preset.variant_index % 4) + 1}"
         return base
+
+    @staticmethod
+    def _gender_label(value: str) -> str:
+        return {"female": "여성", "male": "남성", "neutral": "중성"}.get(value, "미확인")
+
+    def _windows_selection_for(self, preset: VoicePresetProfile) -> dict[str, str | None]:
+        assert self.backend is not None
+        inventory = [
+            item
+            for item in self._windows_voice_inventory(self.backend.executable)
+            if item["culture"].lower().startswith("ko-")
+        ]
+        expected = preset.gender
+        compatible = [
+            item for item in inventory
+            if (
+                item["gender"] == expected
+                if preset.requires_gender_match
+                else item["gender"] in {"neutral", "notset", "unknown"}
+            )
+        ]
+        if self.backend.voice:
+            compatible = [item for item in compatible if item["name"] == self.backend.voice]
+        preferred = next((
+            item for item in compatible
+            if any(token in item["name"].lower() for token in preset.preferred_voice_tokens)
+        ), None)
+        if preferred is not None:
+            selected = preferred
+            basis = "preferred-name"
+        elif len(compatible) > preset.variant_index:
+            selected = compatible[preset.variant_index]
+            basis = f"gender-slot-{preset.variant_index + 1}"
+        else:
+            raise VoicePresetUnavailableError(
+                f"설치된 {self._gender_label(expected)} Windows 한국어 음성 중 "
+                f"{preset.display_name} 프리셋에 별도 배정할 후보가 없습니다."
+            )
+        return {
+            "selected_voice_id": selected["name"],
+            "selected_voice_name": selected["name"],
+            "selected_gender": selected["gender"],
+            "selection_basis": basis,
+        }
+
+    def selection_diagnostics(self) -> list[dict[str, object]]:
+        results: list[dict[str, object]] = []
+        for preset in list_voice_presets():
+            base: dict[str, object] = {
+                "engine_id": "system",
+                "engine_name": "SoriON Local Korean Voice",
+                "voice_id": preset.id,
+                "display_name": preset.display_name,
+                "expected_gender": preset.gender,
+                "status": "missing",
+                "selected_voice_id": None,
+                "selected_voice_name": None,
+                "selected_gender": None,
+                "selection_basis": "unavailable",
+                "reason": self.reason or "시스템 음성 엔진을 사용할 수 없습니다.",
+            }
+            if self.backend is None:
+                results.append(base)
+                continue
+            try:
+                if self.backend.kind == "windows":
+                    selected = self._windows_selection_for(preset)
+                elif self.backend.kind == "macos":
+                    name = self._macos_voice_for(preset)
+                    selected = {
+                        "selected_voice_id": name,
+                        "selected_voice_name": name,
+                        "selected_gender": self._infer_voice_gender(name),
+                        "selection_basis": "macos-inventory",
+                    }
+                else:
+                    name = self._espeak_voice_for(preset)
+                    selected = {
+                        "selected_voice_id": name,
+                        "selected_voice_name": name,
+                        "selected_gender": preset.gender,
+                        "selection_basis": "espeak-gender-variant",
+                    }
+                base.update(selected)
+                base["status"] = "ready"
+                base["reason"] = "현재 기기에서 선택될 실제 시스템 화자입니다."
+            except VoicePresetUnavailableError as error:
+                base["status"] = "blocked"
+                base["reason"] = str(error)
+            results.append(base)
+        return results
 
     async def synthesize(self, request: TtsSynthesisRequest, output_path: Path) -> None:
         if self.backend is None:
@@ -392,6 +490,9 @@ class SystemTtsEngine(TtsEngine):
             korean_specialization=45,
             long_form=True,
         )
+
+    def voice_selection_diagnostics(self) -> list[dict[str, object]]:
+        return self.adapter.selection_diagnostics()
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:
         if request.output_format != "wav":

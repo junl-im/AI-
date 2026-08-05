@@ -13,6 +13,9 @@ class DeviceBenchmarkRequest(BaseModel):
     engine_id: str = Field(min_length=1, max_length=80)
     model_id: str = Field(min_length=1, max_length=120)
     model_version: str = Field(min_length=1, max_length=80)
+    model_digest: str = Field(default="", max_length=128)
+    accelerator_name: str = Field(default="unknown", min_length=1, max_length=120)
+    gpu_name: str = Field(default="", max_length=160)
     preset_id: str = Field(default="unknown", min_length=1, max_length=80)
     sample_minutes: int = Field(ge=1, le=120)
     soak_elapsed_seconds: float | None = Field(default=None, ge=0, le=43200)
@@ -109,17 +112,27 @@ class DeviceCertificationCoverage(BaseModel):
 class DeviceMetricAggregate(BaseModel):
     device_profile: DeviceProfile
     engine_id: str
+    model_id: str
+    model_version: str
+    model_digest: str
+    accelerator_name: str
+    gpu_name: str
     preset_id: str
     records: int
     ready_records: int
     failure_rate: float
     average_realtime_factor: float
+    p50_realtime_factor: float
+    p95_realtime_factor: float
+    p50_first_audio_ms: int | None = None
     p95_first_audio_ms: int | None = None
     p95_sse_reconnect_ms: int | None = None
     p95_audio_fetch_recovery_ms: int | None = None
     p95_playback_interruption_ms: int | None = None
     p95_seam_waited_ms: int | None = None
     p95_seam_decode_ms: int | None = None
+    p50_final_handoff_error_ms: int | None = None
+    p95_final_handoff_error_ms: int | None = None
 
 
 class DeviceBenchmarkSummaryResponse(BaseModel):
@@ -170,3 +183,51 @@ class SttBatchVerificationResponse(BaseModel):
     regeneration_segment_ids: list[str]
     blocked_segment_ids: list[str]
     processing_seconds: float
+
+
+class WorkerSynthesisTelemetryResponse(BaseModel):
+    id: str
+    recorded_at: datetime
+    engine_id: str
+    worker_job_id: str
+    preset_id: str
+    model_id: str
+    model_version: str
+    model_digest: str
+    device_profile: str
+    accelerator_name: str
+    gpu_name: str
+    first_audio_ms: int | None = None
+    processing_ms: int
+    audio_duration_seconds: float | None = None
+    realtime_factor: float | None = None
+    final_handoff_error_ms: int | None = None
+    succeeded: bool
+    failure_reason: str = ""
+
+
+class WorkerTelemetryAggregate(BaseModel):
+    engine_id: str
+    preset_id: str
+    model_id: str
+    model_version: str
+    model_digest: str
+    device_profile: str
+    accelerator_name: str
+    gpu_name: str
+    records: int
+    success_records: int
+    failure_rate: float
+    p50_first_audio_ms: int | None = None
+    p95_first_audio_ms: int | None = None
+    p50_realtime_factor: float | None = None
+    p95_realtime_factor: float | None = None
+    p50_final_handoff_error_ms: int | None = None
+    p95_final_handoff_error_ms: int | None = None
+
+
+class WorkerTelemetrySummaryResponse(BaseModel):
+    total_records: int
+    success_records: int
+    failed_records: int
+    metric_groups: list[WorkerTelemetryAggregate] = Field(default_factory=list)

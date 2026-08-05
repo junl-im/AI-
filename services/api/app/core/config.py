@@ -51,6 +51,10 @@ class Settings(BaseSettings):
     stt_comparison_path: str = ".sorion/quality/stt-regeneration-comparisons.jsonl"
     export_soak_path: str = ".sorion/quality/export-soak.jsonl"
     evidence_intake_path: str = ".sorion/quality/imported-evidence.jsonl"
+    voice_review_approval_path: str = ".sorion/quality/voice-review-approvals.jsonl"
+    voice_review_signing_secret: str = ""
+    voice_review_signing_key_id: str = "local-review-key"
+    worker_telemetry_path: str = ".sorion/quality/worker-synthesis-telemetry.jsonl"
     stt_directory: str = ".sorion/stt"
     stt_max_file_bytes: int = 100 * 1024 * 1024
     faster_whisper_model: str = "small"
@@ -106,6 +110,14 @@ class Settings(BaseSettings):
     @property
     def evidence_intake_file(self) -> Path:
         return Path(self.evidence_intake_path).expanduser().resolve()
+
+    @property
+    def voice_review_approval_file(self) -> Path:
+        return Path(self.voice_review_approval_path).expanduser().resolve()
+
+    @property
+    def worker_telemetry_file(self) -> Path:
+        return Path(self.worker_telemetry_path).expanduser().resolve()
 
     @property
     def stt_path(self) -> Path:

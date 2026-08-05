@@ -1,6 +1,6 @@
 # Voice Preset Fidelity Contract
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.7.1 · Voice Preset Fidelity Hotfix`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard`
 
 ## 목적
 
@@ -16,12 +16,20 @@
 6. 특정 프리셋만 준비되지 않은 오류는 엔진 장애로 계산하거나 회로 차단을 열지 않는다.
 7. Browser/System 음성은 기기 내장 음성의 안전한 근사값이며 전용 인물 음색으로 표시하지 않는다.
 8. 실제 인물별 음색은 동의·권리 확인을 마친 동일 ID의 전용 WAV 또는 다중 화자 모델이 있을 때만 보장 후보가 된다.
+9. 동일 ID manifest의 동의·이용 범위·사람 승인·SHA-256이 모두 준비돼야 전용 WAV를 사용한다.
+10. 같은 WAV checksum을 여러 인물 프리셋에 등록하면 파일명이 달라도 모두 차단한다.
+11. 승인된 사람 검수는 승인 당시 WAV SHA-256과 결박하며 파일 교체 뒤 과거 승인을 재사용하지 않는다.
+12. Quality Lab 검수 묶음의 가져오기는 로컬 평가 복원이며 manifest를 자동 승인하지 않는다.
+13. Windows/Melo 실제 선택 화자 metadata는 진단 근거이며 특정 인물 일치 보증으로 표현하지 않는다.
+14. 검수 묶음만으로 manifest를 자동 승인하지 않고 현재 WAV·manifest를 다시 계산한 명시적 preview/apply를 사용한다.
+15. signed manifest는 설정된 신뢰 key ID·secret으로 검증되지 않으면 READY로 처리하지 않는다.
+16. Worker 자동 합성 성능을 10·30·60분 실기기 soak와 섞거나 장시간 인증으로 표현하지 않는다.
 
 ## 엔진별 처리
 
 | 엔진 | 적용 방식 | 후보 부족 시 |
 | --- | --- | --- |
-| CosyVoice | `voice-presets/{preset-id}.wav` 전용 파일만 사용 | 다른 프리셋·기본 WAV로 대체하지 않고 다음 엔진으로 이동 |
+| CosyVoice | `voice-presets/{preset-id}.wav`와 동일 ID의 인증 manifest만 사용 | 증거 누락·checksum 불일치·중복 WAV면 다른 음성으로 대체하지 않고 다음 엔진으로 이동 |
 | MeloTTS | 화자 이름 우선, 이후 성별 호환 화자 순번 사용 | 단일 `KR` 화자 또는 같은 화자 반복 사용 금지 |
 | Windows System.Speech | 한국어·성별 메타데이터와 프리셋별 후보 순번 사용 | 다른 성별·같은 후보 중복 배정 금지 |
 | macOS `say` | 한국어 이름에서 성별을 식별하고 프리셋별 후보 사용 | 기존 공통 `Yuna` 강제값 제거, 호환 후보 없으면 실패 |
@@ -47,8 +55,9 @@
 - `voice-presets` 폴더에 5개 동일 ID WAV 배치
 - 각 WAV의 화자 동의, 사용 범위, 출처, 라이선스 기록
 - 실제 청취로 이름·성별·톤 확인
-- Engine Doctor에서 5/5 파일 검사
+- Engine Doctor에서 WAV 5/5, manifest 인증 5/5, 최종 사용 가능 5/5를 각각 검사
+- 같은 WAV가 여러 인물에 중복되지 않았는지 실제 SHA-256 검사
 - 짧은 문장과 장문 첫 구간을 프리셋별로 생성해 비교
 - 모델·장치·프리셋별 first audio, RTF, 실패율 기록
 
-WAV 파형만으로 성별이나 화자 신원을 자동 확정하지 않는다. 다음 업데이트에서는 별도 manifest에 선언값·동의·checksum을 기록하고 사람이 검토하는 흐름을 추가한다.
+WAV 파형만으로 성별이나 화자 신원을 자동 확정하지 않는다. manifest는 운영 증거를 구조화하지만 사실 여부를 자동 보증하지 않으므로 원본 동의·권리 문서와 사람 청취 검토를 별도로 보존한다. 구체적인 작성 순서는 [`VOICE_PRESET_EVIDENCE.md`](VOICE_PRESET_EVIDENCE.md)를 따른다.

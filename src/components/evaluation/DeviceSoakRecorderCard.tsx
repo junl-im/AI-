@@ -50,6 +50,9 @@ export function DeviceSoakRecorderCard({ onRecorded }: { onRecorded: () => void 
   const [engineId, setEngineId] = useState('cosyvoice3')
   const [modelId, setModelId] = useState('cosyvoice3-local')
   const [modelVersion, setModelVersion] = useState('unknown')
+  const [modelDigest, setModelDigest] = useState('')
+  const [acceleratorName, setAcceleratorName] = useState('unknown')
+  const [gpuName, setGpuName] = useState('')
   const [presetId, setPresetId] = useState('sori-warm')
   const [sampleMinutes, setSampleMinutes] = useState<10 | 30 | 60>(() => session?.sampleMinutes ?? 10)
   const [scenario, setScenario] = useState<DeviceCertificationScenario>(() => session?.scenario ?? 'baseline')
@@ -107,6 +110,9 @@ export function DeviceSoakRecorderCard({ onRecorded }: { onRecorded: () => void 
       engineId: engineId.trim() || 'cosyvoice3',
       modelId: modelId.trim() || 'unknown',
       modelVersion: modelVersion.trim() || 'unknown',
+      modelDigest: modelDigest.trim(),
+      acceleratorName: acceleratorName.trim() || 'unknown',
+      gpuName: gpuName.trim(),
       presetId,
       sampleMinutes,
       soakElapsedSeconds: elapsedSeconds || null,
@@ -197,6 +203,9 @@ export function DeviceSoakRecorderCard({ onRecorded }: { onRecorded: () => void 
         <input aria-label="엔진 ID" value={engineId} onChange={(event) => setEngineId(event.target.value)} placeholder="엔진 ID" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />
         <input aria-label="모델 ID" value={modelId} onChange={(event) => setModelId(event.target.value)} placeholder="모델 ID" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />
         <input aria-label="모델 버전" value={modelVersion} onChange={(event) => setModelVersion(event.target.value)} placeholder="모델 버전" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />
+        <input aria-label="모델 digest" value={modelDigest} onChange={(event) => setModelDigest(event.target.value)} placeholder="모델 SHA-256/digest" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />
+        <input aria-label="가속 장치" value={acceleratorName} onChange={(event) => setAcceleratorName(event.target.value)} placeholder="cpu/cuda/mps" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />
+        <input aria-label="GPU 이름" value={gpuName} onChange={(event) => setGpuName(event.target.value)} placeholder="GPU 이름" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />
         <input aria-label="처리 시간 초" inputMode="decimal" value={processingSeconds} onChange={(event) => setProcessingSeconds(event.target.value)} placeholder="처리 시간 초" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />
         <input aria-label="재생 음원 길이 초" inputMode="decimal" value={audioDurationSeconds} onChange={(event) => setAudioDurationSeconds(event.target.value)} placeholder="재생 음원 길이 초" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />
         <input aria-label="첫 음성 밀리초" inputMode="numeric" value={firstAudioMs} onChange={(event) => setFirstAudioMs(event.target.value)} placeholder="첫 음성 ms" className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs" />

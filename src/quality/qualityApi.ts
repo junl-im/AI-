@@ -182,17 +182,27 @@ export async function getDeviceBenchmarkSummary() {
     metric_groups: Array<{
       device_profile: 'cuda' | 'apple-silicon' | 'cpu' | 'android' | 'ios'
       engine_id: string
+      model_id: string
+      model_version: string
+      model_digest: string
+      accelerator_name: string
+      gpu_name: string
       preset_id: string
       records: number
       ready_records: number
       failure_rate: number
       average_realtime_factor: number
+      p50_realtime_factor: number
+      p95_realtime_factor: number
+      p50_first_audio_ms: number | null
       p95_first_audio_ms: number | null
       p95_sse_reconnect_ms: number | null
       p95_audio_fetch_recovery_ms: number | null
       p95_playback_interruption_ms: number | null
       p95_seam_waited_ms: number | null
       p95_seam_decode_ms: number | null
+      p50_final_handoff_error_ms: number | null
+      p95_final_handoff_error_ms: number | null
     }>
   }>('/quality/device-benchmarks/summary')
   return {
@@ -219,17 +229,27 @@ export async function getDeviceBenchmarkSummary() {
     metricGroups: (result.metric_groups ?? []).map((item) => ({
       deviceProfile: item.device_profile,
       engineId: item.engine_id,
+      modelId: item.model_id,
+      modelVersion: item.model_version,
+      modelDigest: item.model_digest,
+      acceleratorName: item.accelerator_name,
+      gpuName: item.gpu_name,
       presetId: item.preset_id,
       records: item.records,
       readyRecords: item.ready_records,
       failureRate: item.failure_rate,
       averageRealtimeFactor: item.average_realtime_factor,
+      p50RealtimeFactor: item.p50_realtime_factor,
+      p95RealtimeFactor: item.p95_realtime_factor,
+      p50FirstAudioMs: item.p50_first_audio_ms,
       p95FirstAudioMs: item.p95_first_audio_ms,
       p95SseReconnectMs: item.p95_sse_reconnect_ms,
       p95AudioFetchRecoveryMs: item.p95_audio_fetch_recovery_ms,
       p95PlaybackInterruptionMs: item.p95_playback_interruption_ms,
       p95SeamWaitedMs: item.p95_seam_waited_ms,
       p95SeamDecodeMs: item.p95_seam_decode_ms,
+      p50FinalHandoffErrorMs: item.p50_final_handoff_error_ms,
+      p95FinalHandoffErrorMs: item.p95_final_handoff_error_ms,
     })),
   }
 }
@@ -248,6 +268,9 @@ export async function recordDeviceSoak(input: DeviceSoakRecordInput): Promise<De
       engine_id: input.engineId,
       model_id: input.modelId,
       model_version: input.modelVersion,
+      model_digest: input.modelDigest,
+      accelerator_name: input.acceleratorName,
+      gpu_name: input.gpuName,
       preset_id: input.presetId,
       sample_minutes: input.sampleMinutes,
       soak_elapsed_seconds: input.soakElapsedSeconds,
@@ -372,5 +395,57 @@ export async function downloadQualityEvidenceBundle() {
   return {
     sha256: verification.expected_sha256,
     recordCount: verification.record_count,
+  }
+}
+
+
+export async function getWorkerTelemetrySummary() {
+  const result = await apiRequest<{
+    total_records: number
+    success_records: number
+    failed_records: number
+    metric_groups: Array<{
+      engine_id: string
+      preset_id: string
+      model_id: string
+      model_version: string
+      model_digest: string
+      device_profile: string
+      accelerator_name: string
+      gpu_name: string
+      records: number
+      success_records: number
+      failure_rate: number
+      p50_first_audio_ms: number | null
+      p95_first_audio_ms: number | null
+      p50_realtime_factor: number | null
+      p95_realtime_factor: number | null
+      p50_final_handoff_error_ms: number | null
+      p95_final_handoff_error_ms: number | null
+    }>
+  }>('/quality/worker-telemetry/summary')
+  return {
+    totalRecords: result.total_records,
+    successRecords: result.success_records,
+    failedRecords: result.failed_records,
+    metricGroups: result.metric_groups.map((item) => ({
+      engineId: item.engine_id,
+      presetId: item.preset_id,
+      modelId: item.model_id,
+      modelVersion: item.model_version,
+      modelDigest: item.model_digest,
+      deviceProfile: item.device_profile,
+      acceleratorName: item.accelerator_name,
+      gpuName: item.gpu_name,
+      records: item.records,
+      successRecords: item.success_records,
+      failureRate: item.failure_rate,
+      p50FirstAudioMs: item.p50_first_audio_ms,
+      p95FirstAudioMs: item.p95_first_audio_ms,
+      p50RealtimeFactor: item.p50_realtime_factor,
+      p95RealtimeFactor: item.p95_realtime_factor,
+      p50FinalHandoffErrorMs: item.p50_final_handoff_error_ms,
+      p95FinalHandoffErrorMs: item.p95_final_handoff_error_ms,
+    })),
   }
 }

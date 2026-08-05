@@ -29,7 +29,36 @@ interface EngineDoctorDiagnostics {
     ready: boolean | null
     realEngineCount: number | null
     voicePresetReadyCount: number | null
+    voicePresetAudioReadyCount: number | null
+    voicePresetManifestReadyCount: number | null
     voicePresetExpectedCount: number | null
+    voicePresetDuplicateGroupCount: number | null
+    voicePresets: Array<{
+      voiceId: string
+      status: string
+      audioUsable: boolean
+      manifestStatus: string
+      consentStatus: string
+      humanReviewStatus: string
+      checksumMatches: boolean | null
+      duplicateVoiceIds: string[]
+      reviewChecksumMatches: boolean | null
+      approvalId: string | null
+      signatureMode: string
+      signingKeyId: string | null
+      signatureStatus: string
+      consentDaysRemaining: number | null
+      rightsDaysRemaining: number | null
+    }>
+    voiceSelections: Array<{
+      engineId: string
+      voiceId: string
+      status: string
+      selectedVoiceId: string | null
+      selectedVoiceName: string | null
+      selectedGender: string | null
+      selectionBasis: string
+    }>
     steps: Array<{ id: string; status: string; required: boolean }>
   }
 }
@@ -117,7 +146,36 @@ export function useEngineDoctor() {
         ready: setup?.ready ?? null,
         realEngineCount: setup?.realEngineCount ?? null,
         voicePresetReadyCount: setup?.voicePresetReadyCount ?? null,
+        voicePresetAudioReadyCount: setup?.voicePresetAudioReadyCount ?? null,
+        voicePresetManifestReadyCount: setup?.voicePresetManifestReadyCount ?? null,
         voicePresetExpectedCount: setup?.voicePresetExpectedCount ?? null,
+        voicePresetDuplicateGroupCount: setup?.voicePresetDuplicateGroupCount ?? null,
+        voicePresets: setup?.voicePresetDiagnostics.map((item) => ({
+          voiceId: item.voiceId,
+          status: item.status,
+          audioUsable: item.audioUsable,
+          manifestStatus: item.manifestStatus,
+          consentStatus: item.consentStatus,
+          humanReviewStatus: item.humanReviewStatus,
+          checksumMatches: item.checksumMatches,
+          duplicateVoiceIds: item.duplicateVoiceIds,
+          reviewChecksumMatches: item.reviewChecksumMatches,
+          approvalId: item.approvalId,
+          signatureMode: item.signatureMode,
+          signingKeyId: item.signingKeyId,
+          signatureStatus: item.signatureStatus,
+          consentDaysRemaining: item.consentDaysRemaining,
+          rightsDaysRemaining: item.rightsDaysRemaining,
+        })) ?? [],
+        voiceSelections: setup?.voiceSelectionDiagnostics.map((item) => ({
+          engineId: item.engineId,
+          voiceId: item.voiceId,
+          status: item.status,
+          selectedVoiceId: item.selectedVoiceId,
+          selectedVoiceName: item.selectedVoiceName,
+          selectedGender: item.selectedGender,
+          selectionBasis: item.selectionBasis,
+        })) ?? [],
         steps: setup?.steps.map(({ id, status, required }) => ({ id, status, required })) ?? [],
       },
     }

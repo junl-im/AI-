@@ -222,6 +222,9 @@ def test_mobile_certification_requires_recovery_evidence(client):
         json={
             **base,
             "preset_id": "on-clear",
+            "model_digest": "sha256:test-model",
+            "accelerator_name": "cuda",
+            "gpu_name": "RTX Test",
             "soak_elapsed_seconds": 605,
             "sse_reconnected": True,
             "audio_fetch_recovered": True,
@@ -254,11 +257,15 @@ def test_mobile_certification_requires_recovery_evidence(client):
         and item["preset_id"] == "on-clear"
     )
     assert metrics["records"] == 1
+    assert metrics["model_digest"] == "sha256:test-model"
+    assert metrics["accelerator_name"] == "cuda"
+    assert metrics["gpu_name"] == "RTX Test"
     assert metrics["p95_sse_reconnect_ms"] == 900
     assert metrics["p95_audio_fetch_recovery_ms"] == 1200
     assert metrics["p95_playback_interruption_ms"] == 650
     assert metrics["p95_seam_waited_ms"] == 850
     assert metrics["p95_seam_decode_ms"] == 140
+    assert metrics["p95_final_handoff_error_ms"] is None
 
 
 def test_mobile_certification_warns_when_recovery_timings_are_missing(client):
@@ -307,3 +314,57 @@ def test_device_soak_warns_when_wall_clock_is_shorter_than_target(client):
 
     assert response.status_code == 200
     assert response.json()["status"] == "warning"
+
+
+def test_worker_telemetry_summary_separates_model_digest_and_reports_percentiles(client):
+    store = client.app.state.worker_telemetry_store
+    base = {
+        "engine_id": "cosyvoice3",
+        "worker_job_id": "worker-1",
+        "preset_id": "on-clear",
+        "model_id": "cosyvoice3",
+        "model_version": "1",
+        "model_digest": "sha256:model-a",
+        "device_profile": "cuda",
+        "accelerator_name": "cuda:0",
+        "gpu_name": "RTX Test",
+        "processing_ms": 2000,
+        "audio_duration_seconds": 4.0,
+        "succeeded": True,
+        "failure_reason": "",
+    }
+    for index, first_audio in enumerate([500, 900, 1500], start=1):
+        store.append({
+            **base,
+            "id": f"telemetry-{index}",
+            "recorded_at": f"2026-08-05T0{index}:00:00+00:00",
+            "worker_job_id": f"worker-{index}",
+            "first_audio_ms": first_audio,
+            "realtime_factor": [0.4, 0.5, 0.8][index - 1],
+            "final_handoff_error_ms": [20, 40, 80][index - 1],
+        })
+    store.append({
+        **base,
+        "id": "telemetry-other-model",
+        "recorded_at": "2026-08-05T04:00:00+00:00",
+        "worker_job_id": "worker-other",
+        "model_digest": "sha256:model-b",
+        "first_audio_ms": 300,
+        "realtime_factor": 0.3,
+        "final_handoff_error_ms": 10,
+    })
+
+    response = client.get("/api/v1/quality/worker-telemetry/summary")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total_records"] == 4
+    assert len(body["metric_groups"]) == 2
+    group = next(item for item in body["metric_groups"] if item["model_digest"] == "sha256:model-a")
+    assert group["records"] == 3
+    assert group["p50_first_audio_ms"] == 900
+    assert group["p95_first_audio_ms"] == 1500
+    assert group["p50_realtime_factor"] == 0.5
+    assert group["p95_realtime_factor"] == 0.8
+    assert group["p50_final_handoff_error_ms"] == 40
+    assert group["p95_final_handoff_error_ms"] == 80

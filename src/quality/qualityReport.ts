@@ -35,9 +35,13 @@ export function exportQualityReviewsJson(reviews: QualityReview[]): void {
 }
 
 export function buildQualityCsv(reviews: QualityReview[]): string {
-  const header = ['평가일시', '엔진ID', '엔진명', '모드', '별점', '문장', '메모', '생성ms', '음원초', 'RTF']
+  const header = ['평가일시', '검수결정', '프리셋ID', '인물명', '선언성별', '엔진ID', '엔진명', '모드', '별점', '문장', '메모', '생성ms', '음원초', 'RTF']
   const rows = reviews.map((review) => [
     review.updatedAt,
+    review.decision ?? (review.rating >= 4 ? 'approved' : review.rating <= 2 ? 'rejected' : 'needs-review'),
+    review.voiceId ?? 'legacy-unknown',
+    review.voiceName ?? '기존 기록',
+    review.voiceGender ?? 'neutral',
     review.engineId,
     review.engineName,
     review.engineMode,

@@ -131,3 +131,29 @@ async def test_windows_preset_marker_becomes_non_circuit_error(tmp_path, monkeyp
 
     with pytest.raises(VoicePresetUnavailableError, match="남성 한국어 음성이 부족"):
         await adapter._windows(request, tmp_path / "result.wav")
+
+
+def test_espeak_selection_diagnostics_are_distinct_per_preset():
+    adapter = object.__new__(SystemSpeechAdapter)
+    adapter.backend = type(
+        "Backend",
+        (),
+        {"kind": "espeak", "executable": "espeak", "voice": "ko"},
+    )()
+    adapter.reason = None
+
+    diagnostics = {
+        item["voice_id"]: item
+        for item in adapter.selection_diagnostics()
+    }
+
+    assert diagnostics["sori-warm"]["selected_voice_id"].startswith("ko+f")
+    assert diagnostics["on-clear"]["selected_voice_id"].startswith("ko+m")
+    assert (
+        diagnostics["on-clear"]["selected_voice_id"]
+        != diagnostics["jun-deep"]["selected_voice_id"]
+    )
+    assert (
+        diagnostics["jun-deep"]["selected_voice_id"]
+        != diagnostics["min-energetic"]["selected_voice_id"]
+    )

@@ -1,7 +1,8 @@
-import type { ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import type { ConnectionLayer, ConnectivityStatus } from '../../settings/connectivityTypes'
-import type { SetupStepStatus, VoicePresetStatus } from '../../settings/setupTypes'
+import type { SetupStepStatus, VoicePresetStatus, VoiceSelectionStatus } from '../../settings/setupTypes'
 import { useEngineDoctor } from '../../hooks/useEngineDoctor'
+import { diagnoseBrowserSpeechVoices, type BrowserVoiceSelectionDiagnostic } from '../../tts/browserSpeech'
 import { StatusPill } from '../ui/StatusPill'
 
 const layerLabels = {
@@ -11,13 +12,13 @@ const layerLabels = {
   gpu: '가속 장치',
 } as const
 
-function toneForStatus(status: ConnectivityStatus | SetupStepStatus | VoicePresetStatus | ConnectionLayer['state']) {
+function toneForStatus(status: ConnectivityStatus | SetupStepStatus | VoicePresetStatus | VoiceSelectionStatus | ConnectionLayer['state']) {
   if (status === 'ready') return 'good' as const
   if (status === 'warning' || status === 'checking') return 'warning' as const
   return 'neutral' as const
 }
 
-function labelForStatus(status: ConnectivityStatus | SetupStepStatus | VoicePresetStatus | ConnectionLayer['state']) {
+function labelForStatus(status: ConnectivityStatus | SetupStepStatus | VoicePresetStatus | VoiceSelectionStatus | ConnectionLayer['state']) {
   const labels: Record<string, string> = {
     ready: '준비됨',
     warning: '확인 필요',
@@ -26,15 +27,37 @@ function labelForStatus(status: ConnectivityStatus | SetupStepStatus | VoicePres
     checking: '확인 중',
     unknown: '미확인',
     blocked: '사용 차단',
+    idle: '대기',
   }
   return labels[status] ?? status
 }
 
+
+function genderLabel(gender: string) {
+  const labels: Record<string, string> = { female: '여성', male: '남성', neutral: '중성' }
+  return labels[gender] ?? gender
+}
+
+function shortHash(value: string | null) {
+  return value ? `${value.slice(0, 12)}…${value.slice(-8)}` : '-'
+}
+
 export function EngineDoctorCard() {
   const doctor = useEngineDoctor()
+  const [browserVoiceDiagnostics, setBrowserVoiceDiagnostics] = useState<BrowserVoiceSelectionDiagnostic[]>([])
   const presetReady = doctor.setup?.voicePresetReadyCount ?? 0
-  const presetExpected = doctor.setup?.voicePresetExpectedCount ?? 3
+  const presetAudioReady = doctor.setup?.voicePresetAudioReadyCount ?? 0
+  const presetManifestReady = doctor.setup?.voicePresetManifestReadyCount ?? 0
+  const presetExpected = doctor.setup?.voicePresetExpectedCount ?? 5
   const overallStatus = doctor.report?.status ?? (doctor.loading ? 'warning' : 'missing')
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return undefined
+    const refresh = () => setBrowserVoiceDiagnostics(diagnoseBrowserSpeechVoices())
+    refresh()
+    window.speechSynthesis.addEventListener('voiceschanged', refresh)
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', refresh)
+  }, [])
 
   return (
     <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
@@ -152,15 +175,29 @@ export function EngineDoctorCard() {
       <div className="mt-4 rounded-2xl border border-soa-line bg-white p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <strong className="text-sm">CosyVoice 프리셋 음색</strong>
+            <strong className="text-sm">CosyVoice 프리셋 음색·증거</strong>
             <p className="mt-1 text-xs text-soa-muted">
-              voice-presets 폴더의 동의받은 WAV 준비 상태
+              WAV만이 아니라 동의·권리·사람 검수·SHA-256·중복 여부까지 확인합니다.
             </p>
           </div>
           <StatusPill
             label={`${presetReady}/${presetExpected}`}
             tone={presetReady === presetExpected ? 'good' : 'warning'}
           />
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          <div className="rounded-xl bg-[#f7f5ef] p-3 text-xs">
+            <strong>WAV 검사</strong>
+            <p className="mt-1 font-black">{presetAudioReady}/{presetExpected}</p>
+          </div>
+          <div className="rounded-xl bg-[#f7f5ef] p-3 text-xs">
+            <strong>manifest 인증</strong>
+            <p className="mt-1 font-black">{presetManifestReady}/{presetExpected}</p>
+          </div>
+          <div className="rounded-xl bg-[#f7f5ef] p-3 text-xs">
+            <strong>최종 사용 가능</strong>
+            <p className="mt-1 font-black">{presetReady}/{presetExpected}</p>
+          </div>
         </div>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#ece9e1]">
           <div
@@ -176,10 +213,27 @@ export function EngineDoctorCard() {
           <div className="mt-3 grid gap-2">
             {doctor.setup.voicePresetDiagnostics.map((item) => (
               <div key={item.voiceId} className="rounded-xl bg-[#f7f5ef] p-3 text-xs">
-                <div className="flex items-center justify-between gap-2">
-                  <strong>{item.filename}</strong>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <strong>{item.displayName} · {item.filename}</strong>
                   <StatusPill label={labelForStatus(item.status)} tone={toneForStatus(item.status)} />
                 </div>
+                <p className="mt-1 leading-5 text-soa-muted">
+                  선언 {genderLabel(item.declaredGender)} · WAV {labelForStatus(item.audioUsable ? 'ready' : item.status)} ·
+                  manifest v{item.schemaVersion ?? '-'} {labelForStatus(item.manifestStatus)} · 동의 {item.consentStatus} · 사람 검수 {item.humanReviewStatus}
+                </p>
+                <p className="mt-1 break-all leading-5 text-soa-muted">
+                  SHA-256 실제 {shortHash(item.actualSha256)} · 선언 {shortHash(item.declaredSha256)}
+                  {item.checksumMatches === true ? ' · 일치' : item.checksumMatches === false ? ' · 불일치' : ''}
+                </p>
+                <p className="mt-1 break-all leading-5 text-soa-muted">
+                  검수 WAV {shortHash(item.reviewAudioSha256)}
+                  {item.reviewChecksumMatches === true ? ' · 현재 WAV와 일치' : item.reviewChecksumMatches === false ? ' · 교체 감지·승인 무효' : ''}
+                </p>
+                <p className="mt-1 break-all leading-5 text-soa-muted">
+                  승인 {item.approvalId ?? '-'} · 서명 {item.signatureStatus} · mode {item.signatureMode}
+                  {item.signingKeyId ? ` · key ${item.signingKeyId}` : ''}
+                  {item.signedPayloadSha256 ? ` · payload ${shortHash(item.signedPayloadSha256)}` : ''}
+                </p>
                 <p className="mt-1 leading-5 text-soa-muted">
                   {item.durationSeconds !== null ? `${item.durationSeconds.toFixed(1)}초 · ` : ''}
                   {item.sampleRate ? `${Math.round(item.sampleRate / 1000)}kHz · ` : ''}
@@ -187,11 +241,96 @@ export function EngineDoctorCard() {
                   무음 {item.silenceRatio !== null ? `${Math.round(item.silenceRatio * 100)}%` : '-'} ·
                   클리핑 {item.clippingRatio !== null ? `${Math.round(item.clippingRatio * 1000) / 10}%` : '-'}
                 </p>
+                {(item.consentDaysRemaining !== null || item.rightsDaysRemaining !== null) ? (
+                  <p className="mt-1 font-bold leading-5">
+                    동의 만료 {item.consentDaysRemaining !== null ? `${item.consentDaysRemaining}일` : '-'} · 권리 만료 {item.rightsDaysRemaining !== null ? `${item.rightsDaysRemaining}일` : '-'}
+                  </p>
+                ) : null}
+                {item.duplicateVoiceIds.length ? (
+                  <p className="mt-1 font-black leading-5">중복 WAV: {item.duplicateVoiceIds.join(', ')}</p>
+                ) : null}
                 {item.issues.length ? <p className="mt-1 font-bold leading-5">{item.issues.join(' ')}</p> : null}
               </div>
             ))}
           </div>
         ) : null}
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-soa-line bg-white p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <strong className="text-sm">Windows · MeloTTS 실제 화자 선택</strong>
+            <p className="mt-1 text-xs text-soa-muted">speaker ID·이름·성별 판정과 선택 근거를 프리셋별로 표시합니다.</p>
+          </div>
+          <StatusPill
+            label={`${doctor.setup?.voiceSelectionDiagnostics.filter((item) => item.status === 'ready').length ?? 0} READY`}
+            tone={doctor.setup?.voiceSelectionDiagnostics.some((item) => item.status === 'ready') ? 'good' : 'warning'}
+          />
+        </div>
+        {doctor.setup?.voiceSelectionDiagnostics.length ? (
+          <div className="mt-3 grid gap-2">
+            {doctor.setup.voiceSelectionDiagnostics.map((item) => (
+              <div key={`${item.engineId}-${item.voiceId}`} className="rounded-xl bg-[#f7f5ef] p-3 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <strong>{item.engineName} · {item.displayName} · {genderLabel(item.expectedGender)}</strong>
+                  <StatusPill label={labelForStatus(item.status)} tone={toneForStatus(item.status)} />
+                </div>
+                <p className="mt-1 break-all leading-5 text-soa-muted">
+                  {item.selectedVoiceName ?? '선택된 화자 없음'}
+                  {item.selectedVoiceId ? ` · ID ${item.selectedVoiceId}` : ''}
+                  {item.selectedGender ? ` · 판정 ${genderLabel(item.selectedGender)}` : ''}
+                </p>
+                <p className="mt-1 leading-5 text-soa-muted">근거 {item.selectionBasis}</p>
+                <p className="mt-1 font-bold leading-5">{item.reason}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-3 text-xs leading-5 text-soa-muted">진단 가능한 Windows System.Speech 또는 MeloTTS 엔진이 없습니다.</p>
+        )}
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-soa-line bg-white p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <strong className="text-sm">브라우저 프리셋 실제 배정</strong>
+            <p className="mt-1 text-xs text-soa-muted">
+              현재 기기의 Web Speech API가 각 인물에 어떤 음성을 배정하는지와 선정 근거입니다.
+            </p>
+          </div>
+          <StatusPill
+            label={`${browserVoiceDiagnostics.filter((item) => item.status === 'ready').length}/${presetExpected}`}
+            tone={browserVoiceDiagnostics.length === presetExpected && browserVoiceDiagnostics.every((item) => item.status === 'ready') ? 'good' : 'warning'}
+          />
+        </div>
+        {browserVoiceDiagnostics.length ? (
+          <div className="mt-3 grid gap-2">
+            {browserVoiceDiagnostics.map((item) => (
+              <div key={item.voiceId} className="rounded-xl bg-[#f7f5ef] p-3 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <strong>{item.presetName} · {genderLabel(item.expectedGender)}</strong>
+                  <StatusPill
+                    label={item.status === 'ready' ? '배정됨' : '미지원'}
+                    tone={item.status === 'ready' ? 'good' : 'warning'}
+                  />
+                </div>
+                <p className="mt-1 leading-5 text-soa-muted">
+                  {item.selectedVoiceName ?? '선택된 음성 없음'}
+                  {item.selectedVoiceUri ? ` · ${item.selectedVoiceUri}` : ''}
+                </p>
+                <p className="mt-1 leading-5 text-soa-muted">
+                  한국어 후보 {item.koreanCandidateCount} · 성별 호환 {item.compatibleCandidateCount} ·
+                  근거 {item.selectionBasis}
+                </p>
+                <p className="mt-1 font-bold leading-5">{item.reason}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-3 text-xs leading-5 text-soa-muted">
+            브라우저 음성 목록을 아직 받지 못했거나 Web Speech API를 지원하지 않습니다.
+          </p>
+        )}
       </div>
 
       {doctor.setup ? (

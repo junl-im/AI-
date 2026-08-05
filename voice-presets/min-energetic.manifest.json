@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "voice_id": "min-energetic",
+  "display_name": "민준",
+  "declared_gender": "male",
+  "reference_file": "min-energetic.wav",
+  "consent": {
+    "status": "pending",
+    "subject_reference": "",
+    "evidence_reference": "",
+    "consented_at": null,
+    "expires_at": null,
+    "notes": "실제 화자 또는 권리 보유자의 동의 증거를 확인한 뒤 confirmed로 변경하세요."
+  },
+  "rights": {
+    "source_type": "unknown",
+    "source_reference": "",
+    "allowed_uses": [
+      "tts-inference"
+    ],
+    "commercial_use": false,
+    "redistribution": false,
+    "training_use": false,
+    "expires_at": null,
+    "notes": "출처와 허용 범위를 확인하기 전에는 외부 배포 또는 상업 이용을 승인하지 마세요."
+  },
+  "integrity": {
+    "sha256": "",
+    "file_size_bytes": null
+  },
+  "human_review": {
+    "status": "pending",
+    "reviewer": "",
+    "reviewed_at": null,
+    "sample_text": "안녕하세요. 이 문장은 소리온 음성 프리셋의 성별, 발음, 속도와 인물 구분을 검수하기 위한 공통 문장입니다.",
+    "audio_sha256": "",
+    "source_review_bundle_sha256": "",
+    "notes": "동일 문장 A/B 청취 후 인물 구분, 선언 성별, 잡음, 발음, 속도를 기록하세요."
+  }
+}

@@ -96,6 +96,9 @@ export interface DeviceSoakRecordInput {
   engineId: string
   modelId: string
   modelVersion: string
+  modelDigest: string
+  acceleratorName: string
+  gpuName: string
   presetId: string
   sampleMinutes: 10 | 30 | 60
   soakElapsedSeconds: number | null
@@ -137,17 +140,27 @@ export interface DeviceCertificationCoverage {
 export interface DeviceMetricAggregate {
   deviceProfile: DeviceBenchmarkCoverage['profile']
   engineId: string
+  modelId: string
+  modelVersion: string
+  modelDigest: string
+  acceleratorName: string
+  gpuName: string
   presetId: string
   records: number
   readyRecords: number
   failureRate: number
   averageRealtimeFactor: number
+  p50RealtimeFactor: number
+  p95RealtimeFactor: number
+  p50FirstAudioMs: number | null
   p95FirstAudioMs: number | null
   p95SseReconnectMs: number | null
   p95AudioFetchRecoveryMs: number | null
   p95PlaybackInterruptionMs: number | null
   p95SeamWaitedMs: number | null
   p95SeamDecodeMs: number | null
+  p50FinalHandoffErrorMs: number | null
+  p95FinalHandoffErrorMs: number | null
 }
 
 export interface DeviceBenchmarkSummary {
@@ -160,6 +173,34 @@ export interface DeviceBenchmarkSummary {
   certificationCoverage: DeviceCertificationCoverage[]
   missingCertifications: string[]
   metricGroups: DeviceMetricAggregate[]
+}
+
+
+export interface WorkerTelemetryAggregate {
+  engineId: string
+  presetId: string
+  modelId: string
+  modelVersion: string
+  modelDigest: string
+  deviceProfile: string
+  acceleratorName: string
+  gpuName: string
+  records: number
+  successRecords: number
+  failureRate: number
+  p50FirstAudioMs: number | null
+  p95FirstAudioMs: number | null
+  p50RealtimeFactor: number | null
+  p95RealtimeFactor: number | null
+  p50FinalHandoffErrorMs: number | null
+  p95FinalHandoffErrorMs: number | null
+}
+
+export interface WorkerTelemetrySummary {
+  totalRecords: number
+  successRecords: number
+  failedRecords: number
+  metricGroups: WorkerTelemetryAggregate[]
 }
 
 

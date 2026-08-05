@@ -25,6 +25,7 @@ from app.services.rate_limit import FixedWindowRateLimiter
 from app.services.segment_audio import SegmentAudioSigner
 from app.services.sqlite_job_store import SQLiteJobStore
 from app.services.tts_pipeline import TtsPipeline
+from app.services.voice_preset_approval import VoicePresetApprovalService
 from app.storage.audio_store import AudioStore
 from app.storage.voice_clone_store import VoiceCloneStore
 
@@ -71,11 +72,20 @@ async def lifespan(app: FastAPI):
     app.state.device_benchmark_store = DeviceBenchmarkStore(
         settings.device_benchmark_file
     )
+    app.state.worker_telemetry_store = DeviceBenchmarkStore(
+        settings.worker_telemetry_file
+    )
     app.state.stt_comparison_store = QualityEvidenceStore(
         settings.stt_comparison_file
     )
     app.state.export_soak_store = QualityEvidenceStore(settings.export_soak_file)
     app.state.evidence_intake_store = EvidenceIntakeStore(settings.evidence_intake_file)
+    app.state.voice_preset_approval_service = VoicePresetApprovalService(
+        settings.cosyvoice_preset_path,
+        settings.voice_review_approval_file,
+        settings.voice_review_signing_secret,
+        settings.voice_review_signing_key_id,
+    )
     app.state.stt_adapter = FasterWhisperAdapter(
         settings.faster_whisper_model,
         settings.faster_whisper_device,
@@ -119,6 +129,9 @@ async def lifespan(app: FastAPI):
             settings.cosyvoice_tts_reference_path,
             settings.cosyvoice_tts_profile_id,
             preset_directory=settings.cosyvoice_preset_directory,
+            telemetry_store=app.state.worker_telemetry_store,
+            review_signing_secret=settings.voice_review_signing_secret,
+            review_signing_key_id=settings.voice_review_signing_key_id,
         )
     )
     if settings.enable_melo_tts:

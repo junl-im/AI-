@@ -1,5 +1,37 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.8.2 · Signed review approval and benchmark dashboard
+
+- 현재 WAV·manifest·검수 묶음 checksum을 재계산하는 승인 diff 미리보기와 명시적 apply confirmation을 추가합니다.
+- 미리보기 뒤 파일 상태가 바뀌면 stale 승인 적용을 거부하고 승인 전후 manifest snapshot을 감사 JSONL에 보존합니다.
+- manifest schema v3에 approval ID, signed payload SHA-256, 선택적 HMAC-SHA256과 signing key ID를 추가합니다.
+- Engine Doctor와 CosyVoice 합성 경로에서 payload digest와 설정된 신뢰 키의 서명 상태를 검증합니다.
+- 최근 승인 rollback은 현재 manifest가 승인 직후 상태와 같은 경우에만 허용하고 사유와 관련 approval ID를 기록합니다.
+- CosyVoice Worker 합성의 모델 digest·장치·GPU·first audio·RTF·handoff 오차·실패 원인을 별도 자동 telemetry로 저장합니다.
+- Quality Lab에 Worker 자동 telemetry와 10·30·60분 실기기 soak를 분리한 모델·GPU·프리셋별 P50/P95 benchmark 표를 추가합니다.
+- signed review/benchmark 정적 계약을 repository preflight에 추가해 총 23개 검사를 수행합니다.
+
+## 0.9.3-beta.3 Engine Heartbeat 6.8.1 · Review export sync and voice selection telemetry
+
+- manifest schema를 v2로 올리고 사람 승인에 승인 당시 WAV SHA-256과 검수 묶음 checksum 참조를 기록합니다.
+- 승인된 WAV가 교체되거나 checksum이 달라지면 사람 검수를 `stale`로 자동 무효화하고 CosyVoice 사용을 차단합니다.
+- 동의·권리 만료일까지 30일 이하인 프리셋을 경고하고 만료된 증거는 계속 차단합니다.
+- Quality Lab에 승인 후보·재검토·거부 결정을 추가하고 SHA-256 검증 검수 묶음 JSON 내보내기·가져오기를 제공합니다.
+- 검수 묶음 가져오기는 로컬 평가만 병합하며 manifest의 승인 상태·검수자·WAV checksum을 자동 변경하지 않습니다.
+- Engine Doctor가 Windows System.Speech와 MeloTTS의 실제 선택 화자명·speaker ID·판정 성별·선택 근거를 표시합니다.
+- 실기기 benchmark를 모델 ID·버전·digest·가속 장치·GPU·프리셋별로 그룹화하고 final handoff 오차 P95를 집계합니다.
+- review sync/telemetry 정적 계약 검사를 추가해 repository preflight를 22개로 확장합니다.
+
+## 0.9.3-beta.3 Engine Heartbeat 6.8.0 · Preset evidence review
+
+- 5개 인물 프리셋별 consent·rights·integrity·human review manifest schema와 안전한 pending 템플릿을 추가합니다.
+- Engine Doctor가 WAV 품질, manifest 인증, 최종 사용 가능 수를 분리하고 checksum 불일치·다른 프리셋과의 동일 WAV를 차단합니다.
+- CosyVoice 실제 합성도 동의·권리·사람 승인·SHA-256·고유 음성을 모두 검사해 진단 우회를 허용하지 않습니다.
+- 현재 기기의 Browser Speech 실제 배정 음성명·URI·성별 판정 근거와 후보 부족 사유를 표시합니다.
+- Quality Lab A/B를 5개 프리셋 선택 방식으로 확장하고 로컬 판정·CSV에 프리셋 ID·이름·성별을 기록합니다.
+- 개인정보 제외 진단 복사본에 프리셋별 인증·checksum·중복 상태를 포함합니다.
+- 실제 화자 WAV와 동의 자료는 포함하지 않으며 템플릿이 pending인 상태를 READY로 가장하지 않습니다.
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.7.1 · Voice preset fidelity hotfix
 
 - 알 수 없는 프리셋 ID를 첫 여성 프리셋으로 바꾸지 않고 명시적 오류로 처리합니다.

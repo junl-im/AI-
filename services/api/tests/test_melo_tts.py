@@ -129,3 +129,25 @@ async def test_melo_does_not_replace_male_preset_with_unknown_single_speaker(tmp
                 job_id=uuid4(),
             )
         )
+
+
+def test_melo_selection_diagnostics_reports_actual_speaker_id(tmp_path):
+    model = MultiSpeakerMeloModel()
+    engine = MeloTtsEngine(
+        AudioStore(tmp_path, ttl_minutes=30),
+        model_factory=lambda: model,
+        ready_override=True,
+    )
+    engine._model = model
+
+    diagnostics = {
+        item["voice_id"]: item
+        for item in engine.voice_selection_diagnostics()
+    }
+
+    assert diagnostics["on-clear"]["status"] == "ready"
+    assert diagnostics["on-clear"]["selected_voice_id"] == "2"
+    assert diagnostics["on-clear"]["selected_voice_name"] == "InJoon Male"
+    assert diagnostics["on-clear"]["selected_gender"] == "male"
+    assert diagnostics["jun-deep"]["selected_voice_id"] == "3"
+    assert diagnostics["min-energetic"]["status"] == "blocked"

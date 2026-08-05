@@ -1,0 +1,85 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.8.0 -> Engine Heartbeat 6.8.1 Review Export Sync & Voice Selection Telemetry
+Changed or added files: 53
+Deleted tracked files: 0
+
+Applied scope:
+- Export and verify local A/B review decisions as a SHA-256 protected review bundle without auto-approving manifests.
+- Bind approved human review to the exact WAV SHA-256 and mark it stale after replacement.
+- Warn 30 days before consent or rights expiry and keep expired evidence blocked.
+- Show actual Windows System.Speech and MeloTTS speaker selection metadata per preset.
+- Group device benchmarks by model digest, accelerator, GPU, and preset, including final handoff P95.
+- Add input size/count validation, legacy migration, regression tests, preflight contracts, and permanent handover records.
+
+Validation:
+- Repository preflight: 22 passed
+- API pytest: 161 passed
+- Worker pytest: 14 passed
+- TS/TSX transpile syntax: 179 files passed
+- Review bundle runtime smoke: passed
+- Python compileall: passed
+- Full npm lint/typecheck/Vitest/Vite: not run because the internal registry returned 404 for zustand@5.0.8
+- Ruff: not run because ruff is not installed in this environment
+
+Important limitations:
+- Real speaker WAV files, consent/right source documents, operator signatures, and CosyVoice model weights are not included.
+- Review bundle SHA-256 detects file changes; it is not an electronic signature or proof of rights, identity, or measurement truth.
+- Import merges local reviews only and never changes manifest approval, reviewer, review time, or WAV checksum automatically.
+- Windows/Melo voice metadata is environment telemetry, not certified person identity.
+
+Changed or added:
+- FOUNDATION_REPORT.md
+- PATCH_MANIFEST.txt
+- README.md
+- START_HERE.md
+- docs/CHANGELOG.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/TEST.md
+- docs/VOICE_PRESETS.md
+- docs/VOICE_PRESET_EVIDENCE.md
+- docs/VOICE_PRESET_FIDELITY.md
+- docs/VOICE_REVIEW_SYNC.md
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.1-review-export-voice-telemetry/DELETE_LIST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.1-review-export-voice-telemetry/PATCH_MANIFEST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.1-review-export-voice-telemetry/PATCH_README.md
+- package.json
+- scripts/check-voice-preset-contracts.mjs
+- scripts/check-voice-preset-evidence.mjs
+- scripts/check-voice-review-sync.mjs
+- scripts/run-preflight.mjs
+- services/api/app/api/routes/verification.py
+- services/api/app/engines/tts/melo_tts.py
+- services/api/app/engines/tts/system_tts.py
+- services/api/app/schemas/setup.py
+- services/api/app/schemas/verification.py
+- services/api/app/schemas/voice_preset_evidence.py
+- services/api/app/services/setup_diagnostics.py
+- services/api/app/services/voice_preset_evidence.py
+- services/api/tests/test_cosyvoice_worker_tts.py
+- services/api/tests/test_melo_tts.py
+- services/api/tests/test_setup.py
+- services/api/tests/test_system_tts.py
+- services/api/tests/test_verification.py
+- src/components/evaluation/DeviceSoakRecorderCard.tsx
+- src/components/evaluation/EngineDoctorCard.tsx
+- src/components/evaluation/QualityResultCard.tsx
+- src/hooks/useEngineDoctor.ts
+- src/pages/QualityPage.tsx
+- src/quality/qualityApi.ts
+- src/quality/qualityReport.ts
+- src/quality/qualityReviewRepository.ts
+- src/quality/qualityReviewTypes.ts
+- src/quality/qualityTypes.ts
+- src/quality/voicePresetReviewBundle.test.ts
+- src/quality/voicePresetReviewBundle.ts
+- src/settings/setupApi.ts
+- src/settings/setupTypes.ts
+- voice-presets/README.md
+- voice-presets/dam-calm.manifest.json
+- voice-presets/jun-deep.manifest.json
+- voice-presets/min-energetic.manifest.json
+- voice-presets/on-clear.manifest.json
+- voice-presets/sori-warm.manifest.json
+
+Deleted tracked files:
+- none

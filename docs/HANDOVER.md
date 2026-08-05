@@ -1,14 +1,64 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.7.1 · Voice Preset Fidelity Hotfix**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-05 KST**
+최종 갱신: **2026-08-05 18:15 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+## Engine Heartbeat 6.8.2 Signed Review Approval & Benchmark Dashboard
+
+1. **작업 일시(KST)**: 2026-08-05 18:15
+2. **대상·기준 버전**: 6.8.1 Review Export Sync & Voice Selection Telemetry → 6.8.2 Signed Review Approval & Benchmark Dashboard
+3. **변경 내용**:
+   - 현재 WAV·manifest·검수 묶음 checksum을 다시 계산한 승인 diff 미리보기, 명시적 적용 확인과 stale preview 거부를 추가했습니다.
+   - manifest schema v3에 approval ID, 승인 payload digest, 선택적 HMAC-SHA256 서명과 key ID를 추가했습니다.
+   - 승인 전후 manifest snapshot을 로컬 JSONL 감사 기록에 저장하고 승인 이후 manifest가 달라진 경우 위험한 롤백을 거부합니다.
+   - Engine Doctor와 실제 CosyVoice 합성에서 승인 payload·서명 상태를 확인합니다. 신뢰 키가 없으면 signed manifest는 READY가 아닙니다.
+   - CosyVoice Worker 성공·실패마다 모델 ID·버전·manifest digest, 장치·GPU, first audio, RTF와 handoff 오차를 별도 JSONL에 기록합니다.
+   - Quality Lab에 Worker 자동 telemetry와 실기기 soak를 분리한 모델·GPU·프리셋 benchmark 대시보드를 추가했습니다.
+4. **변경 이유**: 검수 JSON이나 과거 checksum만으로 실제 프리셋이 승인되는 것을 막고, 승인 파일 변경과 운영자 롤백을 추적하며, 짧은 자동 합성 수치를 장시간 실기기 증거로 오인하지 않기 위함입니다.
+5. **영향 범위**: Quality Lab, Engine Doctor, voice preset approval API/service/schema, CosyVoice Worker TTS, manifest v3 검증, Worker model diagnostics, verification summary API, 설정 환경변수와 preflight.
+6. **주요 파일**: `src/components/evaluation/VoicePresetApprovalCard.tsx`, `src/components/evaluation/BenchmarkDashboardCard.tsx`, `src/quality/voicePresetApprovalApi.ts`, `services/api/app/services/voice_preset_approval.py`, `services/api/app/services/voice_preset_evidence.py`, `services/api/app/engines/tts/cosyvoice_worker_tts.py`, `services/api/app/api/routes/verification.py`, `services/worker/app/model_manifest.py`, `scripts/check-signed-review-benchmark.mjs`.
+7. **검증 결과**: Repository preflight 23/23, API pytest 164, Worker pytest 14, TS/TSX transpile 182와 Python compileall 통과. 설치된 Web 의존성이 없어 ESLint·semantic typecheck·Vitest·Vite build는 GitHub Actions가 최종 판정합니다.
+8. **제한·주의사항**: 실제 5명 WAV·동의·권리 원본·운영자 신뢰 키·CosyVoice 모델·실기기 장시간 수치는 포함하지 않았습니다. 기본 서명 secret은 비어 있으므로 릴리스 manifest는 자동 signed 상태가 아닙니다. HMAC은 키 보유 확인일 뿐 화자 신원·법적 권리를 증명하지 않습니다.
+9. **산출물**: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.2-signed-review-benchmark-dashboard-full.zip`, `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.1-to-6.8.2-signed-review-benchmark-dashboard-patch.zip`, `SHA256SUMS-6.8.2.txt`.
+10. **다음 예상 업데이트**: Heartbeat 6.8.3 Trust Key Rotation & Evidence Renewal Queue. 복수 신뢰 키의 순차 교체, 만료 증거 갱신 대기열, 개인정보 최소 감사 묶음과 benchmark 기준선·회귀 경고를 우선합니다.
+
+## Engine Heartbeat 6.8.1 Review Export Sync & Voice Selection Telemetry
+
+1. **작업 일시(KST)**: 2026-08-05 17:37
+2. **대상·기준 버전**: 6.8.0 Preset Evidence Review → 6.8.1 Review Export Sync & Voice Selection Telemetry
+3. **변경 내용**:
+   - manifest schema v2에 승인 당시 WAV SHA-256과 검수 묶음 checksum 참조를 추가했습니다.
+   - 현재 WAV가 승인 당시 checksum과 다르면 사람 검수를 `stale`로 자동 무효화하고 CosyVoice 사용을 차단합니다.
+   - 동의·권리 만료 30일 전 경고와 만료 후 차단 상태를 Engine Doctor에 제공합니다.
+   - Quality Lab에 승인 후보·재검토·거부 결정, SHA-256 검수 묶음 내보내기·가져오기를 추가했습니다.
+   - 가져오기는 로컬 평가만 병합하며 manifest 승인·검수자·검수 시각·WAV checksum을 자동 수정하지 않습니다.
+   - Windows System.Speech와 MeloTTS의 실제 선택 화자 이름·ID·성별 판정·선택 근거를 프리셋별 진단에 추가했습니다.
+   - benchmark를 모델 ID·버전·digest·가속 장치·GPU·프리셋별로 분리하고 final handoff P95를 집계합니다.
+4. **변경 이유**: 로컬 A/B 판정이 실제 승인 증거로 오인되거나 WAV 교체 뒤 과거 승인이 재사용되는 문제를 방지하고, 기기·모델이 실제 선택한 음성을 운영자가 확인할 수 있게 하기 위함입니다.
+5. **영향 범위**: Quality Lab, Engine Doctor, Setup API, System/Melo TTS 어댑터, CosyVoice 프리셋 증거 검사, 실기기 benchmark API·UI, manifest 템플릿과 preflight.
+6. **주요 파일**: `src/quality/voicePresetReviewBundle.ts`, `src/pages/QualityPage.tsx`, `src/components/evaluation/EngineDoctorCard.tsx`, `services/api/app/services/voice_preset_evidence.py`, `services/api/app/engines/tts/system_tts.py`, `services/api/app/engines/tts/melo_tts.py`, `services/api/app/api/routes/verification.py`, `scripts/check-voice-review-sync.mjs`, `voice-presets/*.manifest.json`.
+7. **검증 결과**: Repository preflight 22/22, API pytest 161, Worker pytest 14, TS/TSX transpile 179, 검수 묶음 runtime smoke, Python compileall 통과. npm ci는 내부 registry의 `zustand@5.0.8` 404로 실패해 전체 ESLint·semantic typecheck·Vitest·Vite build는 GitHub Actions가 최종 판정합니다.
+8. **제한·주의사항**: 실제 5명 WAV, 동의·권리 원본, 운영자 서명, CosyVoice 모델과 실기기 benchmark 값은 포함하지 않았습니다. 검수 묶음 SHA-256은 변조 감지이며 전자서명·권리 증명이 아닙니다. Windows/Melo 화자 metadata는 인물 일치 보증이 아닙니다.
+9. **산출물**: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.1-review-export-voice-telemetry-full.zip`, `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.0-to-6.8.1-review-export-voice-telemetry-patch.zip`, `SHA256SUMS-6.8.1.txt`.
+10. **다음 예상 업데이트**: Heartbeat 6.8.2 Signed Review Approval & Benchmark Dashboard. 사람이 diff와 증거를 확인하는 명시적 manifest 승인 도구, 선택적 서명 검증, 모델·GPU·프리셋 benchmark 대시보드와 실제 Worker telemetry 연결을 우선합니다.
+
+## Engine Heartbeat 6.8.0 Preset Evidence Review
+
+- 제품 버전은 `0.9.3-beta.3`으로 유지하고 내부 patch identifier를 Heartbeat 6.8.0으로 올렸습니다.
+- 5개 전용 WAV마다 동일 ID manifest가 필수이며 동의, `tts-inference` 권리, 사람 승인, 실제 SHA-256 일치가 모두 필요합니다.
+- 같은 WAV SHA-256을 여러 인물 프리셋에 등록하면 Engine Doctor와 실제 CosyVoice 합성에서 모두 차단합니다.
+- Engine Doctor는 WAV 품질, manifest 인증, 최종 사용 가능을 분리하고 실제·선언 checksum과 중복 ID를 표시합니다.
+- Browser Speech의 현재 기기별 실제 배정 음성명·URI·성별 판정 근거와 후보 부족 사유를 표시합니다.
+- Quality Lab은 5개 프리셋별 동일 문장 A/B와 로컬 승인·거부 기록, CSV 프리셋 메타데이터를 지원합니다.
+- 전달본에는 실제 화자 WAV·동의 증거·모델이 없으며 manifest는 의도적으로 pending입니다. 이를 READY로 표현하지 않습니다.
+- 다음 목표는 Heartbeat 6.8.1 Review Export Sync & Voice Selection Telemetry입니다.
+
 ## Engine Heartbeat 6.7.1 Voice Preset Fidelity Hotfix
 
 - 제품 버전은 `0.9.3-beta.3`으로 유지하고 내부 patch identifier만 Heartbeat 6.7.1로 올렸습니다.
@@ -720,3 +770,15 @@ CI Hotfix 4 테스트 규칙:
 8. 제한/주의: 실제 5개 화자 WAV와 CosyVoice 모델은 포함하지 않았다. Browser/System/eSpeak는 전용 인물이 아닌 기기·엔진 근사 음성이며 운영체제에 충분한 별도 후보가 없으면 일부 프리셋이 명시적으로 미지원될 수 있다. WAV만으로 성별·신원·동의를 자동 판정하지 않는다.
 9. 산출물: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.7.1-voice-preset-fidelity-full.zip`, `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.7-to-6.7.1-voice-preset-fidelity-patch.zip`, `SHA256SUMS.txt`.
 10. 다음 예상 업데이트: Heartbeat 6.8에서 프리셋별 동의·출처·선언 성별·WAV SHA-256 manifest, Engine Doctor 검토 상태, 5종 A/B 청취 승인과 실제 CosyVoice benchmark를 추가한다.
+
+## 55. 2026-08-05 15:50 KST · 0.9.3-beta.3 Engine Heartbeat 6.8.0 Preset Evidence Review
+1. 기준 버전은 Heartbeat 6.7.1이며 제품 버전 `0.9.3-beta.3`은 변경하지 않았다.
+2. 5개 프리셋마다 consent, rights, integrity, human review를 기록하는 동일 ID manifest schema와 pending 템플릿을 추가했다.
+3. 전용 WAV 사용 조건을 오디오 품질뿐 아니라 동의 confirmed, `tts-inference` 권리, 사람 approved, 실제 SHA-256·파일 크기 일치까지 확대했다.
+4. 동일한 WAV SHA-256을 둘 이상의 인물 프리셋에 등록하면 진단과 실제 CosyVoice 합성 양쪽에서 차단한다.
+5. Engine Doctor는 WAV/manifest/최종 사용 가능 수, 프리셋별 checksum과 중복 ID, 현재 브라우저 음성 실제 배정 근거를 표시한다.
+6. Quality Lab의 A/B 프리셋을 5종 선택 방식으로 바꾸고 IndexedDB 키와 CSV에 voice ID·이름·선언 성별을 추가했다.
+7. 개인정보 제외 진단 복사본은 로컬 경로·WAV·원문을 제외하고 프리셋 인증·checksum·중복 상태만 포함한다.
+8. 검증 결과: Repository preflight 21개, API pytest 158개, Worker pytest 14개, CosyVoice 전용 8개, TS/TSX transpile 177개와 Python compileall을 통과했다. 전체 npm quality는 내부 registry의 `zustand@5.0.8` 404로 GitHub Actions 최종 판정이다.
+9. 제한: 실제 5개 화자 WAV·동의/권리 원본·CosyVoice 모델은 포함하지 않았다. manifest 템플릿은 pending이며 Browser/System 음성은 전용 인물이 아닌 기기 근사값이다.
+10. 다음 예상 업데이트는 Heartbeat 6.8.1의 A/B 검수 내보내기·manifest 연계, System/Melo 실제 화자 telemetry, 프리셋별 CosyVoice benchmark다.

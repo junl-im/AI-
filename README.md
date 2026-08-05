@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.7.1 · Voice Preset Fidelity Hotfix`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.8.2 · Signed Review Approval & Benchmark Dashboard`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -49,6 +49,20 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 로컬 Export ZIP: WAV·MP3·SRT·VTT·JSON 최대 20개/250MiB를 서버 업로드 없이 SHA-256 manifest, 진행률과 취소를 포함해 묶음
 - Lock gate: repository preflight가 package-lock 존재와 package.json 직접 의존성 일치를 필수 검사하며 패치는 기존 검증 lock을 보존
 - 음성 정합성: 전용 인물 WAV가 없으면 시스템 근사 음성임을 표시하고, 호환 후보가 없을 때 다른 성별이나 같은 음성을 성공으로 처리하지 않음
+- 프리셋 증거: 전용 WAV는 동일 ID manifest의 동의·권리·사람 검수·SHA-256과 실제 파일 일치가 모두 확인돼야 사용
+- 중복 차단: 같은 WAV SHA-256을 여러 인물 프리셋에 등록하면 진단과 실제 CosyVoice 합성 모두 차단
+- A/B 검수: Quality Lab에서 5개 프리셋을 선택해 같은 문장·같은 엔진으로 비교하고 프리셋 메타데이터와 판정을 저장
+- 브라우저 증거: Engine Doctor가 현재 기기의 실제 Web Speech 음성명·URI·성별 판정 근거·후보 부족 사유를 표시
+- 검수 동기화: Quality Lab 평가를 SHA-256 검증 JSON 묶음으로 내보내고 다시 가져오되 manifest 승인을 자동 변경하지 않음
+- 검수 무효화: 승인 시점 WAV SHA-256과 현재 파일이 다르면 `stale`로 차단하고 재청취를 요구
+- 만료 경고: 동의·권리 만료 30일 전부터 Engine Doctor에 남은 일수와 경고를 표시
+- 실제 화자 텔레메트리: Windows System.Speech와 MeloTTS의 선택 화자·speaker ID·성별 판정·선택 근거를 표시
+- benchmark 분리: 모델 ID·버전·digest·가속 장치·GPU·프리셋별 first audio·RTF·실패율·handoff P95 집계
+- 수동 승인: 현재 WAV·manifest·검수 묶음 checksum을 다시 계산한 diff 미리보기 뒤에만 manifest v3 승인을 적용
+- 승인 감사·롤백: 승인 전후 manifest snapshot과 연결 ID를 JSONL로 보존하고 현재 manifest가 달라진 경우 롤백 거부
+- 선택적 신뢰 서명: 로컬 HMAC 키가 설정된 경우 승인 payload를 서명·검증하며 키가 없으면 명시적으로 unsigned 처리
+- Worker 자동 텔레메트리: 짧은 합성의 모델 digest·GPU·first audio·RTF·handoff를 실기기 soak와 별도 저장
+- benchmark 대시보드: Worker 자동 측정과 10·30·60분 soak를 분리하고 모델·GPU·프리셋별 P50/P95 표시
 
 ## 무료 실행
 
@@ -93,6 +107,10 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 음원 보존 정책: [`docs/AUDIO_ARCHIVE_POLICY.md`](docs/AUDIO_ARCHIVE_POLICY.md)
 - 음성 프리셋: [`docs/VOICE_PRESETS.md`](docs/VOICE_PRESETS.md)
 - 프리셋 음성 정합성 계약: [`docs/VOICE_PRESET_FIDELITY.md`](docs/VOICE_PRESET_FIDELITY.md)
+- 프리셋 동의·권리·checksum 증거: [`docs/VOICE_PRESET_EVIDENCE.md`](docs/VOICE_PRESET_EVIDENCE.md)
+- 프리셋 검수 묶음·실제 화자 텔레메트리: [`docs/VOICE_REVIEW_SYNC.md`](docs/VOICE_REVIEW_SYNC.md)
+- 프리셋 수동 승인·서명·롤백: [`docs/VOICE_REVIEW_APPROVAL.md`](docs/VOICE_REVIEW_APPROVAL.md)
+- Worker 자동 텔레메트리·benchmark 대시보드: [`docs/BENCHMARK_DASHBOARD.md`](docs/BENCHMARK_DASHBOARD.md)
 - UI/UX 점검: [`docs/UI_UX_AUDIT_HEARTBEAT_5_2.md`](docs/UI_UX_AUDIT_HEARTBEAT_5_2.md)
 - lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
 - 재현 가능한 Web 품질: [`docs/REPRODUCIBLE_WEB_QUALITY.md`](docs/REPRODUCIBLE_WEB_QUALITY.md)

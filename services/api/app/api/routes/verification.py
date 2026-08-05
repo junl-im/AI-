@@ -17,17 +17,30 @@ from app.schemas.verification import (
     SttMeasurementResponse,
     SttProbeResponse,
     SttSegmentVerificationResponse,
+    WorkerSynthesisTelemetryResponse,
+    WorkerTelemetrySummaryResponse,
 )
 from app.services import stt_evaluation
 
 router = APIRouter()
 
 
-def _percentile95(values: list[int]) -> int | None:
+def _percentile(values: list[float], percentile: int) -> float | None:
     if not values:
         return None
     ordered = sorted(values)
-    return ordered[max(0, ((len(ordered) * 95 + 99) // 100) - 1)]
+    index = max(0, ((len(ordered) * percentile + 99) // 100) - 1)
+    return ordered[index]
+
+
+def _percentile95(values: list[int]) -> int | None:
+    value = _percentile([float(item) for item in values], 95)
+    return round(value) if value is not None else None
+
+
+def _percentile50(values: list[int]) -> int | None:
+    value = _percentile([float(item) for item in values], 50)
+    return round(value) if value is not None else None
 
 
 def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkSummaryResponse:
@@ -81,22 +94,54 @@ def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkS
                     missing_certifications.append(
                         f"{profile}:{scenario}:{minutes}m"
                     )
-    grouped: dict[tuple[str, str, str], list[DeviceBenchmarkResponse]] = {}
+    grouped: dict[tuple[str, str, str, str, str, str, str, str], list[DeviceBenchmarkResponse]] = {}
     for item in items:
         grouped.setdefault(
-            (item.device_profile, item.engine_id, item.preset_id),
+            (
+                item.device_profile,
+                item.engine_id,
+                item.model_id,
+                item.model_version,
+                item.model_digest,
+                item.accelerator_name,
+                item.gpu_name,
+                item.preset_id,
+            ),
             [],
         ).append(item)
     metric_groups = []
-    for (profile, engine_id, preset_id), records in sorted(grouped.items()):
+    for (
+        profile,
+        engine_id,
+        model_id,
+        model_version,
+        model_digest,
+        accelerator_name,
+        gpu_name,
+        preset_id,
+    ), records in sorted(grouped.items()):
         metric_groups.append({
             "device_profile": profile,
             "engine_id": engine_id,
+            "model_id": model_id,
+            "model_version": model_version,
+            "model_digest": model_digest,
+            "accelerator_name": accelerator_name,
+            "gpu_name": gpu_name,
             "preset_id": preset_id,
             "records": len(records),
             "ready_records": sum(item.status == "ready" for item in records),
             "failure_rate": sum(item.status == "failed" for item in records) / len(records),
             "average_realtime_factor": sum(item.realtime_factor for item in records) / len(records),
+            "p50_realtime_factor": float(
+                _percentile([item.realtime_factor for item in records], 50) or 0
+            ),
+            "p95_realtime_factor": float(
+                _percentile([item.realtime_factor for item in records], 95) or 0
+            ),
+            "p50_first_audio_ms": _percentile50([
+                item.first_audio_ms for item in records if item.first_audio_ms is not None
+            ]),
             "p95_first_audio_ms": _percentile95([
                 item.first_audio_ms for item in records if item.first_audio_ms is not None
             ]),
@@ -118,6 +163,14 @@ def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkS
             "p95_seam_decode_ms": _percentile95([
                 item.seam_p95_decode_ms
                 for item in records if item.seam_p95_decode_ms is not None
+            ]),
+            "p50_final_handoff_error_ms": _percentile50([
+                item.final_handoff_error_ms
+                for item in records if item.final_handoff_error_ms is not None
+            ]),
+            "p95_final_handoff_error_ms": _percentile95([
+                item.final_handoff_error_ms
+                for item in records if item.final_handoff_error_ms is not None
             ]),
         })
     return DeviceBenchmarkSummaryResponse(
@@ -228,6 +281,94 @@ async def summarize_device_benchmarks(request: Request) -> DeviceBenchmarkSummar
         for item in request.app.state.device_benchmark_store.list(limit=1000)
     ]
     return _benchmark_summary(items)
+
+
+def _worker_telemetry_summary(
+    items: list[WorkerSynthesisTelemetryResponse],
+) -> WorkerTelemetrySummaryResponse:
+    grouped: dict[
+        tuple[str, str, str, str, str, str, str, str],
+        list[WorkerSynthesisTelemetryResponse],
+    ] = {}
+    for item in items:
+        grouped.setdefault((
+            item.engine_id,
+            item.preset_id,
+            item.model_id,
+            item.model_version,
+            item.model_digest,
+            item.device_profile,
+            item.accelerator_name,
+            item.gpu_name,
+        ), []).append(item)
+    groups = []
+    for key, records in sorted(grouped.items()):
+        (
+            engine_id,
+            preset_id,
+            model_id,
+            model_version,
+            model_digest,
+            device_profile,
+            accelerator_name,
+            gpu_name,
+        ) = key
+        rtf = [item.realtime_factor for item in records if item.realtime_factor is not None]
+        first = [item.first_audio_ms for item in records if item.first_audio_ms is not None]
+        handoff = [
+            item.final_handoff_error_ms
+            for item in records
+            if item.final_handoff_error_ms is not None
+        ]
+        success = sum(item.succeeded for item in records)
+        groups.append({
+            "engine_id": engine_id,
+            "preset_id": preset_id,
+            "model_id": model_id,
+            "model_version": model_version,
+            "model_digest": model_digest,
+            "device_profile": device_profile,
+            "accelerator_name": accelerator_name,
+            "gpu_name": gpu_name,
+            "records": len(records),
+            "success_records": success,
+            "failure_rate": (len(records) - success) / len(records),
+            "p50_first_audio_ms": _percentile50(first),
+            "p95_first_audio_ms": _percentile95(first),
+            "p50_realtime_factor": _percentile(rtf, 50),
+            "p95_realtime_factor": _percentile(rtf, 95),
+            "p50_final_handoff_error_ms": _percentile50(handoff),
+            "p95_final_handoff_error_ms": _percentile95(handoff),
+        })
+    return WorkerTelemetrySummaryResponse(
+        total_records=len(items),
+        success_records=sum(item.succeeded for item in items),
+        failed_records=sum(not item.succeeded for item in items),
+        metric_groups=groups,
+    )
+
+
+@router.get(
+    "/worker-telemetry",
+    response_model=list[WorkerSynthesisTelemetryResponse],
+)
+async def list_worker_telemetry(request: Request) -> list[WorkerSynthesisTelemetryResponse]:
+    return [
+        WorkerSynthesisTelemetryResponse.model_validate(item)
+        for item in request.app.state.worker_telemetry_store.list(limit=1000)
+    ]
+
+
+@router.get(
+    "/worker-telemetry/summary",
+    response_model=WorkerTelemetrySummaryResponse,
+)
+async def summarize_worker_telemetry(request: Request) -> WorkerTelemetrySummaryResponse:
+    items = [
+        WorkerSynthesisTelemetryResponse.model_validate(item)
+        for item in request.app.state.worker_telemetry_store.list(limit=5000)
+    ]
+    return _worker_telemetry_summary(items)
 
 
 @router.post("/stt/measure", response_model=SttMeasurementResponse)

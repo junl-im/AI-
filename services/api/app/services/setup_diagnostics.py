@@ -5,9 +5,18 @@ from pathlib import Path
 
 from app.core.config import Settings
 from app.engines.base import TtsEngine
-from app.schemas.setup import SetupStatusResponse, SetupStep, VoicePresetDiagnostic
+from app.schemas.setup import (
+    SetupStatusResponse,
+    SetupStep,
+    VoicePresetDiagnostic,
+    VoiceSelectionDiagnostic,
+)
+from app.services.voice_preset_evidence import (
+    inspect_voice_preset_evidence,
+    mark_duplicate_checksums,
+)
 from app.services.voice_preset_validation import inspect_voice_preset
-from app.services.voice_presets import PRESET_VOICE_IDS
+from app.services.voice_presets import PRESET_VOICE_IDS, list_voice_presets
 
 
 def _audio_directory_check(path: Path) -> SetupStep:
@@ -36,25 +45,37 @@ def _audio_directory_check(path: Path) -> SetupStep:
 
 def _voice_preset_check(
     path: Path | None,
+    signing_secret: str = "",
+    signing_key_id: str = "",
 ) -> tuple[SetupStep, int, list[VoicePresetDiagnostic]]:
+    profiles = list(list_voice_presets())
     if path is None:
         diagnostics = [
             VoicePresetDiagnostic(
-                voice_id=voice_id,
-                filename=f"{voice_id}.wav",
+                voice_id=profile.id,
+                display_name=profile.display_name,
+                declared_gender=profile.gender,
+                filename=f"{profile.id}.wav",
+                manifest_filename=f"{profile.id}.manifest.json",
                 status="missing",
                 usable=False,
+                audio_usable=False,
+                manifest_status="missing",
+                manifest_valid=False,
                 issues=["프리셋 폴더가 연결되지 않았습니다."],
             )
-            for voice_id in PRESET_VOICE_IDS
+            for profile in profiles
         ]
         return (
             SetupStep(
                 id="voice-presets",
-                label="CosyVoice 프리셋 음색",
+                label="CosyVoice 프리셋 음색·증거",
                 status="warning",
                 required=False,
-                detail=f"프리셋 폴더가 연결되지 않았습니다. 0/{len(PRESET_VOICE_IDS)} 사용 가능",
+                detail=(
+                    f"프리셋 폴더가 연결되지 않았습니다. "
+                    f"인증 완료 0/{len(PRESET_VOICE_IDS)}"
+                ),
                 action=(
                     "START_ENGINE.cmd로 실행하거나 "
                     "SORION_COSYVOICE_PRESET_DIRECTORY를 설정하세요."
@@ -64,60 +85,162 @@ def _voice_preset_check(
             diagnostics,
         )
 
-    inspections = [
-        inspect_voice_preset(path / f"{voice_id}.wav", voice_id)
-        for voice_id in PRESET_VOICE_IDS
+    audio_inspections = [
+        inspect_voice_preset(path / f"{profile.id}.wav", profile.id)
+        for profile in profiles
     ]
-    diagnostics = [
-        VoicePresetDiagnostic(
-            voice_id=item.voice_id,
-            filename=item.filename,
-            status=item.status,
-            usable=item.usable,
-            duration_seconds=item.duration_seconds,
-            sample_rate=item.sample_rate,
-            channel_count=item.channel_count,
-            sample_width_bits=item.sample_width_bits,
-            silence_ratio=item.silence_ratio,
-            clipping_ratio=item.clipping_ratio,
-            issues=list(item.issues),
+    evidence_inspections = mark_duplicate_checksums([
+        inspect_voice_preset_evidence(
+            path, profile, audio, signing_secret, signing_key_id
         )
-        for item in inspections
-    ]
-    ready_count = sum(1 for item in inspections if item.usable)
-    blocked = [item.voice_id for item in inspections if item.status == "blocked"]
-    missing = [item.voice_id for item in inspections if item.status == "missing"]
-    warnings = [item.voice_id for item in inspections if item.status == "warning"]
-    if ready_count == len(PRESET_VOICE_IDS) and not warnings:
+        for profile, audio in zip(profiles, audio_inspections, strict=True)
+    ])
+
+    diagnostics: list[VoicePresetDiagnostic] = []
+    for profile, audio, evidence in zip(
+        profiles,
+        audio_inspections,
+        evidence_inspections,
+        strict=True,
+    ):
+        if audio.status == "missing":
+            status = "missing"
+        elif audio.status == "blocked" or evidence.status == "blocked":
+            status = "blocked"
+        elif audio.usable and evidence.ready:
+            status = "ready"
+        else:
+            status = "warning"
+        usable = bool(audio.usable and evidence.ready)
+        issues = [*audio.issues, *evidence.issues]
+        if audio.usable and not evidence.ready and not issues:
+            issues.append("WAV는 사용 가능하지만 증거 manifest 인증이 완료되지 않았습니다.")
+        diagnostics.append(VoicePresetDiagnostic(
+            voice_id=profile.id,
+            display_name=profile.display_name,
+            declared_gender=profile.gender,
+            filename=audio.filename,
+            manifest_filename=evidence.manifest_filename,
+            schema_version=evidence.schema_version,
+            status=status,
+            usable=usable,
+            audio_usable=audio.usable,
+            manifest_status=evidence.status,
+            manifest_valid=evidence.valid,
+            consent_status=evidence.consent_status,
+            human_review_status=evidence.human_review_status,
+            source_type=evidence.source_type,
+            allowed_uses=list(evidence.allowed_uses),
+            declared_sha256=evidence.declared_sha256,
+            actual_sha256=evidence.actual_sha256,
+            checksum_matches=evidence.checksum_matches,
+            review_audio_sha256=evidence.review_audio_sha256,
+            review_checksum_matches=evidence.review_checksum_matches,
+            approval_id=evidence.approval_id,
+            signature_mode=evidence.signature_mode,
+            signing_key_id=evidence.signing_key_id,
+            signature_status=evidence.signature_status,
+            signed_payload_sha256=evidence.signed_payload_sha256,
+            consent_expires_at=(
+                evidence.consent_expires_at.isoformat()
+                if evidence.consent_expires_at
+                else None
+            ),
+            rights_expires_at=(
+                evidence.rights_expires_at.isoformat()
+                if evidence.rights_expires_at
+                else None
+            ),
+            consent_days_remaining=evidence.consent_days_remaining,
+            rights_days_remaining=evidence.rights_days_remaining,
+            duplicate_voice_ids=list(evidence.duplicate_voice_ids),
+            duration_seconds=audio.duration_seconds,
+            sample_rate=audio.sample_rate,
+            channel_count=audio.channel_count,
+            sample_width_bits=audio.sample_width_bits,
+            silence_ratio=audio.silence_ratio,
+            clipping_ratio=audio.clipping_ratio,
+            issues=issues,
+        ))
+
+    certified_count = sum(1 for item in diagnostics if item.usable)
+    audio_ready_count = sum(1 for item in diagnostics if item.audio_usable)
+    manifest_ready_count = sum(
+        1 for item in diagnostics if item.manifest_status == "ready"
+    )
+    duplicate_ids = sorted({
+        item.voice_id
+        for item in diagnostics
+        if item.duplicate_voice_ids
+    })
+    missing = [item.voice_id for item in diagnostics if item.status == "missing"]
+    blocked = [item.voice_id for item in diagnostics if item.status == "blocked"]
+    pending = [item.voice_id for item in diagnostics if item.status == "warning"]
+
+    if certified_count == len(PRESET_VOICE_IDS):
         detail = (
-            f"{len(PRESET_VOICE_IDS)}/{len(PRESET_VOICE_IDS)} 사용 가능 · "
-            "포맷·길이·샘플레이트·무음·클리핑 검사 통과"
+            f"인증 완료 {certified_count}/{len(PRESET_VOICE_IDS)} · "
+            "WAV·동의·권리·사람 검수·SHA-256·중복 검사 통과"
         )
         status = "ready"
         action = None
     else:
-        parts = [f"{ready_count}/{len(PRESET_VOICE_IDS)} 사용 가능"]
+        parts = [
+            f"인증 완료 {certified_count}/{len(PRESET_VOICE_IDS)}",
+            f"WAV 통과 {audio_ready_count}/{len(PRESET_VOICE_IDS)}",
+            f"manifest 통과 {manifest_ready_count}/{len(PRESET_VOICE_IDS)}",
+        ]
         if missing:
             parts.append(f"누락: {', '.join(missing)}")
         if blocked:
             parts.append(f"차단: {', '.join(blocked)}")
-        if warnings:
-            parts.append(f"품질 경고: {', '.join(warnings)}")
+        if pending:
+            parts.append(f"검수 대기: {', '.join(pending)}")
+        if duplicate_ids:
+            parts.append(f"중복 WAV: {', '.join(duplicate_ids)}")
         detail = " · ".join(parts)
         status = "warning"
-        action = "각 WAV 진단을 확인한 뒤 동의받은 기준 음성을 교체하세요."
+        action = (
+            "각 WAV와 동일 ID manifest를 준비하고 동의·권리·사람 검수·"
+            "SHA-256을 완료하세요. 같은 WAV를 여러 인물에 등록하지 마세요."
+        )
     return (
         SetupStep(
             id="voice-presets",
-            label="CosyVoice 프리셋 음색",
+            label="CosyVoice 프리셋 음색·증거",
             status=status,
             required=False,
             detail=detail,
             action=action,
         ),
-        ready_count,
+        certified_count,
         diagnostics,
     )
+
+
+def _voice_selection_diagnostics(engines: list[TtsEngine]) -> list[VoiceSelectionDiagnostic]:
+    diagnostics: list[VoiceSelectionDiagnostic] = []
+    for engine in engines:
+        provider = getattr(engine, "voice_selection_diagnostics", None)
+        if not callable(provider):
+            continue
+        try:
+            raw_items = provider()
+        except Exception as error:  # 진단 실패가 엔진 실행 자체를 막지 않게 격리합니다.
+            info = engine.info()
+            diagnostics.append(VoiceSelectionDiagnostic(
+                engine_id=info.id,
+                engine_name=info.name,
+                voice_id="all",
+                display_name="전체 프리셋",
+                expected_gender="unknown",
+                status="blocked",
+                selection_basis="diagnostic-error",
+                reason=f"화자 선택 진단 실패: {error}",
+            ))
+            continue
+        diagnostics.extend(VoiceSelectionDiagnostic.model_validate(item) for item in raw_items)
+    return diagnostics
 
 
 def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> SetupStatusResponse:
@@ -126,8 +249,21 @@ def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> 
     python_ready = sys.version_info >= (3, 10) and sys.version_info < (3, 13)
     ffmpeg = shutil.which("ffmpeg")
     preset_step, preset_ready_count, preset_diagnostics = _voice_preset_check(
-        settings.cosyvoice_preset_path
+        settings.cosyvoice_preset_path,
+        settings.voice_review_signing_secret,
+        settings.voice_review_signing_key_id,
     )
+    preset_audio_ready_count = sum(
+        1 for item in preset_diagnostics if item.audio_usable
+    )
+    preset_manifest_ready_count = sum(
+        1 for item in preset_diagnostics if item.manifest_status == "ready"
+    )
+    duplicate_groups = {
+        tuple(sorted((item.voice_id, *item.duplicate_voice_ids)))
+        for item in preset_diagnostics
+        if item.duplicate_voice_ids
+    }
     steps = [
         SetupStep(
             id="python",
@@ -189,7 +325,11 @@ def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> 
         ready=required_ready,
         real_engine_count=len(ready_real),
         voice_preset_ready_count=preset_ready_count,
+        voice_preset_audio_ready_count=preset_audio_ready_count,
+        voice_preset_manifest_ready_count=preset_manifest_ready_count,
         voice_preset_expected_count=len(PRESET_VOICE_IDS),
+        voice_preset_duplicate_group_count=len(duplicate_groups),
         voice_preset_diagnostics=preset_diagnostics,
+        voice_selection_diagnostics=_voice_selection_diagnostics(engines),
         steps=steps,
     )

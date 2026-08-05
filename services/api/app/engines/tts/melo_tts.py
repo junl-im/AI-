@@ -14,6 +14,7 @@ from app.services.voice_presets import (
     VoicePresetProfile,
     VoicePresetUnavailableError,
     get_voice_preset,
+    list_voice_presets,
 )
 from app.storage.audio_store import AudioStore
 
@@ -33,6 +34,7 @@ class MeloTtsEngine(TtsEngine):
         self._model_factory = model_factory
         self._model: Any | None = None
         self._load_lock = asyncio.Lock()
+        self._last_selection: dict[str, dict[str, object]] = {}
         self._ready = self._detect() if ready_override is None else ready_override
 
     @staticmethod
@@ -137,7 +139,7 @@ class MeloTtsEngine(TtsEngine):
         return "unknown"
 
     @classmethod
-    def _select_speaker_id(cls, model: Any, preset: VoicePresetProfile) -> Any:
+    def _select_speaker(cls, model: Any, preset: VoicePresetProfile) -> dict[str, object]:
         speaker_ids = dict(model.hps.data.spk2id)
         if not speaker_ids:
             raise RuntimeError("MeloTTS 모델에 선택 가능한 화자가 없습니다.")
@@ -153,7 +155,13 @@ class MeloTtsEngine(TtsEngine):
             )
         ]
         if preferred:
-            return preferred[0][1]
+            name, speaker_id = preferred[0]
+            return {
+                "speaker_id": speaker_id,
+                "speaker_name": str(name),
+                "speaker_gender": cls._speaker_gender(str(name)),
+                "selection_basis": "preferred-name",
+            }
 
         if preset.requires_gender_match:
             compatible = [
@@ -168,10 +176,16 @@ class MeloTtsEngine(TtsEngine):
                     f"{label} 화자가 충분하지 않습니다. "
                     "같은 화자나 반대 성별 화자로 자동 대체하지 않습니다."
                 )
-            return compatible[preset.variant_index][1]
+            name, speaker_id = compatible[preset.variant_index]
+            return {
+                "speaker_id": speaker_id,
+                "speaker_name": str(name),
+                "speaker_gender": preset.gender,
+                "selection_basis": f"gender-slot-{preset.variant_index + 1}",
+            }
 
         neutral = [
-            speaker_id
+            (name, speaker_id)
             for name, speaker_id in speaker_ids.items()
             if cls._speaker_gender(str(name)) == "unknown"
         ]
@@ -180,12 +194,70 @@ class MeloTtsEngine(TtsEngine):
                 f"MeloTTS 모델에 {preset.display_name} 프리셋용 중성 화자가 없습니다. "
                 "성별이 알려진 다른 화자로 자동 대체하지 않습니다."
             )
-        return neutral[preset.variant_index]
+        name, speaker_id = neutral[preset.variant_index]
+        return {
+            "speaker_id": speaker_id,
+            "speaker_name": str(name),
+            "speaker_gender": "unknown",
+            "selection_basis": f"neutral-slot-{preset.variant_index + 1}",
+        }
 
     @classmethod
-    def _synthesize_sync(cls, model: Any, request: TtsSynthesisRequest, output_path: Path) -> None:
+    def _select_speaker_id(cls, model: Any, preset: VoicePresetProfile) -> Any:
+        return cls._select_speaker(model, preset)["speaker_id"]
+
+    def voice_selection_diagnostics(self) -> list[dict[str, object]]:
+        results: list[dict[str, object]] = []
+        for preset in list_voice_presets():
+            base: dict[str, object] = {
+                "engine_id": "melo",
+                "engine_name": "MeloTTS Korean",
+                "voice_id": preset.id,
+                "display_name": preset.display_name,
+                "expected_gender": preset.gender,
+                "status": "idle" if self._ready else "missing",
+                "selected_voice_id": None,
+                "selected_voice_name": None,
+                "selected_gender": None,
+                "selection_basis": "model-not-loaded" if self._ready else "package-unavailable",
+                "reason": (
+                    "첫 생성 후 실제 MeloTTS speaker ID를 확인할 수 있습니다."
+                    if self._ready
+                    else "MeloTTS 선택 설치가 필요합니다."
+                ),
+            }
+            if self._model is None:
+                results.append(base)
+                continue
+            try:
+                selection = self._select_speaker(self._model, preset)
+                base.update({
+                    "status": "ready",
+                    "selected_voice_id": str(selection["speaker_id"]),
+                    "selected_voice_name": str(selection["speaker_name"]),
+                    "selected_gender": str(selection["speaker_gender"]),
+                    "selection_basis": str(selection["selection_basis"]),
+                    "reason": "현재 로딩된 MeloTTS 모델에서 선택될 실제 speaker입니다.",
+                })
+            except (RuntimeError, VoicePresetUnavailableError) as error:
+                base.update({
+                    "status": "blocked",
+                    "selection_basis": "incompatible-model",
+                    "reason": str(error),
+                })
+            results.append(base)
+        return results
+
+    def _synthesize_sync(self, model: Any, request: TtsSynthesisRequest, output_path: Path) -> None:
         preset = get_voice_preset(request.voice_id)
-        speaker_id = cls._select_speaker_id(model, preset)
+        selection = self._select_speaker(model, preset)
+        speaker_id = selection["speaker_id"]
+        self._last_selection[preset.id] = {
+            "selected_voice_id": str(speaker_id),
+            "selected_voice_name": str(selection["speaker_name"]),
+            "selected_gender": str(selection["speaker_gender"]),
+            "selection_basis": str(selection["selection_basis"]),
+        }
         effective_speed = max(0.5, min(2.0, request.speed * preset.rate_multiplier))
         model.tts_to_file(request.text, speaker_id, str(output_path), speed=effective_speed)
         if not output_path.is_file() or output_path.stat().st_size <= 44:

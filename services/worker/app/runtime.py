@@ -69,6 +69,7 @@ class RuntimeDiagnostics:
     model_size_mb: int | None = None
     model_install_state: str = "unknown"
     min_disk_free_mb: int = 0
+    model_digest: str | None = None
 
     def as_dict(self) -> dict[str, object]:
         payload = self.__dict__.copy()
@@ -199,6 +200,7 @@ class CosyVoiceRuntime:
             model_size_mb=model_size_mb,
             model_install_state=install_state,
             min_disk_free_mb=self.settings.min_disk_free_mb,
+            model_digest=verification.model_digest,
         )
 
     def _torch_snapshot(self) -> TorchSnapshot:

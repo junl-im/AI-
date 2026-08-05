@@ -26,6 +26,9 @@ const checks = [
   ['signed audio / device certification', 'check-signed-audio-certification.mjs'],
   ['device soak / audio archive policy', 'check-device-soak-archive.mjs'],
   ['voice presets', 'check-voice-preset-contracts.mjs'],
+  ['voice preset evidence', 'check-voice-preset-evidence.mjs'],
+  ['voice review sync / telemetry', 'check-voice-review-sync.mjs'],
+  ['signed review approval / benchmark dashboard', 'check-signed-review-benchmark.mjs'],
   ['verification evidence', 'check-verification-evidence.mjs'],
   ['evidence intake / local bundle', 'check-evidence-intake-bundle.mjs'],
 ]
