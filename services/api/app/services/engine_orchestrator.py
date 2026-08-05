@@ -7,6 +7,7 @@ from app.engines.base import TtsEngine
 from app.engines.registry import EngineRegistry
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest, TtsSynthesisResponse
+from app.services.voice_presets import VoicePresetUnavailableError
 
 EngineRunner = Callable[[TtsEngine, TtsSynthesisRequest], Awaitable[TtsSynthesisResponse]]
 
@@ -130,6 +131,7 @@ class EngineOrchestrator:
 
         attempts: list[str] = []
         errors: list[str] = []
+        preset_errors: list[str] = []
         for engine in candidates:
             info = engine.info()
             attempts.append(info.id)
@@ -138,6 +140,12 @@ class EngineOrchestrator:
                 result = await runner(engine, engine_request)
             except asyncio.CancelledError:
                 raise
+            except VoicePresetUnavailableError as error:
+                message = str(error).strip() or error.__class__.__name__
+                detail = f"{info.id}: {message}"
+                errors.append(detail)
+                preset_errors.append(detail)
+                continue
             except Exception as error:
                 message = str(error).strip() or error.__class__.__name__
                 errors.append(f"{info.id}: {message}")
@@ -153,6 +161,8 @@ class EngineOrchestrator:
                     ),
                 }
             )
+        if attempts and len(preset_errors) == len(attempts):
+            raise EngineRequestUnsupportedError("; ".join(preset_errors))
         raise EngineExhaustedError(attempts, errors)
 
     def _candidate_engines(

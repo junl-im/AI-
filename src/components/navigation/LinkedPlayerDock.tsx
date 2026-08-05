@@ -194,10 +194,18 @@ export function LinkedPlayerDock() {
   function startBrowserSpeech() {
     if (!browserPlayback || !isBrowserSpeechSupported()) return
     window.speechSynthesis.cancel()
-    const utterance = createBrowserSpeechUtterance({
-      ...browserPlayback,
-      rate: Math.min(2, Math.max(0.5, browserPlayback.rate * playbackRateRef.current)),
-    })
+    let utterance: SpeechSynthesisUtterance
+    try {
+      utterance = createBrowserSpeechUtterance({
+        ...browserPlayback,
+        rate: Math.min(2, Math.max(0.5, browserPlayback.rate * playbackRateRef.current)),
+      })
+      setPlaybackError(null)
+    } catch (error) {
+      setPlaying(false)
+      setPlaybackError(error instanceof Error ? error.message : '프리셋과 맞는 브라우저 음성을 선택하지 못했습니다.')
+      return
+    }
     setDuration(track?.audio.durationSeconds ?? 0)
     utterance.onstart = () => {
       recordPlaybackMetric('browserSpeechStartMs')

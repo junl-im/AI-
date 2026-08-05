@@ -7,6 +7,7 @@ import pytest
 from app.engines.tts.cosyvoice_worker_tts import CosyVoiceWorkerTtsEngine
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest
+from app.services.voice_presets import VoicePresetUnavailableError
 from app.storage.audio_store import AudioStore
 
 
@@ -141,3 +142,28 @@ async def test_cosyvoice_uses_voice_id_named_preset_reference(
     assert worker.profile_id == f"sorion-reference-{voice_id}"
     assert worker.sample_path == preset.resolve()
     assert f"{voice_id} 전용" in result.message
+
+
+@pytest.mark.asyncio
+async def test_cosyvoice_does_not_fallback_missing_preset_to_default_reference(tmp_path):
+    sample = tmp_path / "reference.wav"
+    sample.write_bytes(wav_bytes())
+    preset_directory = tmp_path / "presets"
+    preset_directory.mkdir()
+    engine = CosyVoiceWorkerTtsEngine(
+        AudioStore(tmp_path / "audio", 30),
+        FakeWorker(),
+        str(sample),
+        "sorion-reference",
+        poll_interval_seconds=0.01,
+        preset_directory=str(preset_directory),
+    )
+
+    with pytest.raises(VoicePresetUnavailableError, match="자동 대체하지 않습니다"):
+        await engine.synthesize(
+            TtsSynthesisRequest(
+                text="누락 프리셋은 기본 여성 음성으로 대체되면 안 됩니다.",
+                voice_id="on-clear",
+                job_id=uuid4(),
+            )
+        )

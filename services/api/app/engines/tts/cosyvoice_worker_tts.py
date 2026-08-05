@@ -9,7 +9,7 @@ from app.engines.voiceclone.cosyvoice_worker import CosyVoiceCloneEngine, Worker
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest, TtsSynthesisResponse
 from app.services.voice_preset_validation import inspect_voice_preset
-from app.services.voice_presets import PRESET_VOICE_IDS
+from app.services.voice_presets import PRESET_VOICE_IDS, VoicePresetUnavailableError
 from app.storage.audio_store import AudioStore
 
 
@@ -84,17 +84,29 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
         ]
 
     def _reference_for(self, voice_id: str) -> tuple[Path, str, bool]:
-        if self.preset_directory is not None:
+        if voice_id in PRESET_VOICE_IDS:
+            if self.preset_directory is None:
+                raise VoicePresetUnavailableError(
+                    f"{voice_id} 전용 CosyVoice 기준 음성 폴더가 연결되지 않았습니다. "
+                    "다른 사람의 기본 음성으로 자동 대체하지 않습니다."
+                )
             preset_path = self.preset_directory / f"{voice_id}.wav"
-            if inspect_voice_preset(preset_path, voice_id).usable:
-                return preset_path, f"{self.profile_id}-{voice_id}", True
+            inspection = inspect_voice_preset(preset_path, voice_id)
+            if not inspection.usable:
+                detail = ", ".join(inspection.issues) or inspection.status
+                raise VoicePresetUnavailableError(
+                    f"{voice_id} 전용 CosyVoice WAV를 사용할 수 없습니다: {detail}. "
+                    "다른 프리셋 또는 기본 음성으로 자동 대체하지 않습니다."
+                )
+            return preset_path, f"{self.profile_id}-{voice_id}", True
+
         if (
             self.reference_path is not None
             and inspect_voice_preset(self.reference_path, "default-reference").usable
         ):
             return self.reference_path, self.profile_id, False
         raise RuntimeError(
-            f"{voice_id} 프리셋 기준 음성과 기본 CosyVoice 기준 음성이 없습니다."
+            f"{voice_id}에 사용할 기본 CosyVoice 기준 음성이 없습니다."
         )
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:
@@ -151,9 +163,13 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             audio_url=f"/api/v1/audio/{output_path.name}",
             estimated_duration_seconds=round(duration, 1),
             message=(
-                f"{request.voice_id} 전용 기준 음색으로 WAV를 생성했습니다."
+                f"{request.voice_id} 전용 기준 음색을 확인해 WAV를 생성했습니다. "
+                "다른 프리셋 음성 폴백은 사용하지 않았습니다."
                 if preset_applied
-                else "SoriON CosyVoice 기본 한국어 기준 음색으로 WAV를 생성했습니다."
+                else (
+                    "명시적으로 지정한 SoriON CosyVoice 기본 한국어 "
+                    "기준 음색으로 WAV를 생성했습니다."
+                )
             ),
             processing_ms=processing_ms,
             file_size_bytes=output_path.stat().st_size,

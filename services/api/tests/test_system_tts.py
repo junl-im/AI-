@@ -7,6 +7,7 @@ import pytest
 from app.core.config import Settings
 from app.engines.tts.system_tts import SystemSpeechAdapter, SystemTtsEngine
 from app.schemas.tts import TtsSynthesisRequest
+from app.services.voice_presets import VoicePresetUnavailableError
 from app.storage.audio_store import AudioStore
 
 
@@ -92,3 +93,41 @@ def test_windows_backend_accepts_korean_voice(monkeypatch):
 
     assert adapter.backend is not None
     assert adapter.backend.kind == "windows"
+
+
+def test_espeak_uses_gendered_variants_without_cross_gender_fallback():
+    adapter = object.__new__(SystemSpeechAdapter)
+    adapter.backend = type("Backend", (), {"voice": "ko"})()
+
+    from app.services.voice_presets import get_voice_preset
+
+    assert adapter._espeak_voice_for(get_voice_preset("sori-warm")).startswith("ko+f")
+    assert adapter._espeak_voice_for(get_voice_preset("on-clear")).startswith("ko+m")
+    assert adapter._espeak_voice_for(get_voice_preset("jun-deep")) != adapter._espeak_voice_for(
+        get_voice_preset("on-clear")
+    )
+
+@pytest.mark.asyncio
+async def test_windows_preset_marker_becomes_non_circuit_error(tmp_path, monkeypatch):
+    adapter = object.__new__(SystemSpeechAdapter)
+    adapter.backend = type(
+        "Backend",
+        (),
+        {"kind": "windows", "executable": "powershell.exe", "voice": ""},
+    )()
+
+    async def reject(_command):
+        raise RuntimeError(
+            "PowerShell error: VOICE_PRESET_UNAVAILABLE: "
+            "남성 한국어 음성이 부족합니다."
+        )
+
+    monkeypatch.setattr(adapter, "_run", reject)
+    request = TtsSynthesisRequest(
+        text="Windows 프리셋 오류 변환 테스트입니다.",
+        voice_id="jun-deep",
+        job_id=uuid4(),
+    )
+
+    with pytest.raises(VoicePresetUnavailableError, match="남성 한국어 음성이 부족"):
+        await adapter._windows(request, tmp_path / "result.wav")

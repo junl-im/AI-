@@ -11,6 +11,8 @@ export interface VoicePreset {
   tags: [string, string, string]
   rateMultiplier: number
   pitchOffset: number
+  voiceVariantIndex: number
+  requiresDedicatedReference: boolean
   preferredVoiceTokens: string[]
 }
 
@@ -25,14 +27,16 @@ export const voicePresets: VoicePreset[] = [
     id: 'sori-warm',
     name: '혜린',
     shortName: '혜',
-    description: '브이로그와 일상 콘텐츠에 자연스러운 따뜻한 목소리',
+    description: '브이로그와 일상 콘텐츠에 자연스러운 따뜻한 여성 목소리',
     tone: 'bg-[#ffe5dc]',
     badge: '추천',
     gender: 'female',
     tags: ['차분', '여성', '한국어'],
     rateMultiplier: 0.96,
     pitchOffset: 1.5,
-    preferredVoiceTokens: ['sunhi', 'yuna', 'heami', 'seoyeon', 'female', '여성', 'korean a'],
+    voiceVariantIndex: 0,
+    requiresDedicatedReference: true,
+    preferredVoiceTokens: ['sunhi', 'yuna', 'heami', 'seoyeon', 'korean a'],
   },
   {
     id: 'on-clear',
@@ -45,20 +49,24 @@ export const voicePresets: VoicePreset[] = [
     tags: ['명료', '남성', '한국어'],
     rateMultiplier: 1.04,
     pitchOffset: -1.5,
-    preferredVoiceTokens: ['injoon', 'hyunsu', 'male', '남성', 'korean b'],
+    voiceVariantIndex: 0,
+    requiresDedicatedReference: true,
+    preferredVoiceTokens: ['injoon', 'hyunsu', 'korean b'],
   },
   {
     id: 'dam-calm',
     name: '소리',
     shortName: '소',
-    description: '오디오북과 긴 문장에 편안한 낮은 에너지',
+    description: '오디오북과 긴 문장에 편안한 중성 목소리',
     tone: 'bg-[#ebe5ff]',
     badge: '차분함',
     gender: 'neutral',
     tags: ['따뜻', '중성', '한국어'],
     rateMultiplier: 0.9,
     pitchOffset: -0.5,
-    preferredVoiceTokens: ['sora', 'jimin', 'natural', 'korean c'],
+    voiceVariantIndex: 0,
+    requiresDedicatedReference: true,
+    preferredVoiceTokens: ['jimin', 'natural', 'neutral', '중성', 'korean c'],
   },
   {
     id: 'jun-deep',
@@ -71,7 +79,9 @@ export const voicePresets: VoicePreset[] = [
     tags: ['저음', '남성', '한국어'],
     rateMultiplier: 0.92,
     pitchOffset: -2.5,
-    preferredVoiceTokens: ['minsu', 'bongjin', 'deep', 'baritone', 'male', '남성', 'korean d'],
+    voiceVariantIndex: 1,
+    requiresDedicatedReference: true,
+    preferredVoiceTokens: ['minsu', 'bongjin', 'yong', 'deep', 'baritone', 'korean d'],
   },
   {
     id: 'min-energetic',
@@ -84,12 +94,24 @@ export const voicePresets: VoicePreset[] = [
     tags: ['활기', '남성', '한국어'],
     rateMultiplier: 1.08,
     pitchOffset: -0.5,
-    preferredVoiceTokens: ['young male', 'energetic', 'male', '남성', 'korean e'],
+    voiceVariantIndex: 2,
+    requiresDedicatedReference: true,
+    preferredVoiceTokens: ['young male', 'energetic', 'youngho', 'korean e'],
   },
 ]
 
 export function getVoicePreset(voiceId: string): VoicePreset {
   return voicePresets.find((voice) => voice.id === voiceId) ?? voicePresets[0]
+}
+
+export function requireVoicePreset(voiceId: string): VoicePreset {
+  const preset = voicePresets.find((voice) => voice.id === voiceId)
+  if (!preset) throw new Error(`지원하지 않는 음성 프리셋입니다: ${voiceId}`)
+  return preset
+}
+
+export function isVoicePresetId(voiceId: string): boolean {
+  return voicePresets.some((voice) => voice.id === voiceId)
 }
 
 export function filterVoicePresets(gender: VoiceGender | 'all'): VoicePreset[] {

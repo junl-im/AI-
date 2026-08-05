@@ -1,14 +1,25 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.7 · Field Evidence Intake & Local Export Bundle**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.7.1 · Voice Preset Fidelity Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-03 KST**
+최종 갱신: **2026-08-05 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+## Engine Heartbeat 6.7.1 Voice Preset Fidelity Hotfix
+
+- 제품 버전은 `0.9.3-beta.3`으로 유지하고 내부 patch identifier만 Heartbeat 6.7.1로 올렸습니다.
+- 혜린 여성, 도윤·준호·민준 남성, 소리 중성 메타데이터를 Browser/System/Melo 실제 후보 선택에 반영합니다.
+- 알 수 없는 ID를 혜린으로 바꾸거나 남성 프리셋을 여성 음성으로 재생하는 묵시적 폴백을 차단합니다.
+- 같은 성별 후보가 부족하면 도윤·준호·민준에 같은 음성을 순환 배정하지 않습니다.
+- CosyVoice의 알려진 5개 프리셋은 같은 ID의 전용 WAV가 필수이며 기본 기준 WAV로 대체하지 않습니다.
+- 프리셋별 후보 부족은 엔진 고장이 아니므로 오케스트레이터 failure count와 circuit breaker를 증가시키지 않습니다.
+- 실제 5개 화자 WAV·모델은 전달본에 없습니다. Browser/System/eSpeak는 인물 전용 음색이 아닌 안전한 근사 음성입니다.
+- 다음 목표는 Heartbeat 6.8 Preset Evidence Review, Consent Manifest & CosyVoice Benchmarks입니다.
+
 ## Engine Heartbeat 6.7 Field Evidence Intake & Local Export Bundle
 
 - 제품 버전은 `0.9.3-beta.3`으로 유지하고 내부 patch identifier만 Heartbeat 6.7로 올렸습니다.
@@ -697,3 +708,15 @@ CI Hotfix 4 테스트 규칙:
 4. 브라우저 로컬 ZIP은 최대 20개/250MiB, 파일별 SHA-256 manifest, 진행률과 취소를 제공한다.
 5. npm lock 검사를 preflight에 포함하되 패치가 기존 검증 lock을 덮어쓰거나 임의 생성하지 않는다.
 6. 다음 목표는 가져온 증거 보존·검토와 CosyVoice 5종 실제 benchmark schema다.
+
+## 54. 2026-08-05 10:17 KST · 0.9.3-beta.3 Engine Heartbeat 6.7.1 Voice Preset Fidelity Hotfix
+1. 작업 일시(KST): 2026-08-05 10:17 KST.
+2. 대상/기준: `0.9.3-beta.3 · Engine Heartbeat 6.7.1`, 기준은 사용자가 전달한 `Engine Heartbeat 6.7` 전체본이다.
+3. 변경 내용: 프리셋 ID·성별·후보 순번 계약을 Web과 API에 추가하고 Browser, Windows, macOS, eSpeak, MeloTTS, CosyVoice의 음성 선택과 오류 처리를 수정했다. 알려진 프리셋은 반대 성별, 알 수 없는 성별, 같은 후보 순환 또는 기본 WAV로 조용히 대체되지 않는다.
+4. 변경 이유: 화면에는 남성·인물별 프리셋으로 표시되지만 실제로는 여성 음성 또는 하나의 공통 음성이 재생되던 정합성 문제를 막기 위해서다.
+5. 영향 범위: Web Browser Speech 선택·재생 오류 UI, FastAPI 프리셋 계약, System/Melo/CosyVoice 어댑터, 엔진 오케스트레이터의 fallback·circuit breaker, 회귀 검사와 운영 문서다.
+6. 주요 파일: `src/tts/voicePresets.ts`, `src/tts/browserSpeech.ts`, `src/components/navigation/LinkedPlayerDock.tsx`, `services/api/app/services/voice_presets.py`, `services/api/app/services/engine_orchestrator.py`, `services/api/app/engines/tts/{system_tts.py,melo_tts.py,cosyvoice_worker_tts.py}`, Windows PowerShell 스크립트, 테스트와 `docs/VOICE_PRESET_FIDELITY.md`다.
+7. 검증 결과: Repository preflight 20개, API pytest 154개, Worker pytest 14개, 핵심 프리셋 회귀 29개, TS/TSX transpile 179개, Browser runtime smoke, Python compileall과 `check-voice-preset-contracts.mjs`를 통과했다. 전체 npm 의존성 설치는 내부 registry의 `zustand@5.0.8` 404로 실행하지 못했다.
+8. 제한/주의: 실제 5개 화자 WAV와 CosyVoice 모델은 포함하지 않았다. Browser/System/eSpeak는 전용 인물이 아닌 기기·엔진 근사 음성이며 운영체제에 충분한 별도 후보가 없으면 일부 프리셋이 명시적으로 미지원될 수 있다. WAV만으로 성별·신원·동의를 자동 판정하지 않는다.
+9. 산출물: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.7.1-voice-preset-fidelity-full.zip`, `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.7-to-6.7.1-voice-preset-fidelity-patch.zip`, `SHA256SUMS.txt`.
+10. 다음 예상 업데이트: Heartbeat 6.8에서 프리셋별 동의·출처·선언 성별·WAV SHA-256 manifest, Engine Doctor 검토 상태, 5종 A/B 청취 승인과 실제 CosyVoice benchmark를 추가한다.

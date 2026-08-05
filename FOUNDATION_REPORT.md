@@ -1,7 +1,17 @@
 # SoriON AI 0.9.3-beta.3 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.7 · Field Evidence Intake & Local Export Bundle**
+결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.7.1 · Voice Preset Fidelity Hotfix**
 
+
+## Engine Heartbeat 6.7.1 Voice Preset Fidelity Hotfix
+
+- 여성·남성·중성 메타데이터와 실제 엔진 후보 선택을 연결하고 반대 성별 묵시적 폴백을 차단했습니다.
+- 남성 후보가 1개뿐일 때 도윤·준호·민준 모두에게 반복 배정하지 않고 후순위 프리셋을 미지원 처리합니다.
+- CosyVoice는 알려진 프리셋에 동일 ID 전용 WAV를 필수로 하며 공통 기본 기준 음성을 대체 사용하지 않습니다.
+- MeloTTS의 단일 `KR` 화자, macOS 공통 `Yuna`, Windows·Browser 순번 순환 선택 문제를 제거했습니다.
+- 프리셋별 호환성 부족은 엔진 전체 고장이 아니므로 실패 횟수와 circuit breaker를 증가시키지 않습니다.
+- 검증: Repository preflight 20개, API pytest 154개, Worker pytest 14개, 핵심 프리셋 회귀 29개, TS/TSX transpile 179개, Browser runtime smoke, Python compileall과 음성 계약 검사를 통과했습니다.
+- 제한: 실제 5개 화자 WAV와 모델은 포함하지 않았습니다. Browser/System/eSpeak 결과는 전용 인물이 아닌 기기·엔진 근사 음성입니다. 전체 npm Web 품질은 registry 404로 GitHub Actions 최종 확인이 필요합니다.
 
 ## Engine Heartbeat 6.7 Field Evidence Intake & Local Export Bundle
 

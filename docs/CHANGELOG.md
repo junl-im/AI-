@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.7.1 · Voice preset fidelity hotfix
+
+- 알 수 없는 프리셋 ID를 첫 여성 프리셋으로 바꾸지 않고 명시적 오류로 처리합니다.
+- Browser Speech가 한국어 음성 이름·URI에서 성별을 확인하며 반대 성별과 성별이 명시된 중성 대체를 차단합니다.
+- 도윤·준호·민준의 별도 남성 후보가 부족할 때 같은 음성을 순환 재사용하지 않습니다.
+- Windows System.Speech와 macOS `say`가 성별·프리셋별 후보를 선택하며 공통 음성 강제값을 제거합니다.
+- eSpeak는 여성·남성 변형 번호를 분리하고, MeloTTS는 단일 `KR` 화자와 같은 화자 중복 대체를 차단합니다.
+- CosyVoice의 알려진 5개 프리셋은 동일 ID 전용 WAV가 없으면 기본 기준 음성으로 대체하지 않습니다.
+- 프리셋 호환성 부족은 엔진 장애나 circuit breaker 실패로 계산하지 않고 다음 엔진을 시험합니다.
+- 플레이어는 호환 브라우저 음성이 없을 때 조용히 기본 음성을 재생하지 않고 사용자에게 오류를 표시합니다.
+- 음성 정합성 계약 문서와 회귀 검사를 추가하고 제품 버전은 `0.9.3-beta.3`으로 유지합니다.
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.7 · Field evidence intake and local export bundle
 
 - field evidence v2와 완료된 Web quality run report를 서버 checksum으로 preview·등록합니다.

@@ -1,5 +1,6 @@
 import asyncio
 import platform
+import re
 import shutil
 import subprocess
 import wave
@@ -10,7 +11,11 @@ from uuid import UUID, uuid4
 from app.engines.base import TtsEngine
 from app.schemas.engine import EngineInfo
 from app.schemas.tts import TtsSynthesisRequest, TtsSynthesisResponse
-from app.services.voice_presets import get_voice_preset
+from app.services.voice_presets import (
+    VoicePresetProfile,
+    VoicePresetUnavailableError,
+    get_voice_preset,
+)
 from app.storage.audio_store import AudioStore
 
 
@@ -21,9 +26,41 @@ class SystemBackend:
     voice: str
 
 
+_FEMALE_NAME_TOKENS = (
+    "female",
+    "woman",
+    "girl",
+    "여성",
+    "여자",
+    "sunhi",
+    "yuna",
+    "heami",
+    "seoyeon",
+    "sora",
+    "samantha",
+    "zira",
+)
+_MALE_NAME_TOKENS = (
+    "male",
+    "man",
+    "boy",
+    "남성",
+    "남자",
+    "injoon",
+    "hyunsu",
+    "minsu",
+    "bongjin",
+    "yong",
+    "youngho",
+    "david",
+    "mark",
+    "daniel",
+)
+
+
 class SystemSpeechAdapter:
     def __init__(self, configured_voice: str = "") -> None:
-        self.backend = self._detect(configured_voice)
+        self.backend = self._detect(configured_voice.strip())
         self.reason = None if self.backend else self._unavailable_reason()
 
     @staticmethod
@@ -43,7 +80,7 @@ class SystemSpeechAdapter:
             say = shutil.which("say")
             afconvert = shutil.which("afconvert")
             if say and afconvert:
-                return SystemBackend("macos", say, configured_voice or "Yuna")
+                return SystemBackend("macos", say, configured_voice)
         executable = shutil.which("espeak-ng") or shutil.which("espeak")
         if executable and self._has_korean_espeak_voice(executable):
             return SystemBackend("espeak", executable, configured_voice or "ko")
@@ -80,7 +117,10 @@ class SystemSpeechAdapter:
                 if "|" in line
             ]
             if configured_voice:
-                return any(name == configured_voice for name, _ in voices)
+                return any(
+                    name == configured_voice and culture.lower().startswith("ko-")
+                    for name, culture in voices
+                )
             return any(culture.lower().startswith("ko-") for _, culture in voices)
         except (OSError, subprocess.SubprocessError):
             return False
@@ -98,6 +138,104 @@ class SystemSpeechAdapter:
             return " ko " in f" {result.stdout.lower()} " or "korean" in result.stdout.lower()
         except (OSError, subprocess.SubprocessError):
             return False
+
+    @staticmethod
+    def _identity_has_token(identity: str, token: str) -> bool:
+        if token in {"female", "male", "woman", "man", "girl", "boy"}:
+            return re.search(rf"(?<![a-z]){re.escape(token)}(?![a-z])", identity) is not None
+        return token in identity
+
+    @classmethod
+    def _infer_voice_gender(cls, name: str) -> str:
+        identity = name.lower()
+        female = any(cls._identity_has_token(identity, token) for token in _FEMALE_NAME_TOKENS)
+        male = any(cls._identity_has_token(identity, token) for token in _MALE_NAME_TOKENS)
+        if female and not male:
+            return "female"
+        if male and not female:
+            return "male"
+        return "unknown"
+
+    @staticmethod
+    def _macos_korean_voices(executable: str) -> list[str]:
+        try:
+            result = subprocess.run(
+                [executable, "-v", "?"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return []
+        if result.returncode != 0:
+            return []
+        voices: list[str] = []
+        for line in result.stdout.splitlines():
+            match = re.match(r"^(.+?)\s+ko(?:_|-)KR\s+#", line.strip(), re.IGNORECASE)
+            if match:
+                voices.append(match.group(1).strip())
+        return voices
+
+    def _macos_voice_for(self, preset: VoicePresetProfile) -> str:
+        assert self.backend is not None
+        voices = self._macos_korean_voices(self.backend.executable)
+        if self.backend.voice:
+            if self.backend.voice not in voices:
+                raise VoicePresetUnavailableError(
+                    f"설정한 macOS 한국어 음성 '{self.backend.voice}'을 찾지 못했습니다."
+                )
+            candidates = [self.backend.voice]
+        else:
+            candidates = voices
+        if not candidates:
+            raise VoicePresetUnavailableError("설치된 macOS 한국어 음성을 찾지 못했습니다.")
+
+        candidates = [
+            voice
+            for voice in candidates
+            if (
+                self._infer_voice_gender(voice) == preset.gender
+                if preset.requires_gender_match
+                else self._infer_voice_gender(voice) == "unknown"
+            )
+        ]
+        if not candidates:
+            label = (
+                "남성" if preset.gender == "male"
+                else "여성" if preset.gender == "female"
+                else "중성"
+            )
+            raise VoicePresetUnavailableError(
+                f"{preset.display_name} 프리셋에 필요한 {label} macOS 한국어 음성이 없습니다. "
+                "다른 성별 또는 정체가 다른 음성으로 자동 대체하지 않습니다."
+            )
+
+        preferred = next(
+            (
+                voice
+                for voice in candidates
+                if any(token in voice.lower() for token in preset.preferred_voice_tokens)
+            ),
+            None,
+        )
+        if preferred:
+            return preferred
+        if len(candidates) <= preset.variant_index:
+            raise VoicePresetUnavailableError(
+                f"{preset.display_name} 프리셋에 배정할 별도 macOS 한국어 음성이 없습니다. "
+                "같은 음성을 다른 인물 프리셋에 중복 배정하지 않습니다."
+            )
+        return candidates[preset.variant_index]
+
+    def _espeak_voice_for(self, preset: VoicePresetProfile) -> str:
+        assert self.backend is not None
+        base = self.backend.voice.split("+", maxsplit=1)[0] or "ko"
+        if preset.gender == "male":
+            return f"{base}+m{(preset.variant_index % 7) + 1}"
+        if preset.gender == "female":
+            return f"{base}+f{(preset.variant_index % 4) + 1}"
+        return base
 
     async def synthesize(self, request: TtsSynthesisRequest, output_path: Path) -> None:
         if self.backend is None:
@@ -118,7 +256,7 @@ class SystemSpeechAdapter:
         command = [
             self.backend.executable,
             "-v",
-            self.backend.voice,
+            self._espeak_voice_for(preset),
             "-s",
             str(speed),
             "-p",
@@ -133,6 +271,7 @@ class SystemSpeechAdapter:
         assert self.backend is not None
         aiff_path = output_path.with_suffix(".aiff")
         preset = get_voice_preset(request.voice_id)
+        selected_voice = self._macos_voice_for(preset)
         words_per_minute = max(
             90,
             min(360, round(180 * request.speed * preset.rate_multiplier)),
@@ -141,7 +280,7 @@ class SystemSpeechAdapter:
             await self._run([
                 self.backend.executable,
                 "-v",
-                self.backend.voice,
+                selected_voice,
                 "-r",
                 str(words_per_minute),
                 "-o",
@@ -169,25 +308,35 @@ class SystemSpeechAdapter:
         effective_speed = request.speed * preset.rate_multiplier
         rate = max(-10, min(10, round((effective_speed - 1) * 8)))
         try:
-            await self._run([
-                self.backend.executable,
-                "-NoProfile",
-                "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                str(script),
-                "-TextPath",
-                str(text_path),
-                "-OutputPath",
-                str(output_path),
-                "-Rate",
-                str(rate),
-                "-VoiceName",
-                self.backend.voice,
-                "-VoicePreset",
-                preset.id,
-            ])
+            try:
+                await self._run([
+                    self.backend.executable,
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(script),
+                    "-TextPath",
+                    str(text_path),
+                    "-OutputPath",
+                    str(output_path),
+                    "-Rate",
+                    str(rate),
+                    "-VoiceName",
+                    self.backend.voice,
+                    "-VoicePreset",
+                    preset.id,
+                    "-ExpectedGender",
+                    preset.gender,
+                ])
+            except RuntimeError as error:
+                marker = "VOICE_PRESET_UNAVAILABLE:"
+                message = str(error)
+                if marker in message:
+                    detail = message.split(marker, maxsplit=1)[1].strip()
+                    raise VoicePresetUnavailableError(detail) from error
+                raise
         finally:
             text_path.unlink(missing_ok=True)
 
@@ -250,6 +399,7 @@ class SystemTtsEngine(TtsEngine):
         if self.adapter.backend is None:
             raise RuntimeError(self.adapter.reason or "시스템 음성 엔진을 사용할 수 없습니다.")
 
+        preset = get_voice_preset(request.voice_id)
         job_id = request.job_id or uuid4()
         output_path = self.store.output_path(UUID(str(job_id)), "wav")
         try:
@@ -259,6 +409,7 @@ class SystemTtsEngine(TtsEngine):
             self.store.remove(output_path)
             raise
 
+        gender_label = {"male": "남성", "female": "여성", "neutral": "중성"}[preset.gender]
         return TtsSynthesisResponse(
             job_id=str(job_id),
             status="completed",
@@ -267,9 +418,9 @@ class SystemTtsEngine(TtsEngine):
             audio_url=f"/api/v1/audio/{output_path.name}",
             estimated_duration_seconds=round(duration, 1),
             message=(
-                f"{get_voice_preset(request.voice_id).display_name} 프리셋을 "
-                "기기의 한국어 시스템 음성에 적용해 WAV를 생성했습니다. "
-                "AI 모델 음성은 아닙니다."
+                f"{preset.display_name}({gender_label}) 프리셋과 호환되는 "
+                "기기 한국어 음성을 적용했습니다. "
+                "반대 성별 자동 대체는 차단되며, 전용 AI 화자와는 다른 시스템 근사 음성입니다."
             ),
         )
 

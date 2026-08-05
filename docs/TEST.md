@@ -1,3 +1,15 @@
+# Heartbeat 6.7.1 음성 프리셋 정합성 추가 검증
+
+- 알 수 없는 프리셋 ID를 첫 여성 프리셋으로 대체하지 않는지 검사
+- Browser Speech의 여성·남성·중성 후보 분리와 반대 성별 차단
+- 남성 후보 1개를 도윤·준호·민준에 순환 중복 배정하지 않는지 검사
+- CosyVoice 전용 WAV 누락 시 기본 기준 WAV로 대체하지 않는지 검사
+- MeloTTS 단일 `KR` 화자 차단과 다중 남성 화자 순번 배정
+- Windows/macOS/eSpeak의 성별·프리셋별 선택 계약
+- 프리셋 호환성 오류가 엔진 circuit breaker를 열지 않는지 검사
+- API pytest 154개, Worker pytest 14개, 핵심 회귀 28개, Python compileall
+- 전체 npm lint·typecheck·Vitest·Vite build는 registry 404로 GitHub Actions 최종 판정
+
 # Heartbeat 6.7 추가 검증
 
 - npm lock integrity와 Evidence Intake/Local Bundle을 포함한 repository preflight 20개

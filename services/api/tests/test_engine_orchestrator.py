@@ -12,6 +12,7 @@ from app.services.engine_orchestrator import (
     EngineRequestUnsupportedError,
     EngineUnavailableError,
 )
+from app.services.voice_presets import VoicePresetUnavailableError
 
 
 class FakeEngine(TtsEngine):
@@ -260,3 +261,45 @@ async def test_requested_emotion_prefers_capable_korean_engine():
     )
 
     assert result.engine_id == "korean-premium"
+
+
+@pytest.mark.asyncio
+async def test_preset_incompatibility_falls_back_without_opening_engine_circuit():
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("single-speaker"))
+    registry.register_tts(FakeEngine("compatible"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["single-speaker", "compatible"],
+        failure_threshold=1,
+    )
+
+    async def runner(engine, engine_request):
+        if engine.info().id == "single-speaker":
+            raise VoicePresetUnavailableError("남성 프리셋용 화자가 없습니다.")
+        return await engine.synthesize(engine_request)
+
+    result = await orchestrator.synthesize(request(), runner)
+    runtime = {item.id: item for item in orchestrator.list_info()}
+
+    assert result.engine_id == "compatible"
+    assert result.attempted_engine_ids == ["single-speaker", "compatible"]
+    assert runtime["single-speaker"].failure_count == 0
+    assert runtime["single-speaker"].health == "ready"
+
+
+@pytest.mark.asyncio
+async def test_all_preset_incompatible_engines_return_unsupported_without_circuit_failure():
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("single-speaker"))
+    orchestrator = EngineOrchestrator(registry, failure_threshold=1)
+
+    async def incompatible(engine, engine_request):
+        raise VoicePresetUnavailableError("요청 프리셋 성별과 맞는 화자가 없습니다.")
+
+    with pytest.raises(EngineRequestUnsupportedError, match="프리셋 성별"):
+        await orchestrator.synthesize(request(), incompatible)
+
+    runtime = {item.id: item for item in orchestrator.list_info()}
+    assert runtime["single-speaker"].failure_count == 0
+    assert runtime["single-speaker"].health == "ready"

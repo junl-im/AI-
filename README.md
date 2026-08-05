@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.7 · Field Evidence Intake & Local Export Bundle`
+- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.7.1 · Voice Preset Fidelity Hotfix`
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -22,7 +22,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - PWA: 1024px 최적화 로고와 1.5MiB 사전 캐시 예산 검사
 - 모바일: 카카오톡 WebView를 감지해 로컬 PC 엔진 제한과 외부 브라우저 전환을 즉시 안내
 - 재생 UX: 보이는 재생 버튼이 선택값을 자동 적용하고 생성·선택된 음성을 즉시 재생
-- 프리셋: 여성 1종·남성 3종·중성 1종의 Browser/System/Melo 운율 프로필과 CosyVoice 기준 음원 라우팅
+- 프리셋: 여성 1종·남성 3종·중성 1종, 성별 불일치·동일 화자 중복 배정·CosyVoice 기본 WAV 대체를 차단
 - Engine Doctor: API·TTS·Worker·GPU·프리셋 5종 상태 진단, 주소 저장, 자동 연결 복구와 개인정보 제외 진단 복사
 - PC 편집: 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
 - 엔진 표시: 우측 상단 API·Worker·GPU 3점 상태와 실패 시 작업 메시지 자동 알림
@@ -48,6 +48,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 증거 Intake: field evidence v2와 Web quality run report를 5MiB 제한·서버 checksum 재검증·bundle/record 중복 차단 뒤 등록
 - 로컬 Export ZIP: WAV·MP3·SRT·VTT·JSON 최대 20개/250MiB를 서버 업로드 없이 SHA-256 manifest, 진행률과 취소를 포함해 묶음
 - Lock gate: repository preflight가 package-lock 존재와 package.json 직접 의존성 일치를 필수 검사하며 패치는 기존 검증 lock을 보존
+- 음성 정합성: 전용 인물 WAV가 없으면 시스템 근사 음성임을 표시하고, 호환 후보가 없을 때 다른 성별이나 같은 음성을 성공으로 처리하지 않음
 
 ## 무료 실행
 
@@ -91,6 +92,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 실기기 soak recorder: [`docs/DEVICE_SOAK_RECORDER.md`](docs/DEVICE_SOAK_RECORDER.md)
 - 음원 보존 정책: [`docs/AUDIO_ARCHIVE_POLICY.md`](docs/AUDIO_ARCHIVE_POLICY.md)
 - 음성 프리셋: [`docs/VOICE_PRESETS.md`](docs/VOICE_PRESETS.md)
+- 프리셋 음성 정합성 계약: [`docs/VOICE_PRESET_FIDELITY.md`](docs/VOICE_PRESET_FIDELITY.md)
 - UI/UX 점검: [`docs/UI_UX_AUDIT_HEARTBEAT_5_2.md`](docs/UI_UX_AUDIT_HEARTBEAT_5_2.md)
 - lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)
 - 재현 가능한 Web 품질: [`docs/REPRODUCIBLE_WEB_QUALITY.md`](docs/REPRODUCIBLE_WEB_QUALITY.md)

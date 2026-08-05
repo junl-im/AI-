@@ -32,8 +32,11 @@ const originalSynthesis = Object.getOwnPropertyDescriptor(window, 'speechSynthes
 function installBrowserSpeech() {
   const voices = [
     { name: 'English', lang: 'en-US', voiceURI: 'english' },
-    { name: 'Korean A', lang: 'ko-KR', voiceURI: 'korean-a' },
-    { name: 'Korean B', lang: 'ko-KR', voiceURI: 'korean-b' },
+    { name: 'Microsoft Heami Female', lang: 'ko-KR', voiceURI: 'korean-a' },
+    { name: 'Microsoft InJoon Male', lang: 'ko-KR', voiceURI: 'korean-b' },
+    { name: 'Korean Neutral', lang: 'ko-KR', voiceURI: 'korean-c' },
+    { name: 'Korean Minsu Male', lang: 'ko-KR', voiceURI: 'korean-d' },
+    { name: 'Korean Youngho Male', lang: 'ko-KR', voiceURI: 'korean-e' },
   ] as SpeechSynthesisVoice[]
   Object.defineProperty(globalThis, 'SpeechSynthesisUtterance', {
     configurable: true,
@@ -116,7 +119,7 @@ describe('browserSpeech', () => {
     const utterance = createBrowserSpeechUtterance(playback)
 
     expect(selected?.lang).toBe('ko-KR')
-    expect(selected?.name).toBe('Korean A')
+    expect(selected?.name).toBe('Microsoft Heami Female')
     expect(utterance.text).toBe(request.text)
     expect(utterance.lang).toBe('ko-KR')
     expect(utterance.rate).toBe(playback.rate)
@@ -128,10 +131,45 @@ describe('browserSpeech', () => {
     const warm = createBrowserSpeechPlayback(request)
     const clear = createBrowserSpeechPlayback({ ...request, voiceId: 'on-clear' })
 
-    expect(selectBrowserSpeechVoice(voices, 'sori-warm')?.name).toBe('Korean A')
-    expect(selectBrowserSpeechVoice(voices, 'on-clear')?.name).toBe('Korean B')
+    expect(selectBrowserSpeechVoice(voices, 'sori-warm')?.name).toBe('Microsoft Heami Female')
+    expect(selectBrowserSpeechVoice(voices, 'on-clear')?.name).toBe('Microsoft InJoon Male')
     expect(clear.rate).not.toBe(warm.rate)
     expect(clear.pitch).not.toBe(warm.pitch)
+  })
+
+  it('남성 프리셋을 여성 음성으로 자동 대체하지 않는다', () => {
+    installBrowserSpeech()
+    const femaleOnly = [
+      { name: 'Microsoft Heami Female', lang: 'ko-KR', voiceURI: 'female-only' },
+    ] as SpeechSynthesisVoice[]
+
+    expect(selectBrowserSpeechVoice(femaleOnly, 'on-clear')).toBeNull()
+  })
+
+
+  it('같은 남성 음성을 여러 인물 프리셋에 중복 배정하지 않는다', () => {
+    const oneMaleVoice = [
+      { name: 'Generic Korean Male', lang: 'ko-KR', voiceURI: 'male-only' },
+    ] as SpeechSynthesisVoice[]
+
+    expect(selectBrowserSpeechVoice(oneMaleVoice, 'on-clear')?.name).toBe('Generic Korean Male')
+    expect(selectBrowserSpeechVoice(oneMaleVoice, 'jun-deep')).toBeNull()
+    expect(selectBrowserSpeechVoice(oneMaleVoice, 'min-energetic')).toBeNull()
+  })
+
+  it('중성 프리셋을 성별이 명시된 음성으로 자동 대체하지 않는다', () => {
+    const genderedOnly = [
+      { name: 'Korean Female', lang: 'ko-KR', voiceURI: 'female' },
+      { name: 'Korean Male', lang: 'ko-KR', voiceURI: 'male' },
+    ] as SpeechSynthesisVoice[]
+
+    expect(selectBrowserSpeechVoice(genderedOnly, 'dam-calm')).toBeNull()
+  })
+
+  it('알 수 없는 프리셋 ID를 첫 여성 프리셋으로 바꾸지 않는다', () => {
+    const voices = installBrowserSpeech()
+
+    expect(() => selectBrowserSpeechVoice(voices, 'unknown-preset')).toThrow('지원하지 않는 음성 프리셋')
   })
 
   it('긴 내용일수록 예상 재생시간이 늘고 빠른 속도에서는 줄어든다', () => {

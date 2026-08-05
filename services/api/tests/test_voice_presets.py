@@ -1,3 +1,5 @@
+import pytest
+
 from app.services.voice_presets import PRESET_VOICE_IDS, get_voice_preset, list_voice_presets
 
 
@@ -20,4 +22,5 @@ def test_builtin_voice_presets_have_distinct_prosody_and_three_male_options():
     }
     assert len(rates) == 5
     assert deep.pitch_offset < clear.pitch_offset < energetic.pitch_offset < warm.pitch_offset
-    assert get_voice_preset("missing").id == "sori-warm"
+    with pytest.raises(ValueError, match="지원하지 않는"):
+        get_voice_preset("missing")

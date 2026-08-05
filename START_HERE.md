@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.7 · Field Evidence Intake & Local Export Bundle`
+현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.7.1 · Voice Preset Fidelity Hotfix`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -60,3 +60,8 @@
 47. Heartbeat 6.7은 field evidence v2와 완료된 Web quality run report를 preview 후 등록하며 bundle·record/evidence SHA-256 중복을 차단합니다.
 48. Quality Lab의 로컬 ZIP은 WAV·MP3·SRT·VTT·JSON 최대 20개, 250MiB 이하만 브라우저에서 묶고 파일별 SHA-256 manifest, 진행률과 취소를 제공합니다.
 49. Repository preflight는 npm lock을 필수 검사합니다. 덮어쓰기 패치는 저장소의 기존 검증 `package-lock.json`을 보존하며 lock이 없는 독립 ZIP은 검증 lock을 먼저 추가해야 합니다.
+
+50. Heartbeat 6.7.1은 알 수 없는 프리셋을 혜린으로 바꾸거나 남성 프리셋을 여성 음성으로 재생하는 묵시적 폴백을 차단합니다.
+51. 도윤·준호·민준에 필요한 별도 남성 후보가 부족하면 같은 시스템·브라우저·Melo 화자를 순환 재사용하지 않고 해당 프리셋을 미지원 처리합니다.
+52. 알려진 5개 CosyVoice 프리셋은 동일 ID의 전용 WAV만 사용합니다. 기본 기준 WAV와 다른 인물 WAV는 대체재가 아닙니다.
+53. Browser/System 음성은 기기별 근사 음성입니다. 정확한 인물별 음색은 동의받은 5개 전용 WAV와 실제 청취 검토가 필요합니다.
