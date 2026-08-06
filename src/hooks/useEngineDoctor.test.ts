@@ -72,7 +72,7 @@ describe('useEngineDoctor', () => {
         ttsReady: false,
         latencyMs: 999,
         status: 'offline',
-      } as Awaited<ReturnType<typeof runApiConnectivityAudit>>)
+      } as unknown as Awaited<ReturnType<typeof runApiConnectivityAudit>>)
       firstSetup.resolve({ ready: false } as Awaited<ReturnType<typeof getSetupStatus>>)
       await firstRun
     })

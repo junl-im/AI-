@@ -1,8 +1,8 @@
 import asyncio
 import time
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Mapping
 from uuid import UUID, uuid4
 
 from app.engines.base import TtsEngine

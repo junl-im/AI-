@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import os
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
 
 
 class InterprocessLockTimeoutError(TimeoutError):
@@ -38,11 +38,11 @@ def exclusive_file_lock(
 
                     fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 acquired = True
-            except (BlockingIOError, OSError):
+            except (BlockingIOError, OSError) as error:
                 if time.monotonic() >= deadline:
                     raise InterprocessLockTimeoutError(
                         f"파일 잠금을 {timeout_seconds:g}초 안에 얻지 못했습니다: {path.name}"
-                    )
+                    ) from error
                 time.sleep(max(0.01, poll_interval_seconds))
         yield
     finally:

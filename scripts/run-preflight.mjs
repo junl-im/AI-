@@ -19,6 +19,7 @@ const checks = [
   ['benchmark baseline / privacy audit', 'check-benchmark-privacy-audit.mjs'],
   ['long-run reliability / writer safety', 'check-long-run-writer-safety.mjs'],
   ['playback control flow', 'check-playback-control-flow.mjs'],
+  ['quality gate compatibility', 'check-quality-gate-compatibility.mjs'],
   ['Firebase web config', 'check-firebase-config.mjs'],
   ['lock retry contract', 'check-lock-network-retry.mjs'],
   ['CI architecture', 'check-ci-failure-domains.mjs'],

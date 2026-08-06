@@ -1,9 +1,17 @@
-# SoriON AI 0.9.7 Verification Report
+# SoriON AI 0.9.8 Verification Report
 
-결과 버전: **0.9.7 · Natural Playback Controls**
+결과 버전: **0.9.8 · Quality Gate Compatibility**
 
 
+## 0.9.8 Quality Gate Compatibility
 
+- Python 3.10+ Ruff UP035 기준에 맞춰 `Iterator`와 `Mapping`을 `collections.abc`에서 가져옵니다.
+- 미래 annotation을 직접 참조하고 file lock timeout 예외에 원래 오류를 연결해 UP037·B904를 제거합니다.
+- 모바일 음성 설정에 현재 선택 엔진을 전달해 `DubbingVoiceControlsProps` 계약을 충족합니다.
+- Engine Doctor의 의도적 부분 fixture는 `unknown`을 거쳐 변환해 TypeScript의 불충분한 겹침 경고를 제거합니다.
+- dependency-free compatibility preflight를 추가해 동일한 Ruff·Web 타입 회귀를 조기에 차단합니다.
+- 검증: Repository preflight 32/32, API pytest 188개, Worker pytest 14개, TS/TSX 190개 구문 검사와 Python compileall을 통과했습니다.
+- 제한: 현재 실행 환경에서 Ruff binary와 Web node_modules를 내려받을 수 없어 실제 Ruff·ESLint·semantic typecheck·Vitest·Vite build는 GitHub Actions가 최종 판정합니다.
 
 ## 0.9.7 Natural Playback Controls
 

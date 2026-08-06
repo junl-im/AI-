@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.9.8 · Quality gate compatibility
+
+- Ruff UP035에 맞춰 `Iterator`와 `Mapping` import를 `collections.abc`로 이동합니다.
+- 미래 annotation의 불필요한 따옴표를 제거하고 file lock timeout 예외에 원래 오류를 연결합니다.
+- 모바일 `DubbingVoiceControls`에 현재 선택 엔진을 전달해 누락된 필수 prop 오류를 해결합니다.
+- Engine Doctor 테스트의 부분 mock을 `unknown` 경유 캐스팅으로 명시해 TypeScript 변환 경고를 해결합니다.
+- 동일한 Ruff·Web 타입 회귀를 검사하는 dependency-free quality gate compatibility preflight를 추가합니다.
+- 앱·API·Worker 제품 버전을 0.9.8로 동기화합니다.
+
 ## 0.9.7 · Natural playback controls
 
 - 재생 버튼을 누르면 실제 media `play` 또는 Browser Speech `onstart` 이벤트를 기다리지 않고 즉시 일시정지 버튼으로 전환합니다.

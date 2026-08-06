@@ -490,7 +490,8 @@ export function HomePage() {
                 pitch={speechPitch}
                 emotion={speechEmotion}
                 normalizeText={normalizeText}
-                      onVoiceChange={setVoiceId}
+                engine={engineCatalog.selected}
+                onVoiceChange={setVoiceId}
                 onPreview={(id) => void previewVoice(id)}
                 onSpeedChange={setSpeechSpeed}
                 onPitchChange={setSpeechPitch}

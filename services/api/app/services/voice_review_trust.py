@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Mapping
 
 
 class VoiceReviewTrustConfigurationError(ValueError):
@@ -57,7 +57,7 @@ class VoiceReviewTrustStore:
         active_secret: str = "",
         active_key_id: str = "local-review-key",
         trusted_keys: Mapping[str, str] | None = None,
-    ) -> "VoiceReviewTrustStore":
+    ) -> VoiceReviewTrustStore:
         normalized_active_id = active_key_id.strip() or "local-review-key"
         secrets: dict[str, bytes] = {
             key_id.strip(): secret.encode("utf-8")

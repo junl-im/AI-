@@ -420,3 +420,13 @@ Semantic Versioning을 사용한다.
 - 핵심: 재생 클릭 즉시 일시정지 전환, 준비 중 재생 취소, Browser Speech 늦은 callback 차단
 - 삭제 파일: 없음
 - 다음 제품 버전: `0.9.8`
+
+
+## 0.9.8 Quality Gate Compatibility
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.8-quality-gate-compatibility-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.7-to-0.9.8-quality-gate-compatibility-patch.zip`
+- 기준 버전: `0.9.7`
+- 핵심: Ruff 최신 규칙 10건, Web TypeScript 계약 2건, 재유입 preflight
+- 삭제 파일: 없음
+- 다음 제품 버전: `0.9.9`

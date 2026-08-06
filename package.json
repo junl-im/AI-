@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "private": true,
   "type": "module",
   "scripts": {
@@ -76,7 +76,8 @@
     "quality:version-sync": "node scripts/check-version-sync.mjs",
     "quality:benchmark-audit": "node scripts/check-benchmark-privacy-audit.mjs",
     "quality:long-run-writer": "node scripts/check-long-run-writer-safety.mjs",
-    "quality:playback-flow": "node scripts/check-playback-control-flow.mjs"
+    "quality:playback-flow": "node scripts/check-playback-control-flow.mjs",
+    "quality:compatibility": "node scripts/check-quality-gate-compatibility.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",

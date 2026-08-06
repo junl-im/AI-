@@ -1,8 +1,8 @@
 import os
 import shutil
 import sys
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Mapping
 
 from app.core.config import Settings
 from app.engines.base import TtsEngine

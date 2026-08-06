@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.7 · Natural Playback Controls**
+현재 기준 버전: **0.9.8 · Quality Gate Compatibility**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-06 KST**
 제품 소유·디자인: **곰같은여우**
@@ -10,6 +10,15 @@
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+
+## 0.9.8 Quality Gate Compatibility
+
+1. **대상·기준 버전**: 0.9.8 / 0.9.7 Natural Playback Controls.
+2. **변경 내용**: GitHub Actions의 Ruff UP035·UP037·B904·I001과 Web TypeScript 2건을 수정했습니다.
+3. **Python 계약**: collection protocol type은 `collections.abc`, lock timeout은 원래 예외를 원인으로 연결합니다.
+4. **Web 계약**: 모바일 음성 설정에 `engineCatalog.selected`를 전달하고 Engine Doctor 부분 fixture는 `unknown` 경유 변환을 사용합니다.
+5. **회귀 방지**: `check-quality-gate-compatibility.mjs`를 repository preflight에 추가했습니다.
+6. **다음 업데이트**: 0.9.9 Approval Service Modularization & Operator Baselines.
 
 ## 0.9.7 Natural Playback Controls
 

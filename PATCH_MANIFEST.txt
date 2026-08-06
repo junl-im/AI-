@@ -1,21 +1,20 @@
-SoriON AI 0.9.6 -> 0.9.7 Natural Playback Controls
+SoriON AI 0.9.7 -> 0.9.8 Quality Gate Compatibility
 
 기준 버전
-- 0.9.6 Long-Run Reliability & Writer Safety
+- 0.9.7 Natural Playback Controls
 
 적용 결과
-- 외부 표시와 앱·API·Worker 제품 버전을 v0.9.7로 동기화
-- 재생 버튼 클릭 즉시 일시정지 버튼으로 전환
-- 준비 중 또는 재생 중 다시 누르면 즉시 재생 버튼으로 복원
-- 파일 음원과 Browser Speech에 같은 상태 순서 적용
-- 취소된 Browser Speech callback 경합 차단
-- 접근성 상태와 회귀 방지 preflight 추가
+- Ruff UP035, UP037, B904, I001 오류 수정
+- Web 필수 engine prop 누락 수정
+- Engine Doctor 부분 fixture 타입 변환 경고 수정
+- 앱·API·Worker·테스트 제품 버전 v0.9.8 동기화
+- 동일 오류 재유입을 차단하는 dependency-free preflight 추가
 
 변경 수
 - 추가 4개
-- 수정 40개
+- 수정 42개
 - 삭제 0개
-- 총 44개
+- 총 46개
 
 삭제 파일
 - 없음
