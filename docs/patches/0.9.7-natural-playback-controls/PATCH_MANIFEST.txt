@@ -1,0 +1,26 @@
+기준 버전: 0.9.6 Long-Run Reliability & Writer Safety
+적용 버전: 0.9.7 Natural Playback Controls
+
+추가 파일
+- docs/PLAYBACK_CONTROL_FLOW.md
+- docs/patches/0.9.7-natural-playback-controls/PATCH_MANIFEST.txt
+- docs/patches/0.9.7-natural-playback-controls/PATCH_README.md
+- scripts/check-playback-control-flow.mjs
+
+주요 수정
+- VERSION, package.json, package-lock.json과 API·Worker 패키지 버전을 0.9.7로 동기화
+- 재생 클릭 즉시 일시정지 버튼 전환과 준비 중 재생 취소
+- Browser Speech run ID로 취소된 callback의 늦은 상태 변경 차단
+- 만들기 재생바와 작업공간 Dock의 재생 상태 스타일·접근성 상태 추가
+- 파일 음원·Browser Speech 즉시 전환 회귀 테스트 추가
+- repository preflight에 playback control flow 계약 추가
+- README, FOUNDATION_REPORT, ROADMAP, PRODUCTION_READINESS, HANDOVER, CHANGELOG, NEXT_UPDATE 갱신
+
+삭제 파일
+- 없음
+
+변경 수
+- 추가 4개
+- 수정 40개
+- 삭제 0개
+- 총 44개

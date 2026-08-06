@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.9.7 · Natural playback controls
+
+- 재생 버튼을 누르면 실제 media `play` 또는 Browser Speech `onstart` 이벤트를 기다리지 않고 즉시 일시정지 버튼으로 전환합니다.
+- 준비 중 또는 재생 중 일시정지를 누르면 요청을 즉시 멈추고 재생 버튼으로 복원합니다.
+- Browser Speech 실행별 run ID를 추가해 취소된 utterance의 늦은 callback이 최신 버튼 상태를 덮지 못하게 합니다.
+- 파일 음원과 브라우저 음성의 즉시 버튼 전환 회귀 테스트와 repository preflight 계약을 추가합니다.
+- 앱·API·Worker·보고서의 제품 버전을 0.9.7로 동기화합니다.
+
+## 0.9.6 · Long-run reliability & writer safety
+
+- 승인·재서명·롤백에 SQLite writer lease와 fencing token을 추가해 stale writer의 파일 반영을 차단합니다.
+- 기존 thread lock과 OS file lock을 유지해 동일 프로세스·동일 호스트·공유 승인 저장소의 쓰기 경합을 단계별로 막습니다.
+- 5·30·60분 API·Worker soak를 기존 CI workflow의 수동·주간 job으로 분리하고 생존율, 응답 P95, 최장 중단, 복구 시간과 API 메모리 증가를 기록합니다.
+- 개인정보 제외 감사 자료를 검증된 JSON, 파일별 SHA-256 manifest와 README를 포함한 ZIP으로 내보냅니다.
+- 앱·API·Worker·보고서의 제품 버전을 0.9.6으로 동기화합니다.
+
 ## 0.9.5 · Benchmark baseline & privacy-safe audit bundle
 
 - 같은 모델·digest·가속기·프리셋 그룹에서 최초 5건과 최근 5건의 비중첩 window를 비교합니다.

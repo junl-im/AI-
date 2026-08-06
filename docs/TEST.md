@@ -795,3 +795,25 @@ ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지
 - 감사 bundle 변조 시 서버 verifier가 실패하는지 확인합니다.
 - Repository preflight 29/29, API pytest 183개, Worker pytest 14개, TS/TSX 190개 구문 검사와 Python compileall을 통과했습니다.
 - 전체 ESLint·semantic typecheck·Vitest·Vite production build는 Web 의존성이 없는 현재 환경에서 실행하지 못했으며 GitHub Actions가 최종 판정합니다.
+
+## 0.9.6 장시간 안정성 검사
+
+```bash
+cd services/api
+python scripts/run_runtime_soak.py \
+  --duration-minutes 5 \
+  --api-url http://127.0.0.1:8000 \
+  --worker-url http://127.0.0.1:8765
+```
+
+GitHub Actions 수동 실행에서는 `runtime_soak_minutes`를 5·30·60분 중 선택합니다. 주간 예약은 30분이며 일반 Push·PR에는 장시간 job을 추가하지 않습니다.
+
+## 0.9.7 Natural Playback Controls 검사
+
+- 파일 음원 `play()` Promise가 아직 끝나지 않아도 재생 클릭 직후 버튼이 `일시정지`로 바뀌는지 확인합니다.
+- 준비 중 일시정지를 누르면 `pause()`가 호출되고 버튼이 다시 `재생`으로 복원되는지 확인합니다.
+- Browser Speech `onstart`가 늦어도 버튼이 먼저 `일시정지`로 바뀌는지 확인합니다.
+- 취소된 Browser Speech callback이 이후 UI 상태를 덮지 못하는지 확인합니다.
+- dependency-free `quality:playback-flow`와 repository preflight가 관련 코드·테스트·스타일 계약을 검사합니다.
+- 샌드박스 결과: Repository preflight 31/31, API pytest 188개, Worker pytest 14개, TS/TSX 190개 구문 검사와 Python compileall을 통과했습니다.
+- 전체 ESLint·Vitest·semantic typecheck·Vite production build는 설치된 Web 의존성이 없어 GitHub Actions에서 최종 확인합니다.

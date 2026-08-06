@@ -1,0 +1,31 @@
+기준 버전: 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle
+적용 버전: 0.9.6 Long-Run Reliability & Writer Safety
+
+추가 파일
+- docs/LONG_RUN_RELIABILITY_AND_WRITER_SAFETY.md
+- docs/patches/0.9.6-long-run-writer-safety/PATCH_MANIFEST.txt
+- docs/patches/0.9.6-long-run-writer-safety/PATCH_README.md
+- scripts/check-long-run-writer-safety.mjs
+- services/api/app/services/runtime_soak.py
+- services/api/app/services/writer_lease.py
+- services/api/scripts/run_runtime_soak.py
+- services/api/tests/test_runtime_soak.py
+- services/api/tests/test_writer_lease.py
+
+주요 수정
+- VERSION, package.json, package-lock.json과 API·Worker 패키지 버전을 0.9.6으로 동기화
+- 승인·재서명·롤백에 thread lock, SQLite lease/fencing token, OS file lock 결합
+- API·Worker 장시간 soak CLI와 수동·주간 GitHub Actions job 추가
+- 프로세스 메모리와 열린 파일·소켓 descriptor 진단 추가
+- 개인정보 제외 감사 자료를 redacted JSON, manifest, README가 포함된 ZIP으로 확장
+- Quality Lab 감사 ZIP 다운로드, Web API 타입·테스트, repository preflight 갱신
+- README, FOUNDATION_REPORT, ROADMAP, PRODUCTION_READINESS, HANDOVER, CHANGELOG, NEXT_UPDATE 갱신
+
+삭제 파일
+- 없음
+
+변경 수
+- 추가 9개
+- 수정 54개
+- 삭제 0개
+- 총 63개

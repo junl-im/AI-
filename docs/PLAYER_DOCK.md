@@ -87,3 +87,11 @@ SoriON의 모든 음원은 화면마다 별도 플레이어를 만들지 않고 
 ## Engine Heartbeat 6.4 signed final audio recovery
 
 최종 API 트랙은 작업 ID를 보존하고 새로고침 또는 media error에서 완료 결과를 다시 조회해 새 HMAC URL을 받습니다. 재발급 성공 시 트랙 ID, 제목, 저장 위치와 재생 의도를 유지합니다. 서버 파일 TTL이 끝난 경우에는 반복 요청하지 않고 다시 생성을 안내합니다.
+
+## 0.9.7 자연스러운 재생 버튼 순서
+
+- 사용자가 `재생`을 누르면 실제 media `play` 이벤트를 기다리지 않고 즉시 `일시정지`로 전환합니다.
+- 준비 중 또는 재생 중 `일시정지`를 누르면 pending 재생까지 멈추고 버튼을 `재생`으로 복원합니다.
+- 파일 음원과 Browser Speech가 같은 상태 계약을 사용합니다.
+- Browser Speech는 실행별 run ID를 사용해 취소된 utterance의 늦은 callback을 무시합니다.
+- 버튼은 동적 접근성 이름과 `aria-pressed`로 현재 상태를 전달합니다.

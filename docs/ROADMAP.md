@@ -1,12 +1,21 @@
 # ROADMAP
 
-현재 제품 버전: `0.9.5`
+현재 제품 버전: `0.9.7`
 
-## 0.9.5 완료 · Benchmark Baseline & Privacy-Safe Audit
 
-- Worker 자동 telemetry 비중첩 기준선과 회귀 경보
-- 개인정보 제외 승인·신뢰 키·성능 감사 JSON과 SHA-256 검증
-- 다음 목표는 0.9.6 다중 노드 writer 안전성과 장시간 안정성
+## 0.9.7 완료 · Natural Playback Controls
+
+- 재생 클릭 즉시 일시정지 버튼으로 전환
+- 일시정지 클릭 즉시 재생 버튼으로 복귀
+- 파일 음원·Browser Speech 준비 지연 중 중복 재생 방지
+- 다음 목표는 0.9.8 승인 서비스 모듈화와 운영자 확정 기준선
+
+## 0.9.6 완료 · Long-Run Reliability & Writer Safety
+
+- 승인·재서명·롤백의 SQLite writer lease와 fencing token
+- API·Worker 5·30·60분 장시간 soak와 복구·누수 지표
+- 개인정보 제외 감사 ZIP과 파일별 SHA-256 manifest
+- 다음 목표는 0.9.7 승인 서비스 모듈화와 운영자 확정 기준선
 
 ## Phase 1 — Foundation
 

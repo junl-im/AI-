@@ -1,6 +1,23 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.9.5`
+현재 기준 버전: `0.9.7`
+
+
+## 0.9.7 추가 게이트
+
+- 재생 버튼은 실제 media 시작 이벤트 지연과 무관하게 사용자 클릭 직후 일시정지 상태를 표시해야 합니다.
+- 준비 중 일시정지를 누르면 pending 재생을 취소하고 늦은 callback이 UI를 재생 상태로 되돌리지 않아야 합니다.
+- 파일 음원과 Browser Speech 양쪽에 같은 `재생 → 일시정지 → 재생` 순서가 적용돼야 합니다.
+- 버튼은 `aria-pressed`와 동적 접근성 이름으로 현재 상태를 노출해야 합니다.
+
+## 0.9.6 추가 게이트
+
+- 승인·재서명·롤백은 thread lock, SQLite writer lease, fencing token, OS file lock을 모두 통과해야 합니다.
+- lease를 잃은 stale writer는 manifest 원자 교체 직전에 중단돼야 합니다.
+- 일반 Push·PR은 장시간 soak를 실행하지 않고, 수동 5·30·60분과 주간 30분 job으로 분리합니다.
+- soak 보고서는 성공률, P95 지연, 중단·복구, 메모리와 열린 descriptor 증가를 SHA-256과 함께 기록합니다.
+- 개인정보 제외 감사 ZIP에는 실제 WAV, 비밀키, 서명 원문, 사람 식별자와 GPU 원문이 포함되지 않아야 합니다.
+- SQLite lease를 일반 NFS 또는 독립 서버용 진정한 분산 lock으로 표현하지 않습니다.
 
 ## 목적
 

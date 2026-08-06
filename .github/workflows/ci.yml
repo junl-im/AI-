@@ -8,6 +8,14 @@ on:
         required: false
         default: false
         type: boolean
+      runtime_soak_minutes:
+        description: Optional API·Worker soak duration
+        required: true
+        default: 'off'
+        type: choice
+        options: ['off', '5', '30', '60']
+  schedule:
+    - cron: '15 18 * * 0'
   push:
     branches: [main]
   pull_request:
@@ -17,9 +25,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: sorion-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
+  group: >-
+    sorion-${{ github.workflow }}-${{ github.event_name }}-${{
+    github.event_name == 'workflow_dispatch' && inputs.runtime_soak_minutes ||
+    github.event.pull_request.number || github.ref }}
+  cancel-in-progress: >-
+    ${{ github.event_name != 'schedule' &&
+    !(github.event_name == 'workflow_dispatch' && inputs.runtime_soak_minutes != 'off') }}
 env:
   SORION_NODE_VERSION: '22.18.0'
   SORION_UV_VERSION: '0.11.32'
@@ -413,6 +425,87 @@ jobs:
         run: uv run --locked --python 3.10 ruff check app tests --output-format=github
       - name: Run Worker tests
         run: uv run --locked --python 3.10 pytest tests -q
+
+
+  runtime_soak:
+    name: API·Worker runtime soak
+    if: >-
+      ${{ github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && inputs.runtime_soak_minutes != 'off') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      SOAK_DURATION_MINUTES: ${{ github.event_name == 'schedule' && '30' || inputs.runtime_soak_minutes }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: '0.11.32'
+          enable-cache: true
+      - name: Install locked API and Worker environments
+        run: |
+          cd services/api && uv sync --locked --dev --python 3.10
+          cd ../worker && uv sync --locked --dev --python 3.10
+      - name: Start isolated Worker and API
+        shell: bash
+        run: |
+          mkdir -p .sorion/soak
+          (
+            cd services/worker
+            SORION_WORKER_REQUIRE_MODEL_MANIFEST=false \
+            SORION_WORKER_OUTPUT_PATH=../../.sorion/soak/worker \
+            uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8765 \
+              > ../../.sorion/soak/worker.log 2>&1 &
+            echo $! > ../../.sorion/soak/worker.pid
+          )
+          (
+            cd services/api
+            SORION_COSYVOICE_WORKER_URL=http://127.0.0.1:8765 \
+            SORION_JOB_STORE_PATH=../../.sorion/soak/jobs.sqlite3 \
+            SORION_AUDIO_DIRECTORY=../../.sorion/soak/audio \
+            SORION_VOICE_REVIEW_WRITER_LEASE_PATH=../../.sorion/soak/writer.sqlite3 \
+            uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000 \
+              > ../../.sorion/soak/api.log 2>&1 &
+            echo $! > ../../.sorion/soak/api.pid
+          )
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8765/health >/dev/null \
+              && curl --fail --silent http://127.0.0.1:8000/api/v1/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo 'Runtime services did not become healthy.' >&2
+          exit 1
+      - name: Run API and Worker soak
+        working-directory: services/api
+        run: |
+          uv run --locked python scripts/run_runtime_soak.py \
+            --duration-minutes "$SOAK_DURATION_MINUTES" \
+            --interval-seconds 10 \
+            --api-url http://127.0.0.1:8000 \
+            --worker-url http://127.0.0.1:8765 \
+            --output ../../.sorion/soak/runtime-soak.json
+      - name: Stop runtime services
+        if: always()
+        shell: bash
+        run: |
+          for file in .sorion/soak/api.pid .sorion/soak/worker.pid; do
+            if [[ -f "$file" ]]; then
+              kill "$(cat "$file")" 2>/dev/null || true
+            fi
+          done
+      - name: Upload runtime soak evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: sorion-runtime-soak-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .sorion/soak
+          if-no-files-found: error
+          retention-days: 30
 
   deploy:
     name: Deploy GitHub Pages

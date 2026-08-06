@@ -21,8 +21,8 @@
 
 Semantic Versioning을 사용한다.
 
-사용자 화면 버전은 `0.9.4`, `0.9.5`처럼 단순 증가시키며 내부 Heartbeat·revision은 고급 진단에만 표시한다.
-다음 버전은 `npm run version:set -- 0.9.6` 형식으로 갱신하고 `npm run quality:version-sync`로 확인한다.
+사용자 화면 버전은 `0.9.5`, `0.9.6`처럼 단순 증가시키며 내부 Heartbeat·revision은 고급 진단에만 표시한다.
+다음 버전은 `npm run version:set -- 0.9.7` 형식으로 갱신하고 `npm run quality:version-sync`로 확인한다.
 
 - Patch: 호환되는 수정
 - Minor: 호환되는 기능 추가
@@ -411,3 +411,12 @@ Semantic Versioning을 사용한다.
 - 핵심: Worker 비중첩 기준선·회귀 경보, 개인정보 제외 승인·신뢰 키·성능 감사 JSON
 - 삭제 파일: 없음
 - 다음 제품 버전: `0.9.6`
+
+## 0.9.7 Natural Playback Controls
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.7-natural-playback-controls-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.6-to-0.9.7-natural-playback-controls-patch.zip`
+- 기준 버전: `0.9.6`
+- 핵심: 재생 클릭 즉시 일시정지 전환, 준비 중 재생 취소, Browser Speech 늦은 callback 차단
+- 삭제 파일: 없음
+- 다음 제품 버전: `0.9.8`

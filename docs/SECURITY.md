@@ -115,3 +115,7 @@ GPU 원문을 제거합니다. GPU 조건은 장치 profile·가속기·GPU 문�
 구분합니다. 실제 WAV, 모델 가중치, 동의·권리 원문, HMAC secret과 운영자 token은 포함하지 않습니다.
 
 bundle SHA-256은 내용 변경 탐지용이며 발행자 인증이나 법적 전자서명으로 표현하지 않습니다.
+
+## 0.9.6 writer lease와 fencing
+
+프리셋 승인 쓰기는 thread lock과 OS file lock 외에 SQLite writer lease를 획득합니다. lease마다 증가하는 fencing token을 실제 파일 쓰기 직전에 재확인하므로 만료된 요청은 반영되지 않습니다. SQLite 파일을 안전하게 공유하지 않는 다중 노드에서는 관리형 DB advisory lock 또는 전용 분산 lock을 사용해야 하며 일반 NFS를 안전한 분산 lock으로 간주하지 않습니다.

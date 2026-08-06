@@ -264,3 +264,9 @@ Web quality report JSON 가져오기는 report 내부 SHA와 7개 phase 계약�
 - `POST /api/v1/quality/privacy-audit-bundle/verify`: 레코드와 전체 SHA-256 재검증
 
 감사 JSON에는 actor·reviewer·IP·GPU 원문·signature·실제 WAV·동의 원문·비밀키가 포함되지 않습니다.
+
+## 0.9.6 감사 ZIP과 runtime soak
+
+- `GET /api/v1/quality/privacy-audit-bundle.zip`: 검증된 redacted 감사 JSON, 파일별 SHA-256 manifest와 README를 ZIP으로 반환합니다.
+- 응답 헤더 `X-SoriON-Bundle-SHA256`, `X-SoriON-Record-Count`로 다운로드 전 검증 결과를 확인할 수 있습니다.
+- `services/api/scripts/run_runtime_soak.py`: API diagnostics와 Worker health를 주기적으로 검사해 성공률, 지연, 복구, 메모리와 열린 descriptor 증가를 JSON으로 기록합니다.

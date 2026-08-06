@@ -1,14 +1,40 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.5 · Benchmark Baseline & Privacy-Safe Audit Bundle**
+현재 기준 버전: **0.9.7 · Natural Playback Controls**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-06 15:39 KST**
+최종 갱신: **2026-08-06 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 0.9.7 Natural Playback Controls
+
+1. **작업 일시(KST)**: 2026-08-06 16:14
+2. **대상·기준 버전**: 0.9.7 / 0.9.6 Long-Run Reliability & Writer Safety.
+3. **변경 내용**: 재생 클릭 즉시 일시정지 버튼으로 전환하고, 다시 누르면 준비 중 또는 재생 중 요청을 멈춘 뒤 재생 버튼으로 복원합니다. 파일 음원과 Browser Speech에 같은 흐름을 적용했습니다.
+4. **변경 이유**: 실제 `play`·`onstart` 이벤트가 늦을 때 버튼이 재생 상태로 남아 중복 클릭과 체감 지연을 만들었기 때문입니다.
+5. **영향 범위**: 만들기 고정 재생바, 작업공간 Dock, Browser Speech callback 경합, 재생 접근성 상태, Web 회귀 테스트와 preflight입니다.
+6. **주요 파일**: `LinkedPlayerDock.tsx`, `LinkedPlayerDock.test.tsx`, `player-dock.css`, `dubbing-overlays.css`, `check-playback-control-flow.mjs`, `PLAYBACK_CONTROL_FLOW.md`.
+7. **검증 결과**: dependency-free playback flow 검사와 repository preflight를 통과했습니다. 전체 Web Vitest·ESLint·Vite build는 설치 의존성이 없어 GitHub Actions가 최종 판정합니다.
+8. **제한·주의사항**: 브라우저 autoplay 정책, 실제 오디오 decode, 네트워크와 운영체제 음성 시작 시간은 제거할 수 없습니다. 이번 변경은 버튼 반응과 중복 요청 경합을 제거합니다.
+9. **산출물**: `SoriON-AI-0.9.7-natural-playback-controls-full.zip`, `SoriON-AI-0.9.6-to-0.9.7-natural-playback-controls-patch.zip`.
+10. **다음 업데이트**: 0.9.8 Approval Service Modularization & Operator Baselines.
+
+## 0.9.6 Long-Run Reliability & Writer Safety
+
+1. **대상·기준 버전**: 0.9.6 / 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle.
+2. **writer 안전성**: 승인·재서명·롤백은 thread lock, SQLite writer lease/fencing token, OS file lock, 적용 직전 파일 재검증과 원자 쓰기를 순서대로 통과합니다.
+3. **stale writer 차단**: lease 만료나 더 높은 fencing token 발급 뒤에는 이전 요청이 실제 manifest를 쓸 수 없습니다.
+4. **장시간 안정성**: 기존 단일 `ci.yml`의 수동 5·30·60분과 주간 30분 job이 API·Worker 성공률, 지연, 중단·복구, 메모리, 열린 descriptor 증가를 기록합니다.
+5. **감사 자료**: Quality Lab은 검증된 redacted JSON, 파일별 SHA-256 manifest, README를 포함한 ZIP을 내려받습니다. 실제 WAV·비밀키·서명 원문·사람 식별자는 제외합니다.
+6. **검증**: Repository preflight 30/30, API pytest 188개, Worker pytest 14개, TS/TSX 구문 191개, Python compileall과 실제 짧은 API·Worker soak를 통과했습니다.
+7. **한계**: SQLite lease는 안전하게 공유되는 동일 DB 파일 범위입니다. 일반 NFS나 독립 서버를 진정한 분산 lock으로 표현하지 않습니다.
+8. **다음 업데이트**: 0.9.7 Approval Service Modularization & Operator Baselines.
+
 
 ## 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle
 
