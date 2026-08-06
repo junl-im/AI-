@@ -2,6 +2,8 @@ const MAX_FILES = 20
 export const MAX_LOCAL_BUNDLE_BYTES = 250 * 1024 * 1024
 const ALLOWED_EXTENSIONS = new Set(['wav', 'mp3', 'srt', 'vtt', 'json'])
 
+type ArrayBufferBytes = Uint8Array<ArrayBuffer>
+
 export interface LocalBundleEntry {
   name: string
   size: number
@@ -42,15 +44,15 @@ function safeName(name: string): string {
   return sanitized.slice(0, 180) || 'file'
 }
 
-function u16(value: number): Uint8Array {
+function u16(value: number): ArrayBufferBytes {
   return Uint8Array.of(value & 0xff, (value >>> 8) & 0xff)
 }
 
-function u32(value: number): Uint8Array {
+function u32(value: number): ArrayBufferBytes {
   return Uint8Array.of(value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, (value >>> 24) & 0xff)
 }
 
-function concat(parts: Uint8Array[]): Uint8Array {
+function concat(parts: readonly ArrayBufferBytes[]): ArrayBufferBytes {
   const total = parts.reduce((sum, item) => sum + item.length, 0)
   const output = new Uint8Array(total)
   let offset = 0
@@ -77,21 +79,21 @@ function crc32(bytes: Uint8Array): number {
   return (crc ^ 0xffffffff) >>> 0
 }
 
-async function sha256(bytes: Uint8Array): Promise<string> {
+async function sha256(bytes: ArrayBufferBytes): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', bytes)
   return Array.from(new Uint8Array(digest), (value) => value.toString(16).padStart(2, '0')).join('')
 }
 
 interface PreparedFile {
   name: string
-  bytes: Uint8Array
+  bytes: ArrayBufferBytes
   mediaType: string
   sha256: string
 }
 
-function zipStored(files: PreparedFile[]): Uint8Array {
-  const locals: Uint8Array[] = []
-  const centrals: Uint8Array[] = []
+function zipStored(files: PreparedFile[]): ArrayBufferBytes {
+  const locals: ArrayBufferBytes[] = []
+  const centrals: ArrayBufferBytes[] = []
   let offset = 0
   for (const file of files) {
     const name = new TextEncoder().encode(file.name)
