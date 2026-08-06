@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.9.9 · CI quality hotfix
+
+- `voice_preset_approval.py`의 `app.services` import를 Ruff isort 순서로 재정렬해 I001을 해결합니다.
+- LinkedPlayerDock 테스트에서 렌더 초기 source 동기화 `pause()` 호출을 초기화하고 사용자 일시정지 호출만 검증합니다.
+- import 순서와 테스트 기준점 회귀를 dependency-free preflight에서 차단합니다.
+- 앱·API·Worker 제품 버전을 0.9.9로 동기화합니다.
+
 ## 0.9.8 · Quality gate compatibility
 
 - Ruff UP035에 맞춰 `Iterator`와 `Mapping` import를 `collections.abc`로 이동합니다.

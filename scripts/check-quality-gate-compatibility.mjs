@@ -47,6 +47,17 @@ requireText(lock, ') from error', 'B904 exception chaining')
 const home = await read('src/pages/HomePage.tsx')
 requireText(home, 'engine={engineCatalog.selected}', '모바일 음성 설정 엔진 전달')
 
+const approval = await read('services/api/app/services/voice_preset_approval.py')
+const trustImportIndex = approval.indexOf(
+  'from app.services.voice_review_trust import VoiceReviewTrustStore',
+)
+const writerImportIndex = approval.indexOf('from app.services.writer_lease import (')
+if (trustImportIndex < 0 || writerImportIndex < 0 || trustImportIndex > writerImportIndex) {
+  throw new Error(
+    'voice_preset_approval.py import 정렬: voice_review_trust 다음에 writer_lease가 와야 합니다.',
+  )
+}
+
 const engineDoctorTest = await read('src/hooks/useEngineDoctor.test.ts')
 requireText(
   engineDoctorTest,

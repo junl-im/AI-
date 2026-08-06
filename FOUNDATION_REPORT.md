@@ -1,7 +1,17 @@
-# SoriON AI 0.9.8 Verification Report
+# SoriON AI 0.9.9 Verification Report
 
-결과 버전: **0.9.8 · Quality Gate Compatibility**
+결과 버전: **0.9.9 · CI Quality Hotfix**
 
+
+
+## 0.9.9 CI Quality Hotfix
+
+- `voice_preset_approval.py`의 first-party import를 Ruff isort 순서로 고정해 I001을 해결합니다.
+- LinkedPlayerDock 테스트는 렌더 시 source 동기화 `pause()` 호출을 기준점에서 제외하고 사용자 일시정지 호출만 검증합니다.
+- compatibility·playback preflight가 두 회귀를 직접 검사합니다.
+- 앱·API·Worker 제품 버전을 0.9.9로 동기화합니다.
+- 검증: Repository preflight 32/32, API pytest 188개, Worker pytest 14개와 Python compileall을 통과했습니다.
+- 제한: Ruff binary와 Web node_modules를 현재 환경에서 내려받지 못해 실제 Ruff·LinkedPlayerDock Vitest·ESLint·semantic typecheck·Vite build는 GitHub Actions가 최종 판정합니다.
 
 ## 0.9.8 Quality Gate Compatibility
 

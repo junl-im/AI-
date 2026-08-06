@@ -1,7 +1,20 @@
 # ROADMAP
 
-현재 제품 버전: `0.9.7`
+현재 제품 버전: `0.9.9`
 
+
+## 0.9.9 완료 · CI Quality Hotfix
+
+- 승인 서비스 first-party import Ruff 정렬 복구
+- 플레이어 테스트의 렌더 초기 pause와 사용자 pause 기준 분리
+- 동일 회귀를 compatibility·playback preflight에서 차단
+- 다음 목표는 0.10.0 승인 서비스 모듈화와 운영자 확정 기준선
+
+## 0.9.8 완료 · Quality Gate Compatibility
+
+- Python collection protocol import와 예외 chaining 최신 Ruff 규칙 반영
+- 모바일 음성 설정 engine prop과 Engine Doctor 테스트 타입 계약 복구
+- 다음 목표는 0.9.9 CI 품질 Hotfix
 
 ## 0.9.7 완료 · Natural Playback Controls
 

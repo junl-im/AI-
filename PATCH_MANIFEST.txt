@@ -1,20 +1,19 @@
-SoriON AI 0.9.7 -> 0.9.8 Quality Gate Compatibility
+SoriON AI 0.9.8 -> 0.9.9 CI Quality Hotfix
 
 기준 버전
-- 0.9.7 Natural Playback Controls
+- 0.9.8 Quality Gate Compatibility
 
 적용 결과
-- Ruff UP035, UP037, B904, I001 오류 수정
-- Web 필수 engine prop 누락 수정
-- Engine Doctor 부분 fixture 타입 변환 경고 수정
-- 앱·API·Worker·테스트 제품 버전 v0.9.8 동기화
-- 동일 오류 재유입을 차단하는 dependency-free preflight 추가
+- Ruff I001 first-party import 정렬 복구
+- LinkedPlayerDock 렌더 초기 pause와 사용자 일시정지 호출 기준 분리
+- 앱·API·Worker·테스트 제품 버전 v0.9.9 동기화
+- 동일 오류 재유입을 차단하는 compatibility·playback preflight 보강
 
 변경 수
-- 추가 4개
-- 수정 42개
+- 추가 2개
+- 수정 37개
 - 삭제 0개
-- 총 46개
+- 총 39개
 
 삭제 파일
 - 없음

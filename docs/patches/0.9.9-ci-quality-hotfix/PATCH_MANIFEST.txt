@@ -1,0 +1,55 @@
+# SoriON AI 0.9.9 CI Quality Hotfix Patch Manifest
+
+기준 버전: 0.9.8 Quality Gate Compatibility
+적용 버전: 0.9.9 CI Quality Hotfix
+
+- 추가 2개
+- 수정 37개
+- 삭제 0개
+- 총 39개
+
+## 추가 파일
+- docs/patches/0.9.9-ci-quality-hotfix/PATCH_MANIFEST.txt
+- docs/patches/0.9.9-ci-quality-hotfix/PATCH_README.md
+
+## 수정 파일
+- APPLY_PATCH.cmd
+- APPLY_PATCH.sh
+- FOUNDATION_REPORT.md
+- PATCH_MANIFEST.txt
+- README.md
+- START_HERE.md
+- VERSION
+- docs/CHANGELOG.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/QUALITY_GATE_COMPATIBILITY.md
+- docs/RELEASE.md
+- docs/ROADMAP.md
+- package-lock.json
+- package.json
+- scripts/check-playback-control-flow.mjs
+- scripts/check-quality-gate-compatibility.mjs
+- services/api/app/services/voice_preset_approval.py
+- services/api/pyproject.toml
+- services/api/tests/test_ai_director.py
+- services/api/tests/test_connectivity.py
+- services/api/tests/test_engine_catalog.py
+- services/api/tests/test_engine_strategy.py
+- services/api/tests/test_evidence.py
+- services/api/tests/test_health.py
+- services/api/tests/test_quality.py
+- services/api/tests/test_runtime_soak.py
+- services/api/tests/test_setup.py
+- services/api/uv.lock
+- services/worker/pyproject.toml
+- services/worker/uv.lock
+- src/api/httpClient.test.ts
+- src/components/navigation/LinkedPlayerDock.test.tsx
+- src/quality/qualityReport.test.ts
+- src/update/appUpdate.test.ts
+- src/update/buildInfo.test.ts
+- src/update/buildInfo.ts
+
+## 삭제 파일
+- 없음

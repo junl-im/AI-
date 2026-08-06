@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.8 · Quality Gate Compatibility`
+- 버전: `0.9.9 · CI Quality Hotfix`
 - 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
 - 감사 내보내기: 실제 WAV·사용자 식별자·GPU 원문·비밀키를 제외한 검증 가능 ZIP을 제공합니다.
 - Web: React + Vite + TypeScript + Zustand + PWA
@@ -68,6 +68,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 승인 접근 제어: loopback은 기존처럼 토큰 없이 사용하고 LAN·외부는 32자 이상 운영자 토큰을 요구
 - 승인 경합 차단: apply·rollback의 상태 재검사와 manifest·WAV 쓰기를 같은 잠금 안에서 수행
 - CI 품질 복구: Ruff 최신 규칙과 Web 타입 계약을 맞추고 재유입 preflight를 추가
+- CI Hotfix: 승인 서비스 import 순서를 Ruff isort 기준으로 고정하고 플레이어 테스트의 초기 media pause와 사용자 pause를 분리
 - 상시 연결: API 후보 병렬 탐색, 20초/90초 heartbeat, 120초 전체 갱신, API↔Worker keep-alive pool과 15초 readiness supervisor
 - 신뢰 키 교체: 새 승인·재서명은 active HMAC 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지
 - 증거 갱신 대기열: 동의·권리 만료, WAV 결박 불일치, unsigned·이전 키 상태를 자동 분류하되 만료일은 자동 연장하지 않음

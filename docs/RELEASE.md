@@ -430,3 +430,12 @@ Semantic Versioning을 사용한다.
 - 핵심: Ruff 최신 규칙 10건, Web TypeScript 계약 2건, 재유입 preflight
 - 삭제 파일: 없음
 - 다음 제품 버전: `0.9.9`
+## 0.9.9 CI Quality Hotfix
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.9-ci-quality-hotfix-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.8-to-0.9.9-ci-quality-hotfix-patch.zip`
+- 기준 버전: `0.9.8`
+- 핵심: Ruff I001 import 순서 복구, LinkedPlayerDock mock 기준점 분리, 재발 방지 preflight
+- 삭제 파일: 없음
+- 다음 제품 버전: `0.10.0`
+

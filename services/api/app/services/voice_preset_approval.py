@@ -33,12 +33,6 @@ from app.services.interprocess_lock import (
     InterprocessLockTimeoutError,
     exclusive_file_lock,
 )
-from app.services.writer_lease import (
-    SQLiteWriterLeaseCoordinator,
-    WriterLease,
-    WriterLeaseLostError,
-    WriterLeaseTimeoutError,
-)
 from app.services.voice_preset_evidence import (
     inspect_voice_preset_evidence,
     mark_duplicate_checksums,
@@ -47,6 +41,12 @@ from app.services.voice_preset_evidence import (
 from app.services.voice_preset_validation import inspect_voice_preset
 from app.services.voice_presets import PRESET_VOICE_IDS, get_voice_preset
 from app.services.voice_review_trust import VoiceReviewTrustStore
+from app.services.writer_lease import (
+    SQLiteWriterLeaseCoordinator,
+    WriterLease,
+    WriterLeaseLostError,
+    WriterLeaseTimeoutError,
+)
 
 _CONFIRM_APPROVAL = "현재 WAV 승인"
 _CONFIRM_ROLLBACK = "승인 롤백"

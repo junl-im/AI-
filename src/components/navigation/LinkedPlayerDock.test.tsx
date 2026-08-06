@@ -159,6 +159,7 @@ describe('LinkedPlayerDock', () => {
     play.mockReturnValueOnce(new Promise<void>(() => undefined))
     usePlayerStore.getState().enqueue(generatedAudio(), '즉시 전환 음성')
     render(<LinkedPlayerDock />)
+    pause.mockClear()
 
     fireEvent.click(screen.getByRole('button', { name: '재생' }))
 

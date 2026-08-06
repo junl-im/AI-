@@ -1,10 +1,10 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.8 · Quality Gate Compatibility`
+현재 기준: `0.9.9 · CI Quality Hotfix`
 
 ## 목표 버전
 
-`0.9.9 · Approval Service Modularization & Operator Baselines`
+`0.10.0 · Approval Service Modularization & Operator Baselines`
 
 ## 최우선 구현
 
@@ -22,9 +22,8 @@
 - 운영자 기준선은 충분한 실제 장치 표본 없이 자동 확정하지 않습니다.
 - 네트워크 장애 주입 soak는 일반 Push CI가 아니라 수동·예약 job에서만 실행합니다.
 
-## 0.9.8에서 넘기는 결정
+## 0.9.9에서 넘기는 결정
 
-- Python collection protocol type은 `collections.abc`에서 가져옵니다.
-- 예외 변환은 원래 예외를 `raise ... from error`로 보존합니다.
-- 모바일 음성 설정은 선택 엔진의 capability를 명시적으로 전달받습니다.
-- 의도적으로 불완전한 TypeScript 테스트 fixture는 `unknown` 경유 변환을 사용합니다.
+- first-party Python import는 Ruff isort의 모듈명 오름차순을 따릅니다.
+- media element 렌더 초기화 호출과 사용자 조작 호출은 테스트 mock 기준점을 분리합니다.
+- 품질 게이트 Hotfix는 제품 동작을 바꾸지 않고 실패 원인만 최소 수정합니다.

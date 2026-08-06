@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.8 · Quality Gate Compatibility**
+현재 기준 버전: **0.9.9 · CI Quality Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-06 KST**
 제품 소유·디자인: **곰같은여우**
@@ -10,6 +10,16 @@
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+
+## 0.9.9 CI Quality Hotfix
+
+1. **대상·기준 버전**: 0.9.9 / 0.9.8 Quality Gate Compatibility.
+2. **Python 수정**: `voice_preset_approval.py`의 first-party import를 Ruff isort 순서로 정렬합니다.
+3. **Web 테스트 수정**: LinkedPlayerDock 렌더가 source 초기화를 위해 호출한 `pause()`를 mock 기준점에서 지운 뒤 사용자 일시정지 1회만 검증합니다.
+4. **제품 동작**: 실제 플레이어의 초기 source 동기화와 사용자 일시정지 동작은 변경하지 않습니다.
+5. **회귀 방지**: compatibility·playback preflight에서 import 순서와 `pause.mockClear()` 계약을 확인합니다.
+6. **검증**: Repository preflight 32/32, API pytest 188개, Worker pytest 14개와 Python compileall을 통과했습니다. Web 전체 검사는 GitHub Actions가 최종 판정합니다.
+7. **다음 업데이트**: 0.10.0 Approval Service Modularization & Operator Baselines.
 
 ## 0.9.8 Quality Gate Compatibility
 

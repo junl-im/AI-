@@ -30,7 +30,7 @@ def test_runtime_soak_report_passes_stable_api_and_worker():
         *[_sample("worker", index) for index in range(5)],
     ]
     report = build_runtime_soak_report(
-        app_version="0.9.8",
+        app_version="0.9.9",
         started_at="2026-08-06T00:00:00+00:00",
         completed_at="2026-08-06T00:01:00+00:00",
         interval_seconds=10,
@@ -50,7 +50,7 @@ def test_runtime_soak_report_detects_outage_and_memory_growth():
         _sample("api", 3, memory=260, descriptors=80),
     ]
     report = build_runtime_soak_report(
-        app_version="0.9.8",
+        app_version="0.9.9",
         started_at="2026-08-06T00:00:00+00:00",
         completed_at="2026-08-06T00:01:00+00:00",
         interval_seconds=20,

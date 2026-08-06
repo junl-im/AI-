@@ -3,7 +3,7 @@ import { fetchRemoteBuildInfo } from './appUpdate'
 
 const manifest = {
   schemaVersion: 1,
-  appVersion: '0.9.8',
+  appVersion: '0.9.9',
   heartbeat: '6.8.4',
   revision: 'abc123',
   buildId: 'build-abc123',
