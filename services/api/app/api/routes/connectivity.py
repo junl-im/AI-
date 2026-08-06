@@ -9,6 +9,7 @@ from fastapi import APIRouter, Request
 from app.engines.registry import engine_registry
 from app.schemas.connectivity import ConnectivityCheck, ConnectivityResponse
 from app.services.proxy_headers import effective_origin, trusted_proxy_networks
+from app.version import APP_VERSION
 
 router = APIRouter()
 
@@ -317,7 +318,7 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         if check.id in {"api", "audio-store", "tts-engine", "cors"}
     )
     return ConnectivityResponse(
-        version="0.9.3-beta.3",
+        version=APP_VERSION,
         status="ready" if required_ready else "warning",
         environment=settings.environment,
         api_base_path="/api/v1",

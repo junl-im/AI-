@@ -8,7 +8,9 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
+- 버전: `0.9.5 · Benchmark Baseline & Privacy-Safe Audit Bundle`
+- 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
+- 감사 내보내기: 실제 WAV·사용자 식별자·GPU 원문·비밀키를 제외한 검증 가능 JSON을 제공합니다.
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -23,9 +25,9 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 모바일: 카카오톡 WebView를 감지해 로컬 PC 엔진 제한과 외부 브라우저 전환을 즉시 안내
 - 재생 UX: 보이는 재생 버튼이 선택값을 자동 적용하고 생성·선택된 음성을 즉시 재생
 - 프리셋: 여성 1종·남성 3종·중성 1종, 성별 불일치·동일 화자 중복 배정·CosyVoice 기본 WAV 대체를 차단
-- Engine Doctor: API·TTS·Worker·GPU·프리셋 5종 상태 진단, 주소 저장, 자동 연결 복구와 개인정보 제외 진단 복사
+- 고급 진단: 설정의 접힌 개발자 영역에서만 API·TTS·Worker·GPU·프리셋 상태와 개인정보 제외 진단을 확인
 - PC 편집: 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
-- 엔진 표시: 우측 상단 API·Worker·GPU 3점 상태와 실패 시 작업 메시지 자동 알림
+- 자동 음성 준비: 일반 화면에는 기술 연결 상태를 숨기고 가장 빠른 경로를 병렬 탐색·자동 재연결·heartbeat로 유지
 - 모바일 Bridge: 공개 HTTPS Origin을 `/connectivity`와 Engine Doctor에서 별도 진단
 - 프리셋 안전성: WAV 포맷·길이·샘플레이트·무음·클리핑을 Worker 요청 전에 검사
 - 지연 지표: 서버 첫 음성 파일 준비 시간과 전체 생성 시간을 분리 표시
@@ -66,6 +68,19 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 승인 접근 제어: loopback은 기존처럼 토큰 없이 사용하고 LAN·외부는 32자 이상 운영자 토큰을 요구
 - 승인 경합 차단: apply·rollback의 상태 재검사와 manifest·WAV 쓰기를 같은 잠금 안에서 수행
 - CI 품질 복구: Ruff import 3건, Web unused/control-regex/Hooks 4건을 수정하고 재유입 preflight를 추가
+- 상시 연결: API 후보 병렬 탐색, 20초/90초 heartbeat, 120초 전체 갱신, API↔Worker keep-alive pool과 15초 readiness supervisor
+- 신뢰 키 교체: 새 승인·재서명은 active HMAC 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지
+- 증거 갱신 대기열: 동의·권리 만료, WAV 결박 불일치, unsigned·이전 키 상태를 자동 분류하되 만료일은 자동 연장하지 않음
+- 승인 파일 보호: apply·재서명·rollback을 같은 호스트의 API 프로세스 간 파일 잠금과 원자 쓰기로 직렬화
+
+### 버전 올리기
+
+```bash
+npm run version:set -- 0.9.6
+npm run quality:version-sync
+```
+
+첫 화면에는 제품 버전만 표시하며 Engine Heartbeat와 배포 revision은 설정의 고급 빌드 정보에서만 확인합니다.
 
 ## 무료 실행
 
@@ -98,6 +113,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 오케스트레이터 설계: [`docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md`](docs/ENGINE_ORCHESTRATOR_BLUEPRINT.md)
 - AI Director: [`docs/AI_DIRECTOR.md`](docs/AI_DIRECTOR.md)
 - API 연결: [`docs/API_CONNECTIVITY.md`](docs/API_CONNECTIVITY.md)
+- 자동 연결 Runtime: [`docs/SEAMLESS_ENGINE_RUNTIME.md`](docs/SEAMLESS_ENGINE_RUNTIME.md)
 - 공개 HTTPS Bridge: [`docs/SECURE_MOBILE_BRIDGE.md`](docs/SECURE_MOBILE_BRIDGE.md)
 - 첫 음성 준비 지연: [`docs/FIRST_AUDIO_LATENCY.md`](docs/FIRST_AUDIO_LATENCY.md)
 - 부분 음원 전달: [`docs/PARTIAL_AUDIO_DELIVERY.md`](docs/PARTIAL_AUDIO_DELIVERY.md)
@@ -113,6 +129,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 프리셋 동의·권리·checksum 증거: [`docs/VOICE_PRESET_EVIDENCE.md`](docs/VOICE_PRESET_EVIDENCE.md)
 - 프리셋 검수 묶음·실제 화자 텔레메트리: [`docs/VOICE_REVIEW_SYNC.md`](docs/VOICE_REVIEW_SYNC.md)
 - 프리셋 수동 승인·서명·롤백: [`docs/VOICE_REVIEW_APPROVAL.md`](docs/VOICE_REVIEW_APPROVAL.md)
+- 신뢰 키 교체·증거 갱신 대기열: [`docs/TRUST_KEY_ROTATION_AND_RENEWAL.md`](docs/TRUST_KEY_ROTATION_AND_RENEWAL.md)
 - Worker 자동 텔레메트리·benchmark 대시보드: [`docs/BENCHMARK_DASHBOARD.md`](docs/BENCHMARK_DASHBOARD.md)
 - UI/UX 점검: [`docs/UI_UX_AUDIT_HEARTBEAT_5_2.md`](docs/UI_UX_AUDIT_HEARTBEAT_5_2.md)
 - lock 생성·검증: [`docs/LOCKFILE_BOOTSTRAP.md`](docs/LOCKFILE_BOOTSTRAP.md)

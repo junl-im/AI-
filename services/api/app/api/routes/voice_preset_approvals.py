@@ -8,6 +8,11 @@ from app.schemas.voice_preset_approval import (
     VoicePresetApprovalRecord,
     VoicePresetApprovalRollbackRequest,
     VoicePresetApprovalRollbackResponse,
+    VoicePresetRenewalQueueResponse,
+    VoicePresetResignApplyRequest,
+    VoicePresetResignApplyResponse,
+    VoicePresetResignPreviewRequest,
+    VoicePresetResignPreviewResponse,
 )
 from app.services.voice_preset_approval import VoicePresetApprovalError
 from app.services.voice_review_operator import (
@@ -128,6 +133,67 @@ async def rollback_voice_preset_approval(
     )
     return VoicePresetApprovalRollbackResponse(
         status="rolled-back",
+        record=record,
+        manifest=manifest,
+    )
+
+
+@router.get(
+    "/voice-preset-approvals/renewals",
+    response_model=VoicePresetRenewalQueueResponse,
+)
+async def list_voice_preset_renewals(
+    request: Request,
+    days: int = Query(default=60, ge=1, le=365),
+) -> VoicePresetRenewalQueueResponse:
+    _principal(request)
+    try:
+        return request.app.state.voice_preset_approval_service.renewal_queue(days)
+    except VoicePresetApprovalError as error:
+        _raise(error)
+
+
+@router.post(
+    "/voice-preset-approvals/resign/preview",
+    response_model=VoicePresetResignPreviewResponse,
+)
+async def preview_voice_preset_resign(
+    payload: VoicePresetResignPreviewRequest,
+    request: Request,
+) -> VoicePresetResignPreviewResponse:
+    _principal(request)
+    try:
+        return request.app.state.voice_preset_approval_service.preview_resign(payload)
+    except VoicePresetApprovalError as error:
+        _raise(error)
+
+
+@router.post(
+    "/voice-preset-approvals/resign/apply",
+    response_model=VoicePresetResignApplyResponse,
+)
+async def apply_voice_preset_resign(
+    payload: VoicePresetResignApplyRequest,
+    request: Request,
+) -> VoicePresetResignApplyResponse:
+    principal = _principal(request)
+    try:
+        record, manifest = request.app.state.voice_preset_approval_service.apply_resign(
+            payload,
+            principal.actor,
+        )
+    except VoicePresetApprovalError as error:
+        _raise(error)
+    request.app.state.audit_logger.write(
+        event="voice-preset-re-signed",
+        method="POST",
+        path="/api/v1/quality/voice-preset-approvals/resign/apply",
+        status_code=200,
+        request_id=record.approval_id,
+        actor=record.actor,
+    )
+    return VoicePresetResignApplyResponse(
+        status="re-signed",
         record=record,
         manifest=manifest,
     )

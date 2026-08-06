@@ -8,10 +8,15 @@ const reportDirectory = join(root, '.sorion', 'ci-report')
 await mkdir(reportDirectory, { recursive: true })
 
 const checks = [
+  ['product version sync', 'check-version-sync.mjs'],
   ['retired files', 'check-stale-files.mjs'],
   ['npm lock integrity', 'check-lockfiles.mjs', '--component', 'npm'],
   ['web manifest', 'check-web-toolchain.mjs', '--manifest-only'],
   ['PWA assets', 'check-pwa-assets.mjs'],
+  ['runtime update / performance guard', 'check-runtime-update-guard.mjs'],
+  ['seamless engine runtime', 'check-seamless-engine-runtime.mjs'],
+  ['trust key rotation / evidence renewal', 'check-trust-key-renewal.mjs'],
+  ['benchmark baseline / privacy audit', 'check-benchmark-privacy-audit.mjs'],
   ['Firebase web config', 'check-firebase-config.mjs'],
   ['lock retry contract', 'check-lock-network-retry.mjs'],
   ['CI architecture', 'check-ci-failure-domains.mjs'],

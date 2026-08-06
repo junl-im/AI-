@@ -14,6 +14,7 @@ import { QualityResultCard } from '../components/evaluation/QualityResultCard'
 import { TextPreviewCard } from '../components/evaluation/TextPreviewCard'
 import {
   compareQualityEngines,
+  downloadPrivacyAuditBundle,
   downloadQualityEvidenceBundle,
   getDeviceBenchmarkSummary,
   getWorkerTelemetrySummary,
@@ -130,6 +131,15 @@ export function QualityPage() {
       await downloadQualityEvidenceBundle()
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '증거 묶음을 검증하지 못했습니다.')
+    }
+  }, [])
+
+  const handlePrivacyAuditDownload = useCallback(async () => {
+    setError(null)
+    try {
+      await downloadPrivacyAuditBundle()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '개인정보 제외 감사 묶음을 검증하지 못했습니다.')
     }
   }, [])
 
@@ -281,6 +291,7 @@ export function QualityPage() {
           loading={loadingEvidenceSummary}
           onRefresh={() => void refreshEvidenceSummary()}
           onDownload={() => void handleEvidenceDownload()}
+          onAuditDownload={() => void handlePrivacyAuditDownload()}
         />
 
         <QualityDiagnosticsCard

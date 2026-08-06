@@ -1,33 +1,24 @@
-SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.8.3 -> Engine Heartbeat 6.8.3.1 Web Quality Test Compatibility Hotfix
-Changed or added files: 11
-Deleted tracked files: 0
+SoriON AI 0.9.4 -> 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle
 
-Applied scope:
-- Add FileReader fallback when File.text() is unavailable during evidence JSON intake.
-- Keep array and oversized-file validation messages stable.
-- Align LinkedPlayerDock Browser Speech test voice with the preset gender-fidelity contract.
-- Reapply the TypeScript 5.9 ArrayBuffer-backed Uint8Array fix for local ZIP export.
+목표
+- 같은 모델·digest·가속기·프리셋 그룹의 최초 5건과 최근 5건을 비교해 회귀 판정
+- 첫 음성 지연, RTF, 실패율, final handoff 오차의 기준선·경고·회귀 상태 제공
+- 실제 WAV, 비밀키, 서명값, 운영자·사용자 식별자, GPU 원문을 제외한 감사 JSON 제공
+- 감사 bundle의 레코드별 checksum과 전체 SHA-256을 서버에서 재검증
+- 외부 표시와 앱·API·Worker 제품 버전을 v0.9.5로 동기화
 
-Validation:
-- Repository preflight: 24 passed
-- TS/TSX parse syntax: 183 files passed
-- Evidence Intake native and FileReader fallback runtime smoke: passed
-- Browser Speech compatible voice selection runtime smoke: passed
-- Local export ZIP generation and unzip integrity: passed
-- Full npm Vitest/ESLint/Vite: not run locally because the internal registry returned 404 for required packages
+변경 파일
+- 추가 6개
+- 수정 47개
+- 삭제 0개
+- 총 53개
 
-Changed or added:
-- PATCH_MANIFEST.txt
-- docs/CHANGELOG.md
-- docs/HANDOVER.md
-- docs/NEXT_UPDATE.md
-- docs/TEST.md
-- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3.1-web-quality-test-compatibility/DELETE_LIST.txt
-- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3.1-web-quality-test-compatibility/PATCH_MANIFEST.txt
-- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3.1-web-quality-test-compatibility/PATCH_README.md
-- src/components/navigation/LinkedPlayerDock.test.tsx
-- src/export/localExportBundle.ts
-- src/quality/evidenceIntake.ts
-
-Deleted tracked files:
-- none
+검증
+- Repository preflight 29/29
+- API pytest 183 passed
+- Worker pytest 14 passed
+- Python compileall passed
+- TS/TSX syntax 190 files passed
+- 0.9.4 기준본 덮어쓰기 후 796개 파일 inventory·SHA-256 일치
+- 패치 적용본과 전체 ZIP 독립 압축 해제본 preflight 29/29
+- 두 ZIP 압축 무결성 검사 통과

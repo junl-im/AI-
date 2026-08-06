@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { EngineInfo } from '../ai/contracts'
-import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
 import { ApiError, getApiConnectionContext } from '../api/httpClient'
 import { useAppStore } from '../store/useAppStore'
 import { getBrowserSpeechEngine } from '../tts/browserSpeech'
@@ -18,28 +17,26 @@ function readyEngineMessage(engines: EngineInfo[]): {
   if (real) {
     return {
       status: 'online',
-      message: `${real.name} · 무료 우선 자동 연결`,
+      message: '음성 제작 준비됨',
     }
   }
   const browser = engines.find((engine) => engine.ready && engine.mode === 'browser')
   if (browser) {
     return {
       status: 'degraded',
-      message: isKakaoInAppBrowser()
-        ? '카카오톡에서는 브라우저 음성을 사용합니다. 로컬 PC 엔진은 외부 브라우저에서 연결하세요.'
-        : '브라우저 한국어 음성을 사용할 수 있습니다. AI 서버는 백그라운드에서 다시 연결합니다.',
+      message: '음성 제작 준비됨',
     }
   }
   const demo = engines.find((engine) => engine.ready && engine.mode === 'mock')
   if (demo) {
     return {
       status: 'degraded',
-      message: '실제 TTS 엔진이 없어 Demo 음성만 사용할 수 있습니다.',
+      message: '미리 듣기 준비됨',
     }
   }
   return {
     status: 'offline',
-    message: '실행 가능한 음성 엔진이 없습니다.',
+    message: '음성 기능을 자동으로 복구하고 있습니다.',
   }
 }
 
@@ -61,8 +58,8 @@ export function useEngineCatalog() {
       setBackendStatus(
         browserEngine ? 'degraded' : 'checking',
         browserEngine
-          ? '브라우저 한국어 음성 준비 · AI 서버 자동 연결 대기'
-          : '음성 시스템을 자동으로 찾고 있습니다.',
+          ? '음성 제작 준비됨'
+          : '음성 기능을 자동으로 준비하고 있습니다.',
       )
       setLoading(false)
       return
@@ -72,7 +69,7 @@ export function useEngineCatalog() {
       setEngines((current) => current.some((engine) => (
         engine.ready && !['mock', 'browser'].includes(engine.mode)
       )) ? current : [browserEngine])
-      setBackendStatus('degraded', '브라우저 한국어 음성 즉시 준비 · 로컬 AI 엔진 빠른 확인 중')
+      setBackendStatus('degraded', '음성 제작 준비됨')
     }
     try {
       const apiEngines = await listEngines()
@@ -89,13 +86,13 @@ export function useEngineCatalog() {
       setBackendStatus(
         browserEngine ? 'degraded' : 'offline',
         browserEngine
-          ? '브라우저 한국어 음성 준비 · AI 서버 재연결 중'
-          : '음성 엔진 목록을 가져오지 못했습니다.',
+          ? '음성 제작 준비됨'
+          : '음성 기능을 자동으로 복구하고 있습니다.',
       )
       setError(browserEngine ? null : (
         caught instanceof ApiError
           ? `${caught.code} · ${caught.message}`
-          : '음성 엔진 목록을 가져오지 못했습니다.'
+          : '음성 기능을 자동으로 복구하고 있습니다.'
       ))
     } finally {
       setLoading(false)

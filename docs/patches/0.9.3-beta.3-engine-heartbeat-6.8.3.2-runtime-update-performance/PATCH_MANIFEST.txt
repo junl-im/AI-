@@ -1,0 +1,58 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.8.3.1 -> Engine Heartbeat 6.8.3.2 Runtime Update Guard & Performance Maintenance
+Changed or added files: 31
+Deleted tracked files: 0
+
+Applied scope:
+- Emit a privacy-minimal version.json and compile-time build ID for deployed update detection.
+- Check updates on startup, a 30-minute cadence, online recovery and tab visibility recovery.
+- Show an explicit global/settings update action and refresh the Service Worker before reload.
+- Lazy-load non-Home pages while preserving the mounted creation workspace.
+- Ignore stale Engine Doctor responses and recheck after network recovery.
+- Keep package dependency versions and the verified lock unchanged.
+
+Validation:
+- Repository preflight: 25 passed
+- Runtime update/performance contract: passed
+- TS/TSX syntax transpile: 191 files passed
+- Core update modules strict stub typecheck: passed
+- Update UI and lazy App strict stub typecheck: passed
+- Engine Doctor hook strict stub typecheck: passed
+- Vite build metadata config strict stub typecheck: passed
+- Build info runtime smoke: passed
+- Full npm Vitest/ESLint/Vite build: not run locally because the internal registry does not expose required packages; GitHub Actions is the final gate
+
+Changed or added:
+- .env.example
+- PATCH_MANIFEST.txt
+- README.md
+- docs/CHANGELOG.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/RUNTIME_UPDATE_AND_PERFORMANCE.md
+- docs/TEST.md
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3.2-runtime-update-performance/DELETE_LIST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3.2-runtime-update-performance/PATCH_MANIFEST.txt
+- docs/patches/0.9.3-beta.3-engine-heartbeat-6.8.3.2-runtime-update-performance/PATCH_README.md
+- firebase.json
+- package.json
+- scripts/check-runtime-update-guard.mjs
+- scripts/run-preflight.mjs
+- src/app/App.test.tsx
+- src/app/App.tsx
+- src/components/evaluation/AppUpdateStatusCard.tsx
+- src/components/evaluation/EngineDoctorCard.tsx
+- src/components/layout/AppShell.tsx
+- src/components/ui/AppUpdateNotice.tsx
+- src/hooks/useEngineDoctor.test.ts
+- src/hooks/useEngineDoctor.ts
+- src/pages/SettingsPage.tsx
+- src/update/appUpdate.test.ts
+- src/update/appUpdate.ts
+- src/update/buildInfo.test.ts
+- src/update/buildInfo.ts
+- src/update/useAppUpdateMonitor.ts
+- src/vite-env.d.ts
+- vite.config.ts
+
+Deleted tracked files:
+- none

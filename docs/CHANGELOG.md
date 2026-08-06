@@ -1,5 +1,40 @@
 # CHANGELOG
 
+## 0.9.5 · Benchmark baseline & privacy-safe audit bundle
+
+- 같은 모델·digest·가속기·프리셋 그룹에서 최초 5건과 최근 5건의 비중첩 window를 비교합니다.
+- Worker telemetry의 실패율, first audio P95, RTF P95와 final handoff P95 회귀를 stable·warning·regressed로 판정합니다.
+- 총 10건 미만은 기준선 부족으로 표시하며 모델·장치가 달라진 자료를 성능 저하로 섞지 않습니다.
+- 승인 history, 신뢰 키 교체 진행, benchmark 회귀와 device coverage를 개인정보 제외 감사 JSON으로 내보냅니다.
+- 감사 JSON에서 actor·reviewer·IP·GPU 원문·signature·실제 WAV·비밀키를 제외하고 GPU 조건은 SHA-256 fingerprint로 대체합니다.
+- 다운로드 전에 레코드와 전체 bundle SHA-256을 서버에서 다시 계산해 변조를 탐지합니다.
+
+## 0.9.4 · Visible version sync
+
+- 첫 화면과 업데이트 알림은 사용자 제품 버전 `v0.9.4`만 표시합니다.
+- 앱·API·Worker·품질 보고서·로컬 Export의 버전을 0.9.4로 통일했습니다.
+- `VERSION`을 단일 제품 버전 기준으로 추가하고 `npm run version:set -- 0.9.5`로 다음 버전을 한 번에 올릴 수 있습니다.
+- Engine Heartbeat와 revision은 설정의 고급 빌드 정보에만 유지합니다.
+- Service Worker 갱신 뒤 build ID를 query에 넣어 새 배포본을 강제로 다시 불러옵니다.
+
+## 0.9.3-beta.3 Engine Heartbeat 6.8.4 · Trust key rotation & evidence renewal queue
+
+- active·previous HMAC 신뢰 키 ring과 무중단 key rotation을 추가했습니다.
+- 이전 신뢰 키 manifest를 검증한 뒤 현재 active key로 diff 미리보기·재서명할 수 있습니다.
+- 동의·권리 만료, WAV 결박 불일치, unsigned·이전 키 상태를 갱신 대기열로 모았습니다.
+- 승인 apply·재서명·rollback에 로컬 파일시스템 프로세스 간 잠금을 추가했습니다.
+- 기존 승인·WAV·검수 묶음 결박을 유지하며 알 수 없는 서명은 자동 덮어쓰지 않습니다.
+
+## 0.9.3-beta.3 Engine Heartbeat 6.8.3.3 · Seamless engine runtime
+
+- 일반 작업·복제 화면에서 API 주소, Worker, GPU와 엔진 ID를 숨기고 자동 준비 상태만 표시합니다.
+- 여러 API 후보를 병렬 검사해 가장 빠른 정상 후보를 선택하고 느린 요청을 취소합니다.
+- 보이는 탭 20초, 숨은 탭 90초 heartbeat와 120초 통합 갱신으로 연결을 자동 유지합니다.
+- 통합 응답의 음성 방식 목록을 15초 cache하고 중복 요청을 하나로 합칩니다.
+- API가 Worker HTTP 연결 풀을 재사용하고 health·readiness를 병렬 검사하며 15초 supervisor로 재연결합니다.
+- 설정의 상세 기술 진단은 접힌 고급 개발자 영역에서만 로드합니다.
+
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.8.3.1 · Web quality test compatibility hotfix
 
 - Evidence Intake가 `File.text()` 미지원 환경에서 `FileReader`로 자동 전환해 jsdom·구형 브라우저에서도 JSON 객체를 읽습니다.

@@ -1,49 +1,33 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.3.1 · Web Quality Test Compatibility Hotfix`
+현재 기준: `0.9.5 · Benchmark Baseline & Privacy-Safe Audit Bundle`
 
 ## 목표 버전
 
-`0.9.3-beta.3 · Engine Heartbeat 6.8.4 · Trust Key Rotation & Evidence Renewal Queue`
+`0.9.6 · Distributed Writer Safety & Long-Run Reliability`
 
 ## 최우선 구현
 
-- 현재 단일 HMAC 신뢰 키를 active·previous 복수 key ID 구조로 확장하고 무중단 교체·grace 기간·폐기 상태를 명시
-- 이전 key로 서명된 승인 manifest를 검증하면서 운영자가 현재 key로 재서명할 수 있는 diff·preview 흐름
-- 동의·권리 만료 임박 프리셋을 한 화면에 모으고 증거 교체, 만료일 변경, WAV 변경에 따른 승인 무효화를 순서대로 처리하는 갱신 대기열
-- 실제 WAV·동의 문서 원문·비밀키를 제외한 approval history, manifest digest와 검증 결과의 개인정보 최소 감사 묶음 export·verify
-- 모델 digest·GPU·프리셋별 최소 표본 수와 운영자가 정한 기준선을 저장하고 first audio·RTF·실패율·handoff 회귀를 경고
-- 짧은 Worker 자동 telemetry와 실기기 soak 모두에서 표본 수 부족, digest 변경, 장치 변경을 명확히 분리
-- 다중 API 프로세스에서도 승인 apply·rollback이 겹치지 않도록 프로세스 간 파일 잠금 또는 단일 writer 계약 추가
-- CI evidence artifact에 실제 수집된 telemetry 요약을 선택적으로 연결하되 수치가 없으면 빈 상태를 유지
-
-## 예상 변경 영역
-
-- `services/api/app/services/voice_preset_approval.py`, key ring·재서명·프로세스 간 잠금·감사 bundle
-- `services/api/app/services/voice_preset_evidence.py`, 복수 trust key 검증
-- `src/components/evaluation`, key rotation·renewal queue·regression UI
-- `services/api/app/api/routes/verification.py`, benchmark baseline과 regression summary
-- `docs/VOICE_REVIEW_APPROVAL.md`, `docs/BENCHMARK_DASHBOARD.md`, 인수인계·테스트 문서
+- 단일 호스트 파일 잠금 범위를 넘어서는 다중 노드 writer 안전성 설계
+- SQLite 또는 외부 lock backend를 통한 승인 apply·재서명·rollback 직렬화
+- API·Worker 30·60분 자동 soak와 메모리·연결 누수 경보
+- 절전 복귀, 네트워크 전환, Worker 재시작 후 자동 복구 시간 장기 추적
+- 자동 기준선의 기간·표본 window 정책과 운영자 확정 snapshot 분리
+- 감사 bundle을 JSON과 ZIP manifest 형태로 함께 내보내는 선택적 export
+- 대형 `voice_preset_approval.py`를 trust·renewal·history 모듈로 분리
 
 ## 선행 조건과 위험
 
-- 신뢰 키와 운영자 토큰은 환경 변수 또는 외부 secret store에서 관리하며 저장소, ZIP, 진단 복사본과 감사 묶음에 포함하지 않습니다.
-- key rotation은 이전 서명을 무조건 무효화하지 않고 key ID·유효 기간·폐기 정책을 명시해야 합니다.
-- 증거 만료일 갱신은 실제 동의·권리 원본을 사람이 확인한 뒤에만 수행하며 자동 연장하지 않습니다.
-- benchmark 기준선은 충분한 실제 표본과 동일 모델 digest·장치 조건이 있을 때만 만들고, 저장소에서 임의 수치를 생성하지 않습니다.
-- HMAC과 checksum은 화자 신원·법적 권리·측정 진실성을 자동 증명하지 않습니다.
+- 분산 잠금은 실제 배포 topology가 정해진 뒤 backend를 선택해야 합니다.
+- Redis 같은 새 운영 의존성을 무조건 추가하지 않습니다.
+- 장시간 soak는 CI 시간을 과도하게 늘리지 않도록 수동·scheduled workflow로 분리합니다.
+- 기준선 snapshot은 충분한 실제 표본과 운영자 확인 없이 자동 확정하지 않습니다.
+- 감사 ZIP에도 실제 WAV, 동의 원문, 비밀키와 사용자 식별자를 포함하지 않습니다.
 
-## 6.8.3.1에서 넘기는 결정
+## 0.9.5에서 넘기는 결정
 
-- Evidence Intake 파일 읽기는 `File.text()`와 `FileReader` fallback을 모두 유지하며, 배열·용량 검증을 읽기 구현 오류보다 먼저 수행합니다.
-- 브라우저 음성 테스트 fixture는 프리셋의 선언 성별과 호환되는 음성을 사용하고, 성별 미확인·반대 성별 자동 대체 금지 정책은 완화하지 않습니다.
-- 로컬 ZIP 바이트는 TypeScript 5.9에서 `ArrayBuffer` 기반 TypedArray로 유지합니다.
-- GitHub Actions에서 Vitest·typecheck·build가 녹색인 것을 확인하기 전 6.8.4 기능 변경을 병합하지 않습니다.
-- 원격 승인·이력·롤백은 운영자 토큰으로 보호하고, 로컬 loopback 무토큰 허용은 명시적 설정으로만 유지합니다.
-- `X-SoriON-User-ID`와 `X-SoriON-Client-ID`는 인증이 아니라 감사용 선언 값입니다.
-- 승인 apply·rollback은 마지막 파일 검증부터 쓰기·이력 추가까지 동일한 프로세스 잠금 안에서 수행합니다. 다중 프로세스 배포는 별도 보강 전 단일 writer를 유지합니다.
-- 승인 preview는 현재 파일 상태에 결박되며 apply 시 다시 계산합니다. stale preview를 우회하지 않습니다.
-- 서명 secret이 비어 있으면 unsigned가 정상이며, 가짜 key·기본 secret·운영자 토큰을 릴리스에 넣지 않습니다.
-- signed manifest는 설정된 신뢰 키로 검증되지 않으면 READY가 아닙니다.
-- Worker 자동 telemetry는 장시간 soak 증거가 아니며 두 집계를 합치지 않습니다.
-- 실제 증거 없이 `confirmed`, `approved`, READY, 서명 또는 성능 수치를 생성하지 않습니다.
+- Worker 회귀는 같은 모델·digest·가속기·프리셋 그룹 안에서만 비교합니다.
+- 최초 5건과 최근 5건의 비중첩 window를 사용하며 총 10건 미만은 판정하지 않습니다.
+- 자동 회귀 경보는 실기기 인증과 장시간 soak를 대체하지 않습니다.
+- 개인정보 제외 감사 JSON은 actor·reviewer·IP·GPU 원문·signature를 제거합니다.
+- 감사 bundle SHA-256은 변조 탐지용이며 전자서명으로 표현하지 않습니다.

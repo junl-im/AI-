@@ -1,17 +1,20 @@
 import type { PropsWithChildren } from 'react'
 import { useBackendBootstrap } from '../../hooks/useBackendBootstrap'
 import { useExitConfirmation } from '../../hooks/useExitConfirmation'
+import { useAppUpdateMonitor } from '../../update/useAppUpdateMonitor'
 import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
 import { useAppStore } from '../../store/useAppStore'
 import { LinkedPlayerDock } from '../navigation/LinkedPlayerDock'
 import { ExitConfirmDialog } from '../ui/ExitConfirmDialog'
 import { InAppBrowserEngineNotice } from './InAppBrowserEngineNotice'
+import { AppUpdateNotice } from '../ui/AppUpdateNotice'
 import { NoticeToast } from '../ui/NoticeToast'
 import { BrandMasthead } from './BrandMasthead'
 import { CompactWorkspaceHeader } from './CompactWorkspaceHeader'
 
 export function AppShell({ children }: PropsWithChildren) {
   useBackendBootstrap()
+  useAppUpdateMonitor()
   const exitConfirmation = useExitConfirmation()
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const page = useAppStore((state) => state.page)
@@ -28,6 +31,7 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <div className={workspaceEntered ? 'soa-app-root is-editor' : 'soa-app-root is-landing'}>
       {workspaceEntered ? <CompactWorkspaceHeader /> : <BrandMasthead />}
+      <AppUpdateNotice />
       {workspaceEntered ? <InAppBrowserEngineNotice /> : null}
       <div className={shellClassName}>
         <section className="soa-primary-frame">{children}</section>

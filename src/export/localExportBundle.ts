@@ -1,3 +1,5 @@
+import { currentBuildInfo } from '../update/buildInfo'
+
 const MAX_FILES = 20
 export const MAX_LOCAL_BUNDLE_BYTES = 250 * 1024 * 1024
 const ALLOWED_EXTENSIONS = new Set(['wav', 'mp3', 'srt', 'vtt', 'json'])
@@ -26,7 +28,7 @@ export interface LocalBundleBuildOptions {
 
 export interface LocalBundleManifest {
   schemaVersion: '1'
-  appVersion: '0.9.3-beta.3'
+  appVersion: string
   generatedAt: string
   files: LocalBundleEntry[]
 }
@@ -165,7 +167,7 @@ export async function buildLocalExportBundle(
   }
   const manifest: LocalBundleManifest = {
     schemaVersion: '1',
-    appVersion: '0.9.3-beta.3',
+    appVersion: currentBuildInfo.appVersion,
     generatedAt: new Date().toISOString(),
     files: manifestEntries,
   }

@@ -6,12 +6,14 @@ import json
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Mapping
 
 from pydantic import ValidationError
 
 from app.schemas.voice_preset_evidence import VoicePresetManifest
 from app.services.voice_preset_validation import VoicePresetInspection
 from app.services.voice_presets import VoicePresetProfile
+from app.services.voice_review_trust import VoiceReviewTrustStore
 
 _SHA256_HEX_LENGTH = 64
 _REQUIRED_INFERENCE_USE = "tts-inference"
@@ -166,7 +168,13 @@ def inspect_voice_preset_evidence(
     audio: VoicePresetInspection,
     signing_secret: str = "",
     signing_key_id: str = "",
+    trusted_signing_keys: Mapping[str, str] | None = None,
 ) -> VoicePresetEvidenceInspection:
+    trust_store = VoiceReviewTrustStore.build(
+        active_secret=signing_secret,
+        active_key_id=signing_key_id,
+        trusted_keys=trusted_signing_keys,
+    )
     manifest_path = directory / f"{preset.id}.manifest.json"
     actual_sha256 = sha256_file(directory / audio.filename) if audio.usable else None
     if not manifest_path.is_file():
@@ -318,25 +326,27 @@ def inspect_voice_preset_evidence(
             elif not _valid_sha256(manifest.approval.signature.strip().lower()):
                 signature_status = "invalid"
                 _blocked_issue(issues, "HMAC 서명 형식이 올바르지 않습니다.")
-            elif signing_key_id and signing_key != signing_key_id:
-                signature_status = "invalid"
-                _blocked_issue(issues, "manifest signing key ID가 현재 신뢰 키와 다릅니다.")
-            elif signing_secret:
-                expected_signature = hmac.new(
-                    signing_secret.encode("utf-8"),
-                    _canonical(signature_payload),
-                    hashlib.sha256,
-                ).hexdigest()
-                if not hmac.compare_digest(expected_signature, manifest.approval.signature):
-                    signature_status = "invalid"
-                    _blocked_issue(issues, "운영자 HMAC 서명을 검증하지 못했습니다.")
-                else:
-                    signature_status = "valid"
             else:
-                _warning_issue(
-                    issues,
-                    "서명된 manifest이지만 로컬 신뢰 키가 없어 검증하지 못했습니다.",
-                )
+                trusted_secret = trust_store.secret_for(signing_key)
+                if trusted_secret is None and trust_store.trusted_key_ids:
+                    signature_status = "invalid"
+                    _blocked_issue(issues, "manifest signing key ID가 신뢰 키 목록에 없습니다.")
+                elif trusted_secret is not None:
+                    expected_signature = hmac.new(
+                        trusted_secret,
+                        _canonical(signature_payload),
+                        hashlib.sha256,
+                    ).hexdigest()
+                    if not hmac.compare_digest(expected_signature, manifest.approval.signature):
+                        signature_status = "invalid"
+                        _blocked_issue(issues, "운영자 HMAC 서명을 검증하지 못했습니다.")
+                    else:
+                        signature_status = "valid"
+                else:
+                    _warning_issue(
+                        issues,
+                        "서명된 manifest이지만 로컬 신뢰 키가 없어 검증하지 못했습니다.",
+                    )
         else:
             signature_status = "unsigned"
 

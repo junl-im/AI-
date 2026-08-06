@@ -126,6 +126,12 @@ export function EngineDoctorCard() {
         </button>
       </div>
 
+      {doctor.lastCheckedAt ? (
+        <p className="mt-3 text-[11px] font-bold text-soa-muted">
+          마지막 진단 {new Date(doctor.lastCheckedAt).toLocaleString('ko-KR')}
+        </p>
+      ) : null}
+
       {doctor.message ? (
         <p className="mt-3 rounded-2xl bg-white p-3 text-xs font-bold leading-5 text-soa-muted">
           {doctor.message}

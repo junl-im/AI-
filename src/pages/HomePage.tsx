@@ -82,7 +82,7 @@ function generatedPreview(
     revokeOnRemove: true,
     result: {
       ...result,
-      message: 'Mock 엔진 프리뷰입니다. 실제 AI 음성이 아닙니다.',
+      message: '샘플 미리듣기입니다. 실제 AI 음성이 아닙니다.',
       fileSizeBytes: blob.size,
     },
   }
@@ -102,12 +102,10 @@ export function HomePage() {
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const page = useAppStore((state) => state.page)
   const backendStatus = useAppStore((state) => state.backendStatus)
-  const backendMessage = useAppStore((state) => state.backendMessage)
   const showNotice = useAppStore((state) => state.showNotice)
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const activeProject = useAppStore((state) => state.activeProject)
   const openProject = useAppStore((state) => state.openProject)
-  const engineHealth = useAppStore((state) => state.engineHealth)
   const workspaceResetToken = useAppStore((state) => state.workspaceResetToken)
   const clearActiveProject = useAppStore((state) => state.clearActiveProject)
   const startNewWorkspace = useAppStore((state) => state.startNewWorkspace)
@@ -129,7 +127,6 @@ export function HomePage() {
   const observedResetTokenRef = useRef(workspaceResetToken)
   const pendingResetSaveRef = useRef<number | null>(null)
   const explicitWorkspaceActionRef = useRef(false)
-  const lastEngineAlertRef = useRef<string | null>(null)
   const engineCatalog = useEngineCatalog()
   const timeline = useTimelineGeneration()
   const generateAllTimelineBlocks = timeline.generateAll
@@ -266,26 +263,6 @@ export function HomePage() {
   const appendMessage = useCallback((message: Omit<WorkspaceMessage, 'id'>) => {
     setMessages((current) => [...current, { ...message, id: createRandomId() }])
   }, [])
-  useEffect(() => {
-    if (!workspaceEntered) return
-    const failures = [
-      engineHealth.api === 'offline' ? 'API 연결 실패' : null,
-      engineHealth.worker === 'offline' ? 'Worker 연결 실패' : null,
-      engineHealth.gpu === 'offline' ? 'GPU 미연결' : null,
-    ].filter((item): item is string => Boolean(item))
-    if (failures.length === 0) {
-      lastEngineAlertRef.current = null
-      return
-    }
-    const signature = `${engineHealth.api}/${engineHealth.worker}/${engineHealth.gpu}/${backendMessage}`
-    if (lastEngineAlertRef.current === signature) return
-    lastEngineAlertRef.current = signature
-    appendMessage({
-      role: 'system',
-      badge: '엔진 연결 알림',
-      text: `${failures.join(' · ')}. ${backendMessage}`,
-    })
-  }, [appendMessage, backendMessage, engineHealth.api, engineHealth.gpu, engineHealth.worker, workspaceEntered])
   const sttVerification = useSelectiveSttRegeneration({ timeline, appendMessage, showNotice })
   const buildOptions = useCallback((): TimelineGenerationOptions => ({
     voiceId,
@@ -334,7 +311,7 @@ export function HomePage() {
   const generateLongform = useCallback(async (pending: PendingLongformGeneration) => {
     appendMessage({
       role: 'assistant',
-      badge: backendStatus === 'degraded' ? '대체 엔진' : '순차 생성',
+      badge: '순차 생성',
       text: `${pending.blockIds.length}개 대사 블록을 앞에서부터 생성합니다.`,
     })
     const generated = await generateAllTimelineBlocks(pending.blockIds)
@@ -402,7 +379,7 @@ export function HomePage() {
       appendMessage({
         role: 'assistant',
         badge: '목소리 선택',
-        text: `${voice.name} 목소리를 선택했습니다. 음성 서버 연결을 자동으로 확인하고 있습니다.`,
+        text: `${voice.name} 목소리를 선택했습니다. 음성 기능이 준비되는 즉시 사용할 수 있습니다.`,
       })
       requestAutomaticApiReconnect()
       return
@@ -426,23 +403,23 @@ export function HomePage() {
       appendMessage({
         role: 'assistant',
         badge: audio.source === 'browser-speech'
-          ? '브라우저 음성'
+          ? '바로 듣기'
           : audio.source === 'browser-demo'
-            ? 'Demo 프리뷰'
+            ? '미리 듣기'
             : audio.result.fallbackUsed
-              ? '자동 엔진 전환'
+              ? '자동 완성'
               : '목소리 프리뷰',
         text: audio.source === 'browser-speech'
-          ? `${voice.name} 설정으로 브라우저 음성을 바로 재생할 수 있습니다.`
+          ? `${voice.name} 설정으로 바로 재생했습니다.`
           : audio.result.fallbackUsed
-            ? `${voice.name} 프리뷰를 사용 가능한 대체 엔진으로 완성했습니다.`
+            ? `${voice.name} 프리뷰를 자동으로 완성했습니다.`
             : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
       })
     } catch {
       appendMessage({
         role: 'system',
         badge: '프리뷰 대기',
-        text: '현재 음성 서버가 준비되지 않았습니다. 연결이 복구되면 다시 시도해 주세요.',
+        text: '음성 기능을 준비하고 있습니다. 잠시 후 다시 시도해 주세요.',
       })
     } finally {
       setPreviewingId(null)
@@ -451,7 +428,7 @@ export function HomePage() {
   async function retryBlock(id: string) {
     if (!engineAvailable) {
       requestAutomaticApiReconnect()
-      showNotice('음성 서버 연결을 자동으로 다시 확인하고 있습니다.')
+      showNotice('음성 기능을 자동으로 준비하고 있습니다.')
       return
     }
     await timeline.retryBlock(id)
@@ -462,7 +439,6 @@ export function HomePage() {
   }
   if (!workspaceEntered) return <LandingHome />
   const savedLabel = formatSavedLabel(lastSavedAt, hydrated, storageMode === 'memory')
-  const engineLabel = engineCatalog.selected?.name ?? '자동 연결 확인 중'
   return (
     <div className="soa-dubbing-workspace">
       <div className="soa-desktop-studio" style={desktopLayout.style}>
@@ -496,8 +472,6 @@ export function HomePage() {
           <DubbingStudioHeader
             title={projectTitle}
             savedLabel={savedLabel}
-            backendStatus={backendStatus}
-            engineLabel={engineLabel}
             downloadHref={currentTrack?.audio.url ?? null}
             downloadName={currentTrack?.audio.filename ?? 'sorion-voice.wav'}
             onTitleChange={setProjectTitle}
@@ -516,8 +490,7 @@ export function HomePage() {
                 pitch={speechPitch}
                 emotion={speechEmotion}
                 normalizeText={normalizeText}
-                engine={engineCatalog.selected}
-                onVoiceChange={setVoiceId}
+                      onVoiceChange={setVoiceId}
                 onPreview={(id) => void previewVoice(id)}
                 onSpeedChange={setSpeechSpeed}
                 onPitchChange={setSpeechPitch}
@@ -530,8 +503,6 @@ export function HomePage() {
             <LongformComposer
               disabled={busy}
               value={composerDraft}
-              backendStatus={backendStatus}
-              backendMessage={backendMessage}
               activity={activity}
               onValueChange={setComposerDraft}
               onSubmit={(value) => void handleLongformSubmit(value)}
@@ -578,7 +549,6 @@ export function HomePage() {
           pitch={speechPitch}
           emotion={speechEmotion}
           normalizeText={normalizeText}
-          engine={engineCatalog.selected}
           onVoiceChange={setVoiceId}
           onPreview={(id) => void previewVoice(id)}
           onSpeedChange={setSpeechSpeed}

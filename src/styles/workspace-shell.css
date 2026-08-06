@@ -87,7 +87,6 @@
   gap: 7px;
 }
 
-.soa-engine-chip,
 .soa-intro-button {
   min-height: 44px;
   border: 0;
@@ -97,38 +96,6 @@
   background: rgba(255, 255, 255, 0.055);
   font-size: 9px;
   font-weight: 850;
-}
-
-.soa-engine-chip {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.soa-engine-chip > small {
-  color: rgba(238, 243, 255, 0.34);
-  font-size: 7px;
-}
-
-.soa-engine-chip__dots {
-  display: grid;
-  grid-template-columns: repeat(3, 6px);
-  gap: 3px;
-}
-
-.soa-engine-chip__dots i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #697286;
-}
-
-.soa-engine-chip__dots i.is-ready { background: #64f0ba; }
-.soa-engine-chip__dots i.is-warning { background: #ffe27b; }
-.soa-engine-chip__dots i.is-offline { background: #ff7b6d; }
-.soa-engine-chip__dots i.is-checking {
-  background: #b9aaff;
-  animation: soa-pulse 1s infinite alternate;
 }
 
 .soa-landing-overview {
@@ -248,9 +215,6 @@
     display: none;
   }
 
-  .soa-engine-chip {
-    padding-inline: 10px;
-  }
 }
 
 .soa-settings-button,

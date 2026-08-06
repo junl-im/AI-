@@ -7,8 +7,6 @@ function renderHeader(onClear = vi.fn()) {
     <DubbingStudioHeader
       title="오디오북 1장"
       savedLabel="오후 07:30 자동 저장됨"
-      backendStatus="online"
-      engineLabel="System Voice"
       downloadHref={null}
       downloadName="voice.wav"
       onTitleChange={vi.fn()}
@@ -22,12 +20,12 @@ function renderHeader(onClear = vi.fn()) {
 }
 
 describe('DubbingStudioHeader', () => {
-  it('프로젝트·저장·엔진 상태를 같은 상단 영역에서 보여준다', () => {
+  it('프로젝트와 저장 상태만 보여주고 엔진 기술 상태는 숨긴다', () => {
     renderHeader()
 
     expect(screen.getByRole('textbox', { name: '프로젝트 제목' })).toHaveValue('오디오북 1장')
     expect(screen.getByText('오후 07:30 자동 저장됨')).toBeInTheDocument()
-    expect(screen.getByText(/AI 음성 엔진 준비 · System Voice/)).toBeInTheDocument()
+    expect(screen.queryByText(/엔진|API|Worker|GPU|System Voice/)).not.toBeInTheDocument()
   })
 
   it('작업 비우기는 앱 내부 확인 뒤에만 실행한다', () => {

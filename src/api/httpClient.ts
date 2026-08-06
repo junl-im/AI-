@@ -84,7 +84,11 @@ function wait(ms: number, signal?: AbortSignal): Promise<void> {
   })
 }
 
-export async function probeApiBaseUrl(value: string, timeoutMs = 3_500): Promise<ApiProbeResult> {
+export async function probeApiBaseUrl(
+  value: string,
+  timeoutMs = 3_500,
+  signal?: AbortSignal,
+): Promise<ApiProbeResult> {
   const baseUrl = normalizeApiBaseUrl(value)
   if (!baseUrl) throw new ApiError('검사할 자동 연결 후보가 없습니다.', 0, 'SOA-2004', 'invalid-url')
   const blocked = getApiConnectionProblem(baseUrl)
@@ -94,6 +98,7 @@ export async function probeApiBaseUrl(value: string, timeoutMs = 3_500): Promise
     baseUrl,
     timeoutMs,
     retries: 0,
+    signal,
   })
   if (payload.status !== 'ok') {
     throw new ApiError('SoriON Health 응답이 올바르지 않습니다.', 502, 'SOA-2011', 'server', true)
@@ -112,26 +117,46 @@ export async function discoverApiBaseUrl(excludeBaseUrl = ''): Promise<ApiProbeR
     ...(await loadRuntimeApiCandidates()),
     ...getApiDiscoveryCandidates(),
   ])].filter((candidate) => candidate !== excluded)
+  if (candidates.length === 0) {
+    throw new ApiError(
+      '배포된 음성 서버 주소가 설정되지 않았습니다. 시스템 설정을 확인하며 자동으로 다시 시도합니다.',
+      0,
+      'SOA-2012',
+      'cors-or-network',
+      true,
+    )
+  }
+
+  const controllers = candidates.map(() => new AbortController())
   const attempts: string[] = []
-  for (const candidate of candidates) {
+  const probes = candidates.map(async (candidate, index) => {
     try {
-      return await probeApiBaseUrl(candidate)
+      return await probeApiBaseUrl(candidate, 2_800, controllers[index].signal)
     } catch (error) {
-      attempts.push(`${candidate}: ${error instanceof Error ? error.message : '연결 실패'}`)
+      if (!(error instanceof ApiError && error.kind === 'cancelled')) {
+        attempts.push(`${candidate}: ${error instanceof Error ? error.message : '연결 실패'}`)
+      }
+      throw error
     }
+  })
+
+  try {
+    const discovered = await Promise.any(probes)
+    controllers.forEach((controller) => controller.abort('discovery-complete'))
+    return discovered
+  } catch {
+    controllers.forEach((controller) => controller.abort('discovery-failed'))
+    if (attempts.length > 0) {
+      console.warn('[SoriON] automatic voice server discovery failed', attempts)
+    }
+    throw new ApiError(
+      '음성 서버에 연결하지 못했습니다. 네트워크와 서버 상태를 확인하며 자동으로 다시 시도합니다.',
+      0,
+      'SOA-2012',
+      'cors-or-network',
+      true,
+    )
   }
-  if (attempts.length > 0) {
-    console.warn('[SoriON] automatic voice server discovery failed', attempts)
-  }
-  throw new ApiError(
-    candidates.length === 0
-      ? '배포된 음성 서버 주소가 설정되지 않았습니다. 시스템 설정을 확인하며 자동으로 다시 시도합니다.'
-      : '음성 서버에 연결하지 못했습니다. 네트워크와 서버 상태를 확인하며 자동으로 다시 시도합니다.',
-    0,
-    'SOA-2012',
-    'cors-or-network',
-    true,
-  )
 }
 
 export function resolveApiAssetUrl(value: string | null): string | null {
@@ -246,11 +271,13 @@ export async function apiRequest<T>(
   }
 
   const failure = lastError ?? new ApiError('알 수 없는 API 오류가 발생했습니다.', 0)
-  dispatchConnectionEvent('sorion-api-failure', {
-    baseUrl,
-    path,
-    code: failure.code,
-    kind: failure.kind,
-  })
+  if (failure.kind !== 'cancelled') {
+    dispatchConnectionEvent('sorion-api-failure', {
+      baseUrl,
+      path,
+      code: failure.code,
+      kind: failure.kind,
+    })
+  }
   throw failure
 }

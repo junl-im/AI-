@@ -283,6 +283,113 @@ async def summarize_device_benchmarks(request: Request) -> DeviceBenchmarkSummar
     return _benchmark_summary(items)
 
 
+_BENCHMARK_WINDOW_SIZE = 5
+_BENCHMARK_MINIMUM_RECORDS = _BENCHMARK_WINDOW_SIZE * 2
+
+
+def _worker_metric_window(
+    records: list[WorkerSynthesisTelemetryResponse],
+) -> dict[str, object]:
+    first = [item.first_audio_ms for item in records if item.first_audio_ms is not None]
+    rtf = [item.realtime_factor for item in records if item.realtime_factor is not None]
+    handoff = [
+        item.final_handoff_error_ms
+        for item in records
+        if item.final_handoff_error_ms is not None
+    ]
+    failures = sum(not item.succeeded for item in records)
+    return {
+        "records": len(records),
+        "failure_rate": failures / len(records) if records else 0.0,
+        "p95_first_audio_ms": _percentile95(first),
+        "p95_realtime_factor": _percentile(rtf, 95),
+        "p95_final_handoff_error_ms": _percentile95(handoff),
+    }
+
+
+def _regression_assessment(
+    records: list[WorkerSynthesisTelemetryResponse],
+) -> dict[str, object]:
+    ordered = sorted(records, key=lambda item: item.recorded_at)
+    if len(ordered) < _BENCHMARK_MINIMUM_RECORDS:
+        return {
+            "status": "insufficient",
+            "minimum_records": _BENCHMARK_MINIMUM_RECORDS,
+            "available_records": len(ordered),
+            "baseline": None,
+            "current": None,
+            "reasons": [
+                "비중첩 기준선과 최근 구간을 만들려면 "
+                f"최소 {_BENCHMARK_MINIMUM_RECORDS}건이 필요합니다."
+            ],
+        }
+
+    baseline = _worker_metric_window(ordered[:_BENCHMARK_WINDOW_SIZE])
+    current = _worker_metric_window(ordered[-_BENCHMARK_WINDOW_SIZE:])
+    reasons: list[str] = []
+    severe = False
+
+    baseline_failure = float(baseline["failure_rate"])
+    current_failure = float(current["failure_rate"])
+    if current_failure > baseline_failure + 0.05:
+        reasons.append(
+            f"실패율이 {baseline_failure * 100:.1f}%에서 "
+            f"{current_failure * 100:.1f}%로 증가했습니다."
+        )
+        severe = current_failure >= 0.2
+
+    comparisons = [
+        (
+            "첫 음성 P95",
+            baseline["p95_first_audio_ms"],
+            current["p95_first_audio_ms"],
+            1.25,
+            100.0,
+            "ms",
+        ),
+        (
+            "RTF P95",
+            baseline["p95_realtime_factor"],
+            current["p95_realtime_factor"],
+            1.20,
+            0.05,
+            "",
+        ),
+        (
+            "최종 교체 오차 P95",
+            baseline["p95_final_handoff_error_ms"],
+            current["p95_final_handoff_error_ms"],
+            1.50,
+            50.0,
+            "ms",
+        ),
+    ]
+    for label, baseline_value, current_value, ratio, absolute_delta, suffix in comparisons:
+        if baseline_value is None or current_value is None:
+            continue
+        before = float(baseline_value)
+        after = float(current_value)
+        if after > before * ratio and after - before >= absolute_delta:
+            reasons.append(
+                f"{label}가 {before:.3g}{suffix}에서 {after:.3g}{suffix}로 악화됐습니다."
+            )
+
+    if not reasons:
+        status = "stable"
+    elif severe or len(reasons) >= 2:
+        status = "regressed"
+    else:
+        status = "warning"
+    return {
+        "status": status,
+        "minimum_records": _BENCHMARK_MINIMUM_RECORDS,
+        "available_records": len(ordered),
+        "baseline": baseline,
+        "current": current,
+        "reasons": reasons,
+    }
+
+
 def _worker_telemetry_summary(
     items: list[WorkerSynthesisTelemetryResponse],
 ) -> WorkerTelemetrySummaryResponse:
@@ -339,6 +446,7 @@ def _worker_telemetry_summary(
             "p95_realtime_factor": _percentile(rtf, 95),
             "p50_final_handoff_error_ms": _percentile50(handoff),
             "p95_final_handoff_error_ms": _percentile95(handoff),
+            "regression": _regression_assessment(records),
         })
     return WorkerTelemetrySummaryResponse(
         total_records=len(items),

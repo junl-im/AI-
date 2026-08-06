@@ -9,7 +9,7 @@
 
 ## 운영자 접근 제어
 
-승인 preview·apply·history·rollback은 모두 같은 인증 게이트를 사용한다.
+승인 preview·apply·history·rollback과 갱신 대기열·재서명 preview/apply는 모두 같은 인증 게이트를 사용한다.
 
 ```env
 # loopback(127.0.0.1, ::1)은 기본적으로 토큰 없이 허용
@@ -64,3 +64,16 @@ SORION_VOICE_REVIEW_SIGNING_KEY_ID=local-review-key-2026-01
 ## 보안 경계
 
 SHA-256은 파일 변경 탐지이고 HMAC은 공유 secret 보유 확인이다. 이 기능은 화자 신원, 동의 문서의 법적 효력, 권리 보유자 또는 청취 품질을 자동 증명하지 않는다. 실제 원본과 사람 검토를 별도로 보존한다.
+
+## Engine Heartbeat 6.8.4 신뢰 키 교체
+
+단일 키를 즉시 교체해 기존 승인 전체를 막지 않도록 active key와 previous key를 분리합니다.
+
+```dotenv
+SORION_VOICE_REVIEW_SIGNING_KEY_ID=review-key-2026-08
+SORION_VOICE_REVIEW_SIGNING_SECRET=secret-store에서-주입
+SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON={"review-key-2026-05":"이전-secret"}
+SORION_VOICE_REVIEW_LOCK_TIMEOUT_SECONDS=10
+```
+
+새 승인과 재서명은 active key만 사용합니다. previous key는 검증 전용이며 Quality Lab의 갱신 대기열에서 active key 재서명 대상을 확인할 수 있습니다. 자세한 절차는 [`TRUST_KEY_ROTATION_AND_RENEWAL.md`](TRUST_KEY_ROTATION_AND_RENEWAL.md)를 따릅니다.

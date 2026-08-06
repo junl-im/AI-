@@ -206,6 +206,23 @@ class WorkerSynthesisTelemetryResponse(BaseModel):
     failure_reason: str = ""
 
 
+class BenchmarkMetricWindow(BaseModel):
+    records: int = Field(ge=0)
+    failure_rate: float = Field(ge=0, le=1)
+    p95_first_audio_ms: int | None = None
+    p95_realtime_factor: float | None = None
+    p95_final_handoff_error_ms: int | None = None
+
+
+class BenchmarkRegressionAssessment(BaseModel):
+    status: Literal["insufficient", "stable", "warning", "regressed"]
+    minimum_records: int = Field(ge=2)
+    available_records: int = Field(ge=0)
+    baseline: BenchmarkMetricWindow | None = None
+    current: BenchmarkMetricWindow | None = None
+    reasons: list[str] = Field(default_factory=list)
+
+
 class WorkerTelemetryAggregate(BaseModel):
     engine_id: str
     preset_id: str
@@ -224,6 +241,7 @@ class WorkerTelemetryAggregate(BaseModel):
     p95_realtime_factor: float | None = None
     p50_final_handoff_error_ms: int | None = None
     p95_final_handoff_error_ms: int | None = None
+    regression: BenchmarkRegressionAssessment
 
 
 class WorkerTelemetrySummaryResponse(BaseModel):

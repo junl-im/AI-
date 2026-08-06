@@ -6,9 +6,10 @@ interface Props {
   loading: boolean
   onRefresh: () => void
   onDownload: () => void
+  onAuditDownload: () => void
 }
 
-export function VerificationEvidenceCard({ summary, loading, onRefresh, onDownload }: Props) {
+export function VerificationEvidenceCard({ summary, loading, onRefresh, onDownload, onAuditDownload }: Props) {
   const completed = summary?.exportSoak.coverage.filter((item) => item.recorded).length ?? 0
   const sttTotal = summary?.stt.totalRecords ?? 0
   const manifest = summary?.manifest
@@ -47,7 +48,8 @@ export function VerificationEvidenceCard({ summary, loading, onRefresh, onDownlo
       </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button type="button" onClick={onRefresh} disabled={loading} className="focus-ring min-h-11 rounded-2xl border border-soa-line bg-white text-xs font-black disabled:opacity-50">새로고침</button>
-        <button type="button" onClick={onDownload} className="focus-ring min-h-11 rounded-2xl bg-soa-ink text-xs font-black text-white">검증 후 JSON 받기</button>
+        <button type="button" onClick={onDownload} className="focus-ring min-h-11 rounded-2xl bg-soa-ink text-xs font-black text-white">품질 증거 JSON</button>
+        <button type="button" onClick={onAuditDownload} className="focus-ring col-span-2 min-h-11 rounded-2xl border border-soa-violet bg-white text-xs font-black text-soa-violet">개인정보 제외 감사 JSON</button>
       </div>
     </section>
   )

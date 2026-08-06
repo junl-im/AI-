@@ -12,10 +12,10 @@ interface AudioResultCardProps {
 }
 
 function resultLabel(audio: GeneratedAudio) {
-  if (audio.source === 'browser-speech') return 'BROWSER VOICE'
-  if (audio.source === 'browser-demo' || audio.result.engineMode === 'mock') return 'DEMO WAV'
-  if (audio.result.engineMode === 'local') return 'LOCAL TTS'
-  return 'AI AUDIO'
+  if (audio.source === 'browser-speech') return '기기 음성'
+  if (audio.source === 'browser-demo' || audio.result.engineMode === 'mock') return '샘플 음성'
+  if (audio.result.engineMode === 'local') return '로컬 음성'
+  return 'AI 음성'
 }
 
 export function AudioResultCard({ audio, sourceText, onRetry, onReset }: AudioResultCardProps) {
@@ -39,7 +39,7 @@ export function AudioResultCard({ audio, sourceText, onRetry, onReset }: AudioRe
       <SegmentResultList text={spokenText} reportedCount={audio.result.segmentCount} />
 
       <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] font-bold text-soa-muted">
-        <span className="rounded-xl bg-white/45 p-2">엔진 {audio.result.engineId}</span>
+        <span className="rounded-xl bg-white/45 p-2">방식 자동 최적화</span>
         <span className="rounded-xl bg-white/45 p-2">음원 {audio.durationSeconds.toFixed(1)}초</span>
         <span className="rounded-xl bg-white/45 p-2">첫 음성 준비 {formatMilliseconds(audio.result.firstAudioMs ?? null)}</span>
         <span className="rounded-xl bg-white/45 p-2">전체 생성 {formatMilliseconds(audio.result.processingMs)}</span>

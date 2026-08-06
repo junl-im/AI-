@@ -1,7 +1,33 @@
+import { readFileSync } from 'node:fs'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+
+interface SoriONBuildInfo {
+  schemaVersion: 1
+  appVersion: string
+  heartbeat: string
+  revision: string
+  buildId: string
+}
+
+const packageJson = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+) as { version: string }
+const heartbeat = '6.8.4'
+const revision = (
+  process.env.VITE_BUILD_REVISION?.trim()
+  || process.env.GITHUB_SHA?.slice(0, 12).trim()
+  || 'local'
+)
+const buildInfo: SoriONBuildInfo = {
+  schemaVersion: 1,
+  appVersion: packageJson.version,
+  heartbeat,
+  revision,
+  buildId: `${packageJson.version}-${heartbeat}-${revision}`,
+}
 
 function normalizeBasePath(value?: string) {
   const trimmed = value?.trim()
@@ -9,12 +35,29 @@ function normalizeBasePath(value?: string) {
   return `/${trimmed.replace(/^\/+|\/+$/g, '')}/`
 }
 
+function buildInfoPlugin(info: SoriONBuildInfo): Plugin {
+  return {
+    name: 'sorion-build-info',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: `${JSON.stringify(info, null, 2)}\n`,
+      })
+    },
+  }
+}
+
 export default defineConfig(() => {
   const base = normalizeBasePath(process.env.VITE_BASE_PATH)
 
   return {
     base,
+    define: {
+      __SORION_BUILD_INFO__: JSON.stringify(buildInfo),
+    },
     plugins: [
+      buildInfoPlugin(buildInfo),
       react(),
       tailwindcss(),
       VitePWA({

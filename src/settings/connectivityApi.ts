@@ -219,27 +219,30 @@ export async function runApiConnectivityAudit(
   const baseUrl = normalizeApiBaseUrl(value)
   if (!baseUrl) throw new ApiError('자동 연결 후보가 없습니다.', 0, 'SOA-2004', 'invalid-url')
   const started = performance.now()
-  const health = await timedCheck(
-    'health-route',
-    'API Health',
-    () => checkHealth(baseUrl, options.signal),
-  )
-  if (health.status !== 'ready') {
-    return failedReport(baseUrl, health, new ApiError(health.detail, 0), started)
-  }
-
   let result: ApiConnectivityResponse
   try {
     result = await apiRequest<ApiConnectivityResponse>('/connectivity', undefined, {
       baseUrl,
       signal: options.signal,
-      timeoutMs: 8_000,
-      retries: 1,
+      timeoutMs: 7_000,
+      retries: 0,
     })
   } catch (error) {
+    const health = await timedCheck(
+      'health-route',
+      'API Health',
+      () => checkHealth(baseUrl, options.signal),
+    )
     return failedReport(baseUrl, health, error, started)
   }
 
+  const health: ConnectivityCheck = {
+    id: 'health-route',
+    label: 'API Health',
+    status: 'ready',
+    detail: '통합 연결 응답으로 API 준비 상태를 확인했습니다.',
+    latencyMs: Math.round(performance.now() - started),
+  }
   const routeChecks = options.mode === 'deep'
     ? await deepRouteChecks(baseUrl, options.signal)
     : []

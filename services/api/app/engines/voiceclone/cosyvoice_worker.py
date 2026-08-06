@@ -1,3 +1,4 @@
+import asyncio
 import json
 import time
 from collections.abc import AsyncIterator
@@ -8,6 +9,7 @@ import httpx
 
 from app.schemas.engine import EngineInfo
 from app.services.worker_auth import build_worker_auth_headers
+from app.version import APP_VERSION
 
 
 class WorkerClientError(RuntimeError):
@@ -39,6 +41,27 @@ class CosyVoiceCloneEngine:
         self._worker_version: str | None = None
         self._last_checked_at: str | None = None
         self._diagnostics: dict[str, object] | None = None
+        self._client: httpx.AsyncClient | None = None
+
+    def _http_client(self) -> httpx.AsyncClient:
+        if self._client is None:
+            self._client = httpx.AsyncClient(
+                transport=self.transport,
+                timeout=self.job_timeout_seconds,
+                limits=httpx.Limits(
+                    max_connections=20,
+                    max_keepalive_connections=10,
+                    keepalive_expiry=60.0,
+                ),
+                headers={"User-Agent": f"SoriON-API/{APP_VERSION}"},
+            )
+        return self._client
+
+    async def close(self) -> None:
+        if self._client is None:
+            return
+        await self._client.aclose()
+        self._client = None
 
     def _initial_reason(self) -> str:
         if self.worker_url:
@@ -75,9 +98,11 @@ class CosyVoiceCloneEngine:
         started = time.perf_counter()
         self._last_checked_at = datetime.now(timezone.utc).isoformat()
         try:
-            health = await self._request_json("GET", "/health", self.timeout_seconds, False)
+            health, readiness = await asyncio.gather(
+                self._request_json("GET", "/health", self.timeout_seconds, False),
+                self._request_json("GET", "/ready", self.timeout_seconds),
+            )
             self._health_ok = health.get("status") == "ok"
-            readiness = await self._request_json("GET", "/ready", self.timeout_seconds)
             self._worker_version = str(health.get("version") or "unknown")
             diagnostics = readiness.get("diagnostics")
             self._diagnostics = diagnostics if isinstance(diagnostics, dict) else None
@@ -119,23 +144,19 @@ class CosyVoiceCloneEngine:
         self._require_worker_url()
         path = "/v1/jobs"
         try:
-            async with httpx.AsyncClient(
-                transport=self.transport,
-                timeout=self.job_timeout_seconds,
-            ) as client:
-                with sample_path.open("rb") as sample:
-                    request = client.build_request(
-                        "POST",
-                        f"{self.worker_url}{path}",
-                        data={"profile_id": profile_id, "text": text},
-                        files={
-                            "sample": (sample_path.name, sample, "application/octet-stream")
-                        },
-                        headers={"User-Agent": "SoriON-API/0.9.3-beta.3"},
-                    )
-                    body = await request.aread()
-                    request.headers.update(self._auth_headers("POST", path, body))
-                    response = await client.send(request)
+            client = self._http_client()
+            with sample_path.open("rb") as sample:
+                request = client.build_request(
+                    "POST",
+                    f"{self.worker_url}{path}",
+                    data={"profile_id": profile_id, "text": text},
+                    files={
+                        "sample": (sample_path.name, sample, "application/octet-stream")
+                    },
+                )
+                body = await request.aread()
+                request.headers.update(self._auth_headers("POST", path, body))
+                response = await client.send(request)
             return self._decode_response(response)
         except (httpx.HTTPError, OSError) as error:
             raise WorkerClientError(f"Worker 작업을 시작하지 못했습니다: {error}") from error
@@ -162,14 +183,11 @@ class CosyVoiceCloneEngine:
         path = f"/v1/jobs/{job_id}{suffix}"
         self._require_worker_url()
         try:
-            async with httpx.AsyncClient(
-                transport=self.transport,
+            response = await self._http_client().get(
+                f"{self.worker_url}{path}",
+                headers=self._auth_headers("GET", path, b""),
                 timeout=self.job_timeout_seconds,
-            ) as client:
-                response = await client.get(
-                    f"{self.worker_url}{path}",
-                    headers=self._auth_headers("GET", path, b""),
-                )
+            )
             if not response.is_success:
                 self._raise_for_response(response)
             return response.content
@@ -187,16 +205,16 @@ class CosyVoiceCloneEngine:
         if last_event_id:
             headers["Last-Event-ID"] = last_event_id
         try:
-            async with httpx.AsyncClient(transport=self.transport, timeout=None) as client:
-                async with client.stream(
-                    "GET",
-                    f"{self.worker_url}{path}",
-                    headers=headers,
-                ) as response:
-                    if not response.is_success:
-                        self._raise_for_response(response)
-                    async for chunk in response.aiter_bytes():
-                        yield chunk
+            async with self._http_client().stream(
+                "GET",
+                f"{self.worker_url}{path}",
+                headers=headers,
+                timeout=None,
+            ) as response:
+                if not response.is_success:
+                    self._raise_for_response(response)
+                async for chunk in response.aiter_bytes():
+                    yield chunk
         except httpx.HTTPError as error:
             raise WorkerClientError(f"Worker 이벤트 연결이 끊겼습니다: {error}") from error
 
@@ -210,16 +228,17 @@ class CosyVoiceCloneEngine:
         self._require_worker_url()
         headers = {
             "Accept": "application/json",
-            "User-Agent": "SoriON-API/0.9.3-beta.3",
+            "User-Agent": f"SoriON-API/{APP_VERSION}",
         }
         if authenticate:
             headers.update(self._auth_headers(method, path, b""))
         try:
-            async with httpx.AsyncClient(
-                transport=self.transport,
+            response = await self._http_client().request(
+                method,
+                f"{self.worker_url}{path}",
+                headers=headers,
                 timeout=timeout_seconds,
-            ) as client:
-                response = await client.request(method, f"{self.worker_url}{path}", headers=headers)
+            )
             return self._decode_response(response)
         except httpx.HTTPError as error:
             raise WorkerClientError(f"Worker에 연결할 수 없습니다: {error}") from error

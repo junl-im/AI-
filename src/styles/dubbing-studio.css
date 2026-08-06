@@ -100,27 +100,6 @@
   opacity: 0.23;
 }
 
-.soa-dubbing-engine-button {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-}
-
-.soa-dubbing-engine-button i {
-  width: 3px;
-  border-radius: 9px;
-  background: #8b8b8b;
-}
-
-.soa-dubbing-engine-button i:nth-child(1) { height: 13px; }
-.soa-dubbing-engine-button i:nth-child(2) { height: 25px; }
-.soa-dubbing-engine-button i:nth-child(3) { height: 17px; }
-.soa-dubbing-engine-button.is-online i { background: #65e3c2; }
-.soa-dubbing-engine-button.is-degraded i { background: #ffd26f; }
-.soa-dubbing-engine-button.is-checking i { background: #9e8cff; animation: soa-dubbing-bars 850ms infinite alternate; }
-.soa-dubbing-engine-button.is-offline i { background: #ff8177; }
-
 .soa-dubbing-more {
   position: relative;
 }
@@ -318,8 +297,7 @@
 
 .soa-dubbing-script__stats strong { margin-left: auto; color: rgba(255, 255, 255, 0.64); }
 
-.soa-dubbing-activity,
-.soa-dubbing-engine-note {
+.soa-dubbing-activity {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
@@ -342,16 +320,6 @@
 
 .soa-dubbing-activity p { margin: 1px 0 0; font-size: 9px; line-height: 1.5; }
 .soa-dubbing-activity.is-system { background: rgba(255, 99, 87, 0.07); }
-
-.soa-dubbing-engine-note { grid-template-columns: 8px minmax(0, 1fr); }
-.soa-dubbing-engine-note > i { width: 7px; height: 7px; margin-top: 4px; border-radius: 50%; background: #878787; }
-.soa-dubbing-engine-note.is-online > i { background: #62deb8; box-shadow: 0 0 10px rgba(98, 222, 184, 0.5); }
-.soa-dubbing-engine-note.is-degraded > i { background: #ffd16b; }
-.soa-dubbing-engine-note.is-offline > i { background: #ff766c; }
-.soa-dubbing-engine-note strong,
-.soa-dubbing-engine-note small { display: block; }
-.soa-dubbing-engine-note strong { font-size: 9px; }
-.soa-dubbing-engine-note small { margin-top: 3px; color: rgba(255, 255, 255, 0.34); font-size: 8px; line-height: 1.45; }
 
 .soa-dubbing-generate {
   display: flex;

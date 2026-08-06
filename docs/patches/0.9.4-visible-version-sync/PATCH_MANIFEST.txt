@@ -1,0 +1,17 @@
+SoriON AI 0.9.3-beta.3 / Engine Heartbeat 6.8.4 -> 0.9.4 Visible Version Sync
+
+목표
+- 사용자 화면 버전을 v0.9.4로 단순 표시
+- 앱, API, Worker, 보고서, Export의 제품 버전 통일
+- VERSION 단일 기준 및 다음 버전 일괄 갱신 명령 추가
+- Service Worker 갱신 후 build ID query로 새 배포본 강제 진입
+
+삭제 파일
+- 없음
+
+검증
+- Repository preflight 28/28
+- API pytest 179 passed
+- Worker pytest 14 passed
+- Python compileall passed
+- TS/TSX syntax 191 files passed

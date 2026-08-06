@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
@@ -28,6 +29,7 @@ from app.services.tts_pipeline import TtsPipeline
 from app.services.voice_preset_approval import VoicePresetApprovalService
 from app.storage.audio_store import AudioStore
 from app.storage.voice_clone_store import VoiceCloneStore
+from app.version import APP_VERSION
 
 
 def client_key(request: Request) -> str:
@@ -85,6 +87,8 @@ async def lifespan(app: FastAPI):
         settings.voice_review_approval_file,
         settings.voice_review_signing_secret,
         settings.voice_review_signing_key_id,
+        settings.voice_review_trusted_key_map,
+        settings.voice_review_lock_timeout_seconds,
     )
     app.state.stt_adapter = FasterWhisperAdapter(
         settings.faster_whisper_model,
@@ -132,6 +136,7 @@ async def lifespan(app: FastAPI):
             telemetry_store=app.state.worker_telemetry_store,
             review_signing_secret=settings.voice_review_signing_secret,
             review_signing_key_id=settings.voice_review_signing_key_id,
+            review_trusted_signing_keys=settings.voice_review_trusted_key_map,
         )
     )
     if settings.enable_melo_tts:
@@ -147,15 +152,37 @@ async def lifespan(app: FastAPI):
         cooldown_seconds=settings.engine_cooldown_seconds,
     )
     engine_registry.register_voice_clone(cosyvoice_worker)
-    yield
-    engine_registry.clear()
+
+    async def maintain_worker_readiness() -> None:
+        while True:
+            await asyncio.sleep(settings.cosyvoice_worker_probe_interval_seconds)
+            try:
+                await cosyvoice_worker.probe()
+            except Exception as error:  # pragma: no cover - defensive supervisor guard
+                app.state.audit_logger.write(
+                    event="worker-readiness-supervisor-error",
+                    method="SYSTEM",
+                    path=settings.cosyvoice_worker_url or "worker-unconfigured",
+                    status_code=503,
+                    request_id="worker-supervisor",
+                    actor=str(error)[:500],
+                )
+
+    worker_supervisor = asyncio.create_task(maintain_worker_readiness())
+    try:
+        yield
+    finally:
+        worker_supervisor.cancel()
+        await asyncio.gather(worker_supervisor, return_exceptions=True)
+        await cosyvoice_worker.close()
+        engine_registry.clear()
 
 
 settings = get_settings()
 app = FastAPI(
     title="SoriON AI API",
     description="교체 가능한 AI 음성 엔진 게이트웨이",
-    version="0.9.3-beta.3",
+    version=APP_VERSION,
     lifespan=lifespan,
 )
 app.add_middleware(

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query, Request
 
+from app.api.routes.verification import _benchmark_summary, _worker_telemetry_summary
 from app.schemas.evidence import (
     EvidenceIntakeImportResponse,
     EvidenceIntakePreviewResponse,
@@ -19,6 +20,14 @@ from app.schemas.evidence import (
     SttRegenerationComparisonRequest,
     SttRegenerationComparisonResponse,
 )
+from app.schemas.privacy_audit import (
+    PrivacyAuditBundleResponse,
+    PrivacyAuditVerificationResponse,
+)
+from app.schemas.verification import (
+    DeviceBenchmarkResponse,
+    WorkerSynthesisTelemetryResponse,
+)
 from app.services.evidence_bundle import (
     EVIDENCE_BUNDLE_SCHEMA_VERSION,
     build_bundle_manifest,
@@ -30,6 +39,11 @@ from app.services.evidence_metrics import (
     summarize_export_soak,
     summarize_stt_comparisons,
 )
+from app.services.privacy_audit_bundle import (
+    build_privacy_audit_bundle,
+    verify_privacy_audit_bundle,
+)
+from app.services.voice_preset_approval import VoicePresetApprovalError
 from app.services.web_quality_report import verify_web_quality_report
 
 router = APIRouter()
@@ -197,6 +211,53 @@ async def verify_evidence_bundle(
 ) -> QualityEvidenceVerificationResponse:
     return QualityEvidenceVerificationResponse.model_validate(
         verify_bundle_payload(payload)
+    )
+
+
+def _privacy_audit_payload(request: Request) -> dict[str, object]:
+    approval_history = [
+        item.model_dump(mode="json")
+        for item in request.app.state.voice_preset_approval_service.list_history(500)
+    ]
+    try:
+        renewal_queue = request.app.state.voice_preset_approval_service.renewal_queue(60)
+        renewal_payload: dict[str, object] | None = renewal_queue.model_dump(mode="json")
+    except VoicePresetApprovalError:
+        renewal_payload = None
+    worker_items = [
+        WorkerSynthesisTelemetryResponse.model_validate(item)
+        for item in request.app.state.worker_telemetry_store.list(limit=5000)
+    ]
+    device_items = [
+        DeviceBenchmarkResponse.model_validate(item)
+        for item in request.app.state.device_benchmark_store.list(limit=1000)
+    ]
+    worker_summary = _worker_telemetry_summary(worker_items).model_dump(mode="json")
+    device_summary = _benchmark_summary(device_items).model_dump(mode="json")
+    return build_privacy_audit_bundle(
+        app_version=request.app.version,
+        exported_at=datetime.now(timezone.utc),
+        approval_history=approval_history,
+        renewal_queue=renewal_payload,
+        worker_groups=worker_summary.get("metric_groups", []),
+        device_summary=device_summary,
+    )
+
+
+@router.get("/privacy-audit-bundle", response_model=PrivacyAuditBundleResponse)
+async def privacy_audit_bundle(request: Request) -> PrivacyAuditBundleResponse:
+    return PrivacyAuditBundleResponse.model_validate(_privacy_audit_payload(request))
+
+
+@router.post(
+    "/privacy-audit-bundle/verify",
+    response_model=PrivacyAuditVerificationResponse,
+)
+async def verify_privacy_audit(
+    payload: dict[str, object],
+) -> PrivacyAuditVerificationResponse:
+    return PrivacyAuditVerificationResponse.model_validate(
+        verify_privacy_audit_bundle(payload)
     )
 
 

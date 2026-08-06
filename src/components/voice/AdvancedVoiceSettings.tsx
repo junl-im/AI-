@@ -80,7 +80,7 @@ export function AdvancedVoiceSettings({
                 />
               </label>
               <p className="rounded-2xl bg-[#f4f2ec] px-3 py-2 text-[11px] font-semibold leading-5 text-soa-muted">
-                현재 엔진이 지원하는 설정만 활성화됩니다. 긴 문장은 자동으로 나누어 WAV 하나로 연결합니다.
+                현재 음성 방식에서 사용할 수 있는 설정만 활성화됩니다. 긴 문장은 자동으로 나누어 WAV 하나로 연결합니다.
               </p>
             </div>
           </motion.div>

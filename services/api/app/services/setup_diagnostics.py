@@ -2,6 +2,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from typing import Mapping
 
 from app.core.config import Settings
 from app.engines.base import TtsEngine
@@ -47,6 +48,7 @@ def _voice_preset_check(
     path: Path | None,
     signing_secret: str = "",
     signing_key_id: str = "",
+    trusted_signing_keys: Mapping[str, str] | None = None,
 ) -> tuple[SetupStep, int, list[VoicePresetDiagnostic]]:
     profiles = list(list_voice_presets())
     if path is None:
@@ -91,7 +93,12 @@ def _voice_preset_check(
     ]
     evidence_inspections = mark_duplicate_checksums([
         inspect_voice_preset_evidence(
-            path, profile, audio, signing_secret, signing_key_id
+            path,
+            profile,
+            audio,
+            signing_secret,
+            signing_key_id,
+            trusted_signing_keys,
         )
         for profile, audio in zip(profiles, audio_inspections, strict=True)
     ])
@@ -252,6 +259,7 @@ def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> 
         settings.cosyvoice_preset_path,
         settings.voice_review_signing_secret,
         settings.voice_review_signing_key_id,
+        settings.voice_review_trusted_key_map,
     )
     preset_audio_ready_count = sum(
         1 for item in preset_diagnostics if item.audio_usable

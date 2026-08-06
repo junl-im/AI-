@@ -259,7 +259,7 @@ def test_evidence_intake_accepts_verified_web_quality_report(client):
     report = {
         "schemaVersion": 1,
         "mode": "run",
-        "appVersion": "0.9.3-beta.3",
+        "appVersion": "0.9.5",
         "heartbeat": "6.7",
         "startedAt": "2026-08-03T09:00:00.000Z",
         "completedAt": "2026-08-03T09:01:00.000Z",
@@ -323,3 +323,85 @@ def test_evidence_intake_accepts_verified_web_quality_report(client):
     )
     assert tampered.status_code == 200
     assert tampered.json()["valid"] is False
+
+
+def test_privacy_audit_bundle_redacts_people_gpu_and_verifies(client):
+    import json
+
+    service = client.app.state.voice_preset_approval_service
+    service.history_path.write_text(
+        json.dumps({
+            "record": {
+                "approval_id": "approval-private-1",
+                "event": "approved",
+                "voice_id": "sori-warm",
+                "actor": "ip:127.0.0.1;user:private-user",
+                "reviewer": "Private Reviewer",
+                "at": "2026-08-06T00:00:00+00:00",
+                "audio_sha256": "a" * 64,
+                "before_manifest_sha256": "b" * 64,
+                "after_manifest_sha256": "c" * 64,
+                "review_bundle_sha256": "d" * 64,
+                "signature_mode": "hmac-sha256",
+                "signing_key_id": "active-key",
+                "signed_payload_sha256": "e" * 64,
+                "signature": "secret-looking-signature",
+            },
+            "before_manifest": {},
+            "after_manifest": {},
+        }) + "\n",
+        encoding="utf-8",
+    )
+    client.app.state.worker_telemetry_store.append({
+        "id": "audit-telemetry",
+        "recorded_at": "2026-08-06T00:00:00+00:00",
+        "engine_id": "cosyvoice3",
+        "worker_job_id": "worker-private",
+        "preset_id": "sori-warm",
+        "model_id": "cosyvoice3",
+        "model_version": "1",
+        "model_digest": "sha256:model",
+        "device_profile": "cuda",
+        "accelerator_name": "cuda:0",
+        "gpu_name": "Private Workstation GPU",
+        "first_audio_ms": 500,
+        "processing_ms": 1000,
+        "audio_duration_seconds": 4.0,
+        "realtime_factor": 0.25,
+        "final_handoff_error_ms": 20,
+        "succeeded": True,
+        "failure_reason": "",
+    })
+
+    response = client.get("/api/v1/quality/privacy-audit-bundle")
+    assert response.status_code == 200
+    bundle = response.json()
+    serialized = json.dumps(bundle, ensure_ascii=False)
+    assert bundle["schema_version"] == "privacy-audit/1"
+    assert bundle["redacted"] is True
+    assert "Private Reviewer" not in serialized
+    assert "private-user" not in serialized
+    assert "Private Workstation GPU" not in serialized
+    assert "secret-looking-signature" not in serialized
+    assert bundle["approval_history"][0]["voice_id"] == "sori-warm"
+    assert len(bundle["benchmark_regressions"][0]["hardware_fingerprint_sha256"]) == 64
+
+    verified = client.post(
+        "/api/v1/quality/privacy-audit-bundle/verify",
+        json=bundle,
+    )
+    assert verified.status_code == 200
+    assert verified.json()["valid"] is True
+
+
+def test_privacy_audit_verifier_rejects_tampering(client):
+    bundle = client.get("/api/v1/quality/privacy-audit-bundle").json()
+    bundle["trust_rotation"]["trusted_key_count"] = 999
+
+    response = client.post(
+        "/api/v1/quality/privacy-audit-bundle/verify",
+        json=bundle,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["valid"] is False

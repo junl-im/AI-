@@ -231,3 +231,36 @@ GET /api/v1/tts/jobs/{job_id}/segments/{index}/audio?file=...&expires=...&signat
 - `GET /api/v1/quality/evidence-intake`: 최근 등록된 evidence bundle 목록을 반환한다.
 
 Web quality report JSON 가져오기는 report 내부 SHA와 7개 phase 계약을 검증한다. 실제 log·dist 파일 자체의 검증은 원 artifact에서 `npm run quality:web-report:verify`를 실행해야 한다.
+
+## 프리셋 승인·신뢰 키 교체 API
+
+모든 endpoint는 loopback 또는 32자 이상 운영자 토큰 인증을 요구합니다. 재서명과 갱신 대기열은 일반 사용자 화면에 노출하지 않고 Quality Lab의 운영자 카드에서만 사용합니다.
+
+- `POST /api/v1/quality/voice-preset-approvals/preview`
+- `POST /api/v1/quality/voice-preset-approvals/apply`
+- `GET /api/v1/quality/voice-preset-approvals/history`
+- `POST /api/v1/quality/voice-preset-approvals/{approval_id}/rollback`
+- `GET /api/v1/quality/voice-preset-approvals/renewals?days=60`
+- `POST /api/v1/quality/voice-preset-approvals/resign/preview`
+- `POST /api/v1/quality/voice-preset-approvals/resign/apply`
+
+새 승인과 재서명은 active key만 사용합니다. previous key는 검증 전용이며 unknown key·invalid HMAC은 자동 덮어쓰지 않습니다. 승인 apply·재서명·rollback은 같은 로컬 파일시스템의 API 프로세스 간 파일 잠금을 획득합니다.
+
+
+## 0.9.5 benchmark 회귀와 개인정보 제외 감사 API
+
+`GET /api/v1/quality/worker-telemetry/summary`의 각 `metric_groups[]`에는 `regression`이 추가됩니다.
+
+- `status`: `insufficient`, `stable`, `warning`, `regressed`
+- `minimum_records`: 현재 10
+- `available_records`
+- 최초 5건 기준 구간과 최근 5건 현재 구간
+- 실패율, first audio P95, RTF P95, final handoff P95
+- 사람이 읽을 수 있는 `reasons`
+
+모델 ID·버전·digest, 장치 profile, 가속기, GPU와 프리셋이 다르면 별도 그룹입니다.
+
+- `GET /api/v1/quality/privacy-audit-bundle`: 개인정보 제외 감사 JSON 생성
+- `POST /api/v1/quality/privacy-audit-bundle/verify`: 레코드와 전체 SHA-256 재검증
+
+감사 JSON에는 actor·reviewer·IP·GPU 원문·signature·실제 WAV·동의 원문·비밀키가 포함되지 않습니다.

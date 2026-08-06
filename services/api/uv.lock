@@ -418,7 +418,7 @@ wheels = [
 
 [[package]]
 name = "sorion-api"
-version = "0.9.3b2"
+version = "0.9.5"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },

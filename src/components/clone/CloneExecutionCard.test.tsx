@@ -43,12 +43,11 @@ function job(status: VoiceCloneJob['status'] = 'running'): VoiceCloneJob {
 }
 
 describe('CloneExecutionCard', () => {
-  it('Worker가 준비되지 않으면 실제 실행 버튼을 잠근다', () => {
+  it('음성 준비가 끝나지 않으면 실행 버튼을 잠그고 기술 상태는 숨긴다', () => {
     render(
       <CloneExecutionCard
         profileName="내 목소리"
         ready={false}
-        reason="모델이 준비되지 않았습니다."
         job={null}
         busy={false}
         error={null}
@@ -58,7 +57,8 @@ describe('CloneExecutionCard', () => {
       />,
     )
 
-    expect(screen.getByText('모델이 준비되지 않았습니다.')).toBeInTheDocument()
+    expect(screen.getByText(/음성 기능을 자동으로 준비/)).toBeInTheDocument()
+    expect(screen.queryByText(/Worker|GPU|API|모델/)).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '이 목소리로 WAV 생성하기' }))
       .toBeDisabled()
   })
@@ -69,7 +69,6 @@ describe('CloneExecutionCard', () => {
       <CloneExecutionCard
         profileName="내 목소리"
         ready
-        reason={null}
         job={job()}
         busy={false}
         error={null}
@@ -90,7 +89,6 @@ describe('CloneExecutionCard', () => {
       <CloneExecutionCard
         profileName="내 목소리"
         ready
-        reason={null}
         job={job('completed')}
         busy={false}
         error={null}

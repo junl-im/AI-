@@ -1,7 +1,37 @@
-# SoriON AI 0.9.3-beta.3 Verification Report
+# SoriON AI 0.9.5 Verification Report
 
-결과 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate**
+결과 버전: **0.9.5 · Benchmark Baseline & Privacy-Safe Audit Bundle**
 
+
+
+## 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle
+
+- 같은 모델·버전·digest·장치 profile·가속기·GPU·프리셋 조건만 같은 benchmark 그룹으로 비교합니다.
+- 최초 5건과 최근 5건의 비중첩 window를 사용하고 총 10건 미만은 `insufficient`로 유지합니다.
+- 실패율, first audio P95, RTF P95, final handoff P95를 stable·warning·regressed로 판정합니다.
+- 승인 history, 신뢰 키 교체 집계, benchmark 회귀와 device coverage를 개인정보 제외 감사 JSON으로 제공합니다.
+- actor·reviewer·IP·GPU 원문·signature·실제 WAV·동의 원문·비밀키는 감사 JSON과 릴리스 ZIP에 포함하지 않습니다.
+- 감사 묶음은 레코드별 SHA-256과 전체 bundle SHA-256을 서버에서 다시 계산해 변조를 탐지합니다.
+- 검증: Repository preflight 29/29, API pytest 183개, Worker pytest 14개, TS/TSX 구문 검사 190개와 Python compileall을 통과했습니다.
+- 제한: 전체 ESLint·semantic typecheck·Vitest·Vite production build는 프로젝트 Web 의존성이 없는 현재 환경에서 실행하지 못했으며 GitHub Actions가 최종 판정합니다.
+
+## Engine Heartbeat 6.8.4 Trust Key Rotation & Evidence Renewal Queue
+
+- 새 승인과 재서명은 active HMAC key만 사용하고, previous key는 grace 기간 동안 기존 manifest 검증에만 사용합니다.
+- Quality Lab은 동의·권리 만료, WAV·검수 SHA-256 불일치, unsigned·previous key 상태를 갱신 대기열로 분리합니다.
+- previous key의 유효한 manifest는 현재 key로 diff 미리보기 후에만 재서명할 수 있으며, 알 수 없는 key ID나 잘못된 HMAC은 자동 덮어쓰지 않습니다.
+- 승인 apply·재서명·rollback은 스레드 잠금과 로컬 파일시스템 프로세스 간 잠금을 함께 획득한 뒤 원자 쓰기·history append를 수행합니다.
+- 같은 파일시스템을 공유하지 않는 다중 노드 배포는 단일 writer 또는 외부 분산 잠금이 필요합니다.
+- 동의·권리 만료일은 자동 연장하지 않으며 실제 증거 원문과 비밀키는 저장소·진단·배포 ZIP에 포함하지 않습니다.
+
+## Engine Heartbeat 6.8.3.3 Seamless Engine Runtime
+
+- 일반 헤더·장문 편집·목소리 복제 화면에서 API 주소, Worker, GPU, 엔진 ID와 연결 실패 기술 문구를 제거하고 작업에 필요한 준비 상태만 표시합니다.
+- 저장 주소·runtime config·허용 후보를 병렬 검사하고 가장 먼저 정상 응답한 주소를 즉시 사용하며 느린 탐색은 취소합니다.
+- 보이는 탭 20초, 숨은 탭 90초 heartbeat와 120초 통합 갱신, 온라인·탭·네트워크 변경 즉시 재검사를 추가했습니다.
+- 통합 진단에서 받은 엔진 목록을 15초 cache하고 동일 요청을 합쳐 중복 왕복을 줄였습니다.
+- API↔Worker는 keep-alive `httpx.AsyncClient`를 재사용하고 health·readiness를 병렬 검사하며 15초 supervisor로 재시작을 자동 복구합니다.
+- 모델 cold start, GPU context와 실제 네트워크 왕복은 0초를 보장하지 않으며 불필요한 순차 대기와 중복 연결만 제거합니다.
 
 ## Engine Heartbeat 6.8.3 CI Quality Unblock & Approval Operator Gate
 
@@ -13,7 +43,7 @@
 - 승인 apply와 rollback은 동일 잠금 안에서 WAV·manifest·history를 다시 검증해 동시 요청의 lost update를 차단합니다.
 - manifest 원자 교체와 approval JSONL append에 flush·fsync를 추가하고 WAV가 승인 후 변경된 경우 과거 manifest 롤백을 거부합니다.
 - 재유입 방지용 `voice review operator gate / CI unblock` 검사를 추가해 repository preflight를 24개로 확장했습니다.
-- 검증: Repository preflight 24/24, API pytest 171개, Worker pytest 14개, TS/TSX transpile 182개와 Python compileall을 통과했습니다.
+- 검증: Repository preflight 26/26, API pytest 171개, Worker pytest 14개, TS/TSX transpile 192개와 Python compileall을 통과했습니다.
 - 제한: 현재 환경에는 Python 3.10 Ruff와 프로젝트 Web 의존성이 설치되지 않아 전체 Ruff·ESLint·semantic typecheck·Vitest·Vite build는 GitHub Actions 재실행이 최종 판정합니다.
 
 

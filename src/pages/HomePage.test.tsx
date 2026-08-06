@@ -49,7 +49,7 @@ describe('HomePage', () => {
     expect(textbox).toHaveAttribute('maxlength', '20000')
     expect(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' })).toBeInTheDocument()
     expect(scoped.getByRole('button', { name: '혜린 목소리 미리듣기' })).toBeInTheDocument()
-    expect(scoped.getByText('음성 서버 연결 대기')).toBeInTheDocument()
+    expect(scoped.queryByText(/음성 서버 연결 대기|API 연결|Worker|GPU/)).not.toBeInTheDocument()
 
     fireEvent.change(textbox, {
       target: { value: '첫 번째 문장입니다. 두 번째 문장입니다.' },
@@ -89,7 +89,7 @@ describe('HomePage', () => {
     const voiceSettings = screen.getByRole('dialog', { name: '음성 설정' })
     expect(within(voiceSettings).getByRole('radio', { name: '밝게' })).toHaveClass('is-active')
   })
-  it('엔진 계층 실패를 작업 메시지로 즉시 알린다', async () => {
+  it('엔진 자동 복구 중에도 기술 실패 상태를 작업 화면에 노출하지 않는다', () => {
     useAppStore.setState({
       workspaceEntered: true,
       backendStatus: 'degraded',
@@ -108,7 +108,8 @@ describe('HomePage', () => {
 
     render(<HomePage />)
 
-    await waitFor(() => expect(screen.getAllByText(/API 연결 실패 · Worker 연결 실패 · GPU 미연결/).length).toBeGreaterThan(0))
+    expect(screen.queryByText(/API 연결 실패|Worker 연결 실패|GPU 미연결/)).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })).toBeEnabled()
   })
 
 })

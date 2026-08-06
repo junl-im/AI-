@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   getApiConnectionContext,
   normalizeApiBaseUrl,
@@ -70,15 +70,20 @@ export function useEngineDoctor() {
   const [setup, setSetup] = useState<SetupStatus | null>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [lastCheckedAt, setLastCheckedAt] = useState<string | null>(null)
+  const requestSequence = useRef(0)
   const inAppBrowser = useMemo(() => detectInAppBrowser(), [])
   const inAppBrowserLabel = inAppBrowser?.label ?? null
 
   const runCheckFor = useCallback(async (value: string) => {
+    const requestId = requestSequence.current + 1
+    requestSequence.current = requestId
     const normalized = normalizeApiBaseUrl(value)
     if (!normalized) {
       setMessage('연결 주소가 없습니다. PC에서는 START_ENGINE.cmd를 먼저 실행해 주세요.')
       setReport(null)
       setSetup(null)
+      setLoading(false)
       return false
     }
     setLoading(true)
@@ -88,20 +93,24 @@ export function useEngineDoctor() {
         runApiConnectivityAudit(normalized, { mode: 'deep' }),
         getSetupStatus(normalized),
       ])
+      if (requestSequence.current !== requestId) return false
       setBaseUrl(normalized)
       setReport(nextReport)
       setSetup(nextSetup)
+      setLastCheckedAt(new Date().toISOString())
       setMessage(nextReport.ttsReady
         ? `실제 음성 엔진을 확인했습니다. ${nextReport.latencyMs}ms`
         : 'API는 응답하지만 실제 음성 엔진 준비가 더 필요합니다.')
       return nextReport.apiReady && nextReport.ttsReady
     } catch (error) {
+      if (requestSequence.current !== requestId) return false
       setReport(null)
       setSetup(null)
+      setLastCheckedAt(new Date().toISOString())
       setMessage(error instanceof Error ? error.message : '엔진 진단에 실패했습니다.')
       return false
     } finally {
-      setLoading(false)
+      if (requestSequence.current === requestId) setLoading(false)
     }
   }, [])
 
@@ -119,6 +128,7 @@ export function useEngineDoctor() {
   }, [baseUrl, runCheckFor])
 
   const restoreAutomatic = useCallback(() => {
+    requestSequence.current += 1
     resetApiBaseUrl()
     requestAutomaticApiReconnect()
     const context = getApiConnectionContext()
@@ -126,6 +136,7 @@ export function useEngineDoctor() {
     setReport(null)
     setSetup(null)
     setMessage('자동 연결을 다시 시작했습니다. 엔진 실행 후 다시 진단해 주세요.')
+    setLoading(false)
   }, [])
 
   const copyDiagnostics = useCallback(async () => {
@@ -193,6 +204,18 @@ export function useEngineDoctor() {
     if (initialContext.baseUrl) void runCheckFor(initialContext.baseUrl)
   }, [initialContext.baseUrl, runCheckFor])
 
+  useEffect(() => {
+    const handleOnline = () => {
+      const context = getApiConnectionContext()
+      if (context.baseUrl) void runCheckFor(context.baseUrl)
+    }
+    window.addEventListener('online', handleOnline)
+    return () => {
+      requestSequence.current += 1
+      window.removeEventListener('online', handleOnline)
+    }
+  }, [runCheckFor])
+
   return {
     baseUrl,
     setBaseUrl,
@@ -200,6 +223,7 @@ export function useEngineDoctor() {
     setup,
     loading,
     message,
+    lastCheckedAt,
     inAppBrowser,
     runCheck,
     saveAndCheck,

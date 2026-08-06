@@ -63,7 +63,7 @@ export interface VoicePresetApprovalPreview {
 
 export interface VoicePresetApprovalRecord {
   approvalId: string
-  event: 'approved' | 'rolled-back'
+  event: 'approved' | 'rolled-back' | 're-signed'
   voiceId: string
   actor: string
   reviewer: string
@@ -94,7 +94,7 @@ function payload(input: VoicePresetApprovalInput) {
 
 interface VoicePresetApprovalRecordResponse {
   approval_id: string
-  event: 'approved' | 'rolled-back'
+  event: 'approved' | 'rolled-back' | 're-signed'
   voice_id: string
   actor: string
   reviewer: string
@@ -211,6 +211,156 @@ export async function rollbackVoicePresetApproval(
     method: 'POST',
     headers: operatorHeaders(operatorToken),
     body: JSON.stringify({ confirmation: '승인 롤백', reason }),
+  })
+  return { record: mapRecord(value.record), manifest: value.manifest as Record<string, unknown> }
+}
+
+
+export interface VoicePresetRenewalItem {
+  voiceId: string
+  displayName: string
+  priority: 'blocked' | 'urgent' | 'soon' | 'rotation'
+  reasons: string[]
+  manifestSha256: string | null
+  audioSha256: string | null
+  consentExpiresAt: string | null
+  rightsExpiresAt: string | null
+  consentDaysRemaining: number | null
+  rightsDaysRemaining: number | null
+  currentKeyId: string | null
+  activeKeyId: string | null
+  canResign: boolean
+}
+
+export interface VoicePresetRenewalQueue {
+  generatedAt: string
+  warningDays: number
+  activeKeyId: string | null
+  trustedKeyIds: string[]
+  items: VoicePresetRenewalItem[]
+}
+
+interface VoicePresetRenewalQueueResponse {
+  generated_at: string
+  warning_days: number
+  active_key_id?: string | null
+  trusted_key_ids?: string[]
+  items?: Array<{
+    voice_id: string
+    display_name: string
+    priority: 'blocked' | 'urgent' | 'soon' | 'rotation'
+    reasons?: string[]
+    manifest_sha256?: string | null
+    audio_sha256?: string | null
+    consent_expires_at?: string | null
+    rights_expires_at?: string | null
+    consent_days_remaining?: number | null
+    rights_days_remaining?: number | null
+    current_key_id?: string | null
+    active_key_id?: string | null
+    can_resign?: boolean
+  }>
+}
+
+export interface VoicePresetResignPreview {
+  previewId: string
+  voiceId: string
+  currentManifestSha256: string
+  proposedManifestSha256: string
+  currentKeyId: string | null
+  activeKeyId: string
+  resignedAt: string
+  changes: VoicePresetApprovalDiff[]
+  blockingIssues: string[]
+  canApply: boolean
+}
+
+interface VoicePresetResignPreviewResponse {
+  preview_id: string
+  voice_id: string
+  current_manifest_sha256: string
+  proposed_manifest_sha256: string
+  current_key_id?: string | null
+  active_key_id: string
+  resigned_at: string
+  changes?: Array<{ path: string; before: unknown; after: unknown }>
+  blocking_issues?: string[]
+  can_apply: boolean
+}
+
+export async function listVoicePresetRenewals(
+  operatorToken = '',
+  warningDays = 60,
+): Promise<VoicePresetRenewalQueue> {
+  const value = await apiRequest<VoicePresetRenewalQueueResponse>(
+    `/quality/voice-preset-approvals/renewals?days=${encodeURIComponent(String(warningDays))}`,
+    { headers: operatorHeaders(operatorToken) },
+  )
+  return {
+    generatedAt: value.generated_at,
+    warningDays: value.warning_days,
+    activeKeyId: value.active_key_id ?? null,
+    trustedKeyIds: value.trusted_key_ids ?? [],
+    items: (value.items ?? []).map((item) => ({
+      voiceId: item.voice_id,
+      displayName: item.display_name,
+      priority: item.priority,
+      reasons: item.reasons ?? [],
+      manifestSha256: item.manifest_sha256 ?? null,
+      audioSha256: item.audio_sha256 ?? null,
+      consentExpiresAt: item.consent_expires_at ?? null,
+      rightsExpiresAt: item.rights_expires_at ?? null,
+      consentDaysRemaining: item.consent_days_remaining ?? null,
+      rightsDaysRemaining: item.rights_days_remaining ?? null,
+      currentKeyId: item.current_key_id ?? null,
+      activeKeyId: item.active_key_id ?? null,
+      canResign: item.can_resign ?? false,
+    })),
+  }
+}
+
+export async function previewVoicePresetResign(
+  voiceId: string,
+  expectedManifestSha256: string | null,
+  operatorToken = '',
+): Promise<VoicePresetResignPreview> {
+  const value = await apiRequest<VoicePresetResignPreviewResponse>('/quality/voice-preset-approvals/resign/preview', {
+    method: 'POST',
+    headers: operatorHeaders(operatorToken),
+    body: JSON.stringify({
+      voice_id: voiceId,
+      expected_manifest_sha256: expectedManifestSha256,
+      resigned_at: new Date().toISOString(),
+    }),
+  })
+  return {
+    previewId: value.preview_id,
+    voiceId: value.voice_id,
+    currentManifestSha256: value.current_manifest_sha256,
+    proposedManifestSha256: value.proposed_manifest_sha256,
+    currentKeyId: value.current_key_id ?? null,
+    activeKeyId: value.active_key_id,
+    resignedAt: value.resigned_at,
+    changes: (value.changes ?? []).map((item) => ({ path: item.path, before: item.before, after: item.after })),
+    blockingIssues: value.blocking_issues ?? [],
+    canApply: value.can_apply,
+  }
+}
+
+export async function applyVoicePresetResign(
+  preview: VoicePresetResignPreview,
+  operatorToken = '',
+) {
+  const value = await apiRequest<VoicePresetApprovalMutationResponse>('/quality/voice-preset-approvals/resign/apply', {
+    method: 'POST',
+    headers: operatorHeaders(operatorToken),
+    body: JSON.stringify({
+      voice_id: preview.voiceId,
+      expected_manifest_sha256: preview.currentManifestSha256,
+      resigned_at: preview.resignedAt,
+      preview_id: preview.previewId,
+      confirmation: '현재 키로 재서명',
+    }),
   })
   return { record: mapRecord(value.record), manifest: value.manifest as Record<string, unknown> }
 }

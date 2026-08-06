@@ -278,14 +278,14 @@ export function getApiBaseUrl(): string {
   return getApiConnectionContext().baseUrl
 }
 
-export function saveApiBaseUrl(value: string): string {
+export function saveApiBaseUrl(value: string, notify = true): string {
   const normalized = normalizeApiBaseUrl(value)
   if (!normalized || isStaticHostingApiCandidate(normalized)) {
     throw new ApiError('배포된 음성 서버 주소를 확인할 수 없습니다.', 0, 'SOA-2004', 'invalid-url')
   }
   storageSet(API_BASE_STORAGE_KEY, normalized)
   rememberApiUrl(normalized, false)
-  window.dispatchEvent(new Event('sorion-api-change'))
+  if (notify) window.dispatchEvent(new Event('sorion-api-change'))
   return normalized
 }
 

@@ -168,7 +168,7 @@ await requireText('services/api/app/services/setup_diagnostics.py', ['PRESET_VOI
 await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '수동 검토', 'npm ci', 'uv sync --locked'])
 await requireText('src/test/setup.ts', ['afterEach', 'cleanup()', 'Object.defineProperty(Blob.prototype', "reader.readAsArrayBuffer(this)"])
 await requireText('src/tts/mockWave.test.ts', ['async function readBlob', "typeof blob.arrayBuffer === 'function'", 'reader.readAsArrayBuffer(blob)'])
-await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/voiceApi.ts', ['request.engineId === BROWSER_SPEECH_ENGINE_ID', 'timeoutMs: 3_500']); await requireText('src/hooks/useEngineCatalog.ts', ['브라우저 한국어 음성 즉시 준비']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])
+await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/voiceApi.ts', ['request.engineId === BROWSER_SPEECH_ENGINE_ID', 'timeoutMs: 3_500']); await requireText('src/hooks/useEngineCatalog.ts', ['음성 제작 준비됨', '음성 기능을 자동으로 복구하고 있습니다.']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])
 await requireText('src/components/layout/BrandMasthead.tsx', [
   'BrandIcon',
   'SoriON AI 첫 페이지',
@@ -180,7 +180,7 @@ await requireText('src/components/layout/BrandMasthead.test.tsx', [
   'SoriON AI 첫 페이지',
 ])
 await requireText('src/pages/VoiceClonePage.tsx', [
-  '실제 AI 음성으로 연결합니다.',
+  '동의된 샘플만 안전한 음성 제작 과정에 사용합니다.',
   'prepareVoiceCloneProfile',
   'startVoiceCloneJob',
   'cancelVoiceCloneJob',
@@ -288,7 +288,7 @@ await requireText('.env.example', ['SORION_TTS_ENGINE_ORDER=cosyvoice3,melo,syst
 await requireText('services/api/app/services/engine_strategy.py', ['free_only=True', 'firebase-static-plus-local-runtime'])
 await requireText('services/api/app/api/routes/tts.py', ['/jobs/{job_id}/events', 'text/event-stream'])
 await requireText('src/tts/jobProgressStream.ts', ['streamSpeechProgress', 'text/event-stream'])
-await requireText('src/pages/SettingsPage.tsx', ['무료 전용 자동'])
+await requireText('src/pages/SettingsPage.tsx', ['음성 자동 준비', '고급 진단 및 개발자 정보'])
 await requireText('docs/FREE_ONLY_ENGINE_POLICY.md', ['FREE-ONLY', 'CosyVoice Worker'])
 await requireText('docs/FIREBASE_SPARK_FREE_DEPLOYMENT.md', ['hosting', 'localhost'])
 await requireText('docs/PROGRESSIVE_TTS_STREAMING.md', ['polling', 'X-Accel-Buffering'])

@@ -64,3 +64,21 @@ def test_remote_approval_history_requires_matching_operator_token(
     assert "SOA-6832" in denied.json()["detail"]
     assert allowed.status_code == 200
     assert allowed.json() == []
+
+
+def test_renewal_route_is_static_and_returns_domain_error_without_preset_directory(client):
+    response = client.get("/api/v1/quality/voice-preset-approvals/renewals")
+
+    assert response.status_code == 409
+    assert "SOA-6810" in response.json()["detail"]
+    assert "프리셋 폴더" in response.json()["detail"]
+
+
+def test_resign_preview_route_reaches_domain_validation(client):
+    response = client.post(
+        "/api/v1/quality/voice-preset-approvals/resign/preview",
+        json={"voice_id": "not-a-preset", "expected_manifest_sha256": None},
+    )
+
+    assert response.status_code == 409
+    assert "지원하지 않는 프리셋 ID" in response.json()["detail"]

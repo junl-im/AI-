@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useModalDialog } from '../../hooks/useModalDialog'
-import type { BackendStatus } from '../../store/useAppStore'
 
 interface DubbingStudioHeaderProps {
   title: string
   savedLabel: string
-  backendStatus: BackendStatus
-  engineLabel: string
   downloadHref: string | null
   downloadName: string
   onTitleChange: (value: string) => void
@@ -17,19 +14,9 @@ interface DubbingStudioHeaderProps {
   onClear: () => void
 }
 
-function engineStatusLabel(status: BackendStatus, engineLabel: string): string {
-  if (status === 'online') return 'AI 음성 엔진 준비'
-  if (status === 'degraded' && engineLabel.includes('브라우저')) return '브라우저 음성 준비'
-  if (status === 'degraded') return '대체 음성 모드'
-  if (status === 'checking') return '음성 시스템 확인 중'
-  return '음성 서버 자동 재연결 중'
-}
-
 export function DubbingStudioHeader({
   title,
   savedLabel,
-  backendStatus,
-  engineLabel,
   downloadHref,
   downloadName,
   onTitleChange,
@@ -91,18 +78,9 @@ export function DubbingStudioHeader({
           />
           <button type="button" onClick={() => titleRef.current?.focus()} aria-label="프로젝트 제목 수정">✎</button>
           <p>{savedLabel}</p>
-          <small>{engineStatusLabel(backendStatus, engineLabel)} · {engineLabel}</small>
         </div>
 
         <div className="soa-dubbing-toolbar__actions" aria-label="프로젝트 동작">
-          <button
-            type="button"
-            className={`soa-dubbing-engine-button is-${backendStatus}`}
-            onClick={onOpenQuality}
-            aria-label={`${engineStatusLabel(backendStatus, engineLabel)}. 품질 연구소 열기`}
-          >
-            <i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" />
-          </button>
           {downloadHref ? (
             <a href={downloadHref} download={downloadName} aria-label="현재 음성 다운로드">⇩</a>
           ) : (

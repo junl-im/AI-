@@ -176,6 +176,23 @@ export interface DeviceBenchmarkSummary {
 }
 
 
+export interface BenchmarkMetricWindow {
+  records: number
+  failureRate: number
+  p95FirstAudioMs: number | null
+  p95RealtimeFactor: number | null
+  p95FinalHandoffErrorMs: number | null
+}
+
+export interface BenchmarkRegressionAssessment {
+  status: 'insufficient' | 'stable' | 'warning' | 'regressed'
+  minimumRecords: number
+  availableRecords: number
+  baseline: BenchmarkMetricWindow | null
+  current: BenchmarkMetricWindow | null
+  reasons: string[]
+}
+
 export interface WorkerTelemetryAggregate {
   engineId: string
   presetId: string
@@ -194,6 +211,7 @@ export interface WorkerTelemetryAggregate {
   p95RealtimeFactor: number | null
   p50FinalHandoffErrorMs: number | null
   p95FinalHandoffErrorMs: number | null
+  regression: BenchmarkRegressionAssessment
 }
 
 export interface WorkerTelemetrySummary {

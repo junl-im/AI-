@@ -1,5 +1,4 @@
 import type { VoiceEmotion } from '../../ai/contracts'
-import type { EngineInfo } from '../../ai/contracts'
 import { voicePresets } from '../../tts/voicePresets'
 import {
   formatPitch,
@@ -15,7 +14,6 @@ interface DesktopVoiceDrawerProps {
   pitch: number
   emotion: VoiceEmotion
   normalizeText: boolean
-  engine: EngineInfo | null
   onVoiceChange: (voiceId: string) => void
   onPreview: (voiceId: string) => void
   onSpeedChange: (value: number) => void
@@ -34,7 +32,6 @@ export function DesktopVoiceDrawer({
   pitch,
   emotion,
   normalizeText,
-  engine,
   onVoiceChange,
   onPreview,
   onSpeedChange,
@@ -146,7 +143,7 @@ export function DesktopVoiceDrawer({
               </div>
             </div>
             <label className="soa-voice-drawer__normalize">
-              <span><b>숫자·기호 읽기 보정</b><small>{engine?.name ?? '지원 엔진 자동 선택'}</small></span>
+              <span><b>숫자·기호 읽기 보정</b><small>자동 최적화</small></span>
               <input
                 type="checkbox"
                 checked={normalizeText}

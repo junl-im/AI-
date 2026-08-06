@@ -785,3 +785,13 @@ ESLint·전체 Vitest·semantic typecheck·Vite production build는 실행하지
 - `.github/workflows/ci.yml` YAML parse: 통과
 - 전체 ESLint·Vitest·semantic typecheck·Vite build는 설치된 Web dependency가 없는 sandbox에서는 실행하지 못했습니다. 커밋된 lock을 사용하는 GitHub Actions에서 최종 확인합니다.
 - Ruff는 현재 실행 환경에 설치돼 있지 않아 API·Worker CI에서 최종 확인합니다.
+
+## 0.9.5 Benchmark Baseline & Privacy-Safe Audit 검사
+
+- 같은 모델·digest·장치·GPU·프리셋 그룹이 10건 미만이면 회귀 판정을 하지 않는지 확인합니다.
+- 최초 5건과 최근 5건이 비중첩으로 비교되고 다중 지표 악화가 `regressed`인지 확인합니다.
+- 감사 bundle에서 actor, reviewer, 사용자 ID, GPU 원문과 signature가 제거되는지 확인합니다.
+- GPU 조건이 64자리 SHA-256 fingerprint로 대체되는지 확인합니다.
+- 감사 bundle 변조 시 서버 verifier가 실패하는지 확인합니다.
+- Repository preflight 29/29, API pytest 183개, Worker pytest 14개, TS/TSX 190개 구문 검사와 Python compileall을 통과했습니다.
+- 전체 ESLint·semantic typecheck·Vitest·Vite production build는 Web 의존성이 없는 현재 환경에서 실행하지 못했으며 GitHub Actions가 최종 판정합니다.

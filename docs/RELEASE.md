@@ -21,6 +21,9 @@
 
 Semantic Versioning을 사용한다.
 
+사용자 화면 버전은 `0.9.4`, `0.9.5`처럼 단순 증가시키며 내부 Heartbeat·revision은 고급 진단에만 표시한다.
+다음 버전은 `npm run version:set -- 0.9.6` 형식으로 갱신하고 `npm run quality:version-sync`로 확인한다.
+
 - Patch: 호환되는 수정
 - Minor: 호환되는 기능 추가
 - Major: API나 데이터 계약의 파괴적 변경
@@ -399,3 +402,12 @@ Semantic Versioning을 사용한다.
 - 기준 버전: `0.9.3-beta.1 CI Hotfix 2`
 - 핵심: registry 일시 장애 재시도·부분 npm cache 보존, 실기기 측정표, 실패 문장 선택 STT 재생성.
 - 패치에는 stale SVG 삭제 목록과 Windows·macOS/Linux 적용 스크립트를 포함한다.
+
+## 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle
+
+- 전체 통파일 ZIP: `SoriON-AI-0.9.5-benchmark-privacy-audit-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.4-to-0.9.5-benchmark-privacy-audit-patch.zip`
+- 기준 버전: `0.9.4`
+- 핵심: Worker 비중첩 기준선·회귀 경보, 개인정보 제외 승인·신뢰 키·성능 감사 JSON
+- 삭제 파일: 없음
+- 다음 제품 버전: `0.9.6`

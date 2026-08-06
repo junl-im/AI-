@@ -4,7 +4,7 @@ import type { SpeechJobProgress } from '../../tts/voiceApi'
 const labels: Record<GenerationPhase, string> = {
   idle: '준비됨',
   preparing: '문장 확인 중',
-  requesting: '음성 엔진 요청 중',
+  requesting: '음성 준비 요청 중',
   rendering: '데모 WAV 준비 중',
   completed: '음성 준비 완료',
   cancelled: '생성 취소됨',
@@ -34,7 +34,7 @@ export function GenerationProgress({ phase, progress, onCancel }: GenerationProg
         <span className="size-4 animate-spin rounded-full border-2 border-soa-violet border-t-transparent" aria-hidden="true" />
         <div className="min-w-0 flex-1">
           <strong className="block text-sm tracking-[-0.025em]">{progress?.message ?? labels[phase]}</strong>
-          <span className="mt-0.5 block text-xs text-soa-muted">{segment ?? '로컬 엔진은 첫 실행에 시간이 더 걸릴 수 있습니다.'}</span>
+          <span className="mt-0.5 block text-xs text-soa-muted">{segment ?? '첫 실행에는 준비 시간이 조금 더 걸릴 수 있습니다.'}</span>
         </div>
         <span className="text-xs font-black text-soa-violet">{value}%</span>
         <button type="button" onClick={onCancel} className="focus-ring min-h-10 rounded-xl border border-soa-ink/15 bg-white px-3 text-xs font-black">취소</button>

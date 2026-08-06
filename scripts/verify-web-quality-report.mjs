@@ -10,13 +10,14 @@ const reportPath = process.argv.find((value, index) => index > 1 && !value.start
   || join(root, '.sorion', 'web-quality', 'report.json')
 const allowPlan = process.argv.includes('--allow-plan')
 const report = JSON.parse(await readFile(reportPath, 'utf8'))
+const productVersion = (await readFile(join(root, 'VERSION'), 'utf8')).trim()
 const reportDirectory = dirname(reportPath)
 const failures = []
 
 if (report.schemaVersion !== WEB_QUALITY_SCHEMA_VERSION) failures.push('schemaVersion 불일치')
 if (!['plan', 'run'].includes(report.mode)) failures.push('mode 오류')
 if (report.mode === 'plan' && !allowPlan) failures.push('plan report는 실검증 증거가 아닙니다.')
-if (report.appVersion !== '0.9.3-beta.3') failures.push('제품 버전 불일치')
+if (report.appVersion !== productVersion) failures.push('제품 버전 불일치')
 if (report.heartbeat !== '6.7') failures.push('Heartbeat 불일치')
 const expectedIds = WEB_QUALITY_PHASES.map((phase) => phase.id)
 const actualIds = report.phases?.map((phase) => phase.id) ?? []

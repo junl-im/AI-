@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CloneConsentCard } from '../components/clone/CloneConsentCard'
 import { CloneExecutionCard } from '../components/clone/CloneExecutionCard'
 import { CloneReadyCard } from '../components/clone/CloneReadyCard'
@@ -56,7 +56,7 @@ function localProfile(input: {
     consent: input.consent,
     createdAt: now,
     updatedAt: now,
-    message: '샘플과 동의 기록을 이 기기에 저장했습니다. CosyVoice Worker 연결 후 실제 복제를 시작할 수 있습니다.',
+    message: '샘플과 동의 기록을 이 기기에 저장했습니다. 준비가 완료되면 실제 복제를 바로 시작할 수 있습니다.',
   }
 }
 
@@ -75,7 +75,6 @@ export function VoiceClonePage() {
   const [consent, setConsent] = useState<VoiceCloneConsent>(initialConsent)
   const [profile, setProfile] = useState<VoiceCloneProfile | null>(null)
   const [capability, setCapability] = useState<VoiceCloneCapability | null>(null)
-  const [capabilityError, setCapabilityError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [job, setJob] = useState<VoiceCloneJob | null>(null)
   const activeJobId = job?.id ?? null
@@ -99,9 +98,8 @@ export function VoiceClonePage() {
     void getVoiceCloneCapability()
       .then((result) => {
         setCapability(result)
-        setCapabilityError(null)
       })
-      .catch(() => setCapabilityError('Voice API 미연결 · 로컬 샘플 준비만 가능'))
+      .catch(() => setCapability(null))
   }, [])
 
   useEffect(() => {
@@ -177,16 +175,7 @@ export function VoiceClonePage() {
     showNotice('복제 음성을 완성해 하단 플레이어에 연결했습니다.')
   }, [enqueue, job, profile?.displayName, showNotice])
 
-  const engineLabel = useMemo(() => {
-    if (capabilityError) return capabilityError
-    if (!capability) return 'CosyVoice Worker 확인 중'
-    const gpu = capability.diagnostics?.gpu_name
-    const version = capability.workerVersion ? ` v${capability.workerVersion}` : ''
-    if (capability.ready) {
-      return `${capability.engineName}${version} 준비됨${gpu ? ` · ${gpu}` : ''}`
-    }
-    return `${capability.engineName}${version} 연결 대기`
-  }, [capability, capabilityError])
+
 
   async function handlePrepare() {
     if (!recorder.file || !analysis || !canSubmit) return
@@ -309,8 +298,7 @@ export function VoiceClonePage() {
     <WorkspacePageScaffold
       eyebrow="VOICE CLONE · CONSENT FIRST"
       title="내 목소리 복제"
-      description="동의된 샘플만 별도 Worker에 전달해 실제 AI 음성으로 연결합니다. 문장별 생성 상태와 취소·재시도를 실시간으로 관리합니다."
-      status={<span>{engineLabel}</span>}
+      description="동의된 샘플만 안전한 음성 제작 과정에 사용합니다. 문장별 생성 상태와 취소·재시도를 실시간으로 관리합니다."
       className="soa-clone-page"
     >
       <CloneStepIndicator current={currentStep} />
@@ -339,7 +327,6 @@ export function VoiceClonePage() {
           <CloneExecutionCard
             profileName={profile.displayName}
             ready={Boolean(capability?.ready && profile.status === 'engine-ready')}
-            reason={capability?.reason ?? capabilityError}
             job={job}
             busy={jobBusy}
             error={jobError}

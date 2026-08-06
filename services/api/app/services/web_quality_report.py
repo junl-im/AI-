@@ -4,6 +4,8 @@ import hashlib
 import json
 from typing import Any
 
+from app.version import APP_VERSION
+
 WEB_QUALITY_SCHEMA_VERSION = 1
 WEB_QUALITY_PHASES = [
     ("lock-structure", "npm run locks:check -- --component npm"),
@@ -88,8 +90,8 @@ def verify_web_quality_report(payload: dict[str, object]) -> dict[str, object]:
         failures.append("지원하지 않는 Web quality schema입니다.")
     if payload.get("mode") != "run":
         failures.append("실행 완료된 run report만 가져올 수 있습니다.")
-    if payload.get("appVersion") != "0.9.3-beta.3":
-        failures.append("제품 버전이 0.9.3-beta.3이 아닙니다.")
+    if payload.get("appVersion") != APP_VERSION:
+        failures.append(f"제품 버전이 {APP_VERSION}이 아닙니다.")
     if payload.get("heartbeat") not in {"6.6", "6.7"}:
         failures.append("Heartbeat 6.6 또는 6.7 report만 지원합니다.")
     if payload.get("passed") is not True:

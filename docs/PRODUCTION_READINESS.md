@@ -1,6 +1,6 @@
 # Korean TTS Production Readiness
 
-현재 기준 버전: `0.9.3-beta.3`
+현재 기준 버전: `0.9.5`
 
 ## 목적
 

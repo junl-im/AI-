@@ -32,7 +32,7 @@ export function EmotionSelector({ value, supported, onChange }: EmotionSelectorP
           )
         })}
       </div>
-      {!supported ? <p className="mt-2 text-[10px] font-semibold text-soa-muted">현재 엔진은 말투 제어를 지원하지 않아 기본 톤으로 생성합니다.</p> : null}
+      {!supported ? <p className="mt-2 text-[10px] font-semibold text-soa-muted">현재 음성 방식에서는 기본 톤으로 생성합니다.</p> : null}
     </fieldset>
   )
 }

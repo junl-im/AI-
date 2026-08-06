@@ -1,0 +1,26 @@
+기준 버전: 0.9.4 Visible Version Sync
+적용 버전: 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle
+
+추가 파일
+- docs/BENCHMARK_BASELINE_AND_PRIVACY_AUDIT.md
+- docs/patches/0.9.5-benchmark-privacy-audit/PATCH_MANIFEST.txt
+- docs/patches/0.9.5-benchmark-privacy-audit/PATCH_README.md
+- scripts/check-benchmark-privacy-audit.mjs
+- services/api/app/schemas/privacy_audit.py
+- services/api/app/services/privacy_audit_bundle.py
+
+주요 수정
+- VERSION, package.json, package-lock.json과 API·Worker 패키지 버전을 0.9.5로 동기화
+- verification route·schema에 benchmark 기준선과 회귀 판정 추가
+- evidence route에 개인정보 제외 감사 bundle export·verify 추가
+- Quality Lab에 회귀 상태와 감사 JSON 다운로드 추가
+- API·Web 테스트, preflight, README·HANDOVER·CHANGELOG·NEXT_UPDATE 갱신
+
+삭제 파일
+- 없음
+
+변경 수
+- 추가 6개
+- 수정 47개
+- 삭제 0개
+- 총 53개

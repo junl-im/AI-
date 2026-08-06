@@ -1,3 +1,4 @@
+import { currentBuildInfo } from '../update/buildInfo'
 import { voicePresets } from '../tts/voicePresets'
 import type { VoiceGender } from '../tts/voicePresets'
 import { importQualityReviews } from './qualityReviewRepository'
@@ -24,8 +25,8 @@ interface ManifestReviewDraft {
 export interface VoicePresetReviewBundle {
   schemaVersion: typeof VOICE_REVIEW_BUNDLE_SCHEMA
   app: '곰같은여우 SoriON AI'
-  appVersion: '0.9.3-beta.3'
-  engineHeartbeat: '6.8.3'
+  appVersion: string
+  engineHeartbeat: string
   exportedAt: string
   reviewCount: number
   reviews: QualityReview[]
@@ -70,8 +71,8 @@ export async function buildVoicePresetReviewBundle(reviews: QualityReview[]): Pr
   const payload = {
     schemaVersion: VOICE_REVIEW_BUNDLE_SCHEMA,
     app: '곰같은여우 SoriON AI' as const,
-    appVersion: '0.9.3-beta.3' as const,
-    engineHeartbeat: '6.8.3' as const,
+    appVersion: currentBuildInfo.appVersion,
+    engineHeartbeat: currentBuildInfo.heartbeat,
     exportedAt: new Date().toISOString(),
     reviewCount: reviews.length,
     reviews,
@@ -90,7 +91,7 @@ function migrateLegacyReport(value: Record<string, unknown>): Record<string, unk
     return {
       schemaVersion: VOICE_REVIEW_BUNDLE_SCHEMA,
       app: value.app,
-      appVersion: value.version ?? '0.9.3-beta.3',
+      appVersion: value.version ?? currentBuildInfo.appVersion,
       engineHeartbeat: 'legacy-migrated',
       exportedAt: value.exportedAt ?? new Date().toISOString(),
       reviewCount: value.reviews.length,

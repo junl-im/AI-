@@ -45,7 +45,7 @@ class VoicePresetApprovalApplyRequest(VoicePresetApprovalInput):
 
 class VoicePresetApprovalRecord(BaseModel):
     approval_id: str
-    event: Literal["approved", "rolled-back"]
+    event: Literal["approved", "rolled-back", "re-signed"]
     voice_id: str
     actor: str
     reviewer: str
@@ -76,3 +76,60 @@ class VoicePresetApprovalRollbackResponse(BaseModel):
     status: Literal["rolled-back"]
     record: VoicePresetApprovalRecord
     manifest: dict[str, object]
+
+
+class VoicePresetResignPreviewRequest(BaseModel):
+    voice_id: str = Field(min_length=1, max_length=100)
+    expected_manifest_sha256: str | None = Field(default=None, min_length=64, max_length=64)
+    resigned_at: datetime | None = None
+
+
+class VoicePresetResignPreviewResponse(BaseModel):
+    preview_id: str
+    voice_id: str
+    current_manifest_sha256: str
+    proposed_manifest_sha256: str
+    current_key_id: str | None = None
+    active_key_id: str
+    resigned_at: datetime
+    changes: list[VoicePresetApprovalDiff]
+    blocking_issues: list[str]
+    can_apply: bool
+
+
+class VoicePresetResignApplyRequest(VoicePresetResignPreviewRequest):
+    preview_id: str = Field(min_length=64, max_length=64)
+    confirmation: str = Field(min_length=1, max_length=80)
+
+
+class VoicePresetResignApplyResponse(BaseModel):
+    status: Literal["re-signed"]
+    record: VoicePresetApprovalRecord
+    manifest: dict[str, object]
+
+
+RenewalPriority = Literal["blocked", "urgent", "soon", "rotation"]
+
+
+class VoicePresetRenewalItem(BaseModel):
+    voice_id: str
+    display_name: str
+    priority: RenewalPriority
+    reasons: list[str]
+    manifest_sha256: str | None = None
+    audio_sha256: str | None = None
+    consent_expires_at: datetime | None = None
+    rights_expires_at: datetime | None = None
+    consent_days_remaining: int | None = None
+    rights_days_remaining: int | None = None
+    current_key_id: str | None = None
+    active_key_id: str | None = None
+    can_resign: bool = False
+
+
+class VoicePresetRenewalQueueResponse(BaseModel):
+    generated_at: datetime
+    warning_days: int
+    active_key_id: str | None = None
+    trusted_key_ids: list[str] = Field(default_factory=list)
+    items: list[VoicePresetRenewalItem] = Field(default_factory=list)

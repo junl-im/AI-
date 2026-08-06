@@ -37,7 +37,7 @@ describe('DubbingVoiceControls', () => {
     expect(settings).toBeInTheDocument()
     expect(within(settings).getByText('한국어 숫자·기호 읽기 보정')).toBeInTheDocument()
     expect(within(settings).getAllByRole('slider').every((slider) => !slider.hasAttribute('disabled'))).toBe(true)
-    expect(within(settings).getAllByText('지원 엔진 자동 선택').length).toBeGreaterThan(0)
+    expect(within(settings).getAllByText('자동 최적화').length).toBeGreaterThan(0)
     expect(within(settings).queryByRole('button', { name: '적용하기' })).not.toBeInTheDocument()
     expect(within(settings).getByRole('button', { name: /현재 설정 적용 · 재생/ })).toBeInTheDocument()
   })

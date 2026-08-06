@@ -2,6 +2,7 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Mapping
 from uuid import UUID, uuid4
 
 from app.engines.base import TtsEngine
@@ -36,6 +37,7 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
         telemetry_store: DeviceBenchmarkStore | None = None,
         review_signing_secret: str = "",
         review_signing_key_id: str = "",
+        review_trusted_signing_keys: Mapping[str, str] | None = None,
     ) -> None:
         self.store = store
         self.worker = worker
@@ -50,6 +52,7 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
         self.telemetry_store = telemetry_store
         self.review_signing_secret = review_signing_secret
         self.review_signing_key_id = review_signing_key_id
+        self.review_trusted_signing_keys = dict(review_trusted_signing_keys or {})
 
     def info(self) -> EngineInfo:
         worker_info = self.worker.info()
@@ -102,6 +105,7 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
                 ),
                 self.review_signing_secret,
                 self.review_signing_key_id,
+                self.review_trusted_signing_keys,
             )
             for voice_id in PRESET_VOICE_IDS
         ])

@@ -178,3 +178,113 @@ def test_approval_rejects_changed_audio_after_preview(tmp_path):
             ),
             actor="test",
         )
+
+
+def test_previous_trust_key_remains_valid_and_can_be_resigned(tmp_path):
+    from app.schemas.voice_preset_approval import (
+        VoicePresetResignApplyRequest,
+        VoicePresetResignPreviewRequest,
+    )
+
+    preset_dir = tmp_path / "voice-presets"
+    preset_dir.mkdir()
+    audio = preset_dir / "on-clear.wav"
+    _write_wave(audio)
+    manifest_path = preset_dir / "on-clear.manifest.json"
+    manifest_path.write_text(
+        json.dumps(_manifest(_sha256(audio), audio.stat().st_size), ensure_ascii=False),
+        encoding="utf-8",
+    )
+    history_path = tmp_path / "approval-history.jsonl"
+    old_service = VoicePresetApprovalService(
+        preset_dir,
+        history_path,
+        signing_secret="old-secret",
+        signing_key_id="old-key",
+    )
+    base = VoicePresetApprovalInput(
+        voice_id="on-clear",
+        reviewer="reviewer-a",
+        sample_text="같은 문장으로 도윤 음성을 검수했습니다.",
+        review_bundle_sha256="c" * 64,
+        expected_audio_sha256=_sha256(audio),
+        reviewed_at=datetime(2026, 8, 5, 9, 0, tzinfo=timezone.utc),
+    )
+    approval_preview = old_service.preview(base)
+    approved_record, _approved = old_service.apply(
+        VoicePresetApprovalApplyRequest(
+            **base.model_dump(),
+            preview_id=approval_preview.preview_id,
+            confirmation="현재 WAV 승인",
+        ),
+        actor="test-operator",
+    )
+
+    rotated_service = VoicePresetApprovalService(
+        preset_dir,
+        history_path,
+        signing_secret="new-secret",
+        signing_key_id="new-key",
+        trusted_signing_keys={"old-key": "old-secret"},
+    )
+    evidence_before = inspect_voice_preset_evidence(
+        preset_dir,
+        get_voice_preset("on-clear"),
+        inspect_voice_preset(audio, "on-clear"),
+        "new-secret",
+        "new-key",
+        {"old-key": "old-secret"},
+    )
+    assert evidence_before.signature_status == "valid"
+    assert evidence_before.ready is True
+
+    queue = rotated_service.renewal_queue(60)
+    renewal = next(item for item in queue.items if item.voice_id == "on-clear")
+    assert renewal.priority == "rotation"
+    assert renewal.can_resign is True
+    assert renewal.current_key_id == "old-key"
+    assert renewal.active_key_id == "new-key"
+
+    resign_preview = rotated_service.preview_resign(
+        VoicePresetResignPreviewRequest(
+            voice_id="on-clear",
+            expected_manifest_sha256=renewal.manifest_sha256,
+        )
+    )
+    assert resign_preview.can_apply is True
+    assert resign_preview.current_key_id == "old-key"
+    assert resign_preview.active_key_id == "new-key"
+
+    resign_record, resigned = rotated_service.apply_resign(
+        VoicePresetResignApplyRequest(
+            voice_id="on-clear",
+            expected_manifest_sha256=resign_preview.current_manifest_sha256,
+            resigned_at=resign_preview.resigned_at,
+            preview_id=resign_preview.preview_id,
+            confirmation="현재 키로 재서명",
+        ),
+        actor="test-operator",
+    )
+    assert resign_record.event == "re-signed"
+    assert resign_record.related_approval_id == approved_record.approval_id
+    assert resigned["approval"]["key_id"] == "new-key"
+
+    evidence_after = inspect_voice_preset_evidence(
+        preset_dir,
+        get_voice_preset("on-clear"),
+        inspect_voice_preset(audio, "on-clear"),
+        "new-secret",
+        "new-key",
+        {"old-key": "old-secret"},
+    )
+    assert evidence_after.signature_status == "valid"
+    assert evidence_after.ready is True
+
+    rollback, restored = rotated_service.rollback(
+        approved_record.approval_id,
+        "승인 롤백",
+        "교체 후 롤백 확인",
+        "test-operator",
+    )
+    assert rollback.event == "rolled-back"
+    assert restored["human_review"]["status"] == "pending"

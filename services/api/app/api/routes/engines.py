@@ -6,18 +6,19 @@ from app.schemas.engine_catalog import EngineCatalogResponse
 from app.schemas.engine_strategy import EngineStrategyResponse
 from app.services.engine_catalog import current_engine_catalog
 from app.services.engine_strategy import current_engine_strategy
+from app.version import APP_VERSION
 
 router = APIRouter()
 
 
 @router.get("/strategy", response_model=EngineStrategyResponse)
 async def engine_strategy(request: Request) -> EngineStrategyResponse:
-    return current_engine_strategy("0.9.3-beta.3")
+    return current_engine_strategy(APP_VERSION)
 
 
 @router.get("/catalog", response_model=EngineCatalogResponse)
 async def engine_catalog() -> EngineCatalogResponse:
-    return current_engine_catalog("0.9.3-beta.3")
+    return current_engine_catalog(APP_VERSION)
 
 
 @router.get("", response_model=list[EngineInfo])

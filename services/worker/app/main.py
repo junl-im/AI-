@@ -21,6 +21,7 @@ from app.schemas import (
     WorkerJobResponse,
 )
 from app.security import verify_worker_request
+from app.version import APP_VERSION
 
 
 async def save_sample(sample: UploadFile, destination: Path, max_bytes: int) -> None:
@@ -78,7 +79,7 @@ def create_app(
 
     app = FastAPI(
         title="SoriON CosyVoice Worker",
-        version="0.9.3-beta.3",
+        version=APP_VERSION,
         description="인증·감사·TTL을 포함한 CosyVoice 음성 복제 실행 서비스",
         lifespan=lifespan,
     )

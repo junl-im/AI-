@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.version import APP_VERSION
+
 WorkerJobStatus = Literal[
     "queued",
     "running",
@@ -20,7 +22,7 @@ WorkerSegmentStatus = Literal[
 
 class HealthResponse(BaseModel):
     status: Literal["ok"] = "ok"
-    version: str = "0.9.3-beta.3"
+    version: str = APP_VERSION
     service: str = "sorion-cosyvoice-worker"
 
 
@@ -68,7 +70,7 @@ class WorkerDiagnosticsResponse(BaseModel):
 
 class ReadinessResponse(BaseModel):
     status: Literal["ready", "not-ready"]
-    version: str = "0.9.3-beta.3"
+    version: str = APP_VERSION
     diagnostics: WorkerDiagnosticsResponse
 
 

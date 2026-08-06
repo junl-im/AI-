@@ -1,0 +1,22 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.8.3.2 -> 6.8.3.3 Seamless Engine Runtime
+
+Changed or added files: 55
+Deleted tracked files: 0
+
+- Normal user surfaces no longer expose API, Worker, GPU or engine identifiers.
+- API candidates are raced in parallel and slower probes are cancelled.
+- Visible/hidden heartbeat, automatic failover and browser fallback run without user action.
+- Engine catalog reads are cached and in-flight requests are deduplicated.
+- API-to-Worker HTTP keepalive and a readiness supervisor remove repeated connection setup.
+- API startup readiness probes initialize the Worker runtime adapter ahead of the first job when the configured runtime is available.
+- Advanced technical details remain available only inside the collapsed developer diagnostics section.
+
+Validation
+- Repository preflight: 26/26
+- API pytest: 171 passed
+- Worker pytest: 14 passed
+- TS/TSX syntax transpile: 192 files
+- Python compileall: passed
+- GitHub Actions remains the final ESLint, Vitest and Vite production-build gate.
+
+The exact file list is recorded in the root PATCH_MANIFEST.txt included in the archive.

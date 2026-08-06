@@ -35,14 +35,14 @@ describe('App workspace continuity', () => {
     })
   })
 
-  it('keeps the creation workspace mounted while visiting another page', () => {
+  it('keeps the creation workspace mounted while visiting another page', async () => {
     render(<App />)
 
     fireEvent.click(screen.getByRole('button', { name: '초안 0' }))
     expect(screen.getByRole('button', { name: '초안 1' })).toBeInTheDocument()
 
     act(() => useAppStore.getState().setPage('clone'))
-    expect(screen.getByText('복제 화면')).toBeInTheDocument()
+    expect(await screen.findByText('복제 화면')).toBeInTheDocument()
 
     act(() => useAppStore.getState().setPage('home'))
     expect(screen.getByRole('button', { name: '초안 1' })).toBeInTheDocument()

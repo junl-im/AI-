@@ -131,6 +131,61 @@ interface ApiHealthResult {
   default_engine: string
 }
 
+const ENGINE_CATALOG_CACHE_MS = 15_000
+let engineCatalogCache: { baseUrl: string; cachedAt: number; engines: EngineInfo[] } | null = null
+let engineCatalogRequest: { baseUrl: string; promise: Promise<EngineInfo[]> } | null = null
+
+function mapEngine(engine: ApiEngineInfo): EngineInfo {
+  return {
+    id: engine.id,
+    name: engine.name,
+    kind: engine.kind,
+    mode: engine.mode,
+    provider: engine.provider,
+    languages: engine.languages,
+    outputFormats: engine.output_formats,
+    supportsEmotion: engine.supports_emotion,
+    supportsSpeed: engine.supports_speed,
+    supportsPitch: engine.supports_pitch,
+    supportsVoiceClone: engine.supports_voice_clone,
+    ready: engine.ready,
+    reason: engine.reason,
+    qualityTier: engine.quality_tier ?? 'basic',
+    autoEligible: engine.auto_eligible ?? true,
+    koreanSpecialization: engine.korean_specialization ?? 0,
+    longForm: engine.long_form ?? false,
+    streaming: engine.streaming ?? false,
+    recommended: engine.recommended ?? false,
+    health: engine.health ?? (engine.ready ? 'ready' : 'unavailable'),
+    successCount: engine.success_count ?? 0,
+    failureCount: engine.failure_count ?? 0,
+    consecutiveFailures: engine.consecutive_failures ?? 0,
+    cooldownRemainingSeconds: engine.cooldown_remaining_seconds ?? 0,
+    lastError: engine.last_error ?? null,
+  }
+}
+
+export function primeEngineCatalog(
+  engines: EngineInfo[],
+  baseUrl = getApiConnectionContext().baseUrl,
+): void {
+  if (!baseUrl) return
+  engineCatalogCache = {
+    baseUrl,
+    cachedAt: Date.now(),
+    engines: engines.map((engine) => ({ ...engine })),
+  }
+}
+
+function readPrimedEngineCatalog(baseUrl: string): EngineInfo[] | null {
+  if (
+    !engineCatalogCache
+    || engineCatalogCache.baseUrl !== baseUrl
+    || Date.now() - engineCatalogCache.cachedAt > ENGINE_CATALOG_CACHE_MS
+  ) return null
+  return engineCatalogCache.engines.map((engine) => ({ ...engine }))
+}
+
 export function mapReadySegment(value: ApiReadySegment): SpeechReadySegment {
   return {
     index: value.index,
@@ -198,39 +253,32 @@ export async function checkHealth(baseUrl?: string, signal?: AbortSignal): Promi
 }
 
 export async function listEngines(baseUrl?: string, signal?: AbortSignal): Promise<EngineInfo[]> {
-  const engines = await apiRequest<ApiEngineInfo[]>('/engines', undefined, {
+  const resolvedBaseUrl = baseUrl ?? getApiConnectionContext().baseUrl
+  const cached = !signal ? readPrimedEngineCatalog(resolvedBaseUrl) : null
+  if (cached) return cached
+  if (!signal && engineCatalogRequest?.baseUrl === resolvedBaseUrl) {
+    return engineCatalogRequest.promise
+  }
+
+  const request = apiRequest<ApiEngineInfo[]>('/engines', undefined, {
     baseUrl,
     signal,
     retries: 0,
     timeoutMs: 3_500,
+  }).then((engines) => {
+    const mapped = engines.map(mapEngine)
+    primeEngineCatalog(mapped, resolvedBaseUrl)
+    return mapped
   })
-  return engines.map((engine) => ({
-    id: engine.id,
-    name: engine.name,
-    kind: engine.kind,
-    mode: engine.mode,
-    provider: engine.provider,
-    languages: engine.languages,
-    outputFormats: engine.output_formats,
-    supportsEmotion: engine.supports_emotion,
-    supportsSpeed: engine.supports_speed,
-    supportsPitch: engine.supports_pitch,
-    supportsVoiceClone: engine.supports_voice_clone,
-    ready: engine.ready,
-    reason: engine.reason,
-    qualityTier: engine.quality_tier ?? 'basic',
-    autoEligible: engine.auto_eligible ?? true,
-    koreanSpecialization: engine.korean_specialization ?? 0,
-    longForm: engine.long_form ?? false,
-    streaming: engine.streaming ?? false,
-    recommended: engine.recommended ?? false,
-    health: engine.health ?? (engine.ready ? 'ready' : 'unavailable'),
-    successCount: engine.success_count ?? 0,
-    failureCount: engine.failure_count ?? 0,
-    consecutiveFailures: engine.consecutive_failures ?? 0,
-    cooldownRemainingSeconds: engine.cooldown_remaining_seconds ?? 0,
-    lastError: engine.last_error ?? null,
-  }))
+
+  if (!signal) {
+    engineCatalogRequest = { baseUrl: resolvedBaseUrl, promise: request }
+    const clearRequest = () => {
+      if (engineCatalogRequest?.promise === request) engineCatalogRequest = null
+    }
+    void request.then(clearRequest, clearRequest)
+  }
+  return request
 }
 
 export async function synthesizeSpeech(

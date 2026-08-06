@@ -1,9 +1,13 @@
 @echo off
 setlocal
-node scripts\apply-delete-list.mjs docs\patches$slug\DELETE_LIST.txt || exit /b 1
-node scripts\run-preflight.mjs || exit /b 1
-python -m compileall -q services\api\app services\api\tests services\worker\app services\worker\tests || exit /b 1
-python -m pytest services\api\tests -q || exit /b 1
-python -m pytest services\worker\tests -q || exit /b 1
-echo Engine Heartbeat 6.7 Field Evidence Intake ^& Local Export Bundle 적용 완료. 제품 버전은 0.9.3-beta.3입니다. GitHub Desktop에서 변경을 Commit/Push하고 Web quality를 확인하세요.
-endlocal
+cd /d "%~dp0"
+node scripts\apply-delete-list.mjs docs\patches\0.9.3-beta.3-ci-hardening-3\DELETE_LIST.txt
+if errorlevel 1 exit /b 1
+echo SoriON AI v0.9.5 Benchmark Baseline ^& Privacy-Safe Audit 패치가 적용되었습니다.
+echo 버전 동기화와 벤치마크·감사 계약을 확인합니다.
+node scripts\check-version-sync.mjs
+if errorlevel 1 exit /b 1
+node scripts\check-benchmark-privacy-audit.mjs
+if errorlevel 1 exit /b 1
+echo 검사가 통과했습니다. GitHub Desktop에서 변경사항을 확인한 뒤 Commit 및 Push 하세요.
+pause

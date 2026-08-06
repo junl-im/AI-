@@ -37,11 +37,11 @@ if ((routes.match(/_principal\(request\)/g) ?? []).length < 4) {
   failures.push('voice_preset_approvals.py: preview/apply/history/rollback 전체에 인증 게이트가 필요합니다.')
 }
 const service = await requireMarkers('services/api/app/services/voice_preset_approval.py', [
-  'with self._lock:',
+  'with self._write_lock():',
   '적용 직전 WAV가 변경되어 승인을 중단했습니다.',
   'os.fsync(output.fileno())',
 ])
-const applyLock = service.indexOf('with self._lock:', service.indexOf('    def apply('))
+const applyLock = service.indexOf('with self._write_lock():', service.indexOf('    def apply('))
 const applyPrepare = service.indexOf('prepared = self._prepare', service.indexOf('    def apply('))
 if (applyLock < 0 || applyPrepare < applyLock) {
   failures.push('voice_preset_approval.py: apply 재검증은 동일 잠금 안에서 실행되어야 합니다.')

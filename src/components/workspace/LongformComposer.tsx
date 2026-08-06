@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react'
-import type { BackendStatus } from '../../store/useAppStore'
 import { splitTextForUi } from '../../tts/segmentText'
 import type { WorkspaceMessage } from '../../workspace/workspaceTypes'
 
@@ -8,8 +7,6 @@ const MAX_SCRIPT_LENGTH = 20_000
 interface LongformComposerProps {
   disabled: boolean
   value: string
-  backendStatus: BackendStatus
-  backendMessage: string
   activity: WorkspaceMessage
   onValueChange: (value: string) => void
   onSubmit: (value: string) => void
@@ -27,19 +24,9 @@ function isEditableTarget(target: EventTarget | null): boolean {
   )
 }
 
-function engineStatusText(status: BackendStatus, message: string): string {
-  if (status === 'online') return '실제 음성 엔진 준비됨'
-  if (status === 'degraded' && message.includes('브라우저')) return '브라우저 음성 준비됨'
-  if (status === 'degraded') return '대체 음성 모드'
-  if (status === 'checking') return '음성 시스템 확인 중'
-  return '음성 서버 연결 대기'
-}
-
 export function LongformComposer({
   disabled,
   value,
-  backendStatus,
-  backendMessage,
   activity,
   onValueChange,
   onSubmit,
@@ -134,11 +121,6 @@ export function LongformComposer({
       <div className={`soa-dubbing-activity is-${activity.role}`} aria-live="polite">
         <span>{activity.badge ?? '작업 상태'}</span>
         <p>{activity.text}</p>
-      </div>
-
-      <div className={`soa-dubbing-engine-note is-${backendStatus}`} role="status">
-        <i aria-hidden="true" />
-        <span><strong>{engineStatusText(backendStatus, backendMessage)}</strong><small>{backendMessage}</small></span>
       </div>
 
       <button

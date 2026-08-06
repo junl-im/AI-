@@ -4,14 +4,19 @@ import type { VoicePresetDiagnostic } from '../../settings/setupTypes'
 import { voiceGenderLabels, voicePresets } from '../../tts/voicePresets'
 import {
   applyVoicePresetApproval,
+  applyVoicePresetResign,
   listVoicePresetApprovalHistory,
+  listVoicePresetRenewals,
   loadVoiceReviewOperatorToken,
   previewVoicePresetApproval,
+  previewVoicePresetResign,
   rollbackVoicePresetApproval,
   saveVoiceReviewOperatorToken,
   type VoicePresetApprovalInput,
   type VoicePresetApprovalPreview,
   type VoicePresetApprovalRecord,
+  type VoicePresetRenewalQueue,
+  type VoicePresetResignPreview,
 } from '../../quality/voicePresetApprovalApi'
 import { StatusPill } from '../ui/StatusPill'
 
@@ -25,6 +30,7 @@ export function VoicePresetApprovalCard() {
   const [diagnostics, setDiagnostics] = useState<VoicePresetDiagnostic[]>([])
   const [operatorToken, setOperatorToken] = useState(loadVoiceReviewOperatorToken)
   const [history, setHistory] = useState<VoicePresetApprovalRecord[]>([])
+  const [renewalQueue, setRenewalQueue] = useState<VoicePresetRenewalQueue | null>(null)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
   const [reviewer, setReviewer] = useState('')
   const [sampleText, setSampleText] = useState('같은 문장과 같은 엔진 조건에서 현재 프리셋의 인물·성별·음질을 확인했습니다.')
@@ -32,16 +38,21 @@ export function VoicePresetApprovalCard() {
   const [notes, setNotes] = useState('')
   const [reviewedAt, setReviewedAt] = useState('')
   const [preview, setPreview] = useState<VoicePresetApprovalPreview | null>(null)
+  const [resignPreview, setResignPreview] = useState<VoicePresetResignPreview | null>(null)
   const [rollbackReason, setRollbackReason] = useState('')
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const refresh = useCallback(async (token: string) => {
-    const setup = await getSetupStatus()
+    const [setup, records, renewals] = await Promise.all([
+      getSetupStatus(),
+      listVoicePresetApprovalHistory(token),
+      listVoicePresetRenewals(token),
+    ])
     setDiagnostics(setup.voicePresetDiagnostics)
-    const records = await listVoicePresetApprovalHistory(token)
     setHistory(records)
+    setRenewalQueue(renewals)
   }, [])
 
   useEffect(() => {
@@ -55,6 +66,10 @@ export function VoicePresetApprovalCard() {
     [diagnostics, voiceId],
   )
   const selectedPreset = voicePresets.find((item) => item.id === voiceId) ?? voicePresets[0]
+  const selectedRenewal = useMemo(
+    () => renewalQueue?.items.find((item) => item.voiceId === voiceId) ?? null,
+    [renewalQueue, voiceId],
+  )
   const canPreview = Boolean(
     reviewer.trim()
     && sampleText.trim()
@@ -97,6 +112,35 @@ export function VoicePresetApprovalCard() {
       await refresh(operatorToken)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : '승인을 적용하지 못했습니다.')
+    } finally { setBusy(false) }
+  }
+
+  async function handleResignPreview() {
+    setBusy(true); setError(null); setNotice(null)
+    try {
+      const result = await previewVoicePresetResign(
+        voiceId,
+        selectedRenewal?.manifestSha256 ?? null,
+        operatorToken,
+      )
+      setResignPreview(result)
+      setNotice(`신뢰 키 ${result.currentKeyId ?? 'unsigned'} → ${result.activeKeyId} 재서명 diff를 만들었습니다.`)
+    } catch (caught) {
+      setResignPreview(null)
+      setError(caught instanceof Error ? caught.message : '재서명 미리보기를 만들지 못했습니다.')
+    } finally { setBusy(false) }
+  }
+
+  async function handleResignApply() {
+    if (!resignPreview) return
+    setBusy(true); setError(null); setNotice(null)
+    try {
+      await applyVoicePresetResign(resignPreview, operatorToken)
+      setNotice('기존 사람 검수와 WAV 결박을 유지한 채 현재 active 신뢰 키로 재서명했습니다.')
+      setResignPreview(null)
+      await refresh(operatorToken)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '현재 키 재서명을 적용하지 못했습니다.')
     } finally { setBusy(false) }
   }
 
@@ -165,7 +209,7 @@ export function VoicePresetApprovalCard() {
 
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <label className="text-xs font-black">프리셋
-          <select value={voiceId} onChange={(event) => { setVoiceId(event.target.value); setPreview(null); setReviewedAt('') }} className="mt-1 min-h-11 w-full rounded-xl border border-soa-line bg-white px-3">
+          <select value={voiceId} onChange={(event) => { setVoiceId(event.target.value); setPreview(null); setResignPreview(null); setReviewedAt('') }} className="mt-1 min-h-11 w-full rounded-xl border border-soa-line bg-white px-3">
             {voicePresets.map((preset) => <option key={preset.id} value={preset.id}>{preset.name} · {voiceGenderLabels[preset.gender]}</option>)}
           </select>
         </label>
@@ -188,6 +232,36 @@ export function VoicePresetApprovalCard() {
         <p>WAV {shortHash(diagnostic?.actualSha256)} · manifest schema {diagnostic?.schemaVersion ?? '-'}</p>
         <p>동의 {diagnostic?.consentStatus ?? '-'} · 권리 {diagnostic?.allowedUses.join(', ') || '-'} · 검수 {diagnostic?.humanReviewStatus ?? '-'}</p>
         <p>서명 {diagnostic?.signatureStatus ?? 'missing'} · key {diagnostic?.signingKeyId ?? '-'}</p>
+      </div>
+
+      <div className="mt-3 rounded-2xl border border-soa-line bg-white p-3 text-[10px] font-bold leading-5">
+        <div className="flex items-center justify-between gap-3">
+          <strong className="text-xs">증거 갱신·신뢰 키 교체 대기열</strong>
+          <StatusPill
+            label={selectedRenewal ? selectedRenewal.priority : '대기 없음'}
+            tone={selectedRenewal?.priority === 'blocked' ? 'danger' : selectedRenewal ? 'warning' : 'good'}
+          />
+        </div>
+        <p className="mt-1 text-soa-muted">active key {renewalQueue?.activeKeyId ?? '미설정'} · trusted {renewalQueue?.trustedKeyIds.length ?? 0}개 · 전체 대기 {renewalQueue?.items.length ?? 0}건</p>
+        {selectedRenewal ? (
+          <>
+            {selectedRenewal.reasons.map((reason) => <p key={reason} className={selectedRenewal.priority === 'blocked' ? 'text-red-700' : 'text-amber-700'}>· {reason}</p>)}
+            <p className="text-soa-muted">동의 {selectedRenewal.consentDaysRemaining ?? '-'}일 · 권리 {selectedRenewal.rightsDaysRemaining ?? '-'}일 · key {selectedRenewal.currentKeyId ?? 'unsigned'}</p>
+            {selectedRenewal.canResign && (
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <button type="button" disabled={busy} onClick={() => void handleResignPreview()} className="min-h-10 rounded-xl border border-soa-line px-3 text-xs font-black disabled:opacity-40">현재 키 재서명 diff</button>
+                <button type="button" disabled={!resignPreview?.canApply || busy} onClick={() => void handleResignApply()} className="min-h-10 rounded-xl bg-soa-lime px-3 text-xs font-black disabled:opacity-40">재서명 적용</button>
+              </div>
+            )}
+            {resignPreview && (
+              <div className="mt-2 rounded-xl bg-[#f7f5ef] p-2 font-mono">
+                <p>{shortHash(resignPreview.currentManifestSha256)} → {shortHash(resignPreview.proposedManifestSha256)}</p>
+                <p>{resignPreview.currentKeyId ?? 'unsigned'} → {resignPreview.activeKeyId} · 변경 {resignPreview.changes.length}개</p>
+                {resignPreview.blockingIssues.map((item) => <p key={item} className="text-red-700">차단 · {item}</p>)}
+              </div>
+            )}
+          </>
+        ) : <p className="mt-1 text-emerald-700">선택한 프리셋에 갱신 또는 키 교체 작업이 없습니다.</p>}
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">

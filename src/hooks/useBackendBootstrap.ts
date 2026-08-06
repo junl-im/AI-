@@ -2,125 +2,154 @@ import { useEffect, useRef } from 'react'
 import {
   discoverApiBaseUrl,
   getApiConnectionContext,
+  probeApiBaseUrl,
   saveApiBaseUrl,
 } from '../api/httpClient'
-import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
 import { getNetworkInformation, getMobileNetworkSnapshot } from '../network/mobileNetwork'
 import { runApiConnectivityAudit } from '../settings/connectivityApi'
 import { useAppStore } from '../store/useAppStore'
 import { isBrowserSpeechSupported } from '../tts/browserSpeech'
+import { primeEngineCatalog } from '../tts/voiceApi'
 
-const RETRY_DELAYS_MS = [5_000, 12_000, 30_000, 60_000]
+const RETRY_DELAYS_MS = [1_000, 2_500, 5_000, 10_000, 30_000]
+const HEALTHY_HEARTBEAT_MS = 20_000
+const HIDDEN_HEARTBEAT_MS = 90_000
+const FULL_AUDIT_INTERVAL_MS = 120_000
 
 export function useBackendBootstrap(): void {
   const setBackendStatus = useAppStore((state) => state.setBackendStatus)
   const setEngineHealth = useAppStore((state) => state.setEngineHealth)
-  const resetEngineHealth = useAppStore((state) => state.resetEngineHealth)
   const runningRef = useRef(false)
-  const queuedRef = useRef(false)
+  const queuedFullRef = useRef(false)
   const retryIndexRef = useRef(0)
-  const retryTimerRef = useRef<number | null>(null)
+  const timerRef = useRef<number | null>(null)
   const aliveRef = useRef(true)
+  const lastFullAuditAtRef = useRef(0)
 
   useEffect(() => {
     aliveRef.current = true
 
-    const clearRetry = () => {
-      if (retryTimerRef.current !== null) window.clearTimeout(retryTimerRef.current)
-      retryTimerRef.current = null
+    const clearTimer = () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current)
+      timerRef.current = null
     }
 
-    const scheduleRetry = (inspect: () => Promise<void>) => {
-      clearRetry()
+    const schedule = (inspect: (forceFull?: boolean) => Promise<void>, delayMs: number, forceFull = false) => {
+      clearTimer()
+      timerRef.current = window.setTimeout(() => void inspect(forceFull), delayMs)
+    }
+
+    const scheduleHeartbeat = (inspect: (forceFull?: boolean) => Promise<void>) => {
       const network = getMobileNetworkSnapshot()
-      if (!network.online || !network.visible) return
+      if (!network.online) return
+      schedule(
+        inspect,
+        document.visibilityState === 'visible' ? HEALTHY_HEARTBEAT_MS : HIDDEN_HEARTBEAT_MS,
+      )
+    }
+
+    const scheduleRetry = (inspect: (forceFull?: boolean) => Promise<void>) => {
+      clearTimer()
+      const network = getMobileNetworkSnapshot()
+      if (!network.online) return
       const index = Math.min(retryIndexRef.current, RETRY_DELAYS_MS.length - 1)
-      retryTimerRef.current = window.setTimeout(() => void inspect(), RETRY_DELAYS_MS[index])
+      schedule(inspect, RETRY_DELAYS_MS[index], true)
       retryIndexRef.current += 1
     }
 
-    const failOverApi = async (currentBaseUrl: string): Promise<boolean> => {
+    const applySeamlessFallback = () => {
+      const browserReady = isBrowserSpeechSupported()
+      const context = getApiConnectionContext()
+      setEngineHealth({
+        api: 'offline',
+        tts: browserReady ? 'ready' : 'checking',
+        worker: 'unknown',
+        gpu: 'unknown',
+        baseUrl: context.baseUrl,
+        latencyMs: null,
+        lastCheckedAt: new Date().toISOString(),
+        requestId: null,
+      })
+      setBackendStatus(
+        browserReady ? 'degraded' : 'checking',
+        browserReady ? '음성 제작 준비됨' : '음성 기능을 자동으로 준비하고 있습니다.',
+      )
+      return browserReady
+    }
+
+    const discoverAndPromote = async (currentBaseUrl = ''): Promise<boolean> => {
       try {
         const discovered = await discoverApiBaseUrl(currentBaseUrl)
-        saveApiBaseUrl(discovered.baseUrl)
+        saveApiBaseUrl(discovered.baseUrl, false)
         retryIndexRef.current = 0
-        setBackendStatus('checking', '다음 음성 서버로 자동 전환하고 있습니다.')
+        setBackendStatus('checking', '음성 기능을 자동으로 준비하고 있습니다.')
         return true
       } catch {
         return false
       }
     }
 
-    const applyBrowserFallback = (detail: string) => {
-      const browserReady = isBrowserSpeechSupported()
-      setEngineHealth({
-        api: 'offline',
-        tts: browserReady ? 'ready' : 'offline',
-        worker: 'unknown',
-        gpu: 'unknown',
-        baseUrl: getApiConnectionContext().baseUrl,
-        latencyMs: null,
-        lastCheckedAt: new Date().toISOString(),
-        requestId: null,
-      })
-      setBackendStatus(
-        browserReady ? 'degraded' : 'offline',
-        browserReady
-          ? isKakaoInAppBrowser()
-            ? '카카오톡 브라우저 음성 준비 · 로컬 PC 엔진은 외부 브라우저에서 연결'
-            : '브라우저 한국어 음성 준비 · AI 서버 자동 재연결 중'
-          : detail,
-      )
-      return browserReady
-    }
-
-    async function inspect() {
+    async function inspect(forceFull = false): Promise<void> {
       if (!aliveRef.current) return
       if (runningRef.current) {
-        queuedRef.current = true
+        queuedFullRef.current ||= forceFull
         return
       }
       runningRef.current = true
-      clearRetry()
-      let context = getApiConnectionContext()
-      if (!context.configured) {
-        if (isBrowserSpeechSupported()) {
-          applyBrowserFallback('음성 시스템을 자동으로 찾고 있습니다.')
-        } else {
-          resetEngineHealth()
-          setBackendStatus('checking', '음성 시스템을 자동으로 찾고 있습니다.')
-        }
-        try {
-          const discovered = await discoverApiBaseUrl()
-          saveApiBaseUrl(discovered.baseUrl)
-          context = getApiConnectionContext()
-        } catch (error) {
-          applyBrowserFallback(
-            error instanceof Error
-              ? error.message
-              : '음성 시스템을 자동으로 연결하지 못했습니다.',
-          )
-          runningRef.current = false
-          scheduleRetry(inspect)
-          return
-        }
-      }
+      clearTimer()
 
-      setBackendStatus('checking', '모바일 네트워크에서 API·TTS·Worker·GPU를 확인하고 있습니다.')
-      setEngineHealth({
-        api: 'checking',
-        tts: 'checking',
-        worker: 'checking',
-        gpu: 'checking',
-        baseUrl: context.baseUrl,
-      })
       try {
+        let context = getApiConnectionContext()
+        if (!context.configured) {
+          applySeamlessFallback()
+          if (!await discoverAndPromote()) {
+            scheduleRetry(inspect)
+            return
+          }
+          context = getApiConnectionContext()
+        }
+
+        const fullAuditDue = forceFull
+          || Date.now() - lastFullAuditAtRef.current >= FULL_AUDIT_INTERVAL_MS
+
+        if (!fullAuditDue) {
+          try {
+            const heartbeat = await probeApiBaseUrl(context.baseUrl, 2_500)
+            if (!aliveRef.current) return
+            retryIndexRef.current = 0
+            setEngineHealth({
+              api: 'ready',
+              baseUrl: heartbeat.baseUrl,
+              latencyMs: heartbeat.latencyMs,
+              lastCheckedAt: new Date().toISOString(),
+            })
+            scheduleHeartbeat(inspect)
+            return
+          } catch {
+            forceFull = true
+          }
+        }
+
+        setBackendStatus('checking', '음성 기능을 자동으로 준비하고 있습니다.')
+        setEngineHealth({
+          api: 'checking',
+          tts: 'checking',
+          worker: 'checking',
+          gpu: 'checking',
+          baseUrl: context.baseUrl,
+        })
+
         const report = await runApiConnectivityAudit(context.baseUrl, { mode: 'quick' })
         if (!aliveRef.current) return
-        const browserReady = isBrowserSpeechSupported()
+        lastFullAuditAtRef.current = Date.now()
+        primeEngineCatalog(report.ttsEngines, report.baseUrl)
         setEngineHealth({
           api: report.layers.api.state,
-          tts: report.ttsReady ? report.layers.tts.state : browserReady ? 'ready' : report.layers.tts.state,
+          tts: report.ttsReady
+            ? report.layers.tts.state
+            : isBrowserSpeechSupported()
+              ? 'ready'
+              : report.layers.tts.state,
           worker: report.layers.worker.state,
           gpu: report.layers.gpu.state,
           baseUrl: report.baseUrl,
@@ -128,63 +157,69 @@ export function useBackendBootstrap(): void {
           lastCheckedAt: report.lastCheckedAt,
           requestId: report.requestId,
         })
-        if (report.apiReady) window.dispatchEvent(new Event('sorion-engine-refresh'))
+
+        if (report.apiReady) {
+          window.dispatchEvent(new CustomEvent('sorion-engine-refresh', {
+            detail: { baseUrl: report.baseUrl },
+          }))
+        }
         if (report.apiReady && report.ttsReady) {
           retryIndexRef.current = 0
-          setBackendStatus('online', `실제 TTS 준비 · ${report.latencyMs}ms`)
-        } else if (!report.apiReady && await failOverApi(context.baseUrl)) {
-          queuedRef.current = true
-        } else if (browserReady) {
-          setBackendStatus('degraded', '브라우저 한국어 음성 준비 · AI 서버 자동 재연결 중')
-          scheduleRetry(inspect)
-        } else if (report.apiReady) {
-          setBackendStatus('degraded', report.layers.tts.detail)
-          scheduleRetry(inspect)
-        } else {
-          setBackendStatus('offline', report.layers.api.detail)
-          scheduleRetry(inspect)
+          setBackendStatus('online', '음성 제작 준비됨')
+          scheduleHeartbeat(inspect)
+          return
         }
-      } catch (error) {
-        if (!aliveRef.current) return
-        if (await failOverApi(context.baseUrl)) {
-          queuedRef.current = true
+        if (!report.apiReady && await discoverAndPromote(context.baseUrl)) {
+          queuedFullRef.current = true
+          return
+        }
+        applySeamlessFallback()
+        scheduleRetry(inspect)
+      } catch {
+        const context = getApiConnectionContext()
+        if (await discoverAndPromote(context.baseUrl)) {
+          queuedFullRef.current = true
         } else {
-          applyBrowserFallback(
-            error instanceof Error ? error.message : 'Voice API에 연결할 수 없습니다.',
-          )
+          applySeamlessFallback()
           scheduleRetry(inspect)
         }
       } finally {
         runningRef.current = false
-        if (queuedRef.current && aliveRef.current) {
-          queuedRef.current = false
-          window.setTimeout(() => void inspect(), 0)
+        if (queuedFullRef.current && aliveRef.current) {
+          queuedFullRef.current = false
+          window.setTimeout(() => void inspect(true), 0)
         }
       }
     }
 
-    const requestInspect = () => void inspect()
+    const requestFullInspect = () => void inspect(true)
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') requestInspect()
+      if (document.visibilityState === 'visible') requestFullInspect()
+      else scheduleHeartbeat(inspect)
+    }
+    const handleOffline = () => {
+      clearTimer()
+      applySeamlessFallback()
     }
     const networkInformation = getNetworkInformation()
 
-    void inspect()
-    window.addEventListener('sorion-api-change', requestInspect)
-    window.addEventListener('sorion-api-reconnect', requestInspect)
-    window.addEventListener('online', requestInspect)
-    window.addEventListener('offline', requestInspect)
+    applySeamlessFallback()
+    void inspect(true)
+    window.addEventListener('sorion-api-change', requestFullInspect)
+    window.addEventListener('sorion-api-reconnect', requestFullInspect)
+    window.addEventListener('online', requestFullInspect)
+    window.addEventListener('offline', handleOffline)
     document.addEventListener('visibilitychange', handleVisibility)
-    networkInformation?.addEventListener('change', requestInspect)
+    networkInformation?.addEventListener('change', requestFullInspect)
     return () => {
       aliveRef.current = false
-      clearRetry()
-      window.removeEventListener('sorion-api-change', requestInspect)
-      window.removeEventListener('sorion-api-reconnect', requestInspect)
-      window.removeEventListener('online', requestInspect)
-      window.removeEventListener('offline', requestInspect)
+      clearTimer()
+      window.removeEventListener('sorion-api-change', requestFullInspect)
+      window.removeEventListener('sorion-api-reconnect', requestFullInspect)
+      window.removeEventListener('online', requestFullInspect)
+      window.removeEventListener('offline', handleOffline)
       document.removeEventListener('visibilitychange', handleVisibility)
-      networkInformation?.removeEventListener('change', requestInspect)
+      networkInformation?.removeEventListener('change', requestFullInspect)
     }
-  }, [resetEngineHealth, setBackendStatus, setEngineHealth])
+  }, [setBackendStatus, setEngineHealth])
 }

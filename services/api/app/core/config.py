@@ -4,6 +4,8 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.services.voice_review_trust import parse_trusted_keys_json
+
 
 class Settings(BaseSettings):
     environment: str = "development"
@@ -38,6 +40,7 @@ class Settings(BaseSettings):
     cosyvoice_worker_url: str = ""
     cosyvoice_worker_timeout_seconds: float = 2.5
     cosyvoice_worker_job_timeout_seconds: float = 45.0
+    cosyvoice_worker_probe_interval_seconds: float = Field(default=15.0, ge=5.0, le=300.0)
     cosyvoice_tts_reference_path: str = ""
     cosyvoice_tts_profile_id: str = "sorion-korean-reference"
     cosyvoice_preset_directory: str = ""
@@ -54,6 +57,8 @@ class Settings(BaseSettings):
     voice_review_approval_path: str = ".sorion/quality/voice-review-approvals.jsonl"
     voice_review_signing_secret: str = ""
     voice_review_signing_key_id: str = "local-review-key"
+    voice_review_trusted_keys_json: str = ""
+    voice_review_lock_timeout_seconds: float = Field(default=10.0, ge=0.1, le=120.0)
     voice_review_operator_token: str = ""
     voice_review_allow_loopback_without_token: bool = True
     worker_telemetry_path: str = ".sorion/quality/worker-synthesis-telemetry.jsonl"
@@ -116,6 +121,11 @@ class Settings(BaseSettings):
     @property
     def voice_review_approval_file(self) -> Path:
         return Path(self.voice_review_approval_path).expanduser().resolve()
+
+
+    @property
+    def voice_review_trusted_key_map(self) -> dict[str, str]:
+        return parse_trusted_keys_json(self.voice_review_trusted_keys_json)
 
     @property
     def worker_telemetry_file(self) -> Path:

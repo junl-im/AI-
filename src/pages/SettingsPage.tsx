@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { EngineBlueprintCard } from '../components/evaluation/EngineBlueprintCard'
+import { AppUpdateStatusCard } from '../components/evaluation/AppUpdateStatusCard'
 import { EngineDoctorCard } from '../components/evaluation/EngineDoctorCard'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { StatusPill } from '../components/ui/StatusPill'
@@ -8,11 +9,26 @@ import { useEngineBlueprint } from '../hooks/useEngineBlueprint'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import { useAppStore } from '../store/useAppStore'
 
+function AdvancedEngineDiagnostics() {
+  const engineBlueprint = useEngineBlueprint()
+  return (
+    <div className="mt-4 space-y-3">
+      <EngineDoctorCard />
+      <EngineBlueprintCard
+        blueprint={engineBlueprint.blueprint}
+        loading={engineBlueprint.loading}
+        error={engineBlueprint.error}
+        onRefresh={() => void engineBlueprint.refresh()}
+      />
+    </div>
+  )
+}
+
 export function SettingsPage() {
   const showNotice = useAppStore((state) => state.showNotice)
   const firebaseReady = isFirebaseConfigured()
   const engineCatalog = useEngineCatalog()
-  const engineBlueprint = useEngineBlueprint()
+  const [advancedOpen, setAdvancedOpen] = useState(false)
 
   useEffect(() => {
     void consumeGoogleSignInResult().then((user) => {
@@ -36,28 +52,34 @@ export function SettingsPage() {
     <WorkspacePageScaffold
       eyebrow="SETTINGS · SIMPLE BY DEFAULT"
       title="설정"
-      description="연결과 엔진 선택은 시스템이 자동으로 관리합니다. 여기에는 계정과 개인정보처럼 사용자가 결정해야 하는 항목만 둡니다."
+      description="음성 준비와 연결은 시스템이 자동으로 관리합니다. 여기에는 계정과 개인정보처럼 사용자가 결정해야 하는 항목만 둡니다."
     >
       <section className="space-y-3">
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-black tracking-[-0.035em]">음성 엔진 운영</h2>
-            <StatusPill label="무료 전용 자동" tone="good" />
+            <h2 className="font-black tracking-[-0.035em]">음성 자동 준비</h2>
+            <StatusPill
+              label={engineCatalog.selected ? '준비됨' : engineCatalog.loading ? '준비 중' : '자동 복구 중'}
+              tone={engineCatalog.selected ? 'good' : 'warning'}
+            />
           </div>
           <p className="mt-2 text-sm leading-6 text-soa-muted">
-            유료 API 코드는 포함하지 않습니다. CosyVoice·MeloTTS·시스템 음성·브라우저 음성만 자동 연결합니다.
-          </p>
-          <p className="mt-3 rounded-2xl bg-white p-3 text-xs font-bold text-soa-muted">
-            현재 {engineCatalog.selected?.name ?? (engineCatalog.loading ? '엔진 확인 중' : '브라우저 대체 음성 대기')}
+            가장 적합한 무료 음성 방식을 자동으로 선택하고 연결 상태를 계속 유지합니다. 사용자가 주소나 기술 방식을 직접 고를 필요가 없습니다.
           </p>
         </article>
-        <EngineDoctorCard />
-        <EngineBlueprintCard
-          blueprint={engineBlueprint.blueprint}
-          loading={engineBlueprint.loading}
-          error={engineBlueprint.error}
-          onRefresh={() => void engineBlueprint.refresh()}
-        />
+        <AppUpdateStatusCard />
+        <details
+          className="rounded-[26px] border border-soa-line bg-soa-card p-5"
+          onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
+        >
+          <summary className="cursor-pointer list-none font-black tracking-[-0.035em]">
+            고급 진단 및 개발자 정보
+          </summary>
+          <p className="mt-2 text-xs leading-5 text-soa-muted">
+            일반 사용에는 필요하지 않습니다. 배포·장치·모델 문제를 확인할 때만 열어 주세요.
+          </p>
+          {advancedOpen ? <AdvancedEngineDiagnostics /> : null}
+        </details>
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-black tracking-[-0.035em]">계정과 동기화</h2>
@@ -69,7 +91,7 @@ export function SettingsPage() {
 
         <article className="rounded-[26px] border border-soa-line bg-soa-card p-5">
           <h2 className="font-black tracking-[-0.035em]">개인정보 원칙</h2>
-          <p className="mt-2 text-sm leading-6 text-soa-muted">생성된 WAV는 로컬 API의 임시 폴더에만 보관되며 기본 30분 뒤 정리됩니다. 목소리 복제에는 소유권과 동의 확인 절차가 필수입니다.</p>
+          <p className="mt-2 text-sm leading-6 text-soa-muted">생성된 WAV는 이 기기의 임시 폴더에만 보관되며 기본 30분 뒤 정리됩니다. 목소리 복제에는 소유권과 동의 확인 절차가 필수입니다.</p>
         </article>
       </section>
     </WorkspacePageScaffold>

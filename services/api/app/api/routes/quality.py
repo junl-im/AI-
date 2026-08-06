@@ -17,6 +17,7 @@ from app.schemas.quality import (
 )
 from app.schemas.tts import TtsSynthesisRequest
 from app.services.engine_diagnostics import quality_diagnostics
+from app.version import APP_VERSION
 
 router = APIRouter()
 _DATA_FILE = Path(__file__).parents[2] / "data" / "korean_tts_sentences.json"
@@ -31,7 +32,7 @@ def _absolute_audio_url(request: Request, audio_url: str | None) -> str | None:
 @router.get("/diagnostics", response_model=QualityDiagnosticsResponse)
 async def diagnostics(request: Request) -> QualityDiagnosticsResponse:
     runtime_info = request.app.state.engine_orchestrator.list_info()
-    return quality_diagnostics("0.9.3-beta.3", engine_registry.list_tts(), runtime_info)
+    return quality_diagnostics(APP_VERSION, engine_registry.list_tts(), runtime_info)
 
 
 @router.get("/sentences", response_model=list[EvaluationSentence])

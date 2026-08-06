@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
+현재 버전: `0.9.5 · Benchmark Baseline & Privacy-Safe Audit Bundle`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -13,8 +13,11 @@
 9. Firebase Web 공개 설정은 `.env.development`·`.env.production`에서 자동 로드되며 Firestore·Storage는 기본 차단 상태입니다.
 10. 카카오톡에서 연 모바일 링크는 PC localhost 엔진을 사용하지 않으며 외부 브라우저 또는 공개 HTTPS API가 필요합니다.
 11. 모든 재생 버튼은 선택한 목소리·설정을 먼저 적용하고 즉시 재생하며, CosyVoice 프리셋 음원은 `voice-presets` 안내를 따릅니다.
-12. 설정의 Engine Doctor에서 API·TTS·Worker·GPU와 프리셋 5종 준비 상태를 한 번에 확인하고 연결 주소를 복구할 수 있습니다.
+12. 음성 연결은 자동으로 유지됩니다. 상세 API·Worker·GPU 진단은 설정의 `고급 진단 및 개발자 정보`를 열었을 때만 표시됩니다.
 13. 실제 모델·실기기 수치를 준비하지 않았다면 성공 또는 성능을 가장하지 않습니다.
+
+- Heartbeat 6.8.4는 새 승인·재서명에 active 신뢰 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지합니다. `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에는 이전 key만 넣고 secret은 Git·ZIP·진단 응답에 포함하지 않습니다.
+- 승인 apply·재서명·rollback은 같은 로컬 파일시스템을 공유하는 API 프로세스 사이에서도 파일 잠금으로 직렬화됩니다. 여러 서버·네트워크 파일시스템은 단일 writer 또는 분산 잠금이 필요합니다.
 
 14. PC 1180px 이상에서는 프로젝트 목록·Chat Workspace·Voice Drawer 3단 편집 화면과 가로 타임라인을 사용합니다.
 15. Engine Doctor의 `모바일 공개 HTTPS Bridge`는 현재 요청 Origin이 공개 HTTPS인지 진단하며 인증 수단은 아닙니다.

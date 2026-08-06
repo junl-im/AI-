@@ -72,7 +72,7 @@ export function VoiceSettingsSheet({
         </header>
 
         <label>
-          <span><b>속도</b><strong>{speed.toFixed(2)}× · {supportsSpeed ? '현재 엔진 적용' : '지원 엔진 자동 선택'}</strong></span>
+          <span><b>속도</b><strong>{speed.toFixed(2)}× · {supportsSpeed ? '현재 설정 적용' : '자동 최적화'}</strong></span>
           <input
             type="range"
             min={VOICE_SPEED_CONTROL.min}
@@ -85,7 +85,7 @@ export function VoiceSettingsSheet({
           />
         </label>
         <label>
-          <span><b>높낮이</b><strong>{formatPitch(pitch)} · {supportsPitch ? '현재 엔진 적용' : '지원 엔진 자동 선택'}</strong></span>
+          <span><b>높낮이</b><strong>{formatPitch(pitch)} · {supportsPitch ? '현재 설정 적용' : '자동 최적화'}</strong></span>
           <input
             type="range"
             min={VOICE_PITCH_CONTROL.min}
@@ -99,7 +99,7 @@ export function VoiceSettingsSheet({
         </label>
 
         <div className="soa-emotion-settings">
-          <span><b>말투</b><strong>{supportsEmotion ? '현재 엔진 적용' : '지원 엔진 자동 선택'}</strong></span>
+          <span><b>말투</b><strong>{supportsEmotion ? '현재 설정 적용' : '자동 최적화'}</strong></span>
           <div role="radiogroup" aria-label="음성 말투">
             {VOICE_EMOTION_OPTIONS.map((item) => (
               <button

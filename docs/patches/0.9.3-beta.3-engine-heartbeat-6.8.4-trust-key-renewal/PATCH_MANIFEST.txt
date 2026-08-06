@@ -1,0 +1,20 @@
+SoriON AI 0.9.3-beta.3 Engine Heartbeat 6.8.3.3 -> 6.8.4 Trust Key Rotation & Evidence Renewal Queue
+
+Changed or added files: 41
+Deleted tracked files: 0
+
+- Active and previous HMAC trust keys allow staged rotation without immediately invalidating existing approved manifests.
+- Current-key re-signing requires a valid trusted signature, unchanged WAV binding and an explicit preview/apply flow.
+- The renewal queue separates consent/rights expiry, WAV binding failures, unsigned approvals and previous-key rotation work.
+- Approval apply, re-sign and rollback share an in-process and interprocess file-lock boundary.
+- Unknown key IDs, invalid HMAC values and expired evidence are never auto-repaired or auto-extended.
+
+Validation
+- Repository preflight: 27/27
+- API pytest: 179 passed
+- Worker pytest: 14 passed
+- TS/TSX syntax transpile: 191 files
+- Python compileall: passed
+- GitHub Actions remains the final ESLint, Vitest and Vite production-build gate.
+
+The exact file list is recorded in the root PATCH_MANIFEST.txt included in the archive.

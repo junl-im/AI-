@@ -368,3 +368,74 @@ def test_worker_telemetry_summary_separates_model_digest_and_reports_percentiles
     assert group["p95_realtime_factor"] == 0.8
     assert group["p50_final_handoff_error_ms"] == 40
     assert group["p95_final_handoff_error_ms"] == 80
+
+
+def test_worker_telemetry_regression_requires_non_overlapping_windows(client):
+    store = client.app.state.worker_telemetry_store
+    base = {
+        "engine_id": "cosyvoice3",
+        "preset_id": "sori-warm",
+        "model_id": "cosyvoice3",
+        "model_version": "1",
+        "model_digest": "sha256:baseline-model",
+        "device_profile": "cuda",
+        "accelerator_name": "cuda:0",
+        "gpu_name": "Private GPU Name",
+        "processing_ms": 1000,
+        "audio_duration_seconds": 4.0,
+        "succeeded": True,
+        "failure_reason": "",
+    }
+    for index in range(9):
+        store.append({
+            **base,
+            "id": f"baseline-{index}",
+            "worker_job_id": f"job-{index}",
+            "recorded_at": f"2026-08-05T{index:02d}:00:00+00:00",
+            "first_audio_ms": 400,
+            "realtime_factor": 0.3,
+            "final_handoff_error_ms": 20,
+        })
+
+    summary = client.get("/api/v1/quality/worker-telemetry/summary").json()
+    group = summary["metric_groups"][0]
+    assert group["regression"]["status"] == "insufficient"
+    assert group["regression"]["minimum_records"] == 10
+    assert group["regression"]["available_records"] == 9
+
+
+def test_worker_telemetry_detects_multi_metric_regression(client):
+    store = client.app.state.worker_telemetry_store
+    base = {
+        "engine_id": "cosyvoice3",
+        "preset_id": "on-clear",
+        "model_id": "cosyvoice3",
+        "model_version": "1",
+        "model_digest": "sha256:regression-model",
+        "device_profile": "cuda",
+        "accelerator_name": "cuda:0",
+        "gpu_name": "Private GPU Name",
+        "processing_ms": 1000,
+        "audio_duration_seconds": 4.0,
+        "failure_reason": "",
+    }
+    for index in range(10):
+        recent = index >= 5
+        store.append({
+            **base,
+            "id": f"regression-{index}",
+            "worker_job_id": f"regression-job-{index}",
+            "recorded_at": f"2026-08-05T{index:02d}:00:00+00:00",
+            "first_audio_ms": 1200 if recent else 400,
+            "realtime_factor": 0.9 if recent else 0.3,
+            "final_handoff_error_ms": 160 if recent else 20,
+            "succeeded": not (recent and index == 9),
+        })
+
+    summary = client.get("/api/v1/quality/worker-telemetry/summary").json()
+    group = summary["metric_groups"][0]
+    assessment = group["regression"]
+    assert assessment["status"] == "regressed"
+    assert assessment["baseline"]["records"] == 5
+    assert assessment["current"]["records"] == 5
+    assert len(assessment["reasons"]) >= 2

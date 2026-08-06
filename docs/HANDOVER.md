@@ -1,14 +1,60 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.3.1 · Web Quality Test Compatibility Hotfix**
+현재 기준 버전: **0.9.5 · Benchmark Baseline & Privacy-Safe Audit Bundle**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-06 11:07 KST**
+최종 갱신: **2026-08-06 15:39 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle
+
+1. **작업 일시(KST)**: 2026-08-06 15:32
+2. **대상·기준 버전**: 0.9.5 / 0.9.4 Visible Version Sync
+3. **변경 내용**: Worker telemetry에 최초 5건·최근 5건 비중첩 기준선과 회귀 판정을 추가하고 개인정보 제외 감사 bundle export·verify를 추가했습니다.
+4. **변경 이유**: 단순 P50/P95 집계만으로는 실제 악화를 알 수 없었고 승인·신뢰 키 상태를 외부 공유 가능한 형태로 감사할 수 없었습니다.
+5. **영향 범위**: Quality Lab benchmark UI, API verification·evidence route, Web download, API schema·tests, repository preflight와 문서입니다.
+6. **주요 파일**: `verification.py`, `privacy_audit_bundle.py`, `privacy_audit.py`, `BenchmarkDashboardCard.tsx`, `VerificationEvidenceCard.tsx`, `qualityApi.ts`, `qualityTypes.ts`.
+7. **검증 결과**: Repository preflight 29/29, API pytest 183개, Worker pytest 14개, TS/TSX 구문 검사 190개와 Python compileall을 통과했습니다. 0.9.4 기준본에 패치를 덮어쓴 결과가 완성본 796개 파일과 일치했고, 패치 적용본·전체 ZIP 독립 압축 해제본도 preflight 29/29와 ZIP 무결성 검사를 통과했습니다.
+8. **제한**: 자동 기준선은 실제 장치 인증을 대체하지 않으며 10건 미만은 판정하지 않습니다. checksum은 전자서명이 아닙니다. 다중 노드는 여전히 외부 직렬화가 필요합니다.
+9. **산출물**: `SoriON-AI-0.9.5-benchmark-privacy-audit-full.zip`, `SoriON-AI-0.9.4-to-0.9.5-benchmark-privacy-audit-patch.zip`.
+10. **다음 업데이트**: 0.9.6 Distributed Writer Safety & Long-Run Reliability.
+
+## 0.9.4 Visible Version Sync
+
+1. **사용자 결정**: 외부 제품 버전은 `0.9.4 → 0.9.5`처럼 단순 순번으로 표시합니다.
+2. **단일 기준**: 루트 `VERSION`, `package.json`, lock, API·Worker 메타데이터를 동기화합니다.
+3. **화면 표시**: 첫 화면은 `v0.9.4`만 보이며 Heartbeat·revision은 고급 빌드 정보에서만 확인합니다.
+4. **배포 갱신**: `version.json`과 Service Worker를 no-store로 확인하고 새 build ID를 포함한 URL로 다시 진입합니다.
+5. **다음 버전**: `npm run version:set -- 0.9.5` 후 `npm run quality:version-sync`를 실행합니다.
+6. **검증**: preflight, API·Worker pytest, Python compileall, TS/TSX 구문 검사, 패치 재현성과 ZIP 무결성을 확인합니다.
+
+## Engine Heartbeat 6.8.4 Trust Key Rotation & Evidence Renewal Queue
+
+1. **작업 일시(KST)**: 2026-08-06 13:04
+2. **대상·기준 버전**: 6.8.3.3 Seamless Engine Runtime → 6.8.4 Trust Key Rotation & Evidence Renewal Queue.
+3. **주요 적용**: active·previous trust ring, current-key 재서명 preview/apply, 동의·권리·WAV 결박 갱신 대기열, 프로세스 간 승인 파일 잠금.
+4. **안전 경계**: unknown key ID·잘못된 HMAC은 자동 재서명하지 않으며 동의·권리 만료일도 자동 연장하지 않습니다. 실제 secret·WAV·증거 원문은 ZIP과 진단 응답에 포함하지 않습니다.
+5. **운영 순서**: 새 key를 active로 설정하고 기존 active를 `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에 previous key로 둔 뒤, Quality Lab에서 diff 확인→재서명→완료율 확인→grace 종료 후 previous key 제거 순으로 진행합니다.
+6. **동시성**: approval apply·re-sign·rollback은 thread lock과 로컬 file lock을 같은 경계에서 획득합니다. 같은 로컬 파일시스템이 아닌 다중 노드는 단일 writer 또는 분산 lock이 필요합니다.
+7. **검증 기준**: Repository preflight, API pytest, Worker pytest, Python compileall, TS/TSX 계약, 패치 덮어쓰기 재현성, ZIP 무결성을 모두 확인합니다.
+8. **제한**: HMAC은 secret 보유와 payload 무결성을 확인할 뿐 화자 신원·법적 권리를 증명하지 않습니다. checksum도 실제 청취 행위를 증명하지 않습니다.
+9. **산출물**: 전체 프로젝트 ZIP과 6.8.3.3→6.8.4 덮어쓰기 패치 ZIP 두 개를 제공합니다.
+10. **다음 예상 업데이트**: 6.8.4.1 Benchmark Baseline & Privacy-Safe Audit Bundle. 충분한 실기기 표본 기반 회귀 기준선과 비밀·실제 WAV를 제외한 감사 묶음을 추가합니다.
+
+## Engine Heartbeat 6.8.3.3 Seamless Engine Runtime
+
+1. **작업 일시(KST)**: 2026-08-06 12:28
+2. **대상·기준 버전**: 6.8.3.2 Runtime Update Guard & Performance Maintenance → 6.8.3.3 Seamless Engine Runtime
+3. **변경 내용**: 일반 화면 기술 상태 비노출, API 후보 병렬 탐색, 가시성별 heartbeat, 자동 failover, 엔진 목록 cache, API↔Worker keep-alive pool, 병렬 health/readiness와 주기 supervisor를 적용했습니다.
+4. **사용자 결정**: 사용자는 주소·API·Worker·GPU·엔진 연결 상태를 보지 않습니다. 시스템이 스스로 연결하고 고급 진단은 명시적으로 열 때만 표시합니다.
+5. **성능 경계**: 네트워크·모델 적재·GPU context의 실제 cold start는 0초를 보장하지 않습니다. 브라우저 음성은 즉시 대체하고 서버·Worker는 백그라운드에서 계속 준비합니다.
+6. **주요 파일**: `src/hooks/useBackendBootstrap.ts`, `src/api/httpClient.ts`, `src/settings/connectivityApi.ts`, `src/tts/voiceApi.ts`, `services/api/app/engines/voiceclone/cosyvoice_worker.py`, `services/api/app/main.py`, 일반 작업 UI와 `docs/SEAMLESS_ENGINE_RUNTIME.md`.
+7. **다음 예상 업데이트**: 6.8.4 Trust Key Rotation & Evidence Renewal Queue는 6.8.3.3 GitHub Actions 녹색 확인 후 별도 보안 패치로 진행합니다.
+
 ## Engine Heartbeat 6.8.3.1 Web Quality Test Compatibility Hotfix
 
 1. **작업 일시(KST)**: 2026-08-06 11:07
@@ -40,8 +86,8 @@
 4. **변경 이유**: CI 실패로 배포가 차단된 문제를 먼저 해소하고, API가 LAN이나 외부에 노출됐을 때 임의 승인·이력 열람·롤백이 가능한 운영 보안 문제와 동시 승인 경합을 막기 위함입니다.
 5. **영향 범위**: API 설정, approval routes/service, 운영자 인증 서비스, Quality Lab 토큰 입력, GitHub Actions 품질 대상 파일, preflight와 문서.
 6. **주요 파일**: `services/api/app/services/voice_review_operator.py`, `services/api/app/api/routes/voice_preset_approvals.py`, `services/api/app/services/voice_preset_approval.py`, `src/quality/voicePresetApprovalApi.ts`, `src/components/evaluation/VoicePresetApprovalCard.tsx`, `scripts/check-voice-review-operator-gate.mjs`.
-7. **검증 결과**: Repository preflight 24/24, API pytest 171, Worker pytest 14, TS/TSX transpile 182와 Python compileall 통과. 로컬 환경에는 Ruff와 Web node_modules가 없어 실제 Ruff·ESLint·semantic typecheck·Vitest·Vite build의 최종 판정은 GitHub Actions 재실행이 필요합니다.
-8. **제한·주의사항**: 운영자 토큰과 서명 secret은 ZIP에 포함하지 않습니다. loopback 무토큰 허용은 기본 로컬 사용성을 위한 설정이며 운영 환경에서는 `SORION_VOICE_REVIEW_ALLOW_LOOPBACK_WITHOUT_TOKEN=false`로 강제할 수 있습니다. 현재 잠금은 단일 API 프로세스 내부 동시 요청을 직렬화하며, 다중 프로세스·다중 노드 배포는 외부 잠금 또는 단일 writer 구성이 필요합니다.
+7. **검증 결과**: Repository preflight 26/26, API pytest 171, Worker pytest 14, TS/TSX transpile 192와 Python compileall 통과. 로컬 환경에는 Ruff와 Web node_modules가 없어 실제 Ruff·ESLint·semantic typecheck·Vitest·Vite build의 최종 판정은 GitHub Actions 재실행이 필요합니다.
+8. **제한·주의사항**: 운영자 토큰과 서명 secret은 ZIP에 포함하지 않습니다. loopback 무토큰 허용은 기본 로컬 사용성을 위한 설정이며 운영 환경에서는 `SORION_VOICE_REVIEW_ALLOW_LOOPBACK_WITHOUT_TOKEN=false`로 강제할 수 있습니다. 6.8.4부터 같은 로컬 파일시스템의 다중 API 프로세스는 파일 잠금으로 직렬화합니다. 다중 노드 배포는 여전히 외부 분산 잠금 또는 단일 writer 구성이 필요합니다.
 9. **산출물**: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.3-ci-quality-approval-gate-full.zip`, `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.2-to-6.8.3-ci-quality-approval-gate-patch.zip`, `SHA256SUMS-6.8.3.txt`.
 10. **다음 예상 업데이트**: Heartbeat 6.8.4 Trust Key Rotation & Evidence Renewal Queue. 복수 신뢰 키, 증거 갱신 대기열, 프로세스 간 승인 잠금과 benchmark 기준선·회귀 경고를 우선합니다.
 

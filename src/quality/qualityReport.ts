@@ -1,3 +1,4 @@
+import { currentBuildInfo } from '../update/buildInfo'
 import type { QualityReview } from './qualityReviewTypes'
 
 function downloadBlob(blob: Blob, filename: string): void {
@@ -21,7 +22,7 @@ function csvCell(value: string | number | null): string {
 export function buildQualityReport(reviews: QualityReview[]) {
   return {
     app: '곰같은여우 SoriON AI',
-    version: '0.9.3-beta.3',
+    version: currentBuildInfo.appVersion,
     exportedAt: new Date().toISOString(),
     reviews,
   }

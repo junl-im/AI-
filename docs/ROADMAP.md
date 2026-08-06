@@ -1,5 +1,13 @@
 # ROADMAP
 
+현재 제품 버전: `0.9.5`
+
+## 0.9.5 완료 · Benchmark Baseline & Privacy-Safe Audit
+
+- Worker 자동 telemetry 비중첩 기준선과 회귀 경보
+- 개인정보 제외 승인·신뢰 키·성능 감사 JSON과 SHA-256 검증
+- 다음 목표는 0.9.6 다중 노드 writer 안전성과 장시간 안정성
+
 ## Phase 1 — Foundation
 
 - [x] 신규 코드베이스 기초 구조

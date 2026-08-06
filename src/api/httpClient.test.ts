@@ -59,6 +59,51 @@ describe('API connection context', () => {
   })
 
 
+  it('selects the fastest ready API candidate and aborts slower probes', async () => {
+    const slowProbeAborted = vi.fn()
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      const url = String(input)
+      if (url.endsWith('sorion-runtime-config.json')) {
+        return Promise.resolve(new Response(JSON.stringify({
+          apiBaseUrls: [
+            'https://slow.example.com',
+            'https://fast.example.com',
+          ],
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }))
+      }
+      if (url.startsWith('https://fast.example.com/api/v1/health')) {
+        return Promise.resolve(new Response(JSON.stringify({
+          status: 'ok',
+          version: '0.9.5',
+          default_engine: 'auto',
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }))
+      }
+      if (url.startsWith('https://slow.example.com/api/v1/health')) {
+        return new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () => {
+            slowProbeAborted()
+            reject(new DOMException('aborted', 'AbortError'))
+          }, { once: true })
+        })
+      }
+      return Promise.reject(new TypeError(`unexpected candidate: ${url}`))
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await expect(discoverApiBaseUrl()).resolves.toMatchObject({
+      baseUrl: 'https://fast.example.com/api/v1',
+    })
+    await Promise.resolve()
+
+    expect(slowProbeAborted).toHaveBeenCalledTimes(1)
+  })
+
   it('skips a failed saved API and promotes the next runtime candidate', async () => {
     const fetchMock = vi.fn((input: RequestInfo | URL): Promise<Response> => {
       const url = String(input)
@@ -76,7 +121,7 @@ describe('API connection context', () => {
       if (url.startsWith('https://voice-b.example.com/api/v1/health')) {
         return Promise.resolve(new Response(JSON.stringify({
           status: 'ok',
-          version: '0.9.3-beta.3',
+          version: '0.9.5',
           default_engine: 'auto',
         }), {
           status: 200,

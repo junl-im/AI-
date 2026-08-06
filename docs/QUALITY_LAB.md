@@ -58,3 +58,12 @@ RTF는 품질 점수가 아닙니다. 자연스러움과 발음 평가는 반드
 Quality Lab은 SoriON evidence v2와 완료된 Heartbeat 6.6·6.7 Web quality run report를 파일로 선택해 preview한 뒤 등록한다. checksum이나 schema가 틀리거나 동일 bundle·record가 이미 있으면 등록 버튼을 비활성화한다. Web quality report의 source commit SHA와 run ID는 파일에서 자동 채운다.
 
 Local Export Bundle 카드는 WAV·MP3·SRT·VTT·JSON 최대 20개, 250MiB 이하를 서버 전송 없이 ZIP으로 만든다. 파일별 SHA-256 manifest, 진행률, 취소와 100MiB 초과 모바일 메모리 경고를 제공한다.
+
+## 0.9.5 성능 회귀와 감사 JSON
+
+Benchmark Dashboard는 같은 모델·digest·장치·가속기·GPU·프리셋 그룹 안에서만 최초 5건과
+최근 5건을 비교합니다. 표본 10건 미만은 기준선 부족으로 표시합니다.
+
+Verified Evidence 카드의 `개인정보 제외 감사 JSON`은 승인 history, 신뢰 키 교체 집계,
+benchmark 회귀와 device coverage만 포함합니다. 다운로드 전에 서버에서 전체 SHA-256을 다시
+계산하며 실제 WAV, 동의·권리 원문, 사용자 식별자, GPU 원문과 secret은 포함하지 않습니다.

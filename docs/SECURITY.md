@@ -31,7 +31,7 @@ SORION_WORKER_AUTH_TTL_SECONDS=30
 
 ## Heartbeat 6.8.3 프리셋 승인 운영자 게이트
 
-프리셋 승인 관련 네 endpoint는 공개 품질 API와 분리된 운영 경계로 취급한다.
+프리셋 승인·갱신·재서명 endpoint 전체는 공개 품질 API와 분리된 운영 경계로 취급한다.
 
 - loopback 요청은 `SORION_VOICE_REVIEW_ALLOW_LOOPBACK_WITHOUT_TOKEN=true`일 때만 무토큰 허용한다.
 - LAN·외부 요청은 32자 이상 `SORION_VOICE_REVIEW_OPERATOR_TOKEN`과 `X-SoriON-Operator-Token` 헤더가 모두 필요하다.
@@ -99,3 +99,19 @@ DB 파일은 API 서버의 비공개 데이터 디렉터리에 두고 Web 정적
 자동 fallback은 등록되고 ready인 TTS Adapter 안에서만 수행한다. 사용자 입력으로 임의 Worker URL이나
 엔진 모듈을 선택하지 못하며 명시 엔진 요청은 다른 엔진으로 조용히 바꾸지 않는다. 마지막 오류는
 진단용 300자로 제한하고 원문 문장·음성 데이터·비밀키를 엔진 runtime 상태에 저장하지 않는다.
+
+## Voice review trust key ring
+
+- 새 서명은 `SORION_VOICE_REVIEW_SIGNING_KEY_ID`와 `SORION_VOICE_REVIEW_SIGNING_SECRET`의 active key만 사용한다.
+- grace 기간의 previous key는 `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에서 검증 전용으로 관리한다.
+- key ID는 공개 식별자지만 secret은 Git, 로그, API 응답, ZIP에 포함하지 않는다.
+- 승인 apply·재서명·rollback은 같은 호스트의 프로세스 간 파일 잠금을 통과해야 한다.
+- 알 수 없는 key ID 또는 검증 실패 서명은 자동 재서명하지 않는다.
+
+## 0.9.5 개인정보 제외 감사 bundle 경계
+
+감사 bundle은 운영 상태를 공유할 수 있도록 actor·reviewer·IP·사용자 선언 ID·승인 signature와
+GPU 원문을 제거합니다. GPU 조건은 장치 profile·가속기·GPU 문자열의 SHA-256 fingerprint로만
+구분합니다. 실제 WAV, 모델 가중치, 동의·권리 원문, HMAC secret과 운영자 token은 포함하지 않습니다.
+
+bundle SHA-256은 내용 변경 탐지용이며 발행자 인증이나 법적 전자서명으로 표현하지 않습니다.

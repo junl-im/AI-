@@ -17,6 +17,19 @@ function metric(value: number | null, suffix = '') {
   return value === null ? '-' : `${Number(value.toFixed(3))}${suffix}`
 }
 
+function regressionLabel(status: 'insufficient' | 'stable' | 'warning' | 'regressed', available: number, minimum: number) {
+  if (status === 'insufficient') return `기준선 ${available}/${minimum}`
+  if (status === 'stable') return '기준선 안정'
+  if (status === 'warning') return '회귀 주의'
+  return '성능 회귀'
+}
+
+function regressionTone(status: 'insufficient' | 'stable' | 'warning' | 'regressed') {
+  if (status === 'stable') return 'good' as const
+  if (status === 'regressed') return 'danger' as const
+  return 'warning' as const
+}
+
 export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, onRefresh }: BenchmarkDashboardCardProps) {
   const [presetFilter, setPresetFilter] = useState('all')
   const [digestFilter, setDigestFilter] = useState('all')
@@ -61,11 +74,28 @@ export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, 
             <div key={`${group.engineId}-${group.presetId}-${group.modelDigest}-${group.gpuName}`} className="rounded-2xl border border-soa-line bg-white p-3 text-[10px] font-bold leading-5 text-soa-muted">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <strong className="text-xs text-soa-ink">{group.presetId} · {group.modelId} {group.modelVersion}</strong>
-                <span>n={group.records} · 성공 {group.successRecords} · 실패율 {(group.failureRate * 100).toFixed(1)}%</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span>n={group.records} · 성공 {group.successRecords} · 실패율 {(group.failureRate * 100).toFixed(1)}%</span>
+                  <StatusPill
+                    label={regressionLabel(group.regression.status, group.regression.availableRecords, group.regression.minimumRecords)}
+                    tone={regressionTone(group.regression.status)}
+                  />
+                </div>
               </div>
               <p>{group.deviceProfile} · {group.acceleratorName} · {group.gpuName || 'GPU 이름 없음'} · {compactHash(group.modelDigest)}</p>
               <p>first audio P50/P95 {metric(group.p50FirstAudioMs, 'ms')} / {metric(group.p95FirstAudioMs, 'ms')}</p>
               <p>RTF P50/P95 {metric(group.p50RealtimeFactor)} / {metric(group.p95RealtimeFactor)} · handoff P50/P95 {metric(group.p50FinalHandoffErrorMs, 'ms')} / {metric(group.p95FinalHandoffErrorMs, 'ms')}</p>
+              {group.regression.baseline && group.regression.current ? (
+                <div className="mt-2 rounded-xl bg-[#f7f5ef] px-3 py-2">
+                  <p>기준→최근 · first audio {metric(group.regression.baseline.p95FirstAudioMs, 'ms')} → {metric(group.regression.current.p95FirstAudioMs, 'ms')} · RTF {metric(group.regression.baseline.p95RealtimeFactor)} → {metric(group.regression.current.p95RealtimeFactor)}</p>
+                  <p>실패율 {(group.regression.baseline.failureRate * 100).toFixed(1)}% → {(group.regression.current.failureRate * 100).toFixed(1)}% · handoff {metric(group.regression.baseline.p95FinalHandoffErrorMs, 'ms')} → {metric(group.regression.current.p95FinalHandoffErrorMs, 'ms')}</p>
+                </div>
+              ) : null}
+              {group.regression.reasons.length ? (
+                <ul className="mt-2 list-disc pl-4 text-[10px]">
+                  {group.regression.reasons.map((reason) => <li key={reason}>{reason}</li>)}
+                </ul>
+              ) : null}
             </div>
           ))}
         </div>

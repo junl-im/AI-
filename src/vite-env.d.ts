@@ -15,3 +15,11 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+declare const __SORION_BUILD_INFO__: {
+  readonly schemaVersion: 1
+  readonly appVersion: string
+  readonly heartbeat: string
+  readonly revision: string
+  readonly buildId: string
+}

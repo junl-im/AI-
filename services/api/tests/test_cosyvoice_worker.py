@@ -40,10 +40,16 @@ async def test_worker_probe_updates_ready_state():
         transport=httpx.MockTransport(worker_transport),
     )
 
-    assert await engine.probe() is True
-    assert engine.info().ready is True
-    assert engine.probe_snapshot()["worker_version"] == "test-worker"
-    assert engine.probe_snapshot()["diagnostics"]["backend"] == "test"
+    try:
+        assert await engine.probe() is True
+        first_client = engine._client
+        assert await engine.probe() is True
+        assert engine._client is first_client
+        assert engine.info().ready is True
+        assert engine.probe_snapshot()["worker_version"] == "test-worker"
+        assert engine.probe_snapshot()["diagnostics"]["backend"] == "test"
+    finally:
+        await engine.close()
 
 
 @pytest.mark.asyncio
@@ -65,10 +71,13 @@ async def test_worker_can_create_job(tmp_path: Path):
         transport=httpx.MockTransport(worker_transport),
     )
 
-    result = await engine.create_job("profile-1", "안녕하세요.", sample)
+    try:
+        result = await engine.create_job("profile-1", "안녕하세요.", sample)
 
-    assert result["id"] == "job-1"
-    assert result["status"] == "queued"
+        assert result["id"] == "job-1"
+        assert result["status"] == "queued"
+    finally:
+        await engine.close()
 
 
 @pytest.mark.asyncio
@@ -80,6 +89,9 @@ async def test_worker_diagnostics_are_forwarded():
         transport=httpx.MockTransport(worker_transport),
     )
 
-    diagnostics = await engine.diagnostics()
+    try:
+        diagnostics = await engine.diagnostics()
 
-    assert diagnostics == {"ready": True, "backend": "test"}
+        assert diagnostics == {"ready": True, "backend": "test"}
+    finally:
+        await engine.close()

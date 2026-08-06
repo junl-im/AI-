@@ -4,7 +4,6 @@ import type { VoiceCloneJob } from '../../voiceclone/voiceCloneTypes'
 interface CloneExecutionCardProps {
   profileName: string
   ready: boolean
-  reason: string | null
   job: VoiceCloneJob | null
   busy: boolean
   error: string | null
@@ -24,7 +23,6 @@ const statusLabels: Record<VoiceCloneJob['status'], string> = {
 export function CloneExecutionCard({
   profileName,
   ready,
-  reason,
   job,
   busy,
   error,
@@ -44,14 +42,14 @@ export function CloneExecutionCard({
           <h2 id="clone-execution-title">{profileName}로 문장을 말하게 합니다.</h2>
         </div>
         <strong className={ready ? 'is-ready' : 'is-waiting'}>
-          {ready ? 'WORKER READY' : 'WORKER WAITING'}
+          {ready ? '준비됨' : '자동 준비 중'}
         </strong>
       </div>
       <p>
         문장을 구간별로 생성하고, 첫 구간이 끝나는 순간부터 진행 상태를 표시합니다.
-        실제 모델이 준비되지 않은 환경에서는 실행 버튼을 열지 않습니다.
+        음성 준비가 끝나기 전에는 실행 버튼을 열지 않습니다.
       </p>
-      {!ready ? <div className="soa-worker-warning">{reason ?? 'CosyVoice Worker 연결이 필요합니다.'}</div> : null}
+      {!ready ? <div className="soa-worker-warning">음성 기능을 자동으로 준비하고 있습니다. 샘플과 동의 기록은 그대로 유지됩니다.</div> : null}
       <label className="soa-clone-script">
         복제할 문장
         <textarea

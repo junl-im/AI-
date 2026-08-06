@@ -399,6 +399,34 @@ export async function downloadQualityEvidenceBundle() {
 }
 
 
+export async function downloadPrivacyAuditBundle() {
+  const payload = await apiRequest<Record<string, unknown>>('/quality/privacy-audit-bundle')
+  const verification = await apiRequest<{
+    valid: boolean
+    expected_sha256: string | null
+    record_count: number
+    reason: string
+  }>('/quality/privacy-audit-bundle/verify', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  if (!verification.valid || !verification.expected_sha256) {
+    throw new Error(`감사 묶음 무결성 검사 실패: ${verification.reason}`)
+  }
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = `sorion-privacy-audit-${verification.expected_sha256.slice(0, 12)}.json`
+  anchor.click()
+  URL.revokeObjectURL(url)
+  return {
+    sha256: verification.expected_sha256,
+    recordCount: verification.record_count,
+  }
+}
+
+
 export async function getWorkerTelemetrySummary() {
   const result = await apiRequest<{
     total_records: number
@@ -422,6 +450,26 @@ export async function getWorkerTelemetrySummary() {
       p95_realtime_factor: number | null
       p50_final_handoff_error_ms: number | null
       p95_final_handoff_error_ms: number | null
+      regression: {
+        status: 'insufficient' | 'stable' | 'warning' | 'regressed'
+        minimum_records: number
+        available_records: number
+        baseline: {
+          records: number
+          failure_rate: number
+          p95_first_audio_ms: number | null
+          p95_realtime_factor: number | null
+          p95_final_handoff_error_ms: number | null
+        } | null
+        current: {
+          records: number
+          failure_rate: number
+          p95_first_audio_ms: number | null
+          p95_realtime_factor: number | null
+          p95_final_handoff_error_ms: number | null
+        } | null
+        reasons: string[]
+      }
     }>
   }>('/quality/worker-telemetry/summary')
   return {
@@ -446,6 +494,26 @@ export async function getWorkerTelemetrySummary() {
       p95RealtimeFactor: item.p95_realtime_factor,
       p50FinalHandoffErrorMs: item.p50_final_handoff_error_ms,
       p95FinalHandoffErrorMs: item.p95_final_handoff_error_ms,
+      regression: {
+        status: item.regression.status,
+        minimumRecords: item.regression.minimum_records,
+        availableRecords: item.regression.available_records,
+        baseline: item.regression.baseline ? {
+          records: item.regression.baseline.records,
+          failureRate: item.regression.baseline.failure_rate,
+          p95FirstAudioMs: item.regression.baseline.p95_first_audio_ms,
+          p95RealtimeFactor: item.regression.baseline.p95_realtime_factor,
+          p95FinalHandoffErrorMs: item.regression.baseline.p95_final_handoff_error_ms,
+        } : null,
+        current: item.regression.current ? {
+          records: item.regression.current.records,
+          failureRate: item.regression.current.failure_rate,
+          p95FirstAudioMs: item.regression.current.p95_first_audio_ms,
+          p95RealtimeFactor: item.regression.current.p95_realtime_factor,
+          p95FinalHandoffErrorMs: item.regression.current.p95_final_handoff_error_ms,
+        } : null,
+        reasons: item.regression.reasons,
+      },
     })),
   }
 }
