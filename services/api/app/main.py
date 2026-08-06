@@ -20,6 +20,7 @@ from app.services.device_benchmark_store import DeviceBenchmarkStore
 from app.services.engine_orchestrator import EngineOrchestrator
 from app.services.evidence_intake_store import EvidenceIntakeStore
 from app.services.job_manager import JobManager
+from app.services.operator_baseline_store import OperatorBaselineStore
 from app.services.proxy_headers import client_address
 from app.services.quality_evidence_store import QualityEvidenceStore
 from app.services.rate_limit import FixedWindowRateLimiter
@@ -77,6 +78,9 @@ async def lifespan(app: FastAPI):
     )
     app.state.worker_telemetry_store = DeviceBenchmarkStore(
         settings.worker_telemetry_file
+    )
+    app.state.operator_baseline_store = OperatorBaselineStore(
+        settings.operator_baseline_file
     )
     app.state.stt_comparison_store = QualityEvidenceStore(
         settings.stt_comparison_file

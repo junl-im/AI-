@@ -11,10 +11,10 @@ import { useAppStore } from '../store/useAppStore'
 import { isBrowserSpeechSupported } from '../tts/browserSpeech'
 import { primeEngineCatalog } from '../tts/voiceApi'
 
-const RETRY_DELAYS_MS = [1_000, 2_500, 5_000, 10_000, 30_000]
-const HEALTHY_HEARTBEAT_MS = 20_000
-const HIDDEN_HEARTBEAT_MS = 90_000
-const FULL_AUDIT_INTERVAL_MS = 120_000
+const RETRY_DELAYS_MS = [750, 1_500, 3_000, 6_000, 12_000, 30_000]
+const HEALTHY_HEARTBEAT_MS = 12_000
+const HIDDEN_HEARTBEAT_MS = 45_000
+const FULL_AUDIT_INTERVAL_MS = 60_000
 
 export function useBackendBootstrap(): void {
   const setBackendStatus = useAppStore((state) => state.setBackendStatus)
@@ -25,6 +25,7 @@ export function useBackendBootstrap(): void {
   const timerRef = useRef<number | null>(null)
   const aliveRef = useRef(true)
   const lastFullAuditAtRef = useRef(0)
+  const lastCatalogRefreshAtRef = useRef(0)
 
   useEffect(() => {
     aliveRef.current = true
@@ -123,6 +124,12 @@ export function useBackendBootstrap(): void {
               latencyMs: heartbeat.latencyMs,
               lastCheckedAt: new Date().toISOString(),
             })
+            if (Date.now() - lastCatalogRefreshAtRef.current >= HIDDEN_HEARTBEAT_MS) {
+              lastCatalogRefreshAtRef.current = Date.now()
+              window.dispatchEvent(new CustomEvent('sorion-engine-refresh', {
+                detail: { baseUrl: heartbeat.baseUrl },
+              }))
+            }
             scheduleHeartbeat(inspect)
             return
           } catch {
@@ -193,6 +200,7 @@ export function useBackendBootstrap(): void {
     }
 
     const requestFullInspect = () => void inspect(true)
+    const requestFastInspect = () => void inspect(false)
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') requestFullInspect()
       else scheduleHeartbeat(inspect)
@@ -208,6 +216,8 @@ export function useBackendBootstrap(): void {
     window.addEventListener('sorion-api-change', requestFullInspect)
     window.addEventListener('sorion-api-reconnect', requestFullInspect)
     window.addEventListener('online', requestFullInspect)
+    window.addEventListener('focus', requestFastInspect)
+    window.addEventListener('pageshow', requestFullInspect)
     window.addEventListener('offline', handleOffline)
     document.addEventListener('visibilitychange', handleVisibility)
     networkInformation?.addEventListener('change', requestFullInspect)
@@ -217,6 +227,8 @@ export function useBackendBootstrap(): void {
       window.removeEventListener('sorion-api-change', requestFullInspect)
       window.removeEventListener('sorion-api-reconnect', requestFullInspect)
       window.removeEventListener('online', requestFullInspect)
+      window.removeEventListener('focus', requestFastInspect)
+      window.removeEventListener('pageshow', requestFullInspect)
       window.removeEventListener('offline', handleOffline)
       document.removeEventListener('visibilitychange', handleVisibility)
       networkInformation?.removeEventListener('change', requestFullInspect)

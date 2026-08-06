@@ -430,6 +430,15 @@ Semantic Versioning을 사용한다.
 - 핵심: Ruff 최신 규칙 10건, Web TypeScript 계약 2건, 재유입 preflight
 - 삭제 파일: 없음
 - 다음 제품 버전: `0.9.9`
+## 0.10.0 Always-on Preset Runtime & PC Three-Pane
+
+- 전체 통파일 ZIP: `SoriON-AI-0.10.0-always-on-preset-pc-three-pane-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.9-to-0.10.0-always-on-preset-pc-three-pane-patch.zip`
+- 프리셋 미리듣기 내부 대기열·자동 재연결·점진 재시도
+- 일반 화면 엔진 연결 상태 비노출
+- 12초/45초 heartbeat와 60초 전체 점검
+- 1024px PC 3분할과 v2 기본 펼침 레이아웃
+
 ## 0.9.9 CI Quality Hotfix
 
 - 전체 통파일 ZIP: `SoriON-AI-0.9.9-ci-quality-hotfix-full.zip`
@@ -439,3 +448,20 @@ Semantic Versioning을 사용한다.
 - 삭제 파일: 없음
 - 다음 제품 버전: `0.10.0`
 
+## 0.10.1 Approval Modularization & Operator Baselines
+
+- 전체 통파일 ZIP: `SoriON-AI-0.10.1-approval-modularization-operator-baselines-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.10.0-to-0.10.1-approval-modularization-operator-baselines-patch.zip`
+- 기준 버전: `0.10.0`
+- 핵심: 승인 서비스 책임 분리, 운영자 확정 최근 5건 기준선, 교체·폐기 history, 자동 기준선과 별도 회귀 판정
+- 삭제 파일: 없음
+- 다음 제품 버전: `0.10.2`
+
+
+## 0.10.1 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.10.1-approval-modularization-operator-baselines-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.10.0-to-0.10.1-approval-modularization-operator-baselines-patch.zip`
+- 패치 기준 버전: `0.10.0`
+- 핵심 확인: 승인 서비스 책임 분리, 기존 writer 안전 계약 유지, 운영자 기준선 확정·교체·폐기와 자동 기준선 분리 표시
+- 삭제 파일: 없음

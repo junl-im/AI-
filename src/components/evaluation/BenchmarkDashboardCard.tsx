@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import type { DeviceBenchmarkSummary, WorkerTelemetrySummary } from '../../quality/qualityTypes'
+import { confirmWorkerOperatorBaseline, retireWorkerOperatorBaseline } from '../../quality/qualityApi'
+import type { DeviceBenchmarkSummary, WorkerTelemetrySummary, WorkerTelemetryAggregate } from '../../quality/qualityTypes'
 import { StatusPill } from '../ui/StatusPill'
 
 interface BenchmarkDashboardCardProps {
@@ -33,6 +34,9 @@ function regressionTone(status: 'insufficient' | 'stable' | 'warning' | 'regress
 export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, onRefresh }: BenchmarkDashboardCardProps) {
   const [presetFilter, setPresetFilter] = useState('all')
   const [digestFilter, setDigestFilter] = useState('all')
+  const [baselineBusy, setBaselineBusy] = useState<string | null>(null)
+  const [baselineNotice, setBaselineNotice] = useState<string | null>(null)
+  const [baselineError, setBaselineError] = useState<string | null>(null)
   const groups = useMemo(() => workerSummary?.metricGroups ?? [], [workerSummary?.metricGroups])
   const presets = useMemo(() => [...new Set(groups.map((item) => item.presetId))].sort(), [groups])
   const digests = useMemo(() => [...new Set(groups.map((item) => item.modelDigest || 'missing'))].sort(), [groups])
@@ -40,6 +44,45 @@ export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, 
     (presetFilter === 'all' || item.presetId === presetFilter)
     && (digestFilter === 'all' || (item.modelDigest || 'missing') === digestFilter)
   ))
+
+  async function confirmBaseline(group: WorkerTelemetryAggregate) {
+    const replacing = Boolean(group.operatorBaseline)
+    if (!window.confirm(replacing
+      ? '현재 최근 5건으로 운영자 기준선을 교체할까요?'
+      : '현재 최근 5건을 운영자 확정 기준선으로 저장할까요?')) return
+    setBaselineBusy(group.operatorBaseline?.baselineId ?? group.engineId + group.presetId)
+    setBaselineError(null)
+    setBaselineNotice(null)
+    try {
+      const baseline = await confirmWorkerOperatorBaseline(
+        group,
+        replacing ? 'Quality Lab에서 운영자 기준선 교체' : 'Quality Lab에서 운영자 기준선 최초 확정',
+      )
+      setBaselineNotice(`운영자 기준선 ${baseline.baselineId.slice(0, 12)}…을 확정했습니다.`)
+      onRefresh()
+    } catch (caught) {
+      setBaselineError(caught instanceof Error ? caught.message : '운영자 기준선을 확정하지 못했습니다.')
+    } finally {
+      setBaselineBusy(null)
+    }
+  }
+
+  async function retireBaseline(group: WorkerTelemetryAggregate) {
+    const baseline = group.operatorBaseline
+    if (!baseline || !window.confirm('이 운영자 기준선을 폐기할까요? 자동 기준선은 계속 유지됩니다.')) return
+    setBaselineBusy(baseline.baselineId)
+    setBaselineError(null)
+    setBaselineNotice(null)
+    try {
+      await retireWorkerOperatorBaseline(baseline.baselineId, 'Quality Lab에서 운영자 기준선 폐기')
+      setBaselineNotice('운영자 기준선을 폐기했습니다. 자동 기준선 평가는 계속됩니다.')
+      onRefresh()
+    } catch (caught) {
+      setBaselineError(caught instanceof Error ? caught.message : '운영자 기준선을 폐기하지 못했습니다.')
+    } finally {
+      setBaselineBusy(null)
+    }
+  }
 
   return (
     <section className="rounded-[28px] border border-soa-line bg-soa-card p-5">
@@ -96,12 +139,55 @@ export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, 
                   {group.regression.reasons.map((reason) => <li key={reason}>{reason}</li>)}
                 </ul>
               ) : null}
+              <div className="mt-3 rounded-xl border border-soa-line bg-[#fbfaf6] px-3 py-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <strong className="text-xs text-soa-ink">운영자 확정 기준선</strong>
+                    <p>{group.operatorBaseline
+                      ? `${new Date(group.operatorBaseline.createdAt).toLocaleString('ko-KR')} · 최근 ${group.operatorBaseline.sourceRecords}건 snapshot`
+                      : '아직 확정하지 않음 · 자동 기준선과 별도로 관리'}</p>
+                  </div>
+                  {group.operatorRegression ? (
+                    <StatusPill
+                      label={`운영자 ${regressionLabel(group.operatorRegression.status, group.operatorRegression.availableRecords, 5)}`}
+                      tone={regressionTone(group.operatorRegression.status)}
+                    />
+                  ) : null}
+                </div>
+                {group.operatorBaseline ? (
+                  <p className="mt-1 font-mono">SHA-256 {compactHash(group.operatorBaseline.sourceRecordsSha256)}</p>
+                ) : null}
+                {group.operatorRegression?.reasons.length ? (
+                  <ul className="mt-1 list-disc pl-4">
+                    {group.operatorRegression.reasons.map((reason) => <li key={reason}>{reason}</li>)}
+                  </ul>
+                ) : null}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void confirmBaseline(group)}
+                    disabled={group.records < 5 || baselineBusy !== null}
+                    className="focus-ring min-h-9 rounded-xl border border-soa-line bg-white px-3 text-[10px] font-black disabled:opacity-40"
+                  >{group.operatorBaseline ? '현재 5건으로 교체' : '현재 5건 기준선 확정'}</button>
+                  {group.operatorBaseline ? (
+                    <button
+                      type="button"
+                      onClick={() => void retireBaseline(group)}
+                      disabled={baselineBusy !== null}
+                      className="focus-ring min-h-9 rounded-xl border border-soa-line bg-white px-3 text-[10px] font-black disabled:opacity-40"
+                    >기준선 폐기</button>
+                  ) : null}
+                </div>
+              </div>
             </div>
           ))}
         </div>
       ) : (
         <p className="mt-4 rounded-2xl bg-[#f7f5ef] p-4 text-xs font-bold text-soa-muted">선택한 조건의 Worker 자동 텔레메트리가 없습니다.</p>
       )}
+
+      {baselineNotice ? <p className="mt-4 rounded-xl bg-soa-mint/20 px-3 py-2 text-xs font-bold text-soa-ink">{baselineNotice}</p> : null}
+      {baselineError ? <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-xs font-bold text-red-700">{baselineError}</p> : null}
 
       <div className="mt-4 rounded-2xl bg-[#f7f5ef] p-3 text-[10px] font-bold leading-5 text-soa-muted">
         <strong className="text-xs text-soa-ink">실기기 soak 별도 집계</strong>

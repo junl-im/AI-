@@ -10,6 +10,8 @@ import type {
   QualityEvidenceSummary,
   DeviceSoakRecordInput,
   DeviceSoakRecordResult,
+  OperatorBenchmarkBaseline,
+  WorkerTelemetryAggregate,
 } from './qualityTypes'
 
 interface ApiDiagnosticCheck {
@@ -478,6 +480,43 @@ export async function getWorkerTelemetrySummary() {
         } | null
         reasons: string[]
       }
+      operator_baseline: {
+        baseline_id: string
+        group_key: string
+        engine_id: string
+        preset_id: string
+        model_id: string
+        model_version: string
+        model_digest: string
+        device_profile: string
+        accelerator_name: string
+        gpu_name: string
+        source_records: number
+        source_records_sha256: string
+        metrics: {
+          records: number
+          failure_rate: number
+          p95_first_audio_ms: number | null
+          p95_realtime_factor: number | null
+          p95_final_handoff_error_ms: number | null
+        }
+        created_at: string
+        actor: string
+        note: string
+      } | null
+      operator_regression: {
+        baseline_id: string
+        status: 'insufficient' | 'stable' | 'warning' | 'regressed'
+        available_records: number
+        current: {
+          records: number
+          failure_rate: number
+          p95_first_audio_ms: number | null
+          p95_realtime_factor: number | null
+          p95_final_handoff_error_ms: number | null
+        } | null
+        reasons: string[]
+      } | null
     }>
   }>('/quality/worker-telemetry/summary')
   return {
@@ -522,6 +561,137 @@ export async function getWorkerTelemetrySummary() {
         } : null,
         reasons: item.regression.reasons,
       },
+      operatorBaseline: item.operator_baseline ? {
+        baselineId: item.operator_baseline.baseline_id,
+        groupKey: item.operator_baseline.group_key,
+        engineId: item.operator_baseline.engine_id,
+        presetId: item.operator_baseline.preset_id,
+        modelId: item.operator_baseline.model_id,
+        modelVersion: item.operator_baseline.model_version,
+        modelDigest: item.operator_baseline.model_digest,
+        deviceProfile: item.operator_baseline.device_profile,
+        acceleratorName: item.operator_baseline.accelerator_name,
+        gpuName: item.operator_baseline.gpu_name,
+        sourceRecords: item.operator_baseline.source_records,
+        sourceRecordsSha256: item.operator_baseline.source_records_sha256,
+        metrics: {
+          records: item.operator_baseline.metrics.records,
+          failureRate: item.operator_baseline.metrics.failure_rate,
+          p95FirstAudioMs: item.operator_baseline.metrics.p95_first_audio_ms,
+          p95RealtimeFactor: item.operator_baseline.metrics.p95_realtime_factor,
+          p95FinalHandoffErrorMs: item.operator_baseline.metrics.p95_final_handoff_error_ms,
+        },
+        createdAt: item.operator_baseline.created_at,
+        actor: item.operator_baseline.actor,
+        note: item.operator_baseline.note,
+      } : null,
+      operatorRegression: item.operator_regression ? {
+        baselineId: item.operator_regression.baseline_id,
+        status: item.operator_regression.status,
+        availableRecords: item.operator_regression.available_records,
+        current: item.operator_regression.current ? {
+          records: item.operator_regression.current.records,
+          failureRate: item.operator_regression.current.failure_rate,
+          p95FirstAudioMs: item.operator_regression.current.p95_first_audio_ms,
+          p95RealtimeFactor: item.operator_regression.current.p95_realtime_factor,
+          p95FinalHandoffErrorMs: item.operator_regression.current.p95_final_handoff_error_ms,
+        } : null,
+        reasons: item.operator_regression.reasons,
+      } : null,
     })),
   }
 }
+
+function operatorHeaders() {
+  if (typeof window === 'undefined') return undefined
+  try {
+    const value = window.sessionStorage.getItem('sorion.voice-review.operator-token')?.trim()
+    return value ? { 'X-SoriON-Operator-Token': value } : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export async function confirmWorkerOperatorBaseline(
+  group: WorkerTelemetryAggregate,
+  note = '',
+): Promise<OperatorBenchmarkBaseline> {
+  const result = await apiRequest<{
+    baseline_id: string
+    group_key: string
+    engine_id: string
+    preset_id: string
+    model_id: string
+    model_version: string
+    model_digest: string
+    device_profile: string
+    accelerator_name: string
+    gpu_name: string
+    source_records: number
+    source_records_sha256: string
+    metrics: {
+      records: number
+      failure_rate: number
+      p95_first_audio_ms: number | null
+      p95_realtime_factor: number | null
+      p95_final_handoff_error_ms: number | null
+    }
+    created_at: string
+    actor: string
+    note: string
+  }>('/quality/worker-telemetry/operator-baselines', {
+    method: 'POST',
+    headers: operatorHeaders(),
+    body: JSON.stringify({
+      engine_id: group.engineId,
+      preset_id: group.presetId,
+      model_id: group.modelId,
+      model_version: group.modelVersion,
+      model_digest: group.modelDigest,
+      device_profile: group.deviceProfile,
+      accelerator_name: group.acceleratorName,
+      gpu_name: group.gpuName,
+      confirmation: '현재 성능 기준선 확정',
+      note,
+    }),
+  })
+  return {
+    baselineId: result.baseline_id,
+    groupKey: result.group_key,
+    engineId: result.engine_id,
+    presetId: result.preset_id,
+    modelId: result.model_id,
+    modelVersion: result.model_version,
+    modelDigest: result.model_digest,
+    deviceProfile: result.device_profile,
+    acceleratorName: result.accelerator_name,
+    gpuName: result.gpu_name,
+    sourceRecords: result.source_records,
+    sourceRecordsSha256: result.source_records_sha256,
+    metrics: {
+      records: result.metrics.records,
+      failureRate: result.metrics.failure_rate,
+      p95FirstAudioMs: result.metrics.p95_first_audio_ms,
+      p95RealtimeFactor: result.metrics.p95_realtime_factor,
+      p95FinalHandoffErrorMs: result.metrics.p95_final_handoff_error_ms,
+    },
+    createdAt: result.created_at,
+    actor: result.actor,
+    note: result.note,
+  }
+}
+
+export async function retireWorkerOperatorBaseline(baselineId: string, reason: string) {
+  return apiRequest<{ status: string; baseline_id: string }>(
+    `/quality/worker-telemetry/operator-baselines/${encodeURIComponent(baselineId)}/retire`,
+    {
+      method: 'POST',
+      headers: operatorHeaders(),
+      body: JSON.stringify({
+        confirmation: '운영자 기준선 폐기',
+        reason,
+      }),
+    },
+  )
+}
+

@@ -159,7 +159,7 @@
   color: #ff9a90;
 }
 
-@media (min-width: 1180px) {
+@media (min-width: 1024px) {
   .soa-workspace-shell--dubbing,
   .soa-workspace-shell--dubbing.soa-workspace-shell--has-player {
     padding-bottom: 152px;
@@ -167,9 +167,10 @@
 
   .soa-desktop-studio {
     display: grid;
-    grid-template-columns: var(--soa-project-rail-width, 246px) 6px minmax(0, 1fr) 6px var(--soa-voice-drawer-width, 304px);
+    grid-template-columns: var(--soa-project-rail-width, 224px) 6px minmax(0, 1fr) 6px var(--soa-voice-drawer-width, 286px);
     min-height: calc(100dvh - 58px);
-    max-width: 1800px;
+    width: 100%;
+    max-width: 1920px;
     margin: 0 auto;
   }
 
@@ -599,7 +600,7 @@
   }
 }
 
-@media (min-width: 1180px) {
+@media (min-width: 1024px) {
   .soa-dubbing-activity { display: none; }
 }
 

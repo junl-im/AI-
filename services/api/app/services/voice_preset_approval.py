@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-import os
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
@@ -14,11 +13,9 @@ from uuid import uuid4
 
 from app.schemas.voice_preset_approval import (
     VoicePresetApprovalApplyRequest,
-    VoicePresetApprovalDiff,
     VoicePresetApprovalInput,
     VoicePresetApprovalPreviewResponse,
     VoicePresetApprovalRecord,
-    VoicePresetRenewalItem,
     VoicePresetRenewalQueueResponse,
     VoicePresetResignApplyRequest,
     VoicePresetResignPreviewRequest,
@@ -38,6 +35,15 @@ from app.services.voice_preset_evidence import (
     mark_duplicate_checksums,
     sha256_file,
 )
+from app.services.voice_preset_approval_primitives import (
+    canonical_json as _canonical,
+    manifest_diff as _diff,
+    manifest_digest as _manifest_digest,
+    signature_payload as _signature_payload,
+    valid_sha256 as _valid_sha256,
+)
+from app.services.voice_preset_approval_storage import VoicePresetApprovalStorage
+from app.services.voice_preset_renewal import VoicePresetRenewalService
 from app.services.voice_preset_validation import inspect_voice_preset
 from app.services.voice_presets import PRESET_VOICE_IDS, get_voice_preset
 from app.services.voice_review_trust import VoiceReviewTrustStore
@@ -55,61 +61,6 @@ _CONFIRM_RESIGN = "현재 키로 재서명"
 
 class VoicePresetApprovalError(ValueError):
     pass
-
-
-def _canonical(value: object) -> bytes:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-
-
-def _sha256_bytes(value: bytes) -> str:
-    return hashlib.sha256(value).hexdigest()
-
-
-def _valid_sha256(value: str) -> bool:
-    return len(value) == 64 and all(character in "0123456789abcdef" for character in value)
-
-
-def _manifest_digest(payload: dict[str, object]) -> str:
-    return _sha256_bytes(_canonical(payload))
-
-
-def _signature_payload(payload: dict[str, object]) -> dict[str, object]:
-    value = json.loads(json.dumps(payload, ensure_ascii=False))
-    approval = value.get("approval")
-    if isinstance(approval, dict):
-        approval["signature"] = ""
-        approval["signed_payload_sha256"] = ""
-    return value
-
-
-def _diff(before: object, after: object, path: str = "") -> list[VoicePresetApprovalDiff]:
-    if isinstance(before, dict) and isinstance(after, dict):
-        rows: list[VoicePresetApprovalDiff] = []
-        for key in sorted(set(before) | set(after)):
-            child = f"{path}.{key}" if path else key
-            rows.extend(_diff(before.get(key), after.get(key), child))
-        return rows
-    if before != after:
-        return [VoicePresetApprovalDiff(path=path, before=before, after=after)]
-    return []
-
-
-def _normalized_datetime(value: datetime | None) -> datetime | None:
-    if value is None:
-        return None
-    return value if value.tzinfo is not None else value.replace(tzinfo=timezone.utc)
-
-
-def _days_remaining(value: datetime | None, now: datetime) -> int | None:
-    normalized = _normalized_datetime(value)
-    if normalized is None:
-        return None
-    return int((normalized - now).total_seconds() // 86400)
 
 
 @dataclass(frozen=True)
@@ -143,7 +94,7 @@ class VoicePresetApprovalService:
     ) -> None:
         self.preset_directory = preset_directory
         self.history_path = history_path
-        self.history_path.parent.mkdir(parents=True, exist_ok=True)
+        self.storage = VoicePresetApprovalStorage(history_path)
         self.signing_secret = signing_secret
         self.signing_key_id = signing_key_id.strip() or "local-review-key"
         self.trusted_signing_keys = dict(trusted_signing_keys or {})
@@ -412,7 +363,7 @@ class VoicePresetApprovalService:
                     "적용 직전 WAV가 변경되어 승인을 중단했습니다."
                 )
             self._assert_writer_lease(lease)
-            self._atomic_write(manifest_path, prepared.proposed_manifest)
+            self.storage.write_manifest(manifest_path, prepared.proposed_manifest)
             record = VoicePresetApprovalRecord(
                 approval_id=prepared.response.approval_id,
                 event="approved",
@@ -443,7 +394,7 @@ class VoicePresetApprovalService:
                     or None
                 ),
             )
-            self._append_history(
+            self.storage.append_history(
                 record,
                 prepared.current_manifest,
                 prepared.proposed_manifest,
@@ -603,7 +554,7 @@ class VoicePresetApprovalService:
             if current_audio_sha256 != prepared.audio_sha256:
                 raise VoicePresetApprovalError("적용 직전 WAV가 변경되어 재서명을 중단했습니다.")
             self._assert_writer_lease(lease)
-            self._atomic_write(manifest_path, prepared.proposed_manifest)
+            self.storage.write_manifest(manifest_path, prepared.proposed_manifest)
             record_id = "resign-" + prepared.response.preview_id[:24]
             approval = prepared.proposed_manifest.get("approval", {})
             record = VoicePresetApprovalRecord(
@@ -623,166 +574,27 @@ class VoicePresetApprovalService:
                 signature=str(approval.get("signature") or "") or None,
                 related_approval_id=prepared.related_approval_id,
             )
-            self._append_history(record, prepared.current_manifest, prepared.proposed_manifest)
+            self.storage.append_history(
+                record,
+                prepared.current_manifest,
+                prepared.proposed_manifest,
+            )
         return record, prepared.proposed_manifest
 
     def renewal_queue(self, warning_days: int = 60) -> VoicePresetRenewalQueueResponse:
-        warning_days = max(1, min(warning_days, 365))
-        now = datetime.now(timezone.utc)
         directory = self._require_directory()
-        items: list[VoicePresetRenewalItem] = []
-        for voice_id in PRESET_VOICE_IDS:
-            profile = get_voice_preset(voice_id)
-            manifest_path = directory / f"{voice_id}.manifest.json"
-            audio_path = directory / f"{voice_id}.wav"
-            reasons: list[str] = []
-            priority = "rotation"
-            manifest_digest: str | None = None
-            audio_digest: str | None = None
-            consent_expires_at = None
-            rights_expires_at = None
-            consent_days = None
-            rights_days = None
-            current_key_id: str | None = None
-            can_resign = False
-
-            if not manifest_path.is_file():
-                reasons.append("manifest가 없어 동의·권리 상태를 확인할 수 없습니다.")
-                priority = "blocked"
-            else:
-                try:
-                    raw = json.loads(manifest_path.read_text(encoding="utf-8"))
-                    if not isinstance(raw, dict):
-                        raise ValueError("manifest 최상위 값이 객체가 아닙니다.")
-                    manifest_digest = _manifest_digest(raw)
-                    manifest = VoicePresetManifest.model_validate(raw)
-                except Exception as error:
-                    reasons.append(f"manifest를 검증하지 못했습니다: {error}")
-                    priority = "blocked"
-                else:
-                    consent_expires_at = _normalized_datetime(manifest.consent.expires_at)
-                    rights_expires_at = _normalized_datetime(manifest.rights.expires_at)
-                    consent_days = _days_remaining(consent_expires_at, now)
-                    rights_days = _days_remaining(rights_expires_at, now)
-                    current_key_id = manifest.approval.key_id.strip() or None
-
-                    if manifest.consent.status != "confirmed":
-                        reasons.append(f"화자 동의 상태가 {manifest.consent.status}입니다.")
-                        priority = "blocked"
-                    if consent_days is not None:
-                        if consent_days < 0:
-                            reasons.append("화자 동의 유효기간이 지났습니다.")
-                            priority = "blocked"
-                        elif consent_days <= warning_days:
-                            reasons.append(f"화자 동의가 {consent_days}일 이내 만료됩니다.")
-                            if priority != "blocked":
-                                priority = "urgent" if consent_days <= 7 else "soon"
-                    if "tts-inference" not in manifest.rights.allowed_uses:
-                        reasons.append("권리 범위에 tts-inference가 없습니다.")
-                        priority = "blocked"
-                    if rights_days is not None:
-                        if rights_days < 0:
-                            reasons.append("음성 사용 권리 유효기간이 지났습니다.")
-                            priority = "blocked"
-                        elif rights_days <= warning_days:
-                            reasons.append(f"음성 사용 권리가 {rights_days}일 이내 만료됩니다.")
-                            if priority != "blocked":
-                                priority = "urgent" if rights_days <= 7 else "soon"
-
-                    audio = inspect_voice_preset(audio_path, voice_id)
-                    if audio.usable:
-                        audio_digest = sha256_file(audio_path)
-                        if manifest.integrity.sha256.lower() != audio_digest:
-                            reasons.append("manifest SHA-256와 현재 WAV가 다릅니다.")
-                            priority = "blocked"
-                        if (
-                            manifest.human_review.status == "approved"
-                            and manifest.human_review.audio_sha256.lower() != audio_digest
-                        ):
-                            reasons.append("승인 당시 WAV와 현재 WAV가 달라 재검수가 필요합니다.")
-                            priority = "blocked"
-                    else:
-                        reasons.append("사용 가능한 WAV가 배치되지 않았습니다.")
-                        priority = "blocked"
-
-                    evidence = inspect_voice_preset_evidence(
-                        directory,
-                        profile,
-                        audio,
-                        self.signing_secret,
-                        self.signing_key_id,
-                        self.trusted_signing_keys,
-                    )
-                    if manifest.approval.mode == "hmac-sha256":
-                        if evidence.signature_status != "valid":
-                            reasons.append("현재 manifest 서명을 신뢰 키로 검증하지 못했습니다.")
-                            priority = "blocked"
-                        elif (
-                            self.trust_store.can_sign
-                            and current_key_id != self.trust_store.active_key_id
-                        ):
-                            reasons.append(
-                                f"이전 신뢰 키 {current_key_id or '-'}에서 "
-                                f"현재 키 {self.trust_store.active_key_id}로 재서명이 필요합니다."
-                            )
-                    elif (
-                        manifest.human_review.status == "approved"
-                        and self.trust_store.can_sign
-                    ):
-                        reasons.append(
-                            "승인 manifest가 unsigned 상태여서 현재 키 서명이 필요합니다."
-                        )
-
-                    can_resign = bool(
-                        self.trust_store.can_sign
-                        and audio_digest
-                        and manifest.human_review.status == "approved"
-                        and manifest.human_review.audio_sha256.lower() == audio_digest
-                        and (
-                            manifest.approval.mode == "unsigned"
-                            or evidence.signature_status == "valid"
-                        )
-                        and (
-                            manifest.approval.mode == "unsigned"
-                            or current_key_id != self.trust_store.active_key_id
-                        )
-                    )
-
-            if reasons:
-                items.append(VoicePresetRenewalItem(
-                    voice_id=voice_id,
-                    display_name=profile.display_name,
-                    priority=priority,
-                    reasons=list(dict.fromkeys(reasons)),
-                    manifest_sha256=manifest_digest,
-                    audio_sha256=audio_digest,
-                    consent_expires_at=consent_expires_at,
-                    rights_expires_at=rights_expires_at,
-                    consent_days_remaining=consent_days,
-                    rights_days_remaining=rights_days,
-                    current_key_id=current_key_id,
-                    active_key_id=(
-                        self.trust_store.active_key_id
-                        if self.trust_store.can_sign
-                        else None
-                    ),
-                    can_resign=can_resign,
-                ))
-
-        order = {"blocked": 0, "urgent": 1, "soon": 2, "rotation": 3}
-        items.sort(key=lambda item: (order[item.priority], item.voice_id))
-        return VoicePresetRenewalQueueResponse(
-            generated_at=now,
-            warning_days=warning_days,
-            active_key_id=self.trust_store.active_key_id if self.trust_store.can_sign else None,
-            trusted_key_ids=list(self.trust_store.trusted_key_ids),
-            items=items,
-        )
+        return VoicePresetRenewalService(
+            directory=directory,
+            signing_secret=self.signing_secret,
+            signing_key_id=self.signing_key_id,
+            trusted_signing_keys=self.trusted_signing_keys,
+            trust_store=self.trust_store,
+        ).build(warning_days)
 
     def list_history(self, limit: int = 100) -> list[VoicePresetApprovalRecord]:
         return [
             VoicePresetApprovalRecord.model_validate(item["record"])
-            for item in reversed(self._read_history()[-max(1, min(limit, 500)):])
+            for item in reversed(self.storage.read_history()[-max(1, min(limit, 500)):])
             if isinstance(item.get("record"), dict)
         ]
 
@@ -798,7 +610,7 @@ class VoicePresetApprovalService:
                 f"확인 문구는 '{_CONFIRM_ROLLBACK}'이어야 합니다."
             )
         with self._write_lock() as lease:
-            history = self._read_history()
+            history = self.storage.read_history()
             source_index = next(
                 (
                     index
@@ -863,61 +675,7 @@ class VoicePresetApprovalService:
                 related_approval_id=approval_id,
             )
             self._assert_writer_lease(lease)
-            self._atomic_write(manifest_path, rollback_manifest)
-            self._append_history(rollback_record, current, rollback_manifest)
+            self.storage.write_manifest(manifest_path, rollback_manifest)
+            self.storage.append_history(rollback_record, current, rollback_manifest)
         return rollback_record, rollback_manifest
 
-    def _atomic_write(self, path: Path, payload: dict[str, object]) -> None:
-        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-        try:
-            with temporary.open("w", encoding="utf-8", newline="\n") as output:
-                output.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
-                output.flush()
-                os.fsync(output.fileno())
-            temporary.replace(path)
-            self._fsync_directory(path.parent)
-        finally:
-            temporary.unlink(missing_ok=True)
-
-    @staticmethod
-    def _fsync_directory(directory: Path) -> None:
-        flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
-        try:
-            descriptor = os.open(directory, flags)
-        except OSError:
-            return
-        try:
-            os.fsync(descriptor)
-        finally:
-            os.close(descriptor)
-
-    def _append_history(
-        self,
-        record: VoicePresetApprovalRecord,
-        before: dict[str, object],
-        after: dict[str, object],
-    ) -> None:
-        value = {
-            "record": record.model_dump(mode="json"),
-            "before_manifest": before,
-            "after_manifest": after,
-        }
-        with self.history_path.open("a", encoding="utf-8", newline="\n") as output:
-            output.write(
-                json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n"
-            )
-            output.flush()
-            os.fsync(output.fileno())
-
-    def _read_history(self) -> list[dict[str, object]]:
-        if not self.history_path.is_file():
-            return []
-        results: list[dict[str, object]] = []
-        for line in self.history_path.read_text(encoding="utf-8").splitlines():
-            try:
-                value = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            if isinstance(value, dict):
-                results.append(value)
-        return results

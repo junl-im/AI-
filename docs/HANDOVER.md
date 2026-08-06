@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.9 · CI Quality Hotfix**
+현재 기준 버전: **0.10.1 · Approval Modularization & Operator Baselines**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-06 KST**
 제품 소유·디자인: **곰같은여우**
@@ -10,6 +10,30 @@
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+
+## 0.10.1 Approval Modularization & Operator Baselines
+
+1. **작업 일시(KST)**: 2026-08-06 18:27 KST.
+2. **대상·기준 버전**: 0.10.1 / 0.10.0 Always-on Preset Runtime & PC Three-Pane.
+3. **변경 내용**: 923줄 승인 서비스를 orchestration, canonical hash·diff, 원자 저장·history, 갱신 대기열로 분리하고 운영자 확정 성능 기준선의 생성·교체·폐기와 별도 회귀 판정을 추가했습니다.
+4. **변경 이유**: 승인·서명·파일 저장·갱신 책임이 한 파일에 집중되어 변경 위험이 커졌고, 자동 최초5/최근5 기준선만으로는 운영자가 검증한 장기 기준을 고정할 수 없었기 때문입니다.
+5. **영향 범위**: 음성 프리셋 승인·재서명·롤백, 증거 갱신 대기열, Worker telemetry 집계, Quality Lab benchmark UI, API schema·route·설정·테스트와 repository preflight입니다.
+6. **주요 파일**: `voice_preset_approval.py`, `voice_preset_approval_primitives.py`, `voice_preset_approval_storage.py`, `voice_preset_renewal.py`, `operator_baseline_store.py`, `worker_benchmark_baseline.py`, `verification.py`, `BenchmarkDashboardCard.tsx`, `qualityApi.ts`, `qualityTypes.ts`.
+7. **검증 결과**: Repository preflight 34/34, API pytest 189개, Worker pytest 14개, TS/TSX 구문 검사 190개, 변경 Web semantic 계약 검사와 Python compileall을 통과했습니다. 0.10.0 기준 패치 적용본과 전체본의 829개 파일 SHA-256이 완전히 일치했고, 양쪽 preflight 34/34와 두 ZIP 무결성 검사도 통과했습니다.
+8. **제한·주의사항**: 운영자 기준선은 동일 조건 최근 5건의 통계 snapshot이며 실제 청취 승인이나 실기기 인증을 대체하지 않습니다. Ruff와 전체 Web ESLint·Vitest·Vite build는 전달 환경의 설치 의존성 제약 때문에 GitHub Actions가 최종 판정합니다.
+9. **산출물**: `SoriON-AI-0.10.1-approval-modularization-operator-baselines-full.zip`, `SoriON-AI-0.10.0-to-0.10.1-approval-modularization-operator-baselines-patch.zip`.
+10. **다음 업데이트**: 0.10.2 Recovery Soak & Managed Lock Interface.
+
+
+## 0.10.0 Always-on Preset Runtime & PC Three-Pane
+
+1. **대상·기준 버전**: 0.10.0 / 0.9.9 CI Quality Hotfix.
+2. **프리셋 자동 연동**: 미리듣기 요청은 엔진 준비 전에도 내부 대기열에 유지하고 연결 복구 뒤 자동 재실행합니다.
+3. **지속 연결**: 12초/45초 heartbeat, 60초 전체 점검, focus·pageshow·online·network change 재검사를 사용합니다.
+4. **상태 비노출**: 일반 작업 화면은 API·Worker·GPU·주소·연결 여부와 인앱 엔진 안내를 표시하지 않습니다.
+5. **PC 3분할**: 1024px부터 프로젝트/중앙 작업/프리셋 음성의 세 영역을 기본 펼침으로 표시합니다.
+6. **레이아웃 저장**: `sorion.desktop-studio-layout.v2`를 사용해 이전 v1 접힘 상태로 패널이 사라지는 문제를 차단합니다.
+7. **다음 업데이트**: 0.10.1 Approval Service Modularization & Operator Baselines.
 
 ## 0.9.9 CI Quality Hotfix
 
@@ -364,7 +388,7 @@ health · readiness · GPU diagnostics · jobs · SSE · WAV
 - API·실제 TTS·Demo 상태를 구분하고 Worker·GPU 3단계 상태를 표시.
 - 초기 랜딩에서는 숨고 작업공간 진입 뒤 나타나는 Linked Player Dock과 최대 20개 큐.
 - 목소리 복제, 품질 연구소와 클릭 시 편집 상태를 복원하는 프로젝트 저장소.
-- PC 1180px 이상 좌우 패널의 너비 조절·접기와 `sorion.desktop-studio-layout.v1` 로컬 저장.
+- PC 1024px 이상 좌우 패널의 너비 조절·접기와 `sorion.desktop-studio-layout.v2` 로컬 저장.
 - Engine Doctor의 공개 HTTPS Bridge, 프리셋 WAV 세부 진단과 첫 음성 파일 준비 지표 표시.
 ### FastAPI Gateway
 - Health, Setup, Connectivity, Engine Registry.
@@ -747,7 +771,7 @@ CI Hotfix 4 테스트 규칙:
 
 ## 41. 0.9.3-beta.3 Engine Heartbeat 4
 - 첫 화면 4단계를 한 화면 안의 2×2 또는 1×4 그리드로 정리했다.
-- PC 1180px 이상은 왼쪽 프로젝트 목록, 중앙 Chat Workspace, 오른쪽 Voice Drawer의 3단 편집 구조다.
+- PC 1024px 이상은 왼쪽 프로젝트 목록, 중앙 Chat Workspace, 오른쪽 Voice Drawer의 3단 편집 구조다.
 - 중앙 하단 Timeline Editor는 시간 눈금·플레이헤드·가로 클립·가위·삭제 도구를 표시한다.
 - 상단 엔진 상태는 API·Worker·GPU 3점으로 유지하고 실패 계층은 작업 메시지로 즉시 기록한다.
 - 검증: preflight 11개, API 123개, Worker 14개, compileall, 변경 TS/TSX transpile 및 전체 parser 154개 통과.

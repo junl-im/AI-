@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.9.9 · CI Quality Hotfix`
+현재 버전: `0.10.1 · Approval Modularization & Operator Baselines`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -15,6 +15,8 @@
 11. 모든 재생 버튼은 클릭 즉시 일시정지 버튼으로 전환되고, 일시정지하면 다시 재생 버튼으로 돌아옵니다. 선택한 목소리·설정을 먼저 적용하며 CosyVoice 프리셋 음원은 `voice-presets` 안내를 따릅니다.
 12. 음성 연결은 자동으로 유지됩니다. 상세 API·Worker·GPU 진단은 설정의 `고급 진단 및 개발자 정보`를 열었을 때만 표시됩니다.
 13. 실제 모델·실기기 수치를 준비하지 않았다면 성공 또는 성능을 가장하지 않습니다.
+14. Quality Lab의 운영자 기준선은 같은 조건의 최근 5건이 있어야 확정할 수 있으며 자동 기준선과 별도로 유지됩니다.
+15. 승인 서비스의 원자 쓰기·history·갱신 대기열은 분리 모듈이지만 잠금과 적용 직전 재검증 순서는 변경하지 않습니다.
 
 - Heartbeat 6.8.4는 새 승인·재서명에 active 신뢰 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지합니다. `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에는 이전 key만 넣고 secret은 Git·ZIP·진단 응답에 포함하지 않습니다.
 - 승인 apply·재서명·rollback은 같은 로컬 파일시스템을 공유하는 API 프로세스 사이에서도 파일 잠금으로 직렬화됩니다. 여러 서버·네트워크 파일시스템은 단일 writer 또는 분산 잠금이 필요합니다.
@@ -23,11 +25,11 @@
 - GitHub Actions 수동 실행의 `runtime_soak_minutes`에서 5·30·60분을 선택할 수 있으며 주간 예약은 30분입니다.
 - Quality Lab의 개인정보 제외 감사 자료는 JSON이 아니라 내부 manifest를 포함한 ZIP으로 내려받습니다.
 
-14. PC 1180px 이상에서는 프로젝트 목록·Chat Workspace·Voice Drawer 3단 편집 화면과 가로 타임라인을 사용합니다.
+14. PC 1024px 이상에서는 프로젝트 목록·Chat Workspace·Voice Drawer 3단 편집 화면과 가로 타임라인을 사용합니다.
 15. Engine Doctor의 `모바일 공개 HTTPS Bridge`는 현재 요청 Origin이 공개 HTTPS인지 진단하며 인증 수단은 아닙니다.
 16. 프리셋 WAV는 1~30초, 16~48kHz, 모노·스테레오 PCM이어야 하며 과도한 무음·클리핑은 Worker 요청 전에 차단됩니다.
 17. 장문 첫 WAV 구간은 `segment-ready` 이벤트로 최종 병합 전에 플레이어에 연결됩니다. 이는 파일 단위 부분 전달이며 진짜 스트리밍 코덱은 아닙니다.
-18. PC 3단 패널의 너비와 접기 상태는 브라우저 로컬 저장소에 보존됩니다.
+18. PC 3단 패널은 새 v2 레이아웃에서 기본 펼침으로 시작하며 이후 너비와 접기 상태를 브라우저 로컬 저장소에 보존합니다.
 19. PC·모바일 음성 설정은 같은 속도·높낮이 범위와 말투 6종을 사용하며, 과거 저장값은 안전 범위로 보정됩니다.
 20. Sheet·확인창은 키보드 초점 순환, Escape 닫기, 닫힌 뒤 초점 복귀와 배경 스크롤 잠금을 제공합니다.
 21. 전체 Web lint·Vitest·semantic typecheck·production build는 검증된 npm lock이 있는 GitHub Actions에서 최종 확인합니다.

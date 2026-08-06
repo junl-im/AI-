@@ -1,7 +1,22 @@
 # ROADMAP
 
-현재 제품 버전: `0.9.9`
+현재 제품 버전: `0.10.1`
 
+
+## 0.10.1 완료 · Approval Modularization & Operator Baselines
+
+- 승인 orchestration, hash·diff, 원자 저장·history, 갱신 대기열 모듈 분리
+- 운영자 확정 최근 5건 SHA-256 기준선과 자동 기준선 별도 관리
+- 기준선 교체·폐기 history와 Quality Lab 회귀 표시
+- 다음 목표는 0.10.2 Recovery Soak & Managed Lock Interface
+
+
+## 0.10.0 완료 · Always-on Preset Runtime & PC Three-Pane
+
+- 프리셋 음성 미리듣기 자동 대기·재연결·점진 재시도
+- 일반 작업 화면 엔진 연결 상태 완전 비노출
+- 12초/45초 heartbeat와 60초 전체 점검
+- 1024px PC 3분할과 v2 기본 펼침 레이아웃
 
 ## 0.9.9 완료 · CI Quality Hotfix
 

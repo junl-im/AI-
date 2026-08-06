@@ -12,9 +12,9 @@ async function requireMarkers(relativePath, markers) {
   }
 }
 
-await requireMarkers('services/api/app/api/routes/verification.py', [
-  '_BENCHMARK_MINIMUM_RECORDS',
-  '_regression_assessment',
+await requireMarkers('services/api/app/services/worker_benchmark_baseline.py', [
+  'BENCHMARK_MINIMUM_RECORDS',
+  'automatic_assessment',
   '비중첩 기준선',
   'p95_final_handoff_error_ms',
 ])

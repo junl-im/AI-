@@ -39,7 +39,11 @@ if ((routes.match(/_principal\(request\)/g) ?? []).length < 4) {
 const service = await requireMarkers('services/api/app/services/voice_preset_approval.py', [
   'with self._write_lock() as lease:',
   '적용 직전 WAV가 변경되어 승인을 중단했습니다.',
+  'self.storage.write_manifest',
+])
+await requireMarkers('services/api/app/services/voice_preset_approval_storage.py', [
   'os.fsync(output.fileno())',
+  'temporary.replace(path)',
 ])
 const applyLock = service.indexOf('with self._write_lock() as lease:', service.indexOf('    def apply('))
 const applyPrepare = service.indexOf('prepared = self._prepare', service.indexOf('    def apply('))

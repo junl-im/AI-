@@ -37,6 +37,10 @@ def client(tmp_path_factory, monkeypatch):
         str(app_path / "worker-telemetry.jsonl"),
     )
     monkeypatch.setenv(
+        "SORION_OPERATOR_BASELINE_PATH",
+        str(app_path / "operator-baselines.jsonl"),
+    )
+    monkeypatch.setenv(
         "SORION_VOICE_REVIEW_APPROVAL_PATH",
         str(app_path / "voice-review-approvals.jsonl"),
     )

@@ -68,8 +68,8 @@ SoriON의 만들기 화면은 채팅이 아니라 **장문 프로젝트를 문�
 
 ## PC 3단 편집 구조
 
-- 1180px 이상: 왼쪽 프로젝트 히스토리 / 중앙 Chat Workspace·내용 편집·Timeline / 오른쪽 Voice Drawer.
-- 1180px 미만: 기존 모바일 단일 열과 Sheet 기반 음성 선택을 유지합니다.
+- 1024px 이상: 왼쪽 프로젝트 히스토리 / 중앙 Chat Workspace·내용 편집·Timeline / 오른쪽 Voice Drawer.
+- 1024px 미만: 기존 모바일 단일 열과 Sheet 기반 음성 선택을 유지합니다.
 - Timeline은 가로 클립, 시간 눈금, 플레이헤드, 가위·삭제 직접 도구를 우선 표시합니다.
 - API·Worker·GPU 실패는 상단 점 상태와 중앙 시스템 메시지에 동시에 표시합니다.
 

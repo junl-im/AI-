@@ -8,8 +8,10 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.9 · CI Quality Hotfix`
+- 버전: `0.10.1 · Approval Modularization & Operator Baselines`
 - 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
+- 운영자 기준선: 최근 5건을 SHA-256 snapshot으로 확정하고 자동 기준선과 별도로 교체·폐기 이력을 관리합니다.
+- 승인 구조: 해시·diff, 원자 저장·history, 증거 갱신 대기열을 독립 모듈로 분리했습니다.
 - 감사 내보내기: 실제 WAV·사용자 식별자·GPU 원문·비밀키를 제외한 검증 가능 ZIP을 제공합니다.
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
@@ -22,11 +24,11 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - CI: 커밋된 lock 검증, lint·typecheck·Vitest·build 단일 실행기와 로그·dist SHA-256 증거 보고서
 - Firebase: `device-streaming-96b2272c` Web Auth 공개 설정 연결, Firestore·Storage 기본 전면 차단
 - PWA: 1024px 최적화 로고와 1.5MiB 사전 캐시 예산 검사
-- 모바일: 카카오톡 WebView를 감지해 로컬 PC 엔진 제한과 외부 브라우저 전환을 즉시 안내
+- 모바일: 인앱 브라우저에서도 연결 기술 상태를 노출하지 않고 가능한 음성 경로를 자동 선택
 - 재생 UX: 재생을 누르는 즉시 일시정지 버튼으로 바뀌고, 다시 누르면 재생 버튼으로 돌아오는 순차 제어
 - 프리셋: 여성 1종·남성 3종·중성 1종, 성별 불일치·동일 화자 중복 배정·CosyVoice 기본 WAV 대체를 차단
 - 고급 진단: 설정의 접힌 개발자 영역에서만 API·TTS·Worker·GPU·프리셋 상태와 개인정보 제외 진단을 확인
-- PC 편집: 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
+- PC 편집: 1024px부터 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
 - 자동 음성 준비: 일반 화면에는 기술 연결 상태를 숨기고 가장 빠른 경로를 병렬 탐색·자동 재연결·heartbeat로 유지
 - 모바일 Bridge: 공개 HTTPS Origin을 `/connectivity`와 Engine Doctor에서 별도 진단
 - 프리셋 안전성: WAV 포맷·길이·샘플레이트·무음·클리핑을 Worker 요청 전에 검사
@@ -69,7 +71,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 승인 경합 차단: apply·rollback의 상태 재검사와 manifest·WAV 쓰기를 같은 잠금 안에서 수행
 - CI 품질 복구: Ruff 최신 규칙과 Web 타입 계약을 맞추고 재유입 preflight를 추가
 - CI Hotfix: 승인 서비스 import 순서를 Ruff isort 기준으로 고정하고 플레이어 테스트의 초기 media pause와 사용자 pause를 분리
-- 상시 연결: API 후보 병렬 탐색, 20초/90초 heartbeat, 120초 전체 갱신, API↔Worker keep-alive pool과 15초 readiness supervisor
+- 상시 연결: API 후보 병렬 탐색, 12초/45초 heartbeat, 60초 전체 갱신, 포커스·페이지 복귀 자동 재연결과 API↔Worker keep-alive
 - 신뢰 키 교체: 새 승인·재서명은 active HMAC 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지
 - 증거 갱신 대기열: 동의·권리 만료, WAV 결박 불일치, unsigned·이전 키 상태를 자동 분류하되 만료일은 자동 연장하지 않음
 - 승인 파일 보호: apply·재서명·rollback을 같은 호스트의 API 프로세스 간 파일 잠금과 원자 쓰기로 직렬화
@@ -80,7 +82,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 ### 버전 올리기
 
 ```bash
-npm run version:set -- 0.9.9
+npm run version:set -- 0.10.1
 npm run quality:version-sync
 ```
 

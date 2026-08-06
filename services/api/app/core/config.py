@@ -64,6 +64,7 @@ class Settings(BaseSettings):
     voice_review_operator_token: str = ""
     voice_review_allow_loopback_without_token: bool = True
     worker_telemetry_path: str = ".sorion/quality/worker-synthesis-telemetry.jsonl"
+    operator_baseline_path: str = ".sorion/quality/operator-benchmark-baselines.jsonl"
     stt_directory: str = ".sorion/stt"
     stt_max_file_bytes: int = 100 * 1024 * 1024
     faster_whisper_model: str = "small"
@@ -135,6 +136,10 @@ class Settings(BaseSettings):
     @property
     def worker_telemetry_file(self) -> Path:
         return Path(self.worker_telemetry_path).expanduser().resolve()
+
+    @property
+    def operator_baseline_file(self) -> Path:
+        return Path(self.operator_baseline_path).expanduser().resolve()
 
     @property
     def stt_path(self) -> Path:

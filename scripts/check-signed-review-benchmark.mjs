@@ -16,10 +16,15 @@ await requireMarkers('services/api/app/services/voice_preset_approval.py', [
   '현재 WAV 승인',
   'expected_audio_sha256',
   'preview_id',
-  '_atomic_write',
+  'self.storage.write_manifest',
   'before_manifest',
   'rolled-back',
   'hmac.new',
+])
+await requireMarkers('services/api/app/services/voice_preset_approval_storage.py', [
+  'write_manifest',
+  'append_history',
+  'os.fsync(output.fileno())',
 ])
 await requireMarkers('services/api/app/services/voice_preset_evidence.py', [
   'signature_status = "valid"',

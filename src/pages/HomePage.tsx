@@ -122,11 +122,17 @@ export function HomePage() {
   const [composerDraft, setComposerDraft] = useState('')
   const [directiveIds, setDirectiveIds] = useState<ComposerDirective['id'][]>(['numbers'])
   const [previewingId, setPreviewingId] = useState<string | null>(null)
+  const [pendingPreview, setPendingPreview] = useState<{
+    voiceId: string
+    attempt: number
+    failed: boolean
+  } | null>(null)
   const [pendingRecoveryIds, setPendingRecoveryIds] = useState<string[]>([])
   const [pendingGeneration, setPendingGeneration] = useState<PendingLongformGeneration | null>(null)
   const observedResetTokenRef = useRef(workspaceResetToken)
   const pendingResetSaveRef = useRef<number | null>(null)
   const explicitWorkspaceActionRef = useRef(false)
+  const previewRunIdRef = useRef(0)
   const engineCatalog = useEngineCatalog()
   const timeline = useTimelineGeneration()
   const generateAllTimelineBlocks = timeline.generateAll
@@ -214,12 +220,21 @@ export function HomePage() {
     setDirectiveIds(['numbers'])
     setPendingRecoveryIds([])
     setPendingGeneration(null)
+    setPendingPreview(null)
+    setPreviewingId(null)
+    previewRunIdRef.current += 1
   }, [clearQueue, clearTimeline, workspaceResetToken])
   useEffect(() => {
     if (pendingResetSaveRef.current !== workspaceResetToken) return
     pendingResetSaveRef.current = null
     void clearWorkspaceSession().then(saveWorkspaceNow)
   }, [saveWorkspaceNow, workspaceResetToken])
+  useEffect(() => {
+    if (workspaceEntered && page === 'home') return
+    previewRunIdRef.current += 1
+    setPendingPreview(null)
+    setPreviewingId(null)
+  }, [page, workspaceEntered])
   useEffect(() => {
     if (!activeProject) return
     setPendingGeneration(null)
@@ -242,6 +257,9 @@ export function HomePage() {
         text: `${activeProject.title} 내용과 음성 블록을 복원했습니다.`,
       },
     ])
+    setPendingPreview(null)
+    setPreviewingId(null)
+    previewRunIdRef.current += 1
     const recoverableIds = restoreProject(activeProject, {
       voiceId: activeProject.voiceId,
       voiceName: voice.name,
@@ -363,28 +381,39 @@ export function HomePage() {
     if (!engineAvailable) {
       setPendingGeneration(pending)
       appendMessage({
-        role: 'system',
-        badge: '음성 시스템 준비 중',
-        text: '대사 블록을 준비했습니다. 사용할 수 있는 음성이 준비되면 자동으로 이어서 생성합니다.',
+        role: 'assistant',
+        badge: '자동 진행',
+        text: '대사 블록을 준비했습니다. 다음 단계는 자동으로 이어집니다.',
       })
       requestAutomaticApiReconnect()
       return
     }
     await generateLongform(pending)
   }
-  async function previewVoice(nextVoiceId: string) {
+  const selectVoice = useCallback((nextVoiceId: string) => {
+    previewRunIdRef.current += 1
+    setPendingPreview(null)
+    setPreviewingId(null)
+    setVoiceId(getVoicePreset(nextVoiceId).id)
+  }, [])
+
+  const previewVoice = useCallback(async (nextVoiceId: string) => {
     const voice = getVoicePreset(nextVoiceId)
+    const runId = previewRunIdRef.current + 1
+    previewRunIdRef.current = runId
     setVoiceId(voice.id)
+    setPreviewingId(nextVoiceId)
+
     if (!engineAvailable || !engineCatalog.selected) {
-      appendMessage({
-        role: 'assistant',
-        badge: '목소리 선택',
-        text: `${voice.name} 목소리를 선택했습니다. 음성 기능이 준비되는 즉시 사용할 수 있습니다.`,
-      })
+      setPendingPreview((current) => ({
+        voiceId: nextVoiceId,
+        attempt: current?.voiceId === nextVoiceId ? current.attempt : 0,
+        failed: false,
+      }))
       requestAutomaticApiReconnect()
       return
     }
-    setPreviewingId(nextVoiceId)
+
     const text = `안녕하세요. 소리온의 ${voice.name} 목소리입니다.`
     try {
       const request: TtsSynthesisRequest = {
@@ -398,7 +427,9 @@ export function HomePage() {
         normalizeText,
       }
       const result = await synthesizeSpeech(request, createRandomId())
+      if (previewRunIdRef.current !== runId) return
       const audio = generatedPreview(result, request, voice.name)
+      setPendingPreview(null)
       enqueueAndPlay(audio, `${voice.name} 프리뷰`)
       appendMessage({
         role: 'assistant',
@@ -415,20 +446,52 @@ export function HomePage() {
             ? `${voice.name} 프리뷰를 자동으로 완성했습니다.`
             : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
       })
-    } catch {
-      appendMessage({
-        role: 'system',
-        badge: '프리뷰 대기',
-        text: '음성 기능을 준비하고 있습니다. 잠시 후 다시 시도해 주세요.',
-      })
-    } finally {
       setPreviewingId(null)
+    } catch {
+      if (previewRunIdRef.current !== runId) return
+      setPendingPreview((current) => ({
+        voiceId: nextVoiceId,
+        attempt: current?.voiceId === nextVoiceId ? current.attempt + 1 : 1,
+        failed: true,
+      }))
+      requestAutomaticApiReconnect()
     }
-  }
+  }, [
+    appendMessage,
+    engineAvailable,
+    engineCatalog.selected,
+    enqueueAndPlay,
+    normalizeText,
+    selectedEngineId,
+    speechEmotion,
+    speechPitch,
+    speechSpeed,
+  ])
+
+  useEffect(() => {
+    if (!pendingPreview) return
+    const ready = Boolean(
+      engineAvailable
+      && engineCatalog.selected
+      && previewingId === pendingPreview.voiceId
+    )
+    const retryDelay = Math.min(1_000 * (2 ** Math.min(pendingPreview.attempt, 4)), 15_000)
+    const timer = window.setTimeout(() => {
+      if (ready) {
+        const voiceIdToRetry = pendingPreview.voiceId
+        setPendingPreview(null)
+        void previewVoice(voiceIdToRetry)
+        return
+      }
+      requestAutomaticApiReconnect()
+      setPendingPreview((current) => current ? { ...current, attempt: current.attempt + 1 } : current)
+    }, ready && !pendingPreview.failed ? 0 : retryDelay)
+    return () => window.clearTimeout(timer)
+  }, [engineAvailable, engineCatalog.selected, pendingPreview, previewVoice, previewingId])
+
   async function retryBlock(id: string) {
     if (!engineAvailable) {
       requestAutomaticApiReconnect()
-      showNotice('음성 기능을 자동으로 준비하고 있습니다.')
       return
     }
     await timeline.retryBlock(id)
@@ -458,7 +521,7 @@ export function HomePage() {
           role="separator"
           aria-label="프로젝트 패널 너비 조절"
           aria-orientation="vertical"
-          aria-valuemin={200}
+          aria-valuemin={188}
           aria-valuemax={360}
           aria-valuenow={desktopLayout.leftWidth}
           aria-valuetext={desktopLayout.leftCollapsed ? '접힘' : `${desktopLayout.leftWidth}픽셀`}
@@ -491,7 +554,7 @@ export function HomePage() {
                 emotion={speechEmotion}
                 normalizeText={normalizeText}
                 engine={engineCatalog.selected}
-                onVoiceChange={setVoiceId}
+                onVoiceChange={selectVoice}
                 onPreview={(id) => void previewVoice(id)}
                 onSpeedChange={setSpeechSpeed}
                 onPitchChange={setSpeechPitch}
@@ -534,7 +597,7 @@ export function HomePage() {
           role="separator"
           aria-label="보이스 패널 너비 조절"
           aria-orientation="vertical"
-          aria-valuemin={260}
+          aria-valuemin={248}
           aria-valuemax={420}
           aria-valuenow={desktopLayout.rightWidth}
           aria-valuetext={desktopLayout.rightCollapsed ? '접힘' : `${desktopLayout.rightWidth}픽셀`}
@@ -550,7 +613,7 @@ export function HomePage() {
           pitch={speechPitch}
           emotion={speechEmotion}
           normalizeText={normalizeText}
-          onVoiceChange={setVoiceId}
+          onVoiceChange={selectVoice}
           onPreview={(id) => void previewVoice(id)}
           onSpeedChange={setSpeechSpeed}
           onPitchChange={setSpeechPitch}

@@ -59,7 +59,7 @@
 아래 항목은 실제 브라우저와 설치된 Web 의존성이 필요합니다.
 
 - 360px, 390px, 430px에서 Sheet 높이·safe area·가상 키보드 겹침
-- 1180px, 1280px, 1440px에서 3단 레이아웃과 6개 말투 버튼 줄바꿈
+- 1024px, 1280px, 1440px에서 3단 레이아웃과 6개 말투 버튼 줄바꿈
 - NVDA, VoiceOver에서 dialog·radiogroup·separator 읽기 순서
 - Chrome, Safari에서 range 키보드 조작과 초점 링
 - 실제 TTS 연결 상태에서 연속 미리듣기 차단과 재활성화

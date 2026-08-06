@@ -223,6 +223,51 @@ class BenchmarkRegressionAssessment(BaseModel):
     reasons: list[str] = Field(default_factory=list)
 
 
+class OperatorBaselineCreateRequest(BaseModel):
+    engine_id: str = Field(min_length=1, max_length=80)
+    preset_id: str = Field(min_length=1, max_length=80)
+    model_id: str = Field(min_length=1, max_length=120)
+    model_version: str = Field(min_length=1, max_length=80)
+    model_digest: str = Field(default="", max_length=128)
+    device_profile: str = Field(min_length=1, max_length=80)
+    accelerator_name: str = Field(min_length=1, max_length=120)
+    gpu_name: str = Field(default="", max_length=160)
+    confirmation: str = Field(min_length=1, max_length=80)
+    note: str = Field(default="", max_length=500)
+
+
+class OperatorBaselineRetireRequest(BaseModel):
+    confirmation: str = Field(min_length=1, max_length=80)
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class OperatorBenchmarkBaseline(BaseModel):
+    baseline_id: str
+    group_key: str
+    engine_id: str
+    preset_id: str
+    model_id: str
+    model_version: str
+    model_digest: str
+    device_profile: str
+    accelerator_name: str
+    gpu_name: str
+    source_records: int = Field(ge=1)
+    source_records_sha256: str = Field(min_length=64, max_length=64)
+    metrics: BenchmarkMetricWindow
+    created_at: datetime
+    actor: str
+    note: str = ""
+
+
+class OperatorBenchmarkRegressionAssessment(BaseModel):
+    baseline_id: str
+    status: Literal["insufficient", "stable", "warning", "regressed"]
+    available_records: int = Field(ge=0)
+    current: BenchmarkMetricWindow | None = None
+    reasons: list[str] = Field(default_factory=list)
+
+
 class WorkerTelemetryAggregate(BaseModel):
     engine_id: str
     preset_id: str
@@ -242,6 +287,8 @@ class WorkerTelemetryAggregate(BaseModel):
     p50_final_handoff_error_ms: int | None = None
     p95_final_handoff_error_ms: int | None = None
     regression: BenchmarkRegressionAssessment
+    operator_baseline: OperatorBenchmarkBaseline | None = None
+    operator_regression: OperatorBenchmarkRegressionAssessment | None = None
 
 
 class WorkerTelemetrySummaryResponse(BaseModel):

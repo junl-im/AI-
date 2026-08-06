@@ -194,6 +194,33 @@ export interface BenchmarkRegressionAssessment {
   reasons: string[]
 }
 
+export interface OperatorBenchmarkBaseline {
+  baselineId: string
+  groupKey: string
+  engineId: string
+  presetId: string
+  modelId: string
+  modelVersion: string
+  modelDigest: string
+  deviceProfile: string
+  acceleratorName: string
+  gpuName: string
+  sourceRecords: number
+  sourceRecordsSha256: string
+  metrics: BenchmarkMetricWindow
+  createdAt: string
+  actor: string
+  note: string
+}
+
+export interface OperatorBenchmarkRegressionAssessment {
+  baselineId: string
+  status: 'insufficient' | 'stable' | 'warning' | 'regressed'
+  availableRecords: number
+  current: BenchmarkMetricWindow | null
+  reasons: string[]
+}
+
 export interface WorkerTelemetryAggregate {
   engineId: string
   presetId: string
@@ -213,6 +240,8 @@ export interface WorkerTelemetryAggregate {
   p50FinalHandoffErrorMs: number | null
   p95FinalHandoffErrorMs: number | null
   regression: BenchmarkRegressionAssessment
+  operatorBaseline: OperatorBenchmarkBaseline | null
+  operatorRegression: OperatorBenchmarkRegressionAssessment | null
 }
 
 export interface WorkerTelemetrySummary {

@@ -439,3 +439,87 @@ def test_worker_telemetry_detects_multi_metric_regression(client):
     assert assessment["baseline"]["records"] == 5
     assert assessment["current"]["records"] == 5
     assert len(assessment["reasons"]) >= 2
+
+
+def test_operator_baseline_can_be_confirmed_compared_and_retired(client):
+    store = client.app.state.worker_telemetry_store
+    base = {
+        "engine_id": "cosyvoice3",
+        "preset_id": "sori-warm",
+        "model_id": "cosyvoice3",
+        "model_version": "1",
+        "model_digest": "sha256:operator-model",
+        "device_profile": "cuda",
+        "accelerator_name": "cuda:0",
+        "gpu_name": "Private GPU Name",
+        "processing_ms": 1000,
+        "audio_duration_seconds": 4.0,
+        "failure_reason": "",
+    }
+    for index in range(5):
+        store.append({
+            **base,
+            "id": f"operator-base-{index}",
+            "worker_job_id": f"operator-base-job-{index}",
+            "recorded_at": f"2026-08-05T{index:02d}:00:00+00:00",
+            "first_audio_ms": 400,
+            "realtime_factor": 0.3,
+            "final_handoff_error_ms": 20,
+            "succeeded": True,
+        })
+
+    created = client.post(
+        "/api/v1/quality/worker-telemetry/operator-baselines",
+        json={
+            **{
+                key: base[key]
+                for key in (
+                    "engine_id",
+                    "preset_id",
+                    "model_id",
+                    "model_version",
+                    "model_digest",
+                    "device_profile",
+                    "accelerator_name",
+                    "gpu_name",
+                )
+            },
+            "confirmation": "현재 성능 기준선 확정",
+            "note": "release candidate",
+        },
+    )
+
+    assert created.status_code == 200
+    baseline = created.json()
+    assert baseline["source_records"] == 5
+    assert len(baseline["source_records_sha256"]) == 64
+
+    for index in range(5, 10):
+        store.append({
+            **base,
+            "id": f"operator-current-{index}",
+            "worker_job_id": f"operator-current-job-{index}",
+            "recorded_at": f"2026-08-05T{index:02d}:00:00+00:00",
+            "first_audio_ms": 1200,
+            "realtime_factor": 0.9,
+            "final_handoff_error_ms": 160,
+            "succeeded": index != 9,
+        })
+
+    summary = client.get("/api/v1/quality/worker-telemetry/summary")
+    assert summary.status_code == 200
+    group = summary.json()["metric_groups"][0]
+    assert group["operator_baseline"]["baseline_id"] == baseline["baseline_id"]
+    assert group["operator_regression"]["status"] == "regressed"
+
+    retired = client.post(
+        f"/api/v1/quality/worker-telemetry/operator-baselines/{baseline['baseline_id']}/retire",
+        json={
+            "confirmation": "운영자 기준선 폐기",
+            "reason": "new model rollout",
+        },
+    )
+    assert retired.status_code == 200
+    assert client.get(
+        "/api/v1/quality/worker-telemetry/operator-baselines"
+    ).json() == []

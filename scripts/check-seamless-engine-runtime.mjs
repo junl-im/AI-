@@ -36,14 +36,16 @@ requireTokens('src/api/httpClient.ts', httpClient, [
 
 const bootstrap = await source('src/hooks/useBackendBootstrap.ts')
 requireTokens('src/hooks/useBackendBootstrap.ts', bootstrap, [
-  'HEALTHY_HEARTBEAT_MS = 20_000',
-  'HIDDEN_HEARTBEAT_MS = 90_000',
-  'FULL_AUDIT_INTERVAL_MS = 120_000',
+  'HEALTHY_HEARTBEAT_MS = 12_000',
+  'HIDDEN_HEARTBEAT_MS = 45_000',
+  'FULL_AUDIT_INTERVAL_MS = 60_000',
   'discoverApiBaseUrl',
   'probeApiBaseUrl',
   "window.addEventListener('online'",
   "document.addEventListener('visibilitychange'",
   "networkInformation?.addEventListener('change'",
+  "window.addEventListener('focus'",
+  "window.addEventListener('pageshow'",
   'applySeamlessFallback()',
 ])
 

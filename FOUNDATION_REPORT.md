@@ -1,8 +1,29 @@
-# SoriON AI 0.9.9 Verification Report
+# SoriON AI 0.10.1 Verification Report
 
-결과 버전: **0.9.9 · CI Quality Hotfix**
+결과 버전: **0.10.1 · Approval Modularization & Operator Baselines**
 
 
+
+## 0.10.1 Approval Modularization & Operator Baselines
+
+- 923줄 승인 서비스를 678줄 orchestration과 canonical hash·diff, 원자 저장·history, 갱신 대기열 모듈로 분리했습니다.
+- 승인 apply·재서명·rollback의 thread lock, SQLite writer lease·fencing, OS file lock과 적용 직전 재검증을 유지합니다.
+- 동일 엔진·모델 digest·장치·프리셋 최근 5건을 운영자 확정 기준선으로 저장하고 source record SHA-256을 기록합니다.
+- 자동 최초5/최근5 기준선과 운영자 기준선을 별도 비교하며 기준선 교체·폐기 이력을 JSONL로 보존합니다.
+- 앱·API·Worker 제품 버전을 0.10.1로 동기화합니다.
+- 검증: Repository preflight 34개, API pytest 189개, Worker pytest 14개, TS/TSX 190개 구문 검사와 Python compileall을 통과했습니다.
+- 제한: Web node_modules가 없어 ESLint·Vitest·semantic typecheck·Vite production build는 GitHub Actions가 최종 판정합니다.
+
+
+## 0.10.0 Always-on Preset Runtime & PC Three-Pane
+
+- 프리셋 미리듣기를 연결 준비 여부와 분리해 내부 대기열에서 자동 재시도합니다.
+- 활성 12초·백그라운드 45초 heartbeat, 60초 전체 진단, focus·pageshow·network change 재검사를 적용합니다.
+- 일반 화면의 인앱 엔진 안내를 제거하고 기술 연결 상태는 고급 진단으로 한정합니다.
+- 1024px부터 좌·중앙·우 3분할을 기본 표시하고 `sorion.desktop-studio-layout.v2`로 이전 접힘 상태를 초기화합니다.
+- 앱·API·Worker 제품 버전을 0.10.0으로 동기화합니다.
+- 검증: Repository preflight 33/33, API pytest 188개, Worker pytest 14개, TS/TSX 191개 구문 검사와 Python compileall을 통과했습니다.
+- 제한: Web node_modules가 없어 ESLint·Vitest·semantic typecheck·Vite production build는 GitHub Actions가 최종 판정합니다.
 
 ## 0.9.9 CI Quality Hotfix
 
@@ -258,7 +279,7 @@ GitHub Actions가 보고한 Ruff 1건, Web 테스트 8건과 Hooks 경고 1건�
 ## Engine Heartbeat 4
 
 - 첫 화면의 1·2·3·4 작업 흐름을 모바일 2×2, 넓은 PC 1×4로 재배치해 마지막 단계가 잘리지 않게 했습니다.
-- PC 1180px 이상에서 왼쪽 프로젝트 히스토리, 가운데 Chat Workspace, 오른쪽 Voice Drawer의 3단 편집 화면을 제공합니다.
+- PC 1024px 이상에서 왼쪽 프로젝트 히스토리, 가운데 Chat Workspace, 오른쪽 Voice Drawer의 3단 편집 화면을 제공합니다.
 - 타임라인을 가로 트랙·시간 눈금·플레이헤드·가위·삭제 도구가 보이는 CapCut형 편집 영역으로 변경했습니다.
 - 우측 상단 엔진 표시는 API·Worker·GPU 3점으로 단순화하고 계층 실패를 작업 메시지에 자동 기록합니다.
 

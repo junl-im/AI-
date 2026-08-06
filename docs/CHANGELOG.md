@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.10.1 · Approval modularization & operator baselines
+
+- 923줄 승인 서비스를 orchestration, canonical hash·diff, 원자 저장·history, 갱신 대기열 모듈로 분리합니다.
+- 기존 승인·재서명·롤백의 writer lease, fencing token, file lock과 적용 직전 재검증을 유지합니다.
+- 같은 엔진·모델 digest·장치·프리셋의 최근 5건을 운영자 확정 기준선으로 저장합니다.
+- 기준선 원본 측정 ID·시각 목록의 SHA-256과 집계값만 보존하고 음성·사용자 문장은 저장하지 않습니다.
+- 운영자 기준선 교체·폐기 이력을 JSONL로 남기고 자동 기준선과 별도로 회귀를 판정합니다.
+- 앱·API·Worker 제품 버전을 0.10.1로 동기화합니다.
+
+## 0.10.0 · Always-on preset runtime & PC three-pane layout
+
+- 프리셋 미리듣기 요청을 내부 대기열에 유지하고 API·Worker·브라우저 음성이 준비되면 자동으로 다시 실행합니다.
+- 연결 실패 뒤 1~15초 점진 재시도, 새 프리셋 선택 시 이전 요청·늦은 결과 무효화를 적용합니다.
+- 활성 12초·백그라운드 45초 heartbeat와 60초 전체 점검, 포커스·페이지 복귀·네트워크 변경 자동 재연결을 적용합니다.
+- 일반 작업 화면에서 인앱 브라우저 엔진 안내와 API·Worker·GPU·주소·연결 여부를 숨깁니다.
+- PC 3분할 기준을 1180px에서 1024px로 낮추고 레이아웃 저장 키를 v2로 갱신해 좌우 패널을 기본 펼침 상태로 복구합니다.
+- 앱·API·Worker 제품 버전을 0.10.0으로 동기화합니다.
+
 ## 0.9.9 · CI quality hotfix
 
 - `voice_preset_approval.py`의 `app.services` import를 Ruff isort 순서로 재정렬해 I001을 해결합니다.

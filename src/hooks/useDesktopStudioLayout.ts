@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 
-const STORAGE_KEY = 'sorion.desktop-studio-layout.v1'
-const LEFT_MIN = 200
+const STORAGE_KEY = 'sorion.desktop-studio-layout.v2'
+const LEFT_MIN = 188
 const LEFT_MAX = 360
-const RIGHT_MIN = 260
+const RIGHT_MIN = 248
 const RIGHT_MAX = 420
 
 export interface DesktopStudioLayoutState {
@@ -17,8 +17,8 @@ export interface DesktopStudioLayoutState {
 type StudioSide = 'left' | 'right'
 
 const DEFAULT_LAYOUT: DesktopStudioLayoutState = {
-  leftWidth: 246,
-  rightWidth: 304,
+  leftWidth: 224,
+  rightWidth: 286,
   leftCollapsed: false,
   rightCollapsed: false,
 }
@@ -81,7 +81,7 @@ export function useDesktopStudioLayout() {
   const startResize = useCallback((side: StudioSide) => (
     event: ReactPointerEvent<HTMLButtonElement>,
   ) => {
-    if (window.innerWidth < 1180) return
+    if (window.innerWidth < 1024) return
     event.preventDefault()
     const startX = event.clientX
     const initial = side === 'left' ? layout.leftWidth : layout.rightWidth

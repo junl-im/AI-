@@ -11,6 +11,9 @@ from app.schemas.verification import (
     DeviceBenchmarkRequest,
     DeviceBenchmarkResponse,
     DeviceBenchmarkSummaryResponse,
+    OperatorBaselineCreateRequest,
+    OperatorBaselineRetireRequest,
+    OperatorBenchmarkBaseline,
     SttBatchVerificationRequest,
     SttBatchVerificationResponse,
     SttMeasurementRequest,
@@ -21,6 +24,19 @@ from app.schemas.verification import (
     WorkerTelemetrySummaryResponse,
 )
 from app.services import stt_evaluation
+from app.services.voice_review_operator import (
+    VoiceReviewOperatorAuthorizationError,
+    authorize_voice_review_operator,
+)
+from app.services.worker_benchmark_baseline import (
+    BENCHMARK_MINIMUM_RECORDS,
+    BENCHMARK_WINDOW_SIZE,
+    automatic_assessment,
+    create_operator_baseline,
+    group_key_from_values,
+    metric_window,
+    operator_assessment,
+)
 
 router = APIRouter()
 
@@ -283,116 +299,27 @@ async def summarize_device_benchmarks(request: Request) -> DeviceBenchmarkSummar
     return _benchmark_summary(items)
 
 
-_BENCHMARK_WINDOW_SIZE = 5
-_BENCHMARK_MINIMUM_RECORDS = _BENCHMARK_WINDOW_SIZE * 2
+_BENCHMARK_WINDOW_SIZE = BENCHMARK_WINDOW_SIZE
+_BENCHMARK_MINIMUM_RECORDS = BENCHMARK_MINIMUM_RECORDS
 
 
 def _worker_metric_window(
     records: list[WorkerSynthesisTelemetryResponse],
 ) -> dict[str, object]:
-    first = [item.first_audio_ms for item in records if item.first_audio_ms is not None]
-    rtf = [item.realtime_factor for item in records if item.realtime_factor is not None]
-    handoff = [
-        item.final_handoff_error_ms
-        for item in records
-        if item.final_handoff_error_ms is not None
-    ]
-    failures = sum(not item.succeeded for item in records)
-    return {
-        "records": len(records),
-        "failure_rate": failures / len(records) if records else 0.0,
-        "p95_first_audio_ms": _percentile95(first),
-        "p95_realtime_factor": _percentile(rtf, 95),
-        "p95_final_handoff_error_ms": _percentile95(handoff),
-    }
+    return metric_window(records).model_dump(mode="json")
 
 
 def _regression_assessment(
     records: list[WorkerSynthesisTelemetryResponse],
 ) -> dict[str, object]:
-    ordered = sorted(records, key=lambda item: item.recorded_at)
-    if len(ordered) < _BENCHMARK_MINIMUM_RECORDS:
-        return {
-            "status": "insufficient",
-            "minimum_records": _BENCHMARK_MINIMUM_RECORDS,
-            "available_records": len(ordered),
-            "baseline": None,
-            "current": None,
-            "reasons": [
-                "비중첩 기준선과 최근 구간을 만들려면 "
-                f"최소 {_BENCHMARK_MINIMUM_RECORDS}건이 필요합니다."
-            ],
-        }
-
-    baseline = _worker_metric_window(ordered[:_BENCHMARK_WINDOW_SIZE])
-    current = _worker_metric_window(ordered[-_BENCHMARK_WINDOW_SIZE:])
-    reasons: list[str] = []
-    severe = False
-
-    baseline_failure = float(baseline["failure_rate"])
-    current_failure = float(current["failure_rate"])
-    if current_failure > baseline_failure + 0.05:
-        reasons.append(
-            f"실패율이 {baseline_failure * 100:.1f}%에서 "
-            f"{current_failure * 100:.1f}%로 증가했습니다."
-        )
-        severe = current_failure >= 0.2
-
-    comparisons = [
-        (
-            "첫 음성 P95",
-            baseline["p95_first_audio_ms"],
-            current["p95_first_audio_ms"],
-            1.25,
-            100.0,
-            "ms",
-        ),
-        (
-            "RTF P95",
-            baseline["p95_realtime_factor"],
-            current["p95_realtime_factor"],
-            1.20,
-            0.05,
-            "",
-        ),
-        (
-            "최종 교체 오차 P95",
-            baseline["p95_final_handoff_error_ms"],
-            current["p95_final_handoff_error_ms"],
-            1.50,
-            50.0,
-            "ms",
-        ),
-    ]
-    for label, baseline_value, current_value, ratio, absolute_delta, suffix in comparisons:
-        if baseline_value is None or current_value is None:
-            continue
-        before = float(baseline_value)
-        after = float(current_value)
-        if after > before * ratio and after - before >= absolute_delta:
-            reasons.append(
-                f"{label}가 {before:.3g}{suffix}에서 {after:.3g}{suffix}로 악화됐습니다."
-            )
-
-    if not reasons:
-        status = "stable"
-    elif severe or len(reasons) >= 2:
-        status = "regressed"
-    else:
-        status = "warning"
-    return {
-        "status": status,
-        "minimum_records": _BENCHMARK_MINIMUM_RECORDS,
-        "available_records": len(ordered),
-        "baseline": baseline,
-        "current": current,
-        "reasons": reasons,
-    }
+    return automatic_assessment(records).model_dump(mode="json")
 
 
 def _worker_telemetry_summary(
     items: list[WorkerSynthesisTelemetryResponse],
+    operator_baselines: dict[str, OperatorBenchmarkBaseline] | None = None,
 ) -> WorkerTelemetrySummaryResponse:
+    operator_baselines = operator_baselines or {}
     grouped: dict[
         tuple[str, str, str, str, str, str, str, str],
         list[WorkerSynthesisTelemetryResponse],
@@ -428,6 +355,18 @@ def _worker_telemetry_summary(
             if item.final_handoff_error_ms is not None
         ]
         success = sum(item.succeeded for item in records)
+        group_key = group_key_from_values((
+            engine_id,
+            preset_id,
+            model_id,
+            model_version,
+            model_digest,
+            device_profile,
+            accelerator_name,
+            gpu_name,
+        ))
+        operator_baseline = operator_baselines.get(group_key)
+        operator_regression = operator_assessment(operator_baseline, records)
         groups.append({
             "engine_id": engine_id,
             "preset_id": preset_id,
@@ -447,6 +386,8 @@ def _worker_telemetry_summary(
             "p50_final_handoff_error_ms": _percentile50(handoff),
             "p95_final_handoff_error_ms": _percentile95(handoff),
             "regression": _regression_assessment(records),
+            "operator_baseline": operator_baseline,
+            "operator_regression": operator_regression,
         })
     return WorkerTelemetrySummaryResponse(
         total_records=len(items),
@@ -476,7 +417,84 @@ async def summarize_worker_telemetry(request: Request) -> WorkerTelemetrySummary
         WorkerSynthesisTelemetryResponse.model_validate(item)
         for item in request.app.state.worker_telemetry_store.list(limit=5000)
     ]
-    return _worker_telemetry_summary(items)
+    return _worker_telemetry_summary(
+        items,
+        request.app.state.operator_baseline_store.active_by_group(),
+    )
+
+
+def _operator_actor(request: Request) -> str:
+    try:
+        return authorize_voice_review_operator(
+            request,
+            request.app.state.settings,
+        ).actor
+    except VoiceReviewOperatorAuthorizationError as error:
+        raise HTTPException(
+            status_code=error.status_code,
+            detail=f"{error.code}: {error}",
+        ) from error
+
+
+@router.get(
+    "/worker-telemetry/operator-baselines",
+    response_model=list[OperatorBenchmarkBaseline],
+)
+async def list_operator_baselines(request: Request) -> list[OperatorBenchmarkBaseline]:
+    _operator_actor(request)
+    return request.app.state.operator_baseline_store.list_active()
+
+
+@router.post(
+    "/worker-telemetry/operator-baselines",
+    response_model=OperatorBenchmarkBaseline,
+)
+async def confirm_operator_baseline(
+    payload: OperatorBaselineCreateRequest,
+    request: Request,
+) -> OperatorBenchmarkBaseline:
+    if payload.confirmation != "현재 성능 기준선 확정":
+        raise HTTPException(
+            status_code=409,
+            detail="SOA-6910: 확인 문구는 '현재 성능 기준선 확정'이어야 합니다.",
+        )
+    actor = _operator_actor(request)
+    records = [
+        WorkerSynthesisTelemetryResponse.model_validate(item)
+        for item in request.app.state.worker_telemetry_store.list(limit=5000)
+    ]
+    try:
+        baseline = create_operator_baseline(payload, records, actor)
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=f"SOA-6911: {error}") from error
+    request.app.state.operator_baseline_store.create(baseline)
+    return baseline
+
+
+@router.post(
+    "/worker-telemetry/operator-baselines/{baseline_id}/retire",
+    response_model=dict[str, str],
+)
+async def retire_operator_baseline(
+    baseline_id: str,
+    payload: OperatorBaselineRetireRequest,
+    request: Request,
+) -> dict[str, str]:
+    if payload.confirmation != "운영자 기준선 폐기":
+        raise HTTPException(
+            status_code=409,
+            detail="SOA-6912: 확인 문구는 '운영자 기준선 폐기'여야 합니다.",
+        )
+    actor = _operator_actor(request)
+    retired = request.app.state.operator_baseline_store.retire(
+        baseline_id,
+        actor,
+        payload.reason.strip(),
+        datetime.now(timezone.utc).isoformat(),
+    )
+    if not retired:
+        raise HTTPException(status_code=404, detail="SOA-6913: 활성 기준선을 찾지 못했습니다.")
+    return {"status": "retired", "baseline_id": baseline_id}
 
 
 @router.post("/stt/measure", response_model=SttMeasurementResponse)
