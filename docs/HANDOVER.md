@@ -1,14 +1,31 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate**
+현재 기준 버전: **0.9.3-beta.3 · Engine Heartbeat 6.8.3.1 · Web Quality Test Compatibility Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-05 18:42 KST**
+최종 갱신: **2026-08-06 11:07 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+## Engine Heartbeat 6.8.3.1 Web Quality Test Compatibility Hotfix
+
+1. **작업 일시(KST)**: 2026-08-06 11:07
+2. **대상·기준 버전**: 6.8.3 CI Quality Unblock & Approval Operator Gate → 6.8.3.1 Web Quality Test Compatibility Hotfix
+3. **변경 내용**:
+   - Evidence Intake JSON 파일 읽기가 `File.text()`가 없는 jsdom·구형 브라우저 환경에서는 `FileReader`로 자동 전환하도록 수정했습니다.
+   - 배열 JSON과 5MiB 초과 파일 검증을 파일 읽기 방식과 분리해 원래 사용자 오류 메시지가 유지되도록 했습니다.
+   - LinkedPlayerDock 브라우저 음성 테스트 fixture를 프리셋 정합성 계약에 맞는 여성 한국어 음성으로 변경해 실제 `speechSynthesis.speak()`와 시작 지연 telemetry를 검증하도록 했습니다.
+   - 최신 원본에 누락돼 있던 TypeScript 5.9 `Uint8Array<ArrayBuffer>` 로컬 ZIP 타입 수정도 다시 합쳤습니다.
+4. **변경 이유**: jsdom의 `File` 구현 차이로 `file.text is not a function`이 발생했고, 브라우저 음성 테스트가 6.7.1 이후 도입된 성별 미확인 음성 차단 정책과 충돌해 재생 호출이 0회로 끝났기 때문입니다.
+5. **영향 범위**: Quality Lab Evidence Intake 파일 읽기, LinkedPlayerDock 브라우저 음성 단위 테스트, 로컬 Export ZIP의 TypeScript 5.9 호환 타입.
+6. **주요 파일**: `src/quality/evidenceIntake.ts`, `src/components/navigation/LinkedPlayerDock.test.tsx`, `src/export/localExportBundle.ts`.
+7. **검증 결과**: Repository preflight 24/24 통과, TS/TSX parse 183개 통과, Evidence Intake native/fallback runtime smoke 통과, 브라우저 프리셋 음성 선택 runtime smoke 통과, 로컬 ZIP 생성·manifest·PK 헤더·`unzip -t` 무결성 통과. 전체 Vitest·ESLint·Vite build는 내부 npm registry가 `zustand@5.0.8`과 `@eslint/js@9.22.0`을 제공하지 않아 로컬 실행하지 못했으며 GitHub Actions 재실행이 최종 판정입니다.
+8. **제한·주의사항**: 제품의 성별 미확인 음성 차단 정책은 완화하지 않았습니다. 테스트 fixture만 실제 정책에 맞췄으며, 실제 기기에 호환 한국어 음성이 없으면 기존처럼 명시적 미지원 오류가 표시됩니다.
+9. **산출물**: `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.3.1-web-quality-test-compatibility-full.zip`, `SoriON-AI-0.9.3-beta.3-engine-heartbeat-6.8.3-to-6.8.3.1-web-quality-test-compatibility-patch.zip`, `SHA256SUMS-6.8.3.1.txt`.
+10. **다음 예상 업데이트**: Heartbeat 6.8.4 Trust Key Rotation & Evidence Renewal Queue. 이번 핫픽스의 CI 녹색 확인 후 복수 신뢰 키, 증거 갱신 대기열, 프로세스 간 승인 잠금과 benchmark 회귀 경고를 진행합니다.
+
 ## Engine Heartbeat 6.8.3 CI Quality Unblock & Approval Operator Gate
 
 1. **작업 일시(KST)**: 2026-08-05 18:42

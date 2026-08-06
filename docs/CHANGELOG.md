@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.9.3-beta.3 Engine Heartbeat 6.8.3.1 · Web quality test compatibility hotfix
+
+- Evidence Intake가 `File.text()` 미지원 환경에서 `FileReader`로 자동 전환해 jsdom·구형 브라우저에서도 JSON 객체를 읽습니다.
+- 배열 JSON과 5MiB 초과 파일은 읽기 구현 오류 대신 기존의 객체·용량 오류 메시지로 거부합니다.
+- LinkedPlayerDock 테스트의 브라우저 음성 fixture를 여성 프리셋과 호환되는 한국어 음성으로 맞춰 `speechSynthesis.speak()`와 시작 지연 telemetry를 다시 검증합니다.
+- TypeScript 5.9의 `BufferSource`·`BlobPart` 제약에 맞춰 로컬 ZIP 바이트를 `Uint8Array<ArrayBuffer>`로 고정합니다.
+- Repository preflight 24개, TS/TSX parse 183개, Evidence Intake·Browser Speech·Local ZIP focused runtime smoke를 통과했습니다.
+
 ## 0.9.3-beta.3 Engine Heartbeat 6.8.3 · CI quality unblock and approval operator gate
 
 - GitHub Actions가 보고한 Ruff import 정렬 3건과 Web lint·Hooks 4건을 수정합니다.

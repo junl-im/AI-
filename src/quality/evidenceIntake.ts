@@ -69,9 +69,28 @@ function mapPreview(result: {
   }
 }
 
+function readFileText(file: File): Promise<string> {
+  if (typeof file.text === 'function') return file.text()
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result)
+        return
+      }
+      reject(new Error('증거 JSON 파일을 텍스트로 읽지 못했습니다.'))
+    }
+    reader.onerror = () => {
+      reject(reader.error ?? new Error('증거 JSON 파일을 텍스트로 읽지 못했습니다.'))
+    }
+    reader.readAsText(file)
+  })
+}
+
 export async function readEvidenceFile(file: File): Promise<Record<string, unknown>> {
   if (file.size > 5 * 1024 * 1024) throw new Error('증거 JSON은 5MiB 이하여야 합니다.')
-  const parsed: unknown = JSON.parse(await file.text())
+  const parsed: unknown = JSON.parse(await readFileText(file))
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
     throw new Error('증거 JSON 최상위 값은 객체여야 합니다.')
   }

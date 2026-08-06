@@ -92,7 +92,11 @@ function installSpeechSynthesis() {
     cancel: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
-    getVoices: () => [{ name: 'Korean', lang: 'ko-KR', voiceURI: 'ko' }] as SpeechSynthesisVoice[],
+    getVoices: () => [{
+      name: 'Microsoft Heami Female',
+      lang: 'ko-KR',
+      voiceURI: 'korean-a',
+    }] as SpeechSynthesisVoice[],
   }
   Object.defineProperty(globalThis, 'SpeechSynthesisUtterance', {
     configurable: true,

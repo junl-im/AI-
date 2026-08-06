@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
+현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.3.1 · Web Quality Test Compatibility Hotfix`
 
 ## 목표 버전
 
@@ -33,8 +33,12 @@
 - benchmark 기준선은 충분한 실제 표본과 동일 모델 digest·장치 조건이 있을 때만 만들고, 저장소에서 임의 수치를 생성하지 않습니다.
 - HMAC과 checksum은 화자 신원·법적 권리·측정 진실성을 자동 증명하지 않습니다.
 
-## 6.8.3에서 넘기는 결정
+## 6.8.3.1에서 넘기는 결정
 
+- Evidence Intake 파일 읽기는 `File.text()`와 `FileReader` fallback을 모두 유지하며, 배열·용량 검증을 읽기 구현 오류보다 먼저 수행합니다.
+- 브라우저 음성 테스트 fixture는 프리셋의 선언 성별과 호환되는 음성을 사용하고, 성별 미확인·반대 성별 자동 대체 금지 정책은 완화하지 않습니다.
+- 로컬 ZIP 바이트는 TypeScript 5.9에서 `ArrayBuffer` 기반 TypedArray로 유지합니다.
+- GitHub Actions에서 Vitest·typecheck·build가 녹색인 것을 확인하기 전 6.8.4 기능 변경을 병합하지 않습니다.
 - 원격 승인·이력·롤백은 운영자 토큰으로 보호하고, 로컬 loopback 무토큰 허용은 명시적 설정으로만 유지합니다.
 - `X-SoriON-User-ID`와 `X-SoriON-Client-ID`는 인증이 아니라 감사용 선언 값입니다.
 - 승인 apply·rollback은 마지막 파일 검증부터 쓰기·이력 추가까지 동일한 프로세스 잠금 안에서 수행합니다. 다중 프로세스 배포는 별도 보강 전 단일 writer를 유지합니다.

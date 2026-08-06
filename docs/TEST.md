@@ -1,3 +1,13 @@
+# Heartbeat 6.8.3.1 Web 품질 테스트 호환성 핫픽스 검증
+
+- jsdom처럼 `File.text()`가 없는 환경에서 `FileReader` fallback으로 Evidence JSON 객체 읽기
+- 배열 JSON은 `객체` 오류, 5MiB 초과 파일은 `5MiB` 오류를 유지
+- 여성 프리셋과 호환되는 한국어 Browser Speech fixture로 `speak()` 1회와 시작 지연 telemetry 검증
+- TypeScript 5.9 `BufferSource`·`BlobPart` 호환 `Uint8Array<ArrayBuffer>` 로컬 ZIP 생성
+- Repository preflight 24개, TS/TSX parse 183개 통과
+- Evidence Intake native/fallback, Browser Speech 선택, ZIP 생성·`unzip -t` focused runtime smoke 통과
+- 전체 ESLint·semantic typecheck·Vitest·Vite build는 내부 npm registry 누락으로 GitHub Actions 최종 판정
+
 # Heartbeat 6.8.3 CI 품질·승인 운영자 게이트 검증
 
 - GitHub Actions Ruff I001 대상 3개 import block 재정렬
