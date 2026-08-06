@@ -83,8 +83,10 @@ class TestUtterance {
 const originalUtterance = Object.getOwnPropertyDescriptor(globalThis, 'SpeechSynthesisUtterance')
 const originalSynthesis = Object.getOwnPropertyDescriptor(window, 'speechSynthesis')
 
-function installSpeechSynthesis() {
-  const speak = vi.fn((utterance: TestUtterance) => utterance.onstart?.())
+function installSpeechSynthesis(autoStart = true) {
+  const speak = vi.fn((utterance: TestUtterance) => {
+    if (autoStart) utterance.onstart?.()
+  })
   const synthesis = {
     speaking: false,
     paused: false,
@@ -151,6 +153,21 @@ describe('LinkedPlayerDock', () => {
     expect(screen.getByRole('link', { name: '다운로드' })).toBeInTheDocument()
   })
 
+  it('재생을 누르면 실제 media 이벤트를 기다리지 않고 일시정지 버튼으로 바뀐다', () => {
+    const play = vi.mocked(HTMLMediaElement.prototype.play)
+    const pause = vi.mocked(HTMLMediaElement.prototype.pause)
+    play.mockReturnValueOnce(new Promise<void>(() => undefined))
+    usePlayerStore.getState().enqueue(generatedAudio(), '즉시 전환 음성')
+    render(<LinkedPlayerDock />)
+
+    fireEvent.click(screen.getByRole('button', { name: '재생' }))
+
+    expect(screen.getByRole('button', { name: '일시정지' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: '일시정지' }))
+    expect(pause).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: '재생' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
   it('재생 요청이 포함된 트랙은 선택 즉시 재생한다', async () => {
     const play = vi.mocked(HTMLMediaElement.prototype.play)
     render(<LinkedPlayerDock />)
@@ -174,6 +191,20 @@ describe('LinkedPlayerDock', () => {
 
     expect(synthesis.speak).toHaveBeenCalledTimes(1)
     expect(synthesis.speak.mock.calls[0][0].text).toBe('브라우저 음성 재생 테스트')
+  })
+
+  it('브라우저 음성도 시작 이벤트 전에 일시정지 버튼을 먼저 표시한다', () => {
+    const synthesis = installSpeechSynthesis(false)
+    usePlayerStore.getState().enqueue(browserSpeechAudio(), '브라우저 즉시 전환')
+    render(<LinkedPlayerDock />)
+
+    fireEvent.click(screen.getByRole('button', { name: '재생' }))
+
+    expect(synthesis.speak).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: '일시정지' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: '일시정지' }))
+    expect(synthesis.cancel).toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: '재생' })).toHaveAttribute('aria-pressed', 'false')
   })
 
 

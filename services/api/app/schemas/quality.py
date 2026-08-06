@@ -41,6 +41,7 @@ class QualityDiagnosticsResponse(BaseModel):
     platform: str
     process_id: int
     memory_mb: float | None
+    open_file_descriptors: int | None = None
     engines: list[EngineDiagnostic]
 
 

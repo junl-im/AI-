@@ -3,10 +3,10 @@ import { formatBuildLabel, isDifferentBuild, parseAppBuildInfo } from './buildIn
 
 const valid = {
   schemaVersion: 1,
-  appVersion: '0.9.5',
+  appVersion: '0.9.7',
   heartbeat: '6.8.4',
   revision: 'abcdef123456',
-  buildId: '0.9.5-6.8.4-abcdef123456',
+  buildId: '0.9.7-6.8.4-abcdef123456',
 } as const
 
 describe('buildInfo', () => {
@@ -27,6 +27,6 @@ describe('buildInfo', () => {
   })
 
   it('formats a compact operator label', () => {
-    expect(formatBuildLabel(valid)).toBe('v0.9.5')
+    expect(formatBuildLabel(valid)).toBe('v0.9.7')
   })
 })

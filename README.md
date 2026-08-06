@@ -8,9 +8,9 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.9.5 · Benchmark Baseline & Privacy-Safe Audit Bundle`
+- 버전: `0.9.7 · Natural Playback Controls`
 - 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
-- 감사 내보내기: 실제 WAV·사용자 식별자·GPU 원문·비밀키를 제외한 검증 가능 JSON을 제공합니다.
+- 감사 내보내기: 실제 WAV·사용자 식별자·GPU 원문·비밀키를 제외한 검증 가능 ZIP을 제공합니다.
 - Web: React + Vite + TypeScript + Zustand + PWA
 - API: FastAPI + Python 3.10
 - Worker: 선택 설치형 CosyVoice Adapter
@@ -23,7 +23,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - Firebase: `device-streaming-96b2272c` Web Auth 공개 설정 연결, Firestore·Storage 기본 전면 차단
 - PWA: 1024px 최적화 로고와 1.5MiB 사전 캐시 예산 검사
 - 모바일: 카카오톡 WebView를 감지해 로컬 PC 엔진 제한과 외부 브라우저 전환을 즉시 안내
-- 재생 UX: 보이는 재생 버튼이 선택값을 자동 적용하고 생성·선택된 음성을 즉시 재생
+- 재생 UX: 재생을 누르는 즉시 일시정지 버튼으로 바뀌고, 다시 누르면 재생 버튼으로 돌아오는 순차 제어
 - 프리셋: 여성 1종·남성 3종·중성 1종, 성별 불일치·동일 화자 중복 배정·CosyVoice 기본 WAV 대체를 차단
 - 고급 진단: 설정의 접힌 개발자 영역에서만 API·TTS·Worker·GPU·프리셋 상태와 개인정보 제외 진단을 확인
 - PC 편집: 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
@@ -72,11 +72,14 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 신뢰 키 교체: 새 승인·재서명은 active HMAC 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지
 - 증거 갱신 대기열: 동의·권리 만료, WAV 결박 불일치, unsigned·이전 키 상태를 자동 분류하되 만료일은 자동 연장하지 않음
 - 승인 파일 보호: apply·재서명·rollback을 같은 호스트의 API 프로세스 간 파일 잠금과 원자 쓰기로 직렬화
+- writer fencing: SQLite lease의 증가 토큰을 실제 쓰기 직전에 재검증해 만료된 writer 반영을 차단
+- 장시간 안정성: 수동 5·30·60분 및 주간 30분 API·Worker soak로 성공률·복구·메모리·열린 연결 증가를 기록
+- 감사 ZIP: redacted JSON, 파일별 SHA-256 manifest와 포함 범위 README만 묶어 다운로드
 
 ### 버전 올리기
 
 ```bash
-npm run version:set -- 0.9.6
+npm run version:set -- 0.9.7
 npm run quality:version-sync
 ```
 

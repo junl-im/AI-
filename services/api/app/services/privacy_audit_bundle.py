@@ -249,3 +249,62 @@ def verify_privacy_audit_bundle(payload: dict[str, object]) -> dict[str, object]
         "record_count": expected["record_count"],
         "reason": "검증 통과" if valid else "감사 내용 또는 manifest가 변경됐습니다.",
     }
+
+
+def build_privacy_audit_zip(payload: dict[str, object]) -> tuple[bytes, str, int]:
+    import io
+    import json
+    import zipfile
+
+    verification = verify_privacy_audit_bundle(payload)
+    if verification["valid"] is not True:
+        raise ValueError(str(verification["reason"]))
+    bundle_sha256 = str(verification["expected_sha256"])
+    record_count = int(verification["record_count"])
+    audit_bytes = (
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            indent=2,
+            default=lambda value: value.isoformat() if hasattr(value, "isoformat") else str(value),
+        )
+        + "\n"
+    ).encode()
+    readme_bytes = (
+        "SoriON AI 개인정보 제외 감사 묶음\n"
+        "\n"
+        "- 실제 WAV, 동의 원문, 비밀키, 서명 원문, "
+        "사용자 식별자는 포함하지 않습니다.\n"
+        "- audit.json은 서버에서 검증된 redacted 감사 자료입니다.\n"
+        "- MANIFEST.json의 SHA-256으로 ZIP 내부 파일을 다시 확인할 수 있습니다.\n"
+    ).encode()
+    files = {
+        "audit.json": audit_bytes,
+        "README.txt": readme_bytes,
+    }
+    zip_manifest = {
+        "schema_version": "privacy-audit-zip/1",
+        "app_version": payload["app_version"],
+        "bundle_sha256": bundle_sha256,
+        "record_count": record_count,
+        "files": [
+            {
+                "path": name,
+                "bytes": len(content),
+                "sha256": hashlib.sha256(content).hexdigest(),
+            }
+            for name, content in sorted(files.items())
+        ],
+    }
+    files["MANIFEST.json"] = (
+        json.dumps(zip_manifest, ensure_ascii=False, indent=2) + "\n"
+    ).encode()
+
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        for name, content in sorted(files.items()):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o600 << 16
+            archive.writestr(info, content)
+    return output.getvalue(), bundle_sha256, record_count

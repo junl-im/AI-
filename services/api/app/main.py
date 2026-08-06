@@ -27,6 +27,7 @@ from app.services.segment_audio import SegmentAudioSigner
 from app.services.sqlite_job_store import SQLiteJobStore
 from app.services.tts_pipeline import TtsPipeline
 from app.services.voice_preset_approval import VoicePresetApprovalService
+from app.services.writer_lease import SQLiteWriterLeaseCoordinator
 from app.storage.audio_store import AudioStore
 from app.storage.voice_clone_store import VoiceCloneStore
 from app.version import APP_VERSION
@@ -82,6 +83,10 @@ async def lifespan(app: FastAPI):
     )
     app.state.export_soak_store = QualityEvidenceStore(settings.export_soak_file)
     app.state.evidence_intake_store = EvidenceIntakeStore(settings.evidence_intake_file)
+    app.state.voice_review_writer_lease = SQLiteWriterLeaseCoordinator(
+        settings.voice_review_writer_lease_file,
+        settings.voice_review_writer_lease_seconds,
+    )
     app.state.voice_preset_approval_service = VoicePresetApprovalService(
         settings.cosyvoice_preset_path,
         settings.voice_review_approval_file,
@@ -89,6 +94,7 @@ async def lifespan(app: FastAPI):
         settings.voice_review_signing_key_id,
         settings.voice_review_trusted_key_map,
         settings.voice_review_lock_timeout_seconds,
+        app.state.voice_review_writer_lease,
     )
     app.state.stt_adapter = FasterWhisperAdapter(
         settings.faster_whisper_model,
@@ -195,6 +201,9 @@ app.add_middleware(
         "X-Request-ID",
         "X-RateLimit-Remaining",
         "X-RateLimit-Reset",
+        "X-SoriON-Bundle-SHA256",
+        "X-SoriON-Record-Count",
+        "Content-Disposition",
     ],
     max_age=86400,
     allow_private_network=settings.allow_private_network,

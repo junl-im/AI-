@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('..', import.meta.url))
 const nextVersion = process.argv[2]?.trim()
 if (!nextVersion || !/^\d+\.\d+\.\d+$/.test(nextVersion)) {
-  console.error('사용법: npm run version:set -- 0.9.5')
+  console.error('사용법: npm run version:set -- 0.9.7')
   process.exit(1)
 }
 const previousVersion = (await readFile(join(root, 'VERSION'), 'utf8')).trim()

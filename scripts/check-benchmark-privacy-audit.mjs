@@ -27,6 +27,7 @@ await requireMarkers('services/api/app/services/privacy_audit_bundle.py', [
 await requireMarkers('services/api/app/api/routes/evidence.py', [
   '/privacy-audit-bundle',
   '/privacy-audit-bundle/verify',
+  '/privacy-audit-bundle.zip',
 ])
 await requireMarkers('src/components/evaluation/BenchmarkDashboardCard.tsx', [
   '기준선 안정',
@@ -34,7 +35,7 @@ await requireMarkers('src/components/evaluation/BenchmarkDashboardCard.tsx', [
   'group.regression.reasons',
 ])
 await requireMarkers('src/components/evaluation/VerificationEvidenceCard.tsx', [
-  '개인정보 제외 감사 JSON',
+  '개인정보 제외 감사 ZIP',
 ])
 await requireMarkers('docs/BENCHMARK_BASELINE_AND_PRIVACY_AUDIT.md', [
   '비중첩',

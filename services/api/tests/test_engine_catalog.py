@@ -3,7 +3,7 @@ def test_engine_catalog_curates_free_korean_orchestrator(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.9.5"
+    assert body["version"] == "0.9.7"
     assert body["free_only"] is True
     assert body["product_identity"] == "engine-orchestrator"
 

@@ -281,3 +281,97 @@ export async function apiRequest<T>(
   }
   throw failure
 }
+
+export interface ApiDownloadResult {
+  blob: Blob
+  filename: string
+  bundleSha256: string | null
+  recordCount: number | null
+}
+
+function downloadFilename(response: Response, fallback: string): string {
+  const disposition = response.headers.get('content-disposition') ?? ''
+  const match = /filename="?([^";]+)"?/i.exec(disposition)
+  return match?.[1]?.trim() || fallback
+}
+
+export async function apiDownload(
+  path: string,
+  fallbackFilename: string,
+  options: ApiRequestOptions = {},
+): Promise<ApiDownloadResult> {
+  const baseUrl = options.baseUrl ? normalizeApiBaseUrl(options.baseUrl) : getApiBaseUrl()
+  if (!baseUrl) {
+    throw new ApiError(
+      '배포된 음성 서버 주소가 설정되지 않았습니다. 시스템이 자동으로 다시 확인합니다.',
+      0,
+      'SOA-2000',
+      'unconfigured',
+    )
+  }
+  const blocked = getApiConnectionProblem(baseUrl)
+  if (blocked) throw blocked
+
+  const controller = new AbortController()
+  const timeoutMs = adaptiveTimeoutMs(options.timeoutMs ?? DEFAULT_TIMEOUT_MS)
+  const timer = globalThis.setTimeout(() => controller.abort('timeout'), timeoutMs)
+  const abortFromCaller = () => controller.abort('caller')
+  options.signal?.addEventListener('abort', abortFromCaller, { once: true })
+  const requestId = createRandomId()
+
+  try {
+    const response = await fetch(`${baseUrl}${path}`, {
+      method: 'GET',
+      signal: controller.signal,
+      cache: 'no-store',
+      credentials: 'omit',
+      headers: {
+        Accept: 'application/zip, application/octet-stream',
+        'X-Request-ID': requestId,
+        'X-SoriON-Client-ID': getApiClientId(),
+      },
+    })
+    if (!response.ok) {
+      let detail = '파일을 내려받지 못했습니다.'
+      if ((response.headers.get('content-type') ?? '').includes('application/json')) {
+        const payload = await response.json() as { detail?: unknown }
+        detail = errorDetail(payload.detail) ?? detail
+      }
+      throw new ApiError(
+        detail,
+        response.status,
+        'SOA-2008',
+        responseErrorKind(response.status),
+        RETRYABLE_STATUS.has(response.status),
+        response.headers.get('X-Request-ID') ?? requestId,
+      )
+    }
+    rememberApiUrl(baseUrl, true)
+    dispatchConnectionEvent('sorion-api-success', { baseUrl, path, requestId })
+    const recordCountHeader = response.headers.get('X-SoriON-Record-Count')
+    const recordCount = recordCountHeader === null ? null : Number(recordCountHeader)
+    return {
+      blob: await response.blob(),
+      filename: downloadFilename(response, fallbackFilename),
+      bundleSha256: response.headers.get('X-SoriON-Bundle-SHA256'),
+      recordCount: Number.isFinite(recordCount) ? recordCount : null,
+    }
+  } catch (error) {
+    if (error instanceof ApiError) throw error
+    if (controller.signal.aborted) {
+      throw options.signal?.aborted || controller.signal.reason === 'caller'
+        ? new ApiError('다운로드를 취소했습니다.', 499, 'SOA-2003', 'cancelled')
+        : new ApiError('감사 ZIP 다운로드 시간이 초과되었습니다.', 408, 'SOA-2002', 'timeout', true)
+    }
+    throw new ApiError(
+      '감사 ZIP을 내려받지 못했습니다. 연결 상태를 확인해 주세요.',
+      0,
+      'SOA-2001',
+      'cors-or-network',
+      true,
+    )
+  } finally {
+    globalThis.clearTimeout(timer)
+    options.signal?.removeEventListener('abort', abortFromCaller)
+  }
+}

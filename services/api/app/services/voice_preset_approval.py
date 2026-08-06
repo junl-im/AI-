@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import json
 import os
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,6 +32,12 @@ from app.schemas.voice_preset_evidence import (
 from app.services.interprocess_lock import (
     InterprocessLockTimeoutError,
     exclusive_file_lock,
+)
+from app.services.writer_lease import (
+    SQLiteWriterLeaseCoordinator,
+    WriterLease,
+    WriterLeaseLostError,
+    WriterLeaseTimeoutError,
 )
 from app.services.voice_preset_evidence import (
     inspect_voice_preset_evidence,
@@ -133,6 +139,7 @@ class VoicePresetApprovalService:
         signing_key_id: str = "local-review-key",
         trusted_signing_keys: Mapping[str, str] | None = None,
         lock_timeout_seconds: float = 10.0,
+        writer_lease: SQLiteWriterLeaseCoordinator | None = None,
     ) -> None:
         self.preset_directory = preset_directory
         self.history_path = history_path
@@ -146,22 +153,44 @@ class VoicePresetApprovalService:
             trusted_keys=self.trusted_signing_keys,
         )
         self.lock_timeout_seconds = max(0.1, lock_timeout_seconds)
+        self.writer_lease = writer_lease
         self.lock_path = self.history_path.with_suffix(self.history_path.suffix + ".lock")
         self._lock = Lock()
 
     @contextmanager
-    def _write_lock(self) -> Iterator[None]:
+    def _write_lock(self) -> Iterator[WriterLease | None]:
         with self._lock:
             try:
-                with exclusive_file_lock(
-                    self.lock_path,
-                    timeout_seconds=self.lock_timeout_seconds,
-                ):
-                    yield
-            except InterprocessLockTimeoutError as error:
+                lease_context = (
+                    self.writer_lease.acquire(
+                        "voice-preset-approval",
+                        timeout_seconds=self.lock_timeout_seconds,
+                    )
+                    if self.writer_lease is not None
+                    else nullcontext(None)
+                )
+                with lease_context as lease:
+                    with exclusive_file_lock(
+                        self.lock_path,
+                        timeout_seconds=self.lock_timeout_seconds,
+                    ):
+                        yield lease
+            except (InterprocessLockTimeoutError, WriterLeaseTimeoutError) as error:
                 raise VoicePresetApprovalError(
-                    "다른 API 프로세스가 프리셋 승인 파일을 변경 중입니다. 잠시 후 다시 시도하세요."
+                    "다른 API 프로세스가 프리셋 승인 파일을 변경 중입니다. "
+                    "잠시 후 다시 시도하세요."
                 ) from error
+
+    def _assert_writer_lease(self, lease: WriterLease | None) -> None:
+        if lease is None or self.writer_lease is None:
+            return
+        try:
+            self.writer_lease.assert_current(lease)
+        except WriterLeaseLostError as error:
+            raise VoicePresetApprovalError(
+                "승인 writer 권한이 만료되어 변경을 중단했습니다. "
+                "다시 미리보기 하세요."
+            ) from error
 
     def _require_directory(self) -> Path:
         if self.preset_directory is None:
@@ -363,7 +392,7 @@ class VoicePresetApprovalService:
                 f"확인 문구는 '{_CONFIRM_APPROVAL}'이어야 합니다."
             )
         base_payload = VoicePresetApprovalInput.model_validate(payload.model_dump())
-        with self._write_lock():
+        with self._write_lock() as lease:
             prepared = self._prepare(base_payload)
             if prepared.response.preview_id != payload.preview_id:
                 raise VoicePresetApprovalError(
@@ -382,6 +411,7 @@ class VoicePresetApprovalService:
                 raise VoicePresetApprovalError(
                     "적용 직전 WAV가 변경되어 승인을 중단했습니다."
                 )
+            self._assert_writer_lease(lease)
             self._atomic_write(manifest_path, prepared.proposed_manifest)
             record = VoicePresetApprovalRecord(
                 approval_id=prepared.response.approval_id,
@@ -554,7 +584,7 @@ class VoicePresetApprovalService:
                 f"확인 문구는 '{_CONFIRM_RESIGN}'이어야 합니다."
             )
         base_payload = VoicePresetResignPreviewRequest.model_validate(payload.model_dump())
-        with self._write_lock():
+        with self._write_lock() as lease:
             prepared = self._prepare_resign(base_payload)
             if prepared.response.preview_id != payload.preview_id:
                 raise VoicePresetApprovalError(
@@ -572,6 +602,7 @@ class VoicePresetApprovalService:
             )
             if current_audio_sha256 != prepared.audio_sha256:
                 raise VoicePresetApprovalError("적용 직전 WAV가 변경되어 재서명을 중단했습니다.")
+            self._assert_writer_lease(lease)
             self._atomic_write(manifest_path, prepared.proposed_manifest)
             record_id = "resign-" + prepared.response.preview_id[:24]
             approval = prepared.proposed_manifest.get("approval", {})
@@ -766,7 +797,7 @@ class VoicePresetApprovalService:
             raise VoicePresetApprovalError(
                 f"확인 문구는 '{_CONFIRM_ROLLBACK}'이어야 합니다."
             )
-        with self._write_lock():
+        with self._write_lock() as lease:
             history = self._read_history()
             source_index = next(
                 (
@@ -831,6 +862,7 @@ class VoicePresetApprovalService:
                 signature_mode="unsigned",
                 related_approval_id=approval_id,
             )
+            self._assert_writer_lease(lease)
             self._atomic_write(manifest_path, rollback_manifest)
             self._append_history(rollback_record, current, rollback_manifest)
         return rollback_record, rollback_manifest

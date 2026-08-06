@@ -2,6 +2,7 @@ import json
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi.responses import Response
 
 from app.api.routes.verification import _benchmark_summary, _worker_telemetry_summary
 from app.schemas.evidence import (
@@ -41,6 +42,7 @@ from app.services.evidence_metrics import (
 )
 from app.services.privacy_audit_bundle import (
     build_privacy_audit_bundle,
+    build_privacy_audit_zip,
     verify_privacy_audit_bundle,
 )
 from app.services.voice_preset_approval import VoicePresetApprovalError
@@ -247,6 +249,23 @@ def _privacy_audit_payload(request: Request) -> dict[str, object]:
 @router.get("/privacy-audit-bundle", response_model=PrivacyAuditBundleResponse)
 async def privacy_audit_bundle(request: Request) -> PrivacyAuditBundleResponse:
     return PrivacyAuditBundleResponse.model_validate(_privacy_audit_payload(request))
+
+
+@router.get("/privacy-audit-bundle.zip")
+async def privacy_audit_zip(request: Request) -> Response:
+    payload = _privacy_audit_payload(request)
+    archive, bundle_sha256, record_count = build_privacy_audit_zip(payload)
+    filename = f"sorion-privacy-audit-{bundle_sha256[:12]}.zip"
+    return Response(
+        content=archive,
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "X-SoriON-Bundle-SHA256": bundle_sha256,
+            "X-SoriON-Record-Count": str(record_count),
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @router.post(

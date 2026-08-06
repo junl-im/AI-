@@ -272,6 +272,8 @@
 .soa-dubbing-player-controls { display: grid; grid-template-columns: 64px 82px 64px; justify-content: center; align-items: center; gap: 16px; margin-top: 8px; }
 .soa-dubbing-player-controls button { height: 52px; border: 0; color: #fff; background: transparent; font-size: 21px; }
 .soa-dubbing-player-controls button.is-primary { width: 68px; height: 68px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); font-size: 30px; }
+.soa-dubbing-player-controls button.is-primary { transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease; }
+.soa-dubbing-player-controls button.is-primary.is-playing { background: linear-gradient(145deg, rgba(239, 111, 146, 0.36), rgba(143, 104, 255, 0.4)); box-shadow: 0 0 0 5px rgba(239, 111, 146, 0.1), 0 0 24px rgba(143, 104, 255, 0.28); transform: scale(1.04); }
 .soa-dubbing-player-controls button:disabled { opacity: 0.2; }
 .soa-dubbing-player-secondary { display: flex; justify-content: center; gap: 6px; margin-top: 6px; }
 .soa-dubbing-player-secondary button,

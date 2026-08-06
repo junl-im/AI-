@@ -17,6 +17,8 @@ const checks = [
   ['seamless engine runtime', 'check-seamless-engine-runtime.mjs'],
   ['trust key rotation / evidence renewal', 'check-trust-key-renewal.mjs'],
   ['benchmark baseline / privacy audit', 'check-benchmark-privacy-audit.mjs'],
+  ['long-run reliability / writer safety', 'check-long-run-writer-safety.mjs'],
+  ['playback control flow', 'check-playback-control-flow.mjs'],
   ['Firebase web config', 'check-firebase-config.mjs'],
   ['lock retry contract', 'check-lock-network-retry.mjs'],
   ['CI architecture', 'check-ci-failure-domains.mjs'],

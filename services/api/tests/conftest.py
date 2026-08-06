@@ -40,6 +40,10 @@ def client(tmp_path_factory, monkeypatch):
         "SORION_VOICE_REVIEW_APPROVAL_PATH",
         str(app_path / "voice-review-approvals.jsonl"),
     )
+    monkeypatch.setenv(
+        "SORION_VOICE_REVIEW_WRITER_LEASE_PATH",
+        str(app_path / "voice-review-writer.sqlite3"),
+    )
     get_settings.cache_clear()
     try:
         with TestClient(app, client=("127.0.0.1", 50000)) as test_client:

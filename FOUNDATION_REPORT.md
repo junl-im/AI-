@@ -1,7 +1,25 @@
-# SoriON AI 0.9.5 Verification Report
+# SoriON AI 0.9.7 Verification Report
 
-결과 버전: **0.9.5 · Benchmark Baseline & Privacy-Safe Audit Bundle**
+결과 버전: **0.9.7 · Natural Playback Controls**
 
+
+
+
+## 0.9.7 Natural Playback Controls
+
+- 재생 클릭 직후 실제 media `play` 또는 Browser Speech `onstart`를 기다리지 않고 버튼을 일시정지 상태로 전환합니다.
+- 일시정지 클릭은 준비 중인 재생도 취소하며 버튼을 다시 재생 상태로 복원합니다.
+- Browser Speech callback은 run ID로 보호해 취소된 요청의 늦은 이벤트가 최신 UI를 덮지 못합니다.
+- 파일 음원과 브라우저 음성의 즉시 전환 회귀 테스트와 dependency-free preflight 계약을 추가했습니다.
+- 검증: Repository preflight 31/31, API pytest 188개, Worker pytest 14개, TS/TSX 190개 구문 검사와 Python compileall을 통과했습니다.
+- 제한: 전체 ESLint·Vitest·semantic typecheck·Vite production build는 프로젝트 Web 의존성이 없어 GitHub Actions가 최종 판정합니다.
+
+## 0.9.6 Long-Run Reliability & Writer Safety
+
+- SQLite writer lease와 fencing token을 승인·재서명·롤백 쓰기 경계에 추가했습니다.
+- API·Worker 5·30·60분 soak가 성공률, P95 지연, 중단·복구, 메모리와 열린 descriptor 증가를 SHA-256 보고서로 남깁니다.
+- 개인정보 제외 감사 내보내기를 검증된 ZIP과 파일별 manifest로 확장했습니다.
+- API pytest 188개, Worker pytest 14개, repository preflight 30개와 실제 짧은 runtime soak를 통과했습니다.
 
 
 ## 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle

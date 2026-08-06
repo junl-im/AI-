@@ -64,6 +64,7 @@ export function LinkedPlayerDock() {
   const speechTimerRef = useRef<number | null>(null)
   const speechStartedAtRef = useRef(0)
   const speechElapsedRef = useRef(0)
+  const speechRunIdRef = useRef(0)
   const [playing, setPlaying] = useState(false)
   const [current, setCurrent] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -143,6 +144,7 @@ export function LinkedPlayerDock() {
   }
 
   function cancelBrowserSpeech(resetProgress = true) {
+    speechRunIdRef.current += 1
     clearSpeechTimer()
     if (isBrowserSpeechSupported()) window.speechSynthesis.cancel()
     if (resetProgress) {
@@ -193,6 +195,8 @@ export function LinkedPlayerDock() {
 
   function startBrowserSpeech() {
     if (!browserPlayback || !isBrowserSpeechSupported()) return
+    const speechRunId = speechRunIdRef.current + 1
+    speechRunIdRef.current = speechRunId
     window.speechSynthesis.cancel()
     let utterance: SpeechSynthesisUtterance
     try {
@@ -208,11 +212,13 @@ export function LinkedPlayerDock() {
     }
     setDuration(track?.audio.durationSeconds ?? 0)
     utterance.onstart = () => {
+      if (speechRunIdRef.current !== speechRunId) return
       recordPlaybackMetric('browserSpeechStartMs')
       setPlaying(true)
       startSpeechTimer()
     }
     utterance.onend = () => {
+      if (speechRunIdRef.current !== speechRunId) return
       clearSpeechTimer()
       setCurrent(track?.audio.durationSeconds ?? duration)
       speechElapsedRef.current = 0
@@ -220,6 +226,7 @@ export function LinkedPlayerDock() {
       handleEnded()
     }
     utterance.onerror = () => {
+      if (speechRunIdRef.current !== speechRunId) return
       clearSpeechTimer()
       speechElapsedRef.current = 0
       setPlaying(false)
@@ -400,28 +407,42 @@ export function LinkedPlayerDock() {
     if (!track || waitingForSegment) return
     if (browserPlayback) {
       if (!isBrowserSpeechSupported()) return
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume()
-        setPlaying(true)
-        startSpeechTimer()
-      } else if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.pause()
-        pauseSpeechTimer()
+      if (playing) {
+        if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+          window.speechSynthesis.pause()
+          pauseSpeechTimer()
+        } else {
+          cancelBrowserSpeech(false)
+        }
         setPlaying(false)
+      } else if (window.speechSynthesis.paused) {
+        setPlaying(true)
+        window.speechSynthesis.resume()
+        startSpeechTimer()
       } else {
+        setPlaying(true)
         startBrowserSpeech()
       }
       return
     }
     const element = ref.current
     if (!element) return
-    if (element.paused) await element.play()
-    else {
+    if (playing || !element.paused) {
       if (!progressiveActive && currentTrackId) {
         lastSavedPositionRef.current = element.currentTime
         updateResumePosition(currentTrackId, element.currentTime)
       }
       element.pause()
+      setPlaying(false)
+      return
+    }
+    setPlaybackError(null)
+    setPlaying(true)
+    try {
+      await element.play()
+    } catch (error) {
+      setPlaying(false)
+      setPlaybackError(error instanceof Error ? error.message : '음성을 재생하지 못했습니다.')
     }
   }
 
@@ -537,10 +558,11 @@ export function LinkedPlayerDock() {
             <button type="button" onClick={() => move('previous')} disabled={!track} aria-label="이전 음성">|◀</button>
             <button
               type="button"
-              className="is-primary"
+              className={`is-primary ${playing ? 'is-playing' : ''}`}
               onClick={() => void toggle()}
               disabled={!track || waitingForSegment}
               aria-label={waitingForSegment ? '다음 구간 대기' : playing ? '일시정지' : '재생'}
+              aria-pressed={playing}
             >
               {playing ? 'Ⅱ' : '▶'}
             </button>
@@ -587,9 +609,10 @@ export function LinkedPlayerDock() {
               <button type="button" onClick={() => move('previous')} aria-label="이전 음성">‹</button>
               <button
                 type="button"
-                className="soa-player-toggle"
+                className={`soa-player-toggle ${playing ? 'is-playing' : ''}`}
                 onClick={() => void toggle()}
                 aria-label={waitingForSegment ? '다음 구간 대기' : playing ? '일시정지' : '재생'}
+                aria-pressed={playing}
                 disabled={waitingForSegment}
               >
                 {playing ? 'Ⅱ' : '▶'}

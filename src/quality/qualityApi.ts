@@ -1,4 +1,4 @@
-import { apiRequest, resolveApiAssetUrl } from '../api/httpClient'
+import { apiDownload, apiRequest, resolveApiAssetUrl } from '../api/httpClient'
 import type {
   EngineDiagnostic,
   EvaluationSentence,
@@ -45,6 +45,7 @@ interface ApiDiagnostics {
   platform: string
   process_id: number
   memory_mb: number | null
+  open_file_descriptors: number | null
   engines: ApiEngineDiagnostic[]
 }
 
@@ -94,6 +95,7 @@ export async function getQualityDiagnostics(): Promise<QualityDiagnostics> {
     platform: result.platform,
     processId: result.process_id,
     memoryMb: result.memory_mb,
+    openFileDescriptors: result.open_file_descriptors,
     engines: result.engines.map((engine) => ({
       engineId: engine.engine_id,
       name: engine.name,
@@ -413,16 +415,22 @@ export async function downloadPrivacyAuditBundle() {
   if (!verification.valid || !verification.expected_sha256) {
     throw new Error(`감사 묶음 무결성 검사 실패: ${verification.reason}`)
   }
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
+  const download = await apiDownload(
+    '/quality/privacy-audit-bundle.zip',
+    `sorion-privacy-audit-${verification.expected_sha256.slice(0, 12)}.zip`,
+  )
+  if (download.bundleSha256 && download.bundleSha256 !== verification.expected_sha256) {
+    throw new Error('감사 ZIP의 bundle SHA-256이 검증한 JSON과 다릅니다.')
+  }
+  const url = URL.createObjectURL(download.blob)
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `sorion-privacy-audit-${verification.expected_sha256.slice(0, 12)}.json`
+  anchor.download = download.filename
   anchor.click()
   URL.revokeObjectURL(url)
   return {
     sha256: verification.expected_sha256,
-    recordCount: verification.record_count,
+    recordCount: download.recordCount ?? verification.record_count,
   }
 }
 

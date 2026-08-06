@@ -149,6 +149,7 @@ def quality_diagnostics(
         platform=runtime.platform,
         process_id=runtime.process_id,
         memory_mb=runtime.memory_mb,
+        open_file_descriptors=runtime.open_file_descriptors,
         engines=[
             engine_diagnostic(engine, info_by_id.get(engine.info().id))
             for engine in engines

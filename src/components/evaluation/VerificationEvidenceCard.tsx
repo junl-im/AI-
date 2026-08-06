@@ -44,12 +44,12 @@ export function VerificationEvidenceCard({ summary, loading, onRefresh, onDownlo
         <span className="mt-1 block text-[10px] font-bold text-soa-muted">레코드 {manifest?.recordCount ?? 0}건 · 다운로드 전에 서버에서 다시 검증</span>
       </div>
       <p className="mt-3 text-[10px] font-bold leading-5 text-soa-muted">
-        내려받는 증거 묶음은 장치 이름·브라우저 상세 버전·메모를 제거하고 레코드별 SHA-256과 전체 묶음 SHA-256을 포함합니다. 실제 음원과 모델 파일은 포함하지 않습니다.
+        내려받는 증거 묶음은 장치 이름·브라우저 상세 버전·메모를 제거하고 레코드별 SHA-256과 전체 묶음 SHA-256을 포함합니다. 실제 음원과 모델 파일은 포함하지 않으며 ZIP 내부 manifest로 파일별 무결성을 확인합니다.
       </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <button type="button" onClick={onRefresh} disabled={loading} className="focus-ring min-h-11 rounded-2xl border border-soa-line bg-white text-xs font-black disabled:opacity-50">새로고침</button>
         <button type="button" onClick={onDownload} className="focus-ring min-h-11 rounded-2xl bg-soa-ink text-xs font-black text-white">품질 증거 JSON</button>
-        <button type="button" onClick={onAuditDownload} className="focus-ring col-span-2 min-h-11 rounded-2xl border border-soa-violet bg-white text-xs font-black text-soa-violet">개인정보 제외 감사 JSON</button>
+        <button type="button" onClick={onAuditDownload} className="focus-ring col-span-2 min-h-11 rounded-2xl border border-soa-violet bg-white text-xs font-black text-soa-violet">개인정보 제외 감사 ZIP</button>
       </div>
     </section>
   )

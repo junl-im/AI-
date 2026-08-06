@@ -99,6 +99,13 @@
   border-radius: 50%;
   color: #fff;
   background: linear-gradient(145deg, #775cff, #3ecce7);
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.soa-player-transport > .soa-player-toggle.is-playing {
+  background: linear-gradient(145deg, #ef6f92, #8f68ff);
+  box-shadow: 0 0 0 4px rgba(239, 111, 146, 0.12), 0 0 18px rgba(143, 104, 255, 0.34);
+  transform: scale(1.04);
 }
 
 .soa-player-main {
@@ -350,6 +357,11 @@
 @media (prefers-reduced-motion: reduce) {
   .soa-linked-player {
     animation: none;
+  }
+
+  .soa-player-transport > .soa-player-toggle {
+    transition: none;
+    transform: none;
   }
 }
 

@@ -33,6 +33,7 @@ export interface QualityDiagnostics {
   platform: string
   processId: number
   memoryMb: number | null
+  openFileDescriptors: number | null
   engines: EngineDiagnostic[]
 }
 

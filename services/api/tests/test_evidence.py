@@ -259,7 +259,7 @@ def test_evidence_intake_accepts_verified_web_quality_report(client):
     report = {
         "schemaVersion": 1,
         "mode": "run",
-        "appVersion": "0.9.5",
+        "appVersion": "0.9.7",
         "heartbeat": "6.7",
         "startedAt": "2026-08-03T09:00:00.000Z",
         "completedAt": "2026-08-03T09:01:00.000Z",
@@ -405,3 +405,28 @@ def test_privacy_audit_verifier_rejects_tampering(client):
 
     assert response.status_code == 200
     assert response.json()["valid"] is False
+
+
+def test_privacy_audit_zip_contains_verified_redacted_bundle(client):
+    import io
+    import json
+    import zipfile
+
+    response = client.get("/api/v1/quality/privacy-audit-bundle.zip")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/zip"
+    assert len(response.headers["x-sorion-bundle-sha256"]) == 64
+    with zipfile.ZipFile(io.BytesIO(response.content)) as archive:
+        assert sorted(archive.namelist()) == ["MANIFEST.json", "README.txt", "audit.json"]
+        audit = json.loads(archive.read("audit.json"))
+        manifest = json.loads(archive.read("MANIFEST.json"))
+    verification = client.post(
+        "/api/v1/quality/privacy-audit-bundle/verify",
+        json=audit,
+    )
+    assert verification.status_code == 200
+    assert verification.json()["valid"] is True
+    assert manifest["bundle_sha256"] == response.headers["x-sorion-bundle-sha256"]
+    assert manifest["record_count"] == int(response.headers["x-sorion-record-count"])
+    assert "\"signature\"" not in json.dumps(audit)
