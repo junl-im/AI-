@@ -1,0 +1,7 @@
+SoriON AI 0.10.6 overwrite patch
+Base: 0.10.5
+Added: 3
+Modified: 45
+Deleted: 0
+Total changed: 48
+Delete list: none

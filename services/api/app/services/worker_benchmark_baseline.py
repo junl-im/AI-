@@ -9,9 +9,9 @@ from uuid import uuid4
 from app.schemas.verification import (
     BenchmarkMetricWindow,
     BenchmarkRegressionAssessment,
+    OperatorBaselineCreateRequest,
     OperatorBenchmarkBaseline,
     OperatorBenchmarkRegressionAssessment,
-    OperatorBaselineCreateRequest,
     WorkerSynthesisTelemetryResponse,
 )
 

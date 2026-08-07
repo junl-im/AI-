@@ -576,3 +576,58 @@ describe('useTimelineGeneration partial audio delivery', () => {
   })
 
 })
+
+it('moves and removes multiple timeline blocks while preserving their relative order', () => {
+  const { result } = renderHook(() => useTimelineGeneration())
+  act(() => {
+    result.current.restoreSession([
+      {
+        id: 'voice-a',
+        kind: 'voice',
+        text: '첫 문장',
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'system',
+        normalizeText: true,
+        jobId: null,
+        status: 'queued',
+        progress: 0,
+        durationSeconds: 2,
+        error: null,
+        revision: 1,
+      },
+      { id: 'pause-a', kind: 'pause', durationSeconds: 0.5 },
+      {
+        id: 'voice-b',
+        kind: 'voice',
+        text: '둘째 문장',
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'system',
+        normalizeText: true,
+        jobId: null,
+        status: 'queued',
+        progress: 0,
+        durationSeconds: 2,
+        error: null,
+        revision: 1,
+      },
+    ])
+  })
+
+  act(() => {
+    result.current.moveBlocks(['voice-a', 'voice-b'], -1)
+  })
+  expect(result.current.blocks.map((block) => block.id)).toEqual(['voice-a', 'voice-b', 'pause-a'])
+
+  act(() => {
+    result.current.removeBlocks(['voice-a', 'voice-b'])
+  })
+  expect(result.current.blocks.map((block) => block.id)).toEqual(['pause-a'])
+})

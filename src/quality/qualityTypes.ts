@@ -213,6 +213,25 @@ export interface OperatorBenchmarkBaseline {
   note: string
 }
 
+export interface OperatorBaselineHistoryEntry {
+  baseline: OperatorBenchmarkBaseline
+  status: 'active' | 'retired'
+  retiredAt: string | null
+  retiredBy: string
+  retiredReason: string
+  replacementBaselineId: string
+  lastRestoredAt: string | null
+  lastRestoredBy: string
+  lastRestoreReason: string
+}
+
+export interface OperatorBaselineRestorePreview {
+  target: OperatorBenchmarkBaseline
+  currentActive: OperatorBenchmarkBaseline | null
+  willReplaceActive: boolean
+  summary: string[]
+}
+
 export interface OperatorBenchmarkRegressionAssessment {
   baselineId: string
   status: 'insufficient' | 'stable' | 'warning' | 'regressed'

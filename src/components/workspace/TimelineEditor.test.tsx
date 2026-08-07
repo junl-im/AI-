@@ -152,3 +152,37 @@ describe('TimelineEditor', () => {
   })
 
 })
+
+it('Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있다', () => {
+  const onMoveMany = vi.fn()
+  const onRemoveMany = vi.fn()
+  render(
+    <TimelineEditor
+      blocks={blocks}
+      onMove={vi.fn()}
+      onMoveMany={onMoveMany}
+      onReorder={vi.fn()}
+      onSplit={vi.fn()}
+      onUpdateText={vi.fn()}
+      onRetry={vi.fn()}
+      onAddVoice={vi.fn()}
+      onAddPause={vi.fn()}
+      onRemove={vi.fn()}
+      onRemoveMany={onRemoveMany}
+      onClear={vi.fn()}
+    />,
+  )
+
+  const secondVoice = screen.getByText('두 번째 문장입니다.').closest('article')
+  expect(secondVoice).not.toBeNull()
+  fireEvent.click(secondVoice!, { ctrlKey: true })
+
+  expect(screen.getByRole('region', { name: '선택 클립 일괄 작업' })).toBeInTheDocument()
+  expect(screen.getByText(/2개 클립/)).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: '선택 앞으로' }))
+  expect(onMoveMany).toHaveBeenCalledWith(['voice-1', 'voice-2'], -1)
+
+  fireEvent.click(screen.getByRole('button', { name: '선택 삭제' }))
+  expect(onRemoveMany).toHaveBeenCalledWith(['voice-1', 'voice-2'])
+})

@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.10.6 · Baseline Recovery & Multi-Clip Editing
+
+- 운영자 benchmark baseline의 append-only JSONL 이력을 조회하고, 현재 기준선과 과거 기준선을 비교한 뒤 기존 기록을 지우지 않고 `restored` 이벤트로 복원합니다.
+- 기준선 복원 API와 운영자 화면에 history·preview·restore 흐름을 추가해 잘못된 복원 뒤에도 이전 상태로 다시 되돌릴 수 있게 합니다.
+- 타임라인에서 `Ctrl/Cmd` 다중 선택과 `Shift` 범위 선택을 지원하고, 2개 이상 선택 시 일괄 이동·삭제 패널을 제공합니다.
+- 단일 선택은 0.10.5의 빠른 편집기를 그대로 유지하고, 재생 중 자동 선택은 다중 선택을 해제하지 않도록 분리합니다.
+- jsdom에 없는 `scrollIntoView`를 안전하게 가드하고, 중복 음성 미리듣기 접근성 이름·Dock Browser Speech 라벨·품질 보고서 버전 fixture를 현재 UI 계약과 동기화합니다.
+- Ruff I001이 발생한 writer lease·benchmark baseline·voice preset approval import 순서를 정리합니다.
+- 앱·API·Worker 제품 버전을 0.10.6으로 동기화합니다.
+
 ## 0.10.5 · Compact Dock & Practical Clip Editor
 
 - 일반 Dock의 핵심 순서를 `재생/일시정지 → 진행바 → 시간/제목 → 보조 제어`로 고정하고 PC에서 한 줄의 얕은 transport로 압축합니다.

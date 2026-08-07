@@ -9,9 +9,9 @@ import pytest
 from app.services.writer_lease import (
     SQLiteWriterLeaseCoordinator,
     WriterLeaseCoordinator,
-    create_writer_lease_coordinator,
     WriterLeaseLostError,
     WriterLeaseTimeoutError,
+    create_writer_lease_coordinator,
 )
 
 

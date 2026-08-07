@@ -15,6 +15,7 @@ import { FinalExportControls } from './FinalExportControls'
 interface TimelineEditorProps {
   blocks: TimelineBlock[]
   onMove: (id: string, direction: -1 | 1) => void
+  onMoveMany?: (ids: string[], direction: -1 | 1) => void
   onReorder: (sourceId: string, targetId: string) => void
   onSplit: (id: string) => void
   onUpdateText: (id: string, text: string) => void
@@ -22,6 +23,7 @@ interface TimelineEditorProps {
   onAddVoice: () => void
   onAddPause: () => void
   onRemove: (id: string) => void
+  onRemoveMany?: (ids: string[]) => void
   onClear: () => void
   onVerifyAndRegenerate?: () => void
   sttBusy?: boolean
@@ -53,8 +55,9 @@ interface VoiceBlockProps {
   total: number
   width: number
   selected: boolean
+  multiSelected: boolean
   playbackActive: boolean
-  onSelect: (id: string) => void
+  onSelect: (id: string, mode: 'single' | 'toggle' | 'range') => void
   onToggleTrack: (trackId: string) => void
   onMove: TimelineEditorProps['onMove']
   onReorder: TimelineEditorProps['onReorder']
@@ -71,6 +74,7 @@ function VoiceBlock({
   total,
   width,
   selected,
+  multiSelected,
   playbackActive,
   onSelect,
   onToggleTrack,
@@ -145,9 +149,11 @@ function VoiceBlock({
       style={{ '--soa-clip-width': `${width}px` } as CSSProperties}
       tabIndex={0}
       aria-current={selected ? 'true' : undefined}
-      draggable={block.status !== 'generating'}
-      onClick={() => onSelect(block.id)}
-      onFocus={() => onSelect(block.id)}
+      draggable={block.status !== 'generating' && !multiSelected}
+      onClick={(event) => onSelect(
+        block.id,
+        event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single',
+      )}
       onKeyDown={handleKeyboard}
       onDragStart={(event: DragEvent<HTMLElement>) => {
         event.dataTransfer.effectAllowed = 'move'
@@ -283,6 +289,7 @@ function VoiceBlock({
 export function TimelineEditor({
   blocks,
   onMove,
+  onMoveMany,
   onReorder,
   onSplit,
   onUpdateText,
@@ -290,6 +297,7 @@ export function TimelineEditor({
   onAddVoice,
   onAddPause,
   onRemove,
+  onRemoveMany,
   onClear,
   onVerifyAndRegenerate = () => undefined,
   sttBusy = false,
@@ -304,6 +312,8 @@ export function TimelineEditor({
   const quickEditorRef = useRef<HTMLTextAreaElement | null>(null)
   const [zoom, setZoom] = useState(1)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(blocks[0]?.id ?? null)
+  const [selectedBlockIds, setSelectedBlockIds] = useState<Set<string>>(() => new Set(blocks[0] ? [blocks[0].id] : []))
+  const [selectionAnchorId, setSelectionAnchorId] = useState<string | null>(blocks[0]?.id ?? null)
   const [quickDraft, setQuickDraft] = useState('')
 
   const metrics = useMemo(() => {
@@ -334,8 +344,21 @@ export function TimelineEditor({
     ? blocks.slice(0, playbackMetricIndex).reduce((total, block) => total + Math.max(0, block.durationSeconds), 0)
       + Math.min(playbackMetric?.duration ?? 0, playbackPositionSeconds)
     : 0
-  const selectedBlock = blocks.find((block) => block.id === selectedBlockId) ?? null
-  const selectedVoiceBlock = selectedBlock?.kind === 'voice' ? selectedBlock : null
+  const selectedBlocks = blocks.filter((block) => selectedBlockIds.has(block.id))
+  const selectedBlock = selectedBlocks.length === 1
+    ? selectedBlocks[0]
+    : blocks.find((block) => block.id === selectedBlockId) ?? null
+  const selectedVoiceBlock = selectedBlocks.length === 1 && selectedBlock?.kind === 'voice' ? selectedBlock : null
+  const selectedDuration = selectedBlocks.reduce((total, block) => total + Math.max(0, block.durationSeconds), 0)
+  const selectedIds = selectedBlocks.map((block) => block.id)
+  const canMoveSelectionLeft = selectedBlocks.some((block) => {
+    const index = blocks.findIndex((item) => item.id === block.id)
+    return index > 0 && !selectedBlockIds.has(blocks[index - 1].id)
+  })
+  const canMoveSelectionRight = selectedBlocks.some((block) => {
+    const index = blocks.findIndex((item) => item.id === block.id)
+    return index >= 0 && index < blocks.length - 1 && !selectedBlockIds.has(blocks[index + 1].id)
+  })
   const quickDraftTrimmed = quickDraft.trim()
   const quickDraftDirty = Boolean(selectedVoiceBlock && quickDraftTrimmed && quickDraftTrimmed !== selectedVoiceBlock.text)
   const rulerTimes = [0, 0.25, 0.5, 0.75, 1].map((ratio) => totalDuration * ratio)
@@ -352,9 +375,55 @@ export function TimelineEditor({
     return true
   }
 
-  function editBlock(id: string) {
+  function selectBlock(id: string, mode: 'single' | 'toggle' | 'range' = 'single') {
+    if (mode === 'range' && selectionAnchorId) {
+      const anchorIndex = blocks.findIndex((block) => block.id === selectionAnchorId)
+      const targetIndex = blocks.findIndex((block) => block.id === id)
+      if (anchorIndex >= 0 && targetIndex >= 0) {
+        const start = Math.min(anchorIndex, targetIndex)
+        const end = Math.max(anchorIndex, targetIndex)
+        setSelectedBlockIds(new Set(blocks.slice(start, end + 1).map((block) => block.id)))
+        setSelectedBlockId(id)
+        return
+      }
+    }
+
+    if (mode === 'toggle') {
+      const next = new Set(selectedBlockIds)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      setSelectedBlockIds(next)
+      setSelectionAnchorId(id)
+      setSelectedBlockId(next.has(id) ? id : [...next][0] ?? null)
+      return
+    }
+
+    setSelectedBlockIds(new Set([id]))
+    setSelectionAnchorId(id)
     setSelectedBlockId(id)
+  }
+
+  function editBlock(id: string) {
+    selectBlock(id)
     window.requestAnimationFrame(() => quickEditorRef.current?.focus())
+  }
+
+  function moveSelection(id: string, direction: -1 | 1) {
+    if (selectedBlockIds.has(id) && selectedBlockIds.size > 1 && onMoveMany) {
+      onMoveMany(selectedIds, direction)
+      return
+    }
+    onMove(id, direction)
+  }
+
+  function removeSelection(id: string) {
+    if (selectedBlockIds.has(id) && selectedBlockIds.size > 1 && onRemoveMany) {
+      onRemoveMany(selectedIds)
+      setSelectedBlockIds(new Set())
+      setSelectedBlockId(null)
+      return
+    }
+    onRemove(id)
   }
 
   function seekFromTimeline(event: PointerEvent<HTMLDivElement>) {
@@ -367,7 +436,7 @@ export function TimelineEditor({
     const block = blocks.find((item) => item.id === metric.id)
     if (!block || block.kind !== 'voice' || !block.trackId || block.status !== 'ready') return
     const ratio = Math.max(0, Math.min(1, (x - metric.offset) / metric.width))
-    setSelectedBlockId(block.id)
+    selectBlock(block.id)
     seekTrack(block.trackId, ratio * metric.duration)
   }
 
@@ -376,19 +445,34 @@ export function TimelineEditor({
   }, [selectedVoiceBlock?.id, selectedVoiceBlock?.text])
 
   useEffect(() => {
-    if (selectedBlockId && blocks.some((block) => block.id === selectedBlockId)) return
-    setSelectedBlockId(blocks[0]?.id ?? null)
-  }, [blocks, selectedBlockId])
+    const validIds = new Set(blocks.map((block) => block.id))
+    const next = new Set([...selectedBlockIds].filter((id) => validIds.has(id)))
+    if (next.size !== selectedBlockIds.size) setSelectedBlockIds(next)
+    if (selectedBlockId && validIds.has(selectedBlockId)) return
+    const fallback = [...next][0] ?? blocks[0]?.id ?? null
+    setSelectedBlockId(fallback)
+    setSelectionAnchorId(fallback)
+    if (!next.size && fallback) setSelectedBlockIds(new Set([fallback]))
+  }, [blocks, selectedBlockId, selectedBlockIds])
+
+  const multiSelectionActive = selectedBlockIds.size > 1
 
   useEffect(() => {
     if (!playbackBlock) return
-    setSelectedBlockId(playbackBlock.id)
-    clipRefs.current.get(playbackBlock.id)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-      inline: 'center',
-    })
-  }, [playbackBlock])
+    if (!multiSelectionActive) {
+      setSelectedBlockIds(new Set([playbackBlock.id]))
+      setSelectionAnchorId(playbackBlock.id)
+      setSelectedBlockId(playbackBlock.id)
+    }
+    const playbackElement = clipRefs.current.get(playbackBlock.id)
+    if (typeof playbackElement?.scrollIntoView === 'function') {
+      playbackElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      })
+    }
+  }, [multiSelectionActive, playbackBlock])
 
   let voiceIndex = -1
 
@@ -413,11 +497,13 @@ export function TimelineEditor({
         <div>
           <strong>{blocks.length}개 클립</strong>
           <span>총 {formatDuration(totalDuration)}</span>
-          {selectedBlock ? (
+          {selectedBlocks.length > 1 ? (
+            <span>선택 · {selectedBlocks.length}개 · {formatDuration(selectedDuration)}</span>
+          ) : selectedBlock ? (
             <span>선택 · {selectedBlock.kind === 'voice' ? selectedBlock.voiceName : '쉼'} {formatDuration(selectedBlock.durationSeconds)}</span>
           ) : null}
         </div>
-        <p>트랙 클릭 위치 이동 · Space 재생/일시정지 · Enter 편집 · Delete 삭제 · Alt+←/→ 이동</p>
+        <p>트랙 클릭 위치 이동 · Ctrl/Cmd 클릭 다중 선택 · Shift 클릭 범위 선택 · Enter 편집 · Delete 삭제 · Alt+←/→ 이동</p>
         <div className="soa-timeline-zoom" aria-label="타임라인 확대 축소">
           <button type="button" onClick={() => setZoom((value) => Math.max(0.72, value - 0.14))} aria-label="타임라인 축소">−</button>
           <button type="button" onClick={() => setZoom(1)} aria-label="타임라인 기본 배율">{Math.round(zoom * 100)}%</button>
@@ -425,7 +511,27 @@ export function TimelineEditor({
         </div>
       </div>
 
-      {selectedBlock ? (
+      {selectedBlocks.length > 1 ? (
+        <section className="soa-timeline-quick-editor is-batch" aria-label="선택 클립 일괄 작업">
+          <div className="soa-timeline-quick-editor__meta">
+            <span>다중 선택</span>
+            <strong>{selectedBlocks.length}개 클립 · {formatDuration(selectedDuration)}</strong>
+            <small>선택 순서는 유지한 채 한 칸씩 이동합니다.</small>
+          </div>
+          <div className="soa-timeline-batch-summary">
+            {selectedBlocks.slice(0, 4).map((block) => (
+              <span key={block.id}>{block.kind === 'voice' ? block.text : `쉼 ${block.durationSeconds.toFixed(1)}초`}</span>
+            ))}
+            {selectedBlocks.length > 4 ? <span>외 {selectedBlocks.length - 4}개</span> : null}
+          </div>
+          <div className="soa-timeline-quick-editor__actions is-batch">
+            <button type="button" disabled={!onMoveMany || !canMoveSelectionLeft} onClick={() => onMoveMany?.(selectedIds, -1)}>선택 앞으로</button>
+            <button type="button" disabled={!onMoveMany || !canMoveSelectionRight} onClick={() => onMoveMany?.(selectedIds, 1)}>선택 뒤로</button>
+            <button type="button" onClick={() => { setSelectedBlockIds(new Set()); setSelectedBlockId(null) }}>선택 해제</button>
+            <button type="button" className="is-danger" disabled={!onRemoveMany} onClick={() => { onRemoveMany?.(selectedIds); setSelectedBlockIds(new Set()); setSelectedBlockId(null) }}>선택 삭제</button>
+          </div>
+        </section>
+      ) : selectedBlock ? (
         <section className="soa-timeline-quick-editor" aria-label="선택 클립 빠른 편집">
           <div className="soa-timeline-quick-editor__meta">
             <span>선택 클립</span>
@@ -467,14 +573,14 @@ export function TimelineEditor({
                 <button type="button" onClick={saveQuickDraft} disabled={!quickDraftDirty}>저장</button>
                 <button type="button" onClick={() => { saveQuickDraft(); onRetry(selectedVoiceBlock.id) }} disabled={selectedVoiceBlock.status === 'generating' || !quickDraftTrimmed}>재생성</button>
                 <button type="button" onClick={() => { saveQuickDraft(); onSplit(selectedVoiceBlock.id) }}>나누기</button>
-                <button type="button" className="is-danger" onClick={() => onRemove(selectedVoiceBlock.id)}>삭제</button>
+                <button type="button" className="is-danger" onClick={() => removeSelection(selectedVoiceBlock.id)}>삭제</button>
               </div>
             </>
           ) : (
             <div className="soa-timeline-quick-editor__actions is-pause">
-              <button type="button" disabled={blocks[0]?.id === selectedBlock.id} onClick={() => onMove(selectedBlock.id, -1)}>앞으로</button>
-              <button type="button" disabled={blocks.at(-1)?.id === selectedBlock.id} onClick={() => onMove(selectedBlock.id, 1)}>뒤로</button>
-              <button type="button" className="is-danger" onClick={() => onRemove(selectedBlock.id)}>쉼 삭제</button>
+              <button type="button" disabled={blocks[0]?.id === selectedBlock.id} onClick={() => moveSelection(selectedBlock.id, -1)}>앞으로</button>
+              <button type="button" disabled={blocks.at(-1)?.id === selectedBlock.id} onClick={() => moveSelection(selectedBlock.id, 1)}>뒤로</button>
+              <button type="button" className="is-danger" onClick={() => removeSelection(selectedBlock.id)}>쉼 삭제</button>
             </div>
           )}
         </section>
@@ -517,12 +623,14 @@ export function TimelineEditor({
                             if (element) clipRefs.current.set(block.id, element)
                             else clipRefs.current.delete(block.id)
                           }}
-                          className={`soa-dubbing-pause-block ${selectedBlockId === block.id ? 'is-selected' : ''}`}
+                          className={`soa-dubbing-pause-block ${selectedBlockIds.has(block.id) ? 'is-selected' : ''}`}
                           style={{ '--soa-clip-width': `${metric.width}px` } as CSSProperties}
                           tabIndex={0}
-                          draggable
-                          onFocus={() => setSelectedBlockId(block.id)}
-                          onClick={() => setSelectedBlockId(block.id)}
+                          draggable={selectedBlockIds.size <= 1}
+                          onClick={(event) => selectBlock(
+                            block.id,
+                            event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single',
+                          )}
                           onDragStart={(event) => event.dataTransfer.setData('text/plain', block.id)}
                           onDragOver={(event) => event.preventDefault()}
                           onDrop={(event) => {
@@ -532,7 +640,7 @@ export function TimelineEditor({
                           }}
                         >
                           <span>쉼</span><strong>{block.durationSeconds.toFixed(1)}초</strong>
-                          <button type="button" onClick={() => onRemove(block.id)} aria-label="쉼 블록 삭제">×</button>
+                          <button type="button" onClick={(event) => { event.stopPropagation(); removeSelection(block.id) }} aria-label="쉼 블록 삭제">×</button>
                         </div>
                       )
                     }
@@ -552,16 +660,17 @@ export function TimelineEditor({
                           index={index}
                           total={blocks.length}
                           width={metric.width}
-                          selected={selectedBlockId === block.id}
+                          selected={selectedBlockIds.has(block.id)}
+                          multiSelected={selectedBlockIds.size > 1 && selectedBlockIds.has(block.id)}
                           playbackActive={active && playbackActive}
-                          onSelect={setSelectedBlockId}
+                          onSelect={selectBlock}
                           onToggleTrack={toggleTrack}
-                          onMove={onMove}
+                          onMove={moveSelection}
                           onReorder={onReorder}
                           onSplit={onSplit}
                           onEdit={editBlock}
                           onRetry={onRetry}
-                          onRemove={onRemove}
+                          onRemove={removeSelection}
                         />
                       </div>
                     )

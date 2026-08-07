@@ -6,6 +6,7 @@ interface VoicePreviewButtonProps {
   previewPlaying: boolean
   onPreview: (voiceId: string) => void
   className?: string
+  labelContext?: string
 }
 
 export function VoicePreviewButton({
@@ -16,18 +17,20 @@ export function VoicePreviewButton({
   previewPlaying,
   onPreview,
   className,
+  labelContext,
 }: VoicePreviewButtonProps) {
   const loading = previewingId === voiceId
   const active = activePreviewId === voiceId
   const playing = active && previewPlaying
   const disabled = previewingId !== null && !loading
-  const label = loading
+  const baseLabel = loading
     ? `${voiceName} 미리듣기 준비 취소`
     : playing
       ? `${voiceName} 미리듣기 일시정지`
       : active
         ? `${voiceName} 미리듣기 계속 재생`
         : `${voiceName} 목소리 미리듣기`
+  const label = labelContext ? `${labelContext} ${baseLabel}` : baseLabel
 
   return (
     <button

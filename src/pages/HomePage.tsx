@@ -614,6 +614,7 @@ export function HomePage() {
             <TimelineEditor
               blocks={timeline.blocks}
               onMove={timeline.moveBlock}
+              onMoveMany={timeline.moveBlocks}
               onReorder={timeline.reorderBlock}
               onSplit={timeline.splitBlock}
               onUpdateText={timeline.updateText}
@@ -621,6 +622,7 @@ export function HomePage() {
               onAddVoice={() => timeline.addVoiceBlock(buildOptions())}
               onAddPause={timeline.addPause}
               onRemove={timeline.removeBlock}
+              onRemoveMany={timeline.removeBlocks}
               onClear={() => {
                 setPendingGeneration(null)
                 timeline.clear()

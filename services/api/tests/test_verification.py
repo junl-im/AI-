@@ -523,3 +523,128 @@ def test_operator_baseline_can_be_confirmed_compared_and_retired(client):
     assert client.get(
         "/api/v1/quality/worker-telemetry/operator-baselines"
     ).json() == []
+
+
+def test_operator_baseline_history_preview_and_restore_are_append_only(client):
+    store = client.app.state.worker_telemetry_store
+    base = {
+        "engine_id": "system",
+        "preset_id": "sori-warm",
+        "model_id": "system",
+        "model_version": "1",
+        "model_digest": "sha256:history-model",
+        "device_profile": "cpu",
+        "accelerator_name": "cpu",
+        "gpu_name": "",
+        "processing_ms": 1000,
+        "audio_duration_seconds": 4.0,
+        "failure_reason": "",
+    }
+    create_payload = {
+        key: base[key]
+        for key in (
+            "engine_id",
+            "preset_id",
+            "model_id",
+            "model_version",
+            "model_digest",
+            "device_profile",
+            "accelerator_name",
+            "gpu_name",
+        )
+    }
+    create_payload.update({
+        "confirmation": "현재 성능 기준선 확정",
+        "note": "history test",
+    })
+
+    for index in range(5):
+        store.append({
+            **base,
+            "id": f"history-base-{index}",
+            "worker_job_id": f"history-base-job-{index}",
+            "recorded_at": f"2026-08-06T{index:02d}:00:00+00:00",
+            "first_audio_ms": 420,
+            "realtime_factor": 0.31,
+            "final_handoff_error_ms": 18,
+            "succeeded": True,
+        })
+    first = client.post(
+        "/api/v1/quality/worker-telemetry/operator-baselines",
+        json=create_payload,
+    )
+    assert first.status_code == 200
+    first_baseline = first.json()
+
+    for index in range(5, 10):
+        store.append({
+            **base,
+            "id": f"history-current-{index}",
+            "worker_job_id": f"history-current-job-{index}",
+            "recorded_at": f"2026-08-06T{index:02d}:00:00+00:00",
+            "first_audio_ms": 850,
+            "realtime_factor": 0.62,
+            "final_handoff_error_ms": 70,
+            "succeeded": True,
+        })
+    second = client.post(
+        "/api/v1/quality/worker-telemetry/operator-baselines",
+        json={**create_payload, "note": "replacement"},
+    )
+    assert second.status_code == 200
+    second_baseline = second.json()
+    assert second_baseline["baseline_id"] != first_baseline["baseline_id"]
+
+    history = client.get(
+        "/api/v1/quality/worker-telemetry/operator-baselines/history",
+        params={"group_key": first_baseline["group_key"]},
+    )
+    assert history.status_code == 200
+    history_items = history.json()
+    assert len(history_items) == 2
+    by_id = {item["baseline"]["baseline_id"]: item for item in history_items}
+    assert by_id[first_baseline["baseline_id"]]["status"] == "retired"
+    assert (
+        by_id[first_baseline["baseline_id"]]["replacement_baseline_id"]
+        == second_baseline["baseline_id"]
+    )
+    assert by_id[second_baseline["baseline_id"]]["status"] == "active"
+
+    preview = client.get(
+        "/api/v1/quality/worker-telemetry/operator-baselines/"
+        f"{first_baseline['baseline_id']}/restore-preview"
+    )
+    assert preview.status_code == 200
+    preview_body = preview.json()
+    assert preview_body["target"]["baseline_id"] == first_baseline["baseline_id"]
+    assert preview_body["current_active"]["baseline_id"] == second_baseline["baseline_id"]
+    assert preview_body["will_replace_active"] is True
+
+    restored = client.post(
+        "/api/v1/quality/worker-telemetry/operator-baselines/"
+        f"{first_baseline['baseline_id']}/restore",
+        json={
+            "confirmation": "과거 운영자 기준선 복원",
+            "reason": "회귀 전 안정 기준으로 복원",
+        },
+    )
+    assert restored.status_code == 200
+    assert restored.json()["baseline_id"] == first_baseline["baseline_id"]
+
+    active = client.get("/api/v1/quality/worker-telemetry/operator-baselines")
+    assert active.status_code == 200
+    assert [item["baseline_id"] for item in active.json()] == [
+        first_baseline["baseline_id"]
+    ]
+
+    restored_history = client.get(
+        "/api/v1/quality/worker-telemetry/operator-baselines/history",
+        params={"group_key": first_baseline["group_key"]},
+    ).json()
+    restored_by_id = {item["baseline"]["baseline_id"]: item for item in restored_history}
+    assert restored_by_id[first_baseline["baseline_id"]]["status"] == "active"
+    assert (
+        restored_by_id[first_baseline["baseline_id"]]["last_restore_reason"]
+        == "회귀 전 안정 기준으로 복원"
+    )
+    assert restored_by_id[second_baseline["baseline_id"]]["status"] == "retired"

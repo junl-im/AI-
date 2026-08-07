@@ -12,6 +12,9 @@ from app.schemas.verification import (
     DeviceBenchmarkResponse,
     DeviceBenchmarkSummaryResponse,
     OperatorBaselineCreateRequest,
+    OperatorBaselineHistoryEntry,
+    OperatorBaselineRestorePreview,
+    OperatorBaselineRestoreRequest,
     OperatorBaselineRetireRequest,
     OperatorBenchmarkBaseline,
     SttBatchVerificationRequest,
@@ -443,6 +446,83 @@ def _operator_actor(request: Request) -> str:
 async def list_operator_baselines(request: Request) -> list[OperatorBenchmarkBaseline]:
     _operator_actor(request)
     return request.app.state.operator_baseline_store.list_active()
+
+
+@router.get(
+    "/worker-telemetry/operator-baselines/history",
+    response_model=list[OperatorBaselineHistoryEntry],
+)
+async def list_operator_baseline_history(
+    request: Request,
+    group_key: str | None = None,
+) -> list[OperatorBaselineHistoryEntry]:
+    _operator_actor(request)
+    return request.app.state.operator_baseline_store.history(group_key=group_key)
+
+
+@router.get(
+    "/worker-telemetry/operator-baselines/{baseline_id}/restore-preview",
+    response_model=OperatorBaselineRestorePreview,
+)
+async def preview_operator_baseline_restore(
+    baseline_id: str,
+    request: Request,
+) -> OperatorBaselineRestorePreview:
+    _operator_actor(request)
+    store = request.app.state.operator_baseline_store
+    target = store.get(baseline_id)
+    if target is None:
+        raise HTTPException(
+            status_code=404,
+            detail="SOA-6914: 과거 운영자 기준선을 찾지 못했습니다.",
+        )
+    current = store.active_by_group().get(target.group_key)
+    summary = [
+        f"복원 대상: {target.baseline_id}",
+        f"snapshot: 최근 {target.source_records}건 · {target.created_at.isoformat()}",
+    ]
+    will_replace = current is not None and current.baseline_id != target.baseline_id
+    if will_replace:
+        summary.append(f"현재 활성 기준선 {current.baseline_id}은 이력에 보존한 채 교체됩니다.")
+    elif current is None:
+        summary.append("현재 활성 기준선이 없어 복원 대상이 바로 활성화됩니다.")
+    else:
+        summary.append("이미 활성 기준선입니다. 데이터 변경은 발생하지 않습니다.")
+    return OperatorBaselineRestorePreview(
+        target=target,
+        current_active=current,
+        will_replace_active=will_replace,
+        summary=summary,
+    )
+
+
+@router.post(
+    "/worker-telemetry/operator-baselines/{baseline_id}/restore",
+    response_model=OperatorBenchmarkBaseline,
+)
+async def restore_operator_baseline(
+    baseline_id: str,
+    payload: OperatorBaselineRestoreRequest,
+    request: Request,
+) -> OperatorBenchmarkBaseline:
+    if payload.confirmation != "과거 운영자 기준선 복원":
+        raise HTTPException(
+            status_code=409,
+            detail="SOA-6915: 확인 문구는 '과거 운영자 기준선 복원'이어야 합니다.",
+        )
+    actor = _operator_actor(request)
+    restored = request.app.state.operator_baseline_store.restore(
+        baseline_id,
+        actor,
+        payload.reason.strip(),
+        datetime.now(timezone.utc).isoformat(),
+    )
+    if restored is None:
+        raise HTTPException(
+            status_code=404,
+            detail="SOA-6914: 과거 운영자 기준선을 찾지 못했습니다.",
+        )
+    return restored
 
 
 @router.post(

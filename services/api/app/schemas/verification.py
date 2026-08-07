@@ -241,6 +241,11 @@ class OperatorBaselineRetireRequest(BaseModel):
     reason: str = Field(min_length=1, max_length=500)
 
 
+class OperatorBaselineRestoreRequest(BaseModel):
+    confirmation: str = Field(min_length=1, max_length=80)
+    reason: str = Field(min_length=1, max_length=500)
+
+
 class OperatorBenchmarkBaseline(BaseModel):
     baseline_id: str
     group_key: str
@@ -258,6 +263,25 @@ class OperatorBenchmarkBaseline(BaseModel):
     created_at: datetime
     actor: str
     note: str = ""
+
+
+class OperatorBaselineHistoryEntry(BaseModel):
+    baseline: OperatorBenchmarkBaseline
+    status: Literal["active", "retired"]
+    retired_at: datetime | None = None
+    retired_by: str = ""
+    retired_reason: str = ""
+    replacement_baseline_id: str = ""
+    last_restored_at: datetime | None = None
+    last_restored_by: str = ""
+    last_restore_reason: str = ""
+
+
+class OperatorBaselineRestorePreview(BaseModel):
+    target: OperatorBenchmarkBaseline
+    current_active: OperatorBenchmarkBaseline | None = None
+    will_replace_active: bool = False
+    summary: list[str] = Field(default_factory=list)
 
 
 class OperatorBenchmarkRegressionAssessment(BaseModel):

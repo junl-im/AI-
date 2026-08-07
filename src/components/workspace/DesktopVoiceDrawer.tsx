@@ -96,6 +96,7 @@ export function DesktopVoiceDrawer({
                     activePreviewId={activePreviewId}
                     previewPlaying={previewPlaying}
                     onPreview={onPreview}
+                    labelContext="보이스 라이브러리"
                   />
                 </article>
               )

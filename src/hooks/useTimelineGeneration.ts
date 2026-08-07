@@ -674,6 +674,26 @@ export function useTimelineGeneration() {
     })
   }, [commit])
 
+  const moveBlocks = useCallback((ids: string[], direction: -1 | 1) => {
+    const selected = new Set(ids)
+    if (!selected.size) return
+    commit((current) => {
+      const next = [...current]
+      if (direction < 0) {
+        for (let index = 1; index < next.length; index += 1) {
+          if (!selected.has(next[index].id) || selected.has(next[index - 1].id)) continue
+          ;[next[index - 1], next[index]] = [next[index], next[index - 1]]
+        }
+      } else {
+        for (let index = next.length - 2; index >= 0; index -= 1) {
+          if (!selected.has(next[index].id) || selected.has(next[index + 1].id)) continue
+          ;[next[index], next[index + 1]] = [next[index + 1], next[index]]
+        }
+      }
+      return next
+    })
+  }, [commit])
+
   const updateText = useCallback((id: string, text: string) => {
     cancelActiveGeneration(id)
     commit((current) => current.map((block) => {
@@ -733,6 +753,17 @@ export function useTimelineGeneration() {
     }))
   }, [cancelActiveGeneration, commit, removeTrack])
 
+  const removeBlocks = useCallback((ids: string[]) => {
+    const selected = new Set(ids)
+    if (!selected.size) return
+    ids.forEach((id) => cancelActiveGeneration(id))
+    commit((current) => current.filter((block) => {
+      if (!selected.has(block.id)) return true
+      if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
+      return false
+    }))
+  }, [cancelActiveGeneration, commit, removeTrack])
+
   const clear = useCallback(() => {
     controllers.current.forEach((controller) => controller.abort())
     blocksRef.current.forEach((block) => {
@@ -753,11 +784,13 @@ export function useTimelineGeneration() {
     regenerateBlocks,
     retryBlock,
     moveBlock,
+    moveBlocks,
     reorderBlock,
     updateText,
     splitBlock,
     addPause,
     removeBlock,
+    removeBlocks,
     clear,
   }
 }

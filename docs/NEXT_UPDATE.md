@@ -1,25 +1,25 @@
 # NEXT UPDATE
 
-현재 기준: `0.10.5 · Compact Dock & Practical Clip Editor`
+현재 기준: `0.10.6 · Baseline Recovery & Multi-Clip Editing`
 
 ## 목표 버전
 
-`0.10.6 · Baseline History & Recovery Dashboard`
+`0.10.7 · Recovery Evidence & Voice Inventory Diagnostics`
 
 ## 최우선 구현
 
-- 운영자 기준선 전체 history 조회와 복원 preview
-- 이전 soak 결과를 Quality Lab에서 비교하는 운영 화면
+- 이전 runtime soak 결과를 Quality Lab에서 직접 비교하는 운영 화면
 - 브라우저 절전·온라인 복귀·네트워크 종류 변경 E2E 장애 주입
-- 실제 1024·1280·1440px 화면 이미지 비교
-- 0.10.5 빠른 편집 흐름을 바탕으로 타임라인 다중 선택과 일괄 이동·삭제 검토
-- 프리셋별 실제 기기 음성 inventory 변화 감지와 진단 캐시 무효화 검토
+- 실제 1024·1280·1440px 화면 이미지 비교와 Compact Dock 시각 회귀
+- 프리셋별 실제 기기 음성 inventory 변화 감지와 진단 캐시 무효화
+- 다중 선택 상태에서 일괄 재생성·voice 변경 등 안전한 batch 작업 검토
 - 누적 HANDOVER 과거 기록을 `docs/archive`로 분리하는 방안 검토
 
-## 0.10.5에서 넘기는 결정
+## 0.10.6에서 넘기는 결정
 
-- Dock의 핵심 순서는 `재생/일시정지 → 진행바 → 시간/제목 → 보조 제어`이며, PC에서 보조 기능 때문에 진행바가 별도 줄로 밀리지 않게 유지합니다.
-- 타임라인 카드는 선택·상태·대사 미리보기 역할에 집중하고, 텍스트 변경은 선택 클립 빠른 편집기를 기본 편집 표면으로 유지합니다.
-- Enter는 선택 클립 편집기로 이동하고 `Ctrl/Cmd+Enter`는 저장 후 재생성을 수행합니다.
+- 운영자 기준선 복원은 append-only history를 유지하며 과거 이벤트를 삭제하거나 rewrite하지 않습니다.
+- 과거 기준선 복원은 현재 기준선과 target 기준선을 preview한 뒤에만 실행합니다.
+- 타임라인은 1개 선택일 때 빠른 편집기를 유지하고 2개 이상일 때만 일괄 작업 패널을 사용합니다.
+- 재생 중 자동 선택은 다중 선택을 임의로 해제하지 않습니다.
+- Dock의 핵심 순서는 `재생/일시정지 → 진행바 → 시간/제목 → 보조 제어`를 유지합니다.
 - 0.10.4의 `SOA-4022`, auto Browser Speech 폴백, System TTS의 eSpeak 보조 경로와 반대 성별 강제 대체 금지는 그대로 유지합니다.
-- 원래 0.10.5로 예정됐던 Baseline History & Recovery Dashboard는 사용자 편집 UX 우선순위에 따라 0.10.6으로 이동합니다.

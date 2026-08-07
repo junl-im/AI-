@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.10.5 · Compact Dock & Practical Clip Editor`
+현재 버전: `0.10.6 · Baseline Recovery & Multi-Clip Editing`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -24,6 +24,8 @@
 20. 타임라인 카드는 대사 미리보기에 집중하고 실제 텍스트 수정·저장·미리듣기·재생성·분할·삭제는 선택 클립 빠른 편집기에서 수행합니다. 프리셋 미리듣기 버튼은 준비 취소·일시정지·계속 재생 상태를 현재 플레이어와 동기화합니다.
 21. `auto` 생성에서 서버가 `SOA-4022` 프리셋 호환 불가를 반환하면 호환 가능한 Browser Speech까지 자동으로 이어서 시도합니다.
 22. System TTS는 Windows/macOS 기본 백엔드가 해당 프리셋을 거부하거나 실행 실패할 때 설치된 eSpeak 한국어 백엔드를 보조 경로로 시도합니다. eSpeak가 설치되지 않았거나 호환 한국어 음성이 없으면 이 보조 경로는 사용할 수 없습니다.
+23. Quality Lab의 운영자 benchmark 기준선은 전체 append-only history를 조회할 수 있고, 과거 기준선은 현재 기준선과 비교 미리보기를 거친 뒤 복원합니다. 복원은 기존 기록을 덮어쓰지 않고 `restored` 이벤트를 추가합니다.
+24. 타임라인은 `Ctrl/Cmd`로 개별 다중 선택, `Shift`로 범위 선택합니다. 2개 이상 선택하면 일괄 이동·삭제를 사용하고, 1개 선택은 기존 빠른 편집기로 수정합니다.
 
 - Heartbeat 6.8.4는 새 승인·재서명에 active 신뢰 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지합니다. `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에는 이전 key만 넣고 secret은 Git·ZIP·진단 응답에 포함하지 않습니다.
 - 승인 apply·재서명·rollback은 같은 로컬 파일시스템을 공유하는 API 프로세스 사이에서도 파일 잠금으로 직렬화됩니다. 여러 서버·네트워크 파일시스템은 단일 writer 또는 분산 잠금이 필요합니다.

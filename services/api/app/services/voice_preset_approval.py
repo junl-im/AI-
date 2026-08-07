@@ -30,11 +30,6 @@ from app.services.interprocess_lock import (
     InterprocessLockTimeoutError,
     exclusive_file_lock,
 )
-from app.services.voice_preset_evidence import (
-    inspect_voice_preset_evidence,
-    mark_duplicate_checksums,
-    sha256_file,
-)
 from app.services.voice_preset_approval_primitives import (
     canonical_json as _canonical,
     manifest_diff as _diff,
@@ -43,6 +38,11 @@ from app.services.voice_preset_approval_primitives import (
     valid_sha256 as _valid_sha256,
 )
 from app.services.voice_preset_approval_storage import VoicePresetApprovalStorage
+from app.services.voice_preset_evidence import (
+    inspect_voice_preset_evidence,
+    mark_duplicate_checksums,
+    sha256_file,
+)
 from app.services.voice_preset_renewal import VoicePresetRenewalService
 from app.services.voice_preset_validation import inspect_voice_preset
 from app.services.voice_presets import PRESET_VOICE_IDS, get_voice_preset

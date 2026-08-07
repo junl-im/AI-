@@ -870,3 +870,44 @@
     grid-column: auto;
   }
 }
+
+/* 0.10.6 multi-clip practical editing */
+.soa-timeline-quick-editor.is-batch {
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+}
+
+.soa-timeline-batch-summary {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: 5px;
+}
+
+.soa-timeline-batch-summary span {
+  max-width: 220px;
+  overflow: hidden;
+  border: 1px solid rgba(125, 202, 255, 0.12);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: rgba(255, 255, 255, 0.56);
+  background: rgba(125, 202, 255, 0.045);
+  font-size: 8px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.soa-timeline-quick-editor__actions.is-batch {
+  grid-template-columns: repeat(2, minmax(78px, 1fr));
+}
+
+@media (max-width: 919px) {
+  .soa-timeline-quick-editor.is-batch {
+    grid-template-columns: 1fr;
+  }
+
+  .soa-timeline-quick-editor__actions.is-batch {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

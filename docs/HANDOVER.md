@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.10.5 · Compact Dock & Practical Clip Editor**
+현재 기준 버전: **0.10.6 · Baseline Recovery & Multi-Clip Editing**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-07 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,20 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 0.10.6 Baseline Recovery & Multi-Clip Editing
+
+1. **작업 일시(KST)**: 2026-08-07 11:43 이후.
+2. **대상·기준 버전**: 0.10.6 / 0.10.5 Compact Dock & Practical Clip Editor.
+3. **변경 내용**: 운영자 benchmark baseline의 append-only JSONL history 조회, 현재/과거 기준선 비교 preview, `restored` 이벤트 기반 복원을 추가했습니다. 타임라인은 `Ctrl/Cmd` 다중 선택과 `Shift` 범위 선택을 지원하고 2개 이상 선택 시 일괄 이동·삭제 패널을 제공합니다.
+4. **복원 안전성**: 복원은 과거 파일을 덮어쓰거나 이벤트를 삭제하지 않습니다. 대상 baseline을 active로 만드는 새 restore 이벤트를 추가하므로 잘못 복원해도 history를 이용해 다시 되돌릴 수 있습니다.
+5. **편집 안전성**: 단일 선택은 0.10.5 빠른 편집기를 그대로 사용합니다. 다중 선택 중 재생 위치가 바뀌어도 자동 선택이 선택 집합을 해제하지 않으며, 선택 블록이 삭제되면 유효 ID만 남기도록 정리합니다.
+6. **CI hotfix**: jsdom에 없는 `scrollIntoView` 호출을 함수 존재 여부로 가드하고, Desktop Voice Drawer 미리듣기 접근성 이름을 메인 컨트롤과 구분했습니다. Compact Dock Browser Speech 라벨 테스트와 Quality report 버전 fixture를 현재 계약에 동기화하고 Ruff I001 import 정렬 3건을 수정했습니다.
+7. **검증 결과**: Repository preflight 36/36, Studio UX·playback flow·version sync·compatibility 계약, API pytest 199/199, Worker 14/14, TS/TSX dependency-free transpile 191/191을 통과했습니다. API에는 FastAPI 422 상수 deprecation 경고 1건만 남습니다. 현재 전달 환경에는 node_modules가 없어 전체 Web ESLint·Vitest·semantic typecheck·Vite build는 GitHub Actions가 최종 판정합니다.
+8. **알려진 제한**: 실제 1024·1280·1440px 브라우저 screenshot 비교와 네트워크/절전 E2E 장애 주입은 다음 업데이트로 넘깁니다. 실제 CosyVoice 5종 WAV·동의/권리 자료·모델 가중치는 포함하지 않습니다.
+9. **산출물**: `SoriON-AI-0.10.6-baseline-recovery-multi-clip-editing-full.zip`, `SoriON-AI-0.10.5-to-0.10.6-baseline-recovery-multi-clip-editing-patch.zip`.
+10. **다음 업데이트**: 0.10.7 Recovery Evidence & Voice Inventory Diagnostics. 이전 soak 비교 UI, 실기기 화면 회귀, 네트워크·절전 복귀 장애 주입, 음성 inventory 변화 감지를 우선합니다.
 
 
 ## 0.10.5 Compact Dock & Practical Clip Editor

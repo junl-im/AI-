@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { currentBuildInfo } from '../update/buildInfo'
 import { buildQualityCsv, buildQualityReport } from './qualityReport'
 import type { QualityReview } from './qualityReviewTypes'
 
@@ -23,7 +24,7 @@ const review: QualityReview = {
 describe('quality report export', () => {
   it('builds a versioned JSON report', () => {
     const report = buildQualityReport([review])
-    expect(report.version).toBe('0.10.0')
+    expect(report.version).toBe(currentBuildInfo.appVersion)
     expect(report.reviews).toHaveLength(1)
   })
 

@@ -183,7 +183,7 @@ describe('LinkedPlayerDock', () => {
     usePlayerStore.getState().enqueue(browserSpeechAudio(), '브라우저 완성 음성')
     render(<LinkedPlayerDock />)
 
-    expect(screen.getByText('브라우저 재생')).toBeInTheDocument()
+    expect(screen.getByText('브라우저')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '다운로드' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '브라우저 음성은 위치 이동을 지원하지 않음' }))
       .toBeDisabled()

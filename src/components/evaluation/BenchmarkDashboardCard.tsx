@@ -1,6 +1,18 @@
 import { useMemo, useState } from 'react'
-import { confirmWorkerOperatorBaseline, retireWorkerOperatorBaseline } from '../../quality/qualityApi'
-import type { DeviceBenchmarkSummary, WorkerTelemetrySummary, WorkerTelemetryAggregate } from '../../quality/qualityTypes'
+import {
+  confirmWorkerOperatorBaseline,
+  getWorkerOperatorBaselineHistory,
+  previewWorkerOperatorBaselineRestore,
+  restoreWorkerOperatorBaseline,
+  retireWorkerOperatorBaseline,
+} from '../../quality/qualityApi'
+import type {
+  DeviceBenchmarkSummary,
+  OperatorBaselineHistoryEntry,
+  OperatorBaselineRestorePreview,
+  WorkerTelemetrySummary,
+  WorkerTelemetryAggregate,
+} from '../../quality/qualityTypes'
 import { StatusPill } from '../ui/StatusPill'
 
 interface BenchmarkDashboardCardProps {
@@ -37,6 +49,10 @@ export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, 
   const [baselineBusy, setBaselineBusy] = useState<string | null>(null)
   const [baselineNotice, setBaselineNotice] = useState<string | null>(null)
   const [baselineError, setBaselineError] = useState<string | null>(null)
+  const [historyOpenGroup, setHistoryOpenGroup] = useState<string | null>(null)
+  const [historyLoading, setHistoryLoading] = useState<string | null>(null)
+  const [historyByGroup, setHistoryByGroup] = useState<Record<string, OperatorBaselineHistoryEntry[]>>({})
+  const [restorePreview, setRestorePreview] = useState<OperatorBaselineRestorePreview | null>(null)
   const groups = useMemo(() => workerSummary?.metricGroups ?? [], [workerSummary?.metricGroups])
   const presets = useMemo(() => [...new Set(groups.map((item) => item.presetId))].sort(), [groups])
   const digests = useMemo(() => [...new Set(groups.map((item) => item.modelDigest || 'missing'))].sort(), [groups])
@@ -79,6 +95,60 @@ export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, 
       onRefresh()
     } catch (caught) {
       setBaselineError(caught instanceof Error ? caught.message : '운영자 기준선을 폐기하지 못했습니다.')
+    } finally {
+      setBaselineBusy(null)
+    }
+  }
+
+  async function toggleHistory(group: WorkerTelemetryAggregate) {
+    if (historyOpenGroup === group.groupKey) {
+      setHistoryOpenGroup(null)
+      setRestorePreview(null)
+      return
+    }
+    setHistoryOpenGroup(group.groupKey)
+    setRestorePreview(null)
+    if (historyByGroup[group.groupKey]) return
+    setHistoryLoading(group.groupKey)
+    setBaselineError(null)
+    try {
+      const history = await getWorkerOperatorBaselineHistory(group.groupKey)
+      setHistoryByGroup((current) => ({ ...current, [group.groupKey]: history }))
+    } catch (caught) {
+      setBaselineError(caught instanceof Error ? caught.message : '운영자 기준선 이력을 불러오지 못했습니다.')
+    } finally {
+      setHistoryLoading(null)
+    }
+  }
+
+  async function previewRestore(entry: OperatorBaselineHistoryEntry) {
+    setBaselineBusy(entry.baseline.baselineId)
+    setBaselineError(null)
+    try {
+      setRestorePreview(await previewWorkerOperatorBaselineRestore(entry.baseline.baselineId))
+    } catch (caught) {
+      setBaselineError(caught instanceof Error ? caught.message : '복원 미리보기를 불러오지 못했습니다.')
+    } finally {
+      setBaselineBusy(null)
+    }
+  }
+
+  async function restoreBaseline(group: WorkerTelemetryAggregate) {
+    if (!restorePreview) return
+    const target = restorePreview.target
+    if (!window.confirm(`${new Date(target.createdAt).toLocaleString('ko-KR')} 기준선으로 복원할까요? 현재 기준선도 이력에 남습니다.`)) return
+    setBaselineBusy(target.baselineId)
+    setBaselineError(null)
+    setBaselineNotice(null)
+    try {
+      await restoreWorkerOperatorBaseline(target.baselineId, 'Quality Lab 복원 미리보기 확인 후 복원')
+      const history = await getWorkerOperatorBaselineHistory(group.groupKey)
+      setHistoryByGroup((current) => ({ ...current, [group.groupKey]: history }))
+      setRestorePreview(null)
+      setBaselineNotice('과거 운영자 기준선을 복원했습니다. 교체된 기준선은 이력에 그대로 보존됩니다.')
+      onRefresh()
+    } catch (caught) {
+      setBaselineError(caught instanceof Error ? caught.message : '과거 운영자 기준선을 복원하지 못했습니다.')
     } finally {
       setBaselineBusy(null)
     }
@@ -177,7 +247,67 @@ export function BenchmarkDashboardCard({ deviceSummary, workerSummary, loading, 
                       className="focus-ring min-h-9 rounded-xl border border-soa-line bg-white px-3 text-[10px] font-black disabled:opacity-40"
                     >기준선 폐기</button>
                   ) : null}
+                  <button
+                    type="button"
+                    onClick={() => void toggleHistory(group)}
+                    disabled={historyLoading === group.groupKey}
+                    className="focus-ring min-h-9 rounded-xl border border-soa-line bg-white px-3 text-[10px] font-black disabled:opacity-40"
+                  >{historyLoading === group.groupKey ? '이력 불러오는 중…' : historyOpenGroup === group.groupKey ? '이력 닫기' : '기준선 이력'}</button>
                 </div>
+                {historyOpenGroup === group.groupKey ? (
+                  <div className="mt-3 space-y-2 border-t border-soa-line pt-3" aria-label={`${group.presetId} 운영자 기준선 이력`}>
+                    {(historyByGroup[group.groupKey] ?? []).length ? (historyByGroup[group.groupKey] ?? []).map((entry) => (
+                      <div key={entry.baseline.baselineId} className="rounded-xl bg-white px-3 py-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <strong className="text-[11px] text-soa-ink">{new Date(entry.baseline.createdAt).toLocaleString('ko-KR')} · {entry.baseline.sourceRecords}건</strong>
+                          <StatusPill label={entry.status === 'active' ? '현재 사용 중' : '과거 기준선'} tone={entry.status === 'active' ? 'good' : 'warning'} />
+                        </div>
+                        <p>first audio P95 {metric(entry.baseline.metrics.p95FirstAudioMs, 'ms')} · RTF P95 {metric(entry.baseline.metrics.p95RealtimeFactor)} · 실패율 {(entry.baseline.metrics.failureRate * 100).toFixed(1)}%</p>
+                        <p>handoff P95 {metric(entry.baseline.metrics.p95FinalHandoffErrorMs, 'ms')} · {entry.baseline.note || '메모 없음'}</p>
+                        {entry.retiredReason ? <p>마지막 교체/폐기: {entry.retiredReason}</p> : null}
+                        {entry.lastRestoredAt ? <p>마지막 복원: {new Date(entry.lastRestoredAt).toLocaleString('ko-KR')} · {entry.lastRestoreReason}</p> : null}
+                        {entry.status === 'retired' ? (
+                          <button
+                            type="button"
+                            className="focus-ring mt-2 min-h-8 rounded-lg border border-soa-line bg-[#fbfaf6] px-3 text-[10px] font-black disabled:opacity-40"
+                            disabled={baselineBusy !== null}
+                            onClick={() => void previewRestore(entry)}
+                          >복원 전 비교</button>
+                        ) : null}
+                      </div>
+                    )) : historyLoading === group.groupKey ? null : (
+                      <p className="rounded-xl bg-white px-3 py-2">저장된 운영자 기준선 이력이 없습니다.</p>
+                    )}
+                    {restorePreview?.target.groupKey === group.groupKey ? (
+                      <div className="rounded-xl border border-soa-line bg-[#f7f5ef] p-3" aria-label="기준선 복원 미리보기">
+                        <strong className="text-xs text-soa-ink">복원 미리보기</strong>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          <div className="rounded-lg bg-white p-2">
+                            <b className="text-soa-ink">복원 대상</b>
+                            <p>{new Date(restorePreview.target.createdAt).toLocaleString('ko-KR')}</p>
+                            <p>first audio {metric(restorePreview.target.metrics.p95FirstAudioMs, 'ms')} · RTF {metric(restorePreview.target.metrics.p95RealtimeFactor)}</p>
+                            <p>실패율 {(restorePreview.target.metrics.failureRate * 100).toFixed(1)}% · handoff {metric(restorePreview.target.metrics.p95FinalHandoffErrorMs, 'ms')}</p>
+                          </div>
+                          <div className="rounded-lg bg-white p-2">
+                            <b className="text-soa-ink">현재 활성</b>
+                            {restorePreview.currentActive ? (
+                              <>
+                                <p>{new Date(restorePreview.currentActive.createdAt).toLocaleString('ko-KR')}</p>
+                                <p>first audio {metric(restorePreview.currentActive.metrics.p95FirstAudioMs, 'ms')} · RTF {metric(restorePreview.currentActive.metrics.p95RealtimeFactor)}</p>
+                                <p>실패율 {(restorePreview.currentActive.metrics.failureRate * 100).toFixed(1)}% · handoff {metric(restorePreview.currentActive.metrics.p95FinalHandoffErrorMs, 'ms')}</p>
+                              </>
+                            ) : <p>현재 활성 기준선 없음</p>}
+                          </div>
+                        </div>
+                        <ul className="mt-2 list-disc pl-4">{restorePreview.summary.map((line) => <li key={line}>{line}</li>)}</ul>
+                        <div className="mt-2 flex gap-2">
+                          <button type="button" className="focus-ring min-h-9 rounded-xl border border-soa-line bg-white px-3 text-[10px] font-black" onClick={() => void restoreBaseline(group)} disabled={baselineBusy !== null || restorePreview.currentActive?.baselineId === restorePreview.target.baselineId}>과거 기준선 복원</button>
+                          <button type="button" className="focus-ring min-h-9 rounded-xl border border-soa-line bg-white px-3 text-[10px] font-black" onClick={() => setRestorePreview(null)}>취소</button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
           ))}

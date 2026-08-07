@@ -52,10 +52,16 @@ await requireMarkers('services/api/app/services/worker_benchmark_baseline.py', [
 await requireMarkers('services/api/app/services/operator_baseline_store.py', [
   'event": "created"',
   'event": "retired"',
+  'event": "restored"',
+  'def history(',
+  'def restore(',
   '_active_by_group_unlocked',
 ])
 await requireMarkers('services/api/app/api/routes/verification.py', [
   '/worker-telemetry/operator-baselines',
+  '/worker-telemetry/operator-baselines/history',
+  '/restore-preview',
+  '과거 운영자 기준선 복원',
   '현재 성능 기준선 확정',
   '운영자 기준선 폐기',
 ])
@@ -63,9 +69,13 @@ await requireMarkers('src/components/evaluation/BenchmarkDashboardCard.tsx', [
   '운영자 확정 기준선',
   '현재 5건 기준선 확정',
   '기준선 폐기',
+  '기준선 이력',
+  '복원 전 비교',
+  '복원 미리보기',
 ])
 await requireMarkers('services/api/tests/test_verification.py', [
   'test_operator_baseline_can_be_confirmed_compared_and_retired',
+  'test_operator_baseline_history_preview_and_restore_are_append_only',
 ])
 await requireMarkers('docs/APPROVAL_MODULARIZATION_AND_OPERATOR_BASELINES.md', [
   '0.10.1',

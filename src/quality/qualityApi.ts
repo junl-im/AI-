@@ -10,6 +10,8 @@ import type {
   QualityEvidenceSummary,
   DeviceSoakRecordInput,
   DeviceSoakRecordResult,
+  OperatorBaselineHistoryEntry,
+  OperatorBaselineRestorePreview,
   OperatorBenchmarkBaseline,
   WorkerTelemetryAggregate,
 } from './qualityTypes'
@@ -612,49 +614,32 @@ function operatorHeaders() {
   }
 }
 
-export async function confirmWorkerOperatorBaseline(
-  group: WorkerTelemetryAggregate,
-  note = '',
-): Promise<OperatorBenchmarkBaseline> {
-  const result = await apiRequest<{
-    baseline_id: string
-    group_key: string
-    engine_id: string
-    preset_id: string
-    model_id: string
-    model_version: string
-    model_digest: string
-    device_profile: string
-    accelerator_name: string
-    gpu_name: string
-    source_records: number
-    source_records_sha256: string
-    metrics: {
-      records: number
-      failure_rate: number
-      p95_first_audio_ms: number | null
-      p95_realtime_factor: number | null
-      p95_final_handoff_error_ms: number | null
-    }
-    created_at: string
-    actor: string
-    note: string
-  }>('/quality/worker-telemetry/operator-baselines', {
-    method: 'POST',
-    headers: operatorHeaders(),
-    body: JSON.stringify({
-      engine_id: group.engineId,
-      preset_id: group.presetId,
-      model_id: group.modelId,
-      model_version: group.modelVersion,
-      model_digest: group.modelDigest,
-      device_profile: group.deviceProfile,
-      accelerator_name: group.acceleratorName,
-      gpu_name: group.gpuName,
-      confirmation: '현재 성능 기준선 확정',
-      note,
-    }),
-  })
+interface ApiOperatorBenchmarkBaseline {
+  baseline_id: string
+  group_key: string
+  engine_id: string
+  preset_id: string
+  model_id: string
+  model_version: string
+  model_digest: string
+  device_profile: string
+  accelerator_name: string
+  gpu_name: string
+  source_records: number
+  source_records_sha256: string
+  metrics: {
+    records: number
+    failure_rate: number
+    p95_first_audio_ms: number | null
+    p95_realtime_factor: number | null
+    p95_final_handoff_error_ms: number | null
+  }
+  created_at: string
+  actor: string
+  note: string
+}
+
+function mapOperatorBaseline(result: ApiOperatorBenchmarkBaseline): OperatorBenchmarkBaseline {
   return {
     baselineId: result.baseline_id,
     groupKey: result.group_key,
@@ -681,6 +666,29 @@ export async function confirmWorkerOperatorBaseline(
   }
 }
 
+export async function confirmWorkerOperatorBaseline(
+  group: WorkerTelemetryAggregate,
+  note = '',
+): Promise<OperatorBenchmarkBaseline> {
+  const result = await apiRequest<ApiOperatorBenchmarkBaseline>('/quality/worker-telemetry/operator-baselines', {
+    method: 'POST',
+    headers: operatorHeaders(),
+    body: JSON.stringify({
+      engine_id: group.engineId,
+      preset_id: group.presetId,
+      model_id: group.modelId,
+      model_version: group.modelVersion,
+      model_digest: group.modelDigest,
+      device_profile: group.deviceProfile,
+      accelerator_name: group.acceleratorName,
+      gpu_name: group.gpuName,
+      confirmation: '현재 성능 기준선 확정',
+      note,
+    }),
+  })
+  return mapOperatorBaseline(result)
+}
+
 export async function retireWorkerOperatorBaseline(baselineId: string, reason: string) {
   return apiRequest<{ status: string; baseline_id: string }>(
     `/quality/worker-telemetry/operator-baselines/${encodeURIComponent(baselineId)}/retire`,
@@ -693,5 +701,70 @@ export async function retireWorkerOperatorBaseline(baselineId: string, reason: s
       }),
     },
   )
+}
+
+export async function getWorkerOperatorBaselineHistory(groupKey: string): Promise<OperatorBaselineHistoryEntry[]> {
+  const query = new URLSearchParams({ group_key: groupKey })
+  const result = await apiRequest<Array<{
+    baseline: ApiOperatorBenchmarkBaseline
+    status: 'active' | 'retired'
+    retired_at: string | null
+    retired_by: string
+    retired_reason: string
+    replacement_baseline_id: string
+    last_restored_at: string | null
+    last_restored_by: string
+    last_restore_reason: string
+  }>>(`/quality/worker-telemetry/operator-baselines/history?${query.toString()}`, {
+    headers: operatorHeaders(),
+  })
+  return result.map((item) => ({
+    baseline: mapOperatorBaseline(item.baseline),
+    status: item.status,
+    retiredAt: item.retired_at,
+    retiredBy: item.retired_by,
+    retiredReason: item.retired_reason,
+    replacementBaselineId: item.replacement_baseline_id,
+    lastRestoredAt: item.last_restored_at,
+    lastRestoredBy: item.last_restored_by,
+    lastRestoreReason: item.last_restore_reason,
+  }))
+}
+
+export async function previewWorkerOperatorBaselineRestore(
+  baselineId: string,
+): Promise<OperatorBaselineRestorePreview> {
+  const result = await apiRequest<{
+    target: ApiOperatorBenchmarkBaseline
+    current_active: ApiOperatorBenchmarkBaseline | null
+    will_replace_active: boolean
+    summary: string[]
+  }>(`/quality/worker-telemetry/operator-baselines/${encodeURIComponent(baselineId)}/restore-preview`, {
+    headers: operatorHeaders(),
+  })
+  return {
+    target: mapOperatorBaseline(result.target),
+    currentActive: result.current_active ? mapOperatorBaseline(result.current_active) : null,
+    willReplaceActive: result.will_replace_active,
+    summary: result.summary,
+  }
+}
+
+export async function restoreWorkerOperatorBaseline(
+  baselineId: string,
+  reason: string,
+): Promise<OperatorBenchmarkBaseline> {
+  const result = await apiRequest<ApiOperatorBenchmarkBaseline>(
+    `/quality/worker-telemetry/operator-baselines/${encodeURIComponent(baselineId)}/restore`,
+    {
+      method: 'POST',
+      headers: operatorHeaders(),
+      body: JSON.stringify({
+        confirmation: '과거 운영자 기준선 복원',
+        reason,
+      }),
+    },
+  )
+  return mapOperatorBaseline(result)
 }
 
