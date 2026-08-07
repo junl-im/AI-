@@ -1,24 +1,22 @@
-SoriON AI 0.10.6 -> 0.10.7 Recovery Evidence & Voice Inventory Diagnostics
+SoriON AI 0.10.7 -> 0.10.8 CI Test Contract Stability Hotfix
 
 기준 버전
-- 0.10.6 Baseline Recovery & Multi-Clip Editing
+- 0.10.7 Recovery Evidence & Voice Inventory Diagnostics
 
 적용 결과
-- Worker telemetry group_key를 API schema/payload와 Web groupKey까지 연결
-- voice_preset_approval primitive import 구조 단순화로 Ruff I001 재발 지점 축소
-- runtime-soak/2 이전/현재 JSON 비교 카드
-- 실제 OS 상태를 변경하지 않는 앱 recovery path event injection
-- Browser Speech voice inventory fingerprint 변화 감지와 voiceschanged 재평가
-- 앱·API·Worker 제품 버전 v0.10.7 동기화
+- browserPlaybackEvidence 테스트의 afterEach 내부 중첩 it() 제거
+- HomePage 통합 테스트를 선택 클립 빠른 편집기 + 카드 텍스트 계약과 동기화
+- dependency-free project rules에 동일 회귀 사전 차단 계약 추가
+- 앱·API·Worker 제품 버전 v0.10.8 동기화
 
 변경 수
-- 추가 14개
-- 수정 36개
+- 추가 2개
+- 수정 28개
 - 삭제 0개
-- 총 50개
+- 총 30개
 
 삭제 파일
 - 없음
 
 상세 manifest
-- docs/patches/0.10.7/PATCH_MANIFEST.txt
+- docs/patches/0.10.8/PATCH_MANIFEST.txt

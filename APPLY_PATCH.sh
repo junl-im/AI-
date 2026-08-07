@@ -2,9 +2,8 @@
 set -eu
 cd "$(dirname "$0")"
 node scripts/apply-delete-list.mjs docs/patches/0.9.3-beta.3-ci-hardening-3/DELETE_LIST.txt
-printf '%s\n' 'SoriON AI v0.10.7 Recovery Evidence & Voice Inventory Diagnostics 패치가 적용되었습니다.'
-printf '%s\n' 'Worker group key, soak 비교, recovery path injection, Browser voice inventory 진단을 확인합니다.'
+printf '%s\n' 'SoriON AI v0.10.8 CI Test Contract Stability Hotfix 패치가 적용되었습니다.'
+printf '%s\n' 'Vitest nested-test 구조와 HomePage 빠른 편집기 테스트 계약을 확인합니다.'
 node scripts/check-version-sync.mjs
-node scripts/check-recovery-evidence-voice-inventory.mjs
 node scripts/run-preflight.mjs
-printf '%s\n' '로컬 dependency-free 검사가 통과했습니다. GitHub Actions에서 Ruff와 전체 Web quality를 최종 확인하세요.'
+printf '%s\n' 'dependency-free 검사가 통과했습니다. GitHub Actions에서 전체 Web quality를 최종 확인하세요.'

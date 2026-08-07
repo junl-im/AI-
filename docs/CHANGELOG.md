@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.10.8 · CI Test Contract Stability Hotfix
+
+- `browserPlaybackEvidence.test.ts`에서 진단용 장애 주입 테스트가 `afterEach()` 내부에 중복 삽입되어 Vitest가 테스트 안의 `test()` 호출로 판정하던 구조를 제거합니다.
+- HomePage 장문 통합 테스트를 0.10.5 이후의 실제 편집 UX와 동기화해, 선택 문장은 단일 빠른 편집기에서 검증하고 나머지 문장은 타임라인 카드 텍스트로 검증합니다.
+- dependency-free 프로젝트 규칙에 위 두 회귀 형태를 고정해 같은 CI 오류가 의존성 설치 전 preflight 단계에서 다시 들어오지 않도록 합니다.
+- 앱·API·Worker 제품 버전을 0.10.8로 동기화합니다.
+
 ## 0.10.7 · Recovery Evidence & Voice Inventory Diagnostics
 
 - Worker telemetry 집계에 `group_key`를 API 필수 필드로 추가하고 Web `WorkerTelemetryAggregate.groupKey`까지 연결해 기준선이 없는 그룹도 History 조회가 안전하게 동작하도록 수정합니다.

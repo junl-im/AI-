@@ -1,10 +1,10 @@
 # NEXT UPDATE
 
-현재 기준: `0.10.7 · Recovery Evidence & Voice Inventory Diagnostics`
+현재 기준: `0.10.8 · CI Test Contract Stability Hotfix`
 
 ## 목표 버전
 
-`0.10.8 · Visual Regression & Safe Batch Voice Editing`
+`0.10.9 · Visual Regression & Safe Batch Voice Editing`
 
 ## 최우선 구현
 
@@ -15,7 +15,10 @@
 - 브라우저 음성 inventory 변경 뒤 프리셋별 이전/현재 배정 diff 표시
 - 누적 HANDOVER 과거 기록을 `docs/archive`로 분리하되 현재 필수 결정은 원본에 유지
 
-## 0.10.7에서 넘기는 결정
+## 0.10.8에서 넘기는 결정
+
+- Web CI 안정화가 완료되기 전에는 새 기능을 섞지 않고, Vitest 구조·편집 UI 테스트 계약을 먼저 고정합니다.
+- 카드별 textarea는 다시 도입하지 않으며 단일 선택 빠른 편집기 + 타임라인 카드 텍스트 구조를 유지합니다.
 
 - 운영자 기준선 복원은 append-only history를 유지하며 과거 이벤트를 삭제하거나 rewrite하지 않습니다.
 - 과거 기준선 복원은 현재 기준선과 target 기준선을 preview한 뒤에만 실행합니다.

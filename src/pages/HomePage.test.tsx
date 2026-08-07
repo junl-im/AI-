@@ -57,8 +57,9 @@ describe('HomePage', () => {
     fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
 
     expect(textbox).toHaveValue('첫 번째 문장입니다. 두 번째 문장입니다.')
-    expect(scoped.getByDisplayValue('첫 번째 문장입니다.')).toBeInTheDocument()
-    expect(scoped.getByDisplayValue('두 번째 문장입니다.')).toBeInTheDocument()
+    expect(scoped.getByRole('textbox', { name: '선택 대사 빠른 수정' }))
+      .toHaveValue('첫 번째 문장입니다.')
+    expect(scoped.getByText('두 번째 문장입니다.')).toBeInTheDocument()
     expect(scoped.getAllByText('혜린').length).toBeGreaterThanOrEqual(3)
     expect(scoped.getByRole('complementary', { name: '프로젝트 목록' })).toBeInTheDocument()
     expect(scoped.getByRole('complementary', { name: '미니 보이스 라이브러리' })).toBeInTheDocument()

@@ -167,6 +167,8 @@ await requireText('src/hooks/useEngineDoctor.ts', ['runApiConnectivityAudit', 'g
 await requireText('services/api/app/services/setup_diagnostics.py', ['PRESET_VOICE_IDS', 'voice-presets', 'voice_preset_ready_count'])
 await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '수동 검토', 'npm ci', 'uv sync --locked'])
 await requireText('src/test/setup.ts', ['afterEach', 'cleanup()', 'Object.defineProperty(Blob.prototype', "reader.readAsArrayBuffer(this)"])
+await requireAbsent('src/quality/browserPlaybackEvidence.test.ts', ["vi.restoreAllMocks()\n  it("])
+await requireText('src/pages/HomePage.test.tsx', ["name: '선택 대사 빠른 수정'", "getByText('두 번째 문장입니다.')"])
 await requireText('src/tts/mockWave.test.ts', ['async function readBlob', "typeof blob.arrayBuffer === 'function'", 'reader.readAsArrayBuffer(blob)'])
 await requireText('src/components/ui/BrandIcon.tsx', ['sorion-logo.png', 'SoriON AI']); await requireText('src/tts/browserSpeech.ts', ["BROWSER_SPEECH_ENGINE_ID = 'browser-speech'", "mode: 'browser'", 'recommended: false', 'SpeechSynthesisUtterance']); await requireText('src/tts/voiceApi.ts', ['request.engineId === BROWSER_SPEECH_ENGINE_ID', 'timeoutMs: 3_500']); await requireText('src/hooks/useEngineCatalog.ts', ['음성 제작 준비됨', '음성 기능을 자동으로 복구하고 있습니다.']); await requireText('src/tts/browserSpeech.test.ts', ['API 없는 결과를 다운로드 없는 실제 브라우저 재생 결과로 만든다', '한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다'])
 await requireText('src/components/layout/BrandMasthead.tsx', [

@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.10.7 · Recovery Evidence & Voice Inventory Diagnostics**
+현재 기준 버전: **0.10.8 · CI Test Contract Stability Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-07 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,20 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 0.10.8 CI Test Contract Stability Hotfix
+
+1. **작업 일시(KST)**: 2026-08-07 15:33 이후.
+2. **대상 버전과 기준 버전**: 0.10.8 / 0.10.7 Recovery Evidence & Voice Inventory Diagnostics.
+3. **변경 내용**: `browserPlaybackEvidence.test.ts`의 `afterEach()` 안에 잘못 중복된 장애 주입 `it()` 블록을 제거하고, HomePage 장문 통합 테스트를 단일 빠른 편집기 + 카드 텍스트 구조에 맞게 갱신했습니다. 동일 회귀를 dependency-free project rules에서 사전 차단하도록 계약도 추가했습니다.
+4. **변경 이유**: GitHub Actions Web quality에서 Vitest가 테스트 종료 훅 내부의 중첩 테스트 정의를 금지해 4개 테스트가 연쇄 실패했고, HomePage 테스트는 0.10.5에서 카드별 textarea를 제거한 뒤에도 두 문장을 모두 display value로 찾는 이전 UX 계약을 유지해 실패했습니다.
+5. **영향 범위**: Web 테스트 구조, HomePage 통합 테스트, dependency-free project rules, 제품 버전·릴리스 문서입니다. 실제 재생·음성 합성·타임라인 편집 런타임 코드는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/quality/browserPlaybackEvidence.test.ts`, `src/pages/HomePage.test.tsx`, `scripts/check-project-rules.mjs`, 제품 버전 파일과 API 버전 fixture, `docs/CHANGELOG.md`, `docs/NEXT_UPDATE.md`, `docs/HANDOVER.md`.
+7. **검증 결과**: API pytest 199/199, Worker pytest 14/14, Repository preflight 37/37, 제품 버전 sync v0.10.8, Python compileall, dependency-free TS/TSX transpile 201/201을 통과했습니다. Web 의존성 설치는 내부 npm registry가 `zustand@5.0.8`을 404로 반환해 중단되어 GitHub Actions와 동일한 Vitest/ESLint/semantic typecheck/Vite build는 로컬에서 직접 실행하지 못했으며 Actions 재실행이 최종 판정입니다.
+8. **알려진 제한과 주의사항**: 이번 버전은 CI 안정화 전용 hotfix이며 0.10.8에 예정했던 Chromium 시각 회귀·안전한 다중 음성 편집 기능은 0.10.9로 이동합니다. 카드별 textarea를 다시 추가하지 않습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.10.8-ci-test-contract-stability-hotfix-full.zip`, `SoriON-AI-0.10.7-to-0.10.8-ci-test-contract-stability-hotfix-patch.zip`.
+10. **다음 예상 업데이트**: 0.10.9 Visual Regression & Safe Batch Voice Editing. 실제 Chromium 1024·1280·1440px 시각 회귀, 다중 선택 일괄 재생성·voice 변경 전 영향 preview, 실제 OS 절전·Wi-Fi 증거 분리를 이어갑니다.
 
 
 ## 0.10.7 Recovery Evidence & Voice Inventory Diagnostics
