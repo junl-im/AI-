@@ -18,6 +18,7 @@ const checks = [
   ['always-on preset / PC layout', 'check-always-on-preset-pc-layout.mjs'],
   ['approval modularization / operator baseline', 'check-approval-modularization-operator-baseline.mjs'],
   ['recovery soak / managed lock', 'check-recovery-soak-managed-lock.mjs'],
+  ['recovery evidence / voice inventory', 'check-recovery-evidence-voice-inventory.mjs'],
   ['studio playback / timeline UX', 'check-studio-playback-timeline-ux.mjs'],
   ['trust key rotation / evidence renewal', 'check-trust-key-renewal.mjs'],
   ['benchmark baseline / privacy audit', 'check-benchmark-privacy-audit.mjs'],

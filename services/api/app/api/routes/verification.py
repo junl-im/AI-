@@ -371,6 +371,7 @@ def _worker_telemetry_summary(
         operator_baseline = operator_baselines.get(group_key)
         operator_regression = operator_assessment(operator_baseline, records)
         groups.append({
+            "group_key": group_key,
             "engine_id": engine_id,
             "preset_id": preset_id,
             "model_id": model_id,

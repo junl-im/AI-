@@ -5,6 +5,8 @@ import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
 import { BenchmarkDashboardCard } from '../components/evaluation/BenchmarkDashboardCard'
 import { VoicePresetApprovalCard } from '../components/evaluation/VoicePresetApprovalCard'
 import { DeviceSoakRecorderCard } from '../components/evaluation/DeviceSoakRecorderCard'
+import { RuntimeSoakComparisonCard } from '../components/evaluation/RuntimeSoakComparisonCard'
+import { RecoveryInjectionCard } from '../components/evaluation/RecoveryInjectionCard'
 import { VerificationEvidenceCard } from '../components/evaluation/VerificationEvidenceCard'
 import { EvidenceIntakeCard } from '../components/evaluation/EvidenceIntakeCard'
 import { LocalExportBundleCard } from '../components/evaluation/LocalExportBundleCard'
@@ -277,6 +279,10 @@ export function QualityPage() {
         <VoicePresetApprovalCard />
 
         <DeviceSoakRecorderCard onRecorded={() => void refreshDeviceSummary()} />
+
+        <RuntimeSoakComparisonCard />
+
+        <RecoveryInjectionCard />
 
         <BrowserPlaybackEvidenceCard />
 

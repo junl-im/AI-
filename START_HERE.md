@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.10.6 · Baseline Recovery & Multi-Clip Editing`
+현재 버전: `0.10.7 · Recovery Evidence & Voice Inventory Diagnostics`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -26,6 +26,10 @@
 22. System TTS는 Windows/macOS 기본 백엔드가 해당 프리셋을 거부하거나 실행 실패할 때 설치된 eSpeak 한국어 백엔드를 보조 경로로 시도합니다. eSpeak가 설치되지 않았거나 호환 한국어 음성이 없으면 이 보조 경로는 사용할 수 없습니다.
 23. Quality Lab의 운영자 benchmark 기준선은 전체 append-only history를 조회할 수 있고, 과거 기준선은 현재 기준선과 비교 미리보기를 거친 뒤 복원합니다. 복원은 기존 기록을 덮어쓰지 않고 `restored` 이벤트를 추가합니다.
 24. 타임라인은 `Ctrl/Cmd`로 개별 다중 선택, `Shift`로 범위 선택합니다. 2개 이상 선택하면 일괄 이동·삭제를 사용하고, 1개 선택은 기존 빠른 편집기로 수정합니다.
+25. Quality Lab의 Runtime Soak Compare는 `runtime-soak/2` 이전·현재 JSON을 브라우저 메모리에서만 읽고 API와 같은 회귀 임계치로 비교합니다.
+26. Recovery Path Injection은 실제 Wi-Fi나 절전을 조작하지 않습니다. online·pageshow/focus·Network Information change와 `sorion-engine-refresh` 처리 경로만 주입하므로 실기기 장애 인증과 구분합니다.
+27. Engine Doctor는 브라우저 음성 inventory fingerprint 변화를 감지합니다. `voiceschanged` 발생 시 프리셋 배정과 엔진 카탈로그를 다시 계산하며 fingerprint는 보안 서명이 아닌 변화 감지용입니다.
+28. Worker benchmark History는 운영자 기준선이 아직 없어도 API의 `group_key`를 사용해 같은 조건 그룹을 조회합니다.
 
 - Heartbeat 6.8.4는 새 승인·재서명에 active 신뢰 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지합니다. `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에는 이전 key만 넣고 secret은 Git·ZIP·진단 응답에 포함하지 않습니다.
 - 승인 apply·재서명·rollback은 같은 로컬 파일시스템을 공유하는 API 프로세스 사이에서도 파일 잠금으로 직렬화됩니다. 여러 서버·네트워크 파일시스템은 단일 writer 또는 분산 잠금이 필요합니다.

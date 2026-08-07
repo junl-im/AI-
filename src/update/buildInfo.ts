@@ -34,10 +34,10 @@ export function parseAppBuildInfo(value: unknown): AppBuildInfo | null {
 const injectedBuildInfo = typeof __SORION_BUILD_INFO__ === 'undefined'
   ? {
       schemaVersion: 1 as const,
-      appVersion: '0.10.6',
+      appVersion: '0.10.7',
       heartbeat: '6.8.4',
       revision: 'test',
-      buildId: '0.10.6-6.8.4-test',
+      buildId: '0.10.7-6.8.4-test',
     }
   : __SORION_BUILD_INFO__
 

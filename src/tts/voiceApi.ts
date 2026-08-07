@@ -135,6 +135,11 @@ const ENGINE_CATALOG_CACHE_MS = 15_000
 let engineCatalogCache: { baseUrl: string; cachedAt: number; engines: EngineInfo[] } | null = null
 let engineCatalogRequest: { baseUrl: string; promise: Promise<EngineInfo[]> } | null = null
 
+export function invalidateEngineCatalogCache(): void {
+  engineCatalogCache = null
+  engineCatalogRequest = null
+}
+
 function isPresetCompatibilityFailure(error: ApiError): boolean {
   return error.status === 422 && error.message.includes('SOA-4022')
 }

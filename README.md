@@ -8,12 +8,15 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.10.6 · Baseline Recovery & Multi-Clip Editing`
+- 버전: `0.10.7 · Recovery Evidence & Voice Inventory Diagnostics`
 - 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
 - 운영자 기준선: 최근 5건을 SHA-256 snapshot으로 확정하고 자동 기준선과 별도로 교체·폐기 이력을 관리합니다.
 - 기준선 복구: append-only history에서 과거 기준선을 비교 미리보기한 뒤 `restored` 이벤트로 되살리며 기존 기록은 삭제하지 않습니다.
 - 다중 클립 편집: `Ctrl/Cmd` 다중 선택과 `Shift` 범위 선택 뒤 선택 클립을 일괄 이동·삭제하고, 단일 선택은 빠른 편집기를 유지합니다.
 - 복구 검증: 장시간 검사 중 Worker를 실제 재시작하고 45초 이내 자동 복구와 이전 실행 대비 회귀를 기록합니다.
+- soak 비교 UI: `runtime-soak/2` 이전·현재 JSON을 Quality Lab에서 직접 열어 응답·성공률·누수·복구 회귀를 비교합니다.
+- 복귀 경로 주입: 실제 네트워크를 끊지 않고 online·pageshow/focus·Network Information change 처리 경로를 안전하게 재실행합니다.
+- 음성 inventory: Web Speech API 음성 목록 fingerprint 변화를 감지하고 프리셋 배정·엔진 카탈로그를 즉시 다시 평가합니다.
 - 잠금 확장: 승인 writer는 `WriterLeaseCoordinator` 인터페이스를 사용하며 SQLite fencing을 기본 backend로 유지합니다.
 - PC 폭 계약: 1024·1280·1440px의 3분할 중앙 작업 폭을 자동 회귀 검사합니다.
 - 승인 구조: 해시·diff, 원자 저장·history, 증거 갱신 대기열을 독립 모듈로 분리했습니다.
@@ -136,6 +139,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 서명 음원 재발급: [`docs/SIGNED_AUDIO_REHYDRATION.md`](docs/SIGNED_AUDIO_REHYDRATION.md)
 - 실기기 인증 계약: [`docs/REAL_DEVICE_CERTIFICATION.md`](docs/REAL_DEVICE_CERTIFICATION.md)
 - 실기기 soak recorder: [`docs/DEVICE_SOAK_RECORDER.md`](docs/DEVICE_SOAK_RECORDER.md)
+- recovery evidence·음성 inventory: [`docs/RECOVERY_EVIDENCE_AND_VOICE_INVENTORY.md`](docs/RECOVERY_EVIDENCE_AND_VOICE_INVENTORY.md)
 - 음원 보존 정책: [`docs/AUDIO_ARCHIVE_POLICY.md`](docs/AUDIO_ARCHIVE_POLICY.md)
 - 음성 프리셋: [`docs/VOICE_PRESETS.md`](docs/VOICE_PRESETS.md)
 - 프리셋 음성 정합성 계약: [`docs/VOICE_PRESET_FIDELITY.md`](docs/VOICE_PRESET_FIDELITY.md)

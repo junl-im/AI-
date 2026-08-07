@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.10.7 · Recovery Evidence & Voice Inventory Diagnostics
+
+- Worker telemetry 집계에 `group_key`를 API 필수 필드로 추가하고 Web `WorkerTelemetryAggregate.groupKey`까지 연결해 기준선이 없는 그룹도 History 조회가 안전하게 동작하도록 수정합니다.
+- `voice_preset_approval.py`의 primitive alias 다중 import를 모듈 import로 단순화해 Ruff I001 재발 가능성을 줄입니다.
+- Quality Lab에서 `runtime-soak/2` 이전·현재 JSON을 직접 선택해 P95 응답, 성공률, 메모리·연결 증가와 복구 시간 회귀를 비교합니다.
+- 실제 네트워크를 변경하지 않는 온라인 복귀·페이지 복귀·Network Information change 이벤트 주입 카드로 앱 복구 처리 경로를 점검합니다.
+- Engine Doctor가 브라우저 음성 inventory fingerprint 변화를 감지하고 `voiceschanged` 때 프리셋 배정과 엔진 카탈로그를 다시 평가합니다.
+- recovery evidence·voice inventory·Worker group key 연결을 고정하는 dependency-free repository 계약 검사를 추가합니다.
+- 앱·API·Worker 제품 버전을 0.10.7로 동기화합니다.
+
 ## 0.10.6 · Baseline Recovery & Multi-Clip Editing
 
 - 운영자 benchmark baseline의 append-only JSONL 이력을 조회하고, 현재 기준선과 과거 기준선을 비교한 뒤 기존 기록을 지우지 않고 `restored` 이벤트로 복원합니다.

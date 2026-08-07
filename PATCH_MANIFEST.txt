@@ -1,23 +1,24 @@
-SoriON AI 0.10.5 -> 0.10.6 Baseline Recovery & Multi-Clip Editing
+SoriON AI 0.10.6 -> 0.10.7 Recovery Evidence & Voice Inventory Diagnostics
 
 기준 버전
-- 0.10.5 Compact Dock & Practical Clip Editor
+- 0.10.6 Baseline Recovery & Multi-Clip Editing
 
 적용 결과
-- 운영자 benchmark baseline append-only history 조회
-- 현재 기준선과 과거 기준선의 restore preview 및 `restored` 이벤트 기반 복원
-- Ctrl/Cmd 다중 선택과 Shift 범위 선택, 선택 클립 일괄 이동·삭제
-- 단일 선택 빠른 편집 유지 및 재생 중 다중 선택 보존
-- jsdom scrollIntoView 가드와 Voice Drawer 미리듣기 접근성 이름 분리
-- Compact Dock Browser Speech 라벨·Quality report 버전 fixture 동기화
-- Ruff I001 import 정렬 hotfix 3건
-- 앱·API·Worker 제품 버전 v0.10.6 동기화
+- Worker telemetry group_key를 API schema/payload와 Web groupKey까지 연결
+- voice_preset_approval primitive import 구조 단순화로 Ruff I001 재발 지점 축소
+- runtime-soak/2 이전/현재 JSON 비교 카드
+- 실제 OS 상태를 변경하지 않는 앱 recovery path event injection
+- Browser Speech voice inventory fingerprint 변화 감지와 voiceschanged 재평가
+- 앱·API·Worker 제품 버전 v0.10.7 동기화
 
 변경 수
-- 추가 3개
-- 수정 45개
+- 추가 14개
+- 수정 36개
 - 삭제 0개
-- 총 48개
+- 총 50개
 
 삭제 파일
 - 없음
+
+상세 manifest
+- docs/patches/0.10.7/PATCH_MANIFEST.txt

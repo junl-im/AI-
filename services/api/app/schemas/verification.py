@@ -293,6 +293,7 @@ class OperatorBenchmarkRegressionAssessment(BaseModel):
 
 
 class WorkerTelemetryAggregate(BaseModel):
+    group_key: str
     engine_id: str
     preset_id: str
     model_id: str

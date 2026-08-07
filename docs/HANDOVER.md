@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.10.6 · Baseline Recovery & Multi-Clip Editing**
+현재 기준 버전: **0.10.7 · Recovery Evidence & Voice Inventory Diagnostics**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-07 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,20 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 0.10.7 Recovery Evidence & Voice Inventory Diagnostics
+
+1. **작업 일시(KST)**: 2026-08-07 14:19 이후.
+2. **대상 버전과 기준 버전**: 0.10.7 / 0.10.6 Baseline Recovery & Multi-Clip Editing.
+3. **변경 내용**: Worker telemetry aggregate의 `group_key`를 API schema·payload·Web `groupKey`까지 연결하고, `voice_preset_approval.py` import 구조를 단순화해 공유된 CI 차단 원인을 수정했습니다. Quality Lab에는 `runtime-soak/2` 이전/현재 JSON 비교와 앱 복구 경로 이벤트 주입을 추가했고, Engine Doctor에는 브라우저 음성 inventory fingerprint 변화 감지와 `voiceschanged` 기반 엔진 카탈로그 재평가를 추가했습니다.
+4. **변경 이유**: 기준선이 없는 Worker 그룹에서 Web 타입과 API 응답 계약이 어긋나 History 조회가 안전하지 않았고, Python import 정렬 CI가 반복 실패했습니다. 또한 장시간 soak 결과의 전후 비교, 복귀 이벤트 처리 확인, OS/브라우저 음성 목록 변경 후 프리셋 재평가를 운영 화면에서 확인할 수 있는 진단 경로가 필요했습니다.
+5. **영향 범위**: API verification schema/route, Worker telemetry Web 모델과 Benchmark Dashboard, Quality Lab 진단 카드, Engine Doctor, browser voice inventory 저장·감지, engine catalog cache 갱신, repository quality contract, 버전·릴리스 문서입니다. 실제 TTS 합성 정책·프리셋 성별 안전 규칙·운영자 기준선 append-only 복원 정책은 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `services/api/app/schemas/verification.py`, `services/api/app/api/routes/verification.py`, `services/api/app/services/voice_preset_approval.py`, `src/quality/qualityTypes.ts`, `src/quality/qualityApi.ts`, `src/quality/runtimeSoakReport.ts`, `src/components/evaluation/RuntimeSoakComparisonCard.tsx`, `src/quality/recoveryInjection.ts`, `src/components/evaluation/RecoveryInjectionCard.tsx`, `src/tts/browserVoiceInventory.ts`, `src/components/evaluation/EngineDoctorCard.tsx`, `src/hooks/useEngineCatalog.ts`, `scripts/check-recovery-evidence-voice-inventory.mjs`, `docs/RECOVERY_EVIDENCE_AND_VOICE_INVENTORY.md`.
+7. **검증 결과**: API pytest 199/199, Worker pytest 14/14, Python compileall, `.d.ts`를 제외한 TS/TSX dependency-free transpile 201/201, Repository preflight 37/37, version sync를 통과했습니다. 현재 전달 환경에는 Web `node_modules`와 Ruff 0.15.22 실행 환경이 없어 실제 ESLint·semantic typecheck·Vitest·Vite build 및 동일 Ruff 명령은 실행하지 못했으며 GitHub Actions가 최종 판정합니다.
+8. **알려진 제한과 주의사항**: Recovery Path Injection은 앱의 online/pageshow/focus/network-change 처리 경로만 자극하며 실제 Wi-Fi 단절이나 OS 절전·복귀 증거를 대체하지 않습니다. Browser voice fingerprint는 정렬된 음성 메타데이터에서 만든 변화 감지용 식별자이며 보안 checksum이 아닙니다. 실제 1024·1280·1440px Chromium screenshot 회귀도 아직 자동화하지 않았습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.10.7-recovery-evidence-voice-inventory-diagnostics-full.zip`, `SoriON-AI-0.10.6-to-0.10.7-recovery-evidence-voice-inventory-diagnostics-patch.zip`.
+10. **다음 예상 업데이트**: 0.10.8 Visual Regression & Safe Batch Voice Editing. 실제 Chromium 1024·1280·1440px 시각 회귀, 다중 선택 일괄 재생성·voice 변경 전 영향 preview, 실제 OS 절전·Wi-Fi 증거와 synthetic recovery 결과 분리, soak 비교 결과의 provenance 내보내기, 음성 inventory 변경 전후 프리셋 배정 diff를 우선합니다.
 
 
 ## 0.10.6 Baseline Recovery & Multi-Clip Editing

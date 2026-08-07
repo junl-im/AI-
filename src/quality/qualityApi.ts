@@ -445,6 +445,7 @@ export async function getWorkerTelemetrySummary() {
     success_records: number
     failed_records: number
     metric_groups: Array<{
+      group_key: string
       engine_id: string
       preset_id: string
       model_id: string
@@ -526,6 +527,7 @@ export async function getWorkerTelemetrySummary() {
     successRecords: result.success_records,
     failedRecords: result.failed_records,
     metricGroups: result.metric_groups.map((item) => ({
+      groupKey: item.group_key,
       engineId: item.engine_id,
       presetId: item.preset_id,
       modelId: item.model_id,

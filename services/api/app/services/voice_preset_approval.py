@@ -26,16 +26,10 @@ from app.schemas.voice_preset_evidence import (
     VoiceHumanReviewRecord,
     VoicePresetManifest,
 )
+from app.services import voice_preset_approval_primitives as approval_primitives
 from app.services.interprocess_lock import (
     InterprocessLockTimeoutError,
     exclusive_file_lock,
-)
-from app.services.voice_preset_approval_primitives import (
-    canonical_json as _canonical,
-    manifest_diff as _diff,
-    manifest_digest as _manifest_digest,
-    signature_payload as _signature_payload,
-    valid_sha256 as _valid_sha256,
 )
 from app.services.voice_preset_approval_storage import VoicePresetApprovalStorage
 from app.services.voice_preset_evidence import (
@@ -199,11 +193,14 @@ class VoicePresetApprovalService:
             if payload.expected_manifest_sha256
             else None
         )
-        if not _valid_sha256(review_digest) or not _valid_sha256(expected_audio):
+        if (
+            not approval_primitives.valid_sha256(review_digest)
+            or not approval_primitives.valid_sha256(expected_audio)
+        ):
             raise VoicePresetApprovalError(
                 "검수 묶음과 WAV checksum은 소문자 SHA-256이어야 합니다."
             )
-        if expected_manifest and not _valid_sha256(expected_manifest):
+        if expected_manifest and not approval_primitives.valid_sha256(expected_manifest):
             raise VoicePresetApprovalError("manifest checksum은 소문자 SHA-256이어야 합니다.")
 
         directory = self._require_directory()
@@ -220,7 +217,7 @@ class VoicePresetApprovalService:
             )
 
         _manifest_path, current = self._load_manifest(payload.voice_id)
-        current_manifest_sha256 = _manifest_digest(current)
+        current_manifest_sha256 = approval_primitives.manifest_digest(current)
         if expected_manifest and current_manifest_sha256 != expected_manifest:
             raise VoicePresetApprovalError(
                 "입력한 manifest SHA-256과 현재 파일이 다릅니다. 다른 변경을 덮어쓰지 않습니다."
@@ -271,7 +268,7 @@ class VoicePresetApprovalService:
             "audio_sha256": current_audio_sha256,
             "review_bundle_sha256": review_digest,
         }
-        approval_id = "apr-" + _manifest_digest(approval_seed)[:24]
+        approval_id = "apr-" + approval_primitives.manifest_digest(approval_seed)[:24]
         proposed = manifest.model_copy(deep=True)
         proposed.schema_version = 3
         proposed.human_review = VoiceHumanReviewRecord(
@@ -294,16 +291,16 @@ class VoicePresetApprovalService:
             signature="",
         )
         proposed_dict = proposed.model_dump(mode="json")
-        signature_payload = _signature_payload(proposed_dict)
-        signed_payload_sha256 = _manifest_digest(signature_payload)
+        signature_payload = approval_primitives.signature_payload(proposed_dict)
+        signed_payload_sha256 = approval_primitives.manifest_digest(signature_payload)
         proposed_dict["approval"]["signed_payload_sha256"] = signed_payload_sha256
         if active_secret:
             proposed_dict["approval"]["signature"] = hmac.new(
                 active_secret,
-                _canonical(signature_payload),
+                approval_primitives.canonical_json(signature_payload),
                 hashlib.sha256,
             ).hexdigest()
-        proposed_manifest_sha256 = _manifest_digest(proposed_dict)
+        proposed_manifest_sha256 = approval_primitives.manifest_digest(proposed_dict)
         preview_seed = {
             "voice_id": payload.voice_id,
             "audio_sha256": current_audio_sha256,
@@ -311,7 +308,7 @@ class VoicePresetApprovalService:
             "proposed_manifest_sha256": proposed_manifest_sha256,
             "review_bundle_sha256": review_digest,
         }
-        preview_id = _manifest_digest(preview_seed)
+        preview_id = approval_primitives.manifest_digest(preview_seed)
         response = VoicePresetApprovalPreviewResponse(
             preview_id=preview_id,
             approval_id=approval_id,
@@ -320,7 +317,7 @@ class VoicePresetApprovalService:
             current_manifest_sha256=current_manifest_sha256,
             proposed_manifest_sha256=proposed_manifest_sha256,
             proposed_manifest=proposed_dict,
-            changes=_diff(current, proposed_dict),
+            changes=approval_primitives.manifest_diff(current, proposed_dict),
             blocking_issues=sorted(set(blocking)),
             warnings=sorted(set(warnings)),
             duplicate_voice_ids=duplicate_ids,
@@ -353,7 +350,10 @@ class VoicePresetApprovalService:
             if not prepared.response.can_apply:
                 raise VoicePresetApprovalError("차단 사유가 남아 있어 승인할 수 없습니다.")
             manifest_path, current = self._load_manifest(payload.voice_id)
-            if _manifest_digest(current) != prepared.response.current_manifest_sha256:
+            if (
+                approval_primitives.manifest_digest(current)
+                != prepared.response.current_manifest_sha256
+            ):
                 raise VoicePresetApprovalError(
                     "적용 직전 manifest가 변경되어 승인을 중단했습니다."
                 )
@@ -414,13 +414,13 @@ class VoicePresetApprovalService:
             )
         if payload.expected_manifest_sha256:
             expected = payload.expected_manifest_sha256.lower()
-            if not _valid_sha256(expected):
+            if not approval_primitives.valid_sha256(expected):
                 raise VoicePresetApprovalError("manifest checksum은 소문자 SHA-256이어야 합니다.")
         else:
             expected = None
 
         manifest_path, current = self._load_manifest(payload.voice_id)
-        current_manifest_sha256 = _manifest_digest(current)
+        current_manifest_sha256 = approval_primitives.manifest_digest(current)
         if expected and expected != current_manifest_sha256:
             raise VoicePresetApprovalError(
                 "입력한 manifest SHA-256과 현재 파일이 다릅니다. 다시 확인하세요."
@@ -481,16 +481,16 @@ class VoicePresetApprovalService:
             signature="",
         )
         proposed_dict = proposed.model_dump(mode="json")
-        signature_payload = _signature_payload(proposed_dict)
-        signed_payload_sha256 = _manifest_digest(signature_payload)
+        signature_payload = approval_primitives.signature_payload(proposed_dict)
+        signed_payload_sha256 = approval_primitives.manifest_digest(signature_payload)
         proposed_dict["approval"]["signed_payload_sha256"] = signed_payload_sha256
         proposed_dict["approval"]["signature"] = hmac.new(
             active_secret,
-            _canonical(signature_payload),
+            approval_primitives.canonical_json(signature_payload),
             hashlib.sha256,
         ).hexdigest()
-        proposed_manifest_sha256 = _manifest_digest(proposed_dict)
-        preview_id = _manifest_digest({
+        proposed_manifest_sha256 = approval_primitives.manifest_digest(proposed_dict)
+        preview_id = approval_primitives.manifest_digest({
             "voice_id": payload.voice_id,
             "current_manifest_sha256": current_manifest_sha256,
             "proposed_manifest_sha256": proposed_manifest_sha256,
@@ -505,7 +505,7 @@ class VoicePresetApprovalService:
             current_key_id=current_key_id,
             active_key_id=self.trust_store.active_key_id,
             resigned_at=signed_at,
-            changes=_diff(current, proposed_dict),
+            changes=approval_primitives.manifest_diff(current, proposed_dict),
             blocking_issues=sorted(set(blocking)),
             can_apply=not blocking,
         )
@@ -544,7 +544,10 @@ class VoicePresetApprovalService:
             if not prepared.response.can_apply:
                 raise VoicePresetApprovalError("차단 사유가 남아 있어 재서명할 수 없습니다.")
             manifest_path, current = self._load_manifest(payload.voice_id)
-            if _manifest_digest(current) != prepared.response.current_manifest_sha256:
+            if (
+                approval_primitives.manifest_digest(current)
+                != prepared.response.current_manifest_sha256
+            ):
                 raise VoicePresetApprovalError(
                     "적용 직전 manifest가 변경되어 재서명을 중단했습니다."
                 )
@@ -643,7 +646,7 @@ class VoicePresetApprovalService:
                         or expected_after_sha256
                     )
             manifest_path, current = self._load_manifest(record.voice_id)
-            current_digest = _manifest_digest(current)
+            current_digest = approval_primitives.manifest_digest(current)
             if current_digest != expected_after_sha256:
                 raise VoicePresetApprovalError(
                     "승인 이후 manifest가 변경되었습니다. "
@@ -669,7 +672,7 @@ class VoicePresetApprovalService:
                 at=datetime.now(timezone.utc),
                 audio_sha256=record.audio_sha256,
                 before_manifest_sha256=current_digest,
-                after_manifest_sha256=_manifest_digest(rollback_manifest),
+                after_manifest_sha256=approval_primitives.manifest_digest(rollback_manifest),
                 review_bundle_sha256=record.review_bundle_sha256,
                 signature_mode="unsigned",
                 related_approval_id=approval_id,

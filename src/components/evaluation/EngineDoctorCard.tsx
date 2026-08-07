@@ -3,6 +3,11 @@ import type { ConnectionLayer, ConnectivityStatus } from '../../settings/connect
 import type { SetupStepStatus, VoicePresetStatus, VoiceSelectionStatus } from '../../settings/setupTypes'
 import { useEngineDoctor } from '../../hooks/useEngineDoctor'
 import { diagnoseBrowserSpeechVoices, type BrowserVoiceSelectionDiagnostic } from '../../tts/browserSpeech'
+import {
+  acknowledgeBrowserVoiceInventory,
+  observeBrowserVoiceInventory,
+  type BrowserVoiceInventoryObservation,
+} from '../../tts/browserVoiceInventory'
 import { StatusPill } from '../ui/StatusPill'
 
 const layerLabels = {
@@ -45,6 +50,7 @@ function shortHash(value: string | null) {
 export function EngineDoctorCard() {
   const doctor = useEngineDoctor()
   const [browserVoiceDiagnostics, setBrowserVoiceDiagnostics] = useState<BrowserVoiceSelectionDiagnostic[]>([])
+  const [browserVoiceInventory, setBrowserVoiceInventory] = useState<BrowserVoiceInventoryObservation | null>(null)
   const presetReady = doctor.setup?.voicePresetReadyCount ?? 0
   const presetAudioReady = doctor.setup?.voicePresetAudioReadyCount ?? 0
   const presetManifestReady = doctor.setup?.voicePresetManifestReadyCount ?? 0
@@ -53,7 +59,11 @@ export function EngineDoctorCard() {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return undefined
-    const refresh = () => setBrowserVoiceDiagnostics(diagnoseBrowserSpeechVoices())
+    const refresh = () => {
+      const voices = window.speechSynthesis.getVoices()
+      setBrowserVoiceDiagnostics(diagnoseBrowserSpeechVoices(voices))
+      setBrowserVoiceInventory(observeBrowserVoiceInventory(voices))
+    }
     refresh()
     window.speechSynthesis.addEventListener('voiceschanged', refresh)
     return () => window.speechSynthesis.removeEventListener('voiceschanged', refresh)
@@ -309,6 +319,28 @@ export function EngineDoctorCard() {
             tone={browserVoiceDiagnostics.length === presetExpected && browserVoiceDiagnostics.every((item) => item.status === 'ready') ? 'good' : 'warning'}
           />
         </div>
+        {browserVoiceInventory ? (
+          <div className="mt-3 rounded-xl bg-[#f7f5ef] p-3 text-xs font-bold leading-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span>기기 음성 inventory · 전체 {browserVoiceInventory.totalVoices} · 한국어 {browserVoiceInventory.koreanVoices}</span>
+              <StatusPill
+                label={browserVoiceInventory.changed ? '목록 변경 감지' : '목록 동일'}
+                tone={browserVoiceInventory.changed ? 'warning' : 'good'}
+              />
+            </div>
+            <p className="mt-1 font-mono text-[10px] text-soa-muted">{browserVoiceInventory.fingerprint}</p>
+            {browserVoiceInventory.changed ? (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <p className="text-soa-coral">OS·브라우저 음성 목록이 바뀌어 프리셋 배정을 다시 계산했습니다.</p>
+                <button
+                  type="button"
+                  onClick={() => setBrowserVoiceInventory(acknowledgeBrowserVoiceInventory(window.speechSynthesis.getVoices()))}
+                  className="focus-ring min-h-8 rounded-lg border border-soa-line bg-white px-3 text-[10px] font-black"
+                >현재 목록 확인 완료</button>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         {browserVoiceDiagnostics.length ? (
           <div className="mt-3 grid gap-2">
             {browserVoiceDiagnostics.map((item) => (

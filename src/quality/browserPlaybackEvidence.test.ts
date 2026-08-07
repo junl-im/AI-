@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { dispatchRuntimeFault } from '../network/runtimeFaultInjection'
 import {
   collectBrowserPlaybackEvidence,
   runGesturePlaybackProbe,
@@ -28,6 +29,27 @@ afterEach(() => {
   restore(navigator, 'onLine', originalOnline)
   window.localStorage.clear()
   vi.restoreAllMocks()
+  it('진단용 장애 주입은 실제 전환과 분리해서 누적한다', () => {
+    let latest = collectBrowserPlaybackEvidence()
+    const stop = startBrowserPlaybackEvidenceMonitor((evidence) => {
+      latest = evidence
+    })
+
+    dispatchRuntimeFault('network-offline')
+    dispatchRuntimeFault('network-online')
+    dispatchRuntimeFault('network-change')
+    dispatchRuntimeFault('background-hidden')
+    dispatchRuntimeFault('background-visible')
+    stop()
+
+    expect(latest.soak).toMatchObject({
+      networkTransitions: 0,
+      injectedNetworkFaultCount: 2,
+      injectedNetworkChangeCount: 1,
+      injectedBackgroundFaultCount: 2,
+    })
+  })
+
 })
 
 describe('browserPlaybackEvidence', () => {
@@ -97,6 +119,27 @@ describe('browserPlaybackEvidence', () => {
       totalHiddenMs: 3_500,
       longestHiddenMs: 3_500,
       networkTransitions: 1,
+    })
+  })
+
+  it('진단용 장애 주입은 실제 전환과 분리해서 누적한다', () => {
+    let latest = collectBrowserPlaybackEvidence()
+    const stop = startBrowserPlaybackEvidenceMonitor((evidence) => {
+      latest = evidence
+    })
+
+    dispatchRuntimeFault('network-offline')
+    dispatchRuntimeFault('network-online')
+    dispatchRuntimeFault('network-change')
+    dispatchRuntimeFault('background-hidden')
+    dispatchRuntimeFault('background-visible')
+    stop()
+
+    expect(latest.soak).toMatchObject({
+      networkTransitions: 0,
+      injectedNetworkFaultCount: 2,
+      injectedNetworkChangeCount: 1,
+      injectedBackgroundFaultCount: 2,
     })
   })
 

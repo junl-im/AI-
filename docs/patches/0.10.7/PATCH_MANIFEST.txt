@@ -1,0 +1,59 @@
+SoriON AI 0.10.7 overwrite patch
+Base: 0.10.6
+Added: 14
+Modified: 36
+Deleted: 0
+Total changed: 50
+Delete list: none
+
+Files:
+A docs/RECOVERY_EVIDENCE_AND_VOICE_INVENTORY.md
+A docs/patches/0.10.7/PATCH_MANIFEST.txt
+A docs/patches/0.10.7/PATCH_README.md
+A scripts/check-recovery-evidence-voice-inventory.mjs
+A src/components/evaluation/RecoveryInjectionCard.tsx
+A src/components/evaluation/RuntimeSoakComparisonCard.tsx
+A src/network/runtimeFaultInjection.test.ts
+A src/network/runtimeFaultInjection.ts
+A src/quality/recoveryInjection.test.ts
+A src/quality/recoveryInjection.ts
+A src/quality/runtimeSoakReport.test.ts
+A src/quality/runtimeSoakReport.ts
+A src/tts/browserVoiceInventory.test.ts
+A src/tts/browserVoiceInventory.ts
+M APPLY_PATCH.cmd
+M APPLY_PATCH.sh
+M PATCH_MANIFEST.txt
+M README.md
+M START_HERE.md
+M VERSION
+M docs/CHANGELOG.md
+M docs/HANDOVER.md
+M docs/NEXT_UPDATE.md
+M package-lock.json
+M package.json
+M scripts/run-preflight.mjs
+M services/api/app/api/routes/verification.py
+M services/api/app/schemas/verification.py
+M services/api/app/services/voice_preset_approval.py
+M services/api/pyproject.toml
+M services/api/tests/test_ai_director.py
+M services/api/tests/test_connectivity.py
+M services/api/tests/test_engine_catalog.py
+M services/api/tests/test_engine_strategy.py
+M services/api/tests/test_evidence.py
+M services/api/tests/test_health.py
+M services/api/tests/test_quality.py
+M services/api/tests/test_setup.py
+M services/api/uv.lock
+M services/worker/pyproject.toml
+M services/worker/uv.lock
+M src/components/evaluation/EngineDoctorCard.tsx
+M src/hooks/useEngineCatalog.ts
+M src/pages/QualityPage.tsx
+M src/quality/browserPlaybackEvidence.test.ts
+M src/quality/browserPlaybackEvidence.ts
+M src/quality/qualityApi.ts
+M src/quality/qualityTypes.ts
+M src/tts/voiceApi.ts
+M src/update/buildInfo.ts

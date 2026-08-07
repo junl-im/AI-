@@ -1,3 +1,4 @@
+import { subscribeRuntimeFaults } from '../network/runtimeFaultInjection'
 export type BrowserDeviceProfile = 'android-chrome' | 'ios-safari' | 'pwa' | 'desktop-browser'
 export type PlaybackProbeResult = 'not-tested' | 'passed' | 'blocked' | 'failed'
 export type BackgroundRestoreResult = 'not-tested' | 'observed'
@@ -11,10 +12,13 @@ export interface BrowserSoakObservation {
   totalHiddenMs: number
   longestHiddenMs: number
   pageShowRestoreCount: number
+  injectedNetworkFaultCount: number
+  injectedBackgroundFaultCount: number
+  injectedNetworkChangeCount: number
 }
 
 export interface BrowserPlaybackEvidence {
-  schemaVersion: 2
+  schemaVersion: 3
   recordedAt: string
   deviceProfile: BrowserDeviceProfile
   browserName: string
@@ -30,8 +34,11 @@ export interface BrowserPlaybackEvidence {
   soak: BrowserSoakObservation
 }
 
-const STORAGE_KEY = 'sorion.browser-playback-evidence.v2'
-const LEGACY_STORAGE_KEY = 'sorion.browser-playback-evidence.v1'
+const STORAGE_KEY = 'sorion.browser-playback-evidence.v3'
+const LEGACY_STORAGE_KEYS = [
+  'sorion.browser-playback-evidence.v2',
+  'sorion.browser-playback-evidence.v1',
+]
 const SILENT_WAV_DATA_URI = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA='
 
 function detectBrowserName(userAgent: string): string {
@@ -64,6 +71,9 @@ function createSoakObservation(now = new Date().toISOString()): BrowserSoakObser
     totalHiddenMs: 0,
     longestHiddenMs: 0,
     pageShowRestoreCount: 0,
+    injectedNetworkFaultCount: 0,
+    injectedBackgroundFaultCount: 0,
+    injectedNetworkChangeCount: 0,
   }
 }
 
@@ -79,6 +89,9 @@ function normalizeSoak(value: unknown, fallbackAt: string): BrowserSoakObservati
     totalHiddenMs: Math.max(0, Number(soak.totalHiddenMs) || 0),
     longestHiddenMs: Math.max(0, Number(soak.longestHiddenMs) || 0),
     pageShowRestoreCount: Math.max(0, Number(soak.pageShowRestoreCount) || 0),
+    injectedNetworkFaultCount: Math.max(0, Number(soak.injectedNetworkFaultCount) || 0),
+    injectedBackgroundFaultCount: Math.max(0, Number(soak.injectedBackgroundFaultCount) || 0),
+    injectedNetworkChangeCount: Math.max(0, Number(soak.injectedNetworkChangeCount) || 0),
   }
 }
 
@@ -91,7 +104,7 @@ export function collectBrowserPlaybackEvidence(
     || Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
   const recordedAt = new Date().toISOString()
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     recordedAt,
     deviceProfile: detectProfile(navigator.userAgent, standalone),
     browserName: detectBrowserName(navigator.userAgent),
@@ -162,10 +175,15 @@ export function loadBrowserPlaybackEvidence(): BrowserPlaybackEvidence | null {
   try {
     const current = window.localStorage.getItem(STORAGE_KEY)
     if (current) return parseEvidence(current)
-    const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY)
-    const migrated = legacy ? parseEvidence(legacy) : null
-    if (migrated) saveBrowserPlaybackEvidence(migrated)
-    return migrated
+    for (const key of LEGACY_STORAGE_KEYS) {
+      const legacy = window.localStorage.getItem(key)
+      const migrated = legacy ? parseEvidence(legacy) : null
+      if (migrated) {
+        saveBrowserPlaybackEvidence(migrated)
+        return migrated
+      }
+    }
+    return null
   } catch {
     return null
   }
@@ -174,7 +192,7 @@ export function loadBrowserPlaybackEvidence(): BrowserPlaybackEvidence | null {
 export function saveBrowserPlaybackEvidence(evidence: BrowserPlaybackEvidence) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(evidence))
-    window.localStorage.removeItem(LEGACY_STORAGE_KEY)
+    LEGACY_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key))
   } catch {
     // Private browsing and storage quotas must not block playback diagnostics.
   }
@@ -248,6 +266,27 @@ export function startBrowserPlaybackEvidenceMonitor(
       pageShowRestoreCount: base.soak.pageShowRestoreCount + 1,
     }, 'observed')
   }
+  const stopFaultMonitor = subscribeRuntimeFaults((detail) => {
+    const base = readCurrent()
+    if (detail.kind === 'network-change') {
+      commit(base, {
+        ...base.soak,
+        injectedNetworkChangeCount: base.soak.injectedNetworkChangeCount + 1,
+      })
+      return
+    }
+    if (detail.kind === 'network-offline' || detail.kind === 'network-online') {
+      commit(base, {
+        ...base.soak,
+        injectedNetworkFaultCount: base.soak.injectedNetworkFaultCount + 1,
+      })
+      return
+    }
+    commit(base, {
+      ...base.soak,
+      injectedBackgroundFaultCount: base.soak.injectedBackgroundFaultCount + 1,
+    })
+  })
 
   window.addEventListener('online', handleNetwork)
   window.addEventListener('offline', handleNetwork)
@@ -261,6 +300,7 @@ export function startBrowserPlaybackEvidenceMonitor(
     window.removeEventListener('offline', handleNetwork)
     document.removeEventListener('visibilitychange', handleVisibility)
     window.removeEventListener('pageshow', handlePageShow)
+    stopFaultMonitor()
   }
 }
 

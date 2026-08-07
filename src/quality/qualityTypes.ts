@@ -241,6 +241,7 @@ export interface OperatorBenchmarkRegressionAssessment {
 }
 
 export interface WorkerTelemetryAggregate {
+  groupKey: string
   engineId: string
   presetId: string
   modelId: string

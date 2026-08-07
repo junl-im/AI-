@@ -3,7 +3,7 @@ import type { EngineInfo } from '../ai/contracts'
 import { ApiError, getApiConnectionContext } from '../api/httpClient'
 import { useAppStore } from '../store/useAppStore'
 import { getBrowserSpeechEngine } from '../tts/browserSpeech'
-import { listEngines } from '../tts/voiceApi'
+import { invalidateEngineCatalogCache, listEngines } from '../tts/voiceApi'
 
 function readyEngineMessage(engines: EngineInfo[]): {
   status: 'online' | 'degraded' | 'offline'
@@ -105,14 +105,21 @@ export function useEngineCatalog() {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') void refresh()
     }
+    const speechSynthesis = typeof window.speechSynthesis === 'undefined' ? null : window.speechSynthesis
+    const handleVoicesChanged = () => {
+      invalidateEngineCatalogCache()
+      void refresh()
+    }
     window.addEventListener('sorion-api-change', handleRefresh)
     window.addEventListener('sorion-engine-refresh', handleRefresh)
     window.addEventListener('online', handleRefresh)
+    speechSynthesis?.addEventListener('voiceschanged', handleVoicesChanged)
     document.addEventListener('visibilitychange', handleVisibility)
     return () => {
       window.removeEventListener('sorion-api-change', handleRefresh)
       window.removeEventListener('sorion-engine-refresh', handleRefresh)
       window.removeEventListener('online', handleRefresh)
+      speechSynthesis?.removeEventListener('voiceschanged', handleVoicesChanged)
       document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [refresh])

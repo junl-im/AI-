@@ -1,21 +1,21 @@
 # NEXT UPDATE
 
-현재 기준: `0.10.6 · Baseline Recovery & Multi-Clip Editing`
+현재 기준: `0.10.7 · Recovery Evidence & Voice Inventory Diagnostics`
 
 ## 목표 버전
 
-`0.10.7 · Recovery Evidence & Voice Inventory Diagnostics`
+`0.10.8 · Visual Regression & Safe Batch Voice Editing`
 
 ## 최우선 구현
 
-- 이전 runtime soak 결과를 Quality Lab에서 직접 비교하는 운영 화면
-- 브라우저 절전·온라인 복귀·네트워크 종류 변경 E2E 장애 주입
-- 실제 1024·1280·1440px 화면 이미지 비교와 Compact Dock 시각 회귀
-- 프리셋별 실제 기기 음성 inventory 변화 감지와 진단 캐시 무효화
-- 다중 선택 상태에서 일괄 재생성·voice 변경 등 안전한 batch 작업 검토
-- 누적 HANDOVER 과거 기록을 `docs/archive`로 분리하는 방안 검토
+- 실제 Chromium 환경의 1024·1280·1440px Compact Dock·3분할 screenshot 기준선과 시각 회귀
+- 다중 선택 클립의 일괄 재생성·voice 변경·실행 전 영향 preview
+- 실제 OS 절전·Wi-Fi 전환 실기기 증거를 Recovery Path Injection 결과와 분리해서 함께 표시
+- runtime soak 비교 결과의 파일명·SHA-256·비교 시각 내보내기
+- 브라우저 음성 inventory 변경 뒤 프리셋별 이전/현재 배정 diff 표시
+- 누적 HANDOVER 과거 기록을 `docs/archive`로 분리하되 현재 필수 결정은 원본에 유지
 
-## 0.10.6에서 넘기는 결정
+## 0.10.7에서 넘기는 결정
 
 - 운영자 기준선 복원은 append-only history를 유지하며 과거 이벤트를 삭제하거나 rewrite하지 않습니다.
 - 과거 기준선 복원은 현재 기준선과 target 기준선을 preview한 뒤에만 실행합니다.
