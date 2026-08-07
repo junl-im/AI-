@@ -60,6 +60,23 @@ requireTokens('services/api/scripts/run_runtime_soak.py', soakRunner, [
   '_load_recovery_events',
 ])
 
+
+const soakComparison = await source('src/quality/runtimeSoakReport.ts')
+requireTokens('src/quality/runtimeSoakReport.ts', soakComparison, [
+  'RuntimeSoakArtifactProvenance',
+  'runtime-soak-comparison/1',
+  'buildRuntimeSoakComparisonEvidence(',
+  'file_sha256',
+  'loaded_at',
+])
+
+const soakComparisonCard = await source('src/components/evaluation/RuntimeSoakComparisonCard.tsx')
+requireTokens('src/components/evaluation/RuntimeSoakComparisonCard.tsx', soakComparisonCard, [
+  'soak 비교 provenance',
+  '비교 증거 JSON 저장',
+  'SHA-256',
+])
+
 const recoveryDrill = await source('services/api/scripts/run_worker_recovery_drill.py')
 requireTokens('services/api/scripts/run_worker_recovery_drill.py', recoveryDrill, [
   '"kind": "worker-restart"',

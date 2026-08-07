@@ -33,6 +33,9 @@ export interface EngineDiagnostic {
   lastLatencyMs: number | null
   lastSuccessAt: string | null
   lastFailureAt: string | null
+  selectionPenalty: number
+  degradedRemainingSeconds: number
+  selectionReason: string | null
   checks: DiagnosticCheck[]
 }
 

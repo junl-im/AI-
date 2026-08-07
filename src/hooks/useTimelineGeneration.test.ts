@@ -631,3 +631,66 @@ it('moves and removes multiple timeline blocks while preserving their relative o
   })
   expect(result.current.blocks.map((block) => block.id)).toEqual(['pause-a'])
 })
+
+it('changes only selected voice blocks and invalidates their generated revision for batch editing', () => {
+  const { result } = renderHook(() => useTimelineGeneration())
+  act(() => {
+    result.current.restoreSession([
+      {
+        id: 'voice-a',
+        kind: 'voice',
+        text: '첫 문장',
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'system',
+        normalizeText: true,
+        jobId: null,
+        status: 'queued',
+        progress: 0,
+        durationSeconds: 2,
+        error: null,
+        revision: 3,
+      },
+      { id: 'pause-a', kind: 'pause', durationSeconds: 0.5 },
+      {
+        id: 'voice-b',
+        kind: 'voice',
+        text: '둘째 문장',
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'system',
+        normalizeText: true,
+        jobId: null,
+        status: 'queued',
+        progress: 0,
+        durationSeconds: 2,
+        error: null,
+        revision: 4,
+      },
+    ])
+  })
+
+  act(() => {
+    result.current.updateVoiceMany(['voice-a', 'pause-a'], 'on-clear', '도윤')
+  })
+
+  const first = result.current.blocks.find((block) => block.id === 'voice-a')
+  const second = result.current.blocks.find((block) => block.id === 'voice-b')
+  expect(first?.kind).toBe('voice')
+  expect(second?.kind).toBe('voice')
+  if (!first || first.kind !== 'voice' || !second || second.kind !== 'voice') {
+    throw new Error('voice block missing')
+  }
+  expect(first.voiceId).toBe('on-clear')
+  expect(first.voiceName).toBe('도윤')
+  expect(first.revision).toBe(4)
+  expect(first.status).toBe('queued')
+  expect(second.voiceId).toBe('sori-warm')
+  expect(second.revision).toBe(4)
+})

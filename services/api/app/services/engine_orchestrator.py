@@ -54,6 +54,11 @@ class EngineRuntimeState:
     last_latency_ms: float | None = None
     last_success_at: str | None = None
     last_failure_at: str | None = None
+    degraded_until: float = 0.0
+    latency_ewma_ms: float | None = None
+    reliability_ewma: float | None = None
+    last_attempt_monotonic: float = 0.0
+    performance_sample_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -71,6 +76,9 @@ class EngineOrchestrator:
         failure_threshold: int = 2,
         cooldown_seconds: float = 30.0,
         max_cooldown_seconds: float = 240.0,
+        soft_degrade_seconds: float = 15.0,
+        performance_min_samples: int = 4,
+        performance_window_seconds: float = 120.0,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
         self.registry = registry
@@ -81,6 +89,9 @@ class EngineOrchestrator:
             self.cooldown_seconds,
             max_cooldown_seconds,
         )
+        self.soft_degrade_seconds = max(0.0, soft_degrade_seconds)
+        self.performance_min_samples = max(2, performance_min_samples)
+        self.performance_window_seconds = max(0.0, performance_window_seconds)
         self._clock = clock
         self._runtime: dict[str, EngineRuntimeState] = {}
         self._lock = asyncio.Lock()
@@ -101,7 +112,13 @@ class EngineOrchestrator:
             info = engine.info()
             state = self._runtime.get(info.id, EngineRuntimeState())
             remaining = max(0.0, state.open_until - now)
+            degraded_remaining = max(0.0, state.degraded_until - now)
             health = self._health(info, state, remaining)
+            selection_penalty, selection_reason = self._selection_penalty(
+                info,
+                state,
+                now,
+            )
             attempts = state.successes + state.failures
             success_rate = (state.successes / attempts) if attempts else None
             average_latency = (
@@ -140,6 +157,9 @@ class EngineOrchestrator:
                         ),
                         "last_success_at": state.last_success_at,
                         "last_failure_at": state.last_failure_at,
+                        "selection_penalty": selection_penalty,
+                        "degraded_remaining_seconds": round(degraded_remaining, 1),
+                        "selection_reason": selection_reason,
                     }
                 )
             )
@@ -299,12 +319,20 @@ class EngineOrchestrator:
         self,
         info: EngineInfo,
         request: TtsSynthesisRequest | None,
-    ) -> tuple[int, int, int, int, int, str]:
+    ) -> tuple[int, int, int, int, int, int, str]:
         try:
             configured_rank = self.preferred_order.index(info.id)
         except ValueError:
             configured_rank = len(self.preferred_order) + 10
         mode_rank = {"ai": 0, "local": 1, "mock": 2}.get(info.mode, 3)
+        state = self._runtime.get(info.id, EngineRuntimeState())
+        now = self._clock()
+        runtime_unavailable = int(
+            state.maintenance_in_flight
+            or state.probe_in_flight
+            or state.open_until > now
+        )
+        selection_penalty, _ = self._selection_penalty(info, state, now)
         capability_penalty = 0
         if request is not None:
             if request.emotion != "neutral" and not info.supports_emotion:
@@ -321,12 +349,76 @@ class EngineOrchestrator:
         }.get(info.quality_tier, 4)
         return (
             0 if info.ready else 1,
-            configured_rank + capability_penalty,
+            runtime_unavailable,
+            configured_rank + capability_penalty + selection_penalty,
             quality_rank,
             100 - info.korean_specialization,
             mode_rank,
             info.id,
         )
+
+    def _selection_penalty(
+        self,
+        info: EngineInfo,
+        state: EngineRuntimeState,
+        now: float,
+    ) -> tuple[int, str | None]:
+        if not info.ready:
+            return 0, None
+        if state.open_until > 0 or state.probe_in_flight or state.maintenance_in_flight:
+            return 0, None
+        reasons: list[str] = []
+        penalty = 0
+        remaining = state.degraded_until - now
+        if remaining > 0 and state.consecutive_failures > 0:
+            soft_penalty = min(60, 20 + (state.consecutive_failures - 1) * 15)
+            penalty += soft_penalty
+            reasons.append(f"최근 실패로 {remaining:.1f}초 자동 우회")
+
+        performance_penalty, performance_reason = self._performance_penalty(state, now)
+        penalty += performance_penalty
+        if performance_reason:
+            reasons.append(performance_reason)
+        return min(80, penalty), " · ".join(reasons) or None
+
+    def _performance_penalty(
+        self,
+        state: EngineRuntimeState,
+        now: float,
+    ) -> tuple[int, str | None]:
+        if (
+            state.performance_sample_count < self.performance_min_samples
+            or state.last_attempt_monotonic <= 0
+        ):
+            return 0, None
+        if self.performance_window_seconds <= 0:
+            return 0, None
+        if now - state.last_attempt_monotonic > self.performance_window_seconds:
+            return 0, None
+
+        penalty = 0
+        reasons: list[str] = []
+        reliability = state.reliability_ewma
+        if reliability is not None:
+            if reliability < 0.65:
+                penalty += 30
+                reasons.append(f"최근 안정도 {reliability * 100:.0f}%")
+            elif reliability < 0.85:
+                penalty += 15
+                reasons.append(f"최근 안정도 {reliability * 100:.0f}%")
+
+        latency = state.latency_ewma_ms
+        if latency is not None:
+            if latency > 6000:
+                penalty += 20
+                reasons.append(f"최근 지연 {latency:.0f}ms")
+            elif latency > 3500:
+                penalty += 10
+                reasons.append(f"최근 지연 {latency:.0f}ms")
+
+        if penalty <= 0:
+            return 0, None
+        return min(45, penalty), "성능 표본 감점: " + ", ".join(reasons)
 
     @staticmethod
     def _compatible(info: EngineInfo, request: TtsSynthesisRequest) -> bool:
@@ -397,12 +489,19 @@ class EngineOrchestrator:
     async def _record_success(self, engine_id: str, elapsed_ms: float) -> None:
         async with self._lock:
             state = self._runtime.setdefault(engine_id, EngineRuntimeState())
+            recovered_from_circuit = state.open_until > 0
             state.successes += 1
             state.active_requests = max(0, state.active_requests - 1)
             state.consecutive_failures = 0
+            self._update_performance_sample(state, elapsed_ms, success=True)
+            if recovered_from_circuit:
+                state.reliability_ewma = 1.0
+                state.latency_ewma_ms = elapsed_ms
+                state.performance_sample_count = 1
             state.open_until = 0.0
             state.probe_in_flight = False
             state.backoff_level = 0
+            state.degraded_until = 0.0
             state.last_error = None
             state.last_latency_ms = elapsed_ms
             state.total_latency_ms += elapsed_ms
@@ -420,10 +519,16 @@ class EngineOrchestrator:
             state.active_requests = max(0, state.active_requests - 1)
             state.consecutive_failures += 1
             state.probe_in_flight = False
+            self._update_performance_sample(state, elapsed_ms, success=False)
             state.last_error = message[:300]
             state.last_latency_ms = elapsed_ms
             state.total_latency_ms += elapsed_ms
             state.last_failure_at = self._timestamp()
+            if self.soft_degrade_seconds > 0:
+                state.degraded_until = max(
+                    state.degraded_until,
+                    self._clock() + self.soft_degrade_seconds,
+                )
             if state.consecutive_failures >= self.failure_threshold:
                 state.circuit_open_count += 1
                 state.backoff_level += 1
@@ -433,6 +538,40 @@ class EngineOrchestrator:
                     self.max_cooldown_seconds,
                 )
                 state.open_until = self._clock() + cooldown
+
+    def _update_performance_sample(
+        self,
+        state: EngineRuntimeState,
+        elapsed_ms: float,
+        *,
+        success: bool,
+    ) -> None:
+        now = self._clock()
+        if (
+            self.performance_window_seconds > 0
+            and state.last_attempt_monotonic > 0
+            and now - state.last_attempt_monotonic > self.performance_window_seconds
+        ):
+            state.latency_ewma_ms = None
+            state.reliability_ewma = None
+            state.performance_sample_count = 0
+
+        alpha = 0.3
+        if state.latency_ewma_ms is None:
+            state.latency_ewma_ms = elapsed_ms
+        else:
+            state.latency_ewma_ms = (
+                alpha * elapsed_ms
+            ) + ((1 - alpha) * state.latency_ewma_ms)
+        sample = 1.0 if success else 0.0
+        if state.reliability_ewma is None:
+            state.reliability_ewma = sample
+        else:
+            state.reliability_ewma = (
+                alpha * sample
+            ) + ((1 - alpha) * state.reliability_ewma)
+        state.performance_sample_count += 1
+        state.last_attempt_monotonic = now
 
     def _elapsed_ms(self, started: float) -> float:
         return max(0.0, (self._clock() - started) * 1000)

@@ -11,6 +11,9 @@ SoriON AI 0.11.0은 음성 엔진의 단순 fallback보다 **장애 격리, 단�
 - 사용자가 특정 엔진을 명시적으로 선택해도 열린 circuit을 우회하지 않고 계속 두드리지 않습니다. 격리 중인 선택 엔진은 즉시 런타임 사용 불가로 처리합니다.
 - 프리셋 호환 불가(`SOA-4022`)는 엔진 자체 장애가 아니므로 circuit 실패 횟수에 포함하지 않습니다.
 - 취소된 half-open 요청은 probe 점유를 반드시 해제해 영구적인 `probe_in_flight` 상태를 만들지 않습니다.
+- circuit 임계치 전 최근 합성 실패는 기본 15초의 soft-degrade 구간을 만들고 auto 선택 순위에 감점을 적용합니다. 연속 요청이 같은 불안정 엔진을 즉시 다시 밟는 것을 줄이는 1차 완충입니다.
+- soft-degrade는 명시적으로 고른 엔진을 차단하지 않으며 성공하면 즉시 해제됩니다. 또한 circuit open 이력이 생긴 뒤에는 cooldown 종료 후 half-open probe가 감점보다 우선합니다.
+- `SORION_ENGINE_SOFT_DEGRADE_SECONDS=0`으로 soft-degrade만 끌 수 있으며 circuit breaker는 그대로 유지됩니다.
 
 ## 런타임 관측 지표
 
@@ -23,6 +26,7 @@ Engine API, Quality Lab, Engine Doctor는 엔진별로 다음 지표를 같은 �
 - 현재 cooldown 남은 시간
 - half-open probe 진행 여부
 - 최근 성공·실패 시각과 최근 오류
+- 자동 선택 감점, soft-degrade 남은 시간과 선택 사유
 
 이 지표는 성능 benchmark를 대신하지 않습니다. 런타임 장애 격리와 복구 상태를 빠르게 판단하기 위한 운영 지표입니다.
 

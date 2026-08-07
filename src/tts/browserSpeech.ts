@@ -104,6 +104,9 @@ export function getBrowserSpeechEngine(): EngineInfo | null {
     consecutiveFailures: 0,
     cooldownRemainingSeconds: 0,
     lastError: null,
+    selectionPenalty: 0,
+    degradedRemainingSeconds: 0,
+    selectionReason: null,
   }
 }
 

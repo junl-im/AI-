@@ -538,3 +538,164 @@ async def test_runtime_refresh_blocks_new_synthesis_until_maintenance_finishes()
     release_refresh.set()
     refreshed = await reset_task
     assert refreshed.health == "ready"
+
+
+@pytest.mark.asyncio
+async def test_recent_failure_temporarily_deprioritizes_engine_before_circuit_opens():
+    clock = {"now": 100.0}
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    registry.register_tts(FakeEngine("backup", mode="local"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["primary", "backup"],
+        failure_threshold=2,
+        soft_degrade_seconds=15,
+        clock=lambda: clock["now"],
+    )
+    primary_calls = 0
+
+    async def runner(engine, engine_request):
+        nonlocal primary_calls
+        if engine.info().id == "primary":
+            primary_calls += 1
+            if primary_calls == 1:
+                raise RuntimeError("temporary primary failure")
+        return await engine.synthesize(engine_request)
+
+    first = await orchestrator.synthesize(request(), runner)
+    after_failure = {item.id: item for item in orchestrator.list_info()}
+    second = await orchestrator.synthesize(request(), runner)
+
+    assert first.engine_id == "backup"
+    assert after_failure["primary"].health == "ready"
+    assert after_failure["primary"].selection_penalty == 20
+    assert after_failure["primary"].degraded_remaining_seconds == 15
+    assert after_failure["primary"].recommended is False
+    assert after_failure["backup"].recommended is True
+    assert second.engine_id == "backup"
+    assert second.attempted_engine_ids == ["backup"]
+    assert primary_calls == 1
+
+    clock["now"] += 16
+    third = await orchestrator.synthesize(request(), runner)
+    recovered = {item.id: item for item in orchestrator.list_info()}
+
+    assert third.engine_id == "primary"
+    assert third.attempted_engine_ids == ["primary"]
+    assert primary_calls == 2
+    assert recovered["primary"].selection_penalty == 0
+    assert recovered["primary"].degraded_remaining_seconds == 0
+
+
+@pytest.mark.asyncio
+async def test_explicit_engine_can_probe_soft_degraded_runtime_and_clear_penalty():
+    clock = {"now": 50.0}
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    registry.register_tts(FakeEngine("backup", mode="local"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["primary", "backup"],
+        failure_threshold=2,
+        soft_degrade_seconds=30,
+        clock=lambda: clock["now"],
+    )
+    fail_once = True
+
+    async def runner(engine, engine_request):
+        nonlocal fail_once
+        if engine.info().id == "primary" and fail_once:
+            fail_once = False
+            raise RuntimeError("temporary")
+        return await engine.synthesize(engine_request)
+
+    await orchestrator.synthesize(request(), runner)
+    degraded = {item.id: item for item in orchestrator.list_info()}
+    assert degraded["primary"].selection_penalty == 20
+
+    result = await orchestrator.synthesize(request("primary"), runner)
+    recovered = {item.id: item for item in orchestrator.list_info()}
+
+    assert result.engine_id == "primary"
+    assert recovered["primary"].selection_penalty == 0
+    assert recovered["primary"].consecutive_failures == 0
+
+@pytest.mark.asyncio
+async def test_recent_slow_samples_temporarily_deprioritize_auto_engine():
+    clock = {"now": 100.0}
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    registry.register_tts(FakeEngine("backup"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["primary", "backup"],
+        soft_degrade_seconds=0,
+        performance_min_samples=4,
+        performance_window_seconds=120,
+        clock=lambda: clock["now"],
+    )
+
+    async def slow_primary_runner(engine, engine_request):
+        if engine.info().id == "primary":
+            clock["now"] += 4.2
+        return await engine.synthesize(engine_request)
+
+    for _ in range(4):
+        result = await orchestrator.synthesize(request("primary"), slow_primary_runner)
+        assert result.engine_id == "primary"
+
+    runtime = {item.id: item for item in orchestrator.list_info()}
+    auto_result = await orchestrator.synthesize(
+        request(),
+        lambda engine, engine_request: engine.synthesize(engine_request),
+    )
+
+    assert runtime["primary"].selection_penalty == 10
+    assert "최근 지연" in (runtime["primary"].selection_reason or "")
+    assert runtime["backup"].recommended is True
+    assert auto_result.engine_id == "backup"
+
+    clock["now"] += 121
+    recovered = {item.id: item for item in orchestrator.list_info()}
+    assert recovered["primary"].selection_penalty == 0
+    assert recovered["primary"].recommended is True
+
+@pytest.mark.asyncio
+async def test_performance_window_expiry_resets_old_ewma_samples_before_new_observation():
+    clock = {"now": 100.0}
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    registry.register_tts(FakeEngine("backup"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["primary", "backup"],
+        soft_degrade_seconds=0,
+        performance_min_samples=4,
+        performance_window_seconds=120,
+        clock=lambda: clock["now"],
+    )
+
+    async def slow_primary_runner(engine, engine_request):
+        if engine.info().id == "primary":
+            clock["now"] += 4.2
+        return await engine.synthesize(engine_request)
+
+    for _ in range(4):
+        await orchestrator.synthesize(request("primary"), slow_primary_runner)
+
+    degraded = {item.id: item for item in orchestrator.list_info()}
+    assert degraded["primary"].selection_penalty == 10
+
+    clock["now"] += 121
+    await orchestrator.synthesize(
+        request("primary"),
+        lambda engine, engine_request: engine.synthesize(engine_request),
+    )
+    refreshed = {item.id: item for item in orchestrator.list_info()}
+
+    assert refreshed["primary"].selection_penalty == 0
+    state = orchestrator._runtime["primary"]
+    assert state.performance_sample_count == 1
+    assert state.latency_ewma_ms is not None
+    assert state.latency_ewma_ms < 100

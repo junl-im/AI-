@@ -49,6 +49,9 @@ interface ApiEngineDiagnostic {
   last_latency_ms: number | null
   last_success_at: string | null
   last_failure_at: string | null
+  selection_penalty: number
+  degraded_remaining_seconds: number
+  selection_reason: string | null
   checks: ApiDiagnosticCheck[]
 }
 
@@ -135,6 +138,9 @@ export async function getQualityDiagnostics(): Promise<QualityDiagnostics> {
       lastLatencyMs: engine.last_latency_ms,
       lastSuccessAt: engine.last_success_at,
       lastFailureAt: engine.last_failure_at,
+      selectionPenalty: engine.selection_penalty,
+      degradedRemainingSeconds: engine.degraded_remaining_seconds,
+      selectionReason: engine.selection_reason,
       checks: engine.checks,
     })),
   }

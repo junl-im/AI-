@@ -623,6 +623,12 @@ export function HomePage() {
               onAddPause={timeline.addPause}
               onRemove={timeline.removeBlock}
               onRemoveMany={timeline.removeBlocks}
+              onBatchVoiceChange={async (ids, nextVoiceId, regenerate) => {
+                const voice = getVoicePreset(nextVoiceId)
+                timeline.updateVoiceMany(ids, voice.id, voice.name)
+                return regenerate ? timeline.regenerateMany(ids) : null
+              }}
+              onRegenerateMany={timeline.regenerateMany}
               onClear={() => {
                 setPendingGeneration(null)
                 timeline.clear()

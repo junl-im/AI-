@@ -16,7 +16,20 @@ await requireTokens('src/quality/qualityTypes.ts', ['export interface WorkerTele
 await requireTokens('src/quality/qualityApi.ts', ['group_key: string', 'groupKey: item.group_key'])
 await requireTokens('src/components/evaluation/RuntimeSoakComparisonCard.tsx', ['RUNTIME SOAK COMPARE', 'compareRuntimeSoakReports'])
 await requireTokens('src/quality/recoveryInjection.ts', ['online-resume', 'page-resume', 'network-change', 'sorion-engine-refresh'])
-await requireTokens('src/tts/browserVoiceInventory.ts', ['sorion.browser-voice-inventory.v1', 'observeBrowserVoiceInventory', 'previousFingerprint'])
+await requireTokens('src/tts/browserVoiceInventory.ts', [
+  'sorion.browser-voice-inventory.v1',
+  'sorion.browser-voice-inventory.v2',
+  'observeBrowserVoiceInventory',
+  'previousFingerprint',
+  'BrowserVoiceAssignmentDiff',
+  'assignmentDiff',
+  'previousAssignments',
+])
+await requireTokens('src/components/evaluation/EngineDoctorCard.tsx', [
+  '프리셋 음성 배정 변경',
+  'previousVoiceName',
+  'currentVoiceName',
+])
 await requireTokens('src/hooks/useEngineCatalog.ts', ['voiceschanged', 'invalidateEngineCatalogCache'])
 
 console.log('Recovery evidence / voice inventory 계약 검사 통과')

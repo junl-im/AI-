@@ -34,6 +34,7 @@ describe('browser voice inventory', () => {
     const changed = observeBrowserVoiceInventory([voice('SunHi Female'), voice('InJoon Male')])
     expect(changed.changed).toBe(true)
     expect(changed.previousFingerprint).not.toBeNull()
+    expect(changed.assignmentDiff.some((item) => item.currentVoiceName === 'InJoon Male')).toBe(true)
     expect(acknowledgeBrowserVoiceInventory([voice('SunHi Female'), voice('InJoon Male')]).changed).toBe(false)
   })
 })

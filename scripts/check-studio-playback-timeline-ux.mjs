@@ -39,6 +39,9 @@ requireTokens('src/styles/dubbing-overlays.css', overlayCss, [
   '.soa-dubbing-block.is-selected',
   '0.10.6 multi-clip practical editing',
   '.soa-timeline-batch-summary',
+  '0.11.1 safe batch voice editing',
+  '.soa-timeline-batch-controls',
+  '.soa-timeline-batch-preview',
 ])
 
 const previewButton = await source('src/components/voice/VoicePreviewButton.tsx')
@@ -93,6 +96,12 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'onMoveMany',
   'onRemoveMany',
   '선택 클립 일괄 작업',
+  '선택 클립 일괄 목소리',
+  '변경 미리보기',
+  '적용 후 재생성',
+  '실패만 재시도',
+  'onBatchVoiceChange',
+  'onRegenerateMany',
 ])
 
 const playerTests = await source('src/components/navigation/LinkedPlayerDock.test.tsx')
@@ -105,6 +114,8 @@ requireTokens('src/components/workspace/TimelineEditor.test.tsx', timelineTests,
   '선택 클립을 빠른 편집 패널에서 수정하고 저장한다',
   '클립의 편집 버튼은 선택 클립 빠른 편집기로 연결된다',
   'Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있다',
+  '목소리만 적용',
+  '실패만 재시도 1',
 ])
 
 const browser = await source('src/tts/browserSpeech.ts')

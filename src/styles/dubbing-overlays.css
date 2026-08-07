@@ -381,7 +381,7 @@
 
 .soa-timeline-toolbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 12px;
   margin-top: 12px;
@@ -403,6 +403,27 @@
 .soa-timeline-toolbar span,
 .soa-timeline-toolbar p { color: rgba(255, 255, 255, 0.4); font-size: 8px; white-space: nowrap; }
 .soa-timeline-toolbar p { margin: 0; }
+
+
+.soa-timeline-selection-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.soa-timeline-selection-actions button {
+  min-height: 28px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 9px;
+  color: rgba(255, 255, 255, 0.64);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.soa-timeline-selection-actions button:disabled {
+  opacity: 0.24;
+}
 
 .soa-timeline-zoom { display: flex; gap: 3px; }
 .soa-timeline-zoom button {
@@ -490,7 +511,7 @@
 
 @media (max-width: 919px) {
   .soa-timeline-toolbar {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
   .soa-timeline-toolbar p { display: none; }
@@ -909,5 +930,247 @@
 
   .soa-timeline-quick-editor__actions.is-batch {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 0.11.1 safe batch voice editing */
+.soa-timeline-quick-editor.is-batch {
+  grid-template-columns: 140px minmax(0, 1fr) 240px;
+}
+
+.soa-timeline-batch-controls {
+  display: grid;
+  grid-template-columns: minmax(130px, 1.2fr) repeat(3, minmax(82px, auto));
+  align-items: end;
+  gap: 5px;
+}
+
+.soa-timeline-batch-controls label {
+  display: grid;
+  gap: 4px;
+}
+
+.soa-timeline-batch-controls label > span {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.soa-timeline-batch-controls select,
+.soa-timeline-batch-controls button,
+.soa-timeline-batch-preview button {
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0 9px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.soa-timeline-batch-controls select {
+  width: 100%;
+  color: #f7f7f7;
+  background: #14171d;
+}
+
+.soa-timeline-batch-controls button:disabled,
+.soa-timeline-batch-preview button:disabled {
+  opacity: 0.26;
+}
+
+.soa-timeline-batch-preview {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) repeat(2, minmax(120px, auto)) auto;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(216, 255, 114, 0.16);
+  border-radius: 10px;
+  padding: 7px 8px;
+  background: rgba(216, 255, 114, 0.04);
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 8px;
+}
+
+.soa-timeline-batch-preview strong {
+  color: #f7f7f7;
+  font-size: 9px;
+}
+
+.soa-timeline-batch-preview .is-warning {
+  color: #ffb39f;
+}
+
+.soa-timeline-batch-preview > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.soa-timeline-batch-preview button.is-primary {
+  border-color: transparent;
+  color: #171714;
+  background: #d8ff72;
+}
+
+.soa-timeline-batch-result {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  border: 1px solid rgba(216, 255, 114, 0.16);
+  border-radius: 10px;
+  padding: 7px 9px;
+  background: rgba(216, 255, 114, 0.04);
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 8px;
+}
+
+.soa-timeline-batch-result.has-failures {
+  border-color: rgba(255, 145, 134, 0.2);
+  background: rgba(255, 145, 134, 0.05);
+}
+
+.soa-timeline-batch-result strong {
+  color: #f7f7f7;
+  font-size: 9px;
+}
+
+.soa-timeline-batch-result small {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.4);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .soa-timeline-quick-editor.is-batch {
+    grid-template-columns: 130px minmax(0, 1fr);
+  }
+
+  .soa-timeline-quick-editor.is-batch > .soa-timeline-quick-editor__actions.is-batch {
+    grid-column: 1 / -1;
+  }
+
+  .soa-timeline-batch-controls {
+    grid-template-columns: minmax(130px, 1fr) repeat(3, minmax(76px, auto));
+  }
+
+  .soa-timeline-batch-preview {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .soa-timeline-batch-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .soa-timeline-batch-controls label {
+    grid-column: 1 / -1;
+  }
+
+  .soa-timeline-batch-preview,
+  .soa-timeline-batch-result {
+    grid-template-columns: 1fr;
+  }
+
+  .soa-timeline-selection-actions {
+    display: none;
+  }
+
+  .soa-timeline-batch-preview > div {
+    justify-content: stretch;
+  }
+
+  .soa-timeline-batch-preview button {
+    flex: 1;
+  }
+}
+
+.soa-timeline-batch-result__groups {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.soa-timeline-batch-result__groups button {
+  min-height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0 9px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.soa-timeline-batch-result__groups button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.soa-timeline-batch-result small.is-warning {
+  grid-column: 1 / -1;
+  color: #ffb39f;
+  white-space: normal;
+}
+
+.soa-timeline-batch-history {
+  grid-column: 1 / -1;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 6px;
+}
+
+.soa-timeline-batch-history__toggle {
+  width: fit-content;
+  min-height: 26px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.soa-timeline-batch-history ol {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.soa-timeline-batch-history li {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  border-radius: 7px;
+  padding: 5px 7px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.soa-timeline-batch-history time,
+.soa-timeline-batch-history span,
+.soa-timeline-batch-history small {
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 8px;
+}
+
+.soa-timeline-batch-history strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .soa-timeline-batch-history li {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 }

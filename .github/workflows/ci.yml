@@ -331,6 +331,11 @@ jobs:
       - name: Verify Web quality report
         if: steps.web_quality.outcome == 'success'
         run: npm run quality:web-report:verify
+      - name: Run Chromium visual layout regression
+        id: visual_layout
+        if: steps.web_quality.outcome == 'success'
+        continue-on-error: true
+        run: npm run quality:visual-layout
       - name: Upload Web quality evidence
         if: always()
         uses: actions/upload-artifact@v6
@@ -341,7 +346,7 @@ jobs:
           include-hidden-files: true
           path: .sorion/web-quality
       - name: Fail after preserving Web evidence
-        if: steps.web_quality.outcome == 'failure'
+        if: steps.web_quality.outcome == 'failure' || steps.visual_layout.outcome == 'failure'
         run: exit 1
       - name: Write empty static-host runtime configuration
         run: npm run runtime:config

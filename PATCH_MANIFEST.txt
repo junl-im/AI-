@@ -1,25 +1,23 @@
-SoriON AI 0.10.8 -> 0.11.0 Adaptive Engine Resilience & Recovery
+SoriON AI 0.11.3 -> 0.11.4 Visual Baseline Approval & Recovery Provenance
 
 기준 버전
-- 0.10.8 CI Test Contract Stability Hotfix
+- 0.11.3 Failure-Guided Editing & Adaptive Performance Routing
 
 적용 결과
-- engine circuit breaker half-open 단일 probe 및 동시 재폭주 방지
-- 반복 probe 실패 bounded exponential cooldown / 성공 시 backoff reset
-- 명시적 엔진 선택의 circuit 보호와 preset incompatibility 비장애 분리
-- System/Melo/CosyVoice runtime rediscovery 및 운영자 reset API
-- Quality Lab·Engine Doctor 런타임 성공률·지연·격리·probe 진단
-- Web cooldown/probing 엔진 선택 제외와 복구 시점 카탈로그 재조회
-- 앱·API·Worker 제품 버전 v0.11.0 동기화
+- 승인형 Chromium visual baseline과 허용 오차 pixel diff
+- Timeline 최근 6건 batch retry history
+- Runtime soak source filename/SHA-256/time provenance와 비교 evidence export
+- Engine performance observation window expiry 시 stale EWMA reset
+- 앱·API·Worker 제품 버전 v0.11.4 동기화
 
 변경 수
 - 추가 4개
-- 수정 50개
+- 수정 37개
 - 삭제 0개
-- 총 54개
+- 총 41개
 
 삭제 파일
 - 없음
 
 상세 manifest
-- docs/patches/0.11.0/PATCH_MANIFEST.txt
+- docs/patches/0.11.4-visual-baseline-recovery-provenance/PATCH_MANIFEST.txt

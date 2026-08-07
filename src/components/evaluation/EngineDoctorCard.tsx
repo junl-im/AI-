@@ -228,8 +228,12 @@ export function EngineDoctorCard() {
                       ? '복구 확인 중'
                       : engine.health === 'cooldown'
                         ? `격리 ${Math.ceil(engine.cooldownRemainingSeconds ?? 0)}초`
-                        : engine.recommended
-                          ? '자동 우선'
+                        : (engine.selectionPenalty ?? 0) > 0
+                          ? ((engine.degradedRemainingSeconds ?? 0) > 0
+                            ? `자동 우회 ${Math.ceil(engine.degradedRemainingSeconds ?? 0)}초`
+                            : '성능 기반 자동 감점')
+                          : engine.recommended
+                            ? '자동 우선'
                           : engine.ready
                             ? '대체 준비'
                             : '준비 필요'}
@@ -243,8 +247,12 @@ export function EngineDoctorCard() {
                 </p>
                 <p className="mt-1 leading-5 text-soa-muted">
                   누적 격리 {engine.circuitOpenCount ?? 0}회
+                  {(engine.selectionPenalty ?? 0) > 0 ? ` · 자동 선택 감점 ${engine.selectionPenalty}` : ''}
                   {engine.lastError ? ` · 최근 오류 ${engine.lastError}` : ''}
                 </p>
+                {engine.selectionReason ? (
+                  <p className="mt-1 text-[10px] font-bold leading-5 text-soa-muted">{engine.selectionReason}</p>
+                ) : null}
                 {engine.health === 'cooldown' ? (
                   <button
                     type="button"
@@ -403,13 +411,27 @@ export function EngineDoctorCard() {
             </div>
             <p className="mt-1 font-mono text-[10px] text-soa-muted">{browserVoiceInventory.fingerprint}</p>
             {browserVoiceInventory.changed ? (
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <p className="text-soa-coral">OS·브라우저 음성 목록이 바뀌어 프리셋 배정을 다시 계산했습니다.</p>
-                <button
-                  type="button"
-                  onClick={() => setBrowserVoiceInventory(acknowledgeBrowserVoiceInventory(window.speechSynthesis.getVoices()))}
-                  className="focus-ring min-h-8 rounded-lg border border-soa-line bg-white px-3 text-[10px] font-black"
-                >현재 목록 확인 완료</button>
+              <div className="mt-2 grid gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-soa-coral">OS·브라우저 음성 목록이 바뀌어 프리셋 배정을 다시 계산했습니다.</p>
+                  <button
+                    type="button"
+                    onClick={() => setBrowserVoiceInventory(acknowledgeBrowserVoiceInventory(window.speechSynthesis.getVoices()))}
+                    className="focus-ring min-h-8 rounded-lg border border-soa-line bg-white px-3 text-[10px] font-black"
+                  >현재 목록 확인 완료</button>
+                </div>
+                {browserVoiceInventory.assignmentDiff.length ? (
+                  <div className="grid gap-1 rounded-lg border border-soa-line bg-white p-2" aria-label="프리셋 음성 배정 변경">
+                    {browserVoiceInventory.assignmentDiff.map((item) => (
+                      <p key={item.voiceId} className="leading-5 text-soa-muted">
+                        <strong className="text-soa-ink">{item.presetName}</strong> ·
+                        {' '}{item.previousVoiceName ?? '미지원'} → {item.currentVoiceName ?? '미지원'}
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-soa-muted">목록은 바뀌었지만 현재 프리셋의 실제 배정 결과는 동일합니다.</p>
+                )}
               </div>
             ) : null}
           </div>

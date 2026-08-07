@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 import { TimelineEditor } from './TimelineEditor'
@@ -153,9 +153,16 @@ describe('TimelineEditor', () => {
 
 })
 
-it('Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있다', () => {
+it('Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있다 · 안전한 목소리 변경과 재생성도 지원한다', async () => {
   const onMoveMany = vi.fn()
   const onRemoveMany = vi.fn()
+  const onBatchVoiceChange = vi.fn().mockResolvedValue(null)
+  const onRegenerateMany = vi.fn().mockResolvedValue({
+    requestedIds: ['voice-2'],
+    succeededIds: ['voice-2'],
+    failedIds: [],
+    skippedIds: [],
+  })
   render(
     <TimelineEditor
       blocks={blocks}
@@ -169,6 +176,8 @@ it('Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있
       onAddPause={vi.fn()}
       onRemove={vi.fn()}
       onRemoveMany={onRemoveMany}
+      onBatchVoiceChange={onBatchVoiceChange}
+      onRegenerateMany={onRegenerateMany}
       onClear={vi.fn()}
     />,
   )
@@ -180,9 +189,153 @@ it('Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있
   expect(screen.getByRole('region', { name: '선택 클립 일괄 작업' })).toBeInTheDocument()
   expect(screen.getByText(/2개 클립/)).toBeInTheDocument()
 
+  fireEvent.change(screen.getByRole('combobox', { name: '선택 클립 일괄 목소리' }), {
+    target: { value: 'on-clear' },
+  })
+  fireEvent.click(screen.getByRole('button', { name: '변경 미리보기' }))
+  expect(screen.getByRole('status', { name: '일괄 목소리 변경 영향 미리보기' })).toHaveTextContent('도윤 목소리로 변경')
+  expect(screen.getByText(/기존 완성 음원 1개/)).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: '목소리만 적용' }))
+  await waitFor(() => expect(onBatchVoiceChange).toHaveBeenCalledWith(['voice-1', 'voice-2'], 'on-clear', false))
+
+  fireEvent.click(screen.getByRole('button', { name: '실패만 재시도 1' }))
+  await waitFor(() => expect(onRegenerateMany).toHaveBeenCalledWith(['voice-2']))
+  expect(screen.getByRole('status', { name: '최근 일괄 음성 작업 결과' })).toHaveTextContent('성공 1 · 실패 0 · 건너뜀 0')
+
   fireEvent.click(screen.getByRole('button', { name: '선택 앞으로' }))
   expect(onMoveMany).toHaveBeenCalledWith(['voice-1', 'voice-2'], -1)
 
   fireEvent.click(screen.getByRole('button', { name: '선택 삭제' }))
   expect(onRemoveMany).toHaveBeenCalledWith(['voice-1', 'voice-2'])
+})
+
+
+it('일괄 재생성 실패 뒤 실패 클립만 자동 선택하고 결과를 유지한다', async () => {
+  const onRegenerateMany = vi.fn().mockResolvedValue({
+    requestedIds: ['voice-1', 'voice-2'],
+    succeededIds: ['voice-1'],
+    failedIds: ['voice-2'],
+    skippedIds: [],
+  })
+  render(
+    <TimelineEditor
+      blocks={blocks}
+      onMove={vi.fn()}
+      onMoveMany={vi.fn()}
+      onReorder={vi.fn()}
+      onSplit={vi.fn()}
+      onUpdateText={vi.fn()}
+      onRetry={vi.fn()}
+      onAddVoice={vi.fn()}
+      onAddPause={vi.fn()}
+      onRemove={vi.fn()}
+      onRemoveMany={vi.fn()}
+      onRegenerateMany={onRegenerateMany}
+      onClear={vi.fn()}
+    />,
+  )
+
+  fireEvent.click(screen.getByRole('button', { name: '대사 전체' }))
+  fireEvent.click(screen.getByRole('button', { name: '선택 재생성' }))
+
+  await waitFor(() => expect(onRegenerateMany).toHaveBeenCalledWith(['voice-1', 'voice-2']))
+  expect(screen.getByRole('status', { name: '최근 일괄 음성 작업 결과' })).toHaveTextContent('성공 1 · 실패 1 · 건너뜀 0')
+  expect(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('두 번째 문장입니다.')
+})
+
+it('일괄 실패 원인을 그룹으로 나눠 필요한 항목만 다시 시도한다', async () => {
+  const onRegenerateMany = vi.fn()
+    .mockResolvedValueOnce({
+      requestedIds: ['voice-1', 'voice-2'],
+      succeededIds: [],
+      failedIds: ['voice-1', 'voice-2'],
+      skippedIds: [],
+      failures: [
+        { id: 'voice-1', kind: 'network', message: 'network timeout' },
+        { id: 'voice-2', kind: 'engine', message: 'engine unavailable' },
+      ],
+    })
+    .mockResolvedValueOnce({
+      requestedIds: ['voice-1'],
+      succeededIds: ['voice-1'],
+      failedIds: [],
+      skippedIds: [],
+      failures: [],
+    })
+
+  render(
+    <TimelineEditor
+      blocks={blocks}
+      onMove={vi.fn()}
+      onMoveMany={vi.fn()}
+      onReorder={vi.fn()}
+      onSplit={vi.fn()}
+      onUpdateText={vi.fn()}
+      onRetry={vi.fn()}
+      onAddVoice={vi.fn()}
+      onAddPause={vi.fn()}
+      onRemove={vi.fn()}
+      onRemoveMany={vi.fn()}
+      onRegenerateMany={onRegenerateMany}
+      onClear={vi.fn()}
+    />,
+  )
+
+  fireEvent.click(screen.getByRole('button', { name: '대사 전체' }))
+  fireEvent.click(screen.getByRole('button', { name: '선택 재생성' }))
+
+  await waitFor(() => expect(screen.getByRole('button', { name: '연결 1 · 재시도' })).toBeInTheDocument())
+  expect(screen.getByRole('button', { name: '엔진 1 · 재시도' })).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: '연결 1 · 재시도' }))
+  await waitFor(() => expect(onRegenerateMany).toHaveBeenLastCalledWith(['voice-1']))
+})
+
+it('일괄 작업 재시도 이력을 세션 안에서 최근 순서로 보존한다', async () => {
+  const onRegenerateMany = vi.fn()
+    .mockResolvedValueOnce({
+      requestedIds: ['voice-1', 'voice-2'],
+      succeededIds: ['voice-1'],
+      failedIds: ['voice-2'],
+      skippedIds: [],
+      failures: [{ id: 'voice-2', kind: 'engine', message: 'engine unavailable' }],
+    })
+    .mockResolvedValueOnce({
+      requestedIds: ['voice-2'],
+      succeededIds: ['voice-2'],
+      failedIds: [],
+      skippedIds: [],
+      failures: [],
+    })
+
+  render(
+    <TimelineEditor
+      blocks={blocks}
+      onMove={vi.fn()}
+      onMoveMany={vi.fn()}
+      onReorder={vi.fn()}
+      onSplit={vi.fn()}
+      onUpdateText={vi.fn()}
+      onRetry={vi.fn()}
+      onAddVoice={vi.fn()}
+      onAddPause={vi.fn()}
+      onRemove={vi.fn()}
+      onRemoveMany={vi.fn()}
+      onRegenerateMany={onRegenerateMany}
+      onClear={vi.fn()}
+    />,
+  )
+
+  fireEvent.click(screen.getByRole('button', { name: '대사 전체' }))
+  fireEvent.click(screen.getByRole('button', { name: '선택 재생성' }))
+  await waitFor(() => expect(onRegenerateMany).toHaveBeenCalledTimes(1))
+
+  fireEvent.click(screen.getByRole('button', { name: '엔진 1 · 재시도' }))
+  await waitFor(() => expect(onRegenerateMany).toHaveBeenCalledTimes(2))
+
+  const history = screen.getByText('세션 재시도 이력 2건')
+  expect(history).toBeInTheDocument()
+  fireEvent.click(history)
+  expect(screen.getAllByText('일괄 작업').length).toBeGreaterThanOrEqual(1)
+  expect(screen.getByText('빠른 재시도')).toBeInTheDocument()
 })

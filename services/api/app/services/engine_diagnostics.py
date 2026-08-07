@@ -34,6 +34,10 @@ def engine_diagnostic(
         orchestration_detail = "한 요청만 복구 확인 중이며 다른 요청은 대체 엔진으로 우회합니다."
     elif info.health == "cooldown":
         orchestration_detail = "장애 격리 중이라 자동·고정 선택 요청 모두 실행하지 않습니다."
+    elif info.selection_penalty > 0:
+        orchestration_detail = (
+            info.selection_reason or "최근 실패로 자동 선택 우선순위를 낮췄습니다."
+        )
     elif info.recommended:
         orchestration_detail = "현재 자동 생성의 최우선 엔진입니다."
     elif info.auto_eligible:
@@ -167,6 +171,9 @@ def engine_diagnostic(
         last_latency_ms=info.last_latency_ms,
         last_success_at=info.last_success_at,
         last_failure_at=info.last_failure_at,
+        selection_penalty=info.selection_penalty,
+        degraded_remaining_seconds=info.degraded_remaining_seconds,
+        selection_reason=info.selection_reason,
         checks=checks,
     )
 

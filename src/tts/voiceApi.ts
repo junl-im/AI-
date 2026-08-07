@@ -130,6 +130,9 @@ interface ApiEngineInfo {
   last_latency_ms?: number | null
   last_success_at?: string | null
   last_failure_at?: string | null
+  selection_penalty?: number
+  degraded_remaining_seconds?: number
+  selection_reason?: string | null
 }
 
 interface ApiHealthResult {
@@ -191,6 +194,9 @@ function mapEngine(engine: ApiEngineInfo): EngineInfo {
     lastLatencyMs: engine.last_latency_ms ?? null,
     lastSuccessAt: engine.last_success_at ?? null,
     lastFailureAt: engine.last_failure_at ?? null,
+    selectionPenalty: engine.selection_penalty ?? 0,
+    degradedRemainingSeconds: engine.degraded_remaining_seconds ?? 0,
+    selectionReason: engine.selection_reason ?? null,
   }
 }
 

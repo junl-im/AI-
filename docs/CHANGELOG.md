@@ -1,5 +1,42 @@
 # CHANGELOG
 
+
+## 0.11.4 · Visual Baseline Approval & Recovery Provenance
+
+- Chromium 1024/1280/1440 workspace capture에 승인 baseline 저장 모드와 허용 오차 pixel diff를 추가했습니다.
+- 일괄 음성 작업은 최근 6건의 세션 재시도 이력을 유지하고 성공/실패/건너뜀과 실패 원인을 빠르게 확인할 수 있습니다.
+- Runtime soak 비교는 원본 파일명·파일 SHA-256·수집 시각을 provenance로 표시하고 비교 증거 JSON으로 내보냅니다.
+- 엔진 성능 관찰창이 만료되면 오래된 EWMA 표본을 새 요청과 섞지 않고 새 관찰 세션으로 재시작합니다.
+
+## 0.11.3 · Failure-Guided Editing & Adaptive Performance Routing
+
+- 일괄 재생성 실패를 엔진·프리셋·연결·취소·기타로 분류하고 결과 카드에서 원인 그룹별 재시도를 제공합니다.
+- 빠른 실패 재시도는 기본 3회로 제한하고 상한 이후에는 원인을 확인한 뒤 명시적인 선택 재생성을 사용하도록 안내합니다.
+- 엔진 auto 라우팅에 최근 표본 EWMA 안정도·지연 기반 성능 감점을 추가하고 최소 4개 표본·120초 관찰창을 기본값으로 사용합니다.
+- 성능 감점은 TTL 이후 자동 소멸하며 명시적 엔진 선택, circuit cooldown, half-open 단일 probe 계약을 변경하지 않습니다.
+- Engine Doctor·Quality Diagnostics가 단발 soft-degrade 우회와 성능 기반 자동 감점을 구분해 표시합니다.
+- `SORION_ENGINE_PERFORMANCE_MIN_SAMPLES`, `SORION_ENGINE_PERFORMANCE_WINDOW_SECONDS` 설정과 dependency-free 회귀 계약을 추가합니다.
+- 앱·API·Worker 제품 버전을 0.11.3으로 동기화합니다.
+
+## 0.11.2 · Batch Recovery UX & Adaptive Engine Routing
+
+- 일괄 재생성 결과를 성공·실패·건너뜀으로 요약하고 실패가 남으면 해당 클립만 자동 선택해 재시도 동선을 줄입니다.
+- 타임라인 도구막대에 `대사 전체`와 `실패만` 빠른 선택을 추가하고 일괄 작업 중 중복 실행을 잠급니다.
+- 최근 엔진 실패 직후 circuit open 전에도 짧은 soft-degrade 감점을 적용해 auto 라우팅이 같은 불안정 엔진을 연속으로 다시 선택하지 않게 합니다.
+- soft-degrade는 명시적 엔진 선택을 막지 않으며, circuit cooldown 종료 뒤 half-open 단일 probe가 항상 우선하도록 분리합니다.
+- Engine API·Quality Lab·Engine Doctor에 자동 선택 감점, 남은 우회 시간과 선택 사유를 연결합니다.
+- `SORION_ENGINE_SOFT_DEGRADE_SECONDS` 설정과 batch recovery/adaptive routing dependency-free 회귀 계약을 추가합니다.
+- 앱·API·Worker 제품 버전을 0.11.2로 동기화합니다.
+
+## 0.11.1 · Visual Regression & Safe Batch Voice Editing
+
+- 다중 선택 클립에 voice 변경 영향 preview, 목소리만 적용, 적용 후 순차 재생성, 실패만 재시도를 추가합니다.
+- voice 변경 시 기존 audio/track/job을 폐기하고 revision을 증가시켜 이전 음원이 새 프리셋으로 남지 않게 합니다.
+- Browser voice inventory v2가 프리셋별 실제 배정을 보존하고 변경 전후 diff를 Engine Doctor에 표시합니다.
+- production build 뒤 Chromium 1024/1280/1440px에서 실제 작업공간을 구성해 overflow·3분할·Compact Dock·배치 편집 배치를 검사하고 PNG/SHA manifest를 남깁니다.
+- Chromium 검사는 Web quality와 별도 continue-on-error 단계로 증거를 먼저 업로드한 뒤 실패를 최종 반영합니다.
+- 앱·API·Worker 제품 버전을 0.11.1로 동기화합니다.
+
 ## 0.11.0 · Adaptive Engine Resilience & Recovery
 
 - 엔진 circuit breaker를 half-open 단일 probe 방식으로 강화해 cooldown 종료 순간 장애 엔진으로 동시 요청이 재폭주하는 문제를 방지합니다.

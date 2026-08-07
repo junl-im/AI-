@@ -41,6 +41,9 @@ class EngineDiagnostic(BaseModel):
     last_latency_ms: float | None = Field(default=None, ge=0)
     last_success_at: str | None = None
     last_failure_at: str | None = None
+    selection_penalty: int = Field(default=0, ge=0)
+    degraded_remaining_seconds: float = Field(default=0, ge=0)
+    selection_reason: str | None = None
     checks: list[DiagnosticCheck]
 
 

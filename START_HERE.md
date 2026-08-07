@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.11.0 · Adaptive Engine Resilience & Recovery`
+현재 버전: `0.11.4 · Visual Baseline Approval & Recovery Provenance`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -33,6 +33,14 @@
 29. 엔진 circuit이 열리면 cooldown 동안 해당 엔진을 자동 선택하지 않습니다. cooldown 종료 뒤에는 단 하나의 half-open probe만 허용하고 동시 요청은 backup 엔진으로 우회합니다.
 30. `POST /api/v1/engines/{engine_id}/runtime/reset`은 엔진별 재탐지를 먼저 수행합니다. probe 중이거나 재탐지가 실패하면 상태를 억지로 초기화하지 않습니다.
 31. Quality Lab과 Engine Doctor의 성공률·평균 지연·누적 격리·cooldown·probe 상태는 런타임 보호 진단이며 실제 음질·성능 benchmark를 대신하지 않습니다.
+
+32. 다중 선택에서 목소리를 바꿀 때는 `변경 미리보기`로 영향 범위를 확인합니다. 적용 시 기존 완성 음원·track·job은 폐기되고 새 revision으로 queued 처리됩니다.
+33. `선택 재생성`은 선택 대사 전체를, `실패만 재시도`는 실패한 선택 대사만 다시 생성합니다.
+34. Web quality가 production build까지 통과하면 Chromium 1024·1280·1440px 레이아웃 검사를 별도 실행하고 PNG와 SHA-256 manifest를 artifact로 보존합니다.
+35. Engine Doctor의 voice inventory 변경 경고는 프리셋별 이전 배정과 현재 배정 diff를 함께 보여줍니다.
+
+36. 일괄 재생성 실패는 엔진·프리셋·연결·취소·기타로 분류합니다. 원인 그룹별 빠른 재시도는 3회까지만 제공하며 이후에는 오류를 확인하고 명시적인 선택 재생성을 사용합니다.
+37. auto 엔진 선택은 최소 4개 최근 표본이 있을 때 EWMA 안정도와 지연을 120초 동안 보조 신호로 사용합니다. 사용자가 엔진을 직접 선택하는 요청에는 이 성능 감점을 강제하지 않습니다.
 
 - Heartbeat 6.8.4는 새 승인·재서명에 active 신뢰 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지합니다. `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에는 이전 key만 넣고 secret은 Git·ZIP·진단 응답에 포함하지 않습니다.
 - 승인 apply·재서명·rollback은 같은 로컬 파일시스템을 공유하는 API 프로세스 사이에서도 파일 잠금으로 직렬화됩니다. 여러 서버·네트워크 파일시스템은 단일 writer 또는 분산 잠금이 필요합니다.
@@ -119,3 +127,7 @@
 - CosyVoice Worker의 짧은 자동 합성 telemetry는 10·30·60분 실기기 soak와 별도 JSONL·별도 표로 유지한다.
 - benchmark는 모델 digest·GPU·프리셋별 표본 수와 first audio·RTF·handoff P50/P95를 표시하되 표본이 없으면 수치를 만들지 않는다.
 - 동의·권리 만료 경고, WAV 교체 시 `stale`, 반대 성별·중복 화자 폴백 차단은 계속 유지한다.
+34. 일괄 재생성 결과는 성공·실패·건너뜀으로 요약합니다. 실패가 남으면 해당 클립만 자동 선택되며 사용자는 즉시 `실패만 재시도`를 실행할 수 있습니다.
+35. 자동 엔진 선택은 circuit이 열리기 전의 최근 1차 실패에도 짧은 soft-degrade 감점을 적용합니다. 명시적 엔진 선택과 기존 half-open 복구 probe는 이 감점에 의해 차단되지 않습니다.
+36. `SORION_ENGINE_SOFT_DEGRADE_SECONDS`는 최근 실패 뒤 auto 선택 감점 시간이며 기본 15초입니다. 0으로 설정하면 soft-degrade만 비활성화되고 circuit breaker는 유지됩니다.
+

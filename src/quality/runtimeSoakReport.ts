@@ -122,3 +122,51 @@ export function compareRuntimeSoakReports(
   const reasons = targets.flatMap((item) => item.reasons.map((reason) => `${item.target} ${reason}`))
   return { status: reasons.length ? 'regressed' : 'stable', reasons, targets }
 }
+
+export interface RuntimeSoakArtifactProvenance {
+  file_name: string
+  file_sha256: string
+  report_sha256: string
+  app_version: string
+  completed_at: string
+  loaded_at: string
+}
+
+export interface RuntimeSoakComparisonEvidence {
+  schema_version: 'runtime-soak-comparison/1'
+  compared_at: string
+  previous: RuntimeSoakArtifactProvenance
+  current: RuntimeSoakArtifactProvenance
+  comparison: RuntimeSoakComparison
+}
+
+export function buildRuntimeSoakArtifactProvenance(
+  report: RuntimeSoakReport,
+  fileName: string,
+  fileSha256: string,
+  loadedAt: string,
+): RuntimeSoakArtifactProvenance {
+  return {
+    file_name: fileName,
+    file_sha256: fileSha256,
+    report_sha256: report.report_sha256,
+    app_version: report.app_version,
+    completed_at: report.completed_at,
+    loaded_at: loadedAt,
+  }
+}
+
+export function buildRuntimeSoakComparisonEvidence(
+  previous: RuntimeSoakArtifactProvenance,
+  current: RuntimeSoakArtifactProvenance,
+  comparison: RuntimeSoakComparison,
+  comparedAt = new Date().toISOString(),
+): RuntimeSoakComparisonEvidence {
+  return {
+    schema_version: 'runtime-soak-comparison/1',
+    compared_at: comparedAt,
+    previous,
+    current,
+    comparison,
+  }
+}

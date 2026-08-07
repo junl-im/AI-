@@ -1,27 +1,23 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.0 · Adaptive Engine Resilience & Recovery`
+현재 기준: `0.11.4 · Visual Baseline Approval & Recovery Provenance`
 
 ## 목표 버전
 
-`0.11.1 · Visual Regression & Safe Batch Voice Editing`
+`0.11.5 · Recovery Evidence Classification & Editor Command UX`
 
 ## 최우선 구현
 
-- 실제 Chromium 환경의 1024·1280·1440px Compact Dock·3분할·빠른 편집기 screenshot 기준선과 시각 회귀
-- 다중 선택 클립의 일괄 재생성·voice 변경·실행 전 영향 preview와 실패 부분만 재시도
-- Engine Doctor에서 브라우저 음성 inventory 변경 전후 프리셋별 배정 diff 표시
-- 실제 OS 절전·Wi-Fi 전환 실기기 증거를 synthetic Recovery Path Injection과 명확히 분리
-- runtime soak 비교 결과에 파일명·SHA-256·비교 시각 provenance 내보내기
-- 필요하면 엔진 runtime 지표의 프로세스 재시작 간 persistence 여부를 별도 설계하되, 장애 상태를 오래 고착시키지 않는 정책을 먼저 정의
+- 실제 OS/Wi-Fi/visibility 관찰 증거와 synthetic Recovery Path Injection을 export schema와 UI에서 별도 evidence class로 고정
+- 승인된 Chromium baseline PNG가 저장소에 들어온 뒤 CI에서 `SORION_VISUAL_BASELINE_REQUIRED=1` 전환 및 pixel diff 기준 운영
+- 타임라인 다중 선택에 키보드 command bar와 Undo-safe 일괄 작업 preview를 추가해 반복 클릭을 줄임
+- batch 재시도 이력을 필요 시 프로젝트 세션 snapshot에 저장하되 원문·음원·민감 오류 문자열은 보존하지 않음
+- adaptive engine routing의 새 성능 관찰 세션 시작/만료를 Engine Doctor에서 더 명확히 표시하고 장시간 soak로 확인
 
-## 0.11.0에서 고정한 결정
+## 0.11.4에서 고정한 결정
 
-- circuit cooldown 종료 뒤 복구 시도는 한 번에 한 요청만 half-open probe를 획득합니다.
-- 명시적 엔진 선택도 circuit breaker를 우회하지 않습니다.
-- 프리셋 호환 불가 `SOA-4022`는 엔진 장애 카운터에 포함하지 않습니다.
-- 반복 probe 실패는 bounded exponential cooldown, 성공은 backoff reset을 사용합니다.
-- 수동 runtime reset은 엔진별 rediscovery/refresh가 성공한 뒤에만 circuit을 초기화합니다.
-- Browser Speech fallback, System TTS eSpeak 보조 경로, 반대 성별 강제 대체 금지는 유지합니다.
-- 카드별 textarea는 다시 도입하지 않고 단일 빠른 편집기 + 다중 선택 일괄 패널 구조를 유지합니다.
-- 운영자 benchmark baseline 복원은 append-only history를 유지합니다.
+- visual baseline은 신뢰할 수 있는 동일 Chromium runner에서 명시적으로 approve한 PNG만 기준선으로 사용한다.
+- 기준선이 없으면 DOM layout과 후보 PNG는 만들되 pixel baseline 통과를 주장하지 않는다.
+- runtime soak 비교 증거는 원본 파일명·실제 파일 SHA-256·수집/로드/비교 시각 provenance를 함께 보존한다.
+- batch 재시도 이력은 현재 편집 세션 최근 6건만 유지하며 빠른 재시도 상한 3회는 유지한다.
+- performance observation window가 만료되면 오래된 EWMA는 새 표본과 섞지 않는다.

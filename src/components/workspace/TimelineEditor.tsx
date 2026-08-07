@@ -8,7 +8,12 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from 'react'
+import type {
+  TimelineBatchFailureKind,
+  TimelineBatchGenerationSummary,
+} from '../../hooks/useTimelineGeneration'
 import { usePlayerStore } from '../../store/usePlayerStore'
+import { getVoicePreset, voicePresets } from '../../tts/voicePresets'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import { FinalExportControls } from './FinalExportControls'
 
@@ -24,6 +29,12 @@ interface TimelineEditorProps {
   onAddPause: () => void
   onRemove: (id: string) => void
   onRemoveMany?: (ids: string[]) => void
+  onBatchVoiceChange?: (
+    ids: string[],
+    voiceId: string,
+    regenerate: boolean,
+  ) => Promise<TimelineBatchGenerationSummary | null> | TimelineBatchGenerationSummary | null
+  onRegenerateMany?: (ids: string[]) => Promise<TimelineBatchGenerationSummary>
   onClear: () => void
   onVerifyAndRegenerate?: () => void
   sttBusy?: boolean
@@ -34,6 +45,28 @@ interface TimelineMetric {
   offset: number
   width: number
   duration: number
+}
+
+const BATCH_RETRY_LIMIT = 3
+const BATCH_HISTORY_LIMIT = 6
+
+interface BatchHistoryEntry {
+  id: string
+  completedAt: string
+  retry: boolean
+  requested: number
+  succeeded: number
+  failed: number
+  skipped: number
+  failureKinds: TimelineBatchFailureKind[]
+}
+
+const batchFailureLabels: Record<TimelineBatchFailureKind, string> = {
+  engine: '엔진',
+  preset: '프리셋',
+  network: '연결',
+  cancelled: '취소',
+  unknown: '기타',
 }
 
 function formatDuration(seconds: number): string {
@@ -298,6 +331,8 @@ export function TimelineEditor({
   onAddPause,
   onRemove,
   onRemoveMany,
+  onBatchVoiceChange,
+  onRegenerateMany,
   onClear,
   onVerifyAndRegenerate = () => undefined,
   sttBusy = false,
@@ -315,6 +350,23 @@ export function TimelineEditor({
   const [selectedBlockIds, setSelectedBlockIds] = useState<Set<string>>(() => new Set(blocks[0] ? [blocks[0].id] : []))
   const [selectionAnchorId, setSelectionAnchorId] = useState<string | null>(blocks[0]?.id ?? null)
   const [quickDraft, setQuickDraft] = useState('')
+  const [batchVoiceId, setBatchVoiceId] = useState(voicePresets[0].id)
+  const [batchPreviewOpen, setBatchPreviewOpen] = useState(false)
+  const [batchRunning, setBatchRunning] = useState(false)
+  const [batchResult, setBatchResult] = useState<TimelineBatchGenerationSummary | null>(null)
+  const [batchRetryCount, setBatchRetryCount] = useState(0)
+  const [batchHistory, setBatchHistory] = useState<BatchHistoryEntry[]>([])
+  const [batchHistoryOpen, setBatchHistoryOpen] = useState(false)
+  const batchFailures = batchResult?.failures
+    ?? batchResult?.failedIds.map((id) => ({ id, kind: 'unknown' as const, message: '실패 원인을 확인하지 못했습니다.' }))
+    ?? []
+  const batchFailureGroups = (Object.keys(batchFailureLabels) as TimelineBatchFailureKind[])
+    .map((kind) => ({
+      kind,
+      ids: batchFailures.filter((failure) => failure.kind === kind).map((failure) => failure.id),
+    }))
+    .filter((group) => group.ids.length > 0)
+  const batchRetryLimitReached = batchRetryCount >= BATCH_RETRY_LIMIT
 
   const metrics = useMemo(() => {
     let offset = 18
@@ -351,6 +403,17 @@ export function TimelineEditor({
   const selectedVoiceBlock = selectedBlocks.length === 1 && selectedBlock?.kind === 'voice' ? selectedBlock : null
   const selectedDuration = selectedBlocks.reduce((total, block) => total + Math.max(0, block.durationSeconds), 0)
   const selectedIds = selectedBlocks.map((block) => block.id)
+  const selectedVoiceBlocks = selectedBlocks.filter((block): block is TimelineVoiceBlock => block.kind === 'voice')
+  const selectedVoiceIds = selectedVoiceBlocks.map((block) => block.id)
+  const selectedVoiceIdKey = selectedVoiceIds.join('|')
+  const firstSelectedVoiceId = selectedVoiceBlocks[0]?.voiceId ?? null
+  const selectedFailedVoiceIds = selectedVoiceBlocks
+    .filter((block) => block.status === 'failed')
+    .map((block) => block.id)
+  const selectedReadyVoiceCount = selectedVoiceBlocks.filter((block) => block.status === 'ready').length
+  const selectedGeneratingVoiceCount = selectedVoiceBlocks.filter((block) => block.status === 'generating').length
+  const batchVoice = getVoicePreset(batchVoiceId)
+  const batchVoiceChangeCount = selectedVoiceBlocks.filter((block) => block.voiceId !== batchVoice.id).length
   const canMoveSelectionLeft = selectedBlocks.some((block) => {
     const index = blocks.findIndex((item) => item.id === block.id)
     return index > 0 && !selectedBlockIds.has(blocks[index - 1].id)
@@ -362,6 +425,66 @@ export function TimelineEditor({
   const quickDraftTrimmed = quickDraft.trim()
   const quickDraftDirty = Boolean(selectedVoiceBlock && quickDraftTrimmed && quickDraftTrimmed !== selectedVoiceBlock.text)
   const rulerTimes = [0, 0.25, 0.5, 0.75, 1].map((ratio) => totalDuration * ratio)
+
+  function applyBatchResult(summary: TimelineBatchGenerationSummary, retry: boolean) {
+    setBatchResult(summary)
+    setBatchHistory((history) => {
+      const failureKinds = Array.from(new Set(
+        (summary.failures ?? []).map((failure) => failure.kind),
+      ))
+      const next: BatchHistoryEntry = {
+        id: `${Date.now()}-${summary.requestedIds.join('-')}`,
+        completedAt: new Date().toISOString(),
+        retry,
+        requested: summary.requestedIds.length,
+        succeeded: summary.succeededIds.length,
+        failed: summary.failedIds.length,
+        skipped: summary.skippedIds.length,
+        failureKinds,
+      }
+      return [next, ...history].slice(0, BATCH_HISTORY_LIMIT)
+    })
+    if (retry) setBatchRetryCount((count) => count + 1)
+    else setBatchRetryCount(0)
+    if (!summary.failedIds.length) return
+    setSelectedBlockIds(new Set(summary.failedIds))
+    setSelectedBlockId(summary.failedIds[0])
+    setSelectionAnchorId(summary.failedIds[0])
+  }
+
+  async function runBatchGeneration(ids: string[], retry = false) {
+    if (!onRegenerateMany || !ids.length || batchRunning) return
+    setBatchRunning(true)
+    setBatchResult(null)
+    try {
+      const summary = await onRegenerateMany(ids)
+      if (summary) applyBatchResult(summary, retry)
+    } finally {
+      setBatchRunning(false)
+    }
+  }
+
+  async function applyBatchVoice(regenerate: boolean) {
+    if (!onBatchVoiceChange || !selectedVoiceIds.length || batchRunning) return
+    setBatchRunning(regenerate)
+    setBatchResult(null)
+    setBatchRetryCount(0)
+    try {
+      const summary = await onBatchVoiceChange(selectedVoiceIds, batchVoice.id, regenerate)
+      if (summary) applyBatchResult(summary, false)
+      else setBatchResult(null)
+      setBatchPreviewOpen(false)
+    } finally {
+      setBatchRunning(false)
+    }
+  }
+
+  function selectVoiceBlocks(ids: string[]) {
+    if (!ids.length) return
+    setSelectedBlockIds(new Set(ids))
+    setSelectedBlockId(ids[0])
+    setSelectionAnchorId(ids[0])
+  }
 
   function saveQuickDraft() {
     if (!selectedVoiceBlock) return false
@@ -445,6 +568,11 @@ export function TimelineEditor({
   }, [selectedVoiceBlock?.id, selectedVoiceBlock?.text])
 
   useEffect(() => {
+    setBatchPreviewOpen(false)
+    if (firstSelectedVoiceId) setBatchVoiceId(firstSelectedVoiceId)
+  }, [firstSelectedVoiceId, selectedVoiceIdKey])
+
+  useEffect(() => {
     const validIds = new Set(blocks.map((block) => block.id))
     const next = new Set([...selectedBlockIds].filter((id) => validIds.has(id)))
     if (next.size !== selectedBlockIds.size) setSelectedBlockIds(next)
@@ -504,6 +632,18 @@ export function TimelineEditor({
           ) : null}
         </div>
         <p>트랙 클릭 위치 이동 · Ctrl/Cmd 클릭 다중 선택 · Shift 클릭 범위 선택 · Enter 편집 · Delete 삭제 · Alt+←/→ 이동</p>
+        <div className="soa-timeline-selection-actions" aria-label="타임라인 빠른 선택">
+          <button
+            type="button"
+            disabled={!blocks.some((block) => block.kind === 'voice')}
+            onClick={() => selectVoiceBlocks(blocks.filter((block) => block.kind === 'voice').map((block) => block.id))}
+          >대사 전체</button>
+          <button
+            type="button"
+            disabled={!blocks.some((block) => block.kind === 'voice' && block.status === 'failed')}
+            onClick={() => selectVoiceBlocks(blocks.filter((block) => block.kind === 'voice' && block.status === 'failed').map((block) => block.id))}
+          >실패만</button>
+        </div>
         <div className="soa-timeline-zoom" aria-label="타임라인 확대 축소">
           <button type="button" onClick={() => setZoom((value) => Math.max(0.72, value - 0.14))} aria-label="타임라인 축소">−</button>
           <button type="button" onClick={() => setZoom(1)} aria-label="타임라인 기본 배율">{Math.round(zoom * 100)}%</button>
@@ -524,6 +664,65 @@ export function TimelineEditor({
             ))}
             {selectedBlocks.length > 4 ? <span>외 {selectedBlocks.length - 4}개</span> : null}
           </div>
+          <div className="soa-timeline-batch-controls">
+            <label>
+              <span>일괄 목소리</span>
+              <select
+                aria-label="선택 클립 일괄 목소리"
+                value={batchVoiceId}
+                disabled={!selectedVoiceBlocks.length || selectedGeneratingVoiceCount > 0}
+                onChange={(event) => {
+                  setBatchVoiceId(event.target.value)
+                  setBatchPreviewOpen(false)
+                }}
+              >
+                {voicePresets.map((voice) => (
+                  <option key={voice.id} value={voice.id}>{voice.name}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              disabled={!selectedVoiceBlocks.length || selectedGeneratingVoiceCount > 0}
+              onClick={() => setBatchPreviewOpen((value) => !value)}
+            >
+              {batchPreviewOpen ? '미리보기 닫기' : '변경 미리보기'}
+            </button>
+            <button
+              type="button"
+              disabled={!onRegenerateMany || !selectedVoiceIds.length || selectedGeneratingVoiceCount > 0 || batchRunning}
+              onClick={() => void runBatchGeneration(selectedVoiceIds)}
+            >{batchRunning ? '일괄 처리 중…' : '선택 재생성'}</button>
+            <button
+              type="button"
+              disabled={!onRegenerateMany || !selectedFailedVoiceIds.length || selectedGeneratingVoiceCount > 0 || batchRunning || batchRetryLimitReached}
+              onClick={() => void runBatchGeneration(selectedFailedVoiceIds, true)}
+            >{batchRetryLimitReached
+                ? `빠른 재시도 ${BATCH_RETRY_LIMIT}회 도달`
+                : `실패만 재시도${selectedFailedVoiceIds.length ? ` ${selectedFailedVoiceIds.length}` : ''}`}
+            </button>
+          </div>
+          {batchPreviewOpen ? (
+            <div className="soa-timeline-batch-preview" role="status" aria-label="일괄 목소리 변경 영향 미리보기">
+              <strong>{batchVoice.name} 목소리로 변경 · 대상 {batchVoiceChangeCount}개</strong>
+              <span>대사 {selectedVoiceBlocks.length}개 · 쉼 {selectedBlocks.length - selectedVoiceBlocks.length}개 제외</span>
+              <span>기존 완성 음원 {selectedReadyVoiceCount}개는 목소리가 바뀌면 폐기됩니다.</span>
+              {selectedGeneratingVoiceCount ? <span className="is-warning">생성 중 {selectedGeneratingVoiceCount}개가 있어 지금은 적용할 수 없습니다.</span> : null}
+              <div>
+                <button
+                  type="button"
+                  disabled={!onBatchVoiceChange || !batchVoiceChangeCount || selectedGeneratingVoiceCount > 0 || batchRunning}
+                  onClick={() => void applyBatchVoice(false)}
+                >목소리만 적용</button>
+                <button
+                  type="button"
+                  className="is-primary"
+                  disabled={!onBatchVoiceChange || !selectedVoiceIds.length || selectedGeneratingVoiceCount > 0 || batchRunning}
+                  onClick={() => void applyBatchVoice(true)}
+                >{batchRunning ? '적용·재생성 중…' : '적용 후 재생성'}</button>
+              </div>
+            </div>
+          ) : null}
           <div className="soa-timeline-quick-editor__actions is-batch">
             <button type="button" disabled={!onMoveMany || !canMoveSelectionLeft} onClick={() => onMoveMany?.(selectedIds, -1)}>선택 앞으로</button>
             <button type="button" disabled={!onMoveMany || !canMoveSelectionRight} onClick={() => onMoveMany?.(selectedIds, 1)}>선택 뒤로</button>
@@ -584,6 +783,64 @@ export function TimelineEditor({
             </div>
           )}
         </section>
+      ) : null}
+
+      {batchResult ? (
+        <div className={`soa-timeline-batch-result ${batchResult.failedIds.length ? 'has-failures' : 'is-success'}`} role="status" aria-label="최근 일괄 음성 작업 결과">
+          <strong>최근 일괄 작업</strong>
+          <span>성공 {batchResult.succeededIds.length} · 실패 {batchResult.failedIds.length} · 건너뜀 {batchResult.skippedIds.length}</span>
+          {batchResult.failedIds.length ? (
+            <>
+              <small>실패한 클립만 선택했습니다.{batchRetryCount ? ` · 빠른 재시도 ${batchRetryCount}/${BATCH_RETRY_LIMIT}회` : ' · 원인별로 골라 다시 시도할 수 있습니다.'}</small>
+              <div className="soa-timeline-batch-result__groups" aria-label="실패 원인별 재시도">
+                {batchFailureGroups.map((group) => (
+                  <button
+                    key={group.kind}
+                    type="button"
+                    disabled={!onRegenerateMany || batchRunning || batchRetryLimitReached}
+                    onClick={() => {
+                      selectVoiceBlocks(group.ids)
+                      void runBatchGeneration(group.ids, true)
+                    }}
+                  >
+                    {batchFailureLabels[group.kind]} {group.ids.length} · 재시도
+                  </button>
+                ))}
+              </div>
+              {batchRetryLimitReached ? (
+                <small className="is-warning">빠른 재시도 상한에 도달했습니다. 오류 원인을 확인한 뒤 선택 재생성을 사용하세요.</small>
+              ) : null}
+            </>
+          ) : (
+            <small>선택한 대사의 음성 작업이 모두 완료됐습니다.</small>
+          )}
+          {batchHistory.length ? (
+            <div className="soa-timeline-batch-history">
+              <button
+                type="button"
+                className="soa-timeline-batch-history__toggle"
+                aria-expanded={batchHistoryOpen}
+                onClick={() => setBatchHistoryOpen((open) => !open)}
+              >세션 재시도 이력 {batchHistory.length}건</button>
+              {batchHistoryOpen ? (
+                <ol>
+                  {batchHistory.map((entry) => (
+                    <li key={entry.id}>
+                      <time dateTime={entry.completedAt}>
+                        {new Date(entry.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </time>
+                      <span>{entry.retry ? '빠른 재시도' : '일괄 작업'}</span>
+                      <strong>성공 {entry.succeeded} · 실패 {entry.failed} · 건너뜀 {entry.skipped}</strong>
+                      {entry.failureKinds.length ? (
+                        <small>{entry.failureKinds.map((kind) => batchFailureLabels[kind]).join(' · ')}</small>
+                      ) : null}
+                    </li>
+                  ))}
+                </ol>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <div className="soa-capcut-timeline">

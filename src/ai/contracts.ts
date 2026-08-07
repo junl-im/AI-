@@ -65,6 +65,9 @@ export interface EngineInfo {
   lastLatencyMs?: number | null
   lastSuccessAt?: string | null
   lastFailureAt?: string | null
+  selectionPenalty?: number
+  degradedRemainingSeconds?: number
+  selectionReason?: string | null
 }
 
 export interface HealthResult {

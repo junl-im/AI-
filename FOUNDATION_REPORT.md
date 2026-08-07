@@ -1,41 +1,39 @@
-# SoriON AI 0.11.0 Verification Report
+# SoriON AI 0.11.4 Verification Report
 
-결과 버전: **0.11.0 · Adaptive Engine Resilience & Recovery**
-기준 버전: **0.10.8 · CI Test Contract Stability Hotfix**
+결과 버전: **0.11.4 · Visual Baseline Approval & Recovery Provenance**
+기준 버전: **0.11.3 · Failure-Guided Editing & Adaptive Performance Routing**
 
 ## 적용 범위
 
-- circuit breaker를 cooldown 이후 단일 half-open probe 상태 기계로 강화
-- 명시적 엔진 선택에도 circuit 보호 적용
-- 반복 probe 실패의 bounded exponential cooldown과 성공 시 backoff reset
-- preset incompatibility와 runtime failure를 분리해 `SOA-4022`는 circuit 실패로 계산하지 않음
-- System TTS·MeloTTS·CosyVoice Worker의 runtime rediscovery/refresh
-- 엔진 runtime reset API와 실패·probe 충돌 오류 계약
-- Quality Lab·Engine Doctor의 성공률·지연·누적 격리·cooldown·probe 진단
-- Web 엔진 카탈로그의 cooldown/probing 제외와 복구 시점 자동 재조회
-- dependency-free engine resilience 계약과 동시 probe/backoff/reset 회귀 테스트
+- Chromium 1024/1280/1440px 승인 baseline 생성 workflow와 허용 오차 pixel diff
+- baseline 미승인 상태의 후보 PNG/DOM layout 검사와 `--require-baseline` 강제 모드 분리
+- Timeline 일괄 작업 최근 6건 세션 재시도 이력과 중복 결과 제목 정리
+- Runtime soak 원본 파일명·실제 파일 SHA-256·수집/로드/비교 시각 provenance
+- `runtime-soak-comparison/1` 비교 증거 JSON export
+- adaptive engine performance observation window 만료 뒤 stale EWMA/sample count reset
 
 ## 현재 검증 결과
 
-- `python -m pytest -q services/api/tests`: 통과 · 211/211
-- `python -m pytest -q services/worker/tests`: 통과 · 14/14
-- `node scripts/check-version-sync.mjs`: 통과 · v0.11.0
-- `node scripts/check-engine-resilience.mjs`: 통과
-- `node scripts/run-preflight.mjs`: 통과 · 38/38
+- API pytest: 통과 · 215/215
+- Worker pytest: 통과 · 14/14
+- Engine orchestrator 집중 회귀: 통과 · 23/23
+- Repository preflight: 통과 · 40/40
 - dependency-free TS/TSX transpile: 통과 · 201/201 (`.d.ts` 제외)
 - Python compileall: 통과
-- 0.10.8 기준본에 overlay patch 적용 후 완성본 비교: 통과 · 870/870파일 · missing 0 / extra 0 / changed 0
-- 변경 범위: 추가 4 + 수정 50 = 총 54파일, 신규 삭제 0
-- API에는 기존 FastAPI 422 상수 deprecation 경고 1건만 남습니다.
+- Visual baseline/pixel diff 코드 계약 및 Node syntax check: 통과
+- 변경 범위: 추가 4 + 수정 37 = 총 41파일 · 삭제 0
+- 0.11.3 패치 ZIP 실제 적용 재현: 통과 · 886/886 files · missing 0 / extra 0 / changed 0
+- 전체/패치 ZIP 압축 무결성 검사: 통과
 
 ## 검증 환경 제한
 
-- 현재 전달 환경에는 프로젝트 Web `node_modules`가 없고 이전 설치 시 내부 npm registry가 `zustand@5.0.8`을 404로 반환했습니다.
-- Ruff 0.15.22 CLI도 현재 환경에 설치되어 있지 않아 GitHub Actions와 동일한 Ruff 명령은 직접 재실행하지 못했습니다.
-- 따라서 실제 ESLint·semantic TypeScript·Vitest·Vite production build와 Ruff는 GitHub Actions가 최종 판정합니다.
+- `npm ci`는 내부 registry의 `zustand@5.0.8` 404로 중단되어 동일 GitHub Actions Web ESLint·semantic typecheck·Vitest·Vite build는 실행하지 못했습니다.
+- 이 환경에서는 production build가 없으므로 실제 앱의 승인 PNG 생성과 pixel diff 실행은 하지 않았습니다. GitHub Actions 또는 신뢰 runner에서 `quality:visual-layout:approve`가 필요합니다.
+- API 테스트에는 기존 FastAPI 422 상수 deprecation warning 1건이 남습니다.
 
 ## 기능 제한
 
-- circuit runtime 지표는 API 프로세스 메모리에 있으며 프로세스 재시작 뒤 초기화됩니다.
+- 승인 visual baseline이 저장소에 아직 없으면 pixel baseline 통과를 주장하지 않으며 DOM layout과 후보 PNG 증거만 생성합니다.
+- batch 재시도 이력은 현재 Timeline Editor 마운트 세션 최근 6건이며 프로젝트 영구 이력이 아닙니다.
+- 엔진 성능 표본 reset은 auto routing의 최근 관찰 신호만 초기화하며 circuit breaker·명시적 엔진 선택·`SOA-4022` 규칙은 변경하지 않습니다.
 - 실제 CosyVoice 5개 preset WAV·화자 동의/권리·사람 검수 자료·모델 가중치는 포함하지 않습니다.
-- 호환 한국어 System/eSpeak/Melo/CosyVoice 엔진이 기기에 없다면 존재하지 않는 음색을 다른 성별/인물로 위장하지 않습니다.

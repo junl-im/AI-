@@ -1,0 +1,44 @@
+SoriON AI 0.11.4 overwrite patch
+Base: 0.11.3 Failure-Guided Editing & Adaptive Performance Routing
+
+A docs/VISUAL_BASELINE_RECOVERY_PROVENANCE.md
+A docs/patches/0.11.4-visual-baseline-recovery-provenance/PATCH_MANIFEST.txt
+A docs/patches/0.11.4-visual-baseline-recovery-provenance/PATCH_README.md
+A visual-baselines/workspace/README.md
+M APPLY_PATCH.cmd
+M APPLY_PATCH.sh
+M FOUNDATION_REPORT.md
+M PATCH_MANIFEST.txt
+M README.md
+M START_HERE.md
+M VERSION
+M docs/CHANGELOG.md
+M docs/HANDOVER.md
+M docs/NEXT_UPDATE.md
+M package-lock.json
+M package.json
+M scripts/check-batch-recovery-adaptive-routing.mjs
+M scripts/check-recovery-soak-managed-lock.mjs
+M scripts/check-visual-layout-regression.mjs
+M scripts/run-visual-layout-regression.mjs
+M services/api/app/services/engine_orchestrator.py
+M services/api/pyproject.toml
+M services/api/tests/test_ai_director.py
+M services/api/tests/test_connectivity.py
+M services/api/tests/test_engine_catalog.py
+M services/api/tests/test_engine_orchestrator.py
+M services/api/tests/test_engine_strategy.py
+M services/api/tests/test_evidence.py
+M services/api/tests/test_health.py
+M services/api/tests/test_quality.py
+M services/api/tests/test_setup.py
+M services/api/uv.lock
+M services/worker/pyproject.toml
+M services/worker/uv.lock
+M src/components/evaluation/RuntimeSoakComparisonCard.tsx
+M src/components/workspace/TimelineEditor.test.tsx
+M src/components/workspace/TimelineEditor.tsx
+M src/quality/runtimeSoakReport.test.ts
+M src/quality/runtimeSoakReport.ts
+M src/styles/dubbing-overlays.css
+M src/update/buildInfo.ts

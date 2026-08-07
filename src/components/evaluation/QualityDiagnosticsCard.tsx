@@ -69,8 +69,12 @@ export function QualityDiagnosticsCard({
                         ? '복구 확인 중'
                         : engine.health === 'cooldown'
                           ? `자동 격리 ${Math.ceil(engine.cooldownRemainingSeconds)}초`
-                          : engine.recommended
-                            ? '자동 우선'
+                          : engine.selectionPenalty > 0
+                            ? (engine.degradedRemainingSeconds > 0
+                              ? `자동 우회 ${Math.ceil(engine.degradedRemainingSeconds)}초`
+                              : '성능 기반 자동 감점')
+                            : engine.recommended
+                              ? '자동 우선'
                             : engine.ready
                               ? '대체 준비'
                               : '준비 필요'}
@@ -82,11 +86,14 @@ export function QualityDiagnosticsCard({
                     <span className="rounded-xl bg-[#f4f2ec] p-2">{successRateLabel(engine.successRate)}</span>
                     <span className="rounded-xl bg-[#f4f2ec] p-2">{latencyLabel(engine.averageLatencyMs)}</span>
                     <span className="rounded-xl bg-[#f4f2ec] p-2">격리 {engine.circuitOpenCount}회</span>
-                    <span className="rounded-xl bg-[#f4f2ec] p-2">시도 {engine.attemptCount}회</span>
+                    <span className="rounded-xl bg-[#f4f2ec] p-2">{engine.selectionPenalty > 0 ? `자동 감점 ${engine.selectionPenalty}` : `시도 ${engine.attemptCount}회`}</span>
                   </div>
                   <p className="mt-2 text-[10px] font-bold text-soa-muted">
                     {engine.qualityTier.toUpperCase()} · 한국어 {engine.koreanSpecialization} · 성공 {engine.successCount} · 실패 {engine.failureCount} · {engine.streaming ? '스트리밍 지원' : '완성 후 재생'}
                   </p>
+                  {engine.selectionReason ? (
+                    <p className="mt-1 text-[10px] font-bold leading-5 text-soa-muted">{engine.selectionReason}</p>
+                  ) : null}
 
                   {engine.health === 'cooldown' ? (
                     <button

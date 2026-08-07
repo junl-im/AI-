@@ -4,7 +4,7 @@ def test_quality_diagnostics_reports_runtime_and_engines(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.11.0"
+    assert body["version"] == "0.11.4"
     assert body["python_version"]
     assert any(engine["engine_id"] == "mock" for engine in body["engines"])
 
@@ -55,3 +55,6 @@ def test_quality_diagnostics_exposes_engine_resilience_metrics(client):
     assert "average_latency_ms" in engine
     assert "circuit_open_count" in engine
     assert "probe_in_flight" in engine
+    assert "selection_penalty" in engine
+    assert "degraded_remaining_seconds" in engine
+    assert "selection_reason" in engine

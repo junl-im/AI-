@@ -162,6 +162,9 @@ async def lifespan(app: FastAPI):
         failure_threshold=settings.engine_failure_threshold,
         cooldown_seconds=settings.engine_cooldown_seconds,
         max_cooldown_seconds=settings.engine_max_cooldown_seconds,
+        soft_degrade_seconds=settings.engine_soft_degrade_seconds,
+        performance_min_samples=settings.engine_performance_min_samples,
+        performance_window_seconds=settings.engine_performance_window_seconds,
     )
     engine_registry.register_voice_clone(cosyvoice_worker)
 

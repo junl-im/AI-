@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.11.0",
+  "version": "0.11.4",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,7 +17,7 @@
     "cleanup:stale-brand": "node scripts/remove-stale-brand-assets.mjs",
     "quality:web-manifest": "node scripts/check-web-toolchain.mjs --manifest-only",
     "quality:web-toolchain": "node scripts/check-web-toolchain.mjs",
-    "quality": "npm run quality:lock-network && npm run quality:version-sync && npm run quality:ci-architecture && npm run quality:reproducible-web && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:runtime-update && npm run quality:seamless-engine && npm run quality:engine-resilience && npm run quality:always-on-workspace && npm run quality:operator-baselines && npm run quality:recovery-soak && npm run quality:recovery-evidence && npm run quality:studio-ux && npm run quality:trust-key-renewal && npm run quality:benchmark-audit && npm run quality:long-run-writer && npm run quality:playback-flow && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:partial-audio-bridge && npm run quality:ordered-segment-playback && npm run quality:seam-metrics && npm run quality:signed-audio-certification && npm run quality:device-soak-archive && npm run quality:voice-presets && npm run quality:voice-preset-evidence && npm run quality:voice-review-sync && npm run quality:signed-review-benchmark && npm run quality:voice-review-operator && npm run quality:evidence && npm run quality:evidence-intake && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
+    "quality": "npm run quality:lock-network && npm run quality:version-sync && npm run quality:ci-architecture && npm run quality:reproducible-web && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:runtime-update && npm run quality:seamless-engine && npm run quality:engine-resilience && npm run quality:batch-recovery-routing && npm run quality:always-on-workspace && npm run quality:operator-baselines && npm run quality:recovery-soak && npm run quality:recovery-evidence && npm run quality:studio-ux && npm run quality:trust-key-renewal && npm run quality:benchmark-audit && npm run quality:long-run-writer && npm run quality:playback-flow && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:partial-audio-bridge && npm run quality:ordered-segment-playback && npm run quality:seam-metrics && npm run quality:signed-audio-certification && npm run quality:device-soak-archive && npm run quality:voice-presets && npm run quality:voice-preset-evidence && npm run quality:voice-review-sync && npm run quality:signed-review-benchmark && npm run quality:voice-review-operator && npm run quality:evidence && npm run quality:evidence-intake && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
@@ -83,7 +83,10 @@
     "quality:recovery-soak": "node scripts/check-recovery-soak-managed-lock.mjs",
     "quality:studio-ux": "node scripts/check-studio-playback-timeline-ux.mjs",
     "quality:recovery-evidence": "node scripts/check-recovery-evidence-voice-inventory.mjs",
-    "quality:engine-resilience": "node scripts/check-engine-resilience.mjs"
+    "quality:engine-resilience": "node scripts/check-engine-resilience.mjs",
+    "quality:visual-layout": "node scripts/run-visual-layout-regression.mjs",
+    "quality:batch-recovery-routing": "node scripts/check-batch-recovery-adaptive-routing.mjs",
+    "quality:visual-layout:approve": "node scripts/run-visual-layout-regression.mjs --approve"
   },
   "engines": {
     "node": ">=22.12.0 <25",

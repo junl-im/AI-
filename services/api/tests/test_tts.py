@@ -63,6 +63,8 @@ def test_engine_catalog_marks_one_ready_engine_as_recommended(client):
     ready = [item for item in response.json() if item["ready"]]
     assert ready
     assert sum(1 for item in ready if item["recommended"]) == 1
+    assert all("selection_penalty" in item for item in ready)
+    assert all("degraded_remaining_seconds" in item for item in ready)
 
 
 def test_all_engine_failures_return_soa_4013(client, monkeypatch):

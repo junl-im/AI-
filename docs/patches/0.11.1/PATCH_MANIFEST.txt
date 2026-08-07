@@ -1,0 +1,46 @@
+SoriON AI 0.11.1 overwrite patch
+Base: 0.11.0 Adaptive Engine Resilience & Recovery
+
+A docs/SAFE_BATCH_VOICE_EDITING_VISUAL_REGRESSION.md
+A docs/patches/0.11.1/PATCH_MANIFEST.txt
+A docs/patches/0.11.1/PATCH_README.md
+A scripts/check-visual-layout-regression.mjs
+A scripts/run-visual-layout-regression.mjs
+M .github/workflows/ci.yml
+M APPLY_PATCH.cmd
+M APPLY_PATCH.sh
+M FOUNDATION_REPORT.md
+M PATCH_MANIFEST.txt
+M README.md
+M START_HERE.md
+M VERSION
+M docs/CHANGELOG.md
+M docs/HANDOVER.md
+M docs/NEXT_UPDATE.md
+M package-lock.json
+M package.json
+M scripts/check-recovery-evidence-voice-inventory.mjs
+M scripts/check-studio-playback-timeline-ux.mjs
+M scripts/run-preflight.mjs
+M services/api/pyproject.toml
+M services/api/tests/test_ai_director.py
+M services/api/tests/test_connectivity.py
+M services/api/tests/test_engine_catalog.py
+M services/api/tests/test_engine_strategy.py
+M services/api/tests/test_evidence.py
+M services/api/tests/test_health.py
+M services/api/tests/test_quality.py
+M services/api/tests/test_setup.py
+M services/api/uv.lock
+M services/worker/pyproject.toml
+M services/worker/uv.lock
+M src/components/evaluation/EngineDoctorCard.tsx
+M src/components/workspace/TimelineEditor.test.tsx
+M src/components/workspace/TimelineEditor.tsx
+M src/hooks/useTimelineGeneration.test.ts
+M src/hooks/useTimelineGeneration.ts
+M src/pages/HomePage.tsx
+M src/styles/dubbing-overlays.css
+M src/tts/browserVoiceInventory.test.ts
+M src/tts/browserVoiceInventory.ts
+M src/update/buildInfo.ts

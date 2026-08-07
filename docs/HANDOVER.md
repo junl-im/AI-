@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.0 · Adaptive Engine Resilience & Recovery**
+현재 기준 버전: **0.11.3 · Failure-Guided Editing & Adaptive Performance Routing**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-07 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,48 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+
+## 0.11.3 Failure-Guided Editing & Adaptive Performance Routing
+
+1. **작업 일시(KST)**: 2026-08-07 18:12 이후.
+2. **대상 버전과 기준 버전**: 0.11.3 / 0.11.2 Batch Recovery UX & Adaptive Engine Routing.
+3. **변경 내용**: 일괄 재생성 실패를 엔진·프리셋·연결·취소·기타로 분류해 결과 UI에서 원인 그룹별 재시도를 제공하고 빠른 실패 재시도는 3회 상한을 둡니다. 엔진 auto 라우팅은 최소 4개 최근 표본의 EWMA 안정도·지연을 120초 관찰창에서 평가해 느리거나 불안정한 엔진을 임시 감점합니다.
+4. **변경 이유**: 실패 클립만 자동 선택하는 것만으로는 같은 원인의 실패를 반복하기 쉬웠고, circuit이 열리지 않은 상태에서도 장시간 느린 엔진이 설정 순서만으로 계속 우선될 수 있어 실사용 체감 지연을 줄일 보조 신호가 필요했습니다.
+5. **영향 범위**: TimelineEditor/useTimelineGeneration batch 계약·UI, EngineOrchestrator/config/main, Engine Doctor·Quality Diagnostics 표시, batch/adaptive routing preflight, 버전·문서입니다. 명시적 엔진 선택과 circuit cooldown/half-open 복구 계약은 유지합니다.
+6. **변경·추가된 주요 파일**: `src/hooks/useTimelineGeneration.ts`, `src/components/workspace/TimelineEditor.tsx`, `src/styles/dubbing-overlays.css`, `services/api/app/services/engine_orchestrator.py`, `services/api/app/core/config.py`, `src/components/evaluation/{EngineDoctorCard,QualityDiagnosticsCard}.tsx`, `scripts/check-batch-recovery-adaptive-routing.mjs`, `docs/FAILURE_GUIDED_EDITING_PERFORMANCE_ROUTING.md`.
+7. **검증 결과**: API pytest 214/214, Worker pytest 14/14, Engine orchestrator 22/22를 통과했습니다. Repository preflight 40/40, dependency-free TS/TSX transpile 201/201, Python compileall을 통과했습니다. 공식 0.11.2 기준본 대비 변경 범위는 추가 3 + 수정 37 = 총 40파일, 삭제 0입니다. 0.11.2 기준본에 패치 ZIP을 실제 적용한 결과 882/882 files · missing 0 / extra 0 / changed 0으로 완성본과 일치했습니다. 프로젝트 `node_modules`가 없어 동일 GitHub Actions Web ESLint·semantic typecheck·Vitest·Vite build는 Actions가 최종 판정합니다.
+8. **알려진 제한**: EWMA 성능 감점은 현재 API 프로세스 메모리의 auto 선택 보조 신호이고 음질 benchmark가 아닙니다. 실제 CosyVoice 전용 WAV/권리 자료 부재 제한은 유지됩니다.
+9. **산출물**: `SoriON-AI-0.11.3-failure-guided-editing-adaptive-performance-routing-full.zip`, `SoriON-AI-0.11.2-to-0.11.3-failure-guided-editing-adaptive-performance-routing-patch.zip` 예정.
+10. **다음 예상 업데이트**: 0.11.4 Visual Baseline Approval & Recovery Provenance. pixel baseline 승인, soak provenance, 실제 OS 복귀 증거 분리를 우선합니다.
+
+## 0.11.2 Batch Recovery UX & Adaptive Engine Routing
+
+1. **작업 일시(KST)**: 2026-08-07 17:07 이후.
+2. **대상 버전과 기준 버전**: 0.11.2 / 0.11.1 Visual Regression & Safe Batch Voice Editing.
+3. **변경 내용**: 다중 일괄 재생성 결과를 성공·실패·건너뜀으로 반환하고 UI에 유지하며, 실패가 있으면 실패 클립만 자동 선택해 즉시 재시도할 수 있게 했습니다. 타임라인에 대사 전체/실패만 빠른 선택을 추가했습니다. 엔진 auto 라우팅은 circuit open 전 최근 실패 뒤 짧은 soft-degrade 감점을 적용합니다.
+4. **변경 이유**: 기존 실패만 재시도는 사용자가 실패 클립을 다시 확인해야 했고 결과가 선택 전환과 함께 사라질 수 있었습니다. 엔진은 circuit 임계치에 도달하기 전 같은 실패 엔진을 다음 auto 요청이 바로 다시 선택할 수 있어 연속 체감 실패를 줄일 1차 완충이 필요했습니다.
+5. **영향 범위**: TimelineEditor/useTimelineGeneration/HomePage batch 계약, 엔진 orchestrator·schema·config·diagnostics, Engine Doctor/Quality Lab, repository preflight, 버전·문서입니다. 명시적 엔진 선택과 0.11.0 half-open 복구 계약은 유지합니다.
+6. **주요 파일**: `src/components/workspace/TimelineEditor.tsx`, `src/hooks/useTimelineGeneration.ts`, `services/api/app/services/engine_orchestrator.py`, `services/api/app/schemas/engine.py`, `services/api/app/services/engine_diagnostics.py`, `src/components/evaluation/EngineDoctorCard.tsx`, `scripts/check-batch-recovery-adaptive-routing.mjs`, `docs/BATCH_RECOVERY_ADAPTIVE_ENGINE_ROUTING.md`.
+7. **검증 결과**: API pytest 213/213, Worker pytest 14/14, Repository preflight 40/40, dependency-free TS/TSX transpile 201/201, Python compileall, 제품 버전 sync를 통과했습니다. `npm ci --ignore-scripts`는 내부 registry의 `zustand@5.0.8` 404로 중단되어 실제 ESLint·semantic typecheck·Vitest·Vite build는 GitHub Actions가 최종 판정합니다. 0.11.1 기준본에 54개 변경 파일을 직접 overlay한 결과 879/879 files · missing 0 / extra 0 / changed 0으로 일치했습니다.
+8. **알려진 제한**: soft-degrade 런타임 상태는 API 프로세스 메모리이며 재시작 시 초기화됩니다. 감점은 음질 평가가 아니라 최근 실패를 이용한 auto 선택 안정화 신호입니다. 실제 CosyVoice 전용 WAV/권리 자료 부재 제한도 유지됩니다.
+9. **산출물**: `SoriON-AI-0.11.2-batch-recovery-ux-adaptive-engine-routing-full.zip`, `SoriON-AI-0.11.1-to-0.11.2-batch-recovery-ux-adaptive-engine-routing-patch.zip` 예정.
+10. **다음 예상 업데이트**: 0.11.3 Visual Baseline Approval & Recovery Provenance. pixel baseline 승인, soak provenance, 실제 OS 복귀 증거 분리, batch 실패 원인 그룹화를 우선합니다.
+
+
+## 0.11.1 Visual Regression & Safe Batch Voice Editing
+
+1. **작업 일시(KST)**: 2026-08-07 16:42 이후.
+2. **대상 버전과 기준 버전**: 0.11.1 / 0.11.0 Adaptive Engine Resilience & Recovery.
+3. **변경 내용**: 다중 선택 voice 변경 preview, 목소리 적용/적용 후 재생성, 실패만 재시도, Browser voice inventory 프리셋 배정 diff, Chromium 1024·1280·1440px production layout evidence 단계를 추가했습니다.
+4. **변경 이유**: 다중 선택이 이동·삭제에만 머물러 실제 편집 효율이 낮았고, 음성 목록 변경 뒤 어떤 프리셋 배정이 달라졌는지와 Compact Dock/3분할이 실제 브라우저 폭에서 유지되는지 자동 증거가 필요했습니다.
+5. **영향 범위**: TimelineEditor, useTimelineGeneration, HomePage 연결, Engine Doctor, browserVoiceInventory v2, Web CI visual layout runner, preflight 계약, 버전·문서입니다. 0.11.0 엔진 회복력 정책은 변경하지 않습니다.
+6. **주요 파일**: `src/components/workspace/TimelineEditor.tsx`, `src/hooks/useTimelineGeneration.ts`, `src/tts/browserVoiceInventory.ts`, `src/components/evaluation/EngineDoctorCard.tsx`, `scripts/run-visual-layout-regression.mjs`, `scripts/check-visual-layout-regression.mjs`, `.github/workflows/ci.yml`, `docs/SAFE_BATCH_VOICE_EDITING_VISUAL_REGRESSION.md`.
+7. **검증 결과**: API pytest 211/211, Worker 14/14, Repository preflight 39/39, Python compileall, dependency-free TS/TSX transpile 201/201을 통과했습니다. npm 설치는 내부 registry의 `zustand@5.0.8` 404로 중단됐습니다. 관리형 Chromium 144는 이 환경에서 loopback URL을 정책 차단해 실제 앱 screenshot 실행은 불가했고 GitHub Actions가 production visual layout의 최종 판정입니다.
+8. **알려진 제한**: 0.11.1 Chromium 검사는 DOM 실측 + PNG/SHA evidence이며 pixel baseline diff는 아직 강제하지 않습니다. 실제 CosyVoice WAV/권리 자료 부재 제한도 유지됩니다.
+9. **산출물**: 0.11.1 전체 ZIP과 0.11.0→0.11.1 덮어쓰기 패치를 생성합니다.
+10. **다음 예상 업데이트**: 0.11.2에서 승인된 pixel baseline 비교, batch 결과 요약/재시도 횟수, soak provenance와 실제 OS 복귀 evidence 분리를 진행합니다.
 
 
 ## 0.11.0 Adaptive Engine Resilience & Recovery
@@ -1044,3 +1086,16 @@ CI Hotfix 4 테스트 규칙:
 8. 검증 결과: Repository preflight 21개, API pytest 158개, Worker pytest 14개, CosyVoice 전용 8개, TS/TSX transpile 177개와 Python compileall을 통과했다. 전체 npm quality는 내부 registry의 `zustand@5.0.8` 404로 GitHub Actions 최종 판정이다.
 9. 제한: 실제 5개 화자 WAV·동의/권리 원본·CosyVoice 모델은 포함하지 않았다. manifest 템플릿은 pending이며 Browser/System 음성은 전용 인물이 아닌 기기 근사값이다.
 10. 다음 예상 업데이트는 Heartbeat 6.8.1의 A/B 검수 내보내기·manifest 연계, System/Melo 실제 화자 telemetry, 프리셋별 CosyVoice benchmark다.
+
+
+## 2026-08-07 18:38 KST · v0.11.4 Visual Baseline Approval & Recovery Provenance
+1. 작업 일시(KST): 2026-08-07 18:38.
+2. 대상/기준: `0.11.4 · Visual Baseline Approval & Recovery Provenance`, 기준은 공식 `0.11.3` 전체본이다.
+3. 변경 내용: Chromium 승인 baseline/pixel diff workflow, Timeline batch 최근 6건 재시도 이력, runtime soak 파일 provenance와 비교 증거 JSON, adaptive engine EWMA 관찰창 reset을 추가했다.
+4. 변경 이유: 화면 회귀를 단순 PNG 보관이 아닌 승인 기준선과 허용 오차로 운영하고, 품질 비교 파일의 출처를 재현 가능하게 남기며, 오래된 엔진 성능 표본이 장시간 뒤 auto routing에 다시 섞이는 문제를 막기 위해서다.
+5. 영향 범위: visual layout runner/CI 계약, Timeline Editor와 overlay CSS, Quality Lab runtime soak compare, Engine Orchestrator와 회귀 테스트, 운영 문서다.
+6. 주요 파일: `scripts/run-visual-layout-regression.mjs`, `visual-baselines/workspace/README.md`, `src/components/workspace/TimelineEditor.tsx`, `src/quality/runtimeSoakReport.ts`, `src/components/evaluation/RuntimeSoakComparisonCard.tsx`, `services/api/app/services/engine_orchestrator.py`, `docs/VISUAL_BASELINE_RECOVERY_PROVENANCE.md`.
+7. 검증 결과: API 215/215, Worker 14/14, engine orchestrator 23/23, Repository preflight 40/40, TS/TSX transpile 201/201, Python compileall을 통과했다. 공식 0.11.3에 패치 ZIP과 APPLY_PATCH를 적용한 결과 886/886 files · missing 0 / extra 0 / changed 0이다.
+8. 제한/주의: 현재 실행 환경에는 Web `node_modules`가 없어 실제 Vitest/ESLint/Vite build를 동일 CI 조건으로 실행할 수 없다. 승인 PNG는 신뢰 runner에서 `quality:visual-layout:approve` 실행 후 커밋해야 하며 승인 전에는 pixel baseline 통과를 주장하지 않는다.
+9. 산출물: `SoriON-AI-0.11.4-visual-baseline-recovery-provenance-full.zip`, `SoriON-AI-0.11.3-to-0.11.4-visual-baseline-recovery-provenance-patch.zip`, SHA-256 목록.
+10. 다음 예상 업데이트: `0.11.5 · Recovery Evidence Classification & Editor Command UX`에서 실제/주입 복구 증거 분리, 승인 baseline CI 강제, 키보드 중심 batch 편집과 장시간 engine observation 진단을 진행한다.

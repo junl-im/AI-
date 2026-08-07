@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { compareRuntimeSoakReports, parseRuntimeSoakReport } from './runtimeSoakReport'
+import {
+  buildRuntimeSoakComparisonEvidence,
+  compareRuntimeSoakReports,
+  parseRuntimeSoakReport,
+} from './runtimeSoakReport'
 
 function report(latency: number, successRate = 1) {
   return parseRuntimeSoakReport(JSON.stringify({
@@ -30,4 +34,37 @@ describe('runtime soak comparison', () => {
   it('keeps stable reports green', () => {
     expect(compareRuntimeSoakReports(report(20), report(22)).status).toBe('stable')
   })
+})
+
+it('comparison evidence keeps source filenames and hashes as provenance', () => {
+  const previous = report(20)
+  const current = report(21)
+  const comparison = compareRuntimeSoakReports(previous, current)
+  const previousProvenance = {
+    file_name: 'previous.json',
+    file_sha256: '1'.repeat(64),
+    report_sha256: previous.report_sha256,
+    app_version: previous.app_version,
+    completed_at: previous.completed_at,
+    loaded_at: '2026-08-07T01:00:00Z',
+  }
+  const currentProvenance = {
+    file_name: 'current.json',
+    file_sha256: '2'.repeat(64),
+    report_sha256: current.report_sha256,
+    app_version: current.app_version,
+    completed_at: current.completed_at,
+    loaded_at: '2026-08-07T02:00:00Z',
+  }
+  const evidence = buildRuntimeSoakComparisonEvidence(
+    previousProvenance,
+    currentProvenance,
+    comparison,
+    '2026-08-07T03:00:00Z',
+  )
+
+  expect(evidence.schema_version).toBe('runtime-soak-comparison/1')
+  expect(evidence.previous.file_name).toBe('previous.json')
+  expect(evidence.current.file_sha256).toBe('2'.repeat(64))
+  expect(evidence.compared_at).toBe('2026-08-07T03:00:00Z')
 })

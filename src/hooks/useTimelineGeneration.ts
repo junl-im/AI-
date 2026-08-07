@@ -41,6 +41,31 @@ export interface TimelineGenerationResult {
   blockId: string
   audio: GeneratedAudio
 }
+
+export type TimelineBatchFailureKind = 'engine' | 'preset' | 'network' | 'cancelled' | 'unknown'
+
+export interface TimelineBatchFailure {
+  id: string
+  kind: TimelineBatchFailureKind
+  message: string
+}
+
+export interface TimelineBatchGenerationSummary {
+  requestedIds: string[]
+  succeededIds: string[]
+  failedIds: string[]
+  skippedIds: string[]
+  failures?: TimelineBatchFailure[]
+}
+
+function classifyBatchFailure(message: string | null | undefined): TimelineBatchFailureKind {
+  const normalized = (message ?? '').toLowerCase()
+  if (/soa-4022|프리셋|preset|목소리.*지원/.test(normalized)) return 'preset'
+  if (/offline|network|연결|cors|timeout|502|503|504|fetch/.test(normalized)) return 'network'
+  if (/cancel|abort|취소/.test(normalized)) return 'cancelled'
+  if (/engine|엔진|worker|melo|cosyvoice|system tts|espeak/.test(normalized)) return 'engine'
+  return 'unknown'
+}
 type BlocksUpdater = (current: TimelineBlock[]) => TimelineBlock[]
 export function useTimelineGeneration() {
   const [blocks, setBlocks] = useState<TimelineBlock[]>([])
@@ -587,6 +612,85 @@ export function useTimelineGeneration() {
     generate: generateBlock,
   }), [cancelActiveGeneration, commit, generateBlock, removeTrack])
 
+  const updateVoiceMany = useCallback((ids: string[], voiceId: string, voiceName: string) => {
+    const selected = new Set(ids)
+    if (!selected.size) return
+    ids.forEach((id) => cancelActiveGeneration(id))
+    commit((current) => current.map((block) => {
+      if (block.kind !== 'voice' || !selected.has(block.id) || block.voiceId === voiceId) return block
+      if (block.trackId) removeTrack(block.trackId)
+      return {
+        ...block,
+        voiceId,
+        voiceName,
+        status: 'queued' as const,
+        progress: 0,
+        audio: null,
+        trackId: null,
+        jobId: null,
+        error: null,
+        revision: block.revision + 1,
+        sttVerification: undefined,
+      }
+    }))
+  }, [cancelActiveGeneration, commit, removeTrack])
+
+  const regenerateMany = useCallback(async (ids: string[]): Promise<TimelineBatchGenerationSummary> => {
+    const requestedIds = [...new Set(ids)]
+    const selected = new Set(requestedIds)
+    if (!selected.size) {
+      return { requestedIds: [], succeededIds: [], failedIds: [], skippedIds: [], failures: [] }
+    }
+    const voiceIds = blocksRef.current
+      .filter((block): block is TimelineVoiceBlock => block.kind === 'voice' && selected.has(block.id))
+      .map((block) => block.id)
+    const voiceIdSet = new Set(voiceIds)
+    const skippedIds = requestedIds.filter((id) => !voiceIdSet.has(id))
+
+    voiceIds.forEach((id) => cancelActiveGeneration(id))
+    commit((current) => current.map((block) => {
+      if (block.kind !== 'voice' || !voiceIdSet.has(block.id)) return block
+      const alreadyClean = block.status === 'queued'
+        && !block.audio
+        && !block.trackId
+        && !block.jobId
+        && !block.error
+      if (alreadyClean) return block
+      if (block.trackId) removeTrack(block.trackId)
+      return {
+        ...block,
+        status: 'queued' as const,
+        progress: 0,
+        audio: null,
+        trackId: null,
+        jobId: null,
+        error: null,
+        revision: block.revision + 1,
+        sttVerification: block.sttVerification
+          ? { ...block.sttVerification, status: 'unchecked' as const }
+          : undefined,
+      }
+    }))
+
+    const succeededIds: string[] = []
+    const failedIds: string[] = []
+    const failures: TimelineBatchFailure[] = []
+    for (const id of voiceIds) {
+      const audio = await generateBlock(id)
+      if (audio) {
+        succeededIds.push(id)
+        continue
+      }
+      failedIds.push(id)
+      const latest = blocksRef.current.find((block) => block.id === id)
+      const message = latest?.kind === 'voice'
+        ? (latest.error ?? '재생성 결과를 만들지 못했습니다.')
+        : '재생성 가능한 대사 클립이 아닙니다.'
+      failures.push({ id, kind: classifyBatchFailure(message), message })
+    }
+    return { requestedIds, succeededIds, failedIds, skippedIds, failures }
+  }, [cancelActiveGeneration, commit, generateBlock, removeTrack])
+
   const restoreSession = useCallback((savedBlocks: PersistedTimelineBlock[]): string[] => {
     controllers.current.forEach((controller) => controller.abort())
     timers.current.forEach((timer) => window.clearTimeout(timer))
@@ -782,6 +886,8 @@ export function useTimelineGeneration() {
     generateAll,
     applySttVerification,
     regenerateBlocks,
+    regenerateMany,
+    updateVoiceMany,
     retryBlock,
     moveBlock,
     moveBlocks,
