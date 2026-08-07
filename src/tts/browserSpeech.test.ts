@@ -148,14 +148,16 @@ describe('browserSpeech', () => {
   })
 
 
-  it('같은 남성 음성을 여러 인물 프리셋에 중복 배정하지 않는다', () => {
+  it('같은 성별 후보가 하나뿐이어도 준호와 민준 프리셋을 운율 차이로 재사용한다', () => {
     const oneMaleVoice = [
       { name: 'Generic Korean Male', lang: 'ko-KR', voiceURI: 'male-only' },
     ] as SpeechSynthesisVoice[]
 
     expect(selectBrowserSpeechVoice(oneMaleVoice, 'on-clear')?.name).toBe('Generic Korean Male')
-    expect(selectBrowserSpeechVoice(oneMaleVoice, 'jun-deep')).toBeNull()
-    expect(selectBrowserSpeechVoice(oneMaleVoice, 'min-energetic')).toBeNull()
+    expect(selectBrowserSpeechVoice(oneMaleVoice, 'jun-deep')?.name).toBe('Generic Korean Male')
+    expect(selectBrowserSpeechVoice(oneMaleVoice, 'min-energetic')?.name).toBe('Generic Korean Male')
+    expect(createBrowserSpeechPlayback({ ...request, voiceId: 'jun-deep' }).rate)
+      .not.toBe(createBrowserSpeechPlayback({ ...request, voiceId: 'min-energetic' }).rate)
   })
 
   it('중성 프리셋을 성별이 명시된 음성으로 자동 대체하지 않는다', () => {

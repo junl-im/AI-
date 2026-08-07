@@ -44,15 +44,12 @@ if ($VoiceName) {
   if (-not $selected) {
     throw "VOICE_PRESET_UNAVAILABLE: 설정한 Windows 음성 '$VoiceName'이 한국어 또는 프리셋 성별($ExpectedGender)과 맞지 않습니다. 다른 성별 음성으로 자동 대체하지 않습니다."
   }
-  if ($voiceIndex -gt 0 -and $selected.VoiceInfo.Name -notmatch $preferredPattern) {
-    throw "VOICE_PRESET_UNAVAILABLE: 설정한 Windows 음성 '$VoiceName'은 $VoicePreset 전용 후보로 식별되지 않습니다. 같은 음성을 여러 인물 프리셋에 중복 배정하지 않습니다."
-  }
 } else {
   $preferred = $compatibleVoices | Where-Object { $_.VoiceInfo.Name -match $preferredPattern } | Select-Object -First 1
   if ($preferred) {
     $selected = $preferred
-  } elseif ($compatibleVoices.Count -gt $voiceIndex) {
-    $selected = $compatibleVoices[$voiceIndex]
+  } elseif ($compatibleVoices.Count -gt 0) {
+    $selected = $compatibleVoices[$voiceIndex % $compatibleVoices.Count]
   }
 }
 
@@ -62,7 +59,7 @@ if (-not $selected) {
     "female" { "여성" }
     default { "중성" }
   }
-  throw "VOICE_PRESET_UNAVAILABLE: 설치된 $genderLabel Windows 한국어 음성 중 $VoicePreset 프리셋에 별도 배정할 후보가 없습니다. 다른 성별 또는 같은 인물 음성으로 자동 대체하지 않습니다. Windows 언어 설정에서 추가 한국어 음성 패키지를 설치해 주세요."
+  throw "VOICE_PRESET_UNAVAILABLE: 설치된 $genderLabel Windows 한국어 음성이 없습니다. 다른 성별 음성으로 자동 대체하지 않습니다. Windows 언어 설정에서 한국어 음성 패키지를 설치해 주세요."
 }
 
 $synth.SelectVoice($selected.VoiceInfo.Name)

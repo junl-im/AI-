@@ -1,6 +1,14 @@
 # Voice Preset Fidelity Contract
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
+현재 기준: `0.10.4 · Voice Preset Engine Reliability Hotfix`
+
+## 0.10.4 엔진 복구 강화
+
+- 서버의 모든 준비된 엔진이 **엔진 장애가 아니라 해당 프리셋 호환성만** 부족한 경우 API는 `SOA-4022`로 구분합니다.
+- Web의 `auto` 생성은 `SOA-4022`를 최종 실패로 끝내지 않고, 현재 기기에 성별 호환 한국어 Browser Speech가 있으면 마지막 로컬 재생 경로로 이어서 시도합니다. 명시적으로 특정 서버 엔진을 고른 품질 비교 요청은 이 프리셋 폴백으로 바꾸지 않습니다.
+- System TTS는 한 프로세스에서 가능한 로컬 백엔드를 목록으로 유지합니다. Windows System.Speech 또는 macOS `say`가 해당 프리셋을 거부하거나 실행에 실패하고 eSpeak 한국어 음성이 설치돼 있으면 eSpeak를 보조 백엔드로 다시 시도합니다.
+- eSpeak 보조 경로도 설치된 로컬 도구이며 전용 인물 음색이 아닙니다. eSpeak가 없고 운영체제/브라우저에도 호환 성별 한국어 음성이 없으며 전용 CosyVoice WAV도 준비되지 않았다면 해당 프리셋은 정상적으로 지원 불가가 됩니다.
+- MeloTTS 화자 이름 성별 판정은 Browser/System과 같은 `youngho` 남성 토큰을 사용하도록 맞췄습니다. 단일 `KR`처럼 성별을 확인할 수 없는 화자를 남성/여성 프리셋으로 강제 사용하는 정책은 도입하지 않습니다.
 
 ## 목적
 

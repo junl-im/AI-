@@ -150,4 +150,9 @@ def test_melo_selection_diagnostics_reports_actual_speaker_id(tmp_path):
     assert diagnostics["on-clear"]["selected_voice_name"] == "InJoon Male"
     assert diagnostics["on-clear"]["selected_gender"] == "male"
     assert diagnostics["jun-deep"]["selected_voice_id"] == "3"
-    assert diagnostics["min-energetic"]["status"] == "blocked"
+    assert diagnostics["min-energetic"]["status"] == "ready"
+    assert diagnostics["min-energetic"]["selection_basis"] == "same-gender-cycle"
+
+
+def test_melo_recognizes_youngho_as_male_speaker():
+    assert MeloTtsEngine._speaker_gender("YoungHo Korean") == "male"

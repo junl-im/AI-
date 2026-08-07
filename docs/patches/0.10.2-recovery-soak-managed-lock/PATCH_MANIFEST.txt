@@ -1,0 +1,64 @@
+# SoriON AI 0.10.2 Patch Manifest
+
+- 추가: 6개
+- 수정: 42개
+- 삭제: 0개
+- 총 변경: 48개
+
+## 추가 파일
+
+- `docs/RECOVERY_SOAK_AND_MANAGED_LOCK.md`
+- `docs/patches/0.10.2-recovery-soak-managed-lock/DELETE_LIST.txt`
+- `docs/patches/0.10.2-recovery-soak-managed-lock/PATCH_MANIFEST.txt`
+- `docs/patches/0.10.2-recovery-soak-managed-lock/PATCH_README.md`
+- `scripts/check-recovery-soak-managed-lock.mjs`
+- `services/api/scripts/run_worker_recovery_drill.py`
+
+## 수정 파일
+
+- `.github/workflows/ci.yml`
+- `APPLY_PATCH.cmd`
+- `APPLY_PATCH.sh`
+- `FOUNDATION_REPORT.md`
+- `PATCH_MANIFEST.txt`
+- `README.md`
+- `START_HERE.md`
+- `VERSION`
+- `docs/CHANGELOG.md`
+- `docs/HANDOVER.md`
+- `docs/NEXT_UPDATE.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/RELEASE.md`
+- `docs/ROADMAP.md`
+- `package-lock.json`
+- `package.json`
+- `scripts/check-always-on-preset-pc-layout.mjs`
+- `scripts/check-long-run-writer-safety.mjs`
+- `scripts/run-preflight.mjs`
+- `services/api/app/core/config.py`
+- `services/api/app/main.py`
+- `services/api/app/services/runtime_soak.py`
+- `services/api/app/services/voice_preset_approval.py`
+- `services/api/app/services/writer_lease.py`
+- `services/api/pyproject.toml`
+- `services/api/scripts/run_runtime_soak.py`
+- `services/api/tests/test_ai_director.py`
+- `services/api/tests/test_connectivity.py`
+- `services/api/tests/test_engine_catalog.py`
+- `services/api/tests/test_engine_strategy.py`
+- `services/api/tests/test_evidence.py`
+- `services/api/tests/test_health.py`
+- `services/api/tests/test_quality.py`
+- `services/api/tests/test_runtime_soak.py`
+- `services/api/tests/test_setup.py`
+- `services/api/tests/test_writer_lease.py`
+- `services/api/uv.lock`
+- `services/worker/pyproject.toml`
+- `services/worker/uv.lock`
+- `src/hooks/useDesktopStudioLayout.test.ts`
+- `src/hooks/useDesktopStudioLayout.ts`
+- `src/update/buildInfo.ts`
+
+## 삭제 파일
+
+- 없음

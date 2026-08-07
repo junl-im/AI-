@@ -48,8 +48,8 @@ from app.services.voice_preset_validation import inspect_voice_preset
 from app.services.voice_presets import PRESET_VOICE_IDS, get_voice_preset
 from app.services.voice_review_trust import VoiceReviewTrustStore
 from app.services.writer_lease import (
-    SQLiteWriterLeaseCoordinator,
     WriterLease,
+    WriterLeaseCoordinator,
     WriterLeaseLostError,
     WriterLeaseTimeoutError,
 )
@@ -90,7 +90,7 @@ class VoicePresetApprovalService:
         signing_key_id: str = "local-review-key",
         trusted_signing_keys: Mapping[str, str] | None = None,
         lock_timeout_seconds: float = 10.0,
-        writer_lease: SQLiteWriterLeaseCoordinator | None = None,
+        writer_lease: WriterLeaseCoordinator | None = None,
     ) -> None:
         self.preset_directory = preset_directory
         self.history_path = history_path

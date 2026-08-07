@@ -64,21 +64,23 @@ const melo = await read('services/api/app/engines/tts/melo_tts.py')
 for (const required of [
   '_select_speaker_id',
   'VoicePresetUnavailableError',
-  '같은 화자나 반대 성별 화자로 자동 대체하지 않습니다',
+  'same-gender-cycle',
+  '반대 성별 화자로 자동 대체하지 않습니다',
 ]) {
   if (!melo.includes(required)) failures.push(`melo_tts.py: ${required} 누락`)
 }
 
 const systemTts = await read('services/api/app/engines/tts/system_tts.py')
 const windowsScript = await read('services/api/app/engines/tts/scripts/windows_speech.ps1')
-for (const required of ['_macos_voice_for', '_espeak_voice_for', 'preset.gender']) {
+for (const required of ['_detect_backends', '_available_backends', '_macos_voice_for', '_espeak_voice_for', 'preset.gender']) {
   if (!systemTts.includes(required)) failures.push(`system_tts.py: ${required} 누락`)
 }
 for (const required of [
   'ExpectedGender',
   'VoiceInfo.Gender',
   'VOICE_PRESET_UNAVAILABLE:',
-  '같은 음성을 여러 인물 프리셋에 중복 배정하지 않습니다',
+  '$voiceIndex % $compatibleVoices.Count',
+  '다른 성별 음성으로 자동 대체하지 않습니다',
 ]) {
   if (!windowsScript.includes(required)) failures.push(`windows_speech.ps1: ${required} 누락`)
 }
@@ -89,10 +91,25 @@ for (const required of [
   'preset.voiceVariantIndex',
   '반대 성별 음성 재생을 차단했습니다',
   'compatible.length === 0',
-  'compatible[preset.voiceVariantIndex] ?? null',
+  "selectionBasis: 'preferred-token' | 'variant-index' | 'compatible-cycle' | 'none'",
+  'preset.voiceVariantIndex % compatible.length',
   'requireVoicePreset',
 ]) {
   if (!browserSpeech.includes(required)) failures.push(`browserSpeech.ts: ${required} 누락`)
+}
+
+const voiceApi = await read('src/tts/voiceApi.ts')
+for (const required of [
+  'isPresetCompatibilityFailure',
+  "error.status === 422 && error.message.includes('SOA-4022')",
+  'canFallbackToBrowserForRequest',
+]) {
+  if (!voiceApi.includes(required)) failures.push(`voiceApi.ts: ${required} 누락`)
+}
+
+const ttsRoute = await read('services/api/app/api/routes/tts.py')
+for (const required of ['EngineRequestUnsupportedError', 'SOA-4022']) {
+  if (!ttsRoute.includes(required)) failures.push(`tts.py: ${required} 누락`)
 }
 
 const orchestrator = await read('services/api/app/services/engine_orchestrator.py')
@@ -132,7 +149,7 @@ const apiTests = [
 ].join('\n')
 for (const required of [
   '남성 프리셋을 여성 음성으로 자동 대체하지 않는다',
-  '같은 남성 음성을 여러 인물 프리셋에 중복 배정하지 않는다',
+  '같은 성별 후보가 하나뿐이어도 준호와 민준 프리셋을 운율 차이로 재사용한다',
   '알 수 없는 프리셋 ID를 첫 여성 프리셋으로 바꾸지 않는다',
 ]) {
   if (!browserTests.includes(required)) failures.push(`browserSpeech.test.ts: ${required} 누락`)
@@ -178,4 +195,4 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log('Voice preset 계약 검사 통과 · 5종/남성 3종 · 성별 폴백 및 미인증·중복 WAV 차단')
+console.log('Voice preset 계약 검사 통과 · 5종/남성 3종 · 같은 성별 순환 사용 및 반대 성별 차단')

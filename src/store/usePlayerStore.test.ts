@@ -51,6 +51,29 @@ describe('usePlayerStore', () => {
     expect(first).not.toBe(second)
   })
 
+  it('같은 트랙의 프리셋 버튼을 다시 누르면 재생 토글 신호를 보낸다', () => {
+    const id = usePlayerStore.getState().enqueue(audio('toggle'), '토글 음성')
+    const before = usePlayerStore.getState().toggleRequestId
+
+    usePlayerStore.getState().toggleTrack(id)
+
+    expect(usePlayerStore.getState().toggleRequestId).toBe(before + 1)
+  })
+
+  it('타임라인 위치 이동 요청은 트랙과 초 단위를 함께 기록한다', () => {
+    const id = usePlayerStore.getState().enqueue(audio('seek'), '위치 이동')
+    const before = usePlayerStore.getState().seekRequestId
+
+    usePlayerStore.getState().seekTrack(id, 1.25)
+
+    expect(usePlayerStore.getState()).toMatchObject({
+      currentTrackId: id,
+      seekTrackId: id,
+      seekTargetSeconds: 1.25,
+      seekRequestId: before + 1,
+    })
+  })
+
   it('프리뷰는 대기열 추가와 동시에 재생을 요청한다', () => {
     const before = usePlayerStore.getState().playRequestId
     const id = usePlayerStore.getState().enqueueAndPlay(audio('preview'), '프리뷰')

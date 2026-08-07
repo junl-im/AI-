@@ -356,3 +356,517 @@
   background: #ff756f;
   color: #171018;
 }
+
+/* Context-aware preview buttons. */
+.soa-dubbing-voice-row button[data-preview-state="playing"],
+.soa-voice-sheet-preview[data-preview-state="playing"],
+.soa-voice-drawer__play[data-preview-state="playing"] {
+  color: #141820;
+  background: #d8ff72;
+  box-shadow: 0 0 0 3px rgba(216, 255, 114, 0.12);
+}
+
+.soa-dubbing-voice-row button[data-preview-state="loading"],
+.soa-voice-sheet-preview[data-preview-state="loading"],
+.soa-voice-drawer__play[data-preview-state="loading"] {
+  color: #ffd6d1;
+  background: rgba(255, 118, 108, 0.18);
+}
+
+.soa-voice-sheet-preview:disabled,
+.soa-voice-drawer__play:disabled {
+  cursor: not-allowed;
+  opacity: 0.28;
+}
+
+.soa-timeline-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 13px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.soa-timeline-toolbar > div:first-child {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  overflow: hidden;
+}
+
+.soa-timeline-toolbar strong { color: #fff; font-size: 10px; }
+.soa-timeline-toolbar span,
+.soa-timeline-toolbar p { color: rgba(255, 255, 255, 0.4); font-size: 8px; white-space: nowrap; }
+.soa-timeline-toolbar p { margin: 0; }
+
+.soa-timeline-zoom { display: flex; gap: 3px; }
+.soa-timeline-zoom button {
+  min-width: 30px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.soa-capcut-track-canvas {
+  position: relative;
+  min-height: 154px;
+}
+
+.soa-capcut-track-canvas .soa-dubbing-block-list {
+  position: relative;
+  z-index: 2;
+}
+
+.soa-capcut-playhead {
+  transition: left 120ms linear;
+}
+
+.soa-capcut-playhead span {
+  position: absolute;
+  top: 8px;
+  left: 7px;
+  border-radius: 6px;
+  padding: 3px 5px;
+  color: #fff;
+  background: rgba(255, 112, 100, 0.92);
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.soa-capcut-track-label span {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 8px;
+}
+
+.soa-dubbing-block {
+  outline: 0 solid transparent;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.soa-dubbing-block:focus-visible,
+.soa-dubbing-block.is-selected {
+  border-color: rgba(125, 202, 255, 0.78);
+  outline: 3px solid rgba(125, 202, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
+}
+
+.soa-dubbing-block.is-playing {
+  border-color: rgba(216, 255, 114, 0.72);
+  box-shadow: 0 0 0 3px rgba(216, 255, 114, 0.08), 0 12px 34px rgba(0, 0, 0, 0.3);
+}
+
+.soa-dubbing-block__grip {
+  position: absolute;
+  top: 50%;
+  left: -7px;
+  z-index: 3;
+  color: rgba(255, 255, 255, 0.24);
+  font-size: 14px;
+  cursor: grab;
+  transform: translateY(-50%);
+}
+
+.soa-dubbing-block__tools > button.is-playing {
+  color: #151923;
+  background: #d8ff72;
+}
+
+.soa-dubbing-pause-block.is-selected {
+  outline: 3px solid rgba(125, 202, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(125, 202, 255, 0.62);
+}
+
+@media (max-width: 919px) {
+  .soa-timeline-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .soa-timeline-toolbar p { display: none; }
+}
+
+@media (min-width: 1024px) {
+  .soa-dubbing-block-list > div {
+    flex: 0 0 auto;
+  }
+}
+
+/* 0.10.3 PC compact studio player: shallow two-row transport instead of a tall mobile stack. */
+@media (min-width: 980px) {
+  .soa-dubbing-player-dock {
+    padding: 0 10px env(safe-area-inset-bottom);
+  }
+
+  .soa-dubbing-player-dock__inner {
+    display: grid;
+    width: min(calc(100% - 20px), 1180px);
+    grid-template-columns: minmax(230px, 1fr) auto auto;
+    align-items: center;
+    gap: 3px 12px;
+    border-radius: 14px 14px 0 0;
+    padding: 6px 10px 7px;
+  }
+
+  .soa-dubbing-player-progress {
+    grid-column: 1 / -1;
+    height: 11px;
+    padding: 4px 0 3px;
+  }
+
+  .soa-dubbing-player-progress::before,
+  .soa-dubbing-player-progress > i {
+    top: 4px;
+    height: 3px;
+  }
+
+  .soa-dubbing-player-progress > b {
+    top: 1px;
+    height: 9px;
+  }
+
+  .soa-dubbing-player-time {
+    grid-template-columns: 38px minmax(0, 1fr) 38px;
+    gap: 5px;
+    font-size: 8px;
+  }
+
+  .soa-dubbing-player-time span small {
+    display: none;
+  }
+
+  .soa-dubbing-player-controls {
+    grid-template-columns: 30px 40px 30px;
+    gap: 4px;
+    margin: 0;
+  }
+
+  .soa-dubbing-player-controls button {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .soa-dubbing-player-controls button.is-primary {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    font-size: 18px;
+  }
+
+  .soa-dubbing-player-controls button.is-primary.is-playing {
+    box-shadow: 0 0 0 3px rgba(239, 111, 146, 0.09), 0 0 14px rgba(143, 104, 255, 0.2);
+    transform: none;
+  }
+
+  .soa-dubbing-player-secondary {
+    justify-content: flex-end;
+    gap: 4px;
+    margin: 0;
+  }
+
+  .soa-dubbing-player-secondary button,
+  .soa-dubbing-player-secondary a,
+  .soa-dubbing-player-secondary .soa-browser-voice-label {
+    min-height: 27px;
+    padding: 0 7px;
+    font-size: 7px;
+  }
+
+  .soa-dubbing-player-dock .soa-player-queue {
+    right: 8px;
+    bottom: calc(100% + 5px);
+  }
+}
+
+/* 0.10.5 compact creation player: transport and progress stay on one line. */
+.soa-dubbing-player-dock__inner {
+  padding: 7px 10px;
+}
+
+.soa-dubbing-player-compact {
+  display: grid;
+  grid-template-columns: 38px minmax(160px, 1fr) minmax(170px, 300px) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.soa-dubbing-player-toggle {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 0;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(145deg, #ff8175, #8b65ef 58%, #2c8cf4);
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.soa-dubbing-player-toggle.is-playing {
+  box-shadow: 0 0 0 3px rgba(255, 145, 134, 0.12);
+}
+
+.soa-dubbing-player-compact .soa-dubbing-player-progress {
+  height: 22px;
+  padding: 9px 0;
+}
+
+.soa-dubbing-player-compact .soa-dubbing-player-progress::before,
+.soa-dubbing-player-compact .soa-dubbing-player-progress > i {
+  top: 9px;
+  height: 4px;
+}
+
+.soa-dubbing-player-compact .soa-dubbing-player-progress > b {
+  top: 4px;
+  height: 14px;
+}
+
+.soa-dubbing-player-compact .soa-dubbing-player-time {
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  gap: 6px;
+  font-size: 8px;
+}
+
+.soa-dubbing-player-compact .soa-dubbing-player-time span {
+  text-align: left;
+}
+
+.soa-dubbing-player-compact .soa-dubbing-player-time span small {
+  display: block;
+}
+
+.soa-dubbing-player-compact .soa-dubbing-player-secondary {
+  justify-content: flex-end;
+  gap: 3px;
+  margin: 0;
+}
+
+.soa-dubbing-player-compact .soa-dubbing-player-secondary button,
+.soa-dubbing-player-compact .soa-dubbing-player-secondary a,
+.soa-dubbing-player-compact .soa-browser-voice-label {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0 7px;
+  font-size: 8px;
+}
+
+.soa-dubbing-main {
+  padding-bottom: 88px;
+}
+
+.soa-timeline-quick-editor {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 8px;
+  border: 1px solid rgba(125, 202, 255, 0.14);
+  border-radius: 13px;
+  padding: 8px;
+  background: linear-gradient(110deg, rgba(125, 202, 255, 0.055), rgba(255, 145, 134, 0.035));
+}
+
+.soa-timeline-quick-editor__meta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding: 3px 4px;
+}
+
+.soa-timeline-quick-editor__meta span {
+  color: rgba(125, 202, 255, 0.68);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.soa-timeline-quick-editor__meta strong {
+  overflow: hidden;
+  color: #fff;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.soa-timeline-quick-editor__meta small {
+  color: rgba(255, 255, 255, 0.36);
+  font-size: 7px;
+}
+
+.soa-timeline-quick-editor > textarea {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  padding: 10px 11px;
+  color: #f7f7f7;
+  background: #14171d;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.soa-timeline-quick-editor > textarea:focus {
+  border-color: rgba(125, 202, 255, 0.56);
+}
+
+.soa-timeline-quick-editor__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(58px, 1fr));
+  align-content: center;
+  gap: 5px;
+}
+
+.soa-timeline-quick-editor__actions button {
+  min-height: 30px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 9px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.soa-timeline-quick-editor__actions button.is-primary {
+  color: #171714;
+  background: #d8ff72;
+}
+
+.soa-timeline-quick-editor__actions button.is-danger {
+  color: #ff9a90;
+}
+
+.soa-timeline-quick-editor__actions button:disabled {
+  opacity: 0.26;
+}
+
+.soa-timeline-quick-editor__actions.is-pause {
+  grid-column: 2 / -1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.soa-dubbing-block__script-preview {
+  display: -webkit-box;
+  min-height: 45px;
+  overflow: hidden;
+  margin: 10px 0 0;
+  border-radius: 9px;
+  padding: 8px 9px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(0, 0, 0, 0.16);
+  font-size: 10px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+@media (min-width: 1024px) {
+  .soa-dubbing-block {
+    min-height: 128px;
+  }
+
+  .soa-capcut-track-row,
+  .soa-capcut-track-canvas {
+    min-height: 148px;
+  }
+
+  .soa-dubbing-main {
+    padding-bottom: 64px;
+  }
+}
+
+@media (max-width: 760px) {
+  .soa-dubbing-player-dock__inner {
+    padding: 6px 8px max(6px, env(safe-area-inset-bottom));
+  }
+
+  .soa-dubbing-player-compact {
+    grid-template-columns: 40px minmax(0, 1fr) 76px;
+    gap: 6px;
+  }
+
+  .soa-dubbing-player-toggle {
+    width: 38px;
+    height: 38px;
+  }
+
+  .soa-dubbing-player-compact .soa-dubbing-player-time {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .soa-dubbing-player-compact .soa-dubbing-player-time span,
+  .soa-dubbing-player-compact .soa-dubbing-player-time time:last-child {
+    display: none;
+  }
+
+  .soa-dubbing-player-compact .soa-dubbing-player-time time:first-child {
+    text-align: right;
+  }
+
+  .soa-dubbing-player-compact .soa-dubbing-player-secondary {
+    display: none;
+  }
+
+  .soa-timeline-quick-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .soa-timeline-quick-editor__meta {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .soa-timeline-quick-editor > textarea {
+    min-height: 96px;
+    font-size: 16px;
+  }
+
+  .soa-timeline-quick-editor__actions {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .soa-timeline-quick-editor__actions button {
+    min-height: 40px;
+    padding: 0 5px;
+  }
+
+  .soa-timeline-quick-editor__actions.is-pause {
+    grid-column: auto;
+  }
+
+  .soa-dubbing-add-block {
+    bottom: 92px;
+  }
+}
+
+@media (min-width: 980px) {
+  .soa-dubbing-player-dock__inner {
+    display: block;
+  }
+
+  .soa-dubbing-player-compact .soa-dubbing-player-progress {
+    grid-column: auto;
+  }
+}

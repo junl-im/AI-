@@ -445,6 +445,15 @@ jobs:
         with:
           version: '0.11.32'
           enable-cache: true
+      - name: Restore previous runtime soak baseline
+        uses: actions/cache/restore@v5
+        with:
+          path: .sorion/soak-history
+          key: >-
+            sorion-runtime-soak-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            sorion-runtime-soak-${{ runner.os }}-${{ github.ref_name }}-
+            sorion-runtime-soak-${{ runner.os }}-
       - name: Install locked API and Worker environments
         run: |
           cd services/api && uv sync --locked --dev --python 3.10
@@ -480,7 +489,21 @@ jobs:
           done
           echo 'Runtime services did not become healthy.' >&2
           exit 1
+      - name: Schedule Worker restart recovery drill
+        working-directory: services/api
+        shell: bash
+        run: |
+          uv run --locked python scripts/run_worker_recovery_drill.py \
+            --pid-file ../../.sorion/soak/worker.pid \
+            --worker-directory ../worker \
+            --delay-seconds 20 \
+            --timeout-seconds 45 \
+            --output ../../.sorion/soak/recovery-events.json \
+            --log ../../.sorion/soak/worker-recovery.log \
+            > ../../.sorion/soak/recovery-drill.log 2>&1 &
+          echo $! > ../../.sorion/soak/recovery-drill.pid
       - name: Run API and Worker soak
+        id: runtime-soak
         working-directory: services/api
         run: |
           uv run --locked python scripts/run_runtime_soak.py \
@@ -488,7 +511,20 @@ jobs:
             --interval-seconds 10 \
             --api-url http://127.0.0.1:8000 \
             --worker-url http://127.0.0.1:8765 \
+            --baseline-report ../../.sorion/soak-history/latest.json \
+            --recovery-events ../../.sorion/soak/recovery-events.json \
+            --history-output ../../.sorion/soak-history/latest.json \
             --output ../../.sorion/soak/runtime-soak.json
+      - name: Wait for recovery drill evidence
+        if: always()
+        shell: bash
+        run: |
+          for attempt in $(seq 1 60); do
+            [[ -f .sorion/soak/recovery-events.json ]] && exit 0
+            sleep 1
+          done
+          echo 'Worker recovery drill evidence was not created.' >&2
+          exit 1
       - name: Stop runtime services
         if: always()
         shell: bash
@@ -498,6 +534,13 @@ jobs:
               kill "$(cat "$file")" 2>/dev/null || true
             fi
           done
+      - name: Save runtime soak baseline
+        if: steps.runtime-soak.outcome == 'success' && hashFiles('.sorion/soak-history/latest.json') != ''
+        uses: actions/cache/save@v5
+        with:
+          path: .sorion/soak-history
+          key: >-
+            sorion-runtime-soak-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
       - name: Upload runtime soak evidence
         if: always()
         uses: actions/upload-artifact@v6

@@ -70,7 +70,7 @@ requireTokens('src/hooks/useDesktopStudioLayout.ts', layoutHook, [
   "sorion.desktop-studio-layout.v2",
   'leftWidth: 224',
   'rightWidth: 286',
-  'window.innerWidth < 1024',
+  'window.innerWidth < DESKTOP_STUDIO_BREAKPOINT',
 ])
 
 const desktopCss = await source('src/styles/desktop-studio.css')

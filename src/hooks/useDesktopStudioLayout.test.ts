@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeDesktopStudioLayout } from './useDesktopStudioLayout'
+import {
+  calculateDesktopStudioViewport,
+  normalizeDesktopStudioLayout,
+} from './useDesktopStudioLayout'
 
 describe('desktop studio layout', () => {
   it('starts PC workspaces with all three panes expanded', () => {
@@ -22,6 +25,30 @@ describe('desktop studio layout', () => {
     expect(normalizeDesktopStudioLayout({ leftCollapsed: true, rightCollapsed: true })).toMatchObject({
       leftCollapsed: true,
       rightCollapsed: true,
+    })
+  })
+
+  it.each([
+    [1024, 502],
+    [1280, 758],
+    [1440, 918],
+  ])('keeps a usable three-pane center at %ipx', (viewportWidth, centerWidth) => {
+    expect(calculateDesktopStudioViewport(viewportWidth)).toMatchObject({
+      viewportWidth,
+      threePane: true,
+      leftWidth: 224,
+      centerWidth,
+      rightWidth: 286,
+    })
+  })
+
+  it('uses the full width below the desktop breakpoint', () => {
+    expect(calculateDesktopStudioViewport(960)).toEqual({
+      viewportWidth: 960,
+      threePane: false,
+      leftWidth: 0,
+      centerWidth: 960,
+      rightWidth: 0,
     })
   })
 })

@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## 0.10.5 · Compact Dock & Practical Clip Editor
+
+- 일반 Dock의 핵심 순서를 `재생/일시정지 → 진행바 → 시간/제목 → 보조 제어`로 고정하고 PC에서 한 줄의 얕은 transport로 압축합니다.
+- 만들기 화면 전용 Dock도 재생 버튼 바로 옆에 긴 진행바를 배치하고 장식 파형을 제거해 세로 점유를 줄입니다.
+- 타임라인 카드 내부의 반복 textarea를 제거하고 선택 클립 전용 빠른 편집 패널에서 수정·저장·미리듣기·재생성·분할·삭제를 처리합니다.
+- Enter는 선택 클립 빠른 편집기에 포커스를 이동하고 `Ctrl/Cmd+Enter`는 저장 후 재생성을 실행합니다.
+- Dock 순서와 빠른 편집 진입을 고정하는 Vitest 회귀 테스트와 dependency-free Studio UX 계약 검사를 강화합니다.
+- 0.10.4의 프리셋 호환 `SOA-4022`, Browser Speech 연속 폴백, System TTS eSpeak 보조 경로와 반대 성별 강제 대체 금지는 유지합니다.
+- 앱·API·Worker 제품 버전을 0.10.5로 동기화합니다.
+
+## 0.10.4 · Voice Preset Engine Reliability Hotfix
+
+- 서버 엔진들이 특정 프리셋만 표현하지 못한 경우를 `SOA-4022`로 구분하고, `auto` 생성은 호환 Browser Speech까지 계속 시도합니다.
+- System TTS가 가능한 로컬 백엔드를 복수로 유지해 Windows/macOS 기본 음성이 프리셋과 맞지 않거나 실행 실패하면 설치된 eSpeak 한국어 백엔드로 재시도합니다.
+- System Engine Doctor 진단에 보조 백엔드 선택 근거를 표시하고 eSpeak가 있으면 pitch 지원 가능성도 엔진 capability에 반영합니다.
+- MeloTTS의 `YoungHo` 계열 남성 화자 이름 판정을 Browser/System과 동일하게 맞췄습니다.
+- 전용 CosyVoice WAV가 없는데 다른 인물 음색으로 가장하는 폴백은 추가하지 않았으며, 호환 로컬 음성이 전혀 없으면 지원 불가를 유지합니다.
+- 프리셋 호환 API·System 이중화·Melo 판정 회귀 테스트와 repository preset 계약 검사를 강화했습니다.
+- 앱·API·Worker 제품 버전을 0.10.4로 동기화합니다.
+
+## 0.10.3 · Compact playback dock & direct timeline editing
+
+- PC 일반 Dock과 만들기 전용 Dock을 얕은 2단 구조로 줄여 작업 화면의 세로 공간을 돌려줍니다.
+- 준호·민준은 같은 성별 한국어 음성이 1개뿐인 기기에서도 프리셋별 속도·높낮이 차이로 안전하게 재사용하며 반대 성별은 차단합니다.
+- 프리셋 미리듣기 버튼이 준비 취소·재생·일시정지·계속 재생 상태를 즉시 표시합니다.
+- 타임라인에 실제 플레이어 위치를 연결하고 트랙 클릭 seek, 확대·축소, 자동 선택·스크롤과 단축키 편집을 추가합니다.
+- 클립에 재생·편집·분할·삭제 직접 도구와 선택·재생 강조를 적용합니다.
+- 앱·API·Worker 제품 버전을 0.10.3으로 동기화합니다.
+
+## 0.10.2 · Recovery soak & managed lock interface
+
+- 장시간 API·Worker 검사에서 이전 실행의 응답 P95, 성공률, 복구 시간, 메모리와 열린 연결 증가를 비교합니다.
+- 수동·주간 soak 중 Worker를 실제 재시작하고 45초 안의 자동 복구 여부를 증거 JSON으로 기록합니다.
+- 이전 soak 보고서를 GitHub Actions cache에 보존하고 현재 결과를 다음 실행 기준으로 교체합니다.
+- 승인 writer 잠금을 `WriterLeaseCoordinator` Protocol과 backend factory 뒤로 분리하며 기본 SQLite fencing 계약을 유지합니다.
+- 1024·1280·1440px PC 3분할의 좌·중앙·우 폭을 계산 함수와 회귀 테스트로 고정합니다.
+- 앱·API·Worker 제품 버전을 0.10.2로 동기화합니다.
+
 ## 0.10.1 · Approval modularization & operator baselines
 
 - 923줄 승인 서비스를 orchestration, canonical hash·diff, 원자 저장·history, 갱신 대기열 모듈로 분리합니다.

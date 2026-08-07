@@ -8,6 +8,8 @@ import pytest
 
 from app.services.writer_lease import (
     SQLiteWriterLeaseCoordinator,
+    WriterLeaseCoordinator,
+    create_writer_lease_coordinator,
     WriterLeaseLostError,
     WriterLeaseTimeoutError,
 )
@@ -63,3 +65,21 @@ def test_expired_writer_cannot_commit_after_fencing_token_changes(tmp_path) -> N
             with pytest.raises(WriterLeaseLostError):
                 coordinator.assert_current(first)
             coordinator.assert_current(second)
+
+def test_writer_lease_factory_exposes_backend_contract(tmp_path) -> None:
+    coordinator = create_writer_lease_coordinator(
+        "sqlite",
+        sqlite_path=tmp_path / "writer.sqlite3",
+        lease_seconds=5.0,
+    )
+    assert isinstance(coordinator, WriterLeaseCoordinator)
+    assert coordinator.backend_name == "sqlite"
+
+
+def test_writer_lease_factory_rejects_unknown_backend(tmp_path) -> None:
+    with pytest.raises(ValueError, match="지원하지 않는 writer lease backend"):
+        create_writer_lease_coordinator(
+            "managed-db",
+            sqlite_path=tmp_path / "writer.sqlite3",
+        )
+

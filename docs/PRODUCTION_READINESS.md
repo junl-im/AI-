@@ -1,3 +1,4 @@
+- [x] runtime soak가 이전 실행 비교와 Worker 실제 재시작 복구 시간을 기록합니다.
 # Korean TTS Production Readiness
 
 현재 기준 버전: `0.9.7`

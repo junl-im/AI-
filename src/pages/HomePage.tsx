@@ -110,7 +110,11 @@ export function HomePage() {
   const clearActiveProject = useAppStore((state) => state.clearActiveProject)
   const startNewWorkspace = useAppStore((state) => state.startNewWorkspace)
   const enqueueAndPlay = usePlayerStore((state) => state.enqueueAndPlay)
+  const toggleTrack = usePlayerStore((state) => state.toggleTrack)
   const clearQueue = usePlayerStore((state) => state.clearQueue)
+  const playerQueue = usePlayerStore((state) => state.queue)
+  const playbackTrackId = usePlayerStore((state) => state.playbackTrackId)
+  const playbackActive = usePlayerStore((state) => state.playbackActive)
   const currentTrack = usePlayerStore(getCurrentTrack)
   const desktopLayout = useDesktopStudioLayout()
   const [projectTitle, setProjectTitle] = useState('새 프로젝트')
@@ -122,6 +126,7 @@ export function HomePage() {
   const [composerDraft, setComposerDraft] = useState('')
   const [directiveIds, setDirectiveIds] = useState<ComposerDirective['id'][]>(['numbers'])
   const [previewingId, setPreviewingId] = useState<string | null>(null)
+  const [activePreview, setActivePreview] = useState<{ voiceId: string; trackId: string } | null>(null)
   const [pendingPreview, setPendingPreview] = useState<{
     voiceId: string
     attempt: number
@@ -141,6 +146,15 @@ export function HomePage() {
   const restoreSession = timeline.restoreSession
   const clearTimeline = timeline.clear
   const selectedVoice = useMemo(() => getVoicePreset(voiceId), [voiceId])
+  const activePreviewExists = Boolean(
+    activePreview && playerQueue.some((track) => track.id === activePreview.trackId),
+  )
+  const activePreviewId = activePreviewExists ? activePreview?.voiceId ?? null : null
+  const previewPlaying = Boolean(
+    activePreviewExists
+    && activePreview?.trackId === playbackTrackId
+    && playbackActive,
+  )
   const activity = useMemo(() => (
     [...messages].reverse().find((message) => message.role !== 'user') ?? initialMessages[0]
   ), [messages])
@@ -430,7 +444,8 @@ export function HomePage() {
       if (previewRunIdRef.current !== runId) return
       const audio = generatedPreview(result, request, voice.name)
       setPendingPreview(null)
-      enqueueAndPlay(audio, `${voice.name} 프리뷰`)
+      const previewTrackId = enqueueAndPlay(audio, `${voice.name} 프리뷰`)
+      setActivePreview({ voiceId: voice.id, trackId: previewTrackId })
       appendMessage({
         role: 'assistant',
         badge: audio.source === 'browser-speech'
@@ -467,6 +482,29 @@ export function HomePage() {
     speechPitch,
     speechSpeed,
   ])
+
+  function handlePreview(nextVoiceId: string) {
+    if (previewingId === nextVoiceId) {
+      previewRunIdRef.current += 1
+      setPendingPreview(null)
+      setPreviewingId(null)
+      return
+    }
+    if (
+      activePreview?.voiceId === nextVoiceId
+      && playerQueue.some((track) => track.id === activePreview.trackId)
+    ) {
+      toggleTrack(activePreview.trackId)
+      return
+    }
+    void previewVoice(nextVoiceId)
+  }
+
+  useEffect(() => {
+    if (!activePreview) return
+    if (playerQueue.some((track) => track.id === activePreview.trackId)) return
+    setActivePreview(null)
+  }, [activePreview, playerQueue])
 
   useEffect(() => {
     if (!pendingPreview) return
@@ -549,13 +587,15 @@ export function HomePage() {
               <DubbingVoiceControls
                 voiceId={voiceId}
                 previewingId={previewingId}
+                activePreviewId={activePreviewId}
+                previewPlaying={previewPlaying}
                 speed={speechSpeed}
                 pitch={speechPitch}
                 emotion={speechEmotion}
                 normalizeText={normalizeText}
                 engine={engineCatalog.selected}
                 onVoiceChange={selectVoice}
-                onPreview={(id) => void previewVoice(id)}
+                onPreview={handlePreview}
                 onSpeedChange={setSpeechSpeed}
                 onPitchChange={setSpeechPitch}
                 onEmotionChange={setSpeechEmotion}
@@ -609,12 +649,14 @@ export function HomePage() {
         <DesktopVoiceDrawer
           voiceId={voiceId}
           previewingId={previewingId}
+          activePreviewId={activePreviewId}
+          previewPlaying={previewPlaying}
           speed={speechSpeed}
           pitch={speechPitch}
           emotion={speechEmotion}
           normalizeText={normalizeText}
           onVoiceChange={selectVoice}
-          onPreview={(id) => void previewVoice(id)}
+          onPreview={handlePreview}
           onSpeedChange={setSpeechSpeed}
           onPitchChange={setSpeechPitch}
           onEmotionChange={setSpeechEmotion}

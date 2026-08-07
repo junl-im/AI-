@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { useModalDialog } from '../../hooks/useModalDialog'
+import { VoicePreviewButton } from '../voice/VoicePreviewButton'
 import {
   filterVoicePresets,
   voiceGenderLabels,
@@ -12,6 +13,8 @@ interface VoicePickerSheetProps {
   open: boolean
   selectedId: string
   previewingId: string | null
+  activePreviewId: string | null
+  previewPlaying: boolean
   onClose: () => void
   onSelect: (voiceId: string) => void
   onPreview: (voiceId: string) => void
@@ -31,6 +34,8 @@ export function VoicePickerSheet({
   open,
   selectedId,
   previewingId,
+  activePreviewId,
+  previewPlaying,
   onClose,
   onSelect,
   onPreview,
@@ -132,19 +137,18 @@ export function VoicePickerSheet({
                     <small>{voice.description}</small>
                   </span>
                 </button>
-                <button
-                  type="button"
+                <VoicePreviewButton
                   className="soa-voice-sheet-preview"
-                  disabled={previewingId !== null}
-                  aria-busy={previewingId === voice.id}
-                  onClick={() => {
-                    onSelect(voice.id)
-                    onPreview(voice.id)
+                  voiceId={voice.id}
+                  voiceName={voice.name}
+                  previewingId={previewingId}
+                  activePreviewId={activePreviewId}
+                  previewPlaying={previewPlaying}
+                  onPreview={(voiceId) => {
+                    onSelect(voiceId)
+                    onPreview(voiceId)
                   }}
-                  aria-label={`${voice.name} 목소리 미리듣기`}
-                >
-                  {previewingId === voice.id ? '…' : '▶'}
-                </button>
+                />
                 <span className="soa-voice-sheet-check" aria-hidden="true">{selected ? '✓' : ''}</span>
               </div>
             )

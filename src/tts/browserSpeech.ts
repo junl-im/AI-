@@ -25,7 +25,7 @@ export interface BrowserVoiceSelectionDiagnostic {
   selectedVoiceName: string | null
   selectedVoiceUri: string | null
   inferredGender: VoiceGender | 'unknown' | null
-  selectionBasis: 'preferred-token' | 'variant-index' | 'none'
+  selectionBasis: 'preferred-token' | 'variant-index' | 'compatible-cycle' | 'none'
   koreanCandidateCount: number
   compatibleCandidateCount: number
   reason: string
@@ -172,27 +172,13 @@ function selectBrowserSpeechVoiceWithEvidence(
     const identity = voiceIdentity(voice)
     return preset.preferredVoiceTokens.some((token) => identityIncludesToken(identity, token))
   })
-  const selected = preferred ?? compatible[preset.voiceVariantIndex] ?? null
-  if (!selected) {
-    return {
-      voice: null,
-      diagnostic: {
-        voiceId: preset.id,
-        presetName: preset.name,
-        expectedGender: preset.gender,
-        status: 'missing',
-        selectedVoiceName: null,
-        selectedVoiceUri: null,
-        inferredGender: null,
-        selectionBasis: 'none',
-        koreanCandidateCount: korean.length,
-        compatibleCandidateCount: compatible.length,
-        reason: `호환 후보가 ${compatible.length}개뿐이라 프리셋 순번 ${preset.voiceVariantIndex + 1}을 배정할 수 없습니다. 같은 음성을 중복 사용하지 않습니다.`,
-      },
-    }
-  }
-
-  const selectionBasis = preferred ? 'preferred-token' : 'variant-index'
+  const exactVariant = compatible[preset.voiceVariantIndex] ?? null
+  const selected = preferred ?? exactVariant ?? compatible[preset.voiceVariantIndex % compatible.length]
+  const selectionBasis = preferred
+    ? 'preferred-token'
+    : exactVariant
+      ? 'variant-index'
+      : 'compatible-cycle'
   return {
     voice: selected,
     diagnostic: {
@@ -208,7 +194,9 @@ function selectBrowserSpeechVoiceWithEvidence(
       compatibleCandidateCount: compatible.length,
       reason: selectionBasis === 'preferred-token'
         ? '프리셋 선호 토큰과 성별이 일치하는 음성을 선택했습니다.'
-        : `성별 호환 후보 중 프리셋 전용 순번 ${preset.voiceVariantIndex + 1}을 선택했습니다.`,
+        : selectionBasis === 'variant-index'
+          ? `성별 호환 후보 중 프리셋 전용 순번 ${preset.voiceVariantIndex + 1}을 선택했습니다.`
+          : '설치된 같은 성별 한국어 음성이 제한적이어서 해당 음성을 프리셋 속도·높낮이 설정과 함께 재사용합니다.',
     },
   }
 }

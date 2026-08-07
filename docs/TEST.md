@@ -1,3 +1,15 @@
+# SoriON AI 0.10.3 Compact Playback & Timeline UX 검증
+
+- Repository preflight 36/36 통과
+- API pytest 194개 통과
+- Worker pytest 14개 통과
+- TS/TSX parse 192개 통과
+- Python compileall 통과
+- 같은 성별 시스템 음성 순환과 반대 성별 차단 계약 통과
+- 프리셋 버튼 idle·loading·playing·paused 계약 통과
+- PC 일반·만들기 Dock compact CSS와 타임라인 seek·단축키 계약 통과
+- 전체 Web ESLint·Vitest·semantic typecheck·Vite build는 GitHub Actions 최종 판정
+
 # Heartbeat 6.8.3.1 Web 품질 테스트 호환성 핫픽스 검증
 
 - jsdom처럼 `File.text()`가 없는 환경에서 `FileReader` fallback으로 Evidence JSON 객체 읽기

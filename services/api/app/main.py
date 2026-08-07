@@ -28,7 +28,7 @@ from app.services.segment_audio import SegmentAudioSigner
 from app.services.sqlite_job_store import SQLiteJobStore
 from app.services.tts_pipeline import TtsPipeline
 from app.services.voice_preset_approval import VoicePresetApprovalService
-from app.services.writer_lease import SQLiteWriterLeaseCoordinator
+from app.services.writer_lease import create_writer_lease_coordinator
 from app.storage.audio_store import AudioStore
 from app.storage.voice_clone_store import VoiceCloneStore
 from app.version import APP_VERSION
@@ -87,9 +87,10 @@ async def lifespan(app: FastAPI):
     )
     app.state.export_soak_store = QualityEvidenceStore(settings.export_soak_file)
     app.state.evidence_intake_store = EvidenceIntakeStore(settings.evidence_intake_file)
-    app.state.voice_review_writer_lease = SQLiteWriterLeaseCoordinator(
-        settings.voice_review_writer_lease_file,
-        settings.voice_review_writer_lease_seconds,
+    app.state.voice_review_writer_lease = create_writer_lease_coordinator(
+        settings.voice_review_writer_lease_backend,
+        sqlite_path=settings.voice_review_writer_lease_file,
+        lease_seconds=settings.voice_review_writer_lease_seconds,
     )
     app.state.voice_preset_approval_service = VoicePresetApprovalService(
         settings.cosyvoice_preset_path,

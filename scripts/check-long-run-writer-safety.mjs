@@ -23,7 +23,7 @@ await requireMarkers('services/api/app/services/voice_preset_approval.py', [
   '승인 writer 권한이 만료되어',
 ])
 await requireMarkers('services/api/app/services/runtime_soak.py', [
-  'runtime-soak/1',
+  'runtime-soak/2',
   'p95_recovery_seconds',
   'memory_growth_mb',
   'open_file_descriptors_growth',

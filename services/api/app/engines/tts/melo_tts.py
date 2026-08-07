@@ -128,7 +128,7 @@ class MeloTtsEngine(TtsEngine):
         )
         male_tokens = (
             "male", "man", "boy", "남성", "남자",
-            "injoon", "hyunsu", "minsu", "bongjin", "yong",
+            "injoon", "hyunsu", "minsu", "bongjin", "yong", "youngho",
         )
         female = any(cls._identity_has_token(identity, token) for token in female_tokens)
         male = any(cls._identity_has_token(identity, token) for token in male_tokens)
@@ -169,19 +169,22 @@ class MeloTtsEngine(TtsEngine):
                 for name, speaker_id in speaker_ids.items()
                 if cls._speaker_gender(str(name)) == preset.gender
             ]
-            if len(compatible) <= preset.variant_index:
+            if not compatible:
                 label = "남성" if preset.gender == "male" else "여성"
                 raise VoicePresetUnavailableError(
-                    f"MeloTTS 모델에 {preset.display_name} 프리셋용 "
-                    f"{label} 화자가 충분하지 않습니다. "
-                    "같은 화자나 반대 성별 화자로 자동 대체하지 않습니다."
+                    f"MeloTTS 모델에 {preset.display_name} 프리셋용 {label} 화자가 없습니다. "
+                    "반대 성별 화자로 자동 대체하지 않습니다."
                 )
-            name, speaker_id = compatible[preset.variant_index]
+            name, speaker_id = compatible[preset.variant_index % len(compatible)]
             return {
                 "speaker_id": speaker_id,
                 "speaker_name": str(name),
                 "speaker_gender": preset.gender,
-                "selection_basis": f"gender-slot-{preset.variant_index + 1}",
+                "selection_basis": (
+                    f"gender-slot-{preset.variant_index + 1}"
+                    if len(compatible) > preset.variant_index
+                    else "same-gender-cycle"
+                ),
             }
 
         neutral = [
@@ -189,17 +192,21 @@ class MeloTtsEngine(TtsEngine):
             for name, speaker_id in speaker_ids.items()
             if cls._speaker_gender(str(name)) == "unknown"
         ]
-        if len(neutral) <= preset.variant_index:
+        if not neutral:
             raise VoicePresetUnavailableError(
                 f"MeloTTS 모델에 {preset.display_name} 프리셋용 중성 화자가 없습니다. "
                 "성별이 알려진 다른 화자로 자동 대체하지 않습니다."
             )
-        name, speaker_id = neutral[preset.variant_index]
+        name, speaker_id = neutral[preset.variant_index % len(neutral)]
         return {
             "speaker_id": speaker_id,
             "speaker_name": str(name),
             "speaker_gender": "unknown",
-            "selection_basis": f"neutral-slot-{preset.variant_index + 1}",
+            "selection_basis": (
+                f"neutral-slot-{preset.variant_index + 1}"
+                if len(neutral) > preset.variant_index
+                else "neutral-cycle"
+            ),
         }
 
     @classmethod

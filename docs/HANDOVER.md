@@ -1,14 +1,69 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.10.1 · Approval Modularization & Operator Baselines**
+현재 기준 버전: **0.10.5 · Compact Dock & Practical Clip Editor**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-06 KST**
+최종 갱신: **2026-08-07 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 0.10.5 Compact Dock & Practical Clip Editor
+
+1. **작업 일시(KST)**: 2026-08-07 10:44 이후.
+2. **대상·기준 버전**: 0.10.5 / 0.10.4 Voice Preset Engine Reliability Hotfix.
+3. **변경 내용**: 일반 Dock과 만들기 전용 Dock에서 재생/일시정지 버튼을 맨 앞에 두고 진행바를 바로 옆에 배치해 PC transport를 한 줄로 압축했습니다. 타임라인 카드 내부 textarea 대신 선택 클립 빠른 편집기를 추가해 수정·저장·미리듣기·재생성·분할·삭제를 한곳에 모았습니다.
+4. **변경 이유**: 재생 도구가 파형·제목·보조 버튼 때문에 위아래로 커지고, 카드마다 작은 편집창을 두는 방식이 긴 대본에서 실제 수정 동선을 느리게 만들었기 때문입니다.
+5. **영향 범위**: Linked Player Dock, 만들기 전용 player dock, TimelineEditor, 두 Dock CSS, Studio playback/timeline UX 계약·회귀 테스트, 버전·릴리스 문서입니다. 음성 엔진 합성 정책은 변경하지 않습니다.
+6. **주요 파일**: `src/components/navigation/LinkedPlayerDock.tsx`, `src/components/workspace/TimelineEditor.tsx`, `src/styles/player-dock.css`, `src/styles/dubbing-overlays.css`, 관련 테스트, `scripts/check-studio-playback-timeline-ux.mjs`, `docs/STUDIO_PLAYBACK_TIMELINE_UX.md`.
+7. **검증 결과**: `check-version-sync` v0.10.5, playback control flow, Studio playback/timeline UX 계약, Repository preflight 36/36, TS/TSX 191개 dependency-free transpile, API 198/198, Worker 14/14, API·Worker `compileall`을 통과했습니다. npm 의존성 설치는 현재 전달 환경의 내부 registry에서 `zustand@5.0.8`을 찾지 못해 404로 중단되어 Web ESLint·Vitest·semantic typecheck·Vite build는 미실행이며 GitHub Actions Web quality가 최종 판정합니다.
+8. **알려진 제한**: 브라우저 렌더링 스크린샷 기반 1024·1280·1440px 시각 비교는 이번 환경에서 실행하지 못했습니다. 모바일 일반 Dock은 좁은 폭에서 보조 제어가 별도 행을 사용할 수 있으나 만들기 Dock은 보조 제어를 숨겨 핵심 transport 한 줄을 유지합니다.
+9. **산출물**: `SoriON-AI-0.10.5-compact-dock-practical-editor-full.zip`, `SoriON-AI-0.10.4-to-0.10.5-compact-dock-practical-editor-patch.zip`.
+10. **다음 업데이트**: 0.10.6 Baseline History & Recovery Dashboard. 원래 0.10.5에 예정했던 운영 대시보드 작업은 사용자 편집 UX 우선순위에 따라 한 차수 이동합니다.
+
+
+## 0.10.4 Voice Preset Engine Reliability Hotfix
+
+1. **작업 일시(KST)**: 2026-08-07 10:07 이후.
+2. **대상·기준 버전**: 0.10.4 / 0.10.3 Compact Playback Dock & Direct Timeline Editing.
+3. **변경 내용**: 서버 엔진의 프리셋 호환 부족을 `SOA-4022`로 분리하고 Web `auto` 생성이 호환 Browser Speech까지 이어서 시도합니다. System TTS는 Windows/macOS 기본 백엔드와 설치된 eSpeak 한국어 백엔드를 함께 유지해 프리셋 거부·실행 실패 때 보조 로컬 백엔드로 재시도합니다. Melo의 `YoungHo` 남성 화자 판정 누락도 보완했습니다.
+4. **변경 이유**: 엔진 자체는 준비됐지만 일부 성별/variant 프리셋만 표현하지 못할 때 422에서 생성 흐름이 끝나거나, 같은 PC에 eSpeak가 있어도 이미 선택된 OS 백엔드 때문에 사용하지 못하는 경로가 있었기 때문입니다.
+5. **영향 범위**: TTS API 오류 계약, Web auto fallback, System TTS 백엔드 탐지·합성·진단, Melo 화자 판정, 프리셋 회귀 테스트와 문서입니다.
+6. **주요 파일**: `src/tts/voiceApi.ts`, `services/api/app/api/routes/tts.py`, `services/api/app/engines/tts/system_tts.py`, `services/api/app/engines/tts/melo_tts.py`, 관련 테스트와 `scripts/check-voice-preset-contracts.mjs`.
+7. **검증 결과**: `check-version-sync` v0.10.4, voice preset 계약, repository preflight 36/36, API 198/198, Worker 14/14, API·Worker `compileall`을 통과했습니다. 현재 전달 환경에는 `node_modules`가 없어 Web ESLint·Vitest·semantic typecheck·Vite build는 미실행이며 GitHub Actions Web quality가 최종 판정합니다. API 테스트에는 FastAPI 422 상수 deprecation 경고 1건만 남습니다.
+8. **알려진 제한**: 전달 ZIP에는 실제 5개 CosyVoice WAV·동의 자료·모델 가중치가 없습니다. eSpeak 또는 성별 호환 OS/Browser 한국어 음성이 기기에 없으면 근사 폴백도 사용할 수 없습니다. 성별 미확정 단일 Melo 화자를 남성/여성으로 강제 배정하지 않습니다.
+9. **산출물**: `SoriON-AI-0.10.4-voice-preset-engine-reliability-full.zip`, `SoriON-AI-0.10.3-to-0.10.4-voice-preset-engine-reliability-patch.zip`.
+10. **다음 업데이트**: 0.10.5 Baseline History & Recovery Dashboard.
+
+
+## 0.10.3 Compact Playback Dock & Direct Timeline Editing
+
+1. **작업 일시(KST)**: 2026-08-06 22:54 이후.
+2. **대상·기준 버전**: 0.10.3 / 0.10.2 Recovery Soak & Managed Lock Interface.
+3. **PC Dock**: 일반 Dock과 만들기 전용 Dock을 PC에서 얕은 구조로 재배치해 세로 점유를 줄입니다. 모바일 터치 구조는 유지합니다.
+4. **준호·민준**: 같은 성별 한국어 음성이 제한된 Browser·Windows·macOS·Melo 환경에서 순환 사용하되 반대 성별은 차단합니다. 전용 CosyVoice WAV 증거 계약은 변경하지 않습니다.
+5. **프리셋 버튼**: 준비 취소·일시정지·계속 재생을 현재 단일 플레이어 상태와 동기화합니다.
+6. **타임라인**: player snapshot, 클릭 seek, 플레이헤드 시간, zoom, 자동 스크롤, Space·Enter·Delete·Alt+방향키와 직접 편집·분할·삭제 도구를 추가합니다.
+7. **검증 결과**: preflight 36/36, API 194개, Worker 14개, TS/TSX 192개 구문과 Python compileall을 통과했습니다. 전체 Web build는 GitHub Actions가 최종 판정합니다.
+8. **변경 범위**: 추가 6개·수정 52개, 총 58개이며 삭제는 없습니다.
+9. **산출물**: `SoriON-AI-0.10.3-compact-playback-timeline-full.zip`, `SoriON-AI-0.10.2-to-0.10.3-compact-playback-timeline-patch.zip`.
+10. **다음 업데이트**: 0.10.4 Baseline History & Recovery Dashboard.
+
+
+## 0.10.2 Recovery Soak & Managed Lock Interface
+
+1. **작업 일시(KST)**: 2026-08-06 18:39 이후.
+2. **대상·기준 버전**: 0.10.2 / 0.10.1 Approval Modularization & Operator Baselines.
+3. **변경 내용**: 장시간 API·Worker 결과를 이전 실행과 비교하고, 검사 중 Worker를 실제 재시작해 45초 이내 복구를 검증합니다. 승인 writer lease는 공통 Protocol과 backend factory 뒤로 분리했습니다.
+4. **계획 장애 처리**: 의도적 Worker 재시작 중의 실패 표본은 일반 성공률·중단 실패로 중복 계산하지 않고 recovery event 기준으로 판정합니다.
+5. **PC 레이아웃**: 1024·1280·1440px 기본 3분할 폭을 계산 함수와 회귀 테스트로 고정했습니다.
+6. **검증 결과**: preflight 35/35, API 194개, Worker 14개, TS/TSX 190개 구문, Python compileall과 격리된 최소 FastAPI Worker 재시작 실행기 smoke에서 2.02초 복구를 통과했습니다.
+7. **제한**: 실제 30·60분 soak와 전체 Web build는 GitHub Actions가 최종 판정합니다. 관리형 DB backend는 인터페이스만 준비됐고 현재 허용 backend는 sqlite입니다.
+8. **산출물**: `SoriON-AI-0.10.2-recovery-soak-managed-lock-full.zip`, `SoriON-AI-0.10.1-to-0.10.2-recovery-soak-managed-lock-patch.zip`.
+9. **다음 업데이트**: 0.10.3 Baseline History & Recovery Dashboard.
 
 
 ## 0.10.1 Approval Modularization & Operator Baselines

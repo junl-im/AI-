@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { VoiceEmotion } from '../../ai/contracts'
 import type { EngineInfo } from '../../ai/contracts'
+import { VoicePreviewButton } from '../voice/VoicePreviewButton'
 import { getVoicePreset } from '../../tts/voicePresets'
 import { VoicePickerSheet } from './VoicePickerSheet'
 import { VoiceSettingsSheet } from './VoiceSettingsSheet'
@@ -8,6 +9,8 @@ import { VoiceSettingsSheet } from './VoiceSettingsSheet'
 interface DubbingVoiceControlsProps {
   voiceId: string
   previewingId: string | null
+  activePreviewId: string | null
+  previewPlaying: boolean
   speed: number
   pitch: number
   emotion: VoiceEmotion
@@ -25,6 +28,8 @@ interface DubbingVoiceControlsProps {
 export function DubbingVoiceControls({
   voiceId,
   previewingId,
+  activePreviewId,
+  previewPlaying,
   speed,
   pitch,
   emotion,
@@ -66,20 +71,22 @@ export function DubbingVoiceControls({
         >
           ☷
         </button>
-        <button
-          type="button"
-          onClick={() => onPreview(voiceId)}
-          disabled={previewingId !== null}
-          aria-label={`${voice.name} 목소리 미리듣기`}
-        >
-          {previewingId === voiceId ? '…' : '▶'}
-        </button>
+        <VoicePreviewButton
+          voiceId={voiceId}
+          voiceName={voice.name}
+          previewingId={previewingId}
+          activePreviewId={activePreviewId}
+          previewPlaying={previewPlaying}
+          onPreview={onPreview}
+        />
       </section>
 
       <VoicePickerSheet
         open={pickerOpen}
         selectedId={voiceId}
         previewingId={previewingId}
+        activePreviewId={activePreviewId}
+        previewPlaying={previewPlaying}
         onClose={() => setPickerOpen(false)}
         onSelect={onVoiceChange}
         onPreview={onPreview}

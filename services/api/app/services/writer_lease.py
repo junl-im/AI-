@@ -7,6 +7,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Protocol, runtime_checkable
 from uuid import uuid4
 
 
@@ -26,7 +27,26 @@ class WriterLease:
     expires_at: float
 
 
+@runtime_checkable
+class WriterLeaseCoordinator(Protocol):
+    backend_name: str
+
+    def acquire(
+        self,
+        resource: str,
+        *,
+        timeout_seconds: float = 10.0,
+        poll_interval_seconds: float = 0.05,
+    ) -> Iterator[WriterLease]: ...
+
+    def assert_current(self, lease: WriterLease) -> None: ...
+
+    def status(self, resource: str) -> dict[str, object]: ...
+
+
 class SQLiteWriterLeaseCoordinator:
+    backend_name = "sqlite"
+
     def __init__(self, path: Path, lease_seconds: float = 30.0) -> None:
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -167,3 +187,18 @@ class SQLiteWriterLeaseCoordinator:
             "expires_at": float(row[2]),
             "updated_at": float(row[3]),
         }
+
+def create_writer_lease_coordinator(
+    backend: str,
+    *,
+    sqlite_path: Path,
+    lease_seconds: float = 30.0,
+) -> WriterLeaseCoordinator:
+    normalized = backend.strip().lower() or "sqlite"
+    if normalized == "sqlite":
+        return SQLiteWriterLeaseCoordinator(sqlite_path, lease_seconds)
+    raise ValueError(
+        "지원하지 않는 writer lease backend입니다: "
+        f"{backend!r}. 현재는 sqlite만 사용할 수 있습니다."
+    )
+

@@ -1,4 +1,5 @@
 import type { VoiceEmotion } from '../../ai/contracts'
+import { VoicePreviewButton } from '../voice/VoicePreviewButton'
 import { voicePresets } from '../../tts/voicePresets'
 import {
   formatPitch,
@@ -10,6 +11,8 @@ import {
 interface DesktopVoiceDrawerProps {
   voiceId: string
   previewingId: string | null
+  activePreviewId: string | null
+  previewPlaying: boolean
   speed: number
   pitch: number
   emotion: VoiceEmotion
@@ -28,6 +31,8 @@ interface DesktopVoiceDrawerProps {
 export function DesktopVoiceDrawer({
   voiceId,
   previewingId,
+  activePreviewId,
+  previewPlaying,
   speed,
   pitch,
   emotion,
@@ -83,16 +88,15 @@ export function DesktopVoiceDrawer({
                     <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
                     <span><strong>{voice.name}</strong><small>{voice.tags.join(' · ')}</small></span>
                   </button>
-                  <button
-                    type="button"
+                  <VoicePreviewButton
                     className="soa-voice-drawer__play"
-                    aria-label={`${voice.name} 목소리 적용 후 재생`}
-                    aria-busy={previewingId === voice.id}
-                    disabled={previewingId !== null}
-                    onClick={() => onPreview(voice.id)}
-                  >
-                    {previewingId === voice.id ? '…' : '▶'}
-                  </button>
+                    voiceId={voice.id}
+                    voiceName={voice.name}
+                    previewingId={previewingId}
+                    activePreviewId={activePreviewId}
+                    previewPlaying={previewPlaying}
+                    onPreview={onPreview}
+                  />
                 </article>
               )
             })}

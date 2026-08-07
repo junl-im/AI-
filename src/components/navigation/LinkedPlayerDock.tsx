@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -32,6 +33,10 @@ export function LinkedPlayerDock() {
   const playRequestId = usePlayerStore((state) => state.playRequestId)
   const repeatMode = usePlayerStore((state) => state.repeatMode)
   const playbackRate = usePlayerStore((state) => state.playbackRate)
+  const toggleRequestId = usePlayerStore((state) => state.toggleRequestId)
+  const seekRequestId = usePlayerStore((state) => state.seekRequestId)
+  const seekTrackId = usePlayerStore((state) => state.seekTrackId)
+  const seekTargetSeconds = usePlayerStore((state) => state.seekTargetSeconds)
   const selectAndPlay = usePlayerStore((state) => state.selectAndPlay)
   const replaceTrack = usePlayerStore((state) => state.replace)
   const remove = usePlayerStore((state) => state.remove)
@@ -40,6 +45,7 @@ export function LinkedPlayerDock() {
   const selectPrevious = usePlayerStore((state) => state.selectPrevious)
   const cycleRepeatMode = usePlayerStore((state) => state.cycleRepeatMode)
   const setPlaybackRate = usePlayerStore((state) => state.setPlaybackRate)
+  const setPlaybackSnapshot = usePlayerStore((state) => state.setPlaybackSnapshot)
   const updateTelemetry = usePlayerStore((state) => state.updateTelemetry)
   const recordSeamMetric = usePlayerStore((state) => state.recordSeamMetric)
   const updateResumePosition = usePlayerStore((state) => state.updateResumePosition)
@@ -59,6 +65,9 @@ export function LinkedPlayerDock() {
   const lastSeamKeyRef = useRef<string | null>(null)
   const lastSavedPositionRef = useRef(0)
   const handledPlayRequestRef = useRef(playRequestId)
+  const handledToggleRequestRef = useRef(toggleRequestId)
+  const handledSeekRequestRef = useRef(seekRequestId)
+  const toggleHandlerRef = useRef<() => Promise<void>>(async () => undefined)
   const rehydrationAttemptRef = useRef<string | null>(null)
   const playbackRateRef = useRef(playbackRate)
   const speechTimerRef = useRef<number | null>(null)
@@ -87,11 +96,6 @@ export function LinkedPlayerDock() {
   currentTimeRef.current = current
   playingRef.current = playing
   waitingForSegmentRef.current = waitingForSegment
-  const bars = useMemo(
-    () => [18, 34, 58, 28, 74, 42, 86, 38, 68, 30, 52, 22, 44, 70, 36, 56, 26, 48],
-    [],
-  )
-
 
   function recordPlaybackMetric(
     field: 'firstByteMs' | 'playingMs' | 'browserSpeechStartMs',
@@ -367,10 +371,15 @@ export function LinkedPlayerDock() {
     if (!track) setQueueOpen(false)
   }, [track])
 
+  useEffect(() => {
+    setPlaybackSnapshot(currentTrackId, current, playing)
+  }, [current, currentTrackId, playing, setPlaybackSnapshot])
+
   useEffect(() => () => {
     clearSpeechTimer()
     if (isBrowserSpeechSupported()) window.speechSynthesis.cancel()
-  }, [])
+    setPlaybackSnapshot(null, 0, false)
+  }, [setPlaybackSnapshot])
 
   async function recoverFinalAudio() {
     if (!track || !currentTrackId || track.audio.rehydration?.kind !== 'tts-final') {
@@ -437,6 +446,10 @@ export function LinkedPlayerDock() {
       return
     }
     setPlaybackError(null)
+    if (element.ended || (Number.isFinite(element.duration) && element.currentTime >= element.duration - 0.05)) {
+      element.currentTime = 0
+      setCurrent(0)
+    }
     setPlaying(true)
     try {
       await element.play()
@@ -445,6 +458,41 @@ export function LinkedPlayerDock() {
       setPlaybackError(error instanceof Error ? error.message : '음성을 재생하지 못했습니다.')
     }
   }
+
+  toggleHandlerRef.current = toggle
+
+  const applyRequestedSeek = useCallback(() => {
+    if (seekRequestId === handledSeekRequestRef.current) return
+    if (seekTrackId !== currentTrackId || browserPlayback || progressiveActive) return
+    const element = ref.current
+    if (!element || element.readyState < 1) return
+    const maximum = Number.isFinite(element.duration) ? Math.max(0, element.duration) : seekTargetSeconds
+    const next = Math.min(maximum, Math.max(0, seekTargetSeconds))
+    element.currentTime = next
+    currentTimeRef.current = next
+    lastSavedPositionRef.current = next
+    setCurrent(next)
+    if (currentTrackId) updateResumePosition(currentTrackId, next)
+    handledSeekRequestRef.current = seekRequestId
+  }, [
+    browserPlayback,
+    currentTrackId,
+    progressiveActive,
+    seekRequestId,
+    seekTargetSeconds,
+    seekTrackId,
+    updateResumePosition,
+  ])
+
+  useEffect(() => {
+    if (toggleRequestId === handledToggleRequestRef.current) return
+    handledToggleRequestRef.current = toggleRequestId
+    void toggleHandlerRef.current()
+  }, [toggleRequestId])
+
+  useEffect(() => {
+    applyRequestedSeek()
+  }, [applyRequestedSeek, playbackUrl])
 
   function move(direction: 'next' | 'previous') {
     resumeAfterTrackChange.current = playing
@@ -536,29 +584,10 @@ export function LinkedPlayerDock() {
     return (
       <aside className="soa-dubbing-player-dock" aria-label="더빙 재생 플레이어">
         <div className="soa-dubbing-player-dock__inner">
-          <button
-            type="button"
-            className="soa-dubbing-player-progress"
-            onClick={seek}
-            disabled={!track || Boolean(browserPlayback) || progressiveActive}
-            aria-label={seekBlockedLabel}
-          >
-            <i style={{ width: `${progress}%` }} />
-            <b style={{ left: `${progress}%` }} />
-          </button>
-          <div className="soa-dubbing-player-time">
-            <time>{formatTime(current)}</time>
-            <span>
-              {track?.title ?? '완성된 음성을 선택하세요'}
-              {playbackDetail ? <small>{playbackDetail}</small> : null}
-            </span>
-            <time>{formatTime(duration)}</time>
-          </div>
-          <div className="soa-dubbing-player-controls">
-            <button type="button" onClick={() => move('previous')} disabled={!track} aria-label="이전 음성">|◀</button>
+          <div className="soa-dubbing-player-compact">
             <button
               type="button"
-              className={`is-primary ${playing ? 'is-playing' : ''}`}
+              className={`soa-dubbing-player-toggle ${playing ? 'is-playing' : ''}`}
               onClick={() => void toggle()}
               disabled={!track || waitingForSegment}
               aria-label={waitingForSegment ? '다음 구간 대기' : playing ? '일시정지' : '재생'}
@@ -566,21 +595,41 @@ export function LinkedPlayerDock() {
             >
               {playing ? 'Ⅱ' : '▶'}
             </button>
-            <button type="button" onClick={() => move('next')} disabled={!track} aria-label="다음 음성">▶|</button>
-          </div>
-          <div className="soa-dubbing-player-secondary">
             <button
               type="button"
-              onClick={cycleRepeatMode}
-              className={repeatMode !== 'off' ? 'is-active' : ''}
+              className="soa-dubbing-player-progress"
+              onClick={seek}
+              disabled={!track || Boolean(browserPlayback) || progressiveActive}
+              aria-label={seekBlockedLabel}
             >
-              {repeatMode === 'one' ? '한 곡 반복' : '반복'}
+              <i style={{ width: `${progress}%` }} />
+              <b style={{ left: `${progress}%` }} />
             </button>
-            <button type="button" onClick={() => setQueueOpen((open) => !open)} disabled={!track}>
-              대기열 {queue.length}
-            </button>
-            {track?.audio.url && !track.audio.partial ? <a href={track.audio.url} download={track.audio.filename}>다운로드</a> : null}
-            {browserPlayback ? <span className="soa-browser-voice-label">브라우저 재생</span> : null}
+            <div className="soa-dubbing-player-time">
+              <time>{formatTime(current)}</time>
+              <span>
+                {track?.title ?? '완성된 음성을 선택하세요'}
+                {playbackDetail ? <small>{playbackDetail}</small> : null}
+              </span>
+              <time>{formatTime(duration)}</time>
+            </div>
+            <div className="soa-dubbing-player-secondary">
+              <button type="button" onClick={() => move('previous')} disabled={!track} aria-label="이전 음성">‹</button>
+              <button type="button" onClick={() => move('next')} disabled={!track} aria-label="다음 음성">›</button>
+              <button
+                type="button"
+                onClick={cycleRepeatMode}
+                className={repeatMode !== 'off' ? 'is-active' : ''}
+                aria-label={`반복 모드 ${repeatMode}`}
+              >
+                {repeatMode === 'one' ? '↻1' : '↻'}
+              </button>
+              <button type="button" onClick={() => setQueueOpen((open) => !open)} disabled={!track} aria-label="대기열 열기">
+                ☷ {queue.length}
+              </button>
+              {track?.audio.url && !track.audio.partial ? <a href={track.audio.url} download={track.audio.filename} aria-label="다운로드">↓</a> : null}
+              {browserPlayback ? <span className="soa-browser-voice-label">브라우저</span> : null}
+            </div>
           </div>
           {audio}
           {track && queueOpen ? (
@@ -605,42 +654,34 @@ export function LinkedPlayerDock() {
       <div className="soa-dock__inner">
         {track ? (
           <section className="soa-linked-player" aria-label="연계형 오디오 플레이어">
-            <div className="soa-player-transport">
-              <button type="button" onClick={() => move('previous')} aria-label="이전 음성">‹</button>
-              <button
-                type="button"
-                className={`soa-player-toggle ${playing ? 'is-playing' : ''}`}
-                onClick={() => void toggle()}
-                aria-label={waitingForSegment ? '다음 구간 대기' : playing ? '일시정지' : '재생'}
-                aria-pressed={playing}
-                disabled={waitingForSegment}
-              >
-                {playing ? 'Ⅱ' : '▶'}
-              </button>
-              <button type="button" onClick={() => move('next')} aria-label="다음 음성">›</button>
+            <button
+              type="button"
+              className={`soa-player-toggle ${playing ? 'is-playing' : ''}`}
+              onClick={() => void toggle()}
+              aria-label={waitingForSegment ? '다음 구간 대기' : playing ? '일시정지' : '재생'}
+              aria-pressed={playing}
+              disabled={waitingForSegment}
+            >
+              {playing ? 'Ⅱ' : '▶'}
+            </button>
+            <button
+              type="button"
+              className="soa-player-scrub"
+              onClick={seek}
+              disabled={Boolean(browserPlayback) || progressiveActive}
+              aria-label={seekBlockedLabel}
+            >
+              <span style={{ width: `${progress}%` }} />
+              <b style={{ left: `${progress}%` }} />
+            </button>
+            <time className="soa-player-time">{formatTime(current)} / {formatTime(duration)}</time>
+            <div className="soa-player-title">
+              <strong>{track.title}</strong>
+              {playbackDetail ? <small>{playbackDetail}</small> : null}
             </div>
-            <div className="soa-player-main">
-              <div className="soa-player-title">
-                <strong>{track.title}</strong>
-                <span>{track.audio.result.engineId}</span>
-                {playbackDetail ? <small>{playbackDetail}</small> : null}
-              </div>
-              <button
-                type="button"
-                className="soa-player-wave"
-                onClick={seek}
-                disabled={Boolean(browserPlayback) || progressiveActive}
-                aria-label={seekBlockedLabel}
-              >
-                <span className="soa-player-progress" style={{ width: `${progress}%` }} />
-                {bars.map((height, index) => (
-                  <i key={`${height}-${index}`} style={{ height: `${height}%` }} />
-                ))}
-                <b style={{ left: `${progress}%` }} />
-              </button>
-            </div>
-            <time>{formatTime(current)} / {formatTime(duration)}</time>
             <div className="soa-player-actions">
+              <button type="button" onClick={() => move('previous')} aria-label="이전 음성">‹</button>
+              <button type="button" onClick={() => move('next')} aria-label="다음 음성">›</button>
               <button
                 type="button"
                 onClick={cycleRepeatMode}
@@ -661,7 +702,7 @@ export function LinkedPlayerDock() {
               {track.audio.url && !track.audio.partial ? (
                 <a href={track.audio.url} download={track.audio.filename} aria-label="현재 음성 다운로드">↓</a>
               ) : null}
-              <button type="button" onClick={() => setQueueOpen((open) => !open)}>대기열 {queue.length}</button>
+              <button type="button" onClick={() => setQueueOpen((open) => !open)} aria-label="대기열 열기">☷ {queue.length}</button>
             </div>
             {audio}
           </section>

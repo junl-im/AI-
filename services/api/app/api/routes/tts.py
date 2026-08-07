@@ -19,6 +19,7 @@ from app.schemas.tts import (
 )
 from app.services.engine_orchestrator import (
     EngineExhaustedError,
+    EngineRequestUnsupportedError,
     EngineUnavailableError,
 )
 from app.services.job_manager import (
@@ -184,6 +185,11 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
         raise HTTPException(
             status_code=499,
             detail="SOA-4007: 사용자가 음성 생성을 취소했습니다.",
+        ) from error
+    except EngineRequestUnsupportedError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"SOA-4022: 선택한 프리셋을 현재 서버 음성 엔진에서 표현할 수 없습니다. {error}",
         ) from error
     except ValueError as error:
         raise HTTPException(

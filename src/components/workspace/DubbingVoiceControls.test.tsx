@@ -5,6 +5,8 @@ import { DubbingVoiceControls } from './DubbingVoiceControls'
 const baseProps = {
   voiceId: 'sori-warm',
   previewingId: null,
+  activePreviewId: null,
+  previewPlaying: false,
   speed: 1,
   pitch: 0,
   emotion: 'neutral' as const,
@@ -77,15 +79,28 @@ describe('DubbingVoiceControls', () => {
     expect(document.body.style.overflow).toBe('')
   })
 
-  it('프리뷰 중에는 중복 재생 요청을 막는다', () => {
+  it('프리뷰 준비 중에는 현재 요청은 취소할 수 있고 다른 프리셋만 잠근다', () => {
     render(<DubbingVoiceControls {...baseProps} previewingId="sori-warm" />)
 
+    expect(screen.getByRole('button', { name: '혜린 미리듣기 준비 취소' })).not.toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
-    expect(screen.getAllByRole('button', { name: /목소리 미리듣기/ }).every((button) => button.hasAttribute('disabled'))).toBe(true)
+    expect(screen.getByRole('button', { name: '도윤 목소리 미리듣기' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: '목소리 선택 닫기' }))
 
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
     expect(screen.getByRole('button', { name: '현재 설정으로 재생 준비 중…' })).toBeDisabled()
+  })
+
+  it('재생 중인 프리셋 버튼은 일시정지로 바뀌고 다시 누를 수 있다', () => {
+    render(
+      <DubbingVoiceControls
+        {...baseProps}
+        activePreviewId="sori-warm"
+        previewPlaying
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: '혜린 미리듣기 일시정지' })).toHaveTextContent('Ⅱ')
   })
 
   it('목소리 라디오는 방향키로 이동하고 선택값을 갱신한다', () => {

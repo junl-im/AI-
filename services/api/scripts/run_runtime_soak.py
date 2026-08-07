@@ -4,13 +4,19 @@ import argparse
 import json
 import sys
 import time
+from collections.abc import Mapping
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.services.runtime_soak import RuntimeProbeSample, build_runtime_soak_report, utc_now
+from app.services.runtime_soak import (
+    RuntimeProbeSample,
+    RuntimeRecoveryEvent,
+    build_runtime_soak_report,
+    utc_now,
+)
 from app.version import APP_VERSION
 
 
@@ -58,6 +64,35 @@ def _probe(target: str, url: str, timeout_seconds: float) -> RuntimeProbeSample:
         )
 
 
+def _load_mapping(path: Path | None) -> Mapping[str, object] | None:
+    if path is None or not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _load_recovery_events(path: Path | None) -> list[RuntimeRecoveryEvent]:
+    if path is None or not path.is_file():
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    items = payload if isinstance(payload, list) else [payload]
+    events: list[RuntimeRecoveryEvent] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        try:
+            events.append(RuntimeRecoveryEvent(**item))
+        except TypeError:
+            continue
+    return events
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="SoriON API·Worker 장시간 안정성 검사")
     parser.add_argument("--api-url", default="http://127.0.0.1:8000")
@@ -68,7 +103,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-memory-growth-mb", type=float, default=128.0)
     parser.add_argument("--max-open-file-descriptors-growth", type=int, default=32)
     parser.add_argument("--max-outage-seconds", type=float, default=30.0)
+    parser.add_argument("--max-recovery-seconds", type=float, default=45.0)
     parser.add_argument("--minimum-success-rate", type=float, default=0.99)
+    parser.add_argument("--baseline-report", type=Path)
+    parser.add_argument("--recovery-events", type=Path)
+    parser.add_argument("--history-output", type=Path)
     parser.add_argument("--output", type=Path, default=Path(".sorion/soak/runtime-soak.json"))
     return parser.parse_args()
 
@@ -107,13 +146,20 @@ def main() -> int:
         completed_at=utc_now(),
         interval_seconds=interval_seconds,
         samples=samples,
+        recovery_events=_load_recovery_events(args.recovery_events),
+        baseline_report=_load_mapping(args.baseline_report),
         max_memory_growth_mb=args.max_memory_growth_mb,
         max_open_file_descriptors_growth=args.max_open_file_descriptors_growth,
         max_outage_seconds=args.max_outage_seconds,
+        max_recovery_seconds=args.max_recovery_seconds,
         minimum_success_rate=args.minimum_success_rate,
     )
+    rendered = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+    args.output.write_text(rendered, encoding="utf-8")
+    if args.history_output is not None:
+        args.history_output.parent.mkdir(parents=True, exist_ok=True)
+        args.history_output.write_text(rendered, encoding="utf-8")
     print(
         f"Runtime soak {report['status']} · {len(samples)} samples · "
         f"SHA-256 {report['report_sha256']}"

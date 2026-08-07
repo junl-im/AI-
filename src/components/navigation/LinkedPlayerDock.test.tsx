@@ -407,4 +407,17 @@ describe('LinkedPlayerDock', () => {
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
   })
 
+
+  it('작업공간 Dock은 재생 버튼 다음에 진행바를 배치한다', () => {
+    useAppStore.setState({ page: 'projects', workspaceEntered: true })
+    usePlayerStore.getState().enqueue(generatedAudio(), '간결 Dock 음성')
+    const { container } = render(<LinkedPlayerDock />)
+
+    const player = container.querySelector('.soa-linked-player')
+    expect(player).not.toBeNull()
+    const directChildren = Array.from(player?.children ?? [])
+    expect(directChildren[0]).toHaveClass('soa-player-toggle')
+    expect(directChildren[1]).toHaveClass('soa-player-scrub')
+  })
+
 })

@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     voice_review_signing_key_id: str = "local-review-key"
     voice_review_trusted_keys_json: str = ""
     voice_review_lock_timeout_seconds: float = Field(default=10.0, ge=0.1, le=120.0)
+    voice_review_writer_lease_backend: str = "sqlite"
     voice_review_writer_lease_path: str = ".sorion/quality/voice-review-writer.sqlite3"
     voice_review_writer_lease_seconds: float = Field(default=30.0, ge=5.0, le=300.0)
     voice_review_operator_token: str = ""

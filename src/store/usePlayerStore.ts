@@ -56,6 +56,13 @@ export interface PlayerState {
   playRequestId: number
   repeatMode: RepeatMode
   playbackRate: number
+  playbackTrackId: string | null
+  playbackPositionSeconds: number
+  playbackActive: boolean
+  toggleRequestId: number
+  seekRequestId: number
+  seekTrackId: string | null
+  seekTargetSeconds: number
   enqueue: (audio: GeneratedAudio, title?: string) => string
   enqueueAndPlay: (audio: GeneratedAudio, title?: string) => string
   replace: (trackId: string, audio: GeneratedAudio, title?: string, autoplay?: boolean) => void
@@ -66,6 +73,9 @@ export interface PlayerState {
   restoreSession: (tracks: PlayerTrack[], currentTrackId: string | null, repeatMode: RepeatMode, playbackRate: number) => void
   select: (trackId: string) => void
   selectAndPlay: (trackId: string) => void
+  toggleTrack: (trackId: string) => void
+  seekTrack: (trackId: string, seconds: number) => void
+  setPlaybackSnapshot: (trackId: string | null, seconds: number, active: boolean) => void
   remove: (trackId: string) => void
   clearQueue: () => void
   selectNext: () => string | null
@@ -80,6 +90,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   playRequestId: 0,
   repeatMode: 'off',
   playbackRate: 1,
+  playbackTrackId: null,
+  playbackPositionSeconds: 0,
+  playbackActive: false,
+  toggleRequestId: 0,
+  seekRequestId: 0,
+  seekTrackId: null,
+  seekTargetSeconds: 0,
   enqueue: (audio, title = 'SoriON 생성 음성') => {
     const track = createTrack(audio, title)
     set((state) => appendTrack(state, track, false))
@@ -197,6 +214,30 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       ? { currentTrackId, playRequestId: state.playRequestId + 1 }
       : state
   )),
+  toggleTrack: (trackId) => set((state) => {
+    if (!state.queue.some((track) => track.id === trackId)) return state
+    if (state.currentTrackId !== trackId) {
+      return { currentTrackId: trackId, playRequestId: state.playRequestId + 1 }
+    }
+    return { toggleRequestId: state.toggleRequestId + 1 }
+  }),
+  seekTrack: (trackId, seconds) => set((state) => {
+    if (!state.queue.some((track) => track.id === trackId)) return state
+    return {
+      currentTrackId: trackId,
+      seekTrackId: trackId,
+      seekTargetSeconds: Math.max(0, Number.isFinite(seconds) ? seconds : 0),
+      seekRequestId: state.seekRequestId + 1,
+    }
+  }),
+  setPlaybackSnapshot: (playbackTrackId, playbackPositionSeconds, playbackActive) => set({
+    playbackTrackId,
+    playbackPositionSeconds: Math.max(
+      0,
+      Number.isFinite(playbackPositionSeconds) ? playbackPositionSeconds : 0,
+    ),
+    playbackActive,
+  }),
   remove: (trackId) => set((state) => {
     const index = state.queue.findIndex((track) => track.id === trackId)
     if (index < 0) return state
@@ -206,11 +247,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (currentTrackId === trackId) {
       currentTrackId = queue[index]?.id ?? queue[index - 1]?.id ?? null
     }
-    return { queue, currentTrackId }
+    return {
+      queue,
+      currentTrackId,
+      playbackTrackId: state.playbackTrackId === trackId ? null : state.playbackTrackId,
+      playbackPositionSeconds: state.playbackTrackId === trackId ? 0 : state.playbackPositionSeconds,
+      playbackActive: state.playbackTrackId === trackId ? false : state.playbackActive,
+      seekTrackId: state.seekTrackId === trackId ? null : state.seekTrackId,
+      seekTargetSeconds: state.seekTrackId === trackId ? 0 : state.seekTargetSeconds,
+    }
   }),
   clearQueue: () => set((state) => {
     state.queue.forEach(releaseTrack)
-    return { queue: [], currentTrackId: null }
+    return {
+      queue: [],
+      currentTrackId: null,
+      playbackTrackId: null,
+      playbackPositionSeconds: 0,
+      playbackActive: false,
+      seekTrackId: null,
+      seekTargetSeconds: 0,
+    }
   }),
   selectNext: () => {
     const state = get()

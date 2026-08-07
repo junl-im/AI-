@@ -72,7 +72,7 @@ describe('TimelineEditor', () => {
     expect(screen.getByRole('button', { name: '1번 대사 음성 다시 생성' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '2번 대사 음성 다시 생성' }))
     expect(onRetry).toHaveBeenCalledWith('voice-2')
-    expect(screen.getByText('00:30')).toBeInTheDocument()
+    expect(screen.getByText('0:08')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '1번 대사 가위로 나누기' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '1번 대사 삭제' })).toBeInTheDocument()
   })
@@ -99,9 +99,56 @@ describe('TimelineEditor', () => {
 
     fireEvent.click(menuButton)
     expect(menuButton).toHaveAttribute('aria-expanded', 'true')
-    fireEvent.click(screen.getByRole('button', { name: '블록 삭제' }))
+    fireEvent.click(screen.getByRole('button', { name: '클립 삭제' }))
 
     expect(onRemove).toHaveBeenCalledWith('voice-2')
-    expect(screen.queryByRole('button', { name: '블록 삭제' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '클립 삭제' })).not.toBeInTheDocument()
   })
+
+  it('선택 클립을 빠른 편집 패널에서 수정하고 저장한다', () => {
+    const onUpdateText = vi.fn()
+    render(
+      <TimelineEditor
+        blocks={blocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={onUpdateText}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+
+    const editor = screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })
+    expect(editor).toHaveValue('첫 번째 문장입니다.')
+    fireEvent.change(editor, { target: { value: '실사용 편집기로 바로 고친 문장입니다.' } })
+    expect(screen.getByText(/수정됨 · 저장 필요/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '저장' }))
+
+    expect(onUpdateText).toHaveBeenCalledWith('voice-1', '실사용 편집기로 바로 고친 문장입니다.')
+  })
+
+  it('클립의 편집 버튼은 선택 클립 빠른 편집기로 연결된다', () => {
+    render(
+      <TimelineEditor
+        blocks={blocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={vi.fn()}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '2번 대사 바로 편집' }))
+    expect(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('두 번째 문장입니다.')
+  })
+
 })

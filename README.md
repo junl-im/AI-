@@ -8,9 +8,12 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.10.1 · Approval Modularization & Operator Baselines`
+- 버전: `0.10.5 · Compact Dock & Practical Clip Editor`
 - 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
 - 운영자 기준선: 최근 5건을 SHA-256 snapshot으로 확정하고 자동 기준선과 별도로 교체·폐기 이력을 관리합니다.
+- 복구 검증: 장시간 검사 중 Worker를 실제 재시작하고 45초 이내 자동 복구와 이전 실행 대비 회귀를 기록합니다.
+- 잠금 확장: 승인 writer는 `WriterLeaseCoordinator` 인터페이스를 사용하며 SQLite fencing을 기본 backend로 유지합니다.
+- PC 폭 계약: 1024·1280·1440px의 3분할 중앙 작업 폭을 자동 회귀 검사합니다.
 - 승인 구조: 해시·diff, 원자 저장·history, 증거 갱신 대기열을 독립 모듈로 분리했습니다.
 - 감사 내보내기: 실제 WAV·사용자 식별자·GPU 원문·비밀키를 제외한 검증 가능 ZIP을 제공합니다.
 - Web: React + Vite + TypeScript + Zustand + PWA
@@ -18,6 +21,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - Worker: 선택 설치형 CosyVoice Adapter
 - 장문 제작: 최대 20,000자 내용과 문장별 재생성
 - 자동 순서: CosyVoice → MeloTTS → System Voice → Browser Speech
+- 프리셋 복구: 서버 엔진이 특정 프리셋만 표현하지 못하면 `SOA-4022`로 구분하고 auto 요청은 호환 Browser Speech까지 계속 시도
+- 로컬 이중화: Windows/macOS System Voice가 프리셋과 맞지 않으면 설치된 eSpeak 한국어 백엔드를 보조 경로로 시도
 - 진행 상태: SSE 우선, polling 자동 대체
 - 세션: IndexedDB 자동 저장과 SQLite 결과 복구
 - 배포: GitHub Pages 또는 Firebase Hosting Spark 정적 Web
@@ -26,9 +31,9 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - PWA: 1024px 최적화 로고와 1.5MiB 사전 캐시 예산 검사
 - 모바일: 인앱 브라우저에서도 연결 기술 상태를 노출하지 않고 가능한 음성 경로를 자동 선택
 - 재생 UX: 재생을 누르는 즉시 일시정지 버튼으로 바뀌고, 다시 누르면 재생 버튼으로 돌아오는 순차 제어
-- 프리셋: 여성 1종·남성 3종·중성 1종, 성별 불일치·동일 화자 중복 배정·CosyVoice 기본 WAV 대체를 차단
+- 프리셋: 여성 1종·남성 3종·중성 1종, 반대 성별과 CosyVoice 기본 WAV 대체는 차단하고 제한된 시스템 음성은 같은 성별 안에서 프리셋 운율로 구분
 - 고급 진단: 설정의 접힌 개발자 영역에서만 API·TTS·Worker·GPU·프리셋 상태와 개인정보 제외 진단을 확인
-- PC 편집: 1024px부터 프로젝트 히스토리 / Chat Workspace / Voice Drawer 3단 분할과 CapCut형 가로 타임라인
+- PC 편집: 1024px부터 3단 분할, 재생 버튼 바로 옆 진행바를 둔 한 줄 Compact Dock, 클릭 seek·확대·단축키와 선택 클립 빠른 편집기를 갖춘 가로 타임라인
 - 자동 음성 준비: 일반 화면에는 기술 연결 상태를 숨기고 가장 빠른 경로를 병렬 탐색·자동 재연결·heartbeat로 유지
 - 모바일 Bridge: 공개 HTTPS Origin을 `/connectivity`와 Engine Doctor에서 별도 진단
 - 프리셋 안전성: WAV 포맷·길이·샘플레이트·무음·클리핑을 Worker 요청 전에 검사
@@ -52,7 +57,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 증거 Intake: field evidence v2와 Web quality run report를 5MiB 제한·서버 checksum 재검증·bundle/record 중복 차단 뒤 등록
 - 로컬 Export ZIP: WAV·MP3·SRT·VTT·JSON 최대 20개/250MiB를 서버 업로드 없이 SHA-256 manifest, 진행률과 취소를 포함해 묶음
 - Lock gate: repository preflight가 package-lock 존재와 package.json 직접 의존성 일치를 필수 검사하며 패치는 기존 검증 lock을 보존
-- 음성 정합성: 전용 인물 WAV가 없으면 시스템 근사 음성임을 표시하고, 호환 후보가 없을 때 다른 성별이나 같은 음성을 성공으로 처리하지 않음
+- 음성 정합성: 전용 인물 WAV가 없으면 시스템 근사 음성으로 처리하며 같은 성별 후보는 프리셋 운율로 재사용하고 반대 성별은 차단
 - 프리셋 증거: 전용 WAV는 동일 ID manifest의 동의·권리·사람 검수·SHA-256과 실제 파일 일치가 모두 확인돼야 사용
 - 중복 차단: 같은 WAV SHA-256을 여러 인물 프리셋에 등록하면 진단과 실제 CosyVoice 합성 모두 차단
 - A/B 검수: Quality Lab에서 5개 프리셋을 선택해 같은 문장·같은 엔진으로 비교하고 프리셋 메타데이터와 판정을 저장
@@ -82,7 +87,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 ### 버전 올리기
 
 ```bash
-npm run version:set -- 0.10.1
+npm run version:set -- 0.10.6
 npm run quality:version-sync
 ```
 

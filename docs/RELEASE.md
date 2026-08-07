@@ -22,7 +22,7 @@
 Semantic Versioning을 사용한다.
 
 사용자 화면 버전은 `0.9.5`, `0.9.6`처럼 단순 증가시키며 내부 Heartbeat·revision은 고급 진단에만 표시한다.
-다음 버전은 `npm run version:set -- 0.9.7` 형식으로 갱신하고 `npm run quality:version-sync`로 확인한다.
+다음 버전은 `npm run version:set -- 0.10.5` 형식으로 갱신하고 `npm run quality:version-sync`로 확인한다.
 
 - Patch: 호환되는 수정
 - Minor: 호환되는 기능 추가
@@ -465,3 +465,13 @@ Semantic Versioning을 사용한다.
 - 패치 기준 버전: `0.10.0`
 - 핵심 확인: 승인 서비스 책임 분리, 기존 writer 안전 계약 유지, 운영자 기준선 확정·교체·폐기와 자동 기준선 분리 표시
 - 삭제 파일: 없음
+
+## 0.10.2 Recovery Soak & Managed Lock Interface
+
+- 전체 통파일 ZIP: `SoriON-AI-0.10.2-recovery-soak-managed-lock-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.10.1-to-0.10.2-recovery-soak-managed-lock-patch.zip`
+- 기준 버전: `0.10.1`
+- 핵심: 이전 soak 비교, Worker 실제 재시작 복구, writer lease backend interface, PC 3분할 폭 회귀 계약
+- 삭제 파일: 없음
+- 다음 제품 버전: `0.10.3`
+

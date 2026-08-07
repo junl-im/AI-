@@ -157,3 +157,79 @@ def test_espeak_selection_diagnostics_are_distinct_per_preset():
         diagnostics["jun-deep"]["selected_voice_id"]
         != diagnostics["min-energetic"]["selected_voice_id"]
     )
+
+
+@pytest.mark.asyncio
+async def test_system_adapter_falls_back_to_espeak_for_incompatible_primary_preset(
+    tmp_path,
+    monkeypatch,
+):
+    adapter = object.__new__(SystemSpeechAdapter)
+    windows = type(
+        "Backend",
+        (),
+        {"kind": "windows", "executable": "powershell.exe", "voice": ""},
+    )()
+    espeak = type(
+        "Backend",
+        (),
+        {"kind": "espeak", "executable": "espeak", "voice": "ko"},
+    )()
+    adapter.backends = [windows, espeak]
+    adapter.backend = windows
+    adapter.reason = None
+    attempts = []
+
+    async def reject_windows(request, output_path, backend=None):
+        attempts.append((backend or windows).kind)
+        raise VoicePresetUnavailableError("남성 Windows 한국어 음성이 없습니다.")
+
+    async def render_espeak(request, output_path, backend=None):
+        attempts.append((backend or espeak).kind)
+        with wave.open(str(output_path), "wb") as audio:
+            audio.setnchannels(1)
+            audio.setsampwidth(2)
+            audio.setframerate(16000)
+            audio.writeframes(b"\x00\x00" * 800)
+
+    monkeypatch.setattr(adapter, "_windows", reject_windows)
+    monkeypatch.setattr(adapter, "_espeak", render_espeak)
+
+    await adapter.synthesize(
+        TtsSynthesisRequest(
+            text="도윤 프리셋을 보조 로컬 엔진으로 생성합니다.",
+            voice_id="on-clear",
+            job_id=uuid4(),
+        ),
+        tmp_path / "fallback.wav",
+    )
+
+    assert attempts == ["windows", "espeak"]
+
+
+def test_windows_detection_keeps_espeak_as_secondary_backend(monkeypatch):
+    monkeypatch.setattr(
+        "app.engines.tts.system_tts.platform.system",
+        lambda: "Windows",
+    )
+    monkeypatch.setattr(
+        "app.engines.tts.system_tts.shutil.which",
+        lambda name: {
+            "powershell": "powershell.exe",
+            "espeak-ng": "espeak-ng.exe",
+        }.get(name),
+    )
+    monkeypatch.setattr(
+        SystemSpeechAdapter,
+        "_has_windows_korean_voice",
+        classmethod(lambda cls, executable, configured_voice: True),
+    )
+    monkeypatch.setattr(
+        SystemSpeechAdapter,
+        "_has_korean_espeak_voice",
+        staticmethod(lambda executable: True),
+    )
+
+    adapter = SystemSpeechAdapter()
+
+    assert [backend.kind for backend in adapter.backends] == ["windows", "espeak"]

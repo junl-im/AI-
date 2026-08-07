@@ -162,7 +162,7 @@
 @media (min-width: 1024px) {
   .soa-workspace-shell--dubbing,
   .soa-workspace-shell--dubbing.soa-workspace-shell--has-player {
-    padding-bottom: 152px;
+    padding-bottom: 92px;
   }
 
   .soa-desktop-studio {
@@ -407,9 +407,9 @@
   }
 
   .soa-dubbing-block {
-    width: 286px;
+    width: var(--soa-clip-width, 286px);
     min-height: 152px;
-    flex: 0 0 286px;
+    flex: 0 0 var(--soa-clip-width, 286px);
     border-radius: 12px;
     padding: 10px;
     background: #20242e;
@@ -429,9 +429,9 @@
   .soa-dubbing-block-menu__trigger { width: 30px; height: 30px; border-radius: 8px; font-size: 12px; }
 
   .soa-dubbing-pause-block {
-    width: 82px;
+    width: var(--soa-clip-width, 82px);
     min-height: 152px;
-    flex: 0 0 82px;
+    flex: 0 0 var(--soa-clip-width, 82px);
     flex-direction: column;
   }
 

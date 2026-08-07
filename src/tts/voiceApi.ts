@@ -135,6 +135,14 @@ const ENGINE_CATALOG_CACHE_MS = 15_000
 let engineCatalogCache: { baseUrl: string; cachedAt: number; engines: EngineInfo[] } | null = null
 let engineCatalogRequest: { baseUrl: string; promise: Promise<EngineInfo[]> } | null = null
 
+function isPresetCompatibilityFailure(error: ApiError): boolean {
+  return error.status === 422 && error.message.includes('SOA-4022')
+}
+
+function canFallbackToBrowserForRequest(request: TtsSynthesisRequest): boolean {
+  return !request.engineId || request.engineId === 'auto'
+}
+
 function mapEngine(engine: ApiEngineInfo): EngineInfo {
   return {
     id: engine.id,
@@ -315,12 +323,13 @@ export async function synthesizeSpeech(
     if (error instanceof ApiError && error.kind === 'cancelled') throw error
     if (
       error instanceof ApiError
+      && browserFallbackAvailable
       && (
-        ['unconfigured', 'timeout', 'cors-or-network', 'offline', 'mixed-content', 'mobile-localhost']
+        (isPresetCompatibilityFailure(error) && canFallbackToBrowserForRequest(request))
+        || ['unconfigured', 'timeout', 'cors-or-network', 'offline', 'mixed-content', 'mobile-localhost']
           .includes(error.kind)
         || [502, 503, 504].includes(error.status)
       )
-      && browserFallbackAvailable
     ) {
       return createBrowserSpeechResult(request, jobId)
     }

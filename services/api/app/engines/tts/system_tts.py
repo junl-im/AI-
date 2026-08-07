@@ -61,7 +61,8 @@ _MALE_NAME_TOKENS = (
 
 class SystemSpeechAdapter:
     def __init__(self, configured_voice: str = "") -> None:
-        self.backend = self._detect(configured_voice.strip())
+        self.backends = self._detect_backends(configured_voice.strip())
+        self.backend = self.backends[0] if self.backends else None
         self.reason = None if self.backend else self._unavailable_reason()
 
     @staticmethod
@@ -71,21 +72,41 @@ class SystemSpeechAdapter:
             "Windows 음성, macOS say 또는 eSpeak를 설치해 주세요."
         )
 
-    def _detect(self, configured_voice: str) -> SystemBackend | None:
+    @staticmethod
+    def _espeak_voice_name(configured_voice: str) -> str:
+        value = configured_voice.strip().lower()
+        return configured_voice if value == "ko" or value.startswith("ko+") else "ko"
+
+    def _detect_backends(self, configured_voice: str) -> list[SystemBackend]:
+        backends: list[SystemBackend] = []
         system = platform.system().lower()
         if system == "windows":
             executable = shutil.which("powershell") or shutil.which("pwsh")
             if executable and self._has_windows_korean_voice(executable, configured_voice):
-                return SystemBackend("windows", executable, configured_voice)
-        if system == "darwin":
+                backends.append(SystemBackend("windows", executable, configured_voice))
+        elif system == "darwin":
             say = shutil.which("say")
             afconvert = shutil.which("afconvert")
             if say and afconvert:
-                return SystemBackend("macos", say, configured_voice)
+                backends.append(SystemBackend("macos", say, configured_voice))
+
         executable = shutil.which("espeak-ng") or shutil.which("espeak")
         if executable and self._has_korean_espeak_voice(executable):
-            return SystemBackend("espeak", executable, configured_voice or "ko")
-        return None
+            backends.append(
+                SystemBackend(
+                    "espeak",
+                    executable,
+                    self._espeak_voice_name(configured_voice),
+                )
+            )
+        return backends
+
+    def _available_backends(self) -> list[SystemBackend]:
+        backends = getattr(self, "backends", None)
+        if backends is not None:
+            return list(backends)
+        backend = getattr(self, "backend", None)
+        return [backend] if backend is not None else []
 
     @staticmethod
     def _windows_voice_inventory(executable: str) -> list[dict[str, str]]:
@@ -184,15 +205,20 @@ class SystemSpeechAdapter:
                 voices.append(match.group(1).strip())
         return voices
 
-    def _macos_voice_for(self, preset: VoicePresetProfile) -> str:
-        assert self.backend is not None
-        voices = self._macos_korean_voices(self.backend.executable)
-        if self.backend.voice:
-            if self.backend.voice not in voices:
+    def _macos_voice_for(
+        self,
+        preset: VoicePresetProfile,
+        backend: SystemBackend | None = None,
+    ) -> str:
+        resolved = backend or self.backend
+        assert resolved is not None
+        voices = self._macos_korean_voices(resolved.executable)
+        if resolved.voice:
+            if resolved.voice not in voices:
                 raise VoicePresetUnavailableError(
-                    f"설정한 macOS 한국어 음성 '{self.backend.voice}'을 찾지 못했습니다."
+                    f"설정한 macOS 한국어 음성 '{resolved.voice}'을 찾지 못했습니다."
                 )
-            candidates = [self.backend.voice]
+            candidates = [resolved.voice]
         else:
             candidates = voices
         if not candidates:
@@ -228,16 +254,16 @@ class SystemSpeechAdapter:
         )
         if preferred:
             return preferred
-        if len(candidates) <= preset.variant_index:
-            raise VoicePresetUnavailableError(
-                f"{preset.display_name} 프리셋에 배정할 별도 macOS 한국어 음성이 없습니다. "
-                "같은 음성을 다른 인물 프리셋에 중복 배정하지 않습니다."
-            )
-        return candidates[preset.variant_index]
+        return candidates[preset.variant_index % len(candidates)]
 
-    def _espeak_voice_for(self, preset: VoicePresetProfile) -> str:
-        assert self.backend is not None
-        base = self.backend.voice.split("+", maxsplit=1)[0] or "ko"
+    def _espeak_voice_for(
+        self,
+        preset: VoicePresetProfile,
+        backend: SystemBackend | None = None,
+    ) -> str:
+        resolved = backend or self.backend
+        assert resolved is not None
+        base = resolved.voice.split("+", maxsplit=1)[0] or "ko"
         if preset.gender == "male":
             return f"{base}+m{(preset.variant_index % 7) + 1}"
         if preset.gender == "female":
@@ -248,11 +274,16 @@ class SystemSpeechAdapter:
     def _gender_label(value: str) -> str:
         return {"female": "여성", "male": "남성", "neutral": "중성"}.get(value, "미확인")
 
-    def _windows_selection_for(self, preset: VoicePresetProfile) -> dict[str, str | None]:
-        assert self.backend is not None
+    def _windows_selection_for(
+        self,
+        preset: VoicePresetProfile,
+        backend: SystemBackend | None = None,
+    ) -> dict[str, str | None]:
+        resolved = backend or self.backend
+        assert resolved is not None
         inventory = [
             item
-            for item in self._windows_voice_inventory(self.backend.executable)
+            for item in self._windows_voice_inventory(resolved.executable)
             if item["culture"].lower().startswith("ko-")
         ]
         expected = preset.gender
@@ -264,8 +295,8 @@ class SystemSpeechAdapter:
                 else item["gender"] in {"neutral", "notset", "unknown"}
             )
         ]
-        if self.backend.voice:
-            compatible = [item for item in compatible if item["name"] == self.backend.voice]
+        if resolved.voice:
+            compatible = [item for item in compatible if item["name"] == resolved.voice]
         preferred = next((
             item for item in compatible
             if any(token in item["name"].lower() for token in preset.preferred_voice_tokens)
@@ -273,13 +304,16 @@ class SystemSpeechAdapter:
         if preferred is not None:
             selected = preferred
             basis = "preferred-name"
-        elif len(compatible) > preset.variant_index:
-            selected = compatible[preset.variant_index]
-            basis = f"gender-slot-{preset.variant_index + 1}"
+        elif compatible:
+            selected = compatible[preset.variant_index % len(compatible)]
+            basis = (
+                f"gender-slot-{preset.variant_index + 1}"
+                if len(compatible) > preset.variant_index
+                else "same-gender-cycle"
+            )
         else:
             raise VoicePresetUnavailableError(
-                f"설치된 {self._gender_label(expected)} Windows 한국어 음성 중 "
-                f"{preset.display_name} 프리셋에 별도 배정할 후보가 없습니다."
+                f"설치된 {self._gender_label(expected)} Windows 한국어 음성이 없습니다."
             )
         return {
             "selected_voice_id": selected["name"],
@@ -290,6 +324,7 @@ class SystemSpeechAdapter:
 
     def selection_diagnostics(self) -> list[dict[str, object]]:
         results: list[dict[str, object]] = []
+        backends = self._available_backends()
         for preset in list_voice_presets():
             base: dict[str, object] = {
                 "engine_id": "system",
@@ -304,57 +339,93 @@ class SystemSpeechAdapter:
                 "selection_basis": "unavailable",
                 "reason": self.reason or "시스템 음성 엔진을 사용할 수 없습니다.",
             }
-            if self.backend is None:
+            if not backends:
                 results.append(base)
                 continue
-            try:
-                if self.backend.kind == "windows":
-                    selected = self._windows_selection_for(preset)
-                elif self.backend.kind == "macos":
-                    name = self._macos_voice_for(preset)
-                    selected = {
-                        "selected_voice_id": name,
-                        "selected_voice_name": name,
-                        "selected_gender": self._infer_voice_gender(name),
-                        "selection_basis": "macos-inventory",
-                    }
-                else:
-                    name = self._espeak_voice_for(preset)
-                    selected = {
-                        "selected_voice_id": name,
-                        "selected_voice_name": name,
-                        "selected_gender": preset.gender,
-                        "selection_basis": "espeak-gender-variant",
-                    }
-                base.update(selected)
-                base["status"] = "ready"
-                base["reason"] = "현재 기기에서 선택될 실제 시스템 화자입니다."
-            except VoicePresetUnavailableError as error:
+            errors: list[str] = []
+            for index, backend in enumerate(backends):
+                try:
+                    if backend.kind == "windows":
+                        selected = self._windows_selection_for(preset, backend)
+                    elif backend.kind == "macos":
+                        name = self._macos_voice_for(preset, backend)
+                        selected = {
+                            "selected_voice_id": name,
+                            "selected_voice_name": name,
+                            "selected_gender": self._infer_voice_gender(name),
+                            "selection_basis": "macos-inventory",
+                        }
+                    else:
+                        name = self._espeak_voice_for(preset, backend)
+                        selected = {
+                            "selected_voice_id": name,
+                            "selected_voice_name": name,
+                            "selected_gender": preset.gender,
+                            "selection_basis": "espeak-gender-variant",
+                        }
+                    if index > 0:
+                        selected["selection_basis"] = (
+                            f"fallback-{backend.kind}:{selected['selection_basis']}"
+                        )
+                    base.update(selected)
+                    base["status"] = "ready"
+                    base["reason"] = (
+                        "기본 시스템 음성이 프리셋과 맞지 않아 보조 로컬 백엔드로 전환했습니다."
+                        if index > 0
+                        else "현재 기기에서 선택될 실제 시스템 화자입니다."
+                    )
+                    break
+                except VoicePresetUnavailableError as error:
+                    errors.append(f"{backend.kind}: {error}")
+            else:
                 base["status"] = "blocked"
-                base["reason"] = str(error)
+                base["reason"] = "; ".join(errors)
             results.append(base)
         return results
 
     async def synthesize(self, request: TtsSynthesisRequest, output_path: Path) -> None:
-        if self.backend is None:
+        backends = self._available_backends()
+        if not backends:
             raise RuntimeError(self.reason or "시스템 음성 엔진을 사용할 수 없습니다.")
-        if self.backend.kind == "windows":
-            await self._windows(request, output_path)
-        elif self.backend.kind == "macos":
-            await self._macos(request, output_path)
-        else:
-            await self._espeak(request, output_path)
-        self._validate_wave(output_path)
 
-    async def _espeak(self, request: TtsSynthesisRequest, output_path: Path) -> None:
-        assert self.backend is not None
+        preset_errors: list[str] = []
+        runtime_errors: list[str] = []
+        for backend in backends:
+            output_path.unlink(missing_ok=True)
+            try:
+                if backend.kind == "windows":
+                    await self._windows(request, output_path, backend)
+                elif backend.kind == "macos":
+                    await self._macos(request, output_path, backend)
+                else:
+                    await self._espeak(request, output_path, backend)
+                self._validate_wave(output_path)
+                return
+            except VoicePresetUnavailableError as error:
+                preset_errors.append(f"{backend.kind}: {error}")
+            except RuntimeError as error:
+                runtime_errors.append(f"{backend.kind}: {error}")
+
+        if preset_errors and not runtime_errors:
+            raise VoicePresetUnavailableError("; ".join(preset_errors))
+        detail = "; ".join([*preset_errors, *runtime_errors])
+        raise RuntimeError(detail or "시스템 음성 백엔드를 모두 시도했지만 생성하지 못했습니다.")
+
+    async def _espeak(
+        self,
+        request: TtsSynthesisRequest,
+        output_path: Path,
+        backend: SystemBackend | None = None,
+    ) -> None:
+        resolved = backend or self.backend
+        assert resolved is not None
         preset = get_voice_preset(request.voice_id)
         speed = max(80, min(360, round(175 * request.speed * preset.rate_multiplier)))
         pitch = max(0, min(99, round(50 + (request.pitch + preset.pitch_offset) * 3)))
         command = [
-            self.backend.executable,
+            resolved.executable,
             "-v",
-            self._espeak_voice_for(preset),
+            self._espeak_voice_for(preset, resolved),
             "-s",
             str(speed),
             "-p",
@@ -365,18 +436,24 @@ class SystemSpeechAdapter:
         ]
         await self._run(command)
 
-    async def _macos(self, request: TtsSynthesisRequest, output_path: Path) -> None:
-        assert self.backend is not None
+    async def _macos(
+        self,
+        request: TtsSynthesisRequest,
+        output_path: Path,
+        backend: SystemBackend | None = None,
+    ) -> None:
+        resolved = backend or self.backend
+        assert resolved is not None
         aiff_path = output_path.with_suffix(".aiff")
         preset = get_voice_preset(request.voice_id)
-        selected_voice = self._macos_voice_for(preset)
+        selected_voice = self._macos_voice_for(preset, resolved)
         words_per_minute = max(
             90,
             min(360, round(180 * request.speed * preset.rate_multiplier)),
         )
         try:
             await self._run([
-                self.backend.executable,
+                resolved.executable,
                 "-v",
                 selected_voice,
                 "-r",
@@ -397,8 +474,14 @@ class SystemSpeechAdapter:
         finally:
             aiff_path.unlink(missing_ok=True)
 
-    async def _windows(self, request: TtsSynthesisRequest, output_path: Path) -> None:
-        assert self.backend is not None
+    async def _windows(
+        self,
+        request: TtsSynthesisRequest,
+        output_path: Path,
+        backend: SystemBackend | None = None,
+    ) -> None:
+        resolved = backend or self.backend
+        assert resolved is not None
         script = Path(__file__).with_name("scripts") / "windows_speech.ps1"
         text_path = output_path.with_suffix(".txt")
         text_path.write_text(request.text, encoding="utf-8")
@@ -408,7 +491,7 @@ class SystemSpeechAdapter:
         try:
             try:
                 await self._run([
-                    self.backend.executable,
+                    resolved.executable,
                     "-NoProfile",
                     "-NonInteractive",
                     "-ExecutionPolicy",
@@ -422,7 +505,7 @@ class SystemSpeechAdapter:
                     "-Rate",
                     str(rate),
                     "-VoiceName",
-                    self.backend.voice,
+                    resolved.voice,
                     "-VoicePreset",
                     preset.id,
                     "-ExpectedGender",
@@ -472,17 +555,18 @@ class SystemTtsEngine(TtsEngine):
 
     def info(self) -> EngineInfo:
         backend = self.adapter.backend
+        backends = self.adapter._available_backends()
         return EngineInfo(
             id="system",
             name="SoriON Local Korean Voice",
             kind="tts",
             mode="local",
-            provider=backend.kind if backend else "operating-system",
+            provider="+".join(item.kind for item in backends) if backends else "operating-system",
             languages=["ko-KR"],
             output_formats=["wav"],
             supports_emotion=False,
             supports_speed=True,
-            supports_pitch=bool(backend and backend.kind == "espeak"),
+            supports_pitch=any(item.kind == "espeak" for item in backends),
             supports_voice_clone=False,
             ready=backend is not None,
             reason=self.adapter.reason,

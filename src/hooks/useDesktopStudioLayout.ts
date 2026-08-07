@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 
-const STORAGE_KEY = 'sorion.desktop-studio-layout.v2'
+export const DESKTOP_STUDIO_BREAKPOINT = 1024
+export const DESKTOP_STUDIO_STORAGE_KEY = 'sorion.desktop-studio-layout.v2'
+export const DESKTOP_STUDIO_DIVIDER_WIDTH = 6
 const LEFT_MIN = 188
 const LEFT_MAX = 360
 const RIGHT_MIN = 248
@@ -36,10 +38,45 @@ export function normalizeDesktopStudioLayout(value: Partial<DesktopStudioLayoutS
   }
 }
 
+export interface DesktopStudioViewportSnapshot {
+  viewportWidth: number
+  threePane: boolean
+  leftWidth: number
+  centerWidth: number
+  rightWidth: number
+}
+
+export function calculateDesktopStudioViewport(
+  viewportWidth: number,
+  value: Partial<DesktopStudioLayoutState> = {},
+): DesktopStudioViewportSnapshot {
+  const width = Math.max(0, Math.round(viewportWidth))
+  const layout = normalizeDesktopStudioLayout(value)
+  if (width < DESKTOP_STUDIO_BREAKPOINT) {
+    return {
+      viewportWidth: width,
+      threePane: false,
+      leftWidth: 0,
+      centerWidth: width,
+      rightWidth: 0,
+    }
+  }
+  const leftWidth = layout.leftCollapsed ? 56 : layout.leftWidth
+  const rightWidth = layout.rightCollapsed ? 56 : layout.rightWidth
+  const dividerWidth = DESKTOP_STUDIO_DIVIDER_WIDTH * 2
+  return {
+    viewportWidth: width,
+    threePane: true,
+    leftWidth,
+    centerWidth: Math.max(0, width - leftWidth - rightWidth - dividerWidth),
+    rightWidth,
+  }
+}
+
 function loadLayout(): DesktopStudioLayoutState {
   if (typeof window === 'undefined') return DEFAULT_LAYOUT
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY)
+    const stored = window.localStorage.getItem(DESKTOP_STUDIO_STORAGE_KEY)
     if (!stored) return DEFAULT_LAYOUT
     return normalizeDesktopStudioLayout(JSON.parse(stored) as Partial<DesktopStudioLayoutState>)
   } catch {
@@ -52,7 +89,7 @@ export function useDesktopStudioLayout() {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(layout))
+      window.localStorage.setItem(DESKTOP_STUDIO_STORAGE_KEY, JSON.stringify(layout))
     } catch {
       // Private browsing and storage policies must not block editing.
     }
@@ -81,7 +118,7 @@ export function useDesktopStudioLayout() {
   const startResize = useCallback((side: StudioSide) => (
     event: ReactPointerEvent<HTMLButtonElement>,
   ) => {
-    if (window.innerWidth < 1024) return
+    if (window.innerWidth < DESKTOP_STUDIO_BREAKPOINT) return
     event.preventDefault()
     const startX = event.clientX
     const initial = side === 'left' ? layout.leftWidth : layout.rightWidth

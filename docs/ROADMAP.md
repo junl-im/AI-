@@ -1,6 +1,16 @@
 # ROADMAP
 
-현재 제품 버전: `0.10.1`
+현재 제품 버전: `0.10.2`
+
+
+## 0.10.2 완료 · Recovery Soak & Managed Lock Interface
+
+- 이전 장시간 검사 대비 응답·성공률·복구·메모리·연결 회귀 비교
+- Worker 실제 재시작과 45초 자동 복구 gate
+- 계획된 복구 실패와 일반 장애 표본 분리
+- writer lease Protocol과 SQLite backend factory
+- 1024·1280·1440px PC 3분할 폭 회귀 계약
+- 다음 목표는 0.10.3 Baseline History & Recovery Dashboard
 
 
 ## 0.10.1 완료 · Approval Modularization & Operator Baselines

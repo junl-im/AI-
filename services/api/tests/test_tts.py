@@ -5,7 +5,10 @@ from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
 from app.main import app
-from app.services.engine_orchestrator import EngineExhaustedError
+from app.services.engine_orchestrator import (
+    EngineExhaustedError,
+    EngineRequestUnsupportedError,
+)
 
 
 def test_mock_tts_validates_contract(client):
@@ -82,6 +85,26 @@ def test_all_engine_failures_return_soa_4013(client, monkeypatch):
 
     assert response.status_code == 503
     assert "SOA-4013" in response.json()["detail"]
+
+
+def test_preset_compatibility_failure_returns_stable_soa_4022(client, monkeypatch):
+    class PresetRejectingOrchestrator:
+        async def synthesize(self, request, runner):
+            raise EngineRequestUnsupportedError("system: 남성 한국어 음성이 없습니다.")
+
+    monkeypatch.setattr(app.state, "engine_orchestrator", PresetRejectingOrchestrator())
+    response = client.post(
+        "/api/v1/tts/synthesize",
+        json={
+            "text": "프리셋 호환 실패 코드를 확인합니다.",
+            "voice_id": "on-clear",
+            "engine_id": "auto",
+            "job_id": str(uuid4()),
+        },
+    )
+
+    assert response.status_code == 422
+    assert "SOA-4022" in response.json()["detail"]
 
 
 def test_tts_rejects_empty_text(client):
