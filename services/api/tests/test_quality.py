@@ -4,7 +4,7 @@ def test_quality_diagnostics_reports_runtime_and_engines(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.10.8"
+    assert body["version"] == "0.11.0"
     assert body["python_version"]
     assert any(engine["engine_id"] == "mock" for engine in body["engines"])
 
@@ -42,3 +42,16 @@ def test_quality_compare_handles_mock_without_audio(client):
     assert result["engine_id"] == "mock"
     assert result["status"] == "mock-complete"
     assert result["audio_url"] is None
+
+
+def test_quality_diagnostics_exposes_engine_resilience_metrics(client):
+    response = client.get("/api/v1/quality/diagnostics")
+
+    assert response.status_code == 200
+    engine = next(item for item in response.json()["engines"] if item["engine_id"] == "mock")
+    assert engine["health"] in {"ready", "probing", "cooldown", "unavailable"}
+    assert engine["attempt_count"] >= 0
+    assert "success_rate" in engine
+    assert "average_latency_ms" in engine
+    assert "circuit_open_count" in engine
+    assert "probe_in_flight" in engine

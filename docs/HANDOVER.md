@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.10.8 · CI Test Contract Stability Hotfix**
+현재 기준 버전: **0.11.0 · Adaptive Engine Resilience & Recovery**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-07 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,20 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 0.11.0 Adaptive Engine Resilience & Recovery
+
+1. **작업 일시(KST)**: 2026-08-07 15:55 이후.
+2. **대상 버전과 기준 버전**: 0.11.0 / 0.10.8 CI Test Contract Stability Hotfix. 사용자 요청으로 기존 0.10.9 UI 계획보다 엔진 안정화를 우선했습니다.
+3. **변경 내용**: 엔진 circuit breaker를 cooldown 뒤 단일 half-open probe 방식으로 강화하고 반복 복구 실패의 bounded exponential backoff, 명시적 엔진 선택의 circuit 준수, 취소 시 probe 해제, preset incompatibility 비장애 처리와 런타임 성공률·지연·격리 이력을 추가했습니다. 수동 runtime reset은 System 음성/eSpeak 재탐지, Melo 모델 unload, CosyVoice Worker probe를 먼저 수행합니다.
+4. **변경 이유**: 기존 회로차단기는 cooldown 종료 직후 여러 요청이 장애 엔진으로 동시에 재진입할 수 있었고, 특정 엔진 고정 요청은 circuit을 우회할 수 있었습니다. 또한 엔진 설치·Worker 상태가 바뀐 뒤 API 재시작 없이 안전하게 재탐지하고 복구 상태를 운영 화면에서 판단할 수 있는 경로가 필요했습니다.
+5. **영향 범위**: API engine orchestration·schema·config·reset route, System/Melo/CosyVoice TTS runtime refresh, Quality diagnostics, Web engine catalog 선택/재조회, Quality Lab·Engine Doctor 운영 UI, 엔진 회복력 preflight·회귀 테스트, 제품 버전·릴리스 문서입니다. Browser Speech fallback, SOA-4022, 프리셋 성별 안전 규칙은 유지합니다.
+6. **변경·추가된 주요 파일**: `services/api/app/services/engine_orchestrator.py`, `services/api/app/api/routes/engines.py`, `services/api/app/schemas/engine.py`, `services/api/app/services/engine_diagnostics.py`, `services/api/app/engines/tts/system_tts.py`, `melo_tts.py`, `cosyvoice_worker_tts.py`, `src/tts/voiceApi.ts`, `src/hooks/useEngineCatalog.ts`, `src/components/evaluation/QualityDiagnosticsCard.tsx`, `EngineDoctorCard.tsx`, `scripts/check-engine-resilience.mjs`, `docs/ENGINE_RESILIENCE_AND_RECOVERY.md`.
+7. **검증 결과**: API pytest 211/211, Worker pytest 14/14, Repository preflight 38/38, 제품 버전 sync v0.11.0, Python compileall, dependency-free TS/TSX transpile 201/201, 0.10.8 기준본 overlay 적용 후 완성본 870/870파일 SHA 일치(missing 0 / extra 0 / changed 0)를 통과했습니다. 현재 환경에는 Web node_modules와 Python 3.10용 Ruff 0.15.22 CLI가 없어 GitHub Actions 동일 ESLint·semantic typecheck·Vitest·Vite build·Ruff 명령은 로컬에서 직접 실행하지 못했으며 Actions가 최종 판정합니다.
+8. **알려진 제한과 주의사항**: circuit runtime 지표는 현재 API 프로세스 메모리에 있으므로 재시작 시 초기화됩니다. 실제 CosyVoice 5종 WAV·동의/권리·검수 자료·모델 가중치가 없으면 전용 프리셋을 가장하지 않습니다. 수동 reset은 실제 환경 수정 후 재탐지 도구이며 장애를 숨기기 위한 반복 강제 reset 용도가 아닙니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.0-adaptive-engine-resilience-recovery-full.zip`, `SoriON-AI-0.10.8-to-0.11.0-adaptive-engine-resilience-recovery-patch.zip`.
+10. **다음 예상 업데이트**: 0.11.1 Visual Regression & Safe Batch Voice Editing. Chromium 1024·1280·1440px 시각 회귀, 다중 클립 일괄 voice 변경/재생성 영향 preview, inventory 프리셋 배정 diff, 실기기 복귀 증거와 synthetic recovery 분리를 이어갑니다.
 
 
 ## 0.10.8 CI Test Contract Stability Hotfix

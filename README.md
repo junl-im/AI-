@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.10.8 · CI Test Contract Stability Hotfix`
+- 버전: `0.11.0 · Adaptive Engine Resilience & Recovery`
 - 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
 - 운영자 기준선: 최근 5건을 SHA-256 snapshot으로 확정하고 자동 기준선과 별도로 교체·폐기 이력을 관리합니다.
 - 기준선 복구: append-only history에서 과거 기준선을 비교 미리보기한 뒤 `restored` 이벤트로 되살리며 기존 기록은 삭제하지 않습니다.
@@ -27,6 +27,10 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 장문 제작: 최대 20,000자 내용과 문장별 재생성
 - 자동 순서: CosyVoice → MeloTTS → System Voice → Browser Speech
 - 프리셋 복구: 서버 엔진이 특정 프리셋만 표현하지 못하면 `SOA-4022`로 구분하고 auto 요청은 호환 Browser Speech까지 계속 시도
+- 엔진 회복력: 장애 엔진은 circuit breaker로 격리하고 cooldown 뒤 단일 half-open probe만 허용해 동시 재폭주를 방지
+- 적응형 backoff: 반복 복구 실패는 cooldown을 상한 내에서 단계적으로 늘리고 성공 시 즉시 기본 단계로 복귀
+- 엔진 재탐지: 수동 런타임 초기화 시 System 음성/eSpeak 재탐지, Melo 모델 unload, CosyVoice Worker probe를 엔진별로 수행
+- 런타임 진단: 엔진별 성공률·평균 지연·누적 격리·cooldown·half-open probe를 Quality Lab과 Engine Doctor에서 확인
 - 로컬 이중화: Windows/macOS System Voice가 프리셋과 맞지 않으면 설치된 eSpeak 한국어 백엔드를 보조 경로로 시도
 - 진행 상태: SSE 우선, polling 자동 대체
 - 세션: IndexedDB 자동 저장과 SQLite 결과 복구

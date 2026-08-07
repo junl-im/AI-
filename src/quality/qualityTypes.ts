@@ -20,10 +20,19 @@ export interface EngineDiagnostic {
   streaming: boolean
   modelLoaded: boolean | null
   recommended: boolean
-  health: 'ready' | 'cooldown' | 'unavailable'
+  health: 'ready' | 'probing' | 'cooldown' | 'unavailable'
   successCount: number
   failureCount: number
+  attemptCount: number
+  successRate: number | null
+  consecutiveFailures: number
   cooldownRemainingSeconds: number
+  circuitOpenCount: number
+  probeInFlight: boolean
+  averageLatencyMs: number | null
+  lastLatencyMs: number | null
+  lastSuccessAt: string | null
+  lastFailureAt: string | null
   checks: DiagnosticCheck[]
 }
 

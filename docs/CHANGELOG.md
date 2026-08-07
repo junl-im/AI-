@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.11.0 · Adaptive Engine Resilience & Recovery
+
+- 엔진 circuit breaker를 half-open 단일 probe 방식으로 강화해 cooldown 종료 순간 장애 엔진으로 동시 요청이 재폭주하는 문제를 방지합니다.
+- 명시적으로 선택한 엔진도 열린 circuit을 존중하고, 반복 probe 실패는 설정 가능한 상한 내에서 지수 cooldown을 적용하며 성공하면 backoff 단계를 초기화합니다.
+- 프리셋 호환 불가 `SOA-4022`는 엔진 장애 횟수에서 제외하고 취소된 probe는 점유 상태를 안전하게 해제합니다.
+- System TTS·MeloTTS·CosyVoice Worker에 runtime refresh를 추가하고 엔진별 재탐지 후 circuit을 초기화하는 운영 API를 제공합니다. 실행 중 합성이 있으면 reset을 거절하고 재탐지 중 신규 합성은 backup으로 격리합니다.
+- Engine API·Quality Lab·Engine Doctor에 시도/성공/실패, 성공률, 지연시간, 누적 격리, cooldown, half-open probe와 최근 성공·실패 시각을 연결합니다.
+- Web 엔진 카탈로그는 cooldown/probing 엔진을 자동 선택에서 제외하고 예상 복구 시점에 캐시를 무효화해 상태를 다시 조회합니다.
+- 엔진 회복력 계약을 dependency-free preflight에 추가하고 API 회귀 테스트에 동시 probe·bounded backoff·runtime reset·재탐지 시나리오를 고정합니다.
+- 앱·API·Worker 제품 버전을 0.11.0으로 동기화합니다.
+
 ## 0.10.8 · CI Test Contract Stability Hotfix
 
 - `browserPlaybackEvidence.test.ts`에서 진단용 장애 주입 테스트가 `afterEach()` 내부에 중복 삽입되어 Vitest가 테스트 안의 `test()` 호출로 판정하던 구조를 제거합니다.

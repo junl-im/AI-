@@ -35,6 +35,7 @@ class MeloTtsEngine(TtsEngine):
         self._model: Any | None = None
         self._load_lock = asyncio.Lock()
         self._last_selection: dict[str, dict[str, object]] = {}
+        self._ready_override = ready_override
         self._ready = self._detect() if ready_override is None else ready_override
 
     @staticmethod
@@ -67,6 +68,15 @@ class MeloTtsEngine(TtsEngine):
             korean_specialization=78,
             long_form=True,
         )
+
+    async def refresh_runtime(self) -> None:
+        async with self._load_lock:
+            self._model = None
+            self._ready = (
+                self._detect()
+                if self._ready_override is None
+                else self._ready_override
+            )
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:
         if not self._ready:

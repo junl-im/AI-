@@ -116,12 +116,20 @@ interface ApiEngineInfo {
   long_form?: boolean
   streaming?: boolean
   recommended?: boolean
-  health?: 'ready' | 'cooldown' | 'unavailable'
+  health?: 'ready' | 'probing' | 'cooldown' | 'unavailable'
   success_count?: number
   failure_count?: number
+  attempt_count?: number
+  success_rate?: number | null
   consecutive_failures?: number
   cooldown_remaining_seconds?: number
   last_error?: string | null
+  circuit_open_count?: number
+  probe_in_flight?: boolean
+  average_latency_ms?: number | null
+  last_latency_ms?: number | null
+  last_success_at?: string | null
+  last_failure_at?: string | null
 }
 
 interface ApiHealthResult {
@@ -172,10 +180,34 @@ function mapEngine(engine: ApiEngineInfo): EngineInfo {
     health: engine.health ?? (engine.ready ? 'ready' : 'unavailable'),
     successCount: engine.success_count ?? 0,
     failureCount: engine.failure_count ?? 0,
+    attemptCount: engine.attempt_count ?? 0,
+    successRate: engine.success_rate ?? null,
     consecutiveFailures: engine.consecutive_failures ?? 0,
     cooldownRemainingSeconds: engine.cooldown_remaining_seconds ?? 0,
     lastError: engine.last_error ?? null,
+    circuitOpenCount: engine.circuit_open_count ?? 0,
+    probeInFlight: engine.probe_in_flight ?? false,
+    averageLatencyMs: engine.average_latency_ms ?? null,
+    lastLatencyMs: engine.last_latency_ms ?? null,
+    lastSuccessAt: engine.last_success_at ?? null,
+    lastFailureAt: engine.last_failure_at ?? null,
   }
+}
+
+interface ApiEngineRuntimeResetResponse {
+  engine_id: string
+  cleared: boolean
+  message: string
+  engine: ApiEngineInfo
+}
+
+export async function resetEngineRuntime(engineId: string): Promise<EngineInfo> {
+  const result = await apiRequest<ApiEngineRuntimeResetResponse>(
+    `/engines/${encodeURIComponent(engineId)}/runtime/reset`,
+    { method: 'POST' },
+  )
+  invalidateEngineCatalogCache()
+  return mapEngine(result.engine)
 }
 
 export function primeEngineCatalog(

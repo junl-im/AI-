@@ -161,6 +161,7 @@ async def lifespan(app: FastAPI):
         preferred_order=settings.tts_engine_order_list,
         failure_threshold=settings.engine_failure_threshold,
         cooldown_seconds=settings.engine_cooldown_seconds,
+        max_cooldown_seconds=settings.engine_max_cooldown_seconds,
     )
     engine_registry.register_voice_clone(cosyvoice_worker)
 

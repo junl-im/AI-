@@ -31,7 +31,16 @@ class EngineDiagnostic(BaseModel):
     health: EngineHealth = "unavailable"
     success_count: int = 0
     failure_count: int = 0
+    attempt_count: int = 0
+    success_rate: float | None = Field(default=None, ge=0, le=1)
+    consecutive_failures: int = 0
     cooldown_remaining_seconds: float = 0
+    circuit_open_count: int = 0
+    probe_in_flight: bool = False
+    average_latency_ms: float | None = Field(default=None, ge=0)
+    last_latency_ms: float | None = Field(default=None, ge=0)
+    last_success_at: str | None = None
+    last_failure_at: str | None = None
     checks: list[DiagnosticCheck]
 
 

@@ -36,10 +36,19 @@ interface ApiEngineDiagnostic {
   streaming: boolean
   model_loaded: boolean | null
   recommended: boolean
-  health: 'ready' | 'cooldown' | 'unavailable'
+  health: 'ready' | 'probing' | 'cooldown' | 'unavailable'
   success_count: number
   failure_count: number
+  attempt_count: number
+  success_rate: number | null
+  consecutive_failures: number
   cooldown_remaining_seconds: number
+  circuit_open_count: number
+  probe_in_flight: boolean
+  average_latency_ms: number | null
+  last_latency_ms: number | null
+  last_success_at: string | null
+  last_failure_at: string | null
   checks: ApiDiagnosticCheck[]
 }
 
@@ -116,7 +125,16 @@ export async function getQualityDiagnostics(): Promise<QualityDiagnostics> {
       health: engine.health,
       successCount: engine.success_count,
       failureCount: engine.failure_count,
+      attemptCount: engine.attempt_count,
+      successRate: engine.success_rate,
+      consecutiveFailures: engine.consecutive_failures,
       cooldownRemainingSeconds: engine.cooldown_remaining_seconds,
+      circuitOpenCount: engine.circuit_open_count,
+      probeInFlight: engine.probe_in_flight,
+      averageLatencyMs: engine.average_latency_ms,
+      lastLatencyMs: engine.last_latency_ms,
+      lastSuccessAt: engine.last_success_at,
+      lastFailureAt: engine.last_failure_at,
       checks: engine.checks,
     })),
   }

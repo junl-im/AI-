@@ -233,3 +233,23 @@ def test_windows_detection_keeps_espeak_as_secondary_backend(monkeypatch):
     adapter = SystemSpeechAdapter()
 
     assert [backend.kind for backend in adapter.backends] == ["windows", "espeak"]
+
+
+def test_system_adapter_refresh_redetects_newly_available_backend(monkeypatch):
+    detected = [[], [type(
+        "Backend",
+        (),
+        {"kind": "espeak", "executable": "espeak", "voice": "ko"},
+    )()]]
+
+    def detect(_self, _configured_voice):
+        return detected.pop(0)
+
+    monkeypatch.setattr(SystemSpeechAdapter, "_detect_backends", detect)
+    adapter = SystemSpeechAdapter()
+
+    assert adapter.backend is None
+    adapter.refresh()
+    assert adapter.backend is not None
+    assert adapter.backend.kind == "espeak"
+    assert adapter.reason is None

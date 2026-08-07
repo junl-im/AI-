@@ -42,6 +42,7 @@ import {
   downloadVoicePresetReviewBundle,
   parseAndImportVoicePresetReviewBundle,
 } from '../quality/voicePresetReviewBundle'
+import { resetEngineRuntime } from '../tts/voiceApi'
 import { voiceGenderLabels, voicePresets } from '../tts/voicePresets'
 
 const FALLBACK_SENTENCE: EvaluationSentence = {
@@ -71,6 +72,7 @@ export function QualityPage() {
   const [error, setError] = useState<string | null>(null)
   const [reviewCount, setReviewCount] = useState(0)
   const [reviewSyncNotice, setReviewSyncNotice] = useState<string | null>(null)
+  const [resettingEngineId, setResettingEngineId] = useState<string | null>(null)
   const reviewImportRef = useRef<HTMLInputElement | null>(null)
 
   const refreshDiagnostics = useCallback(async () => {
@@ -126,6 +128,19 @@ export function QualityPage() {
   const refreshReviewCount = useCallback(() => {
     void listQualityReviews().then((items) => setReviewCount(items.length)).catch(() => undefined)
   }, [])
+
+  const handleResetEngine = useCallback(async (engineId: string) => {
+    setResettingEngineId(engineId)
+    setError(null)
+    try {
+      await resetEngineRuntime(engineId)
+      await refreshDiagnostics()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : '엔진 격리 상태를 초기화하지 못했습니다.')
+    } finally {
+      setResettingEngineId(null)
+    }
+  }, [refreshDiagnostics])
 
   const handleEvidenceDownload = useCallback(async () => {
     setError(null)
@@ -304,7 +319,9 @@ export function QualityPage() {
           diagnostics={diagnostics}
           loading={loadingDiagnostics}
           error={error}
+          resettingEngineId={resettingEngineId}
           onRefresh={() => void refreshDiagnostics()}
+          onResetEngine={(engineId) => void handleResetEngine(engineId)}
         />
 
         <section className="rounded-[28px] border border-soa-line bg-soa-card p-5">

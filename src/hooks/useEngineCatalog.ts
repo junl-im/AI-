@@ -11,6 +11,8 @@ function readyEngineMessage(engines: EngineInfo[]): {
 } {
   const real = engines.find((engine) => (
     engine.ready
+    && engine.health !== 'cooldown'
+    && engine.health !== 'probing'
     && engine.autoEligible !== false
     && !['mock', 'browser'].includes(engine.mode)
   ))
@@ -67,7 +69,10 @@ export function useEngineCatalog() {
     const browserEngine = getBrowserSpeechEngine()
     if (browserEngine) {
       setEngines((current) => current.some((engine) => (
-        engine.ready && !['mock', 'browser'].includes(engine.mode)
+        engine.ready
+        && engine.health !== 'cooldown'
+        && engine.health !== 'probing'
+        && !['mock', 'browser'].includes(engine.mode)
       )) ? current : [browserEngine])
       setBackendStatus('degraded', '음성 제작 준비됨')
     }
@@ -124,15 +129,42 @@ export function useEngineCatalog() {
     }
   }, [refresh])
 
+  useEffect(() => {
+    const cooldowns = engines
+      .filter((engine) => engine.health === 'cooldown' && (engine.cooldownRemainingSeconds ?? 0) > 0)
+      .map((engine) => engine.cooldownRemainingSeconds ?? 0)
+    const probing = engines.some((engine) => engine.health === 'probing')
+    if (!cooldowns.length && !probing) return undefined
+    const delayMs = probing
+      ? 900
+      : Math.max(350, Math.min(...cooldowns) * 1000 + 200)
+    const timer = window.setTimeout(() => {
+      invalidateEngineCatalogCache()
+      void refresh()
+    }, delayMs)
+    return () => window.clearTimeout(timer)
+  }, [engines, refresh])
+
   const selected = useMemo(
-    () => engines.find((engine) => engine.ready && engine.recommended)
+    () => engines.find((engine) => (
+      engine.ready
+      && engine.recommended
+      && engine.health !== 'cooldown'
+      && engine.health !== 'probing'
+    ))
       ?? engines.find((engine) => (
         engine.ready
+        && engine.health !== 'cooldown'
+        && engine.health !== 'probing'
         && engine.autoEligible !== false
         && !['mock', 'browser'].includes(engine.mode)
       ))
       ?? engines.find((engine) => engine.ready && engine.mode === 'browser')
-      ?? engines.find((engine) => engine.ready)
+      ?? engines.find((engine) => (
+        engine.ready
+        && engine.health !== 'cooldown'
+        && engine.health !== 'probing'
+      ))
       ?? null,
     [engines],
   )

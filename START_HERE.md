@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.10.8 · CI Test Contract Stability Hotfix`
+현재 버전: `0.11.0 · Adaptive Engine Resilience & Recovery`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -30,6 +30,9 @@
 26. Recovery Path Injection은 실제 Wi-Fi나 절전을 조작하지 않습니다. online·pageshow/focus·Network Information change와 `sorion-engine-refresh` 처리 경로만 주입하므로 실기기 장애 인증과 구분합니다.
 27. Engine Doctor는 브라우저 음성 inventory fingerprint 변화를 감지합니다. `voiceschanged` 발생 시 프리셋 배정과 엔진 카탈로그를 다시 계산하며 fingerprint는 보안 서명이 아닌 변화 감지용입니다.
 28. Worker benchmark History는 운영자 기준선이 아직 없어도 API의 `group_key`를 사용해 같은 조건 그룹을 조회합니다.
+29. 엔진 circuit이 열리면 cooldown 동안 해당 엔진을 자동 선택하지 않습니다. cooldown 종료 뒤에는 단 하나의 half-open probe만 허용하고 동시 요청은 backup 엔진으로 우회합니다.
+30. `POST /api/v1/engines/{engine_id}/runtime/reset`은 엔진별 재탐지를 먼저 수행합니다. probe 중이거나 재탐지가 실패하면 상태를 억지로 초기화하지 않습니다.
+31. Quality Lab과 Engine Doctor의 성공률·평균 지연·누적 격리·cooldown·probe 상태는 런타임 보호 진단이며 실제 음질·성능 benchmark를 대신하지 않습니다.
 
 - Heartbeat 6.8.4는 새 승인·재서명에 active 신뢰 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지합니다. `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에는 이전 key만 넣고 secret은 Git·ZIP·진단 응답에 포함하지 않습니다.
 - 승인 apply·재서명·rollback은 같은 로컬 파일시스템을 공유하는 API 프로세스 사이에서도 파일 잠금으로 직렬화됩니다. 여러 서버·네트워크 파일시스템은 단일 writer 또는 분산 잠금이 필요합니다.

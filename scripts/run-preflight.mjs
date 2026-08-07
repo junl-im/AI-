@@ -15,6 +15,7 @@ const checks = [
   ['PWA assets', 'check-pwa-assets.mjs'],
   ['runtime update / performance guard', 'check-runtime-update-guard.mjs'],
   ['seamless engine runtime', 'check-seamless-engine-runtime.mjs'],
+  ['engine resilience / half-open recovery', 'check-engine-resilience.mjs'],
   ['always-on preset / PC layout', 'check-always-on-preset-pc-layout.mjs'],
   ['approval modularization / operator baseline', 'check-approval-modularization-operator-baseline.mjs'],
   ['recovery soak / managed lock', 'check-recovery-soak-managed-lock.mjs'],

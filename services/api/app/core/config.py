@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     tts_engine_order: str = "cosyvoice3,melo,system,mock"
     engine_failure_threshold: int = Field(default=2, ge=1, le=10)
     engine_cooldown_seconds: float = Field(default=30.0, ge=1.0, le=600.0)
+    engine_max_cooldown_seconds: float = Field(default=240.0, ge=1.0, le=3600.0)
     allow_mock_engine: bool = True
     enable_melo_tts: bool = True
     melo_device: str = "auto"

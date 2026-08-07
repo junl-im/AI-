@@ -3,6 +3,7 @@ import type { ConnectionLayer, ConnectivityStatus } from '../../settings/connect
 import type { SetupStepStatus, VoicePresetStatus, VoiceSelectionStatus } from '../../settings/setupTypes'
 import { useEngineDoctor } from '../../hooks/useEngineDoctor'
 import { diagnoseBrowserSpeechVoices, type BrowserVoiceSelectionDiagnostic } from '../../tts/browserSpeech'
+import { resetEngineRuntime } from '../../tts/voiceApi'
 import {
   acknowledgeBrowserVoiceInventory,
   observeBrowserVoiceInventory,
@@ -51,11 +52,27 @@ export function EngineDoctorCard() {
   const doctor = useEngineDoctor()
   const [browserVoiceDiagnostics, setBrowserVoiceDiagnostics] = useState<BrowserVoiceSelectionDiagnostic[]>([])
   const [browserVoiceInventory, setBrowserVoiceInventory] = useState<BrowserVoiceInventoryObservation | null>(null)
+  const [resettingEngineId, setResettingEngineId] = useState<string | null>(null)
+  const [runtimeActionMessage, setRuntimeActionMessage] = useState<string | null>(null)
   const presetReady = doctor.setup?.voicePresetReadyCount ?? 0
   const presetAudioReady = doctor.setup?.voicePresetAudioReadyCount ?? 0
   const presetManifestReady = doctor.setup?.voicePresetManifestReadyCount ?? 0
   const presetExpected = doctor.setup?.voicePresetExpectedCount ?? 5
   const overallStatus = doctor.report?.status ?? (doctor.loading ? 'warning' : 'missing')
+
+  async function handleResetEngine(engineId: string) {
+    setResettingEngineId(engineId)
+    setRuntimeActionMessage(null)
+    try {
+      await resetEngineRuntime(engineId)
+      setRuntimeActionMessage('엔진을 다시 탐지하고 장애 격리 상태를 초기화했습니다.')
+      await doctor.runCheck()
+    } catch (error) {
+      setRuntimeActionMessage(error instanceof Error ? error.message : '엔진 복구 상태를 초기화하지 못했습니다.')
+    } finally {
+      setResettingEngineId(null)
+    }
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return undefined
@@ -187,6 +204,62 @@ export function EngineDoctorCard() {
           )
         })}
       </div>
+
+      {doctor.report?.ttsEngines.length ? (
+        <div className="mt-4 rounded-2xl border border-soa-line bg-white p-4">
+          <div>
+            <strong className="text-sm">엔진 런타임 보호 상태</strong>
+            <p className="mt-1 text-xs text-soa-muted">
+              실패 격리·단일 복구 probe·성공률·지연시간을 실제 API 런타임 기준으로 표시합니다.
+            </p>
+          </div>
+          {runtimeActionMessage ? (
+            <p className="mt-3 rounded-xl bg-[#f7f5ef] p-3 text-xs font-bold leading-5 text-soa-muted">
+              {runtimeActionMessage}
+            </p>
+          ) : null}
+          <div className="mt-3 grid gap-2">
+            {doctor.report.ttsEngines.map((engine) => (
+              <div key={engine.id} className="rounded-xl bg-[#f7f5ef] p-3 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <strong>{engine.name}</strong>
+                  <StatusPill
+                    label={engine.health === 'probing'
+                      ? '복구 확인 중'
+                      : engine.health === 'cooldown'
+                        ? `격리 ${Math.ceil(engine.cooldownRemainingSeconds ?? 0)}초`
+                        : engine.recommended
+                          ? '자동 우선'
+                          : engine.ready
+                            ? '대체 준비'
+                            : '준비 필요'}
+                    tone={engine.health === 'ready' && engine.ready ? 'good' : 'warning'}
+                  />
+                </div>
+                <p className="mt-1 leading-5 text-soa-muted">
+                  시도 {engine.attemptCount ?? 0} · 성공 {engine.successCount ?? 0} · 실패 {engine.failureCount ?? 0} ·
+                  성공률 {engine.successRate === null || engine.successRate === undefined ? '-' : `${Math.round(engine.successRate * 100)}%`} ·
+                  평균 지연 {engine.averageLatencyMs === null || engine.averageLatencyMs === undefined ? '-' : `${Math.round(engine.averageLatencyMs)}ms`}
+                </p>
+                <p className="mt-1 leading-5 text-soa-muted">
+                  누적 격리 {engine.circuitOpenCount ?? 0}회
+                  {engine.lastError ? ` · 최근 오류 ${engine.lastError}` : ''}
+                </p>
+                {engine.health === 'cooldown' ? (
+                  <button
+                    type="button"
+                    disabled={resettingEngineId === engine.id}
+                    onClick={() => void handleResetEngine(engine.id)}
+                    className="focus-ring mt-2 min-h-8 rounded-lg border border-soa-line bg-white px-3 text-[10px] font-black disabled:opacity-50"
+                  >
+                    {resettingEngineId === engine.id ? '초기화 중…' : '격리 상태 수동 초기화'}
+                  </button>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-4 rounded-2xl border border-soa-line bg-white p-4">
         <div className="flex items-center justify-between gap-3">

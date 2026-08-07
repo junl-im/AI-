@@ -10,6 +10,7 @@ from app.services.engine_orchestrator import (
     EngineExhaustedError,
     EngineOrchestrator,
     EngineRequestUnsupportedError,
+    EngineRuntimeBusyError,
     EngineUnavailableError,
 )
 from app.services.voice_presets import VoicePresetUnavailableError
@@ -303,3 +304,237 @@ async def test_all_preset_incompatible_engines_return_unsupported_without_circui
     runtime = {item.id: item for item in orchestrator.list_info()}
     assert runtime["single-speaker"].failure_count == 0
     assert runtime["single-speaker"].health == "ready"
+
+
+@pytest.mark.asyncio
+async def test_explicit_engine_respects_open_circuit_without_hammering_runner():
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        failure_threshold=1,
+        cooldown_seconds=60,
+    )
+    calls = 0
+
+    async def fail(engine, engine_request):
+        nonlocal calls
+        calls += 1
+        raise RuntimeError("primary failed")
+
+    with pytest.raises(EngineExhaustedError):
+        await orchestrator.synthesize(request("primary"), fail)
+    with pytest.raises(EngineUnavailableError, match="장애 격리"):
+        await orchestrator.synthesize(request("primary"), fail)
+
+    assert calls == 1
+
+
+@pytest.mark.asyncio
+async def test_half_open_allows_only_one_probe_while_other_request_uses_backup():
+    import asyncio
+
+    clock = {"now": 100.0}
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    registry.register_tts(FakeEngine("backup", mode="local"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["primary", "backup"],
+        failure_threshold=1,
+        cooldown_seconds=10,
+        clock=lambda: clock["now"],
+    )
+
+    async def initial_runner(engine, engine_request):
+        if engine.info().id == "primary":
+            raise RuntimeError("primary failed")
+        return await engine.synthesize(engine_request)
+
+    await orchestrator.synthesize(request(), initial_runner)
+    clock["now"] = 111.0
+    probe_started = asyncio.Event()
+    release_probe = asyncio.Event()
+
+    async def recovery_runner(engine, engine_request):
+        if engine.info().id == "primary":
+            probe_started.set()
+            await release_probe.wait()
+        return await engine.synthesize(engine_request)
+
+    first_task = asyncio.create_task(orchestrator.synthesize(request(), recovery_runner))
+    await probe_started.wait()
+    during_probe = {item.id: item for item in orchestrator.list_info()}
+    second = await orchestrator.synthesize(request(), recovery_runner)
+    release_probe.set()
+    first = await first_task
+
+    assert during_probe["primary"].health == "probing"
+    assert second.engine_id == "backup"
+    assert second.attempted_engine_ids == ["backup"]
+    assert first.engine_id == "primary"
+    assert first.attempted_engine_ids == ["primary"]
+
+
+@pytest.mark.asyncio
+async def test_repeated_probe_failure_uses_bounded_exponential_backoff():
+    clock = {"now": 100.0}
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        failure_threshold=1,
+        cooldown_seconds=10,
+        max_cooldown_seconds=25,
+        clock=lambda: clock["now"],
+    )
+
+    async def fail(engine, engine_request):
+        raise RuntimeError("still down")
+
+    with pytest.raises(EngineExhaustedError):
+        await orchestrator.synthesize(request(), fail)
+    first = orchestrator.list_info()[0]
+    assert first.cooldown_remaining_seconds == 10
+    assert first.circuit_open_count == 1
+
+    clock["now"] = 111.0
+    with pytest.raises(EngineExhaustedError):
+        await orchestrator.synthesize(request(), fail)
+    second = orchestrator.list_info()[0]
+    assert second.cooldown_remaining_seconds == 20
+    assert second.circuit_open_count == 2
+
+    clock["now"] = 132.0
+    with pytest.raises(EngineExhaustedError):
+        await orchestrator.synthesize(request(), fail)
+    third = orchestrator.list_info()[0]
+    assert third.cooldown_remaining_seconds == 25
+    assert third.circuit_open_count == 3
+
+
+@pytest.mark.asyncio
+async def test_success_records_runtime_metrics_and_resets_backoff_level():
+    clock = {"now": 10.0}
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        failure_threshold=1,
+        cooldown_seconds=5,
+        clock=lambda: clock["now"],
+    )
+
+    async def fail(engine, engine_request):
+        clock["now"] += 0.2
+        raise RuntimeError("temporary")
+
+    with pytest.raises(EngineExhaustedError):
+        await orchestrator.synthesize(request(), fail)
+    clock["now"] += 6
+
+    async def recover(engine, engine_request):
+        clock["now"] += 0.15
+        return await engine.synthesize(engine_request)
+
+    await orchestrator.synthesize(request(), recover)
+    info = orchestrator.list_info()[0]
+
+    assert info.health == "ready"
+    assert info.success_count == 1
+    assert info.failure_count == 1
+    assert info.attempt_count == 2
+    assert info.success_rate == 0.5
+    assert info.average_latency_ms == 175.0
+    assert info.last_latency_ms == 150.0
+    assert info.circuit_open_count == 1
+    assert info.last_success_at is not None
+    assert info.last_failure_at is not None
+
+
+@pytest.mark.asyncio
+async def test_runtime_reset_clears_circuit_and_counters():
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        failure_threshold=1,
+        cooldown_seconds=60,
+    )
+
+    async def fail(engine, engine_request):
+        raise RuntimeError("temporary")
+
+    with pytest.raises(EngineExhaustedError):
+        await orchestrator.synthesize(request(), fail)
+    before = orchestrator.list_info()[0]
+    after = await orchestrator.reset_runtime("primary")
+
+    assert before.health == "cooldown"
+    assert after.health == "ready"
+    assert after.failure_count == 0
+    assert after.circuit_open_count == 0
+    assert after.last_error is None
+
+
+@pytest.mark.asyncio
+async def test_runtime_reset_rejects_engine_with_active_synthesis():
+    import asyncio
+
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    orchestrator = EngineOrchestrator(registry)
+    started = asyncio.Event()
+    release = asyncio.Event()
+
+    async def runner(engine, engine_request):
+        started.set()
+        await release.wait()
+        return await engine.synthesize(engine_request)
+
+    task = asyncio.create_task(orchestrator.synthesize(request(), runner))
+    await started.wait()
+
+    with pytest.raises(EngineRuntimeBusyError, match="실행 중인 합성"):
+        await orchestrator.reset_runtime("primary")
+
+    release.set()
+    result = await task
+    assert result.engine_id == "primary"
+
+
+@pytest.mark.asyncio
+async def test_runtime_refresh_blocks_new_synthesis_until_maintenance_finishes():
+    import asyncio
+
+    refresh_started = asyncio.Event()
+    release_refresh = asyncio.Event()
+
+    class RefreshingEngine(FakeEngine):
+        async def refresh_runtime(self):
+            refresh_started.set()
+            await release_refresh.wait()
+
+    registry = EngineRegistry()
+    registry.register_tts(RefreshingEngine("primary"))
+    registry.register_tts(FakeEngine("backup", mode="local"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["primary", "backup"],
+    )
+
+    reset_task = asyncio.create_task(orchestrator.reset_runtime("primary"))
+    await refresh_started.wait()
+    during = {item.id: item for item in orchestrator.list_info()}
+    result = await orchestrator.synthesize(
+        request(),
+        lambda engine, engine_request: engine.synthesize(engine_request),
+    )
+
+    assert during["primary"].health == "probing"
+    assert result.engine_id == "backup"
+    assert result.attempted_engine_ids == ["backup"]
+
+    release_refresh.set()
+    refreshed = await reset_task
+    assert refreshed.health == "ready"

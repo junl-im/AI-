@@ -8,6 +8,7 @@ from app.main import app
 from app.services.engine_orchestrator import (
     EngineExhaustedError,
     EngineRequestUnsupportedError,
+    EngineRuntimeState,
 )
 
 
@@ -327,3 +328,30 @@ def test_completed_job_progress_is_available_as_sse(client):
     assert response.headers["content-type"].startswith("text/event-stream")
     assert "event: progress" in response.text
     assert '"phase":"completed"' in response.text
+
+
+def test_engine_runtime_reset_endpoint_clears_runtime_state(client):
+    orchestrator = client.app.state.engine_orchestrator
+    runtime = orchestrator._runtime.setdefault("mock", EngineRuntimeState())
+    runtime.failures = 2
+    runtime.consecutive_failures = 2
+    runtime.open_until = orchestrator._clock() + 60
+    runtime.circuit_open_count = 1
+    runtime.last_error = "forced test failure"
+
+    response = client.post("/api/v1/engines/mock/runtime/reset")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["cleared"] is True
+    assert body["engine_id"] == "mock"
+    assert body["engine"]["health"] == "ready"
+    assert body["engine"]["failure_count"] == 0
+    assert body["engine"]["circuit_open_count"] == 0
+
+
+def test_engine_runtime_reset_endpoint_rejects_unknown_engine(client):
+    response = client.post("/api/v1/engines/not-installed/runtime/reset")
+
+    assert response.status_code == 404
+    assert "SOA-4031" in response.json()["detail"]

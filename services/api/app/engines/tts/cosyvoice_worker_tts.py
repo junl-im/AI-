@@ -215,6 +215,9 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             "failure_reason": failure_reason[:1000],
         })
 
+    async def refresh_runtime(self) -> None:
+        await self.worker.probe()
+
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:
         if request.output_format != "wav":
             raise ValueError("CosyVoice Worker 일반 TTS는 현재 WAV만 지원합니다.")

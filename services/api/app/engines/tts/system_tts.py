@@ -61,7 +61,14 @@ _MALE_NAME_TOKENS = (
 
 class SystemSpeechAdapter:
     def __init__(self, configured_voice: str = "") -> None:
-        self.backends = self._detect_backends(configured_voice.strip())
+        self.configured_voice = configured_voice.strip()
+        self.backends: list[SystemBackend] = []
+        self.backend: SystemBackend | None = None
+        self.reason: str | None = None
+        self.refresh()
+
+    def refresh(self) -> None:
+        self.backends = self._detect_backends(self.configured_voice)
         self.backend = self.backends[0] if self.backends else None
         self.reason = None if self.backend else self._unavailable_reason()
 
@@ -577,6 +584,9 @@ class SystemTtsEngine(TtsEngine):
 
     def voice_selection_diagnostics(self) -> list[dict[str, object]]:
         return self.adapter.selection_diagnostics()
+
+    def refresh_runtime(self) -> None:
+        self.adapter.refresh()
 
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:
         if request.output_format != "wav":

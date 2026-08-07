@@ -3,7 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 EngineMode = Literal["mock", "local", "ai"]
-EngineHealth = Literal["ready", "cooldown", "unavailable"]
+EngineHealth = Literal["ready", "probing", "cooldown", "unavailable"]
 EngineQualityTier = Literal["basic", "standard", "premium", "reference"]
 
 
@@ -30,6 +30,21 @@ class EngineInfo(BaseModel):
     health: EngineHealth = "unavailable"
     success_count: int = 0
     failure_count: int = 0
+    attempt_count: int = 0
+    success_rate: float | None = Field(default=None, ge=0, le=1)
     consecutive_failures: int = 0
     cooldown_remaining_seconds: float = 0
     last_error: str | None = None
+    circuit_open_count: int = 0
+    probe_in_flight: bool = False
+    average_latency_ms: float | None = Field(default=None, ge=0)
+    last_latency_ms: float | None = Field(default=None, ge=0)
+    last_success_at: str | None = None
+    last_failure_at: str | None = None
+
+
+class EngineRuntimeResetResponse(BaseModel):
+    engine_id: str
+    cleared: bool
+    message: str
+    engine: EngineInfo

@@ -156,3 +156,19 @@ def test_melo_selection_diagnostics_reports_actual_speaker_id(tmp_path):
 
 def test_melo_recognizes_youngho_as_male_speaker():
     assert MeloTtsEngine._speaker_gender("YoungHo Korean") == "male"
+
+
+@pytest.mark.asyncio
+async def test_melo_runtime_refresh_unloads_model_but_preserves_ready_override(tmp_path):
+    model = MultiSpeakerMeloModel()
+    engine = MeloTtsEngine(
+        AudioStore(tmp_path, ttl_minutes=30),
+        model_factory=lambda: model,
+        ready_override=True,
+    )
+    engine._model = model
+
+    await engine.refresh_runtime()
+
+    assert engine._model is None
+    assert engine.info().ready is True

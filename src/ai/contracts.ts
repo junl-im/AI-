@@ -51,12 +51,20 @@ export interface EngineInfo {
   longForm?: boolean
   streaming?: boolean
   recommended?: boolean
-  health?: 'ready' | 'cooldown' | 'unavailable'
+  health?: 'ready' | 'probing' | 'cooldown' | 'unavailable'
   successCount?: number
   failureCount?: number
+  attemptCount?: number
+  successRate?: number | null
   consecutiveFailures?: number
   cooldownRemainingSeconds?: number
   lastError?: string | null
+  circuitOpenCount?: number
+  probeInFlight?: boolean
+  averageLatencyMs?: number | null
+  lastLatencyMs?: number | null
+  lastSuccessAt?: string | null
+  lastFailureAt?: string | null
 }
 
 export interface HealthResult {

@@ -30,23 +30,37 @@ def engine_diagnostic(
             detail=info.reason or "현재 환경에서 음성 생성을 시작할 수 있습니다.",
         ),
     ]
+    if info.health == "probing":
+        orchestration_detail = "한 요청만 복구 확인 중이며 다른 요청은 대체 엔진으로 우회합니다."
+    elif info.health == "cooldown":
+        orchestration_detail = "장애 격리 중이라 자동·고정 선택 요청 모두 실행하지 않습니다."
+    elif info.recommended:
+        orchestration_detail = "현재 자동 생성의 최우선 엔진입니다."
+    elif info.auto_eligible:
+        orchestration_detail = "실패 시 자동 대체 후보로 대기합니다."
+    else:
+        orchestration_detail = "테스트 전용 또는 현재 자동 후보가 아닙니다."
     checks.append(
         DiagnosticCheck(
             id="auto-orchestration",
             label="자동 엔진 운영",
-            status="ready" if info.recommended else "idle",
-            detail=(
-                "현재 자동 생성의 최우선 엔진입니다."
-                if info.recommended
-                else (
-                    "실패 시 자동 대체 후보로 대기합니다."
-                    if info.auto_eligible
-                    else "테스트 전용 또는 현재 자동 후보가 아닙니다."
-                )
-            ),
+            status="ready" if info.recommended and info.health == "ready" else "idle",
+            detail=orchestration_detail,
         )
     )
-    if info.health == "cooldown":
+    if info.health == "probing":
+        checks.append(
+            DiagnosticCheck(
+                id="circuit-breaker",
+                label="복구 단일 Probe",
+                status="idle",
+                detail=(
+                    "cooldown 종료 후 한 요청만 복구 확인 중입니다. "
+                    "다른 자동 요청은 대체 엔진으로 우회합니다."
+                ),
+            )
+        )
+    elif info.health == "cooldown":
         checks.append(
             DiagnosticCheck(
                 id="circuit-breaker",
@@ -54,7 +68,19 @@ def engine_diagnostic(
                 status="missing",
                 detail=(
                     f"연속 실패로 {info.cooldown_remaining_seconds:.1f}초 동안 "
-                    "자동 선택에서 제외합니다."
+                    "자동·고정 선택 요청에서 제외합니다."
+                ),
+            )
+        )
+    elif info.circuit_open_count:
+        checks.append(
+            DiagnosticCheck(
+                id="circuit-breaker",
+                label="장애 복구 이력",
+                status="ready",
+                detail=(
+                    f"누적 {info.circuit_open_count}회 격리 이력이 있으며 현재는 "
+                    "정상 요청을 받을 수 있습니다."
                 ),
             )
         )
@@ -131,7 +157,16 @@ def engine_diagnostic(
         health=info.health,
         success_count=info.success_count,
         failure_count=info.failure_count,
+        attempt_count=info.attempt_count,
+        success_rate=info.success_rate,
+        consecutive_failures=info.consecutive_failures,
         cooldown_remaining_seconds=info.cooldown_remaining_seconds,
+        circuit_open_count=info.circuit_open_count,
+        probe_in_flight=info.probe_in_flight,
+        average_latency_ms=info.average_latency_ms,
+        last_latency_ms=info.last_latency_ms,
+        last_success_at=info.last_success_at,
+        last_failure_at=info.last_failure_at,
         checks=checks,
     )
 
