@@ -8,7 +8,7 @@ export function WorkspaceConversation({ messages }: WorkspaceConversationProps) 
   const visible = messages.slice(-5)
   const latest = visible.at(-1)
   return (
-    <details className="soa-workspace-conversation">
+    <details className="soa-workspace-conversation" role="region" aria-label="작업 메시지">
       <summary>
         <span>제작 기록</span>
         <strong>{latest?.badge ?? '준비'} · {visible.length}개</strong>

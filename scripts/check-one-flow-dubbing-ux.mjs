@@ -55,7 +55,9 @@ requireTokens('src/components/workspace/DubbingVoiceControls.tsx', voiceControls
 
 const conversation = await source('src/components/workspace/WorkspaceConversation.tsx')
 requireTokens('src/components/workspace/WorkspaceConversation.tsx', conversation, [
-  '<details className="soa-workspace-conversation">',
+  'className="soa-workspace-conversation"',
+  'role="region"',
+  'aria-label="작업 메시지"',
   '<summary>',
   '제작 기록',
 ])
@@ -65,6 +67,8 @@ requireTokens('src/hooks/useDesktopStudioLayout.ts', layout, [
   'sorion.desktop-studio-layout.v3',
   'leftCollapsed: true',
   'rightCollapsed: true',
+  'value.leftCollapsed ?? DEFAULT_LAYOUT.leftCollapsed',
+  'value.rightCollapsed ?? DEFAULT_LAYOUT.rightCollapsed',
   'toggleSidePanels',
   'sidePanelsCollapsed: layout.leftCollapsed && layout.rightCollapsed',
 ])

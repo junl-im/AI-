@@ -33,8 +33,8 @@ export function normalizeDesktopStudioLayout(value: Partial<DesktopStudioLayoutS
   return {
     leftWidth: clamp(value.leftWidth ?? DEFAULT_LAYOUT.leftWidth, LEFT_MIN, LEFT_MAX),
     rightWidth: clamp(value.rightWidth ?? DEFAULT_LAYOUT.rightWidth, RIGHT_MIN, RIGHT_MAX),
-    leftCollapsed: value.leftCollapsed === true,
-    rightCollapsed: value.rightCollapsed === true,
+    leftCollapsed: value.leftCollapsed ?? DEFAULT_LAYOUT.leftCollapsed,
+    rightCollapsed: value.rightCollapsed ?? DEFAULT_LAYOUT.rightCollapsed,
   }
 }
 
