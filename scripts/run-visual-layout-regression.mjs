@@ -102,18 +102,24 @@ async function startStaticServer() {
   return { server, url: `http://127.0.0.1:${address.port}/` }
 }
 
-async function waitForJson(url, timeoutMs = 8_000) {
+async function waitForJson(url, timeoutMs = 20_000, browserState = null) {
   const deadline = Date.now() + timeoutMs
+  let lastError = null
   while (Date.now() < deadline) {
+    if (browserState?.exited()) {
+      throw new Error(`Chromium이 디버깅 endpoint 준비 전에 종료되었습니다. exit=${browserState.exitCode()} stderr=${browserState.stderr()}`)
+    }
     try {
       const response = await fetch(url)
       if (response.ok) return await response.json()
-    } catch {
-      // Browser debugging endpoint is still starting.
+      lastError = new Error(`HTTP ${response.status}`)
+    } catch (error) {
+      lastError = error
     }
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 120))
   }
-  throw new Error(`시간 안에 브라우저 디버깅 endpoint가 열리지 않았습니다: ${url}`)
+  const suffix = lastError instanceof Error ? ` · 마지막 오류: ${lastError.message}` : ''
+  throw new Error(`시간 안에 브라우저 디버깅 endpoint가 열리지 않았습니다: ${url}${suffix}`)
 }
 
 function createCdpClient(socketUrl) {
@@ -176,16 +182,43 @@ async function evaluate(cdp, expression) {
   return result.result?.value
 }
 
+async function waitForCondition(cdp, expression, label, timeoutMs = 15_000) {
+  const deadline = Date.now() + timeoutMs
+  let lastError = null
+  while (Date.now() < deadline) {
+    try {
+      if (await evaluate(cdp, expression)) return true
+      lastError = null
+    } catch (error) {
+      lastError = error
+    }
+    await new Promise((resolve) => setTimeout(resolve, 120))
+  }
+  const suffix = lastError instanceof Error ? ` · 마지막 오류: ${lastError.message}` : ''
+  throw new Error(`${label} 준비 대기 시간이 초과되었습니다.${suffix}`)
+}
+
 async function buildWorkspaceFixture(cdp) {
   const fixtureText = '첫 번째 실사용 더빙 문장입니다. 두 번째 클립의 목소리를 함께 바꿉니다. 세 번째 문장으로 화면 폭도 점검합니다.'
-  await evaluate(cdp, `(() => {
+  await waitForCondition(
+    cdp,
+    `(() => [...document.querySelectorAll('button')].some((item) => item.textContent?.includes('장문 음성 스튜디오 시작')))()`,
+    '장문 음성 스튜디오 시작 버튼',
+  )
+  const studioOpened = await evaluate(cdp, `(() => {
     const button = [...document.querySelectorAll('button')]
       .find((item) => item.textContent?.includes('장문 음성 스튜디오 시작'))
     button?.click()
     return Boolean(button)
   })()`)
-  await new Promise((resolve) => setTimeout(resolve, 250))
-  await evaluate(cdp, `(() => {
+  if (!studioOpened) throw new Error('장문 음성 스튜디오 시작 버튼을 실행하지 못했습니다.')
+
+  await waitForCondition(
+    cdp,
+    `(() => document.querySelector('[aria-label="음성으로 만들 장문 내용"]') instanceof HTMLTextAreaElement)()`,
+    '장문 내용 편집기',
+  )
+  const editorUpdated = await evaluate(cdp, `(() => {
     const editor = document.querySelector('[aria-label="음성으로 만들 장문 내용"]')
     if (!(editor instanceof HTMLTextAreaElement)) return false
     const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set
@@ -193,22 +226,42 @@ async function buildWorkspaceFixture(cdp) {
     editor.dispatchEvent(new Event('input', { bubbles: true }))
     return true
   })()`)
-  await new Promise((resolve) => setTimeout(resolve, 120))
-  await evaluate(cdp, `(() => {
+  if (!editorUpdated) throw new Error('장문 내용 fixture를 입력하지 못했습니다.')
+
+  await waitForCondition(
+    cdp,
+    `(() => [...document.querySelectorAll('button')].some((item) => item.textContent?.includes('전체 내용 음성 제작')))()`,
+    '전체 내용 음성 제작 버튼',
+  )
+  const productionStarted = await evaluate(cdp, `(() => {
     const button = [...document.querySelectorAll('button')]
       .find((item) => item.textContent?.includes('전체 내용 음성 제작'))
     button?.click()
     return Boolean(button)
   })()`)
-  await new Promise((resolve) => setTimeout(resolve, 450))
-  await evaluate(cdp, `(() => {
+  if (!productionStarted) throw new Error('전체 내용 음성 제작 버튼을 실행하지 못했습니다.')
+
+  await waitForCondition(
+    cdp,
+    `(() => [...document.querySelectorAll('article.soa-dubbing-block')]
+      .filter((item) => item.querySelector('.soa-dubbing-block__script-preview')).length >= 2)()`,
+    'visual fixture 음성 클립 2개',
+    20_000,
+  )
+  const selectedCount = await evaluate(cdp, `(() => {
     const voices = [...document.querySelectorAll('article.soa-dubbing-block')]
       .filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
-    if (voices.length < 2) return voices.length
+    if (voices.length < 2) return 0
     voices[1].dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }))
     return voices.length
   })()`)
-  await new Promise((resolve) => setTimeout(resolve, 180))
+  if (selectedCount < 2) throw new Error(`visual fixture 클립이 부족합니다: ${selectedCount}`)
+
+  await waitForCondition(
+    cdp,
+    `(() => Boolean(document.querySelector('.soa-timeline-quick-editor.is-batch') && document.querySelector('.soa-timeline-batch-controls')))()`,
+    '다중 선택 batch 편집기',
+  )
 }
 
 const layoutProbeExpression = `(() => {
@@ -345,24 +398,48 @@ const child = spawn(browser.command, [
   `--user-data-dir=${userDataDirectory}`,
   'about:blank',
 ], { stdio: ['ignore', 'ignore', 'pipe'] })
+const chromiumStderr = []
+child.stderr?.setEncoding('utf8')
+child.stderr?.on('data', (chunk) => {
+  chromiumStderr.push(String(chunk))
+  if (chromiumStderr.length > 40) chromiumStderr.shift()
+})
+const browserState = {
+  exited: () => child.exitCode !== null,
+  exitCode: () => child.exitCode,
+  stderr: () => chromiumStderr.join('').trim().slice(-4_000),
+}
+let stage = 'chromium-debug-endpoint'
 
 try {
-  await waitForJson(`http://127.0.0.1:${debuggingPort}/json/version`)
+  await waitForJson(`http://127.0.0.1:${debuggingPort}/json/version`, 20_000, browserState)
+  stage = 'chromium-target'
   const targetResponse = await fetch(
     `http://127.0.0.1:${debuggingPort}/json/new?${encodeURIComponent(url)}`,
     { method: 'PUT' },
   )
   if (!targetResponse.ok) throw new Error(`Chromium target 생성 실패: ${targetResponse.status}`)
   const target = await targetResponse.json()
+  stage = 'cdp-connect'
   const cdp = createCdpClient(target.webSocketDebuggerUrl)
   await cdp.send('Page.enable')
   await cdp.send('Runtime.enable')
+  await cdp.send('Emulation.setDeviceMetricsOverride', {
+    width: viewports[0],
+    height,
+    deviceScaleFactor: 1,
+    mobile: false,
+  })
 
-  const firstLoad = cdp.once('Page.loadEventFired')
-  await cdp.send('Page.navigate', { url })
-  await firstLoad
+  stage = 'page-navigate'
+  const navigation = await cdp.send('Page.navigate', { url })
+  if (navigation?.errorText) throw new Error(`Page.navigate 실패: ${navigation.errorText}`)
+  await waitForCondition(cdp, `(() => document.readyState === 'complete')()`, 'production page load', 20_000)
+
+  stage = 'workspace-fixture'
   await buildWorkspaceFixture(cdp)
 
+  stage = 'layout-capture'
   const captures = []
   let failed = false
   for (const width of viewports) {
@@ -479,6 +556,24 @@ try {
   } else {
     console.log(`Visual layout regression 통과 · ${captures.map((item) => `${item.viewport.width}px`).join(' / ')}`)
   }
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error)
+  const stderr = browserState.stderr()
+  const detail = stderr ? `${message} · chromium stderr: ${stderr}` : message
+  console.error(`Chromium visual runner 실패 · stage=${stage} · ${detail}`)
+  if (process.env.GITHUB_ACTIONS === 'true') {
+    const escaped = `stage=${stage} · ${detail}`.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
+    console.error(`::error title=Chromium visual runner ${stage}::${escaped}`)
+  }
+  await writeFile(join(output, 'runner-failure.json'), `${JSON.stringify({
+    schemaVersion: 1,
+    stage,
+    browser: browser.version,
+    error: message,
+    chromiumStderr: stderr || null,
+    capturedAt: new Date().toISOString(),
+  }, null, 2)}\n`, 'utf8').catch(() => {})
+  process.exitCode = 1
 } finally {
   const exited = new Promise((resolve) => child.once('exit', resolve))
   child.kill('SIGTERM')

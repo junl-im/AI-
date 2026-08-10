@@ -37,6 +37,10 @@ requireTokens('scripts/run-visual-layout-regression.mjs', runner, [
   'maxDiffRatio',
   'channelThreshold',
   'approveBaseline',
+  'waitForCondition',
+  "stage = 'workspace-fixture'",
+  'runner-failure.json',
+  'Chromium visual runner',
 ])
 
 
