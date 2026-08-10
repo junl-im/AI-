@@ -1,23 +1,23 @@
-SoriON AI 0.11.3 -> 0.11.4 Visual Baseline Approval & Recovery Provenance
+SoriON AI 0.11.4 -> 0.11.5 Editor Command UX & Adaptive Engine Load Awareness
 
 기준 버전
-- 0.11.3 Failure-Guided Editing & Adaptive Performance Routing
+- 0.11.4 Visual Baseline Approval & Recovery Provenance
 
 적용 결과
-- 승인형 Chromium visual baseline과 허용 오차 pixel diff
-- Timeline 최근 6건 batch retry history
-- Runtime soak source filename/SHA-256/time provenance와 비교 evidence export
-- Engine performance observation window expiry 시 stale EWMA reset
-- 앱·API·Worker 제품 버전 v0.11.4 동기화
+- Timeline 다중 선택 keyboard command bar와 안전 실행 preview
+- 일괄 이동 직전 1회 Undo
+- auto engine active-request 기반 병렬 부하 분산
+- performance observation session 상태·표본·관찰창·EWMA 진단
+- 앱·API·Worker 제품 버전 v0.11.5 동기화
 
 변경 수
-- 추가 4개
-- 수정 37개
+- 추가 6개
+- 수정 42개
 - 삭제 0개
-- 총 41개
+- 총 48개
 
 삭제 파일
 - 없음
 
 상세 manifest
-- docs/patches/0.11.4-visual-baseline-recovery-provenance/PATCH_MANIFEST.txt
+- docs/patches/0.11.5-editor-command-adaptive-engine-load/PATCH_MANIFEST.txt

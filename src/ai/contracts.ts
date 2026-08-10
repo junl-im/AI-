@@ -68,6 +68,16 @@ export interface EngineInfo {
   selectionPenalty?: number
   degradedRemainingSeconds?: number
   selectionReason?: string | null
+  activeRequestCount?: number
+  performanceSampleCount?: number
+  performanceMinSamples?: number
+  performanceWindowSeconds?: number
+  performanceWindowRemainingSeconds?: number
+  performanceObservationStatus?: 'disabled' | 'idle' | 'warming' | 'active' | 'expired'
+  performanceObservationStartedAt?: string | null
+  performanceLastSampleAt?: string | null
+  performanceLatencyEwmaMs?: number | null
+  performanceReliabilityEwma?: number | null
 }
 
 export interface HealthResult {

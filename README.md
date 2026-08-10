@@ -8,11 +8,12 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.11.4 · Visual Baseline Approval & Recovery Provenance`
+- 버전: `0.11.5 · Editor Command UX & Adaptive Engine Load Awareness`
 - 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
 - 운영자 기준선: 최근 5건을 SHA-256 snapshot으로 확정하고 자동 기준선과 별도로 교체·폐기 이력을 관리합니다.
 - 기준선 복구: append-only history에서 과거 기준선을 비교 미리보기한 뒤 `restored` 이벤트로 되살리며 기존 기록은 삭제하지 않습니다.
 - 다중 클립 편집: `Ctrl/Cmd`/`Shift` 선택 뒤 이동·삭제뿐 아니라 voice 변경 영향 미리보기, 일괄 재생성, 실패만 재시도를 지원합니다.
+- 편집 명령 UX: 다중 선택에서 `Ctrl/Cmd+A`, `R`, `Shift+R`, `Alt+←/→`, `Delete`, `Esc`, `?`를 지원하고 재생성·삭제는 영향 미리보기, 이동은 1회 Undo를 제공합니다.
 - 배치 복구 UX: 일괄 재생성 뒤 성공·실패·건너뜀을 즉시 요약하고 실패 클립만 자동 선택해 재시도 동선을 줄입니다.
 - 실패 원인 안내: 일괄 실패를 엔진·프리셋·연결·취소·기타로 그룹화하고 필요한 그룹만 빠르게 재시도하며 빠른 재시도는 기본 3회로 제한합니다.
 - 복구 검증: 장시간 검사 중 Worker를 실제 재시작하고 45초 이내 자동 복구와 이전 실행 대비 회귀를 기록합니다.
@@ -32,6 +33,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 엔진 회복력: 장애 엔진은 circuit breaker로 격리하고 cooldown 뒤 단일 half-open probe만 허용해 동시 재폭주를 방지
 - 적응형 자동 라우팅: circuit이 열리기 전 첫 최근 실패도 짧은 soft-degrade 구간으로 감점해 연속 요청이 같은 불안정 엔진을 다시 밟지 않게 합니다.
 - 성능 적응 라우팅: 최근 4개 이상 표본의 EWMA 안정도·지연을 120초 관찰창에서 평가해 느리거나 불안정한 엔진의 auto 우선순위를 임시로 낮춥니다.
+- 병렬 부하 분산: auto 요청은 현재 실행 중인 요청 수를 일시 감점해 준비된 backup 엔진으로 동시 작업을 분산하며, 명시적 엔진 선택은 그대로 존중합니다.
+- 관찰 세션 진단: Engine Doctor·Quality Diagnostics에서 EWMA 관찰 상태(warming/active/expired), 표본 수, 남은 관찰창, 실행 중 요청 수를 확인합니다.
 - 적응형 backoff: 반복 복구 실패는 cooldown을 상한 내에서 단계적으로 늘리고 성공 시 즉시 기본 단계로 복귀
 - 엔진 재탐지: 수동 런타임 초기화 시 System 음성/eSpeak 재탐지, Melo 모델 unload, CosyVoice Worker probe를 엔진별로 수행
 - 런타임 진단: 엔진별 성공률·평균 지연·누적 격리·cooldown·half-open probe를 Quality Lab과 Engine Doctor에서 확인

@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.3 · Failure-Guided Editing & Adaptive Performance Routing**
+현재 기준 버전: **0.11.5 · Editor Command UX & Adaptive Engine Load Awareness**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-07 KST**
+최종 갱신: **2026-08-10 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -1099,3 +1099,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한/주의: 현재 실행 환경에는 Web `node_modules`가 없어 실제 Vitest/ESLint/Vite build를 동일 CI 조건으로 실행할 수 없다. 승인 PNG는 신뢰 runner에서 `quality:visual-layout:approve` 실행 후 커밋해야 하며 승인 전에는 pixel baseline 통과를 주장하지 않는다.
 9. 산출물: `SoriON-AI-0.11.4-visual-baseline-recovery-provenance-full.zip`, `SoriON-AI-0.11.3-to-0.11.4-visual-baseline-recovery-provenance-patch.zip`, SHA-256 목록.
 10. 다음 예상 업데이트: `0.11.5 · Recovery Evidence Classification & Editor Command UX`에서 실제/주입 복구 증거 분리, 승인 baseline CI 강제, 키보드 중심 batch 편집과 장시간 engine observation 진단을 진행한다.
+
+## 2026-08-10 10:15 KST · v0.11.5 Editor Command UX & Adaptive Engine Load Awareness
+1. 작업 일시(KST): 2026-08-10 10:15.
+2. 대상/기준: `0.11.5 · Editor Command UX & Adaptive Engine Load Awareness`, 기준은 사용자가 전달한 공식 `0.11.4 · Visual Baseline Approval & Recovery Provenance` 전체본이다.
+3. 변경 내용: Timeline 다중 선택에 `Ctrl/Cmd+A`, `R`, `Shift+R`, `Alt+←/→`, `Delete`, `Esc`, `?` command bar를 추가하고, 준비된 음원을 덮어쓰는 재생성·삭제에는 안전 미리보기, 이동에는 직전 1회 Undo를 추가했다. Engine auto routing은 현재 실행 중 요청 수를 임시 감점해 병렬 생성이 한 엔진에 몰리는 것을 줄이고, performance observation session의 상태·표본·남은 창·EWMA를 API와 Engine Doctor/Quality Diagnostics에 노출한다.
+4. 변경 이유: 긴 대본의 반복 클릭을 줄이고 일괄 작업의 파괴적 실행을 더 명확하게 확인하며, 동시에 들어온 auto 생성 요청이 설정상 첫 엔진에 집중되는 병목을 완화하고 장시간 성능 관찰 신호의 생명주기를 운영자가 구분할 수 있게 하기 위해서다.
+5. 영향 범위: `TimelineEditor`와 관련 CSS/회귀 테스트, EngineOrchestrator·engine/quality schema·diagnostics, Web engine/quality API mapping과 진단 UI, repository preflight, 버전·문서다. circuit breaker, half-open probe, 명시적 엔진 선택, `SOA-4022` 계약은 유지한다.
+6. 변경·추가된 주요 파일: `src/components/workspace/TimelineEditor.tsx`, `src/styles/timeline-command-bar.css`, `src/components/evaluation/{EngineDoctorCard,QualityDiagnosticsCard}.tsx`, `src/{tts/voiceApi,settings/connectivityApi,quality/qualityApi}.ts`, `services/api/app/services/engine_orchestrator.py`, `services/api/app/schemas/{engine,quality}.py`, `services/api/app/services/engine_diagnostics.py`, `scripts/check-editor-command-engine-observation.mjs`, `docs/EDITOR_COMMAND_ENGINE_LOAD_AWARENESS.md`.
+7. 검증 결과: API pytest 217/217, Worker pytest 14/14, Engine orchestrator 25/25, Engine orchestrator+Quality 집중 회귀 30/30, Repository preflight 41/41, Python compileall, dependency-free TS/TSX transpile 201/201, 제품 버전 sync v0.11.5를 통과했다. 공식 0.11.4 기준본에 48개 patch 파일을 overlay하고 APPLY_PATCH를 실행한 결과 892/892 files · missing 0 / extra 0 / changed 0으로 완성본과 일치했다.
+8. 알려진 제한과 주의사항: 내부 npm registry가 `zustand@5.0.8`을 404로 반환해 Web 의존성을 설치하지 못했고 동일 CI 조건의 ESLint·Vitest·Vite build·semantic typecheck는 로컬에서 완료하지 못했다. global `tsc -b`는 Vite/Vitest/Node 타입 패키지 누락만 보고했다. active-request 감점은 순간 부하 힌트이지 성능 benchmark가 아니며 이동 Undo는 전체 편집 history가 아니다. 실제/주입 복구 증거 class 분리, 승인 visual baseline CI 강제, 프로젝트 세션 retry snapshot은 아직 완료하지 않았다.
+9. 생성한 전체 ZIP과 패치 ZIP 이름: `SoriON-AI-0.11.5-editor-command-adaptive-engine-load-full.zip`, `SoriON-AI-0.11.4-to-0.11.5-editor-command-adaptive-engine-load-patch.zip`, `SHA256SUMS.txt`.
+10. 다음 예상 업데이트: `0.11.6 · Recovery Evidence Classification & Session Safety`. 실제 OS/Wi-Fi/visibility와 synthetic injection 증거 class 분리, 승인 Chromium baseline CI 강제, 민감정보 없는 batch retry session snapshot, active-request 분산 장시간 soak 검증을 우선한다.
+

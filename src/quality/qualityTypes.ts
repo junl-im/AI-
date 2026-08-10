@@ -36,6 +36,16 @@ export interface EngineDiagnostic {
   selectionPenalty: number
   degradedRemainingSeconds: number
   selectionReason: string | null
+  activeRequestCount: number
+  performanceSampleCount: number
+  performanceMinSamples: number
+  performanceWindowSeconds: number
+  performanceWindowRemainingSeconds: number
+  performanceObservationStatus: 'disabled' | 'idle' | 'warming' | 'active' | 'expired'
+  performanceObservationStartedAt: string | null
+  performanceLastSampleAt: string | null
+  performanceLatencyEwmaMs: number | null
+  performanceReliabilityEwma: number | null
   checks: DiagnosticCheck[]
 }
 

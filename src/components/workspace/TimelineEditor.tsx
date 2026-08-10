@@ -61,6 +61,18 @@ interface BatchHistoryEntry {
   failureKinds: TimelineBatchFailureKind[]
 }
 
+type BatchCommandKind = 'regenerate' | 'retry-failed' | 'delete'
+
+interface BatchCommandPreview {
+  kind: BatchCommandKind
+  ids: string[]
+}
+
+interface BatchMoveUndo {
+  ids: string[]
+  direction: -1 | 1
+}
+
 const batchFailureLabels: Record<TimelineBatchFailureKind, string> = {
   engine: '엔진',
   preset: '프리셋',
@@ -357,6 +369,9 @@ export function TimelineEditor({
   const [batchRetryCount, setBatchRetryCount] = useState(0)
   const [batchHistory, setBatchHistory] = useState<BatchHistoryEntry[]>([])
   const [batchHistoryOpen, setBatchHistoryOpen] = useState(false)
+  const [batchCommandPreview, setBatchCommandPreview] = useState<BatchCommandPreview | null>(null)
+  const [lastBatchMove, setLastBatchMove] = useState<BatchMoveUndo | null>(null)
+  const [shortcutHelpOpen, setShortcutHelpOpen] = useState(false)
   const batchFailures = batchResult?.failures
     ?? batchResult?.failedIds.map((id) => ({ id, kind: 'unknown' as const, message: '실패 원인을 확인하지 못했습니다.' }))
     ?? []
@@ -406,6 +421,7 @@ export function TimelineEditor({
   const selectedVoiceBlocks = selectedBlocks.filter((block): block is TimelineVoiceBlock => block.kind === 'voice')
   const selectedVoiceIds = selectedVoiceBlocks.map((block) => block.id)
   const selectedVoiceIdKey = selectedVoiceIds.join('|')
+  const selectedIdKey = selectedIds.join('|')
   const firstSelectedVoiceId = selectedVoiceBlocks[0]?.voiceId ?? null
   const selectedFailedVoiceIds = selectedVoiceBlocks
     .filter((block) => block.status === 'failed')
@@ -425,6 +441,11 @@ export function TimelineEditor({
   const quickDraftTrimmed = quickDraft.trim()
   const quickDraftDirty = Boolean(selectedVoiceBlock && quickDraftTrimmed && quickDraftTrimmed !== selectedVoiceBlock.text)
   const rulerTimes = [0, 0.25, 0.5, 0.75, 1].map((ratio) => totalDuration * ratio)
+  const commandPreviewBlocks = batchCommandPreview
+    ? blocks.filter((block) => batchCommandPreview.ids.includes(block.id))
+    : []
+  const commandPreviewVoiceCount = commandPreviewBlocks.filter((block) => block.kind === 'voice').length
+  const commandPreviewReadyCount = commandPreviewBlocks.filter((block) => block.kind === 'voice' && block.status === 'ready').length
 
   function applyBatchResult(summary: TimelineBatchGenerationSummary, retry: boolean) {
     setBatchResult(summary)
@@ -484,6 +505,96 @@ export function TimelineEditor({
     setSelectedBlockIds(new Set(ids))
     setSelectedBlockId(ids[0])
     setSelectionAnchorId(ids[0])
+  }
+
+  function clearSelection() {
+    setSelectedBlockIds(new Set())
+    setSelectedBlockId(null)
+    setSelectionAnchorId(null)
+    setBatchCommandPreview(null)
+  }
+
+  function stageBatchCommand(kind: BatchCommandKind, ids: string[]) {
+    if (!ids.length || batchRunning) return
+    setBatchCommandPreview({ kind, ids: [...ids] })
+  }
+
+  async function executeBatchCommand() {
+    const preview = batchCommandPreview
+    if (!preview) return
+    setBatchCommandPreview(null)
+    if (preview.kind === 'delete') {
+      onRemoveMany?.(preview.ids)
+      clearSelection()
+      return
+    }
+    await runBatchGeneration(preview.ids, preview.kind === 'retry-failed')
+  }
+
+  function performBatchMove(direction: -1 | 1) {
+    if (!onMoveMany || !selectedIds.length) return
+    onMoveMany(selectedIds, direction)
+    setLastBatchMove({ ids: [...selectedIds], direction })
+  }
+
+  function undoBatchMove() {
+    if (!onMoveMany || !lastBatchMove) return
+    onMoveMany(lastBatchMove.ids, lastBatchMove.direction === -1 ? 1 : -1)
+    setLastBatchMove(null)
+  }
+
+  function handleTimelineCommandKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.defaultPrevented) return
+    const target = event.target as HTMLElement
+    if (target.closest('textarea, input, select, button, a, [contenteditable="true"]')) return
+
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+      const voiceIds = blocks.filter((block) => block.kind === 'voice').map((block) => block.id)
+      if (!voiceIds.length) return
+      event.preventDefault()
+      event.stopPropagation()
+      selectVoiceBlocks(voiceIds)
+      return
+    }
+    if (event.key === '?') {
+      event.preventDefault()
+      event.stopPropagation()
+      setShortcutHelpOpen((open) => !open)
+      return
+    }
+    if (event.key === 'Escape' && selectedBlockIds.size > 1) {
+      event.preventDefault()
+      event.stopPropagation()
+      clearSelection()
+      return
+    }
+    if (selectedBlockIds.size <= 1) return
+
+    if (event.key.toLowerCase() === 'r' && !event.metaKey && !event.ctrlKey && !event.altKey) {
+      const ids = event.shiftKey ? selectedFailedVoiceIds : selectedVoiceIds
+      if (!ids.length) return
+      event.preventDefault()
+      event.stopPropagation()
+      stageBatchCommand(event.shiftKey ? 'retry-failed' : 'regenerate', ids)
+      return
+    }
+    if ((event.key === 'Delete' || event.key === 'Backspace') && onRemoveMany) {
+      event.preventDefault()
+      event.stopPropagation()
+      stageBatchCommand('delete', selectedIds)
+      return
+    }
+    if (event.altKey && event.key === 'ArrowLeft' && canMoveSelectionLeft) {
+      event.preventDefault()
+      event.stopPropagation()
+      performBatchMove(-1)
+      return
+    }
+    if (event.altKey && event.key === 'ArrowRight' && canMoveSelectionRight) {
+      event.preventDefault()
+      event.stopPropagation()
+      performBatchMove(1)
+    }
   }
 
   function saveQuickDraft() {
@@ -569,8 +680,9 @@ export function TimelineEditor({
 
   useEffect(() => {
     setBatchPreviewOpen(false)
+    setBatchCommandPreview(null)
     if (firstSelectedVoiceId) setBatchVoiceId(firstSelectedVoiceId)
-  }, [firstSelectedVoiceId, selectedVoiceIdKey])
+  }, [firstSelectedVoiceId, selectedIdKey, selectedVoiceIdKey])
 
   useEffect(() => {
     const validIds = new Set(blocks.map((block) => block.id))
@@ -605,7 +717,11 @@ export function TimelineEditor({
   let voiceIndex = -1
 
   return (
-    <section className="soa-timeline soa-dubbing-timeline" aria-label="음성 블록 편집">
+    <section
+      className="soa-timeline soa-dubbing-timeline"
+      aria-label="음성 블록 편집"
+      onKeyDownCapture={handleTimelineCommandKeyDown}
+    >
       <header className="soa-dubbing-timeline__head">
         <div><span>TIMELINE EDITOR</span><strong>트랙 · 플레이헤드 · 클립 편집</strong></div>
         <div>
@@ -631,7 +747,7 @@ export function TimelineEditor({
             <span>선택 · {selectedBlock.kind === 'voice' ? selectedBlock.voiceName : '쉼'} {formatDuration(selectedBlock.durationSeconds)}</span>
           ) : null}
         </div>
-        <p>트랙 클릭 위치 이동 · Ctrl/Cmd 클릭 다중 선택 · Shift 클릭 범위 선택 · Enter 편집 · Delete 삭제 · Alt+←/→ 이동</p>
+        <p>트랙 클릭 위치 이동 · Ctrl/Cmd 클릭 다중 선택 · Shift 클릭 범위 선택 · Ctrl/Cmd+A 대사 전체 · R 일괄 재생성 · ? 단축키</p>
         <div className="soa-timeline-selection-actions" aria-label="타임라인 빠른 선택">
           <button
             type="button"
@@ -664,6 +780,32 @@ export function TimelineEditor({
             ))}
             {selectedBlocks.length > 4 ? <span>외 {selectedBlocks.length - 4}개</span> : null}
           </div>
+          <div className="soa-timeline-command-bar" aria-label="다중 선택 키보드 명령">
+            <strong>COMMAND</strong>
+            <button type="button" disabled={!selectedVoiceIds.length || batchRunning} onClick={() => stageBatchCommand('regenerate', selectedVoiceIds)}><kbd>R</kbd> 재생성</button>
+            <button type="button" disabled={!selectedFailedVoiceIds.length || batchRunning || batchRetryLimitReached} onClick={() => stageBatchCommand('retry-failed', selectedFailedVoiceIds)}><kbd>⇧R</kbd> 실패만</button>
+            <button type="button" disabled={!onMoveMany || !canMoveSelectionLeft} onClick={() => performBatchMove(-1)}><kbd>⌥←</kbd> 앞으로</button>
+            <button type="button" disabled={!onMoveMany || !canMoveSelectionRight} onClick={() => performBatchMove(1)}><kbd>⌥→</kbd> 뒤로</button>
+            <button type="button" className="is-danger" disabled={!onRemoveMany || batchRunning} onClick={() => stageBatchCommand('delete', selectedIds)}><kbd>Del</kbd> 삭제</button>
+            <button type="button" onClick={clearSelection}><kbd>Esc</kbd> 해제</button>
+            <button type="button" aria-expanded={shortcutHelpOpen} onClick={() => setShortcutHelpOpen((open) => !open)}><kbd>?</kbd> 도움말</button>
+          </div>
+          {lastBatchMove ? (
+            <div className="soa-timeline-command-undo" role="status">
+              <span>선택 이동을 적용했습니다.</span>
+              <button type="button" onClick={undoBatchMove}>이동 되돌리기</button>
+            </div>
+          ) : null}
+          {shortcutHelpOpen ? (
+            <div className="soa-timeline-command-help" role="note">
+              <span><kbd>Ctrl/Cmd+A</kbd> 대사 전체 선택</span>
+              <span><kbd>R</kbd> 선택 재생성 미리보기</span>
+              <span><kbd>Shift+R</kbd> 실패만 재시도 미리보기</span>
+              <span><kbd>Alt+←/→</kbd> 선택 이동</span>
+              <span><kbd>Delete</kbd> 삭제 안전 확인</span>
+              <span><kbd>Esc</kbd> 다중 선택 해제</span>
+            </div>
+          ) : null}
           <div className="soa-timeline-batch-controls">
             <label>
               <span>일괄 목소리</span>
@@ -691,7 +833,9 @@ export function TimelineEditor({
             <button
               type="button"
               disabled={!onRegenerateMany || !selectedVoiceIds.length || selectedGeneratingVoiceCount > 0 || batchRunning}
-              onClick={() => void runBatchGeneration(selectedVoiceIds)}
+              onClick={() => selectedReadyVoiceCount > 0
+                ? stageBatchCommand('regenerate', selectedVoiceIds)
+                : void runBatchGeneration(selectedVoiceIds)}
             >{batchRunning ? '일괄 처리 중…' : '선택 재생성'}</button>
             <button
               type="button"
@@ -723,11 +867,36 @@ export function TimelineEditor({
               </div>
             </div>
           ) : null}
+          {batchCommandPreview ? (
+            <div className="soa-timeline-batch-preview is-command" role="alertdialog" aria-label="일괄 명령 안전 미리보기">
+              <strong>
+                {batchCommandPreview.kind === 'delete'
+                  ? `선택 ${commandPreviewBlocks.length}개 삭제`
+                  : batchCommandPreview.kind === 'retry-failed'
+                    ? `실패 대사 ${commandPreviewVoiceCount}개 재시도`
+                    : `선택 대사 ${commandPreviewVoiceCount}개 재생성`}
+              </strong>
+              <span>대사 {commandPreviewVoiceCount}개 · 쉼 {commandPreviewBlocks.length - commandPreviewVoiceCount}개</span>
+              <span className={batchCommandPreview.kind === 'delete' || commandPreviewReadyCount > 0 ? 'is-warning' : undefined}>
+                {batchCommandPreview.kind === 'delete'
+                  ? '삭제는 즉시 반영됩니다. 대상을 확인한 뒤 실행하세요.'
+                  : commandPreviewReadyCount > 0
+                    ? `완성 음원 ${commandPreviewReadyCount}개는 다시 생성하면서 교체됩니다.`
+                    : '기존 완성 음원을 덮어쓰지 않습니다.'}
+              </span>
+              <div>
+                <button type="button" onClick={() => setBatchCommandPreview(null)}>취소</button>
+                <button type="button" className="is-primary" disabled={batchRunning} onClick={() => void executeBatchCommand()}>
+                  {batchCommandPreview.kind === 'delete' ? '삭제 실행' : '안전 실행'}
+                </button>
+              </div>
+            </div>
+          ) : null}
           <div className="soa-timeline-quick-editor__actions is-batch">
-            <button type="button" disabled={!onMoveMany || !canMoveSelectionLeft} onClick={() => onMoveMany?.(selectedIds, -1)}>선택 앞으로</button>
-            <button type="button" disabled={!onMoveMany || !canMoveSelectionRight} onClick={() => onMoveMany?.(selectedIds, 1)}>선택 뒤로</button>
-            <button type="button" onClick={() => { setSelectedBlockIds(new Set()); setSelectedBlockId(null) }}>선택 해제</button>
-            <button type="button" className="is-danger" disabled={!onRemoveMany} onClick={() => { onRemoveMany?.(selectedIds); setSelectedBlockIds(new Set()); setSelectedBlockId(null) }}>선택 삭제</button>
+            <button type="button" disabled={!onMoveMany || !canMoveSelectionLeft} onClick={() => performBatchMove(-1)}>선택 앞으로</button>
+            <button type="button" disabled={!onMoveMany || !canMoveSelectionRight} onClick={() => performBatchMove(1)}>선택 뒤로</button>
+            <button type="button" onClick={clearSelection}>선택 해제</button>
+            <button type="button" className="is-danger" disabled={!onRemoveMany} onClick={() => stageBatchCommand('delete', selectedIds)}>선택 삭제</button>
           </div>
         </section>
       ) : selectedBlock ? (

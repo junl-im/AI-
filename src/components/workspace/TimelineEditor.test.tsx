@@ -206,6 +206,8 @@ it('Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있
   expect(onMoveMany).toHaveBeenCalledWith(['voice-1', 'voice-2'], -1)
 
   fireEvent.click(screen.getByRole('button', { name: '선택 삭제' }))
+  expect(screen.getByRole('alertdialog', { name: '일괄 명령 안전 미리보기' })).toHaveTextContent('선택 2개 삭제')
+  fireEvent.click(screen.getByRole('button', { name: '삭제 실행' }))
   expect(onRemoveMany).toHaveBeenCalledWith(['voice-1', 'voice-2'])
 })
 
@@ -237,6 +239,7 @@ it('일괄 재생성 실패 뒤 실패 클립만 자동 선택하고 결과를 �
 
   fireEvent.click(screen.getByRole('button', { name: '대사 전체' }))
   fireEvent.click(screen.getByRole('button', { name: '선택 재생성' }))
+  fireEvent.click(screen.getByRole('button', { name: '안전 실행' }))
 
   await waitFor(() => expect(onRegenerateMany).toHaveBeenCalledWith(['voice-1', 'voice-2']))
   expect(screen.getByRole('status', { name: '최근 일괄 음성 작업 결과' })).toHaveTextContent('성공 1 · 실패 1 · 건너뜀 0')
@@ -283,6 +286,7 @@ it('일괄 실패 원인을 그룹으로 나눠 필요한 항목만 다시 시�
 
   fireEvent.click(screen.getByRole('button', { name: '대사 전체' }))
   fireEvent.click(screen.getByRole('button', { name: '선택 재생성' }))
+  fireEvent.click(screen.getByRole('button', { name: '안전 실행' }))
 
   await waitFor(() => expect(screen.getByRole('button', { name: '연결 1 · 재시도' })).toBeInTheDocument())
   expect(screen.getByRole('button', { name: '엔진 1 · 재시도' })).toBeInTheDocument()
@@ -328,6 +332,7 @@ it('일괄 작업 재시도 이력을 세션 안에서 최근 순서로 보존�
 
   fireEvent.click(screen.getByRole('button', { name: '대사 전체' }))
   fireEvent.click(screen.getByRole('button', { name: '선택 재생성' }))
+  fireEvent.click(screen.getByRole('button', { name: '안전 실행' }))
   await waitFor(() => expect(onRegenerateMany).toHaveBeenCalledTimes(1))
 
   fireEvent.click(screen.getByRole('button', { name: '엔진 1 · 재시도' }))
@@ -338,4 +343,53 @@ it('일괄 작업 재시도 이력을 세션 안에서 최근 순서로 보존�
   fireEvent.click(history)
   expect(screen.getAllByText('일괄 작업').length).toBeGreaterThanOrEqual(1)
   expect(screen.getByText('빠른 재시도')).toBeInTheDocument()
+})
+
+it('다중 선택 command bar는 키보드 재생성·이동 되돌리기·삭제 안전 확인을 제공한다', async () => {
+  const onMoveMany = vi.fn()
+  const onRemoveMany = vi.fn()
+  const onRegenerateMany = vi.fn().mockResolvedValue({
+    requestedIds: ['voice-1', 'voice-2'],
+    succeededIds: ['voice-1', 'voice-2'],
+    failedIds: [],
+    skippedIds: [],
+    failures: [],
+  })
+  render(
+    <TimelineEditor
+      blocks={blocks}
+      onMove={vi.fn()}
+      onMoveMany={onMoveMany}
+      onReorder={vi.fn()}
+      onSplit={vi.fn()}
+      onUpdateText={vi.fn()}
+      onRetry={vi.fn()}
+      onAddVoice={vi.fn()}
+      onAddPause={vi.fn()}
+      onRemove={vi.fn()}
+      onRemoveMany={onRemoveMany}
+      onRegenerateMany={onRegenerateMany}
+      onClear={vi.fn()}
+    />,
+  )
+
+  const firstVoice = screen.getByText('첫 번째 문장입니다.').closest('article')
+  expect(firstVoice).not.toBeNull()
+  fireEvent.keyDown(firstVoice!, { key: 'a', ctrlKey: true })
+  expect(screen.getByRole('region', { name: '선택 클립 일괄 작업' })).toBeInTheDocument()
+
+  fireEvent.keyDown(firstVoice!, { key: 'r' })
+  expect(screen.getByRole('alertdialog', { name: '일괄 명령 안전 미리보기' })).toHaveTextContent('선택 대사 2개 재생성')
+  fireEvent.click(screen.getByRole('button', { name: '안전 실행' }))
+  await waitFor(() => expect(onRegenerateMany).toHaveBeenCalledWith(['voice-1', 'voice-2']))
+
+  fireEvent.keyDown(firstVoice!, { key: 'ArrowRight', altKey: true })
+  expect(onMoveMany).toHaveBeenLastCalledWith(['voice-1', 'voice-2'], 1)
+  fireEvent.click(screen.getByRole('button', { name: '이동 되돌리기' }))
+  expect(onMoveMany).toHaveBeenLastCalledWith(['voice-1', 'voice-2'], -1)
+
+  fireEvent.keyDown(firstVoice!, { key: 'Delete' })
+  expect(screen.getByRole('alertdialog', { name: '일괄 명령 안전 미리보기' })).toHaveTextContent('선택 2개 삭제')
+  fireEvent.click(screen.getByRole('button', { name: '삭제 실행' }))
+  expect(onRemoveMany).toHaveBeenCalledWith(['voice-1', 'voice-2'])
 })

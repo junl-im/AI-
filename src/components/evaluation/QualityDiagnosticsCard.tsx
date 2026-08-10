@@ -18,6 +18,17 @@ function latencyLabel(value: number | null) {
   return value === null ? '지연 미측정' : `평균 ${Math.round(value)}ms`
 }
 
+function observationLabel(status: QualityDiagnostics['engines'][number]['performanceObservationStatus']) {
+  const labels = {
+    disabled: '관찰 꺼짐',
+    idle: '관찰 대기',
+    warming: '표본 수집',
+    active: '관찰 활성',
+    expired: '관찰 만료',
+  } as const
+  return labels[status]
+}
+
 export function QualityDiagnosticsCard({
   diagnostics,
   loading,
@@ -86,10 +97,16 @@ export function QualityDiagnosticsCard({
                     <span className="rounded-xl bg-[#f4f2ec] p-2">{successRateLabel(engine.successRate)}</span>
                     <span className="rounded-xl bg-[#f4f2ec] p-2">{latencyLabel(engine.averageLatencyMs)}</span>
                     <span className="rounded-xl bg-[#f4f2ec] p-2">격리 {engine.circuitOpenCount}회</span>
-                    <span className="rounded-xl bg-[#f4f2ec] p-2">{engine.selectionPenalty > 0 ? `자동 감점 ${engine.selectionPenalty}` : `시도 ${engine.attemptCount}회`}</span>
+                    <span className="rounded-xl bg-[#f4f2ec] p-2">{engine.activeRequestCount > 0 ? `실행 중 ${engine.activeRequestCount}` : engine.selectionPenalty > 0 ? `자동 감점 ${engine.selectionPenalty}` : `시도 ${engine.attemptCount}회`}</span>
                   </div>
                   <p className="mt-2 text-[10px] font-bold text-soa-muted">
                     {engine.qualityTier.toUpperCase()} · 한국어 {engine.koreanSpecialization} · 성공 {engine.successCount} · 실패 {engine.failureCount} · {engine.streaming ? '스트리밍 지원' : '완성 후 재생'}
+                  </p>
+                  <p className="mt-1 text-[10px] font-bold leading-5 text-soa-muted">
+                    {observationLabel(engine.performanceObservationStatus)} · 표본 {engine.performanceSampleCount}/{engine.performanceMinSamples}
+                    {engine.performanceWindowRemainingSeconds > 0 ? ` · 남은 ${Math.ceil(engine.performanceWindowRemainingSeconds)}초` : ''}
+                    {engine.performanceReliabilityEwma === null ? '' : ` · 안정도 ${Math.round(engine.performanceReliabilityEwma * 100)}%`}
+                    {engine.performanceLatencyEwmaMs === null ? '' : ` · EWMA ${Math.round(engine.performanceLatencyEwmaMs)}ms`}
                   </p>
                   {engine.selectionReason ? (
                     <p className="mt-1 text-[10px] font-bold leading-5 text-soa-muted">{engine.selectionReason}</p>

@@ -1,39 +1,42 @@
-# SoriON AI 0.11.4 Verification Report
+# SoriON AI 0.11.5 Verification Report
 
-결과 버전: **0.11.4 · Visual Baseline Approval & Recovery Provenance**
-기준 버전: **0.11.3 · Failure-Guided Editing & Adaptive Performance Routing**
+결과 버전: **0.11.5 · Editor Command UX & Adaptive Engine Load Awareness**  
+기준 버전: **0.11.4 · Visual Baseline Approval & Recovery Provenance**
 
 ## 적용 범위
 
-- Chromium 1024/1280/1440px 승인 baseline 생성 workflow와 허용 오차 pixel diff
-- baseline 미승인 상태의 후보 PNG/DOM layout 검사와 `--require-baseline` 강제 모드 분리
-- Timeline 일괄 작업 최근 6건 세션 재시도 이력과 중복 결과 제목 정리
-- Runtime soak 원본 파일명·실제 파일 SHA-256·수집/로드/비교 시각 provenance
-- `runtime-soak-comparison/1` 비교 증거 JSON export
-- adaptive engine performance observation window 만료 뒤 stale EWMA/sample count reset
+- Timeline 다중 선택 keyboard command bar와 입력 요소 보호
+- 준비된 음원 재생성·삭제의 안전 실행 preview
+- 일괄 이동 직전 1회 Undo
+- auto engine routing의 현재 실행 요청 수 기반 임시 부하 감점
+- performance observation session 상태/표본/남은 창/EWMA 진단 노출
+- 관찰창 만료 뒤 새 표본을 새 성능 관찰 세션으로 시작
+- editor command/engine observation dependency-free preflight 계약
 
 ## 현재 검증 결과
 
-- API pytest: 통과 · 215/215
-- Worker pytest: 통과 · 14/14
-- Engine orchestrator 집중 회귀: 통과 · 23/23
-- Repository preflight: 통과 · 40/40
-- dependency-free TS/TSX transpile: 통과 · 201/201 (`.d.ts` 제외)
+- API pytest: 통과 · **217/217**
+- Worker pytest: 통과 · **14/14**
+- Engine orchestrator 집중 회귀: 통과 · **25/25**
+- Engine orchestrator + Quality 집중 회귀: 통과 · **30/30**
+- Repository preflight: 통과 · **41/41**
 - Python compileall: 통과
-- Visual baseline/pixel diff 코드 계약 및 Node syntax check: 통과
-- 변경 범위: 추가 4 + 수정 37 = 총 41파일 · 삭제 0
-- 0.11.3 패치 ZIP 실제 적용 재현: 통과 · 886/886 files · missing 0 / extra 0 / changed 0
-- 전체/패치 ZIP 압축 무결성 검사: 통과
+- 제품 버전 sync: 통과 · **v0.11.5**
+- editor command/engine observation dependency-free 계약: 통과
+- dependency-free TS/TSX transpile syntax: 통과 · **201/201**
+- 0.11.4 기준본 + 패치 overlay 재현: 통과 · **892/892 files · missing 0 / extra 0 / changed 0**
 
 ## 검증 환경 제한
 
-- `npm ci`는 내부 registry의 `zustand@5.0.8` 404로 중단되어 동일 GitHub Actions Web ESLint·semantic typecheck·Vitest·Vite build는 실행하지 못했습니다.
-- 이 환경에서는 production build가 없으므로 실제 앱의 승인 PNG 생성과 pixel diff 실행은 하지 않았습니다. GitHub Actions 또는 신뢰 runner에서 `quality:visual-layout:approve`가 필요합니다.
+- `npm ci --ignore-scripts --no-audit --no-fund`는 내부 registry가 `zustand@5.0.8`을 404로 반환해 완료하지 못했습니다.
+- 따라서 동일 GitHub Actions 조건의 Web ESLint·Vitest·Vite production build는 이 환경에서 직접 실행하지 못했습니다.
+- global `tsc -b`도 Vite/Vitest/Node 타입 패키지 미설치만 보고해 semantic typecheck를 완료하지 못했습니다.
 - API 테스트에는 기존 FastAPI 422 상수 deprecation warning 1건이 남습니다.
 
 ## 기능 제한
 
-- 승인 visual baseline이 저장소에 아직 없으면 pixel baseline 통과를 주장하지 않으며 DOM layout과 후보 PNG 증거만 생성합니다.
-- batch 재시도 이력은 현재 Timeline Editor 마운트 세션 최근 6건이며 프로젝트 영구 이력이 아닙니다.
-- 엔진 성능 표본 reset은 auto routing의 최근 관찰 신호만 초기화하며 circuit breaker·명시적 엔진 선택·`SOA-4022` 규칙은 변경하지 않습니다.
+- `active_request_count` 감점은 프로세스 메모리의 순간 부하 분산 힌트이며 실제 엔진 용량·처리량 benchmark가 아닙니다.
+- 일괄 이동 Undo는 직전 한 번의 같은 선택 이동만 되돌리는 경량 기능이며 전체 편집 history 시스템이 아닙니다.
+- 실제 OS/Wi-Fi/visibility 복구 증거와 synthetic recovery injection의 schema-level 분리는 다음 버전으로 이월했습니다.
+- 승인 Chromium baseline CI 강제와 프로젝트 세션 retry snapshot도 다음 버전으로 이월했습니다.
 - 실제 CosyVoice 5개 preset WAV·화자 동의/권리·사람 검수 자료·모델 가중치는 포함하지 않습니다.

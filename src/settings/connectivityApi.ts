@@ -85,6 +85,16 @@ interface ApiEngineInfo {
   selection_penalty?: number
   degraded_remaining_seconds?: number
   selection_reason?: string | null
+  active_request_count?: number
+  performance_sample_count?: number
+  performance_min_samples?: number
+  performance_window_seconds?: number
+  performance_window_remaining_seconds?: number
+  performance_observation_status?: 'disabled' | 'idle' | 'warming' | 'active' | 'expired'
+  performance_observation_started_at?: string | null
+  performance_last_sample_at?: string | null
+  performance_latency_ewma_ms?: number | null
+  performance_reliability_ewma?: number | null
 }
 
 interface ConnectivityAuditOptions {
@@ -130,6 +140,16 @@ function mapEngine(engine: ApiEngineInfo): EngineInfo {
     selectionPenalty: engine.selection_penalty ?? 0,
     degradedRemainingSeconds: engine.degraded_remaining_seconds ?? 0,
     selectionReason: engine.selection_reason ?? null,
+    activeRequestCount: engine.active_request_count ?? 0,
+    performanceSampleCount: engine.performance_sample_count ?? 0,
+    performanceMinSamples: engine.performance_min_samples ?? 0,
+    performanceWindowSeconds: engine.performance_window_seconds ?? 0,
+    performanceWindowRemainingSeconds: engine.performance_window_remaining_seconds ?? 0,
+    performanceObservationStatus: engine.performance_observation_status ?? 'idle',
+    performanceObservationStartedAt: engine.performance_observation_started_at ?? null,
+    performanceLastSampleAt: engine.performance_last_sample_at ?? null,
+    performanceLatencyEwmaMs: engine.performance_latency_ewma_ms ?? null,
+    performanceReliabilityEwma: engine.performance_reliability_ewma ?? null,
   }
 }
 

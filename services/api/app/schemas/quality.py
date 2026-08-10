@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from app.schemas.engine import (
     EngineHealth,
     EngineMode,
+    EngineObservationStatus,
     EngineQualityTier,
 )
 from app.schemas.tts import Emotion
@@ -44,6 +45,16 @@ class EngineDiagnostic(BaseModel):
     selection_penalty: int = Field(default=0, ge=0)
     degraded_remaining_seconds: float = Field(default=0, ge=0)
     selection_reason: str | None = None
+    active_request_count: int = Field(default=0, ge=0)
+    performance_sample_count: int = Field(default=0, ge=0)
+    performance_min_samples: int = Field(default=0, ge=0)
+    performance_window_seconds: float = Field(default=0, ge=0)
+    performance_window_remaining_seconds: float = Field(default=0, ge=0)
+    performance_observation_status: EngineObservationStatus = "idle"
+    performance_observation_started_at: str | None = None
+    performance_last_sample_at: str | None = None
+    performance_latency_ewma_ms: float | None = Field(default=None, ge=0)
+    performance_reliability_ewma: float | None = Field(default=None, ge=0, le=1)
     checks: list[DiagnosticCheck]
 
 

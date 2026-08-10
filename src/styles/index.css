@@ -8,6 +8,7 @@
 @import "./desktop-studio.css";
 @import "./dubbing-overlays.css";
 @import "./timeline-editor.css";
+@import "./timeline-command-bar.css";
 @import "./player-dock.css";
 @import "./voice-clone.css";
 @import "./clone-execution.css";

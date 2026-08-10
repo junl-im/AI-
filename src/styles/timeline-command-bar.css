@@ -1,0 +1,93 @@
+/* 0.11.5 keyboard command UX and guarded batch execution */
+.soa-timeline-command-bar {
+  grid-column: 1 / -1;
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 7px;
+}
+
+.soa-timeline-command-bar > strong {
+  margin-right: 2px;
+  color: rgba(216, 255, 114, 0.72);
+  font-size: 7px;
+  letter-spacing: 0.14em;
+}
+
+.soa-timeline-command-bar button,
+.soa-timeline-command-undo button {
+  min-height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 0 8px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.soa-timeline-command-bar button.is-danger {
+  color: #ffb39f;
+}
+
+.soa-timeline-command-bar button:disabled {
+  opacity: 0.28;
+}
+
+.soa-timeline-command-bar kbd,
+.soa-timeline-command-help kbd {
+  display: inline-flex;
+  min-width: 18px;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  padding: 1px 4px;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(0, 0, 0, 0.16);
+  font: inherit;
+  font-size: 7px;
+}
+
+.soa-timeline-command-undo,
+.soa-timeline-command-help {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  border-radius: 9px;
+  padding: 6px 8px;
+  color: rgba(255, 255, 255, 0.52);
+  background: rgba(125, 202, 255, 0.045);
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.soa-timeline-command-help span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.soa-timeline-batch-preview.is-command {
+  border-color: rgba(125, 202, 255, 0.18);
+  background: rgba(125, 202, 255, 0.045);
+}
+
+@media (max-width: 760px) {
+  .soa-timeline-command-bar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .soa-timeline-command-bar > strong {
+    grid-column: 1 / -1;
+  }
+
+  .soa-timeline-command-bar button {
+    width: 100%;
+  }
+}

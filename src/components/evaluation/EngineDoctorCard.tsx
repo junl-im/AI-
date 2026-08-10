@@ -48,6 +48,17 @@ function shortHash(value: string | null) {
   return value ? `${value.slice(0, 12)}…${value.slice(-8)}` : '-'
 }
 
+function observationLabel(status: string | undefined) {
+  const labels: Record<string, string> = {
+    disabled: '관찰 꺼짐',
+    idle: '관찰 대기',
+    warming: '표본 수집',
+    active: '관찰 활성',
+    expired: '관찰 만료',
+  }
+  return labels[status ?? 'idle'] ?? '관찰 대기'
+}
+
 export function EngineDoctorCard() {
   const doctor = useEngineDoctor()
   const [browserVoiceDiagnostics, setBrowserVoiceDiagnostics] = useState<BrowserVoiceSelectionDiagnostic[]>([])
@@ -210,7 +221,7 @@ export function EngineDoctorCard() {
           <div>
             <strong className="text-sm">엔진 런타임 보호 상태</strong>
             <p className="mt-1 text-xs text-soa-muted">
-              실패 격리·단일 복구 probe·성공률·지연시간을 실제 API 런타임 기준으로 표시합니다.
+              실패 격리·단일 복구 probe·성공률·지연시간·EWMA 관찰창·동시 실행 부하를 실제 API 런타임 기준으로 표시합니다.
             </p>
           </div>
           {runtimeActionMessage ? (
@@ -247,8 +258,19 @@ export function EngineDoctorCard() {
                 </p>
                 <p className="mt-1 leading-5 text-soa-muted">
                   누적 격리 {engine.circuitOpenCount ?? 0}회
+                  {(engine.activeRequestCount ?? 0) > 0 ? ` · 실행 중 ${engine.activeRequestCount}건` : ''}
                   {(engine.selectionPenalty ?? 0) > 0 ? ` · 자동 선택 감점 ${engine.selectionPenalty}` : ''}
                   {engine.lastError ? ` · 최근 오류 ${engine.lastError}` : ''}
+                </p>
+                <p className="mt-1 text-[10px] font-bold leading-5 text-soa-muted">
+                  {observationLabel(engine.performanceObservationStatus)} · 표본 {engine.performanceSampleCount ?? 0}/{engine.performanceMinSamples ?? 0}
+                  {(engine.performanceWindowRemainingSeconds ?? 0) > 0 ? ` · 남은 관찰창 ${Math.ceil(engine.performanceWindowRemainingSeconds ?? 0)}초` : ''}
+                  {engine.performanceReliabilityEwma === null || engine.performanceReliabilityEwma === undefined
+                    ? ''
+                    : ` · EWMA 안정도 ${Math.round(engine.performanceReliabilityEwma * 100)}%`}
+                  {engine.performanceLatencyEwmaMs === null || engine.performanceLatencyEwmaMs === undefined
+                    ? ''
+                    : ` · EWMA 지연 ${Math.round(engine.performanceLatencyEwmaMs)}ms`}
                 </p>
                 {engine.selectionReason ? (
                   <p className="mt-1 text-[10px] font-bold leading-5 text-soa-muted">{engine.selectionReason}</p>

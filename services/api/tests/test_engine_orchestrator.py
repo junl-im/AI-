@@ -699,3 +699,87 @@ async def test_performance_window_expiry_resets_old_ewma_samples_before_new_obse
     assert state.performance_sample_count == 1
     assert state.latency_ewma_ms is not None
     assert state.latency_ewma_ms < 100
+
+@pytest.mark.asyncio
+async def test_active_auto_request_temporarily_spreads_parallel_load_to_backup():
+    import asyncio
+
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    registry.register_tts(FakeEngine("backup"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["primary", "backup"],
+        soft_degrade_seconds=0,
+    )
+    primary_started = asyncio.Event()
+    release_primary = asyncio.Event()
+
+    async def runner(engine, engine_request):
+        if engine.info().id == "primary":
+            primary_started.set()
+            await release_primary.wait()
+        return await engine.synthesize(engine_request)
+
+    first_task = asyncio.create_task(orchestrator.synthesize(request(), runner))
+    await primary_started.wait()
+
+    during = {item.id: item for item in orchestrator.list_info()}
+    second = await orchestrator.synthesize(request(), runner)
+    release_primary.set()
+    first = await first_task
+
+    assert during["primary"].active_request_count == 1
+    assert during["primary"].selection_penalty >= 12
+    assert "병렬 요청 분산" in (during["primary"].selection_reason or "")
+    assert during["backup"].recommended is True
+    assert second.engine_id == "backup"
+    assert first.engine_id == "primary"
+
+
+@pytest.mark.asyncio
+async def test_performance_observation_reports_warming_active_expired_and_new_session():
+    clock = {"now": 100.0}
+    registry = EngineRegistry()
+    registry.register_tts(FakeEngine("primary"))
+    orchestrator = EngineOrchestrator(
+        registry,
+        preferred_order=["primary"],
+        soft_degrade_seconds=0,
+        performance_min_samples=4,
+        performance_window_seconds=120,
+        clock=lambda: clock["now"],
+    )
+
+    async def observed_runner(engine, engine_request):
+        clock["now"] += 0.05
+        return await engine.synthesize(engine_request)
+
+    await orchestrator.synthesize(request("primary"), observed_runner)
+    warming = orchestrator.list_info()[0]
+    assert warming.performance_observation_status == "warming"
+    assert warming.performance_sample_count == 1
+    assert warming.performance_min_samples == 4
+    assert warming.performance_window_remaining_seconds == 120
+    assert warming.performance_observation_started_at is not None
+    assert warming.performance_last_sample_at is not None
+    assert warming.performance_latency_ewma_ms == 50.0
+    assert warming.performance_reliability_ewma == 1.0
+
+    for _ in range(3):
+        await orchestrator.synthesize(request("primary"), observed_runner)
+    active = orchestrator.list_info()[0]
+    assert active.performance_observation_status == "active"
+    assert active.performance_sample_count == 4
+
+    clock["now"] += 121
+    expired = orchestrator.list_info()[0]
+    assert expired.performance_observation_status == "expired"
+    assert expired.performance_window_remaining_seconds == 0
+    assert expired.selection_penalty == 0
+
+    await orchestrator.synthesize(request("primary"), observed_runner)
+    refreshed = orchestrator.list_info()[0]
+    assert refreshed.performance_observation_status == "warming"
+    assert refreshed.performance_sample_count == 1
+    assert refreshed.performance_latency_ewma_ms == 50.0

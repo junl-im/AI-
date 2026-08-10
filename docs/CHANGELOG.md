@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.11.5 · Editor Command UX & Adaptive Engine Load Awareness
+
+- 타임라인 다중 선택에 `Ctrl/Cmd+A`, `R`, `Shift+R`, `Alt+←/→`, `Delete`, `Esc`, `?` 키보드 명령과 항상 보이는 command bar를 추가했습니다.
+- 준비된 음원을 덮어쓰는 일괄 재생성과 삭제는 영향 범위를 먼저 확인하고 실행하며, 일괄 이동은 직전 1회 Undo를 제공합니다.
+- auto 엔진 선택은 현재 실행 중 요청 수를 임시 감점해 동시 생성 요청을 준비된 backup 엔진으로 분산합니다. 명시적 엔진 선택은 변경하지 않습니다.
+- 성능 관찰 세션을 `idle/warming/active/expired`로 구분하고 표본 수, 남은 관찰창, 시작/최근 표본 시각, EWMA 지연·안정도를 Engine Doctor와 Quality Diagnostics에 연결했습니다.
+- 성능 관찰창 만료 뒤 새 표본은 새 세션으로 시작하며 오래된 EWMA와 섞지 않습니다.
+- editor command/engine observation dependency-free 계약과 동시 부하 분산·관찰 세션 회귀 테스트를 추가했습니다.
+
 
 ## 0.11.4 · Visual Baseline Approval & Recovery Provenance
 

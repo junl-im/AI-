@@ -88,6 +88,40 @@ def engine_diagnostic(
                 ),
             )
         )
+
+    observation_label = {
+        "disabled": "관찰 비활성",
+        "idle": "관찰 대기",
+        "warming": "표본 수집 중",
+        "active": "관찰 활성",
+        "expired": "관찰 만료",
+    }.get(info.performance_observation_status, "관찰 대기")
+    if info.performance_observation_status == "warming":
+        observation_detail = (
+            f"최근 성능 표본 {info.performance_sample_count}/{info.performance_min_samples}건을 "
+            "수집 중입니다. 최소 표본 이후 자동 라우팅 감점에 반영합니다."
+        )
+    elif info.performance_observation_status == "active":
+        observation_detail = (
+            f"최근 성능 표본 {info.performance_sample_count}건을 사용 중이며 "
+            f"{info.performance_window_remaining_seconds:.1f}초 동안 새 표본과 이어집니다."
+        )
+    elif info.performance_observation_status == "expired":
+        observation_detail = (
+            "이전 성능 관찰창이 만료됐습니다. 다음 합성부터 새 EWMA 관찰 세션을 시작합니다."
+        )
+    elif info.performance_observation_status == "disabled":
+        observation_detail = "성능 관찰창 기반 자동 감점이 비활성화되어 있습니다."
+    else:
+        observation_detail = "첫 합성 표본이 들어오면 새 성능 관찰 세션을 시작합니다."
+    checks.append(
+        DiagnosticCheck(
+            id="performance-observation",
+            label=observation_label,
+            status="ready" if info.performance_observation_status == "active" else "idle",
+            detail=observation_detail,
+        )
+    )
     model_loaded: bool | None = None
 
     if info.id == "melo":
@@ -174,6 +208,16 @@ def engine_diagnostic(
         selection_penalty=info.selection_penalty,
         degraded_remaining_seconds=info.degraded_remaining_seconds,
         selection_reason=info.selection_reason,
+        active_request_count=info.active_request_count,
+        performance_sample_count=info.performance_sample_count,
+        performance_min_samples=info.performance_min_samples,
+        performance_window_seconds=info.performance_window_seconds,
+        performance_window_remaining_seconds=info.performance_window_remaining_seconds,
+        performance_observation_status=info.performance_observation_status,
+        performance_observation_started_at=info.performance_observation_started_at,
+        performance_last_sample_at=info.performance_last_sample_at,
+        performance_latency_ewma_ms=info.performance_latency_ewma_ms,
+        performance_reliability_ewma=info.performance_reliability_ewma,
         checks=checks,
     )
 

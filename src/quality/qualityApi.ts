@@ -52,6 +52,16 @@ interface ApiEngineDiagnostic {
   selection_penalty: number
   degraded_remaining_seconds: number
   selection_reason: string | null
+  active_request_count: number
+  performance_sample_count: number
+  performance_min_samples: number
+  performance_window_seconds: number
+  performance_window_remaining_seconds: number
+  performance_observation_status: 'disabled' | 'idle' | 'warming' | 'active' | 'expired'
+  performance_observation_started_at: string | null
+  performance_last_sample_at: string | null
+  performance_latency_ewma_ms: number | null
+  performance_reliability_ewma: number | null
   checks: ApiDiagnosticCheck[]
 }
 
@@ -141,6 +151,16 @@ export async function getQualityDiagnostics(): Promise<QualityDiagnostics> {
       selectionPenalty: engine.selection_penalty,
       degradedRemainingSeconds: engine.degraded_remaining_seconds,
       selectionReason: engine.selection_reason,
+      activeRequestCount: engine.active_request_count,
+      performanceSampleCount: engine.performance_sample_count,
+      performanceMinSamples: engine.performance_min_samples,
+      performanceWindowSeconds: engine.performance_window_seconds,
+      performanceWindowRemainingSeconds: engine.performance_window_remaining_seconds,
+      performanceObservationStatus: engine.performance_observation_status,
+      performanceObservationStartedAt: engine.performance_observation_started_at,
+      performanceLastSampleAt: engine.performance_last_sample_at,
+      performanceLatencyEwmaMs: engine.performance_latency_ewma_ms,
+      performanceReliabilityEwma: engine.performance_reliability_ewma,
       checks: engine.checks,
     })),
   }

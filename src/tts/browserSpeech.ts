@@ -107,6 +107,16 @@ export function getBrowserSpeechEngine(): EngineInfo | null {
     selectionPenalty: 0,
     degradedRemainingSeconds: 0,
     selectionReason: null,
+    activeRequestCount: 0,
+    performanceSampleCount: 0,
+    performanceMinSamples: 0,
+    performanceWindowSeconds: 0,
+    performanceWindowRemainingSeconds: 0,
+    performanceObservationStatus: 'disabled',
+    performanceObservationStartedAt: null,
+    performanceLastSampleAt: null,
+    performanceLatencyEwmaMs: null,
+    performanceReliabilityEwma: null,
   }
 }
 

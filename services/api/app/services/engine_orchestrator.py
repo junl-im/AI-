@@ -59,6 +59,9 @@ class EngineRuntimeState:
     reliability_ewma: float | None = None
     last_attempt_monotonic: float = 0.0
     performance_sample_count: int = 0
+    performance_started_monotonic: float = 0.0
+    performance_observation_started_at: str | None = None
+    performance_last_sample_at: str | None = None
 
 
 @dataclass(frozen=True)
@@ -119,6 +122,10 @@ class EngineOrchestrator:
                 state,
                 now,
             )
+            observation_status, observation_remaining = self._performance_observation(
+                state,
+                now,
+            )
             attempts = state.successes + state.failures
             success_rate = (state.successes / attempts) if attempts else None
             average_latency = (
@@ -160,6 +167,26 @@ class EngineOrchestrator:
                         "selection_penalty": selection_penalty,
                         "degraded_remaining_seconds": round(degraded_remaining, 1),
                         "selection_reason": selection_reason,
+                        "active_request_count": state.active_requests,
+                        "performance_sample_count": state.performance_sample_count,
+                        "performance_min_samples": self.performance_min_samples,
+                        "performance_window_seconds": self.performance_window_seconds,
+                        "performance_window_remaining_seconds": round(observation_remaining, 1),
+                        "performance_observation_status": observation_status,
+                        "performance_observation_started_at": (
+                            state.performance_observation_started_at
+                        ),
+                        "performance_last_sample_at": state.performance_last_sample_at,
+                        "performance_latency_ewma_ms": (
+                            round(state.latency_ewma_ms, 1)
+                            if state.latency_ewma_ms is not None
+                            else None
+                        ),
+                        "performance_reliability_ewma": (
+                            round(state.reliability_ewma, 4)
+                            if state.reliability_ewma is not None
+                            else None
+                        ),
                     }
                 )
             )
@@ -369,6 +396,12 @@ class EngineOrchestrator:
             return 0, None
         reasons: list[str] = []
         penalty = 0
+        if state.active_requests > 0:
+            load_penalty = min(36, state.active_requests * 12)
+            penalty += load_penalty
+            reasons.append(
+                f"현재 실행 {state.active_requests}건으로 병렬 요청 분산"
+            )
         remaining = state.degraded_until - now
         if remaining > 0 and state.consecutive_failures > 0:
             soft_penalty = min(60, 20 + (state.consecutive_failures - 1) * 15)
@@ -380,6 +413,23 @@ class EngineOrchestrator:
         if performance_reason:
             reasons.append(performance_reason)
         return min(80, penalty), " · ".join(reasons) or None
+
+    def _performance_observation(
+        self,
+        state: EngineRuntimeState,
+        now: float,
+    ) -> tuple[str, float]:
+        if self.performance_window_seconds <= 0:
+            return "disabled", 0.0
+        if state.performance_sample_count <= 0 or state.last_attempt_monotonic <= 0:
+            return "idle", 0.0
+        elapsed = max(0.0, now - state.last_attempt_monotonic)
+        remaining = max(0.0, self.performance_window_seconds - elapsed)
+        if elapsed > self.performance_window_seconds:
+            return "expired", 0.0
+        if state.performance_sample_count < self.performance_min_samples:
+            return "warming", remaining
+        return "active", remaining
 
     def _performance_penalty(
         self,
@@ -555,6 +605,13 @@ class EngineOrchestrator:
             state.latency_ewma_ms = None
             state.reliability_ewma = None
             state.performance_sample_count = 0
+            state.performance_started_monotonic = 0.0
+            state.performance_observation_started_at = None
+            state.performance_last_sample_at = None
+
+        if state.performance_sample_count == 0:
+            state.performance_started_monotonic = now
+            state.performance_observation_started_at = self._timestamp()
 
         alpha = 0.3
         if state.latency_ewma_ms is None:
@@ -572,6 +629,7 @@ class EngineOrchestrator:
             ) + ((1 - alpha) * state.reliability_ewma)
         state.performance_sample_count += 1
         state.last_attempt_monotonic = now
+        state.performance_last_sample_at = self._timestamp()
 
     def _elapsed_ms(self, started: float) -> float:
         return max(0.0, (self._clock() - started) * 1000)
