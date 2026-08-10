@@ -243,7 +243,7 @@ it('일괄 재생성 실패 뒤 실패 클립만 자동 선택하고 결과를 �
 
   await waitFor(() => expect(onRegenerateMany).toHaveBeenCalledWith(['voice-1', 'voice-2']))
   expect(screen.getByRole('status', { name: '최근 일괄 음성 작업 결과' })).toHaveTextContent('성공 1 · 실패 1 · 건너뜀 0')
-  expect(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('두 번째 문장입니다.')
+  await waitFor(() => expect(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('두 번째 문장입니다.'))
 })
 
 it('일괄 실패 원인을 그룹으로 나눠 필요한 항목만 다시 시도한다', async () => {
@@ -373,7 +373,7 @@ it('다중 선택 command bar는 키보드 재생성·이동 되돌리기·삭�
     />,
   )
 
-  const firstVoice = screen.getByText('첫 번째 문장입니다.').closest('article')
+  const firstVoice = screen.getByTitle('첫 번째 문장입니다.').closest('article')
   expect(firstVoice).not.toBeNull()
   fireEvent.keyDown(firstVoice!, { key: 'a', ctrlKey: true })
   expect(screen.getByRole('region', { name: '선택 클립 일괄 작업' })).toBeInTheDocument()

@@ -468,9 +468,11 @@ export function TimelineEditor({
     if (retry) setBatchRetryCount((count) => count + 1)
     else setBatchRetryCount(0)
     if (!summary.failedIds.length) return
+    const firstFailedBlock = blocks.find((block) => block.id === summary.failedIds[0])
     setSelectedBlockIds(new Set(summary.failedIds))
     setSelectedBlockId(summary.failedIds[0])
     setSelectionAnchorId(summary.failedIds[0])
+    setQuickDraft(firstFailedBlock?.kind === 'voice' ? firstFailedBlock.text : '')
   }
 
   async function runBatchGeneration(ids: string[], retry = false) {
