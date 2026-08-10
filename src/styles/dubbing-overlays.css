@@ -939,7 +939,9 @@
 }
 
 .soa-timeline-batch-controls {
+  grid-column: 2 / -1;
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(130px, 1.2fr) repeat(3, minmax(82px, auto));
   align-items: end;
   gap: 5px;
@@ -1056,7 +1058,8 @@
   }
 
   .soa-timeline-batch-controls {
-    grid-template-columns: minmax(130px, 1fr) repeat(3, minmax(76px, auto));
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .soa-timeline-batch-preview {
@@ -1066,6 +1069,7 @@
 
 @media (max-width: 760px) {
   .soa-timeline-batch-controls {
+    grid-column: 1 / -1;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

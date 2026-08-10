@@ -39,6 +39,17 @@ requireTokens('scripts/run-visual-layout-regression.mjs', runner, [
   'approveBaseline',
 ])
 
+
+const dubbingOverlays = await read('src/styles/dubbing-overlays.css')
+requireTokens('src/styles/dubbing-overlays.css', dubbingOverlays, [
+  '.soa-timeline-batch-controls {',
+  'grid-column: 2 / -1;',
+  'min-width: 0;',
+  '@media (max-width: 1180px)',
+  'grid-column: 1 / -1;',
+  'grid-template-columns: repeat(2, minmax(0, 1fr));',
+])
+
 const packageJson = await read('package.json')
 requireTokens('package.json', packageJson, [
   '"quality:visual-layout": "node scripts/run-visual-layout-regression.mjs"',

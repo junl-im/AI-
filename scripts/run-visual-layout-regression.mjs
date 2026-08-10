@@ -460,7 +460,20 @@ try {
   cdp.close()
   if (failed) {
     for (const capture of captures.filter((item) => !item.passed)) {
-      console.error(`${capture.viewport.width}px 실패 · ${capture.failures.join(', ')}`)
+      const details = {
+        failures: capture.failures,
+        overflow: capture.layout.overflow,
+        batch: capture.layout.batch,
+        batchControls: capture.layout.batchControls,
+        dock: capture.layout.dock,
+        baseline: capture.baseline.status,
+      }
+      const message = `${capture.viewport.width}px 실패 · ${capture.failures.join(', ')} · ${JSON.stringify(details)}`
+      console.error(message)
+      if (process.env.GITHUB_ACTIONS === 'true') {
+        const escaped = message.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
+        console.error(`::error title=Chromium visual layout ${capture.viewport.width}px::${escaped}`)
+      }
     }
     process.exitCode = 1
   } else {
