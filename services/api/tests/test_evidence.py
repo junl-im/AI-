@@ -99,13 +99,14 @@ def test_evidence_bundle_has_stable_manifest_and_verifies(client):
     first = client.get("/api/v1/quality/evidence-bundle").json()
     second = client.get("/api/v1/quality/evidence-bundle").json()
 
-    assert first["schema_version"] == "2"
+    assert first["schema_version"] == "3"
     assert first["manifest"]["record_count"] == 1
     assert len(first["manifest"]["bundle_sha256"]) == 64
     assert first["manifest"]["bundle_sha256"] == second["manifest"]["bundle_sha256"]
     assert first["device_benchmarks"][0]["device_name"] == "android"
     assert first["device_benchmarks"][0]["browser_version"] == ""
     assert first["device_benchmarks"][0]["notes"] == ""
+    assert first["device_benchmarks"][0]["recovery_evidence_class"] == "not-applicable"
 
     verified = client.post(
         "/api/v1/quality/evidence-bundle/verify",
@@ -119,6 +120,31 @@ def test_evidence_bundle_has_stable_manifest_and_verifies(client):
         "record_count": 1,
         "reason": "검증 통과",
     }
+
+
+def test_evidence_bundle_verifier_accepts_legacy_schema_v2(client):
+    from app.services.evidence_bundle import build_bundle_manifest
+
+    bundle = client.get("/api/v1/quality/evidence-bundle").json()
+    bundle["schema_version"] = "2"
+    categories = {
+        "device_benchmarks": bundle["device_benchmarks"],
+        "stt_regeneration_comparisons": bundle["stt_regeneration_comparisons"],
+        "export_soak_records": bundle["export_soak_records"],
+    }
+    bundle["manifest"] = build_bundle_manifest(
+        app_version=bundle["app_version"],
+        redacted=bundle["redacted"],
+        categories=categories,
+        summary=bundle["summary"],
+        schema_version="2",
+    )
+
+    response = client.post("/api/v1/quality/evidence-bundle/verify", json=bundle)
+
+    assert response.status_code == 200
+    assert response.json()["valid"] is True
+    assert response.json()["provided_sha256"] == bundle["manifest"]["bundle_sha256"]
 
 
 def test_evidence_bundle_verifier_rejects_tampered_record(client):
@@ -154,7 +180,7 @@ def test_evidence_summary_exposes_redacted_manifest(client):
 
     assert response.status_code == 200
     manifest = response.json()["manifest"]
-    assert manifest["schema_version"] == "2"
+    assert manifest["schema_version"] == "3"
     assert manifest["record_count"] == 0
     assert len(manifest["bundle_sha256"]) == 64
 
@@ -259,7 +285,7 @@ def test_evidence_intake_accepts_verified_web_quality_report(client):
     report = {
         "schemaVersion": 1,
         "mode": "run",
-        "appVersion": "0.11.5",
+        "appVersion": "0.11.7",
         "heartbeat": "6.7",
         "startedAt": "2026-08-03T09:00:00.000Z",
         "completedAt": "2026-08-03T09:01:00.000Z",

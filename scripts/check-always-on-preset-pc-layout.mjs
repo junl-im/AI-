@@ -67,7 +67,7 @@ forbidTokens('src/components/layout/AppShell.tsx', appShell, [
 
 const layoutHook = await source('src/hooks/useDesktopStudioLayout.ts')
 requireTokens('src/hooks/useDesktopStudioLayout.ts', layoutHook, [
-  "sorion.desktop-studio-layout.v2",
+  "sorion.desktop-studio-layout.v3",
   'leftWidth: 224',
   'rightWidth: 286',
   'window.innerWidth < DESKTOP_STUDIO_BREAKPOINT',

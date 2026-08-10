@@ -14,6 +14,8 @@ function renderHeader(onClear = vi.fn()) {
       onOpenQuality={vi.fn()}
       onOpenProjects={vi.fn()}
       onOpenSettings={vi.fn()}
+      sidePanelsCollapsed
+      onToggleSidePanels={vi.fn()}
       onClear={onClear}
     />,
   )
@@ -73,6 +75,29 @@ describe('DubbingStudioHeader', () => {
     expect(screen.queryByRole('alertdialog', { name: '현재 작업을 비울까요?' })).not.toBeInTheDocument()
     expect(document.body.style.overflow).toBe('')
     expect(menuButton).toHaveFocus()
+  })
+
+  it('간편 모드에서 한 번에 프로 패널을 펼칠 수 있다', () => {
+    const onToggleSidePanels = vi.fn()
+    render(
+      <DubbingStudioHeader
+        title="간편 더빙"
+        savedLabel="자동 저장됨"
+        downloadHref={null}
+        downloadName="voice.wav"
+        onTitleChange={vi.fn()}
+        onOpenClone={vi.fn()}
+        onOpenQuality={vi.fn()}
+        onOpenProjects={vi.fn()}
+        onOpenSettings={vi.fn()}
+        sidePanelsCollapsed
+        onToggleSidePanels={onToggleSidePanels}
+        onClear={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '프로 패널 펼치기' }))
+    expect(onToggleSidePanels).toHaveBeenCalledTimes(1)
   })
 
 })

@@ -8,7 +8,13 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.11.5 · Editor Command UX & Adaptive Engine Load Awareness`
+- 버전: `0.11.7 · One-Flow Dubbing UX`
+- 원플로우 더빙: 새 작업은 좌우 프로 패널을 접고 중앙에서 `목소리 → 대본 → 바로 더빙 → 듣기`까지 한 흐름으로 끝냅니다.
+- 빠른 목소리: 기본 5개 프리셋을 별도 Sheet 없이 즉시 바꾸고, 전체 목록·속도·높낮이·말투는 필요할 때만 펼칩니다.
+- 대본 가져오기: TXT·MD·SRT·VTT 파일 선택/드래그앤드롭을 지원하고 자막 타임코드·cue 번호를 자동 정리합니다.
+- 초보자 집중 모드: 빈 프로젝트에서는 타임라인과 제작 기록을 접어 두고, 생성 또는 직접 편집을 시작했을 때만 상세 작업 영역을 보여줍니다.
+- 프로 전환: PC 헤더의 `프로 패널` 한 번으로 프로젝트 목록과 Voice Drawer를 동시에 열어 기존 고급 기능·대량 편집 흐름을 그대로 사용할 수 있습니다.
+- 첫 결과 듣기: 원플로우 전체 생성은 첫 준비 음성을 자동 재생하고 새 프로젝트 제목은 대본 첫 문장에서 자동 제안합니다.
 - 성능 보호: 같은 모델·장치·프리셋의 최초 5건과 최근 5건을 분리 비교해 회귀를 표시합니다.
 - 운영자 기준선: 최근 5건을 SHA-256 snapshot으로 확정하고 자동 기준선과 별도로 교체·폐기 이력을 관리합니다.
 - 기준선 복구: append-only history에서 과거 기준선을 비교 미리보기한 뒤 `restored` 이벤트로 되살리며 기존 기록은 삭제하지 않습니다.
@@ -19,6 +25,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - 복구 검증: 장시간 검사 중 Worker를 실제 재시작하고 45초 이내 자동 복구와 이전 실행 대비 회귀를 기록합니다.
 - soak 비교 UI: `runtime-soak/2` 이전·현재 JSON을 Quality Lab에서 직접 열어 응답·성공률·누수·복구 회귀를 비교합니다.
 - 복귀 경로 주입: 실제 네트워크를 끊지 않고 online·pageshow/focus·Network Information change 처리 경로를 안전하게 재실행합니다.
+- 복구 증거 분류: 실기기 복구는 `observed-device`, 안전 주입은 `synthetic-injection`, baseline은 `not-applicable`로 기록하며 synthetic 증거는 실기기 READY 인증에 사용할 수 없습니다.
+- 세션 안전성: batch 재시도 이력은 최근 6건·재시도 3회 상한의 집계만 저장하고 클립 ID·원문·음원·오류 문자열은 프로젝트 세션에 보존하지 않습니다.
 - 음성 inventory: Web Speech API 목록 변화 시 5개 프리셋의 이전 배정 → 현재 배정 diff를 표시하고 엔진 카탈로그를 즉시 다시 평가합니다.
 - 잠금 확장: 승인 writer는 `WriterLeaseCoordinator` 인터페이스를 사용하며 SQLite fencing을 기본 backend로 유지합니다.
 - PC 폭 계약: production build 뒤 실제 Chromium 1024·1280·1440px에서 3분할·Compact Dock·다중 편집 overflow를 측정하고 PNG/SHA 증거를 남깁니다.
@@ -151,6 +159,7 @@ Firebase Hosting Spark와 GitHub Pages는 Web/PWA만 제공합니다. 데스크�
 - 실기기 인증 계약: [`docs/REAL_DEVICE_CERTIFICATION.md`](docs/REAL_DEVICE_CERTIFICATION.md)
 - 실기기 soak recorder: [`docs/DEVICE_SOAK_RECORDER.md`](docs/DEVICE_SOAK_RECORDER.md)
 - recovery evidence·음성 inventory: [`docs/RECOVERY_EVIDENCE_AND_VOICE_INVENTORY.md`](docs/RECOVERY_EVIDENCE_AND_VOICE_INVENTORY.md)
+- recovery evidence 분류·세션 안전: [`docs/RECOVERY_EVIDENCE_CLASSIFICATION_SESSION_SAFETY.md`](docs/RECOVERY_EVIDENCE_CLASSIFICATION_SESSION_SAFETY.md)
 - 음원 보존 정책: [`docs/AUDIO_ARCHIVE_POLICY.md`](docs/AUDIO_ARCHIVE_POLICY.md)
 - 음성 프리셋: [`docs/VOICE_PRESETS.md`](docs/VOICE_PRESETS.md)
 - 프리셋 음성 정합성 계약: [`docs/VOICE_PRESET_FIDELITY.md`](docs/VOICE_PRESET_FIDELITY.md)

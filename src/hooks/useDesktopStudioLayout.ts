@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 
 export const DESKTOP_STUDIO_BREAKPOINT = 1024
-export const DESKTOP_STUDIO_STORAGE_KEY = 'sorion.desktop-studio-layout.v2'
+export const DESKTOP_STUDIO_STORAGE_KEY = 'sorion.desktop-studio-layout.v3'
 export const DESKTOP_STUDIO_DIVIDER_WIDTH = 6
 const LEFT_MIN = 188
 const LEFT_MAX = 360
@@ -21,8 +21,8 @@ type StudioSide = 'left' | 'right'
 const DEFAULT_LAYOUT: DesktopStudioLayoutState = {
   leftWidth: 224,
   rightWidth: 286,
-  leftCollapsed: false,
-  rightCollapsed: false,
+  leftCollapsed: true,
+  rightCollapsed: true,
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -101,6 +101,17 @@ export function useDesktopStudioLayout() {
       : { ...current, rightCollapsed: !current.rightCollapsed })
   }, [])
 
+  const toggleSidePanels = useCallback(() => {
+    setLayout((current) => {
+      const openBoth = current.leftCollapsed && current.rightCollapsed
+      return {
+        ...current,
+        leftCollapsed: !openBoth,
+        rightCollapsed: !openBoth,
+      }
+    })
+  }, [])
+
   const resizeBy = useCallback((side: StudioSide, delta: number) => {
     setLayout((current) => side === 'left'
       ? {
@@ -158,6 +169,8 @@ export function useDesktopStudioLayout() {
   return {
     ...layout,
     style,
+    sidePanelsCollapsed: layout.leftCollapsed && layout.rightCollapsed,
+    toggleSidePanels,
     toggleLeft: () => toggle('left'),
     toggleRight: () => toggle('right'),
     startLeftResize: startResize('left'),

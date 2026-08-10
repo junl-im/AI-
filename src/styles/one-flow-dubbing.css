@@ -1,0 +1,230 @@
+.soa-one-flow-composer {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.18);
+}
+
+.soa-one-flow-composer__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.soa-one-flow-composer__heading > div { min-width: 0; }
+.soa-one-flow-composer__heading span:first-child {
+  color: #d8ff72;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+.soa-one-flow-composer__heading h1 {
+  margin: 5px 0 0;
+  color: #fff;
+  font-size: clamp(20px, 4.5vw, 28px);
+  font-weight: 950;
+  letter-spacing: -0.035em;
+}
+.soa-one-flow-composer__heading p {
+  max-width: 620px;
+  margin: 7px 0 0;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+.soa-one-flow-composer__shortcut {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: rgba(255, 255, 255, 0.45) !important;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 8px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap;
+}
+
+.soa-one-flow-composer__voice {
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 15px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.16);
+}
+.soa-one-flow-composer__voice .soa-dubbing-voice-row {
+  grid-template-columns: minmax(0, 1fr) 46px 46px;
+  gap: 7px;
+  padding: 0;
+}
+.soa-one-flow-composer__voice .soa-dubbing-voice-choice { min-height: 50px; }
+.soa-one-flow-composer__voice .soa-dubbing-voice-choice .soa-voice-avatar { width: 42px; height: 42px; }
+.soa-one-flow-composer__voice .soa-dubbing-voice-choice strong { font-size: 15px; }
+
+.soa-dubbing-voice-quick {
+  display: flex;
+  min-width: 0;
+  grid-column: 1 / -1;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0 1px;
+  scrollbar-width: thin;
+}
+.soa-dubbing-voice-quick > button {
+  display: inline-flex;
+  min-width: max-content;
+  min-height: 36px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+  padding: 4px 9px 4px 5px;
+  color: rgba(255, 255, 255, 0.56);
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 9px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.soa-dubbing-voice-quick > button:hover { color: #fff; background: rgba(255, 255, 255, 0.07); }
+.soa-dubbing-voice-quick > button.is-active {
+  border-color: rgba(216, 255, 114, 0.48);
+  color: #efffc7;
+  background: rgba(216, 255, 114, 0.09);
+}
+.soa-dubbing-voice-quick .soa-voice-avatar {
+  width: 26px;
+  height: 26px;
+  font-size: 9px;
+}
+.soa-dubbing-voice-quick > .soa-dubbing-voice-quick__all {
+  padding-inline: 11px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(143, 128, 255, 0.08);
+}
+
+.soa-one-flow-composer .soa-dubbing-script__editor {
+  margin-top: 0;
+  border-color: rgba(216, 255, 114, 0.38);
+  border-radius: 15px;
+  background: rgba(7, 9, 13, 0.56);
+  box-shadow: 0 0 0 3px rgba(216, 255, 114, 0.045);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.soa-one-flow-composer .soa-dubbing-script__editor:focus-within {
+  border-color: rgba(216, 255, 114, 0.76);
+  box-shadow: 0 0 0 4px rgba(216, 255, 114, 0.075);
+}
+.soa-one-flow-composer .soa-dubbing-script__editor textarea {
+  min-height: 210px;
+  padding: 20px;
+  font-size: 17px;
+  line-height: 1.72;
+}
+.soa-one-flow-composer__auto {
+  border-radius: 999px;
+  padding: 3px 7px;
+  color: #c9fbdc;
+  background: rgba(83, 218, 155, 0.08);
+}
+
+.soa-one-flow-composer__activity {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: transparent;
+}
+.soa-one-flow-composer__activity > span { color: #d8ff72; background: rgba(216, 255, 114, 0.08); }
+.soa-one-flow-composer__activity p { font-size: 10px; }
+
+.soa-one-flow-composer__generate {
+  min-height: 66px;
+  margin-top: 9px;
+  border-radius: 15px;
+  color: #11150b;
+  background: linear-gradient(115deg, #d8ff72, #95f0bd 52%, #83b7ff);
+  box-shadow: 0 18px 38px rgba(144, 220, 139, 0.14);
+}
+.soa-one-flow-composer__generate span { font-size: 15px; }
+.soa-one-flow-composer__generate small { color: rgba(17, 21, 11, 0.62); font-size: 9px; font-weight: 800; text-align: right; }
+.soa-one-flow-composer__generate:disabled {
+  color: rgba(255, 255, 255, 0.3);
+  background: #242830;
+  box-shadow: none;
+}
+.soa-one-flow-composer__generate:disabled small { color: rgba(255, 255, 255, 0.28); }
+
+.soa-workspace-conversation {
+  margin: 10px 0 0;
+  padding: 0;
+}
+.soa-workspace-conversation > summary {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 12px;
+  color: rgba(255, 255, 255, 0.46);
+  cursor: pointer;
+  list-style: none;
+}
+.soa-workspace-conversation > summary::-webkit-details-marker { display: none; }
+.soa-workspace-conversation > summary::after {
+  content: '⌄';
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 12px;
+}
+.soa-workspace-conversation[open] > summary::after { transform: rotate(180deg); }
+.soa-workspace-conversation > summary span { font-size: 10px; font-weight: 850; }
+.soa-workspace-conversation > summary strong { margin-left: auto; font-size: 9px; font-weight: 750; }
+.soa-workspace-conversation > div { margin: 0 10px 10px; }
+
+.soa-dubbing-pro-toggle { display: none !important; }
+
+@media (min-width: 1024px) {
+  .soa-one-flow-composer { padding: 18px; }
+  .soa-one-flow-composer__heading h1 { font-size: 28px; }
+  .soa-one-flow-composer .soa-dubbing-script__editor textarea { min-height: 260px; }
+  .soa-dubbing-pro-toggle { display: grid !important; }
+}
+
+@media (max-width: 620px) {
+  .soa-one-flow-composer { border-right: 0; border-left: 0; border-radius: 0; margin-inline: -16px; padding: 14px 16px; }
+  .soa-one-flow-composer__heading { display: block; }
+  .soa-one-flow-composer__shortcut { display: inline-flex; margin-top: 9px; }
+  .soa-one-flow-composer__voice { padding: 7px; }
+  .soa-one-flow-composer .soa-dubbing-script__editor textarea { min-height: 190px; padding: 16px; font-size: 16px; }
+  .soa-one-flow-composer__generate { display: grid; justify-content: start; min-height: 72px; padding: 12px 15px; }
+  .soa-one-flow-composer__generate small { margin-top: 3px; text-align: left; }
+}
+
+.soa-one-flow-composer__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+.soa-one-flow-composer__blank {
+  min-height: 34px;
+  border: 0;
+  border-radius: 9px;
+  padding: 0 10px;
+  color: rgba(255, 255, 255, 0.46);
+  background: transparent;
+  font-size: 9px;
+  font-weight: 800;
+}
+.soa-one-flow-composer__blank:hover { color: #fff; background: rgba(255, 255, 255, 0.045); }
+.soa-one-flow-composer__blank:disabled { opacity: 0.3; }
+.soa-one-flow-composer__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+.soa-one-flow-composer__actions { gap: 4px; flex-wrap: wrap; }

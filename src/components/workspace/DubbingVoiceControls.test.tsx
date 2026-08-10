@@ -22,6 +22,15 @@ const baseProps = {
 }
 
 describe('DubbingVoiceControls', () => {
+  it('자주 쓰는 목소리를 sheet 없이 한 번에 바꾼다', () => {
+    const onVoiceChange = vi.fn()
+    render(<DubbingVoiceControls {...baseProps} onVoiceChange={onVoiceChange} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '도윤 빠른 선택' }))
+    expect(onVoiceChange).toHaveBeenCalledWith('on-clear')
+    expect(screen.getByRole('button', { name: '혜린 빠른 선택' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
   it('화자 선택과 읽기 설정을 별도 Sheet로 연다', () => {
     render(<DubbingVoiceControls {...baseProps} />)
 

@@ -6,9 +6,13 @@ interface WorkspaceConversationProps {
 
 export function WorkspaceConversation({ messages }: WorkspaceConversationProps) {
   const visible = messages.slice(-5)
+  const latest = visible.at(-1)
   return (
-    <section className="soa-workspace-conversation" aria-label="작업 메시지">
-      <header><span>CHAT WORKSPACE</span><strong>제작 흐름</strong></header>
+    <details className="soa-workspace-conversation">
+      <summary>
+        <span>제작 기록</span>
+        <strong>{latest?.badge ?? '준비'} · {visible.length}개</strong>
+      </summary>
       <div aria-live="polite">
         {visible.map((message) => (
           <article key={message.id} className={`is-${message.role}`}>
@@ -17,6 +21,6 @@ export function WorkspaceConversation({ messages }: WorkspaceConversationProps) 
           </article>
         ))}
       </div>
-    </section>
+    </details>
   )
 }

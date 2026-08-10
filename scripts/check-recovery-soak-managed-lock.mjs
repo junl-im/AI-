@@ -104,9 +104,9 @@ requireTokens('src/hooks/useDesktopStudioLayout.ts', layout, [
 
 const layoutTest = await source('src/hooks/useDesktopStudioLayout.test.ts')
 requireTokens('src/hooks/useDesktopStudioLayout.test.ts', layoutTest, [
-  '[1024, 502]',
-  '[1280, 758]',
-  '[1440, 918]',
+  '[1024, 900]',
+  '[1280, 1156]',
+  '[1440, 1316]',
   'uses the full width below the desktop breakpoint',
 ])
 

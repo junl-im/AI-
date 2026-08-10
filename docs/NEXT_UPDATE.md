@@ -1,24 +1,25 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.5 · Editor Command UX & Adaptive Engine Load Awareness`
+현재 기준: `0.11.7 · One-Flow Dubbing UX`
 
 ## 목표 버전
 
-`0.11.6 · Recovery Evidence Classification & Session Safety`
+`0.11.8 · Approved Visual Baseline & Engine Soak Provenance`
 
 ## 최우선 구현
 
-- 실제 OS/Wi-Fi/visibility 관찰 증거와 synthetic Recovery Path Injection을 export schema와 UI에서 별도 evidence class로 고정
-- 승인된 Chromium baseline PNG가 저장소에 들어온 뒤 CI에서 `SORION_VISUAL_BASELINE_REQUIRED=1` 전환 및 pixel diff 기준 운영
-- batch 재시도 이력을 필요 시 프로젝트 세션 snapshot에 저장하되 원문·음원·민감 오류 문자열은 보존하지 않음
-- keyboard command bar의 이동 Undo를 구조 변경에도 안전한 snapshot 기반 복원으로 확장할지 검증
-- adaptive engine active-request 분산과 performance observation session을 장시간 soak에서 측정하고 과도한 엔진 전환 여부를 확인
+- 사람이 승인한 Chromium 1024·1280·1440 baseline PNG와 SHA manifest가 저장소에 들어온 경우에만 `SORION_VISUAL_BASELINE_REQUIRED=1`을 CI 필수 gate로 전환
+- baseline 승인·교체 절차와 pixel diff 허용 오차를 provenance로 기록해 임의 snapshot 갱신이 회귀를 숨기지 못하게 함
+- `active_request_count` 기반 병렬 엔진 분산과 performance observation을 장시간 soak에서 측정해 엔진 전환 횟수·성공률·지연 회귀를 함께 기록
+- recovery evidence intake/summary에서 observed와 synthetic 건수를 빠르게 구분할 수 있는 운영자 필터·요약 검토
+- one-flow 사용성에서 실제 첫 작업 클릭 수·키보드 경로를 regression fixture로 고정하고, 고급 패널을 펼친 상태에서도 1024px overflow가 없는지 계속 검증
+- keyboard command 이동 Undo를 구조 변경에도 안전한 snapshot/history 방식으로 확장할지 메모리·세션 크기·충돌 규칙을 검증
 
-## 0.11.5에서 고정한 결정
+## 0.11.7에서 고정한 결정
 
-- 다중 선택 키보드 명령은 textarea/input/select/button/link/contenteditable 입력을 가로채지 않는다.
-- 준비된 음원을 교체하는 일괄 재생성과 삭제는 실행 전 영향 미리보기를 거친다.
-- 일괄 이동 Undo는 현재 직전 1회만 제공하며 다른 구조 변경 이후의 완전한 history undo로 가장하지 않는다.
-- `active_request_count`는 auto 선택의 일시 부하 분산 신호이며 엔진 처리량 benchmark나 명시적 엔진 차단으로 해석하지 않는다.
-- performance observation window가 만료되면 오래된 EWMA와 표본을 새 세션에 섞지 않는다.
-- 실제/주입 복구 증거 분리, 승인 baseline CI 강제, 프로젝트 세션 retry snapshot은 0.11.5에서 완료한 것으로 주장하지 않는다.
+- 새 프로젝트는 중앙 원플로우에 집중하고 좌우 프로 패널은 기본 접힘으로 시작한다. 고급 기능은 제거하지 않고 한 번에 다시 펼칠 수 있다.
+- 기본 제작 경로는 `목소리 → 대본 → 바로 더빙 → 첫 결과 듣기`이며 첫 결과 자동 재생은 사용자가 현재 세션에서 생성 버튼을 직접 실행한 경우에만 적용한다.
+- TXT·MD·SRT·VTT는 서버 업로드 없이 브라우저에서 텍스트로 읽고 SRT/VTT 타임코드를 정리한 뒤 기존 장문 분할 계약으로 보낸다.
+- 기본 5개 프리셋은 중앙에서 즉시 선택하고 전체 목록·속도·높낮이·말투는 필요할 때만 펼친다.
+- 빈 프로젝트에서는 타임라인을 숨기지만 직접 편집 버튼으로 기존 block/timeline 편집에 즉시 진입할 수 있다.
+- 0.11.6의 recovery evidence provenance와 session privacy 경계는 변경하지 않는다.

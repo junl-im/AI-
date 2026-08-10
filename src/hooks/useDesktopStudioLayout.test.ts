@@ -5,12 +5,12 @@ import {
 } from './useDesktopStudioLayout'
 
 describe('desktop studio layout', () => {
-  it('starts PC workspaces with all three panes expanded', () => {
+  it('starts PC workspaces in focused one-flow mode', () => {
     expect(normalizeDesktopStudioLayout({})).toMatchObject({
       leftWidth: 224,
       rightWidth: 286,
-      leftCollapsed: false,
-      rightCollapsed: false,
+      leftCollapsed: true,
+      rightCollapsed: true,
     })
   })
 
@@ -29,16 +29,16 @@ describe('desktop studio layout', () => {
   })
 
   it.each([
-    [1024, 502],
-    [1280, 758],
-    [1440, 918],
+    [1024, 900],
+    [1280, 1156],
+    [1440, 1316],
   ])('keeps a usable three-pane center at %ipx', (viewportWidth, centerWidth) => {
     expect(calculateDesktopStudioViewport(viewportWidth)).toMatchObject({
       viewportWidth,
       threePane: true,
-      leftWidth: 224,
+      leftWidth: 56,
       centerWidth,
-      rightWidth: 286,
+      rightWidth: 56,
     })
   })
 

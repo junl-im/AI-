@@ -1,23 +1,25 @@
-SoriON AI 0.11.4 -> 0.11.5 Editor Command UX & Adaptive Engine Load Awareness
+SoriON AI 0.11.6 -> 0.11.7 One-Flow Dubbing UX
 
 기준 버전
-- 0.11.4 Visual Baseline Approval & Recovery Provenance
+- 0.11.6 Recovery Evidence Classification & Session Safety
 
 적용 결과
-- Timeline 다중 선택 keyboard command bar와 안전 실행 preview
-- 일괄 이동 직전 1회 Undo
-- auto engine active-request 기반 병렬 부하 분산
-- performance observation session 상태·표본·관찰창·EWMA 진단
-- 앱·API·Worker 제품 버전 v0.11.5 동기화
+- 새 프로젝트 simple-by-default 중앙 집중 모드 + 한 번에 프로 패널 전환
+- 빠른 5개 목소리 + 기존 전체 Voice Picker/음성 세부 설정 보존
+- TXT·MD·SRT·VTT 파일 intake + 자막 cue/timestamp 자동 정리
+- 빈 timeline 숨김 + 직접 편집 진입 + 제작 기록 접힘
+- Ctrl/Cmd+Enter + 첫 결과 autoplay + 대본 기반 프로젝트 제목 제안
+- desktop layout storage v3 + one-flow dependency-free 품질 계약
+- 앱·API·Worker 제품 버전 v0.11.7 동기화
 
 변경 수
 - 추가 6개
-- 수정 42개
+- 수정 43개
 - 삭제 0개
-- 총 48개
+- 총 49개
 
 삭제 파일
 - 없음
 
 상세 manifest
-- docs/patches/0.11.5-editor-command-adaptive-engine-load/PATCH_MANIFEST.txt
+- docs/patches/0.11.7-one-flow-dubbing-ux/PATCH_MANIFEST.txt

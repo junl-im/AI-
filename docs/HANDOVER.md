@@ -1,14 +1,38 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.5 · Editor Command UX & Adaptive Engine Load Awareness**
+현재 기준 버전: **0.11.7 · One-Flow Dubbing UX**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-10 KST**
+최종 갱신: **2026-08-10 17:12 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 0.11.7 One-Flow Dubbing UX
+
+1. **작업 일시(KST)**: 2026-08-10 17:12 이후.
+2. **대상·기준 버전**: 0.11.7 / 0.11.6 Recovery Evidence Classification & Session Safety.
+3. **사용자 목표**: 클로바더빙처럼 처음 써도 바로 생성할 만큼 단순하면서 기존 상용 도구 이상의 대량 편집·복구·엔진 자동화 능력을 숨기지 않는 편의성 대폭 강화.
+4. **기본 흐름**: 새 프로젝트는 좌우 프로 패널과 빈 타임라인을 접고 중앙에서 빠른 목소리 → 대본 → 바로 더빙 → 첫 결과 자동 재생으로 완료합니다. `Ctrl/Cmd+Enter`도 같은 생성 경로입니다.
+5. **고급 기능 보존**: 헤더 `프로 패널`로 좌우 패널을 동시에 펼치며 개별 접기·리사이즈, 전체 Voice Picker, 속도·높낮이·말투, 기존 batch/keyboard/recovery 기능은 유지합니다.
+6. **대본 Intake**: TXT·MD·SRT·VTT를 선택 또는 drag-and-drop으로 읽고 SRT/VTT cue 번호·타임코드·단순 태그를 제거합니다. 원본 파일은 session snapshot에 저장하지 않습니다.
+7. **상태 단순화**: 제작 기록은 접힌 details로 축소하고 빈 프로젝트 타임라인은 숨깁니다. `빈 대사부터 직접 편집`은 기존 타임라인 편집기로 즉시 진입합니다.
+8. **레이아웃 계약**: `sorion.desktop-studio-layout.v3`, 새 기본은 양쪽 collapsed이며 1024/1280/1440 center 예상 폭은 900/1156/1316입니다.
+9. **검증**: 최종 검증 수치는 `FOUNDATION_REPORT.md`를 따른다. 승인 Chromium pixel baseline 강제는 여전히 별도 0.11.8 범위다.
+10. **다음 업데이트**: 0.11.8 Approved Visual Baseline & Engine Soak Provenance.
+
+## 0.11.6 Recovery Evidence Classification & Session Safety
+
+1. **작업 일시(KST)**: 2026-08-10 16:27 이후.
+2. **대상·기준 버전**: 0.11.6 / 0.11.5 Editor Command UX & Adaptive Engine Load Awareness + Web quality visual-runner hotfix.
+3. **변경 내용**: recovery evidence를 observed-device/synthetic-injection/not-applicable로 분리하고 synthetic injection이 실기기 certification을 만족하지 못하도록 API에서 강제합니다. workspace session v3에는 개인정보 최소 batch retry 집계 snapshot을 추가합니다.
+4. **세션 안전성**: 최근 6건·retry count 최대 3회, 완료시각과 성공/실패/건너뜀·실패 분류만 저장합니다. clip ID·원문·음원·상세 오류 문자열은 저장하지 않습니다. v1/v2 session은 빈 retry snapshot으로 호환 복원합니다.
+5. **증거 호환**: 신규 evidence bundle은 schema v3이며 기존 v2 bundle verifier는 유지합니다. Recovery Path Injection export에는 synthetic provenance를 명시합니다.
+6. **검증**: recovery/evidence 집중 API 30/30, 전체 API 219/219, Worker 14/14, Python compileall, dependency-free TS/TSX 201/201과 계약 검사를 통과했습니다. Repository preflight 42/42와 0.11.5 visual-runner hotfix 기준본 + 48파일 overlay 897/897 files · missing 0 / extra 0 / changed 0을 통과했습니다.
+7. **제한**: 승인 Chromium baseline PNG는 아직 없으므로 baseline-required CI는 강제하지 않습니다. active-request engine routing 장시간 soak와 구조 변경 snapshot Undo는 미완료입니다.
+8. **다음 업데이트**: 0.11.7 Approved Visual Baseline Enforcement & Engine Soak Provenance.
 
 
 
@@ -185,7 +209,7 @@
 3. **지속 연결**: 12초/45초 heartbeat, 60초 전체 점검, focus·pageshow·online·network change 재검사를 사용합니다.
 4. **상태 비노출**: 일반 작업 화면은 API·Worker·GPU·주소·연결 여부와 인앱 엔진 안내를 표시하지 않습니다.
 5. **PC 3분할**: 1024px부터 프로젝트/중앙 작업/프리셋 음성의 세 영역을 기본 펼침으로 표시합니다.
-6. **레이아웃 저장**: `sorion.desktop-studio-layout.v2`를 사용해 이전 v1 접힘 상태로 패널이 사라지는 문제를 차단합니다.
+6. **레이아웃 저장**: `sorion.desktop-studio-layout.v3`를 사용해 새 프로젝트는 양쪽 패널 접힘 집중 모드로 시작하고 사용자가 펼친 상태와 폭을 보존합니다.
 7. **다음 업데이트**: 0.10.1 Approval Service Modularization & Operator Baselines.
 
 ## 0.9.9 CI Quality Hotfix
@@ -541,7 +565,7 @@ health · readiness · GPU diagnostics · jobs · SSE · WAV
 - API·실제 TTS·Demo 상태를 구분하고 Worker·GPU 3단계 상태를 표시.
 - 초기 랜딩에서는 숨고 작업공간 진입 뒤 나타나는 Linked Player Dock과 최대 20개 큐.
 - 목소리 복제, 품질 연구소와 클릭 시 편집 상태를 복원하는 프로젝트 저장소.
-- PC 1024px 이상 좌우 패널의 너비 조절·접기와 `sorion.desktop-studio-layout.v2` 로컬 저장.
+- PC 1024px 이상 좌우 패널의 너비 조절·접기와 `sorion.desktop-studio-layout.v3` 로컬 저장. 새 프로젝트는 양쪽 접힘 집중 모드로 시작.
 - Engine Doctor의 공개 HTTPS Bridge, 프리셋 WAV 세부 진단과 첫 음성 파일 준비 지표 표시.
 ### FastAPI Gateway
 - Health, Setup, Connectivity, Engine Registry.

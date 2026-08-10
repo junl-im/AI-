@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { LongformComposer } from './LongformComposer'
+import { LongformComposer, normalizeImportedScript } from './LongformComposer'
 
 const activity = {
   id: 'activity',
@@ -62,4 +62,15 @@ describe('LongformComposer', () => {
     expect(editor).toHaveFocus()
     expect(onValueChange).toHaveBeenCalledWith('가')
   })
+  it('SRT/VTT 대본 파일은 번호와 타임코드를 제거해 바로 읽을 문장만 남긴다', () => {
+    const source = `1
+00:00:01,000 --> 00:00:03,000
+안녕하세요.
+
+2
+00:00:03,100 --> 00:00:05,000
+두 번째 문장입니다.`
+    expect(normalizeImportedScript(source, 'sample.srt')).toBe('안녕하세요.\n두 번째 문장입니다.')
+  })
+
 })

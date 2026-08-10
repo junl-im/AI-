@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 0.11.7 · One-Flow Dubbing UX
+
+- 새 프로젝트의 PC 기본 상태를 좌우 패널 접힘 집중 모드로 바꾸고 헤더 `프로 패널` 버튼으로 프로젝트 목록과 Voice Drawer를 한 번에 펼칠 수 있게 했습니다.
+- 중앙 Longform Composer에 빠른 목소리 선택, 미리듣기/세부설정, 대본 편집, 생성 행동을 결합해 `목소리 → 대본 → 바로 더빙 → 듣기` 한 흐름으로 정리했습니다.
+- 기본 5개 프리셋을 별도 Sheet 없이 즉시 바꾸는 빠른 선택을 추가하면서 전체 Voice Picker와 기존 속도·높낮이·말투 설정은 유지했습니다.
+- 빈 프로젝트에서는 타임라인을 숨기고 생성 후 또는 `빈 대사부터 직접 편집`을 눌렀을 때만 노출하며, 제작 기록은 접힌 `details`로 축소했습니다.
+- TXT·MD·SRT·VTT 파일 선택과 drag-and-drop 가져오기를 추가하고 SRT/VTT cue 번호·타임코드·단순 태그를 대본에서 제거합니다.
+- `Ctrl/Cmd+Enter` 즉시 생성, 첫 준비 음성 자동 재생, 첫 대본 기반 새 프로젝트 제목 자동 제안을 추가했습니다.
+- one-flow UX를 dependency-free repository contract와 단위 테스트 토큰으로 고정하고 desktop layout 저장 키를 v3로 승격했습니다.
+
+## 0.11.6 · Recovery Evidence Classification & Session Safety
+
+- 복구 증거에 `observed-device`, `synthetic-injection`, `not-applicable` provenance를 추가하고 실제 실기기 recorder와 Recovery Path Injection을 schema/UI/export에서 분리했습니다.
+- synthetic Recovery Path Injection이 성공해도 Android/iOS recovery certification coverage 또는 READY를 충족하지 못하도록 API summary와 기록 판정을 강화했습니다.
+- evidence bundle 신규 export를 schema v3로 올리되 verifier는 기존 schema v2 bundle hash를 같은 규칙으로 계속 검증합니다.
+- workspace session schema v3에 batch retry snapshot을 추가하고 최근 6건·재시도 3회 상한의 성공/실패/건너뜀/실패 분류 집계만 저장합니다.
+- batch retry snapshot sanitizer가 clip ID, 원문, 음원, 임의 error 문자열을 폐기하며 복원 UI도 개인정보 최소 저장 범위를 명시합니다.
+- recovery evidence/session safety dependency-free 계약과 API 회귀 테스트를 추가하고 앱·API·Worker 제품 버전을 0.11.6으로 동기화했습니다.
+- 승인 Chromium baseline PNG가 아직 없으므로 baseline-required CI 강제 전환은 하지 않았습니다.
+
 ## 0.11.5 · Editor Command UX & Adaptive Engine Load Awareness
 
 - 타임라인 다중 선택에 `Ctrl/Cmd+A`, `R`, `Shift+R`, `Alt+←/→`, `Delete`, `Esc`, `?` 키보드 명령과 항상 보이는 command bar를 추가했습니다.

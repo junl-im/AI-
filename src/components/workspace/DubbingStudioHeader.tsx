@@ -11,6 +11,8 @@ interface DubbingStudioHeaderProps {
   onOpenQuality: () => void
   onOpenProjects: () => void
   onOpenSettings: () => void
+  sidePanelsCollapsed: boolean
+  onToggleSidePanels: () => void
   onClear: () => void
 }
 
@@ -24,6 +26,8 @@ export function DubbingStudioHeader({
   onOpenQuality,
   onOpenProjects,
   onOpenSettings,
+  sidePanelsCollapsed,
+  onToggleSidePanels,
   onClear,
 }: DubbingStudioHeaderProps) {
   const titleRef = useRef<HTMLInputElement | null>(null)
@@ -81,6 +85,16 @@ export function DubbingStudioHeader({
         </div>
 
         <div className="soa-dubbing-toolbar__actions" aria-label="프로젝트 동작">
+          <button
+            type="button"
+            className="soa-dubbing-pro-toggle"
+            onClick={onToggleSidePanels}
+            aria-label={sidePanelsCollapsed ? '프로 패널 펼치기' : '간편 모드로 전환'}
+            aria-pressed={!sidePanelsCollapsed}
+            title={sidePanelsCollapsed ? '프로젝트·보이스 패널 펼치기' : '양쪽 패널 접기'}
+          >
+            {sidePanelsCollapsed ? '▦' : '◫'}
+          </button>
           {downloadHref ? (
             <a href={downloadHref} download={downloadName} aria-label="현재 음성 다운로드">⇩</a>
           ) : (

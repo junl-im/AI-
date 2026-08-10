@@ -592,14 +592,14 @@ export function useTimelineGeneration() {
     return results
   }, [runBlock])
 
-  const generateAll = useCallback(async (ids: string[]) => {
+  const generateAll = useCallback(async (ids: string[], autoplayFirst = false) => {
     const results: TimelineGenerationResult[] = []
-    for (const id of ids) {
-      const audio = await generateBlock(id)
+    for (const [index, id] of ids.entries()) {
+      const audio = await runBlock(id, true, autoplayFirst && index === 0)
       if (audio) results.push({ blockId: id, audio })
     }
     return results
-  }, [generateBlock])
+  }, [runBlock])
 
   const applySttVerification = useCallback((results: SttSegmentVerificationResult[]) => {
     commit((current) => applySttResultsToBlocks(current, results))

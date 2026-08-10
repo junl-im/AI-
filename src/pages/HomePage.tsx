@@ -29,7 +29,7 @@ import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import { synthesizeSpeech } from '../tts/voiceApi'
 import { getVoicePreset, voicePresets } from '../tts/voicePresets'
 import { createRandomId } from '../utils/randomId'
-import type { WorkspaceSession } from '../workspace/sessionTypes'
+import type { WorkspaceBatchRetrySnapshot, WorkspaceSession } from '../workspace/sessionTypes'
 import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import type { ComposerDirective, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
@@ -125,6 +125,7 @@ export function HomePage() {
   const [speechEmotion, setSpeechEmotion] = useState<VoiceEmotion>('neutral')
   const [composerDraft, setComposerDraft] = useState('')
   const [directiveIds, setDirectiveIds] = useState<ComposerDirective['id'][]>(['numbers'])
+  const [batchRetrySnapshot, setBatchRetrySnapshot] = useState<WorkspaceBatchRetrySnapshot>({ retryCount: 0, history: [] })
   const [previewingId, setPreviewingId] = useState<string | null>(null)
   const [activePreview, setActivePreview] = useState<{ voiceId: string; trackId: string } | null>(null)
   const [pendingPreview, setPendingPreview] = useState<{
@@ -188,6 +189,7 @@ export function HomePage() {
     setDirectiveIds(session.directiveIds.includes('numbers') ? ['numbers'] : [])
     setMessages(session.messages.length > 0 ? session.messages : initialMessages)
     setPendingRecoveryIds(restoreSession(session.blocks))
+    setBatchRetrySnapshot(session.batchRetrySnapshot)
     if (session.workspaceEntered) enterWorkspace(session.page)
   }, [enterWorkspace, restoreSession])
   const notifyPersistenceUnavailable = useCallback(() => {
@@ -210,6 +212,7 @@ export function HomePage() {
     directiveIds,
     messages,
     blocks: timeline.blocks,
+    batchRetrySnapshot,
     onRestore: restoreWorkspaceSession,
     onPersistenceUnavailable: notifyPersistenceUnavailable,
   })
@@ -232,6 +235,7 @@ export function HomePage() {
     setSpeechEmotion('neutral')
     setComposerDraft('')
     setDirectiveIds(['numbers'])
+    setBatchRetrySnapshot({ retryCount: 0, history: [] })
     setPendingRecoveryIds([])
     setPendingGeneration(null)
     setPendingPreview(null)
@@ -262,6 +266,7 @@ export function HomePage() {
     setSpeechEmotion(activeProject.emotion)
     setComposerDraft(activeProject.text)
     setDirectiveIds(activeProject.normalizeText === false ? [] : ['numbers'])
+    setBatchRetrySnapshot({ retryCount: 0, history: [] })
     setMessages([
       initialMessages[0],
       {
@@ -322,7 +327,9 @@ export function HomePage() {
     const now = new Date().toISOString()
     await saveProject({
       id: createRandomId(),
-      title: projectTitle.trim() || text.replace(/\s+/g, ' ').slice(0, 36) || '새 프로젝트',
+      title: projectTitle.trim() && projectTitle.trim() !== '새 프로젝트'
+        ? projectTitle.trim()
+        : text.replace(/\s+/g, ' ').trim().slice(0, 36) || '새 프로젝트',
       text,
       voiceId: options.voiceId,
       emotion: options.emotion,
@@ -346,7 +353,7 @@ export function HomePage() {
       badge: '순차 생성',
       text: `${pending.blockIds.length}개 대사 블록을 앞에서부터 생성합니다.`,
     })
-    const generated = await generateAllTimelineBlocks(pending.blockIds)
+    const generated = await generateAllTimelineBlocks(pending.blockIds, true)
     if (generated.length === 0) {
       appendMessage({
         role: 'system',
@@ -382,6 +389,10 @@ export function HomePage() {
   }, [busy, engineAvailable, generateLongform, pendingGeneration])
   async function handleLongformSubmit(value: string) {
     const options = buildOptions()
+    if (projectTitle.trim() === '새 프로젝트') {
+      const suggestedTitle = value.replace(/\s+/g, ' ').trim().slice(0, 36)
+      if (suggestedTitle) setProjectTitle(suggestedTitle)
+    }
     setPendingGeneration(null)
     clearTimeline()
     clearQueue()
@@ -580,37 +591,41 @@ export function HomePage() {
             onOpenQuality={() => enterWorkspace('quality')}
             onOpenProjects={() => enterWorkspace('projects')}
             onOpenSettings={() => enterWorkspace('settings')}
+            sidePanelsCollapsed={desktopLayout.sidePanelsCollapsed}
+            onToggleSidePanels={desktopLayout.toggleSidePanels}
             onClear={clearCurrentWork}
           />
           <main className="soa-dubbing-main">
-            <div className="soa-mobile-voice-controls">
-              <DubbingVoiceControls
-                voiceId={voiceId}
-                previewingId={previewingId}
-                activePreviewId={activePreviewId}
-                previewPlaying={previewPlaying}
-                speed={speechSpeed}
-                pitch={speechPitch}
-                emotion={speechEmotion}
-                normalizeText={normalizeText}
-                engine={engineCatalog.selected}
-                onVoiceChange={selectVoice}
-                onPreview={handlePreview}
-                onSpeedChange={setSpeechSpeed}
-                onPitchChange={setSpeechPitch}
-                onEmotionChange={setSpeechEmotion}
-                onNormalizeTextChange={(value) => setDirectiveIds(value ? ['numbers'] : [])}
-                onCreateVoice={() => enterWorkspace('clone')}
-              />
-            </div>
-            <WorkspaceConversation messages={messages} />
             <LongformComposer
               disabled={busy}
               value={composerDraft}
               activity={activity}
+              voiceControls={(
+                <DubbingVoiceControls
+                  voiceId={voiceId}
+                  previewingId={previewingId}
+                  activePreviewId={activePreviewId}
+                  previewPlaying={previewPlaying}
+                  speed={speechSpeed}
+                  pitch={speechPitch}
+                  emotion={speechEmotion}
+                  normalizeText={normalizeText}
+                  engine={engineCatalog.selected}
+                  onVoiceChange={selectVoice}
+                  onPreview={handlePreview}
+                  onSpeedChange={setSpeechSpeed}
+                  onPitchChange={setSpeechPitch}
+                  onEmotionChange={setSpeechEmotion}
+                  onNormalizeTextChange={(value) => setDirectiveIds(value ? ['numbers'] : [])}
+                  onCreateVoice={() => enterWorkspace('clone')}
+                />
+              )}
+              onAddBlank={() => timeline.addVoiceBlock(buildOptions())}
               onValueChange={setComposerDraft}
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
+            <WorkspaceConversation messages={messages} />
+            {timeline.blocks.length > 0 ? (
             <TimelineEditor
               blocks={timeline.blocks}
               onMove={timeline.moveBlock}
@@ -635,7 +650,10 @@ export function HomePage() {
               }}
               onVerifyAndRegenerate={() => void sttVerification.run()}
               sttBusy={sttVerification.busy}
+              batchRetrySnapshot={batchRetrySnapshot}
+              onBatchRetrySnapshotChange={setBatchRetrySnapshot}
             />
+            ) : null}
           </main>
         </section>
 
