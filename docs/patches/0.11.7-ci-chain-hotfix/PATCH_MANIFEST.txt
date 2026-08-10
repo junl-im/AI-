@@ -1,0 +1,42 @@
+SoriON AI 0.11.7 CI Chain Integrity Hotfix overwrite patch
+Base: GitHub b5cd5cb (0.11.6 cumulative recovery/session files missing)
+
+A docs/RECOVERY_EVIDENCE_CLASSIFICATION_SESSION_SAFETY.md
+A docs/patches/0.11.6-recovery-evidence-session-safety/DELETE_LIST.txt
+A docs/patches/0.11.6-recovery-evidence-session-safety/PATCH_MANIFEST.txt
+A docs/patches/0.11.6-recovery-evidence-session-safety/PATCH_README.md
+A docs/patches/0.11.7-ci-chain-hotfix/DELETE_LIST.txt
+A docs/patches/0.11.7-ci-chain-hotfix/PATCH_README.md
+A scripts/check-recovery-evidence-session-safety.mjs
+A docs/patches/0.11.7-ci-chain-hotfix/PATCH_MANIFEST.txt
+M APPLY_PATCH.cmd
+M APPLY_PATCH.sh
+M FOUNDATION_REPORT.md
+M PATCH_MANIFEST.txt
+M README.md
+M START_HERE.md
+M docs/CHANGELOG.md
+M docs/HANDOVER.md
+M docs/NEXT_UPDATE.md
+M scripts/run-preflight.mjs
+M services/api/app/api/routes/verification.py
+M services/api/app/schemas/verification.py
+M services/api/app/services/evidence_bundle.py
+M services/api/tests/test_verification.py
+M src/components/evaluation/DeviceSoakRecorderCard.tsx
+M src/components/evaluation/RecoveryInjectionCard.tsx
+M src/components/workspace/TimelineEditor.test.tsx
+M src/components/workspace/TimelineEditor.tsx
+M src/hooks/useWorkspaceSessionPersistence.ts
+M src/quality/qualityApi.ts
+M src/quality/qualityTypes.ts
+M src/quality/recoveryInjection.test.ts
+M src/quality/recoveryInjection.ts
+M src/workspace/sessionCodec.test.ts
+M src/workspace/sessionCodec.ts
+M src/workspace/sessionTypes.ts
+
+Added: 8
+Modified: 26
+Deleted: 0
+Total: 34

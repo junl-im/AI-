@@ -97,6 +97,50 @@ describe('workspace session codec', () => {
     expect(hasMeaningfulWorkspaceSession(optionOnly)).toBe(true)
   })
 
+
+  it('stores only bounded aggregate batch retry history without clip or error payloads', () => {
+    const session = createWorkspaceSession({
+      ...sessionDraft(),
+      batchRetrySnapshot: {
+        retryCount: 9,
+        history: [{
+          completedAt: '2026-08-10T06:00:00.000Z',
+          retry: true,
+          requested: 4,
+          succeeded: 2,
+          failed: 2,
+          skipped: 0,
+          failureKinds: ['network'],
+          clipIds: ['voice-secret'],
+          errorMessage: 'private backend error',
+          originalText: '민감한 원문',
+        }],
+      } as never,
+    }, 8)
+
+    expect(session.batchRetrySnapshot.retryCount).toBe(3)
+    expect(session.batchRetrySnapshot.history).toEqual([{
+      completedAt: '2026-08-10T06:00:00.000Z',
+      retry: true,
+      requested: 4,
+      succeeded: 2,
+      failed: 2,
+      skipped: 0,
+      failureKinds: ['network'],
+    }])
+    expect(JSON.stringify(session.batchRetrySnapshot)).not.toContain('voice-secret')
+    expect(JSON.stringify(session.batchRetrySnapshot)).not.toContain('private backend error')
+    expect(JSON.stringify(session.batchRetrySnapshot)).not.toContain('민감한 원문')
+  })
+
+  it('restores schema v2 sessions with an empty safe batch retry snapshot', () => {
+    const session = createWorkspaceSession(sessionDraft(), 3)
+    const legacy = { ...session, schemaVersion: 2 }
+    delete (legacy as Partial<typeof session>).batchRetrySnapshot
+
+    expect(normalizeWorkspaceSession(legacy)?.batchRetrySnapshot).toEqual({ retryCount: 0, history: [] })
+  })
+
   it('rejects expired or incompatible records', () => {
     const session = createWorkspaceSession(sessionDraft(), 1)
     expect(normalizeWorkspaceSession({ ...session, schemaVersion: 999 })).toBeNull()

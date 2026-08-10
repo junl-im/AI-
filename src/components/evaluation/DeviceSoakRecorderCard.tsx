@@ -117,6 +117,7 @@ export function DeviceSoakRecorderCard({ onRecorded }: { onRecorded: () => void 
       sampleMinutes,
       soakElapsedSeconds: elapsedSeconds || null,
       scenario,
+      recoveryEvidenceClass: scenario === 'baseline' ? 'not-applicable' : 'observed-device',
       browserVersion: browserEvidence?.browserName ?? '',
       firstAudioMs: nullableNumber(firstAudioMs),
       processingSeconds: Math.max(0.1, Number(processingSeconds) || elapsedSeconds || 1),
@@ -214,7 +215,11 @@ export function DeviceSoakRecorderCard({ onRecorded }: { onRecorded: () => void 
 
       {recoveryRequired ? (
         <div className="mt-3 rounded-2xl border border-soa-line bg-white p-3">
-          <strong className="text-xs">복구 증거</strong>
+          <div className="flex items-center justify-between gap-2">
+            <strong className="text-xs">복구 증거</strong>
+            <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black text-emerald-700">OBSERVED DEVICE</span>
+          </div>
+          <p className="mt-1 text-[10px] font-bold leading-4 text-soa-muted">이 기록은 실제 기기에서 직접 관찰한 복구 증거로만 저장됩니다. Recovery Path Injection 결과와 섞이지 않습니다.</p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <select aria-label="SSE 재연결 결과" value={sseState} onChange={(event) => setSseState(event.target.value)} className="focus-ring min-h-11 rounded-xl border border-soa-line px-3 text-xs"><option value="unverified">SSE 미검증</option><option value="passed">SSE 성공</option><option value="failed">SSE 실패</option></select>
             <input aria-label="SSE 재연결 시간" inputMode="numeric" value={sseReconnectMs} onChange={(event) => setSseReconnectMs(event.target.value)} placeholder="SSE 재연결 ms" className="focus-ring min-h-11 rounded-xl border border-soa-line px-3 text-xs" />

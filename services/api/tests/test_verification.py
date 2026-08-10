@@ -233,6 +233,7 @@ def test_mobile_certification_requires_recovery_evidence(client):
             "playback_interruption_ms": 650,
             "seam_p95_waited_ms": 850,
             "seam_p95_decode_ms": 140,
+            "recovery_evidence_class": "observed-device",
         },
     )
 
@@ -266,6 +267,46 @@ def test_mobile_certification_requires_recovery_evidence(client):
     assert metrics["p95_seam_waited_ms"] == 850
     assert metrics["p95_seam_decode_ms"] == 140
     assert metrics["p95_final_handoff_error_ms"] is None
+
+
+def test_synthetic_recovery_evidence_never_satisfies_device_certification(client):
+    response = client.post(
+        "/api/v1/quality/device-benchmarks",
+        json={
+            "device_profile": "android",
+            "device_name": "Synthetic Path Test",
+            "engine_id": "cosyvoice3",
+            "model_id": "cosyvoice3-local",
+            "model_version": "1",
+            "sample_minutes": 10,
+            "soak_elapsed_seconds": 605,
+            "scenario": "network-switch",
+            "recovery_evidence_class": "synthetic-injection",
+            "processing_seconds": 60,
+            "audio_duration_seconds": 120,
+            "playback_completed": True,
+            "sse_reconnected": True,
+            "audio_fetch_recovered": True,
+            "sse_reconnect_ms": 900,
+            "audio_fetch_recovery_ms": 1200,
+            "playback_interruption_ms": 650,
+            "succeeded": True,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "warning"
+    assert response.json()["recovery_evidence_class"] == "synthetic-injection"
+
+    summary = client.get("/api/v1/quality/device-benchmarks/summary").json()
+    row = next(
+        item for item in summary["certification_coverage"]
+        if item["profile"] == "android"
+        and item["scenario"] == "network-switch"
+        and item["sample_minutes"] == 10
+    )
+    assert row["recorded"] is False
+    assert "android:network-switch:10m" in summary["missing_certifications"]
 
 
 def test_mobile_certification_warns_when_recovery_timings_are_missing(client):

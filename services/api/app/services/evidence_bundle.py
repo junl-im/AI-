@@ -3,7 +3,8 @@ import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-EVIDENCE_BUNDLE_SCHEMA_VERSION = "2"
+EVIDENCE_BUNDLE_SCHEMA_VERSION = "3"
+SUPPORTED_EVIDENCE_BUNDLE_SCHEMA_VERSIONS = {"2", EVIDENCE_BUNDLE_SCHEMA_VERSION}
 
 _BUNDLE_KEYS = {
     "schema_version",
@@ -90,20 +91,21 @@ def build_bundle_manifest(
     redacted: bool,
     categories: Mapping[str, list[dict[str, object]]],
     summary: dict[str, object],
+    schema_version: str = EVIDENCE_BUNDLE_SCHEMA_VERSION,
 ) -> dict[str, object]:
     normalized_categories = normalize_categories(categories)
     records, category_counts, records_sha256 = build_record_manifest(
         normalized_categories
     )
     unsigned_manifest = {
-        "schema_version": EVIDENCE_BUNDLE_SCHEMA_VERSION,
+        "schema_version": schema_version,
         "record_count": len(records),
         "category_counts": category_counts,
         "records_sha256": records_sha256,
         "records": records,
     }
     bundle_sha256 = sha256_json({
-        "schema_version": EVIDENCE_BUNDLE_SCHEMA_VERSION,
+        "schema_version": schema_version,
         "app_version": app_version,
         "redacted": redacted,
         "categories": normalized_categories,
@@ -123,7 +125,7 @@ def verify_bundle_payload(payload: dict[str, object]) -> dict[str, object]:
             "record_count": 0,
             "reason": f"허용되지 않은 필드가 있습니다: {', '.join(unexpected_keys)}",
         }
-    if payload.get("schema_version") != EVIDENCE_BUNDLE_SCHEMA_VERSION:
+    if payload.get("schema_version") not in SUPPORTED_EVIDENCE_BUNDLE_SCHEMA_VERSIONS:
         return {
             "valid": False,
             "provided_sha256": None,
@@ -196,6 +198,7 @@ def verify_bundle_payload(payload: dict[str, object]) -> dict[str, object]:
         redacted=bool(payload.get("redacted", True)),
         categories=typed_categories,
         summary=summary,
+        schema_version=str(payload.get("schema_version", "")),
     )
     provided_sha256 = manifest.get("bundle_sha256")
     manifest_matches = all(

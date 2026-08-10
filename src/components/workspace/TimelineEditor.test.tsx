@@ -296,6 +296,7 @@ it('일괄 실패 원인을 그룹으로 나눠 필요한 항목만 다시 시�
 })
 
 it('일괄 작업 재시도 이력을 세션 안에서 최근 순서로 보존한다', async () => {
+  const onBatchRetrySnapshotChange = vi.fn()
   const onRegenerateMany = vi.fn()
     .mockResolvedValueOnce({
       requestedIds: ['voice-1', 'voice-2'],
@@ -327,6 +328,7 @@ it('일괄 작업 재시도 이력을 세션 안에서 최근 순서로 보존�
       onRemoveMany={vi.fn()}
       onRegenerateMany={onRegenerateMany}
       onClear={vi.fn()}
+      onBatchRetrySnapshotChange={onBatchRetrySnapshotChange}
     />,
   )
 
@@ -343,6 +345,11 @@ it('일괄 작업 재시도 이력을 세션 안에서 최근 순서로 보존�
   fireEvent.click(history)
   expect(screen.getAllByText('일괄 작업').length).toBeGreaterThanOrEqual(1)
   expect(screen.getByText('빠른 재시도')).toBeInTheDocument()
+  expect(onBatchRetrySnapshotChange).toHaveBeenCalled()
+  const snapshot = onBatchRetrySnapshotChange.mock.calls.at(-1)?.[0]
+  expect(snapshot).toMatchObject({ retryCount: 1 })
+  expect(JSON.stringify(snapshot)).not.toContain('voice-2')
+  expect(JSON.stringify(snapshot)).not.toContain('engine unavailable')
 })
 
 it('다중 선택 command bar는 키보드 재생성·이동 되돌리기·삭제 안전 확인을 제공한다', async () => {

@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
@@ -65,12 +66,23 @@ function annotationValue(value) {
 const results = []
 for (const [label, script, ...args] of checks) {
   process.stdout.write(`\n::group::Preflight · ${label}\n`)
-  const result = spawnSync(process.execPath, [join(root, 'scripts', script), ...args], {
-    cwd: root,
-    encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
-    env: process.env,
-  })
+  const scriptPath = join(root, 'scripts', script)
+  let result
+  if (!existsSync(scriptPath)) {
+    result = {
+      status: 1,
+      stdout: '',
+      stderr: `필수 preflight 스크립트가 없습니다: scripts/${script}\n패치 기준 버전이 맞는지 확인하고 누적 패치를 적용하세요.`,
+      error: undefined,
+    }
+  } else {
+    result = spawnSync(process.execPath, [scriptPath, ...args], {
+      cwd: root,
+      encoding: 'utf8',
+      maxBuffer: 32 * 1024 * 1024,
+      env: process.env,
+    })
+  }
   const output = [result.stdout, result.stderr, result.error?.message]
     .filter(Boolean)
     .join('\n')

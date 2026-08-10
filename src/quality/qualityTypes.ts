@@ -112,6 +112,7 @@ export interface DeviceBenchmarkCoverage {
 }
 
 export type DeviceCertificationScenario = 'baseline' | 'network-switch' | 'background-resume' | 'installed-pwa'
+export type RecoveryEvidenceClass = 'not-applicable' | 'observed-device' | 'synthetic-injection'
 
 export interface DeviceSoakRecordInput {
   deviceProfile: 'android' | 'ios'
@@ -126,6 +127,7 @@ export interface DeviceSoakRecordInput {
   sampleMinutes: 10 | 30 | 60
   soakElapsedSeconds: number | null
   scenario: DeviceCertificationScenario
+  recoveryEvidenceClass: RecoveryEvidenceClass
   browserVersion: string
   firstAudioMs: number | null
   processingSeconds: number

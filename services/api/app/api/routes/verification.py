@@ -76,7 +76,13 @@ def _benchmark_summary(items: list[DeviceBenchmarkResponse]) -> DeviceBenchmarkS
     latest_certification: dict[tuple[str, str, int], DeviceBenchmarkResponse] = {}
     for item in sorted(items, key=lambda value: value.recorded_at):
         latest[(item.device_profile, item.sample_minutes)] = item
-        if item.device_profile in certification_profiles:
+        if (
+            item.device_profile in certification_profiles
+            and (
+                item.scenario == "baseline"
+                or item.recovery_evidence_class == "observed-device"
+            )
+        ):
             latest_certification[(
                 item.device_profile,
                 item.scenario,
@@ -224,6 +230,10 @@ async def record_device_benchmark(
         payload.sse_reconnected is None
         or payload.audio_fetch_recovered is None
     )
+    recovery_evidence_unverified = (
+        scenario_requires_recovery
+        and payload.recovery_evidence_class != "observed-device"
+    )
     recovery_timing_unverified = scenario_requires_recovery and (
         payload.sse_reconnect_ms is None
         or payload.audio_fetch_recovery_ms is None
@@ -248,6 +258,7 @@ async def record_device_benchmark(
         realtime_factor > 1.0
         or payload.retry_count
         or recovery_unverified
+        or recovery_evidence_unverified
         or recovery_timing_unverified
         or soak_duration_incomplete
         or soak_duration_unverified

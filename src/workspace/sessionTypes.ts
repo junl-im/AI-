@@ -9,9 +9,26 @@ import type {
 } from './workspaceTypes'
 
 export const ACTIVE_WORKSPACE_SESSION_ID = 'active-workspace'
-export const WORKSPACE_SESSION_SCHEMA_VERSION = 2
+export const WORKSPACE_SESSION_SCHEMA_VERSION = 3
 
 export type WorkspaceStorageMode = 'indexeddb' | 'localstorage' | 'memory'
+
+export type WorkspaceBatchFailureKind = 'engine' | 'preset' | 'network' | 'cancelled' | 'unknown'
+
+export interface WorkspaceBatchHistoryEntry {
+  completedAt: string
+  retry: boolean
+  requested: number
+  succeeded: number
+  failed: number
+  skipped: number
+  failureKinds: WorkspaceBatchFailureKind[]
+}
+
+export interface WorkspaceBatchRetrySnapshot {
+  retryCount: number
+  history: WorkspaceBatchHistoryEntry[]
+}
 
 export interface PersistedTimelineVoiceBlock {
   id: string
@@ -59,6 +76,7 @@ export interface WorkspaceSession {
   directiveIds: ComposerDirective['id'][]
   messages: WorkspaceMessage[]
   blocks: PersistedTimelineBlock[]
+  batchRetrySnapshot: WorkspaceBatchRetrySnapshot
 }
 
 export interface WorkspaceSessionDraft {
@@ -73,6 +91,7 @@ export interface WorkspaceSessionDraft {
   directiveIds: ComposerDirective['id'][]
   messages: WorkspaceMessage[]
   blocks: TimelineBlock[]
+  batchRetrySnapshot?: WorkspaceBatchRetrySnapshot
 }
 
 export interface WorkspaceSessionLoadResult {

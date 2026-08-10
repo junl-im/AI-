@@ -2,6 +2,14 @@
 
 ## 0.11.7 · One-Flow Dubbing UX
 
+### CI chain hotfix · 2026-08-10
+
+- GitHub 커밋 `b5cd5cb`가 0.11.5 기준선 위에 0.11.7 패치만 적용되어 0.11.6 recovery evidence/session safety 누적 파일 21개가 빠진 상태를 복구합니다.
+- 누락된 `check-recovery-evidence-session-safety.mjs`와 recovery provenance/session schema v3 구현, evidence bundle schema v3 및 legacy v2 verifier 호환을 완전본과 동기화합니다.
+- 현재 GitHub 상태에서 재현되던 API evidence 3건 실패(schema 2/3 불일치)를 제거합니다.
+- `run-preflight.mjs`는 검사 스크립트가 없을 때 raw `MODULE_NOT_FOUND` 대신 누락 파일과 패치 기준 불일치를 직접 안내합니다.
+- 제품 버전은 0.11.7을 유지하며 기능 범위는 변경하지 않습니다.
+
 - 새 프로젝트의 PC 기본 상태를 좌우 패널 접힘 집중 모드로 바꾸고 헤더 `프로 패널` 버튼으로 프로젝트 목록과 Voice Drawer를 한 번에 펼칠 수 있게 했습니다.
 - 중앙 Longform Composer에 빠른 목소리 선택, 미리듣기/세부설정, 대본 편집, 생성 행동을 결합해 `목소리 → 대본 → 바로 더빙 → 듣기` 한 흐름으로 정리했습니다.
 - 기본 5개 프리셋을 별도 Sheet 없이 즉시 바꾸는 빠른 선택을 추가하면서 전체 Voice Picker와 기존 속도·높낮이·말투 설정은 유지했습니다.

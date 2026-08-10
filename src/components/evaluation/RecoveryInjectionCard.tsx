@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { injectRecoveryPath, type RecoveryInjectionResult } from '../../quality/recoveryInjection'
+import {
+  downloadRecoveryInjectionEvidence,
+  injectRecoveryPath,
+  type RecoveryInjectionResult,
+} from '../../quality/recoveryInjection'
 import { StatusPill } from '../ui/StatusPill'
 
 export function RecoveryInjectionCard() {
@@ -11,10 +15,10 @@ export function RecoveryInjectionCard() {
           <span className="text-[10px] font-black tracking-[0.15em] text-soa-muted">RECOVERY PATH INJECTION</span>
           <h2 className="mt-1 text-xl font-black tracking-[-0.05em]">복귀 처리 경로 점검</h2>
         </div>
-        <StatusPill label={result ? '주입 완료' : '대기'} tone={result ? 'good' : 'neutral'} />
+        <StatusPill label={result ? 'SYNTHETIC' : '대기'} tone={result ? 'warning' : 'neutral'} />
       </div>
       <p className="mt-2 text-xs font-semibold leading-5 text-soa-muted">
-        실제 Wi-Fi를 끊거나 기기를 절전시키지 않습니다. 온라인 복귀·페이지 복귀·네트워크 종류 변경 때 앱이 실행하는 이벤트 경로만 안전하게 주입합니다.
+        실제 Wi-Fi를 끊거나 기기를 절전시키지 않습니다. 이 결과는 항상 synthetic-injection 증거로 분류되며 실기기 복구 인증을 대신하지 않습니다.
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
         <button type="button" onClick={() => setResult(injectRecoveryPath('online-resume'))} className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 text-xs font-black">온라인 복귀 경로</button>
@@ -23,9 +27,11 @@ export function RecoveryInjectionCard() {
       </div>
       {result ? (
         <div className="mt-3 rounded-xl bg-white p-3 text-xs font-bold leading-5">
+          <p><strong>증거 등급 · synthetic-injection</strong></p>
           <p>{result.detail}</p>
           <p className="text-soa-muted">이벤트: {result.events.join(' → ') || '없음'} · {new Date(result.injectedAt).toLocaleString('ko-KR')}</p>
           {!result.supported ? <p className="text-soa-coral">Network Information API 자체는 이 브라우저에서 지원되지 않습니다.</p> : null}
+          <button type="button" onClick={() => downloadRecoveryInjectionEvidence(result)} className="focus-ring mt-2 min-h-10 rounded-xl border border-soa-line bg-white px-3 text-xs font-black">Synthetic 증거 JSON</button>
         </div>
       ) : null}
     </section>

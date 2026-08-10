@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 DeviceProfile = Literal["cuda", "apple-silicon", "cpu", "android", "ios"]
 DeviceScenario = Literal["baseline", "network-switch", "background-resume", "installed-pwa"]
+RecoveryEvidenceClass = Literal["not-applicable", "observed-device", "synthetic-injection"]
 
 
 class DeviceBenchmarkRequest(BaseModel):
@@ -20,6 +21,7 @@ class DeviceBenchmarkRequest(BaseModel):
     sample_minutes: int = Field(ge=1, le=120)
     soak_elapsed_seconds: float | None = Field(default=None, ge=0, le=43200)
     scenario: DeviceScenario = "baseline"
+    recovery_evidence_class: RecoveryEvidenceClass = "not-applicable"
     browser_version: str = Field(default="", max_length=120)
     first_audio_ms: int | None = Field(default=None, ge=0)
     processing_seconds: float = Field(gt=0)

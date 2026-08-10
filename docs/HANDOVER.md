@@ -1136,3 +1136,16 @@ CI Hotfix 4 테스트 규칙:
 9. 생성한 전체 ZIP과 패치 ZIP 이름: `SoriON-AI-0.11.5-editor-command-adaptive-engine-load-full.zip`, `SoriON-AI-0.11.4-to-0.11.5-editor-command-adaptive-engine-load-patch.zip`, `SHA256SUMS.txt`.
 10. 다음 예상 업데이트: `0.11.6 · Recovery Evidence Classification & Session Safety`. 실제 OS/Wi-Fi/visibility와 synthetic injection 증거 class 분리, 승인 Chromium baseline CI 강제, 민감정보 없는 batch retry session snapshot, active-request 분산 장시간 soak 검증을 우선한다.
 
+
+
+## 2026-08-10 17:50 KST · v0.11.7 CI Chain Integrity Hotfix
+1. 작업 일시(KST): 2026-08-10 17:50.
+2. 대상/기준: 제품 버전은 `0.11.7 · One-Flow Dubbing UX`를 유지하며, 기준은 GitHub 커밋 `b5cd5cb`다. 해당 커밋의 부모 `05552c4`는 0.11.5 계열이어서 0.11.6 누적 적용 없이 0.11.7 패치만 올라간 상태였다.
+3. 변경 내용: 0.11.6 recovery evidence/session safety에서 추가·변경된 파일 중 현재 GitHub에 빠진 21개를 0.11.7 완성본과 동기화하고, preflight 검사 스크립트 누락 시 raw Node MODULE_NOT_FOUND 대신 누락 경로와 패치 기준 불일치를 직접 안내하도록 runner를 보강했다.
+4. 변경 이유: `run-preflight.mjs`가 존재하지 않는 `scripts/check-recovery-evidence-session-safety.mjs`를 호출해 preflight가 실패했고, API tests는 schema v3 테스트와 schema v2 구현이 섞여 evidence 3건이 실패했기 때문이다.
+5. 영향 범위: recovery evidence provenance, evidence bundle v3/v2 verifier, verification API schema/route, workspace session v3 및 retry snapshot privacy, Timeline recovery snapshot wiring, recovery injection UI/API, repository preflight runner와 릴리스 문서다. One-Flow UX 자체 동작과 제품 버전은 변경하지 않는다.
+6. 주요 파일: `scripts/check-recovery-evidence-session-safety.mjs`, `scripts/run-preflight.mjs`, `services/api/app/services/evidence_bundle.py`, `services/api/app/{api/routes/verification.py,schemas/verification.py}`, `services/api/tests/test_verification.py`, `src/workspace/{sessionTypes,sessionCodec}.ts`, `src/quality/{qualityTypes,recoveryInjection,qualityApi}.ts`, `src/components/{evaluation,workspace}` 관련 파일.
+7. 검증 결과: GitHub 상태 재구성에서 preflight 1건 MODULE_NOT_FOUND와 API 3건 실패를 재현했다. hotfix 적용 후 Repository preflight 43/43, API 219/219, Worker 14/14, Python compileall, TS/TSX dependency-free transpile 201/201, Python 3.10 문법 parse 143/143을 통과했다. 0.11.5 visual-runner 기준본 + 실제 0.11.7 패치 + 34파일 hotfix overlay + APPLY_PATCH 결과는 906/906 files · missing 0 / extra 0 / changed 0으로 hotfix 완성본과 일치했다.
+8. 알려진 제한과 주의사항: 이 환경에는 Python 3.10 interpreter가 없어 API 테스트는 설치된 Python에서 실행하며, 실제 Python 3.10 최종 판정은 GitHub Actions가 담당한다. Web npm 전체 quality는 내부 registry 제약이 있으면 GitHub Actions를 최종 gate로 사용한다.
+9. 생성 산출물: `SoriON-AI-0.11.7-ci-chain-hotfix-full.zip`, `SoriON-AI-0.11.7-b5cd5cb-ci-chain-hotfix-patch.zip`, SHA-256 목록.
+10. 다음 예상 업데이트: `0.11.8 · Approved Visual Baseline & Engine Soak Provenance`. 이후 패치는 기준 버전뿐 아니라 실제 GitHub 기준선과 누적 파일 일치 여부를 먼저 검증하고, 필요 시 self-contained 누적 패치로 제공한다.

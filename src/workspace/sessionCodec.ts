@@ -5,6 +5,8 @@ import {
   ACTIVE_WORKSPACE_SESSION_ID,
   WORKSPACE_SESSION_SCHEMA_VERSION,
   type PersistedTimelineBlock,
+  type WorkspaceBatchHistoryEntry,
+  type WorkspaceBatchRetrySnapshot,
   type WorkspaceSession,
   type WorkspaceSessionDraft,
 } from './sessionTypes'
@@ -16,9 +18,12 @@ const MAX_COMPOSER_LENGTH = 20_000
 const MAX_PROJECT_TITLE_LENGTH = 80
 const MAX_BLOCK_TEXT_LENGTH = 2_000
 const MAX_SESSION_AGE_MS = 1000 * 60 * 60 * 24 * 45
+const MAX_BATCH_HISTORY = 6
+const MAX_BATCH_RETRY_COUNT = 3
 const pages: AppPage[] = ['home', 'clone', 'quality', 'projects', 'settings']
 const statuses: TimelineBlockStatus[] = ['queued', 'generating', 'ready', 'failed']
 const directiveIds = ['commercial', 'slow', 'numbers', 'bright'] as const
+const batchFailureKinds = ['engine', 'preset', 'network', 'cancelled', 'unknown'] as const
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
@@ -31,7 +36,6 @@ function safeText(value: unknown, limit: number): string {
 function finiteNumber(value: unknown, fallback: number): number {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback
 }
-
 
 function normalizeSttVerification(value: unknown): TimelineSttVerification | undefined {
   if (!isRecord(value)) return undefined
@@ -50,6 +54,37 @@ function normalizeSttVerification(value: unknown): TimelineSttVerification | und
       10,
       Math.max(0, Math.floor(finiteNumber(value.regenerationAttempts, 0))),
     ),
+  }
+}
+
+function normalizeBatchRetrySnapshot(value: unknown): WorkspaceBatchRetrySnapshot {
+  if (!isRecord(value)) return { retryCount: 0, history: [] }
+  const rawHistory = Array.isArray(value.history) ? value.history : []
+  const history = rawHistory.slice(0, MAX_BATCH_HISTORY).flatMap<WorkspaceBatchHistoryEntry>((entry) => {
+    if (!isRecord(entry) || typeof entry.completedAt !== 'string') return []
+    const completedAt = Date.parse(entry.completedAt)
+    if (!Number.isFinite(completedAt)) return []
+    const failureKinds = Array.isArray(entry.failureKinds)
+      ? entry.failureKinds.filter((kind): kind is typeof batchFailureKinds[number] => (
+          batchFailureKinds.includes(kind as typeof batchFailureKinds[number])
+        ))
+      : []
+    return [{
+      completedAt: new Date(completedAt).toISOString(),
+      retry: entry.retry === true,
+      requested: Math.min(500, Math.max(0, Math.floor(finiteNumber(entry.requested, 0)))),
+      succeeded: Math.min(500, Math.max(0, Math.floor(finiteNumber(entry.succeeded, 0)))),
+      failed: Math.min(500, Math.max(0, Math.floor(finiteNumber(entry.failed, 0)))),
+      skipped: Math.min(500, Math.max(0, Math.floor(finiteNumber(entry.skipped, 0)))),
+      failureKinds,
+    }]
+  })
+  return {
+    retryCount: Math.min(
+      MAX_BATCH_RETRY_COUNT,
+      Math.max(0, Math.floor(finiteNumber(value.retryCount, 0))),
+    ),
+    history,
   }
 }
 
@@ -124,6 +159,8 @@ export function createWorkspaceSession(
     }
   })
 
+  const batchRetrySnapshot = normalizeBatchRetrySnapshot(draft.batchRetrySnapshot)
+
   return {
     id: ACTIVE_WORKSPACE_SESSION_ID,
     schemaVersion: WORKSPACE_SESSION_SCHEMA_VERSION,
@@ -145,13 +182,14 @@ export function createWorkspaceSession(
       badge: message.badge?.slice(0, 160),
     })),
     blocks,
+    batchRetrySnapshot,
   }
 }
 
 export function normalizeWorkspaceSession(value: unknown): WorkspaceSession | null {
   if (!isRecord(value)) return null
   if (value.id !== ACTIVE_WORKSPACE_SESSION_ID) return null
-  if (![1, WORKSPACE_SESSION_SCHEMA_VERSION].includes(Number(value.schemaVersion))) return null
+  if (![1, 2, WORKSPACE_SESSION_SCHEMA_VERSION].includes(Number(value.schemaVersion))) return null
   if (typeof value.savedAt !== 'string') return null
   const savedAt = Date.parse(value.savedAt)
   if (!Number.isFinite(savedAt) || Date.now() - savedAt > MAX_SESSION_AGE_MS) return null
@@ -196,6 +234,7 @@ export function normalizeWorkspaceSession(value: unknown): WorkspaceSession | nu
       : ['numbers'],
     messages,
     blocks,
+    batchRetrySnapshot: normalizeBatchRetrySnapshot(value.batchRetrySnapshot),
   }
 }
 
@@ -210,4 +249,5 @@ export function hasMeaningfulWorkspaceSession(session: WorkspaceSession): boolea
     || session.composerDraft.trim().length > 0
     || session.directiveIds.length !== 1
     || session.directiveIds[0] !== 'numbers'
+    || session.batchRetrySnapshot.history.length > 0
 }

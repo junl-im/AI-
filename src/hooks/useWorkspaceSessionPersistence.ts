@@ -40,6 +40,7 @@ export function useWorkspaceSessionPersistence({
   directiveIds,
   messages,
   blocks,
+  batchRetrySnapshot,
   onRestore,
   onPersistenceUnavailable,
 }: WorkspaceSessionPersistenceOptions): WorkspaceSessionPersistenceState {
@@ -64,6 +65,7 @@ export function useWorkspaceSessionPersistence({
     directiveIds,
     messages,
     blocks,
+    batchRetrySnapshot,
   })
   const latestDraftRef = useRef<WorkspaceSessionDraft>({
     workspaceEntered,
@@ -77,6 +79,7 @@ export function useWorkspaceSessionPersistence({
     directiveIds,
     messages,
     blocks,
+    batchRetrySnapshot,
   })
 
   latestDraftRef.current = {
@@ -91,6 +94,7 @@ export function useWorkspaceSessionPersistence({
     directiveIds,
     messages,
     blocks,
+    batchRetrySnapshot,
   }
 
   useEffect(() => {
@@ -108,9 +112,10 @@ export function useWorkspaceSessionPersistence({
       || initial.directiveIds !== directiveIds
       || initial.messages !== messages
       || initial.blocks !== blocks
+      || initial.batchRetrySnapshot !== batchRetrySnapshot
     ) dirtyBeforeHydrationRef.current = true
   }, [
-    blocks, composerDraft, directiveIds, hydrated, messages, page, projectTitle,
+    batchRetrySnapshot, blocks, composerDraft, directiveIds, hydrated, messages, page, projectTitle,
     speechEmotion, speechPitch, speechSpeed, voiceId, workspaceEntered,
   ])
 
@@ -181,6 +186,7 @@ export function useWorkspaceSessionPersistence({
       if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current)
     }
   }, [
+    batchRetrySnapshot,
     blocks,
     composerDraft,
     directiveIds,

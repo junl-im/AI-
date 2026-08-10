@@ -9,6 +9,8 @@ describe('recovery path injection', () => {
     window.addEventListener('sorion-engine-refresh', refresh, { once: true })
     const result = injectRecoveryPath('online-resume')
     expect(result.supported).toBe(true)
+    expect(result.evidenceClass).toBe('synthetic-injection')
+    expect(result.schemaVersion).toBe(1)
     expect(online).toHaveBeenCalledTimes(1)
     expect(refresh).toHaveBeenCalledTimes(1)
   })

@@ -325,6 +325,7 @@ export async function recordDeviceSoak(input: DeviceSoakRecordInput): Promise<De
       sample_minutes: input.sampleMinutes,
       soak_elapsed_seconds: input.soakElapsedSeconds,
       scenario: input.scenario,
+      recovery_evidence_class: input.recoveryEvidenceClass,
       browser_version: input.browserVersion,
       first_audio_ms: input.firstAudioMs,
       processing_seconds: input.processingSeconds,

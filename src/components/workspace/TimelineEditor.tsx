@@ -14,6 +14,7 @@ import type {
 } from '../../hooks/useTimelineGeneration'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { getVoicePreset, voicePresets } from '../../tts/voicePresets'
+import type { WorkspaceBatchHistoryEntry, WorkspaceBatchRetrySnapshot } from '../../workspace/sessionTypes'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import { FinalExportControls } from './FinalExportControls'
 
@@ -38,6 +39,8 @@ interface TimelineEditorProps {
   onClear: () => void
   onVerifyAndRegenerate?: () => void
   sttBusy?: boolean
+  batchRetrySnapshot?: WorkspaceBatchRetrySnapshot
+  onBatchRetrySnapshotChange?: (snapshot: WorkspaceBatchRetrySnapshot) => void
 }
 
 interface TimelineMetric {
@@ -50,16 +53,7 @@ interface TimelineMetric {
 const BATCH_RETRY_LIMIT = 3
 const BATCH_HISTORY_LIMIT = 6
 
-interface BatchHistoryEntry {
-  id: string
-  completedAt: string
-  retry: boolean
-  requested: number
-  succeeded: number
-  failed: number
-  skipped: number
-  failureKinds: TimelineBatchFailureKind[]
-}
+type BatchHistoryEntry = WorkspaceBatchHistoryEntry
 
 type BatchCommandKind = 'regenerate' | 'retry-failed' | 'delete'
 
@@ -348,6 +342,8 @@ export function TimelineEditor({
   onClear,
   onVerifyAndRegenerate = () => undefined,
   sttBusy = false,
+  batchRetrySnapshot,
+  onBatchRetrySnapshotChange,
 }: TimelineEditorProps) {
   const currentTrackId = usePlayerStore((state) => state.currentTrackId)
   const playbackTrackId = usePlayerStore((state) => state.playbackTrackId)
@@ -366,8 +362,8 @@ export function TimelineEditor({
   const [batchPreviewOpen, setBatchPreviewOpen] = useState(false)
   const [batchRunning, setBatchRunning] = useState(false)
   const [batchResult, setBatchResult] = useState<TimelineBatchGenerationSummary | null>(null)
-  const [batchRetryCount, setBatchRetryCount] = useState(0)
-  const [batchHistory, setBatchHistory] = useState<BatchHistoryEntry[]>([])
+  const [batchRetryCount, setBatchRetryCount] = useState(batchRetrySnapshot?.retryCount ?? 0)
+  const [batchHistory, setBatchHistory] = useState<BatchHistoryEntry[]>(batchRetrySnapshot?.history ?? [])
   const [batchHistoryOpen, setBatchHistoryOpen] = useState(false)
   const [batchCommandPreview, setBatchCommandPreview] = useState<BatchCommandPreview | null>(null)
   const [lastBatchMove, setLastBatchMove] = useState<BatchMoveUndo | null>(null)
@@ -382,6 +378,12 @@ export function TimelineEditor({
     }))
     .filter((group) => group.ids.length > 0)
   const batchRetryLimitReached = batchRetryCount >= BATCH_RETRY_LIMIT
+
+  useEffect(() => {
+    if (!batchRetrySnapshot) return
+    setBatchRetryCount(batchRetrySnapshot.retryCount)
+    setBatchHistory(batchRetrySnapshot.history)
+  }, [batchRetrySnapshot])
 
   const metrics = useMemo(() => {
     let offset = 18
@@ -449,24 +451,23 @@ export function TimelineEditor({
 
   function applyBatchResult(summary: TimelineBatchGenerationSummary, retry: boolean) {
     setBatchResult(summary)
-    setBatchHistory((history) => {
-      const failureKinds = Array.from(new Set(
-        (summary.failures ?? []).map((failure) => failure.kind),
-      ))
-      const next: BatchHistoryEntry = {
-        id: `${Date.now()}-${summary.requestedIds.join('-')}`,
-        completedAt: new Date().toISOString(),
-        retry,
-        requested: summary.requestedIds.length,
-        succeeded: summary.succeededIds.length,
-        failed: summary.failedIds.length,
-        skipped: summary.skippedIds.length,
-        failureKinds,
-      }
-      return [next, ...history].slice(0, BATCH_HISTORY_LIMIT)
-    })
-    if (retry) setBatchRetryCount((count) => count + 1)
-    else setBatchRetryCount(0)
+    const failureKinds = Array.from(new Set(
+      (summary.failures ?? []).map((failure) => failure.kind),
+    ))
+    const next: BatchHistoryEntry = {
+      completedAt: new Date().toISOString(),
+      retry,
+      requested: summary.requestedIds.length,
+      succeeded: summary.succeededIds.length,
+      failed: summary.failedIds.length,
+      skipped: summary.skippedIds.length,
+      failureKinds,
+    }
+    const nextHistory = [next, ...batchHistory].slice(0, BATCH_HISTORY_LIMIT)
+    const nextRetryCount = retry ? Math.min(BATCH_RETRY_LIMIT, batchRetryCount + 1) : 0
+    setBatchHistory(nextHistory)
+    setBatchRetryCount(nextRetryCount)
+    onBatchRetrySnapshotChange?.({ retryCount: nextRetryCount, history: nextHistory })
     if (!summary.failedIds.length) return
     const firstFailedBlock = blocks.find((block) => block.id === summary.failedIds[0])
     setSelectedBlockIds(new Set(summary.failedIds))
@@ -491,11 +492,14 @@ export function TimelineEditor({
     if (!onBatchVoiceChange || !selectedVoiceIds.length || batchRunning) return
     setBatchRunning(regenerate)
     setBatchResult(null)
-    setBatchRetryCount(0)
     try {
       const summary = await onBatchVoiceChange(selectedVoiceIds, batchVoice.id, regenerate)
       if (summary) applyBatchResult(summary, false)
-      else setBatchResult(null)
+      else {
+        setBatchResult(null)
+        setBatchRetryCount(0)
+        onBatchRetrySnapshotChange?.({ retryCount: 0, history: batchHistory })
+      }
       setBatchPreviewOpen(false)
     } finally {
       setBatchRunning(false)
@@ -996,7 +1000,7 @@ export function TimelineEditor({
               {batchHistoryOpen ? (
                 <ol>
                   {batchHistory.map((entry) => (
-                    <li key={entry.id}>
+                    <li key={`${entry.completedAt}-${entry.retry ? 'retry' : 'batch'}`}>
                       <time dateTime={entry.completedAt}>
                         {new Date(entry.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </time>
@@ -1011,6 +1015,14 @@ export function TimelineEditor({
               ) : null}
             </div>
           ) : null}
+        </div>
+      ) : null}
+
+      {!batchResult && batchHistory.length ? (
+        <div className="soa-timeline-batch-result is-session" role="status" aria-label="복원된 일괄 재시도 이력">
+          <strong>복원된 세션 재시도 이력</strong>
+          <span>{batchHistory.length}건 · 빠른 재시도 {batchRetryCount}/{BATCH_RETRY_LIMIT}회</span>
+          <small>클립 ID·원문·음원·오류 문자열은 저장하지 않고 성공/실패 집계와 실패 분류만 복원했습니다.</small>
         </div>
       ) : null}
 
