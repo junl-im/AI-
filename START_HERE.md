@@ -2,8 +2,6 @@
 
 현재 버전: `0.11.7 · One-Flow Dubbing UX`
 
-CI hotfix 상태: GitHub `b5cd5cb`처럼 0.11.6 누적 파일 없이 0.11.7 패치만 적용된 저장소에는 `0.11.7-ci-chain-hotfix` 패치를 먼저 덮어써 recovery/session/API schema를 완성본과 동기화합니다.
-
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.

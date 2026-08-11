@@ -1,17 +1,9 @@
 # SoriON AI 0.11.7 Verification Report
 
 결과 버전: **0.11.7 · One-Flow Dubbing UX**  
-기준 버전: **GitHub b5cd5cb · 0.11.5 기준선 위 0.11.7 패치 적용 상태**
+기준 버전: **0.11.6 · Recovery Evidence Classification & Session Safety**
 
-## CI chain hotfix 적용 범위
-
-- GitHub 기준선 누락 복구: 0.11.6에서 추가·변경됐지만 b5cd5cb에 빠진 recovery/session 파일 21개를 0.11.7 완성본과 동기화
-- `scripts/check-recovery-evidence-session-safety.mjs` 복원
-- API evidence bundle schema v3 + legacy v2 verifier 호환 구현 복원
-- workspace session schema v3, batch retry privacy sanitizer, recovery evidence provenance 구현 복원
-- preflight 누락 스크립트 진단을 raw MODULE_NOT_FOUND 대신 명시적 패치 기준 오류로 개선
-
-## 기존 0.11.7 기능 범위
+## 적용 범위
 
 - 새 프로젝트 PC 기본 레이아웃을 양쪽 패널 접힘 집중 모드로 변경
 - 헤더 `프로 패널` 한 번으로 좌우 프로젝트/Voice 패널 동시 확장·접기
@@ -35,16 +27,12 @@
 - dependency-free TS/TSX transpile syntax: 통과 · **201/201**
 - Repository preflight: 통과 · **43/43**
 - npm lock install 시도: 현재 전달 환경 내부 registry의 `zustand@5.0.8` 404로 중단
-- 올바른 0.11.7 전체본 API pytest: **219/219**
-- GitHub b5cd5cb 재구성 상태 API pytest: **3 failed / 215 passed** 재현 후 hotfix 적용으로 **219/219** 복구
-- GitHub b5cd5cb 재구성 상태 preflight: recovery checker `MODULE_NOT_FOUND` 재현 후 hotfix 적용으로 **43/43** 복구
-- current GitHub 재구성 + 34파일 self-contained hotfix overlay + `APPLY_PATCH.sh`: **906/906 files · missing 0 / extra 0 / changed 0**
-- Python 3.10 문법 호환 parse: **143/143 API app/test files 통과**
+- 0.11.6 기준본 + **49파일 patch overlay** 재현: 통과 · **903/903 files · missing 0 / extra 0 / changed 0**
 
 ## 검증 환경 제한
 
 - 현재 내부 npm registry가 lock에 고정된 `zustand@5.0.8`을 제공하지 않아 이 환경에서 GitHub Actions와 동일한 ESLint·semantic TypeScript·Vitest·Vite production build·Chromium visual layout을 재실행할 수 없습니다.
-- 0.11.6은 로컬 검증·패키징까지 완료됐지만 GitHub `b5cd5cb`의 부모가 0.11.5 계열임이 확인되어, 0.11.6이 원격 기준선에 적용됐다고 간주하지 않습니다. 이 hotfix 적용 뒤 GitHub Actions가 Python 3.10 API와 전체 Web quality를 최종 판정합니다.
+- 직전 0.11.6 기준선은 사용자 확인 기준 GitHub Web quality를 안전히 통과한 상태입니다. 이번 Web 변경분의 최종 품질 gate는 Push 뒤 GitHub Actions입니다.
 - API 테스트에는 기존 FastAPI 422 상수 deprecation warning 1건이 남습니다.
 
 ## 기능·운영 제한
