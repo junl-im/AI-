@@ -4,7 +4,7 @@ import { ApiError } from '../api/httpClient'
 import { usePlayerStore } from '../store/usePlayerStore'
 import type { TtsSynthesisResult } from '../ai/contracts'
 import type { SpeechJobProgress, SpeechReadySegment } from '../tts/voiceApi'
-import { useTimelineGeneration } from './useTimelineGeneration'
+import { useTimelineGeneration, type TimelineGenerationBatchResult } from './useTimelineGeneration'
 
 const streamMocks = vi.hoisted(() => ({
   streamSpeechProgress: vi.fn(),
@@ -736,14 +736,14 @@ describe('useTimelineGeneration fast ordered batch', () => {
       })
     })
 
-    let batch: Awaited<ReturnType<typeof result.current.generateAll>> | null = null
+    let batch!: TimelineGenerationBatchResult
     await act(async () => {
       batch = await result.current.generateAll(ids, true)
     })
 
-    expect(batch?.cancelled).toBe(false)
-    expect(batch?.concurrency).toBe(2)
-    expect(batch?.results.map((item) => item.blockId)).toEqual(ids)
+    expect(batch.cancelled).toBe(false)
+    expect(batch.concurrency).toBe(2)
+    expect(batch.results.map((item) => item.blockId)).toEqual(ids)
     expect(maxActive).toBe(2)
     expect(usePlayerStore.getState().queue.map((track) => track.title)).toEqual([
       expect.stringContaining('첫 번째'),
