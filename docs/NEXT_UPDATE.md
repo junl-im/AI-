@@ -1,26 +1,25 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.7 · One-Flow Dubbing UX`
+현재 기준: `0.11.9 · Multi-Speaker Assist & Resume Generation`
 
 ## 목표 버전
 
-`0.11.8 · Approved Visual Baseline & Engine Soak Provenance`
+`0.11.10 · Editing History & Speaker Workflow Polish`
 
-## 최우선 구현
+### 우선순위
 
-- 사람이 승인한 Chromium 1024·1280·1440 baseline PNG와 SHA manifest가 저장소에 들어온 경우에만 `SORION_VISUAL_BASELINE_REQUIRED=1`을 CI 필수 gate로 전환
-- baseline 승인·교체 절차와 pixel diff 허용 오차를 provenance로 기록해 임의 snapshot 갱신이 회귀를 숨기지 못하게 함
-- `active_request_count` 기반 병렬 엔진 분산과 performance observation을 장시간 soak에서 측정해 엔진 전환 횟수·성공률·지연 회귀를 함께 기록
-- recovery evidence intake/summary에서 observed와 synthetic 건수를 빠르게 구분할 수 있는 운영자 필터·요약 검토
-- one-flow 사용성에서 실제 첫 작업 클릭 수·키보드 경로를 regression fixture로 고정하고, 고급 패널을 펼친 상태에서도 1024px overflow가 없는지 계속 검증
-- keyboard command 이동 Undo를 구조 변경에도 안전한 snapshot/history 방식으로 확장할지 메모리·세션 크기·충돌 규칙을 검증
+1. 다중 화자 mapping을 프로젝트 편집 중 다시 열어 빠르게 수정할 수 있는 `화자 관리` 진입점을 검토합니다.
+2. Timeline 이동 1회 Undo를 text/voice 변경까지 포함하는 bounded edit history로 확장하되 audio/job 폐기 규칙을 안전하게 유지합니다.
+3. 긴 다중 화자 대본에서 speaker mapping, 2-way parallel, engine switching, 취소/재개가 성공률과 P95 지연을 악화시키지 않는지 soak evidence를 남깁니다.
+4. `화자: 대사` 외에 screenplay 스타일 지원은 자동 추론이 아니라 명시적 import option으로만 검토합니다.
+5. 승인된 Chromium 1024/1280/1440 baseline PNG와 SHA manifest가 확보된 경우에만 `SORION_VISUAL_BASELINE_REQUIRED=1`을 CI 필수 gate로 전환합니다.
+6. 프로젝트 저장 스키마의 `timelineClips`가 구버전 프로젝트와 호환되는지 실제 IndexedDB migration/restore 사례를 추가 검증합니다.
 
-## 0.11.7에서 고정한 결정
+## 0.11.9에서 고정한 결정
 
-- 패치 전달은 직전 버전 전제만 문서화하는 것으로 끝내지 않고, 실제 GitHub 기준선과 누적 파일 일치 여부를 검증한다. 기준선이 건너뛰어진 경우 hotfix는 필요한 누적 파일을 self-contained 형태로 포함한다.
-- 새 프로젝트는 중앙 원플로우에 집중하고 좌우 프로 패널은 기본 접힘으로 시작한다. 고급 기능은 제거하지 않고 한 번에 다시 펼칠 수 있다.
-- 기본 제작 경로는 `목소리 → 대본 → 바로 더빙 → 첫 결과 듣기`이며 첫 결과 자동 재생은 사용자가 현재 세션에서 생성 버튼을 직접 실행한 경우에만 적용한다.
-- TXT·MD·SRT·VTT는 서버 업로드 없이 브라우저에서 텍스트로 읽고 SRT/VTT 타임코드를 정리한 뒤 기존 장문 분할 계약으로 보낸다.
-- 기본 5개 프리셋은 중앙에서 즉시 선택하고 전체 목록·속도·높낮이·말투는 필요할 때만 펼친다.
-- 빈 프로젝트에서는 타임라인을 숨기지만 직접 편집 버튼으로 기존 block/timeline 편집에 즉시 진입할 수 있다.
-- 0.11.6의 recovery evidence provenance와 session privacy 경계는 변경하지 않는다.
+- Multi-Speaker Assist는 명확한 `화자: 대사` 전체 라인 형식에서만 자동 활성화합니다.
+- 이름에서 성별·연령을 추정하지 않습니다.
+- voice suggestion은 사용자 승인 전 실제 생성에 사용하지 않습니다.
+- clip-level voice와 job 순서를 프로젝트 저장/복원에서 유지합니다.
+- resume은 queued clip만 생성하고 ready clip은 보존합니다.
+- 첫 음성 우선 + 이후 최대 2-way bounded parallel + 원문 순서 복원 계약을 유지합니다.

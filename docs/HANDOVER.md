@@ -1,14 +1,27 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.7 · One-Flow Dubbing UX**
+현재 기준 버전: **0.11.9 · Multi-Speaker Assist & Resume Generation**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-10 17:12 KST**
+최종 갱신: **2026-08-11 11:05 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 0.11.8 Fast One-Flow & Safe Parallel Generation
+
+1. **작업 일시(KST)**: 2026-08-11 11:05 이후.
+2. **대상 버전과 기준 버전**: 0.11.8 / GitHub Web quality 통과한 0.11.7 One-Flow Dubbing UX + Web quality hotfix.
+3. **변경 내용**: 첫 대사를 우선 생성·자동 재생하고 나머지는 최대 2개 bounded parallel로 생성합니다. 완료 순서와 무관하게 player queue를 원문 timeline 순서로 복원하고, 생성 진행률·대기 수·중지, 현재 대본 첫 문장 미리듣기, SRT/VTT clipboard 자동 정리와 `말하기 좋게 정리`를 One-Flow에 추가했습니다. 전체 비우기도 batch run token을 무효화하고 active 요청을 abort합니다. 버전 도구는 API version fixture 8개를 자동 갱신·검사합니다.
+4. **변경 이유**: 0.11.7은 첫 사용 동선을 단순화했지만 긴 대본 전체 생성이 완전 순차라 engine load awareness를 충분히 활용하지 못했고, 실제 대본 미리듣기·붙여넣기 정리·생성 중 중지/진행 가시성이 부족했습니다. 빠른 처리와 기존 순서·복구 안전성을 동시에 유지하기 위해 bounded parallel과 명시적 cancellation/order restoration을 도입했습니다.
+5. **영향 범위**: One-Flow composer/HomePage, timeline generation, player queue store, script preparation, bounded batch helper, 관련 테스트·CSS, preflight/version tooling, 앱·API·Worker 버전과 릴리스 문서입니다. 기존 engine circuit breaker, recovery evidence/session safety, explicit engine 선택 계약은 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/LongformComposer.tsx`, `src/pages/HomePage.tsx`, `src/hooks/useTimelineGeneration.ts`, `src/store/usePlayerStore.ts`, `src/workspace/{scriptPreparation,boundedBatch}.ts`, `src/player/queueOrder.ts`, 관련 테스트, `src/styles/one-flow-dubbing.css`, `scripts/check-one-flow-dubbing-ux.mjs`, `scripts/{set-app-version,check-version-sync}.mjs`, `docs/FAST_ONE_FLOW_SAFE_PARALLEL.md`.
+7. **검증 결과**: Repository preflight 43/43, API pytest 219/219, Worker pytest 14/14, Python compileall, 제품 버전 sync v0.11.8, dependency-free TS/TSX transpile 207/207, script preparation + bounded batch + queue ordering runtime smoke를 통과했습니다. 직전 0.11.7 Web quality hotfix 기준 49파일 overlay와 실제 생성 patch/full ZIP 재적용 모두 916/916 files · missing 0 · extra 0 · changed 0으로 일치했습니다. 전체 npm Web ESLint/Vitest/semantic typecheck/Vite/Chromium은 로컬 dependency install 불완전으로 미실행이며 GitHub Actions가 최종 gate입니다.
+8. **알려진 제한과 주의사항**: 병렬도는 최대 2이며 장시간 soak에서 실패율·P95·engine switching 영향을 추가 검증해야 합니다. `말하기 좋게 정리`는 의미를 AI로 재작성하지 않습니다. 명시적 `화자: 대사`는 현재 수만 감지하고 자동 voice 배정은 하지 않습니다. 승인 Chromium baseline이 없으므로 baseline-required CI는 아직 강제하지 않습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.8-fast-one-flow-safe-parallel-full.zip`, `SoriON-AI-0.11.7-to-0.11.8-fast-one-flow-safe-parallel-patch.zip`.
+10. **다음 예상 업데이트**: 0.11.9 Multi-Speaker Assist & Approved Visual Baseline. 명시적 화자 라벨 기반 승인형 voice mapping, clip-level voice 저장/복원, 0.11.8 bounded-parallel soak evidence, 승인된 1024/1280/1440 Chromium baseline gate와 생성 중지 후 남은 대사 원클릭 재개를 검토합니다.
 
 ## 0.11.7 One-Flow Dubbing UX
 
@@ -1149,3 +1162,26 @@ CI Hotfix 4 테스트 규칙:
 8. 알려진 제한과 주의사항: 이 환경에는 Python 3.10 interpreter가 없어 API 테스트는 설치된 Python에서 실행하며, 실제 Python 3.10 최종 판정은 GitHub Actions가 담당한다. Web npm 전체 quality는 내부 registry 제약이 있으면 GitHub Actions를 최종 gate로 사용한다.
 9. 생성 산출물: `SoriON-AI-0.11.7-ci-chain-hotfix-full.zip`, `SoriON-AI-0.11.7-b5cd5cb-ci-chain-hotfix-patch.zip`, SHA-256 목록.
 10. 다음 예상 업데이트: `0.11.8 · Approved Visual Baseline & Engine Soak Provenance`. 이후 패치는 기준 버전뿐 아니라 실제 GitHub 기준선과 누적 파일 일치 여부를 먼저 검증하고, 필요 시 self-contained 누적 패치로 제공한다.
+
+## 0.11.9 Multi-Speaker Assist & Resume Generation
+
+- `src/workspace/multiSpeaker.ts`는 모든 비어 있지 않은 줄이 명확한 `화자: 대사` 형식인지 보수적으로 검사합니다. 2명 이상이며 unmatched line이 0개일 때만 Assist 대상입니다.
+- 화자별 목소리는 preset suggestion일 뿐입니다. `SpeakerVoiceAssignmentPanel`의 명시적 확인 전에는 HomePage가 생성 submit을 차단합니다.
+- speaker preview는 `preserveSelection=true`로 실행해 전역 선택 voice를 바꾸지 않습니다.
+- `useTimelineGeneration.stageSegments()`는 clip별 generation option을 유지하며 기존 bounded generation을 그대로 사용합니다.
+- `VoiceProject.timelineClips`는 clip text/voiceId/voiceName을 저장합니다. `jobIds`는 동일 순서입니다. 구버전 프로젝트는 `timelineClips`가 없으므로 기존 단일 voice restore 경로를 사용합니다.
+- batch 취소 뒤 `getQueuedVoiceBlockIds()`로 남은 작업만 resume합니다. resume 완료 후 저장은 `allBlockIds` 전체 snapshot을 사용해 이전 ready clip의 job/voice를 잃지 않습니다.
+- 신규 dependency-free gate는 `scripts/check-multi-speaker-resume.mjs`이며 repository preflight에 포함됩니다.
+- 승인 visual baseline PNG는 아직 별도 승인 증거가 없으므로 baseline-required CI를 강제하지 않습니다.
+
+## 2026-08-11 KST · v0.11.9 Multi-Speaker Assist & Resume Generation
+1. 작업 일시(KST): 2026-08-11.
+2. 대상/기준: `0.11.9 · Multi-Speaker Assist & Resume Generation`, 기준은 GitHub Web quality를 통과한 `0.11.8 · Fast One-Flow & Safe Parallel Generation` 전체본이다.
+3. 변경 내용: 모든 비어 있지 않은 줄이 명확한 `화자: 대사` 형식이고 화자가 2명 이상일 때만 Multi-Speaker Assist를 활성화한다. 화자별 voice는 suggestion만 만들고 사용자가 `이 화자 배정으로 만들기`를 명시적으로 눌러야 생성에 적용한다. clip별 voice option을 유지하는 timeline staging, 저장 프로젝트의 clip-level voice/job ordering, 생성 중지 뒤 원래 batch의 queued clip만 다시 만드는 `남은 대사 이어서 만들기`를 추가했다.
+4. 변경 이유: 긴 대본을 단일 화자로만 처리하거나 중지 후 전체를 다시 생성해야 하는 반복 비용을 줄이되, 화자·성별·캐릭터를 이름에서 추측해 자동 음성을 배정하는 위험은 피하기 위해서다. 완료된 음성을 보존하면서 남은 작업만 이어가는 것이 One-Flow의 빠른 제작 경험과 엔진 비용·안정성에 모두 유리하다.
+5. 영향 범위: `HomePage`의 생성 orchestration, `LongformComposer`의 speaker approval/resume UI, `useTimelineGeneration`의 per-segment staging·queued lookup·project restore, `VoiceProject` schema의 optional `timelineClips`, multi-speaker parser/assignment helper, One-Flow CSS, repository preflight와 버전/릴리스 문서다. 기존 bounded parallel 최대 2개, 첫 음성 우선, 순서 복원, recovery/session/engine 안전 계약은 유지한다.
+6. 주요 파일: `src/workspace/multiSpeaker.ts`, `src/components/workspace/SpeakerVoiceAssignment.tsx`, `src/components/workspace/LongformComposer.tsx`, `src/pages/HomePage.tsx`, `src/hooks/useTimelineGeneration.ts`, `src/workspace/timelineBlocks.ts`, `src/projects/projectTypes.ts`, `src/styles/one-flow-dubbing.css`, `scripts/check-multi-speaker-resume.mjs`, 관련 Vitest 파일과 `docs/MULTI_SPEAKER_RESUME_GENERATION.md`다.
+7. 검증 결과: Repository preflight 44/44, API pytest 219/219, Worker pytest 14/14, Python compileall, 제품 버전 sync v0.11.9, dependency-free TS/TSX transpile 211/211, Multi-Speaker parser/assignment/timeline runtime smoke를 통과했다. 실제 0.11.8 전체본에 최종 patch ZIP과 `APPLY_PATCH.sh`를 적용한 결과 **925/925 files · missing 0 · extra 0 · changed 0**으로 0.11.9 완성본과 파일 SHA가 일치했다.
+8. 알려진 제한과 주의사항: 이 실행 환경의 `npm ci`는 registry DNS `EAI_AGAIN`으로 완료되지 않아 전체 ESLint·semantic TypeScript·Vitest·Vite build·Chromium visual regression은 GitHub Actions `Web quality`가 최종 gate다. 화자 Assist는 모든 줄이 명확한 `화자: 대사` 형식일 때만 동작하며 이름이나 텍스트만으로 성별·인물을 추측하지 않는다. 승인 Chromium baseline PNG도 아직 신뢰된 승인 절차가 없으므로 baseline-required CI는 강제하지 않는다.
+9. 생성 산출물: `SoriON-AI-0.11.9-multi-speaker-resume-full.zip`, `SoriON-AI-0.11.8-to-0.11.9-multi-speaker-resume-patch.zip`, `SoriON-AI-0.11.9-multi-speaker-resume-SHA256SUMS.txt`.
+10. 다음 예상 업데이트: `0.11.10 · Editing History & Speaker Workflow Polish`. 자주 쓰는 화자 mapping 재사용, 제한된 안전 편집 history/Undo, multi-speaker 장시간 soak와 취소·재개 provenance, 명시적 screenplay import 옵션을 진행한다. 승인된 1024/1280/1440 Chromium baseline이 실제로 확보된 경우에만 pixel baseline을 필수 CI gate로 승격한다.

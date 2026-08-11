@@ -74,6 +74,17 @@ describe('usePlayerStore', () => {
     })
   })
 
+  it('병렬 생성으로 완료 순서가 달라도 요청한 타임라인 순서로 다시 정렬한다', () => {
+    const first = usePlayerStore.getState().enqueue(audio('one'), '첫 음성')
+    const third = usePlayerStore.getState().enqueue(audio('three'), '세 번째 음성')
+    const second = usePlayerStore.getState().enqueue(audio('two'), '두 번째 음성')
+
+    usePlayerStore.getState().alignTrackOrder([first, second, third])
+
+    expect(usePlayerStore.getState().queue.map((track) => track.id)).toEqual([first, second, third])
+    expect(usePlayerStore.getState().currentTrackId).toBe(first)
+  })
+
   it('프리뷰는 대기열 추가와 동시에 재생을 요청한다', () => {
     const before = usePlayerStore.getState().playRequestId
     const id = usePlayerStore.getState().enqueueAndPlay(audio('preview'), '프리뷰')

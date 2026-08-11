@@ -1,6 +1,23 @@
 # ROADMAP
 
-현재 제품 버전: `0.10.2`
+현재 제품 버전: `0.11.9`
+
+## 0.11.9 완료 · Multi-Speaker Assist & Resume Generation
+
+- 명확한 `화자: 대사` 형식만 감지하는 보수적 Multi-Speaker Assist
+- 사용자 승인 전 자동 voice 배정을 실제 생성에 사용하지 않는 확인 gate
+- clip-level voice/project restore와 job 순서 보존
+- 취소 뒤 queued 대사만 재개하는 `남은 대사 이어서 만들기`
+- 다음 목표는 0.11.10 Editing History & Speaker Workflow Polish
+
+## 0.11.8 완료 · Fast One-Flow & Safe Parallel Generation
+
+- 첫 대사 우선 재생 + 이후 최대 2개 bounded parallel 생성
+- 병렬 완료 뒤 player queue를 원문 timeline 순서로 자동 복원
+- 실제 대본 첫 문장 미리듣기와 생성 진행률/중지
+- SRT/VTT clipboard 자동 정리와 Markdown 말하기용 정리
+- 다음 목표는 0.11.9 Multi-Speaker Assist & Approved Visual Baseline
+
 
 
 ## 0.10.2 완료 · Recovery Soak & Managed Lock Interface

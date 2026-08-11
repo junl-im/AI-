@@ -314,7 +314,7 @@ await requireText('src/pages/LandingHome.tsx', [
   '문장별 목소리로 완성합니다.',
 ])
 await requireText('src/components/workspace/LongformComposer.tsx', [
-  'MAX_SCRIPT_LENGTH = 20_000',
+  'MAX_DUBBING_SCRIPT_LENGTH',
   '음성으로 만들 장문 내용',
   '여기에 더빙할 문장을 입력하거나 붙여 넣으세요.',
   '전체 내용 음성 제작',

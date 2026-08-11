@@ -19,4 +19,9 @@ export interface VoiceProject {
   pitch?: number
   normalizeText?: boolean
   jobIds?: Array<string | null>
+  timelineClips?: Array<{
+    text: string
+    voiceId: string
+    voiceName: string
+  }>
 }

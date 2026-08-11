@@ -33,7 +33,7 @@ requireTokens('src/pages/HomePage.tsx', home, [
   'requestAutomaticApiReconnect()',
   'failed: true',
   'retryDelay',
-  'void previewVoice(voiceIdToRetry)',
+  'void previewVoice(voiceIdToRetry, pendingPreview.text, pendingPreview.preserveSelection)',
   'onVoiceChange={selectVoice}',
   "badge: '자동 진행'",
 ])

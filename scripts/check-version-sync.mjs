@@ -26,6 +26,21 @@ for (const relativePath of ['services/api/uv.lock', 'services/worker/uv.lock']) 
   }
 }
 
+const versionFixtureFiles = [
+  'services/api/tests/test_ai_director.py',
+  'services/api/tests/test_connectivity.py',
+  'services/api/tests/test_engine_catalog.py',
+  'services/api/tests/test_engine_strategy.py',
+  'services/api/tests/test_evidence.py',
+  'services/api/tests/test_health.py',
+  'services/api/tests/test_quality.py',
+  'services/api/tests/test_setup.py',
+]
+for (const relativePath of versionFixtureFiles) {
+  const text = await readFile(join(root, relativePath), 'utf8')
+  if (!text.includes(version)) failures.push(`${relativePath}: 현재 제품 버전 fixture 누락`)
+}
+
 const requiredRuntimeTexts = new Map([
   ['src/components/layout/BrandMasthead.tsx', ['currentBuildInfo.appVersion', 'VERSION']],
   ['src/update/buildInfo.ts', [`appVersion: '${version}'`, 'formatBuildDiagnosticsLabel']],

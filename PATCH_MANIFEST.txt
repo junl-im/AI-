@@ -1,19 +1,18 @@
-SoriON AI 0.11.7 CI Chain Integrity Hotfix
+SoriON AI 0.11.9 Multi-Speaker Assist & Resume Generation
 
 기준 상태
-- GitHub commit b5cd5cb
-- 0.11.5 계열 기준선 위에 0.11.7 One-Flow patch만 적용되어 0.11.6 cumulative recovery/session files가 누락된 상태
+- GitHub Actions Web quality를 통과한 0.11.8 Fast One-Flow & Safe Parallel Generation
 
 적용 결과
-- 0.11.6 recovery evidence/session safety 누적 파일을 0.11.7 완성본과 동기화
-- evidence bundle schema v3 + legacy schema v2 verifier 복구
-- workspace session schema v3 + privacy-safe batch retry snapshot 복구
-- recovery evidence provenance API/UI 복구
-- missing preflight script 진단 개선
-- 제품 버전 0.11.7 유지
+- 명확한 화자:대사 script의 보수적 Multi-Speaker Assist
+- 사용자 승인 전 voice suggestion 비적용
+- clip-level voice/project restore와 job 순서 유지
+- 생성 중지 뒤 queued-only resume
+- 기존 first-audio priority / 2-way bounded parallel / timeline order / engine recovery 계약 유지
+- 제품 버전 0.11.9
 
 삭제 파일
 - 없음
 
 상세 manifest
-- docs/patches/0.11.7-ci-chain-hotfix/PATCH_MANIFEST.txt
+- docs/patches/0.11.9-multi-speaker-resume/PATCH_MANIFEST.txt

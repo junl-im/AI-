@@ -27,7 +27,15 @@ requireTokens('src/pages/HomePage.tsx', home, [
   '<WorkspaceConversation messages={messages} />',
   'timeline.blocks.length > 0 ? (',
   'onAddBlank={() => timeline.addVoiceBlock(buildOptions())}',
-  'generateAllTimelineBlocks(pending.blockIds, true)',
+  'generationProgress={generationProgress}',
+  'resumeCount={resumeQueuedCount}',
+  'onPreviewText={(text) => void previewVoice(voiceId, text)}',
+  'onCancelGeneration={cancelLongformGeneration}',
+  'const batch = await generateAllTimelineBlocks(pending.blockIds, !pending.resume)',
+  'onResumeGeneration={() => void resumeLongformGeneration()}',
+  '<SpeakerVoiceAssignmentPanel',
+  'buildMultiSpeakerTimelineSegments(',
+  'speakerAssignmentsConfirmed',
   'sidePanelsCollapsed={desktopLayout.sidePanelsCollapsed}',
   'onToggleSidePanels={desktopLayout.toggleSidePanels}',
 ])
@@ -43,6 +51,29 @@ requireTokens('src/components/workspace/LongformComposer.tsx', composer, [
   'normalizeImportedScript',
   '대본 파일 불러오기',
   '.srt,.vtt',
+  '말하기 좋게 정리',
+  '첫 문장 미리듣기',
+  'role="progressbar"',
+  '생성 중지',
+  '남은 {resumeCount}개 이어서 만들기',
+  '개 대기',
+  'submitBlockedReason',
+])
+
+const speakerAssist = await source('src/components/workspace/SpeakerVoiceAssignment.tsx')
+requireTokens('src/components/workspace/SpeakerVoiceAssignment.tsx', speakerAssist, [
+  'MULTI-SPEAKER ASSIST',
+  '목소리는 제안만 합니다.',
+  '이 화자 배정으로 만들기',
+  'aria-label={`${speaker} 목소리`}',
+])
+
+const multiSpeaker = await source('src/workspace/multiSpeaker.ts')
+requireTokens('src/workspace/multiSpeaker.ts', multiSpeaker, [
+  'analyzeMultiSpeakerScript',
+  'unmatchedLines.length === 0',
+  'suggestSpeakerVoiceAssignments',
+  'buildMultiSpeakerTimelineSegments',
 ])
 
 const voiceControls = await source('src/components/workspace/DubbingVoiceControls.tsx')
@@ -73,10 +104,45 @@ requireTokens('src/hooks/useDesktopStudioLayout.ts', layout, [
   'sidePanelsCollapsed: layout.leftCollapsed && layout.rightCollapsed',
 ])
 
+const scriptPreparation = await source('src/workspace/scriptPreparation.ts')
+requireTokens('src/workspace/scriptPreparation.ts', scriptPreparation, [
+  'MAX_DUBBING_SCRIPT_LENGTH = 20_000',
+  'looksLikeSubtitleScript',
+  'polishScriptForSpeech',
+  'countDetectedSpeakers',
+])
+
+const player = await source('src/store/usePlayerStore.ts')
+requireTokens('src/store/usePlayerStore.ts', player, [
+  'alignTrackOrder: (trackIds: string[]) => void',
+  'alignItemsById(state.queue, trackIds)',
+])
+
+const boundedBatch = await source('src/workspace/boundedBatch.ts')
+requireTokens('src/workspace/boundedBatch.ts', boundedBatch, [
+  'runBoundedOrderedBatch',
+  'Math.min(items.length, Math.floor(maxConcurrency) || 1)',
+  'while (!isCancelled())',
+])
+
+const queueOrder = await source('src/player/queueOrder.ts')
+requireTokens('src/player/queueOrder.ts', queueOrder, [
+  'alignItemsById',
+  'order.has(item.id)',
+])
+
 const timeline = await source('src/hooks/useTimelineGeneration.ts')
 requireTokens('src/hooks/useTimelineGeneration.ts', timeline, [
   'async (ids: string[], autoplayFirst = false)',
-  'runBlock(id, true, autoplayFirst && index === 0)',
+  'TIMELINE_GENERATION_CONCURRENCY = 2',
+  'await generateOne(requestedIds[0], true)',
+  'runBoundedOrderedBatch(',
+  'alignTrackOrder(orderedTrackIds)',
+  'cancelAllGeneration',
+  'batchGenerationRunRef.current += 1',
+  'Array.from(controllers.current.keys()).forEach((id) => cancelActiveGeneration(id))',
+  'getQueuedVoiceBlockIds',
+  'timelineBlocksFromSegments',
 ])
 
 const header = await source('src/components/workspace/DubbingStudioHeader.tsx')
@@ -91,6 +157,8 @@ requireTokens('src/styles/one-flow-dubbing.css', css, [
   '.soa-one-flow-composer {',
   '.soa-dubbing-voice-quick {',
   '.soa-one-flow-composer__generate {',
+  '.soa-speaker-assist {',
+  '.soa-one-flow-resume {',
   '.soa-workspace-conversation > summary {',
   '@media (min-width: 1024px)',
   '@media (max-width: 620px)',
@@ -99,6 +167,10 @@ requireTokens('src/styles/one-flow-dubbing.css', css, [
 const composerTests = await source('src/components/workspace/LongformComposer.test.tsx')
 requireTokens('src/components/workspace/LongformComposer.test.tsx', composerTests, [
   'Ctrl+Enter로 현재 장문 내용을 제작 요청한다',
+  '현재 대본의 첫 문장을 별도 생성 없이 미리듣기 요청한다',
+  '긴 대본 생성 중에는 완료 수와 중지 동작을 같은 화면에서 제공한다',
+  '화자 배정 확인 전에는 생성 단축키와 버튼을 막는다',
+  '중지 후 남은 대사를 한 번에 이어서 만들 수 있다',
 ])
 const layoutTests = await source('src/hooks/useDesktopStudioLayout.test.ts')
 requireTokens('src/hooks/useDesktopStudioLayout.test.ts', layoutTests, [

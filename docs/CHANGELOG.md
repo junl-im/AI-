@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.11.9 · Multi-Speaker Assist & Resume Generation
+
+- 모든 비어 있지 않은 줄이 명확한 `화자: 대사` 형식이고 2명 이상 화자가 있을 때 Multi-Speaker Assist를 표시합니다. 설명문이 섞인 대본은 자동 화자 배정 대상에서 제외합니다.
+- 첫 화자는 현재 선택 목소리를 유지하고 이후 화자는 프리셋을 순환 제안하지만, 제안은 `이 화자 배정으로 만들기`를 사용자가 눌러 확인하기 전에는 생성에 사용하지 않습니다.
+- 화자별 선택 목소리로 문장을 분할해 clip별 generation option을 만들고 기존 첫 음성 우선 + 최대 2-way bounded parallel + 원문 순서 복원 계약을 그대로 사용합니다.
+- 화자별 배정 미리듣기는 현재 전역 목소리 선택을 바꾸지 않아 확인 완료 상태를 불필요하게 무효화하지 않습니다.
+- 생성 취소 뒤 남은 queued 대사 수를 One-Flow 카드에 표시하고 `남은 대사 이어서 만들기`로 ready 클립을 보존한 채 나머지만 재개합니다.
+- 프로젝트 저장에 `timelineClips`를 추가해 text·voiceId·voiceName과 jobIds 순서를 함께 보존하며 재오픈 시 다중 화자 타임라인을 그대로 복원합니다.
+- Multi-speaker/resume 전용 dependency-free preflight 계약과 parser/UI/timeline 회귀 테스트를 추가했습니다.
+- 앱·API·Worker 제품 버전을 0.11.9로 동기화했습니다.
+
+## 0.11.8 · Fast One-Flow & Safe Parallel Generation
+
+- 장문 전체 생성은 첫 대사를 우선 완성·자동 재생한 뒤 나머지를 최대 2개씩 bounded parallel로 처리해 순차 생성 대기시간을 줄입니다.
+- 병렬 요청의 완료 순서가 달라도 플레이어 대기열을 원문 타임라인 순서로 다시 정렬해 재생 순서가 바뀌지 않습니다.
+- One-Flow 카드에 생성 완료 수·동시 생성 수 progress bar와 `생성 중지`를 추가하고, 취소 뒤 아직 시작하지 않은 대사는 queued 상태로 남겨 다시 이어갈 수 있게 했습니다.
+- 현재 대본의 첫 문장을 선택한 목소리·속도·높낮이·말투 설정으로 바로 들어보는 `첫 문장 미리듣기`를 추가했습니다.
+- SRT/VTT 텍스트를 클립보드에서 그대로 붙여 넣어도 cue 번호·타임코드를 자동 제거하며, `말하기 좋게 정리`는 Markdown 제목/목록/인용 장식과 불필요한 공백만 정리합니다.
+- 대본 통계에 2명 이상 명시적 `화자: 대사` 표기가 있을 때 화자 수를 안내해 다인 대본을 빠르게 확인할 수 있게 했습니다.
+- player queue에 `alignTrackOrder`를 추가하고 One-Flow preflight가 병렬 상한·순서 복원·취소·대본 정리·실제 대본 미리듣기 계약을 검사합니다.
+- 앱·API·Worker 제품 버전을 0.11.8로 동기화했고, `set-app-version`/`check-version-sync`가 API의 버전 고정 fixture 8개까지 자동 갱신·검사해 릴리스 승격 뒤 테스트 문자열이 뒤처지는 회귀를 막습니다.
+
 ## 0.11.7 · One-Flow Dubbing UX
 
 ### CI chain hotfix · 2026-08-10

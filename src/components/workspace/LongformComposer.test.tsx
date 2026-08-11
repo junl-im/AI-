@@ -73,4 +73,79 @@ describe('LongformComposer', () => {
     expect(normalizeImportedScript(source, 'sample.srt')).toBe('안녕하세요.\n두 번째 문장입니다.')
   })
 
+  it('현재 대본의 첫 문장을 별도 생성 없이 미리듣기 요청한다', () => {
+    const onPreviewText = vi.fn()
+    render(
+      <LongformComposer
+        disabled={false}
+        value="첫 문장입니다. 두 번째 문장입니다."
+        activity={activity}
+        onPreviewText={onPreviewText}
+        onValueChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '▶ 첫 문장 미리듣기' }))
+    expect(onPreviewText).toHaveBeenCalledWith('첫 문장입니다.')
+  })
+
+  it('긴 대본 생성 중에는 완료 수와 중지 동작을 같은 화면에서 제공한다', () => {
+    const onCancelGeneration = vi.fn()
+    render(
+      <LongformComposer
+        disabled
+        value="첫 문장입니다. 두 번째 문장입니다. 세 번째 문장입니다."
+        activity={activity}
+        generationProgress={{ total: 3, ready: 1, failed: 0, generating: 2, queued: 0 }}
+        onCancelGeneration={onCancelGeneration}
+        onValueChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
+    expect(screen.getByText('2개 생성 중')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '생성 중지' }))
+    expect(onCancelGeneration).toHaveBeenCalledOnce()
+  })
+
+  it('화자 배정 확인 전에는 생성 단축키와 버튼을 막는다', () => {
+    const onSubmit = vi.fn()
+    render(
+      <LongformComposer
+        disabled={false}
+        value="철수: 안녕하세요.\n영희: 반가워요."
+        activity={activity}
+        submitBlockedReason="2명 화자 목소리를 먼저 확인해 주세요."
+        onValueChange={vi.fn()}
+        onSubmit={onSubmit}
+      />,
+    )
+
+    const textbox = screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })
+    fireEvent.keyDown(textbox, { key: 'Enter', ctrlKey: true })
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /전체 내용 음성 제작/ })).toBeDisabled()
+    expect(screen.getByRole('status')).toHaveTextContent('2명 화자 목소리를 먼저 확인해 주세요.')
+  })
+
+  it('중지 후 남은 대사를 한 번에 이어서 만들 수 있다', () => {
+    const onResumeGeneration = vi.fn()
+    render(
+      <LongformComposer
+        disabled={false}
+        value="첫 문장입니다. 두 번째 문장입니다."
+        activity={activity}
+        resumeCount={2}
+        onResumeGeneration={onResumeGeneration}
+        onValueChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '남은 대사 2개 이어서 만들기' }))
+    expect(onResumeGeneration).toHaveBeenCalledOnce()
+  })
+
 })

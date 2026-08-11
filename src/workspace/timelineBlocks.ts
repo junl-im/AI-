@@ -13,6 +13,11 @@ export interface TimelineGenerationOptions {
   normalizeText: boolean
 }
 
+export interface TimelineStagedSegment {
+  text: string
+  options: TimelineGenerationOptions
+}
+
 export function estimateTimelineDuration(text: string): number {
   return Math.max(1.2, Math.round((text.length / 4.4) * 10) / 10)
 }
@@ -64,6 +69,19 @@ export function timelineBlocksFromText(
   const segments = splitTextForUi(text)
   return segments.flatMap((segment, index) => {
     const block = createTimelineVoiceBlock(segment, options)
+    if (index === segments.length - 1) return [block]
+    return [
+      block,
+      { id: createRandomId(), kind: 'pause' as const, durationSeconds: 0.5 },
+    ]
+  })
+}
+
+export function timelineBlocksFromSegments(
+  segments: TimelineStagedSegment[],
+): TimelineBlock[] {
+  return segments.flatMap((segment, index) => {
+    const block = createTimelineVoiceBlock(segment.text, segment.options)
     if (index === segments.length - 1) return [block]
     return [
       block,

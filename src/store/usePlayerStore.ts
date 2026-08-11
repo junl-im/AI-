@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { GeneratedAudio, PlaybackSeamMetric, PlaybackTelemetry, ProgressiveAudioSegment } from '../tts/generationTypes'
 import type { PlayerTrack, RepeatMode } from '../player/playerTypes'
+import { alignItemsById } from '../player/queueOrder'
 import { createRandomId } from '../utils/randomId'
 
 const MAX_QUEUE_SIZE = 20
@@ -82,6 +83,7 @@ export interface PlayerState {
   selectPrevious: () => string | null
   cycleRepeatMode: () => void
   setPlaybackRate: (rate: number) => void
+  alignTrackOrder: (trackIds: string[]) => void
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -299,6 +301,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   setPlaybackRate: (playbackRate) => set({
     playbackRate: Math.min(2, Math.max(0.75, playbackRate)),
   }),
+  alignTrackOrder: (trackIds) => set((state) => ({
+    queue: alignItemsById(state.queue, trackIds),
+  })),
 }))
 
 export function getCurrentTrack(state: PlayerState): PlayerTrack | null {

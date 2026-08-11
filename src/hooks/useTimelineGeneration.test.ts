@@ -694,3 +694,147 @@ it('changes only selected voice blocks and invalidates their generated revision 
   expect(second.voiceId).toBe('sori-warm')
   expect(second.revision).toBe(4)
 })
+
+
+describe('useTimelineGeneration fast ordered batch', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    streamMocks.streamSpeechProgress.mockResolvedValue(true)
+    usePlayerStore.getState().clearQueue()
+  })
+
+  it('첫 음성은 먼저 재생하고 나머지는 최대 2개 병렬 처리한 뒤 원문 순서로 정렬한다', async () => {
+    let active = 0
+    let maxActive = 0
+    voiceApiMocks.synthesizeSpeech.mockImplementation(async (request, jobId) => {
+      active += 1
+      maxActive = Math.max(maxActive, active)
+      const delay = request.text.includes('두 번째') ? 24 : request.text.includes('세 번째') ? 3 : 2
+      await new Promise((resolve) => setTimeout(resolve, delay))
+      active -= 1
+      return {
+        ...completedResult,
+        jobId,
+        engineId: 'browser-speech',
+        engineMode: 'browser',
+        audioUrl: null,
+        normalizedText: request.text,
+      }
+    })
+
+    const { result } = renderHook(() => useTimelineGeneration())
+    let ids: string[] = []
+    act(() => {
+      ids = result.current.stageText('첫 번째 문장입니다. 두 번째 문장입니다. 세 번째 문장입니다. 네 번째 문장입니다.', {
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'auto',
+        normalizeText: true,
+      })
+    })
+
+    let batch: Awaited<ReturnType<typeof result.current.generateAll>> | null = null
+    await act(async () => {
+      batch = await result.current.generateAll(ids, true)
+    })
+
+    expect(batch?.cancelled).toBe(false)
+    expect(batch?.concurrency).toBe(2)
+    expect(batch?.results.map((item) => item.blockId)).toEqual(ids)
+    expect(maxActive).toBe(2)
+    expect(usePlayerStore.getState().queue.map((track) => track.title)).toEqual([
+      expect.stringContaining('첫 번째'),
+      expect.stringContaining('두 번째'),
+      expect.stringContaining('세 번째'),
+      expect.stringContaining('네 번째'),
+    ])
+  })
+})
+
+describe('useTimelineGeneration multi speaker staging', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    streamMocks.streamSpeechProgress.mockResolvedValue(true)
+    usePlayerStore.getState().clearQueue()
+  })
+
+  it('stages explicit per-clip voice options without collapsing them to the project default', () => {
+    const { result } = renderHook(() => useTimelineGeneration())
+    act(() => {
+      result.current.stageSegments([
+        {
+          text: '철수 대사입니다.',
+          options: {
+            voiceId: 'on-clear',
+            voiceName: '도윤',
+            emotion: 'neutral',
+            speed: 1,
+            pitch: 0,
+            engineId: 'auto',
+            normalizeText: true,
+          },
+        },
+        {
+          text: '영희 대사입니다.',
+          options: {
+            voiceId: 'sori-warm',
+            voiceName: '혜린',
+            emotion: 'neutral',
+            speed: 1,
+            pitch: 0,
+            engineId: 'auto',
+            normalizeText: true,
+          },
+        },
+      ])
+    })
+
+    const voices = result.current.blocks
+      .filter((block) => block.kind === 'voice')
+      .map((block) => ({ text: block.text, voiceId: block.voiceId }))
+    expect(voices).toEqual([
+      { text: '철수 대사입니다.', voiceId: 'on-clear' },
+      { text: '영희 대사입니다.', voiceId: 'sori-warm' },
+    ])
+  })
+
+  it('restores saved project clip-level voices and job ordering', () => {
+    const { result } = renderHook(() => useTimelineGeneration())
+    let recoverableIds: string[] = []
+    act(() => {
+      recoverableIds = result.current.restoreProject({
+        id: 'multi-project',
+        title: '다중 화자',
+        text: '철수: 안녕하세요.\n영희: 반가워요.',
+        voiceId: 'sori-warm',
+        emotion: 'neutral',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'generated',
+        jobIds: ['job-a', 'job-b'],
+        timelineClips: [
+          { text: '안녕하세요.', voiceId: 'on-clear', voiceName: '도윤' },
+          { text: '반가워요.', voiceId: 'sori-warm', voiceName: '혜린' },
+        ],
+      }, {
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'auto',
+        normalizeText: true,
+      })
+    })
+
+    expect(recoverableIds).toHaveLength(2)
+    const voices = result.current.blocks.filter((block) => block.kind === 'voice')
+    expect(voices).toMatchObject([
+      { text: '안녕하세요.', voiceId: 'on-clear', jobId: 'job-a' },
+      { text: '반가워요.', voiceId: 'sori-warm', jobId: 'job-b' },
+    ])
+  })
+})

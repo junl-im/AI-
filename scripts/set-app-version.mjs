@@ -45,5 +45,19 @@ for (const relativePath of ['services/api/uv.lock', 'services/worker/uv.lock']) 
 await replace('src/update/buildInfo.ts', `appVersion: '${previousVersion}'`, `appVersion: '${nextVersion}'`)
 await replace('src/update/buildInfo.ts', `buildId: '${previousVersion}-`, `buildId: '${nextVersion}-`)
 
+const versionFixtureFiles = [
+  'services/api/tests/test_ai_director.py',
+  'services/api/tests/test_connectivity.py',
+  'services/api/tests/test_engine_catalog.py',
+  'services/api/tests/test_engine_strategy.py',
+  'services/api/tests/test_evidence.py',
+  'services/api/tests/test_health.py',
+  'services/api/tests/test_quality.py',
+  'services/api/tests/test_setup.py',
+]
+for (const relativePath of versionFixtureFiles) {
+  await replace(relativePath, previousVersion, nextVersion)
+}
+
 console.log(`SoriON AI 제품 버전 갱신 완료 · v${previousVersion} -> v${nextVersion}`)
 console.log('다음 명령: npm run quality:version-sync')

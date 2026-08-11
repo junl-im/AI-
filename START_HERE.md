@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.11.7 · One-Flow Dubbing UX`
+현재 버전: `0.11.9 · Multi-Speaker Assist & Resume Generation`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -52,6 +52,14 @@
 46. TXT·MD·SRT·VTT는 파일 선택 또는 드래그앤드롭으로 불러옵니다. SRT/VTT cue 번호·타임코드는 편집 대본에 남기지 않으며 가져온 원본 파일 자체는 프로젝트 세션에 저장하지 않습니다.
 47. 기본 5개 프리셋은 중앙 원플로우 카드에서 바로 선택할 수 있고, 전체 목소리·속도·높낮이·말투와 프로젝트 도구는 필요할 때만 Sheet/프로 패널로 엽니다.
 48. 원플로우 전체 생성은 첫 준비 결과를 자동 재생하지만 새로고침/세션 복원 자동재생 금지 정책은 그대로 유지합니다.
+49. 장문 생성은 첫 대사를 우선 재생한 뒤 나머지를 최대 2개씩 병렬 처리합니다. 엔진 circuit/soft-degrade/active-request 감점 계약은 그대로 적용합니다.
+50. 병렬 완료 순서는 사용자 재생 순서가 아닙니다. 생성 종료 시 track ID를 원문 timeline 순서로 정렬해 플레이어 순서를 복원합니다.
+51. SRT/VTT 붙여넣기는 자막 cue를 자동 정리하고 `말하기 좋게 정리`는 Markdown 장식만 제거합니다. 의미를 바꾸는 AI 재작성은 자동 실행하지 않습니다.
+52. `생성 중지`는 현재 batch token을 무효화하고 실행 중 요청을 abort합니다. 완료 음원은 보존하고 미시작 대사는 queued로 남깁니다.
+53. `화자: 대사` 형식은 모든 비어 있지 않은 줄이 명시적 화자 표기를 만족하고 2명 이상이 감지될 때만 Multi-Speaker Assist를 엽니다. 혼합 형식은 자동 배정하지 않습니다.
+54. 화자별 목소리는 자동 제안일 뿐이며 `이 화자 배정으로 만들기`를 누르기 전에는 생성 버튼과 Ctrl/Cmd+Enter가 해당 배정을 사용하지 않습니다.
+55. 다중 화자 생성 프로젝트는 timeline clip별 text·voiceId·voiceName과 job 순서를 저장하고 재오픈 시 같은 배정을 복원합니다.
+56. 생성 중지 뒤 `남은 대사 이어서 만들기`는 queued 블록만 재실행합니다. 이전 ready 블록은 재생성하거나 삭제하지 않습니다.
 
 - Heartbeat 6.8.4는 새 승인·재서명에 active 신뢰 키만 사용하고 previous key는 grace 기간 검증 전용으로 유지합니다. `SORION_VOICE_REVIEW_TRUSTED_KEYS_JSON`에는 이전 key만 넣고 secret은 Git·ZIP·진단 응답에 포함하지 않습니다.
 - 승인 apply·재서명·rollback은 같은 로컬 파일시스템을 공유하는 API 프로세스 사이에서도 파일 잠금으로 직렬화됩니다. 여러 서버·네트워크 파일시스템은 단일 writer 또는 분산 잠금이 필요합니다.

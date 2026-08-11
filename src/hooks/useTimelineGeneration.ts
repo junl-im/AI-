@@ -26,11 +26,14 @@ import {
   createTimelineVoiceBlock,
   estimateTimelineDuration,
   timelineBlocksFromText,
+  timelineBlocksFromSegments,
   timelineOptionsFromBlock,
   timelineSplitPoint,
   type TimelineGenerationOptions,
+  type TimelineStagedSegment,
 } from '../workspace/timelineBlocks'
 import { createRandomId } from '../utils/randomId'
+import { runBoundedOrderedBatch } from '../workspace/boundedBatch'
 import type { SttSegmentVerificationResult } from '../stt/verificationApi'
 import {
   applySttResultsToBlocks,
@@ -41,6 +44,14 @@ export interface TimelineGenerationResult {
   blockId: string
   audio: GeneratedAudio
 }
+
+export interface TimelineGenerationBatchResult {
+  results: TimelineGenerationResult[]
+  cancelled: boolean
+  concurrency: number
+}
+
+export const TIMELINE_GENERATION_CONCURRENCY = 2
 
 export type TimelineBatchFailureKind = 'engine' | 'preset' | 'network' | 'cancelled' | 'unknown'
 
@@ -72,9 +83,11 @@ export function useTimelineGeneration() {
   const blocksRef = useRef<TimelineBlock[]>([])
   const controllers = useRef(new Map<string, AbortController>())
   const timers = useRef(new Map<string, number>())
+  const batchGenerationRunRef = useRef(0)
   const enqueue = usePlayerStore((state) => state.enqueue)
   const enqueueAndPlay = usePlayerStore((state) => state.enqueueAndPlay)
   const replaceTrack = usePlayerStore((state) => state.replace)
+  const alignTrackOrder = usePlayerStore((state) => state.alignTrackOrder)
   const appendProgressiveSegment = usePlayerStore((state) => state.appendProgressiveSegment)
   const removeTrack = usePlayerStore((state) => state.remove)
   const commit = useCallback((updater: BlocksUpdater) => {
@@ -112,6 +125,17 @@ export function useTimelineGeneration() {
     options: TimelineGenerationOptions,
   ): string[] => {
     const staged = timelineBlocksFromText(text, options)
+    commit((current) => current.length === 0
+      ? staged
+      : [
+          ...current,
+          { id: createRandomId(), kind: 'pause', durationSeconds: 0.8 },
+          ...staged,
+        ])
+    return staged.filter((block) => block.kind === 'voice').map((block) => block.id)
+  }, [commit])
+  const stageSegments = useCallback((segments: TimelineStagedSegment[]): string[] => {
+    const staged = timelineBlocksFromSegments(segments)
     commit((current) => current.length === 0
       ? staged
       : [
@@ -592,14 +616,87 @@ export function useTimelineGeneration() {
     return results
   }, [runBlock])
 
-  const generateAll = useCallback(async (ids: string[], autoplayFirst = false) => {
-    const results: TimelineGenerationResult[] = []
-    for (const [index, id] of ids.entries()) {
-      const audio = await runBlock(id, true, autoplayFirst && index === 0)
-      if (audio) results.push({ blockId: id, audio })
+  const generateAll = useCallback(async (ids: string[], autoplayFirst = false): Promise<TimelineGenerationBatchResult> => {
+    const requestedIds = [...new Set(ids)]
+    const runId = batchGenerationRunRef.current + 1
+    batchGenerationRunRef.current = runId
+    const resultById = new Map<string, GeneratedAudio>()
+
+    const generateOne = async (id: string, autoplay = false) => {
+      if (batchGenerationRunRef.current !== runId) return
+      const audio = await runBlock(id, true, autoplay)
+      if (audio) resultById.set(id, audio)
     }
-    return results
-  }, [runBlock])
+
+    let startIndex = 0
+    if (autoplayFirst && requestedIds.length > 0) {
+      await generateOne(requestedIds[0], true)
+      startIndex = 1
+    }
+
+    const remainingIds = requestedIds.slice(startIndex)
+    const concurrency = Math.min(TIMELINE_GENERATION_CONCURRENCY, Math.max(1, remainingIds.length))
+    await runBoundedOrderedBatch(
+      remainingIds,
+      concurrency,
+      async (id) => {
+        await generateOne(id)
+        return id
+      },
+      () => batchGenerationRunRef.current !== runId,
+    )
+
+    const orderedTrackIds = requestedIds.flatMap((id) => {
+      const block = blocksRef.current.find((item) => item.id === id)
+      return block?.kind === 'voice' && block.trackId ? [block.trackId] : []
+    })
+    alignTrackOrder(orderedTrackIds)
+
+    return {
+      results: requestedIds.flatMap((blockId) => {
+        const audio = resultById.get(blockId)
+        return audio ? [{ blockId, audio }] : []
+      }),
+      cancelled: batchGenerationRunRef.current !== runId,
+      concurrency,
+    }
+  }, [alignTrackOrder, runBlock])
+
+  const cancelAllGeneration = useCallback(() => {
+    batchGenerationRunRef.current += 1
+    for (const blockId of [...controllers.current.keys()]) cancelActiveGeneration(blockId)
+    commit((current) => current.map((block) => (
+      block.kind === 'voice' && block.status === 'generating'
+        ? { ...block, status: 'queued' as const, progress: 0, error: null }
+        : block
+    )))
+  }, [cancelActiveGeneration, commit])
+
+  const getQueuedVoiceBlockIds = useCallback((ids?: string[]) => {
+    const selected = ids ? new Set(ids) : null
+    return blocksRef.current.flatMap((block) => (
+      block.kind === 'voice'
+      && block.status === 'queued'
+      && (!selected || selected.has(block.id))
+        ? [block.id]
+        : []
+    ))
+  }, [])
+
+  const getVoiceBlockSnapshots = useCallback((ids: string[]) => {
+    const selected = new Set(ids)
+    return blocksRef.current.flatMap((block) => (
+      block.kind === 'voice' && selected.has(block.id)
+        ? [{
+            id: block.id,
+            text: block.text,
+            voiceId: block.voiceId,
+            voiceName: block.voiceName,
+            jobId: block.jobId,
+          }]
+        : []
+    ))
+  }, [])
 
   const applySttVerification = useCallback((results: SttSegmentVerificationResult[]) => {
     commit((current) => applySttResultsToBlocks(current, results))
@@ -738,7 +835,17 @@ export function useTimelineGeneration() {
         ? [project.lastJobId]
         : []
     let voiceIndex = 0
-    const restored = timelineBlocksFromText(project.text, options).map((block) => {
+    const restoredBase = project.timelineClips?.length
+      ? timelineBlocksFromSegments(project.timelineClips.map((clip) => ({
+          text: clip.text,
+          options: {
+            ...options,
+            voiceId: clip.voiceId,
+            voiceName: clip.voiceName,
+          },
+        })))
+      : timelineBlocksFromText(project.text, options)
+    const restored = restoredBase.map((block) => {
       if (block.kind !== 'voice') return block
       const jobId = jobIds[voiceIndex] ?? null
       voiceIndex += 1
@@ -869,21 +976,26 @@ export function useTimelineGeneration() {
   }, [cancelActiveGeneration, commit, removeTrack])
 
   const clear = useCallback(() => {
-    controllers.current.forEach((controller) => controller.abort())
+    batchGenerationRunRef.current += 1
+    Array.from(controllers.current.keys()).forEach((id) => cancelActiveGeneration(id))
     blocksRef.current.forEach((block) => {
       if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
     })
     commit(() => [])
-  }, [commit, removeTrack])
+  }, [cancelActiveGeneration, commit, removeTrack])
 
   return {
     blocks,
     stageText,
+    stageSegments,
     addVoiceBlock,
     restoreProject,
     restoreSession,
     recoverBlocks,
     generateAll,
+    cancelAllGeneration,
+    getQueuedVoiceBlockIds,
+    getVoiceBlockSnapshots,
     applySttVerification,
     regenerateBlocks,
     regenerateMany,

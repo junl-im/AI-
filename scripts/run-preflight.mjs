@@ -20,6 +20,7 @@ const checks = [
   ['batch recovery / adaptive engine routing', 'check-batch-recovery-adaptive-routing.mjs'],
   ['editor command UX / engine observation', 'check-editor-command-engine-observation.mjs'],
   ['one-flow dubbing UX', 'check-one-flow-dubbing-ux.mjs'],
+  ['multi-speaker assist / resume generation', 'check-multi-speaker-resume.mjs'],
   ['recovery evidence classification / session safety', 'check-recovery-evidence-session-safety.mjs'],
   ['always-on preset / PC layout', 'check-always-on-preset-pc-layout.mjs'],
   ['approval modularization / operator baseline', 'check-approval-modularization-operator-baseline.mjs'],

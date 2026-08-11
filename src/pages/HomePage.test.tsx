@@ -113,4 +113,25 @@ describe('HomePage', () => {
     expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })).toBeEnabled()
   })
 
+  it('명확한 다중 화자 대본은 목소리 확인 뒤에만 타임라인으로 적용한다', () => {
+    useAppStore.setState({ workspaceEntered: true })
+    const view = render(<HomePage />)
+    const scoped = within(view.container)
+    const textbox = scoped.getByRole('textbox', { name: '음성으로 만들 장문 내용' })
+
+    fireEvent.change(textbox, {
+      target: { value: '철수: 안녕하세요.\n영희: 반가워요.' },
+    })
+
+    expect(scoped.getByRole('region', { name: '화자별 목소리 배정' })).toBeInTheDocument()
+    expect(scoped.getByRole('button', { name: /전체 내용 음성 제작/ })).toBeDisabled()
+
+    fireEvent.click(scoped.getByRole('button', { name: '이 화자 배정으로 만들기' }))
+    expect(scoped.getByRole('button', { name: /전체 내용 음성 제작/ })).toBeEnabled()
+
+    fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    expect(scoped.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('안녕하세요.')
+    expect(scoped.getByText('반가워요.')).toBeInTheDocument()
+  })
+
 })
