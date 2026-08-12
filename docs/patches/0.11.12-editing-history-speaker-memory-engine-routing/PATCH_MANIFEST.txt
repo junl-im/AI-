@@ -1,0 +1,69 @@
+SoriON AI 0.11.12 patch manifest
+base: 0.11.11 Mobile Studio Flow & Natural Voice Playback
+version: 0.11.12
+added: 10
+changed: 37
+removed: 0
+total patch files: 47
+
+validation:
+- preflight 47/47
+- API 219/219
+- Worker 14/14
+- TS/TSX transpile 221/221
+- Python compileall
+- targeted TypeScript semantic: history/speaker/routing/useTimelineGeneration
+
+added files:
+- docs/EDITING_HISTORY_SPEAKER_MEMORY_ENGINE_TRACE.md
+- docs/patches/0.11.12-editing-history-speaker-memory-engine-routing/DELETE_LIST.txt
+- docs/patches/0.11.12-editing-history-speaker-memory-engine-routing/PATCH_README.md
+- scripts/check-edit-history-speaker-routing.mjs
+- src/timeline/editHistory.test.ts
+- src/timeline/editHistory.ts
+- src/workspace/engineRoutingTrace.test.ts
+- src/workspace/engineRoutingTrace.ts
+- src/workspace/speakerVoiceMemory.test.ts
+- src/workspace/speakerVoiceMemory.ts
+
+changed files:
+- APPLY_PATCH.cmd
+- APPLY_PATCH.sh
+- FOUNDATION_REPORT.md
+- PATCH_MANIFEST.txt
+- README.md
+- START_HERE.md
+- VERSION
+- docs/CHANGELOG.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/ROADMAP.md
+- package-lock.json
+- package.json
+- scripts/check-editor-command-engine-observation.mjs
+- scripts/check-one-flow-dubbing-ux.mjs
+- scripts/run-preflight.mjs
+- services/api/pyproject.toml
+- services/api/tests/test_ai_director.py
+- services/api/tests/test_connectivity.py
+- services/api/tests/test_engine_catalog.py
+- services/api/tests/test_engine_strategy.py
+- services/api/tests/test_evidence.py
+- services/api/tests/test_health.py
+- services/api/tests/test_quality.py
+- services/api/tests/test_setup.py
+- services/api/uv.lock
+- services/worker/pyproject.toml
+- services/worker/uv.lock
+- src/components/workspace/SpeakerVoiceAssignment.tsx
+- src/components/workspace/TimelineEditor.test.tsx
+- src/components/workspace/TimelineEditor.tsx
+- src/hooks/useTimelineGeneration.test.ts
+- src/hooks/useTimelineGeneration.ts
+- src/pages/HomePage.tsx
+- src/styles/one-flow-dubbing.css
+- src/styles/timeline-command-bar.css
+- src/update/buildInfo.ts
+
+removed files:
+- none

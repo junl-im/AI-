@@ -184,6 +184,8 @@ describe('TimelineEditor', () => {
 it('Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있다 · 안전한 목소리 변경과 재생성도 지원한다', async () => {
   const onMoveMany = vi.fn()
   const onRemoveMany = vi.fn()
+  const onUndo = vi.fn()
+  const onRedo = vi.fn()
   const onBatchVoiceChange = vi.fn().mockResolvedValue(null)
   const onRegenerateMany = vi.fn().mockResolvedValue({
     requestedIds: ['voice-2'],
@@ -207,6 +209,12 @@ it('Ctrl/Cmd 다중 선택 뒤 선택 클립을 일괄 이동·삭제할 수 있
       onBatchVoiceChange={onBatchVoiceChange}
       onRegenerateMany={onRegenerateMany}
       onClear={vi.fn()}
+      canUndo
+      canRedo
+      undoLabel="선택 클립 이동"
+      redoLabel="대사 수정"
+      onUndo={onUndo}
+      onRedo={onRedo}
     />,
   )
 
@@ -380,7 +388,7 @@ it('일괄 작업 재시도 이력을 세션 안에서 최근 순서로 보존�
   expect(JSON.stringify(snapshot)).not.toContain('engine unavailable')
 })
 
-it('다중 선택 command bar는 키보드 재생성·이동 되돌리기·삭제 안전 확인을 제공한다', async () => {
+it('다중 선택 command bar는 재생성·Undo/Redo·삭제 안전 확인을 제공한다', async () => {
   const onMoveMany = vi.fn()
   const onRemoveMany = vi.fn()
   const onRegenerateMany = vi.fn().mockResolvedValue({
@@ -420,8 +428,12 @@ it('다중 선택 command bar는 키보드 재생성·이동 되돌리기·삭�
 
   fireEvent.keyDown(firstVoice!, { key: 'ArrowRight', altKey: true })
   expect(onMoveMany).toHaveBeenLastCalledWith(['voice-1', 'voice-2'], 1)
-  fireEvent.click(screen.getByRole('button', { name: '이동 되돌리기' }))
-  expect(onMoveMany).toHaveBeenLastCalledWith(['voice-1', 'voice-2'], -1)
+  fireEvent.keyDown(firstVoice!, { key: 'z', ctrlKey: true })
+  expect(onUndo).toHaveBeenCalledTimes(1)
+  fireEvent.keyDown(firstVoice!, { key: 'z', ctrlKey: true, shiftKey: true })
+  expect(onRedo).toHaveBeenCalledTimes(1)
+  fireEvent.click(screen.getByRole('button', { name: '선택 클립 이동 되돌리기' }))
+  expect(onUndo).toHaveBeenCalledTimes(2)
 
   fireEvent.keyDown(firstVoice!, { key: 'Delete' })
   expect(screen.getByRole('alertdialog', { name: '일괄 명령 안전 미리보기' })).toHaveTextContent('선택 2개 삭제')

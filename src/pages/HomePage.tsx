@@ -31,6 +31,7 @@ import { synthesizeSpeech } from '../tts/voiceApi'
 import { getVoicePreset, voicePresets } from '../tts/voicePresets'
 import { clampVoiceSettingsToNaturalRange } from '../tts/voiceRecommendation'
 import { createRandomId } from '../utils/randomId'
+import { formatEngineRoutingTrace } from '../workspace/engineRoutingTrace'
 import {
   analyzeMultiSpeakerScript,
   buildMultiSpeakerTimelineSegments,
@@ -38,6 +39,10 @@ import {
   type SpeakerVoiceAssignment,
 } from '../workspace/multiSpeaker'
 import type { WorkspaceBatchRetrySnapshot, WorkspaceSession } from '../workspace/sessionTypes'
+import {
+  getRememberedSpeakerVoiceMap,
+  rememberSpeakerVoiceAssignments,
+} from '../workspace/speakerVoiceMemory'
 import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import type { ComposerDirective, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
@@ -150,6 +155,7 @@ export function HomePage() {
   const [resumeGeneration, setResumeGeneration] = useState<PendingLongformGeneration | null>(null)
   const [speakerAssignments, setSpeakerAssignments] = useState<SpeakerVoiceAssignment[]>([])
   const [speakerAssignmentsConfirmed, setSpeakerAssignmentsConfirmed] = useState(false)
+  const [rememberedSpeakerVoices, setRememberedSpeakerVoices] = useState<Record<string, string>>({})
   const observedResetTokenRef = useRef(workspaceResetToken)
   const pendingResetSaveRef = useRef<number | null>(null)
   const explicitWorkspaceActionRef = useRef(false)
@@ -161,6 +167,7 @@ export function HomePage() {
   const restoreProject = timeline.restoreProject
   const restoreSession = timeline.restoreSession
   const clearTimeline = timeline.clear
+  const resetTimelineEditHistory = timeline.resetEditHistory
   const getQueuedVoiceBlockIds = timeline.getQueuedVoiceBlockIds
   const getVoiceBlockSnapshots = timeline.getVoiceBlockSnapshots
   const selectedVoice = useMemo(() => getVoicePreset(voiceId), [voiceId])
@@ -212,8 +219,11 @@ export function HomePage() {
     if (!multiSpeakerAnalysis.eligible) {
       setSpeakerAssignments([])
       setSpeakerAssignmentsConfirmed(false)
+      setRememberedSpeakerVoices({})
       return
     }
+    const remembered = getRememberedSpeakerVoiceMap(multiSpeakerAnalysis.speakers)
+    setRememberedSpeakerVoices(Object.fromEntries(remembered))
     setSpeakerAssignments((current) => {
       const currentMap = new Map(current.map((item) => [item.speaker, item.voiceId]))
       const suggested = suggestSpeakerVoiceAssignments(
@@ -223,7 +233,7 @@ export function HomePage() {
       )
       return suggested.map((item) => ({
         ...item,
-        voiceId: currentMap.get(item.speaker) ?? item.voiceId,
+        voiceId: currentMap.get(item.speaker) ?? remembered.get(item.speaker) ?? item.voiceId,
       }))
     })
     setSpeakerAssignmentsConfirmed(false)
@@ -284,6 +294,7 @@ export function HomePage() {
     observedResetTokenRef.current = workspaceResetToken
     pendingResetSaveRef.current = workspaceResetToken
     clearTimeline()
+    resetTimelineEditHistory()
     clearQueue()
     setProjectTitle('새 프로젝트')
     setMessages(initialMessages)
@@ -300,7 +311,7 @@ export function HomePage() {
     setPendingPreview(null)
     setPreviewingId(null)
     previewRunIdRef.current += 1
-  }, [clearQueue, clearTimeline, workspaceResetToken])
+  }, [clearQueue, clearTimeline, resetTimelineEditHistory, workspaceResetToken])
   useEffect(() => {
     if (pendingResetSaveRef.current !== workspaceResetToken) return
     pendingResetSaveRef.current = null
@@ -445,7 +456,7 @@ export function HomePage() {
     appendMessage({
       role: 'assistant',
       badge: '제작 완료',
-      text: `${generated.length}개 음성 블록을 원문 순서로 정리해 플레이어와 프로젝트에 연결했습니다.`,
+      text: `${generated.length}개 음성 블록을 원문 순서로 정리해 플레이어와 프로젝트에 연결했습니다. 엔진 기록 · ${formatEngineRoutingTrace(batch.routing)}`,
     })
     try {
       await saveLongformProject(pending.text, pending.options, pending.allBlockIds, generated)
@@ -646,6 +657,10 @@ export function HomePage() {
   function confirmSpeakerAssignments() {
     if (!multiSpeakerAnalysis.eligible || speakerAssignments.length !== multiSpeakerAnalysis.speakers.length) return
     setSpeakerAssignmentsConfirmed(true)
+    rememberSpeakerVoiceAssignments(speakerAssignments)
+    setRememberedSpeakerVoices(Object.fromEntries(
+      speakerAssignments.map((item) => [item.speaker, item.voiceId]),
+    ))
     appendMessage({
       role: 'assistant',
       badge: '화자 목소리 확인',
@@ -779,6 +794,7 @@ export function HomePage() {
                   assignments={speakerAssignments}
                   confirmed={speakerAssignmentsConfirmed}
                   sampleBySpeaker={multiSpeakerAnalysis.sampleBySpeaker}
+                  rememberedVoiceBySpeaker={rememberedSpeakerVoices}
                   onAssignmentChange={changeSpeakerAssignment}
                   onConfirm={confirmSpeakerAssignments}
                   onPreview={(nextVoiceId, text) => void previewVoice(nextVoiceId, text, true)}
@@ -795,7 +811,7 @@ export function HomePage() {
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
             <WorkspaceConversation messages={messages} />
-            {timeline.blocks.length > 0 ? (
+            {timeline.blocks.length > 0 || timeline.canUndo || timeline.canRedo ? (
             <TimelineEditor
               blocks={timeline.blocks}
               onMove={timeline.moveBlock}
@@ -823,6 +839,12 @@ export function HomePage() {
               sttBusy={sttVerification.busy}
               batchRetrySnapshot={batchRetrySnapshot}
               onBatchRetrySnapshotChange={setBatchRetrySnapshot}
+              canUndo={timeline.canUndo}
+              canRedo={timeline.canRedo}
+              undoLabel={timeline.undoLabel}
+              redoLabel={timeline.redoLabel}
+              onUndo={timeline.undoEdit}
+              onRedo={timeline.redoEdit}
             />
             ) : null}
           </main>

@@ -25,14 +25,15 @@ for (const [token, label] of [
   ['handleTimelineCommandKeyDown', 'timeline keyboard command handler missing'],
   ["stageBatchCommand('regenerate'", 'guarded regeneration command missing'],
   ["stageBatchCommand('delete'", 'guarded delete command missing'],
-  ['이동 되돌리기', 'batch move undo missing'],
+  ['Ctrl/Cmd+Shift+Z', 'bounded redo guidance missing'],
+  ['soa-timeline-history-controls', 'timeline history controls missing'],
   ['일괄 명령 안전 미리보기', 'batch command preview missing'],
   ['Ctrl/Cmd+A', 'select-all keyboard guidance missing'],
 ]) requireText(timeline, token, label)
 
 requireText(
   timelineTests,
-  '다중 선택 command bar는 키보드 재생성·이동 되돌리기·삭제 안전 확인을 제공한다',
+  '다중 선택 command bar는 재생성·Undo/Redo·삭제 안전 확인을 제공한다',
   'keyboard command UX regression test missing',
 )
 

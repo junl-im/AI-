@@ -1,20 +1,17 @@
-SoriON AI 0.11.11 Mobile Studio Flow & Natural Voice Playback
+SoriON AI 0.11.12 Editing History, Speaker Memory & Engine Routing Trace
 
 기준 상태
-- 0.11.10 Horizontal Timeline Workspace 전체 통파일
+- 0.11.11 Mobile Studio Flow & Natural Voice Playback 전체 통파일
 
 적용 결과
-- 모바일 홈 Player + 주요 Dock 일관화
-- 현재 목소리 1개 + 팝업 전체 목록/미리듣기/장점/주의점
-- 대본 맞춤 voice 추천은 자동 적용 없이 선택 보조로만 제공
-- preset별 natural speed/pitch 범위로 목소리 전환 설정 보정
-- 모바일 composer focus/keyboard viewport 상단 정렬
-- 모바일 full-width horizontal timeline + 1.25배 기본 zoom
-- 생성 음성 store play 요청과 Player 버튼 상태 즉시 연결
-- 제품 버전 0.11.11
+- Timeline 최근 20단계 bounded Undo/Redo
+- text/voice 변경 복원 시 stale audio/job 재사용 차단
+- 화자 raw text 대신 hash key+voiceId 최근 배정 기억
+- 장문 batch engine usage/switch/fallback routing trace
+- 제품 버전 0.11.12
 
 삭제 파일
 - 없음
 
 상세 manifest
-- docs/patches/0.11.11-mobile-studio-flow-natural-voice-playback/PATCH_MANIFEST.txt
+- docs/patches/0.11.12-editing-history-speaker-memory-engine-routing/PATCH_MANIFEST.txt

@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.11 · Mobile Studio Flow & Natural Voice Playback**
+현재 기준 버전: **0.11.12 · Editing History, Speaker Memory & Engine Routing Trace**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-12 12:47 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,17 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 0.11.12 Editing History, Speaker Memory & Engine Routing Trace
+
+- Timeline 편집 history는 20개 bounded past/future stack이며 새 편집 시 redo를 비웁니다.
+- 순서-only Undo/Redo는 기존 ready track을 유지하고, text/voice/삭제 복원처럼 음성 의미가 바뀌는 상태는 queued로 안전 복원합니다.
+- 새 workspace/session/project restore는 이전 history를 reset합니다.
+- Multi-Speaker 최근 배정은 speaker raw text를 저장하지 않고 hash key+voiceId만 최대 24건 저장하며 사용자 confirm gate를 유지합니다.
+- 장문 완료 메시지는 engine routing trace(engine usage/switch/fallback/attempted engine count)를 포함합니다.
+- 동시성은 최대 2를 유지하며 실제 soak evidence 전 자동 상향하지 않습니다.
+- 전용 계약: `scripts/check-edit-history-speaker-routing.mjs`.
+- 상세 설계: `docs/EDITING_HISTORY_SPEAKER_MEMORY_ENGINE_TRACE.md`.
 
 ## 0.11.11 Mobile Studio Flow & Natural Voice Playback
 1. **작업 일시/기준**: 2026-08-12 14:13 KST 이후 · 0.11.10 Horizontal Timeline Workspace 기준.
@@ -58,8 +69,6 @@
 7. **제한**: 승인 Chromium baseline PNG는 아직 없으므로 baseline-required CI는 강제하지 않습니다. active-request engine routing 장시간 soak와 구조 변경 snapshot Undo는 미완료입니다.
 8. **다음 업데이트**: 0.11.7 Approved Visual Baseline Enforcement & Engine Soak Provenance.
 
-
-
 ## 0.11.3 Failure-Guided Editing & Adaptive Performance Routing
 
 1. **작업 일시(KST)**: 2026-08-07 18:12 이후.
@@ -86,7 +95,6 @@
 9. **산출물**: `SoriON-AI-0.11.2-batch-recovery-ux-adaptive-engine-routing-full.zip`, `SoriON-AI-0.11.1-to-0.11.2-batch-recovery-ux-adaptive-engine-routing-patch.zip` 예정.
 10. **다음 예상 업데이트**: 0.11.3 Visual Baseline Approval & Recovery Provenance. pixel baseline 승인, soak provenance, 실제 OS 복귀 증거 분리, batch 실패 원인 그룹화를 우선합니다.
 
-
 ## 0.11.1 Visual Regression & Safe Batch Voice Editing
 
 1. **작업 일시(KST)**: 2026-08-07 16:42 이후.
@@ -99,7 +107,6 @@
 8. **알려진 제한**: 0.11.1 Chromium 검사는 DOM 실측 + PNG/SHA evidence이며 pixel baseline diff는 아직 강제하지 않습니다. 실제 CosyVoice WAV/권리 자료 부재 제한도 유지됩니다.
 9. **산출물**: 0.11.1 전체 ZIP과 0.11.0→0.11.1 덮어쓰기 패치를 생성합니다.
 10. **다음 예상 업데이트**: 0.11.2에서 승인된 pixel baseline 비교, batch 결과 요약/재시도 횟수, soak provenance와 실제 OS 복귀 evidence 분리를 진행합니다.
-
 
 ## 0.11.0 Adaptive Engine Resilience & Recovery
 
@@ -114,7 +121,6 @@
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.0-adaptive-engine-resilience-recovery-full.zip`, `SoriON-AI-0.10.8-to-0.11.0-adaptive-engine-resilience-recovery-patch.zip`.
 10. **다음 예상 업데이트**: 0.11.1 Visual Regression & Safe Batch Voice Editing. Chromium 1024·1280·1440px 시각 회귀, 다중 클립 일괄 voice 변경/재생성 영향 preview, inventory 프리셋 배정 diff, 실기기 복귀 증거와 synthetic recovery 분리를 이어갑니다.
 
-
 ## 0.10.8 CI Test Contract Stability Hotfix
 
 1. **작업 일시(KST)**: 2026-08-07 15:33 이후.
@@ -127,7 +133,6 @@
 8. **알려진 제한과 주의사항**: 이번 버전은 CI 안정화 전용 hotfix이며 0.10.8에 예정했던 Chromium 시각 회귀·안전한 다중 음성 편집 기능은 0.10.9로 이동합니다. 카드별 textarea를 다시 추가하지 않습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.10.8-ci-test-contract-stability-hotfix-full.zip`, `SoriON-AI-0.10.7-to-0.10.8-ci-test-contract-stability-hotfix-patch.zip`.
 10. **다음 예상 업데이트**: 0.10.9 Visual Regression & Safe Batch Voice Editing. 실제 Chromium 1024·1280·1440px 시각 회귀, 다중 선택 일괄 재생성·voice 변경 전 영향 preview, 실제 OS 절전·Wi-Fi 증거 분리를 이어갑니다.
-
 
 ## 0.10.7 Recovery Evidence & Voice Inventory Diagnostics
 
@@ -142,7 +147,6 @@
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.10.7-recovery-evidence-voice-inventory-diagnostics-full.zip`, `SoriON-AI-0.10.6-to-0.10.7-recovery-evidence-voice-inventory-diagnostics-patch.zip`.
 10. **다음 예상 업데이트**: 0.10.8 Visual Regression & Safe Batch Voice Editing. 실제 Chromium 1024·1280·1440px 시각 회귀, 다중 선택 일괄 재생성·voice 변경 전 영향 preview, 실제 OS 절전·Wi-Fi 증거와 synthetic recovery 결과 분리, soak 비교 결과의 provenance 내보내기, 음성 inventory 변경 전후 프리셋 배정 diff를 우선합니다.
 
-
 ## 0.10.6 Baseline Recovery & Multi-Clip Editing
 
 1. **작업 일시(KST)**: 2026-08-07 11:43 이후.
@@ -155,7 +159,6 @@
 8. **알려진 제한**: 실제 1024·1280·1440px 브라우저 screenshot 비교와 네트워크/절전 E2E 장애 주입은 다음 업데이트로 넘깁니다. 실제 CosyVoice 5종 WAV·동의/권리 자료·모델 가중치는 포함하지 않습니다.
 9. **산출물**: `SoriON-AI-0.10.6-baseline-recovery-multi-clip-editing-full.zip`, `SoriON-AI-0.10.5-to-0.10.6-baseline-recovery-multi-clip-editing-patch.zip`.
 10. **다음 업데이트**: 0.10.7 Recovery Evidence & Voice Inventory Diagnostics. 이전 soak 비교 UI, 실기기 화면 회귀, 네트워크·절전 복귀 장애 주입, 음성 inventory 변화 감지를 우선합니다.
-
 
 ## 0.10.5 Compact Dock & Practical Clip Editor
 
@@ -170,7 +173,6 @@
 9. **산출물**: `SoriON-AI-0.10.5-compact-dock-practical-editor-full.zip`, `SoriON-AI-0.10.4-to-0.10.5-compact-dock-practical-editor-patch.zip`.
 10. **다음 업데이트**: 0.10.6 Baseline History & Recovery Dashboard. 원래 0.10.5에 예정했던 운영 대시보드 작업은 사용자 편집 UX 우선순위에 따라 한 차수 이동합니다.
 
-
 ## 0.10.4 Voice Preset Engine Reliability Hotfix
 
 1. **작업 일시(KST)**: 2026-08-07 10:07 이후.
@@ -183,7 +185,6 @@
 8. **알려진 제한**: 전달 ZIP에는 실제 5개 CosyVoice WAV·동의 자료·모델 가중치가 없습니다. eSpeak 또는 성별 호환 OS/Browser 한국어 음성이 기기에 없으면 근사 폴백도 사용할 수 없습니다. 성별 미확정 단일 Melo 화자를 남성/여성으로 강제 배정하지 않습니다.
 9. **산출물**: `SoriON-AI-0.10.4-voice-preset-engine-reliability-full.zip`, `SoriON-AI-0.10.3-to-0.10.4-voice-preset-engine-reliability-patch.zip`.
 10. **다음 업데이트**: 0.10.5 Baseline History & Recovery Dashboard.
-
 
 ## 0.10.3 Compact Playback Dock & Direct Timeline Editing
 
@@ -198,7 +199,6 @@
 9. **산출물**: `SoriON-AI-0.10.3-compact-playback-timeline-full.zip`, `SoriON-AI-0.10.2-to-0.10.3-compact-playback-timeline-patch.zip`.
 10. **다음 업데이트**: 0.10.4 Baseline History & Recovery Dashboard.
 
-
 ## 0.10.2 Recovery Soak & Managed Lock Interface
 
 1. **작업 일시(KST)**: 2026-08-06 18:39 이후.
@@ -210,7 +210,6 @@
 7. **제한**: 실제 30·60분 soak와 전체 Web build는 GitHub Actions가 최종 판정합니다. 관리형 DB backend는 인터페이스만 준비됐고 현재 허용 backend는 sqlite입니다.
 8. **산출물**: `SoriON-AI-0.10.2-recovery-soak-managed-lock-full.zip`, `SoriON-AI-0.10.1-to-0.10.2-recovery-soak-managed-lock-patch.zip`.
 9. **다음 업데이트**: 0.10.3 Baseline History & Recovery Dashboard.
-
 
 ## 0.10.1 Approval Modularization & Operator Baselines
 
@@ -224,7 +223,6 @@
 8. **제한·주의사항**: 운영자 기준선은 동일 조건 최근 5건의 통계 snapshot이며 실제 청취 승인이나 실기기 인증을 대체하지 않습니다. Ruff와 전체 Web ESLint·Vitest·Vite build는 전달 환경의 설치 의존성 제약 때문에 GitHub Actions가 최종 판정합니다.
 9. **산출물**: `SoriON-AI-0.10.1-approval-modularization-operator-baselines-full.zip`, `SoriON-AI-0.10.0-to-0.10.1-approval-modularization-operator-baselines-patch.zip`.
 10. **다음 업데이트**: 0.10.2 Recovery Soak & Managed Lock Interface.
-
 
 ## 0.10.0 Always-on Preset Runtime & PC Three-Pane
 
@@ -278,7 +276,6 @@
 6. **검증**: Repository preflight 30/30, API pytest 188개, Worker pytest 14개, TS/TSX 구문 191개, Python compileall과 실제 짧은 API·Worker soak를 통과했습니다.
 7. **한계**: SQLite lease는 안전하게 공유되는 동일 DB 파일 범위입니다. 일반 NFS나 독립 서버를 진정한 분산 lock으로 표현하지 않습니다.
 8. **다음 업데이트**: 0.9.7 Approval Service Modularization & Operator Baselines.
-
 
 ## 0.9.5 Benchmark Baseline & Privacy-Safe Audit Bundle
 
@@ -1041,7 +1038,6 @@ CI Hotfix 4 테스트 규칙:
 9. Repository preflight 12/12, API pytest 133개, Worker pytest 14개, Python compileall과 TS/TSX 159개 transpile 검사를 통과했다.
 10. 내부 npm registry 404로 전체 Web lint·Vitest·semantic typecheck·Vite build는 실행하지 못했으므로 GitHub Actions가 최종 Web 판정이다.
 
-
 ## 47. 2026-08-03 08:47 KST · 0.9.3-beta.3 Engine Heartbeat 6.1 Progressive Playback Stability & Male Presets
 1. 기존 도윤 남성 프리셋에 준호 저음·민준 활력을 추가해 전체 5종, 남성 3종으로 확장했다.
 2. `src/tts/voicePresets.ts`는 성별 메타데이터와 필터 함수를 제공하고 모바일 Voice Picker는 전체·남성·여성·중성 실제 필터를 사용한다.
@@ -1064,7 +1060,6 @@ CI Hotfix 4 테스트 규칙:
 8. 전달본에 npm lock과 설치 의존성이 없어 ESLint·전체 Vitest·semantic typecheck·Vite build는 GitHub Actions가 최종 판정한다. `tsc -b`는 누락된 Vite·Vitest·Node 타입 패키지만 보고했다.
 9. 다음 목표는 seam gap 실측, 새로고침 복구, Android Chrome·iOS Safari·PWA soak와 실제 CosyVoice 프리셋 5종 증거다.
 
-
 ## 49. 2026-08-03 12:17 KST · 0.9.3-beta.3 Engine Heartbeat 6.3 Seam Metrics & Device Soak
 1. Player는 현재 구간 `ended` 시각과 다음 구간 `playing` 시각의 차이를 seam gap으로 기록하고 다음 구간 생성 대기 포함 여부를 별도 플래그로 남긴다.
 2. seam은 트랙별 최근 20개만 보존하며 Quality Lab에서 평균·최대·최근 전환을 표시하고 사용자 문장 없이 JSON으로 내보낸다.
@@ -1074,7 +1069,6 @@ CI Hotfix 4 테스트 규칙:
 6. 관찰 이벤트는 실제 음성 재생·SSE 유지 성공을 인증하지 않으며 Android Chrome·iOS Safari·PWA 수동 soak가 여전히 필요하다.
 7. 검증: `Repository preflight 15/15, API pytest 135개, Worker pytest 14개, Python compileall, TS/TSX 166개 transpile 구문 검사, 핵심 비-React 모듈 strict semantic 검사와 player session·browser evidence runtime smoke를 통과했습니다`.
 8. 다음 목표는 만료된 최종 음원을 작업 ID로 재발급하고 실제 기기 10·30·60분 soak와 seam P95를 확보하는 Heartbeat 6.4다.
-
 
 ## 50. 2026-08-03 13:17 KST · 0.9.3-beta.3 Engine Heartbeat 6.4 Signed Audio Rehydration & Device Certification
 1. 기준 버전은 Engine Heartbeat 6.3이며 목표는 만료 URL 재발급, seam P95·handoff 오차, 모바일 인증 시나리오 분리다.
@@ -1094,7 +1088,6 @@ CI Hotfix 4 테스트 규칙:
     - Export 서버 파일은 30분 임시이며 사용자 다운로드만 보존으로 인정한다.
     - 로컬 보존 기록에는 파일명 메타데이터만 남고 음성 바이트·원문·전체 URL은 저장하지 않는다.
 12. Heartbeat 6.6 Field Evidence & Reproducible Web Quality를 완료했으며 다음 목표는 Heartbeat 6.7 Field Evidence Intake & Local Export Bundle이다.
-
 
 ## 52. 2026-08-03 15:19 KST · 0.9.3-beta.3 Engine Heartbeat 6.5.2 Stream Handoff CI Hotfix
 1. 기준 버전은 Heartbeat 6.5.1이며 제품 버전 `0.9.3-beta.3`은 변경하지 않았다.
@@ -1135,7 +1128,6 @@ CI Hotfix 4 테스트 규칙:
 9. 제한: 실제 5개 화자 WAV·동의/권리 원본·CosyVoice 모델은 포함하지 않았다. manifest 템플릿은 pending이며 Browser/System 음성은 전용 인물이 아닌 기기 근사값이다.
 10. 다음 예상 업데이트는 Heartbeat 6.8.1의 A/B 검수 내보내기·manifest 연계, System/Melo 실제 화자 telemetry, 프리셋별 CosyVoice benchmark다.
 
-
 ## 2026-08-07 18:38 KST · v0.11.4 Visual Baseline Approval & Recovery Provenance
 1. 작업 일시(KST): 2026-08-07 18:38.
 2. 대상/기준: `0.11.4 · Visual Baseline Approval & Recovery Provenance`, 기준은 공식 `0.11.3` 전체본이다.
@@ -1159,8 +1151,6 @@ CI Hotfix 4 테스트 규칙:
 8. 알려진 제한과 주의사항: 내부 npm registry가 `zustand@5.0.8`을 404로 반환해 Web 의존성을 설치하지 못했고 동일 CI 조건의 ESLint·Vitest·Vite build·semantic typecheck는 로컬에서 완료하지 못했다. global `tsc -b`는 Vite/Vitest/Node 타입 패키지 누락만 보고했다. active-request 감점은 순간 부하 힌트이지 성능 benchmark가 아니며 이동 Undo는 전체 편집 history가 아니다. 실제/주입 복구 증거 class 분리, 승인 visual baseline CI 강제, 프로젝트 세션 retry snapshot은 아직 완료하지 않았다.
 9. 생성한 전체 ZIP과 패치 ZIP 이름: `SoriON-AI-0.11.5-editor-command-adaptive-engine-load-full.zip`, `SoriON-AI-0.11.4-to-0.11.5-editor-command-adaptive-engine-load-patch.zip`, `SHA256SUMS.txt`.
 10. 다음 예상 업데이트: `0.11.6 · Recovery Evidence Classification & Session Safety`. 실제 OS/Wi-Fi/visibility와 synthetic injection 증거 class 분리, 승인 Chromium baseline CI 강제, 민감정보 없는 batch retry session snapshot, active-request 분산 장시간 soak 검증을 우선한다.
-
-
 
 ## 2026-08-10 17:50 KST · v0.11.7 CI Chain Integrity Hotfix
 1. 작업 일시(KST): 2026-08-10 17:50.

@@ -33,8 +33,20 @@ import {
   type TimelineStagedSegment,
 } from '../workspace/timelineBlocks'
 import { createRandomId } from '../utils/randomId'
+import {
+  EMPTY_TIMELINE_EDIT_HISTORY,
+  TIMELINE_EDIT_HISTORY_LIMIT,
+  captureTimelineEditSnapshot,
+  pushTimelineEditHistory,
+  snapshotVoiceToQueuedBlock,
+  timelineBlockMatchesSnapshot,
+  timelineEditSnapshotsEqual,
+  type TimelineEditHistoryState,
+  type TimelineEditSnapshot,
+} from '../timeline/editHistory'
 import { runBoundedOrderedBatch } from '../workspace/boundedBatch'
 import type { SttSegmentVerificationResult } from '../stt/verificationApi'
+import { buildEngineRoutingTrace, type EngineRoutingTrace } from '../workspace/engineRoutingTrace'
 import {
   applySttResultsToBlocks,
   regenerateSttBlocks,
@@ -49,6 +61,7 @@ export interface TimelineGenerationBatchResult {
   results: TimelineGenerationResult[]
   cancelled: boolean
   concurrency: number
+  routing: EngineRoutingTrace
 }
 
 export const TIMELINE_GENERATION_CONCURRENCY = 2
@@ -84,6 +97,9 @@ export function useTimelineGeneration() {
   const controllers = useRef(new Map<string, AbortController>())
   const timers = useRef(new Map<string, number>())
   const batchGenerationRunRef = useRef(0)
+  const editHistoryRef = useRef<TimelineEditHistoryState>(EMPTY_TIMELINE_EDIT_HISTORY)
+  const editHistoryIdRef = useRef(0)
+  const [editHistory, setEditHistory] = useState<TimelineEditHistoryState>(EMPTY_TIMELINE_EDIT_HISTORY)
   const enqueue = usePlayerStore((state) => state.enqueue)
   const enqueueAndPlay = usePlayerStore((state) => state.enqueueAndPlay)
   const replaceTrack = usePlayerStore((state) => state.replace)
@@ -95,6 +111,29 @@ export function useTimelineGeneration() {
     blocksRef.current = next
     setBlocks(next)
   }, [])
+  const replaceEditHistory = useCallback((next: TimelineEditHistoryState) => {
+    editHistoryRef.current = next
+    setEditHistory(next)
+  }, [])
+  const resetEditHistory = useCallback(() => {
+    replaceEditHistory(EMPTY_TIMELINE_EDIT_HISTORY)
+  }, [replaceEditHistory])
+  const commitEdit = useCallback((label: string, updater: BlocksUpdater) => {
+    const before = captureTimelineEditSnapshot(blocksRef.current)
+    const next = updater(blocksRef.current)
+    const after = captureTimelineEditSnapshot(next)
+    if (timelineEditSnapshotsEqual(before, after)) return false
+    blocksRef.current = next
+    setBlocks(next)
+    const history = pushTimelineEditHistory(editHistoryRef.current, {
+      id: ++editHistoryIdRef.current,
+      label,
+      before,
+      after,
+    })
+    replaceEditHistory(history)
+    return true
+  }, [replaceEditHistory])
   const stopPolling = useCallback((blockId: string) => {
     const timer = timers.current.get(blockId)
     if (timer !== undefined) window.clearTimeout(timer)
@@ -105,6 +144,58 @@ export function useTimelineGeneration() {
     controllers.current.delete(blockId)
     stopPolling(blockId)
   }, [stopPolling])
+  const applyEditSnapshot = useCallback((snapshot: TimelineEditSnapshot) => {
+    batchGenerationRunRef.current += 1
+    const current = blocksRef.current
+    const currentById = new Map(current.map((block) => [block.id, block]))
+    const snapshotById = new Map(snapshot.map((block) => [block.id, block]))
+
+    current.forEach((block) => {
+      const target = snapshotById.get(block.id)
+      if (target && timelineBlockMatchesSnapshot(block, target)) return
+      cancelActiveGeneration(block.id)
+      if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
+    })
+
+    const next: TimelineBlock[] = snapshot.map((item) => {
+      const currentBlock = currentById.get(item.id)
+      if (timelineBlockMatchesSnapshot(currentBlock, item)) return currentBlock!
+      if (item.kind === 'pause') return { ...item }
+      return snapshotVoiceToQueuedBlock(
+        item,
+        currentBlock?.kind === 'voice' ? currentBlock.revision : 0,
+      )
+    })
+    blocksRef.current = next
+    setBlocks(next)
+    alignTrackOrder(next.flatMap((block) => (
+      block.kind === 'voice' && block.trackId ? [block.trackId] : []
+    )))
+  }, [alignTrackOrder, cancelActiveGeneration, removeTrack])
+
+  const undoEdit = useCallback(() => {
+    const current = editHistoryRef.current
+    const entry = current.past[current.past.length - 1]
+    if (!entry) return false
+    applyEditSnapshot(entry.before)
+    replaceEditHistory({
+      past: current.past.slice(0, -1),
+      future: [entry, ...current.future].slice(0, TIMELINE_EDIT_HISTORY_LIMIT),
+    })
+    return true
+  }, [applyEditSnapshot, replaceEditHistory])
+
+  const redoEdit = useCallback(() => {
+    const current = editHistoryRef.current
+    const entry = current.future[0]
+    if (!entry) return false
+    applyEditSnapshot(entry.after)
+    replaceEditHistory({
+      past: [...current.past, entry].slice(-TIMELINE_EDIT_HISTORY_LIMIT),
+      future: current.future.slice(1),
+    })
+    return true
+  }, [applyEditSnapshot, replaceEditHistory])
   useEffect(() => () => {
     controllers.current.forEach((controller) => controller.abort())
     timers.current.forEach((timer) => window.clearTimeout(timer))
@@ -125,7 +216,7 @@ export function useTimelineGeneration() {
     options: TimelineGenerationOptions,
   ): string[] => {
     const staged = timelineBlocksFromText(text, options)
-    commit((current) => current.length === 0
+    commitEdit('대본 클립 추가', (current) => current.length === 0
       ? staged
       : [
           ...current,
@@ -133,10 +224,10 @@ export function useTimelineGeneration() {
           ...staged,
         ])
     return staged.filter((block) => block.kind === 'voice').map((block) => block.id)
-  }, [commit])
+  }, [commitEdit])
   const stageSegments = useCallback((segments: TimelineStagedSegment[]): string[] => {
     const staged = timelineBlocksFromSegments(segments)
-    commit((current) => current.length === 0
+    commitEdit('다중 화자 대본 추가', (current) => current.length === 0
       ? staged
       : [
           ...current,
@@ -144,15 +235,15 @@ export function useTimelineGeneration() {
           ...staged,
         ])
     return staged.filter((block) => block.kind === 'voice').map((block) => block.id)
-  }, [commit])
+  }, [commitEdit])
   const addVoiceBlock = useCallback((
     options: TimelineGenerationOptions,
     text = '',
   ): string => {
     const block = createTimelineVoiceBlock(text, options)
-    commit((current) => [...current, block])
+    commitEdit('대사 클립 추가', (current) => [...current, block])
     return block.id
-  }, [commit])
+  }, [commitEdit])
   const pollProgress = useCallback((
     blockId: string,
     jobId: string,
@@ -652,13 +743,15 @@ export function useTimelineGeneration() {
     })
     alignTrackOrder(orderedTrackIds)
 
+    const results = requestedIds.flatMap((blockId) => {
+      const audio = resultById.get(blockId)
+      return audio ? [{ blockId, audio }] : []
+    })
     return {
-      results: requestedIds.flatMap((blockId) => {
-        const audio = resultById.get(blockId)
-        return audio ? [{ blockId, audio }] : []
-      }),
+      results,
       cancelled: batchGenerationRunRef.current !== runId,
       concurrency,
+      routing: buildEngineRoutingTrace(results),
     }
   }, [alignTrackOrder, runBlock])
 
@@ -713,7 +806,7 @@ export function useTimelineGeneration() {
     const selected = new Set(ids)
     if (!selected.size) return
     ids.forEach((id) => cancelActiveGeneration(id))
-    commit((current) => current.map((block) => {
+    commitEdit('선택 클립 목소리 변경', (current) => current.map((block) => {
       if (block.kind !== 'voice' || !selected.has(block.id) || block.voiceId === voiceId) return block
       if (block.trackId) removeTrack(block.trackId)
       return {
@@ -730,7 +823,7 @@ export function useTimelineGeneration() {
         sttVerification: undefined,
       }
     }))
-  }, [cancelActiveGeneration, commit, removeTrack])
+  }, [cancelActiveGeneration, commitEdit, removeTrack])
 
   const regenerateMany = useCallback(async (ids: string[]): Promise<TimelineBatchGenerationSummary> => {
     const requestedIds = [...new Set(ids)]
@@ -813,10 +906,11 @@ export function useTimelineGeneration() {
       }
     })
     commit(() => restored)
+    resetEditHistory()
     return restored
       .filter((block): block is TimelineVoiceBlock => block.kind === 'voice' && Boolean(block.jobId))
       .map((block) => block.id)
-  }, [commit, removeTrack])
+  }, [commit, removeTrack, resetEditHistory])
   const restoreProject = useCallback((
     project: VoiceProject,
     options: TimelineGenerationOptions,
@@ -857,13 +951,14 @@ export function useTimelineGeneration() {
       }
     })
     commit(() => restored)
+    resetEditHistory()
     return restored
       .filter((block): block is TimelineVoiceBlock => block.kind === 'voice' && Boolean(block.jobId))
       .map((block) => block.id)
-  }, [commit, removeTrack])
+  }, [commit, removeTrack, resetEditHistory])
 
   const moveBlock = useCallback((id: string, direction: -1 | 1) => {
-    commit((current) => {
+    commitEdit('클립 이동', (current) => {
       const index = current.findIndex((block) => block.id === id)
       const target = index + direction
       if (index < 0 || target < 0 || target >= current.length) return current
@@ -871,10 +966,10 @@ export function useTimelineGeneration() {
       ;[next[index], next[target]] = [next[target], next[index]]
       return next
     })
-  }, [commit])
+  }, [commitEdit])
 
   const reorderBlock = useCallback((sourceId: string, targetId: string) => {
-    commit((current) => {
+    commitEdit('클립 순서 변경', (current) => {
       const sourceIndex = current.findIndex((block) => block.id === sourceId)
       const targetIndex = current.findIndex((block) => block.id === targetId)
       if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) return current
@@ -883,12 +978,12 @@ export function useTimelineGeneration() {
       next.splice(targetIndex, 0, moved)
       return next
     })
-  }, [commit])
+  }, [commitEdit])
 
   const moveBlocks = useCallback((ids: string[], direction: -1 | 1) => {
     const selected = new Set(ids)
     if (!selected.size) return
-    commit((current) => {
+    commitEdit('선택 클립 이동', (current) => {
       const next = [...current]
       if (direction < 0) {
         for (let index = 1; index < next.length; index += 1) {
@@ -903,11 +998,11 @@ export function useTimelineGeneration() {
       }
       return next
     })
-  }, [commit])
+  }, [commitEdit])
 
   const updateText = useCallback((id: string, text: string) => {
     cancelActiveGeneration(id)
-    commit((current) => current.map((block) => {
+    commitEdit('대사 수정', (current) => current.map((block) => {
       if (block.id !== id || block.kind !== 'voice') return block
       if (block.trackId) removeTrack(block.trackId)
       return {
@@ -924,11 +1019,11 @@ export function useTimelineGeneration() {
         sttVerification: undefined,
       }
     }))
-  }, [cancelActiveGeneration, commit, removeTrack])
+  }, [cancelActiveGeneration, commitEdit, removeTrack])
 
   const splitBlock = useCallback((id: string) => {
     cancelActiveGeneration(id)
-    commit((current) => {
+    commitEdit('클립 분할', (current) => {
       const index = current.findIndex((block) => block.id === id)
       const block = current[index]
       if (!block || block.kind !== 'voice' || block.text.length < 8) return current
@@ -945,35 +1040,35 @@ export function useTimelineGeneration() {
         ...current.slice(index + 1),
       ]
     })
-  }, [cancelActiveGeneration, commit, removeTrack])
+  }, [cancelActiveGeneration, commitEdit, removeTrack])
 
   const addPause = useCallback(() => {
-    commit((current) => [
+    commitEdit('쉼 추가', (current) => [
       ...current,
       { id: createRandomId(), kind: 'pause', durationSeconds: 0.5 },
     ])
-  }, [commit])
+  }, [commitEdit])
 
 
   const removeBlock = useCallback((id: string) => {
     cancelActiveGeneration(id)
-    commit((current) => current.filter((block) => {
+    commitEdit('클립 삭제', (current) => current.filter((block) => {
       if (block.id !== id) return true
       if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
       return false
     }))
-  }, [cancelActiveGeneration, commit, removeTrack])
+  }, [cancelActiveGeneration, commitEdit, removeTrack])
 
   const removeBlocks = useCallback((ids: string[]) => {
     const selected = new Set(ids)
     if (!selected.size) return
     ids.forEach((id) => cancelActiveGeneration(id))
-    commit((current) => current.filter((block) => {
+    commitEdit('선택 클립 삭제', (current) => current.filter((block) => {
       if (!selected.has(block.id)) return true
       if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
       return false
     }))
-  }, [cancelActiveGeneration, commit, removeTrack])
+  }, [cancelActiveGeneration, commitEdit, removeTrack])
 
   const clear = useCallback(() => {
     batchGenerationRunRef.current += 1
@@ -981,8 +1076,8 @@ export function useTimelineGeneration() {
     blocksRef.current.forEach((block) => {
       if (block.kind === 'voice' && block.trackId) removeTrack(block.trackId)
     })
-    commit(() => [])
-  }, [cancelActiveGeneration, commit, removeTrack])
+    commitEdit('타임라인 전체 비우기', () => [])
+  }, [cancelActiveGeneration, commitEdit, removeTrack])
 
   return {
     blocks,
@@ -1010,5 +1105,12 @@ export function useTimelineGeneration() {
     removeBlock,
     removeBlocks,
     clear,
+    canUndo: editHistory.past.length > 0,
+    canRedo: editHistory.future.length > 0,
+    undoLabel: editHistory.past[editHistory.past.length - 1]?.label ?? null,
+    redoLabel: editHistory.future[0]?.label ?? null,
+    undoEdit,
+    redoEdit,
+    resetEditHistory,
   }
 }

@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.11.12 · Editing History, Speaker Memory & Engine Routing Trace
+
+- Timeline 편집을 최근 20단계 bounded Undo/Redo로 확장하고 `Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z`, `Ctrl/Cmd+Y`와 toolbar 버튼을 연결했습니다.
+- 이동·재정렬·대사 수정·분할·쉼 추가·삭제·다중 삭제·일괄 목소리 변경을 history에 기록합니다.
+- Undo/Redo에서 내용/voice가 달라진 clip은 폐기된 audio/job/track을 되살리지 않고 queued로 복원하며, 순서만 바뀐 ready clip은 기존 재생 결과를 유지합니다.
+- 새 프로젝트·세션·저장 프로젝트 복원은 timeline history를 초기화해 다른 작업의 Undo 상태가 섞이지 않게 했습니다.
+- 최근 승인한 화자-목소리 조합을 화자 원문이 아닌 hash key+voiceId만 최대 24건 저장하고 다음 Multi-Speaker Assist에서 우선 제안합니다.
+- 장문 batch 완료 결과에 engine routing trace를 추가해 실제 엔진별 사용 횟수·switch 횟수·fallback 횟수·시도 엔진 수를 집계합니다.
+- 기존 최대 2-way bounded parallel, circuit breaker, active-load 분산, EWMA 성능 감점과 명시적 엔진 선택 계약은 유지합니다.
+- Editing History / Speaker Memory / Engine Routing Trace 전용 dependency-free preflight를 추가하고 제품 버전을 0.11.12로 동기화했습니다.
+
 ## 0.11.11 · Mobile Studio Flow & Natural Voice Playback
 
 - 모바일 홈에서도 생성 플레이어 아래 주요 Dock을 함께 노출해 설정/품질 화면과 네비게이션 구조를 일관화했습니다.

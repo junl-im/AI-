@@ -91,3 +91,34 @@
     width: 100%;
   }
 }
+
+.soa-timeline-history-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.soa-timeline-history-controls button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--soa-line);
+  border-radius: 10px;
+  background: var(--soa-card, #fff);
+  font-weight: 800;
+}
+
+.soa-timeline-history-controls button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+@media (max-width: 760px) {
+  .soa-timeline-history-controls button span {
+    display: none;
+  }
+
+  .soa-timeline-history-controls button {
+    min-width: 38px;
+    padding-inline: 8px;
+  }
+}

@@ -838,3 +838,52 @@ describe('useTimelineGeneration multi speaker staging', () => {
     ])
   })
 })
+
+
+describe('useTimelineGeneration bounded edit history', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    usePlayerStore.getState().clearQueue()
+  })
+
+  it('대사 수정과 클립 추가를 Undo/Redo하며 stale 음원을 복원하지 않는다', () => {
+    const { result } = renderHook(() => useTimelineGeneration())
+    let blockId = ''
+    act(() => {
+      ;[blockId] = result.current.stageText('원래 대사입니다.', {
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'auto',
+        normalizeText: true,
+      })
+    })
+    expect(result.current.canUndo).toBe(true)
+    expect(result.current.undoLabel).toBe('대본 클립 추가')
+
+    act(() => result.current.updateText(blockId, '수정된 대사입니다.'))
+    expect(result.current.undoLabel).toBe('대사 수정')
+    expect(result.current.blocks[0]).toMatchObject({ text: '수정된 대사입니다.', status: 'queued' })
+
+    act(() => { result.current.undoEdit() })
+    expect(result.current.blocks[0]).toMatchObject({
+      text: '원래 대사입니다.',
+      status: 'queued',
+      audio: null,
+      trackId: null,
+      jobId: null,
+    })
+    expect(result.current.canRedo).toBe(true)
+    expect(result.current.redoLabel).toBe('대사 수정')
+
+    act(() => { result.current.redoEdit() })
+    expect(result.current.blocks[0]).toMatchObject({ text: '수정된 대사입니다.', status: 'queued' })
+
+    act(() => { result.current.undoEdit() })
+    act(() => { result.current.undoEdit() })
+    expect(result.current.blocks).toHaveLength(0)
+    expect(result.current.canRedo).toBe(true)
+  })
+})

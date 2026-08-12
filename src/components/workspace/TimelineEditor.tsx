@@ -49,6 +49,12 @@ interface TimelineEditorProps {
   sttBusy?: boolean
   batchRetrySnapshot?: WorkspaceBatchRetrySnapshot
   onBatchRetrySnapshotChange?: (snapshot: WorkspaceBatchRetrySnapshot) => void
+  canUndo?: boolean
+  canRedo?: boolean
+  undoLabel?: string | null
+  redoLabel?: string | null
+  onUndo?: () => boolean | void
+  onRedo?: () => boolean | void
 }
 
 const BATCH_RETRY_LIMIT = 3
@@ -61,11 +67,6 @@ type BatchCommandKind = 'regenerate' | 'retry-failed' | 'delete'
 interface BatchCommandPreview {
   kind: BatchCommandKind
   ids: string[]
-}
-
-interface BatchMoveUndo {
-  ids: string[]
-  direction: -1 | 1
 }
 
 const batchFailureLabels: Record<TimelineBatchFailureKind, string> = {
@@ -350,6 +351,12 @@ export function TimelineEditor({
   sttBusy = false,
   batchRetrySnapshot,
   onBatchRetrySnapshotChange,
+  canUndo = false,
+  canRedo = false,
+  undoLabel = null,
+  redoLabel = null,
+  onUndo,
+  onRedo,
 }: TimelineEditorProps) {
   const currentTrackId = usePlayerStore((state) => state.currentTrackId)
   const playbackTrackId = usePlayerStore((state) => state.playbackTrackId)
@@ -373,7 +380,6 @@ export function TimelineEditor({
   const [batchHistory, setBatchHistory] = useState<BatchHistoryEntry[]>(batchRetrySnapshot?.history ?? [])
   const [batchHistoryOpen, setBatchHistoryOpen] = useState(false)
   const [batchCommandPreview, setBatchCommandPreview] = useState<BatchCommandPreview | null>(null)
-  const [lastBatchMove, setLastBatchMove] = useState<BatchMoveUndo | null>(null)
   const [shortcutHelpOpen, setShortcutHelpOpen] = useState(false)
   const batchFailures = batchResult?.failures
     ?? batchResult?.failedIds.map((id) => ({ id, kind: 'unknown' as const, message: '실패 원인을 확인하지 못했습니다.' }))
@@ -535,19 +541,29 @@ export function TimelineEditor({
   function performBatchMove(direction: -1 | 1) {
     if (!onMoveMany || !selectedIds.length) return
     onMoveMany(selectedIds, direction)
-    setLastBatchMove({ ids: [...selectedIds], direction })
-  }
-
-  function undoBatchMove() {
-    if (!onMoveMany || !lastBatchMove) return
-    onMoveMany(lastBatchMove.ids, lastBatchMove.direction === -1 ? 1 : -1)
-    setLastBatchMove(null)
   }
 
   function handleTimelineCommandKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.defaultPrevented) return
     const target = event.target as HTMLElement
     if (target.closest('textarea, input, select, button, a, [contenteditable="true"]')) return
+
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
+      const redo = event.shiftKey
+      if ((redo && !canRedo) || (!redo && !canUndo)) return
+      event.preventDefault()
+      event.stopPropagation()
+      if (redo) onRedo?.()
+      else onUndo?.()
+      return
+    }
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'y') {
+      if (!canRedo) return
+      event.preventDefault()
+      event.stopPropagation()
+      onRedo?.()
+      return
+    }
 
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
       const voiceIds = blocks.filter((block) => block.kind === 'voice').map((block) => block.id)
@@ -781,6 +797,22 @@ export function TimelineEditor({
             onClick={() => selectVoiceBlocks(blocks.filter((block) => block.kind === 'voice' && block.status === 'failed').map((block) => block.id))}
           >실패만</button>
         </div>
+        <div className="soa-timeline-history-controls" aria-label="타임라인 편집 이력">
+          <button
+            type="button"
+            disabled={!canUndo}
+            onClick={() => onUndo?.()}
+            aria-label={undoLabel ? `${undoLabel} 되돌리기` : '편집 되돌리기'}
+            title={undoLabel ? `되돌리기 · ${undoLabel}` : '되돌리기 · Ctrl/Cmd+Z'}
+          >↶ <span>Undo</span></button>
+          <button
+            type="button"
+            disabled={!canRedo}
+            onClick={() => onRedo?.()}
+            aria-label={redoLabel ? `${redoLabel} 다시 실행` : '편집 다시 실행'}
+            title={redoLabel ? `다시 실행 · ${redoLabel}` : '다시 실행 · Ctrl/Cmd+Shift+Z'}
+          >↷ <span>Redo</span></button>
+        </div>
         <div className="soa-timeline-zoom" aria-label="타임라인 확대 축소">
           <button type="button" onClick={() => setZoom((value) => Math.max(0.72, value - 0.14))} aria-label="타임라인 축소">−</button>
           <button type="button" onClick={() => setZoom(getDefaultTimelineZoom())} aria-label="타임라인 기본 배율">{Math.round(zoom * 100)}%</button>
@@ -811,14 +843,10 @@ export function TimelineEditor({
             <button type="button" onClick={clearSelection}><kbd>Esc</kbd> 해제</button>
             <button type="button" aria-expanded={shortcutHelpOpen} onClick={() => setShortcutHelpOpen((open) => !open)}><kbd>?</kbd> 도움말</button>
           </div>
-          {lastBatchMove ? (
-            <div className="soa-timeline-command-undo" role="status">
-              <span>선택 이동을 적용했습니다.</span>
-              <button type="button" onClick={undoBatchMove}>이동 되돌리기</button>
-            </div>
-          ) : null}
           {shortcutHelpOpen ? (
             <div className="soa-timeline-command-help" role="note">
+              <span><kbd>Ctrl/Cmd+Z</kbd> 최근 편집 되돌리기</span>
+              <span><kbd>Ctrl/Cmd+Shift+Z</kbd> 다시 실행</span>
               <span><kbd>Ctrl/Cmd+A</kbd> 대사 전체 선택</span>
               <span><kbd>R</kbd> 선택 재생성 미리보기</span>
               <span><kbd>Shift+R</kbd> 실패만 재시도 미리보기</span>

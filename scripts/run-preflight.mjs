@@ -19,6 +19,7 @@ const checks = [
   ['engine resilience / half-open recovery', 'check-engine-resilience.mjs'],
   ['batch recovery / adaptive engine routing', 'check-batch-recovery-adaptive-routing.mjs'],
   ['editor command UX / engine observation', 'check-editor-command-engine-observation.mjs'],
+  ['editing history / speaker memory / engine routing trace', 'check-edit-history-speaker-routing.mjs'],
   ['one-flow dubbing UX', 'check-one-flow-dubbing-ux.mjs'],
   ['multi-speaker assist / resume generation', 'check-multi-speaker-resume.mjs'],
   ['recovery evidence classification / session safety', 'check-recovery-evidence-session-safety.mjs'],

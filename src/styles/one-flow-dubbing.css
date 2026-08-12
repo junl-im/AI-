@@ -380,3 +380,11 @@
   .soa-one-flow-resume { display: grid; justify-content: start; }
 }
 .soa-speaker-assist__confirm:disabled { cursor: default; opacity: 0.72; }
+
+.soa-speaker-assist__row > strong small {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--soa-muted);
+}

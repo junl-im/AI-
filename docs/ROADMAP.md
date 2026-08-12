@@ -1,6 +1,14 @@
 # ROADMAP
 
-현재 제품 버전: `0.11.11`
+현재 제품 버전: `0.11.12`
+
+## 0.11.12 완료 · Editing History, Speaker Memory & Engine Routing Trace
+
+- 최근 20단계 Timeline bounded Undo/Redo와 keyboard/toolbar 제어
+- stale audio/job을 복원하지 않는 안전 snapshot apply
+- 화자 원문 대신 hash key+voiceId만 저장하는 최근 배정 재사용
+- batch engine usage/switch/fallback routing trace
+- 다음 목표는 0.11.13 Adaptive Longform Soak & Mobile Editing Polish
 
 ## 0.11.11 완료 · Mobile Studio Flow & Natural Voice Playback
 

@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.11.11 · Mobile Studio Flow & Natural Voice Playback`
+현재 버전: `0.11.12 · Editing History, Speaker Memory & Engine Routing Trace`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
@@ -42,7 +42,7 @@
 36. 일괄 재생성 실패는 엔진·프리셋·연결·취소·기타로 분류합니다. 원인 그룹별 빠른 재시도는 3회까지만 제공하며 이후에는 오류를 확인하고 명시적인 선택 재생성을 사용합니다.
 37. auto 엔진 선택은 최소 4개 최근 표본이 있을 때 EWMA 안정도와 지연을 120초 동안 보조 신호로 사용합니다. 사용자가 엔진을 직접 선택하는 요청에는 이 성능 감점을 강제하지 않습니다.
 38. 다중 선택 상태에서 `Ctrl/Cmd+A` 전체 선택, `R` 재생성, `Shift+R` 실패만 재시도, `Alt+←/→` 이동, `Delete` 삭제, `Esc` 선택 해제, `?` 도움말을 사용할 수 있습니다. 입력창·버튼 등 폼 요소에는 이 전역 명령을 가로채지 않습니다.
-39. 준비된 음원이 포함된 일괄 재생성과 삭제는 안전 미리보기를 거치며, 일괄 이동은 직전 1회에 한해 반대 방향 Undo를 제공합니다.
+39. Timeline Editor는 최근 20단계 bounded Undo/Redo를 사용합니다. 이동·재정렬·대사 수정·분할·쉼·삭제·일괄 목소리 변경을 되돌릴 수 있으며 내용/voice가 달라진 복원 clip은 stale 음원을 재사용하지 않고 queued로 돌아갑니다.
 40. auto 엔진 선택은 현재 실행 중 요청 1건당 일시 부하 감점을 적용해 준비된 엔진 사이에서 병렬 요청을 분산합니다. 이 값은 용량 benchmark가 아니며 명시적 엔진 선택을 막지 않습니다.
 41. Engine Doctor의 performance observation 상태는 `warming/active/expired`와 표본 수·남은 관찰창을 표시합니다. 만료 뒤 첫 새 표본은 이전 EWMA와 섞지 않고 새 관찰 세션을 시작합니다.
 42. 복구 증거는 `observed-device`·`synthetic-injection`·`not-applicable`로 구분합니다. Recovery Path Injection의 성공 결과는 synthetic 진단일 뿐 Android/iOS 실기기 READY 인증을 충족하지 않습니다.
@@ -154,3 +154,6 @@
 57. 모바일 홈에서도 생성 플레이어 아래 주요 Dock을 함께 표시합니다. 대본 입력에 focus하거나 모바일 키보드 viewport가 변하면 현재 편집 칸을 상단 작업 위치로 재정렬합니다.
 58. 대본 맞춤 목소리 추천은 선택 보조일 뿐 자동 적용하지 않으며, 프리셋 전환 시 speed/pitch는 해당 목소리의 권장 자연 범위로 보정합니다.
 59. 생성 음성의 store 재생 요청은 플레이어 버튼 상태를 즉시 연결하고 실제 media play가 실패하면 재생 상태를 원복해 오류를 표시합니다.
+
+47. 화자 배정 기억은 화자 원문 대신 정규화 hash key와 voiceId만 최대 24건 로컬 저장하고, 다음 동일 화자 대본에서 제안만 합니다.
+48. 장문 제작 완료 메시지의 엔진 기록은 실제 engineId 사용 횟수·전환·fallback을 요약한 routing trace이며 음질 benchmark나 용량 보장을 의미하지 않습니다.

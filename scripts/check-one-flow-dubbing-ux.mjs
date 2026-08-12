@@ -25,7 +25,7 @@ requireTokens('src/pages/HomePage.tsx', home, [
   'voiceControls={(',
   '<DubbingVoiceControls',
   '<WorkspaceConversation messages={messages} />',
-  'timeline.blocks.length > 0 ? (',
+  'timeline.blocks.length > 0 || timeline.canUndo || timeline.canRedo ? (',
   'onAddBlank={() => timeline.addVoiceBlock(buildOptions())}',
   'generationProgress={generationProgress}',
   'resumeCount={resumeQueuedCount}',
