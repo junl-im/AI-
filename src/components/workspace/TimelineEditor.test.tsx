@@ -391,6 +391,8 @@ it('일괄 작업 재시도 이력을 세션 안에서 최근 순서로 보존�
 it('다중 선택 command bar는 재생성·Undo/Redo·삭제 안전 확인을 제공한다', async () => {
   const onMoveMany = vi.fn()
   const onRemoveMany = vi.fn()
+  const onUndo = vi.fn()
+  const onRedo = vi.fn()
   const onRegenerateMany = vi.fn().mockResolvedValue({
     requestedIds: ['voice-1', 'voice-2'],
     succeededIds: ['voice-1', 'voice-2'],
@@ -412,6 +414,8 @@ it('다중 선택 command bar는 재생성·Undo/Redo·삭제 안전 확인을 �
       onRemove={vi.fn()}
       onRemoveMany={onRemoveMany}
       onRegenerateMany={onRegenerateMany}
+      onUndo={onUndo}
+      onRedo={onRedo}
       onClear={vi.fn()}
     />,
   )
