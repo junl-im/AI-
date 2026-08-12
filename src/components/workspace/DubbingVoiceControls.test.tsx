@@ -154,8 +154,9 @@ describe('DubbingVoiceControls', () => {
     render(<DubbingVoiceControls {...baseProps} scriptText="이 기능의 사용법을 세 단계로 설명합니다." />)
 
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
-    expect(screen.getByText('대본 맞춤 추천')).toBeInTheDocument()
-    expect(screen.getByText(/도윤/)).toBeInTheDocument()
+    const recommendation = screen.getByRole('status')
+    expect(recommendation).toHaveTextContent('대본 맞춤 추천')
+    expect(recommendation).toHaveTextContent('도윤')
     expect(screen.getAllByText(/장점 ·/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/주의 ·/).length).toBeGreaterThan(0)
   })

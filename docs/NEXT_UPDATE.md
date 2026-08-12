@@ -2,6 +2,12 @@
 
 현재 기준: `0.11.12 · Editing History, Speaker Memory & Engine Routing Trace`
 
+## 현재 안정화 선행 조건
+
+- GitHub Actions #101에서 확인된 중복 요소 단일 조회 2건은 `0.11.12 Web quality duplicate-query hotfix`로 수정했습니다.
+- 새 Actions run에서 Web quality가 녹색이 되기 전에는 0.11.13 기능 변경을 Push하지 않습니다.
+- hotfix는 제품 UI를 축소하지 않고 접근성 role/영역 기반 테스트 selector만 교정합니다.
+
 ## 목표 버전
 
 `0.11.13 · Adaptive Longform Soak & Mobile Editing Polish`

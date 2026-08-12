@@ -2,7 +2,7 @@
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
 현재 기준 버전: **0.11.12 · Editing History, Speaker Memory & Engine Routing Trace**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-12 12:47 KST**
+최종 갱신: **2026-08-12 17:45 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -10,6 +10,17 @@
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+## 2026-08-12 KST · 0.11.12 Web quality duplicate-query hotfix
+1. **작업 일시(KST)**: 2026-08-12 17:45 KST.
+2. **대상 버전과 기준 버전**: 제품 버전 0.11.12 유지 / GitHub commit `3fffe1e8531d79b984809d23859629f7212ceecc` (Undo/Redo test hotfix 적용본) 기준.
+3. **변경 내용**: `TimelineEditor.test.tsx`의 중복 `title` 단일 조회를 clip article의 접근성 이름 조회로 교체하고, `DubbingVoiceControls.test.tsx`의 `/도윤/` 전역 단일 텍스트 조회를 `role=status` 추천 요약 영역으로 범위 제한했습니다.
+4. **변경 이유**: 0.11.10~0.11.11 UI 개선으로 동일 대사 title이 article/preview에 함께 존재하고, 추천 목소리 이름도 요약/status와 radio card에 동시에 보이는 것이 정상인데 테스트가 단일 요소만 존재한다고 가정해 GitHub Actions Web quality #101에서 Vitest 2건이 실패했습니다. 제품 UI 중복 정보는 의도된 접근성/비교 정보이므로 UI를 제거하지 않고 테스트 selector를 의미 기반으로 고쳤습니다.
+5. **영향 범위**: 테스트 2파일과 검증/인수인계 문서만 변경합니다. Timeline, voice picker, playback, engine, persistence 런타임 코드는 변경하지 않습니다.
+6. **주요 파일**: `src/components/workspace/TimelineEditor.test.tsx`, `src/components/workspace/DubbingVoiceControls.test.tsx`, `FOUNDATION_REPORT.md`, `docs/{HANDOVER,CHANGELOG,NEXT_UPDATE}.md`, `docs/patches/0.11.12-web-quality-query-hotfix/*`.
+7. **검증 결과**: Repository preflight 47/47, API pytest 219/219, Worker pytest 14/14, dependency-free TS/TSX transpile 221/221 통과. 전체 semantic `tsc`/Vitest는 깨끗한 전달본에서 Web 의존성을 설치하지 못해 재실행하지 못했으며 GitHub Actions가 최종 Web gate입니다.
+8. **알려진 제한과 주의사항**: 이번 hotfix는 CI 테스트 selector 안정화만 수행합니다. 실제 제품 UI 동작을 바꾸지 않습니다. FastAPI HTTP 422 deprecation warning 1건과 승인 voice WAV/evidence pending 경고는 기존 제한으로 유지됩니다.
+9. **산출물**: `SoriON-AI-0.11.12-3fffe1e-web-quality-query-hotfix-patch.zip`, `SoriON-AI-0.11.12-web-quality-query-hotfix-full.zip`, `SoriON-AI-0.11.12-web-quality-query-hotfix-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: 이 hotfix의 새 GitHub Actions run이 녹색인 것을 확인한 뒤 `0.11.13 · Adaptive Longform Soak & Mobile Editing Polish`로 진행합니다.
 ## 0.11.12 Editing History, Speaker Memory & Engine Routing Trace
 
 - Timeline 편집 history는 20개 bounded past/future stack이며 새 편집 시 redo를 비웁니다.

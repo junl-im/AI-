@@ -2,6 +2,13 @@
 
 ## 0.11.12 · Editing History, Speaker Memory & Engine Routing Trace
 
+### Web quality duplicate-query hotfix · 2026-08-12
+
+- GitHub Actions #101에서 `TimelineEditor.test.tsx`가 article과 내부 preview의 동일 `title`을 `getByTitle` 하나로 조회해 실패하던 테스트를 clip article의 접근성 이름 조회로 변경했습니다.
+- `DubbingVoiceControls.test.tsx`가 추천 요약과 voice radio에 동시에 표시되는 `도윤`을 전역 `getByText`로 조회하던 테스트를 추천 `role=status` 영역으로 범위 제한했습니다.
+- 제품 UI/엔진/재생/저장 로직은 변경하지 않고 테스트 selector의 의미 정확도만 높였습니다.
+- 제품 버전은 0.11.12를 유지합니다.
+
 - Timeline 편집을 최근 20단계 bounded Undo/Redo로 확장하고 `Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z`, `Ctrl/Cmd+Y`와 toolbar 버튼을 연결했습니다.
 - 이동·재정렬·대사 수정·분할·쉼 추가·삭제·다중 삭제·일괄 목소리 변경을 history에 기록합니다.
 - Undo/Redo에서 내용/voice가 달라진 clip은 폐기된 audio/job/track을 되살리지 않고 queued로 복원하며, 순서만 바뀐 ready clip은 기존 재생 결과를 유지합니다.

@@ -420,8 +420,7 @@ it('다중 선택 command bar는 재생성·Undo/Redo·삭제 안전 확인을 �
     />,
   )
 
-  const firstVoice = screen.getByTitle('첫 번째 문장입니다.').closest('article')
-  expect(firstVoice).not.toBeNull()
+  const firstVoice = screen.getByRole('article', { name: '클립 1 · 혜린 · 0:03 · 완료' })
   fireEvent.keyDown(firstVoice!, { key: 'a', ctrlKey: true })
   expect(screen.getByRole('region', { name: '선택 클립 일괄 작업' })).toBeInTheDocument()
 

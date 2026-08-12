@@ -1,0 +1,15 @@
+SoriON AI 0.11.12 Web quality duplicate-query hotfix
+Base commit: 3fffe1e8531d79b984809d23859629f7212ceecc
+Product version: 0.11.12 (unchanged)
+Delete files: none
+
+Files in patch (9):
+FOUNDATION_REPORT.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/patches/0.11.12-web-quality-query-hotfix/DELETE_LIST.txt
+docs/patches/0.11.12-web-quality-query-hotfix/PATCH_MANIFEST.txt
+docs/patches/0.11.12-web-quality-query-hotfix/PATCH_README.md
+src/components/workspace/DubbingVoiceControls.test.tsx
+src/components/workspace/TimelineEditor.test.tsx
