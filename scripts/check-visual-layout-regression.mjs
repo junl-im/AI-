@@ -41,6 +41,9 @@ requireTokens('scripts/run-visual-layout-regression.mjs', runner, [
   "stage = 'workspace-fixture'",
   'runner-failure.json',
   'Chromium visual runner',
+  'button[aria-label^=\"전체 내용 음성 제작\"]',
+  'button.soa-one-flow-composer__generate',
+  '!button.disabled',
 ])
 
 

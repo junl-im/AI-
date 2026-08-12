@@ -230,14 +230,19 @@ async function buildWorkspaceFixture(cdp) {
 
   await waitForCondition(
     cdp,
-    `(() => [...document.querySelectorAll('button')].some((item) => item.textContent?.includes('전체 내용 음성 제작')))()`,
+    `(() => {
+      const button = document.querySelector('button[aria-label^="전체 내용 음성 제작"]')
+        ?? document.querySelector('button.soa-one-flow-composer__generate')
+      return button instanceof HTMLButtonElement && !button.disabled
+    })()`,
     '전체 내용 음성 제작 버튼',
   )
   const productionStarted = await evaluate(cdp, `(() => {
-    const button = [...document.querySelectorAll('button')]
-      .find((item) => item.textContent?.includes('전체 내용 음성 제작'))
-    button?.click()
-    return Boolean(button)
+    const button = document.querySelector('button[aria-label^="전체 내용 음성 제작"]')
+      ?? document.querySelector('button.soa-one-flow-composer__generate')
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return false
+    button.click()
+    return true
   })()`)
   if (!productionStarted) throw new Error('전체 내용 음성 제작 버튼을 실행하지 못했습니다.')
 
