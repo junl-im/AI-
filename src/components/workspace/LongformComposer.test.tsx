@@ -148,4 +148,35 @@ describe('LongformComposer', () => {
     expect(onResumeGeneration).toHaveBeenCalledOnce()
   })
 
+
+  it('모바일에서 대본 입력을 시작하면 편집 칸을 상단 작업 위치로 맞춘다', () => {
+    const originalWidth = window.innerWidth
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 })
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+    const requestAnimationFrame = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0)
+      return 1
+    })
+    render(
+      <LongformComposer
+        disabled={false}
+        value="모바일 대본"
+        activity={activity}
+        onValueChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    )
+    const editor = screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })
+    vi.spyOn(editor, 'getBoundingClientRect').mockReturnValue({
+      x: 0, y: 420, top: 420, left: 0, right: 360, bottom: 620, width: 360, height: 200,
+      toJSON: () => ({}),
+    })
+
+    fireEvent.focus(editor)
+    expect(scrollTo).toHaveBeenCalled()
+
+    requestAnimationFrame.mockRestore()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalWidth })
+  })
+
 })

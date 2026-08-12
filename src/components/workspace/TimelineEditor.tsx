@@ -16,6 +16,14 @@ import { usePlayerStore } from '../../store/usePlayerStore'
 import { getVoicePreset, voicePresets } from '../../tts/voicePresets'
 import type { WorkspaceBatchHistoryEntry, WorkspaceBatchRetrySnapshot } from '../../workspace/sessionTypes'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
+import {
+  TIMELINE_INSET_PX,
+  TIMELINE_PIXELS_PER_SECOND,
+  buildTimelineMetrics,
+  buildTimelineRulerTicks,
+  getTimelineCanvasWidth,
+  getTimelineContentWidth,
+} from '../../timeline/timelineGeometry'
 import { FinalExportControls } from './FinalExportControls'
 
 interface TimelineEditorProps {
@@ -41,13 +49,6 @@ interface TimelineEditorProps {
   sttBusy?: boolean
   batchRetrySnapshot?: WorkspaceBatchRetrySnapshot
   onBatchRetrySnapshotChange?: (snapshot: WorkspaceBatchRetrySnapshot) => void
-}
-
-interface TimelineMetric {
-  id: string
-  offset: number
-  width: number
-  duration: number
 }
 
 const BATCH_RETRY_LIMIT = 3
@@ -80,11 +81,8 @@ function formatDuration(seconds: number): string {
   return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, '0')}`
 }
 
-function clipWidth(block: TimelineBlock, zoom: number): number {
-  if (block.kind === 'pause') {
-    return Math.round(Math.min(150, Math.max(72, 68 + block.durationSeconds * 20)) * zoom)
-  }
-  return Math.round(Math.min(430, Math.max(220, 210 + block.durationSeconds * 11)) * zoom)
+function getDefaultTimelineZoom(): number {
+  return typeof window !== 'undefined' && window.innerWidth <= 760 ? 1.25 : 1
 }
 
 interface VoiceBlockProps {
@@ -193,7 +191,15 @@ function VoiceBlock({
         block.id,
         event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single',
       )}
+      title={block.text}
+      aria-label={`클립 ${voiceIndex + 1} · ${block.voiceName} · ${formatDuration(block.durationSeconds)} · ${statusLabel}`}
       onKeyDown={handleKeyboard}
+      onDoubleClick={(event) => {
+        const target = event.target as HTMLElement
+        if (target.closest('button, textarea, input, a, [contenteditable="true"]')) return
+        event.stopPropagation()
+        onEdit(block.id)
+      }}
       onDragStart={(event: DragEvent<HTMLElement>) => {
         event.dataTransfer.effectAllowed = 'move'
         event.dataTransfer.setData('text/plain', block.id)
@@ -353,7 +359,8 @@ export function TimelineEditor({
   const seekTrack = usePlayerStore((state) => state.seekTrack)
   const clipRefs = useRef(new Map<string, HTMLElement>())
   const quickEditorRef = useRef<HTMLTextAreaElement | null>(null)
-  const [zoom, setZoom] = useState(1)
+  const timelineScrubbingRef = useRef(false)
+  const [zoom, setZoom] = useState(getDefaultTimelineZoom)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(blocks[0]?.id ?? null)
   const [selectedBlockIds, setSelectedBlockIds] = useState<Set<string>>(() => new Set(blocks[0] ? [blocks[0].id] : []))
   const [selectionAnchorId, setSelectionAnchorId] = useState<string | null>(blocks[0]?.id ?? null)
@@ -385,29 +392,17 @@ export function TimelineEditor({
     setBatchHistory(batchRetrySnapshot.history)
   }, [batchRetrySnapshot])
 
-  const metrics = useMemo(() => {
-    let offset = 18
-    return blocks.map<TimelineMetric>((block) => {
-      const width = clipWidth(block, zoom)
-      const metric = {
-        id: block.id,
-        offset,
-        width,
-        duration: Math.max(0.1, block.durationSeconds),
-      }
-      offset += width + 8
-      return metric
-    })
-  }, [blocks, zoom])
+  const metrics = useMemo(() => buildTimelineMetrics(blocks, zoom), [blocks, zoom])
   const totalDuration = blocks.reduce((total, block) => total + Math.max(0, block.durationSeconds), 0)
-  const canvasWidth = Math.max(640, (metrics.at(-1)?.offset ?? 18) + (metrics.at(-1)?.width ?? 0) + 18)
+  const timelineContentWidth = getTimelineContentWidth(metrics)
+  const canvasWidth = getTimelineCanvasWidth(metrics)
   const playbackBlock = blocks.find((block) => block.kind === 'voice' && block.trackId === playbackTrackId)
     ?? blocks.find((block) => block.kind === 'voice' && block.trackId === currentTrackId)
     ?? null
   const playbackMetric = playbackBlock ? metrics.find((metric) => metric.id === playbackBlock.id) : null
   const playheadLeft = playbackMetric
     ? playbackMetric.offset + Math.min(1, playbackPositionSeconds / playbackMetric.duration) * playbackMetric.width
-    : 18
+    : TIMELINE_INSET_PX
   const playbackMetricIndex = playbackMetric ? metrics.findIndex((metric) => metric.id === playbackMetric.id) : -1
   const playbackTimelineSeconds = playbackMetricIndex >= 0
     ? blocks.slice(0, playbackMetricIndex).reduce((total, block) => total + Math.max(0, block.durationSeconds), 0)
@@ -442,7 +437,7 @@ export function TimelineEditor({
   })
   const quickDraftTrimmed = quickDraft.trim()
   const quickDraftDirty = Boolean(selectedVoiceBlock && quickDraftTrimmed && quickDraftTrimmed !== selectedVoiceBlock.text)
-  const rulerTimes = [0, 0.25, 0.5, 0.75, 1].map((ratio) => totalDuration * ratio)
+  const rulerTicks = buildTimelineRulerTicks(totalDuration, timelineContentWidth)
   const commandPreviewBlocks = batchCommandPreview
     ? blocks.filter((block) => batchCommandPreview.ids.includes(block.id))
     : []
@@ -668,7 +663,7 @@ export function TimelineEditor({
 
   function seekFromTimeline(event: PointerEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement
-    if (target.closest('button, textarea, input, a, .soa-dubbing-block__grip')) return
+    if (target.closest('button, textarea, input, a, .soa-dubbing-block, .soa-dubbing-pause-block, .soa-dubbing-block__grip')) return
     const rect = event.currentTarget.getBoundingClientRect()
     const x = Math.max(0, Math.min(rect.width, event.clientX - rect.left))
     const metric = metrics.find((item) => x >= item.offset && x <= item.offset + item.width)
@@ -678,6 +673,26 @@ export function TimelineEditor({
     const ratio = Math.max(0, Math.min(1, (x - metric.offset) / metric.width))
     selectBlock(block.id)
     seekTrack(block.trackId, ratio * metric.duration)
+  }
+
+  function startTimelineScrub(event: PointerEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement
+    if (target.closest('button, textarea, input, a, .soa-dubbing-block, .soa-dubbing-pause-block')) return
+    timelineScrubbingRef.current = true
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    seekFromTimeline(event)
+  }
+
+  function continueTimelineScrub(event: PointerEvent<HTMLDivElement>) {
+    if (!timelineScrubbingRef.current) return
+    seekFromTimeline(event)
+  }
+
+  function stopTimelineScrub(event: PointerEvent<HTMLDivElement>) {
+    timelineScrubbingRef.current = false
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
   }
 
   useEffect(() => {
@@ -768,7 +783,7 @@ export function TimelineEditor({
         </div>
         <div className="soa-timeline-zoom" aria-label="타임라인 확대 축소">
           <button type="button" onClick={() => setZoom((value) => Math.max(0.72, value - 0.14))} aria-label="타임라인 축소">−</button>
-          <button type="button" onClick={() => setZoom(1)} aria-label="타임라인 기본 배율">{Math.round(zoom * 100)}%</button>
+          <button type="button" onClick={() => setZoom(getDefaultTimelineZoom())} aria-label="타임라인 기본 배율">{Math.round(zoom * 100)}%</button>
           <button type="button" onClick={() => setZoom((value) => Math.min(1.5, value + 0.14))} aria-label="타임라인 확대">＋</button>
         </div>
       </div>
@@ -1026,15 +1041,13 @@ export function TimelineEditor({
         </div>
       ) : null}
 
-      <div className="soa-capcut-timeline">
-        <div className="soa-capcut-ruler" aria-hidden="true">
-          {rulerTimes.map((time, index) => <span key={`${time}-${index}`}>{formatDuration(time)}</span>)}
-        </div>
+      <div className="soa-capcut-timeline" data-timeline-axis="horizontal">
         <div className="soa-capcut-track-row">
           <div className="soa-capcut-track-label">
             <strong>VOICE 1</strong>
             <small>대사 트랙</small>
             <span>{playbackActive ? '재생 중' : '편집 준비'}</span>
+            <em>시간 →</em>
           </div>
           <div className="soa-capcut-track-lane">
             {blocks.length === 0 ? (
@@ -1045,16 +1058,33 @@ export function TimelineEditor({
             ) : (
               <div
                 className="soa-capcut-track-canvas"
-                style={{ width: `${canvasWidth}px` }}
-                onPointerDown={seekFromTimeline}
-                aria-label="타임라인을 클릭해 재생 위치 이동"
+                style={{
+                  width: `${canvasWidth}px`,
+                  '--soa-timeline-second-px': `${TIMELINE_PIXELS_PER_SECOND * zoom}px`,
+                } as CSSProperties}
+                onPointerDown={startTimelineScrub}
+                onPointerMove={continueTimelineScrub}
+                onPointerUp={stopTimelineScrub}
+                onPointerCancel={stopTimelineScrub}
+                aria-label="가로 타임라인을 클릭하거나 드래그해 재생 위치 이동"
               >
+                <div className="soa-capcut-ruler" aria-hidden="true">
+                  {rulerTicks.map((tick, index) => (
+                    <span key={`${tick.time}-${index}`} style={{ left: `${tick.left}px` }}>
+                      <i />{formatDuration(tick.time)}
+                    </span>
+                  ))}
+                </div>
                 <i className="soa-capcut-playhead" style={{ left: `${playheadLeft}px` }} aria-hidden="true">
                   <span>{formatDuration(playbackTimelineSeconds)}</span>
                 </i>
                 <div className="soa-dubbing-block-list">
                   {blocks.map((block, index) => {
                     const metric = metrics[index]
+                    const metricStyle = {
+                      '--soa-clip-offset': `${metric.offset}px`,
+                      '--soa-clip-width': `${metric.width}px`,
+                    } as CSSProperties
                     if (block.kind === 'pause') {
                       return (
                         <div
@@ -1064,9 +1094,10 @@ export function TimelineEditor({
                             else clipRefs.current.delete(block.id)
                           }}
                           className={`soa-dubbing-pause-block ${selectedBlockIds.has(block.id) ? 'is-selected' : ''}`}
-                          style={{ '--soa-clip-width': `${metric.width}px` } as CSSProperties}
+                          style={metricStyle}
                           tabIndex={0}
                           draggable={selectedBlockIds.size <= 1}
+                          title={`쉼 ${block.durationSeconds.toFixed(1)}초`}
                           onClick={(event) => selectBlock(
                             block.id,
                             event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single',
@@ -1093,6 +1124,8 @@ export function TimelineEditor({
                           if (element) clipRefs.current.set(block.id, element)
                           else clipRefs.current.delete(block.id)
                         }}
+                        className="soa-timeline-clip-slot"
+                        style={metricStyle}
                       >
                         <VoiceBlock
                           block={block}

@@ -1,0 +1,86 @@
+/* 0.11.11 voice chooser: one current voice, detailed comparison inside the sheet. */
+.soa-voice-context-recommendation {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 5px 8px;
+  margin-top: 10px;
+  border: 1px solid rgba(216, 255, 114, 0.18);
+  border-radius: 12px;
+  padding: 9px 10px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(216, 255, 114, 0.055);
+}
+.soa-voice-context-recommendation strong { color: #d8ff72; font-size: 9px; }
+.soa-voice-context-recommendation span { color: #fff; font-size: 11px; font-weight: 900; }
+.soa-voice-context-recommendation small { min-width: 0; font-size: 9px; line-height: 1.45; }
+
+.soa-voice-sheet-list > div {
+  grid-template-columns: minmax(0, 1fr) 48px 24px;
+  align-items: start;
+  margin-top: 4px;
+  border: 1px solid transparent;
+  padding: 5px 4px;
+}
+.soa-voice-sheet-list > div.is-recommended { border-color: rgba(216, 255, 114, 0.16); }
+.soa-voice-sheet-choice { align-items: flex-start; min-height: 112px; padding: 6px; }
+.soa-voice-sheet-choice strong { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.soa-voice-sheet-choice strong em {
+  border-radius: 999px;
+  padding: 2px 5px;
+  color: #d8ff72;
+  background: rgba(216, 255, 114, 0.08);
+  font-size: 7px;
+  font-style: normal;
+}
+.soa-voice-sheet-choice small {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  line-height: 1.4;
+}
+.soa-voice-fit,
+.soa-voice-pro,
+.soa-voice-con {
+  display: block;
+  margin-top: 4px;
+  font-size: 8px;
+  line-height: 1.35;
+}
+.soa-voice-fit { color: #bfe8ff; }
+.soa-voice-pro { color: #c9fbdc; }
+.soa-voice-con { color: #ffc4bd; }
+.soa-voice-sheet-preview { margin-top: 12px; }
+.soa-voice-sheet-check { margin-top: 22px; }
+
+.soa-dubbing-player-dock__nav { display: none; }
+@media (max-width: 760px) {
+  .soa-dubbing-player-dock__inner {
+    display: grid;
+    gap: 5px;
+    padding: 6px 8px max(6px, env(safe-area-inset-bottom));
+  }
+  .soa-dubbing-player-dock__nav { display: block; }
+  .soa-dubbing-player-dock__nav .soa-dock__nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    padding: 3px;
+    border-radius: 14px;
+  }
+  .soa-dubbing-player-dock__nav .soa-dock__nav button {
+    min-height: 45px;
+    border-radius: 11px;
+    padding: 2px 3px;
+    font-size: 9px;
+  }
+  .soa-dubbing-player-dock__nav .soa-dock__nav button span {
+    display: block;
+    margin: 0 0 2px;
+    font-size: 11px;
+  }
+  .soa-workspace-shell--dubbing,
+  .soa-workspace-shell--dubbing.soa-workspace-shell--has-player {
+    padding-bottom: 118px;
+  }
+}

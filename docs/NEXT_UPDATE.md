@@ -1,25 +1,24 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.9 · Multi-Speaker Assist & Resume Generation`
+현재 기준: `0.11.11 · Mobile Studio Flow & Natural Voice Playback`
 
 ## 목표 버전
 
-`0.11.10 · Editing History & Speaker Workflow Polish`
+`0.11.12 · Editing History & Engine Soak Polish`
 
 ### 우선순위
 
-1. 다중 화자 mapping을 프로젝트 편집 중 다시 열어 빠르게 수정할 수 있는 `화자 관리` 진입점을 검토합니다.
-2. Timeline 이동 1회 Undo를 text/voice 변경까지 포함하는 bounded edit history로 확장하되 audio/job 폐기 규칙을 안전하게 유지합니다.
-3. 긴 다중 화자 대본에서 speaker mapping, 2-way parallel, engine switching, 취소/재개가 성공률과 P95 지연을 악화시키지 않는지 soak evidence를 남깁니다.
-4. `화자: 대사` 외에 screenplay 스타일 지원은 자동 추론이 아니라 명시적 import option으로만 검토합니다.
-5. 승인된 Chromium 1024/1280/1440 baseline PNG와 SHA manifest가 확보된 경우에만 `SORION_VISUAL_BASELINE_REQUIRED=1`을 CI 필수 gate로 전환합니다.
-6. 프로젝트 저장 스키마의 `timelineClips`가 구버전 프로젝트와 호환되는지 실제 IndexedDB migration/restore 사례를 추가 검증합니다.
+1. Timeline 이동 1회 Undo를 text/voice/split/delete까지 포함하는 bounded Undo/Redo history로 확장합니다.
+2. 화자 mapping을 다시 열고 자주 쓰는 화자-목소리 조합을 프로젝트 단위로 재사용하는 흐름을 검토합니다.
+3. 긴 다중 화자 대본에서 2-way parallel, engine switching, 취소/재개를 장시간 soak해 성공률·P95 지연·switching 빈도를 기록합니다.
+4. 모바일 360/390/430px와 PC 1024/1280/1440px에서 Dock/Player, voice sheet, composer keyboard, horizontal timeline의 실제 Chromium layout을 확인합니다.
+5. 실제 승인 음성 자료가 준비되면 preset별 상황 적합도와 권장 speed/pitch 범위를 사람 청취 evidence로 조정합니다.
+6. 승인 Chromium baseline PNG와 SHA manifest가 확보된 경우에만 pixel baseline을 CI 필수 gate로 승격합니다.
 
-## 0.11.9에서 고정한 결정
+## 0.11.11에서 고정한 결정
 
-- Multi-Speaker Assist는 명확한 `화자: 대사` 전체 라인 형식에서만 자동 활성화합니다.
-- 이름에서 성별·연령을 추정하지 않습니다.
-- voice suggestion은 사용자 승인 전 실제 생성에 사용하지 않습니다.
-- clip-level voice와 job 순서를 프로젝트 저장/복원에서 유지합니다.
-- resume은 queued clip만 생성하고 ready clip은 보존합니다.
-- 첫 음성 우선 + 이후 최대 2-way bounded parallel + 원문 순서 복원 계약을 유지합니다.
+- 홈과 설정/품질 화면의 주요 Dock 접근 경로를 모바일에서 일관되게 유지합니다.
+- One-Flow에는 현재 목소리 하나만 표시하고 전체 목록은 Sheet에서 비교합니다.
+- 미리듣기는 선택을 변경하지 않으며 대본 추천도 자동 적용하지 않습니다.
+- 모바일 타임라인은 세로 카드 스택으로 되돌리지 않고 실제 좌→우 시간축을 유지합니다.
+- 생성 음성의 재생 요청과 플레이어 버튼 상태는 같은 store state를 사용합니다.

@@ -14,6 +14,11 @@ export interface VoicePreset {
   voiceVariantIndex: number
   requiresDedicatedReference: boolean
   preferredVoiceTokens: string[]
+  bestFor: [string, string, string]
+  strengths: [string, string]
+  tradeoffs: [string, string]
+  naturalSpeedRange: [number, number]
+  naturalPitchRange: [number, number]
 }
 
 export const voiceGenderLabels: Record<VoiceGender, string> = {
@@ -37,6 +42,11 @@ export const voicePresets: VoicePreset[] = [
     voiceVariantIndex: 0,
     requiresDedicatedReference: true,
     preferredVoiceTokens: ['sunhi', 'yuna', 'heami', 'seoyeon', 'korean a'],
+    bestFor: ['브이로그', '일상 대화', '감성 소개'],
+    strengths: ['부드러운 친근감', '짧은 문장 연결이 자연스러움'],
+    tradeoffs: ['강한 권위감은 약함', '빠른 광고톤에는 힘이 부족할 수 있음'],
+    naturalSpeedRange: [0.88, 1.08],
+    naturalPitchRange: [-1, 3],
   },
   {
     id: 'on-clear',
@@ -52,6 +62,11 @@ export const voicePresets: VoicePreset[] = [
     voiceVariantIndex: 0,
     requiresDedicatedReference: true,
     preferredVoiceTokens: ['injoon', 'hyunsu', 'korean b'],
+    bestFor: ['교육', '튜토리얼', '정보 전달'],
+    strengths: ['자음 전달이 또렷함', '단계 설명과 숫자 읽기에 안정적'],
+    tradeoffs: ['감성 연기 폭은 좁음', '긴 서정 문장에서는 다소 단정하게 들릴 수 있음'],
+    naturalSpeedRange: [0.94, 1.12],
+    naturalPitchRange: [-3, 1],
   },
   {
     id: 'dam-calm',
@@ -67,6 +82,11 @@ export const voicePresets: VoicePreset[] = [
     voiceVariantIndex: 0,
     requiresDedicatedReference: true,
     preferredVoiceTokens: ['jimin', 'natural', 'neutral', '중성', 'korean c'],
+    bestFor: ['오디오북', '장문 내레이션', '명상·잔잔한 콘텐츠'],
+    strengths: ['오래 들어도 피로가 적음', '문장 사이 호흡이 안정적'],
+    tradeoffs: ['강한 세일즈 표현은 약함', '짧고 강한 숏폼에는 임팩트가 덜할 수 있음'],
+    naturalSpeedRange: [0.82, 1.02],
+    naturalPitchRange: [-2, 2],
   },
   {
     id: 'jun-deep',
@@ -82,6 +102,11 @@ export const voicePresets: VoicePreset[] = [
     voiceVariantIndex: 1,
     requiresDedicatedReference: true,
     preferredVoiceTokens: ['minsu', 'bongjin', 'yong', 'deep', 'baritone', 'korean d'],
+    bestFor: ['다큐멘터리', '역사·사건', '무게감 있는 내레이션'],
+    strengths: ['저음의 안정감', '긴 호흡에서 신뢰감을 유지'],
+    tradeoffs: ['밝은 캐릭터 표현은 제한적', '속도를 과하게 올리면 무게감이 쉽게 깨짐'],
+    naturalSpeedRange: [0.84, 1.0],
+    naturalPitchRange: [-4, 0],
   },
   {
     id: 'min-energetic',
@@ -97,6 +122,11 @@ export const voicePresets: VoicePreset[] = [
     voiceVariantIndex: 2,
     requiresDedicatedReference: true,
     preferredVoiceTokens: ['young male', 'energetic', 'youngho', 'korean e'],
+    bestFor: ['광고', '숏폼', '프로모션·CTA'],
+    strengths: ['초반 주목도가 높음', '짧은 문장과 강조 표현에 강함'],
+    tradeoffs: ['장문에서는 피로감이 생길 수 있음', '차분한 설명 콘텐츠에는 다소 과할 수 있음'],
+    naturalSpeedRange: [0.98, 1.18],
+    naturalPitchRange: [-2, 2],
   },
 ]
 

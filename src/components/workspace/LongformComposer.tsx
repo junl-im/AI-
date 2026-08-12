@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -75,6 +76,18 @@ export function LongformComposer({
 }: LongformComposerProps) {
   const editorRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const alignEditorToMobileTop = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const editor = editorRef.current
+    if (!editor || window.innerWidth > 760) return
+    const rect = editor.getBoundingClientRect()
+    const targetTop = Math.max(0, window.scrollY + rect.top - 68)
+    if (Math.abs(rect.top - 68) < 10) return
+    window.scrollTo({ top: targetTop, behavior })
+  }, [])
+  const alignEditorAfterFocus = useCallback(() => {
+    window.requestAnimationFrame?.(() => alignEditorToMobileTop('smooth'))
+    window.setTimeout(() => alignEditorToMobileTop('auto'), 220)
+  }, [alignEditorToMobileTop])
   const stats = useMemo(() => {
     const trimmed = value.trim()
     const segments = trimmed ? splitTextForUi(trimmed) : []
@@ -86,6 +99,20 @@ export function LongformComposer({
       speakers: countDetectedSpeakers(trimmed),
     }
   }, [value])
+
+  useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return undefined
+    const realign = () => {
+      if (document.activeElement === editorRef.current) alignEditorToMobileTop('auto')
+    }
+    viewport.addEventListener('resize', realign)
+    viewport.addEventListener('scroll', realign)
+    return () => {
+      viewport.removeEventListener('resize', realign)
+      viewport.removeEventListener('scroll', realign)
+    }
+  }, [alignEditorToMobileTop])
 
   useEffect(() => {
     function focusEditorFromTyping(event: KeyboardEvent) {
@@ -214,6 +241,7 @@ export function LongformComposer({
           id="sorion-content-editor"
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
+          onFocus={alignEditorAfterFocus}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           placeholder={'여기에 더빙할 문장을 입력하거나 붙여 넣으세요.\n\n긴 글도 그대로 붙여 넣으면 문장별로 자동 정리합니다.'}

@@ -78,10 +78,10 @@ requireTokens('src/workspace/multiSpeaker.ts', multiSpeaker, [
 
 const voiceControls = await source('src/components/workspace/DubbingVoiceControls.tsx')
 requireTokens('src/components/workspace/DubbingVoiceControls.tsx', voiceControls, [
-  'soa-dubbing-voice-quick',
-  '빠른 목소리 선택',
-  'voicePresets.slice(0, 5)',
-  '빠른 선택',
+  '현재 목소리 ${voice.name} 선택',
+  '<VoicePickerSheet',
+  'contextText={scriptText}',
+  '<VoicePreviewButton',
 ])
 
 const conversation = await source('src/components/workspace/WorkspaceConversation.tsx')
@@ -155,7 +155,7 @@ requireTokens('src/components/workspace/DubbingStudioHeader.tsx', header, [
 const css = await source('src/styles/one-flow-dubbing.css')
 requireTokens('src/styles/one-flow-dubbing.css', css, [
   '.soa-one-flow-composer {',
-  '.soa-dubbing-voice-quick {',
+  '.soa-one-flow-composer__voice {',
   '.soa-one-flow-composer__generate {',
   '.soa-speaker-assist {',
   '.soa-one-flow-resume {',

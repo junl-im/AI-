@@ -65,47 +65,6 @@
 .soa-one-flow-composer__voice .soa-dubbing-voice-choice .soa-voice-avatar { width: 42px; height: 42px; }
 .soa-one-flow-composer__voice .soa-dubbing-voice-choice strong { font-size: 15px; }
 
-.soa-dubbing-voice-quick {
-  display: flex;
-  min-width: 0;
-  grid-column: 1 / -1;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 4px 0 1px;
-  scrollbar-width: thin;
-}
-.soa-dubbing-voice-quick > button {
-  display: inline-flex;
-  min-width: max-content;
-  min-height: 36px;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 999px;
-  padding: 4px 9px 4px 5px;
-  color: rgba(255, 255, 255, 0.56);
-  background: rgba(255, 255, 255, 0.035);
-  font-size: 9px;
-  font-weight: 850;
-  white-space: nowrap;
-}
-.soa-dubbing-voice-quick > button:hover { color: #fff; background: rgba(255, 255, 255, 0.07); }
-.soa-dubbing-voice-quick > button.is-active {
-  border-color: rgba(216, 255, 114, 0.48);
-  color: #efffc7;
-  background: rgba(216, 255, 114, 0.09);
-}
-.soa-dubbing-voice-quick .soa-voice-avatar {
-  width: 26px;
-  height: 26px;
-  font-size: 9px;
-}
-.soa-dubbing-voice-quick > .soa-dubbing-voice-quick__all {
-  padding-inline: 11px;
-  color: rgba(255, 255, 255, 0.72);
-  background: rgba(143, 128, 255, 0.08);
-}
-
 .soa-one-flow-composer .soa-dubbing-script__editor {
   margin-top: 0;
   border-color: rgba(216, 255, 114, 0.38);

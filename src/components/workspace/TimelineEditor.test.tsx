@@ -48,6 +48,34 @@ const blocks: TimelineBlock[] = [
 ]
 
 describe('TimelineEditor', () => {
+  it('PC 가로 타임라인은 시간축과 클립 폭을 같은 좌표계로 유지한다', () => {
+    const { container } = render(
+      <TimelineEditor
+        blocks={blocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={vi.fn()}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+
+    expect(container.querySelector('[data-timeline-axis="horizontal"]')).not.toBeNull()
+    const voiceSlots = container.querySelectorAll<HTMLElement>('.soa-timeline-clip-slot')
+    const pause = container.querySelector<HTMLElement>('.soa-dubbing-pause-block')
+    expect(voiceSlots).toHaveLength(2)
+    expect(voiceSlots[0].style.getPropertyValue('--soa-clip-offset')).toBe('16px')
+    expect(voiceSlots[0].style.getPropertyValue('--soa-clip-width')).toBe('216px')
+    expect(pause?.style.getPropertyValue('--soa-clip-offset')).toBe('232px')
+    expect(pause?.style.getPropertyValue('--soa-clip-width')).toBe('36px')
+    expect(voiceSlots[1].style.getPropertyValue('--soa-clip-offset')).toBe('268px')
+    expect(voiceSlots[1].style.getPropertyValue('--soa-clip-width')).toBe('288px')
+  })
+
   it('완료·쉼·실패 블록과 문장별 재시도를 보여준다', () => {
     const onRetry = vi.fn()
     render(

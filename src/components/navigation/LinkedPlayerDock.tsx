@@ -198,7 +198,11 @@ export function LinkedPlayerDock() {
   }
 
   function startBrowserSpeech() {
-    if (!browserPlayback || !isBrowserSpeechSupported()) return
+    if (!browserPlayback || !isBrowserSpeechSupported()) {
+      setPlaying(false)
+      return
+    }
+    setPlaying(true)
     const speechRunId = speechRunIdRef.current + 1
     speechRunIdRef.current = speechRunId
     window.speechSynthesis.cancel()
@@ -328,9 +332,19 @@ export function LinkedPlayerDock() {
           }
         }
         if (shouldResume && currentTrackId && !browserPlayback && playbackUrl) {
-          void element.play().catch(() => {
-            const resume = () => void element.play().catch(() => undefined)
-            element.addEventListener('canplay', resume, { once: true })
+          setPlaying(true)
+          setPlaybackError(null)
+          void element.play().catch((error) => {
+            if (element.readyState < 2) {
+              const resume = () => void element.play().catch((retryError) => {
+                setPlaying(false)
+                setPlaybackError(retryError instanceof Error ? retryError.message : '음성을 재생하지 못했습니다.')
+              })
+              element.addEventListener('canplay', resume, { once: true })
+              return
+            }
+            setPlaying(false)
+            setPlaybackError(error instanceof Error ? error.message : '음성을 재생하지 못했습니다.')
           })
         }
       }
@@ -535,6 +549,25 @@ export function LinkedPlayerDock() {
       ? '부분 구간 연속 재생 중에는 위치 이동을 지원하지 않음'
       : '재생 위치 이동'
 
+  const navigation = (
+    <nav className="soa-dock__nav" aria-label="주요 메뉴">
+      {primaryNavigationItems.map((item) => (
+        <button
+          key={item.page}
+          type="button"
+          aria-current={page === item.page ? 'page' : undefined}
+          onClick={() => {
+            enterWorkspace(item.page)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+          className={page === item.page ? 'is-active' : ''}
+        >
+          <span aria-hidden="true">{item.icon}</span>{item.label}
+        </button>
+      ))}
+    </nav>
+  )
+
   const audio = playbackUrl ? (
     <audio
       ref={ref}
@@ -632,6 +665,7 @@ export function LinkedPlayerDock() {
             </div>
           </div>
           {audio}
+          <div className="soa-dubbing-player-dock__nav">{navigation}</div>
           {track && queueOpen ? (
             <PlayerQueuePanel
               tracks={queue}
@@ -708,22 +742,7 @@ export function LinkedPlayerDock() {
           </section>
         ) : null}
 
-        <nav className="soa-dock__nav" aria-label="주요 메뉴">
-          {primaryNavigationItems.map((item) => (
-            <button
-              key={item.page}
-              type="button"
-              aria-current={page === item.page ? 'page' : undefined}
-              onClick={() => {
-                enterWorkspace(item.page)
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
-              className={page === item.page ? 'is-active' : ''}
-            >
-              <span aria-hidden="true">{item.icon}</span>{item.label}
-            </button>
-          ))}
-        </nav>
+        {navigation}
 
         {track && queueOpen ? (
           <PlayerQueuePanel

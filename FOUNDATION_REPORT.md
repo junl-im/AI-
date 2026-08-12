@@ -1,45 +1,49 @@
-# SoriON AI 0.11.9 Verification Report
+# SoriON AI 0.11.11 Verification Report
 
-결과 버전: **0.11.9 · Multi-Speaker Assist & Resume Generation**  
-기준 버전: **0.11.8 · Fast One-Flow & Safe Parallel Generation**
+결과 버전: **0.11.11 · Mobile Studio Flow & Natural Voice Playback**  
+기준 버전: **0.11.10 · Horizontal Timeline Workspace**
 
 ## 적용 범위
 
-- 모든 비어 있지 않은 줄이 명확한 `화자: 대사` 형식이고 화자가 2명 이상일 때만 Multi-Speaker Assist 활성화
-- 화자별 목소리는 자동 적용하지 않고 preset suggestion으로만 제공하며 사용자 승인 전 생성 차단
-- 화자별 미리듣기는 전역 선택 voice를 바꾸지 않아 승인 매핑을 우발적으로 변경하지 않음
-- clip별 `voiceId`/`voiceName`을 유지하는 multi-speaker timeline staging
-- 저장 프로젝트에 `timelineClips`를 추가해 clip text/voice mapping/job ordering을 보존하고 구버전 프로젝트는 기존 단일 voice 복원 경로 유지
-- 생성 중지 후 기존 ready 결과를 유지하고 원래 batch 안의 `queued` 대사만 `남은 대사 이어서 만들기`로 재개
-- resume 저장 시 현재 재개 대상만이 아니라 원래 전체 `allBlockIds` snapshot을 사용해 이전 ready clip의 voice/job 상태 보존
-- Multi-Speaker/Resume 전용 dependency-free repository gate 추가
-- 0.11.8 첫 음성 우선, 최대 2개 bounded parallel, 원문 순서 복원, 안전 취소, recovery/session/engine 계약 유지
+- 모바일 홈에서도 Dubbing Player와 주요 Dock을 함께 표시해 화면별 네비게이션 차이를 제거
+- One-Flow에서 현재 선택 목소리 1개만 노출하고 전체 프리셋은 `목소리 선택` Sheet에서 비교
+- preset별 `잘 맞는 상황 / 장점 / 주의점 / natural speed-pitch range` 메타데이터와 대본 문맥 기반 추천 추가
+- Voice Sheet 미리듣기는 현재 선택을 변경하지 않는 preview-only 계약으로 수정
+- 모바일 textarea focus 및 VisualViewport 변화 시 현재 편집 칸을 상단 작업 위치로 재정렬
+- 1024px 미만 Timeline도 실제 좌→우 시간축을 사용하고 760px 이하 기본 zoom을 1.25배로 적용
+- 모바일 트랙의 왼쪽 고정 라벨 공간을 제거해 lane을 화면 폭에 가깝게 확장
+- 생성 track의 store-driven play 요청과 Player 버튼 상태를 즉시 연결하고 native play 실패 시 상태 원복
+- Mobile Studio Flow 전용 dependency-free preflight 추가
+- 앱·API·Worker 제품 버전 0.11.11 동기화
 
-## 최종 검증 결과
+## 검증 결과
 
-- API pytest: 통과 · **219/219**
-- Worker pytest: 통과 · **14/14**
+- Repository preflight: **46/46 통과**
+- API pytest: **219/219 통과**
+- Worker pytest: **14/14 통과**
 - Python compileall: 통과
-- 제품 버전 sync: 통과 · **v0.11.9**
-- dependency-free TS/TSX transpile syntax: 통과 · **211/211**
-- Repository preflight: 통과 · **44/44**
-- Multi-Speaker parser/assignment/timeline runtime smoke: 통과
-- version fixture sync gate: 통과
-- 실제 0.11.8 기준 self-contained patch/full ZIP overlay 검증: **925/925 files · missing 0 · extra 0 · changed 0**
+- 제품 버전 sync: **v0.11.11 통과**
+- dependency-free TS/TSX transpile: **215/215 통과**
+- Mobile Studio Flow contract: 통과
+- One-Flow contract: 통과
+- Horizontal Timeline contract: 통과
+- 기준 0.11.10 대비 변경 범위: **추가 9 + 수정 40 = 49파일, 삭제 0**
+- 기준본 전체 파일: **933**, 결과 전체 파일: **942**
+
+## 자연스러움과 음성 품질 경계
+
+- 대본 맞춤 추천은 키워드·길이 기반 선택 보조이며 자동 적용하지 않습니다.
+- preset의 natural speed/pitch range는 극단 설정의 carry-over를 줄이는 UX 안전 범위이며 실제 음질 보증 수치가 아닙니다.
+- CosyVoice 전용 preset의 실제 자연스러움과 상황 적합도는 승인 WAV·화자 동의·사람 검수·실기기 청취 증거가 준비된 뒤 확정합니다.
+- 현재 voice evidence preflight의 pending 20건은 기존 운영 준비 항목이며 이번 패치가 이를 성공으로 가장하지 않습니다.
 
 ## Web 검증 환경 제한
 
-- 이 실행 환경의 `npm ci`는 npm registry DNS 오류 `EAI_AGAIN`으로 완료되지 않았고 생성된 불완전 `node_modules`는 전달본에서 제거했습니다.
-- 따라서 ESLint·semantic TypeScript·Vitest·Vite production build·Chromium visual layout의 최종 판정은 Push 후 GitHub Actions `Web quality`를 source of truth로 둡니다.
-- 소스 구문은 global TypeScript의 dependency-free transpile로 211개 TS/TSX 파일을 전수 검사했습니다.
-- Multi-Speaker helper runtime smoke는 통과했으나 CommonJS 설정으로 전체 의존 그래프를 별도 `tsc`했을 때 기존 `import.meta` 관련 진단이 함께 출력됐으므로 해당 명령 전체를 semantic typecheck 통과로 주장하지 않습니다.
+- 전달본에는 `node_modules`를 포함하지 않습니다.
+- 현재 실행 환경에서는 완전한 npm dependency install이 보장되지 않아 전체 ESLint·semantic TypeScript·Vitest·Vite production build·실제 Chromium layout은 GitHub Actions `Web quality`를 최종 source of truth로 둡니다.
+- 대신 변경 소스를 포함한 전체 TS/TSX 215개 파일을 global TypeScript dependency-free transpile로 검사했고 syntax diagnostic 0건입니다.
 
-## 안전성·호환성 원칙
+## 패치 재현성
 
-- 화자명·성별·캐릭터를 추측해 voice를 자동 적용하지 않습니다. 명시적 `화자: 대사` 구조와 사용자 승인만 실제 생성 mapping의 근거로 사용합니다.
-- 일부 줄만 화자 형식인 혼합 대본은 자동 분리하지 않습니다. unmatched line이 하나라도 있으면 Assist 적용을 보류합니다.
-- speaker preview는 선택 확인용이며 전역 voice 선택을 변경하지 않습니다.
-- 재개는 원래 취소된 batch의 queued clip만 대상으로 하며 사용자가 그 뒤 수동 추가한 unrelated queued clip을 끌어오지 않습니다.
-- 프로젝트의 `timelineClips`는 optional이라 기존 저장 프로젝트와 하위 호환됩니다.
-- workspace session의 기존 clip별 voice 보존 규칙은 그대로 유지하며 session schema를 불필요하게 올리지 않습니다.
-- 승인 Chromium baseline PNG는 아직 별도 승인 증거가 없으므로 `SORION_VISUAL_BASELINE_REQUIRED=1`을 임의로 강제하지 않습니다.
+- 실제 최종 패치 ZIP을 0.11.10 전체본에 overlay 후 `APPLY_PATCH.sh`를 실행했고 Repository preflight **46/46**을 통과했습니다.
+- overlay 결과와 0.11.11 완성본을 SHA-256 단위로 비교한 결과 **942/942 files · missing 0 · extra 0 · changed 0**입니다.

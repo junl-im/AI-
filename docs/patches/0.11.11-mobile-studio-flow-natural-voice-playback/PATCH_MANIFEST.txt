@@ -1,0 +1,70 @@
+SoriON AI 0.11.11 patch manifest
+base: 0.11.10 Horizontal Timeline Workspace
+version: 0.11.11
+added: 9
+changed: 40
+removed: 0
+total patch files: 49
+
+validation:
+- preflight 46/46
+- API 219/219
+- Worker 14/14
+- TS/TSX transpile 215/215
+- Python compileall
+
+added files:
+- docs/MOBILE_STUDIO_FLOW_AND_NATURAL_VOICE_PLAYBACK.md
+- docs/patches/0.11.11-mobile-studio-flow-natural-voice-playback/DELETE_LIST.txt
+- docs/patches/0.11.11-mobile-studio-flow-natural-voice-playback/PATCH_MANIFEST.txt
+- docs/patches/0.11.11-mobile-studio-flow-natural-voice-playback/PATCH_README.md
+- scripts/check-mobile-studio-flow.mjs
+- src/styles/mobile-studio-flow.css
+- src/styles/timeline-horizontal-mobile.css
+- src/tts/voiceRecommendation.test.ts
+- src/tts/voiceRecommendation.ts
+
+changed files:
+- APPLY_PATCH.cmd
+- APPLY_PATCH.sh
+- FOUNDATION_REPORT.md
+- PATCH_MANIFEST.txt
+- README.md
+- START_HERE.md
+- VERSION
+- docs/CHANGELOG.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/ROADMAP.md
+- package-lock.json
+- package.json
+- scripts/check-one-flow-dubbing-ux.mjs
+- scripts/run-preflight.mjs
+- services/api/pyproject.toml
+- services/api/tests/test_ai_director.py
+- services/api/tests/test_connectivity.py
+- services/api/tests/test_engine_catalog.py
+- services/api/tests/test_engine_strategy.py
+- services/api/tests/test_evidence.py
+- services/api/tests/test_health.py
+- services/api/tests/test_quality.py
+- services/api/tests/test_setup.py
+- services/api/uv.lock
+- services/worker/pyproject.toml
+- services/worker/uv.lock
+- src/components/navigation/LinkedPlayerDock.test.tsx
+- src/components/navigation/LinkedPlayerDock.tsx
+- src/components/workspace/DubbingVoiceControls.test.tsx
+- src/components/workspace/DubbingVoiceControls.tsx
+- src/components/workspace/LongformComposer.test.tsx
+- src/components/workspace/LongformComposer.tsx
+- src/components/workspace/TimelineEditor.tsx
+- src/components/workspace/VoicePickerSheet.tsx
+- src/pages/HomePage.tsx
+- src/styles/index.css
+- src/styles/one-flow-dubbing.css
+- src/tts/voicePresets.ts
+- src/update/buildInfo.ts
+
+removed files:
+- none

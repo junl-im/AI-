@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.11.11 · Mobile Studio Flow & Natural Voice Playback
+
+- 모바일 홈에서도 생성 플레이어 아래 주요 Dock을 함께 노출해 설정/품질 화면과 네비게이션 구조를 일관화했습니다.
+- One-Flow의 빠른 프리셋 나열을 제거하고 현재 선택 목소리 1개만 표시하며, 누르면 팝업에서 전체 목록·상황 적합도·장점·주의점·미리듣기를 비교합니다.
+- 팝업 미리듣기는 선택 목소리를 몰래 바꾸지 않으며, 대본 문맥 기반 추천은 제안만 하고 사용자가 선택하기 전에는 실제 생성 목소리를 변경하지 않습니다.
+- 프리셋마다 자연스러운 speed/pitch 권장 범위를 추가하고 목소리 변경 시 이전 극단 설정을 새 프리셋의 권장 범위 안으로 보정합니다.
+- 모바일 대본 입력 focus/키보드 viewport 변화 때 편집 칸을 화면 상단 작업 위치로 재정렬해 긴 입력 중 현재 작성 위치를 놓치지 않게 했습니다.
+- 1024px 미만 타임라인도 실제 좌→우 time axis를 사용하고 모바일에서는 기본 zoom을 1.25배로 확대하며 왼쪽 고정 트랙 라벨을 제거해 가용 폭을 최대화했습니다.
+- store-driven 생성 음성 재생 요청은 media play 직전에 플레이어 상태를 즉시 `playing`으로 연결하고 실패 시 오류와 함께 원복해 버튼 상태와 실제 음원 요청의 체감 단절을 줄였습니다.
+- Mobile Studio Flow 전용 dependency-free preflight를 추가하고 앱·API·Worker 제품 버전을 0.11.11로 동기화했습니다.
+
+## 0.11.10 · Horizontal Timeline Workspace
+
+- PC Timeline Editor를 세로형 카드 감각에서 NLE형 가로 클립 스트립으로 재정비해 시간 진행과 편집 배치를 모두 좌→우로 통일했습니다.
+- `timelineGeometry` 순수 모듈을 추가해 duration→pixel 폭, clip offset, canvas 폭, ruler tick을 하나의 X축 좌표계로 계산합니다.
+- 클립 폭은 실제 재생 길이에 비례하고 zoom 배율은 초당 픽셀 단위에 직접 반영됩니다. ruler 눈금과 playhead도 같은 geometry를 사용합니다.
+- PC 트랙 안의 직접 편집 버튼을 줄이고 상세 대사 수정은 기존 선택 클립 빠른 편집기로 집중시켜 타임라인 높이와 시각 복잡도를 낮췄습니다.
+- 트랙 배경/눈금은 pointer drag scrubbing을 지원하고 클립 클릭은 seek와 분리해 선택·재배치 중 playhead가 의도치 않게 움직이지 않게 했습니다.
+- 짧은 클립은 container query로 정보 밀도를 자동 축소하고, 모바일/좁은 화면의 기존 세로 편집 UX는 유지합니다.
+- PC horizontal timeline 전용 dependency-free preflight와 geometry/component 회귀 테스트를 추가했습니다.
+- 앱·API·Worker 제품 버전을 0.11.10으로 동기화했습니다.
+
 ## 0.11.9 · Multi-Speaker Assist & Resume Generation
 
 - 모든 비어 있지 않은 줄이 명확한 `화자: 대사` 형식이고 2명 이상 화자가 있을 때 Multi-Speaker Assist를 표시합니다. 설명문이 섞인 대본은 자동 화자 배정 대상에서 제외합니다.

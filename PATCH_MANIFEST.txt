@@ -1,18 +1,20 @@
-SoriON AI 0.11.9 Multi-Speaker Assist & Resume Generation
+SoriON AI 0.11.11 Mobile Studio Flow & Natural Voice Playback
 
 기준 상태
-- GitHub Actions Web quality를 통과한 0.11.8 Fast One-Flow & Safe Parallel Generation
+- 0.11.10 Horizontal Timeline Workspace 전체 통파일
 
 적용 결과
-- 명확한 화자:대사 script의 보수적 Multi-Speaker Assist
-- 사용자 승인 전 voice suggestion 비적용
-- clip-level voice/project restore와 job 순서 유지
-- 생성 중지 뒤 queued-only resume
-- 기존 first-audio priority / 2-way bounded parallel / timeline order / engine recovery 계약 유지
-- 제품 버전 0.11.9
+- 모바일 홈 Player + 주요 Dock 일관화
+- 현재 목소리 1개 + 팝업 전체 목록/미리듣기/장점/주의점
+- 대본 맞춤 voice 추천은 자동 적용 없이 선택 보조로만 제공
+- preset별 natural speed/pitch 범위로 목소리 전환 설정 보정
+- 모바일 composer focus/keyboard viewport 상단 정렬
+- 모바일 full-width horizontal timeline + 1.25배 기본 zoom
+- 생성 음성 store play 요청과 Player 버튼 상태 즉시 연결
+- 제품 버전 0.11.11
 
 삭제 파일
 - 없음
 
 상세 manifest
-- docs/patches/0.11.9-multi-speaker-resume/PATCH_MANIFEST.txt
+- docs/patches/0.11.11-mobile-studio-flow-natural-voice-playback/PATCH_MANIFEST.txt

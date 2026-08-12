@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { useModalDialog } from '../../hooks/useModalDialog'
+import { recommendVoiceForScript } from '../../tts/voiceRecommendation'
 import { VoicePreviewButton } from '../voice/VoicePreviewButton'
 import {
   filterVoicePresets,
@@ -12,6 +13,7 @@ import {
 interface VoicePickerSheetProps {
   open: boolean
   selectedId: string
+  contextText?: string
   previewingId: string | null
   activePreviewId: string | null
   previewPlaying: boolean
@@ -33,6 +35,7 @@ const filterOptions: Array<{ id: VoiceFilter; label: string }> = [
 export function VoicePickerSheet({
   open,
   selectedId,
+  contextText = '',
   previewingId,
   activePreviewId,
   previewPlaying,
@@ -44,7 +47,17 @@ export function VoicePickerSheet({
   const dialogRef = useModalDialog<HTMLElement>(open, onClose)
   const choiceRefs = useRef<Array<HTMLButtonElement | null>>([])
   const [filter, setFilter] = useState<VoiceFilter>('all')
-  const visibleVoices = useMemo(() => filterVoicePresets(filter), [filter])
+  const recommendation = useMemo(
+    () => recommendVoiceForScript(contextText, voicePresets),
+    [contextText],
+  )
+  const visibleVoices = useMemo(() => {
+    const filtered = filterVoicePresets(filter)
+    if (!recommendation || !filtered.some((voice) => voice.id === recommendation.voiceId)) return filtered
+    return [...filtered].sort((left, right) => (
+      Number(right.id === recommendation.voiceId) - Number(left.id === recommendation.voiceId)
+    ))
+  }, [filter, recommendation])
   const hasSelectedVoice = visibleVoices.some((voice) => voice.id === selectedId)
 
   function handleChoiceKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -84,7 +97,7 @@ export function VoicePickerSheet({
           >
             ‹
           </button>
-          <h2 id="voice-picker-title">전체 목소리</h2>
+          <h2 id="voice-picker-title">목소리 선택</h2>
           <button
             type="button"
             onClick={() => {
@@ -109,13 +122,21 @@ export function VoicePickerSheet({
               {option.label}
             </button>
           ))}
-          <span>{voicePresets.length}개 프리셋</span>
+          <span>{voicePresets.length}개 목소리</span>
         </div>
+        {recommendation && contextText.trim() ? (
+          <div className="soa-voice-context-recommendation" role="status">
+            <strong>대본 맞춤 추천</strong>
+            <span>{voicePresets.find((voice) => voice.id === recommendation.voiceId)?.name}</span>
+            <small>{recommendation.reason}</small>
+          </div>
+        ) : null}
         <div className="soa-voice-sheet-list" role="radiogroup" aria-label="목소리 선택">
           {visibleVoices.map((voice, index) => {
             const selected = voice.id === selectedId
+            const recommended = recommendation?.voiceId === voice.id
             return (
-              <div key={voice.id} className={selected ? 'is-selected' : ''}>
+              <div key={voice.id} className={`${selected ? 'is-selected' : ''} ${recommended ? 'is-recommended' : ''}`.trim()}>
                 <button
                   ref={(element) => {
                     choiceRefs.current[index] = element
@@ -133,8 +154,14 @@ export function VoicePickerSheet({
                 >
                   <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
                   <span>
-                    <strong>{voice.name} · {voiceGenderLabels[voice.gender]}</strong>
+                    <strong>
+                      {voice.name} · {voiceGenderLabels[voice.gender]}
+                      {recommended ? <em>대본 추천</em> : null}
+                    </strong>
                     <small>{voice.description}</small>
+                    <span className="soa-voice-fit">잘 맞음 · {voice.bestFor.join(' · ')}</span>
+                    <span className="soa-voice-pro">장점 · {voice.strengths.join(' / ')}</span>
+                    <span className="soa-voice-con">주의 · {voice.tradeoffs.join(' / ')}</span>
                   </span>
                 </button>
                 <VoicePreviewButton
@@ -144,10 +171,7 @@ export function VoicePickerSheet({
                   previewingId={previewingId}
                   activePreviewId={activePreviewId}
                   previewPlaying={previewPlaying}
-                  onPreview={(voiceId) => {
-                    onSelect(voiceId)
-                    onPreview(voiceId)
-                  }}
+                  onPreview={onPreview}
                 />
                 <span className="soa-voice-sheet-check" aria-hidden="true">{selected ? '✓' : ''}</span>
               </div>

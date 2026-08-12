@@ -141,7 +141,8 @@ describe('LinkedPlayerDock', () => {
 
     expect(screen.getByRole('complementary', { name: '더빙 재생 플레이어' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '재생' })).toBeDisabled()
-    expect(screen.queryByRole('navigation', { name: '주요 메뉴' })).not.toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: '주요 메뉴' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /만들기/ })).toHaveAttribute('aria-current', 'page')
   })
 
   it('완성 음성이 생기면 만들기 재생바에서 바로 재생할 수 있다', () => {
@@ -176,6 +177,19 @@ describe('LinkedPlayerDock', () => {
     usePlayerStore.getState().enqueueAndPlay(generatedAudio(), '자동 재생 음성')
 
     await vi.waitFor(() => expect(play).toHaveBeenCalled())
+  })
+
+
+  it('타임라인에서 들어온 재생 요청은 플레이어 버튼 상태도 즉시 연결한다', async () => {
+    const play = vi.mocked(HTMLMediaElement.prototype.play)
+    play.mockReturnValueOnce(new Promise<void>(() => undefined))
+    render(<LinkedPlayerDock />)
+
+    const trackId = usePlayerStore.getState().enqueue(generatedAudio(), '생성 완료 음성')
+    act(() => usePlayerStore.getState().toggleTrack(trackId))
+
+    await vi.waitFor(() => expect(play).toHaveBeenCalled())
+    expect(screen.getByRole('button', { name: '일시정지' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('Voice API가 없어도 브라우저 한국어 음성을 재생한다', () => {

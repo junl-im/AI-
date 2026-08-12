@@ -1,6 +1,25 @@
 # ROADMAP
 
-현재 제품 버전: `0.11.9`
+현재 제품 버전: `0.11.11`
+
+## 0.11.11 완료 · Mobile Studio Flow & Natural Voice Playback
+
+- 모바일 홈 Player + 주요 Dock 일관화
+- 현재 목소리 1개 + 팝업 전체 목록/미리듣기/장단점/상황 적합도
+- preview-only 계약과 대본 맞춤 추천/프리셋 natural range 보정
+- 모바일 composer focus/visualViewport 상단 정렬
+- 모바일 실제 좌→우 horizontal timeline + full-width track
+- 생성 음성 store play 요청과 Player 버튼 즉시 연결
+- 다음 목표는 0.11.12 Editing History & Engine Soak Polish
+
+## 0.11.10 완료 · Horizontal Timeline Workspace
+
+- PC ruler·clip·playhead 동일 X축 geometry
+- 실제 duration 비례 clip 폭과 zoom 연동
+- 얇은 가로 clip strip + 선택 클립 빠른 편집 분리
+- 트랙 background/ruler drag scrubbing과 clip selection/seek 분리
+- 모바일 세로형 유지 + PC 전용 container-query 밀도 조절
+- 다음 목표는 0.11.11 Editing History & Engine Soak Polish
 
 ## 0.11.9 완료 · Multi-Speaker Assist & Resume Generation
 
@@ -8,7 +27,7 @@
 - 사용자 승인 전 자동 voice 배정을 실제 생성에 사용하지 않는 확인 gate
 - clip-level voice/project restore와 job 순서 보존
 - 취소 뒤 queued 대사만 재개하는 `남은 대사 이어서 만들기`
-- 다음 목표는 0.11.10 Editing History & Speaker Workflow Polish
+- 0.11.10에서 PC Horizontal Timeline Workspace를 우선 완료
 
 ## 0.11.8 완료 · Fast One-Flow & Safe Parallel Generation
 

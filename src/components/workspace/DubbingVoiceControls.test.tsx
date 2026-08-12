@@ -22,13 +22,12 @@ const baseProps = {
 }
 
 describe('DubbingVoiceControls', () => {
-  it('자주 쓰는 목소리를 sheet 없이 한 번에 바꾼다', () => {
-    const onVoiceChange = vi.fn()
-    render(<DubbingVoiceControls {...baseProps} onVoiceChange={onVoiceChange} />)
+  it('현재 목소리 하나만 표시하고 목록은 선택 Sheet에서 연다', () => {
+    render(<DubbingVoiceControls {...baseProps} />)
 
-    fireEvent.click(screen.getByRole('button', { name: '도윤 빠른 선택' }))
-    expect(onVoiceChange).toHaveBeenCalledWith('on-clear')
-    expect(screen.getByRole('button', { name: '혜린 빠른 선택' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '현재 목소리 혜린 선택' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '도윤 빠른 선택' })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('빠른 목소리 선택')).not.toBeInTheDocument()
   })
 
   it('화자 선택과 읽기 설정을 별도 Sheet로 연다', () => {
@@ -39,7 +38,7 @@ describe('DubbingVoiceControls', () => {
     expect(screen.getByRole('button', { name: '혜린 목소리 미리듣기' })).toBeInTheDocument()
 
     fireEvent.click(voicePickerButton)
-    expect(screen.getByRole('dialog', { name: '전체 목소리' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: '목소리 선택' })).toBeInTheDocument()
     expect(voicePickerButton).toHaveAttribute('aria-expanded', 'true')
     fireEvent.click(screen.getByRole('button', { name: '목소리 선택 닫기' }))
 
@@ -139,7 +138,7 @@ describe('DubbingVoiceControls', () => {
     expect(screen.queryByRole('radio', { name: /혜린/ })).not.toBeInTheDocument()
   })
 
-  it('프리셋 재생 버튼이 선택과 프리뷰를 동시에 적용한다', () => {
+  it('목소리 목록의 재생 버튼은 선택을 바꾸지 않고 비교 재생만 한다', () => {
     const onVoiceChange = vi.fn()
     const onPreview = vi.fn()
     render(<DubbingVoiceControls {...baseProps} onVoiceChange={onVoiceChange} onPreview={onPreview} />)
@@ -147,7 +146,17 @@ describe('DubbingVoiceControls', () => {
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
     fireEvent.click(screen.getByRole('button', { name: '도윤 목소리 미리듣기' }))
 
-    expect(onVoiceChange).toHaveBeenCalledWith('on-clear')
+    expect(onVoiceChange).not.toHaveBeenCalled()
     expect(onPreview).toHaveBeenCalledWith('on-clear')
+  })
+
+  it('대본 추천과 각 목소리의 장점·주의점을 목록에서 비교한다', () => {
+    render(<DubbingVoiceControls {...baseProps} scriptText="이 기능의 사용법을 세 단계로 설명합니다." />)
+
+    fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    expect(screen.getByText('대본 맞춤 추천')).toBeInTheDocument()
+    expect(screen.getByText(/도윤/)).toBeInTheDocument()
+    expect(screen.getAllByText(/장점 ·/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/주의 ·/).length).toBeGreaterThan(0)
   })
 })

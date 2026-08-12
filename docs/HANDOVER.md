@@ -1,14 +1,25 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.9 · Multi-Speaker Assist & Resume Generation**
+현재 기준 버전: **0.11.11 · Mobile Studio Flow & Natural Voice Playback**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-11 11:05 KST**
+최종 갱신: **2026-08-12 12:47 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 0.11.11 Mobile Studio Flow & Natural Voice Playback
+1. **작업 일시/기준**: 2026-08-12 14:13 KST 이후 · 0.11.10 Horizontal Timeline Workspace 기준.
+3. **핵심 변경**: 모바일 홈 Player+Dock 일관화, 현재 voice 1개+Sheet 비교, preset 상황/장점/주의점, preview-only, 대본 추천/운율 범위 보정, composer 상단 정렬, 모바일 horizontal timeline full-width, 생성 음성 play 상태 즉시 연결.
+4. **음성 안전 원칙**: 추천은 자동 적용하지 않으며 natural range도 실제 음질 보장이 아닙니다. 승인 WAV·동의·사람 검수 전에는 preset 자연스러움을 완료로 판정하지 않습니다.
+5. **재생 계약**: store-driven play request는 UI playing state를 즉시 반영하고 native media play가 실패하면 원복·오류 표시합니다.
+6. **검증**: preflight 46/46, API 219/219, Worker 14/14, TS/TSX transpile 215/215, Python compileall 통과. 최종 overlay 수치는 FOUNDATION_REPORT를 따릅니다.
+7. **다음**: 0.11.12 Editing History & Engine Soak Polish.
+## 0.11.10 Horizontal Timeline Workspace
+- PC ruler·clip·playhead를 동일 time-to-pixel X축으로 통일하고 duration 비례 가로 clip strip, track/ruler scrub, clip selection/reorder 분리를 도입했습니다.
+- 검증은 preflight 45/45, API 219/219, Worker 14/14, TS/TSX 213/213, overlay 933/933이며 자세한 내용은 `docs/HORIZONTAL_TIMELINE_WORKSPACE.md`와 당시 `FOUNDATION_REPORT.md` 기록을 따릅니다.
 
 ## 0.11.8 Fast One-Flow & Safe Parallel Generation
 

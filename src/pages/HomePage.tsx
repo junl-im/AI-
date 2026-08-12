@@ -29,6 +29,7 @@ import type { GeneratedAudio } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import { synthesizeSpeech } from '../tts/voiceApi'
 import { getVoicePreset, voicePresets } from '../tts/voicePresets'
+import { clampVoiceSettingsToNaturalRange } from '../tts/voiceRecommendation'
 import { createRandomId } from '../utils/randomId'
 import {
   analyzeMultiSpeakerScript,
@@ -530,8 +531,11 @@ export function HomePage() {
     previewRunIdRef.current += 1
     setPendingPreview(null)
     setPreviewingId(null)
-    setVoiceId(getVoicePreset(nextVoiceId).id)
-  }, [])
+    const voice = getVoicePreset(nextVoiceId)
+    setVoiceId(voice.id)
+    setSpeechSpeed((current) => clampVoiceSettingsToNaturalRange(voice, current, speechPitch).speed)
+    setSpeechPitch((current) => clampVoiceSettingsToNaturalRange(voice, speechSpeed, current).pitch)
+  }, [speechPitch, speechSpeed])
 
   const previewVoice = useCallback(async (
     nextVoiceId: string,
@@ -629,7 +633,7 @@ export function HomePage() {
       toggleTrack(activePreview.trackId)
       return
     }
-    void previewVoice(nextVoiceId)
+    void previewVoice(nextVoiceId, undefined, true)
   }
 
   function changeSpeakerAssignment(speaker: string, nextVoiceId: string) {
@@ -751,6 +755,7 @@ export function HomePage() {
               voiceControls={(
                 <DubbingVoiceControls
                   voiceId={voiceId}
+                  scriptText={composerDraft}
                   previewingId={previewingId}
                   activePreviewId={activePreviewId}
                   previewPlaying={previewPlaying}

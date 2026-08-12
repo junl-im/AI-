@@ -1,0 +1,302 @@
+/* 0.11.10 PC timeline: one horizontal time axis for ruler, clips and playhead. */
+@media (min-width: 1024px) {
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] {
+    overflow: hidden;
+    border-radius: 14px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-track-row {
+    grid-template-columns: 88px minmax(0, 1fr);
+    min-height: 132px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-track-label {
+    position: relative;
+    z-index: 9;
+    min-height: 132px;
+    padding: 13px 10px;
+    background: #171a22;
+  }
+
+  .soa-capcut-track-label em {
+    align-self: end;
+    margin-top: auto;
+    color: rgba(255, 255, 255, 0.28);
+    font-size: 8px;
+    font-style: normal;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-track-lane {
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0;
+    background-color: #11141b;
+    background-image: none;
+    scrollbar-gutter: stable;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-track-canvas {
+    position: relative;
+    min-height: 118px;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 44px);
+    background-size: var(--soa-timeline-second-px, 72px) 100%, 100% 100%;
+    cursor: crosshair;
+    touch-action: pan-x;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-ruler {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 5;
+    display: block;
+    height: 30px;
+    margin: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0;
+    background: rgba(23, 26, 34, 0.96);
+    pointer-events: none;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-ruler span {
+    position: absolute;
+    top: 0;
+    display: grid;
+    height: 30px;
+    align-content: center;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-ruler span:first-child {
+    transform: none;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-ruler span:last-child {
+    transform: translateX(-100%);
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-ruler span i {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    width: 1px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateX(-50%);
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block-list {
+    position: absolute;
+    z-index: 2;
+    inset: 36px 0 8px;
+    display: block;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-timeline-clip-slot,
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-pause-block {
+    position: absolute;
+    top: 0;
+    left: var(--soa-clip-offset, 0px);
+    width: var(--soa-clip-width, 1px);
+    height: 74px;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    container-type: inline-size;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-timeline-clip-slot {
+    flex: none;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block {
+    display: grid;
+    width: calc(100% - 2px);
+    height: 74px;
+    min-height: 74px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 2px;
+    margin-left: 1px;
+    border-radius: 8px;
+    padding: 6px 7px;
+    overflow: visible;
+    background: #20242e;
+    cursor: default;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block > header,
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block > footer {
+    min-width: 0;
+    gap: 4px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__voice {
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__voice > span {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    font-size: 8px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__voice strong {
+    overflow: hidden;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__voice small {
+    margin-top: 0;
+    font-size: 7px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__tools {
+    gap: 2px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__tools > button,
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block-menu__trigger {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 9px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__direct-tool {
+    display: none;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__script-preview {
+    min-height: 0;
+    overflow: hidden;
+    margin: 1px 0 0;
+    border-radius: 4px;
+    padding: 2px 4px;
+    color: rgba(255, 255, 255, 0.72);
+    background: rgba(0, 0, 0, 0.12);
+    font-size: 8px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block > footer {
+    margin-top: 0;
+    font-size: 7px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block > footer small,
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__error {
+    display: none;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__progress {
+    position: absolute;
+    right: 5px;
+    bottom: 3px;
+    left: 5px;
+    height: 2px;
+    margin: 0;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__grip {
+    left: -4px;
+    font-size: 10px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-pause-block {
+    display: grid;
+    width: calc(var(--soa-clip-width, 1px) - 2px);
+    place-content: center;
+    gap: 2px;
+    margin-left: 1px;
+    border-radius: 7px;
+    padding: 4px 2px;
+    overflow: hidden;
+    font-size: 7px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-pause-block button {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 5px;
+    font-size: 9px;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-playhead {
+    top: 0;
+    bottom: 4px;
+    z-index: 8;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-playhead span {
+    top: 4px;
+    z-index: 9;
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-timeline__empty {
+    min-width: 520px;
+    min-height: 118px;
+    margin: 0;
+  }
+
+  @container (max-width: 150px) {
+    .soa-dubbing-block__voice > span,
+    .soa-dubbing-block__voice small {
+      display: none;
+    }
+
+    .soa-dubbing-block__script-preview {
+      -webkit-line-clamp: 1;
+    }
+  }
+
+  @container (max-width: 105px) {
+    .soa-dubbing-block__voice strong,
+    .soa-dubbing-block-menu,
+    .soa-dubbing-block__status {
+      display: none;
+    }
+
+    .soa-dubbing-block > header {
+      justify-content: flex-end;
+    }
+
+    .soa-dubbing-block__script-preview {
+      padding-inline: 2px;
+      font-size: 7px;
+    }
+  }
+
+  @container (max-width: 58px) {
+    .soa-dubbing-block__tools,
+    .soa-dubbing-block__script-preview {
+      display: none;
+    }
+
+    .soa-dubbing-block {
+      padding: 4px 2px;
+    }
+
+    .soa-dubbing-block > footer {
+      justify-content: center;
+    }
+  }
+}
