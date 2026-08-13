@@ -5,11 +5,26 @@ import type { GeneratedAudio } from '../../tts/generationTypes'
 import { TimelineLinkedPlayer } from './TimelineLinkedPlayer'
 
 function audio(name: string): GeneratedAudio {
+  const url = `https://example.com/${name}.wav`
   return {
-    url: `https://example.com/${name}.wav`,
+    url,
     filename: `${name}.wav`,
     source: 'api',
     durationSeconds: 12,
+    result: {
+      jobId: `test-${name}`,
+      status: 'completed',
+      engineId: 'test-engine',
+      engineMode: 'local',
+      audioUrl: url,
+      estimatedDurationSeconds: 12,
+      message: 'test fixture',
+      normalizedText: null,
+      segmentCount: 1,
+      processingMs: 100,
+      fileSizeBytes: null,
+      realtimeFactor: null,
+    },
   }
 }
 
@@ -27,7 +42,6 @@ describe('TimelineLinkedPlayer', () => {
     const firstId = usePlayerStore.getState().enqueue(audio('first'), '첫 대사')
     usePlayerStore.getState().setPlaybackSnapshot(firstId, 3, true)
     const before = usePlayerStore.getState().toggleRequestId
-
     render(<TimelineLinkedPlayer />)
 
     expect(screen.getByRole('region', { name: '타임라인 연계 플레이어' })).toHaveTextContent('첫 대사')
@@ -45,7 +59,6 @@ describe('TimelineLinkedPlayer', () => {
 
     render(<TimelineLinkedPlayer />)
     fireEvent.click(screen.getByRole('button', { name: '다음 음성' }))
-
     expect(usePlayerStore.getState().currentTrackId).toBe(secondId)
     expect(usePlayerStore.getState().playRequestId).toBe(before + 1)
   })
