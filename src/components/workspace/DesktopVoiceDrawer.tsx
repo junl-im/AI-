@@ -53,22 +53,27 @@ export function DesktopVoiceDrawer({
       className={`soa-voice-drawer ${collapsed ? 'is-collapsed' : ''}`}
       aria-label="미니 보이스 라이브러리"
     >
-      <button
-        type="button"
-        className="soa-studio-panel-toggle"
-        aria-label={collapsed ? '보이스 패널 펼치기' : '보이스 패널 접기'}
-        aria-expanded={!collapsed}
-        aria-controls="soa-voice-drawer"
-        onClick={onToggleCollapsed}
-      >
-        {collapsed ? '‹' : '›'}
-      </button>
       {collapsed ? (
-        <span className="soa-studio-panel-monogram" aria-hidden="true">V</span>
+        <>
+          <button
+            type="button"
+            className="soa-studio-panel-toggle is-collapsed"
+            aria-label="보이스 패널 펼치기"
+            aria-expanded="false"
+            aria-controls="soa-voice-drawer"
+            onClick={onToggleCollapsed}
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+          <span className="soa-studio-panel-monogram" aria-hidden="true">V</span>
+        </>
       ) : (
         <>
           <header>
-            <span>VOICE DRAWER</span>
+            <div className="soa-voice-drawer__heading-row">
+              <span>VOICE DRAWER</span>
+              <button type="button" className="soa-studio-panel-toggle" aria-label="보이스 패널 접기" aria-expanded="true" aria-controls="soa-voice-drawer" onClick={onToggleCollapsed}><b>접기</b> ›</button>
+            </div>
             <strong>목소리 라이브러리</strong>
             <p>목소리와 말투를 고른 뒤 ▶를 누르면 현재 설정으로 미리듣습니다.</p>
           </header>

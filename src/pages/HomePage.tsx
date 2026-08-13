@@ -3,6 +3,7 @@ import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
 import { requestAutomaticApiReconnect } from '../api/httpClient'
 import { DesktopVoiceDrawer } from '../components/workspace/DesktopVoiceDrawer'
 import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader'
+import { FinalExportDialog } from '../components/workspace/FinalExportDialog'
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
 import { LongformComposer } from '../components/workspace/LongformComposer'
 import { SpeakerVoiceAssignmentPanel } from '../components/workspace/SpeakerVoiceAssignment'
@@ -133,6 +134,7 @@ export function HomePage() {
   const currentTrack = usePlayerStore(getCurrentTrack)
   const desktopLayout = useDesktopStudioLayout()
   const [projectTitle, setProjectTitle] = useState('새 프로젝트')
+  const [exportOpen, setExportOpen] = useState(false)
   const [messages, setMessages] = useState<WorkspaceMessage[]>(initialMessages)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
   const [speechSpeed, setSpeechSpeed] = useState(1)
@@ -755,6 +757,8 @@ export function HomePage() {
             onOpenSettings={() => enterWorkspace('settings')}
             sidePanelsCollapsed={desktopLayout.sidePanelsCollapsed}
             onToggleSidePanels={desktopLayout.toggleSidePanels}
+            exportAvailable={timeline.blocks.some((block) => block.kind === 'voice')}
+            onOpenExport={() => setExportOpen(true)}
             onClear={clearCurrentWork}
           />
           <main className="soa-dubbing-main">
@@ -848,6 +852,11 @@ export function HomePage() {
             />
             ) : null}
           </main>
+          <FinalExportDialog
+            open={exportOpen}
+            blocks={timeline.blocks}
+            onClose={() => setExportOpen(false)}
+          />
         </section>
 
         <button

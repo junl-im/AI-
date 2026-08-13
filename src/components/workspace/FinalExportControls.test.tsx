@@ -54,7 +54,7 @@ describe('FinalExportControls', () => {
     })
 
     render(<FinalExportControls blocks={[readyBlock]} />)
-    fireEvent.click(screen.getByRole('button', { name: '최종 WAV + 자막' }))
+    fireEvent.click(screen.getByRole('button', { name: 'WAV + 자막' }))
 
     await waitFor(() => expect(createFinalExport).toHaveBeenCalledWith([readyBlock], 'wav'))
     expect(screen.getByRole('link', { name: '음원 받기' })).toHaveAttribute(

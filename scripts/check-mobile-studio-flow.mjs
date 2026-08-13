@@ -41,11 +41,15 @@ if (voiceControls.includes('soa-dubbing-voice-quick')) {
 const picker = await source('src/components/workspace/VoicePickerSheet.tsx')
 requireTokens('src/components/workspace/VoicePickerSheet.tsx', picker, [
   '대본 맞춤 추천',
-  '잘 맞음 · {voice.bestFor.join',
-  '장점 · {voice.strengths.join',
-  '주의 · {voice.tradeoffs.join',
+  'voice.description',
+  'soa-voice-gender',
   'onPreview={onPreview}',
 ])
+
+
+for (const verboseToken of ['잘 맞음 · {voice.bestFor.join', '장점 · {voice.strengths.join', '주의 · {voice.tradeoffs.join']) {
+  if (picker.includes(verboseToken)) failures.push(`src/components/workspace/VoicePickerSheet.tsx: 성우 선택창 상세 설명이 다시 노출되었습니다. ${verboseToken}`)
+}
 
 const presets = await source('src/tts/voicePresets.ts')
 requireTokens('src/tts/voicePresets.ts', presets, [

@@ -344,7 +344,7 @@ await requireText('src/components/workspace/TimelineEditor.tsx', [
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   "window.scrollTo({ top: 0, behavior: 'smooth' })",
 ])
-await requireText('src/components/workspace/DubbingStudioHeader.tsx', ['프로젝트 제목', '현재 음성 다운로드', '현재 작업 비우기', '프로젝트 메뉴 열기', 'aria-expanded={projectMenuOpen}']); await requireAbsent('src/components/workspace/DubbingStudioHeader.tsx', ['<details', '<summary'])
+await requireText('src/components/workspace/DubbingStudioHeader.tsx', ['프로젝트 제목', '현재 재생 음성만 다운로드', '현재 작업 비우기', '프로젝트 메뉴 열기', 'aria-expanded={projectMenuOpen}']); await requireAbsent('src/components/workspace/DubbingStudioHeader.tsx', ['<details', '<summary'])
 await requireText('src/components/workspace/TimelineEditor.tsx', ['번 대사 블록 메뉴 열기', 'aria-expanded={blockMenuOpen}']); await requireAbsent('src/components/workspace/TimelineEditor.tsx', ['<details', '<summary'])
 await requireText('docs/DUBBING_STUDIO_UX.md', ['더빙 스튜디오', '하단 고정 플레이어', 'workspace reset'])
 await requireText('src/components/workspace/DubbingVoiceControls.tsx', ['VoicePickerSheet', 'VoiceSettingsSheet', '음성 설정 열기'])

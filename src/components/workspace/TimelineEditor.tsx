@@ -14,6 +14,7 @@ import type {
 } from '../../hooks/useTimelineGeneration'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { getVoicePreset, voicePresets } from '../../tts/voicePresets'
+import { TimelineLinkedPlayer } from './TimelineLinkedPlayer'
 import type { WorkspaceBatchHistoryEntry, WorkspaceBatchRetrySnapshot } from '../../workspace/sessionTypes'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import {
@@ -24,7 +25,6 @@ import {
   getTimelineCanvasWidth,
   getTimelineContentWidth,
 } from '../../timeline/timelineGeometry'
-import { FinalExportControls } from './FinalExportControls'
 
 interface TimelineEditorProps {
   blocks: TimelineBlock[]
@@ -1183,7 +1183,7 @@ export function TimelineEditor({
         </div>
       </div>
 
-      <FinalExportControls blocks={blocks} />
+      <TimelineLinkedPlayer />
 
       <button type="button" className="soa-dubbing-add-block" onClick={onAddVoice} aria-label="새 대사 블록 추가">＋</button>
     </section>

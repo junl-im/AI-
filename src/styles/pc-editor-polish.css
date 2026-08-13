@@ -1,0 +1,320 @@
+/* PC editor polish: explicit side panels, linked timeline transport, and export as a completion action. */
+
+.soa-export-dialog-layer {
+  position: fixed;
+  z-index: 96;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(4, 7, 14, 0.72);
+  backdrop-filter: blur(9px);
+}
+
+.soa-export-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(82dvh, 720px);
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  padding: 18px;
+  color: #eef3ff;
+  background: #151922;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.48);
+}
+
+.soa-export-dialog__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.soa-export-dialog__head span {
+  color: #9183ff;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: 0.14em;
+}
+
+.soa-export-dialog__head h2 {
+  margin: 5px 0 0;
+  font-size: 22px;
+  letter-spacing: -0.035em;
+}
+
+.soa-export-dialog__head p {
+  max-width: 430px;
+  margin: 6px 0 0;
+  color: rgba(238, 243, 255, 0.48);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.soa-export-dialog__head > button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.64);
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 20px;
+}
+
+.soa-export-dialog__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  border: 1px solid rgba(216, 255, 114, 0.1);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(216, 255, 114, 0.035);
+}
+
+.soa-export-dialog__status strong { font-size: 11px; }
+.soa-export-dialog__status span { color: rgba(238, 243, 255, 0.45); font-size: 9px; text-align: right; }
+
+.soa-final-export-controls {
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 14px;
+}
+
+.soa-final-export-controls__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.soa-final-export-controls__actions button,
+.soa-final-export-result__preserve,
+.soa-final-export-result__receipt button {
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 11px;
+  color: rgba(238, 243, 255, 0.78);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.soa-final-export-controls__actions button.is-primary,
+.soa-final-export-result__preserve {
+  border-color: transparent;
+  color: #141820;
+  background: #d8ff72;
+}
+
+.soa-final-export-controls__actions button:disabled { opacity: 0.32; }
+.soa-final-export-controls__hint { margin: 8px 2px 0; color: rgba(238, 243, 255, 0.38); font-size: 9px; }
+.soa-final-export-controls__error { margin: 10px 2px 0; color: #ff9186; font-size: 10px; font-weight: 800; }
+
+.soa-final-export-result { display: grid; gap: 10px; margin-top: 14px; }
+.soa-final-export-result__downloads { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.soa-final-export-result__downloads a,
+.soa-final-export-result__downloads span {
+  border-radius: 8px;
+  padding: 7px 9px;
+  color: rgba(238, 243, 255, 0.72);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 9px;
+  font-weight: 850;
+  text-decoration: none;
+}
+.soa-final-export-result__retention { border-radius: 11px; padding: 10px 11px; background: rgba(255, 255, 255, 0.03); }
+.soa-final-export-result__retention strong { font-size: 10px; }
+.soa-final-export-result__retention p { margin: 4px 0 0; color: rgba(238, 243, 255, 0.4); font-size: 9px; line-height: 1.5; }
+.soa-final-export-result__receipt { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: rgba(238, 243, 255, 0.42); font-size: 8px; }
+.soa-final-export-result__receipt span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.soa-final-export-result__receipt button { min-height: 32px; flex: 0 0 auto; padding: 0 9px; color: #ff9186; }
+
+.soa-timeline-linked-player {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) 32px 40px 32px minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 12px;
+  padding: 8px 10px;
+  color: #eef3ff;
+  background: linear-gradient(90deg, rgba(23, 27, 36, 0.98), rgba(17, 20, 27, 0.98));
+}
+
+.soa-timeline-linked-player__identity { min-width: 0; }
+.soa-timeline-linked-player__identity span { display: block; color: rgba(216, 255, 114, 0.68); font-size: 7px; font-weight: 950; letter-spacing: 0.12em; }
+.soa-timeline-linked-player__identity strong { display: block; overflow: hidden; margin-top: 2px; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.soa-timeline-linked-player__identity small { display: block; overflow: hidden; margin-top: 2px; color: rgba(238, 243, 255, 0.34); font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+
+.soa-timeline-linked-player__skip,
+.soa-timeline-linked-player__toggle {
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 9px;
+  color: rgba(238, 243, 255, 0.78);
+  background: rgba(255, 255, 255, 0.045);
+}
+.soa-timeline-linked-player__skip { width: 32px; height: 32px; font-size: 18px; }
+.soa-timeline-linked-player__toggle { width: 40px; height: 40px; color: #151923; background: #d8ff72; font-size: 13px; }
+.soa-timeline-linked-player button:disabled { opacity: 0.28; }
+
+.soa-timeline-linked-player__transport { min-width: 0; }
+.soa-timeline-linked-player__scrub {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 18px;
+  border: 0;
+  padding: 7px 0;
+  background: transparent;
+}
+.soa-timeline-linked-player__scrub::before,
+.soa-timeline-linked-player__scrub i {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 999px;
+  content: '';
+  background: rgba(255, 255, 255, 0.08);
+}
+.soa-timeline-linked-player__scrub i { right: auto; background: linear-gradient(90deg, #d8ff72, #7dcaff); }
+.soa-timeline-linked-player__scrub b { position: absolute; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #eef3ff; transform: translateX(-50%); }
+.soa-timeline-linked-player__transport > div { display: grid; grid-template-columns: 42px 1fr 42px; gap: 5px; color: rgba(238, 243, 255, 0.36); font-size: 7px; }
+.soa-timeline-linked-player__transport span { text-align: center; }
+.soa-timeline-linked-player__transport time:last-child { text-align: right; }
+.soa-timeline-linked-player__sync { display: inline-flex; align-items: center; gap: 4px; color: rgba(238, 243, 255, 0.34); font-size: 7px; font-weight: 900; letter-spacing: 0.08em; }
+.soa-timeline-linked-player__sync i { width: 6px; height: 6px; border-radius: 50%; background: #5edbb2; box-shadow: 0 0 8px rgba(94, 219, 178, 0.35); }
+.soa-timeline-linked-player__sync.is-active { color: rgba(216, 255, 114, 0.72); }
+
+@media (min-width: 1024px) {
+  .soa-dubbing-toolbar__actions .soa-dubbing-pro-toggle,
+  .soa-dubbing-toolbar__actions .soa-dubbing-export-trigger {
+    width: auto;
+    min-width: 36px;
+    grid-auto-flow: column;
+    gap: 6px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .soa-dubbing-toolbar__actions .soa-dubbing-pro-toggle b,
+  .soa-dubbing-toolbar__actions .soa-dubbing-export-trigger b {
+    font-size: 8px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .soa-dubbing-toolbar__actions .soa-dubbing-export-trigger:not(:disabled) {
+    border-color: rgba(216, 255, 114, 0.16);
+    color: #e9ffae;
+    background: rgba(216, 255, 114, 0.055);
+  }
+
+  .soa-project-rail,
+  .soa-voice-drawer { overflow: hidden auto; }
+
+  .soa-project-rail__head { align-items: center; }
+  .soa-project-rail__head > div,
+  .soa-voice-drawer__heading-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+
+  .soa-studio-panel-toggle,
+  .soa-voice-drawer .soa-studio-panel-toggle {
+    position: static;
+    display: inline-flex;
+    width: auto;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0 8px;
+    color: rgba(238, 243, 255, 0.58);
+    background: rgba(255, 255, 255, 0.035);
+    font-size: 10px;
+  }
+
+  .soa-project-rail__head .soa-studio-panel-toggle {
+    min-height: 30px;
+    color: rgba(238, 243, 255, 0.58);
+    background: rgba(255, 255, 255, 0.035);
+  }
+
+  .soa-studio-panel-toggle b { font-size: 8px; font-weight: 850; }
+  .soa-project-rail.is-collapsed,
+  .soa-voice-drawer.is-collapsed { overflow: hidden; }
+  .soa-project-rail.is-collapsed .soa-studio-panel-toggle.is-collapsed,
+  .soa-voice-drawer.is-collapsed .soa-studio-panel-toggle.is-collapsed { width: 38px; height: 38px; padding: 0; font-size: 19px; }
+  .soa-studio-panel-monogram { margin-top: 10px; }
+
+  .soa-voice-drawer__heading-row > span { min-width: 0; }
+  .soa-voice-drawer > header { padding-top: 0; }
+
+  .soa-dubbing-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-bottom: 22px;
+  }
+
+  .soa-dubbing-timeline > .soa-dubbing-timeline__head { order: 1; }
+  .soa-dubbing-timeline > .soa-timeline-toolbar { order: 2; }
+  .soa-dubbing-timeline > .soa-capcut-timeline { order: 3; margin-top: 8px; }
+  .soa-dubbing-timeline > .soa-timeline-linked-player { order: 4; }
+  .soa-dubbing-timeline > .soa-timeline-quick-editor { order: 5; margin-top: 9px; }
+  .soa-dubbing-timeline > .soa-timeline-batch-result { order: 6; }
+  .soa-dubbing-timeline > .soa-dubbing-add-block { order: 7; }
+
+  .soa-dubbing-timeline__head {
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding-bottom: 9px;
+  }
+
+  .soa-dubbing-timeline__head > div:first-child { display: flex; align-items: baseline; gap: 8px; }
+  .soa-dubbing-timeline__head strong { margin-top: 0; font-size: 12px; }
+  .soa-dubbing-timeline__head button { min-height: 30px; border-radius: 8px; font-size: 8px; }
+
+  .soa-timeline-toolbar {
+    margin-top: 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] {
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.025);
+  }
+
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-track-label {
+    background: #151922;
+  }
+
+  .soa-timeline-quick-editor {
+    border-color: rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .soa-timeline-quick-editor__meta span { color: rgba(216, 255, 114, 0.62); }
+}
+
+@media (max-width: 1023px) {
+  .soa-dubbing-toolbar__actions .soa-dubbing-export-trigger b,
+  .soa-dubbing-toolbar__actions .soa-dubbing-pro-toggle b { display: none; }
+  .soa-timeline-linked-player { display: none; }
+}
+
+@media (max-width: 620px) {
+  .soa-export-dialog-layer { align-items: end; padding: 0; }
+  .soa-export-dialog { width: 100%; max-height: 88dvh; border-radius: 20px 20px 0 0; padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+  .soa-export-dialog__status { align-items: flex-start; flex-direction: column; }
+  .soa-export-dialog__status span { text-align: left; }
+}

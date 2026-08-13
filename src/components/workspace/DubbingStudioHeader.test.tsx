@@ -16,6 +16,8 @@ function renderHeader(onClear = vi.fn()) {
       onOpenSettings={vi.fn()}
       sidePanelsCollapsed
       onToggleSidePanels={vi.fn()}
+      exportAvailable
+      onOpenExport={vi.fn()}
       onClear={onClear}
     />,
   )
@@ -92,12 +94,39 @@ describe('DubbingStudioHeader', () => {
         onOpenSettings={vi.fn()}
         sidePanelsCollapsed
         onToggleSidePanels={onToggleSidePanels}
+        exportAvailable
+        onOpenExport={vi.fn()}
         onClear={vi.fn()}
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: '프로 패널 펼치기' }))
+    fireEvent.click(screen.getByRole('button', { name: '사이드 패널 열기' }))
     expect(onToggleSidePanels).toHaveBeenCalledTimes(1)
+  })
+
+  it('완성본 내보내기는 별도 명시적 동작으로 연다', () => {
+    const onOpenExport = vi.fn()
+    render(
+      <DubbingStudioHeader
+        title="내보내기 테스트"
+        savedLabel="자동 저장됨"
+        downloadHref={null}
+        downloadName="voice.wav"
+        onTitleChange={vi.fn()}
+        onOpenClone={vi.fn()}
+        onOpenQuality={vi.fn()}
+        onOpenProjects={vi.fn()}
+        onOpenSettings={vi.fn()}
+        sidePanelsCollapsed={false}
+        onToggleSidePanels={vi.fn()}
+        exportAvailable
+        onOpenExport={onOpenExport}
+        onClear={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '완성본 내보내기' }))
+    expect(onOpenExport).toHaveBeenCalledTimes(1)
   })
 
 })

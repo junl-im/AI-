@@ -1,14 +1,26 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.14 · All Workflows Reliability Hardening**
+현재 기준 버전: **0.11.15 · PC Editor Clarity & Linked Timeline Player**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-13 10:28 KST**
+최종 갱신: **2026-08-13 15:46 KST 이후**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-13 KST · 0.11.15 PC Editor Clarity & Linked Timeline Player
+1. **작업 일시(KST)**: 2026-08-13 15:46 KST 이후.
+2. **대상 버전과 기준 버전**: 0.11.15 / 0.11.14 All Workflows Reliability Hardening + Web quality test hotfix 기준.
+3. **변경 내용**: PC Voice Core를 compact control strip으로 축소하고 Voice Picker를 중앙 compact modal로 개편했습니다. Timeline의 PC 순서를 대사 트랙→연계 플레이어→선택 클립 편집으로 바꾸고, 대사 트랙 아래에 Dock과 같은 player store를 쓰는 linked player를 추가했습니다. 좌우 사이드바 toggle을 패널 header/collapsed rail로 분리해 겹침을 없앴습니다. Timeline 내부 `최종 WAV + 자막` UI는 제거하고 상단 `내보내기` dialog로 옮겼습니다.
+4. **변경 이유**: PC 첫 화면의 Voice Core가 빈 대형 배너처럼 보이고, Voice Picker가 과도하게 큰 sheet로 떠 선택 부담이 컸습니다. Timeline에서도 전체 대사 맥락과 선택 클립 편집의 시각 순서가 뒤집혀 있었고, Dock이 화면 문맥상 멀어지는 상황이 있었습니다. 최종 export는 편집 기능과 완료 기능이 섞여 의미가 불분명했습니다.
+5. **영향 범위**: PC workspace header/Voice Picker/Voice Core/Timeline/side rails/final export, player store 소비 UI와 관련 테스트·dependency-free contract scripts입니다. TTS engine routing, 생성 API, audio payload, 저장 schema는 변경하지 않습니다. 모바일은 기존 Dock 흐름을 유지하고 새 inline player를 1024px 미만에서 숨깁니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/{TimelineLinkedPlayer,FinalExportDialog,TimelineEditor,DubbingStudioHeader,VoicePickerSheet,WorkspaceProjectRail,DesktopVoiceDrawer}.tsx`, `src/pages/HomePage.tsx`, `src/styles/{pc-editor-polish,pc-voice-polish}.css`, `src/tts/voicePresets.ts`, 관련 tests와 `scripts/check-{studio-playback-timeline-ux,mobile-studio-flow,one-flow-dubbing-ux,project-rules}.mjs`, `docs/PC_EDITOR_CLARITY_0_11_15.md`.
+7. **검증 결과**: 임시 Firebase public config를 `.env.example`에서 validation용으로만 복제한 뒤 삭제하고 Repository preflight 47/47을 통과했습니다. one-flow/mobile/project-rules/studio playback-timeline 계약과 changed TS/TSX transpile syntax 검사를 통과했습니다. 전체 Web Vitest/ESLint/semantic typecheck/Vite build는 이 sandbox의 npm dependency install이 `Exit handler never called!`로 실패해 재실행하지 못했으며 GitHub Actions가 최종 Web gate입니다.
+8. **알려진 제한과 주의사항**: `TimelineEditor.tsx`는 1,192줄, `useTimelineGeneration.ts`는 1,117줄이라 다음 버전에서 책임 분리가 필요합니다. Linked Player는 별도 audio element를 두지 않는 controller이므로 실제 오디오 재생 책임은 기존 Dock/player runtime에 유지됩니다. 승인 voice WAV/evidence pending 경고는 기존 제한입니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.15-pc-editor-clarity-full.zip`, `SoriON-AI-0.11.14-to-0.11.15-pc-editor-clarity-patch.zip`.
+10. **다음 예상 업데이트**: 0.11.16 Adaptive Longform Soak & Editor Responsibility Split. 0.11.15의 linked playback 단일 source of truth를 보존하면서 TimelineEditor/useTimelineGeneration 책임 분리와 장문 soak evidence를 진행합니다.
 
 ## 2026-08-13 KST · 0.11.14 All Workflows Reliability Hardening
 1. **작업 일시(KST)**: 2026-08-13 10:28 KST 이후.

@@ -483,3 +483,12 @@ Semantic Versioning을 사용한다.
 - 기준 버전: `0.11.13 · Focused Creation Surface`
 - 핵심 확인: GitHub Actions major 갱신, ref-safe manual concurrency, committed API/Worker uv lock gate, lock-hash npm cache, Dependabot uv/Actions 추적, 실패 evidence 보존
 - 삭제 대상: 없음
+## 0.11.15 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.11.15-pc-editor-clarity-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.11.14-to-0.11.15-pc-editor-clarity-patch.zip`
+- 기준 버전: `0.11.14 · All Workflows Reliability Hardening` + Web quality test hotfix
+- 핵심 확인: compact Voice Core/Voice Picker, dialogue track 우선 순서, Dock과 동일 store를 쓰는 Timeline Linked Player, 겹침 없는 sidebar toggle, Timeline에서 분리된 상단 final export
+- 삭제 대상: 없음
+- 다음 제품 버전: `0.11.16`
+

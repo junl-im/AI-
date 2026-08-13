@@ -150,14 +150,15 @@ describe('DubbingVoiceControls', () => {
     expect(onPreview).toHaveBeenCalledWith('on-clear')
   })
 
-  it('대본 추천과 각 목소리의 장점·주의점을 목록에서 비교한다', () => {
+  it('대본 추천과 간결한 목소리 설명을 목록에서 제공한다', () => {
     render(<DubbingVoiceControls {...baseProps} scriptText="이 기능의 사용법을 세 단계로 설명합니다." />)
 
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
     const recommendation = screen.getByRole('status')
     expect(recommendation).toHaveTextContent('대본 맞춤 추천')
     expect(recommendation).toHaveTextContent('도윤')
-    expect(screen.getAllByText(/장점 ·/).length).toBeGreaterThan(0)
-    expect(screen.getAllByText(/주의 ·/).length).toBeGreaterThan(0)
+    expect(screen.getByText('또렷하고 안정적인 남성 톤')).toBeInTheDocument()
+    expect(screen.queryByText(/장점 ·/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/주의 ·/)).not.toBeInTheDocument()
   })
 })
