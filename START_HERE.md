@@ -1,6 +1,6 @@
 # START HERE
 
-현재 버전: `0.11.12 · Editing History, Speaker Memory & Engine Routing Trace`
+현재 버전: `0.11.13 · Focused Creation Surface`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.

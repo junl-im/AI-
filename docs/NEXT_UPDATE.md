@@ -1,31 +1,23 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.12 · Editing History, Speaker Memory & Engine Routing Trace`
+현재 기준: `0.11.13 · Focused Creation Surface`
 
-## 현재 안정화 선행 조건
+## 이번 패치에서 고정한 결정
 
-- GitHub Actions #101에서 확인된 중복 요소 단일 조회 2건은 `0.11.12 Web quality duplicate-query hotfix`로 수정했습니다.
-- 새 Actions run에서 Web quality가 녹색이 되기 전에는 0.11.13 기능 변경을 Push하지 않습니다.
-- hotfix는 제품 UI를 축소하지 않고 접근성 role/영역 기반 테스트 selector만 교정합니다.
+- 기본 제작 화면은 `목소리 → 텍스트 → 생성 및 재생`을 가장 먼저 보여 줍니다.
+- 고급 음성 설정, 프로젝트 rail, Voice Drawer, Timeline Editor는 삭제하지 않고 on-demand로 유지합니다.
+- Fish Audio는 기능/정보 구조 단순화의 참고 대상이며 UI 복제나 외부 유료 API 의존성 추가 대상이 아닙니다.
+- 장문 생성 동시성 상한은 실제 soak evidence 전까지 2를 유지합니다.
 
 ## 목표 버전
 
-`0.11.13 · Adaptive Longform Soak & Mobile Editing Polish`
+`0.11.14 · Adaptive Longform Soak & Editor Responsibility Split`
 
 ### 우선순위
 
-1. 2-way bounded parallel을 실제 장문/다중 화자 soak에서 반복해 P95 지연·실패율·engine switch/fallback 빈도를 evidence로 남깁니다.
-2. routing trace를 기반으로 동시성 상향이 안전한 조건과 오히려 1-way로 낮춰야 하는 조건을 정의하되 실제 측정 전 자동 상향은 하지 않습니다.
-3. 모바일 360/390/430px에서 Undo/Redo, voice sheet, composer keyboard, horizontal timeline의 실제 Chromium 레이아웃을 별도 회귀로 추가합니다.
-4. speaker memory 관리 UI(최근 배정 보기/삭제)를 개인정보 최소 원칙으로 검토합니다.
-5. TimelineEditor와 useTimelineGeneration의 비대화된 책임을 history/orchestration 단위로 추가 분리합니다.
+1. 2-way bounded parallel을 장문/다중 화자 실측에서 반복해 P95 지연·실패율·engine switch/fallback 빈도를 evidence로 남깁니다.
+2. routing trace 기반으로 1-way로 낮출 조건과 향후 동시성 상향 검토 조건을 문서화합니다.
+3. `TimelineEditor.tsx`의 selection/history/clip rendering/command 책임을 분리합니다.
+4. `useTimelineGeneration.ts`의 orchestration/recovery/player sync를 분리합니다.
+5. 모바일 360/390/430px에서 Composer action row, voice sheet, keyboard, horizontal timeline visual regression을 강화합니다.
 6. 승인 Chromium baseline PNG와 SHA manifest가 확보된 경우에만 pixel baseline을 CI 필수 gate로 승격합니다.
-
-## 0.11.12에서 고정한 결정
-
-- Undo/Redo history 상한은 20개입니다.
-- 폐기된 음원 URL/job은 Undo로 복원하지 않습니다.
-- 화자 배정 기억에는 대본·화자 원문·오디오·job/error를 저장하지 않습니다.
-- 최근 화자 배정은 제안이며 사용자 확인 없이 생성에 자동 적용하지 않습니다.
-- 엔진 routing trace는 관측 자료이며 음질 benchmark가 아닙니다.
-- 장문 동시성 상한은 실제 soak evidence 전까지 2를 유지합니다.

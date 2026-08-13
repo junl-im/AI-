@@ -316,9 +316,9 @@ await requireText('src/pages/LandingHome.tsx', [
 await requireText('src/components/workspace/LongformComposer.tsx', [
   'MAX_DUBBING_SCRIPT_LENGTH',
   '음성으로 만들 장문 내용',
-  '여기에 더빙할 문장을 입력하거나 붙여 넣으세요.',
+  '읽을 텍스트를 입력하거나 붙여 넣으세요.',
   '전체 내용 음성 제작',
-  '대본만 넣으면 바로 더빙',
+  '텍스트를 음성으로',
 ])
 await requireText('src/components/workspace/VoiceLibrary.tsx', [
   '목소리 라이브러리',

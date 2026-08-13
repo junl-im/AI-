@@ -216,9 +216,9 @@ export function LongformComposer({
     <section className="soa-dubbing-script soa-one-flow-composer" aria-labelledby="dubbing-script-title">
       <div className="soa-one-flow-composer__heading">
         <div>
-          <span>ONE-FLOW DUBBING</span>
-          <h1 id="dubbing-script-title">대본만 넣으면 바로 더빙</h1>
-          <p>목소리를 고르고 대본을 입력한 뒤 한 번만 누르세요. 문장 분할과 생성 순서는 자동으로 처리합니다.</p>
+          <span>TEXT TO SPEECH</span>
+          <h1 id="dubbing-script-title">텍스트를 음성으로</h1>
+          <p>목소리를 고르고 대본을 입력하세요. 문장 분할부터 생성 순서, 첫 재생까지 자동으로 이어집니다.</p>
         </div>
         <span className="soa-one-flow-composer__shortcut" aria-label="제작 단축키">⌘/Ctrl + Enter</span>
       </div>
@@ -244,7 +244,7 @@ export function LongformComposer({
           onFocus={alignEditorAfterFocus}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
-          placeholder={'여기에 더빙할 문장을 입력하거나 붙여 넣으세요.\n\n긴 글도 그대로 붙여 넣으면 문장별로 자동 정리합니다.'}
+          placeholder={'읽을 텍스트를 입력하거나 붙여 넣으세요.\n\n긴 대본도 그대로 넣으면 문장별로 자동 나눕니다.'}
           aria-label="음성으로 만들 장문 내용"
           rows={9}
           maxLength={MAX_DUBBING_SCRIPT_LENGTH}
@@ -252,11 +252,11 @@ export function LongformComposer({
         />
         <div className="soa-dubbing-script__stats" aria-label="내용 통계">
           <span>{value.length.toLocaleString()} / {MAX_DUBBING_SCRIPT_LENGTH.toLocaleString()}자</span>
-          <span>{stats.paragraphs}개 문단</span>
           <span>{stats.segments}개 대사</span>
-          {stats.speakers > 0 ? <span>{stats.speakers}명 화자 표기 감지</span> : null}
-          <span className="soa-one-flow-composer__auto">자동 문장 분할</span>
-          <span>TXT · SRT · VTT 바로 불러오기</span>
+          {stats.speakers > 0 ? <span>{stats.speakers}명 화자</span> : null}
+          <span className="soa-one-flow-composer__auto">자동 분할</span>
+          <span className="soa-one-flow-composer__stat-detail">{stats.paragraphs}개 문단</span>
+          <span className="soa-one-flow-composer__stat-detail">TXT · SRT · VTT</span>
           <strong>{formatDuration(stats.durationSeconds)}</strong>
         </div>
       </div>
@@ -281,8 +281,9 @@ export function LongformComposer({
           className="soa-one-flow-composer__blank"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled}
+          aria-label="⇧ 대본 파일 불러오기"
         >
-          ⇧ 대본 파일 불러오기
+          ⇧ 파일
         </button>
         <button
           type="button"
@@ -290,8 +291,9 @@ export function LongformComposer({
           onClick={polishCurrentScript}
           disabled={disabled || value.trim().length === 0}
           title="자막 타임코드, Markdown 목록 기호, 불필요한 공백을 말하기 좋은 대본 형태로 정리합니다."
+          aria-label="✦ 말하기 좋게 정리"
         >
-          ✦ 말하기 좋게 정리
+          ✦ 대본 정리
         </button>
         {onPreviewText ? (
           <button
@@ -299,13 +301,20 @@ export function LongformComposer({
             className="soa-one-flow-composer__blank is-preview"
             onClick={previewFirstSegment}
             disabled={disabled || value.trim().length === 0}
+            aria-label="▶ 첫 문장 미리듣기"
           >
-            ▶ 첫 문장 미리듣기
+            ▶ 첫 문장 듣기
           </button>
         ) : null}
         {onAddBlank ? (
-          <button type="button" className="soa-one-flow-composer__blank" onClick={onAddBlank} disabled={disabled}>
-            ＋ 빈 대사부터 직접 편집
+          <button
+            type="button"
+            className="soa-one-flow-composer__blank"
+            onClick={onAddBlank}
+            disabled={disabled}
+            aria-label="＋ 빈 대사부터 직접 편집"
+          >
+            ＋ 빈 대사
           </button>
         ) : null}
       </div>
@@ -357,10 +366,10 @@ export function LongformComposer({
         onClick={submit}
         aria-label="전체 내용 음성 제작 · 더빙 만들기"
       >
-        <span>{disabled ? '더빙 만드는 중…' : submitBlockedReason ? '화자 목소리 확인 필요' : '▶ 바로 더빙 만들기'}</span>
+        <span>{disabled ? '생성 중…' : submitBlockedReason ? '화자 목소리 확인 필요' : '▶ 생성 및 재생'}</span>
         <small>
           {stats.segments > 0
-            ? `${stats.segments}개 대사 안전 병렬 생성 · 첫 음성 자동 재생 · 순서 자동 유지`
+            ? `${stats.segments}개 대사 · 자동 분할 · 첫 음성 재생 · 순서 유지`
             : '대본을 입력하면 바로 시작할 수 있습니다.'}
         </small>
       </button>

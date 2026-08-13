@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.11.13 · Focused Creation Surface
+
+- Fish Audio의 현재 제품 흐름에서 `텍스트 입력 → 목소리 → Generate & play`, 고급 설정의 보조 배치, Voice Library/Cloning의 분리라는 단순화 원칙을 참고해 중앙 제작 화면을 재정리했습니다.
+- Composer의 중심 문구를 `텍스트를 음성으로`로 바꾸고 기본 CTA를 `생성 및 재생`으로 단순화했습니다. 기존 첫 음성 자동 재생, 장문 분할, 2-way bounded parallel, 재생 순서 복원 계약은 그대로 유지합니다.
+- 프로젝트 제목/상단 도구/Composer card의 시각 무게를 줄이고 다중 그라디언트와 중첩 그림자를 제거해 텍스트 입력 영역을 첫 시선 영역으로 올렸습니다.
+- 파일 불러오기·대본 정리·첫 문장 듣기·빈 대사는 짧은 보조 action으로 축소하고 접근성 이름은 유지했습니다.
+- 모바일에서는 문단 수와 파일 형식 같은 2차 통계를 숨기고 보조 action을 가로 스크롤 한 줄로 유지해 360/390/430px에서 편집 폭을 우선합니다.
+- One-Flow dependency-free gate와 Vitest 계약에 `텍스트를 음성으로`, `생성 및 재생`, 새 placeholder를 추가했습니다.
+- 앱·API·Worker 제품 버전을 0.11.13으로 동기화했습니다.
+
 ## 0.11.12 · Editing History, Speaker Memory & Engine Routing Trace
 
 ### Web quality duplicate-query hotfix · 2026-08-12

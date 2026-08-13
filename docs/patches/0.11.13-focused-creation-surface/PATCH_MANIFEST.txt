@@ -1,0 +1,57 @@
+SoriON AI 0.11.13 patch manifest
+base: 0.11.12 Editing History, Speaker Memory & Engine Routing Trace
+version: 0.11.13
+added: 5
+changed: 31
+removed: 0
+total patch files: 36
+
+validation:
+- repository preflight 47/47 PASS
+- product version sync PASS
+- one-flow dubbing UX contract PASS
+- project rules PASS
+- npm semantic typecheck / Vitest / Vite build: not run in this sandbox because npm registry packages were unavailable
+
+added files:
+- docs/FOCUSED_CREATION_SURFACE.md
+- docs/patches/0.11.13-focused-creation-surface/DELETE_LIST.txt
+- docs/patches/0.11.13-focused-creation-surface/PATCH_MANIFEST.txt
+- docs/patches/0.11.13-focused-creation-surface/PATCH_README.md
+- src/styles/focused-creation-surface.css
+
+changed files:
+- APPLY_PATCH.cmd
+- APPLY_PATCH.sh
+- FOUNDATION_REPORT.md
+- PATCH_MANIFEST.txt
+- README.md
+- START_HERE.md
+- VERSION
+- docs/CHANGELOG.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/ROADMAP.md
+- package-lock.json
+- package.json
+- scripts/check-one-flow-dubbing-ux.mjs
+- scripts/check-project-rules.mjs
+- services/api/pyproject.toml
+- services/api/tests/test_ai_director.py
+- services/api/tests/test_connectivity.py
+- services/api/tests/test_engine_catalog.py
+- services/api/tests/test_engine_strategy.py
+- services/api/tests/test_evidence.py
+- services/api/tests/test_health.py
+- services/api/tests/test_quality.py
+- services/api/tests/test_setup.py
+- services/api/uv.lock
+- services/worker/pyproject.toml
+- services/worker/uv.lock
+- src/components/workspace/LongformComposer.test.tsx
+- src/components/workspace/LongformComposer.tsx
+- src/styles/index.css
+- src/update/buildInfo.ts
+
+removed files:
+- none

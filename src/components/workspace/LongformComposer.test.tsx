@@ -10,6 +10,25 @@ const activity = {
 }
 
 describe('LongformComposer', () => {
+  it('핵심 제작 경로는 텍스트 입력과 생성 및 재생을 우선한다', () => {
+    render(
+      <LongformComposer
+        disabled={false}
+        value="안녕하세요."
+        activity={activity}
+        onValueChange={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('heading', { name: '텍스트를 음성으로' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /전체 내용 음성 제작/ })).toHaveTextContent('생성 및 재생')
+    expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })).toHaveAttribute(
+      'placeholder',
+      expect.stringContaining('읽을 텍스트를 입력하거나 붙여 넣으세요.'),
+    )
+  })
+
   it('일반 작업 화면에는 엔진 연결 기술 상태를 노출하지 않는다', () => {
     render(
       <LongformComposer

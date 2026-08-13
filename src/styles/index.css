@@ -17,6 +17,7 @@
 @import "./voice-clone.css";
 @import "./clone-execution.css";
 @import "./creation-workspace.css";
+@import "./focused-creation-surface.css";
 
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

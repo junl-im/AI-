@@ -1,0 +1,315 @@
+/* 0.11.13 Focused Creation Surface -------------------------------------------------
+   Fish Audio의 '입력 → 목소리 → 생성/재생'처럼 핵심 경로만 먼저 보이게 하되,
+   SoriON 고유의 장문 분할·타임라인·로컬 엔진 기능은 그대로 유지한다. */
+.soa-dubbing-workspace {
+  background: #0d0f12;
+}
+
+.soa-dubbing-header {
+  width: min(100%, 900px);
+  padding: 14px 18px 4px;
+}
+
+.soa-dubbing-project-title {
+  align-items: center;
+}
+
+.soa-dubbing-project-title__copy {
+  grid-template-columns: minmax(0, auto) 28px;
+}
+
+.soa-dubbing-project-title input {
+  width: min(62vw, 560px);
+  font-size: clamp(18px, 3vw, 23px);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+}
+
+.soa-dubbing-project-title__copy > button {
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+}
+
+.soa-dubbing-project-title p {
+  margin-top: 3px;
+  font-size: 9px;
+}
+
+.soa-dubbing-toolbar__actions > button,
+.soa-dubbing-toolbar__actions > a,
+.soa-dubbing-more__trigger {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 17px;
+}
+
+.soa-dubbing-main {
+  width: min(100%, 900px);
+  padding: 12px 18px 120px;
+}
+
+.soa-one-flow-composer {
+  border-color: rgba(255, 255, 255, 0.065);
+  border-radius: 16px;
+  padding: 14px;
+  background: #111419;
+  box-shadow: none;
+}
+
+.soa-one-flow-composer__heading {
+  align-items: center;
+  margin-bottom: 9px;
+}
+
+.soa-one-flow-composer__heading span:first-child {
+  color: rgba(216, 255, 114, 0.7);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.soa-one-flow-composer__heading h1 {
+  margin-top: 3px;
+  font-size: clamp(18px, 3vw, 22px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.soa-one-flow-composer__heading p {
+  max-width: 600px;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.soa-one-flow-composer__shortcut {
+  border-color: rgba(255, 255, 255, 0.06);
+  padding: 6px 9px;
+  background: transparent;
+  font-size: 7px !important;
+}
+
+.soa-one-flow-composer__voice {
+  margin-bottom: 8px;
+  border: 0;
+  border-radius: 12px;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.soa-one-flow-composer__voice .soa-dubbing-voice-row {
+  grid-template-columns: minmax(0, 1fr) 40px 40px;
+  gap: 5px;
+}
+
+.soa-one-flow-composer__voice .soa-dubbing-voice-choice {
+  min-height: 44px;
+}
+
+.soa-one-flow-composer__voice .soa-dubbing-voice-choice .soa-voice-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+.soa-one-flow-composer__voice .soa-dubbing-voice-choice strong {
+  font-size: 13px;
+}
+
+.soa-one-flow-composer__voice .soa-dubbing-voice-row > button:not(.soa-dubbing-voice-choice) {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.soa-one-flow-composer .soa-dubbing-script__editor {
+  border-color: rgba(255, 255, 255, 0.11);
+  border-radius: 13px;
+  background: #0b0d10;
+  box-shadow: none;
+}
+
+.soa-one-flow-composer .soa-dubbing-script__editor:focus-within {
+  border-color: rgba(216, 255, 114, 0.48);
+  box-shadow: 0 0 0 3px rgba(216, 255, 114, 0.045);
+}
+
+.soa-one-flow-composer .soa-dubbing-script__editor textarea {
+  min-height: 240px;
+  padding: 18px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.soa-dubbing-script__stats {
+  gap: 6px 9px;
+  padding: 8px 10px;
+  color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.018);
+  font-size: 8px;
+}
+
+.soa-one-flow-composer__auto {
+  padding: 2px 6px;
+  color: rgba(201, 251, 220, 0.8);
+  background: rgba(83, 218, 155, 0.055);
+}
+
+.soa-one-flow-composer__activity {
+  grid-template-columns: auto minmax(0, 1fr);
+  margin-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.045);
+  border-radius: 0;
+  padding: 8px 2px 4px;
+}
+
+.soa-one-flow-composer__activity > span {
+  padding: 3px 6px;
+  color: rgba(216, 255, 114, 0.78);
+  background: rgba(216, 255, 114, 0.055);
+}
+
+.soa-one-flow-composer__activity p {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 9px;
+}
+
+.soa-one-flow-composer__actions {
+  justify-content: flex-start;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.soa-one-flow-composer__blank {
+  min-height: 32px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0 9px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 8px;
+}
+
+.soa-one-flow-composer__blank:hover {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.soa-one-flow-composer__blank.is-preview {
+  color: rgba(233, 255, 192, 0.88);
+  background: transparent;
+}
+
+.soa-one-flow-composer__generate {
+  min-height: 52px;
+  margin-top: 8px;
+  border-radius: 12px;
+  padding: 0 14px;
+  background: #d8ff72;
+  box-shadow: none;
+}
+
+.soa-one-flow-composer__generate:hover:not(:disabled) {
+  filter: brightness(1.03);
+}
+
+.soa-one-flow-composer__generate span {
+  font-size: 13px;
+}
+
+.soa-one-flow-composer__generate small {
+  color: rgba(17, 21, 11, 0.56);
+  font-size: 8px;
+}
+
+.soa-workspace-conversation {
+  margin-top: 5px;
+}
+
+.soa-workspace-conversation > summary {
+  min-height: 34px;
+  padding-inline: 8px;
+}
+
+@media (min-width: 1024px) {
+  .soa-one-flow-composer {
+    padding: 15px;
+  }
+  .soa-one-flow-composer__heading h1 {
+    font-size: 22px;
+  }
+  .soa-one-flow-composer .soa-dubbing-script__editor textarea {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 620px) {
+  .soa-dubbing-header {
+    padding: 10px 14px 2px;
+  }
+  .soa-dubbing-project-title input {
+    width: min(56vw, 340px);
+    font-size: 18px;
+  }
+  .soa-dubbing-main {
+    padding: 9px 14px 112px;
+  }
+  .soa-one-flow-composer {
+    margin-inline: -14px;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    padding: 12px 14px;
+  }
+  .soa-one-flow-composer__heading p {
+    max-width: 92%;
+  }
+  .soa-one-flow-composer__shortcut {
+    display: none;
+  }
+  .soa-one-flow-composer .soa-dubbing-script__editor textarea {
+    min-height: 210px;
+    padding: 15px;
+    font-size: 15px;
+  }
+  .soa-one-flow-composer__stat-detail {
+    display: none;
+  }
+  .soa-one-flow-composer__actions {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .soa-one-flow-composer__actions::-webkit-scrollbar {
+    display: none;
+  }
+  .soa-one-flow-composer__blank {
+    flex: 0 0 auto;
+  }
+  .soa-one-flow-composer__generate {
+    min-height: 56px;
+    padding: 10px 13px;
+  }
+}
+
+/* 0.11.13 Focused Creation Surface: editor chrome stays quiet so creation owns attention. */
+.soa-app-root.is-editor {
+  background: #0d0f12;
+}
+
+.soa-compact-header {
+  min-height: 50px;
+  padding-block: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+  background: rgba(13, 15, 18, 0.92);
+}
+
+.soa-settings-button,
+.soa-intro-button {
+  min-height: 36px;
+  padding-inline: 11px;
+  background: rgba(255, 255, 255, 0.035);
+}

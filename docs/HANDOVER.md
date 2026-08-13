@@ -1,15 +1,19 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.12 · Editing History, Speaker Memory & Engine Routing Trace**
+현재 기준 버전: **0.11.13 · Focused Creation Surface**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-12 17:45 KST**
+최종 갱신: **2026-08-13 10:20 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
-
+## 2026-08-13 KST · 0.11.13 Focused Creation Surface
+- **기준/변경**: 2026-08-13 10:20 KST · 0.11.12 → 0.11.13. 중앙 Composer를 `텍스트를 음성으로`, CTA를 `생성 및 재생`으로 단순화하고 header/card/shadow/gradient와 모바일 2차 통계를 축소했습니다.
+- **Fish Audio 참고**: 큰 입력 surface, 현재 voice 선택, `Generate & play`, advanced settings/history/library/cloning의 보조 배치 원칙만 참고했습니다. UI 복제나 Fish Audio API/Secret 의존성은 추가하지 않았습니다.
+- **보존/검증**: 첫 음성 자동 재생, 최대 2-way bounded parallel, 순서 복원, Multi-Speaker Assist, Timeline, speaker memory, engine routing, free-only 정책 유지. dependency-free preflight 47/47, version sync, One-Flow, project rules 통과. npm registry 미사용 환경이라 semantic `tsc`/Vitest/Vite build는 최종 CI 확인 대상입니다.
+- **다음**: 0.11.14 Adaptive Longform Soak & Editor Responsibility Split. `TimelineEditor.tsx`, `useTimelineGeneration.ts` 분리와 360/390/430px 실제 Chromium 회귀 우선.
 ## 2026-08-12 KST · 0.11.12 Web quality duplicate-query hotfix
 1. **작업 일시(KST)**: 2026-08-12 17:45 KST.
 2. **대상 버전과 기준 버전**: 제품 버전 0.11.12 유지 / GitHub commit `3fffe1e8531d79b984809d23859629f7212ceecc` (Undo/Redo test hotfix 적용본) 기준.
@@ -31,7 +35,6 @@
 - 동시성은 최대 2를 유지하며 실제 soak evidence 전 자동 상향하지 않습니다.
 - 전용 계약: `scripts/check-edit-history-speaker-routing.mjs`.
 - 상세 설계: `docs/EDITING_HISTORY_SPEAKER_MEMORY_ENGINE_TRACE.md`.
-
 ## 0.11.11 Mobile Studio Flow & Natural Voice Playback
 1. **작업 일시/기준**: 2026-08-12 14:13 KST 이후 · 0.11.10 Horizontal Timeline Workspace 기준.
 3. **핵심 변경**: 모바일 홈 Player+Dock 일관화, 현재 voice 1개+Sheet 비교, preset 상황/장점/주의점, preview-only, 대본 추천/운율 범위 보정, composer 상단 정렬, 모바일 horizontal timeline full-width, 생성 음성 play 상태 즉시 연결.
@@ -42,7 +45,6 @@
 ## 0.11.10 Horizontal Timeline Workspace
 - PC ruler·clip·playhead를 동일 time-to-pixel X축으로 통일하고 duration 비례 가로 clip strip, track/ruler scrub, clip selection/reorder 분리를 도입했습니다.
 - 검증은 preflight 45/45, API 219/219, Worker 14/14, TS/TSX 213/213, overlay 933/933이며 자세한 내용은 `docs/HORIZONTAL_TIMELINE_WORKSPACE.md`와 당시 `FOUNDATION_REPORT.md` 기록을 따릅니다.
-
 ## 0.11.8 Fast One-Flow & Safe Parallel Generation
 
 1. **작업 일시(KST)**: 2026-08-11 11:05 이후.
@@ -55,7 +57,6 @@
 8. **알려진 제한과 주의사항**: 병렬도는 최대 2이며 장시간 soak에서 실패율·P95·engine switching 영향을 추가 검증해야 합니다. `말하기 좋게 정리`는 의미를 AI로 재작성하지 않습니다. 명시적 `화자: 대사`는 현재 수만 감지하고 자동 voice 배정은 하지 않습니다. 승인 Chromium baseline이 없으므로 baseline-required CI는 아직 강제하지 않습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.8-fast-one-flow-safe-parallel-full.zip`, `SoriON-AI-0.11.7-to-0.11.8-fast-one-flow-safe-parallel-patch.zip`.
 10. **다음 예상 업데이트**: 0.11.9 Multi-Speaker Assist & Approved Visual Baseline. 명시적 화자 라벨 기반 승인형 voice mapping, clip-level voice 저장/복원, 0.11.8 bounded-parallel soak evidence, 승인된 1024/1280/1440 Chromium baseline gate와 생성 중지 후 남은 대사 원클릭 재개를 검토합니다.
-
 ## 0.11.7 One-Flow Dubbing UX
 
 1. **작업 일시(KST)**: 2026-08-10 17:12 이후.
@@ -68,7 +69,6 @@
 8. **레이아웃 계약**: `sorion.desktop-studio-layout.v3`, 새 기본은 양쪽 collapsed이며 1024/1280/1440 center 예상 폭은 900/1156/1316입니다.
 9. **검증**: 최종 검증 수치는 `FOUNDATION_REPORT.md`를 따른다. 승인 Chromium pixel baseline 강제는 여전히 별도 0.11.8 범위다.
 10. **다음 업데이트**: 0.11.8 Approved Visual Baseline & Engine Soak Provenance.
-
 ## 0.11.6 Recovery Evidence Classification & Session Safety
 
 1. **작업 일시(KST)**: 2026-08-10 16:27 이후.
@@ -79,7 +79,6 @@
 6. **검증**: recovery/evidence 집중 API 30/30, 전체 API 219/219, Worker 14/14, Python compileall, dependency-free TS/TSX 201/201과 계약 검사를 통과했습니다. Repository preflight 42/42와 0.11.5 visual-runner hotfix 기준본 + 48파일 overlay 897/897 files · missing 0 / extra 0 / changed 0을 통과했습니다.
 7. **제한**: 승인 Chromium baseline PNG는 아직 없으므로 baseline-required CI는 강제하지 않습니다. active-request engine routing 장시간 soak와 구조 변경 snapshot Undo는 미완료입니다.
 8. **다음 업데이트**: 0.11.7 Approved Visual Baseline Enforcement & Engine Soak Provenance.
-
 ## 0.11.3 Failure-Guided Editing & Adaptive Performance Routing
 
 1. **작업 일시(KST)**: 2026-08-07 18:12 이후.

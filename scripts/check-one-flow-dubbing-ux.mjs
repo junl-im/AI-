@@ -42,17 +42,19 @@ requireTokens('src/pages/HomePage.tsx', home, [
 
 const composer = await source('src/components/workspace/LongformComposer.tsx')
 requireTokens('src/components/workspace/LongformComposer.tsx', composer, [
-  'ONE-FLOW DUBBING',
-  '대본만 넣으면 바로 더빙',
-  '자동 문장 분할',
+  'TEXT TO SPEECH',
+  '텍스트를 음성으로',
+  '자동 분할',
   '전체 내용 음성 제작 · 더빙 만들기',
-  '첫 음성 자동 재생',
+  '첫 음성 재생',
   '⌘/Ctrl + Enter',
   'normalizeImportedScript',
   '대본 파일 불러오기',
   '.srt,.vtt',
   '말하기 좋게 정리',
   '첫 문장 미리듣기',
+  '▶ 생성 및 재생',
+  '읽을 텍스트를 입력하거나 붙여 넣으세요.',
   'role="progressbar"',
   '생성 중지',
   '남은 {resumeCount}개 이어서 만들기',
@@ -166,6 +168,7 @@ requireTokens('src/styles/one-flow-dubbing.css', css, [
 
 const composerTests = await source('src/components/workspace/LongformComposer.test.tsx')
 requireTokens('src/components/workspace/LongformComposer.test.tsx', composerTests, [
+  '핵심 제작 경로는 텍스트 입력과 생성 및 재생을 우선한다',
   'Ctrl+Enter로 현재 장문 내용을 제작 요청한다',
   '현재 대본의 첫 문장을 별도 생성 없이 미리듣기 요청한다',
   '긴 대본 생성 중에는 완료 수와 중지 동작을 같은 화면에서 제공한다',
