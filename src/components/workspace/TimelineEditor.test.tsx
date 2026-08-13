@@ -417,6 +417,10 @@ it('다중 선택 command bar는 재생성·Undo/Redo·삭제 안전 확인을 �
       onUndo={onUndo}
       onRedo={onRedo}
       onClear={vi.fn()}
+      canUndo
+      canRedo
+      undoLabel="선택 클립 이동"
+      redoLabel="대사 수정"
     />,
   )
 
