@@ -1,14 +1,22 @@
 # CHANGELOG
 
+## 0.11.14 · All Workflows Reliability Hardening
+
+- GitHub Actions action major를 2026-08 공식 릴리스 기준으로 갱신했습니다: checkout v7, setup-python v7, upload-artifact v7, download-artifact v8, cache v6.
+- 수동 workflow concurrency group에 ref/PR 식별자를 항상 포함하고 lock 생성/soak를 maintenance run으로 분리해 서로 다른 branch 충돌을 막고 같은 ref의 maintenance run은 취소하지 않도록 했습니다.
+- npm registry cache를 lock hash 기반 안정 key로 바꾸고 exact cache hit에서는 save를 건너뛰어 run-id별 cache 누적을 줄였습니다.
+- 일반 Push/PR에서 `services/api/uv.lock`, `services/worker/uv.lock`이 없을 때 자동 생성하지 않고 명확히 실패하도록 변경했습니다. lock 생성은 `workflow_dispatch + generate_lockfiles=true`에서만 허용합니다.
+- Dependabot에 API/Worker `uv` ecosystem과 `github-actions` 추적을 추가했습니다.
+- preflight/Web/runtime soak evidence 경로를 checkout 직후 초기화하고, recovery drill이 시작되지 않은 실패 경로에서는 60초 evidence wait를 건너뛰도록 했습니다.
+- CI 계약 검사에 Action major, uv lock gate, cache key, manual concurrency, Dependabot 범위를 추가해 동일 회귀를 preflight에서 차단합니다.
+- 0.11.13 전달에서 누락됐던 CHANGELOG 항목을 복구해 repository preflight의 현재 버전 계약을 정상화했습니다.
+
 ## 0.11.13 · Focused Creation Surface
 
-- Fish Audio의 현재 제품 흐름에서 `텍스트 입력 → 목소리 → Generate & play`, 고급 설정의 보조 배치, Voice Library/Cloning의 분리라는 단순화 원칙을 참고해 중앙 제작 화면을 재정리했습니다.
-- Composer의 중심 문구를 `텍스트를 음성으로`로 바꾸고 기본 CTA를 `생성 및 재생`으로 단순화했습니다. 기존 첫 음성 자동 재생, 장문 분할, 2-way bounded parallel, 재생 순서 복원 계약은 그대로 유지합니다.
-- 프로젝트 제목/상단 도구/Composer card의 시각 무게를 줄이고 다중 그라디언트와 중첩 그림자를 제거해 텍스트 입력 영역을 첫 시선 영역으로 올렸습니다.
-- 파일 불러오기·대본 정리·첫 문장 듣기·빈 대사는 짧은 보조 action으로 축소하고 접근성 이름은 유지했습니다.
-- 모바일에서는 문단 수와 파일 형식 같은 2차 통계를 숨기고 보조 action을 가로 스크롤 한 줄로 유지해 360/390/430px에서 편집 폭을 우선합니다.
-- One-Flow dependency-free gate와 Vitest 계약에 `텍스트를 음성으로`, `생성 및 재생`, 새 placeholder를 추가했습니다.
-- 앱·API·Worker 제품 버전을 0.11.13으로 동기화했습니다.
+- 첫 제작 화면을 `목소리 → 텍스트 → 생성 및 재생` 중심으로 단순화하고 보조 작업은 낮은 시각 우선순위로 이동했습니다.
+- 기존 다중 화자, Timeline, Undo/Redo, Engine routing, 최대 2-way bounded parallel 생성은 유지했습니다.
+- `focused-creation-surface.css`로 시각 변경을 분리해 기존 대형 CSS의 추가 비대화를 줄였습니다.
+- Fish Audio는 UI 복제가 아니라 큰 입력 영역, 명확한 voice 선택, 생성+청취 CTA의 정보 구조만 참고했습니다.
 
 ## 0.11.12 · Editing History, Speaker Memory & Engine Routing Trace
 

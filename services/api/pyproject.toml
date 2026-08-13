@@ -1,6 +1,6 @@
 [project]
 name = "sorion-api"
-version = "0.11.13"
+version = "0.11.14"
 description = "SoriON AI engine gateway"
 requires-python = ">=3.10,<3.13"
 dependencies = [

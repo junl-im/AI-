@@ -392,7 +392,7 @@ Semantic Versioning을 사용한다.
 - 덮어쓰기용 패치 ZIP: `SoriON-AI-0.9.3-beta.1-ci-hotfix-1-to-ci-hotfix-2-patch.zip`
 - 기준 버전: `0.9.3-beta.1 CI Hotfix 1`
 - 목적: Ruff I001, Web TypeScript mock 호출 타입, React Hook 의존성과 Node 20 Artifact Action 경고 수정
-- Artifact Action: `actions/upload-artifact@v6`, `actions/download-artifact@v7`
+- Artifact Action: `actions/upload-artifact@v7`, `actions/download-artifact@v8`
 - 삭제 파일: 없음
 
 ## 0.9.3-beta.2
@@ -475,3 +475,11 @@ Semantic Versioning을 사용한다.
 - 삭제 파일: 없음
 - 다음 제품 버전: `0.10.3`
 
+
+## 0.11.14 릴리스
+
+- 전체 통파일 ZIP: `SoriON-AI-0.11.14-all-workflows-hardening-full.zip`
+- 덮어쓰기용 패치 ZIP: `SoriON-AI-0.11.13-to-0.11.14-all-workflows-hardening-patch.zip`
+- 기준 버전: `0.11.13 · Focused Creation Surface`
+- 핵심 확인: GitHub Actions major 갱신, ref-safe manual concurrency, committed API/Worker uv lock gate, lock-hash npm cache, Dependabot uv/Actions 추적, 실패 evidence 보존
+- 삭제 대상: 없음

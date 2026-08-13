@@ -11,12 +11,12 @@ API·Worker 품질 결과가 함께 가려지지 않으며, 각 품질 작업은
 
 ## 독립 생성과 검증
 
-- 일반 push·PR은 커밋된 package-lock을 verify-only로 검사한다. lock이 없거나 stale이면 즉시 실패한다.
+- 일반 push·PR은 커밋된 `package-lock.json`, `services/api/uv.lock`, `services/worker/uv.lock`을 verify-only로 검사한다. 어느 lock이든 없거나 stale이면 해당 component가 즉시 실패한다.
 - CI는 소스를 수정하거나 lock을 자동 커밋하지 않는다.
 - 수동 Actions의 `generate_lockfiles=true`는 의도적인 전체 갱신에만 사용한다.
 - `GENERATE_WEB_LOCK.cmd`·`.sh`는 registry 장애 시 선택적으로 사용하는 로컬 복구 수단이다.
 - lock이 있으면 manifest 일치, `npm ci`, 전체 dependency tree를 검증한다.
-- API와 Worker는 별도 `uv lock`, `uv lock --check`, `uv sync --locked` 경로를 유지한다.
+- API와 Worker는 일반 실행에서 `uv lock --check`, `uv sync --locked`만 사용하며, `uv lock` 생성은 수동 `generate_lockfiles=true`에서만 수행한다.
 
 ## lock 증명
 

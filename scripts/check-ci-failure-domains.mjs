@@ -13,11 +13,19 @@ for (const token of [
   "needs.preflight.result == 'success'", "needs.npm_lock.result == 'success'",
   "needs.api_lock.result == 'success'", "needs.worker_lock.result == 'success'",
   'npm run quality:preflight', 'sorion-repository-preflight-${{ github.run_attempt }}',
-  'Committed npm lock required', 'npm run locks:refresh:npm',
+  'Committed npm lock required', 'Committed API uv lock required', 'Committed Worker uv lock required',
+  'npm run locks:refresh:npm',
   'npm run locks:check -- --component npm', 'lock-structure-check.log',
   'Run reproducible Web quality', 'npm run quality:web-repro',
   'npm run quality:web-report:verify', 'sorion-web-quality-${{ github.run_attempt }}',
   'Fail after preserving Web evidence',
+  'Initialize repository preflight evidence', 'Initialize Web quality evidence',
+  'Initialize runtime soak evidence', "steps.recovery_drill.outcome == 'success'",
+  'actions/checkout@v7', 'actions/setup-python@v7',
+  'actions/upload-artifact@v7', 'actions/download-artifact@v8',
+  'actions/cache/restore@v6', 'actions/cache/save@v6',
+  "steps.npm_cache.outputs.cache-hit != 'true'",
+  "'maintenance' || 'standard'",
 ]) if (!workflow.includes(token)) failures.push(`workflow 계약 누락: ${token}`)
 
 for (const forbidden of [
@@ -28,6 +36,14 @@ for (const forbidden of [
   'if [[ "$FORCE_REFRESH" == "true" || ! -f package-lock.json ]]',
   'needs: lockfiles',
   'sorion-verified-lockfiles',
+  'actions/checkout@v6',
+  'actions/setup-python@v6',
+  'actions/upload-artifact@v6',
+  'actions/download-artifact@v7',
+  'actions/cache/restore@v5',
+  'actions/cache/save@v5',
+  'if [[ "$FORCE_REFRESH" == "true" || ! -f services/api/uv.lock ]]',
+  'if [[ "$FORCE_REFRESH" == "true" || ! -f services/worker/uv.lock ]]',
 ]) {
   if (workflow.includes(forbidden)) failures.push(`비재현 자동 변경 또는 단일 장애점 재유입: ${forbidden}`)
 }

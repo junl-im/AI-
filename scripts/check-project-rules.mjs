@@ -131,7 +131,8 @@ await requireText('.github/workflows/ci.yml', [
   'Repository preflight · no dependency install', 'npm lock · generate or verify',
   'API uv lock · generate or verify', 'Worker uv lock · generate or verify',
   'needs: [preflight, npm_lock]', 'needs: [preflight, api_lock]', 'needs: [preflight, worker_lock]',
-  'Committed npm lock required', 'Run reproducible Web quality',
+  'Committed npm lock required', 'Committed API uv lock required', 'Committed Worker uv lock required',
+  'Run reproducible Web quality',
   'npm run quality:web-report:verify', 'sorion-web-quality-${{ github.run_attempt }}',
   'Fail after preserving Web evidence',
   'npm run quality:preflight', 'sorion-repository-preflight-${{ github.run_attempt }}',
@@ -139,9 +140,10 @@ await requireText('.github/workflows/ci.yml', [
   "needs.worker_lock.result == 'success'",
   'astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b',
   "version: '0.11.32'", "python-version: '3.10'", "node-version: '22.18.0'",
-  'actions/checkout@v6', 'actions/setup-node@v6', 'actions/setup-python@v6',
-  'actions/upload-artifact@v6', 'actions/download-artifact@v7',
-  'actions/cache/restore@v5', 'actions/cache/save@v5', 'overwrite: true',
+  'actions/checkout@v7', 'actions/setup-node@v6', 'actions/setup-python@v7',
+  'actions/upload-artifact@v7', 'actions/download-artifact@v8',
+  'actions/cache/restore@v6', 'actions/cache/save@v6', 'overwrite: true',
+  "steps.npm_cache.outputs.cache-hit != 'true'", "'maintenance' || 'standard'",
   'npm run locks:refresh:npm', 'npm run locks:refresh:api', 'npm run locks:refresh:worker',
   '.sorion/lock-audit/npm/status.txt', '.sorion/lock-audit/api/status.txt',
   '.sorion/lock-audit/worker/status.txt',
@@ -150,9 +152,16 @@ await requireText('.github/workflows/ci.yml', [
   'actions/configure-pages@v6', 'actions/upload-pages-artifact@v5', 'actions/deploy-pages@v5',
   'CosyVoice Worker quality · Python 3.10', 'Run Worker tests',
   'Write empty static-host runtime configuration',
+  'Initialize repository preflight evidence', 'Initialize Web quality evidence',
+  'Initialize runtime soak evidence', "steps.recovery_drill.outcome == 'success'",
 ])
 await requireAbsent('.github/workflows/ci.yml', [
   'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24', 'actions/upload-artifact@v4', 'actions/download-artifact@v4',
+])
+await requireText('.github/dependabot.yml', [
+  'package-ecosystem: npm', 'package-ecosystem: uv', 'directory: /services/api',
+  'directory: /services/worker', 'package-ecosystem: github-actions', 'directory: /',
+  'target-branch: develop',
 ])
 await requireAbsent('.github/workflows/ci.yml', [
   'needs: lockfiles', 'sorion-verified-lockfiles', 'npm_config_fetch_retries: 5',
@@ -502,8 +511,8 @@ const workflowContent = await readFile(join(root, '.github/workflows/ci.yml'), '
 if (/astral-sh\/setup-uv@v\d+(?:\.\d+){0,2}/.test(workflowContent)) {
   failures.push('.github/workflows/ci.yml: setup-uv는 존재 여부가 변할 수 있는 태그가 아니라 검증된 커밋 SHA로 고정해야 합니다.')
 }
-for (const legacyAction of ['actions/checkout@v4', 'actions/setup-node@v4', 'actions/setup-python@v4', 'astral-sh/setup-uv@v6', 'actions/configure-pages@v5', 'actions/upload-pages-artifact@v4', 'actions/deploy-pages@v4']) {
-  if (workflowContent.includes(legacyAction)) failures.push(`.github/workflows/ci.yml: Node.js 20 기반 액션 ${legacyAction}이 남아 있습니다.`)
+for (const legacyAction of ['actions/checkout@v4', 'actions/checkout@v6', 'actions/setup-node@v4', 'actions/setup-python@v4', 'actions/setup-python@v6', 'actions/upload-artifact@v6', 'actions/download-artifact@v7', 'actions/cache/restore@v5', 'actions/cache/save@v5', 'astral-sh/setup-uv@v6', 'actions/configure-pages@v5', 'actions/upload-pages-artifact@v4', 'actions/deploy-pages@v4']) {
+  if (workflowContent.includes(legacyAction)) failures.push(`.github/workflows/ci.yml: 현재 채택 세대보다 오래된 Action ${legacyAction}이 남아 있습니다.`)
 }
 for (const relativePath of [
   'services/api/app/services/job_manager.py',

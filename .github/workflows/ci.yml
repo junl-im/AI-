@@ -27,11 +27,14 @@ permissions:
 concurrency:
   group: >-
     sorion-${{ github.workflow }}-${{ github.event_name }}-${{
-    github.event_name == 'workflow_dispatch' && inputs.runtime_soak_minutes ||
-    github.event.pull_request.number || github.ref }}
+    github.event.pull_request.number || github.ref }}-${{
+    github.event_name == 'workflow_dispatch' &&
+    (inputs.generate_lockfiles == true || inputs.runtime_soak_minutes != 'off') &&
+    'maintenance' || 'standard' }}
   cancel-in-progress: >-
     ${{ github.event_name != 'schedule' &&
-    !(github.event_name == 'workflow_dispatch' && inputs.runtime_soak_minutes != 'off') }}
+    !(github.event_name == 'workflow_dispatch' &&
+    (inputs.generate_lockfiles == true || inputs.runtime_soak_minutes != 'off')) }}
 env:
   SORION_NODE_VERSION: '22.18.0'
   SORION_UV_VERSION: '0.11.32'
@@ -42,7 +45,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+      - name: Initialize repository preflight evidence
+        run: |
+          mkdir -p .sorion/ci-report
+          printf '%s\n' 'preflight job initialized' > .sorion/ci-report/status.txt
       - uses: actions/setup-node@v6
         with:
           node-version: '22.18.0'
@@ -53,7 +60,7 @@ jobs:
         run: npm run quality:preflight
       - name: Upload repository preflight report
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sorion-repository-preflight-${{ github.run_attempt }}
           if-no-files-found: error
@@ -69,16 +76,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22.18.0'
-          package-manager-cache: false
+      - uses: actions/checkout@v7
       - name: Initialize npm lock diagnostics
         shell: bash
         run: |
           mkdir -p .sorion/lock-audit/npm
           printf '%s\n' 'npm lock job initialized' > .sorion/lock-audit/npm/status.txt
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.18.0'
+          package-manager-cache: false
       - name: Detect npm lock mode
         id: mode
         shell: bash
@@ -110,7 +117,8 @@ jobs:
             curl --silent --show-error --location --head --max-time 15 https://registry.yarnpkg.com/react || true
           } 2>&1 | tee .sorion/lock-audit/npm/registry-diagnostics.log
       - name: Restore npm registry cache
-        uses: actions/cache/restore@v5
+        id: npm_cache
+        uses: actions/cache/restore@v6
         with:
           path: ~/.npm
           key: sorion-npm-${{ runner.os }}-node-22.18.0-${{ hashFiles('package-lock.json', 'package.json') }}
@@ -127,14 +135,14 @@ jobs:
           npm run locks:check -- --component npm
           npm run deps:ci
       - name: Save npm cache, including partial downloads
-        if: always()
-        uses: actions/cache/save@v5
+        if: always() && steps.npm_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
         with:
           path: ~/.npm
-          key: sorion-npm-${{ runner.os }}-node-22.18.0-${{ hashFiles('package-lock.json', 'package.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: sorion-npm-${{ runner.os }}-node-22.18.0-${{ hashFiles('package-lock.json', 'package.json') }}
       - name: Upload npm diagnostics
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sorion-npm-lock-diagnostics
           overwrite: true
@@ -157,7 +165,7 @@ jobs:
       - name: Write npm lock proof
         run: node scripts/write-lock-proof.mjs npm
       - name: Upload verified npm lock
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sorion-npm-lock
           overwrite: true
@@ -173,12 +181,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+      - name: Initialize API lock diagnostics
+        shell: bash
+        run: |
+          mkdir -p .sorion/lock-audit/api
+          printf '%s\n' 'api lock job initialized' > .sorion/lock-audit/api/status.txt
       - uses: actions/setup-node@v6
         with:
           node-version: '22.18.0'
           package-manager-cache: false
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
@@ -186,18 +199,21 @@ jobs:
           version: '0.11.32'
           working-directory: services/api
           enable-cache: true
-      - name: Initialize API lock diagnostics
-        shell: bash
-        run: |
-          mkdir -p .sorion/lock-audit/api
-          printf '%s\n' 'api lock job initialized' > .sorion/lock-audit/api/status.txt
       - name: Detect API lock mode
         id: mode
         shell: bash
         env:
           FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
         run: |
-          if [[ "$FORCE_REFRESH" == "true" || ! -f services/api/uv.lock ]]; then echo 'mode=generate' >> "$GITHUB_OUTPUT"; else echo 'mode=verify' >> "$GITHUB_OUTPUT"; fi
+          if [[ "$FORCE_REFRESH" == "true" ]]; then
+            echo 'mode=generate' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ ! -f services/api/uv.lock ]]; then
+            echo '::error title=Committed API uv lock required::services/api/uv.lock이 없습니다. workflow_dispatch의 generate_lockfiles로 생성한 뒤 검토하여 커밋하세요.'
+            exit 1
+          fi
+          echo 'mode=verify' >> "$GITHUB_OUTPUT"
       - name: Generate API uv lock with bounded retry
         id: generate
         if: steps.mode.outputs.mode == 'generate'
@@ -211,7 +227,7 @@ jobs:
           uv sync --locked --dev --python 3.10
       - name: Upload API lock diagnostics
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sorion-api-lock-diagnostics
           overwrite: true
@@ -224,7 +240,7 @@ jobs:
         run: exit 1
       - run: npm run locks:check -- --component api
       - run: node scripts/write-lock-proof.mjs api
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: sorion-api-lock
           overwrite: true
@@ -240,12 +256,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+      - name: Initialize Worker lock diagnostics
+        shell: bash
+        run: |
+          mkdir -p .sorion/lock-audit/worker
+          printf '%s\n' 'worker lock job initialized' > .sorion/lock-audit/worker/status.txt
       - uses: actions/setup-node@v6
         with:
           node-version: '22.18.0'
           package-manager-cache: false
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
@@ -253,18 +274,21 @@ jobs:
           version: '0.11.32'
           working-directory: services/worker
           enable-cache: true
-      - name: Initialize Worker lock diagnostics
-        shell: bash
-        run: |
-          mkdir -p .sorion/lock-audit/worker
-          printf '%s\n' 'worker lock job initialized' > .sorion/lock-audit/worker/status.txt
       - name: Detect Worker lock mode
         id: mode
         shell: bash
         env:
           FORCE_REFRESH: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_lockfiles == true }}
         run: |
-          if [[ "$FORCE_REFRESH" == "true" || ! -f services/worker/uv.lock ]]; then echo 'mode=generate' >> "$GITHUB_OUTPUT"; else echo 'mode=verify' >> "$GITHUB_OUTPUT"; fi
+          if [[ "$FORCE_REFRESH" == "true" ]]; then
+            echo 'mode=generate' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ ! -f services/worker/uv.lock ]]; then
+            echo '::error title=Committed Worker uv lock required::services/worker/uv.lock이 없습니다. workflow_dispatch의 generate_lockfiles로 생성한 뒤 검토하여 커밋하세요.'
+            exit 1
+          fi
+          echo 'mode=verify' >> "$GITHUB_OUTPUT"
       - name: Generate Worker uv lock with bounded retry
         id: generate
         if: steps.mode.outputs.mode == 'generate'
@@ -278,7 +302,7 @@ jobs:
           uv sync --locked --dev --python 3.10
       - name: Upload Worker lock diagnostics
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sorion-worker-lock-diagnostics
           overwrite: true
@@ -291,7 +315,7 @@ jobs:
         run: exit 1
       - run: npm run locks:check -- --component worker
       - run: node scripts/write-lock-proof.mjs worker
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: sorion-worker-lock
           overwrite: true
@@ -309,8 +333,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 24
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
+      - uses: actions/checkout@v7
+      - name: Initialize Web quality evidence
+        run: |
+          mkdir -p .sorion/web-quality
+          printf '%s\n' 'web quality job initialized' > .sorion/web-quality/status.txt
+      - uses: actions/download-artifact@v8
         with:
           name: sorion-npm-lock
           path: .
@@ -338,7 +366,7 @@ jobs:
         run: npm run quality:visual-layout
       - name: Upload Web quality evidence
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sorion-web-quality-${{ github.run_attempt }}
           if-no-files-found: error
@@ -369,8 +397,8 @@ jobs:
       run:
         working-directory: services/api
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: sorion-api-lock
           path: .
@@ -381,7 +409,7 @@ jobs:
       - name: Verify API lock proof
         working-directory: .
         run: node scripts/verify-lock-proof.mjs api
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
@@ -405,8 +433,8 @@ jobs:
       run:
         working-directory: services/worker
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: sorion-worker-lock
           path: .
@@ -417,7 +445,7 @@ jobs:
       - name: Verify Worker lock proof
         working-directory: .
         run: node scripts/verify-lock-proof.mjs worker
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
@@ -442,8 +470,12 @@ jobs:
     env:
       SOAK_DURATION_MINUTES: ${{ github.event_name == 'schedule' && '30' || inputs.runtime_soak_minutes }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - name: Initialize runtime soak evidence
+        run: |
+          mkdir -p .sorion/soak
+          printf '%s\n' 'runtime soak job initialized' > .sorion/soak/status.txt
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
       - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
@@ -451,7 +483,7 @@ jobs:
           version: '0.11.32'
           enable-cache: true
       - name: Restore previous runtime soak baseline
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: .sorion/soak-history
           key: >-
@@ -495,6 +527,7 @@ jobs:
           echo 'Runtime services did not become healthy.' >&2
           exit 1
       - name: Schedule Worker restart recovery drill
+        id: recovery_drill
         working-directory: services/api
         shell: bash
         run: |
@@ -521,7 +554,7 @@ jobs:
             --history-output ../../.sorion/soak-history/latest.json \
             --output ../../.sorion/soak/runtime-soak.json
       - name: Wait for recovery drill evidence
-        if: always()
+        if: always() && steps.recovery_drill.outcome == 'success'
         shell: bash
         run: |
           for attempt in $(seq 1 60); do
@@ -541,14 +574,14 @@ jobs:
           done
       - name: Save runtime soak baseline
         if: steps.runtime-soak.outcome == 'success' && hashFiles('.sorion/soak-history/latest.json') != ''
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: .sorion/soak-history
           key: >-
             sorion-runtime-soak-${{ runner.os }}-${{ github.ref_name }}-${{ github.run_id }}
       - name: Upload runtime soak evidence
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: sorion-runtime-soak-${{ github.run_id }}-${{ github.run_attempt }}
           path: .sorion/soak
