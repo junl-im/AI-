@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { VoiceCloneJob } from '../../voiceclone/voiceCloneTypes'
 
 interface CloneExecutionCardProps {
@@ -20,6 +20,13 @@ const statusLabels: Record<VoiceCloneJob['status'], string> = {
   cancelled: '취소됨',
 }
 
+const testScripts = [
+  { id: 'natural', label: '자연스러움', text: '안녕하세요. 오늘은 조금 천천히 이야기해 볼게요. 편안하게 들리는지 확인해 주세요.' },
+  { id: 'narration', label: '내레이션', text: '작은 선택이 모여 하나의 이야기가 됩니다. 문장 끝까지 호흡과 톤이 자연스럽게 이어지는지 들어보세요.' },
+  { id: 'bright', label: '밝은 톤', text: '좋아요! 지금부터 새로운 아이디어를 함께 시작해 볼까요? 밝고 또렷한 느낌을 확인해 주세요.' },
+  { id: 'serious', label: '차분한 톤', text: '중요한 내용은 서두르지 않고 정확하게 전달하는 것이 좋습니다. 안정적인 저음과 발음을 확인해 주세요.' },
+]
+
 export function CloneExecutionCard({
   profileName,
   ready,
@@ -30,33 +37,57 @@ export function CloneExecutionCard({
   onCancel,
   onRetry,
 }: CloneExecutionCardProps) {
-  const [text, setText] = useState('안녕하세요. 소리온에서 만든 내 목소리입니다.')
+  const [text, setText] = useState(testScripts[0].text)
+  const [selectedScriptId, setSelectedScriptId] = useState(testScripts[0].id)
   const running = job?.status === 'queued' || job?.status === 'running'
   const canStart = ready && text.trim().length > 0 && !busy && !running
+  const completedSegments = useMemo(
+    () => job?.segments.filter((segment) => segment.status === 'completed').length ?? 0,
+    [job?.segments],
+  )
 
   return (
-    <section className="soa-clone-execution" aria-labelledby="clone-execution-title">
+    <section className="soa-clone-execution soa-voice-test-lab" aria-labelledby="clone-execution-title">
       <div className="soa-clone-execution__head">
         <div>
-          <span>REAL CLONE EXECUTION</span>
-          <h2 id="clone-execution-title">{profileName}로 문장을 말하게 합니다.</h2>
+          <span>VOICE TEST LAB</span>
+          <h2 id="clone-execution-title">{profileName}의 실제 느낌을 비교하세요.</h2>
         </div>
         <strong className={ready ? 'is-ready' : 'is-waiting'}>
-          {ready ? '준비됨' : '자동 준비 중'}
+          {ready ? 'READY' : '자동 준비 중'}
         </strong>
       </div>
-      <p>
-        문장을 구간별로 생성하고, 첫 구간이 끝나는 순간부터 진행 상태를 표시합니다.
-        음성 준비가 끝나기 전에는 실행 버튼을 열지 않습니다.
-      </p>
-      {!ready ? <div className="soa-worker-warning">음성 기능을 자동으로 준비하고 있습니다. 샘플과 동의 기록은 그대로 유지됩니다.</div> : null}
+      <p>한 문장만 듣고 결정하지 마세요. 자연스러움·내레이션·밝은 톤·차분한 톤을 번갈아 들어보면 발음과 호흡의 약점이 훨씬 잘 보입니다.</p>
+
+      <div className="soa-voice-test-presets" role="tablist" aria-label="목소리 테스트 문장">
+        {testScripts.map((script) => (
+          <button
+            key={script.id}
+            type="button"
+            role="tab"
+            aria-selected={selectedScriptId === script.id}
+            className={selectedScriptId === script.id ? 'is-active' : ''}
+            onClick={() => {
+              setSelectedScriptId(script.id)
+              setText(script.text)
+            }}
+          >
+            {script.label}
+          </button>
+        ))}
+      </div>
+
+      {!ready ? <div className="soa-worker-warning">음성 엔진을 자동으로 준비하고 있습니다. 저장된 원본 샘플과 동의 기록은 그대로 유지됩니다.</div> : null}
       <label className="soa-clone-script">
-        복제할 문장
+        테스트 문장
         <textarea
           value={text}
           maxLength={500}
           rows={4}
-          onChange={(event) => setText(event.target.value)}
+          onChange={(event) => {
+            setSelectedScriptId('custom')
+            setText(event.target.value)
+          }}
           placeholder="내 목소리로 만들 문장을 입력하세요."
         />
         <span>{text.length} / 500</span>
@@ -67,8 +98,9 @@ export function CloneExecutionCard({
         disabled={!canStart}
         onClick={() => onStart(text.trim())}
       >
-        {running ? `목소리 생성 중 · ${job?.progress ?? 0}%` : '이 목소리로 WAV 생성하기'}
+        {running ? `내 목소리 생성 중 · ${job?.progress ?? 0}%` : '▶ 이 문장으로 내 목소리 테스트'}
       </button>
+
       {error ? <p role="alert" className="soa-clone-job-error">{error}</p> : null}
       {job ? (
         <div className="soa-clone-job" aria-live="polite">
@@ -76,6 +108,7 @@ export function CloneExecutionCard({
             <div>
               <strong>{statusLabels[job.status]}</strong>
               <span>{job.message}</span>
+              <small>{job.segments.length ? `완료 구간 ${completedSegments}/${job.segments.length}` : '구간 준비 중'}</small>
             </div>
             <b>{job.progress}%</b>
           </div>

@@ -1,0 +1,14 @@
+apply-sorion-linkage-myvoice.mjs
+verify-sorion-linkage-myvoice.mjs
+README_APPLY.md
+PATCH_FILE_LIST.txt
+src/components/clone/CloneConsentCard.tsx
+src/components/clone/CloneExecutionCard.tsx
+src/components/clone/CloneReadyCard.tsx
+src/components/clone/CloneStepIndicator.tsx
+src/components/clone/MyVoiceLibrary.tsx
+src/components/clone/SampleQualityCard.tsx
+src/components/clone/VoiceSampleCapture.tsx
+src/navigation/navigationItems.ts
+src/styles/my-voice-lab.css
+src/voiceclone/sampleQualityScore.ts
