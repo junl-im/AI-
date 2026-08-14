@@ -1,10 +1,10 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.17 · Generation Runtime Split & Real Mobile Evidence`
+현재 기준: `0.11.18 · SoriON Voice Deck Visual Identity`
 
 ## 목표 버전
 
-`0.11.18 · Timeline Command Split & Longform Soak Evidence`
+`0.11.19 · Timeline Command Split & Longform Soak Evidence`
 
 ### 핵심 기능
 
@@ -15,11 +15,11 @@
 
 ### 선행 조건
 
-- 0.11.17 Web quality에서 desktop visual + mobile visual 두 단계가 모두 통과해야 합니다.
+- 0.11.18 Web quality에서 Voice Deck visual 회귀와 desktop/mobile layout이 모두 통과해야 합니다.
 - 동시 생성 상한은 soak 증거 없이 2보다 높이지 않습니다.
 - 실제 음질 증거가 없는 synthetic/mock 결과는 품질 완료 증거로 취급하지 않습니다.
 
-## 0.11.17에서 고정한 결정
+## 0.11.18에서 고정한 결정
 
 - generation runtime의 progressive/recovery 실행 책임은 hook이 아니라 `src/timeline/generationRuntime.ts`가 소유합니다.
 - partial audio / ordered segment / revision safety static gate는 실제 책임 파일을 직접 검사합니다.

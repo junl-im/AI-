@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.11.18 · SoriON Voice Deck Visual Identity
+
+- 랜딩의 Live Voice 영역을 관리도구형 카드에서 SoriON의 대표 음성 콘솔인 `Voice Deck`으로 전면 재디자인했습니다.
+- 기능 추가 없이 현재 Voice / Engine / Readiness / TTS 진입 계약은 그대로 유지하고, 음성 아바타·시그널 파형·상태·CTA의 시각 계층만 재구성했습니다.
+- 기존의 작은 카드형 파형과 촘촘한 메타데이터 배치를 제거하고, 큰 Voice identity + 풀블리드 signal + 정돈된 Engine + 고대비 CTA 구조로 변경했습니다.
+- SoriON의 cyan / violet / soft pink 음성 스펙트럼을 하나의 어두운 aurora surface에 통합하고 reduced-motion과 focus-visible 접근성을 유지했습니다.
+
 ## 0.11.17 R2 · Web Quality Test Collection Hotfix
 
 - Vitest 실행 범위를 `src/**/*.test.{ts,tsx}`와 `src/**/*.spec.{ts,tsx}`로 제한해 저장소 루트의 과거 전달용 `payload/` 테스트가 Web quality에 재수집되지 않도록 했습니다.

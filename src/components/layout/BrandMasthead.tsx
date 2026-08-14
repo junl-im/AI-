@@ -21,7 +21,7 @@ function LightningWave({ active }: { active: boolean }) {
     <div className={`soa-core-wave ${active ? 'is-active' : ''}`} aria-hidden="true">
       <span />
       <b />
-      {[22, 42, 78, 34, 92, 46, 70, 28, 84, 38, 62, 24].map((height, index) => (
+      {[18, 38, 68, 30, 88, 44, 74, 26, 94, 48, 66, 22, 58, 34, 82, 28, 62, 40].map((height, index) => (
         <i key={`${height}-${index}`} style={{ height: `${height}%` }} />
       ))}
     </div>
@@ -78,26 +78,41 @@ export function BrandMasthead() {
             className={`soa-voice-console is-${liveVoice.readiness}`}
             aria-label={`현재 목소리 ${liveVoice.voiceName}, ${liveVoice.engineName}, ${readinessLabels[liveVoice.readiness]}`}
           >
+            <div className="soa-live-voice-glow" aria-hidden="true" />
             <div className="soa-voice-console__topline">
-              <span>LIVE VOICE</span>
+              <span className="soa-live-voice-signature"><i aria-hidden="true" /> SORION · LIVE VOICE</span>
               <span className="soa-live-dot" data-ready={ready ? 'true' : 'false'}>{readinessLabels[liveVoice.readiness]}</span>
             </div>
-            <div className={`soa-live-voice-avatar ${liveVoice.voiceKind === 'my-voice' ? 'is-mine' : ''}`} aria-hidden="true">
-              {liveVoice.voiceKind === 'my-voice' ? liveVoice.voiceName.trim().slice(0, 1) || 'V' : <BrandIcon className="soa-console-brand-icon" />}
+
+            <div className="soa-live-voice-main">
+              <div className={`soa-live-voice-avatar ${liveVoice.voiceKind === 'my-voice' ? 'is-mine' : ''}`} aria-hidden="true">
+                <span className="soa-live-voice-avatar__ring" />
+                {liveVoice.voiceKind === 'my-voice'
+                  ? <strong>{liveVoice.voiceName.trim().slice(0, 1) || 'V'}</strong>
+                  : <BrandIcon className="soa-console-brand-icon" />}
+              </div>
+
+              <div className="soa-voice-console__copy">
+                <span className="soa-live-voice-kind">{liveVoice.voiceKind === 'my-voice' ? 'MY VOICE' : 'SoriON VOICE'}</span>
+                <strong>{liveVoice.voiceName}</strong>
+                <span>{liveVoice.detail}</span>
+              </div>
             </div>
-            <div className="soa-voice-console__copy">
-              <span className="soa-live-voice-kind">{liveVoice.voiceKind === 'my-voice' ? 'MY VOICE' : 'SoriON VOICE'}</span>
-              <strong>{liveVoice.voiceName}</strong>
-              <span>{liveVoice.detail}</span>
+
+            <div className="soa-live-voice-signal" aria-hidden="true">
+              <span className="soa-live-voice-signal__label">VOICE SIGNAL</span>
+              <LightningWave active={ready} />
             </div>
-            <LightningWave active={ready} />
+
             <div className="soa-live-engine">
               <span>ENGINE</span>
               <strong>{liveVoice.engineName}</strong>
               <small>{liveVoice.engineId ?? 'auto routing'}</small>
             </div>
+
             <button type="button" className="soa-live-voice-open" onClick={() => enterWorkspace('home')}>
-              텍스트를 음성으로 <span aria-hidden="true">→</span>
+              <span>텍스트를 음성으로</span>
+              <b aria-hidden="true">→</b>
             </button>
           </section>
         </div>

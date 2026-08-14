@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.17 · Generation Runtime Split & Real Mobile Evidence**
+현재 기준 버전: **0.11.18 · SoriON Voice Deck Visual Identity**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-14 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,12 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-14 KST · 0.11.18 SoriON Voice Deck Visual Identity
+1. 랜딩 Live Voice 영역은 기능을 추가하지 않고 프로그램의 첫인상을 담당하는 `Voice Deck`으로 전면 재디자인합니다.
+2. 현재 Voice, MY VOICE/SoriON VOICE, Engine, readiness, TTS 진입 계약과 접근성 이름은 유지합니다.
+3. 시각 구조는 큰 Voice identity, full-bleed signal waveform, 작은 engine rail, 고대비 CTA의 4단 구성으로 단순화합니다.
+4. 전달 규칙은 FULL 전체 프로젝트 + 프로젝트 루트에 바로 덮어쓰는 PATCH를 유지합니다.
 
 ## 2026-08-14 KST · 0.11.17 R2 Web Quality Test Collection Hotfix
 1. Vitest는 제품 테스트인 `src/**/*.test.{ts,tsx}` / `src/**/*.spec.{ts,tsx}`만 수집합니다. 과거 전달용 `payload/`는 테스트 입력이 아닙니다.
