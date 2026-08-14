@@ -1,17 +1,12 @@
-SoriON AI 0.11.13 Focused Creation Surface
+APPLY_LIVE_VOICE_EXPORT_HOTFIX.mjs
+VERIFY_LIVE_VOICE_EXPORT_HOTFIX.mjs
+README_APPLY.md
+payload/src/components/layout/BrandMasthead.tsx
+payload/src/components/layout/BrandMasthead.test.tsx
+payload/src/store/useAppStore.ts
+payload/src/styles/live-voice-bar.css
+payload/src/components/workspace/FinalExportDialog.test.tsx
 
-기준 상태
-- 0.11.12 Editing History, Speaker Memory & Engine Routing Trace 전체 통파일
-
-적용 결과
-- 중앙 제작 surface를 `목소리 → 텍스트 → 생성 및 재생`으로 단순화
-- 프로젝트 header와 Composer chrome의 시각 무게 축소
-- 모바일 2차 통계와 보조 action 밀도 축소
-- 장문/다중 화자/Timeline/Engine routing 기능과 동시성 2 상한 유지
-- 제품 버전 0.11.13
-
-삭제 파일
-- 없음
-
-상세 manifest
-- docs/patches/0.11.13-focused-creation-surface/PATCH_MANIFEST.txt
+Patched in-place by APPLY script:
+src/pages/HomePage.tsx
+src/styles/index.css

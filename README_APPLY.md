@@ -1,22 +1,27 @@
-# Apply mobile studio hardening
+# Live Voice Bar + Final Export Web quality hotfix
 
-From the SoriON repository root:
+This patch targets the current project state that has:
 
-```bash
-node APPLY_MOBILE_STUDIO_HARDENING.mjs
-node VERIFY_MOBILE_STUDIO_HARDENING.mjs
-npm run quality:mobile-studio
-```
+- `FinalExportControls` buttons named `최종 WAV + 자막` / `최종 MP3 + 자막`
+- the old static `VOICE CORE` masthead
 
-Then run the normal Web quality workflow.
+## Apply
 
-The patch is idempotent and can be applied to current `0.11.15` main or after the Live Voice + MY VOICE integration candidate. When MY VOICE files are present, the mobile quality contract automatically checks the extra linkage path.
-
-For real Chromium mobile layout evidence after a production build:
+From the repository root:
 
 ```bash
-npm run build
-npm run quality:mobile-layout
+node APPLY_LIVE_VOICE_EXPORT_HOTFIX.mjs
+node VERIFY_LIVE_VOICE_EXPORT_HOTFIX.mjs
+node scripts/run-preflight.mjs
 ```
 
-This uses the repository's existing dependency-free CDP runner and captures 360x800, 390x844, and 430x932 evidence.
+Then push and rerun **Web quality**.
+
+## Changes
+
+- Fixes stale `FinalExportDialog.test.tsx` accessible-name expectation.
+- Replaces the decorative `VOICE CORE` with a real **LIVE VOICE** control bar.
+- Displays current voice, engine, and `CHECKING / READY / LIMITED / OFFLINE / LIVE` state.
+- Adds a direct **텍스트를 음성으로 →** action.
+- Actually imports `live-voice-bar.css` from `src/styles/index.css`.
+- Keeps the existing export button copy; production UI is not regressed to satisfy the test.
