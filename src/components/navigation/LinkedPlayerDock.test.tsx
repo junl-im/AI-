@@ -410,7 +410,7 @@ describe('LinkedPlayerDock', () => {
     expect(play).not.toHaveBeenCalled()
   })
 
-  it('Dock 메뉴를 누르면 페이지와 관계없이 화면 상단으로 이동한다', () => {
+  it('Dock 메뉴를 누르면 페이지와 관계없이 화면 상단으로 이동한다', async () => {
     useAppStore.setState({ page: 'quality', workspaceEntered: true })
     render(<LinkedPlayerDock />)
 
@@ -418,7 +418,9 @@ describe('LinkedPlayerDock', () => {
 
     expect(useAppStore.getState().page).toBe('home')
     expect(useAppStore.getState().workspaceEntered).toBe(true)
-    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
+    await vi.waitFor(() => {
+      expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'auto' })
+    })
   })
 
 

@@ -176,6 +176,10 @@ await requireText('src/hooks/useEngineDoctor.ts', ['runApiConnectivityAudit', 'g
 await requireText('services/api/app/services/setup_diagnostics.py', ['PRESET_VOICE_IDS', 'voice-presets', 'voice_preset_ready_count'])
 await requireText('docs/LOCKFILE_BOOTSTRAP.md', ['독립 lock 작업', 'generate_lockfiles', 'package-lock.json', 'services/api/uv.lock', 'services/worker/uv.lock', 'lock 증명', '수동 검토', 'npm ci', 'uv sync --locked'])
 await requireText('src/test/setup.ts', ['afterEach', 'cleanup()', 'Object.defineProperty(Blob.prototype', "reader.readAsArrayBuffer(this)"])
+await requireText('vitest.config.ts', [
+  "src/**/*.test.{ts,tsx}",
+  "src/**/*.spec.{ts,tsx}",
+])
 await requireAbsent('src/quality/browserPlaybackEvidence.test.ts', ["vi.restoreAllMocks()\n  it("])
 await requireText('src/pages/HomePage.test.tsx', ["name: '선택 대사 빠른 수정'", "getByText('두 번째 문장입니다.')"])
 await requireText('src/tts/mockWave.test.ts', ['async function readBlob', "typeof blob.arrayBuffer === 'function'", 'reader.readAsArrayBuffer(blob)'])

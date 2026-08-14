@@ -1,3 +1,10 @@
+# R2 Web Quality 점검 추가
+
+- GitHub Actions run 31778799250의 Web quality 실패를 재분석했습니다.
+- 제품 `src` 테스트 63개 영역은 정상 수집 대상으로 유지하고, 과거 전달용 `payload/` 테스트는 Vitest 입력에서 제외합니다.
+- `LinkedPlayerDock`의 상단 이동 테스트는 현재 구현의 next-frame + `behavior: auto` 계약을 검증합니다.
+- Repository preflight에서 Vitest src-only 수집 계약을 고정합니다.
+
 # SoriON AI 0.11.17 Verification Report
 
 결과 버전: **0.11.17 · Generation Runtime Split & Real Mobile Evidence**  

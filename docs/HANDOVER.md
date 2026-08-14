@@ -10,6 +10,11 @@
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+## 2026-08-14 KST · 0.11.17 R2 Web Quality Test Collection Hotfix
+1. Vitest는 제품 테스트인 `src/**/*.test.{ts,tsx}` / `src/**/*.spec.{ts,tsx}`만 수집합니다. 과거 전달용 `payload/`는 테스트 입력이 아닙니다.
+2. Dock 페이지 이동은 다음 animation frame에서 `scrollTo({ top: 0, behavior: 'auto' })`를 실행하는 현재 성능 계약을 유지하며 테스트도 같은 비동기 계약을 검증합니다.
+3. 직접 덮어쓰기 PATCH만 적용해 예전 `payload/`가 디스크에 남아 있어도 Web quality가 이를 다시 테스트로 수집하지 않도록 방어합니다.
+
 ## 2026-08-14 KST · 0.11.17 Generation Runtime Split & Real Mobile Evidence
 1. **대상 버전과 기준**: 0.11.17 / 0.11.16 Timeline Editor Split & Mobile Quick Creation.
 2. **핵심 변경**: generation SSE/polling, progressive segment, signed refresh, recovery/fallback, final handoff를 `src/timeline/generationRuntime.ts`로 분리해 hook을 약 679줄로 낮췄습니다.

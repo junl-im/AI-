@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.11.17 R2 · Web Quality Test Collection Hotfix
+
+- Vitest 실행 범위를 `src/**/*.test.{ts,tsx}`와 `src/**/*.spec.{ts,tsx}`로 제한해 저장소 루트의 과거 전달용 `payload/` 테스트가 Web quality에 재수집되지 않도록 했습니다.
+- Dock 페이지 전환 테스트를 실제 구현 계약인 `requestAnimationFrame` 이후 `scrollTo({ top: 0, behavior: 'auto' })`에 맞춰 비동기 검증하도록 수정했습니다.
+- 프로젝트 규칙이 Vitest의 `src` 전용 수집 계약을 확인해 같은 회귀를 preflight에서 방지합니다.
+
 ## 0.11.17 · Generation Runtime Split & Real Mobile Evidence
 
 - `useTimelineGeneration.ts`에서 SSE/polling, progressive segment 준비·순서 보장, 최종 음원 handoff, recovery/fallback 실행 책임을 `src/timeline/generationRuntime.ts`로 분리해 hook을 약 1,116줄에서 약 679줄로 낮췄습니다.
