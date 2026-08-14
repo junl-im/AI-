@@ -236,3 +236,38 @@
   .soa-timeline-toolbar::-webkit-scrollbar,
   .soa-timeline-selection-actions::-webkit-scrollbar { display: none; }
 }
+
+/* 0.11.16 mobile touch selection: modifier keys are not required on phones. */
+.soa-timeline-touch-select { display: none; }
+@media (max-width: 760px), (pointer: coarse) {
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-timeline-touch-select {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    z-index: 9;
+    display: grid;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.82);
+    background: rgba(10, 16, 36, 0.88);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
+    font-size: 11px;
+    font-weight: 900;
+    touch-action: manipulation;
+  }
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-timeline-touch-select[aria-pressed="true"] {
+    border-color: rgba(133, 230, 255, 0.48);
+    color: #d7f7ff;
+    background: rgba(73, 111, 184, 0.74);
+  }
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__tools {
+    padding-right: 25px;
+  }
+  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-pause-block .soa-timeline-touch-select {
+    top: 2px;
+    right: 2px;
+  }
+}

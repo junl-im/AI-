@@ -285,7 +285,7 @@ def test_evidence_intake_accepts_verified_web_quality_report(client):
     report = {
         "schemaVersion": 1,
         "mode": "run",
-        "appVersion": "0.11.15",
+        "appVersion": "0.11.16",
         "heartbeat": "6.7",
         "startedAt": "2026-08-03T09:00:00.000Z",
         "completedAt": "2026-08-03T09:01:00.000Z",

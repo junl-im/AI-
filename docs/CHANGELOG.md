@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.11.16 · Timeline Editor Split & Mobile Quick Creation
+
+- `TimelineEditor.tsx`에서 대사 클립 렌더링 책임을 `TimelineVoiceBlockCard.tsx`로 분리해 1,200줄 안전 상한 직전의 대형 컴포넌트를 약 960줄 수준으로 낮췄습니다.
+- 모바일/터치 환경에서 Ctrl/Cmd 없이도 `＋ / ✓` 버튼으로 원하는 대사와 쉼 블록을 임의 다중 선택할 수 있게 했습니다.
+- 모바일 목소리 Sheet에 현재 적용 대상 수를 표시해, 타임라인 대사를 선택한 상태에서 성우를 탭하면 몇 개 대사에 적용되는지 즉시 알 수 있습니다.
+- 성우 선택 시 Timeline 선택 중 실제 대사 블록만 필터링해 voice 변경을 적용하고, 적용 개수가 안내 문구와 정확히 일치하도록 했습니다.
+- 모바일에서 현재 목소리 컨트롤과 `생성 및 재생` CTA를 작업 흐름 안에서 sticky 처리해 긴 대본에서도 한 손 접근성을 높였습니다.
+- 앱/API/Worker 버전을 0.11.16으로 동기화했습니다.
+
 ## 0.11.15 · Mobile Voice Linkage & Source Integration
 
 - 모바일/PC 목소리 선택을 현재 Timeline 선택 상태와 연결해 성우를 고르면 선택된 대사 클립의 voiceId/voiceName이 즉시 함께 변경됩니다.

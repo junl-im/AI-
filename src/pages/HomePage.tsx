@@ -174,6 +174,13 @@ export function HomePage() {
   const getVoiceBlockSnapshots = timeline.getVoiceBlockSnapshots
   const updateTimelineVoices = timeline.updateVoiceMany
   const selectedVoice = useMemo(() => getVoicePreset(voiceId), [voiceId])
+  const selectedTimelineVoiceIds = useMemo(() => {
+    if (selectedTimelineIds.length === 0) return []
+    const selected = new Set(selectedTimelineIds)
+    return timeline.blocks
+      .filter((block) => block.kind === 'voice' && selected.has(block.id))
+      .map((block) => block.id)
+  }, [selectedTimelineIds, timeline.blocks])
   const activePreviewExists = Boolean(
     activePreview && playerQueue.some((track) => track.id === activePreview.trackId),
   )
@@ -582,11 +589,11 @@ export function HomePage() {
     setVoiceId(voice.id)
     setSpeechSpeed((current) => clampVoiceSettingsToNaturalRange(voice, current, speechPitch).speed)
     setSpeechPitch((current) => clampVoiceSettingsToNaturalRange(voice, speechSpeed, current).pitch)
-    if (selectedTimelineIds.length > 0) {
-      updateTimelineVoices(selectedTimelineIds, voice.id, voice.name)
-      showNotice(`선택한 대사에 ${voice.name} 목소리를 적용했습니다.`)
+    if (selectedTimelineVoiceIds.length > 0) {
+      updateTimelineVoices(selectedTimelineVoiceIds, voice.id, voice.name)
+      showNotice(`선택한 대사 ${selectedTimelineVoiceIds.length}개에 ${voice.name} 목소리를 적용했습니다.`)
     }
-  }, [selectedTimelineIds, showNotice, speechPitch, speechSpeed, updateTimelineVoices])
+  }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, updateTimelineVoices])
 
   const previewVoice = useCallback(async (
     nextVoiceId: string,
@@ -819,6 +826,7 @@ export function HomePage() {
                   emotion={speechEmotion}
                   normalizeText={normalizeText}
                   engine={engineCatalog.selected}
+                  applyTargetCount={selectedTimelineVoiceIds.length}
                   onVoiceChange={selectVoice}
                   onPreview={handlePreview}
                   onSpeedChange={setSpeechSpeed}

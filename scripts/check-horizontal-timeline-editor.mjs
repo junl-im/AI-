@@ -33,7 +33,13 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'startTimelineScrub',
   'continueTimelineScrub',
   'stopTimelineScrub',
+  'TimelineVoiceBlockCard',
+])
+
+const timelineBlockCard = await read('src/components/workspace/TimelineVoiceBlockCard.tsx')
+requireTokens('src/components/workspace/TimelineVoiceBlockCard.tsx', timelineBlockCard, [
   'onDoubleClick={(event) => {',
+  "'--soa-clip-width': `${width}px`",
 ])
 
 

@@ -160,4 +160,14 @@ describe('DubbingVoiceControls', () => {
     expect(screen.getAllByText(/장점 ·/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/주의 ·/).length).toBeGreaterThan(0)
   })
+  it('모바일 목소리 Sheet는 선택된 타임라인 적용 대상을 명확히 보여준다', () => {
+    render(<DubbingVoiceControls {...baseProps} applyTargetCount={2} />)
+
+    fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+
+    const target = screen.getByRole('status')
+    expect(target).toHaveTextContent('타임라인 2개 선택')
+    expect(target).toHaveTextContent('성우를 탭하면 선택된 대사에 바로 적용됩니다.')
+  })
+
 })

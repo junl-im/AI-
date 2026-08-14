@@ -17,6 +17,7 @@ interface DubbingVoiceControlsProps {
   emotion: VoiceEmotion
   normalizeText: boolean
   engine: EngineInfo | null
+  applyTargetCount?: number
   onVoiceChange: (voiceId: string) => void
   onPreview: (voiceId: string) => void
   onSpeedChange: (value: number) => void
@@ -37,6 +38,7 @@ export function DubbingVoiceControls({
   emotion,
   normalizeText,
   engine,
+  applyTargetCount = 0,
   onVoiceChange,
   onPreview,
   onSpeedChange,
@@ -98,6 +100,7 @@ export function DubbingVoiceControls({
         onSelect={onVoiceChange}
         onPreview={onPreview}
         onCreateVoice={onCreateVoice}
+        applyTargetCount={applyTargetCount}
       />
       <VoiceSettingsSheet
         open={settingsOpen}

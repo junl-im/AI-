@@ -336,16 +336,23 @@ await requireText('src/components/workspace/VoiceLibrary.tsx', [
 ])
 await requireText('src/components/workspace/TimelineEditor.tsx', [
   '음성 블록 편집',
-  '문장 나누기',
-  '생성 실패',
   '쉼 추가',
   'onAddVoice',
+  'TimelineVoiceBlockCard',
+])
+await requireText('src/components/workspace/TimelineVoiceBlockCard.tsx', [
+  '문장 나누기',
+  '생성 실패',
+  '번 대사 블록 메뉴 열기',
+  'aria-expanded={blockMenuOpen}',
+  'sttVerification',
+  'soa-timeline-touch-select',
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   "window.scrollTo({ top: 0, behavior: 'smooth' })",
 ])
 await requireText('src/components/workspace/DubbingStudioHeader.tsx', ['프로젝트 제목', '현재 음성 다운로드', '현재 작업 비우기', '프로젝트 메뉴 열기', 'aria-expanded={projectMenuOpen}']); await requireAbsent('src/components/workspace/DubbingStudioHeader.tsx', ['<details', '<summary'])
-await requireText('src/components/workspace/TimelineEditor.tsx', ['번 대사 블록 메뉴 열기', 'aria-expanded={blockMenuOpen}']); await requireAbsent('src/components/workspace/TimelineEditor.tsx', ['<details', '<summary'])
+await requireAbsent('src/components/workspace/TimelineEditor.tsx', ['<details', '<summary']); await requireAbsent('src/components/workspace/TimelineVoiceBlockCard.tsx', ['<details', '<summary'])
 await requireText('docs/DUBBING_STUDIO_UX.md', ['더빙 스튜디오', '하단 고정 플레이어', 'workspace reset'])
 await requireText('src/components/workspace/DubbingVoiceControls.tsx', ['VoicePickerSheet', 'VoiceSettingsSheet', '음성 설정 열기'])
 await requireText('src/styles/dubbing-overlays.css', ['.soa-dubbing-player-dock', '.soa-bottom-sheet', '.soa-dubbing-add-block'])
@@ -497,7 +504,7 @@ await requireText('scripts/lock-retry.mjs', ['ETIMEDOUT', 'EAI_AGAIN', 'retryDel
 await requireText('services/api/app/api/routes/verification.py', ['/device-benchmarks/summary', '/stt/verify-segments', 'max_regeneration_attempts'])
 await requireText('services/api/app/api/routes/verification.py', ['from app.services import stt_evaluation', 'stt_evaluation.measure_stt(payload)', 'stt_evaluation.regeneration_reasons('])
 await requireAbsent('services/api/app/api/routes/verification.py', ['from app.services.stt_evaluation import', 'measure_stt as evaluate_stt'])
-await requireText('src/components/workspace/TimelineEditor.tsx', ['STT 검수 · 실패만 재생성', 'sttVerification'])
+await requireText('src/components/workspace/TimelineEditor.tsx', ['STT 검수 · 실패만 재생성']); await requireText('src/components/workspace/TimelineVoiceBlockCard.tsx', ['sttVerification'])
 await requireText('src/workspace/sttTimeline.ts', ['prepareBlockForSttRegeneration', 'regenerationAttempts'])
 try {
   const workflowFiles = await readdir(join(root, '.github', 'workflows'))

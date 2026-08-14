@@ -1,14 +1,21 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.14 · All Workflows Reliability Hardening**
+현재 기준 버전: **0.11.16 · Timeline Editor Split & Mobile Quick Creation**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-13 10:28 KST**
+최종 갱신: **2026-08-14 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-14 KST · 0.11.16 Timeline Editor Split & Mobile Quick Creation
+1. **대상 버전과 기준**: 0.11.16 / 0.11.15 Mobile Voice Linkage & Source Integration.
+2. **핵심 변경**: Timeline voice clip 렌더링을 별도 컴포넌트로 분리하고, 모바일 `＋ / ✓` 다중 선택, Voice Picker 적용 대상 수 안내, 실제 voice clip만 대상에 포함하는 성우 적용, sticky voice/generate control을 추가했습니다.
+3. **영향 범위**: `TimelineEditor`, `TimelineVoiceBlockCard`, `DubbingVoiceControls`, `VoicePickerSheet`, `HomePage`, 모바일/타임라인 CSS, 관련 테스트와 버전/문서입니다.
+4. **고정 전달 규칙**: FULL은 저장소 전체 프로젝트이며 PATCH는 저장소 경로를 그대로 담아 압축 해제 후 루트에 즉시 덮어쓸 수 있어야 합니다.
+5. **다음 목표**: 0.11.17 Generation Orchestrator Split & Mobile Evidence.
 
 ## 2026-08-13 KST · 0.11.14 All Workflows Reliability Hardening
 1. **작업 일시(KST)**: 2026-08-13 10:28 KST 이후.
@@ -495,6 +502,16 @@
 8. 실제 모델이 없으면 AI 생성·복제 성공을 가장하지 않는다.
 9. 완료 시 전체 ZIP, 패치 ZIP, SHA-256, HANDOVER, CHANGELOG,
    NEXT_UPDATE를 함께 갱신한다.
+## 1. 최신 인수인계 · 0.11.16 Timeline Editor Split & Mobile Quick Creation
+
+- 현재 제품 버전: **0.11.16**.
+- `TimelineEditor.tsx`의 대사 clip rendering을 `TimelineVoiceBlockCard.tsx`로 분리해 hard limit 여유를 확보했습니다.
+- 모바일/터치에서는 `＋ / ✓`로 임의 다중 선택하며, 선택된 실제 대사 수를 Voice Picker에 표시합니다.
+- 선택된 Timeline 대사가 있으면 성우 탭이 해당 대사에 즉시 적용되고, pause는 적용 개수에서 제외합니다.
+- 모바일 voice control과 생성 CTA는 긴 대본에서도 접근하기 쉽도록 sticky 동작합니다.
+- 전달 규칙: FULL은 전체 프로젝트, PATCH는 저장소 경로 그대로 즉시 덮어쓰기 가능한 파일 세트입니다.
+- 다음 목표: **0.11.17 · Generation Orchestrator Split & Mobile Evidence**.
+
 ## 2. 프로젝트의 궁극적 목표
 SoriON AI는 단순한 웹 음성 변환기가 아니라 **한국인을 위한 차세대 AI Voice Platform**이다.
 모바일에서 약 10초 안에 자연스러운 한국어 TTS, 적법한 목소리 복제, 음성 변환,

@@ -21,6 +21,7 @@ interface VoicePickerSheetProps {
   onSelect: (voiceId: string) => void
   onPreview: (voiceId: string) => void
   onCreateVoice: () => void
+  applyTargetCount?: number
 }
 
 type VoiceFilter = VoiceGender | 'all'
@@ -43,6 +44,7 @@ export function VoicePickerSheet({
   onSelect,
   onPreview,
   onCreateVoice,
+  applyTargetCount = 0,
 }: VoicePickerSheetProps) {
   const dialogRef = useModalDialog<HTMLElement>(open, onClose)
   const choiceRefs = useRef<Array<HTMLButtonElement | null>>([])
@@ -108,6 +110,17 @@ export function VoicePickerSheet({
             내 목소리
           </button>
         </header>
+        {applyTargetCount > 0 ? (
+          <div className="soa-voice-apply-target" role="status">
+            <strong>타임라인 {applyTargetCount}개 선택</strong>
+            <span>성우를 탭하면 선택된 대사에 바로 적용됩니다.</span>
+          </div>
+        ) : (
+          <div className="soa-voice-apply-target is-default">
+            <strong>기본 목소리 선택</strong>
+            <span>다음 대사 생성부터 이 목소리를 사용합니다.</span>
+          </div>
+        )}
         <div className="soa-sheet-tags" role="group" aria-label="목소리 성별 필터">
           {filterOptions.map((option) => (
             <button

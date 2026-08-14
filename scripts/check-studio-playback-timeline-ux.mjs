@@ -78,14 +78,20 @@ requireTokens('src/components/navigation/LinkedPlayerDock.tsx', dock, [
   'className="soa-dubbing-player-compact"',
 ])
 
+const timelineBlockCard = await source('src/components/workspace/TimelineVoiceBlockCard.tsx')
+requireTokens('src/components/workspace/TimelineVoiceBlockCard.tsx', timelineBlockCard, [
+  "event.key === ' ' && block.status === 'ready'",
+  "event.altKey && event.key === 'ArrowLeft'",
+  'onDoubleClick={(event) => {',
+  'soa-timeline-touch-select',
+])
+
 const timeline = await source('src/components/workspace/TimelineEditor.tsx')
 requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'seekFromTimeline',
   '트랙 클릭 위치 이동',
   "event.key === 'Delete'",
   "event.key === 'Enter'",
-  "event.key === ' ' && block.status === 'ready'",
-  "event.altKey && event.key === 'ArrowLeft'",
   'soa-capcut-playhead',
   'soa-timeline-zoom',
   'soa-timeline-quick-editor',

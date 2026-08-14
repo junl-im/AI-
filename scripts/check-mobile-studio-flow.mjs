@@ -33,6 +33,7 @@ requireTokens('src/components/workspace/DubbingVoiceControls.tsx', voiceControls
   '현재 목소리 ${voice.name} 선택',
   'contextText={scriptText}',
   '<VoicePickerSheet',
+  'applyTargetCount={applyTargetCount}',
 ])
 if (voiceControls.includes('soa-dubbing-voice-quick')) {
   failures.push('src/components/workspace/DubbingVoiceControls.tsx: 빠른 프리셋 나열 UI가 다시 추가되었습니다.')
@@ -45,6 +46,8 @@ requireTokens('src/components/workspace/VoicePickerSheet.tsx', picker, [
   '장점 · {voice.strengths.join',
   '주의 · {voice.tradeoffs.join',
   'onPreview={onPreview}',
+  '타임라인 {applyTargetCount}개 선택',
+  '성우를 탭하면 선택된 대사에 바로 적용됩니다.',
 ])
 
 const presets = await source('src/tts/voicePresets.ts')
@@ -76,6 +79,19 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'window.innerWidth <= 760 ? 1.25 : 1',
 ])
 
+const timelineVoiceBlock = await source('src/components/workspace/TimelineVoiceBlockCard.tsx')
+requireTokens('src/components/workspace/TimelineVoiceBlockCard.tsx', timelineVoiceBlock, [
+  'soa-timeline-touch-select',
+  "onSelect(block.id, 'toggle')",
+])
+
+const home = await source('src/pages/HomePage.tsx')
+requireTokens('src/pages/HomePage.tsx', home, [
+  'selectedTimelineVoiceIds',
+  'applyTargetCount={selectedTimelineVoiceIds.length}',
+  '선택한 대사 ${selectedTimelineVoiceIds.length}개에',
+])
+
 const mobileCss = await source('src/styles/timeline-horizontal-mobile.css')
 requireTokens('src/styles/timeline-horizontal-mobile.css', mobileCss, [
   '@media (max-width: 1023px)',
@@ -83,6 +99,8 @@ requireTokens('src/styles/timeline-horizontal-mobile.css', mobileCss, [
   'width: var(--soa-clip-width, 1px);',
   'overflow-x: auto;',
   'touch-action: pan-x;',
+  '.soa-timeline-touch-select',
+  'touch-action: manipulation;',
 ])
 
 
@@ -91,6 +109,9 @@ requireTokens('src/styles/mobile-studio-flow.css', mobileFlowCss, [
   '.soa-voice-context-recommendation',
   '.soa-dubbing-player-dock__nav',
   '@media (max-width: 760px)',
+  '.soa-voice-apply-target',
+  '.soa-one-flow-composer__generate',
+  'position: sticky;',
 ])
 
 const indexCss = await source('src/styles/index.css')

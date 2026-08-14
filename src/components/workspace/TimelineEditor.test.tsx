@@ -71,6 +71,29 @@ describe('TimelineEditor', () => {
     await waitFor(() => expect(onSelectionChange).toHaveBeenLastCalledWith(['voice-2']))
   })
 
+  it('모바일용 + 선택 버튼으로 modifier key 없이 여러 대사를 고른다', async () => {
+    const onSelectionChange = vi.fn()
+    render(
+      <TimelineEditor
+        blocks={blocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={vi.fn()}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onClear={vi.fn()}
+        onSelectionChange={onSelectionChange}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '2번 대사 다중 선택' }))
+    await waitFor(() => expect(onSelectionChange).toHaveBeenLastCalledWith(['voice-1', 'voice-2']))
+    expect(screen.getByRole('button', { name: '2번 대사 선택 해제' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
   it('PC 가로 타임라인은 시간축과 클립 폭을 같은 좌표계로 유지한다', () => {
     const { container } = render(
       <TimelineEditor
