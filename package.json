@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.11.16",
+  "version": "0.11.17",
   "private": true,
   "type": "module",
   "scripts": {
@@ -85,8 +85,10 @@
     "quality:recovery-evidence": "node scripts/check-recovery-evidence-voice-inventory.mjs",
     "quality:engine-resilience": "node scripts/check-engine-resilience.mjs",
     "quality:visual-layout": "node scripts/run-visual-layout-regression.mjs",
+    "quality:mobile-layout": "node scripts/run-visual-layout-regression.mjs --mobile",
     "quality:batch-recovery-routing": "node scripts/check-batch-recovery-adaptive-routing.mjs",
     "quality:visual-layout:approve": "node scripts/run-visual-layout-regression.mjs --approve",
+    "quality:mobile-layout:approve": "node scripts/run-visual-layout-regression.mjs --mobile --approve",
     "quality:editor-command-engine": "node scripts/check-editor-command-engine-observation.mjs",
     "quality:recovery-session-safety": "node scripts/check-recovery-evidence-session-safety.mjs",
     "quality:one-flow-ux": "node scripts/check-one-flow-dubbing-ux.mjs",

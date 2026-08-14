@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.11.17 · Generation Runtime Split & Real Mobile Evidence
+
+- `useTimelineGeneration.ts`에서 SSE/polling, progressive segment 준비·순서 보장, 최종 음원 handoff, recovery/fallback 실행 책임을 `src/timeline/generationRuntime.ts`로 분리해 hook을 약 1,116줄에서 약 679줄로 낮췄습니다.
+- 기존 revision guard, partial audio, signed segment refresh, browser speech fallback, 동일 track 최종 WAV 교체 계약은 새 runtime 모듈로 그대로 이동하고 static quality gate도 실제 책임 파일을 검사하도록 갱신했습니다.
+- Chromium visual runner에 `--mobile` 모드를 추가해 360×800, 390×844, 430×932에서 horizontal overflow, 모바일 Dock, 44px navigation touch target, `＋ / ✓` Timeline 다중 선택, batch editor containment를 실제 브라우저에서 검사합니다.
+- GitHub Web quality에 별도 `Chromium mobile layout regression` 단계를 추가하고 실패 evidence를 기존 `.sorion/web-quality` artifact에 함께 보존합니다.
+- 모바일 workspace 하단 여백에 `safe-area-inset-bottom`을 포함해 iPhone 계열 홈 인디케이터와 고정 Dock이 마지막 편집 내용을 가리는 위험을 줄였습니다.
+- 재생 시간 갱신과 무관한 Dock navigation을 memoized component로 분리하고 페이지 전환 scroll을 다음 animation frame의 즉시 top 정렬로 바꿔 모바일 재생 중 불필요한 네비게이션 렌더·스크롤 경쟁을 줄였습니다.
+- 앱/API/Worker 버전을 0.11.17로 동기화했습니다.
+
 ## 0.11.16 · Timeline Editor Split & Mobile Quick Creation
 
 - `TimelineEditor.tsx`에서 대사 클립 렌더링 책임을 `TimelineVoiceBlockCard.tsx`로 분리해 1,200줄 안전 상한 직전의 대형 컴포넌트를 약 960줄 수준으로 낮췄습니다.

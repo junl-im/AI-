@@ -22,7 +22,11 @@ function requireTokens(relative, source, tokens) {
 
 const runner = await read('scripts/run-visual-layout-regression.mjs')
 requireTokens('scripts/run-visual-layout-regression.mjs', runner, [
-  'const viewports = [1024, 1280, 1440]',
+  "{ width: 360, height: 800, mobile: true }",
+  "{ width: 390, height: 844, mobile: true }",
+  "{ width: 430, height: 932, mobile: true }",
+  "[1024, 1280, 1440].map",
+  "process.argv.includes('--mobile')",
   'Page.captureScreenshot',
   'Emulation.setDeviceMetricsOverride',
   'noHorizontalOverflow',
@@ -30,7 +34,11 @@ requireTokens('scripts/run-visual-layout-regression.mjs', runner, [
   'transportOrder',
   'threeColumnVisible',
   'batchControlsContained',
-  "fixture: 'workspace-multi-select'",
+  'navigationTouchTargets',
+  'touchMultiSelectVisible',
+  'dockClearanceReserved',
+  "'workspace-mobile-touch-multi-select'",
+  "'workspace-multi-select'",
   "sha256: await sha256(screenshotPath)",
   'pixelDiff',
   "status: baselinePath ? 'available' : 'pending'",
@@ -43,6 +51,7 @@ requireTokens('scripts/run-visual-layout-regression.mjs', runner, [
   'Chromium visual runner',
   'button[aria-label^=\"전체 내용 음성 제작\"]',
   'button.soa-one-flow-composer__generate',
+  '.soa-timeline-touch-select',
   '!button.disabled',
 ])
 
@@ -60,7 +69,9 @@ requireTokens('src/styles/dubbing-overlays.css', dubbingOverlays, [
 const packageJson = await read('package.json')
 requireTokens('package.json', packageJson, [
   '"quality:visual-layout": "node scripts/run-visual-layout-regression.mjs"',
+  '"quality:mobile-layout": "node scripts/run-visual-layout-regression.mjs --mobile"',
   '"quality:visual-layout:approve": "node scripts/run-visual-layout-regression.mjs --approve"',
+  '"quality:mobile-layout:approve": "node scripts/run-visual-layout-regression.mjs --mobile --approve"',
 ])
 
 const workflow = await read('.github/workflows/ci.yml')
@@ -68,7 +79,10 @@ requireTokens('.github/workflows/ci.yml', workflow, [
   'Run Chromium visual layout regression',
   'id: visual_layout',
   'npm run quality:visual-layout',
-  "steps.visual_layout.outcome == 'failure'",
+  'Run Chromium mobile layout regression',
+  'id: mobile_layout',
+  'npm run quality:mobile-layout',
+  "steps.mobile_layout.outcome == 'failure'",
 ])
 
 if (failures.length) {
@@ -77,4 +91,4 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log('Chromium visual layout regression 계약 검사 통과 · 1024/1280/1440px')
+console.log('Chromium visual layout regression 계약 검사 통과 · desktop 1024/1280/1440 + mobile 360/390/430')

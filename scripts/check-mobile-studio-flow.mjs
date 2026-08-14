@@ -20,10 +20,18 @@ function requireTokens(relativePath, content, tokens) {
   }
 }
 
+const navigationItems = await source('src/navigation/navigationItems.ts')
+requireTokens('src/navigation/navigationItems.ts', navigationItems, [
+  "{ page: 'clone', label: '내 목소리'",
+  "home: '텍스트를 음성으로'",
+  "clone: '내 목소리'",
+])
+
 const player = await source('src/components/navigation/LinkedPlayerDock.tsx')
 requireTokens('src/components/navigation/LinkedPlayerDock.tsx', player, [
   'soa-dubbing-player-dock__nav',
-  'const navigation = (',
+  'const navigation = <DockNavigation',
+  'const DockNavigation = memo',
   'setPlaying(true)',
   "setPlaybackError(error instanceof Error ? error.message : '음성을 재생하지 못했습니다.')",
 ])
@@ -112,6 +120,7 @@ requireTokens('src/styles/mobile-studio-flow.css', mobileFlowCss, [
   '.soa-voice-apply-target',
   '.soa-one-flow-composer__generate',
   'position: sticky;',
+  'padding-bottom: calc(118px + env(safe-area-inset-bottom));',
 ])
 
 const indexCss = await source('src/styles/index.css')

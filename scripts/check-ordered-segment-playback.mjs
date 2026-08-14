@@ -23,7 +23,7 @@ await requireText('src/store/usePlayerStore.ts', [
   '.sort((left, right) => left.index - right.index)',
   'audio.progressive?.segments',
 ])
-await requireText('src/hooks/useTimelineGeneration.ts', [
+await requireText('src/timeline/generationRuntime.ts', [
   'const pendingSegments = new Map<number, SpeechReadySegment>()',
   'let nextSegmentIndex = 1',
   'previewReadySegment',

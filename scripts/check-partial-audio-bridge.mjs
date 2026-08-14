@@ -48,7 +48,7 @@ await requireText('src/tts/jobProgressStream.ts', [
   "event === 'segment-ready'",
   'onSegmentReady(mapSegment',
 ])
-const timelineGenerationSource = await requireText('src/hooks/useTimelineGeneration.ts', [
+const timelineGenerationSource = await requireText('src/timeline/generationRuntime.ts', [
   'previewReadySegment',
   'const targetTrackId = partialTrackId',
   'appendProgressiveSegment(targetTrackId, prepared)',
@@ -59,7 +59,7 @@ const timelineGenerationSource = await requireText('src/hooks/useTimelineGenerat
   'await probeCancellation',
 ])
 if (timelineGenerationSource.includes('await probe.cancel()')) {
-  failures.push('src/hooks/useTimelineGeneration.ts: tee 분기 소비 전에 probe.cancel()을 await하면 교착될 수 있음')
+  failures.push('src/timeline/generationRuntime.ts: tee 분기 소비 전에 probe.cancel()을 await하면 교착될 수 있음')
 }
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   "recordPlaybackMetric('firstByteMs')",

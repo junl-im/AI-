@@ -1,48 +1,51 @@
-# SoriON AI 0.11.16 Verification Report
+# SoriON AI 0.11.17 Verification Report
 
-결과 버전: **0.11.16 · Timeline Editor Split & Mobile Quick Creation**  
-기준: **0.11.15 · Mobile Voice Linkage & Source Integration FULL**  
+결과 버전: **0.11.17 · Generation Runtime Split & Real Mobile Evidence**  
+기준: **0.11.16 · Timeline Editor Split & Mobile Quick Creation FULL**  
 검증일: **2026-08-14 KST**
 
 ## 핵심 변경
 
-- `TimelineEditor.tsx`의 voice clip 렌더링/키보드/메뉴/STT 표시를 `TimelineVoiceBlockCard.tsx`로 분리했습니다.
-- 모바일/터치에서 대사와 쉼을 `＋ / ✓`로 toggle 선택할 수 있어 Ctrl/Cmd modifier가 필요하지 않습니다.
-- Voice Picker가 현재 선택된 실제 voice clip 수를 표시하고 성우 선택의 적용 범위를 안내합니다.
-- `HomePage`는 pause를 제외한 실제 voice clip ID만 성우 변경 대상으로 전달합니다.
-- 모바일의 현재 목소리 control과 `생성 및 재생` CTA를 긴 대본에서도 접근하기 쉬운 sticky 위치로 보강했습니다.
-- 관련 static quality gate가 분리된 Timeline voice component와 모바일 linkage 계약을 직접 검사하도록 갱신했습니다.
+- `useTimelineGeneration.ts`의 progressive audio / recovery / SSE-polling / final handoff 실행 책임을 `src/timeline/generationRuntime.ts`로 분리했습니다.
+- Hook line count를 약 1,116줄에서 약 679줄로 낮추고 외부 controller API는 유지했습니다.
+- partial audio, ordered segment, revision safety static gate가 새 runtime 책임 파일을 직접 확인하도록 갱신했습니다.
+- Chromium visual runner에 360×800 / 390×844 / 430×932 실제 모바일 viewport 모드를 추가했습니다.
+- GitHub Web quality에 desktop visual과 별도의 mobile visual 단계가 추가됩니다.
+- 모바일 workspace bottom clearance에 safe-area를 포함하고 Dock navigation을 memoized component로 분리했습니다.
 
 ## 검증 결과
 
 - Repository preflight: **47/47 PASS**
-- Product version sync: **0.11.16 PASS**
-- Project rules: **PASS**
-- Studio playback / timeline UX contract: **PASS**
-- PC horizontal timeline contract: **PASS**
-- Mobile studio flow contract: **PASS**
-- 수정 TS/TSX dependency-free transpile: **7/7 PASS**
+- Product version sync: **0.11.17 PASS**
+- Generation hook syntax/transpile: **PASS**
+- Generation runtime syntax/transpile: **PASS**
+- Chromium visual runner syntax/static contract: **PASS**
+- Desktop + mobile visual workflow contract: **PASS**
 - Python compileall: **PASS**
 - API pytest: **219/219 PASS**
 - Worker pytest: **14/14 PASS**
 
-## 현재 경고
+## GitHub Actions 최종 판정 항목
 
-실패는 아니지만 다음 파일은 800줄 권고선을 넘습니다.
+현재 전달 환경에는 프로젝트 `node_modules`가 포함되어 있지 않아 Vitest/ESLint/Vite production build 전체를 여기서 실행하지 않습니다. GitHub `Web quality`가 다음 항목의 최종 판정입니다.
 
-- `src/hooks/useTimelineGeneration.ts`: 약 1117줄
+- TypeScript semantic typecheck
+- Vitest 전체 회귀
+- Vite production build
+- Chromium desktop visual 1024/1280/1440
+- Chromium mobile visual 360/390/430
+
+## 현재 구조 경고
+
+실패는 아니지만 다음 책임 분리가 후속 우선순위입니다.
+
 - `src/components/workspace/TimelineEditor.tsx`: 약 961줄
+- `src/hooks/useTimelineGeneration.test.ts`: 약 890줄
 - `src/pages/HomePage.tsx`: 약 941줄
 - `src/quality/qualityApi.ts`: 약 818줄
-- `src/styles/dubbing-overlays.css`: 약 1181줄
-
-다음 0.11.17에서 generation orchestration과 대형 CSS 책임 분리를 우선합니다.
-
-## Web 전체 실행 제한
-
-현재 전달 환경에는 프로젝트 `node_modules`가 포함되어 있지 않으므로 실제 Vitest/ESLint/Vite build 전체 실행은 하지 않았습니다. GitHub Actions `Web quality`가 semantic typecheck와 browser build의 최종 판정입니다.
+- `src/styles/dubbing-overlays.css`: 약 1,181줄
 
 ## 전달 규칙
 
 - **FULL**: 저장소 전체 프로젝트.
-- **PATCH**: 저장소 상대 경로 그대로 담긴 변경 파일. 압축 해제 후 프로젝트 루트에 그대로 덮어쓰면 됩니다. 별도 patch runner가 필요하지 않습니다.
+- **PATCH**: 저장소 상대 경로 그대로 담긴 변경 파일. 압축 해제 후 프로젝트 루트에 바로 덮어씁니다. 별도 APPLY runner가 필요하지 않습니다.

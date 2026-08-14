@@ -148,7 +148,7 @@ describe('HomePage', () => {
     expect(nextVoice).toBeTruthy()
     fireEvent.click(nextVoice!)
 
-    await waitFor(() => expect(useAppStore.getState().notice).toMatch(/선택한 대사에 .* 목소리를 적용했습니다/))
+    await waitFor(() => expect(useAppStore.getState().notice).toMatch(/선택한 대사 1개에 .* 목소리를 적용했습니다/))
   })
 
 })

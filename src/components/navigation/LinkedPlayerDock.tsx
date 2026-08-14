@@ -1,4 +1,5 @@
 import {
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -19,6 +20,33 @@ import { refreshSpeechFinalAudio } from '../../tts/voiceApi'
 import { PlayerQueuePanel } from './PlayerQueuePanel'
 
 const rates = [0.75, 1, 1.25, 1.5, 2]
+
+
+type DockNavigationPage = (typeof primaryNavigationItems)[number]['page']
+
+const DockNavigation = memo(function DockNavigation({
+  page,
+  onNavigate,
+}: {
+  page: DockNavigationPage
+  onNavigate: (page: DockNavigationPage) => void
+}) {
+  return (
+    <nav className="soa-dock__nav" aria-label="주요 메뉴">
+      {primaryNavigationItems.map((item) => (
+        <button
+          key={item.page}
+          type="button"
+          aria-current={page === item.page ? 'page' : undefined}
+          onClick={() => onNavigate(item.page)}
+          className={page === item.page ? 'is-active' : ''}
+        >
+          <span aria-hidden="true">{item.icon}</span>{item.label}
+        </button>
+      ))}
+    </nav>
+  )
+})
 
 function formatTime(value: number) {
   const safe = Number.isFinite(value) ? Math.max(0, value) : 0
@@ -549,24 +577,11 @@ export function LinkedPlayerDock() {
       ? '부분 구간 연속 재생 중에는 위치 이동을 지원하지 않음'
       : '재생 위치 이동'
 
-  const navigation = (
-    <nav className="soa-dock__nav" aria-label="주요 메뉴">
-      {primaryNavigationItems.map((item) => (
-        <button
-          key={item.page}
-          type="button"
-          aria-current={page === item.page ? 'page' : undefined}
-          onClick={() => {
-            enterWorkspace(item.page)
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-          }}
-          className={page === item.page ? 'is-active' : ''}
-        >
-          <span aria-hidden="true">{item.icon}</span>{item.label}
-        </button>
-      ))}
-    </nav>
-  )
+  const navigateFromDock = useCallback((nextPage: DockNavigationPage) => {
+    enterWorkspace(nextPage)
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }))
+  }, [enterWorkspace])
+  const navigation = <DockNavigation page={page} onNavigate={navigateFromDock} />
 
   const audio = playbackUrl ? (
     <audio

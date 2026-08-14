@@ -25,9 +25,14 @@ const requirements = new Map([
     'loadPromiseRef',
   ]],
   ['src/hooks/useTimelineGeneration.ts', [
-    'latestBlock.revision !== revision',
     'restoreSession',
     'revision: block.revision + 1',
+    'runTimelineVoiceBlock',
+  ]],
+  ['src/timeline/generationRuntime.ts', [
+    'latestBlock.revision !== revision',
+    'deps.controllers',
+    'deps.stopPolling',
   ]],
   ['docs/WORKSPACE_SESSION.md', ['IndexedDB', 'Object URL', 'revision', 'localStorage']],
 ])

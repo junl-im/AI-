@@ -364,6 +364,11 @@ jobs:
         if: steps.web_quality.outcome == 'success'
         continue-on-error: true
         run: npm run quality:visual-layout
+      - name: Run Chromium mobile layout regression
+        id: mobile_layout
+        if: steps.web_quality.outcome == 'success'
+        continue-on-error: true
+        run: npm run quality:mobile-layout
       - name: Upload Web quality evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -374,7 +379,7 @@ jobs:
           include-hidden-files: true
           path: .sorion/web-quality
       - name: Fail after preserving Web evidence
-        if: steps.web_quality.outcome == 'failure' || steps.visual_layout.outcome == 'failure'
+        if: steps.web_quality.outcome == 'failure' || steps.visual_layout.outcome == 'failure' || steps.mobile_layout.outcome == 'failure'
         run: exit 1
       - name: Write empty static-host runtime configuration
         run: npm run runtime:config

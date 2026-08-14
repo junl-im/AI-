@@ -81,7 +81,7 @@
   }
   .soa-workspace-shell--dubbing,
   .soa-workspace-shell--dubbing.soa-workspace-shell--has-player {
-    padding-bottom: 118px;
+    padding-bottom: calc(118px + env(safe-area-inset-bottom));
   }
 }
 

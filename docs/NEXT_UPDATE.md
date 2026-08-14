@@ -1,26 +1,28 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.16 · Timeline Editor Split & Mobile Quick Creation`
+현재 기준: `0.11.17 · Generation Runtime Split & Real Mobile Evidence`
 
 ## 목표 버전
 
-`0.11.17 · Generation Orchestrator Split & Mobile Evidence`
+`0.11.18 · Timeline Command Split & Longform Soak Evidence`
 
 ### 핵심 기능
 
-1. `useTimelineGeneration.ts`의 progressive audio / recovery / batch orchestration 책임을 단계적으로 분리합니다.
-2. 360/390/430px 실제 Chromium 모바일 회귀에서 Voice Sheet 선택 → Timeline 적용 → 생성 CTA 접근 흐름을 evidence로 고정합니다.
-3. 모바일 키보드가 열린 상태에서 sticky voice/generate control이 입력 영역을 가리지 않는지 검증합니다.
-4. 장문 최대 2-way bounded parallel의 P95/실패율/fallback evidence를 수집하고 자동 병렬도 증가는 측정 전까지 금지합니다.
+1. `TimelineEditor.tsx`의 selection/history command bar와 quick editor를 별도 모듈로 분리해 800줄 권고선에 더 가깝게 낮춥니다.
+2. `dubbing-overlays.css`의 Timeline/batch/export 영역을 별도 CSS 레이어로 분리해 1,200줄 hard limit 접근을 해소합니다.
+3. 실제 장문 2-way bounded parallel soak에서 P50/P95, 실패율, fallback, engine switch, cancel/resume 지표를 evidence로 저장합니다.
+4. 모바일 Chromium evidence를 Voice Sheet → Timeline 적용 → 생성 CTA → Dock 재생까지 한 단계 더 확장합니다.
 
 ### 선행 조건
 
-- 0.11.16 Web quality에서 TimelineEditor/DubbingVoiceControls 회귀 테스트가 통과해야 합니다.
-- 실제 음질 증거가 없는 환경의 synthetic 결과를 품질 완료 증거로 표현하지 않습니다.
+- 0.11.17 Web quality에서 desktop visual + mobile visual 두 단계가 모두 통과해야 합니다.
+- 동시 생성 상한은 soak 증거 없이 2보다 높이지 않습니다.
+- 실제 음질 증거가 없는 synthetic/mock 결과는 품질 완료 증거로 취급하지 않습니다.
 
-## 0.11.16에서 고정한 결정
+## 0.11.17에서 고정한 결정
 
-- PATCH ZIP은 저장소 경로 그대로 구성해 압축 해제 후 프로젝트 루트에 바로 덮어쓸 수 있어야 합니다.
-- FULL ZIP은 `.github`, docs, public, scripts, services, src 및 루트 설정/lock 파일을 포함한 전체 프로젝트여야 합니다.
-- 모바일 임의 다중 선택은 modifier key가 아닌 화면 내 `＋ / ✓` 컨트롤을 제공합니다.
-- 목소리 선택 안내의 적용 개수는 pause가 아니라 실제 voice clip 개수만 계산합니다.
+- generation runtime의 progressive/recovery 실행 책임은 hook이 아니라 `src/timeline/generationRuntime.ts`가 소유합니다.
+- partial audio / ordered segment / revision safety static gate는 실제 책임 파일을 직접 검사합니다.
+- 모바일 layout gate의 기본 viewport는 360×800, 390×844, 430×932입니다.
+- PATCH ZIP은 저장소 상대 경로 그대로 구성하며 프로젝트 루트에 직접 덮어쓸 수 있어야 합니다.
+- FULL ZIP은 저장소 전체 프로젝트를 포함합니다.

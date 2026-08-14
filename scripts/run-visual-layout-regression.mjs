@@ -13,8 +13,9 @@ function argument(name, fallback) {
   return index >= 0 && process.argv[index + 1] ? process.argv[index + 1] : fallback
 }
 
-const output = argument('--output', join(root, '.sorion', 'web-quality', 'visual-layout'))
-const baselineDir = argument('--baseline-dir', join(root, 'visual-baselines', 'workspace'))
+const mobileMode = process.argv.includes('--mobile')
+const output = argument('--output', join(root, '.sorion', 'web-quality', mobileMode ? 'mobile-layout' : 'visual-layout'))
+const baselineDir = argument('--baseline-dir', join(root, 'visual-baselines', mobileMode ? 'mobile-workspace' : 'workspace'))
 const approveBaseline = process.argv.includes('--approve')
 const requireBaseline = process.argv.includes('--require-baseline')
   || process.env.SORION_VISUAL_BASELINE_REQUIRED === '1'
@@ -26,8 +27,13 @@ const channelThreshold = Number(argument(
   '--channel-threshold',
   process.env.SORION_VISUAL_CHANNEL_THRESHOLD ?? '24',
 ))
-const viewports = [1024, 1280, 1440]
-const height = 900
+const viewportConfigs = mobileMode
+  ? [
+      { width: 360, height: 800, mobile: true },
+      { width: 390, height: 844, mobile: true },
+      { width: 430, height: 932, mobile: true },
+    ]
+  : [1024, 1280, 1440].map((width) => ({ width, height: 900, mobile: false }))
 const browserCandidates = [
   process.env.SORION_CHROMIUM_BIN,
   'chromium',
@@ -198,7 +204,7 @@ async function waitForCondition(cdp, expression, label, timeoutMs = 15_000) {
   throw new Error(`${label} 준비 대기 시간이 초과되었습니다.${suffix}`)
 }
 
-async function buildWorkspaceFixture(cdp) {
+async function buildWorkspaceFixture(cdp, useTouchSelection = false) {
   const fixtureText = '첫 번째 실사용 더빙 문장입니다. 두 번째 클립의 목소리를 함께 바꿉니다. 세 번째 문장으로 화면 폭도 점검합니다.'
   await waitForCondition(
     cdp,
@@ -257,7 +263,13 @@ async function buildWorkspaceFixture(cdp) {
     const voices = [...document.querySelectorAll('article.soa-dubbing-block')]
       .filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
     if (voices.length < 2) return 0
-    voices[1].dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }))
+    if (${useTouchSelection ? 'true' : 'false'}) {
+      const touchSelect = voices[1].querySelector('.soa-timeline-touch-select')
+      if (!(touchSelect instanceof HTMLButtonElement)) return 0
+      touchSelect.click()
+    } else {
+      voices[1].dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }))
+    }
     return voices.length
   })()`)
   if (selectedCount < 2) throw new Error(`visual fixture 클립이 부족합니다: ${selectedCount}`)
@@ -268,6 +280,57 @@ async function buildWorkspaceFixture(cdp) {
     '다중 선택 batch 편집기',
   )
 }
+
+const mobileLayoutProbeExpression = `(() => {
+  const rect = (selector) => {
+    const node = document.querySelector(selector)
+    if (!(node instanceof HTMLElement)) return null
+    const box = node.getBoundingClientRect()
+    return { x: box.x, y: box.y, width: box.width, height: box.height, right: box.right, bottom: box.bottom }
+  }
+  const visibleButtons = (selector) => [...document.querySelectorAll(selector)]
+    .filter((node) => node instanceof HTMLElement && node.getBoundingClientRect().width > 0 && node.getBoundingClientRect().height > 0)
+    .map((node) => {
+      const box = node.getBoundingClientRect()
+      return { width: box.width, height: box.height }
+    })
+  const dock = rect('.soa-dubbing-player-dock')
+  const nav = rect('.soa-dubbing-player-dock__nav .soa-dock__nav')
+  const editor = rect('[aria-label="음성으로 만들 장문 내용"]')
+  const timeline = rect('.soa-timeline')
+  const batch = rect('.soa-timeline-quick-editor.is-batch')
+  const batchControls = rect('.soa-timeline-batch-controls')
+  const navButtons = visibleButtons('.soa-dubbing-player-dock__nav .soa-dock__nav button')
+  const touchSelectors = visibleButtons('.soa-timeline-touch-select')
+  const shell = document.querySelector('.soa-workspace-shell--dubbing')
+  const shellPaddingBottom = shell instanceof HTMLElement ? Number.parseFloat(getComputedStyle(shell).paddingBottom) || 0 : 0
+  const overflow = document.documentElement.scrollWidth - window.innerWidth
+  return {
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+    overflow,
+    dock,
+    nav,
+    editor,
+    timeline,
+    batch,
+    batchControls,
+    shellPaddingBottom,
+    navButtons,
+    touchSelectors,
+    assertions: {
+      noHorizontalOverflow: overflow <= 1,
+      mobileDockVisible: Boolean(dock && dock.height > 0),
+      mobileNavigationVisible: Boolean(nav && nav.height > 0),
+      navigationTouchTargets: navButtons.length >= 4 && navButtons.every((item) => item.height >= 44),
+      touchMultiSelectVisible: touchSelectors.length >= 2 && touchSelectors.every((item) => item.width >= 24 && item.height >= 24),
+      editorContained: Boolean(editor && editor.x >= -1 && editor.right <= window.innerWidth + 1),
+      timelineContained: Boolean(timeline && timeline.x >= -1 && timeline.right <= window.innerWidth + 1),
+      batchVisible: Boolean(batch && batch.height > 0),
+      batchControlsContained: Boolean(batch && batchControls && batchControls.right <= batch.right + 1),
+      dockClearanceReserved: shellPaddingBottom >= 118,
+    },
+  }
+})()`
 
 const layoutProbeExpression = `(() => {
   const rect = (selector) => {
@@ -429,12 +492,16 @@ try {
   const cdp = createCdpClient(target.webSocketDebuggerUrl)
   await cdp.send('Page.enable')
   await cdp.send('Runtime.enable')
+  const firstViewport = viewportConfigs[0]
   await cdp.send('Emulation.setDeviceMetricsOverride', {
-    width: viewports[0],
-    height,
+    width: firstViewport.width,
+    height: firstViewport.height,
     deviceScaleFactor: 1,
-    mobile: false,
+    mobile: firstViewport.mobile,
   })
+  if (mobileMode) {
+    await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 })
+  }
 
   stage = 'page-navigate'
   const navigation = await cdp.send('Page.navigate', { url })
@@ -442,26 +509,27 @@ try {
   await waitForCondition(cdp, `(() => document.readyState === 'complete')()`, 'production page load', 20_000)
 
   stage = 'workspace-fixture'
-  await buildWorkspaceFixture(cdp)
+  await buildWorkspaceFixture(cdp, mobileMode)
 
   stage = 'layout-capture'
   const captures = []
   let failed = false
-  for (const width of viewports) {
+  for (const viewport of viewportConfigs) {
+    const { width, height, mobile } = viewport
     await cdp.send('Emulation.setDeviceMetricsOverride', {
       width,
       height,
       deviceScaleFactor: 1,
-      mobile: false,
+      mobile,
     })
     await new Promise((resolve) => setTimeout(resolve, 180))
-    const metrics = await evaluate(cdp, layoutProbeExpression)
+    const metrics = await evaluate(cdp, mobileMode ? mobileLayoutProbeExpression : layoutProbeExpression)
     const screenshot = await cdp.send('Page.captureScreenshot', {
       format: 'png',
       captureBeyondViewport: false,
       fromSurface: true,
     })
-    const filename = `workspace-${width}x${height}.png`
+    const filename = `${mobileMode ? 'workspace-mobile' : 'workspace'}-${width}x${height}.png`
     const screenshotPath = join(output, filename)
     await writeFile(screenshotPath, Buffer.from(screenshot.data, 'base64'))
     const assertions = Object.entries(metrics.assertions)
@@ -500,7 +568,7 @@ try {
     appVersion,
     capturedAt: new Date().toISOString(),
     browser: browser.version,
-    fixture: 'workspace-multi-select',
+    fixture: mobileMode ? 'workspace-mobile-touch-multi-select' : 'workspace-multi-select',
     baselinePolicy: {
       directory: baselineDir,
       required: requireBaseline,
@@ -523,7 +591,7 @@ try {
       appVersion,
       approvedAt: new Date().toISOString(),
       browser: browser.version,
-      fixture: 'workspace-multi-select',
+      fixture: mobileMode ? 'workspace-mobile-touch-multi-select' : 'workspace-multi-select',
       maxDiffRatio,
       channelThreshold,
       captures: captures.map((capture) => ({
@@ -559,7 +627,7 @@ try {
     }
     process.exitCode = 1
   } else {
-    console.log(`Visual layout regression 통과 · ${captures.map((item) => `${item.viewport.width}px`).join(' / ')}`)
+    console.log(`${mobileMode ? 'Mobile visual layout' : 'Visual layout'} regression 통과 · ${captures.map((item) => `${item.viewport.width}x${item.viewport.height}`).join(' / ')}`)
   }
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error)

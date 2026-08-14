@@ -349,7 +349,7 @@ await requireText('src/components/workspace/TimelineVoiceBlockCard.tsx', [
   'soa-timeline-touch-select',
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
-  "window.scrollTo({ top: 0, behavior: 'smooth' })",
+  "window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }))",
 ])
 await requireText('src/components/workspace/DubbingStudioHeader.tsx', ['프로젝트 제목', '현재 음성 다운로드', '현재 작업 비우기', '프로젝트 메뉴 열기', 'aria-expanded={projectMenuOpen}']); await requireAbsent('src/components/workspace/DubbingStudioHeader.tsx', ['<details', '<summary'])
 await requireAbsent('src/components/workspace/TimelineEditor.tsx', ['<details', '<summary']); await requireAbsent('src/components/workspace/TimelineVoiceBlockCard.tsx', ['<details', '<summary'])

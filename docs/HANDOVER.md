@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.16 · Timeline Editor Split & Mobile Quick Creation**
+현재 기준 버전: **0.11.17 · Generation Runtime Split & Real Mobile Evidence**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-14 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,15 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-14 KST · 0.11.17 Generation Runtime Split & Real Mobile Evidence
+1. **대상 버전과 기준**: 0.11.17 / 0.11.16 Timeline Editor Split & Mobile Quick Creation.
+2. **핵심 변경**: generation SSE/polling, progressive segment, signed refresh, recovery/fallback, final handoff를 `src/timeline/generationRuntime.ts`로 분리해 hook을 약 679줄로 낮췄습니다.
+3. **모바일 증거**: Chromium 360×800, 390×844, 430×932를 Web quality의 별도 mobile visual 단계로 실행하며 touch selection, Dock, overflow, 44px navigation target, batch containment를 검사합니다.
+4. **모바일 성능/안전**: Dock navigation memoization, navigation 후 immediate top scroll, safe-area bottom clearance를 적용했습니다.
+5. **사용자 명칭 고정**: Dock/페이지 명칭은 `내 목소리`, 메인 workspace navigator는 `텍스트를 음성으로`를 사용합니다.
+6. **고정 전달 규칙**: FULL은 전체 프로젝트, PATCH는 저장소 상대 경로 그대로의 직접 덮어쓰기 파일입니다.
+7. **다음 목표**: 0.11.18 Timeline Command Split & Longform Soak Evidence.
 
 ## 2026-08-14 KST · 0.11.16 Timeline Editor Split & Mobile Quick Creation
 1. **대상 버전과 기준**: 0.11.16 / 0.11.15 Mobile Voice Linkage & Source Integration.
