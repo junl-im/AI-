@@ -1,0 +1,492 @@
+--- /mnt/data/mobile_patch_before_release/src/components/workspace/LongformComposer.tsx	2026-08-12 05:20:58.000000000 +0000
++++ /mnt/data/mobile_patch_sim_release/src/components/workspace/LongformComposer.tsx	2026-08-13 15:30:43.717556747 +0000
+@@ -76,17 +76,22 @@
+ }: LongformComposerProps) {
+   const editorRef = useRef<HTMLTextAreaElement>(null)
+   const fileInputRef = useRef<HTMLInputElement>(null)
++  const viewportRealignFrameRef = useRef<number | null>(null)
+   const alignEditorToMobileTop = useCallback((behavior: ScrollBehavior = 'smooth') => {
+     const editor = editorRef.current
+     if (!editor || window.innerWidth > 760) return
++    const viewportOffsetTop = window.visualViewport?.offsetTop ?? 0
++    const desiredTop = 68 + viewportOffsetTop
+     const rect = editor.getBoundingClientRect()
+-    const targetTop = Math.max(0, window.scrollY + rect.top - 68)
+-    if (Math.abs(rect.top - 68) < 10) return
++    const targetTop = Math.max(0, window.scrollY + rect.top - desiredTop)
++    if (Math.abs(rect.top - desiredTop) < 10) return
+     window.scrollTo({ top: targetTop, behavior })
+   }, [])
+   const alignEditorAfterFocus = useCallback(() => {
+-    window.requestAnimationFrame?.(() => alignEditorToMobileTop('smooth'))
+-    window.setTimeout(() => alignEditorToMobileTop('auto'), 220)
++    const reduceMotion = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
++    const smoothBehavior: ScrollBehavior = reduceMotion ? 'auto' : 'smooth'
++    window.requestAnimationFrame?.(() => alignEditorToMobileTop(smoothBehavior))
++    window.setTimeout(() => alignEditorToMobileTop('auto'), 180)
+   }, [alignEditorToMobileTop])
+   const stats = useMemo(() => {
+     const trimmed = value.trim()
+@@ -104,18 +109,27 @@
+     const viewport = window.visualViewport
+     if (!viewport) return undefined
+     const realign = () => {
+-      if (document.activeElement === editorRef.current) alignEditorToMobileTop('auto')
++      if (document.activeElement !== editorRef.current || window.innerWidth > 760) return
++      if (viewportRealignFrameRef.current !== null) return
++      viewportRealignFrameRef.current = window.requestAnimationFrame(() => {
++        viewportRealignFrameRef.current = null
++        alignEditorToMobileTop('auto')
++      })
+     }
+-    viewport.addEventListener('resize', realign)
+-    viewport.addEventListener('scroll', realign)
++    viewport.addEventListener('resize', realign, { passive: true })
++    viewport.addEventListener('scroll', realign, { passive: true })
+     return () => {
+       viewport.removeEventListener('resize', realign)
+       viewport.removeEventListener('scroll', realign)
++      if (viewportRealignFrameRef.current !== null) window.cancelAnimationFrame(viewportRealignFrameRef.current)
++      viewportRealignFrameRef.current = null
+     }
+   }, [alignEditorToMobileTop])
+ 
+   useEffect(() => {
+     function focusEditorFromTyping(event: KeyboardEvent) {
++      const coarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches
++      if (window.innerWidth <= 760 && coarsePointer) return
+       if (
+         disabled
+         || event.defaultPrevented
+--- /mnt/data/mobile_patch_before_release/src/components/workspace/TimelineEditor.tsx	2026-08-13 15:31:14.265558210 +0000
++++ /mnt/data/mobile_patch_sim_release/src/components/workspace/TimelineEditor.tsx	2026-08-13 15:30:43.721556747 +0000
+@@ -251,6 +251,18 @@
+           )}
+           <button
+             type="button"
++            className="soa-dubbing-block__touch-select"
++            onClick={(event) => {
++              event.stopPropagation()
++              onSelect(block.id, 'toggle')
++            }}
++            aria-label={selected ? String(voiceIndex + 1) + '번 대사 선택 해제' : String(voiceIndex + 1) + '번 대사 다중 선택'}
++            aria-pressed={selected}
++          >
++            {selected ? '✓' : '＋'}
++          </button>
++          <button
++            type="button"
+             className="soa-dubbing-block__direct-tool"
+             onClick={(event) => {
+               event.stopPropagation()
+@@ -799,7 +811,7 @@
+             <span>선택 · {selectedBlock.kind === 'voice' ? selectedBlock.voiceName : '쉼'} {formatDuration(selectedBlock.durationSeconds)}</span>
+           ) : null}
+         </div>
+-        <p>트랙 클릭 위치 이동 · Ctrl/Cmd 클릭 다중 선택 · Shift 클릭 범위 선택 · Ctrl/Cmd+A 대사 전체 · R 일괄 재생성 · ? 단축키</p>
++        <p>트랙 클릭 위치 이동 · 모바일 ＋ 버튼 다중 선택 · Ctrl/Cmd 클릭 다중 선택 · Shift 클릭 범위 선택 · Ctrl/Cmd+A 대사 전체 · R 일괄 재생성 · ? 단축키</p>
+         <div className="soa-timeline-selection-actions" aria-label="타임라인 빠른 선택">
+           <button
+             type="button"
+@@ -1159,6 +1171,13 @@
+                           }}
+                         >
+                           <span>쉼</span><strong>{block.durationSeconds.toFixed(1)}초</strong>
++                          <button
++                            type="button"
++                            className="soa-dubbing-block__touch-select"
++                            onClick={(event) => { event.stopPropagation(); selectBlock(block.id, 'toggle') }}
++                            aria-label={selectedBlockIds.has(block.id) ? '쉼 블록 선택 해제' : '쉼 블록 다중 선택'}
++                            aria-pressed={selectedBlockIds.has(block.id)}
++                          >{selectedBlockIds.has(block.id) ? '✓' : '＋'}</button>
+                           <button type="button" onClick={(event) => { event.stopPropagation(); removeSelection(block.id) }} aria-label="쉼 블록 삭제">×</button>
+                         </div>
+                       )
+--- /mnt/data/mobile_patch_before_release/src/components/navigation/LinkedPlayerDock.tsx	2026-08-12 05:21:20.000000000 +0000
++++ /mnt/data/mobile_patch_sim_release/src/components/navigation/LinkedPlayerDock.tsx	2026-08-13 15:30:43.721556747 +0000
+@@ -1,4 +1,5 @@
+ import {
++  memo,
+   useCallback,
+   useEffect,
+   useMemo,
+@@ -19,6 +20,31 @@
+ import { PlayerQueuePanel } from './PlayerQueuePanel'
+ 
+ const rates = [0.75, 1, 1.25, 1.5, 2]
++type DockNavigationPage = (typeof primaryNavigationItems)[number]['page']
++
++const DockNavigation = memo(function DockNavigation({
++  currentPage,
++  onNavigate,
++}: {
++  currentPage: string
++  onNavigate: (page: DockNavigationPage) => void
++}) {
++  return (
++    <nav className="soa-dock__nav" aria-label="주요 메뉴">
++      {primaryNavigationItems.map((item) => (
++        <button
++          key={item.page}
++          type="button"
++          aria-current={currentPage === item.page ? 'page' : undefined}
++          onClick={() => onNavigate(item.page)}
++          className={currentPage === item.page ? 'is-active' : ''}
++        >
++          <span aria-hidden="true">{item.icon}</span>{item.label}
++        </button>
++      ))}
++    </nav>
++  )
++})
+ 
+ function formatTime(value: number) {
+   const safe = Number.isFinite(value) ? Math.max(0, value) : 0
+@@ -549,24 +575,11 @@
+       ? '부분 구간 연속 재생 중에는 위치 이동을 지원하지 않음'
+       : '재생 위치 이동'
+ 
+-  const navigation = (
+-    <nav className="soa-dock__nav" aria-label="주요 메뉴">
+-      {primaryNavigationItems.map((item) => (
+-        <button
+-          key={item.page}
+-          type="button"
+-          aria-current={page === item.page ? 'page' : undefined}
+-          onClick={() => {
+-            enterWorkspace(item.page)
+-            window.scrollTo({ top: 0, behavior: 'smooth' })
+-          }}
+-          className={page === item.page ? 'is-active' : ''}
+-        >
+-          <span aria-hidden="true">{item.icon}</span>{item.label}
+-        </button>
+-      ))}
+-    </nav>
+-  )
++  const navigateFromDock = useCallback((targetPage: DockNavigationPage) => {
++    if (targetPage !== page) enterWorkspace(targetPage)
++    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }))
++  }, [enterWorkspace, page])
++  const navigation = <DockNavigation currentPage={page} onNavigate={navigateFromDock} />
+ 
+   const audio = playbackUrl ? (
+     <audio
+--- /mnt/data/mobile_patch_before_release/src/styles/mobile-studio-flow.css	2026-08-12 05:23:50.000000000 +0000
++++ /mnt/data/mobile_patch_sim_release/src/styles/mobile-studio-flow.css	2026-08-13 15:30:43.725556747 +0000
+@@ -84,3 +84,39 @@
+     padding-bottom: 118px;
+   }
+ }
++
++/* Mobile integration/performance hardening: safe area, tap targets, bounded voice lists. */
++@media (max-width: 760px) {
++  .soa-dubbing-player-dock button,
++  .soa-dubbing-player-dock a,
++  .soa-voice-sheet button,
++  .soa-one-flow-composer button {
++    touch-action: manipulation;
++  }
++
++  .soa-dubbing-player-dock__nav .soa-dock__nav button {
++    min-height: 48px;
++    font-size: 10px;
++  }
++
++  .soa-workspace-shell--dubbing,
++  .soa-workspace-shell--dubbing.soa-workspace-shell--has-player {
++    padding-bottom: calc(118px + env(safe-area-inset-bottom));
++  }
++
++  .soa-voice-sheet-list.is-my-voice {
++    max-height: min(36vh, 320px);
++    overflow-y: auto;
++    overscroll-behavior: contain;
++    -webkit-overflow-scrolling: touch;
++  }
++
++  .soa-dubbing-script__editor textarea {
++    scroll-margin-top: 76px;
++  }
++}
++
++@media (max-width: 430px) {
++  .soa-voice-sheet-choice { min-height: 96px; }
++  .soa-dubbing-player-dock__nav .soa-dock__nav { gap: 4px; }
++}
+--- /mnt/data/mobile_patch_before_release/src/styles/timeline-horizontal-mobile.css	2026-08-12 05:22:00.000000000 +0000
++++ /mnt/data/mobile_patch_sim_release/src/styles/timeline-horizontal-mobile.css	2026-08-13 15:30:43.725556747 +0000
+@@ -236,3 +236,23 @@
+   .soa-timeline-toolbar::-webkit-scrollbar,
+   .soa-timeline-selection-actions::-webkit-scrollbar { display: none; }
+ }
++
++/* Touch-native multi-selection keeps desktop modifier-key behavior while making it reachable on phones. */
++.soa-dubbing-block__touch-select { display: none; }
++
++@media (max-width: 760px) {
++  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__touch-select,
++  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-pause-block .soa-dubbing-block__touch-select {
++    display: inline-grid;
++    width: 24px;
++    height: 24px;
++    place-items: center;
++    border-radius: 6px;
++    font-size: 10px;
++    touch-action: manipulation;
++  }
++
++  .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block__touch-select[aria-pressed="true"] {
++    box-shadow: inset 0 0 0 1px currentColor;
++  }
++}
+--- /mnt/data/mobile_patch_before_release/scripts/check-mobile-studio-flow.mjs	2026-08-12 05:23:50.000000000 +0000
++++ /mnt/data/mobile_patch_sim_release/scripts/check-mobile-studio-flow.mjs	2026-08-13 15:30:43.733556748 +0000
+@@ -23,7 +23,9 @@
+ const player = await source('src/components/navigation/LinkedPlayerDock.tsx')
+ requireTokens('src/components/navigation/LinkedPlayerDock.tsx', player, [
+   'soa-dubbing-player-dock__nav',
+-  'const navigation = (',
++  'const DockNavigation = memo(function DockNavigation',
++  'const navigateFromDock = useCallback',
++  "window.scrollTo({ top: 0, behavior: 'auto' })",
+   'setPlaying(true)',
+   "setPlaybackError(error instanceof Error ? error.message : '음성을 재생하지 못했습니다.')",
+ ])
+@@ -66,6 +68,9 @@
+ requireTokens('src/components/workspace/LongformComposer.tsx', composer, [
+   'alignEditorToMobileTop',
+   'window.visualViewport',
++  'viewportRealignFrameRef',
++  "viewport.addEventListener('resize', realign, { passive: true })",
++  "const coarsePointer = typeof window.matchMedia === 'function'",
+   'onFocus={alignEditorAfterFocus}',
+   'window.scrollTo({ top: targetTop, behavior })',
+ ])
+@@ -74,6 +79,9 @@
+ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
+   'getDefaultTimelineZoom',
+   'window.innerWidth <= 760 ? 1.25 : 1',
++  'soa-dubbing-block__touch-select',
++  "onSelect(block.id, 'toggle')",
++  '모바일 ＋ 버튼 다중 선택',
+ ])
+ 
+ const mobileCss = await source('src/styles/timeline-horizontal-mobile.css')
+@@ -83,6 +91,7 @@
+   'width: var(--soa-clip-width, 1px);',
+   'overflow-x: auto;',
+   'touch-action: pan-x;',
++  '.soa-dubbing-block__touch-select',
+ ])
+ 
+ 
+@@ -91,7 +100,28 @@
+   '.soa-voice-context-recommendation',
+   '.soa-dubbing-player-dock__nav',
+   '@media (max-width: 760px)',
+-])
++  'padding-bottom: calc(118px + env(safe-area-inset-bottom));',
++  'touch-action: manipulation;',
++  '.soa-voice-sheet-list.is-my-voice',
++])
++
++const voiceChoices = await source('src/voice/voiceChoices.ts')
++const homePage = await source('src/pages/HomePage.tsx')
++if (voiceChoices.includes("kind: 'my-voice'")) {
++  requireTokens('src/components/workspace/VoicePickerSheet.tsx', picker, [
++    'MY VOICE',
++    'soa-voice-sheet-myvoices',
++    'onCreateVoice',
++  ])
++  requireTokens('src/pages/HomePage.tsx', homePage, [
++    'timelineSelectionIdsRef',
++    'timeline.updateVoiceMany',
++  ])
++  requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
++    'onSelectionChange',
++  ])
++}
++// MY VOICE mobile bridge
+ 
+ const indexCss = await source('src/styles/index.css')
+ requireTokens('src/styles/index.css', indexCss, [
+--- /mnt/data/mobile_patch_before_release/scripts/run-visual-layout-regression.mjs	2026-08-11 09:33:48.000000000 +0000
++++ /mnt/data/mobile_patch_sim_release/scripts/run-visual-layout-regression.mjs	2026-08-13 15:30:43.737556748 +0000
+@@ -13,8 +13,9 @@
+   return index >= 0 && process.argv[index + 1] ? process.argv[index + 1] : fallback
+ }
+ 
+-const output = argument('--output', join(root, '.sorion', 'web-quality', 'visual-layout'))
+-const baselineDir = argument('--baseline-dir', join(root, 'visual-baselines', 'workspace'))
++const mobileMode = process.argv.includes('--mobile')
++const output = argument('--output', join(root, '.sorion', 'web-quality', mobileMode ? 'mobile-layout' : 'visual-layout'))
++const baselineDir = argument('--baseline-dir', join(root, 'visual-baselines', mobileMode ? 'mobile-workspace' : 'workspace'))
+ const approveBaseline = process.argv.includes('--approve')
+ const requireBaseline = process.argv.includes('--require-baseline')
+   || process.env.SORION_VISUAL_BASELINE_REQUIRED === '1'
+@@ -26,8 +27,13 @@
+   '--channel-threshold',
+   process.env.SORION_VISUAL_CHANNEL_THRESHOLD ?? '24',
+ ))
+-const viewports = [1024, 1280, 1440]
+-const height = 900
++const viewportSpecs = mobileMode
++  ? [
++      { width: 360, height: 800 },
++      { width: 390, height: 844 },
++      { width: 430, height: 932 },
++    ]
++  : [1024, 1280, 1440].map((width) => ({ width, height: 900 }))
+ const browserCandidates = [
+   process.env.SORION_CHROMIUM_BIN,
+   'chromium',
+@@ -257,7 +263,15 @@
+     const voices = [...document.querySelectorAll('article.soa-dubbing-block')]
+       .filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
+     if (voices.length < 2) return 0
+-    voices[1].dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }))
++    if (${mobileMode ? 'true' : 'false'}) {
++      for (const voice of voices.slice(0, 2)) {
++        const toggle = voice.querySelector('button.soa-dubbing-block__touch-select')
++        if (!(toggle instanceof HTMLButtonElement)) return 0
++        if (toggle.getAttribute('aria-pressed') !== 'true') toggle.click()
++      }
++    } else {
++      voices[1].dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }))
++    }
+     return voices.length
+   })()`)
+   if (selectedCount < 2) throw new Error(`visual fixture 클립이 부족합니다: ${selectedCount}`)
+@@ -309,6 +323,48 @@
+   }
+ })()`
+ 
++const mobileLayoutProbeExpression = `(() => {
++  const rect = (selector) => {
++    const node = document.querySelector(selector)
++    if (!(node instanceof HTMLElement)) return null
++    const box = node.getBoundingClientRect()
++    return { x: box.x, y: box.y, width: box.width, height: box.height, right: box.right, bottom: box.bottom }
++  }
++  const dock = rect('.soa-dubbing-player-dock')
++  const navigation = rect('.soa-dubbing-player-dock__nav .soa-dock__nav')
++  const navButton = rect('.soa-dubbing-player-dock__nav .soa-dock__nav button')
++  const touchSelect = rect('button.soa-dubbing-block__touch-select')
++  const editor = rect('[aria-label="음성으로 만들 장문 내용"]')
++  const timeline = rect('.soa-capcut-timeline[data-timeline-axis="horizontal"]')
++  const workspace = document.querySelector('.soa-workspace-shell--dubbing')
++  const workspacePaddingBottom = workspace instanceof HTMLElement
++    ? Number.parseFloat(getComputedStyle(workspace).paddingBottom) || 0
++    : 0
++  const overflow = document.documentElement.scrollWidth - window.innerWidth
++  return {
++    viewport: { width: window.innerWidth, height: window.innerHeight },
++    overflow,
++    dock,
++    navigation,
++    navButton,
++    touchSelect,
++    editor,
++    timeline,
++    workspacePaddingBottom,
++    assertions: {
++      noHorizontalOverflow: overflow <= 1,
++      mobileNavigationVisible: Boolean(navigation && navigation.height > 0),
++      navigationTapTarget: Boolean(navButton && navButton.height >= 44),
++      touchSelectionVisible: Boolean(touchSelect && touchSelect.width >= 20 && touchSelect.height >= 20),
++      editorContained: Boolean(editor && editor.x >= -1 && editor.right <= window.innerWidth + 1),
++      timelineContained: Boolean(timeline && timeline.x >= -16 && timeline.right <= window.innerWidth + 16),
++      dockClearanceReserved: Boolean(dock && workspacePaddingBottom >= Math.max(96, dock.height - 8)),
++    },
++  }
++})()`
++
++const activeLayoutProbeExpression = mobileMode ? mobileLayoutProbeExpression : layoutProbeExpression
++
+ async function sha256(path) {
+   return createHash('sha256').update(await readFile(path)).digest('hex')
+ }
+@@ -429,11 +485,12 @@
+   const cdp = createCdpClient(target.webSocketDebuggerUrl)
+   await cdp.send('Page.enable')
+   await cdp.send('Runtime.enable')
++  const firstViewport = viewportSpecs[0]
+   await cdp.send('Emulation.setDeviceMetricsOverride', {
+-    width: viewports[0],
+-    height,
++    width: firstViewport.width,
++    height: firstViewport.height,
+     deviceScaleFactor: 1,
+-    mobile: false,
++    mobile: mobileMode,
+   })
+ 
+   stage = 'page-navigate'
+@@ -447,21 +504,21 @@
+   stage = 'layout-capture'
+   const captures = []
+   let failed = false
+-  for (const width of viewports) {
++  for (const viewport of viewportSpecs) {
+     await cdp.send('Emulation.setDeviceMetricsOverride', {
+-      width,
+-      height,
++      width: viewport.width,
++      height: viewport.height,
+       deviceScaleFactor: 1,
+-      mobile: false,
++      mobile: mobileMode,
+     })
+     await new Promise((resolve) => setTimeout(resolve, 180))
+-    const metrics = await evaluate(cdp, layoutProbeExpression)
++    const metrics = await evaluate(cdp, activeLayoutProbeExpression)
+     const screenshot = await cdp.send('Page.captureScreenshot', {
+       format: 'png',
+       captureBeyondViewport: false,
+       fromSurface: true,
+     })
+-    const filename = `workspace-${width}x${height}.png`
++    const filename = `${mobileMode ? 'mobile-workspace' : 'workspace'}-${viewport.width}x${viewport.height}.png`
+     const screenshotPath = join(output, filename)
+     await writeFile(screenshotPath, Buffer.from(screenshot.data, 'base64'))
+     const assertions = Object.entries(metrics.assertions)
+@@ -500,7 +557,7 @@
+     appVersion,
+     capturedAt: new Date().toISOString(),
+     browser: browser.version,
+-    fixture: 'workspace-multi-select',
++    fixture: mobileMode ? 'mobile-workspace-touch-multi-select' : 'workspace-multi-select',
+     baselinePolicy: {
+       directory: baselineDir,
+       required: requireBaseline,
+@@ -523,7 +580,7 @@
+       appVersion,
+       approvedAt: new Date().toISOString(),
+       browser: browser.version,
+-      fixture: 'workspace-multi-select',
++      fixture: mobileMode ? 'mobile-workspace-touch-multi-select' : 'workspace-multi-select',
+       maxDiffRatio,
+       channelThreshold,
+       captures: captures.map((capture) => ({
+@@ -559,7 +616,7 @@
+     }
+     process.exitCode = 1
+   } else {
+-    console.log(`Visual layout regression 통과 · ${captures.map((item) => `${item.viewport.width}px`).join(' / ')}`)
++    console.log(`${mobileMode ? 'Mobile' : 'Visual'} layout regression 통과 · ${captures.map((item) => `${item.viewport.width}x${item.viewport.height}`).join(' / ')}`)
+   }
+ } catch (error) {
+   const message = error instanceof Error ? error.message : String(error)
+--- /mnt/data/mobile_patch_before_release/package.json	2026-08-13 15:31:13.535071135 +0000
++++ /mnt/data/mobile_patch_sim_release/package.json	2026-08-13 15:30:43.737556748 +0000
+@@ -92,7 +92,8 @@
+     "quality:one-flow-ux": "node scripts/check-one-flow-dubbing-ux.mjs",
+     "quality:multi-speaker-resume": "node scripts/check-multi-speaker-resume.mjs",
+     "quality:mobile-studio": "node scripts/check-mobile-studio-flow.mjs",
+-    "quality:edit-history-routing": "node scripts/check-edit-history-speaker-routing.mjs"
++    "quality:edit-history-routing": "node scripts/check-edit-history-speaker-routing.mjs",
++    "quality:mobile-layout": "node scripts/run-visual-layout-regression.mjs --mobile"
+   },
+   "engines": {
+     "node": ">=22.12.0 <25",

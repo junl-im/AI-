@@ -1,41 +1,22 @@
-# SoriON Timeline Linkage + My Voice Lab patch
+# Apply mobile studio hardening
 
-## What this patch changes
-
-- Voice Library selection applies to the currently selected Timeline voice clips.
-- Timeline selection is reported back to HomePage so the library and editor share the same voice context.
-- Single selected Timeline clips get an inline voice selector.
-- The static `VOICE 1` track label now reflects the selected/current voice context.
-- Workspace label `AI 음성 스튜디오` becomes `텍스트를 음성으로`.
-- Dock/page label `복제` / `목소리 복제` becomes `내 목소리`.
-- My Voice becomes a profile library + guided capture + device-side quality coach + Voice Test Lab.
-- Saved voice profiles can be selected and previewed instead of exposing only the latest profile.
-- User-facing clone jargon is reduced while consent-first behavior remains intact.
-
-## Apply
-
-From the repository root, overlay this patch folder and run:
+From the SoriON repository root:
 
 ```bash
-node apply-sorion-linkage-myvoice.mjs
-node verify-sorion-linkage-myvoice.mjs
+node APPLY_MOBILE_STUDIO_HARDENING.mjs
+node VERIFY_MOBILE_STUDIO_HARDENING.mjs
+npm run quality:mobile-studio
 ```
 
-Then run the repository's normal Web quality workflow / local quality commands.
+Then run the normal Web quality workflow.
 
-## Safety behavior
+The patch is idempotent and can be applied to current `0.11.15` main or after the Live Voice + MY VOICE integration candidate. When MY VOICE files are present, the mobile quality contract automatically checks the extra linkage path.
 
-Changing the voice of an existing Timeline clip uses the existing `updateVoiceMany` path. Existing generated audio for that clip is detached and the clip returns to queued state, preventing a stale audio/voice mismatch.
+For real Chromium mobile layout evidence after a production build:
 
-The device-side voice sample score is a capture-quality guide only. It does not claim or guarantee synthesis/model quality.
+```bash
+npm run build
+npm run quality:mobile-layout
+```
 
-## Local validation performed
-
-- Patch script syntax: PASS
-- Patch application against a clean local repository checkout: PASS
-- Patch idempotency: PASS
-- TypeScript/TSX parser diagnostics for all touched TS/TSX files: PASS
-- CSS brace balance: PASS
-- Linkage + My Voice static contract check: 14/14 PASS
-
-A full `npm run typecheck` could not be completed in the available local checkout because its dependency tree is incomplete (`vite/client`, `vitest/globals`, Node/Vite packages missing). Final build/test status should be decided by the repository's GitHub Web quality workflow.
+This uses the repository's existing dependency-free CDP runner and captures 360x800, 390x844, and 430x932 evidence.
