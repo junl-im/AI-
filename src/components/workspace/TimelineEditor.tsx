@@ -55,6 +55,7 @@ interface TimelineEditorProps {
   redoLabel?: string | null
   onUndo?: () => boolean | void
   onRedo?: () => boolean | void
+  onSelectionChange?: (ids: string[]) => void
 }
 
 const BATCH_RETRY_LIMIT = 3
@@ -357,6 +358,7 @@ export function TimelineEditor({
   redoLabel = null,
   onUndo,
   onRedo,
+  onSelectionChange,
 }: TimelineEditorProps) {
   const currentTrackId = usePlayerStore((state) => state.currentTrackId)
   const playbackTrackId = usePlayerStore((state) => state.playbackTrackId)
@@ -720,6 +722,10 @@ export function TimelineEditor({
     setBatchCommandPreview(null)
     if (firstSelectedVoiceId) setBatchVoiceId(firstSelectedVoiceId)
   }, [firstSelectedVoiceId, selectedIdKey, selectedVoiceIdKey])
+
+  useEffect(() => {
+    onSelectionChange?.(selectedIdKey ? selectedIdKey.split('|') : [])
+  }, [onSelectionChange, selectedIdKey])
 
   useEffect(() => {
     const validIds = new Set(blocks.map((block) => block.id))

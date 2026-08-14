@@ -1,10 +1,10 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.14 · All Workflows Reliability Hardening`
+현재 기준: `0.11.15 · Mobile Voice Linkage & Source Integration`
 
 ## 목표 버전
 
-`0.11.15 · Adaptive Longform Soak & Editor Responsibility Split`
+`0.11.16 · Adaptive Longform Soak & Editor Responsibility Split`
 
 ### 핵심 기능
 
@@ -29,10 +29,13 @@
 - 실제 CosyVoice 모델·승인 WAV가 없는 환경의 synthetic 결과를 음질 완료 증거로 표현하지 않습니다.
 - editor 분리는 기능 추가와 동시에 대규모 rewrite하지 않고 순수 상태/계산 모듈부터 단계적으로 이동합니다.
 
-## 0.11.14에서 고정한 결정
+## 0.11.15에서 고정한 결정
 
 - 일반 Push/PR은 npm/API/Worker의 committed lock을 모두 요구합니다.
 - lock 생성은 `workflow_dispatch + generate_lockfiles=true`에서만 수행하고 자동 commit/push하지 않습니다.
 - manual workflow concurrency는 ref/PR 단위로 격리하며 lock 생성/soak maintenance run은 같은 ref에서 취소하지 않습니다.
 - npm cache는 lock hash 기반 key를 사용하며 exact hit에서 중복 save하지 않습니다.
 - Dependabot은 npm, API uv, Worker uv, GitHub Actions를 모두 추적합니다.
+
+- 모바일/PC Voice Library와 Timeline 선택 상태는 같은 현재 Voice를 공유합니다.
+- Live Voice Bar는 정적 장식이 아니라 실제 현재 Voice/Engine/Readiness를 표시합니다.

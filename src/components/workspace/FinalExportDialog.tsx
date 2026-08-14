@@ -21,7 +21,6 @@ export function FinalExportDialog({ open, blocks, onClose }: FinalExportDialogPr
   }, [blocks])
 
   if (!open) return null
-
   return (
     <div className="soa-export-dialog-layer" role="presentation" onMouseDown={onClose}>
       <section
@@ -42,7 +41,6 @@ export function FinalExportDialog({ open, blocks, onClose }: FinalExportDialogPr
           </div>
           <button type="button" onClick={onClose} aria-label="내보내기 닫기" data-dialog-autofocus>×</button>
         </header>
-
         <div className="soa-export-dialog__status" role="status">
           <strong>대사 {summary.ready}/{summary.total} 완료</strong>
           <span>{summary.pending > 0 ? `아직 ${summary.pending}개 대사가 완성되지 않았습니다.` : '모든 대사가 내보내기 준비되었습니다.'}</span>

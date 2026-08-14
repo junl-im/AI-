@@ -17,7 +17,6 @@ export function TimelineLinkedPlayer() {
   const select = usePlayerStore((state) => state.select)
   const selectAndPlay = usePlayerStore((state) => state.selectAndPlay)
   const track = usePlayerStore(getCurrentTrack)
-
   const duration = Math.max(0, track?.audio.durationSeconds ?? 0)
   const current = playbackTrackId === currentTrackId
     ? Math.min(duration || playbackPositionSeconds, playbackPositionSeconds)
@@ -52,36 +51,11 @@ export function TimelineLinkedPlayer() {
         <strong>{track?.title ?? '완성된 대사를 선택하세요'}</strong>
         <small>하단 Dock과 같은 재생 상태를 사용합니다.</small>
       </div>
-      <button
-        type="button"
-        className="soa-timeline-linked-player__skip"
-        onClick={() => move(-1)}
-        disabled={!queue.length || currentIndex <= 0}
-        aria-label="이전 음성"
-      >‹</button>
-      <button
-        type="button"
-        className="soa-timeline-linked-player__toggle"
-        onClick={() => currentTrackId && toggleTrack(currentTrackId)}
-        disabled={!track}
-        aria-label={playing ? '일시정지' : '재생'}
-        aria-pressed={playing}
-      >{playing ? 'Ⅱ' : '▶'}</button>
-      <button
-        type="button"
-        className="soa-timeline-linked-player__skip"
-        onClick={() => move(1)}
-        disabled={!queue.length || currentIndex < 0 || currentIndex >= queue.length - 1}
-        aria-label="다음 음성"
-      >›</button>
+      <button type="button" className="soa-timeline-linked-player__skip" onClick={() => move(-1)} disabled={!queue.length || currentIndex <= 0} aria-label="이전 음성">‹</button>
+      <button type="button" className="soa-timeline-linked-player__toggle" onClick={() => currentTrackId && toggleTrack(currentTrackId)} disabled={!track} aria-label={playing ? '일시정지' : '재생'} aria-pressed={playing}>{playing ? 'Ⅱ' : '▶'}</button>
+      <button type="button" className="soa-timeline-linked-player__skip" onClick={() => move(1)} disabled={!queue.length || currentIndex < 0 || currentIndex >= queue.length - 1} aria-label="다음 음성">›</button>
       <div className="soa-timeline-linked-player__transport">
-        <button
-          type="button"
-          className="soa-timeline-linked-player__scrub"
-          onClick={seek}
-          disabled={!track || !duration || seekBlocked}
-          aria-label={seekBlocked ? '현재 음성은 위치 이동을 지원하지 않음' : '타임라인 재생 위치 이동'}
-        >
+        <button type="button" className="soa-timeline-linked-player__scrub" onClick={seek} disabled={!track || !duration || seekBlocked} aria-label={seekBlocked ? '현재 음성은 위치 이동을 지원하지 않음' : '타임라인 재생 위치 이동'}>
           <i style={{ width: `${progress}%` }} />
           <b style={{ left: `${progress}%` }} />
         </button>
@@ -91,9 +65,7 @@ export function TimelineLinkedPlayer() {
           <time>{formatTime(duration)}</time>
         </div>
       </div>
-      <span className={`soa-timeline-linked-player__sync ${playing ? 'is-active' : ''}`}>
-        <i aria-hidden="true" /> SYNC
-      </span>
+      <span className={`soa-timeline-linked-player__sync ${playing ? 'is-active' : ''}`}><i aria-hidden="true" /> SYNC</span>
     </section>
   )
 }

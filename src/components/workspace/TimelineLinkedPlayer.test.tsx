@@ -31,11 +31,7 @@ function audio(name: string): GeneratedAudio {
 describe('TimelineLinkedPlayer', () => {
   beforeEach(() => {
     usePlayerStore.getState().clearQueue()
-    usePlayerStore.setState({
-      playbackTrackId: null,
-      playbackPositionSeconds: 0,
-      playbackActive: false,
-    })
+    usePlayerStore.setState({ playbackTrackId: null, playbackPositionSeconds: 0, playbackActive: false })
   })
 
   it('Dock 재생 스냅샷을 표시하고 같은 toggle 요청을 사용한다', () => {
@@ -43,7 +39,6 @@ describe('TimelineLinkedPlayer', () => {
     usePlayerStore.getState().setPlaybackSnapshot(firstId, 3, true)
     const before = usePlayerStore.getState().toggleRequestId
     render(<TimelineLinkedPlayer />)
-
     expect(screen.getByRole('region', { name: '타임라인 연계 플레이어' })).toHaveTextContent('첫 대사')
     expect(screen.getByText('SYNC')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '일시정지' }))
@@ -56,7 +51,6 @@ describe('TimelineLinkedPlayer', () => {
     usePlayerStore.getState().select(firstId)
     usePlayerStore.getState().setPlaybackSnapshot(firstId, 2, true)
     const before = usePlayerStore.getState().playRequestId
-
     render(<TimelineLinkedPlayer />)
     fireEvent.click(screen.getByRole('button', { name: '다음 음성' }))
     expect(usePlayerStore.getState().currentTrackId).toBe(secondId)

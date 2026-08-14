@@ -1,16 +1,24 @@
-import { useAppStore } from '../../store/useAppStore'
+import { useAppStore, type LiveVoiceReadiness } from '../../store/useAppStore'
 import { currentBuildInfo } from '../../update/buildInfo'
 import { BrandIcon } from '../ui/BrandIcon'
 
 const subtitles = [
   '장문 내용을 문장별 음성으로 빠르게.',
   '한국어의 감정과 호흡을 더 자연스럽게.',
-  '생성부터 복제와 편집까지 한 작업공간에서.',
+  '생성부터 내 목소리와 편집까지 한 작업공간에서.',
 ]
 
-function LightningWave() {
+const readinessLabels: Record<LiveVoiceReadiness, string> = {
+  checking: 'CHECKING',
+  ready: 'READY',
+  limited: 'LIMITED',
+  offline: 'OFFLINE',
+  generating: 'LIVE',
+}
+
+function LightningWave({ active }: { active: boolean }) {
   return (
-    <div className="soa-core-wave" aria-hidden="true">
+    <div className={`soa-core-wave ${active ? 'is-active' : ''}`} aria-hidden="true">
       <span />
       <b />
       {[22, 42, 78, 34, 92, 46, 70, 28, 84, 38, 62, 24].map((height, index) => (
@@ -23,6 +31,9 @@ function LightningWave() {
 export function BrandMasthead() {
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const exitWorkspace = useAppStore((state) => state.exitWorkspace)
+  const liveVoice = useAppStore((state) => state.liveVoice)
+  const live = liveVoice.readiness === 'generating'
+  const ready = liveVoice.readiness === 'ready' || live
 
   return (
     <header className="soa-masthead" aria-label="곰같은여우 SoriON AI 소개">
@@ -63,12 +74,32 @@ export function BrandMasthead() {
             </div>
           </div>
 
-          <div className="soa-voice-console" aria-hidden="true">
-            <div className="soa-voice-console__topline"><span>VOICE CORE</span><span className="soa-live-dot">AUTO</span></div>
-            <BrandIcon className="soa-console-brand-icon" />
-            <div className="soa-voice-console__copy"><strong>목소리의 가능성을 켜다.</strong><span>SoriON Voice Engine</span></div>
-            <LightningWave />
-          </div>
+          <section
+            className={`soa-voice-console is-${liveVoice.readiness}`}
+            aria-label={`현재 목소리 ${liveVoice.voiceName}, ${liveVoice.engineName}, ${readinessLabels[liveVoice.readiness]}`}
+          >
+            <div className="soa-voice-console__topline">
+              <span>LIVE VOICE</span>
+              <span className="soa-live-dot" data-ready={ready ? 'true' : 'false'}>{readinessLabels[liveVoice.readiness]}</span>
+            </div>
+            <div className={`soa-live-voice-avatar ${liveVoice.voiceKind === 'my-voice' ? 'is-mine' : ''}`} aria-hidden="true">
+              {liveVoice.voiceKind === 'my-voice' ? liveVoice.voiceName.trim().slice(0, 1) || 'V' : <BrandIcon className="soa-console-brand-icon" />}
+            </div>
+            <div className="soa-voice-console__copy">
+              <span className="soa-live-voice-kind">{liveVoice.voiceKind === 'my-voice' ? 'MY VOICE' : 'SoriON VOICE'}</span>
+              <strong>{liveVoice.voiceName}</strong>
+              <span>{liveVoice.detail}</span>
+            </div>
+            <LightningWave active={ready} />
+            <div className="soa-live-engine">
+              <span>ENGINE</span>
+              <strong>{liveVoice.engineName}</strong>
+              <small>{liveVoice.engineId ?? 'auto routing'}</small>
+            </div>
+            <button type="button" className="soa-live-voice-open" onClick={() => enterWorkspace('home')}>
+              텍스트를 음성으로 <span aria-hidden="true">→</span>
+            </button>
+          </section>
         </div>
       </div>
     </header>

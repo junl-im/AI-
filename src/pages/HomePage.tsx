@@ -117,6 +117,7 @@ export function HomePage() {
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const page = useAppStore((state) => state.page)
   const backendStatus = useAppStore((state) => state.backendStatus)
+  const setLiveVoice = useAppStore((state) => state.setLiveVoice)
   const showNotice = useAppStore((state) => state.showNotice)
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const activeProject = useAppStore((state) => state.activeProject)
@@ -135,6 +136,7 @@ export function HomePage() {
   const [projectTitle, setProjectTitle] = useState('새 프로젝트')
   const [messages, setMessages] = useState<WorkspaceMessage[]>(initialMessages)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
+  const [selectedTimelineIds, setSelectedTimelineIds] = useState<string[]>([])
   const [speechSpeed, setSpeechSpeed] = useState(1)
   const [speechPitch, setSpeechPitch] = useState(0)
   const [speechEmotion, setSpeechEmotion] = useState<VoiceEmotion>('neutral')
@@ -170,6 +172,7 @@ export function HomePage() {
   const resetTimelineEditHistory = timeline.resetEditHistory
   const getQueuedVoiceBlockIds = timeline.getQueuedVoiceBlockIds
   const getVoiceBlockSnapshots = timeline.getVoiceBlockSnapshots
+  const updateTimelineVoices = timeline.updateVoiceMany
   const selectedVoice = useMemo(() => getVoicePreset(voiceId), [voiceId])
   const activePreviewExists = Boolean(
     activePreview && playerQueue.some((track) => track.id === activePreview.trackId),
@@ -209,6 +212,39 @@ export function HomePage() {
     ? engineCatalog.selected.id
     : 'auto'
   const normalizeText = directiveIds.includes('numbers')
+  useEffect(() => {
+    const engine = engineCatalog.selected
+    const readiness = busy
+      ? 'generating'
+      : backendStatus === 'offline'
+        ? 'offline'
+        : engineCatalog.loading
+          ? 'checking'
+          : backendStatus === 'degraded'
+            ? 'limited'
+            : engineAvailable
+              ? 'ready'
+              : 'checking'
+    const detail = readiness === 'generating'
+      ? `${selectedVoice.name} 목소리로 생성 중입니다.`
+      : readiness === 'ready'
+        ? '음성 생성 준비가 끝났습니다.'
+        : readiness === 'limited'
+          ? '대체 음성 엔진으로 사용할 수 있습니다.'
+          : readiness === 'offline'
+            ? '음성 엔진 연결을 복구하고 있습니다.'
+            : '사용 가능한 음성 엔진을 확인하고 있습니다.'
+
+    setLiveVoice({
+      voiceId,
+      voiceName: selectedVoice.name,
+      voiceKind: voiceId.startsWith('myvoice:') ? 'my-voice' : 'preset',
+      engineId: engine?.id ?? null,
+      engineName: engine?.name ?? '자동 엔진',
+      readiness,
+      detail,
+    })
+  }, [backendStatus, busy, engineAvailable, engineCatalog.loading, engineCatalog.selected, selectedVoice.name, setLiveVoice, voiceId])
   const multiSpeakerAnalysis = useMemo(
     () => analyzeMultiSpeakerScript(composerDraft),
     [composerDraft],
@@ -546,7 +582,11 @@ export function HomePage() {
     setVoiceId(voice.id)
     setSpeechSpeed((current) => clampVoiceSettingsToNaturalRange(voice, current, speechPitch).speed)
     setSpeechPitch((current) => clampVoiceSettingsToNaturalRange(voice, speechSpeed, current).pitch)
-  }, [speechPitch, speechSpeed])
+    if (selectedTimelineIds.length > 0) {
+      updateTimelineVoices(selectedTimelineIds, voice.id, voice.name)
+      showNotice(`선택한 대사에 ${voice.name} 목소리를 적용했습니다.`)
+    }
+  }, [selectedTimelineIds, showNotice, speechPitch, speechSpeed, updateTimelineVoices])
 
   const previewVoice = useCallback(async (
     nextVoiceId: string,
@@ -826,9 +866,11 @@ export function HomePage() {
               onRemoveMany={timeline.removeBlocks}
               onBatchVoiceChange={async (ids, nextVoiceId, regenerate) => {
                 const voice = getVoicePreset(nextVoiceId)
+                setVoiceId(voice.id)
                 timeline.updateVoiceMany(ids, voice.id, voice.name)
                 return regenerate ? timeline.regenerateMany(ids) : null
               }}
+              onSelectionChange={setSelectedTimelineIds}
               onRegenerateMany={timeline.regenerateMany}
               onClear={() => {
                 setPendingGeneration(null)

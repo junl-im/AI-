@@ -134,4 +134,21 @@ describe('HomePage', () => {
     expect(scoped.getByText('반가워요.')).toBeInTheDocument()
   })
 
+  it('목소리 라이브러리 선택을 현재 타임라인 대사에 즉시 연결한다', async () => {
+    useAppStore.setState({ workspaceEntered: true })
+    const view = render(<HomePage />)
+    const scoped = within(view.container)
+    const textbox = scoped.getByRole('textbox', { name: '음성으로 만들 장문 내용' })
+
+    fireEvent.change(textbox, { target: { value: '모바일 목소리 연계 테스트 문장입니다.' } })
+    fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    fireEvent.click(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    const picker = scoped.getByRole('dialog', { name: '목소리 선택' })
+    const nextVoice = within(picker).getAllByRole('radio').find((item) => !item.getAttribute('aria-checked')?.includes('true'))
+    expect(nextVoice).toBeTruthy()
+    fireEvent.click(nextVoice!)
+
+    await waitFor(() => expect(useAppStore.getState().notice).toMatch(/선택한 대사에 .* 목소리를 적용했습니다/))
+  })
+
 })

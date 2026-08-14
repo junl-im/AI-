@@ -48,6 +48,29 @@ const blocks: TimelineBlock[] = [
 ]
 
 describe('TimelineEditor', () => {
+  it('현재 선택 클립 ID를 부모 작업공간에 전달한다', async () => {
+    const onSelectionChange = vi.fn()
+    render(
+      <TimelineEditor
+        blocks={blocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={vi.fn()}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onClear={vi.fn()}
+        onSelectionChange={onSelectionChange}
+      />,
+    )
+
+    await waitFor(() => expect(onSelectionChange).toHaveBeenLastCalledWith(['voice-1']))
+    fireEvent.click(screen.getByLabelText(/클립 2 · 혜린/))
+    await waitFor(() => expect(onSelectionChange).toHaveBeenLastCalledWith(['voice-2']))
+  })
+
   it('PC 가로 타임라인은 시간축과 클립 폭을 같은 좌표계로 유지한다', () => {
     const { container } = render(
       <TimelineEditor

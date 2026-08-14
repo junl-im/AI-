@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.11.15 · Mobile Voice Linkage & Source Integration
+
+- 모바일/PC 목소리 선택을 현재 Timeline 선택 상태와 연결해 성우를 고르면 선택된 대사 클립의 voiceId/voiceName이 즉시 함께 변경됩니다.
+- Timeline 일괄 목소리 변경도 전역 현재 Voice를 동기화해 상단 Live Voice/목소리 라이브러리와 편집기의 선택 상태가 어긋나지 않도록 했습니다.
+- `TimelineEditor`가 현재 선택 ID를 부모에 알리는 `onSelectionChange` 계약을 추가해 라이브러리와 편집기 사이 선택 상태를 공유합니다.
+- 장식용 VOICE CORE를 실제 Voice/Engine/READY·LIVE 상태를 보여주는 Live Voice Bar 소스로 반영하고 관련 CSS import를 고정했습니다.
+- Final Export 테스트의 접근성 이름을 현재 제품 문구(`최종 WAV + 자막`, `최종 MP3 + 자막`)에 맞춰 Web quality 회귀를 정리했습니다.
+- 앱/API/Worker 버전을 0.11.15로 동기화했습니다.
+
 ## 0.11.14 · All Workflows Reliability Hardening
 
 - GitHub Actions action major를 2026-08 공식 릴리스 기준으로 갱신했습니다: checkout v7, setup-python v7, upload-artifact v7, download-artifact v8, cache v6.

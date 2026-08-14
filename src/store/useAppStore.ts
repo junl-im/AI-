@@ -5,6 +5,29 @@ import type { ConnectionLayerState } from '../settings/connectivityTypes'
 export type AppPage = 'home' | 'clone' | 'quality' | 'projects' | 'settings'
 export type BackendStatus = 'unknown' | 'checking' | 'online' | 'degraded' | 'offline'
 
+export type LiveVoiceKind = 'preset' | 'my-voice'
+export type LiveVoiceReadiness = 'checking' | 'ready' | 'limited' | 'offline' | 'generating'
+
+export interface LiveVoiceSnapshot {
+  voiceId: string
+  voiceName: string
+  voiceKind: LiveVoiceKind
+  engineId: string | null
+  engineName: string
+  readiness: LiveVoiceReadiness
+  detail: string
+}
+
+const initialLiveVoice: LiveVoiceSnapshot = {
+  voiceId: 'sori-warm',
+  voiceName: '혜린',
+  voiceKind: 'preset',
+  engineId: null,
+  engineName: '자동 엔진',
+  readiness: 'checking',
+  detail: '음성 엔진을 확인하고 있습니다.',
+}
+
 export interface EngineHealthSnapshot {
   api: ConnectionLayerState
   tts: ConnectionLayerState
@@ -36,6 +59,7 @@ interface AppState {
   backendMessage: string
   engineHealth: EngineHealthSnapshot
   notice: string | null
+  liveVoice: LiveVoiceSnapshot
   setPage: (page: AppPage) => void
   enterWorkspace: (page?: AppPage) => void
   openProject: (project: VoiceProject) => void
@@ -47,6 +71,7 @@ interface AppState {
   resetEngineHealth: () => void
   showNotice: (message: string) => void
   clearNotice: () => void
+  setLiveVoice: (snapshot: LiveVoiceSnapshot) => void
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -58,6 +83,7 @@ export const useAppStore = create<AppState>((set) => ({
   backendMessage: '음성 시스템을 자동으로 확인하고 있습니다.',
   engineHealth: initialEngineHealth,
   notice: null,
+  liveVoice: initialLiveVoice,
   setPage: (page) => set({ page }),
   enterWorkspace: (page = 'home') => set({ page, workspaceEntered: true }),
   openProject: (activeProject) => set({
@@ -83,4 +109,5 @@ export const useAppStore = create<AppState>((set) => ({
   resetEngineHealth: () => set({ engineHealth: initialEngineHealth }),
   showNotice: (notice) => set({ notice }),
   clearNotice: () => set({ notice: null }),
+  setLiveVoice: (liveVoice) => set({ liveVoice }),
 }))
