@@ -1,16 +1,6 @@
 # ROADMAP
 
-현재 제품 버전: `0.11.13`
-
-
-## 0.11.13 완료 · Focused Creation Surface
-
-- `텍스트를 음성으로` 중심의 단일 제작 surface
-- 현재 목소리 1개 + 텍스트 editor + `생성 및 재생` 우선
-- 상단 project chrome, card shadow, gradient CTA 시각 무게 축소
-- 모바일 2차 통계 숨김 + 보조 action 한 줄 유지
-- 기존 장문/다중 화자/타임라인/로컬 엔진 기능 보존
-- 다음 목표는 0.11.14 Adaptive Longform Soak & Editor Responsibility Split
+현재 제품 버전: `0.11.12`
 
 ## 0.11.12 완료 · Editing History, Speaker Memory & Engine Routing Trace
 
@@ -18,7 +8,7 @@
 - stale audio/job을 복원하지 않는 안전 snapshot apply
 - 화자 원문 대신 hash key+voiceId만 저장하는 최근 배정 재사용
 - batch engine usage/switch/fallback routing trace
-- 다음 목표는 0.11.14 Adaptive Longform Soak & Editor Responsibility Split
+- 다음 목표는 0.11.13 Adaptive Longform Soak & Mobile Editing Polish
 
 ## 0.11.11 완료 · Mobile Studio Flow & Natural Voice Playback
 

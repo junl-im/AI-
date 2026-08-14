@@ -61,28 +61,23 @@ export function WorkspaceProjectRail({
       className={`soa-project-rail ${collapsed ? 'is-collapsed' : ''}`}
       aria-label="프로젝트 목록"
     >
+      <button
+        type="button"
+        className="soa-studio-panel-toggle"
+        aria-label={collapsed ? '프로젝트 패널 펼치기' : '프로젝트 패널 접기'}
+        aria-expanded={!collapsed}
+        aria-controls="soa-project-rail"
+        onClick={onToggleCollapsed}
+      >
+        {collapsed ? '›' : '‹'}
+      </button>
       {collapsed ? (
-        <>
-          <button
-            type="button"
-            className="soa-studio-panel-toggle is-collapsed"
-            aria-label="프로젝트 패널 펼치기"
-            aria-expanded="false"
-            aria-controls="soa-project-rail"
-            onClick={onToggleCollapsed}
-          >
-            <span aria-hidden="true">›</span>
-          </button>
-          <span className="soa-studio-panel-monogram" aria-hidden="true">P</span>
-        </>
+        <span className="soa-studio-panel-monogram" aria-hidden="true">P</span>
       ) : (
         <>
       <div className="soa-project-rail__head">
         <span>PROJECTS</span>
-        <div>
-          <button type="button" className="soa-studio-panel-toggle" aria-label="프로젝트 패널 접기" aria-expanded="true" aria-controls="soa-project-rail" onClick={onToggleCollapsed}>‹ <b>접기</b></button>
-          <button type="button" onClick={onNewProject}>＋ 새 작업</button>
-        </div>
+        <button type="button" onClick={onNewProject}>＋ 새 작업</button>
       </div>
 
       <div className="soa-project-rail__current" aria-current="page">

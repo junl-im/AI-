@@ -150,8 +150,8 @@ requireTokens('src/hooks/useTimelineGeneration.ts', timeline, [
 const header = await source('src/components/workspace/DubbingStudioHeader.tsx')
 requireTokens('src/components/workspace/DubbingStudioHeader.tsx', header, [
   'soa-dubbing-pro-toggle',
-  '사이드 패널 열기',
-  '사이드 패널 숨기기',
+  '프로 패널 펼치기',
+  '간편 모드로 전환',
 ])
 
 const css = await source('src/styles/one-flow-dubbing.css')

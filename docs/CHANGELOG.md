@@ -1,15 +1,5 @@
 # CHANGELOG
 
-## 0.11.15 · PC Editor Clarity & Linked Timeline Player
-
-- PC `VOICE CORE`를 큰 배너형 카드에서 낮은 가로형 control strip으로 정리해 아이콘·상태·파형의 위계를 단순화했습니다.
-- 성우 선택은 PC에서 과도하게 큰 bottom sheet 대신 중앙 compact modal로 전환하고, 성우 설명을 이름·성별·한 줄 톤 설명·미리듣기 중심으로 축약했습니다.
-- Timeline Editor의 PC 정보 순서를 `대사 트랙 → 연계 플레이어 → 선택 클립 편집`으로 재배치해 트랙을 먼저 보고 세부 편집으로 내려가는 흐름을 만들었습니다.
-- VOICE 대사 트랙 바로 아래에 Timeline Linked Player를 추가했습니다. 별도 audio element를 만들지 않고 기존 player store의 queue/current track/play-pause/seek/previous/next 상태를 공유해 하단 Dock과 항상 연계됩니다.
-- 좌·우 사이드바 접기/열기 버튼을 각 패널 헤더와 collapsed rail에 분리 배치해 겹침을 제거하고 현재 상태와 복구 위치를 명확하게 했습니다.
-- Timeline 내부의 `최종 WAV + 자막` UI를 제거하고 PC 상단의 명확한 `내보내기` 액션으로 이동했습니다. 내보내기 dialog에서 WAV/MP3와 SRT/VTT 완성본을 생성합니다.
-- final export, linked player, sidebar/header 계약 테스트와 dependency-free preflight 계약을 새 구조에 맞춰 보강했습니다.
-
 ## 0.11.14 · All Workflows Reliability Hardening
 
 - GitHub Actions action major를 2026-08 공식 릴리스 기준으로 갱신했습니다: checkout v7, setup-python v7, upload-artifact v7, download-artifact v8, cache v6.

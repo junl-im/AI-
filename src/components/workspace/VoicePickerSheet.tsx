@@ -88,30 +88,24 @@ export function VoicePickerSheet({
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="soa-sheet-handle" aria-hidden="true" />
-        <header className="soa-sheet-header soa-voice-picker-header">
+        <header className="soa-sheet-header">
           <button
             type="button"
-            className="soa-voice-picker-close"
             onClick={onClose}
             aria-label="목소리 선택 닫기"
             data-dialog-autofocus
           >
-            <span className="soa-voice-picker-close__mobile" aria-hidden="true">‹</span>
-            <span className="soa-voice-picker-close__desktop" aria-hidden="true">×</span>
+            ‹
           </button>
-          <div className="soa-voice-picker-heading">
-            <h2 id="voice-picker-title">목소리 선택</h2>
-            <p>원하는 톤을 고르고 바로 미리 들어보세요.</p>
-          </div>
+          <h2 id="voice-picker-title">목소리 선택</h2>
           <button
             type="button"
-            className="soa-voice-create-button"
             onClick={() => {
               onClose()
               onCreateVoice()
             }}
           >
-            + 내 목소리
+            내 목소리
           </button>
         </header>
         <div className="soa-sheet-tags" role="group" aria-label="목소리 성별 필터">
@@ -161,10 +155,13 @@ export function VoicePickerSheet({
                   <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
                   <span>
                     <strong>
-                      {voice.name} <span className="soa-voice-gender">{voiceGenderLabels[voice.gender]}</span>
+                      {voice.name} · {voiceGenderLabels[voice.gender]}
                       {recommended ? <em>대본 추천</em> : null}
                     </strong>
                     <small>{voice.description}</small>
+                    <span className="soa-voice-fit">잘 맞음 · {voice.bestFor.join(' · ')}</span>
+                    <span className="soa-voice-pro">장점 · {voice.strengths.join(' / ')}</span>
+                    <span className="soa-voice-con">주의 · {voice.tradeoffs.join(' / ')}</span>
                   </span>
                 </button>
                 <VoicePreviewButton

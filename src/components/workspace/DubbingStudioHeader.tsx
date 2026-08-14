@@ -13,8 +13,6 @@ interface DubbingStudioHeaderProps {
   onOpenSettings: () => void
   sidePanelsCollapsed: boolean
   onToggleSidePanels: () => void
-  exportAvailable: boolean
-  onOpenExport: () => void
   onClear: () => void
 }
 
@@ -30,8 +28,6 @@ export function DubbingStudioHeader({
   onOpenSettings,
   sidePanelsCollapsed,
   onToggleSidePanels,
-  exportAvailable,
-  onOpenExport,
   onClear,
 }: DubbingStudioHeaderProps) {
   const titleRef = useRef<HTMLInputElement | null>(null)
@@ -93,25 +89,17 @@ export function DubbingStudioHeader({
             type="button"
             className="soa-dubbing-pro-toggle"
             onClick={onToggleSidePanels}
-            aria-label={sidePanelsCollapsed ? '사이드 패널 열기' : '사이드 패널 숨기기'}
+            aria-label={sidePanelsCollapsed ? '프로 패널 펼치기' : '간편 모드로 전환'}
             aria-pressed={!sidePanelsCollapsed}
-            title={sidePanelsCollapsed ? '프로젝트와 보이스 패널 열기' : '프로젝트와 보이스 패널 숨기기'}
+            title={sidePanelsCollapsed ? '프로젝트·보이스 패널 펼치기' : '양쪽 패널 접기'}
           >
-            <span aria-hidden="true">{sidePanelsCollapsed ? '▦' : '◫'}</span><b>{sidePanelsCollapsed ? '패널 열기' : '패널 숨기기'}</b>
-          </button>
-          <button
-            type="button"
-            className="soa-dubbing-export-trigger"
-            onClick={onOpenExport}
-            disabled={!exportAvailable}
-            aria-label="완성본 내보내기"
-            title={exportAvailable ? '최종 음원과 자막 내보내기' : '대사를 만든 뒤 내보낼 수 있습니다.'}
-          >
-            <span aria-hidden="true">⇩</span><b>내보내기</b>
+            {sidePanelsCollapsed ? '▦' : '◫'}
           </button>
           {downloadHref ? (
-            <a href={downloadHref} download={downloadName} aria-label="현재 재생 음성만 다운로드" title="현재 재생 음성만 다운로드">♪</a>
-          ) : null}
+            <a href={downloadHref} download={downloadName} aria-label="현재 음성 다운로드">⇩</a>
+          ) : (
+            <button type="button" disabled aria-label="현재 음성은 파일 다운로드를 지원하지 않음">⇩</button>
+          )}
           <div ref={projectMenuRef} className="soa-dubbing-more">
             <button
               ref={projectMenuButtonRef}

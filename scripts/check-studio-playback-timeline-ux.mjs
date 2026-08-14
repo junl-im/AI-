@@ -102,28 +102,6 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   '실패만 재시도',
   'onBatchVoiceChange',
   'onRegenerateMany',
-  '<TimelineLinkedPlayer />',
-])
-
-const timelineLinkedPlayer = await source('src/components/workspace/TimelineLinkedPlayer.tsx')
-requireTokens('src/components/workspace/TimelineLinkedPlayer.tsx', timelineLinkedPlayer, [
-  'playbackPositionSeconds',
-  'playbackActive',
-  'toggleTrack(currentTrackId)',
-  'seekTrack(currentTrackId, duration * ratio)',
-  'selectAndPlay(target.id)',
-  '하단 Dock과 같은 재생 상태를 사용합니다.',
-])
-
-const exportDialog = await source('src/components/workspace/FinalExportDialog.tsx')
-requireTokens('src/components/workspace/FinalExportDialog.tsx', exportDialog, [
-  '완성본 내보내기',
-  '<FinalExportControls blocks={blocks} />',
-])
-const studioHeader = await source('src/components/workspace/DubbingStudioHeader.tsx')
-requireTokens('src/components/workspace/DubbingStudioHeader.tsx', studioHeader, [
-  '완성본 내보내기',
-  'soa-dubbing-export-trigger',
 ])
 
 const playerTests = await source('src/components/navigation/LinkedPlayerDock.test.tsx')

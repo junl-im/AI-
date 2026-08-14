@@ -47,7 +47,11 @@ export function CloneExecutionCard({
   )
 
   return (
-    <section className="soa-clone-execution soa-voice-test-lab" aria-labelledby="clone-execution-title">
+    <section
+      className="soa-clone-execution soa-voice-test-lab"
+      aria-labelledby="clone-execution-title"
+      data-execution-contract="REAL CLONE EXECUTION"
+    >
       <div className="soa-clone-execution__head">
         <div>
           <span>VOICE TEST LAB</span>

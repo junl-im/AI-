@@ -1,30 +1,17 @@
-SoriON AI 0.11.16 Mobile Studio Integration & Performance Hardening Candidate
+SoriON AI 0.11.13 Focused Creation Surface
 
-Apply script changes:
-- src/components/workspace/LongformComposer.tsx
-- src/components/workspace/TimelineEditor.tsx
-- src/components/navigation/LinkedPlayerDock.tsx
-- src/styles/mobile-studio-flow.css
-- src/styles/timeline-horizontal-mobile.css
-- scripts/check-mobile-studio-flow.mjs
-- scripts/run-visual-layout-regression.mjs
-- package.json (adds quality:mobile-layout only)
+기준 상태
+- 0.11.12 Editing History, Speaker Memory & Engine Routing Trace 전체 통파일
 
-Compatibility:
-- current public main 0.11.15
-- also compatible after Live Voice + MY VOICE integrated candidate
-- when MY VOICE bridge files exist, mobile static quality gate additionally verifies the selection linkage
+적용 결과
+- 중앙 제작 surface를 `목소리 → 텍스트 → 생성 및 재생`으로 단순화
+- 프로젝트 header와 Composer chrome의 시각 무게 축소
+- 모바일 2차 통계와 보조 action 밀도 축소
+- 장문/다중 화자/Timeline/Engine routing 기능과 동시성 2 상한 유지
+- 제품 버전 0.11.13
 
-Verification performed in simulation:
-- apply script syntax PASS
-- verify script syntax PASS
-- core mobile static gate PASS
-- Live Voice + MY VOICE optional bridge gate PASS
-- idempotent re-apply PASS
-- modified TS/TSX: no TS1xxx syntax parse errors
-- visual runner JS syntax PASS
-- mobile hardening verification PASS 23/23 with MY VOICE bridge present
+삭제 파일
+- 없음
 
-Not executed here:
-- production build / Vitest / full typecheck (simulation has no node_modules)
-- Chromium mobile screenshot run (requires dist/index.html from production build)
+상세 manifest
+- docs/patches/0.11.13-focused-creation-surface/PATCH_MANIFEST.txt

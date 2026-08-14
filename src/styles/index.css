@@ -18,8 +18,6 @@
 @import "./clone-execution.css";
 @import "./creation-workspace.css";
 @import "./focused-creation-surface.css";
-@import "./pc-voice-polish.css";
-@import "./pc-editor-polish.css";
 
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
