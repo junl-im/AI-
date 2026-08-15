@@ -1,3 +1,10 @@
+# 0.11.19 R1 · Voice Picker Accessibility Hotfix
+
+- GitHub Actions run `31857547345` Web quality의 실제 실패는 `DubbingVoiceControls.test.tsx` 1건이었습니다.
+- 원인: Voice Picker 내부의 적용 범위 안내와 대본 맞춤 추천이 모두 `role="status"`를 사용해 Testing Library의 단일 status 조회가 충돌했습니다.
+- 수정: 적용 범위 안내는 `role="note" aria-label="목소리 적용 범위"`로 의미를 분리하고, 추천만 `role="status"`를 유지합니다.
+- 테스트: 추천은 status로, 적용 범위는 이름 있는 note로 각각 검증합니다.
+
 # SoriON AI 0.11.19 Verification Report
 
 결과 버전: **0.11.19 · Voice Engine Fast Path + MY VOICE Runtime**  

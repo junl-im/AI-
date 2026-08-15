@@ -67,7 +67,11 @@ export function VoicePickerSheet({
           <h2 id="voice-picker-title">목소리 선택</h2>
           <button type="button" onClick={() => { onClose(); onCreateVoice() }}>내 목소리</button>
         </header>
-        <div className={`soa-voice-apply-target ${applyTargetCount > 0 ? '' : 'is-default'}`.trim()} role="status">
+        <div
+          className={`soa-voice-apply-target ${applyTargetCount > 0 ? '' : 'is-default'}`.trim()}
+          role="note"
+          aria-label="목소리 적용 범위"
+        >
           <strong>{applyTargetCount > 0 ? `타임라인 ${applyTargetCount}개 선택` : '기본 목소리 선택'}</strong>
           <span>{applyTargetCount > 0 ? '성우를 탭하면 선택된 대사에 바로 적용됩니다.' : '다음 대사 생성부터 이 목소리를 사용합니다.'}</span>
         </div>

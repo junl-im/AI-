@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.11.19 R1 · Voice Picker Accessibility Hotfix
+
+- Voice Picker의 적용 범위 안내를 live `status`에서 정적 `note` 역할로 분리해 대본 맞춤 추천 status와 접근성 역할이 충돌하지 않도록 했습니다.
+- 적용 범위 안내에 `aria-label="목소리 적용 범위"`를 추가하고 테스트도 해당 의미 역할을 직접 검증하도록 갱신했습니다.
+- GitHub Actions run 31857547345에서 발생한 DubbingVoiceControls 단일 Vitest 실패를 대상으로 한 회귀 수정입니다.
+
 ## 0.11.19 · Voice Engine Fast Path + MY VOICE Runtime
 
 - 저장된 `MY VOICE` 프로필을 일반 목소리 선택기·PC Voice Drawer·Timeline 일괄 목소리 선택에 통합하고 `myvoice:<profileId>` ID로 프리셋과 충돌 없이 라우팅합니다.

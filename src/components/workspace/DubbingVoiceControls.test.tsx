@@ -165,7 +165,7 @@ describe('DubbingVoiceControls', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
 
-    const target = screen.getByRole('status')
+    const target = screen.getByRole('note', { name: '목소리 적용 범위' })
     expect(target).toHaveTextContent('타임라인 2개 선택')
     expect(target).toHaveTextContent('성우를 탭하면 선택된 대사에 바로 적용됩니다.')
   })
