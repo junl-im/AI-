@@ -45,7 +45,7 @@ import {
   rememberSpeakerVoiceAssignments,
 } from '../workspace/speakerVoiceMemory'
 import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
-import type { ComposerDirective, WorkspaceMessage } from '../workspace/workspaceTypes'
+import type { ComposerDirective, TimelineVoiceBlock, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
 import { synthesizeVoiceCloneProfile } from '../voiceclone/voiceCloneSynthesis'
 import { isMyVoiceId, toMyVoiceId } from '../voiceclone/voiceIdentity'
@@ -185,7 +185,9 @@ export function HomePage() {
   const selectedTimelineVoiceBlocks = useMemo(() => {
     if (selectedTimelineIds.length === 0) return []
     const selected = new Set(selectedTimelineIds)
-    return timeline.blocks.filter((block) => block.kind === 'voice' && selected.has(block.id))
+    return timeline.blocks.filter(
+      (block): block is TimelineVoiceBlock => block.kind === 'voice' && selected.has(block.id),
+    )
   }, [selectedTimelineIds, timeline.blocks])
   const selectedTimelineVoiceIds = useMemo(
     () => selectedTimelineVoiceBlocks.map((block) => block.id),
