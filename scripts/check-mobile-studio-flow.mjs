@@ -54,7 +54,7 @@ requireTokens('src/components/workspace/VoicePickerSheet.tsx', picker, [
   '장점 · {voice.strengths.join',
   '주의 · {voice.tradeoffs.join',
   'onPreview={onPreview}',
-  '타임라인 {applyTargetCount}개 선택',
+  '타임라인 ${applyTargetCount}개 선택',
   '성우를 탭하면 선택된 대사에 바로 적용됩니다.',
 ])
 

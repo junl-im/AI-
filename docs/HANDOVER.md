@@ -1,14 +1,22 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.18 · SoriON Voice Deck Visual Identity**
+현재 기준 버전: **0.11.19 · Voice Engine Fast Path + MY VOICE Runtime**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-14 KST**
+최종 갱신: **2026-08-15 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-15 KST · 0.11.19 Voice Engine Fast Path + MY VOICE Runtime
+1. `MY VOICE`는 장식용 라이브러리가 아니라 `myvoice:<profileId>` ID로 일반 Voice Picker / Drawer / Timeline과 같은 선택 모델을 사용합니다.
+2. MY VOICE 생성은 Voice Clone API로 직접 라우팅하며 일반 `/tts` 프리셋 요청으로 보내지 않습니다.
+3. Clone 진행은 SSE 우선 + adaptive polling fallback이며, 완료 job 복구·중복 capability probe·프리뷰 취소를 fast path로 최적화합니다.
+4. 저장된 engine-ready 프로필은 내 목소리 페이지에서 다시 선택해 샘플 업로드 없이 테스트할 수 있습니다.
+5. 프리셋 TTS progressive audio와 browser fallback은 유지하고, MY VOICE에는 TTS 전용 signed-final rehydration을 붙이지 않습니다.
+6. 전달 규칙은 전체 프로젝트 FULL + 저장소 루트에 바로 덮어쓰는 PATCH입니다.
 
 ## 2026-08-14 KST · 0.11.18 SoriON Voice Deck Visual Identity
 1. 랜딩 Live Voice 영역은 기능을 추가하지 않고 프로그램의 첫인상을 담당하는 `Voice Deck`으로 전면 재디자인합니다.

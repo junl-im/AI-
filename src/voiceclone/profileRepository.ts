@@ -5,12 +5,19 @@ import {
 } from '../storage/database'
 import type { VoiceCloneProfile } from './voiceCloneTypes'
 
+export const MY_VOICE_PROFILES_CHANGED_EVENT = 'sorion:my-voice-profiles-changed'
+
+function notifyProfilesChanged() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(MY_VOICE_PROFILES_CHANGED_EVENT))
+}
+
 export async function saveVoiceProfile(profile: VoiceCloneProfile): Promise<void> {
   const database = await openSoriOnDatabase()
   const transaction = database.transaction(VOICE_PROFILE_STORE, 'readwrite')
   transaction.objectStore(VOICE_PROFILE_STORE).put(profile)
   await completeTransaction(transaction)
   database.close()
+  notifyProfilesChanged()
 }
 
 export async function listVoiceProfiles(): Promise<VoiceCloneProfile[]> {
@@ -33,4 +40,5 @@ export async function deleteVoiceProfile(profileId: string): Promise<void> {
   transaction.objectStore(VOICE_PROFILE_STORE).delete(profileId)
   await completeTransaction(transaction)
   database.close()
+  notifyProfilesChanged()
 }

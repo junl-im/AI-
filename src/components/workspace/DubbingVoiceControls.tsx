@@ -2,12 +2,13 @@ import { useState } from 'react'
 import type { VoiceEmotion } from '../../ai/contracts'
 import type { EngineInfo } from '../../ai/contracts'
 import { VoicePreviewButton } from '../voice/VoicePreviewButton'
-import { getVoicePreset } from '../../tts/voicePresets'
+import { buildVoiceChoices, resolveVoiceChoice, type VoiceChoice } from '../../voice/voiceChoices'
 import { VoicePickerSheet } from './VoicePickerSheet'
 import { VoiceSettingsSheet } from './VoiceSettingsSheet'
 
 interface DubbingVoiceControlsProps {
   voiceId: string
+  voiceChoices?: VoiceChoice[]
   scriptText?: string
   previewingId: string | null
   activePreviewId: string | null
@@ -29,6 +30,7 @@ interface DubbingVoiceControlsProps {
 
 export function DubbingVoiceControls({
   voiceId,
+  voiceChoices = buildVoiceChoices([]),
   scriptText = '',
   previewingId,
   activePreviewId,
@@ -49,14 +51,15 @@ export function DubbingVoiceControls({
 }: DubbingVoiceControlsProps) {
   const [pickerOpen, setPickerOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const voice = getVoicePreset(voiceId)
+  const voice = resolveVoiceChoice(voiceChoices, voiceId)
+  const customVoice = voice.kind === 'my-voice'
 
   return (
     <>
       <section className="soa-dubbing-voice-row" aria-label="현재 목소리와 음성 설정">
         <button
           type="button"
-          className="soa-dubbing-voice-choice"
+          className={`soa-dubbing-voice-choice ${customVoice ? 'is-my-voice' : ''}`.trim()}
           onClick={() => setPickerOpen(true)}
           aria-label={`현재 목소리 ${voice.name} 선택`}
           aria-haspopup="dialog"
@@ -64,8 +67,8 @@ export function DubbingVoiceControls({
         >
           <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
           <span>
-            <strong>{voice.name}</strong>
-            <small>{voice.bestFor.join(' · ')}</small>
+            <strong>{voice.name}{customVoice ? <em>MY VOICE</em> : null}</strong>
+            <small>{customVoice ? voice.meta : voice.bestFor.join(' · ')}</small>
           </span>
           <b aria-hidden="true">⌄</b>
         </button>
@@ -91,6 +94,7 @@ export function DubbingVoiceControls({
 
       <VoicePickerSheet
         open={pickerOpen}
+        voices={voiceChoices}
         selectedId={voiceId}
         contextText={scriptText}
         previewingId={previewingId}
@@ -108,9 +112,9 @@ export function DubbingVoiceControls({
         pitch={pitch}
         emotion={emotion}
         normalizeText={normalizeText}
-        supportsSpeed={engine?.supportsSpeed ?? false}
-        supportsPitch={engine?.supportsPitch ?? false}
-        supportsEmotion={engine?.supportsEmotion ?? false}
+        supportsSpeed={!customVoice && (engine?.supportsSpeed ?? false)}
+        supportsPitch={!customVoice && (engine?.supportsPitch ?? false)}
+        supportsEmotion={!customVoice && (engine?.supportsEmotion ?? false)}
         previewing={previewingId !== null}
         onClose={() => setSettingsOpen(false)}
         onSpeedChange={onSpeedChange}

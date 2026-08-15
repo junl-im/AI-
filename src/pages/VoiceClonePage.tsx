@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { CloneConsentCard } from '../components/clone/CloneConsentCard'
 import { CloneExecutionCard } from '../components/clone/CloneExecutionCard'
 import { CloneReadyCard } from '../components/clone/CloneReadyCard'
+import { MyVoiceLibrary } from '../components/clone/MyVoiceLibrary'
 import { CloneStepIndicator } from '../components/clone/CloneStepIndicator'
 import { SampleQualityCard } from '../components/clone/SampleQualityCard'
 import { VoiceSampleCapture } from '../components/clone/VoiceSampleCapture'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
+import { useMyVoiceProfiles } from '../hooks/useMyVoiceProfiles'
 import { useVoiceRecorder } from '../hooks/useVoiceRecorder'
 import { useAppStore } from '../store/useAppStore'
 import { usePlayerStore } from '../store/usePlayerStore'
@@ -15,13 +17,13 @@ import { createRandomId } from '../utils/randomId'
 import {
   cancelVoiceCloneJob,
   deleteRemoteVoiceCloneProfile,
-  getVoiceCloneCapability,
-  getVoiceCloneJob,
+  getVoiceCloneCapabilityCached,
   prepareVoiceCloneProfile,
   retryVoiceCloneJob,
   startVoiceCloneJob,
   type VoiceCloneCapability,
 } from '../voiceclone/voiceCloneApi'
+import { watchVoiceCloneJob } from '../voiceclone/voiceCloneSynthesis'
 import type {
   VoiceCloneConsent,
   VoiceCloneJob,
@@ -66,6 +68,7 @@ function errorMessage(error: unknown): string {
 
 export function VoiceClonePage() {
   const recorder = useVoiceRecorder()
+  const { profiles, loading: profilesLoading } = useMyVoiceProfiles()
   const showNotice = useAppStore((state) => state.showNotice)
   const enqueue = usePlayerStore((state) => state.enqueue)
   const enqueuedJobId = useRef<string | null>(null)
@@ -95,11 +98,21 @@ export function VoiceClonePage() {
   )
 
   useEffect(() => {
-    void getVoiceCloneCapability()
-      .then((result) => {
-        setCapability(result)
-      })
-      .catch(() => setCapability(null))
+    let active = true
+    const refresh = (force = false) => {
+      void getVoiceCloneCapabilityCached({ force })
+        .then((result) => { if (active) setCapability(result) })
+        .catch(() => { if (active) setCapability(null) })
+    }
+    refresh()
+    const refreshNow = () => refresh(true)
+    window.addEventListener('focus', refreshNow)
+    window.addEventListener('online', refreshNow)
+    return () => {
+      active = false
+      window.removeEventListener('focus', refreshNow)
+      window.removeEventListener('online', refreshNow)
+    }
   }, [])
 
   useEffect(() => {
@@ -130,23 +143,33 @@ export function VoiceClonePage() {
   }, [recorder.file])
 
   useEffect(() => {
-    if (!activeJobId || !activeJobStatus) return undefined
+    if (!job || !activeJobId || !activeJobStatus) return undefined
     if (!['queued', 'running'].includes(activeJobStatus)) return undefined
+    const controller = new AbortController()
     let active = true
-    const timer = window.setInterval(() => {
-      void getVoiceCloneJob(activeJobId)
-        .then((nextJob) => {
-          if (active) setJob(nextJob)
-        })
-        .catch((error) => {
-          if (active) setJobError(errorMessage(error))
-        })
-    }, 750)
+    void watchVoiceCloneJob(job, controller.signal, (progress) => {
+      if (!active) return
+      setJob((current) => current && current.id === progress.jobId
+        ? {
+            ...current,
+            status: ['completed', 'failed', 'cancelled'].includes(progress.status) ? current.status : progress.status,
+            progress: progress.progress,
+            phase: progress.phase,
+            message: progress.message,
+            firstAudioMs: progress.firstAudioMs,
+          }
+        : current)
+    }).then((nextJob) => {
+      if (active) setJob(nextJob)
+    }).catch((error) => {
+      if (active && !controller.signal.aborted) setJobError(errorMessage(error))
+    })
     return () => {
       active = false
-      window.clearInterval(timer)
+      controller.abort()
     }
   }, [activeJobId, activeJobStatus])
+
 
   useEffect(() => {
     if (!job || job.status !== 'completed' || !job.audioUrl) return
@@ -176,6 +199,26 @@ export function VoiceClonePage() {
   }, [enqueue, job, profile?.displayName, showNotice])
 
 
+  function selectSavedProfile(nextProfile: VoiceCloneProfile) {
+    setProfile(nextProfile)
+    setDisplayName(nextProfile.displayName)
+    setAnalysis(nextProfile.analysis)
+    setConsent(nextProfile.consent)
+    setJob(null)
+    setJobError(null)
+    enqueuedJobId.current = null
+    showNotice(`${nextProfile.displayName} 프로필을 불러왔습니다. 바로 내 목소리 테스트를 만들 수 있습니다.`)
+  }
+
+  function startNewProfile() {
+    setProfile(null)
+    setJob(null)
+    setJobError(null)
+    recorder.reset()
+    setAnalysis(null)
+    setConsent(initialConsent)
+    setDisplayName('내 SoriON 목소리')
+  }
 
   async function handlePrepare() {
     if (!recorder.file || !analysis || !canSubmit) return
@@ -301,6 +344,13 @@ export function VoiceClonePage() {
       description="동의된 샘플만 안전한 음성 제작 과정에 사용합니다. 문장별 생성 상태와 취소·재시도를 실시간으로 관리합니다."
       className="soa-clone-page"
     >
+      <MyVoiceLibrary
+        profiles={profiles}
+        selectedId={profile?.id ?? null}
+        loading={profilesLoading}
+        onSelect={selectSavedProfile}
+        onCreate={startNewProfile}
+      />
       <CloneStepIndicator current={currentStep} />
       <div className="soa-clone-grid">
         <VoiceSampleCapture

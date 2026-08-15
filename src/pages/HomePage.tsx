@@ -11,6 +11,7 @@ import { WorkspaceConversation } from '../components/workspace/WorkspaceConversa
 import { WorkspaceProjectRail } from '../components/workspace/WorkspaceProjectRail'
 import { useDesktopStudioLayout } from '../hooks/useDesktopStudioLayout'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
+import { useMyVoiceProfiles } from '../hooks/useMyVoiceProfiles'
 import {
   useTimelineGeneration,
   type TimelineGenerationOptions,
@@ -46,6 +47,9 @@ import {
 import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import type { ComposerDirective, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
+import { synthesizeVoiceCloneProfile } from '../voiceclone/voiceCloneSynthesis'
+import { isMyVoiceId } from '../voiceclone/voiceIdentity'
+import { buildVoiceChoices, resolveVoiceChoice } from '../voice/voiceChoices'
 import { LandingHome } from './LandingHome'
 
 interface PendingLongformGeneration {
@@ -74,7 +78,7 @@ function generatedPreview(
       filename: buildAudioFilename(request.text, voiceName, 'wav'),
       source: 'api',
       durationSeconds: result.estimatedDurationSeconds,
-      rehydration: { kind: 'tts-final', jobId: result.jobId },
+      ...(isMyVoiceId(request.voiceId) ? {} : { rehydration: { kind: 'tts-final' as const, jobId: result.jobId } }),
       result,
     }
   }
@@ -162,7 +166,10 @@ export function HomePage() {
   const pendingResetSaveRef = useRef<number | null>(null)
   const explicitWorkspaceActionRef = useRef(false)
   const previewRunIdRef = useRef(0)
+  const previewAbortRef = useRef<AbortController | null>(null)
   const engineCatalog = useEngineCatalog()
+  const { profiles: myVoiceProfiles } = useMyVoiceProfiles()
+  const voiceChoices = useMemo(() => buildVoiceChoices(myVoiceProfiles), [myVoiceProfiles])
   const timeline = useTimelineGeneration()
   const generateAllTimelineBlocks = timeline.generateAll
   const recoverBlocks = timeline.recoverBlocks
@@ -173,7 +180,7 @@ export function HomePage() {
   const getQueuedVoiceBlockIds = timeline.getQueuedVoiceBlockIds
   const getVoiceBlockSnapshots = timeline.getVoiceBlockSnapshots
   const updateTimelineVoices = timeline.updateVoiceMany
-  const selectedVoice = useMemo(() => getVoicePreset(voiceId), [voiceId])
+  const selectedVoice = useMemo(() => resolveVoiceChoice(voiceChoices, voiceId), [voiceChoices, voiceId])
   const selectedTimelineVoiceIds = useMemo(() => {
     if (selectedTimelineIds.length === 0) return []
     const selected = new Set(selectedTimelineIds)
@@ -219,39 +226,49 @@ export function HomePage() {
     ? engineCatalog.selected.id
     : 'auto'
   const normalizeText = directiveIds.includes('numbers')
+  const generationRouteReady = selectedVoice.kind === 'my-voice'
+    ? selectedVoice.ready && backendStatus !== 'offline'
+    : engineAvailable
   useEffect(() => {
     const engine = engineCatalog.selected
+    const customVoice = selectedVoice.kind === 'my-voice'
     const readiness = busy
       ? 'generating'
-      : backendStatus === 'offline'
-        ? 'offline'
-        : engineCatalog.loading
-          ? 'checking'
-          : backendStatus === 'degraded'
-            ? 'limited'
-            : engineAvailable
-              ? 'ready'
-              : 'checking'
+      : customVoice
+        ? backendStatus === 'offline' ? 'offline' : selectedVoice.ready ? 'ready' : 'limited'
+        : backendStatus === 'offline'
+          ? 'offline'
+          : engineCatalog.loading
+            ? 'checking'
+            : backendStatus === 'degraded'
+              ? 'limited'
+              : engineAvailable
+                ? 'ready'
+                : 'checking'
     const detail = readiness === 'generating'
       ? `${selectedVoice.name} 목소리로 생성 중입니다.`
-      : readiness === 'ready'
-        ? '음성 생성 준비가 끝났습니다.'
-        : readiness === 'limited'
-          ? '대체 음성 엔진으로 사용할 수 있습니다.'
-          : readiness === 'offline'
-            ? '음성 엔진 연결을 복구하고 있습니다.'
-            : '사용 가능한 음성 엔진을 확인하고 있습니다.'
+      : customVoice && selectedVoice.ready
+        ? '내 목소리 프로필이 실제 생성 엔진에 연결되었습니다.'
+        : customVoice
+          ? '내 목소리 엔진 준비 상태를 확인해 주세요.'
+          : readiness === 'ready'
+            ? '음성 생성 준비가 끝났습니다.'
+            : readiness === 'limited'
+              ? '대체 음성 엔진으로 사용할 수 있습니다.'
+              : readiness === 'offline'
+                ? '음성 엔진 연결을 복구하고 있습니다.'
+                : '사용 가능한 음성 엔진을 확인하고 있습니다.'
 
     setLiveVoice({
       voiceId,
       voiceName: selectedVoice.name,
-      voiceKind: voiceId.startsWith('myvoice:') ? 'my-voice' : 'preset',
-      engineId: engine?.id ?? null,
-      engineName: engine?.name ?? '자동 엔진',
+      voiceKind: customVoice ? 'my-voice' : 'preset',
+      engineId: customVoice ? selectedVoice.profile?.engineId ?? null : engine?.id ?? null,
+      engineName: customVoice ? '내 목소리 엔진' : engine?.name ?? '자동 엔진',
       readiness,
       detail,
     })
-  }, [backendStatus, busy, engineAvailable, engineCatalog.loading, engineCatalog.selected, selectedVoice.name, setLiveVoice, voiceId])
+  }, [backendStatus, busy, engineAvailable, engineCatalog.loading, engineCatalog.selected, selectedVoice, setLiveVoice, voiceId])
   const multiSpeakerAnalysis = useMemo(
     () => analyzeMultiSpeakerScript(composerDraft),
     [composerDraft],
@@ -271,7 +288,7 @@ export function HomePage() {
       const currentMap = new Map(current.map((item) => [item.speaker, item.voiceId]))
       const suggested = suggestSpeakerVoiceAssignments(
         multiSpeakerAnalysis.speakers,
-        voiceId,
+        isMyVoiceId(voiceId) ? voicePresets[0].id : voiceId,
         voicePresets,
       )
       return suggested.map((item) => ({
@@ -284,7 +301,7 @@ export function HomePage() {
   const restoreWorkspaceSession = useCallback((session: WorkspaceSession) => {
     if (explicitWorkspaceActionRef.current || useAppStore.getState().activeProject) return
     setProjectTitle(session.projectTitle || '새 프로젝트')
-    setVoiceId(getVoicePreset(session.voiceId).id)
+    setVoiceId(isMyVoiceId(session.voiceId) ? session.voiceId : getVoicePreset(session.voiceId).id)
     setSpeechSpeed(normalizeVoiceSpeed(session.speechSpeed))
     setSpeechPitch(normalizeVoicePitch(session.speechPitch))
     setSpeechEmotion(
@@ -354,6 +371,7 @@ export function HomePage() {
     setPendingPreview(null)
     setPreviewingId(null)
     previewRunIdRef.current += 1
+    previewAbortRef.current?.abort()
   }, [clearQueue, clearTimeline, resetTimelineEditHistory, workspaceResetToken])
   useEffect(() => {
     if (pendingResetSaveRef.current !== workspaceResetToken) return
@@ -363,6 +381,7 @@ export function HomePage() {
   useEffect(() => {
     if (workspaceEntered && page === 'home') return
     previewRunIdRef.current += 1
+    previewAbortRef.current?.abort()
     setPendingPreview(null)
     setPreviewingId(null)
   }, [page, workspaceEntered])
@@ -370,7 +389,7 @@ export function HomePage() {
     if (!activeProject) return
     setPendingGeneration(null)
     setResumeGeneration(null)
-    const voice = getVoicePreset(activeProject.voiceId)
+    const voice = resolveVoiceChoice(voiceChoices, activeProject.voiceId)
     setProjectTitle(activeProject.title || '새 프로젝트')
     setVoiceId(activeProject.voiceId)
     const restoredSpeed = normalizeVoiceSpeed(activeProject.speed ?? 1)
@@ -393,24 +412,25 @@ export function HomePage() {
     setPendingPreview(null)
     setPreviewingId(null)
     previewRunIdRef.current += 1
+    previewAbortRef.current?.abort()
     const recoverableIds = restoreProject(activeProject, {
       voiceId: activeProject.voiceId,
       voiceName: voice.name,
       emotion: activeProject.emotion,
       speed: restoredSpeed,
       pitch: restoredPitch,
-      engineId: 'auto',
+      engineId: voice.kind === 'my-voice' ? voice.profile?.engineId ?? 'cosyvoice3-worker' : 'auto',
       normalizeText: activeProject.normalizeText ?? true,
     })
     setPendingRecoveryIds(recoverableIds)
     clearActiveProject()
-  }, [activeProject, clearActiveProject, restoreProject])
+  }, [activeProject, clearActiveProject, restoreProject, voiceChoices])
   useEffect(() => {
-    if (!engineAvailable || pendingRecoveryIds.length === 0) return
+    if (!generationRouteReady || pendingRecoveryIds.length === 0) return
     const ids = pendingRecoveryIds
     setPendingRecoveryIds([])
     void recoverBlocks(ids)
-  }, [engineAvailable, pendingRecoveryIds, recoverBlocks])
+  }, [generationRouteReady, pendingRecoveryIds, recoverBlocks])
   const appendMessage = useCallback((message: Omit<WorkspaceMessage, 'id'>) => {
     setMessages((current) => [...current, { ...message, id: createRandomId() }])
   }, [])
@@ -421,9 +441,11 @@ export function HomePage() {
     emotion: speechEmotion,
     speed: normalizeVoiceSpeed(speechSpeed),
     pitch: normalizeVoicePitch(speechPitch),
-    engineId: selectedEngineId,
+    engineId: selectedVoice.kind === 'my-voice'
+      ? selectedVoice.profile?.engineId ?? 'cosyvoice3-worker'
+      : selectedEngineId,
     normalizeText,
-  }), [normalizeText, selectedEngineId, selectedVoice.name, speechEmotion, speechPitch, speechSpeed, voiceId])
+  }), [normalizeText, selectedEngineId, selectedVoice, speechEmotion, speechPitch, speechSpeed, voiceId])
   const saveLongformProject = useCallback(async (
     text: string,
     options: TimelineGenerationOptions,
@@ -517,11 +539,11 @@ export function HomePage() {
     showNotice,
   ])
   useEffect(() => {
-    if (!engineAvailable || !pendingGeneration || busy) return
+    if (!generationRouteReady || !pendingGeneration || busy) return
     const pending = pendingGeneration
     setPendingGeneration(null)
     void generateLongform(pending)
-  }, [busy, engineAvailable, generateLongform, pendingGeneration])
+  }, [busy, generateLongform, generationRouteReady, pendingGeneration])
   async function handleLongformSubmit(value: string) {
     const options = buildOptions()
     if (projectTitle.trim() === '새 프로젝트') {
@@ -554,7 +576,7 @@ export function HomePage() {
         : `${blockIds.length}개 대사 블록으로 정리했습니다. 내용은 위 편집기에 유지됩니다.`,
     })
     const pending = { text: value, options, blockIds, allBlockIds: blockIds }
-    if (!engineAvailable) {
+    if (!generationRouteReady) {
       setPendingGeneration(pending)
       appendMessage({
         role: 'assistant',
@@ -569,7 +591,7 @@ export function HomePage() {
 
   async function resumeLongformGeneration() {
     if (!resumeGeneration || busy) return
-    if (!engineAvailable) {
+    if (!generationRouteReady) {
       setPendingGeneration(resumeGeneration)
       requestAutomaticApiReconnect()
       return
@@ -583,30 +605,54 @@ export function HomePage() {
   }
   const selectVoice = useCallback((nextVoiceId: string) => {
     previewRunIdRef.current += 1
+    previewAbortRef.current?.abort()
     setPendingPreview(null)
     setPreviewingId(null)
-    const voice = getVoicePreset(nextVoiceId)
+    const voice = resolveVoiceChoice(voiceChoices, nextVoiceId)
+    if (voice.kind === 'my-voice' && !voice.ready) {
+      showNotice(`${voice.name}은(는) 아직 내 목소리 엔진 준비가 필요합니다.`)
+      return
+    }
     setVoiceId(voice.id)
-    setSpeechSpeed((current) => clampVoiceSettingsToNaturalRange(voice, current, speechPitch).speed)
-    setSpeechPitch((current) => clampVoiceSettingsToNaturalRange(voice, speechSpeed, current).pitch)
+    if (voice.kind === 'preset') {
+      const preset = getVoicePreset(voice.id)
+      setSpeechSpeed((current) => clampVoiceSettingsToNaturalRange(preset, current, speechPitch).speed)
+      setSpeechPitch((current) => clampVoiceSettingsToNaturalRange(preset, speechSpeed, current).pitch)
+    } else {
+      setSpeechSpeed(1)
+      setSpeechPitch(0)
+      setSpeechEmotion('neutral')
+    }
     if (selectedTimelineVoiceIds.length > 0) {
       updateTimelineVoices(selectedTimelineVoiceIds, voice.id, voice.name)
       showNotice(`선택한 대사 ${selectedTimelineVoiceIds.length}개에 ${voice.name} 목소리를 적용했습니다.`)
     }
-  }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, updateTimelineVoices])
+  }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, updateTimelineVoices, voiceChoices])
 
   const previewVoice = useCallback(async (
     nextVoiceId: string,
     sampleText?: string,
     preserveSelection = false,
   ) => {
-    const voice = getVoicePreset(nextVoiceId)
+    const voice = resolveVoiceChoice(voiceChoices, nextVoiceId)
+    if (voice.kind === 'my-voice' && !voice.ready) {
+      showNotice(`${voice.name}은(는) 아직 생성 준비가 완료되지 않았습니다.`)
+      return
+    }
+    if (voice.kind === 'my-voice' && backendStatus === 'offline') {
+      requestAutomaticApiReconnect()
+      showNotice('내 목소리 엔진 연결을 복구하고 있습니다. 잠시 후 다시 미리들어 주세요.')
+      return
+    }
     const runId = previewRunIdRef.current + 1
     previewRunIdRef.current = runId
+    previewAbortRef.current?.abort()
+    const controller = new AbortController()
+    previewAbortRef.current = controller
     if (!preserveSelection) setVoiceId(voice.id)
     setPreviewingId(nextVoiceId)
 
-    if (!engineAvailable || !engineCatalog.selected) {
+    if (voice.kind === 'preset' && (!engineAvailable || !engineCatalog.selected)) {
       setPendingPreview((current) => ({
         voiceId: nextVoiceId,
         attempt: current?.voiceId === nextVoiceId ? current.attempt : 0,
@@ -622,40 +668,58 @@ export function HomePage() {
     try {
       const request: TtsSynthesisRequest = {
         text,
-        voiceId: nextVoiceId,
-        emotion: speechEmotion,
-        speed: normalizeVoiceSpeed(speechSpeed),
-        pitch: normalizeVoicePitch(speechPitch),
+        voiceId: voice.id,
+        emotion: voice.kind === 'my-voice' ? 'neutral' : speechEmotion,
+        speed: voice.kind === 'my-voice' ? 1 : normalizeVoiceSpeed(speechSpeed),
+        pitch: voice.kind === 'my-voice' ? 0 : normalizeVoicePitch(speechPitch),
         format: 'wav',
-        engineId: selectedEngineId,
+        engineId: voice.kind === 'my-voice'
+          ? voice.profile?.engineId ?? 'cosyvoice3-worker'
+          : selectedEngineId,
         normalizeText,
       }
-      const result = await synthesizeSpeech(request, createRandomId())
-      if (previewRunIdRef.current !== runId) return
+      const result = voice.kind === 'my-voice'
+        ? await synthesizeVoiceCloneProfile({
+            profileId: voice.profile?.id ?? '',
+            text,
+            signal: controller.signal,
+          })
+        : await synthesizeSpeech(request, createRandomId(), controller.signal)
+      if (!result || previewRunIdRef.current !== runId || controller.signal.aborted) return
       const audio = generatedPreview(result, request, voice.name)
       setPendingPreview(null)
       const previewTrackId = enqueueAndPlay(audio, `${voice.name} 프리뷰`)
       setActivePreview({ voiceId: voice.id, trackId: previewTrackId })
       appendMessage({
         role: 'assistant',
-        badge: audio.source === 'browser-speech'
-          ? '바로 듣기'
-          : audio.source === 'browser-demo'
-            ? '미리 듣기'
-            : audio.result.fallbackUsed
-              ? '자동 완성'
-              : '목소리 프리뷰',
-        text: sampleText
-          ? `${voice.name} 설정으로 대본 첫 문장을 미리 들려드립니다.`
+        badge: voice.kind === 'my-voice'
+          ? 'MY VOICE'
           : audio.source === 'browser-speech'
-            ? `${voice.name} 설정으로 바로 재생했습니다.`
-            : audio.result.fallbackUsed
-              ? `${voice.name} 프리뷰를 자동으로 완성했습니다.`
-              : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
+            ? '바로 듣기'
+            : audio.source === 'browser-demo'
+              ? '미리 듣기'
+              : audio.result.fallbackUsed
+                ? '자동 완성'
+                : '목소리 프리뷰',
+        text: voice.kind === 'my-voice'
+          ? `${voice.name} 프로필로 실제 내 목소리 테스트 음성을 만들었습니다.`
+          : sampleText
+            ? `${voice.name} 설정으로 대본 첫 문장을 미리 들려드립니다.`
+            : audio.source === 'browser-speech'
+              ? `${voice.name} 설정으로 바로 재생했습니다.`
+              : audio.result.fallbackUsed
+                ? `${voice.name} 프리뷰를 자동으로 완성했습니다.`
+                : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
       })
       setPreviewingId(null)
     } catch {
-      if (previewRunIdRef.current !== runId) return
+      if (previewRunIdRef.current !== runId || controller.signal.aborted) return
+      if (voice.kind === 'my-voice') {
+        setPendingPreview(null)
+        setPreviewingId(null)
+        showNotice(`${voice.name} 내 목소리 생성에 실패했습니다. 엔진 상태를 확인해 주세요.`)
+        return
+      }
       setPendingPreview((current) => ({
         voiceId: nextVoiceId,
         attempt: current?.voiceId === nextVoiceId ? current.attempt + 1 : 1,
@@ -664,22 +728,29 @@ export function HomePage() {
         preserveSelection,
       }))
       requestAutomaticApiReconnect()
+    } finally {
+      if (previewAbortRef.current === controller) previewAbortRef.current = null
     }
   }, [
     appendMessage,
+    backendStatus,
     engineAvailable,
     engineCatalog.selected,
     enqueueAndPlay,
     normalizeText,
     selectedEngineId,
+    showNotice,
     speechEmotion,
     speechPitch,
     speechSpeed,
+    voiceChoices,
   ])
+
 
   function handlePreview(nextVoiceId: string) {
     if (previewingId === nextVoiceId) {
       previewRunIdRef.current += 1
+      previewAbortRef.current?.abort()
       setPendingPreview(null)
       setPreviewingId(null)
       return
@@ -747,7 +818,15 @@ export function HomePage() {
   }
 
   async function retryBlock(id: string) {
-    if (!engineAvailable) {
+    const block = timeline.blocks.find((item) => item.id === id)
+    const blockVoice = block?.kind === 'voice' ? resolveVoiceChoice(voiceChoices, block.voiceId) : null
+    if (blockVoice?.kind === 'my-voice') {
+      if (!blockVoice.ready || backendStatus === 'offline') {
+        requestAutomaticApiReconnect()
+        showNotice('이 대사의 내 목소리 엔진 준비 상태를 확인해 주세요.')
+        return
+      }
+    } else if (!engineAvailable) {
       requestAutomaticApiReconnect()
       return
     }
@@ -817,6 +896,7 @@ export function HomePage() {
               voiceControls={(
                 <DubbingVoiceControls
                   voiceId={voiceId}
+                  voiceChoices={voiceChoices}
                   scriptText={composerDraft}
                   previewingId={previewingId}
                   activePreviewId={activePreviewId}
@@ -862,6 +942,7 @@ export function HomePage() {
             {timeline.blocks.length > 0 || timeline.canUndo || timeline.canRedo ? (
             <TimelineEditor
               blocks={timeline.blocks}
+              voiceChoices={voiceChoices}
               onMove={timeline.moveBlock}
               onMoveMany={timeline.moveBlocks}
               onReorder={timeline.reorderBlock}
@@ -873,7 +954,16 @@ export function HomePage() {
               onRemove={timeline.removeBlock}
               onRemoveMany={timeline.removeBlocks}
               onBatchVoiceChange={async (ids, nextVoiceId, regenerate) => {
-                const voice = getVoicePreset(nextVoiceId)
+                const voice = resolveVoiceChoice(voiceChoices, nextVoiceId)
+                if (voice.kind === 'my-voice' && (!voice.ready || backendStatus === 'offline')) {
+                  requestAutomaticApiReconnect()
+                  showNotice('선택한 내 목소리 엔진이 아직 준비되지 않았습니다.')
+                  return null
+                }
+                if (voice.kind === 'preset' && regenerate && !engineAvailable) {
+                  requestAutomaticApiReconnect()
+                  return null
+                }
                 setVoiceId(voice.id)
                 timeline.updateVoiceMany(ids, voice.id, voice.name)
                 return regenerate ? timeline.regenerateMany(ids) : null
@@ -917,6 +1007,7 @@ export function HomePage() {
         />
         <DesktopVoiceDrawer
           voiceId={voiceId}
+          voiceChoices={voiceChoices}
           previewingId={previewingId}
           activePreviewId={activePreviewId}
           previewPlaying={previewPlaying}

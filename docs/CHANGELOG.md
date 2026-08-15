@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.11.19 · Voice Engine Fast Path + MY VOICE Runtime
+
+- 저장된 `MY VOICE` 프로필을 일반 목소리 선택기·PC Voice Drawer·Timeline 일괄 목소리 선택에 통합하고 `myvoice:<profileId>` ID로 프리셋과 충돌 없이 라우팅합니다.
+- MY VOICE 선택·미리듣기·Timeline 생성은 일반 TTS가 아니라 실제 Voice Clone job API를 사용하며, 완료된 job 복구 시 새 합성을 만들지 않습니다.
+- Voice Clone 진행 감시는 750ms 고정 polling 대신 Worker SSE를 우선 사용하고, 스트림을 사용할 수 없을 때만 360→900ms adaptive polling으로 복구합니다.
+- Capability 조회는 ready 30초 / unready 최대 3초 캐시와 in-flight coalescing을 적용하고, API→Worker readiness probe도 3초 캐시·동시 요청 병합을 적용해 연속 문장 시작 시 `/health` + `/ready` 중복 호출을 줄입니다.
+- 새 프리뷰가 시작되면 이전 MY VOICE 프리뷰 요청을 AbortSignal로 취소하고, 활성 clone job이 있으면 원격 cancel까지 전달합니다.
+- `내 목소리` 페이지에 저장 프로필 라이브러리를 연결해 샘플 재업로드 없이 기존 engine-ready 프로필로 바로 테스트할 수 있습니다.
+- 일반 프리셋 TTS의 progressive segment / browser fallback / recovery 경로는 유지하며 MY VOICE 최종 음원에는 TTS 전용 rehydration을 붙이지 않습니다.
+
 ## 0.11.18 · SoriON Voice Deck Visual Identity
 
 - 랜딩의 Live Voice 영역을 관리도구형 카드에서 SoriON의 대표 음성 콘솔인 `Voice Deck`으로 전면 재디자인했습니다.

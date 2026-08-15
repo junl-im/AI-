@@ -41,6 +41,8 @@ class CosyVoiceCloneEngine:
         self._worker_version: str | None = None
         self._last_checked_at: str | None = None
         self._diagnostics: dict[str, object] | None = None
+        self._last_probe_monotonic: float | None = None
+        self._probe_lock = asyncio.Lock()
         self._client: httpx.AsyncClient | None = None
 
     def _http_client(self) -> httpx.AsyncClient:
@@ -89,37 +91,53 @@ class CosyVoiceCloneEngine:
             streaming=True,
         )
 
-    async def probe(self) -> bool:
+    async def probe(self, max_age_seconds: float = 3.0, force: bool = False) -> bool:
         if not self.worker_url:
             self._health_ok = False
             self._ready = False
             self._reason = self._initial_reason()
             return False
-        started = time.perf_counter()
-        self._last_checked_at = datetime.now(timezone.utc).isoformat()
-        try:
-            health, readiness = await asyncio.gather(
-                self._request_json("GET", "/health", self.timeout_seconds, False),
-                self._request_json("GET", "/ready", self.timeout_seconds),
-            )
-            self._health_ok = health.get("status") == "ok"
-            self._worker_version = str(health.get("version") or "unknown")
-            diagnostics = readiness.get("diagnostics")
-            self._diagnostics = diagnostics if isinstance(diagnostics, dict) else None
-            ready_flag = bool(self._diagnostics and self._diagnostics.get("ready"))
-            self._ready = readiness.get("status") == "ready" and ready_flag
-            reason = self._diagnostics.get("reason") if self._diagnostics else None
-            self._reason = (
-                f"Worker {self._worker_version} readiness를 확인했습니다."
-                if self._ready
-                else str(reason or "Worker 프로세스는 살아 있지만 모델이 준비되지 않았습니다.")
-            )
-        except WorkerClientError as error:
-            self._health_ok = False
-            self._ready = False
-            self._reason = str(error)
-        self._latency_ms = round((time.perf_counter() - started) * 1000)
-        return self._ready
+        now = time.monotonic()
+        if (
+            not force
+            and self._last_probe_monotonic is not None
+            and now - self._last_probe_monotonic <= max(0.0, max_age_seconds)
+        ):
+            return self._ready
+        async with self._probe_lock:
+            now = time.monotonic()
+            if (
+                not force
+                and self._last_probe_monotonic is not None
+                and now - self._last_probe_monotonic <= max(0.0, max_age_seconds)
+            ):
+                return self._ready
+            started = time.perf_counter()
+            self._last_checked_at = datetime.now(timezone.utc).isoformat()
+            try:
+                health, readiness = await asyncio.gather(
+                    self._request_json("GET", "/health", self.timeout_seconds, False),
+                    self._request_json("GET", "/ready", self.timeout_seconds),
+                )
+                self._health_ok = health.get("status") == "ok"
+                self._worker_version = str(health.get("version") or "unknown")
+                diagnostics = readiness.get("diagnostics")
+                self._diagnostics = diagnostics if isinstance(diagnostics, dict) else None
+                ready_flag = bool(self._diagnostics and self._diagnostics.get("ready"))
+                self._ready = readiness.get("status") == "ready" and ready_flag
+                reason = self._diagnostics.get("reason") if self._diagnostics else None
+                self._reason = (
+                    f"Worker {self._worker_version} readiness를 확인했습니다."
+                    if self._ready
+                    else str(reason or "Worker 프로세스는 살아 있지만 모델이 준비되지 않았습니다.")
+                )
+            except WorkerClientError as error:
+                self._health_ok = False
+                self._ready = False
+                self._reason = str(error)
+            self._latency_ms = round((time.perf_counter() - started) * 1000)
+            self._last_probe_monotonic = time.monotonic()
+            return self._ready
 
     def probe_snapshot(self) -> dict[str, object]:
         return {

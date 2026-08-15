@@ -119,6 +119,42 @@ export async function getVoiceCloneCapability(
   }
 }
 
+let capabilityCache: { value: VoiceCloneCapability; savedAt: number; baseUrl?: string } | null = null
+let capabilityRequest: Promise<VoiceCloneCapability> | null = null
+
+export async function getVoiceCloneCapabilityCached(options: {
+  baseUrl?: string
+  signal?: AbortSignal
+  maxAgeMs?: number
+  force?: boolean
+} = {}): Promise<VoiceCloneCapability> {
+  const maxAgeMs = options.maxAgeMs ?? 30_000
+  const now = Date.now()
+  const cacheAgeLimit = capabilityCache?.value.ready ? maxAgeMs : Math.min(maxAgeMs, 3_000)
+  if (!options.force && capabilityCache
+    && capabilityCache.baseUrl === options.baseUrl
+    && now - capabilityCache.savedAt <= cacheAgeLimit) {
+    return capabilityCache.value
+  }
+  if (!options.force && capabilityRequest && !options.signal) return capabilityRequest
+
+  const request = getVoiceCloneCapability(options.baseUrl, options.signal).then((value) => {
+    capabilityCache = { value, savedAt: Date.now(), baseUrl: options.baseUrl }
+    return value
+  })
+  if (!options.signal) {
+    capabilityRequest = request
+    void request.finally(() => {
+      if (capabilityRequest === request) capabilityRequest = null
+    }).catch(() => undefined)
+  }
+  return request
+}
+
+export function invalidateVoiceCloneCapabilityCache(): void {
+  capabilityCache = null
+}
+
 export async function prepareVoiceCloneProfile(input: {
   file: File
   displayName: string
@@ -154,6 +190,7 @@ export async function prepareVoiceCloneProfile(input: {
 export async function startVoiceCloneJob(
   profileId: string,
   text: string,
+  signal?: AbortSignal,
 ): Promise<VoiceCloneJob> {
   const result = await apiRequest<ApiVoiceCloneJob>(
     `/voice-clones/profiles/${encodeURIComponent(profileId)}/jobs`,
@@ -161,16 +198,16 @@ export async function startVoiceCloneJob(
       method: 'POST',
       body: JSON.stringify({ text }),
     },
-    { timeoutMs: 45_000 },
+    { timeoutMs: 45_000, signal },
   )
   return mapJob(result)
 }
 
-export async function getVoiceCloneJob(jobId: string): Promise<VoiceCloneJob> {
+export async function getVoiceCloneJob(jobId: string, signal?: AbortSignal): Promise<VoiceCloneJob> {
   const result = await apiRequest<ApiVoiceCloneJob>(
     `/voice-clones/jobs/${encodeURIComponent(jobId)}`,
     undefined,
-    { timeoutMs: 8_000 },
+    { timeoutMs: 8_000, signal },
   )
   return mapJob(result)
 }

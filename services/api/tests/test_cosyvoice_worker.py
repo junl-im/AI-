@@ -95,3 +95,34 @@ async def test_worker_diagnostics_are_forwarded():
         assert diagnostics == {"ready": True, "backend": "test"}
     finally:
         await engine.close()
+
+@pytest.mark.asyncio
+async def test_worker_probe_coalesces_recent_readiness_checks():
+    calls = {"health": 0, "ready": 0}
+
+    def transport(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/health":
+            calls["health"] += 1
+            return httpx.Response(200, json={"status": "ok", "version": "cache-test"})
+        if request.url.path == "/ready":
+            calls["ready"] += 1
+            return httpx.Response(
+                200,
+                json={"status": "ready", "diagnostics": {"ready": True, "reason": "준비됨"}},
+            )
+        return httpx.Response(404, json={"detail": "not found"})
+
+    engine = CosyVoiceCloneEngine(
+        "http://worker.test",
+        service_token="test-token",
+        signature_secret="test-secret",
+        transport=httpx.MockTransport(transport),
+    )
+    try:
+        assert await engine.probe() is True
+        assert await engine.probe() is True
+        assert calls == {"health": 1, "ready": 1}
+        assert await engine.probe(force=True) is True
+        assert calls == {"health": 2, "ready": 2}
+    finally:
+        await engine.close()

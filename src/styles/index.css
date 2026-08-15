@@ -19,6 +19,8 @@
 @import "./creation-workspace.css";
 @import "./focused-creation-surface.css";
 @import "./live-voice-bar.css";
+@import "./my-voice-lab.css";
+@import "./my-voice-engine.css";
 
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

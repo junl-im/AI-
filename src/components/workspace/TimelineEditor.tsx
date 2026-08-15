@@ -12,7 +12,8 @@ import type {
   TimelineBatchGenerationSummary,
 } from '../../hooks/useTimelineGeneration'
 import { usePlayerStore } from '../../store/usePlayerStore'
-import { getVoicePreset, voicePresets } from '../../tts/voicePresets'
+import { voicePresets } from '../../tts/voicePresets'
+import { buildVoiceChoices, resolveVoiceChoice, type VoiceChoice } from '../../voice/voiceChoices'
 import type { WorkspaceBatchHistoryEntry, WorkspaceBatchRetrySnapshot } from '../../workspace/sessionTypes'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import {
@@ -56,6 +57,7 @@ interface TimelineEditorProps {
   onUndo?: () => boolean | void
   onRedo?: () => boolean | void
   onSelectionChange?: (ids: string[]) => void
+  voiceChoices?: VoiceChoice[]
 }
 
 const BATCH_RETRY_LIMIT = 3
@@ -113,6 +115,7 @@ export function TimelineEditor({
   onUndo,
   onRedo,
   onSelectionChange,
+  voiceChoices = buildVoiceChoices([]),
 }: TimelineEditorProps) {
   const currentTrackId = usePlayerStore((state) => state.currentTrackId)
   const playbackTrackId = usePlayerStore((state) => state.playbackTrackId)
@@ -187,7 +190,7 @@ export function TimelineEditor({
     .map((block) => block.id)
   const selectedReadyVoiceCount = selectedVoiceBlocks.filter((block) => block.status === 'ready').length
   const selectedGeneratingVoiceCount = selectedVoiceBlocks.filter((block) => block.status === 'generating').length
-  const batchVoice = getVoicePreset(batchVoiceId)
+  const batchVoice = resolveVoiceChoice(voiceChoices, batchVoiceId)
   const batchVoiceChangeCount = selectedVoiceBlocks.filter((block) => block.voiceId !== batchVoice.id).length
   const canMoveSelectionLeft = selectedBlocks.some((block) => {
     const index = blocks.findIndex((item) => item.id === block.id)
@@ -627,8 +630,10 @@ export function TimelineEditor({
                   setBatchPreviewOpen(false)
                 }}
               >
-                {voicePresets.map((voice) => (
-                  <option key={voice.id} value={voice.id}>{voice.name}</option>
+                {voiceChoices.map((voice) => (
+                  <option key={voice.id} value={voice.id} disabled={!voice.ready}>
+                    {voice.kind === 'my-voice' ? `MY · ${voice.name}` : voice.name}
+                  </option>
                 ))}
               </select>
             </label>

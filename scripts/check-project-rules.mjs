@@ -202,6 +202,43 @@ await requireText('src/pages/VoiceClonePage.tsx', [
   'retryVoiceCloneJob',
   'prohibitedUseConfirmed',
 ])
+await requireText('src/voiceclone/voiceCloneSynthesis.ts', [
+  'streamVoiceCloneProgress',
+  'watchVoiceCloneJob',
+  'synthesizeVoiceCloneProfile',
+  'allowStart',
+  'cancelVoiceCloneJob',
+])
+await requireText('src/voiceclone/voiceCloneApi.ts', [
+  'getVoiceCloneCapabilityCached',
+  'capabilityRequest',
+  'maxAgeMs',
+])
+await requireText('services/api/app/engines/voiceclone/cosyvoice_worker.py', [
+  '_probe_lock',
+  '_last_probe_monotonic',
+  'max_age_seconds',
+  'force',
+])
+await requireText('services/api/tests/test_cosyvoice_worker.py', [
+  'test_worker_probe_coalesces_recent_readiness_checks',
+  'probe(force=True)',
+])
+await requireText('src/pages/HomePage.tsx', [
+  'useMyVoiceProfiles',
+  'buildVoiceChoices',
+  'synthesizeVoiceCloneProfile',
+  'isMyVoiceId',
+])
+await requireText('src/timeline/generationRuntime.ts', [
+  'isMyVoiceId',
+  'synthesizeVoiceCloneProfile',
+  'getMyVoiceProfileId',
+])
+await requireText('src/components/workspace/VoicePickerSheet.tsx', [
+  'MY VOICE',
+  'voice.ready',
+])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   '대기열',
   'selectNext',

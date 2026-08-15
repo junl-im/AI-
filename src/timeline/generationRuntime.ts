@@ -18,6 +18,8 @@ import {
   type SpeechReadySegment,
 } from '../tts/voiceApi'
 import { createRandomId } from '../utils/randomId'
+import { synthesizeVoiceCloneProfile } from '../voiceclone/voiceCloneSynthesis'
+import { getMyVoiceProfileId, isMyVoiceId } from '../voiceclone/voiceIdentity'
 import type { TimelineBlock, TimelineVoiceBlock } from '../workspace/workspaceTypes'
 
 export interface TimelineGenerationRuntimeDeps {
@@ -323,64 +325,93 @@ export async function runTimelineVoiceBlock(
     try {
       let jobId = block.jobId
       let result: TtsSynthesisResult | null = null
-      if (jobId) {
-        try {
-          const progress = await getSpeechProgress(jobId, controller.signal)
-          for (const segment of progress.readySegments ?? []) previewReadySegment(segment)
-          if (progress.phase === 'completed') {
-            result = await getSpeechResult(jobId, controller.signal)
-          } else if (progress.phase === 'failed' || progress.phase === 'cancelled') {
-            jobId = null
-          } else {
-            pollProgress(deps, blockId, jobId, revision, controller.signal, previewReadySegment)
-            result = await recoverSpeechResult(jobId, controller.signal)
-          }
-        } catch (error) {
-          const expired = error instanceof ApiError && [404, 410].includes(error.status)
-          const browserFallback = error instanceof ApiError
-            && (
-              ['unconfigured', 'timeout', 'cors-or-network', 'offline', 'mixed-content', 'mobile-localhost']
-                .includes(error.kind)
-              || [502, 503, 504].includes(error.status)
-            )
-            && isBrowserSpeechSupported()
-          if ((expired || browserFallback) && !allowSynthesis) {
+      const customVoice = isMyVoiceId(block.voiceId)
+
+      if (customVoice) {
+        acceptingProgressiveSegments = false
+        const profileId = getMyVoiceProfileId(block.voiceId)
+        if (!profileId) throw new Error('내 목소리 프로필을 찾지 못했습니다.')
+        result = await synthesizeVoiceCloneProfile({
+          profileId,
+          text: block.text,
+          existingJobId: jobId,
+          allowStart: allowSynthesis,
+          signal: controller.signal,
+          onJobId: (nextJobId) => {
+            jobId = nextJobId
+            activeJobId = nextJobId
+            deps.updateVoiceBlock(blockId, { jobId: nextJobId }, revision)
+          },
+          onProgress: (progress) => {
             deps.updateVoiceBlock(blockId, {
-              status: 'queued',
-              progress: 0,
-              jobId: null,
-              error: browserFallback
-                ? '서버 음원은 연결하지 못했습니다. 다시 생성을 누르면 브라우저 음성으로 재생합니다.'
-                : '저장된 음원 보관 기간이 끝났습니다. 다시 생성을 눌러 주세요.',
+              jobId: progress.jobId,
+              progress: Math.max(8, progress.progress),
             }, revision)
-            return null
+          },
+        })
+        if (!result && !allowSynthesis) {
+          deps.updateVoiceBlock(blockId, {
+            status: 'queued',
+            progress: 0,
+            error: '저장된 내 목소리 결과를 찾지 못했습니다. 다시 생성을 눌러 주세요.',
+          }, revision)
+          return null
+        }
+      } else {
+        if (jobId) {
+          try {
+            const progress = await getSpeechProgress(jobId, controller.signal)
+            for (const segment of progress.readySegments ?? []) previewReadySegment(segment)
+            if (progress.phase === 'completed') {
+              result = await getSpeechResult(jobId, controller.signal)
+            } else if (progress.phase === 'failed' || progress.phase === 'cancelled') {
+              jobId = null
+            } else {
+              pollProgress(deps, blockId, jobId, revision, controller.signal, previewReadySegment)
+              result = await recoverSpeechResult(jobId, controller.signal)
+            }
+          } catch (error) {
+            const expired = error instanceof ApiError && [404, 410].includes(error.status)
+            const browserFallback = error instanceof ApiError
+              && (
+                ['unconfigured', 'timeout', 'cors-or-network', 'offline', 'mixed-content', 'mobile-localhost']
+                  .includes(error.kind)
+                || [502, 503, 504].includes(error.status)
+              )
+              && isBrowserSpeechSupported()
+            if ((expired || browserFallback) && !allowSynthesis) {
+              deps.updateVoiceBlock(blockId, {
+                status: 'queued',
+                progress: 0,
+                jobId: null,
+                error: browserFallback
+                  ? '서버 음원은 연결하지 못했습니다. 다시 생성을 누르면 브라우저 음성으로 재생합니다.'
+                  : '저장된 음원 보관 기간이 끝났습니다. 다시 생성을 눌러 주세요.',
+              }, revision)
+              return null
+            }
+            if (expired || browserFallback) jobId = null
+            else throw error
           }
-          if (expired || browserFallback) jobId = null
-          else throw error
+        }
+        if (!result && !allowSynthesis) {
+          deps.updateVoiceBlock(blockId, {
+            status: 'queued',
+            progress: 0,
+            error: '저장된 음원 결과를 찾지 못했습니다. 다시 생성을 눌러 주세요.',
+          }, revision)
+          return null
+        }
+        if (!result) {
+          jobId = createRandomId()
+          activeJobId = jobId
+          deps.updateVoiceBlock(blockId, { jobId }, revision)
+          pollProgress(deps, blockId, jobId, revision, controller.signal, previewReadySegment)
+          result = await synthesizeSpeech(request, jobId, controller.signal)
         }
       }
-      if (!result && !allowSynthesis) {
-        deps.updateVoiceBlock(blockId, {
-          status: 'queued',
-          progress: 0,
-          error: '저장된 음원 결과를 찾지 못했습니다. 다시 생성을 눌러 주세요.',
-        }, revision)
-        return null
-      }
-      if (!result) {
-        jobId = createRandomId()
-        activeJobId = jobId
-        deps.updateVoiceBlock(blockId, { jobId }, revision)
-        pollProgress(
-          deps,
-          blockId,
-          jobId,
-          revision,
-          controller.signal,
-          previewReadySegment,
-        )
-        result = await synthesizeSpeech(request, jobId, controller.signal)
-      }
+      if (!result) return null
+
 
       acceptingProgressiveSegments = false
       const latestBlock = deps.getBlocks().find((item) => item.id === blockId)
@@ -397,7 +428,7 @@ export async function runTimelineVoiceBlock(
           filename: buildAudioFilename(block.text, block.voiceName, 'wav'),
           source: 'api',
           durationSeconds: result.estimatedDurationSeconds,
-          rehydration: { kind: 'tts-final', jobId: result.jobId },
+          ...(customVoice ? {} : { rehydration: { kind: 'tts-final' as const, jobId: result.jobId } }),
           telemetry: {
             requestStartedAtMs,
             serverSegmentReadyMs: partialReadyAfterMs,
