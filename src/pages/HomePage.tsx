@@ -48,7 +48,7 @@ import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import type { ComposerDirective, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
 import { synthesizeVoiceCloneProfile } from '../voiceclone/voiceCloneSynthesis'
-import { isMyVoiceId } from '../voiceclone/voiceIdentity'
+import { isMyVoiceId, toMyVoiceId } from '../voiceclone/voiceIdentity'
 import { buildVoiceChoices, resolveVoiceChoice } from '../voice/voiceChoices'
 import { LandingHome } from './LandingHome'
 
@@ -140,6 +140,7 @@ export function HomePage() {
   const [projectTitle, setProjectTitle] = useState('새 프로젝트')
   const [messages, setMessages] = useState<WorkspaceMessage[]>(initialMessages)
   const [voiceId, setVoiceId] = useState(voicePresets[0].id)
+  const [speakerSeedVoiceId, setSpeakerSeedVoiceId] = useState(voicePresets[0].id)
   const [selectedTimelineIds, setSelectedTimelineIds] = useState<string[]>([])
   const [speechSpeed, setSpeechSpeed] = useState(1)
   const [speechPitch, setSpeechPitch] = useState(0)
@@ -168,7 +169,7 @@ export function HomePage() {
   const previewRunIdRef = useRef(0)
   const previewAbortRef = useRef<AbortController | null>(null)
   const engineCatalog = useEngineCatalog()
-  const { profiles: myVoiceProfiles } = useMyVoiceProfiles()
+  const { profiles: myVoiceProfiles, loading: myVoiceProfilesLoading } = useMyVoiceProfiles()
   const voiceChoices = useMemo(() => buildVoiceChoices(myVoiceProfiles), [myVoiceProfiles])
   const timeline = useTimelineGeneration()
   const generateAllTimelineBlocks = timeline.generateAll
@@ -181,13 +182,22 @@ export function HomePage() {
   const getVoiceBlockSnapshots = timeline.getVoiceBlockSnapshots
   const updateTimelineVoices = timeline.updateVoiceMany
   const selectedVoice = useMemo(() => resolveVoiceChoice(voiceChoices, voiceId), [voiceChoices, voiceId])
-  const selectedTimelineVoiceIds = useMemo(() => {
+  const selectedTimelineVoiceBlocks = useMemo(() => {
     if (selectedTimelineIds.length === 0) return []
     const selected = new Set(selectedTimelineIds)
-    return timeline.blocks
-      .filter((block) => block.kind === 'voice' && selected.has(block.id))
-      .map((block) => block.id)
+    return timeline.blocks.filter((block) => block.kind === 'voice' && selected.has(block.id))
   }, [selectedTimelineIds, timeline.blocks])
+  const selectedTimelineVoiceIds = useMemo(
+    () => selectedTimelineVoiceBlocks.map((block) => block.id),
+    [selectedTimelineVoiceBlocks],
+  )
+  const selectedTimelineVoiceScope = useMemo(() => {
+    if (selectedTimelineVoiceBlocks.length === 0) return null
+    const names = Array.from(new Set(selectedTimelineVoiceBlocks.map((block) => block.voiceName)))
+    return names.length === 1
+      ? `${selectedTimelineVoiceBlocks.length}개 · ${names[0]}`
+      : `${selectedTimelineVoiceBlocks.length}개 · 여러 목소리`
+  }, [selectedTimelineVoiceBlocks])
   const activePreviewExists = Boolean(
     activePreview && playerQueue.some((track) => track.id === activePreview.trackId),
   )
@@ -229,6 +239,24 @@ export function HomePage() {
   const generationRouteReady = selectedVoice.kind === 'my-voice'
     ? selectedVoice.ready && backendStatus !== 'offline'
     : engineAvailable
+
+  useEffect(() => {
+    if (selectedTimelineVoiceBlocks.length === 0) return
+    const selectedVoiceIds = Array.from(new Set<string>(selectedTimelineVoiceBlocks.map((block) => block.voiceId)))
+    if (selectedVoiceIds.length !== 1 || selectedVoiceIds[0] === voiceId) return
+    const nextVoice = resolveVoiceChoice(voiceChoices, selectedVoiceIds[0])
+    if (nextVoice.kind === 'my-voice' && !nextVoice.ready) return
+    setVoiceId(nextVoice.id)
+  }, [selectedTimelineVoiceBlocks, voiceChoices, voiceId])
+
+  useEffect(() => {
+    if (myVoiceProfilesLoading || !isMyVoiceId(voiceId)) return
+    const selectedProfileStillExists = myVoiceProfiles.some((profile) => toMyVoiceId(profile.id) === voiceId)
+    if (selectedProfileStillExists) return
+    setVoiceId(voicePresets[0].id)
+    setSpeakerSeedVoiceId(voicePresets[0].id)
+    showNotice('선택했던 내 목소리 프로필을 찾지 못해 기본 목소리로 전환했습니다.')
+  }, [myVoiceProfiles, myVoiceProfilesLoading, showNotice, voiceId])
   useEffect(() => {
     const engine = engineCatalog.selected
     const customVoice = selectedVoice.kind === 'my-voice'
@@ -288,7 +316,7 @@ export function HomePage() {
       const currentMap = new Map(current.map((item) => [item.speaker, item.voiceId]))
       const suggested = suggestSpeakerVoiceAssignments(
         multiSpeakerAnalysis.speakers,
-        isMyVoiceId(voiceId) ? voicePresets[0].id : voiceId,
+        isMyVoiceId(speakerSeedVoiceId) ? voicePresets[0].id : speakerSeedVoiceId,
         voicePresets,
       )
       return suggested.map((item) => ({
@@ -297,11 +325,13 @@ export function HomePage() {
       }))
     })
     setSpeakerAssignmentsConfirmed(false)
-  }, [speakerSignature, multiSpeakerAnalysis.eligible, multiSpeakerAnalysis.speakers, voiceId])
+  }, [speakerSignature, multiSpeakerAnalysis.eligible, multiSpeakerAnalysis.speakers, speakerSeedVoiceId])
   const restoreWorkspaceSession = useCallback((session: WorkspaceSession) => {
     if (explicitWorkspaceActionRef.current || useAppStore.getState().activeProject) return
     setProjectTitle(session.projectTitle || '새 프로젝트')
-    setVoiceId(isMyVoiceId(session.voiceId) ? session.voiceId : getVoicePreset(session.voiceId).id)
+    const restoredVoiceId = isMyVoiceId(session.voiceId) ? session.voiceId : getVoicePreset(session.voiceId).id
+    setVoiceId(restoredVoiceId)
+    setSpeakerSeedVoiceId(restoredVoiceId)
     setSpeechSpeed(normalizeVoiceSpeed(session.speechSpeed))
     setSpeechPitch(normalizeVoicePitch(session.speechPitch))
     setSpeechEmotion(
@@ -359,6 +389,7 @@ export function HomePage() {
     setProjectTitle('새 프로젝트')
     setMessages(initialMessages)
     setVoiceId(voicePresets[0].id)
+    setSpeakerSeedVoiceId(voicePresets[0].id)
     setSpeechSpeed(1)
     setSpeechPitch(0)
     setSpeechEmotion('neutral')
@@ -392,6 +423,7 @@ export function HomePage() {
     const voice = resolveVoiceChoice(voiceChoices, activeProject.voiceId)
     setProjectTitle(activeProject.title || '새 프로젝트')
     setVoiceId(activeProject.voiceId)
+    setSpeakerSeedVoiceId(activeProject.voiceId)
     const restoredSpeed = normalizeVoiceSpeed(activeProject.speed ?? 1)
     const restoredPitch = normalizeVoicePitch(activeProject.pitch ?? 0)
     setSpeechSpeed(restoredSpeed)
@@ -626,6 +658,8 @@ export function HomePage() {
     if (selectedTimelineVoiceIds.length > 0) {
       updateTimelineVoices(selectedTimelineVoiceIds, voice.id, voice.name)
       showNotice(`선택한 대사 ${selectedTimelineVoiceIds.length}개에 ${voice.name} 목소리를 적용했습니다.`)
+    } else {
+      setSpeakerSeedVoiceId(voice.id)
     }
   }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, updateTimelineVoices, voiceChoices])
 
@@ -907,6 +941,7 @@ export function HomePage() {
                   normalizeText={normalizeText}
                   engine={engineCatalog.selected}
                   applyTargetCount={selectedTimelineVoiceIds.length}
+                  applyTargetLabel={selectedTimelineVoiceScope}
                   onVoiceChange={selectVoice}
                   onPreview={handlePreview}
                   onSpeedChange={setSpeechSpeed}
@@ -943,6 +978,7 @@ export function HomePage() {
             <TimelineEditor
               blocks={timeline.blocks}
               voiceChoices={voiceChoices}
+              currentVoiceId={voiceId}
               onMove={timeline.moveBlock}
               onMoveMany={timeline.moveBlocks}
               onReorder={timeline.reorderBlock}
@@ -1015,6 +1051,8 @@ export function HomePage() {
           pitch={speechPitch}
           emotion={speechEmotion}
           normalizeText={normalizeText}
+          applyTargetCount={selectedTimelineVoiceIds.length}
+          applyTargetLabel={selectedTimelineVoiceScope}
           onVoiceChange={selectVoice}
           onPreview={handlePreview}
           onSpeedChange={setSpeechSpeed}

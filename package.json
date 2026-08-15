@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.11.19",
+  "version": "0.11.22",
   "private": true,
   "type": "module",
   "scripts": {
@@ -94,7 +94,8 @@
     "quality:one-flow-ux": "node scripts/check-one-flow-dubbing-ux.mjs",
     "quality:multi-speaker-resume": "node scripts/check-multi-speaker-resume.mjs",
     "quality:mobile-studio": "node scripts/check-mobile-studio-flow.mjs",
-    "quality:edit-history-routing": "node scripts/check-edit-history-speaker-routing.mjs"
+    "quality:edit-history-routing": "node scripts/check-edit-history-speaker-routing.mjs",
+    "quality:timeline-voice-recovery": "node scripts/check-timeline-voice-recovery-navigation.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",

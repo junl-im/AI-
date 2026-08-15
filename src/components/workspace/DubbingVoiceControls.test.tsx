@@ -163,6 +163,7 @@ describe('DubbingVoiceControls', () => {
   it('모바일 목소리 Sheet는 선택된 타임라인 적용 대상을 명확히 보여준다', () => {
     render(<DubbingVoiceControls {...baseProps} applyTargetCount={2} />)
 
+    expect(screen.getByRole('note', { name: '현재 목소리 적용 대상' })).toHaveTextContent('2개 대사')
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
 
     const target = screen.getByRole('note', { name: '목소리 적용 범위' })

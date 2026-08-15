@@ -91,11 +91,8 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'seekFromTimeline',
   '트랙 클릭 위치 이동',
   "event.key === 'Delete'",
-  "event.key === 'Enter'",
   'soa-capcut-playhead',
   'soa-timeline-zoom',
-  'soa-timeline-quick-editor',
-  '선택 대사 빠른 수정',
   'onEdit={editBlock}',
   'Ctrl/Cmd 클릭 다중 선택',
   "mode === 'range'",
@@ -108,6 +105,13 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   '실패만 재시도',
   'onBatchVoiceChange',
   'onRegenerateMany',
+])
+
+const quickEditor = await source('src/components/workspace/TimelineQuickEditor.tsx')
+requireTokens('src/components/workspace/TimelineQuickEditor.tsx', quickEditor, [
+  "event.key === 'Enter'",
+  'soa-timeline-quick-editor',
+  '선택 대사 빠른 수정',
 ])
 
 const playerTests = await source('src/components/navigation/LinkedPlayerDock.test.tsx')

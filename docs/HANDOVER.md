@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.19 · Voice Engine Fast Path + MY VOICE Runtime**
+현재 기준 버전: **0.11.22 · Timeline Voice Recovery & Quick Navigation**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-15 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,36 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-15 KST · 0.11.22 Timeline Voice Recovery & Quick Navigation
+1. **작업 일시(KST)**: 2026-08-15.
+2. **대상/기준 버전**: `0.11.22 · Timeline Voice Recovery & Quick Navigation` / `0.11.21 · Selection Continuity & Convenience`.
+3. **변경 내용**: 과거 Timeline clip이 삭제·유실되었거나 현재 생성 불가능한 MY VOICE를 참조하면 카드와 빠른 편집기에 `사용 불가 목소리` 상태를 표시합니다. 이미 완성된 audio/track은 자동 폐기하지 않고 계속 미리들을 수 있으며, 사용자가 대체 Voice를 고른 뒤 `교체만 적용` 또는 `교체 후 재생성`을 눌러야 기존 updateVoiceMany 경로가 실행됩니다. 빠른 편집에는 쉼을 건너뛰는 이전/다음 대사와 `Alt+↑/↓` 이동을 추가했고, 이동 전에 0.11.21의 draft autosave를 그대로 실행합니다. 다중 선택은 혼합 voice 수·목소리별 개수·현재 작업 Voice를 함께 표시합니다.
+4. **변경 이유**: 0.11.20~0.11.21에서 Voice/Timeline/Player 연계와 draft 보존은 고정했지만, Timeline 자체에 stale MY VOICE가 남아 있으면 사용자는 기존 음원이 왜 재생되면서 새 생성은 실패하는지 알기 어려웠습니다. 또한 긴 대본에서 대사 이동을 위해 클립을 반복 클릭해야 했고, 혼합 voice 다중 선택의 일괄 대상도 현재 Voice와 혼동될 수 있었습니다.
+5. **영향 범위**: Timeline 단일/다중 선택 UX, MY VOICE stale 상태 표시, 빠른 편집 navigation, Studio playback static contract, CSS 책임 분리, 관련 Vitest/순수 selection test, 제품 버전과 릴리스 문서입니다. API/Worker 생성 계약, 프로젝트 저장 schema, bounded parallel 최대 2개는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/TimelineEditor.tsx`, `TimelineQuickEditor.tsx`, `TimelineVoiceBlockCard.tsx`, `src/timeline/timelineSelection.ts`, 관련 tests, `src/styles/timeline-voice-recovery.css`, `scripts/check-timeline-voice-recovery-navigation.mjs`, `docs/TIMELINE_VOICE_RECOVERY_QUICK_NAVIGATION.md`입니다.
+7. **검증 결과**: API pytest **220/220**, Worker pytest **14/14**, Python compileall, 제품 버전 sync **0.11.22**, dependency-free TS/TSX transpile **240/240**, CSS brace balance **27/27**을 통과했습니다. Repository preflight **48/48 PASS**입니다. npm dependency 설치가 완전하지 않아 로컬 Vitest/ESLint/semantic typecheck/Vite build는 실행하지 못했으며 GitHub Actions Web quality가 최종 gate입니다.
+8. **알려진 제한과 주의사항**: stale MY VOICE 복구 화면은 자동 대체를 하지 않습니다. `교체만 적용`을 누르면 기존 `updateVoiceMany` 계약대로 기존 ready audio가 제거되고 queued 상태가 되므로 UI에서 그 영향을 먼저 경고합니다. 실제 MY VOICE Worker를 연결한 생성 성공/지연 증거는 별도 환경이 필요합니다. TimelineEditor는 빠른 편집을 분리했지만 여전히 1,000줄대이므로 batch/selection 책임 추가 분리가 필요합니다.
+9. **생성 산출물**: `SoriON-AI-0.11.22-timeline-voice-recovery-quick-navigation-full.zip`, `SoriON-AI-0.11.21-to-0.11.22-timeline-voice-recovery-quick-navigation-patch.zip`, `SoriON-AI-0.11.22-timeline-voice-recovery-quick-navigation-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.23 · Recovery Batch & Editor Responsibility Split`. stale MY VOICE 다중 복구 영향 확인, TimelineEditor batch/selection 책임 추가 분리, 실제 Web quality/Chromium evidence를 우선합니다.
+
+## 2026-08-15 KST · 0.11.21 Selection Continuity & Convenience
+1. **작업 일시(KST)**: 2026-08-15.
+2. **대상/기준 버전**: `0.11.21 · Selection Continuity & Convenience` / `0.11.20 · Linkage & Convenience`.
+3. **변경 내용**: Timeline 빠른 편집 draft가 있는 상태에서 다른 클립을 직접 클릭·범위 선택·토글 선택해도 기존 대사를 먼저 저장한 뒤 선택을 전환합니다. Player/Dock 이동 때만 저장되던 0.11.20 보호를 모든 Timeline 선택 전환으로 확장했습니다. 또한 Timeline 선택에 따른 전역 Voice 동기화가 Multi-Speaker Assist의 이미 확인된 화자 배정을 다시 미확인 상태로 되돌리지 않도록, 화자 추천 seed 갱신을 사용자가 기본 목소리를 명시적으로 바꾼 경우와 분리했습니다.
+4. **변경 이유**: 0.11.20에서 Player 연계 저장은 해결됐지만 사용자가 타임라인 클립을 직접 눌렀을 때 미저장 draft가 다음 클립 내용으로 덮일 수 있었고, Timeline 성우 탐색으로 바뀐 전역 `voiceId`가 다중 화자 확인 effect까지 연쇄 실행해 생성 가능 상태를 풀 수 있었습니다.
+5. **영향 범위**: `TimelineEditor`의 선택 전환·빠른 편집, `HomePage`의 Voice/Timeline/Multi-Speaker 상태 연계, 관련 Web 회귀 테스트, 제품 버전·릴리스 문서입니다. 생성 엔진, API/Worker 계약, 최대 2-way bounded parallel, 프로젝트 데이터 schema는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/TimelineEditor.tsx`, `src/components/workspace/TimelineEditor.test.tsx`, `src/pages/HomePage.tsx`, `src/pages/HomePage.test.tsx`, `docs/SELECTION_CONTINUITY_CONVENIENCE.md`, 버전/인수인계/패치 문서입니다.
+7. **검증 결과**: Repository preflight **47/47**, API pytest **220/220**, Worker pytest **14/14**, 제품 버전 sync **0.11.21**, 변경 TS/TSX dependency-free transpile **4/4**를 통과했습니다. 이 전달 환경에서는 `npm ci`가 시간 제한 안에 완료되지 않아 전체 Web dependency 기반 lint/Vitest/semantic typecheck/Vite build는 GitHub Actions Web quality를 최종 gate로 사용합니다.
+8. **알려진 제한과 주의사항**: 빈 문자열은 Timeline 대사로 저장하지 않고 기존 문장으로 되돌리는 기존 안전 규칙을 유지합니다. 삭제된 MY VOICE가 과거 Timeline clip 자체에 남아 있는 경우 기존 완성 음원을 자동 파기·재배정하지 않으며, 해당 stale clip 복구 UX는 다음 패치 후보입니다.
+9. **생성 산출물**: `SoriON-AI-0.11.21-selection-continuity-convenience-full.zip`, `SoriON-AI-0.11.20-to-0.11.21-selection-continuity-convenience-patch.zip`, `SoriON-AI-0.11.21-selection-continuity-convenience-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.22 · Timeline Voice Recovery & Quick Navigation`. stale MY VOICE clip의 비파괴 복구 안내, 이전/다음 대사 빠른 이동, TimelineEditor 책임 분리와 실제 Web quality/Chromium evidence를 우선합니다.
+
+## 2026-08-15 KST · 0.11.20 Linkage & Convenience
+1. Timeline 선택 성우는 현재 Voice 컨트롤과 양방향으로 동기화합니다. 혼합 성우 다중 선택은 기존 현재 Voice를 유지하고 적용 범위에 `여러 목소리`로 표시합니다.
+2. Player가 Timeline 선택을 따라 바꿀 때 빠른 편집 draft가 수정 중이면 먼저 저장해 재생 탐색으로 편집 내용이 사라지지 않게 합니다.
+3. 모바일 Voice controls와 PC Voice Drawer는 선택된 Timeline 적용 대상을 항상 보여주어 목소리 변경 범위를 예측 가능하게 합니다.
+4. MY VOICE 프로필 삭제/유실 뒤 세션의 stale voiceId는 프로필 로딩 완료 후 기본 SoriON Voice로 복구합니다.
 
 ## 2026-08-15 KST · 0.11.19 Voice Engine Fast Path + MY VOICE Runtime
 1. `MY VOICE`는 장식용 라이브러리가 아니라 `myvoice:<profileId>` ID로 일반 Voice Picker / Drawer / Timeline과 같은 선택 모델을 사용합니다.

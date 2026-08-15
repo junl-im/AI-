@@ -1,5 +1,8 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { usePlayerStore } from '../../store/usePlayerStore'
+import type { GeneratedAudio } from '../../tts/generationTypes'
+import type { PlayerTrack } from '../../player/playerTypes'
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 import { TimelineEditor } from './TimelineEditor'
 
@@ -46,6 +49,41 @@ const blocks: TimelineBlock[] = [
     revision: 1,
   },
 ]
+
+const linkedAudio: GeneratedAudio = {
+  url: 'https://voice.example/linked.wav',
+  filename: 'linked.wav',
+  source: 'api',
+  durationSeconds: 3,
+  result: {
+    jobId: 'linked-job',
+    status: 'completed',
+    engineId: 'test-engine',
+    engineMode: 'local',
+    audioUrl: 'https://voice.example/linked.wav',
+    estimatedDurationSeconds: 3,
+    message: 'ready',
+    normalizedText: null,
+    segmentCount: 1,
+    processingMs: 20,
+    fileSizeBytes: 100,
+    realtimeFactor: 0.1,
+  },
+}
+
+function linkedTrack(id: string): PlayerTrack {
+  return {
+    id,
+    title: id,
+    audio: linkedAudio,
+    createdAt: '2026-08-15T00:00:00.000Z',
+    resumePositionSeconds: 0,
+  }
+}
+
+beforeEach(() => {
+  usePlayerStore.getState().clearQueue()
+})
 
 describe('TimelineEditor', () => {
   it('현재 선택 클립 ID를 부모 작업공간에 전달한다', async () => {
@@ -223,6 +261,165 @@ describe('TimelineEditor', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '2번 대사 바로 편집' }))
     expect(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('두 번째 문장입니다.')
+  })
+
+  it('Player가 다른 클립으로 이동하면 미저장 빠른 편집을 먼저 저장하고 선택을 따라간다', async () => {
+    const onUpdateText = vi.fn()
+    const linkedBlocks: TimelineBlock[] = blocks.map((block) => {
+      if (block.kind !== 'voice') return block
+      return {
+        ...block,
+        status: 'ready',
+        progress: 100,
+        trackId: block.id === 'voice-1' ? 'track-1' : 'track-2',
+        error: null,
+      }
+    })
+    usePlayerStore.getState().restoreSession(
+      [linkedTrack('track-1'), linkedTrack('track-2')],
+      'track-1',
+      'off',
+      1,
+    )
+
+    render(
+      <TimelineEditor
+        blocks={linkedBlocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={onUpdateText}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+
+    const editor = screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })
+    fireEvent.change(editor, { target: { value: '재생 이동 전 반드시 저장할 수정 문장입니다.' } })
+    usePlayerStore.getState().select('track-2')
+
+    await waitFor(() => expect(onUpdateText).toHaveBeenCalledWith('voice-1', '재생 이동 전 반드시 저장할 수정 문장입니다.'))
+    await waitFor(() => expect(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('두 번째 문장입니다.'))
+  })
+
+  it('다른 타임라인 클립을 직접 선택해도 미저장 빠른 편집을 먼저 저장한다', async () => {
+    const onUpdateText = vi.fn()
+    render(
+      <TimelineEditor
+        blocks={blocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={onUpdateText}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+
+    const editor = screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })
+    fireEvent.change(editor, { target: { value: '직접 선택 전 저장해야 하는 수정 문장입니다.' } })
+    fireEvent.click(screen.getByRole('article', { name: /클립 2/ }))
+
+    expect(onUpdateText).toHaveBeenCalledWith('voice-1', '직접 선택 전 저장해야 하는 수정 문장입니다.')
+    await waitFor(() => expect(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('두 번째 문장입니다.'))
+  })
+
+  it('빠른 편집 이전·다음 대사 이동은 쉼을 건너뛰고 현재 draft를 먼저 저장한다', async () => {
+    const onUpdateText = vi.fn()
+    render(
+      <TimelineEditor
+        blocks={blocks}
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={onUpdateText}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+
+    const editor = screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })
+    fireEvent.change(editor, { target: { value: '다음 대사 이동 전에 저장할 문장입니다.' } })
+    fireEvent.click(screen.getByRole('button', { name: '다음 대사로 이동' }))
+
+    expect(onUpdateText).toHaveBeenCalledWith('voice-1', '다음 대사 이동 전에 저장할 문장입니다.')
+    await waitFor(() => expect(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('두 번째 문장입니다.'))
+    expect(screen.getByRole('button', { name: '다음 대사로 이동' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '이전 대사로 이동' })).toBeEnabled()
+  })
+
+  it('유실 MY VOICE는 기존 ready 음원을 자동 폐기하지 않고 명시적 복구 선택을 요구한다', async () => {
+    const onBatchVoiceChange = vi.fn().mockResolvedValue(null)
+    const staleBlocks: TimelineBlock[] = blocks.map((block) => block.id === 'voice-1' && block.kind === 'voice'
+      ? { ...block, voiceId: 'myvoice:deleted-profile', voiceName: '삭제된 내 목소리', status: 'ready', trackId: 'stale-track', progress: 100 }
+      : block)
+
+    render(
+      <TimelineEditor
+        blocks={staleBlocks}
+        currentVoiceId="on-clear"
+        onMove={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={vi.fn()}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onBatchVoiceChange={onBatchVoiceChange}
+        onClear={vi.fn()}
+      />,
+    )
+
+    const recovery = screen.getByRole('status', { name: '사용 불가 목소리 복구' })
+    expect(recovery).toHaveTextContent('사용 불가 목소리')
+    expect(recovery).toHaveTextContent('현재 완성 음원은 그대로 유지됩니다')
+    expect(screen.getByRole('article', { name: /클립 1 · 삭제된 내 목소리 .*사용 불가 목소리/ })).toBeInTheDocument()
+    expect(onBatchVoiceChange).not.toHaveBeenCalled()
+    await waitFor(() => expect(screen.getByRole('combobox', { name: '사용 불가 목소리 대체 선택' })).toHaveValue('on-clear'))
+
+    fireEvent.click(screen.getByRole('button', { name: '교체만 적용' }))
+    await waitFor(() => expect(onBatchVoiceChange).toHaveBeenCalledWith(['voice-1'], 'on-clear', false))
+  })
+
+  it('혼합 성우 다중 선택은 구성과 현재 작업 목소리를 분리해 보여준다', async () => {
+    const mixedBlocks: TimelineBlock[] = blocks.map((block) => block.id === 'voice-2' && block.kind === 'voice'
+      ? { ...block, voiceId: 'on-clear', voiceName: '도윤' }
+      : block)
+    render(
+      <TimelineEditor
+        blocks={mixedBlocks}
+        currentVoiceId="dam-calm"
+        onMove={vi.fn()}
+        onMoveMany={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={vi.fn()}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onRemoveMany={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('article', { name: /클립 2 · 도윤/ }), { ctrlKey: true })
+    const summary = screen.getByRole('status', { name: '선택 목소리 구성' })
+    expect(summary).toHaveTextContent('혼합 목소리 2종')
+    expect(summary).toHaveTextContent('현재 작업 목소리 · 소리')
+    expect(summary).toHaveTextContent('혜린 1개')
+    expect(summary).toHaveTextContent('도윤 1개')
+    await waitFor(() => expect(screen.getByRole('combobox', { name: '선택 클립 일괄 목소리' })).toHaveValue('dam-calm'))
   })
 
 })

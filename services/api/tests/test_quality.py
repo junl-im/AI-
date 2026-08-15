@@ -4,7 +4,7 @@ def test_quality_diagnostics_reports_runtime_and_engines(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.11.19"
+    assert body["version"] == "0.11.22"
     assert body["python_version"]
     assert any(engine["engine_id"] == "mock" for engine in body["engines"])
 

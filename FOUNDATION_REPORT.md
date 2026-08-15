@@ -1,3 +1,46 @@
+## 0.11.22 · Timeline Voice Recovery & Quick Navigation
+
+- 삭제·유실된 MY VOICE를 참조하는 Timeline clip에 `사용 불가 목소리` 복구 상태를 추가했습니다.
+- 기존 ready audio는 사용자가 대체 목소리 적용을 명시적으로 실행하기 전까지 자동 제거하지 않습니다.
+- 빠른 편집에 쉼을 건너뛰는 이전/다음 대사 이동과 `Alt+↑/↓`를 추가했으며, 이동 전 draft autosave를 유지합니다.
+- 혼합 voice 다중 선택에서 실제 voice 구성과 현재 작업 Voice를 분리 표시합니다.
+- `TimelineQuickEditor.tsx`, `timelineSelection.ts`, `timeline-voice-recovery.css`로 책임을 분리하고 전용 preflight 계약을 추가했습니다.
+- 상세 설계는 `docs/TIMELINE_VOICE_RECOVERY_QUICK_NAVIGATION.md`를 따릅니다.
+
+### 검증
+
+- Repository preflight: **48/48 PASS**
+- API pytest: **220/220 PASS** (FastAPI deprecated status alias 경고 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Product version sync: **0.11.22 PASS**
+- dependency-free TS/TSX transpile: **240/240 PASS**
+- CSS brace balance: **27/27 PASS**
+- 전체 Web lint/Vitest/semantic typecheck/Vite build: **미실행** — npm 설치가 완전하지 않아 `node_modules/.bin/vitest`가 생성되지 않았으며 GitHub Actions Web quality가 최종 gate입니다.
+
+## 0.11.21 · Selection Continuity & Convenience
+
+- Timeline quick editor의 미저장 draft 보호를 Player 이동에서 모든 직접 선택 전환까지 확장했습니다.
+- Timeline → 현재 Voice 동기화가 확인 완료된 Multi-Speaker 배정 상태를 풀지 않도록 추천 seed 갱신 경로를 분리했습니다.
+- 0.11.20에서 뒤처져 있던 HANDOVER/NEXT_UPDATE 현재 버전 기준을 0.11.21로 동기화했습니다.
+- 상세 설계와 회귀 범위는 `docs/SELECTION_CONTINUITY_CONVENIENCE.md`를 따릅니다.
+
+### 검증
+
+- Repository preflight: **47/47 PASS**
+- API pytest: **220/220 PASS** (FastAPI deprecated status alias 경고 1건)
+- Worker pytest: **14/14 PASS**
+- Product version sync: **0.11.21 PASS**
+- 변경 TS/TSX dependency-free transpile: **4/4 PASS**
+- 전체 Web lint/Vitest/semantic typecheck/Vite build: **미실행** — 이 환경의 `npm ci`가 제한 시간 안에 완료되지 않아 GitHub Actions Web quality가 최종 gate입니다.
+
+## 0.11.20 · Linkage & Convenience
+
+- Timeline에서 단일/동일 성우 클립을 선택하면 상단 현재 목소리와 Voice Drawer 선택이 같은 성우로 자동 동기화됩니다.
+- 하단 Player/Dock이 다른 Timeline 클립으로 이동할 때 빠른 편집 중인 미저장 문장을 먼저 저장한 뒤 선택을 따라가 데이터 손실을 막습니다.
+- 모바일 현재 목소리 영역과 PC Voice Drawer에 "타임라인 선택" 적용 대상을 상시 표시해 성우 선택이 어디에 반영되는지 열기 전부터 알 수 있습니다.
+- 삭제된 MY VOICE 프로필이 세션에 남아 있으면 프로필 로딩 완료 뒤 기본 SoriON Voice로 안전 전환합니다.
+
 # 0.11.19 R1 · Voice Picker Accessibility Hotfix
 
 - GitHub Actions run `31857547345` Web quality의 실제 실패는 `DubbingVoiceControls.test.tsx` 1건이었습니다.

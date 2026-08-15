@@ -134,6 +134,25 @@ describe('HomePage', () => {
     expect(scoped.getByText('반가워요.')).toBeInTheDocument()
   })
 
+  it('다중 화자 배정 확인 뒤 타임라인 성우를 탐색해도 확인 상태를 유지한다', async () => {
+    useAppStore.setState({ workspaceEntered: true })
+    const view = render(<HomePage />)
+    const scoped = within(view.container)
+    const textbox = scoped.getByRole('textbox', { name: '음성으로 만들 장문 내용' })
+
+    fireEvent.change(textbox, {
+      target: { value: '철수: 안녕하세요.\n영희: 반가워요.' },
+    })
+    fireEvent.click(scoped.getByRole('button', { name: '이 화자 배정으로 만들기' }))
+    const submit = scoped.getByRole('button', { name: /전체 내용 음성 제작/ })
+    expect(submit).toBeEnabled()
+
+    fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    fireEvent.click(scoped.getByRole('article', { name: /클립 2/ }))
+
+    await waitFor(() => expect(scoped.getByRole('button', { name: /전체 내용 음성 제작/ })).toBeEnabled())
+  })
+
   it('목소리 라이브러리 선택을 현재 타임라인 대사에 즉시 연결한다', async () => {
     useAppStore.setState({ workspaceEntered: true })
     const view = render(<HomePage />)
@@ -149,6 +168,26 @@ describe('HomePage', () => {
     fireEvent.click(nextVoice!)
 
     await waitFor(() => expect(useAppStore.getState().notice).toMatch(/선택한 대사 1개에 .* 목소리를 적용했습니다/))
+  })
+
+  it('타임라인에서 다른 클립을 고르면 현재 목소리 컨트롤도 해당 클립 성우를 따라간다', async () => {
+    useAppStore.setState({ workspaceEntered: true })
+    const view = render(<HomePage />)
+    const scoped = within(view.container)
+    const textbox = scoped.getByRole('textbox', { name: '음성으로 만들 장문 내용' })
+
+    fireEvent.change(textbox, { target: { value: '첫 번째 문장입니다. 두 번째 문장입니다.' } })
+    fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+
+    fireEvent.click(scoped.getByRole('article', { name: /클립 2 · 혜린/ }))
+    fireEvent.click(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    const picker = scoped.getByRole('dialog', { name: '목소리 선택' })
+    fireEvent.click(within(picker).getByRole('radio', { name: /도윤/ }))
+    await waitFor(() => expect(scoped.getByRole('button', { name: '현재 목소리 도윤 선택' })).toBeInTheDocument())
+
+    fireEvent.click(scoped.getByRole('article', { name: /클립 1 · 혜린/ }))
+    await waitFor(() => expect(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' })).toBeInTheDocument())
+    expect(scoped.getByRole('note', { name: '보이스 라이브러리 적용 대상' })).toHaveTextContent('1개 · 혜린')
   })
 
 })

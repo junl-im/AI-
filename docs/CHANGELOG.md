@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.11.22 · Timeline Voice Recovery & Quick Navigation
+
+- 과거 Timeline 클립이 삭제·유실된 `MY VOICE`를 참조하면 `사용 불가 목소리`와 `복구 필요` 상태를 명확히 표시하고, 기존 ready 음원은 사용자가 교체를 실행하기 전까지 유지합니다.
+- stale MY VOICE에서는 기존 완성 음원 미리듣기는 허용하지만 새 생성·재생성은 대체 목소리를 명시적으로 지정하기 전까지 막습니다.
+- 빠른 편집기에 `이전 대사 / 다음 대사`와 `Alt+↑ / Alt+↓` 이동을 추가하고, 쉼 블록을 건너뛰면서 0.11.21의 draft autosave 계약을 재사용합니다.
+- 혼합 성우 다중 선택에서 `혼합 목소리 N종`, 목소리별 선택 개수, `현재 작업 목소리`를 분리 표시해 일괄 적용 대상을 더 명확히 확인할 수 있습니다.
+- 단일 빠른 편집 UI를 `TimelineQuickEditor.tsx`, 선택 계산을 `timelineSelection.ts`, 신규 스타일을 `timeline-voice-recovery.css`로 분리해 후속 편집기 책임 분리 기반을 만들었습니다.
+- 신규 repository preflight 계약 검사와 회귀 테스트를 추가하고 앱/API/Worker 버전을 `0.11.22`로 동기화했습니다.
+
+## 0.11.21 · Selection Continuity & Convenience
+
+- Timeline 빠른 편집 중 다른 클립을 직접 클릭·범위 선택·다중 선택해도 현재 draft를 먼저 저장한 뒤 선택을 전환해, Player 이동 외의 수동 탐색에서도 편집 내용 유실을 막습니다.
+- 빈 문장처럼 저장할 수 없는 draft도 선택 전환 전에 기존 문장으로 안전 복원해, 선택 이동과 편집 상태가 서로 꼬이지 않게 했습니다.
+- Timeline 선택 성우를 전역 현재 Voice에 동기화하더라도 이미 확인한 Multi-Speaker Assist 화자 배정을 다시 미확인 상태로 풀지 않도록 추천 seed 갱신 경로를 분리했습니다.
+- 사용자가 Timeline 적용 대상 없이 기본 목소리를 명시적으로 바꾼 경우에는 기존처럼 Multi-Speaker 추천 seed를 다시 계산할 수 있습니다.
+- 앱/API/Worker 버전을 `0.11.21`로 동기화하고 HANDOVER/NEXT_UPDATE의 뒤처진 현재 버전 기준을 함께 정리했습니다.
+
+## 0.11.20 · Linkage & Convenience
+
+- Timeline에서 단일/동일 성우 클립을 선택하면 상단 현재 목소리와 Voice Drawer 선택이 같은 성우로 자동 동기화됩니다.
+- 하단 Player/Dock이 다른 Timeline 클립으로 이동할 때 빠른 편집 중인 미저장 문장을 먼저 저장한 뒤 선택을 따라가 데이터 손실을 막습니다.
+- 모바일 현재 목소리 영역과 PC Voice Drawer에 "타임라인 선택" 적용 대상을 상시 표시해 성우 선택이 어디에 반영되는지 열기 전부터 알 수 있습니다.
+- 삭제된 MY VOICE 프로필이 세션에 남아 있으면 프로필 로딩 완료 뒤 기본 SoriON Voice로 안전 전환합니다.
+
+
 ## 0.11.19 R1 · Voice Picker Accessibility Hotfix
 
 - Voice Picker의 적용 범위 안내를 live `status`에서 정적 `note` 역할로 분리해 대본 맞춤 추천 status와 접근성 역할이 충돌하지 않도록 했습니다.

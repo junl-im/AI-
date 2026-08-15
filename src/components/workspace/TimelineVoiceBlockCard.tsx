@@ -15,6 +15,7 @@ interface TimelineVoiceBlockCardProps {
   selected: boolean
   multiSelected: boolean
   playbackActive: boolean
+  voiceUnavailable?: boolean
   onSelect: (id: string, mode: 'single' | 'toggle' | 'range') => void
   onToggleTrack: (trackId: string) => void
   onMove: (id: string, direction: -1 | 1) => void
@@ -34,6 +35,7 @@ export function TimelineVoiceBlockCard({
   selected,
   multiSelected,
   playbackActive,
+  voiceUnavailable = false,
   onSelect,
   onToggleTrack,
   onMove,
@@ -91,7 +93,9 @@ export function TimelineVoiceBlockCard({
         : block.sttVerification?.status === 'unchecked'
           ? 'STT 재검수 대기'
           : null
-  const actionLabel = block.status === 'ready' && block.trackId
+  const actionLabel = voiceUnavailable && !(block.status === 'ready' && block.trackId)
+    ? `${voiceIndex + 1}번 대사 목소리 복구 필요`
+    : block.status === 'ready' && block.trackId
     ? playbackActive
       ? `${voiceIndex + 1}번 대사 일시정지`
       : `${voiceIndex + 1}번 대사 재생`
@@ -103,7 +107,7 @@ export function TimelineVoiceBlockCard({
 
   return (
     <article
-      className={`soa-dubbing-block is-${block.status} ${selected ? 'is-selected' : ''} ${playbackActive ? 'is-playing' : ''}`}
+      className={`soa-dubbing-block is-${block.status} ${selected ? 'is-selected' : ''} ${playbackActive ? 'is-playing' : ''} ${voiceUnavailable ? 'is-voice-unavailable' : ''}`}
       style={{ '--soa-clip-width': `${width}px` } as CSSProperties}
       tabIndex={0}
       aria-current={selected ? 'true' : undefined}
@@ -113,7 +117,7 @@ export function TimelineVoiceBlockCard({
         event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single',
       )}
       title={block.text}
-      aria-label={`클립 ${voiceIndex + 1} · ${block.voiceName} · ${formatDuration(block.durationSeconds)} · ${statusLabel}`}
+      aria-label={`클립 ${voiceIndex + 1} · ${block.voiceName} · ${formatDuration(block.durationSeconds)} · ${statusLabel}${voiceUnavailable ? ' · 사용 불가 목소리' : ''}`}
       onKeyDown={handleKeyboard}
       onDoubleClick={(event) => {
         const target = event.target as HTMLElement
@@ -148,7 +152,8 @@ export function TimelineVoiceBlockCard({
       <header>
         <div className="soa-dubbing-block__voice">
           <span aria-hidden="true">{block.voiceName.slice(0, 1)}</span>
-          <div><strong>{block.voiceName}</strong><small>클립 {voiceIndex + 1}</small></div>
+          <div><strong>{block.voiceName}</strong><small>클립 {voiceIndex + 1}{voiceUnavailable ? ' · 사용 불가 목소리' : ''}</small></div>
+          {voiceUnavailable ? <em className="soa-dubbing-block__voice-warning">복구 필요</em> : null}
         </div>
         <div className="soa-dubbing-block__tools">
           {block.status === 'ready' && block.trackId ? (
@@ -171,7 +176,7 @@ export function TimelineVoiceBlockCard({
                 event.stopPropagation()
                 onRetry(block.id)
               }}
-              disabled={block.status === 'generating' || block.text.trim().length === 0}
+              disabled={voiceUnavailable || block.status === 'generating' || block.text.trim().length === 0}
               aria-label={actionLabel}
             >
               {block.status === 'generating' ? '…' : '▶'}

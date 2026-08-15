@@ -28,6 +28,7 @@ const checks = [
   ['recovery soak / managed lock', 'check-recovery-soak-managed-lock.mjs'],
   ['recovery evidence / voice inventory', 'check-recovery-evidence-voice-inventory.mjs'],
   ['studio playback / timeline UX', 'check-studio-playback-timeline-ux.mjs'],
+  ['timeline voice recovery / quick navigation', 'check-timeline-voice-recovery-navigation.mjs'],
   ['PC horizontal timeline editor', 'check-horizontal-timeline-editor.mjs'],
   ['mobile studio flow / playback link', 'check-mobile-studio-flow.mjs'],
   ['Chromium visual layout regression', 'check-visual-layout-regression.mjs'],

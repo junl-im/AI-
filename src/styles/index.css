@@ -10,6 +10,7 @@
 @import "./dubbing-overlays.css";
 @import "./timeline-editor.css";
 @import "./timeline-command-bar.css";
+@import "./timeline-voice-recovery.css";
 @import "./timeline-horizontal-pc.css";
 @import "./timeline-horizontal-mobile.css";
 @import "./mobile-studio-flow.css";
@@ -21,6 +22,7 @@
 @import "./live-voice-bar.css";
 @import "./my-voice-lab.css";
 @import "./my-voice-engine.css";
+@import "./linkage-convenience.css";
 
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

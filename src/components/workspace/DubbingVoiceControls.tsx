@@ -19,6 +19,7 @@ interface DubbingVoiceControlsProps {
   normalizeText: boolean
   engine: EngineInfo | null
   applyTargetCount?: number
+  applyTargetLabel?: string | null
   onVoiceChange: (voiceId: string) => void
   onPreview: (voiceId: string) => void
   onSpeedChange: (value: number) => void
@@ -41,6 +42,7 @@ export function DubbingVoiceControls({
   normalizeText,
   engine,
   applyTargetCount = 0,
+  applyTargetLabel = null,
   onVoiceChange,
   onPreview,
   onSpeedChange,
@@ -90,6 +92,13 @@ export function DubbingVoiceControls({
           previewPlaying={previewPlaying}
           onPreview={onPreview}
         />
+        {applyTargetCount > 0 ? (
+          <span className="soa-voice-linkage-target" role="note" aria-label="현재 목소리 적용 대상">
+            <b>타임라인 선택</b>
+            <span>{applyTargetLabel ?? `${applyTargetCount}개 대사`}</span>
+            <small>목소리를 고르면 이 대사들에 바로 적용됩니다.</small>
+          </span>
+        ) : null}
       </section>
 
       <VoicePickerSheet

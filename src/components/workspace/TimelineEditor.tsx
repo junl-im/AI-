@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -14,6 +15,7 @@ import type {
 import { usePlayerStore } from '../../store/usePlayerStore'
 import { voicePresets } from '../../tts/voicePresets'
 import { buildVoiceChoices, resolveVoiceChoice, type VoiceChoice } from '../../voice/voiceChoices'
+import { findAdjacentVoiceBlockId, summarizeTimelineVoiceSelection } from '../../timeline/timelineSelection'
 import type { WorkspaceBatchHistoryEntry, WorkspaceBatchRetrySnapshot } from '../../workspace/sessionTypes'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import {
@@ -25,6 +27,7 @@ import {
   getTimelineContentWidth,
 } from '../../timeline/timelineGeometry'
 import { FinalExportControls } from './FinalExportControls'
+import { TimelineQuickEditor } from './TimelineQuickEditor'
 import { TimelineVoiceBlockCard } from './TimelineVoiceBlockCard'
 
 interface TimelineEditorProps {
@@ -58,10 +61,12 @@ interface TimelineEditorProps {
   onRedo?: () => boolean | void
   onSelectionChange?: (ids: string[]) => void
   voiceChoices?: VoiceChoice[]
+  currentVoiceId?: string
 }
 
 const BATCH_RETRY_LIMIT = 3
 const BATCH_HISTORY_LIMIT = 6
+const DEFAULT_VOICE_CHOICES = buildVoiceChoices([])
 
 type BatchHistoryEntry = WorkspaceBatchHistoryEntry
 
@@ -115,7 +120,8 @@ export function TimelineEditor({
   onUndo,
   onRedo,
   onSelectionChange,
-  voiceChoices = buildVoiceChoices([]),
+  voiceChoices = DEFAULT_VOICE_CHOICES,
+  currentVoiceId,
 }: TimelineEditorProps) {
   const currentTrackId = usePlayerStore((state) => state.currentTrackId)
   const playbackTrackId = usePlayerStore((state) => state.playbackTrackId)
@@ -140,6 +146,8 @@ export function TimelineEditor({
   const [batchHistoryOpen, setBatchHistoryOpen] = useState(false)
   const [batchCommandPreview, setBatchCommandPreview] = useState<BatchCommandPreview | null>(null)
   const [shortcutHelpOpen, setShortcutHelpOpen] = useState(false)
+  const [recoveryVoiceId, setRecoveryVoiceId] = useState('')
+  const [recoveryRunning, setRecoveryRunning] = useState(false)
   const batchFailures = batchResult?.failures
     ?? batchResult?.failedIds.map((id) => ({ id, kind: 'unknown' as const, message: '실패 원인을 확인하지 못했습니다.' }))
     ?? []
@@ -191,7 +199,18 @@ export function TimelineEditor({
   const selectedReadyVoiceCount = selectedVoiceBlocks.filter((block) => block.status === 'ready').length
   const selectedGeneratingVoiceCount = selectedVoiceBlocks.filter((block) => block.status === 'generating').length
   const batchVoice = resolveVoiceChoice(voiceChoices, batchVoiceId)
+  const currentVoice = resolveVoiceChoice(voiceChoices, currentVoiceId ?? batchVoice.id)
+  const voiceSelectionSummary = summarizeTimelineVoiceSelection(selectedVoiceBlocks)
   const batchVoiceChangeCount = selectedVoiceBlocks.filter((block) => block.voiceId !== batchVoice.id).length
+  const selectedVoiceChoice = selectedVoiceBlock ? resolveVoiceChoice(voiceChoices, selectedVoiceBlock.voiceId) : null
+  const selectedVoiceUnavailable = Boolean(selectedVoiceChoice?.kind === 'my-voice' && !selectedVoiceChoice.ready)
+  const selectedVoiceMissingProfile = Boolean(selectedVoiceUnavailable && !selectedVoiceChoice?.profile)
+  const replacementVoiceChoices = useMemo(
+    () => voiceChoices.filter((voice) => voice.ready && voice.id !== selectedVoiceBlock?.voiceId),
+    [selectedVoiceBlock?.voiceId, voiceChoices],
+  )
+  const previousVoiceBlockId = selectedVoiceBlock ? findAdjacentVoiceBlockId(blocks, selectedVoiceBlock.id, -1) : null
+  const nextVoiceBlockId = selectedVoiceBlock ? findAdjacentVoiceBlockId(blocks, selectedVoiceBlock.id, 1) : null
   const canMoveSelectionLeft = selectedBlocks.some((block) => {
     const index = blocks.findIndex((item) => item.id === block.id)
     return index > 0 && !selectedBlockIds.has(blocks[index - 1].id)
@@ -201,7 +220,7 @@ export function TimelineEditor({
     return index >= 0 && index < blocks.length - 1 && !selectedBlockIds.has(blocks[index + 1].id)
   })
   const quickDraftTrimmed = quickDraft.trim()
-  const quickDraftDirty = Boolean(selectedVoiceBlock && quickDraftTrimmed && quickDraftTrimmed !== selectedVoiceBlock.text)
+  const quickDraftDirty = Boolean(selectedVoiceBlock && quickDraftTrimmed !== selectedVoiceBlock.text)
   const rulerTicks = buildTimelineRulerTicks(totalDuration, timelineContentWidth)
   const commandPreviewBlocks = batchCommandPreview
     ? blocks.filter((block) => batchCommandPreview.ids.includes(block.id))
@@ -373,7 +392,7 @@ export function TimelineEditor({
     }
   }
 
-  function saveQuickDraft() {
+  const saveQuickDraft = useCallback(() => {
     if (!selectedVoiceBlock) return false
     if (!quickDraftTrimmed) {
       setQuickDraft(selectedVoiceBlock.text)
@@ -383,9 +402,35 @@ export function TimelineEditor({
       onUpdateText(selectedVoiceBlock.id, quickDraftTrimmed)
     }
     return true
+  }, [onUpdateText, quickDraftTrimmed, selectedVoiceBlock])
+
+  function navigateVoiceSelection(direction: -1 | 1) {
+    if (!selectedVoiceBlock) return
+    const targetId = findAdjacentVoiceBlockId(blocks, selectedVoiceBlock.id, direction)
+    if (!targetId) return
+    selectBlock(targetId)
+    window.requestAnimationFrame(() => {
+      clipRefs.current.get(targetId)?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+      quickEditorRef.current?.focus()
+    })
+  }
+
+  async function recoverSelectedVoice(regenerate: boolean) {
+    if (!selectedVoiceBlock || !selectedVoiceUnavailable || !onBatchVoiceChange || !recoveryVoiceId || recoveryRunning) return
+    const replacement = resolveVoiceChoice(voiceChoices, recoveryVoiceId)
+    if (!replacement.ready) return
+    if (quickDraftDirty && !saveQuickDraft()) return
+    setRecoveryRunning(true)
+    try {
+      await onBatchVoiceChange([selectedVoiceBlock.id], replacement.id, regenerate)
+    } finally {
+      setRecoveryRunning(false)
+    }
   }
 
   function selectBlock(id: string, mode: 'single' | 'toggle' | 'range' = 'single') {
+    if (quickDraftDirty) saveQuickDraft()
+
     if (mode === 'range' && selectionAnchorId) {
       const anchorIndex = blocks.findIndex((block) => block.id === selectionAnchorId)
       const targetIndex = blocks.findIndex((block) => block.id === id)
@@ -477,8 +522,26 @@ export function TimelineEditor({
   useEffect(() => {
     setBatchPreviewOpen(false)
     setBatchCommandPreview(null)
-    if (firstSelectedVoiceId) setBatchVoiceId(firstSelectedVoiceId)
-  }, [firstSelectedVoiceId, selectedIdKey, selectedVoiceIdKey])
+    if (!firstSelectedVoiceId) return
+    const firstChoice = resolveVoiceChoice(voiceChoices, firstSelectedVoiceId)
+    const currentChoice = currentVoiceId ? resolveVoiceChoice(voiceChoices, currentVoiceId) : null
+    const preferred = voiceSelectionSummary.mixed || !firstChoice.ready
+      ? (currentChoice?.ready ? currentChoice.id : voiceChoices.find((voice) => voice.ready)?.id)
+      : firstChoice.id
+    if (preferred) setBatchVoiceId(preferred)
+  }, [currentVoiceId, firstSelectedVoiceId, selectedIdKey, selectedVoiceIdKey, voiceChoices, voiceSelectionSummary.mixed])
+
+  useEffect(() => {
+    if (!selectedVoiceUnavailable) {
+      setRecoveryVoiceId('')
+      return
+    }
+    const currentChoice = currentVoiceId ? resolveVoiceChoice(voiceChoices, currentVoiceId) : null
+    const preferred = currentChoice?.ready && currentChoice.id !== selectedVoiceBlock?.voiceId
+      ? currentChoice.id
+      : replacementVoiceChoices[0]?.id ?? ''
+    setRecoveryVoiceId(preferred)
+  }, [currentVoiceId, replacementVoiceChoices, selectedVoiceBlock?.id, selectedVoiceBlock?.voiceId, selectedVoiceUnavailable, voiceChoices])
 
   useEffect(() => {
     onSelectionChange?.(selectedIdKey ? selectedIdKey.split('|') : [])
@@ -498,12 +561,15 @@ export function TimelineEditor({
   const multiSelectionActive = selectedBlockIds.size > 1
 
   useEffect(() => {
+    if (!playbackBlock || multiSelectionActive || playbackBlock.id === selectedBlockId) return
+    if (quickDraftDirty && !saveQuickDraft()) return
+    setSelectedBlockIds(new Set([playbackBlock.id]))
+    setSelectionAnchorId(playbackBlock.id)
+    setSelectedBlockId(playbackBlock.id)
+  }, [multiSelectionActive, playbackBlock, quickDraftDirty, saveQuickDraft, selectedBlockId])
+
+  useEffect(() => {
     if (!playbackBlock) return
-    if (!multiSelectionActive) {
-      setSelectedBlockIds(new Set([playbackBlock.id]))
-      setSelectionAnchorId(playbackBlock.id)
-      setSelectedBlockId(playbackBlock.id)
-    }
     const playbackElement = clipRefs.current.get(playbackBlock.id)
     if (typeof playbackElement?.scrollIntoView === 'function') {
       playbackElement.scrollIntoView({
@@ -512,7 +578,7 @@ export function TimelineEditor({
         inline: 'center',
       })
     }
-  }, [multiSelectionActive, playbackBlock])
+  }, [playbackBlock])
 
   let voiceIndex = -1
 
@@ -595,6 +661,13 @@ export function TimelineEditor({
               <span key={block.id}>{block.kind === 'voice' ? block.text : `쉼 ${block.durationSeconds.toFixed(1)}초`}</span>
             ))}
             {selectedBlocks.length > 4 ? <span>외 {selectedBlocks.length - 4}개</span> : null}
+          </div>
+          <div className={`soa-timeline-selection-voice-summary ${voiceSelectionSummary.mixed ? 'is-mixed' : ''}`} role="status" aria-label="선택 목소리 구성">
+            <strong>{voiceSelectionSummary.mixed ? `혼합 목소리 ${voiceSelectionSummary.voiceCount}종` : `목소리 ${voiceSelectionSummary.labels[0]?.voiceName ?? '-'} 1종`}</strong>
+            <span>현재 작업 목소리 · {currentVoice.name}</span>
+            <span>적용 대상 · 대사 {selectedVoiceBlocks.length}개</span>
+            {voiceSelectionSummary.labels.slice(0, 3).map((item) => <small key={item.voiceId}>{item.voiceName} {item.count}개</small>)}
+            {voiceSelectionSummary.mixed ? <em>일괄 변경은 선택된 대사만 대상으로 합니다. 변경 미리보기에서 기존 음원 영향을 확인하세요.</em> : null}
           </div>
           <div className="soa-timeline-command-bar" aria-label="다중 선택 키보드 명령">
             <strong>COMMAND</strong>
@@ -714,58 +787,46 @@ export function TimelineEditor({
           </div>
         </section>
       ) : selectedBlock ? (
-        <section className="soa-timeline-quick-editor" aria-label="선택 클립 빠른 편집">
-          <div className="soa-timeline-quick-editor__meta">
-            <span>선택 클립</span>
-            <strong>{selectedVoiceBlock ? `${selectedVoiceBlock.voiceName} · ${formatDuration(selectedVoiceBlock.durationSeconds)}` : `쉼 · ${formatDuration(selectedBlock.durationSeconds)}`}</strong>
-            {selectedVoiceBlock ? <small>{quickDraftDirty ? '수정됨 · 저장 필요' : '저장됨'} · {quickDraft.length}/2000자</small> : <small>타임라인 간격 블록</small>}
-          </div>
-          {selectedVoiceBlock ? (
-            <>
-              <textarea
-                ref={quickEditorRef}
-                value={quickDraft}
-                onChange={(event) => setQuickDraft(event.target.value)}
-                onBlur={saveQuickDraft}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-                    event.preventDefault()
-                    if (saveQuickDraft()) onRetry(selectedVoiceBlock.id)
-                  }
-                }}
-                maxLength={2_000}
-                aria-label="선택 대사 빠른 수정"
-                placeholder="선택한 대사를 바로 수정하세요."
-              />
-              <div className="soa-timeline-quick-editor__actions">
-                <button
-                  type="button"
-                  className="is-primary"
-                  onClick={() => {
-                    saveQuickDraft()
-                    if (selectedVoiceBlock.status === 'ready' && selectedVoiceBlock.trackId) toggleTrack(selectedVoiceBlock.trackId)
-                    else onRetry(selectedVoiceBlock.id)
-                  }}
-                  disabled={selectedVoiceBlock.status === 'generating' || !quickDraftTrimmed}
-                >
-                  {selectedVoiceBlock.status === 'ready' && selectedVoiceBlock.trackId
-                    ? playbackBlock?.id === selectedVoiceBlock.id && playbackActive ? '일시정지' : '미리듣기'
-                    : selectedVoiceBlock.status === 'generating' ? '생성 중…' : '음성 생성'}
-                </button>
-                <button type="button" onClick={saveQuickDraft} disabled={!quickDraftDirty}>저장</button>
-                <button type="button" onClick={() => { saveQuickDraft(); onRetry(selectedVoiceBlock.id) }} disabled={selectedVoiceBlock.status === 'generating' || !quickDraftTrimmed}>재생성</button>
-                <button type="button" onClick={() => { saveQuickDraft(); onSplit(selectedVoiceBlock.id) }}>나누기</button>
-                <button type="button" className="is-danger" onClick={() => removeSelection(selectedVoiceBlock.id)}>삭제</button>
-              </div>
-            </>
-          ) : (
-            <div className="soa-timeline-quick-editor__actions is-pause">
-              <button type="button" disabled={blocks[0]?.id === selectedBlock.id} onClick={() => moveSelection(selectedBlock.id, -1)}>앞으로</button>
-              <button type="button" disabled={blocks.at(-1)?.id === selectedBlock.id} onClick={() => moveSelection(selectedBlock.id, 1)}>뒤로</button>
-              <button type="button" className="is-danger" onClick={() => removeSelection(selectedBlock.id)}>쉼 삭제</button>
-            </div>
-          )}
-        </section>
+        <TimelineQuickEditor
+          selectedBlock={selectedBlock}
+          selectedVoiceBlock={selectedVoiceBlock}
+          quickEditorRef={quickEditorRef}
+          quickDraft={quickDraft}
+          quickDraftDirty={quickDraftDirty}
+          quickDraftTrimmed={quickDraftTrimmed}
+          playbackActive={Boolean(selectedVoiceBlock && playbackBlock?.id === selectedVoiceBlock.id && playbackActive)}
+          canNavigatePrevious={Boolean(previousVoiceBlockId)}
+          canNavigateNext={Boolean(nextVoiceBlockId)}
+          canMovePausePrevious={blocks[0]?.id !== selectedBlock.id}
+          canMovePauseNext={blocks.at(-1)?.id !== selectedBlock.id}
+          recovery={selectedVoiceUnavailable && selectedVoiceChoice ? {
+            unavailable: true,
+            missingProfile: selectedVoiceMissingProfile,
+            choiceName: selectedVoiceMissingProfile ? selectedVoiceBlock?.voiceName ?? selectedVoiceChoice.name : selectedVoiceChoice.name,
+            replacementVoiceId: recoveryVoiceId,
+            replacementChoices: replacementVoiceChoices,
+            running: recoveryRunning,
+          } : null}
+          onDraftChange={setQuickDraft}
+          onSave={saveQuickDraft}
+          onPreviewOrGenerate={() => {
+            saveQuickDraft()
+            if (!selectedVoiceBlock) return
+            if (selectedVoiceBlock.status === 'ready' && selectedVoiceBlock.trackId) toggleTrack(selectedVoiceBlock.trackId)
+            else if (!selectedVoiceUnavailable) onRetry(selectedVoiceBlock.id)
+          }}
+          onRegenerate={() => {
+            if (!selectedVoiceBlock || selectedVoiceUnavailable) return
+            saveQuickDraft()
+            onRetry(selectedVoiceBlock.id)
+          }}
+          onSplit={() => { if (selectedVoiceBlock) { saveQuickDraft(); onSplit(selectedVoiceBlock.id) } }}
+          onRemove={() => removeSelection(selectedBlock.id)}
+          onMovePause={(direction) => moveSelection(selectedBlock.id, direction)}
+          onNavigateVoice={navigateVoiceSelection}
+          onRecoveryVoiceChange={setRecoveryVoiceId}
+          onRecoverVoice={(regenerate) => void recoverSelectedVoice(regenerate)}
+        />
       ) : null}
 
       {batchResult ? (
@@ -938,6 +999,7 @@ export function TimelineEditor({
                           selected={selectedBlockIds.has(block.id)}
                           multiSelected={selectedBlockIds.size > 1 && selectedBlockIds.has(block.id)}
                           playbackActive={active && playbackActive}
+                          voiceUnavailable={resolveVoiceChoice(voiceChoices, block.voiceId).kind === 'my-voice' && !resolveVoiceChoice(voiceChoices, block.voiceId).ready}
                           onSelect={selectBlock}
                           onToggleTrack={toggleTrack}
                           onMove={moveSelection}

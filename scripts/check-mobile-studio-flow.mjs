@@ -42,6 +42,7 @@ requireTokens('src/components/workspace/DubbingVoiceControls.tsx', voiceControls
   'contextText={scriptText}',
   '<VoicePickerSheet',
   'applyTargetCount={applyTargetCount}',
+  '현재 목소리 적용 대상',
 ])
 if (voiceControls.includes('soa-dubbing-voice-quick')) {
   failures.push('src/components/workspace/DubbingVoiceControls.tsx: 빠른 프리셋 나열 UI가 다시 추가되었습니다.')
@@ -85,6 +86,7 @@ const timeline = await source('src/components/workspace/TimelineEditor.tsx')
 requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'getDefaultTimelineZoom',
   'window.innerWidth <= 760 ? 1.25 : 1',
+  'quickDraftDirty && !saveQuickDraft()',
 ])
 
 const timelineVoiceBlock = await source('src/components/workspace/TimelineVoiceBlockCard.tsx')
@@ -95,9 +97,18 @@ requireTokens('src/components/workspace/TimelineVoiceBlockCard.tsx', timelineVoi
 
 const home = await source('src/pages/HomePage.tsx')
 requireTokens('src/pages/HomePage.tsx', home, [
+  'selectedTimelineVoiceBlocks',
   'selectedTimelineVoiceIds',
+  'selectedTimelineVoiceScope',
   'applyTargetCount={selectedTimelineVoiceIds.length}',
+  'applyTargetLabel={selectedTimelineVoiceScope}',
   '선택한 대사 ${selectedTimelineVoiceIds.length}개에',
+])
+
+const drawer = await source('src/components/workspace/DesktopVoiceDrawer.tsx')
+requireTokens('src/components/workspace/DesktopVoiceDrawer.tsx', drawer, [
+  'applyTargetCount',
+  '보이스 라이브러리 적용 대상',
 ])
 
 const mobileCss = await source('src/styles/timeline-horizontal-mobile.css')
@@ -127,6 +138,7 @@ const indexCss = await source('src/styles/index.css')
 requireTokens('src/styles/index.css', indexCss, [
   '@import "./timeline-horizontal-mobile.css";',
   '@import "./mobile-studio-flow.css";',
+  '@import "./linkage-convenience.css";',
 ])
 
 if (failures.length) {

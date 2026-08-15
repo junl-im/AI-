@@ -18,6 +18,8 @@ interface DesktopVoiceDrawerProps {
   pitch: number
   emotion: VoiceEmotion
   normalizeText: boolean
+  applyTargetCount?: number
+  applyTargetLabel?: string | null
   onVoiceChange: (voiceId: string) => void
   onPreview: (voiceId: string) => void
   onSpeedChange: (value: number) => void
@@ -31,7 +33,7 @@ interface DesktopVoiceDrawerProps {
 
 export function DesktopVoiceDrawer({
   voiceId, voiceChoices, previewingId, activePreviewId, previewPlaying,
-  speed, pitch, emotion, normalizeText, onVoiceChange, onPreview,
+  speed, pitch, emotion, normalizeText, applyTargetCount = 0, applyTargetLabel = null, onVoiceChange, onPreview,
   onSpeedChange, onPitchChange, onEmotionChange, onNormalizeTextChange,
   onCreateVoice, collapsed, onToggleCollapsed,
 }: DesktopVoiceDrawerProps) {
@@ -59,6 +61,12 @@ export function DesktopVoiceDrawer({
       {collapsed ? <span className="soa-studio-panel-monogram" aria-hidden="true">V</span> : (
         <>
           <header><span>VOICE DRAWER</span><strong>목소리 라이브러리</strong><p>목소리를 고른 뒤 ▶를 누르면 바로 미리듣습니다.</p></header>
+          {applyTargetCount > 0 ? (
+            <div className="soa-voice-drawer__apply-target" role="note" aria-label="보이스 라이브러리 적용 대상">
+              <strong>타임라인 선택 · {applyTargetLabel ?? `${applyTargetCount}개 대사`}</strong>
+              <span>목소리를 누르면 선택된 대사에 즉시 적용됩니다.</span>
+            </div>
+          ) : null}
           {customVoices.length > 0 ? <section className="soa-voice-drawer__group" aria-label="MY VOICE"><div className="soa-voice-drawer__section-title"><strong>MY VOICE</strong><span>내 샘플</span></div><div className="soa-voice-drawer__presets" role="radiogroup" aria-label="내 목소리">{customVoices.map(renderChoice)}</div></section> : null}
           <section className="soa-voice-drawer__group" aria-label="SoriON Voice"><div className="soa-voice-drawer__section-title"><strong>SORION VOICE</strong><span>기본 성우</span></div><div className="soa-voice-drawer__presets" role="radiogroup" aria-label="프리셋 목소리">{presetVoices.map(renderChoice)}</div></section>
 
