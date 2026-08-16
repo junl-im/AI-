@@ -172,6 +172,7 @@ export function TimelineEditor({
   const playbackBlock = blocks.find((block) => block.kind === 'voice' && block.trackId === playbackTrackId)
     ?? blocks.find((block) => block.kind === 'voice' && block.trackId === currentTrackId)
     ?? null
+  const observedPlaybackBlockIdRef = useRef<string | null>(playbackBlock?.id ?? null)
   const playbackMetric = playbackBlock ? metrics.find((metric) => metric.id === playbackBlock.id) : null
   const playheadLeft = playbackMetric
     ? playbackMetric.offset + Math.min(1, playbackPositionSeconds / playbackMetric.duration) * playbackMetric.width
@@ -561,8 +562,17 @@ export function TimelineEditor({
   const multiSelectionActive = selectedBlockIds.size > 1
 
   useEffect(() => {
-    if (!playbackBlock || multiSelectionActive || playbackBlock.id === selectedBlockId) return
+    if (!playbackBlock) {
+      observedPlaybackBlockIdRef.current = null
+      return
+    }
+    if (multiSelectionActive || observedPlaybackBlockIdRef.current === playbackBlock.id) return
+    if (playbackBlock.id === selectedBlockId) {
+      observedPlaybackBlockIdRef.current = playbackBlock.id
+      return
+    }
     if (quickDraftDirty && !saveQuickDraft()) return
+    observedPlaybackBlockIdRef.current = playbackBlock.id
     setSelectedBlockIds(new Set([playbackBlock.id]))
     setSelectionAnchorId(playbackBlock.id)
     setSelectedBlockId(playbackBlock.id)
