@@ -187,7 +187,7 @@ describe('HomePage', () => {
 
     fireEvent.click(scoped.getByRole('article', { name: /클립 1 · 혜린/ }))
     await waitFor(() => expect(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' })).toBeInTheDocument())
-    expect(scoped.getByRole('note', { name: '보이스 라이브러리 적용 대상' })).toHaveTextContent('1개 · 혜린')
+    expect(scoped.getByRole('note', { name: '현재 목소리 적용 대상' })).toHaveTextContent('1개 · 혜린')
   })
 
 })
