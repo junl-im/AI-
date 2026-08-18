@@ -1,7 +1,12 @@
 # NEXT UPDATE
 
-현재 기준: `0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery`
+Current baseline: `0.11.26 R1 - Web Lint Stabilization`
 
+
+## Stabilization gate before 0.11.27
+
+- Push 0.11.26 R1 and require GitHub Actions Web quality to pass lint, critical regression, full Vitest, typecheck, build, and Chromium evidence before starting field/runtime certification changes.
+- If Web quality still fails, fix that failure first and keep 0.11.27 feature work paused.
 ## 목표 버전
 
 `0.11.27 · Field Device & MY VOICE Runtime Certification`

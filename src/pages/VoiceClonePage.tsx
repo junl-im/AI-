@@ -72,6 +72,7 @@ export function VoiceClonePage() {
   const showNotice = useAppStore((state) => state.showNotice)
   const enqueue = usePlayerStore((state) => state.enqueue)
   const enqueuedJobId = useRef<string | null>(null)
+  const activeJobRef = useRef<VoiceCloneJob | null>(null)
   const [analysis, setAnalysis] = useState<VoiceSampleAnalysis | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [displayName, setDisplayName] = useState('내 SoriON 목소리')
@@ -143,11 +144,16 @@ export function VoiceClonePage() {
   }, [recorder.file])
 
   useEffect(() => {
-    if (!job || !activeJobId || !activeJobStatus) return undefined
-    if (!['queued', 'running'].includes(activeJobStatus)) return undefined
+    activeJobRef.current = job
+  }, [job])
+
+  useEffect(() => {
+    const activeJob = activeJobRef.current
+    if (!activeJob || !activeJobId || !activeJobStatus) return undefined
+    if (activeJob.id !== activeJobId || !['queued', 'running'].includes(activeJobStatus)) return undefined
     const controller = new AbortController()
     let active = true
-    void watchVoiceCloneJob(job, controller.signal, (progress) => {
+    void watchVoiceCloneJob(activeJob, controller.signal, (progress) => {
       if (!active) return
       setJob((current) => current && current.id === progress.jobId
         ? {

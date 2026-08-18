@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { LongformComposer, normalizeImportedScript } from './LongformComposer'
+import { normalizeImportedScript } from '../../workspace/scriptPreparation'
+import { LongformComposer } from './LongformComposer'
 
 const activity = {
   id: 'activity',

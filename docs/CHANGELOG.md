@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## 0.11.26 R1 - Web Lint Stabilization
+
+- Stabilizes the Web quality lint gate reported by GitHub Actions run `32109791257` / job `95626676052`.
+- Removes the unused `TimelineVoiceBlock` type import and makes playback-selection effect dependencies explicit through a destructured `replaceSelection` callback.
+- Reworks recovery memo/effect dependencies to reference the actual unavailable Voice ID array/count instead of equivalent string keys that React Hooks lint cannot prove.
+- Removes the unnecessary `backendStatus` callback dependency in `HomePage`.
+- Keeps Voice Clone job watching stable across progress updates by storing the latest job in a ref while the watcher lifecycle remains keyed by job ID/status.
+- Removes the non-component utility re-export from `LongformComposer`; tests import `normalizeImportedScript` from its source module directly.
+- Product semver remains `0.11.26`; this is a delivery revision only.
+
+### Verification
+
+- GitHub Actions failure diagnosis: **confirmed ESLint-only gate failure, 1 error + 6 warnings**.
+- Repository preflight: **50/50 PASS**.
+- API pytest: **220/220 PASS**.
+- Worker pytest: **14/14 PASS**.
+- Python compileall: **PASS**.
+- Targeted TypeScript transpile parse: **6/6 PASS**.
+- Local ESLint/Vitest/typecheck/build: **not completed because local `npm ci` timed out; GitHub Actions rerun is the final gate**.
+- 0.11.27 feature work remains blocked until the R1 Web quality job is green.
+
 ## 0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery
 
 - desktop 1024/1280/1440과 mobile 360/390/430에서 `workspace`, `voice-surface`, `recovery-impact`를 각각 별도 PNG로 캡처하는 Chromium multi-scene evidence runner를 추가했습니다. 각 캡처는 SHA-256, layout assertion, interaction evidence를 manifest에 보존합니다.

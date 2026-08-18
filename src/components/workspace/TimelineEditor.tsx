@@ -20,7 +20,7 @@ import { usePlayerStore } from '../../store/usePlayerStore'
 import { buildVoiceChoices, resolveVoiceChoice, type VoiceChoice } from '../../voice/voiceChoices'
 import { findAdjacentVoiceBlockId } from '../../timeline/timelineSelection'
 import type { WorkspaceBatchRetrySnapshot } from '../../workspace/sessionTypes'
-import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
+import type { TimelineBlock } from '../../workspace/workspaceTypes'
 import {
   TIMELINE_INSET_PX,
   TIMELINE_PIXELS_PER_SECOND,
@@ -128,6 +128,7 @@ export function TimelineEditor({
     selectedVoiceIds,
     selectedDuration,
     multiSelectionActive,
+    replaceSelection,
   } = selection
 
   const batch = useTimelineEditorBatch({
@@ -139,7 +140,7 @@ export function TimelineEditor({
     onBatchRetrySnapshotChange,
     onBatchVoiceChange,
     onRegenerateMany,
-    onReplaceSelection: selection.replaceSelection,
+    onReplaceSelection: replaceSelection,
     onRemoveMany,
     onClearSelection: selection.clearSelection,
   })
@@ -413,8 +414,8 @@ export function TimelineEditor({
     }
     if (quickDraftDirty && !saveQuickDraft()) return
     observedPlaybackBlockIdRef.current = playbackBlock.id
-    selection.replaceSelection([playbackBlock.id])
-  }, [multiSelectionActive, playbackBlock, quickDraftDirty, saveQuickDraft, selectedBlockId, selection.replaceSelection])
+    replaceSelection([playbackBlock.id])
+  }, [multiSelectionActive, playbackBlock, quickDraftDirty, replaceSelection, saveQuickDraft, selectedBlockId])
 
   useEffect(() => {
     if (!playbackBlock) return

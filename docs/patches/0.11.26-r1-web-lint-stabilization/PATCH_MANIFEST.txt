@@ -1,0 +1,23 @@
+Base: 0.11.26
+Target: 0.11.26 R1 - Web Lint Stabilization
+Delete count: 0
+
+Added files:
+docs/WEB_LINT_STABILIZATION_0.11.26_R1.md
+docs/patches/0.11.26-r1-web-lint-stabilization/DELETE_LIST.txt
+docs/patches/0.11.26-r1-web-lint-stabilization/PATCH_MANIFEST.txt
+docs/patches/0.11.26-r1-web-lint-stabilization/PATCH_README.md
+
+Modified files:
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+src/components/workspace/LongformComposer.test.tsx
+src/components/workspace/LongformComposer.tsx
+src/components/workspace/TimelineEditor.tsx
+src/hooks/useTimelineEditorBatch.ts
+src/pages/HomePage.tsx
+src/pages/VoiceClonePage.tsx

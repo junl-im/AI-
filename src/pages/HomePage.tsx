@@ -646,7 +646,6 @@ export function HomePage() {
     }
   }, [
     appendMessage,
-    backendStatus,
     generateAllTimelineBlocks,
     getQueuedVoiceBlockIds,
     saveLongformProject,

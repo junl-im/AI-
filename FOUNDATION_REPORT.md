@@ -1,3 +1,20 @@
+## 0.11.26 R1 - Web Lint Stabilization
+
+- GitHub Actions run `32109791257` reached Web quality after lock/preflight/API/Worker success, then stopped at ESLint with 1 error and 6 warnings.
+- The seven annotations are resolved without changing product semver or feature behavior.
+- Voice Clone watcher lifetime stays keyed to job ID/status while the latest mutable job snapshot is held in a ref.
+- 0.11.27 remains blocked until the R1 Web quality rerun is green.
+
+### Verification
+
+- Repository preflight: **50/50 PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Targeted TypeScript transpile parse: **6/6 PASS**
+- Local dependency-based Web quality: **not completed; `npm ci` timed out in the delivery environment**
+- GitHub Actions rerun: **required final gate**
+
 ## 0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery
 
 - desktop/mobile 각 3개 viewport에서 workspace, Voice surface, recovery impact를 총 18개 PNG evidence로 분리합니다.

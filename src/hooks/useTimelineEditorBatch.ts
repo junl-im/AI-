@@ -105,12 +105,11 @@ export function useTimelineEditorBatch({
     () => selectedUnavailableVoiceBlocks.map((block) => block.id),
     [selectedUnavailableVoiceBlocks],
   )
-  const selectedUnavailableVoiceIdKey = selectedUnavailableVoiceIds.join('|')
   const unavailableVoiceSummary = useMemo(
     () => summarizeTimelineVoiceSelection(selectedUnavailableVoiceBlocks),
     [selectedUnavailableVoiceBlocks],
   )
-  const unavailableOriginalVoiceIdKey = unavailableVoiceSummary.voiceIds.join('|')
+  const unavailableOriginalVoiceIds = unavailableVoiceSummary.voiceIds
   const unavailableReadyCount = selectedUnavailableVoiceBlocks.filter((block) => block.status === 'ready').length
   const unavailableGeneratingCount = selectedUnavailableVoiceBlocks.filter((block) => block.status === 'generating').length
   const unavailableMissingProfileCount = selectedUnavailableVoiceBlocks.filter((block) => {
@@ -118,8 +117,8 @@ export function useTimelineEditorBatch({
     return choice.kind === 'my-voice' && !choice.ready && !choice.profile
   }).length
   const recoveryReplacementChoices = useMemo(
-    () => voiceChoices.filter((voice) => voice.ready && !unavailableVoiceSummary.voiceIds.includes(voice.id)),
-    [unavailableOriginalVoiceIdKey, voiceChoices],
+    () => voiceChoices.filter((voice) => voice.ready && !unavailableOriginalVoiceIds.includes(voice.id)),
+    [unavailableOriginalVoiceIds, voiceChoices],
   )
   const recoveryVoice = resolveVoiceChoice(voiceChoices, recoveryVoiceId)
 
@@ -165,13 +164,13 @@ export function useTimelineEditorBatch({
   }, [currentVoiceId, firstSelectedVoiceId, selectedVoiceIdKey, voiceChoices, voiceSelectionSummary.mixed])
 
   useEffect(() => {
-    if (!selectedUnavailableVoiceBlocks.length) {
+    if (selectedUnavailableVoiceBlocks.length === 0) {
       setRecoveryVoiceId('')
       setRecoveryImpactOpen(false)
       return
     }
     const currentChoice = currentVoiceId ? resolveVoiceChoice(voiceChoices, currentVoiceId) : null
-    const preferred = currentChoice?.ready && !unavailableVoiceSummary.voiceIds.includes(currentChoice.id)
+    const preferred = currentChoice?.ready && !unavailableOriginalVoiceIds.includes(currentChoice.id)
       ? currentChoice.id
       : recoveryReplacementChoices[0]?.id ?? ''
     setRecoveryVoiceId(preferred)
@@ -179,8 +178,8 @@ export function useTimelineEditorBatch({
   }, [
     currentVoiceId,
     recoveryReplacementChoices,
-    selectedUnavailableVoiceIdKey,
-    unavailableOriginalVoiceIdKey,
+    selectedUnavailableVoiceBlocks.length,
+    unavailableOriginalVoiceIds,
     voiceChoices,
   ])
 

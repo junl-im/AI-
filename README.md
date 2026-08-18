@@ -8,7 +8,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery`
+- Version: `0.11.26 R1 - Web Lint Stabilization` (product semver remains `0.11.26`)
+- Web lint stabilization: removes the 1 ESLint error and addresses all 6 React/fast-refresh warnings reported by GitHub Actions run 32109791257 without changing Voice pace, recovery scope, or runtime evidence semantics.
 - Chromium multi-scene evidence: desktop 1024/1280/1440과 mobile 360/390/430에서 workspace / Voice Picker·Drawer / recovery-impact를 각각 캡처하고 PNG SHA-256 + layout/interaction assertion을 GitHub Actions artifact에 보존합니다.
 - MY VOICE runtime evidence: UI fixture는 실제 Worker 성공으로 간주하지 않으며, 동의·Worker/model ready·first-audio를 갖춘 `my-voice-recovery-runtime/1` observed evidence만 실 runtime 성공으로 인정합니다.
 - PC 가로 타임라인: ruler·클립·플레이헤드를 하나의 시간→픽셀 X축으로 통일하고, 클립 폭을 실제 재생 길이에 비례시켜 좌→우 흐름을 그대로 편집 구조에 반영합니다.

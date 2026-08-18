@@ -1,9 +1,10 @@
 # START HERE
 
-현재 버전: `0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery`
+Current version: `0.11.26 R1 - Web Lint Stabilization`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
-1-1. 0.11.26은 desktop/mobile Chromium에서 workspace / Voice Picker·Drawer / recovery-impact를 별도 evidence scene으로 남깁니다. recovery fixture는 실제 Worker 성공이 아니며 `realWorkerClaimed=false`입니다. 실제 MY VOICE 성공은 `my-voice-recovery-runtime/1` observed evidence가 있을 때만 인정합니다. 0.11.25 R1의 카카오 direct speech/watchdog/exit guard와 Voice 속도 보정은 그대로 유지합니다.
+1-1. R1 keeps product semver 0.11.26 and fixes the Web quality ESLint failure from Actions run 32109791257 before 0.11.27 feature work resumes.
+1-2. 0.11.26은 desktop/mobile Chromium에서 workspace / Voice Picker·Drawer / recovery-impact를 별도 evidence scene으로 남깁니다. recovery fixture는 실제 Worker 성공이 아니며 `realWorkerClaimed=false`입니다. 실제 MY VOICE 성공은 `my-voice-recovery-runtime/1` observed evidence가 있을 때만 인정합니다. 0.11.25 R1의 카카오 direct speech/watchdog/exit guard와 Voice 속도 보정은 그대로 유지합니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
 4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.

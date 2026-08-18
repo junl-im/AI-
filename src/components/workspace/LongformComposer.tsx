@@ -19,7 +19,6 @@ import {
 } from '../../workspace/scriptPreparation'
 import type { WorkspaceMessage } from '../../workspace/workspaceTypes'
 
-export { normalizeImportedScript } from '../../workspace/scriptPreparation'
 
 export interface LongformGenerationProgress {
   total: number

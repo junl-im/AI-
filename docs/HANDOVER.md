@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery**
+Current baseline: **0.11.26 R1 - Web Lint Stabilization**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-18 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,19 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 2026-08-18 KST - 0.11.26 R1 Web Lint Stabilization
+1. **Work date (KST)**: 2026-08-18.
+2. **Target/base version**: `0.11.26 R1 - Web Lint Stabilization` / `0.11.26 - Chromium Multi-Scene Evidence & Real MY VOICE Recovery`. Product semver remains `0.11.26`.
+3. **Changes**: Fixed all seven lint annotations from GitHub Actions run `32109791257`, job `95626676052`: one unused type error plus six React Hooks/Fast Refresh warnings. Timeline selection now destructures `replaceSelection`; recovery dependencies reference actual unavailable Voice IDs/counts; HomePage drops an unnecessary dependency; VoiceClonePage tracks the latest job through a ref so progress updates do not restart the watcher; LongformComposer no longer re-exports a non-component utility and its test imports that utility from `workspace/scriptPreparation`.
+4. **Reason**: The 0.11.26 push passed lock, preflight, API, and Worker jobs but Web quality stopped at ESLint before Vitest/typecheck/build/Chromium could run. CI stabilization must precede 0.11.27 feature work.
+5. **Impact scope**: Web lint and React hook lifecycle semantics only. Voice preset pace, mobile Kakao playback/exit guard, stale MY VOICE recovery behavior, Chromium evidence contracts, project schema, API/Worker synthesis, and runtime evidence classification are unchanged.
+6. **Major changed/added files**: `src/components/workspace/TimelineEditor.tsx`, `src/hooks/useTimelineEditorBatch.ts`, `src/pages/{HomePage,VoiceClonePage}.tsx`, `src/components/workspace/{LongformComposer.tsx,LongformComposer.test.tsx}`, `docs/WEB_LINT_STABILIZATION_0.11.26_R1.md`, release/handover documents, and patch delivery metadata.
+7. **Verification**: GitHub failure root cause confirmed from Actions logs as ESLint 1 error + 6 warnings; Repository preflight **50/50 PASS**; API pytest **220/220 PASS**; Worker pytest **14/14 PASS**; Python compileall **PASS**; targeted TypeScript transpile parse **6/6 PASS**. Local `npm ci` timed out, so ESLint/Vitest/semantic typecheck/Vite build/Chromium are not claimed locally and must be confirmed by the next GitHub Actions run.
+8. **Known limits/cautions**: Do not mark R1 CI-green until GitHub Actions passes. In particular, Voice Clone watcher dependencies must not be changed to the entire mutable `job` object because progress updates would repeatedly abort/restart the watcher.
+9. **Generated artifacts**: `SoriON-AI-0.11.26-r1-web-lint-stabilization-full.zip`, `SoriON-AI-0.11.26-to-0.11.26-r1-web-lint-stabilization-patch.zip`, `SoriON-AI-0.11.26-r1-web-lint-stabilization-SHA256SUMS.txt`.
+10. **Next expected update**: `0.11.27 - Field Device & MY VOICE Runtime Certification`, only after R1 Web quality is green.
 
 ## 2026-08-18 KST · 0.11.26 Chromium Multi-Scene Evidence & Real MY VOICE Recovery
 1. **작업 일시(KST)**: 2026-08-18.
