@@ -109,7 +109,7 @@ describe('browserSpeech', () => {
     })
     expect(result.estimatedDurationSeconds).toBeGreaterThan(0)
     expect(playback).toMatchObject({ text: request.text, lang: 'ko-KR', voiceId: 'sori-warm' })
-    expect(playback.rate).toBeLessThan(request.speed)
+    expect(playback.rate).toBeCloseTo(request.speed, 5)
     expect(playback.pitch).toBeGreaterThan(1)
   })
 

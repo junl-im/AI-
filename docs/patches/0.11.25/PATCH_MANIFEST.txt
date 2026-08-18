@@ -1,0 +1,49 @@
+# SoriON AI 0.11.25 Patch Manifest
+
+Base: 0.11.24 R1 - Voice Pace Calibration
+Target: 0.11.25 - Web Quality CI Stabilization & Critical Recovery Gate
+Added: 4
+Modified: 31
+Deleted: 0
+
+[ADDED]
+docs/WEB_QUALITY_CI_STABILIZATION.md
+docs/patches/0.11.25/PATCH_MANIFEST.txt
+docs/patches/0.11.25/PATCH_README.md
+docs/patches/0.11.25/VALIDATION.md
+
+[MODIFIED]
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+VERSION
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/REPRODUCIBLE_WEB_QUALITY.md
+docs/ROADMAP.md
+docs/VOICE_PRESETS.md
+package-lock.json
+package.json
+scripts/check-reproducible-web-quality.mjs
+scripts/check-voice-preset-contracts.mjs
+scripts/run-web-quality.mjs
+scripts/web-quality-plan.mjs
+services/api/app/services/web_quality_report.py
+services/api/pyproject.toml
+services/api/tests/test_ai_director.py
+services/api/tests/test_connectivity.py
+services/api/tests/test_engine_catalog.py
+services/api/tests/test_engine_strategy.py
+services/api/tests/test_evidence.py
+services/api/tests/test_health.py
+services/api/tests/test_quality.py
+services/api/tests/test_setup.py
+services/api/uv.lock
+services/worker/pyproject.toml
+services/worker/uv.lock
+src/tts/browserSpeech.test.ts
+src/update/buildInfo.ts
+
+[DELETED]
+(none)

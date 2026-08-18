@@ -38,6 +38,7 @@ function commandText(command) {
 const startedAt = new Date().toISOString()
 const phases = []
 let failed = false
+let firstFailure = null
 
 for (const phase of WEB_QUALITY_PHASES) {
   const logPath = join(logsDirectory, `${phase.id}.log`)
@@ -89,9 +90,30 @@ for (const phase of WEB_QUALITY_PHASES) {
   })
   if (exitCode !== 0) {
     failed = true
+    firstFailure = {
+      id: phase.id,
+      label: phase.label,
+      command: commandText(phase.command),
+      exitCode,
+      log: `logs/${phase.id}.log`,
+      tail: output.trim().split('\n').slice(-24),
+    }
     process.stderr.write(output)
     break
   }
+}
+
+if (firstFailure) {
+  const failureSummary = [
+    `FAILED PHASE · ${firstFailure.label} (${firstFailure.id})`,
+    `COMMAND · ${firstFailure.command}`,
+    `EXIT CODE · ${firstFailure.exitCode}`,
+    `LOG · ${firstFailure.log}`,
+    '',
+    ...firstFailure.tail,
+    '',
+  ].join('\n')
+  await writeFile(join(outputDirectory, 'failure-summary.txt'), failureSummary, 'utf8')
 }
 
 const lockExists = await readFile(packageLockPath).then(() => true).catch(() => false)
@@ -134,6 +156,10 @@ if (summaryPath) {
     `- Evidence SHA-256: \`${report.evidenceSha256}\``,
     `- Report SHA-256: \`${report.reportSha256}\``,
     `- package-lock SHA-256: \`${report.inputs.packageLockSha256 ?? 'missing'}\``,
+    ...(firstFailure ? [
+      `- Failed phase: **${firstFailure.label}** (\`${firstFailure.id}\`) · exit ${firstFailure.exitCode}`,
+      `- Failure evidence: \`.sorion/web-quality/${firstFailure.log}\` + \`.sorion/web-quality/failure-summary.txt\``,
+    ] : []),
     '',
     '| Phase | Result | Duration |',
     '|---|---|---:|',

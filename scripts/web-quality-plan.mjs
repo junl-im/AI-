@@ -27,6 +27,11 @@ export const WEB_QUALITY_PHASES = [
     command: ['npm', 'run', 'typecheck'],
   },
   {
+    id: 'critical-regression',
+    label: 'Critical voice/recovery regression',
+    command: ['npm', 'run', 'test:web-critical'],
+  },
+  {
     id: 'test',
     label: 'Vitest',
     command: ['npm', 'run', 'test:ci'],

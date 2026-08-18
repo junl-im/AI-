@@ -169,6 +169,12 @@ for (const required of [
 ]) {
   if (!browserTests.includes(required)) failures.push(`browserSpeech.test.ts: ${required} 누락`)
 }
+if (!browserTests.includes('expect(playback.rate).toBeCloseTo(request.speed, 5)')) {
+  failures.push('browserSpeech.test.ts: 혜린 1.00 pace가 요청 speed를 보존하는 계약 누락')
+}
+if (browserTests.includes('expect(playback.rate).toBeLessThan(request.speed)')) {
+  failures.push('browserSpeech.test.ts: R1 이전 감속 기대값이 남아 있습니다.')
+}
 for (const required of [
   'test_cosyvoice_does_not_fallback_missing_preset_to_default_reference',
   'test_melo_does_not_replace_male_preset_with_unknown_single_speaker',

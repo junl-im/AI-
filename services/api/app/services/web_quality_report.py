@@ -13,6 +13,7 @@ WEB_QUALITY_PHASES = [
     ("dependency-tree", "npm run quality:dependency-tree"),
     ("lint", "npm run lint"),
     ("typecheck", "npm run typecheck"),
+    ("critical-regression", "npm run test:web-critical"),
     ("test", "npm run test:ci"),
     ("build", "npm run build"),
 ]

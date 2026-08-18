@@ -1,3 +1,10 @@
+## 0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate
+
+- GitHub Actions run 32096206966에서 Browser Speech pace test의 R1 이전 expectation(`1.10 < 1.10`)이 남아 있음을 확인하고 현재 1.00 baseline 계약으로 수정했습니다.
+- Web quality에 critical voice/recovery regression phase와 실패 summary artifact를 추가했습니다.
+- Web quality report schema/heartbeat는 유지하고 API evidence intake phase contract를 8단계로 동기화했습니다.
+- 실제 Web dependency/Chromium 재검증은 GitHub Actions 재실행을 최종 gate로 둡니다.
+
 ## 0.11.24 R1 · Voice Pace Calibration
 
 - 앱 semver `0.11.24`를 유지하는 R1 hotfix입니다.

@@ -13,6 +13,7 @@ for (const [name, expected] of Object.entries({
   'quality:web-repro': 'node scripts/run-web-quality.mjs',
   'quality:web-report:verify': 'node scripts/verify-web-quality-report.mjs',
   'quality:reproducible-web': 'node scripts/check-reproducible-web-quality.mjs',
+  'test:web-critical': 'vitest run src/tts/browserSpeech.test.ts src/components/workspace/DesktopVoiceDrawer.test.tsx src/components/workspace/TimelineEditor.test.tsx src/hooks/useTimelineGeneration.test.ts --fileParallelism=false',
 })) {
   if (packageJson.scripts?.[name] !== expected) failures.push(`package.json ${name} 계약 불일치`)
 }
@@ -22,6 +23,7 @@ for (const token of [
   '.sorion/web-quality',
   'continue-on-error: true',
   'Fail after preserving Web evidence',
+  'sorion-web-quality-${{ github.run_attempt }}',
 ]) {
   if (!workflow.includes(token)) failures.push(`Web quality workflow 계약 누락: ${token}`)
 }
@@ -60,7 +62,8 @@ try {
     failures.push(`plan report 생성/검증 실패: ${run.stderr}${verify.stderr}`)
   } else {
     const report = JSON.parse(await readFile(reportPath, 'utf8'))
-    if (report.phases?.length !== 7) failures.push('Web quality phase가 7개가 아닙니다.')
+    if (report.phases?.length !== 8) failures.push('Web quality phase가 8개가 아닙니다.')
+    if (report.phases?.[5]?.id !== 'critical-regression') failures.push('critical-regression phase 순서가 올바르지 않습니다.')
     if (!/^[0-9a-f]{64}$/.test(report.evidenceSha256 ?? '')) failures.push('evidence SHA-256 형식 오류')
     const firstLogPath = join(fixture, 'logs', 'lock-structure.log')
     const originalLog = await readFile(firstLogPath, 'utf8')

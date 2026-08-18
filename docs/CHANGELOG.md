@@ -1,3 +1,25 @@
+# CHANGELOG
+
+## 0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate
+
+- GitHub Actions run `32096206966`에서 확인된 `browserSpeech.test.ts`의 stale pace expectation을 수정했습니다. 혜린 preset은 R1에서 `rateMultiplier=1.00`이므로 `request.speed=1.10`일 때 browser playback rate도 `1.10`을 유지하는 것이 현재 계약입니다.
+- dependency-free `check-voice-preset-contracts.mjs`가 R1 이전의 `toBeLessThan(request.speed)` 기대값 재유입을 차단하고, 현재 `toBeCloseTo(request.speed, 5)` 계약을 확인합니다.
+- Web quality에 `critical-regression` phase를 추가해 전체 Vitest 전에 Browser Speech pace, Voice Drawer `재생=선택`, Timeline stale MY VOICE subset recovery/Undo 회귀를 집중 실행합니다.
+- 실패한 Web quality phase는 기존 로그 SHA 증거와 별도로 `.sorion/web-quality/failure-summary.txt`에 phase/command/exit code/로그 tail을 남겨 다음 실패의 원인 확인 시간을 줄입니다.
+- Web quality report schema는 `web-quality/1`, heartbeat는 `6.7`을 유지하며 API intake validator와 phase 순서를 8단계로 동기화했습니다.
+- 실제 MY VOICE Worker/동의 프로필 성공을 synthetic test로 가장하지 않습니다. 실제 clone runtime 및 Chromium multi-scene 캡처는 후속 실환경 gate로 남깁니다.
+
+### 검증
+
+- Product version sync: **0.11.25 PASS**
+- Repository preflight: **49/49 PASS**
+- API pytest: **220/220 PASS** (one existing FastAPI deprecation warning)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Changed Node `.mjs` syntax checks: **PASS**
+- GitHub 실패 원인: `expected 1.1 to be less than 1.1` → **stale test contract 확인 및 수정**
+- Web dependency 기반 critical/full Vitest, lint, semantic typecheck, build, Chromium: **GitHub Actions 재실행 최종 확인 필요**
+
 ## 0.11.24 R1 · Voice Pace Calibration
 
 - 앱 semver는 `0.11.24`를 유지하고 hotfix revision을 R1으로 구분합니다.
@@ -19,8 +41,6 @@
 - Web Vitest: **미실행** — 전달 폴더의 `node_modules`가 불완전해 `vitest` 실행 파일이 없습니다.
 - Semantic TypeScript: **의존성 부족으로 미완료** — 전역 `tsc`는 실행됐지만 Vite/Vitest/React type definition이 없어 종료했습니다.
 - ESLint/Vite build/Chromium: **로컬 미실행**, GitHub Actions 최종 gate로 남깁니다.
-
-# CHANGELOG
 
 ## 0.11.24 · Recovery Batch & Editor Responsibility Split
 

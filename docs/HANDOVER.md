@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.24 R1 · Voice Pace Calibration**
+현재 기준 버전: **0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-18 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,18 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-18 KST - 0.11.25 Web Quality CI Stabilization & Critical Recovery Gate
+1. **Work date (KST)**: 2026-08-18.
+2. **Target/base version**: `0.11.25 - Web Quality CI Stabilization & Critical Recovery Gate` / `0.11.24 R1 - Voice Pace Calibration`.
+3. **Changes**: Fixed the stale Browser Speech pace assertion exposed by GitHub Actions run `32096206966`: with Hyerin `rateMultiplier=1.00`, a requested speed of `1.10` must produce playback rate `1.10`, not a value below it. Added dependency-free protection against the obsolete assertion, an early `critical-regression` Web quality phase for Browser Speech, Voice Drawer preview-selection linkage, Timeline stale MY VOICE subset recovery, and generation-history recovery, plus a first-failure summary artifact.
+4. **Reason**: CI must be green before new feature work. The R1 implementation was correct but one old test still encoded the pre-calibration always-slower behavior, so the failure needed a focused stabilization patch and a narrower early failure domain.
+5. **Impact scope**: Browser Speech test contract, Web quality phase plan, API Web-quality evidence intake phase contract, repository preflight, failure evidence, product version, and release documentation. Voice pace multipliers, Timeline recovery behavior, engine routing, project schema, and MY VOICE runtime behavior are unchanged.
+6. **Major changed/added files**: `src/tts/browserSpeech.test.ts`, `package.json`, `scripts/{web-quality-plan,run-web-quality,check-reproducible-web-quality,check-voice-preset-contracts}.mjs`, `services/api/app/services/web_quality_report.py`, `services/api/tests/test_evidence.py`, `docs/{WEB_QUALITY_CI_STABILIZATION,REPRODUCIBLE_WEB_QUALITY,CHANGELOG,NEXT_UPDATE,HANDOVER}.md`, version-sync files, and patch delivery documents.
+7. **Verification**: Product version sync **0.11.25 PASS**; Repository preflight **49/49 PASS**; API pytest **220/220 PASS** with one existing FastAPI deprecation warning; Worker pytest **14/14 PASS**; Python compileall **PASS**; changed Node `.mjs` syntax checks **PASS**. Dependency-based critical/full Vitest, ESLint, semantic typecheck, Vite build, and Chromium were not run locally because the delivery container does not have a complete Web toolchain; GitHub Actions rerun is the final gate.
+8. **Known limits/cautions**: Do not describe 0.11.25 as CI-green until the new commit passes GitHub Actions. Real MY VOICE clone success and first-audio latency require a real Worker/model and a consented profile. Multi-stale recovery still changes only unavailable MY VOICE clips, and Undo restores semantic Voice assignment without resurrecting discarded historical audio/job/track state.
+9. **Generated artifacts**: `SoriON-AI-0.11.25-web-quality-ci-stabilization-critical-recovery-gate-full.zip`, `SoriON-AI-0.11.24-r1-to-0.11.25-web-quality-ci-stabilization-critical-recovery-gate-patch.zip`, `SoriON-AI-0.11.25-web-quality-ci-stabilization-critical-recovery-gate-SHA256SUMS.txt`.
+10. **Next expected update**: `0.11.26 - Chromium Multi-Scene Evidence & Real MY VOICE Recovery`. After 0.11.25 passes GitHub Web quality, capture separate desktop/mobile workspace, Voice Picker/Drawer, and recovery-impact evidence; add real clone recovery runtime evidence only when the real Worker/model and a consented profile are available.
 
 ## 2026-08-18 KST · 0.11.24 R1 Voice Pace Calibration
 1. **작업 일시(KST)**: 2026-08-18.
@@ -20,7 +32,7 @@
 7. **검증 결과**: 제품 버전 sync **0.11.24 PASS**, Repository preflight **49/49 PASS**, 관련 API pace regression **8/8 PASS**, API pytest **220/220 PASS**, Worker pytest **14/14 PASS**, Python compileall **PASS**, TS/TSX syntax parse **245/245 PASS**, 0.11.24 기준 PATCH overlay **1020/1020 files · missing 0 / extra 0 / changed 0**입니다. Web Vitest는 로컬 `node_modules`가 불완전해 `vitest` binary가 없어 실행하지 못했습니다. 전역 `tsc`는 시작됐지만 Vite/Vitest/React type definition이 없어 semantic typecheck를 완료하지 못했습니다. ESLint/Vite build/Chromium은 GitHub Actions 최종 gate로 남깁니다.
 8. **알려진 제한과 주의사항**: 이 값은 실제 한국인 청취자 benchmark가 아니라 제품 pace calibration입니다. 실제 청취 evidence가 생기기 전에는 더 공격적인 속도 보정을 보증하지 않습니다. MY VOICE는 built-in preset multiplier를 쓰지 않으므로 clone 결과가 느리면 sample cadence/Worker/model을 별도로 확인해야 합니다.
 9. **생성 산출물**: `SoriON-AI-0.11.24-r1-voice-pace-calibration-full.zip`, `SoriON-AI-0.11.24-to-0.11.24-r1-voice-pace-calibration-patch.zip`, `SoriON-AI-0.11.24-r1-voice-pace-calibration-SHA256SUMS.txt`.
-10. **다음 예상 업데이트**: `0.11.25 · Web Quality Evidence & Recovery Runtime Verification`. R1을 실제 GitHub 기준선에 반영해 Vitest/typecheck/lint/build와 desktop/mobile Chromium을 우선 통과시키고, 실제 Worker/동의 프로필이 있을 때만 MY VOICE stale recovery runtime evidence를 추가합니다.
+10. **다음 예상 업데이트**: `0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate`. R1을 실제 GitHub 기준선에 반영해 Vitest/typecheck/lint/build와 desktop/mobile Chromium을 우선 통과시키고, 실제 Worker/동의 프로필이 있을 때만 MY VOICE stale recovery runtime evidence를 추가합니다.
 
 ## 2026-08-18 KST · 0.11.24 Recovery Batch & Editor Responsibility Split
 1. **작업 일시(KST)**: 2026-08-18.
@@ -32,7 +44,7 @@
 7. **검증 결과**: 제품 버전 sync **0.11.24 PASS**, Repository preflight **49/49 PASS**, API pytest **220/220 PASS**, Worker pytest **14/14 PASS**, Python compileall **PASS**, TS/TSX syntax parse **244/244 PASS**, CSS brace balance **28/28 PASS**, 0.11.23 기준 PATCH overlay **1015/1015 files · missing 0 / extra 0 / changed 0**입니다. Python 3.10 Ruff는 `uv`가 런타임을 받는 단계에서 DNS/network 제한으로 실행하지 못했습니다. 전체 Web Vitest/ESLint/semantic typecheck/Vite build와 실제 desktop/mobile Chromium evidence도 이 전달 환경에 완전한 `node_modules`와 연결된 GitHub 저장소 컨텍스트가 없어 로컬에서 실행하지 않았고 GitHub Actions를 최종 gate로 남깁니다.
 8. **알려진 제한과 주의사항**: 다중 복구는 선택 전체가 아니라 unavailable MY VOICE subset만 바꿉니다. 실행 전 ready stale audio는 유지되지만 교체를 실행하면 기존 audio/job/track은 제거되고 queued가 됩니다. Undo는 Voice 배정을 되돌리되 과거 audio 파일을 부활시키지 않습니다. 실제 MY VOICE Worker 성공/first-audio evidence는 모델·동의된 프로필·Worker가 준비된 환경에서만 확인할 수 있습니다.
 9. **생성 산출물**: `SoriON-AI-0.11.24-recovery-batch-editor-responsibility-split-full.zip`, `SoriON-AI-0.11.23-to-0.11.24-recovery-batch-editor-responsibility-split-patch.zip`, `SoriON-AI-0.11.24-recovery-batch-editor-responsibility-split-SHA256SUMS.txt`.
-10. **다음 예상 업데이트**: `0.11.25 · Web Quality Evidence & Recovery Runtime Verification`. 실제 GitHub Actions Web quality와 desktop/mobile Chromium evidence를 먼저 녹색으로 고정하고, 실제 Worker 환경이 있을 때만 stale MY VOICE 재생성 성공/지연 증거를 추가합니다.
+10. **다음 예상 업데이트**: `0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate`. 실제 GitHub Actions Web quality와 desktop/mobile Chromium evidence를 먼저 녹색으로 고정하고, 실제 Worker 환경이 있을 때만 stale MY VOICE 재생성 성공/지연 증거를 추가합니다.
 
 ## 2026-08-18 KST · 0.11.23 Focused Voice Surface & Picker Polish
 1. **작업 일시(KST)**: 2026-08-18.
@@ -954,7 +966,7 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.11.25 · Web Quality Evidence & Recovery Runtime Verification**.
+다음 목표 버전: **0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate**.
 우선순위:
 1. 실제 GitHub Actions에서 Vitest, semantic typecheck, lint, Vite build를 모두 녹색으로 고정한다.
 2. desktop 1024/1280/1440과 mobile 360/390/430 Chromium evidence에서 Voice Picker/Drawer 재생=선택, 상단 지정 영역, multi stale recovery dialog를 확인한다.

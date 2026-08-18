@@ -279,13 +279,14 @@ def test_evidence_intake_accepts_verified_web_quality_report(client):
         ("dependency-tree", "npm run quality:dependency-tree"),
         ("lint", "npm run lint"),
         ("typecheck", "npm run typecheck"),
+        ("critical-regression", "npm run test:web-critical"),
         ("test", "npm run test:ci"),
         ("build", "npm run build"),
     ]
     report = {
         "schemaVersion": 1,
         "mode": "run",
-        "appVersion": "0.11.23",
+        "appVersion": "0.11.25",
         "heartbeat": "6.7",
         "startedAt": "2026-08-03T09:00:00.000Z",
         "completedAt": "2026-08-03T09:01:00.000Z",
