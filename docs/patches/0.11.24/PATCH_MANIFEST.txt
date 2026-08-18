@@ -1,0 +1,52 @@
+# SoriON AI 0.11.24 Patch Manifest
+
+Base: user-provided 0.11.23 · Focused Voice Surface & Picker Polish FULL ZIP
+Target: 0.11.24 · Recovery Batch & Editor Responsibility Split
+Added: 7
+Modified: 31
+Deleted: 0
+
+[ADDED]
+docs/RECOVERY_BATCH_EDITOR_RESPONSIBILITY_SPLIT.md
+docs/patches/0.11.24/PATCH_MANIFEST.txt
+docs/patches/0.11.24/PATCH_README.md
+docs/patches/0.11.24/VALIDATION.md
+scripts/check-recovery-batch-editor-split.mjs
+src/hooks/useTimelineEditorBatch.ts
+src/hooks/useTimelineEditorSelection.ts
+
+[MODIFIED]
+FOUNDATION_REPORT.md
+VERSION
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+package-lock.json
+package.json
+scripts/check-batch-recovery-adaptive-routing.mjs
+scripts/check-edit-history-speaker-routing.mjs
+scripts/check-studio-playback-timeline-ux.mjs
+scripts/check-timeline-voice-recovery-navigation.mjs
+scripts/run-preflight.mjs
+services/api/pyproject.toml
+services/api/tests/test_ai_director.py
+services/api/tests/test_connectivity.py
+services/api/tests/test_engine_catalog.py
+services/api/tests/test_engine_strategy.py
+services/api/tests/test_evidence.py
+services/api/tests/test_health.py
+services/api/tests/test_quality.py
+services/api/tests/test_setup.py
+services/api/uv.lock
+services/worker/pyproject.toml
+services/worker/uv.lock
+src/components/workspace/TimelineEditor.test.tsx
+src/components/workspace/TimelineEditor.tsx
+src/hooks/useTimelineGeneration.test.ts
+src/hooks/useTimelineGeneration.ts
+src/pages/HomePage.tsx
+src/styles/timeline-voice-recovery.css
+src/update/buildInfo.ts
+
+[DELETED]
+(none)

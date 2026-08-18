@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery
+
+- desktop 1024/1280/1440과 mobile 360/390/430에서 `workspace`, `voice-surface`, `recovery-impact`를 각각 별도 PNG로 캡처하는 Chromium multi-scene evidence runner를 추가했습니다. 각 캡처는 SHA-256, layout assertion, interaction evidence를 manifest에 보존합니다.
+- Voice Drawer/Picker의 다른 성우 ▶ 미리듣기를 실제로 클릭한 뒤 `aria-checked` 선택 상태가 바뀌는지 검증해 `재생=선택` 계약을 브라우저 interaction evidence로 확인합니다.
+- recovery scene은 IndexedDB에 stale MY VOICE 2개 + 정상 SoriON Voice 1개인 전용 프로젝트를 준비하고 실제 React Timeline에서 3개를 선택한 뒤 `복구 영향 확인` dialog가 `선택 3개 중 사용 불가 MY VOICE 2개만 변경`한다고 표시하는지 검증합니다.
+- UI fixture는 실제 Worker/model을 사용하지 않으므로 manifest에 `realWorkerClaimed=false`를 강제합니다. 실제 MY VOICE runtime은 `my-voice-recovery-runtime/1` observed evidence JSON과 별도 verifier로만 인정하며 raw profile ID/샘플 경로/오디오 원본을 증거에 넣지 않습니다.
+- GitHub Actions Web quality artifact에 기존 layout evidence와 새 desktop/mobile multi-scene evidence를 함께 업로드하고, 어느 scene runner든 실패하면 evidence 업로드 후 job을 실패시킵니다.
+
+### 검증
+
+- Product version sync: **0.11.26 PASS**
+- Repository preflight: **50/50 PASS**
+- API pytest: **220/220 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- 신규 Node `.mjs` syntax 및 MY VOICE runtime evidence verifier 유효 fixture: **PASS**
+- Chromium multi-scene 실제 실행: **로컬 `npm ci`가 제한 시간 안에 완료되지 않았고 `vite`/`vitest`가 설치되지 않아 미실행; GitHub Actions 최종 gate**
+- 실제 동의된 MY VOICE Worker/model runtime evidence: **현재 환경에 실제 프로필/모델이 없어 미수집; 성공으로 표시하지 않음**
+
 ## 0.11.25 R1 · Mobile WebView Playback & Exit Guard
 
 - 카카오톡 모바일 인앱브라우저에서 Browser Speech preset 미리듣기는 비동기 player effect를 기다리지 않고 최초 탭 call stack 안에서 `speechSynthesis.speak()`를 직접 시작합니다.

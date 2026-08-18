@@ -8,7 +8,9 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- 버전: `0.11.25 R1 · Mobile WebView Playback & Exit Guard`
+- 버전: `0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery`
+- Chromium multi-scene evidence: desktop 1024/1280/1440과 mobile 360/390/430에서 workspace / Voice Picker·Drawer / recovery-impact를 각각 캡처하고 PNG SHA-256 + layout/interaction assertion을 GitHub Actions artifact에 보존합니다.
+- MY VOICE runtime evidence: UI fixture는 실제 Worker 성공으로 간주하지 않으며, 동의·Worker/model ready·first-audio를 갖춘 `my-voice-recovery-runtime/1` observed evidence만 실 runtime 성공으로 인정합니다.
 - PC 가로 타임라인: ruler·클립·플레이헤드를 하나의 시간→픽셀 X축으로 통일하고, 클립 폭을 실제 재생 길이에 비례시켜 좌→우 흐름을 그대로 편집 구조에 반영합니다.
 - PC 클립 스트립: 타임라인 안에서는 얇은 가로 클립으로 순서·길이·화자·상태를 보고, 상세 대사 수정은 선택 클립 빠른 편집기로 분리합니다. 트랙 배경/눈금은 클릭·드래그 seek를 지원하고 클립 클릭은 선택 동작과 분리합니다.
 - 모바일 작업 흐름: 홈에서도 생성 플레이어와 주요 Dock을 함께 보여주고, 대본 입력 중 키보드/viewport 변화에 맞춰 현재 편집 칸을 상단 작업 위치에 유지합니다.

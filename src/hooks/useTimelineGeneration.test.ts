@@ -846,6 +846,60 @@ describe('useTimelineGeneration bounded edit history', () => {
     usePlayerStore.getState().clearQueue()
   })
 
+  it('stale MY VOICE 일괄 복구는 한 개 history entry로 남고 Undo/Redo도 음원을 부활시키지 않는다', () => {
+    const { result } = renderHook(() => useTimelineGeneration())
+    let ids: string[] = []
+    act(() => {
+      ids = result.current.stageSegments([
+        {
+          text: '첫 stale 대사',
+          options: {
+            voiceId: 'myvoice:stale-a',
+            voiceName: '유실 보이스 A',
+            emotion: 'neutral',
+            speed: 1,
+            pitch: 0,
+            engineId: 'auto',
+            normalizeText: true,
+          },
+        },
+        {
+          text: '둘째 stale 대사',
+          options: {
+            voiceId: 'myvoice:stale-b',
+            voiceName: '유실 보이스 B',
+            emotion: 'neutral',
+            speed: 1,
+            pitch: 0,
+            engineId: 'auto',
+            normalizeText: true,
+          },
+        },
+      ])
+      result.current.resetEditHistory()
+      result.current.updateVoiceMany(ids, 'on-clear', '도윤', '사용 불가 목소리 일괄 복구')
+    })
+
+    expect(result.current.undoLabel).toBe('사용 불가 목소리 일괄 복구')
+    expect(result.current.blocks.filter((block) => block.kind === 'voice')).toMatchObject([
+      { voiceId: 'on-clear', status: 'queued' },
+      { voiceId: 'on-clear', status: 'queued' },
+    ])
+
+    act(() => { result.current.undoEdit() })
+    expect(result.current.redoLabel).toBe('사용 불가 목소리 일괄 복구')
+    expect(result.current.blocks.filter((block) => block.kind === 'voice')).toMatchObject([
+      { voiceId: 'myvoice:stale-a', status: 'queued', audio: null, trackId: null, jobId: null },
+      { voiceId: 'myvoice:stale-b', status: 'queued', audio: null, trackId: null, jobId: null },
+    ])
+
+    act(() => { result.current.redoEdit() })
+    expect(result.current.blocks.filter((block) => block.kind === 'voice')).toMatchObject([
+      { voiceId: 'on-clear', status: 'queued', audio: null, trackId: null, jobId: null },
+      { voiceId: 'on-clear', status: 'queued', audio: null, trackId: null, jobId: null },
+    ])
+  })
+
   it('대사 수정과 클립 추가를 Undo/Redo하며 stale 음원을 복원하지 않는다', () => {
     const { result } = renderHook(() => useTimelineGeneration())
     let blockId = ''

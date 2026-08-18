@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.11.25",
+  "version": "0.11.26",
   "private": true,
   "type": "module",
   "scripts": {
@@ -97,7 +97,11 @@
     "quality:mobile-studio": "node scripts/check-mobile-studio-flow.mjs",
     "quality:edit-history-routing": "node scripts/check-edit-history-speaker-routing.mjs",
     "quality:timeline-voice-recovery": "node scripts/check-timeline-voice-recovery-navigation.mjs",
-    "quality:recovery-batch-editor-split": "node scripts/check-recovery-batch-editor-split.mjs"
+    "quality:recovery-batch-editor-split": "node scripts/check-recovery-batch-editor-split.mjs",
+    "quality:visual-scenes": "node scripts/run-chromium-multi-scene-evidence.mjs",
+    "quality:mobile-scenes": "node scripts/run-chromium-multi-scene-evidence.mjs --mobile",
+    "quality:my-voice-runtime-evidence": "node scripts/verify-my-voice-recovery-runtime-evidence.mjs",
+    "quality:my-voice-runtime-evidence:require": "node scripts/verify-my-voice-recovery-runtime-evidence.mjs --require-success"
   },
   "engines": {
     "node": ">=22.12.0 <25",

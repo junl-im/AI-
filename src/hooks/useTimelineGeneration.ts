@@ -365,11 +365,16 @@ export function useTimelineGeneration() {
     generate: generateBlock,
   }), [cancelActiveGeneration, commit, generateBlock, removeTrack])
 
-  const updateVoiceMany = useCallback((ids: string[], voiceId: string, voiceName: string) => {
+  const updateVoiceMany = useCallback((
+    ids: string[],
+    voiceId: string,
+    voiceName: string,
+    historyLabel = '선택 클립 목소리 변경',
+  ) => {
     const selected = new Set(ids)
     if (!selected.size) return
     ids.forEach((id) => cancelActiveGeneration(id))
-    commitEdit('선택 클립 목소리 변경', (current) => current.map((block) => {
+    commitEdit(historyLabel, (current) => current.map((block) => {
       if (block.kind !== 'voice' || !selected.has(block.id) || block.voiceId === voiceId) return block
       if (block.trackId) removeTrack(block.trackId)
       return {

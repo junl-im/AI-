@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.25 R1 · Mobile WebView Playback & Exit Guard**
+현재 기준 버전: **0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-18 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,18 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-18 KST · 0.11.26 Chromium Multi-Scene Evidence & Real MY VOICE Recovery
+1. **작업 일시(KST)**: 2026-08-18.
+2. **대상/기준 버전**: `0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery` / `0.11.25 R1 · Mobile WebView Playback & Exit Guard`.
+3. **변경 내용**: desktop 1024/1280/1440과 mobile 360/390/430에서 workspace, Voice Drawer/Picker, recovery-impact를 별도 scene으로 캡처하는 `run-chromium-multi-scene-evidence.mjs`를 추가했습니다. 각 PNG SHA-256, layout assertion, Voice preview 선택 변화, stale MY VOICE 2/3 복구 범위를 manifest에 기록합니다. recovery fixture는 IndexedDB 프로젝트를 실제 React UI로 열어 선택 3개 중 unavailable 2개만 대상으로 하는 dialog를 확인합니다. 별도로 `my-voice-recovery-runtime/1` observed runtime evidence verifier를 추가해 실제 Worker/model/동의 프로필 성공을 synthetic UI fixture와 분리합니다.
+4. **변경 이유**: 기존 Chromium runner는 workspace 한 scene만 캡처해 0.11.23의 `재생=선택` Voice surface와 0.11.24의 recovery impact dialog를 브라우저 상호작용 수준에서 증명하지 못했습니다. 또한 실제 MY VOICE 성공 증거와 fixture/static 검증을 명확히 분리할 필요가 있었습니다.
+5. **영향 범위**: GitHub Actions Web quality evidence, Chromium desktop/mobile browser regression, Voice Drawer/Picker interaction 검증, Timeline stale recovery visual evidence, MY VOICE runtime evidence privacy/provenance 계약, 제품 버전/문서입니다. 실제 Voice 생성 알고리즘, preset pace, Timeline recovery 동작 자체, 프로젝트 저장 schema는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `scripts/run-chromium-multi-scene-evidence.mjs`, `scripts/check-chromium-multi-scene-evidence.mjs`, `scripts/verify-my-voice-recovery-runtime-evidence.mjs`, `.github/workflows/ci.yml`, `package.json`, `docs/MY_VOICE_RECOVERY_RUNTIME_EVIDENCE.md`, `docs/{CHANGELOG,NEXT_UPDATE,HANDOVER}.md` 및 버전/전달 문서입니다.
+7. **검증 결과**: 제품 version sync **0.11.26 PASS**, Repository preflight **50/50 PASS**, API pytest **220/220 PASS** (기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, 신규 Node `.mjs` syntax 및 MY VOICE runtime evidence verifier 유효 fixture **PASS**입니다. 로컬 `npm ci`는 제한 시간 안에 완료되지 않아 `vite`/`vitest`가 설치되지 않았으므로 실제 Chromium 18-scene 실행과 Web Vitest/lint/typecheck/build는 GitHub Actions 최종 gate로 남깁니다. 실제 동의된 MY VOICE 프로필/Worker/model이 없어 observed runtime evidence는 수집하지 않았으며 성공으로 표시하지 않습니다.
+8. **알려진 제한과 주의사항**: multi-scene recovery project는 UI 범위 검증용 fixture이며 실제 MY VOICE Worker 성공이 아닙니다. manifest는 `realWorkerClaimed=false`를 명시합니다. 실 runtime 성공은 `observed-runtime`, consent verified, Worker/model ready, SHA-256 profile fingerprint, completed first-audio/playback evidence가 있을 때만 인정합니다. raw profile ID/샘플 경로/원본 오디오는 evidence JSON에 넣지 않습니다.
+9. **생성 산출물**: `SoriON-AI-0.11.26-chromium-multi-scene-my-voice-recovery-evidence-full.zip`, `SoriON-AI-0.11.25-r1-to-0.11.26-chromium-multi-scene-my-voice-recovery-evidence-patch.zip`, `SoriON-AI-0.11.26-chromium-multi-scene-my-voice-recovery-evidence-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.27 · Field Device & MY VOICE Runtime Certification`. 0.11.26 Actions artifact를 실제 검토하고 카카오 Android/iOS 및 실제 동의 MY VOICE Worker 환경에서 field/runtime evidence를 닫습니다.
 
 ## 2026-08-18 KST · 0.11.25 R1 Mobile WebView Playback & Exit Guard
 1. **작업 일시(KST)**: 2026-08-18.

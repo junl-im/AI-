@@ -388,7 +388,100 @@ describe('TimelineEditor', () => {
     await waitFor(() => expect(screen.getByRole('combobox', { name: '사용 불가 목소리 대체 선택' })).toHaveValue('on-clear'))
 
     fireEvent.click(screen.getByRole('button', { name: '교체만 적용' }))
-    await waitFor(() => expect(onBatchVoiceChange).toHaveBeenCalledWith(['voice-1'], 'on-clear', false))
+    await waitFor(() => expect(onBatchVoiceChange).toHaveBeenCalledWith(['voice-1'], 'on-clear', false, 'recovery'))
+  })
+
+  it('여러 stale MY VOICE는 원래 구성과 ready 음원 영향을 확인한 뒤 사용 불가 클립만 일괄 복구한다', async () => {
+    const onBatchVoiceChange = vi.fn().mockResolvedValue(null)
+    const staleBlocks: TimelineBlock[] = [
+      ...blocks.map((block) => {
+        if (block.id === 'voice-1' && block.kind === 'voice') {
+          return {
+            ...block,
+            voiceId: 'myvoice:deleted-a',
+            voiceName: '유실 보이스 A',
+            status: 'ready' as const,
+            trackId: 'stale-track-a',
+            progress: 100,
+          }
+        }
+        if (block.id === 'voice-2' && block.kind === 'voice') {
+          return {
+            ...block,
+            voiceId: 'myvoice:deleted-b',
+            voiceName: '유실 보이스 B',
+            status: 'failed' as const,
+            trackId: null,
+            progress: 0,
+          }
+        }
+        return block
+      }),
+      {
+        id: 'voice-3',
+        kind: 'voice',
+        text: '정상 목소리 문장입니다.',
+        voiceId: 'sori-warm',
+        voiceName: '혜린',
+        emotion: 'neutral',
+        speed: 1,
+        pitch: 0,
+        engineId: 'system',
+        normalizeText: true,
+        jobId: null,
+        durationSeconds: 2,
+        status: 'queued',
+        progress: 0,
+        audio: null,
+        trackId: null,
+        error: null,
+        revision: 1,
+      },
+    ]
+
+    render(
+      <TimelineEditor
+        blocks={staleBlocks}
+        currentVoiceId="on-clear"
+        onMove={vi.fn()}
+        onMoveMany={vi.fn()}
+        onReorder={vi.fn()}
+        onSplit={vi.fn()}
+        onUpdateText={vi.fn()}
+        onRetry={vi.fn()}
+        onAddVoice={vi.fn()}
+        onAddPause={vi.fn()}
+        onRemove={vi.fn()}
+        onRemoveMany={vi.fn()}
+        onBatchVoiceChange={onBatchVoiceChange}
+        onClear={vi.fn()}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: '대사 전체' }))
+
+    const recovery = screen.getByRole('status', { name: '선택 사용 불가 목소리 복구' })
+    expect(recovery).toHaveTextContent('사용 불가 MY VOICE 2개')
+    expect(recovery).toHaveTextContent('유실 보이스 A 1개')
+    expect(recovery).toHaveTextContent('유실 보이스 B 1개')
+    expect(recovery).toHaveTextContent('현재 완성 음원 1개는 복구 실행 전까지 그대로 유지됩니다')
+    expect(onBatchVoiceChange).not.toHaveBeenCalled()
+
+    await waitFor(() => expect(screen.getByRole('combobox', { name: '사용 불가 목소리 일괄 대체 선택' })).toHaveValue('on-clear'))
+    fireEvent.click(screen.getByRole('button', { name: '복구 영향 확인' }))
+
+    const impact = screen.getByRole('alertdialog', { name: '사용 불가 목소리 일괄 복구 영향 확인' })
+    expect(impact).toHaveTextContent('선택 3개 중 사용 불가 MY VOICE 2개만 변경합니다')
+    expect(impact).toHaveTextContent('현재 완성 음원 1개는 실행하는 순간 폐기')
+    expect(impact).toHaveTextContent('Undo는 목소리 배정을 되돌리지만 과거 음원 파일을 부활시키지 않고')
+
+    fireEvent.click(screen.getByRole('button', { name: '교체만 적용' }))
+    await waitFor(() => expect(onBatchVoiceChange).toHaveBeenCalledWith(
+      ['voice-1', 'voice-2'],
+      'on-clear',
+      false,
+      'recovery',
+    ))
   })
 
   it('혼합 성우 다중 선택은 구성과 현재 작업 목소리를 분리해 보여준다', async () => {

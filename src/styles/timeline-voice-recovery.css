@@ -216,3 +216,84 @@
     margin-left: 0;
   }
 }
+
+/* 0.11.24 multi stale MY VOICE recovery impact */
+.soa-timeline-batch-recovery {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 0.55fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 179, 159, 0.24);
+  border-radius: 10px;
+  padding: 8px;
+  background: rgba(255, 154, 144, 0.055);
+}
+
+.soa-timeline-batch-recovery__summary,
+.soa-timeline-batch-recovery label {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.soa-timeline-batch-recovery__summary > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.soa-timeline-batch-recovery strong {
+  color: #ffb39f;
+  font-size: 9px;
+}
+
+.soa-timeline-batch-recovery span,
+.soa-timeline-batch-recovery small,
+.soa-timeline-batch-recovery em,
+.soa-timeline-batch-recovery label > span {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 8px;
+  font-style: normal;
+  line-height: 1.4;
+}
+
+.soa-timeline-batch-recovery__summary small {
+  border-radius: 999px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.soa-timeline-batch-recovery em,
+.soa-timeline-batch-recovery .is-warning {
+  color: #ffb39f;
+}
+
+.soa-timeline-batch-recovery select,
+.soa-timeline-batch-recovery > button {
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 0 9px;
+  color: rgba(255, 255, 255, 0.78);
+  background: #14171d;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.soa-timeline-batch-recovery select:disabled,
+.soa-timeline-batch-recovery > button:disabled {
+  opacity: 0.3;
+}
+
+.soa-timeline-batch-preview.is-recovery {
+  border-color: rgba(255, 179, 159, 0.28);
+  background: rgba(255, 154, 144, 0.06);
+}
+
+@media (max-width: 919px) {
+  .soa-timeline-batch-recovery {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
+  }
+}

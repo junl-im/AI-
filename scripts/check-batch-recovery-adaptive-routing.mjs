@@ -14,6 +14,7 @@ function requireText(text, token, label) {
 
 const timeline = await source('src/components/workspace/TimelineEditor.tsx')
 const timelineHook = await source('src/hooks/useTimelineGeneration.ts')
+const editorBatch = await source('src/hooks/useTimelineEditorBatch.ts')
 const timelineTests = await source('src/components/workspace/TimelineEditor.test.tsx')
 const orchestrator = await source('services/api/app/services/engine_orchestrator.py')
 const engineSchema = await source('services/api/app/schemas/engine.py')
@@ -34,10 +35,15 @@ for (const [token, label] of [
   ['>대사 전체</button>', 'select-all voice shortcut missing'],
   ['>실패만</button>', 'failed-only selection shortcut missing'],
   ['실패 원인별 재시도', 'failure-group retry UX missing'],
-  ['BATCH_RETRY_LIMIT = 3', 'bounded quick retry missing'],
-  ['BATCH_HISTORY_LIMIT = 6', 'session retry history limit missing'],
   ['세션 재시도 이력', 'session retry history UX missing'],
 ]) requireText(timeline, token, label)
+
+for (const [token, label] of [
+  ['TIMELINE_BATCH_RETRY_LIMIT = 3', 'bounded quick retry missing'],
+  ['TIMELINE_BATCH_HISTORY_LIMIT = 6', 'session retry history limit missing'],
+  ['batchFailureGroups', 'failure grouping responsibility missing'],
+  ['applyBatchResult', 'batch result responsibility missing'],
+]) requireText(editorBatch, token, label)
 
 requireText(
   timelineTests,

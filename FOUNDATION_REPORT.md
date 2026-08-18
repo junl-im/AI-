@@ -1,3 +1,21 @@
+## 0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery
+
+- desktop/mobile 각 3개 viewport에서 workspace, Voice surface, recovery impact를 총 18개 PNG evidence로 분리합니다.
+- Voice preview click의 선택 변화와 stale MY VOICE 2/3 recovery scope를 브라우저 interaction assertion으로 기록합니다.
+- UI fixture는 실제 clone 성공으로 승격하지 않고 `realWorkerClaimed=false`로 고정합니다.
+- 실제 MY VOICE runtime은 동의/Worker/model/first-audio를 포함한 privacy-safe observed evidence verifier로 별도 검증합니다.
+
+### 검증
+
+- Product version sync: **0.11.26 PASS**
+- Repository preflight: **50/50 PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- 신규 Node `.mjs` syntax 및 MY VOICE runtime evidence verifier fixture: **PASS**
+- 실제 Chromium 18-scene/Web dependency 검증: **로컬 `npm ci` 제한으로 미실행, GitHub Actions 최종 gate**
+- 실제 동의된 MY VOICE Worker/model runtime: **환경 부재로 미수집, 성공으로 표시하지 않음**
+
 ## 0.11.25 R1 · Mobile WebView Playback & Exit Guard
 
 - 앱 semver `0.11.25`를 유지하는 모바일 hotfix revision입니다.

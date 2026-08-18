@@ -369,6 +369,16 @@ jobs:
         if: steps.web_quality.outcome == 'success'
         continue-on-error: true
         run: npm run quality:mobile-layout
+      - name: Run Chromium multi-scene desktop evidence
+        id: visual_scenes
+        if: steps.web_quality.outcome == 'success'
+        continue-on-error: true
+        run: npm run quality:visual-scenes
+      - name: Run Chromium multi-scene mobile evidence
+        id: mobile_scenes
+        if: steps.web_quality.outcome == 'success'
+        continue-on-error: true
+        run: npm run quality:mobile-scenes
       - name: Upload Web quality evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -379,7 +389,7 @@ jobs:
           include-hidden-files: true
           path: .sorion/web-quality
       - name: Fail after preserving Web evidence
-        if: steps.web_quality.outcome == 'failure' || steps.visual_layout.outcome == 'failure' || steps.mobile_layout.outcome == 'failure'
+        if: steps.web_quality.outcome == 'failure' || steps.visual_layout.outcome == 'failure' || steps.mobile_layout.outcome == 'failure' || steps.visual_scenes.outcome == 'failure' || steps.mobile_scenes.outcome == 'failure'
         run: exit 1
       - name: Write empty static-host runtime configuration
         run: npm run runtime:config

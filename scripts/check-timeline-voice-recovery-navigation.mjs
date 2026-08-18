@@ -42,7 +42,7 @@ requireTokens('src/components/workspace/TimelineQuickEditor.tsx', quickEditor, [
 const editor = await source('src/components/workspace/TimelineEditor.tsx')
 requireTokens('src/components/workspace/TimelineEditor.tsx', editor, [
   'selectedVoiceUnavailable',
-  'replacementVoiceChoices',
+  'recoveryReplacementChoices',
   'recoverSelectedVoice',
   'voiceSelectionSummary.mixed',
   '현재 작업 목소리',
@@ -61,7 +61,7 @@ requireTokens('src/components/workspace/TimelineVoiceBlockCard.tsx', card, [
 const home = await source('src/pages/HomePage.tsx')
 requireTokens('src/pages/HomePage.tsx', home, [
   'currentVoiceId={voiceId}',
-  'onBatchVoiceChange={async (ids, nextVoiceId, regenerate) => {',
+  "onBatchVoiceChange={async (ids, nextVoiceId, regenerate, reason = 'batch') => {",
 ])
 
 const tests = await source('src/components/workspace/TimelineEditor.test.tsx')

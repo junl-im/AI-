@@ -87,6 +87,7 @@ requireTokens('src/components/workspace/TimelineVoiceBlockCard.tsx', timelineBlo
 ])
 
 const timeline = await source('src/components/workspace/TimelineEditor.tsx')
+const timelineSelection = await source('src/hooks/useTimelineEditorSelection.ts')
 requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'seekFromTimeline',
   '트랙 클릭 위치 이동',
@@ -95,7 +96,6 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'soa-timeline-zoom',
   'onEdit={editBlock}',
   'Ctrl/Cmd 클릭 다중 선택',
-  "mode === 'range'",
   'onMoveMany',
   'onRemoveMany',
   '선택 클립 일괄 작업',
@@ -105,6 +105,10 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   '실패만 재시도',
   'onBatchVoiceChange',
   'onRegenerateMany',
+])
+requireTokens('src/hooks/useTimelineEditorSelection.ts', timelineSelection, [
+  "mode === 'range'",
+  "mode === 'toggle'",
 ])
 
 const quickEditor = await source('src/components/workspace/TimelineQuickEditor.tsx')
