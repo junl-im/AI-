@@ -1,6 +1,6 @@
 # Real Device Certification Contract
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.5`
+현재 기준: `0.11.27 · Field Device & MY VOICE Runtime Certification`
 
 ## 인증 조합
 
@@ -24,3 +24,7 @@ Quality Lab은 단순 장치 기록 15개와 모바일 인증 24개를 분리해
 `POST /api/v1/quality/device-benchmarks`는 `scenario`, `browser_version`, `preset_id`, `soak_elapsed_seconds`, `playback_completed`, `sse_reconnected`, `audio_fetch_recovered`, `sse_reconnect_ms`, `audio_fetch_recovery_ms`, `playback_interruption_ms`, `seam_p95_waited_ms`, `seam_p95_decode_ms`, `final_handoff_error_ms`를 받습니다. 복구 시나리오는 boolean과 시간 필드가 모두 필요하고 기존 클라이언트는 기본 `baseline`으로 계속 동작합니다.
 
 상세 recorder 계약은 `DEVICE_SOAK_RECORDER.md`를 따릅니다.
+
+## 카카오 WebView 보조 인증
+
+Android Chrome/iOS Safari soak와 별도로 `field-device-certification/1`은 카카오톡 Android/iOS의 preset 미리듣기 및 종료 guard를 기록합니다. 직접 재생 start 또는 실패+외부 브라우저 fallback, exit dialog open/stay close, 실제 수행자 확인이 필요합니다. 상세 계약은 `FIELD_DEVICE_RUNTIME_CERTIFICATION.md`를 따릅니다.

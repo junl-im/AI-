@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
 import { requestAutomaticApiReconnect } from '../api/httpClient'
 import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
+import { recordFieldDeviceEvent } from '../quality/fieldDeviceCertification'
 import { DesktopVoiceDrawer } from '../components/workspace/DesktopVoiceDrawer'
 import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader'
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
@@ -185,7 +186,12 @@ export function HomePage() {
   }, [])
 
   const startKakaoBrowserPreview = useCallback((request: TtsSynthesisRequest, nextVoiceId: string) => {
-    if (!isKakaoInAppBrowser() || !isBrowserSpeechSupported()) return false
+    if (!isKakaoInAppBrowser()) return false
+    recordFieldDeviceEvent('preset-preview-attempted')
+    if (!isBrowserSpeechSupported()) {
+      recordFieldDeviceEvent('preset-preview-unsupported')
+      return false
+    }
     stopDirectBrowserPreview(false)
     const runId = directPreviewRunIdRef.current + 1
     directPreviewRunIdRef.current = runId
@@ -193,6 +199,7 @@ export function HomePage() {
     try {
       utterance = createBrowserSpeechUtterance(createBrowserSpeechPlayback(request))
     } catch (error) {
+      recordFieldDeviceEvent('preset-preview-voice-unavailable')
       setPreviewingId(null)
       setDirectBrowserPreview(null)
       showNotice(error instanceof Error
@@ -204,6 +211,7 @@ export function HomePage() {
     utterance.onstart = () => {
       if (directPreviewRunIdRef.current !== runId) return
       started = true
+      recordFieldDeviceEvent('preset-preview-started')
       if (directPreviewWatchdogRef.current !== null) {
         window.clearTimeout(directPreviewWatchdogRef.current)
         directPreviewWatchdogRef.current = null
@@ -222,6 +230,7 @@ export function HomePage() {
     }
     utterance.onend = finish
     utterance.onerror = () => {
+      recordFieldDeviceEvent('preset-preview-blocked')
       finish()
       showNotice('카카오톡 브라우저가 음성 재생을 차단했습니다. 외부 브라우저로 열면 안정적으로 들을 수 있습니다.')
     }
@@ -230,12 +239,14 @@ export function HomePage() {
       window.speechSynthesis.cancel()
       window.speechSynthesis.speak(utterance)
     } catch {
+      recordFieldDeviceEvent('preset-preview-exception')
       finish()
       showNotice('카카오톡 브라우저가 음성 재생을 시작하지 못했습니다. 외부 브라우저로 열어 주세요.')
       return true
     }
     directPreviewWatchdogRef.current = window.setTimeout(() => {
       if (directPreviewRunIdRef.current !== runId || started) return
+      recordFieldDeviceEvent('preset-preview-watchdog-timeout')
       window.speechSynthesis.cancel()
       setPreviewingId(null)
       setDirectBrowserPreview(null)

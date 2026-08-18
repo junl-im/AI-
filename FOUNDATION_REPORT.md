@@ -1,3 +1,23 @@
+## 0.11.27 · Field Device & MY VOICE Runtime Certification
+
+- Kakao Android/iOS에서 preset preview 직접 시작 또는 WebView 실패+외부 브라우저 fallback, exit dialog open/stay close를 `field-device-certification/1` observed-device evidence로 기록합니다.
+- Quality Lab에서 실제 수행자 확인 뒤 JSON을 저장하며 synthetic evidence와 전체 User-Agent/기기명/원문/오디오를 배제합니다.
+- Android/iOS field evidence + Chromium 9+9 scene manifest + 실제 MY VOICE completed evidence를 통합 검증하고, 실제 runtime이 없으면 pending을 유지합니다.
+- Actions run `32117983645`에서 lint는 통과했고 critical regression 64/65 뒤 exit confirmation test 1건이 실패했습니다. 실제 Back의 guard→base history state 이동을 테스트가 재현하지 않은 문제라 test harness만 교정했고 production exit hook은 유지합니다.
+
+### Verification
+
+- Product version sync: **0.11.27 PASS**
+- Repository preflight: **51/51 PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX dependency-free transpile parse: **249/249 PASS**
+- Field direct/fallback + aggregate certification verifier fixtures: **PASS**
+- R1 Actions: **lint PASS · critical regression 64/65 PASS; exit-history test harness corrected, rerun required**
+- Real Kakao Android/iOS + consented MY VOICE Worker/model: **not collected; not claimed**
+- Dependency-based Web quality/Chromium: **GitHub Actions final gate**
+
 ## 0.11.26 R1 - Web Lint Stabilization
 
 - GitHub Actions run `32109791257` reached Web quality after lock/preflight/API/Worker success, then stopped at ESLint with 1 error and 6 warnings.

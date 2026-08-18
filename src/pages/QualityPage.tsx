@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } f
 import { BrowserPlaybackEvidenceCard } from '../components/evaluation/BrowserPlaybackEvidenceCard'
 import { PlaybackSeamEvidenceCard } from '../components/evaluation/PlaybackSeamEvidenceCard'
 import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
+import { FieldDeviceCertificationCard } from '../components/evaluation/FieldDeviceCertificationCard'
 import { BenchmarkDashboardCard } from '../components/evaluation/BenchmarkDashboardCard'
 import { VoicePresetApprovalCard } from '../components/evaluation/VoicePresetApprovalCard'
 import { DeviceSoakRecorderCard } from '../components/evaluation/DeviceSoakRecorderCard'
@@ -283,6 +284,8 @@ export function QualityPage() {
           loading={loadingDeviceSummary}
           onRefresh={() => void refreshDeviceSummary()}
         />
+
+        <FieldDeviceCertificationCard />
 
         <BenchmarkDashboardCard
           deviceSummary={deviceSummary}

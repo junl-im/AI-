@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { recordFieldDeviceEvent } from '../quality/fieldDeviceCertification'
 
 const BASE_STATE_KEY = '__sorionExitBase'
 const GUARD_STATE_KEY = '__sorionExitGuard'
@@ -24,6 +25,7 @@ export function useExitConfirmation(): ExitConfirmationController {
   const bypassRef = useRef(false)
 
   const stay = useCallback(() => {
+    recordFieldDeviceEvent('exit-stay-closed')
     openRef.current = false
     setOpen(false)
     // Rearm only after the user explicitly stays. This avoids pushState races in mobile WebViews.
@@ -56,6 +58,7 @@ export function useExitConfirmation(): ExitConfirmationController {
         bypassRef.current = true
         return
       }
+      recordFieldDeviceEvent('exit-dialog-opened')
       openRef.current = true
       setOpen(true)
     }

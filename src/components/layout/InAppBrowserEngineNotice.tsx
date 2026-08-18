@@ -4,6 +4,7 @@ import {
   detectInAppBrowser,
 } from '../../browser/inAppBrowser'
 import { isBrowserSpeechSupported } from '../../tts/browserSpeech'
+import { recordFieldDeviceEvent } from '../../quality/fieldDeviceCertification'
 
 export function InAppBrowserEngineNotice() {
   const info = detectInAppBrowser()
@@ -12,6 +13,7 @@ export function InAppBrowserEngineNotice() {
   if (!info || dismissed) return null
 
   function openExternally() {
+    recordFieldDeviceEvent('external-browser-requested')
     const pageUrl = window.location.href
     const copy = navigator.clipboard?.writeText(pageUrl)
     if (copy) {

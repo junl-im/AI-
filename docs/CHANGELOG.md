@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.11.27 · Field Device & MY VOICE Runtime Certification
+
+- 카카오톡 Android/iOS에서 preset 미리듣기 시도, 실제 Speech Synthesis 시작, 차단/unsupported/watchdog/exception, 외부 브라우저 요청, 뒤로가기 dialog 열림, `계속 만들기` 닫힘을 개인정보 최소 local evidence로 기록합니다.
+- Quality Lab에 `카카오 실기기 동작 인증` 카드를 추가해 현재 surface와 관찰 상태를 확인하고, 실제 기기 수행자가 확인한 뒤 `field-device-certification/1` JSON을 내려받을 수 있습니다.
+- 직접 재생이 시작되면 direct path를, WebView가 막으면 실패 원인 + 실제 외부 브라우저 요청을 fallback path로 인정합니다. 자동 관찰만으로 READY가 되지 않고 `operatorConfirmed=true`가 추가로 필요합니다.
+- Android/iOS 실기기 JSON, desktop/mobile Chromium 9+9 scene manifest, `my-voice-recovery-runtime/1` completed evidence를 결합 검증하는 `quality:field-runtime-certification` CLI를 추가했습니다. `--require-all`은 다섯 증거가 모두 있어야 certified를 허용합니다.
+- 전체 User-Agent, 실제 기기 이름, 프로젝트 원문, 음성/샘플 바이트·경로는 field evidence에 저장하지 않습니다. Chromium synthetic fixture는 계속 `realWorkerClaimed=false`이며 실제 MY VOICE 성공으로 승격하지 않습니다.
+- GitHub Actions run `32117983645`에서 R1 lint는 통과했고 critical regression 65개 중 `useExitConfirmation` 1개만 실패했습니다. production hook 문제가 아니라 테스트가 `popstate`만 발생시키고 실제 Back의 guard→base `history.state` 이동을 재현하지 않은 것이 원인이어서, 테스트 helper가 base state로 이동한 뒤 `popstate`를 발생시키도록 교정했습니다. production 종료 로직은 변경하지 않습니다.
+
+### 검증
+
+- Product version sync: **0.11.27 PASS**
+- Repository preflight: **51/51 PASS**
+- API pytest: **220/220 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX dependency-free transpile parse: **249/249 PASS**
+- field device direct/fallback + aggregate certification verifier fixture: **PASS**
+- GitHub Actions R1 Web quality: **lint PASS · critical regression 64/65 PASS, exit-history test harness 1건 교정 후 재확인 필요**
+- 실제 카카오 Android/iOS 및 실제 동의 MY VOICE runtime: **미수집 · 성공으로 표시하지 않음**
+- dependency 기반 Web lint/Vitest/typecheck/build/Chromium: **GitHub Actions 최종 gate**
+
 ## 0.11.26 R1 - Web Lint Stabilization
 
 - Stabilizes the Web quality lint gate reported by GitHub Actions run `32109791257` / job `95626676052`.

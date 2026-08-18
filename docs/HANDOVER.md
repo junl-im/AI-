@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.26 R1 - Web Lint Stabilization**
+Current baseline: **0.11.27 · Field Device & MY VOICE Runtime Certification**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-18 KST**
 제품 소유·디자인: **곰같은여우**
@@ -10,6 +10,18 @@ Current baseline: **0.11.26 R1 - Web Lint Stabilization**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+
+## 2026-08-18 KST · 0.11.27 Field Device & MY VOICE Runtime Certification
+1. **작업 일시(KST)**: 2026-08-18.
+2. **대상/기준 버전**: `0.11.27 · Field Device & MY VOICE Runtime Certification` / `0.11.26 R1 · Web Lint Stabilization` FULL ZIP. R1 lint 안정화 변경을 누락하지 않도록 이번 PATCH 기준은 반드시 0.11.26 R1입니다.
+3. **변경 내용**: 카카오톡 Android/iOS에서 실제 preset preview 시도/onstart/실패 원인, 외부 브라우저 요청, exit dialog open, `계속 만들기` close를 `field-device-certification/1` local evidence로 누적합니다. Quality Lab에 field certification 카드를 추가하고 실제 수행자 확인(`operatorConfirmed`) 뒤 JSON을 저장할 수 있습니다. `verify-field-device-certification.mjs`는 direct preview 또는 blocked/watchdog 등 + 외부 브라우저 fallback, exit open/stay close를 검증합니다. `verify-field-runtime-certification.mjs`는 Android/iOS READY와 선택적 desktop/mobile 9+9 Chromium manifest, 실제 MY VOICE completed evidence를 결합하며 `--require-all`에서만 전체 certified를 요구합니다. 추가로 Actions run `32117983645`에서 R1 lint 통과 후 critical regression 65개 중 exit confirmation test 1건이 실패한 원인을 확인했고, 실제 브라우저 Back이 guard entry에서 base entry로 이동한 뒤 `popstate`를 발생시키는 순서를 테스트 helper가 재현하도록 교정했습니다. production `useExitConfirmation.ts` 동작은 이 교정에서 변경하지 않습니다.
+4. **변경 이유**: 0.11.25 R1에서 모바일 WebView 복구 코드를 넣었지만 실제 카카오 기기에서 무엇이 일어났는지 저장할 구조가 없었고, 0.11.26의 Chromium fixture와 실제 MY VOICE runtime을 하나의 release certification 흐름에서 구분해 검토할 필요가 있었습니다.
+5. **영향 범위**: HomePage 카카오 direct preview 관찰, InAppBrowser 외부 열기 관찰, exit confirmation 관찰, Quality Lab field certification UI, critical regression test 목록, field/runtime CLI verifier, preflight/제품 버전/문서입니다. Voice pace, Timeline recovery scope/Undo, API/Worker 합성 알고리즘, 프로젝트 저장 schema는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/quality/fieldDeviceCertification.ts` 및 test, `src/components/evaluation/FieldDeviceCertificationCard.tsx`, `src/pages/{HomePage,QualityPage}.tsx`, `src/hooks/useExitConfirmation.ts` 및 `useExitConfirmation.test.tsx`, `src/components/layout/InAppBrowserEngineNotice.tsx`, `scripts/{verify-field-device-certification,verify-field-runtime-certification,check-field-runtime-certification,check-web-test-contracts}.mjs`, `package.json`, `scripts/run-preflight.mjs`, `docs/FIELD_DEVICE_RUNTIME_CERTIFICATION.md`와 릴리스/전달 문서입니다.
+7. **검증 결과**: 제품 version sync **0.11.27 PASS**, Repository preflight **51/51 PASS**, API pytest **220/220 PASS**(기존 FastAPI deprecation warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, 전체 TS/TSX dependency-free transpile **249/249 PASS**, field direct/fallback 및 aggregate `--require-all` verifier fixture **PASS**입니다. GitHub Actions run `32117983645`는 R1 lint를 통과하고 critical regression **64/65 PASS**까지 진행했으며 유일한 실패는 `useExitConfirmation.test.tsx`의 history-state 시뮬레이션 오류였습니다. test harness를 실제 guard→base 이동 후 `popstate` 순서로 교정했으며 다음 Actions 재실행이 최종 확인입니다. 실제 카카오 Android/iOS와 실제 동의된 MY VOICE Worker/model evidence는 현재 환경에 없어 수집하지 않았고 성공으로 표시하지 않습니다.
+8. **알려진 제한과 주의사항**: `operatorConfirmed`는 자동으로 true가 되지 않습니다. WebView에서 Speech Synthesis가 실패해도 외부 브라우저 요청까지 실제 관찰되면 fallback path를 field READY로 인정하지만, 외부 브라우저에서 음성 생성 성능 자체를 증명하는 것은 아닙니다. 실제 MY VOICE certification은 `my-voice-recovery-runtime/1` completed evidence가 없으면 pending입니다. 전체 UA, 기기 이름, 프로젝트 원문, 음성/샘플 데이터는 증거에 넣지 않습니다.
+9. **생성 산출물**: `SoriON-AI-0.11.27-field-device-my-voice-runtime-certification-full.zip`, `SoriON-AI-0.11.26-r1-to-0.11.27-field-device-my-voice-runtime-certification-patch.zip`, `SoriON-AI-0.11.27-field-device-my-voice-runtime-certification-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.28 · Certification Intake & Release Readiness`. 실제 Android/iOS field JSON, Chromium 18-scene artifact, MY VOICE runtime JSON을 Quality Lab/API에서 intake하고 release readiness를 한 화면에서 판정하되 미수집 항목은 pending으로 유지합니다.
 
 ## 2026-08-18 KST - 0.11.26 R1 Web Lint Stabilization
 1. **Work date (KST)**: 2026-08-18.

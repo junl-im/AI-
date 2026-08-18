@@ -5,7 +5,9 @@ import { useExitConfirmation } from './useExitConfirmation'
 
 function dispatchPopState() {
   act(() => {
-    window.dispatchEvent(new PopStateEvent('popstate'))
+    // A real Back moves from the guard entry to the base entry before popstate fires.
+    window.history.replaceState({ __sorionExitBase: true }, document.title, '/')
+    window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }))
   })
 }
 

@@ -34,6 +34,7 @@ const checks = [
   ['mobile studio flow / playback link', 'check-mobile-studio-flow.mjs'],
   ['Chromium visual layout regression', 'check-visual-layout-regression.mjs'],
   ['Chromium multi-scene evidence', 'check-chromium-multi-scene-evidence.mjs'],
+  ['field device / runtime certification', 'check-field-runtime-certification.mjs'],
   ['trust key rotation / evidence renewal', 'check-trust-key-renewal.mjs'],
   ['benchmark baseline / privacy audit', 'check-benchmark-privacy-audit.mjs'],
   ['long-run reliability / writer safety', 'check-long-run-writer-safety.mjs'],

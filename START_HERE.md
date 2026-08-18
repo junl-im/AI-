@@ -1,10 +1,12 @@
 # START HERE
 
-Current version: `0.11.26 R1 - Web Lint Stabilization`
+Current version: `0.11.27 · Field Device & MY VOICE Runtime Certification`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
-1-1. R1 keeps product semver 0.11.26 and fixes the Web quality ESLint failure from Actions run 32109791257 before 0.11.27 feature work resumes.
-1-2. 0.11.26은 desktop/mobile Chromium에서 workspace / Voice Picker·Drawer / recovery-impact를 별도 evidence scene으로 남깁니다. recovery fixture는 실제 Worker 성공이 아니며 `realWorkerClaimed=false`입니다. 실제 MY VOICE 성공은 `my-voice-recovery-runtime/1` observed evidence가 있을 때만 인정합니다. 0.11.25 R1의 카카오 direct speech/watchdog/exit guard와 Voice 속도 보정은 그대로 유지합니다.
+1-1. 0.11.27 PATCH 기준은 `0.11.26 R1`입니다. GitHub main이 plain 0.11.26이면 R1 lint 안정화를 먼저 적용한 뒤 이번 PATCH를 덮어씁니다.
+1-2. Quality Lab의 `카카오 실기기 동작 인증`은 실제 Kakao Android/iOS 이벤트만 기록하고 수행자 확인 뒤 READY가 됩니다. 전체 UA/기기명/원문/오디오는 저장하지 않습니다.
+1-3. Chromium fixture는 `realWorkerClaimed=false`이며 실제 MY VOICE 성공은 `my-voice-recovery-runtime/1` completed evidence가 있을 때만 인정합니다.
+1-4. Actions run `32117983645`의 R1 lint는 통과했습니다. critical regression은 64/65 통과했고 `useExitConfirmation.test.tsx`가 실제 Back의 guard→base history state 이동을 재현하지 않아 1건 실패했으므로, 0.11.27 전달본은 test harness를 교정한 최신 ZIP만 사용합니다. production `useExitConfirmation.ts`는 이 교정에서 변경하지 않습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
 4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.

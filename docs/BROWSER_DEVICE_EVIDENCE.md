@@ -1,6 +1,6 @@
 # Browser Device Evidence
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.4`
+현재 기준: `0.11.27 · Field Device & MY VOICE Runtime Certification`
 
 ## 목적
 
@@ -48,3 +48,7 @@
 - `관찰 세션 초기화`는 누적 전환과 숨김 시간을 새로 시작합니다.
 - JSON은 장치 모델명이나 전체 User-Agent를 포함하지 않습니다.
 - 릴리스 판정은 JSON과 함께 기기·OS·브라우저 버전, 테스트 시나리오, 화면 녹화 또는 로그를 별도로 보관해야 합니다.
+
+## 카카오 실기기 event evidence
+
+일반 Browser Playback Evidence와 별도로 카카오톡 WebView에서 실제 preset preview/외부 브라우저 요청/exit guard 이벤트는 `field-device-certification/1`에 기록합니다. Browser Playback 자동 감지값이나 synthetic injection만으로 field READY를 만들지 않습니다.

@@ -13,7 +13,7 @@ def test_director_builds_longform_korean_plan(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.11.26"
+    assert body["version"] == "0.11.27"
     assert body["use_case"] == "audiobook"
     assert body["recommended_speed"] == 0.94
     assert body["engine_order"] == ["cosyvoice3", "melo", "system"]

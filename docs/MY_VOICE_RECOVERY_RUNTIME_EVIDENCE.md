@@ -1,6 +1,6 @@
 # MY VOICE Recovery Runtime Evidence
 
-기준 버전: `0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery`
+기준 버전: `0.11.27 · Field Device & MY VOICE Runtime Certification`
 
 ## 목적
 
@@ -63,3 +63,7 @@ Chromium multi-scene fixture는 선택 3개 중 stale MY VOICE 2개만 복구 �
 `workspace`, `voice-surface`, `recovery-impact` scene의 PNG, SHA-256, layout/interaction assertion을 보존합니다.
 recovery fixture manifest는 `realWorkerClaimed=false`를 명시합니다. 실제 runtime JSON이 없으면 0.11.26을
 MY VOICE 실운영 성공으로 표현하지 않습니다.
+
+## 0.11.27 통합 인증
+
+실제 completed runtime JSON은 `quality:field-runtime-certification`의 `--my-voice` 입력으로 사용할 수 있습니다. `--require-all`에서는 카카오 Android/iOS field READY와 desktop/mobile Chromium 9+9 scene PASS까지 함께 요구합니다. 이 통합 gate도 synthetic fixture를 실제 MY VOICE 성공으로 승격하지 않습니다.

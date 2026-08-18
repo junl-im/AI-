@@ -13,7 +13,8 @@ const exitTest = await read('src/hooks/useExitConfirmation.test.tsx')
 for (const required of [
   "import { act, fireEvent, render, screen } from '@testing-library/react'",
   'act(() => {',
-  "window.dispatchEvent(new PopStateEvent('popstate'))",
+  "window.history.replaceState({ __sorionExitBase: true }, document.title, '/')",
+  "window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }))",
 ]) {
   if (!exitTest.includes(required)) {
     failures.push(`useExitConfirmation.test.tsx: ${required} 누락`)
