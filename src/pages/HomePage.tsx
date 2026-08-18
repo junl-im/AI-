@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
 import { requestAutomaticApiReconnect } from '../api/httpClient'
+import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
 import { DesktopVoiceDrawer } from '../components/workspace/DesktopVoiceDrawer'
 import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader'
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
@@ -25,6 +26,8 @@ import { buildAudioFilename } from '../tts/audioFile'
 import {
   BROWSER_SPEECH_ENGINE_ID,
   createBrowserSpeechPlayback,
+  createBrowserSpeechUtterance,
+  isBrowserSpeechSupported,
 } from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
@@ -150,6 +153,7 @@ export function HomePage() {
   const [batchRetrySnapshot, setBatchRetrySnapshot] = useState<WorkspaceBatchRetrySnapshot>({ retryCount: 0, history: [] })
   const [previewingId, setPreviewingId] = useState<string | null>(null)
   const [activePreview, setActivePreview] = useState<{ voiceId: string; trackId: string } | null>(null)
+  const [directBrowserPreview, setDirectBrowserPreview] = useState<{ voiceId: string; playing: boolean } | null>(null)
   const [pendingPreview, setPendingPreview] = useState<{
     voiceId: string
     attempt: number
@@ -168,6 +172,78 @@ export function HomePage() {
   const explicitWorkspaceActionRef = useRef(false)
   const previewRunIdRef = useRef(0)
   const previewAbortRef = useRef<AbortController | null>(null)
+  const directPreviewRunIdRef = useRef(0)
+  const directPreviewWatchdogRef = useRef<number | null>(null)
+  const stopDirectBrowserPreview = useCallback((resetState = true) => {
+    directPreviewRunIdRef.current += 1
+    if (directPreviewWatchdogRef.current !== null) {
+      window.clearTimeout(directPreviewWatchdogRef.current)
+      directPreviewWatchdogRef.current = null
+    }
+    if (isBrowserSpeechSupported()) window.speechSynthesis.cancel()
+    if (resetState) setDirectBrowserPreview(null)
+  }, [])
+
+  const startKakaoBrowserPreview = useCallback((request: TtsSynthesisRequest, nextVoiceId: string) => {
+    if (!isKakaoInAppBrowser() || !isBrowserSpeechSupported()) return false
+    stopDirectBrowserPreview(false)
+    const runId = directPreviewRunIdRef.current + 1
+    directPreviewRunIdRef.current = runId
+    let utterance: SpeechSynthesisUtterance
+    try {
+      utterance = createBrowserSpeechUtterance(createBrowserSpeechPlayback(request))
+    } catch (error) {
+      setPreviewingId(null)
+      setDirectBrowserPreview(null)
+      showNotice(error instanceof Error
+        ? error.message
+        : '카카오톡 브라우저에서 사용할 수 있는 한국어 음성을 찾지 못했습니다.')
+      return true
+    }
+    let started = false
+    utterance.onstart = () => {
+      if (directPreviewRunIdRef.current !== runId) return
+      started = true
+      if (directPreviewWatchdogRef.current !== null) {
+        window.clearTimeout(directPreviewWatchdogRef.current)
+        directPreviewWatchdogRef.current = null
+      }
+      setPreviewingId(null)
+      setDirectBrowserPreview({ voiceId: nextVoiceId, playing: true })
+    }
+    const finish = () => {
+      if (directPreviewRunIdRef.current !== runId) return
+      if (directPreviewWatchdogRef.current !== null) {
+        window.clearTimeout(directPreviewWatchdogRef.current)
+        directPreviewWatchdogRef.current = null
+      }
+      setPreviewingId(null)
+      setDirectBrowserPreview(null)
+    }
+    utterance.onend = finish
+    utterance.onerror = () => {
+      finish()
+      showNotice('카카오톡 브라우저가 음성 재생을 차단했습니다. 외부 브라우저로 열면 안정적으로 들을 수 있습니다.')
+    }
+    try {
+      // Kakao mobile WebView needs speak() to stay inside the original tap gesture.
+      window.speechSynthesis.cancel()
+      window.speechSynthesis.speak(utterance)
+    } catch {
+      finish()
+      showNotice('카카오톡 브라우저가 음성 재생을 시작하지 못했습니다. 외부 브라우저로 열어 주세요.')
+      return true
+    }
+    directPreviewWatchdogRef.current = window.setTimeout(() => {
+      if (directPreviewRunIdRef.current !== runId || started) return
+      window.speechSynthesis.cancel()
+      setPreviewingId(null)
+      setDirectBrowserPreview(null)
+      showNotice('카카오톡 브라우저에서 음성 시작 응답이 없습니다. 외부 브라우저로 열어 주세요.')
+    }, 1_800)
+    return true
+  }, [showNotice, stopDirectBrowserPreview])
+
   const engineCatalog = useEngineCatalog()
   const { profiles: myVoiceProfiles, loading: myVoiceProfilesLoading } = useMyVoiceProfiles()
   const voiceChoices = useMemo(() => buildVoiceChoices(myVoiceProfiles), [myVoiceProfiles])
@@ -203,12 +279,14 @@ export function HomePage() {
   const activePreviewExists = Boolean(
     activePreview && playerQueue.some((track) => track.id === activePreview.trackId),
   )
-  const activePreviewId = activePreviewExists ? activePreview?.voiceId ?? null : null
-  const previewPlaying = Boolean(
-    activePreviewExists
-    && activePreview?.trackId === playbackTrackId
-    && playbackActive,
-  )
+  const activePreviewId = directBrowserPreview?.voiceId
+    ?? (activePreviewExists ? activePreview?.voiceId ?? null : null)
+  const previewPlaying = directBrowserPreview?.playing
+    ?? Boolean(
+      activePreviewExists
+      && activePreview?.trackId === playbackTrackId
+      && playbackActive,
+    )
   const activity = useMemo(() => (
     [...messages].reverse().find((message) => message.role !== 'user') ?? initialMessages[0]
   ), [messages])
@@ -405,7 +483,8 @@ export function HomePage() {
     setPreviewingId(null)
     previewRunIdRef.current += 1
     previewAbortRef.current?.abort()
-  }, [clearQueue, clearTimeline, resetTimelineEditHistory, workspaceResetToken])
+    stopDirectBrowserPreview()
+  }, [clearQueue, clearTimeline, resetTimelineEditHistory, stopDirectBrowserPreview, workspaceResetToken])
   useEffect(() => {
     if (pendingResetSaveRef.current !== workspaceResetToken) return
     pendingResetSaveRef.current = null
@@ -417,7 +496,8 @@ export function HomePage() {
     previewAbortRef.current?.abort()
     setPendingPreview(null)
     setPreviewingId(null)
-  }, [page, workspaceEntered])
+    stopDirectBrowserPreview()
+  }, [page, stopDirectBrowserPreview, workspaceEntered])
   useEffect(() => {
     if (!activeProject) return
     setPendingGeneration(null)
@@ -447,6 +527,7 @@ export function HomePage() {
     setPreviewingId(null)
     previewRunIdRef.current += 1
     previewAbortRef.current?.abort()
+    stopDirectBrowserPreview()
     const recoverableIds = restoreProject(activeProject, {
       voiceId: activeProject.voiceId,
       voiceName: voice.name,
@@ -458,7 +539,7 @@ export function HomePage() {
     })
     setPendingRecoveryIds(recoverableIds)
     clearActiveProject()
-  }, [activeProject, clearActiveProject, restoreProject, voiceChoices])
+  }, [activeProject, clearActiveProject, restoreProject, stopDirectBrowserPreview, voiceChoices])
   useEffect(() => {
     if (!generationRouteReady || pendingRecoveryIds.length === 0) return
     const ids = pendingRecoveryIds
@@ -638,6 +719,7 @@ export function HomePage() {
     await generateLongform({ ...resumeGeneration, blockIds: queuedIds, resume: true })
   }
   const selectVoice = useCallback((nextVoiceId: string) => {
+    stopDirectBrowserPreview()
     previewRunIdRef.current += 1
     previewAbortRef.current?.abort()
     setPendingPreview(null)
@@ -663,7 +745,7 @@ export function HomePage() {
     } else {
       setSpeakerSeedVoiceId(voice.id)
     }
-  }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, updateTimelineVoices, voiceChoices])
+  }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, stopDirectBrowserPreview, updateTimelineVoices, voiceChoices])
 
   const previewVoice = useCallback(async (
     nextVoiceId: string,
@@ -713,6 +795,19 @@ export function HomePage() {
           ? voice.profile?.engineId ?? 'cosyvoice3-worker'
           : selectedEngineId,
         normalizeText,
+      }
+      if (
+        voice.kind === 'preset'
+        && selectedEngineId === BROWSER_SPEECH_ENGINE_ID
+        && startKakaoBrowserPreview(request, voice.id)
+      ) {
+        setPendingPreview(null)
+        appendMessage({
+          role: 'assistant',
+          badge: '모바일 바로 듣기',
+          text: `${voice.name} 목소리를 카카오톡 모바일 재생 경로로 바로 시작했습니다.`,
+        })
+        return
       }
       const result = voice.kind === 'my-voice'
         ? await synthesizeVoiceCloneProfile({
@@ -779,12 +874,18 @@ export function HomePage() {
     speechEmotion,
     speechPitch,
     speechSpeed,
+    startKakaoBrowserPreview,
     voiceChoices,
   ])
 
 
   function handlePreview(nextVoiceId: string) {
+    if (directBrowserPreview?.voiceId === nextVoiceId) {
+      stopDirectBrowserPreview()
+      return
+    }
     if (previewingId === nextVoiceId) {
+      stopDirectBrowserPreview()
       previewRunIdRef.current += 1
       previewAbortRef.current?.abort()
       setPendingPreview(null)
@@ -827,6 +928,10 @@ export function HomePage() {
     if (playerQueue.some((track) => track.id === activePreview.trackId)) return
     setActivePreview(null)
   }, [activePreview, playerQueue])
+
+  useEffect(() => () => {
+    stopDirectBrowserPreview(false)
+  }, [stopDirectBrowserPreview])
 
   useEffect(() => {
     if (!pendingPreview) return
@@ -991,7 +1096,7 @@ export function HomePage() {
               onAddPause={timeline.addPause}
               onRemove={timeline.removeBlock}
               onRemoveMany={timeline.removeBlocks}
-              onBatchVoiceChange={async (ids, nextVoiceId, regenerate) => {
+              onBatchVoiceChange={async (ids, nextVoiceId, regenerate, reason = 'batch') => {
                 const voice = resolveVoiceChoice(voiceChoices, nextVoiceId)
                 if (voice.kind === 'my-voice' && (!voice.ready || backendStatus === 'offline')) {
                   requestAutomaticApiReconnect()
@@ -1003,7 +1108,14 @@ export function HomePage() {
                   return null
                 }
                 setVoiceId(voice.id)
-                timeline.updateVoiceMany(ids, voice.id, voice.name)
+                timeline.updateVoiceMany(
+                  ids,
+                  voice.id,
+                  voice.name,
+                  reason === 'recovery'
+                    ? (ids.length > 1 ? '사용 불가 목소리 일괄 복구' : '사용 불가 목소리 복구')
+                    : '선택 클립 목소리 변경',
+                )
                 return regenerate ? timeline.regenerateMany(ids) : null
               }}
               onSelectionChange={setSelectedTimelineIds}

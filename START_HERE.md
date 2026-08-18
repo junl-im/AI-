@@ -1,9 +1,9 @@
 # START HERE
 
-현재 버전: `0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate`
+현재 버전: `0.11.25 R1 · Mobile WebView Playback & Exit Guard`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
-1-1. 0.11.25는 GitHub Actions Web quality의 stale Browser Speech pace test를 수정하고, 핵심 Voice/recovery 테스트를 별도 `critical-regression` phase로 먼저 실행합니다. 기본 Voice 속도는 혜린 1.00 / 도윤 1.04 / 소리 0.98 / 준호 0.98 / 민준 1.08을 유지합니다.
+1-1. 0.11.25 R1은 앱 semver `0.11.25`를 유지하는 모바일 hotfix입니다. 카카오톡 preset 미리듣기는 탭 안에서 Browser Speech를 직접 시작하고 1.8초 watchdog을 사용하며, 종료 확인은 `history.go(-2)` 없이 base/guard 한 단계로 동작합니다. 기본 Voice 속도는 혜린 1.00 / 도윤 1.04 / 소리 0.98 / 준호 0.98 / 민준 1.08을 유지합니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
 4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.

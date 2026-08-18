@@ -58,7 +58,6 @@ requireTokens('src/hooks/useBackendBootstrap.ts', bootstrap, [
 
 const appShell = await source('src/components/layout/AppShell.tsx')
 forbidTokens('src/components/layout/AppShell.tsx', appShell, [
-  'InAppBrowserEngineNotice',
   '엔진 연결',
   'API 연결',
   'Worker',

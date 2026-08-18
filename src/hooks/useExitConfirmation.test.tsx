@@ -26,34 +26,40 @@ describe('useExitConfirmation', () => {
     vi.restoreAllMocks()
   })
 
-  it('첫 뒤로가기에는 커스텀 종료 확인창을 보여준다', () => {
+  it('첫 뒤로가기에는 팝업만 열고 계속 만들기를 누를 때 guard를 다시 쌓는다', () => {
+    const push = vi.spyOn(window.history, 'pushState')
     render(<Harness />)
+    const pushesAfterMount = push.mock.calls.length
 
     dispatchPopState()
 
     expect(screen.getByRole('alertdialog')).toBeInTheDocument()
     expect(screen.getByText('SoriON을 닫을까요?')).toBeInTheDocument()
+    expect(push).toHaveBeenCalledTimes(pushesAfterMount)
+
     fireEvent.click(screen.getByRole('button', { name: '계속 만들기' }))
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect(push).toHaveBeenCalledTimes(pushesAfterMount + 1)
   })
 
-  it('확인창이 열린 상태의 두 번째 뒤로가기는 브라우저 이력을 바로 빠져나간다', () => {
-    const back = vi.spyOn(window.history, 'back').mockImplementation(() => undefined)
+  it('확인창이 열린 상태의 두 번째 뒤로가기는 보호 이력을 다시 만들지 않는다', () => {
+    const push = vi.spyOn(window.history, 'pushState')
     render(<Harness />)
+    const pushesAfterMount = push.mock.calls.length
 
     dispatchPopState()
     dispatchPopState()
 
-    expect(back).toHaveBeenCalledTimes(1)
+    expect(push).toHaveBeenCalledTimes(pushesAfterMount)
   })
 
-  it('종료 버튼은 앱이 넣은 두 개의 보호 이력을 건너뛴다', () => {
-    const go = vi.spyOn(window.history, 'go').mockImplementation(() => undefined)
+  it('종료 버튼은 base entry에서 한 번만 뒤로 이동한다', () => {
+    const back = vi.spyOn(window.history, 'back').mockImplementation(() => undefined)
     render(<Harness />)
 
     dispatchPopState()
     fireEvent.click(screen.getByRole('button', { name: '종료' }))
 
-    expect(go).toHaveBeenCalledWith(-2)
+    expect(back).toHaveBeenCalledTimes(1)
   })
 })

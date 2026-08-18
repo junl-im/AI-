@@ -9,6 +9,15 @@ interface ExitConfirmationController {
   exit: () => void
 }
 
+function pushExitGuard() {
+  const state = window.history.state as Record<string, unknown> | null
+  if (state?.[GUARD_STATE_KEY]) return
+  window.history.pushState(
+    { ...(state ?? {}), [GUARD_STATE_KEY]: true },
+    document.title,
+  )
+}
+
 export function useExitConfirmation(): ExitConfirmationController {
   const [open, setOpen] = useState(false)
   const openRef = useRef(false)
@@ -17,13 +26,17 @@ export function useExitConfirmation(): ExitConfirmationController {
   const stay = useCallback(() => {
     openRef.current = false
     setOpen(false)
+    // Rearm only after the user explicitly stays. This avoids pushState races in mobile WebViews.
+    pushExitGuard()
   }, [])
 
   const exit = useCallback(() => {
     bypassRef.current = true
     openRef.current = false
     setOpen(false)
-    window.history.go(-2)
+    // The first Back already moved from the guard entry to the base entry.
+    // One more Back is enough to leave the page and is more reliable in in-app browsers than go(-2).
+    window.history.back()
   }, [])
 
   useEffect(() => {
@@ -33,25 +46,18 @@ export function useExitConfirmation(): ExitConfirmationController {
         { ...(state ?? {}), [BASE_STATE_KEY]: true },
         document.title,
       )
-      window.history.pushState(
-        { ...(state ?? {}), [GUARD_STATE_KEY]: true },
-        document.title,
-      )
+      pushExitGuard()
     }
 
     const handlePopState = () => {
       if (bypassRef.current) return
       if (openRef.current) {
+        // A second hardware Back while the dialog is open is the user's explicit exit gesture.
         bypassRef.current = true
-        window.history.back()
         return
       }
       openRef.current = true
       setOpen(true)
-      window.history.pushState(
-        { ...(window.history.state ?? {}), [GUARD_STATE_KEY]: true },
-        document.title,
-      )
     }
 
     window.addEventListener('popstate', handlePopState)

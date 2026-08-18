@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 0.11.25 R1 · Mobile WebView Playback & Exit Guard
+
+- 카카오톡 모바일 인앱브라우저에서 Browser Speech preset 미리듣기는 비동기 player effect를 기다리지 않고 최초 탭 call stack 안에서 `speechSynthesis.speak()`를 직접 시작합니다.
+- direct preview는 `onstart`가 실제로 도착한 뒤에만 재생 상태를 확정하고, 1.8초 안에 시작 응답이 없으면 재생 상태를 해제하고 외부 브라우저 안내를 표시합니다.
+- 공용 `LinkedPlayerDock`에도 같은 1.8초 start watchdog을 추가해 WebView가 `onstart`/`onerror`를 모두 보내지 않는 경우 일시정지 버튼으로 영구 고정되지 않게 했습니다.
+- 기존에 정의만 되어 있던 `InAppBrowserEngineNotice`를 AppShell에 연결하고, 외부 브라우저 이동은 clipboard 비동기 작업보다 먼저 사용자 탭 안에서 실행해 custom scheme의 user activation을 보존합니다.
+- 종료 확인은 첫 Back에서 dialog만 열고 `계속 만들기`에서 guard를 재설치합니다. `종료`는 `history.go(-2)` 대신 현재 base entry에서 `history.back()` 한 번만 호출해 카카오 WebView back-stack 의존성을 줄였습니다.
+- `test:web-critical`에 `LinkedPlayerDock`, `useExitConfirmation`, `inAppBrowser` 회귀를 추가하고 mobile/preflight 계약이 direct speech, watchdog, 외부 브라우저 gesture, 새 exit guard를 고정합니다.
+
+### 검증
+
+- Product version sync: **0.11.25 PASS**
+- Repository preflight: **49/49 PASS**
+- API pytest: **220/220 PASS** (기존 FastAPI deprecation warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Changed Node `.mjs` syntax: **PASS**
+- Web Vitest/ESLint/semantic typecheck/Vite build: **로컬 node_modules 부재로 미실행, GitHub Actions 최종 gate**
+- 실제 Kakao Android/iOS WebView: **사용자 실기기 재검증 필요**
+
 ## 0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate
 
 - GitHub Actions run `32096206966`에서 확인된 `browserSpeech.test.ts`의 stale pace expectation을 수정했습니다. 혜린 preset은 R1에서 `rateMultiplier=1.00`이므로 `request.speed=1.10`일 때 browser playback rate도 `1.10`을 유지하는 것이 현재 계약입니다.

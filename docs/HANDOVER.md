@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate**
+현재 기준 버전: **0.11.25 R1 · Mobile WebView Playback & Exit Guard**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-18 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,18 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-18 KST · 0.11.25 R1 Mobile WebView Playback & Exit Guard
+1. **작업 일시(KST)**: 2026-08-18.
+2. **대상/기준 버전**: `0.11.25 R1 · Mobile WebView Playback & Exit Guard` / `0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate`. 앱·API·Worker 제품 semver는 `0.11.25`를 유지하고 전달 리비전만 R1로 구분합니다.
+3. **변경 내용**: 카카오톡 모바일 인앱브라우저에서 preset 미리듣기가 버튼 탭 뒤 React effect/`setTimeout(0)`을 거쳐 시작되던 경로를 보완했습니다. Browser Speech가 선택된 카카오 환경에서는 원래 탭 call stack 안에서 `speechSynthesis.speak()`를 호출하는 direct preview 경로를 사용하고, 일반 플레이어 경로에는 1.8초 start watchdog을 추가해 `onstart`/`onerror`가 오지 않는 WebView에서도 일시정지 아이콘으로 영구 고정되지 않게 했습니다. 카카오 전용 외부 브라우저 안내를 AppShell에 실제 연결하고 외부 브라우저 custom-scheme 이동은 clipboard `await`보다 먼저 같은 사용자 제스처 안에서 실행합니다. 종료 확인은 첫 Back에서 dialog만 열고 `계속 만들기` 때 guard를 다시 쌓으며 `종료`는 base entry에서 `history.back()` 한 번만 수행하도록 단순화했습니다.
+4. **변경 이유**: 데스크톱에서는 허용되던 지연된 Web Speech 시작이 모바일 WebView의 user-activation 정책에서 무음/멈춤으로 나타날 수 있었고, 기존 종료 guard의 `popstate` 안 즉시 `pushState` + `history.go(-2)` 방식도 인앱브라우저 back stack에서 불안정할 수 있었기 때문입니다.
+5. **영향 범위**: 카카오톡 Android/iOS 인앱브라우저의 built-in preset 미리듣기, Browser Speech player 실패 복구, 인앱브라우저 외부 열기 안내, 앱 종료 확인 back-stack, 관련 critical Web test/preflight 계약입니다. Voice preset 속도, Voice 선택=재생 계약, API/Worker 생성, Timeline recovery, MY VOICE clone runtime은 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/pages/HomePage.tsx`, `src/components/navigation/LinkedPlayerDock.tsx` 및 test, `src/hooks/useExitConfirmation.ts` 및 test, `src/components/layout/{AppShell,InAppBrowserEngineNotice}.tsx`, `package.json`, `scripts/{check-mobile-studio-flow,check-always-on-preset-pc-layout,check-project-rules,check-reproducible-web-quality}.mjs`, `docs/MOBILE_WEBVIEW_PLAYBACK_EXIT_GUARD.md`와 릴리스/전달 문서입니다.
+7. **검증 결과**: 제품 version sync **0.11.25 PASS**, Repository preflight **49/49 PASS**, API pytest **220/220 PASS**(기존 FastAPI deprecation warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, 변경된 Node `.mjs` syntax **PASS**입니다. 로컬 전달 환경에 완전한 `node_modules`가 없어 Vitest/ESLint/semantic typecheck/Vite build/실제 Kakao WebView·Chromium은 실행하지 못했으며 GitHub Actions와 실기기 카카오 재확인이 최종 gate입니다.
+8. **알려진 제한과 주의사항**: 일부 WKWebView/WebView는 API 객체가 노출되어도 Speech Synthesis 실제 시작을 제한할 수 있습니다. direct user-gesture 경로에서도 1.8초 안에 시작 이벤트가 없으면 실패로 해제하고 외부 브라우저 사용을 안내합니다. 이를 실제 카카오 Android/iOS 음성 성공으로 과장하지 않습니다.
+9. **생성 산출물**: `SoriON-AI-0.11.25-r1-mobile-webview-playback-exit-guard-full.zip`, `SoriON-AI-0.11.25-to-0.11.25-r1-mobile-webview-playback-exit-guard-patch.zip`, `SoriON-AI-0.11.25-r1-mobile-webview-playback-exit-guard-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery`. 먼저 R1을 GitHub Actions와 실제 카카오 Android/iOS에서 재검증하고, 녹색이면 workspace / voice-picker / recovery-impact multi-scene 증거와 실제 동의된 MY VOICE runtime 검증으로 진행합니다.
 
 ## 2026-08-18 KST - 0.11.25 Web Quality CI Stabilization & Critical Recovery Gate
 1. **Work date (KST)**: 2026-08-18.
@@ -966,14 +978,14 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate**.
+다음 목표 버전: **0.11.26 · Chromium Multi-Scene Evidence & Real MY VOICE Recovery**.
 우선순위:
-1. 실제 GitHub Actions에서 Vitest, semantic typecheck, lint, Vite build를 모두 녹색으로 고정한다.
-2. desktop 1024/1280/1440과 mobile 360/390/430 Chromium evidence에서 Voice Picker/Drawer 재생=선택, 상단 지정 영역, multi stale recovery dialog를 확인한다.
+1. 0.11.25 R1을 GitHub Actions에서 critical/full Vitest, semantic typecheck, lint, Vite build까지 녹색으로 고정하고 실제 카카오톡 Android/iOS에서 preset 미리듣기와 종료 확인 `계속 만들기`를 재검증한다.
+2. desktop 1024/1280/1440과 mobile 360/390/430 Chromium evidence에서 workspace, Voice Picker/Drawer, multi stale recovery dialog를 scene별로 분리 확인한다.
 3. 실제 MY VOICE Worker와 동의된 프로필이 있을 때만 stale profile 교체 후 재생성 성공과 first-audio latency를 측정한다.
-4. Web quality가 녹색인 상태에서만 TimelineEditor의 남은 rendering/keyboard orchestration 책임 추가 분리를 판단한다.
-5. 승인되지 않은 pixel baseline이나 실제 모델이 없는 음질 결과를 완료 증거로 승격하지 않는다.
-금지: CI 실패 상태에서 새 기능 진행, 측정 전 병렬도 자동 상향, 대규모 rewrite와 기능 추가 동시 진행, 동의·권리 없는 음성 포함, 모델 없는 성공 표시.
+4. Web quality와 모바일 WebView 검증이 녹색인 상태에서만 TimelineEditor의 남은 rendering/keyboard orchestration 책임 추가 분리를 판단한다.
+5. 승인되지 않은 pixel baseline이나 실제 모델·실기기 증거가 없는 결과를 완료 증거로 승격하지 않는다.
+금지: CI/모바일 failure 확인 상태에서 새 기능 진행, 측정 전 병렬도 자동 상향, 대규모 rewrite와 기능 추가 동시 진행, 동의·권리 없는 음성 포함, 모델 없는 성공 표시.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.

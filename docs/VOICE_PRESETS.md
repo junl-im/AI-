@@ -1,6 +1,6 @@
 # Voice Presets
 
-현재 기준: `0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate`
+현재 기준: `0.11.25 R1 · Mobile WebView Playback & Exit Guard`
 
 SoriON AI의 프리셋은 Web 선택 항목, Browser/System/Melo 운율 프로필, CosyVoice 기준 WAV 파일명을 하나의 ID로 연결합니다. 성별 표시는 탐색용 메타데이터이지만, 이번 Hotfix부터 성별이나 인물 구분을 확인할 수 없는 음성을 조용히 대신 재생하지 않습니다.
 

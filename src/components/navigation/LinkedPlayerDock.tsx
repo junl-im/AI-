@@ -102,6 +102,7 @@ export function LinkedPlayerDock() {
   const speechStartedAtRef = useRef(0)
   const speechElapsedRef = useRef(0)
   const speechRunIdRef = useRef(0)
+  const speechStartWatchdogRef = useRef<number | null>(null)
   const [playing, setPlaying] = useState(false)
   const [current, setCurrent] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -155,6 +156,11 @@ export function LinkedPlayerDock() {
     segmentWaitedRef.current = false
   }
 
+  function clearSpeechStartWatchdog() {
+    if (speechStartWatchdogRef.current !== null) window.clearTimeout(speechStartWatchdogRef.current)
+    speechStartWatchdogRef.current = null
+  }
+
   function clearSpeechTimer() {
     if (speechTimerRef.current !== null) window.clearInterval(speechTimerRef.current)
     speechTimerRef.current = null
@@ -177,6 +183,7 @@ export function LinkedPlayerDock() {
 
   function cancelBrowserSpeech(resetProgress = true) {
     speechRunIdRef.current += 1
+    clearSpeechStartWatchdog()
     clearSpeechTimer()
     if (isBrowserSpeechSupported()) window.speechSynthesis.cancel()
     if (resetProgress) {
@@ -249,12 +256,14 @@ export function LinkedPlayerDock() {
     setDuration(track?.audio.durationSeconds ?? 0)
     utterance.onstart = () => {
       if (speechRunIdRef.current !== speechRunId) return
+      clearSpeechStartWatchdog()
       recordPlaybackMetric('browserSpeechStartMs')
       setPlaying(true)
       startSpeechTimer()
     }
     utterance.onend = () => {
       if (speechRunIdRef.current !== speechRunId) return
+      clearSpeechStartWatchdog()
       clearSpeechTimer()
       setCurrent(track?.audio.durationSeconds ?? duration)
       speechElapsedRef.current = 0
@@ -263,11 +272,28 @@ export function LinkedPlayerDock() {
     }
     utterance.onerror = () => {
       if (speechRunIdRef.current !== speechRunId) return
+      clearSpeechStartWatchdog()
       clearSpeechTimer()
       speechElapsedRef.current = 0
       setPlaying(false)
+      setPlaybackError('브라우저가 음성 재생을 시작하지 못했습니다. 카카오톡 안이라면 외부 브라우저로 열어 주세요.')
     }
-    window.speechSynthesis.speak(utterance)
+    try {
+      window.speechSynthesis.speak(utterance)
+    } catch (error) {
+      clearSpeechStartWatchdog()
+      setPlaying(false)
+      setPlaybackError(error instanceof Error ? error.message : '브라우저 음성 재생을 시작하지 못했습니다.')
+      return
+    }
+    speechStartWatchdogRef.current = window.setTimeout(() => {
+      if (speechRunIdRef.current !== speechRunId) return
+      window.speechSynthesis.cancel()
+      clearSpeechTimer()
+      speechElapsedRef.current = 0
+      setPlaying(false)
+      setPlaybackError('음성 시작 응답이 없습니다. 모바일 인앱 브라우저라면 외부 브라우저로 열어 주세요.')
+    }, 1_800)
   }
 
   useEffect(() => {
@@ -418,6 +444,7 @@ export function LinkedPlayerDock() {
   }, [current, currentTrackId, playing, setPlaybackSnapshot])
 
   useEffect(() => () => {
+    clearSpeechStartWatchdog()
     clearSpeechTimer()
     if (isBrowserSpeechSupported()) window.speechSynthesis.cancel()
     setPlaybackSnapshot(null, 0, false)

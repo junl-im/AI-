@@ -10,6 +10,7 @@ import { AppUpdateNotice } from '../ui/AppUpdateNotice'
 import { NoticeToast } from '../ui/NoticeToast'
 import { BrandMasthead } from './BrandMasthead'
 import { CompactWorkspaceHeader } from './CompactWorkspaceHeader'
+import { InAppBrowserEngineNotice } from './InAppBrowserEngineNotice'
 
 export function AppShell({ children }: PropsWithChildren) {
   useBackendBootstrap()
@@ -31,6 +32,7 @@ export function AppShell({ children }: PropsWithChildren) {
     <div className={workspaceEntered ? 'soa-app-root is-editor' : 'soa-app-root is-landing'}>
       {workspaceEntered ? <CompactWorkspaceHeader /> : <BrandMasthead />}
       <AppUpdateNotice />
+      <InAppBrowserEngineNotice />
       <div className={shellClassName}>
         <section className="soa-primary-frame">{children}</section>
       </div>

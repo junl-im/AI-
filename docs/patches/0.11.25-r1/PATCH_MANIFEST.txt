@@ -1,0 +1,37 @@
+# SoriON AI 0.11.25 R1 Patch Manifest
+
+Base: 0.11.25 - Web Quality CI Stabilization & Critical Recovery Gate
+Target: 0.11.25 R1 - Mobile WebView Playback & Exit Guard
+Added: 4
+Modified: 19
+Deleted: 0
+
+[ADDED]
+docs/MOBILE_WEBVIEW_PLAYBACK_EXIT_GUARD.md
+docs/patches/0.11.25-r1/PATCH_MANIFEST.txt
+docs/patches/0.11.25-r1/PATCH_README.md
+docs/patches/0.11.25-r1/VALIDATION.md
+
+[MODIFIED]
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/VOICE_PRESETS.md
+package.json
+scripts/check-always-on-preset-pc-layout.mjs
+scripts/check-mobile-studio-flow.mjs
+scripts/check-project-rules.mjs
+scripts/check-reproducible-web-quality.mjs
+src/components/layout/AppShell.tsx
+src/components/layout/InAppBrowserEngineNotice.tsx
+src/components/navigation/LinkedPlayerDock.test.tsx
+src/components/navigation/LinkedPlayerDock.tsx
+src/hooks/useExitConfirmation.test.tsx
+src/hooks/useExitConfirmation.ts
+src/pages/HomePage.tsx
+
+[DELETED]
+(none)

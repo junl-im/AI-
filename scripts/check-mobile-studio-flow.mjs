@@ -34,6 +34,8 @@ requireTokens('src/components/navigation/LinkedPlayerDock.tsx', player, [
   'const DockNavigation = memo',
   'setPlaying(true)',
   "setPlaybackError(error instanceof Error ? error.message : '음성을 재생하지 못했습니다.')",
+  'speechStartWatchdogRef',
+  '음성 시작 응답이 없습니다. 모바일 인앱 브라우저라면 외부 브라우저로 열어 주세요.',
 ])
 
 const voiceControls = await source('src/components/workspace/DubbingVoiceControls.tsx')
@@ -106,7 +108,37 @@ requireTokens('src/pages/HomePage.tsx', home, [
   'applyTargetCount={selectedTimelineVoiceIds.length}',
   'applyTargetLabel={selectedTimelineVoiceScope}',
   '선택한 대사 ${selectedTimelineVoiceIds.length}개에',
+  'isKakaoInAppBrowser()',
+  'startKakaoBrowserPreview',
+  'selectedEngineId === BROWSER_SPEECH_ENGINE_ID',
+  'window.speechSynthesis.speak(utterance)',
 ])
+
+
+const appShell = await source('src/components/layout/AppShell.tsx')
+requireTokens('src/components/layout/AppShell.tsx', appShell, [
+  "import { InAppBrowserEngineNotice } from './InAppBrowserEngineNotice'",
+  '<InAppBrowserEngineNotice />',
+])
+
+const inAppNotice = await source('src/components/layout/InAppBrowserEngineNotice.tsx')
+requireTokens('src/components/layout/InAppBrowserEngineNotice.tsx', inAppNotice, [
+  'WebView 정책 때문에 재생 시작이 막힐 수 있습니다.',
+  'window.location.assign(buildExternalBrowserUrl(pageUrl))',
+])
+if (inAppNotice.includes('await navigator.clipboard')) {
+  failures.push('src/components/layout/InAppBrowserEngineNotice.tsx: 외부 브라우저 이동 전에 await가 있어 사용자 제스처가 끊길 수 있습니다.')
+}
+
+const exitConfirmation = await source('src/hooks/useExitConfirmation.ts')
+requireTokens('src/hooks/useExitConfirmation.ts', exitConfirmation, [
+  'pushExitGuard()',
+  'window.history.back()',
+  'Rearm only after the user explicitly stays',
+])
+if (exitConfirmation.includes('window.history.go(-2)')) {
+  failures.push('src/hooks/useExitConfirmation.ts: 인앱브라우저에서 불안정한 history.go(-2)가 다시 추가되었습니다.')
+}
 
 const drawer = await source('src/components/workspace/DesktopVoiceDrawer.tsx')
 requireTokens('src/components/workspace/DesktopVoiceDrawer.tsx', drawer, [

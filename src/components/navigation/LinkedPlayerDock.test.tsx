@@ -130,6 +130,7 @@ describe('LinkedPlayerDock', () => {
 
 
   afterEach(() => {
+    vi.useRealTimers()
     usePlayerStore.getState().clearQueue()
     restoreProperty(globalThis, 'SpeechSynthesisUtterance', originalUtterance)
     restoreProperty(window, 'speechSynthesis', originalSynthesis)
@@ -220,6 +221,23 @@ describe('LinkedPlayerDock', () => {
     fireEvent.click(screen.getByRole('button', { name: '일시정지' }))
     expect(synthesis.cancel).toHaveBeenCalled()
     expect(screen.getByRole('button', { name: '재생' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+
+  it('모바일 WebView처럼 시작 이벤트가 오지 않으면 watchdog이 재생 중 상태를 해제한다', () => {
+    vi.useFakeTimers()
+    const synthesis = installSpeechSynthesis(false)
+    usePlayerStore.getState().enqueue(browserSpeechAudio(), '브라우저 시작 응답 없음')
+    render(<LinkedPlayerDock />)
+
+    fireEvent.click(screen.getByRole('button', { name: '재생' }))
+    expect(screen.getByRole('button', { name: '일시정지' })).toHaveAttribute('aria-pressed', 'true')
+
+    act(() => vi.advanceTimersByTime(1_900))
+
+    expect(synthesis.cancel).toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: '재생' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText(/음성 시작 응답이 없습니다/)).toBeInTheDocument()
   })
 
 

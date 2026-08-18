@@ -1,3 +1,19 @@
+## 0.11.25 R1 · Mobile WebView Playback & Exit Guard
+
+- 앱 semver `0.11.25`를 유지하는 모바일 hotfix revision입니다.
+- 카카오톡 인앱브라우저의 Browser Speech preset 미리듣기를 원래 탭 call stack 안에서 직접 시작하고 1.8초 start watchdog으로 무음 멈춤을 해제합니다.
+- AppShell에 카카오 전용 외부 브라우저 안내를 연결하고 custom-scheme 이동은 clipboard promise보다 먼저 실행합니다.
+- 종료 확인 guard는 첫 Back에서 dialog만 열고 `계속 만들기`에서 guard를 재설치하며 종료는 `history.back()` 한 번만 수행합니다.
+
+### 검증
+
+- Product version sync: **0.11.25 PASS**
+- Repository preflight: **49/49 PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Web dependency 기반 Vitest/ESLint/typecheck/build 및 실제 Kakao WebView: **GitHub Actions/실기기 최종 확인 필요**
+
 ## 0.11.25 · Web Quality CI Stabilization & Critical Recovery Gate
 
 - GitHub Actions run 32096206966에서 Browser Speech pace test의 R1 이전 expectation(`1.10 < 1.10`)이 남아 있음을 확인하고 현재 1.00 baseline 계약으로 수정했습니다.

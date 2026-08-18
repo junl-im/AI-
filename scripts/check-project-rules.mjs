@@ -437,8 +437,9 @@ await requireText('src/api/httpClient.ts', [
 ])
 await requireText('src/hooks/useBackendBootstrap.ts', ['discoverApiBaseUrl', 'saveApiBaseUrl', 'sorion-api-reconnect'])
 await requireText('src/hooks/useExitConfirmation.ts', [
-  'popstate', 'window.history.go(-2)',
+  'popstate', 'pushExitGuard()',
   'window.history.back()',
+  'Rearm only after the user explicitly stays',
 ])
 await import('./check-web-test-contracts.mjs')
 await requireText('src/components/ui/ExitConfirmDialog.tsx', [

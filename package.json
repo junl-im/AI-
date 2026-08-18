@@ -11,7 +11,7 @@
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
     "test:ci": "vitest run --fileParallelism=false",
-    "test:web-critical": "vitest run src/tts/browserSpeech.test.ts src/components/workspace/DesktopVoiceDrawer.test.tsx src/components/workspace/TimelineEditor.test.tsx src/hooks/useTimelineGeneration.test.ts --fileParallelism=false",
+    "test:web-critical": "vitest run src/tts/browserSpeech.test.ts src/components/navigation/LinkedPlayerDock.test.tsx src/hooks/useExitConfirmation.test.tsx src/browser/inAppBrowser.test.ts src/components/workspace/DesktopVoiceDrawer.test.tsx src/components/workspace/TimelineEditor.test.tsx src/hooks/useTimelineGeneration.test.ts --fileParallelism=false",
     "test:watch": "vitest",
     "test:api": "python -m pytest services/api/tests",
     "quality:rules": "node scripts/check-project-rules.mjs",
