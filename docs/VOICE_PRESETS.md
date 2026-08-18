@@ -1,6 +1,6 @@
 # Voice Presets
 
-현재 기준: `0.9.3-beta.3 · Engine Heartbeat 6.8.3 · CI Quality Unblock & Approval Operator Gate`
+현재 기준: `0.11.24 R1 · Voice Pace Calibration`
 
 SoriON AI의 프리셋은 Web 선택 항목, Browser/System/Melo 운율 프로필, CosyVoice 기준 WAV 파일명을 하나의 ID로 연결합니다. 성별 표시는 탐색용 메타데이터이지만, 이번 Hotfix부터 성별이나 인물 구분을 확인할 수 없는 음성을 조용히 대신 재생하지 않습니다.
 
@@ -8,13 +8,21 @@ SoriON AI의 프리셋은 Web 선택 항목, Browser/System/Melo 운율 프로�
 
 | ID | 표시 이름 | 분류 | 권장 용도 | 기본 속도 | 기본 높낮이 | 후보 순번 | CosyVoice WAV |
 | --- | --- | --- | --- | ---: | ---: | ---: | --- |
-| `sori-warm` | 혜린 | 여성 | 따뜻한 내레이션·안내 | 0.96 | 1.5 | 여성 1번 | `sori-warm.wav` |
+| `sori-warm` | 혜린 | 여성 | 따뜻한 내레이션·안내 | 1.00 | 1.5 | 여성 1번 | `sori-warm.wav` |
 | `on-clear` | 도윤 | 남성 | 또렷한 설명·교육 | 1.04 | -1.5 | 남성 1번 | `on-clear.wav` |
-| `dam-calm` | 소리 | 중성 | 차분한 장문·명상 | 0.90 | -0.5 | 중성 1번 | `dam-calm.wav` |
-| `jun-deep` | 준호 | 남성 | 저음 다큐·오디오북 | 0.92 | -2.5 | 남성 2번 | `jun-deep.wav` |
+| `dam-calm` | 소리 | 중성 | 차분한 장문·명상 | 0.98 | -0.5 | 중성 1번 | `dam-calm.wav` |
+| `jun-deep` | 준호 | 남성 | 저음 다큐·오디오북 | 0.98 | -2.5 | 남성 2번 | `jun-deep.wav` |
 | `min-energetic` | 민준 | 남성 | 활력 광고·숏폼 | 1.08 | -0.5 | 남성 3번 | `min-energetic.wav` |
 
 모바일 목소리 선택 Sheet는 전체·남성·여성·중성 필터를 제공하며, 필터 뒤에도 radio 선택과 방향키 이동 순서를 유지합니다.
+
+### 0.11.24 R1 속도 보정 원칙
+
+- UI의 `1.00×`는 캐릭터별 느림 효과가 아니라 **자연스러운 한국어 기본 발화 속도**를 뜻합니다.
+- 혜린은 1.00, 도윤은 1.04, 소리/준호는 0.98, 민준은 1.08의 작은 운율 차이만 둡니다.
+- 차분함·저음은 과도한 감속보다 pitch/voice identity와 문장 호흡으로 표현하며, 특히 소리/준호를 0.90대 초반으로 강제하지 않습니다.
+- 사용자가 1.10× 안팎을 선택한 뒤 Voice를 바꿔도 `naturalSpeedRange`가 다시 1.00 근처로 과도하게 눌러버리지 않도록 상한을 완화했습니다.
+- MY VOICE는 이 preset multiplier를 사용하지 않으며 샘플/clone runtime의 cadence를 별도로 검증합니다.
 
 ## 필수 안전 계약
 

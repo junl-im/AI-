@@ -1,0 +1,23 @@
+# SoriON AI 0.11.24 R1 Patch Manifest
+Base: 0.11.24 · Recovery Batch & Editor Responsibility Split
+Target: 0.11.24 R1 · Voice Pace Calibration
+Product semver: 0.11.24
+Delete files: none
+
+FOUNDATION_REPORT.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+docs/VOICE_PACE_CALIBRATION.md
+docs/VOICE_PRESETS.md
+docs/patches/0.11.24-r1/PATCH_MANIFEST.txt
+docs/patches/0.11.24-r1/PATCH_README.md
+docs/patches/0.11.24-r1/VALIDATION.md
+scripts/check-voice-preset-contracts.mjs
+services/api/app/services/voice_presets.py
+services/api/tests/test_melo_tts.py
+services/api/tests/test_voice_presets.py
+src/tts/voicePresets.test.ts
+src/tts/voicePresets.ts
+src/tts/voiceRecommendation.test.ts

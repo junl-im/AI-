@@ -12,9 +12,24 @@ async function read(relativePath) {
 const frontend = await read('src/tts/voicePresets.ts')
 const backend = await read('services/api/app/services/voice_presets.py')
 const requiredIds = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
+const expectedPace = new Map([
+  ['sori-warm', { frontend: "rateMultiplier: 1.0,", backend: '        1.00,' }],
+  ['on-clear', { frontend: "rateMultiplier: 1.04,", backend: '        1.04,' }],
+  ['dam-calm', { frontend: "rateMultiplier: 0.98,", backend: '        0.98,' }],
+  ['jun-deep', { frontend: "rateMultiplier: 0.98,", backend: '        0.98,' }],
+  ['min-energetic', { frontend: "rateMultiplier: 1.08,", backend: '        1.08,' }],
+])
 for (const voiceId of requiredIds) {
   if (!frontend.includes(`id: '${voiceId}'`)) failures.push(`frontend preset 누락: ${voiceId}`)
   if (!backend.includes(`"${voiceId}"`)) failures.push(`backend preset 누락: ${voiceId}`)
+}
+for (const [voiceId, pace] of expectedPace) {
+  const frontendStart = frontend.indexOf(`id: '${voiceId}'`)
+  const backendStart = backend.indexOf(`"${voiceId}"`)
+  const frontendSlice = frontend.slice(frontendStart, frontendStart + 900)
+  const backendSlice = backend.slice(backendStart, backendStart + 420)
+  if (!frontendSlice.includes(pace.frontend)) failures.push(`frontend pace calibration 불일치: ${voiceId}`)
+  if (!backendSlice.includes(pace.backend)) failures.push(`backend pace calibration 불일치: ${voiceId}`)
 }
 for (const required of [
   "export type VoiceGender = 'female' | 'male' | 'neutral'",

@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.23 · Focused Voice Surface & Picker Polish**
+현재 기준 버전: **0.11.24 R1 · Voice Pace Calibration**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-18 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,30 @@
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-18 KST · 0.11.24 R1 Voice Pace Calibration
+1. **작업 일시(KST)**: 2026-08-18.
+2. **대상/기준 버전**: `0.11.24 R1 · Voice Pace Calibration` / `0.11.24 · Recovery Batch & Editor Responsibility Split` FULL ZIP. 앱·API·Worker의 제품 semver는 기존 3자리 규칙에 따라 `0.11.24`를 유지하고 전달 리비전만 R1으로 구분합니다.
+3. **변경 내용**: 기본 Voice pace multiplier를 혜린 `1.00`, 도윤 `1.04`, 소리 `0.98`, 준호 `0.98`, 민준 `1.08`로 재보정했습니다. 소리/준호의 `naturalSpeedRange` 상한을 각각 1.15/1.12로 높이고 다른 프리셋 범위도 현재 pace 정책에 맞춰 정리했습니다. Frontend/API의 pace 표를 회귀 테스트와 `check-voice-preset-contracts.mjs`에서 동시에 고정했습니다.
+4. **변경 이유**: 기존 UI `1.00×`에서도 혜린 0.96, 소리 0.90, 준호 0.92 multiplier가 다시 곱해져 한국어 일상 발화보다 지나치게 느리게 들릴 수 있었고, 특히 Voice 변경 시 natural range clamp가 사용자가 올린 속도까지 다시 낮출 수 있었기 때문입니다. `1.00× = 자연스러운 한국어 기본 발화`라는 사용자 UX 기준을 명확히 고정합니다.
+5. **영향 범위**: Browser Speech/System TTS/MeloTTS의 built-in preset effective speed, Voice 변경 시 natural speed clamp, preset 문서/테스트/static contract입니다. Voice ID, pitch, engine routing, Timeline recovery, 저장 schema, MY VOICE clone runtime은 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/tts/voicePresets.ts`, `src/tts/voicePresets.test.ts`, `src/tts/voiceRecommendation.test.ts`, `services/api/app/services/voice_presets.py`, `services/api/tests/{test_voice_presets,test_melo_tts}.py`, `scripts/check-voice-preset-contracts.mjs`, `docs/VOICE_PRESETS.md`, `docs/VOICE_PACE_CALIBRATION.md`, 릴리스/패치 문서입니다.
+7. **검증 결과**: 제품 버전 sync **0.11.24 PASS**, Repository preflight **49/49 PASS**, 관련 API pace regression **8/8 PASS**, API pytest **220/220 PASS**, Worker pytest **14/14 PASS**, Python compileall **PASS**, TS/TSX syntax parse **245/245 PASS**, 0.11.24 기준 PATCH overlay **1020/1020 files · missing 0 / extra 0 / changed 0**입니다. Web Vitest는 로컬 `node_modules`가 불완전해 `vitest` binary가 없어 실행하지 못했습니다. 전역 `tsc`는 시작됐지만 Vite/Vitest/React type definition이 없어 semantic typecheck를 완료하지 못했습니다. ESLint/Vite build/Chromium은 GitHub Actions 최종 gate로 남깁니다.
+8. **알려진 제한과 주의사항**: 이 값은 실제 한국인 청취자 benchmark가 아니라 제품 pace calibration입니다. 실제 청취 evidence가 생기기 전에는 더 공격적인 속도 보정을 보증하지 않습니다. MY VOICE는 built-in preset multiplier를 쓰지 않으므로 clone 결과가 느리면 sample cadence/Worker/model을 별도로 확인해야 합니다.
+9. **생성 산출물**: `SoriON-AI-0.11.24-r1-voice-pace-calibration-full.zip`, `SoriON-AI-0.11.24-to-0.11.24-r1-voice-pace-calibration-patch.zip`, `SoriON-AI-0.11.24-r1-voice-pace-calibration-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.25 · Web Quality Evidence & Recovery Runtime Verification`. R1을 실제 GitHub 기준선에 반영해 Vitest/typecheck/lint/build와 desktop/mobile Chromium을 우선 통과시키고, 실제 Worker/동의 프로필이 있을 때만 MY VOICE stale recovery runtime evidence를 추가합니다.
+
+## 2026-08-18 KST · 0.11.24 Recovery Batch & Editor Responsibility Split
+1. **작업 일시(KST)**: 2026-08-18.
+2. **대상/기준 버전**: `0.11.24 · Recovery Batch & Editor Responsibility Split` / 사용자가 전달한 `0.11.23 · Focused Voice Surface & Picker Polish` FULL ZIP.
+3. **변경 내용**: 다중 선택에서 stale/unavailable MY VOICE만 추려 복구하는 흐름을 추가했습니다. 사용 불가 개수, 원래 Voice 구성, ready/generating 상태와 프로필 유실 수를 보여주고 별도 `복구 영향 확인` dialog에서 실제 대상과 기존 완성 음원 폐기 영향을 확인한 뒤 `교체만 적용` 또는 `교체 후 재생성`을 실행합니다. 동시에 Timeline selection 상태를 `useTimelineEditorSelection.ts`, batch/retry/history/recovery 상태를 `useTimelineEditorBatch.ts`로 분리했습니다. `updateVoiceMany`는 recovery 전용 history label을 받아 Undo/Redo 의미를 명확히 합니다.
+4. **변경 이유**: 0.11.22의 단일 stale 복구가 다중 선택에서는 정상 Voice까지 일괄 변경할 위험을 명확히 설명하지 못했고, `TimelineEditor`가 선택·batch·recovery 상태를 함께 소유해 후속 회귀 범위가 컸기 때문입니다. ready stale audio를 자동 파기하지 않는 기존 결정을 유지하면서 실제 영향 범위만 명시적으로 실행하도록 만들고, 편집기 책임을 단계적으로 나눴습니다.
+5. **영향 범위**: Timeline 다중 선택/복구 UI, batch command/retry history controller, selection controller, `updateVoiceMany` history label, HomePage batch Voice 연결, 관련 CSS/회귀 테스트/static preflight, 제품 버전/문서입니다. Voice engine/API/Worker 생성 계약, 저장 schema, 최대 2-way bounded parallel, 0.11.23 Voice Picker/Drawer 재생=선택 계약은 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/hooks/{useTimelineEditorSelection,useTimelineEditorBatch}.ts`, `src/components/workspace/TimelineEditor.tsx` 및 tests, `src/hooks/useTimelineGeneration.ts` 및 test, `src/pages/HomePage.tsx`, `src/styles/timeline-voice-recovery.css`, `scripts/check-recovery-batch-editor-split.mjs`, 기존 관련 contract scripts, `docs/RECOVERY_BATCH_EDITOR_RESPONSIBILITY_SPLIT.md`와 버전/패치 문서입니다.
+7. **검증 결과**: 제품 버전 sync **0.11.24 PASS**, Repository preflight **49/49 PASS**, API pytest **220/220 PASS**, Worker pytest **14/14 PASS**, Python compileall **PASS**, TS/TSX syntax parse **244/244 PASS**, CSS brace balance **28/28 PASS**, 0.11.23 기준 PATCH overlay **1015/1015 files · missing 0 / extra 0 / changed 0**입니다. Python 3.10 Ruff는 `uv`가 런타임을 받는 단계에서 DNS/network 제한으로 실행하지 못했습니다. 전체 Web Vitest/ESLint/semantic typecheck/Vite build와 실제 desktop/mobile Chromium evidence도 이 전달 환경에 완전한 `node_modules`와 연결된 GitHub 저장소 컨텍스트가 없어 로컬에서 실행하지 않았고 GitHub Actions를 최종 gate로 남깁니다.
+8. **알려진 제한과 주의사항**: 다중 복구는 선택 전체가 아니라 unavailable MY VOICE subset만 바꿉니다. 실행 전 ready stale audio는 유지되지만 교체를 실행하면 기존 audio/job/track은 제거되고 queued가 됩니다. Undo는 Voice 배정을 되돌리되 과거 audio 파일을 부활시키지 않습니다. 실제 MY VOICE Worker 성공/first-audio evidence는 모델·동의된 프로필·Worker가 준비된 환경에서만 확인할 수 있습니다.
+9. **생성 산출물**: `SoriON-AI-0.11.24-recovery-batch-editor-responsibility-split-full.zip`, `SoriON-AI-0.11.23-to-0.11.24-recovery-batch-editor-responsibility-split-patch.zip`, `SoriON-AI-0.11.24-recovery-batch-editor-responsibility-split-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.25 · Web Quality Evidence & Recovery Runtime Verification`. 실제 GitHub Actions Web quality와 desktop/mobile Chromium evidence를 먼저 녹색으로 고정하고, 실제 Worker 환경이 있을 때만 stale MY VOICE 재생성 성공/지연 증거를 추가합니다.
 
 ## 2026-08-18 KST · 0.11.23 Focused Voice Surface & Picker Polish
 1. **작업 일시(KST)**: 2026-08-18.
@@ -872,9 +896,9 @@ SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
 - GitHub Pages Source는 GitHub Actions.
 - Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
 ## 16. 현재 산출물과 패치 기준
-- 전체 후보본: `SoriON-AI-0.11.14-all-workflows-hardening-full.zip`.
-- 덮어쓰기 패치: `SoriON-AI-0.11.13-to-0.11.14-all-workflows-hardening-patch.zip`.
-- 정확한 패치 기준: `0.11.13 · Focused Creation Surface` 전체본.
+- 전체 후보본: `SoriON-AI-0.11.24-recovery-batch-editor-responsibility-split-full.zip`.
+- 덮어쓰기 패치: `SoriON-AI-0.11.23-to-0.11.24-recovery-batch-editor-responsibility-split-patch.zip`.
+- 정확한 패치 기준: 사용자가 전달한 `0.11.23 · Focused Voice Surface & Picker Polish` 전체본.
 - 이번 릴리스 추적 파일 삭제: 없음.
 - `.git`, `.sorion`, `node_modules`, `dist`, Python cache, 실행 DB, 사용자 음성·Secret·모델 가중치는 산출물에서 제외한다.
 ## 17. 절대 변경 금지 결정
@@ -930,14 +954,14 @@ CI Hotfix 4 테스트 규칙:
 - placeholder 같은 변경 가능한 카피보다 maxlength, 접근성 이름, callback 같은 제품 계약을 검증한다.
 - `scripts/check-web-test-contracts.mjs`가 두 규칙의 핵심 회귀를 CI 앞단에서 차단한다.
 ## 21. 다음 목표
-다음 목표 버전: **0.11.15 · Adaptive Longform Soak & Editor Responsibility Split**.
+다음 목표 버전: **0.11.25 · Web Quality Evidence & Recovery Runtime Verification**.
 우선순위:
-1. 장문·다중 화자 2-way bounded parallel의 P95 지연, 실패율, fallback, engine switch evidence를 반복 측정한다.
-2. `TimelineEditor.tsx`의 selection/history/rendering 책임을 단계적으로 분리한다.
-3. `useTimelineGeneration.ts`의 orchestration/recovery/player-sync 책임을 단계적으로 분리한다.
-4. 모바일 360/390/430px Chromium layout regression evidence를 추가한다.
+1. 실제 GitHub Actions에서 Vitest, semantic typecheck, lint, Vite build를 모두 녹색으로 고정한다.
+2. desktop 1024/1280/1440과 mobile 360/390/430 Chromium evidence에서 Voice Picker/Drawer 재생=선택, 상단 지정 영역, multi stale recovery dialog를 확인한다.
+3. 실제 MY VOICE Worker와 동의된 프로필이 있을 때만 stale profile 교체 후 재생성 성공과 first-audio latency를 측정한다.
+4. Web quality가 녹색인 상태에서만 TimelineEditor의 남은 rendering/keyboard orchestration 책임 추가 분리를 판단한다.
 5. 승인되지 않은 pixel baseline이나 실제 모델이 없는 음질 결과를 완료 증거로 승격하지 않는다.
-금지: 측정 전 병렬도 자동 상향, 대규모 rewrite와 기능 추가 동시 진행, 동의·권리 없는 음성 포함, 모델 없는 성공 표시.
+금지: CI 실패 상태에서 새 기능 진행, 측정 전 병렬도 자동 상향, 대규모 rewrite와 기능 추가 동시 진행, 동의·권리 없는 음성 포함, 모델 없는 성공 표시.
 ## 22. 변경 이력 보존 위치
 - 0.7.3 이전 MASTER HANDOVER:
   `docs/archive/HANDOVER_MASTER_0.7.3.md`.

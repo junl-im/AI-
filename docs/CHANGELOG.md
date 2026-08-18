@@ -1,4 +1,48 @@
+## 0.11.24 R1 · Voice Pace Calibration
+
+- 앱 semver는 `0.11.24`를 유지하고 hotfix revision을 R1으로 구분합니다.
+- 기본 프리셋 속도 multiplier를 혜린 `1.00`, 도윤 `1.04`, 소리 `0.98`, 준호 `0.98`, 민준 `1.08`로 재보정했습니다.
+- 소리/준호처럼 차분함·저음을 표현하던 프리셋의 과도한 감속을 제거하고, 자연 속도 범위를 상향해 Voice 변경 시 사용자가 선택한 1.10× 안팎 속도가 1.00 근처로 강제 축소되지 않도록 했습니다.
+- 프론트와 API의 multiplier 표를 회귀 테스트와 `check-voice-preset-contracts.mjs`에서 동시에 고정했습니다.
+- MY VOICE의 clone cadence에는 preset multiplier를 적용하지 않는 기존 계약을 유지합니다.
+
+### 검증
+
+- Product version sync: **0.11.24 PASS**
+- Repository preflight: **49/49 PASS**
+- API pytest: **220/220 PASS** (FastAPI deprecated status alias 경고 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX syntax parse: **245/245 PASS**
+- 0.11.24 기준 PATCH overlay: **1020/1020 files · missing 0 / extra 0 / changed 0**
+- 관련 API pace regression: **8/8 PASS**
+- Web Vitest: **미실행** — 전달 폴더의 `node_modules`가 불완전해 `vitest` 실행 파일이 없습니다.
+- Semantic TypeScript: **의존성 부족으로 미완료** — 전역 `tsc`는 실행됐지만 Vite/Vitest/React type definition이 없어 종료했습니다.
+- ESLint/Vite build/Chromium: **로컬 미실행**, GitHub Actions 최종 gate로 남깁니다.
+
 # CHANGELOG
+
+## 0.11.24 · Recovery Batch & Editor Responsibility Split
+
+- 여러 대사를 선택했을 때 stale/unavailable MY VOICE만 별도 subset으로 계산해 정상 Voice 클립을 건드리지 않는 일괄 복구를 추가했습니다.
+- 다중 복구 영역에서 사용 불가 개수, 원래 Voice별 구성, ready/generating 상태와 프로필 유실 수를 보여주고 `복구 영향 확인` dialog에서 실제 교체 범위와 기존 완성 음원 폐기 영향을 다시 확인합니다.
+- ready stale audio는 명시적 실행 전까지 유지하며 `교체만 적용`/`교체 후 재생성`을 누른 뒤에만 대상 클립을 queued 상태로 전환합니다.
+- `TimelineEditor`의 selection 상태를 `useTimelineEditorSelection.ts`, batch command/retry/history/recovery 상태를 `useTimelineEditorBatch.ts`로 분리해 편집기 본문을 약 1,038줄에서 942줄로 줄였습니다.
+- `updateVoiceMany`에 semantic history label을 추가해 일반 일괄 변경과 `사용 불가 목소리 복구`/`사용 불가 목소리 일괄 복구`를 Undo/Redo에서 구분합니다. Undo는 Voice 배정을 되돌리지만 폐기된 과거 audio/job/track을 부활시키지 않고 queued 상태로 복원합니다.
+- 선택 3개 중 stale 2개만 복구하는 회귀 테스트와 복구 Undo/Redo 회귀 테스트, 전용 dependency-free preflight를 추가하고 기존 정적 계약도 새 책임 위치를 보도록 갱신했습니다.
+- 상세 계약은 `docs/RECOVERY_BATCH_EDITOR_RESPONSIBILITY_SPLIT.md`를 따릅니다.
+
+### 검증
+
+- Product version sync: **0.11.24 PASS**
+- Repository preflight: **49/49 PASS**
+- API pytest: **220/220 PASS** (FastAPI deprecated status alias 경고 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX syntax parse: **244/244 PASS**
+- CSS brace balance: **28/28 PASS**
+- Python 3.10 Ruff: **미실행** — `uv`의 Python 3.10 runtime download가 DNS/network 제한으로 실패했습니다.
+- 전체 Web Vitest/ESLint/semantic typecheck/Vite build 및 실제 Chromium evidence: **로컬 미실행** — 전달 환경에 완전한 `node_modules`와 연결된 GitHub 저장소 컨텍스트가 없으므로 GitHub Actions를 최종 gate로 사용합니다.
 
 ## 0.11.23 · Focused Voice Surface & Picker Polish
 

@@ -13,14 +13,20 @@ def test_builtin_voice_presets_have_distinct_prosody_and_three_male_options():
     assert len(PRESET_VOICE_IDS) == 5
     assert {profile.id for profile in list_voice_presets()} == set(PRESET_VOICE_IDS)
     assert sum(profile.gender == "male" for profile in list_voice_presets()) == 3
-    rates = {
-        warm.rate_multiplier,
-        clear.rate_multiplier,
-        calm.rate_multiplier,
-        deep.rate_multiplier,
-        energetic.rate_multiplier,
+    assert {
+        warm.id: warm.rate_multiplier,
+        clear.id: clear.rate_multiplier,
+        calm.id: calm.rate_multiplier,
+        deep.id: deep.rate_multiplier,
+        energetic.id: energetic.rate_multiplier,
+    } == {
+        "sori-warm": 1.00,
+        "on-clear": 1.04,
+        "dam-calm": 0.98,
+        "jun-deep": 0.98,
+        "min-energetic": 1.08,
     }
-    assert len(rates) == 5
+    assert deep.variant_index != clear.variant_index
     assert deep.pitch_offset < clear.pitch_offset < energetic.pitch_offset < warm.pitch_offset
     with pytest.raises(ValueError, match="지원하지 않는"):
         get_voice_preset("missing")

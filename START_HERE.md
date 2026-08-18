@@ -1,8 +1,9 @@
 # START HERE
 
-현재 버전: `0.11.12 · Editing History, Speaker Memory & Engine Routing Trace`
+현재 버전: `0.11.24 R1 · Voice Pace Calibration`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
+1-1. 0.11.24 R1은 앱 semver `0.11.24`를 유지하는 hotfix revision입니다. 기본 Voice 속도는 혜린 1.00 / 도윤 1.04 / 소리 0.98 / 준호 0.98 / 민준 1.08이며 UI `1.00×`는 자연스러운 한국어 기본 발화를 의미합니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
 4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.

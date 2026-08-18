@@ -1,3 +1,40 @@
+## 0.11.24 R1 · Voice Pace Calibration
+
+- 앱 semver `0.11.24`를 유지하는 R1 hotfix입니다.
+- 기본 프리셋 pace를 혜린 1.00 / 도윤 1.04 / 소리 0.98 / 준호 0.98 / 민준 1.08로 재보정했습니다.
+- 소리/준호의 natural speed range 상한을 각각 1.15 / 1.12까지 열어 Voice 전환 시 사용자 속도값을 과도하게 낮추지 않습니다.
+- 프론트/API pace 표는 회귀 테스트와 repository contract에서 동기화합니다.
+
+### 검증
+
+- Product version sync: **0.11.24 PASS**
+- Repository preflight: **49/49 PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX syntax parse: **245/245 PASS**
+- 0.11.24 기준 PATCH overlay: **1020/1020 files · missing 0 / extra 0 / changed 0**
+- Web dependency 기반 Vitest/semantic typecheck/ESLint/Vite build 및 Chromium: **GitHub Actions 최종 확인 필요**
+
+## 0.11.24 · Recovery Batch & Editor Responsibility Split
+
+- 다중 선택에서 unavailable MY VOICE subset만 복구 대상으로 계산하고 원래 Voice 구성/ready audio 영향을 실행 전에 확인하는 recovery impact flow를 추가했습니다.
+- selection controller는 `useTimelineEditorSelection`, batch/recovery controller는 `useTimelineEditorBatch`로 분리했습니다.
+- recovery 변경은 별도 semantic history label을 사용하며 Undo/Redo는 기존 안전 정책대로 historical audio를 부활시키지 않습니다.
+- 상세 설계는 `docs/RECOVERY_BATCH_EDITOR_RESPONSIBILITY_SPLIT.md`를 따릅니다.
+
+### 검증
+
+- Product version sync: **0.11.24 PASS**
+- Repository preflight: **49/49 PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX syntax parse: **244/244 PASS**
+- CSS brace balance: **28/28 PASS**
+- Python 3.10 Ruff: **환경 DNS/network 제한으로 미실행**
+- Web dependency 기반 Vitest/ESLint/semantic typecheck/Vite build 및 실제 Chromium 실행: **GitHub Actions 최종 확인 필요**
+
 ## 0.11.23 · Focused Voice Surface & Picker Polish
 
 - PC 메인 상단 전체를 비우지 않고 지정된 오른쪽 Live Voice 보조 카드만 현재 Voice 중심 카드로 교체했습니다.

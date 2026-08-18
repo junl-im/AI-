@@ -14,6 +14,6 @@ describe('voiceRecommendation', () => {
 
   it('목소리 변경 시 과한 속도와 높낮이를 자연 범위로 제한한다', () => {
     const calm = voicePresets.find((voice) => voice.id === 'dam-calm')!
-    expect(clampVoiceSettingsToNaturalRange(calm, 1.4, 6)).toEqual({ speed: 1.02, pitch: 2 })
+    expect(clampVoiceSettingsToNaturalRange(calm, 1.4, 6)).toEqual({ speed: 1.15, pitch: 2 })
   })
 })
