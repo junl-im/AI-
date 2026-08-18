@@ -54,7 +54,10 @@ requireTokens('src/components/workspace/VoicePickerSheet.tsx', picker, [
   '잘 맞음 · {voice.bestFor.join',
   '장점 · {voice.strengths.join',
   '주의 · {voice.tradeoffs.join',
-  'onPreview={onPreview}',
+  'function previewAndSelect(nextVoiceId: string)',
+  'if (nextVoiceId !== selectedId) onSelect(nextVoiceId)',
+  'onPreview={previewAndSelect}',
+  'soa-voice-picker-scroll',
   '타임라인 ${applyTargetCount}개 선택',
   '성우를 탭하면 선택된 대사에 바로 적용됩니다.',
 ])
@@ -109,6 +112,9 @@ const drawer = await source('src/components/workspace/DesktopVoiceDrawer.tsx')
 requireTokens('src/components/workspace/DesktopVoiceDrawer.tsx', drawer, [
   'applyTargetCount',
   '보이스 라이브러리 적용 대상',
+  'function previewAndSelect(nextVoiceId: string)',
+  'if (nextVoiceId !== voiceId) onVoiceChange(nextVoiceId)',
+  'onPreview={previewAndSelect}',
 ])
 
 const mobileCss = await source('src/styles/timeline-horizontal-mobile.css')
@@ -139,6 +145,7 @@ requireTokens('src/styles/index.css', indexCss, [
   '@import "./timeline-horizontal-mobile.css";',
   '@import "./mobile-studio-flow.css";',
   '@import "./linkage-convenience.css";',
+  '@import "./voice-surface-refresh.css";',
 ])
 
 if (failures.length) {

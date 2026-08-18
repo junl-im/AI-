@@ -42,6 +42,11 @@ export function DesktopVoiceDrawer({
   const selected = voiceChoices.find((voice) => voice.id === voiceId)
   const customSelected = selected?.kind === 'my-voice'
 
+  function previewAndSelect(nextVoiceId: string) {
+    if (nextVoiceId !== voiceId) onVoiceChange(nextVoiceId)
+    onPreview(nextVoiceId)
+  }
+
   const renderChoice = (voice: VoiceChoice) => {
     const active = voice.id === voiceId
     return (
@@ -50,7 +55,7 @@ export function DesktopVoiceDrawer({
           <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
           <span><strong>{voice.name}{voice.kind === 'my-voice' ? <em>MY</em> : null}</strong><small>{voice.kind === 'my-voice' ? voice.meta : voice.meta}</small></span>
         </button>
-        {voice.ready ? <VoicePreviewButton className="soa-voice-drawer__play" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={onPreview} labelContext="보이스 라이브러리" /> : <span className="soa-my-voice-engine-wait">준비</span>}
+        {voice.ready ? <VoicePreviewButton className="soa-voice-drawer__play" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={previewAndSelect} labelContext="보이스 라이브러리" /> : <span className="soa-my-voice-engine-wait">준비</span>}
       </article>
     )
   }
@@ -60,7 +65,7 @@ export function DesktopVoiceDrawer({
       <button type="button" className="soa-studio-panel-toggle" aria-label={collapsed ? '보이스 패널 펼치기' : '보이스 패널 접기'} aria-expanded={!collapsed} aria-controls="soa-voice-drawer" onClick={onToggleCollapsed}>{collapsed ? '‹' : '›'}</button>
       {collapsed ? <span className="soa-studio-panel-monogram" aria-hidden="true">V</span> : (
         <>
-          <header><span>VOICE DRAWER</span><strong>목소리 라이브러리</strong><p>목소리를 고른 뒤 ▶를 누르면 바로 미리듣습니다.</p></header>
+          <header><span>VOICE DRAWER</span><strong>목소리 라이브러리</strong><p>▶를 누르면 해당 목소리를 선택하고 바로 미리듣습니다.</p></header>
           {applyTargetCount > 0 ? (
             <div className="soa-voice-drawer__apply-target" role="note" aria-label="보이스 라이브러리 적용 대상">
               <strong>타임라인 선택 · {applyTargetLabel ?? `${applyTargetCount}개 대사`}</strong>

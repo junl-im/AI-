@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.11.23 · Focused Voice Surface & Picker Polish
+
+- PC 메인 상단 전체를 비우지 않고 사용자가 지정한 오른쪽 보조 Live Voice 카드만 교체했습니다. 브랜드, 버전, 제작자, 제품 제목, 소개 문구와 기본 진입 구조는 유지합니다.
+- 기존 파형 중심 Voice Deck 보조 카드를 `현재 목소리 + 상태 + 엔진 + TTS 진입` 중심의 더 간결한 카드로 재구성해 상단 시선 분산을 줄였습니다.
+- PC Voice Drawer와 목소리 선택 Sheet의 ▶ 미리듣기를 `선택 후 미리듣기`로 통일했습니다. 다른 성우의 ▶를 누르면 이름을 직접 선택했을 때와 같은 Voice/Timeline 적용 경로가 먼저 실행됩니다.
+- 이미 선택된 성우의 ▶ 재생/일시정지는 Voice를 다시 적용하지 않아 Timeline 재적용 알림이 반복되지 않도록 했습니다.
+- 목소리 선택 Sheet를 `고정 외곽 + 내부 스크롤 viewport` 구조로 바꿔 스크롤바가 팝업 라운드 바깥으로 튀어나오지 않도록 하고, PC 중앙 modal의 모서리·여백·닫기/내 목소리 버튼을 정돈했습니다.
+- 완료 내보내기 UI에서 `최종 WAV + 자막` 버튼을 제거하고 `최종 MP3 + 자막`만 노출합니다. WAV 생성 API/내부 포맷 지원 자체는 삭제하지 않아 기존 엔진·soak 계약에는 영향을 주지 않습니다.
+- Voice Picker/Drawer와 Final Export 회귀 테스트를 현재 UX 계약에 맞춰 갱신하고 앱/API/Worker 버전을 `0.11.23`으로 동기화했습니다.
+
 ## 0.11.22 · Timeline Voice Recovery & Quick Navigation
 
 - 과거 Timeline 클립이 삭제·유실된 `MY VOICE`를 참조하면 `사용 불가 목소리`와 `복구 필요` 상태를 명확히 표시하고, 기존 ready 음원은 사용자가 교체를 실행하기 전까지 유지합니다.

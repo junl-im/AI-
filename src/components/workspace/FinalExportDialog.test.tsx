@@ -30,7 +30,7 @@ describe('FinalExportDialog', () => {
 
     expect(screen.getByRole('dialog', { name: '완성본 내보내기' })).toBeInTheDocument()
     expect(screen.getByText('대사 1/1 완료')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '최종 WAV + 자막' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '최종 WAV + 자막' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '최종 MP3 + 자막' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '내보내기 닫기' }))
     expect(onClose).toHaveBeenCalledTimes(1)

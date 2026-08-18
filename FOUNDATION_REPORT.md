@@ -1,3 +1,23 @@
+## 0.11.23 · Focused Voice Surface & Picker Polish
+
+- PC 메인 상단 전체를 비우지 않고 지정된 오른쪽 Live Voice 보조 카드만 현재 Voice 중심 카드로 교체했습니다.
+- Voice Drawer/Picker의 ▶를 선택과 연결해 실제 적용 Voice와 미리듣기 Voice를 일치시켰습니다.
+- Voice Picker를 외곽 clipping + 내부 scroll 구조로 변경해 scrollbar/rounding 문제를 정리했습니다.
+- `최종 WAV + 자막` 완료 버튼을 UI에서 제거하고 MP3+자막 완료 동선만 유지합니다. WAV backend/API 지원은 유지합니다.
+- 상세 UX 계약은 `docs/VOICE_SURFACE_PICKER_POLISH.md`를 따릅니다.
+
+### 검증
+
+- Product version sync: **0.11.23 PASS**
+- Repository preflight: **48/48 PASS**
+- API pytest: **220/220 PASS** (FastAPI deprecated status alias 경고 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX syntax parse: **242/242 PASS**
+- CSS brace balance: **28/28 PASS**
+- Visible UI `최종 WAV + 자막` source scan: **0건 PASS**
+- 전체 Web lint/Vitest/semantic typecheck/Vite build: **로컬 미실행** — 현재 전달 환경에 `node_modules`가 없으며 GitHub Actions Web quality가 최종 gate입니다.
+
 ## 0.11.22 · Timeline Voice Recovery & Quick Navigation
 
 - 삭제·유실된 MY VOICE를 참조하는 Timeline clip에 `사용 불가 목소리` 복구 상태를 추가했습니다.

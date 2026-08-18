@@ -138,7 +138,7 @@ describe('DubbingVoiceControls', () => {
     expect(screen.queryByRole('radio', { name: /혜린/ })).not.toBeInTheDocument()
   })
 
-  it('목소리 목록의 재생 버튼은 선택을 바꾸지 않고 비교 재생만 한다', () => {
+  it('목소리 목록의 재생 버튼은 해당 목소리를 선택하고 바로 미리듣는다', () => {
     const onVoiceChange = vi.fn()
     const onPreview = vi.fn()
     render(<DubbingVoiceControls {...baseProps} onVoiceChange={onVoiceChange} onPreview={onPreview} />)
@@ -146,7 +146,7 @@ describe('DubbingVoiceControls', () => {
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
     fireEvent.click(screen.getByRole('button', { name: '도윤 목소리 미리듣기' }))
 
-    expect(onVoiceChange).not.toHaveBeenCalled()
+    expect(onVoiceChange).toHaveBeenCalledWith('on-clear')
     expect(onPreview).toHaveBeenCalledWith('on-clear')
   })
 

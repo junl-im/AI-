@@ -1,14 +1,26 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-현재 기준 버전: **0.11.22 · Timeline Voice Recovery & Quick Navigation**
+현재 기준 버전: **0.11.23 · Focused Voice Surface & Picker Polish**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-15 KST**
+최종 갱신: **2026-08-18 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-18 KST · 0.11.23 Focused Voice Surface & Picker Polish
+1. **작업 일시(KST)**: 2026-08-18.
+2. **대상/기준 버전**: `0.11.23 · Focused Voice Surface & Picker Polish` / GitHub `main` commit `235cfd2b5030efe7c5c7837c5ad9b5c8ed4ab7fd`의 `0.11.22` 코드 상태.
+3. **변경 내용**: PC 메인 상단 전체를 지우지 않고 사용자가 지정한 오른쪽 보조 Live Voice 카드만 교체 디자인했습니다. 브랜드/버전/제작자/제품 제목/소개 문구는 유지합니다. Voice Drawer와 Voice Picker의 ▶는 다른 성우일 때 `onVoiceChange`를 먼저 호출한 뒤 preview를 실행해 재생과 선택을 일치시킵니다. Voice Picker는 외곽 sheet의 overflow를 숨기고 내부 `soa-voice-picker-scroll`만 스크롤하도록 분리했습니다. 완료 Export UI에서는 `최종 WAV + 자막` 노출을 제거하고 MP3+자막 완료 동선만 유지합니다.
+4. **변경 이유**: 상단 전체 삭제가 아니라 지정 영역만 정리해 디자인을 대체해야 한다는 사용자 결정을 보존하면서, Voice 라이브러리에서 ▶ 재생과 실제 선택 성우가 어긋나는 UX, modal scrollbar가 라운드 밖으로 보이는 문제, 제거 대상으로 지정된 WAV 완료 버튼 잔존을 함께 해결하기 위해서입니다.
+5. **영향 범위**: `BrandMasthead`의 오른쪽 보조 카드, Desktop Voice Drawer, Voice Picker Sheet, Final Export 노출 UI, 관련 CSS와 회귀 테스트, 제품 버전/문서입니다. 메인 브랜드 구조, Timeline 생성 계약, Voice engine routing, WAV backend/API 포맷 지원, 저장 schema는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/components/layout/BrandMasthead.tsx`, `src/components/workspace/{DesktopVoiceDrawer,VoicePickerSheet,FinalExportControls}.tsx`, 관련 tests, `src/styles/voice-surface-refresh.css`, `src/styles/index.css`, `docs/VOICE_SURFACE_PICKER_POLISH.md`, 버전/패치 문서입니다.
+7. **검증 결과**: Repository preflight **48/48 PASS**, 제품 버전 sync **0.11.23 PASS**, API pytest **220/220 PASS**, Worker pytest **14/14 PASS**, Python compileall **PASS**, TS/TSX syntax parse **242/242 PASS**, CSS brace balance **28/28 PASS**, `최종 WAV + 자막` 비테스트 UI source 잔존 **0건**을 확인했습니다. 현재 전달 환경은 `node_modules`가 없어 dependency 기반 Vitest/ESLint/semantic typecheck/Vite build는 로컬에서 실행할 수 없으며 GitHub Actions Web quality가 최종 gate입니다.
+8. **알려진 제한과 주의사항**: 이번 상단 변경은 사용자 지정 보조 카드에만 한정합니다. `최종 WAV + 자막`은 UI에서 제거했지만 서버/내부 WAV 기능을 삭제한 것이 아닙니다. 새 modal 레이아웃의 실제 Chromium pixel evidence는 GitHub Actions/브라우저 실행 환경에서 최종 확인이 필요합니다.
+9. **생성 산출물**: `SoriON-AI-0.11.23-focused-voice-surface-picker-polish-full.zip`, `SoriON-AI-0.11.22-to-0.11.23-focused-voice-surface-picker-polish-patch.zip`, `SoriON-AI-0.11.23-focused-voice-surface-picker-polish-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.24 · Recovery Batch & Editor Responsibility Split`. 0.11.22에서 이월한 stale MY VOICE 다중 복구 영향 확인, TimelineEditor batch/selection 책임 분리, 0.11.23 Web quality/Chromium evidence를 진행합니다.
 
 ## 2026-08-15 KST · 0.11.22 Timeline Voice Recovery & Quick Navigation
 1. **작업 일시(KST)**: 2026-08-15.

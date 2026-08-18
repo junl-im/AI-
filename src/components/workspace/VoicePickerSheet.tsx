@@ -46,6 +46,11 @@ export function VoicePickerSheet({
   }, [filter, presetVoices, recommendation])
   const hasSelectedPreset = visibleVoices.some((voice) => voice.id === selectedId)
 
+  function previewAndSelect(nextVoiceId: string) {
+    if (nextVoiceId !== selectedId) onSelect(nextVoiceId)
+    onPreview(nextVoiceId)
+  }
+
   function handleChoiceKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const forward = event.key === 'ArrowDown' || event.key === 'ArrowRight'
     const backward = event.key === 'ArrowUp' || event.key === 'ArrowLeft'
@@ -62,11 +67,15 @@ export function VoicePickerSheet({
     <div className="soa-sheet-backdrop" role="presentation" onMouseDown={onClose}>
       <section ref={dialogRef} className="soa-bottom-sheet soa-voice-picker-sheet" role="dialog" aria-modal="true" aria-labelledby="voice-picker-title" tabIndex={-1} onMouseDown={(event) => event.stopPropagation()}>
         <div className="soa-sheet-handle" aria-hidden="true" />
-        <header className="soa-sheet-header">
-          <button type="button" onClick={onClose} aria-label="목소리 선택 닫기" data-dialog-autofocus>‹</button>
+        <header className="soa-sheet-header soa-voice-picker-header">
+          <button type="button" className="soa-voice-picker-close" onClick={onClose} aria-label="목소리 선택 닫기" data-dialog-autofocus>
+            <span className="soa-voice-picker-close__mobile" aria-hidden="true">‹</span>
+            <span className="soa-voice-picker-close__desktop" aria-hidden="true">×</span>
+          </button>
           <h2 id="voice-picker-title">목소리 선택</h2>
-          <button type="button" onClick={() => { onClose(); onCreateVoice() }}>내 목소리</button>
+          <button type="button" className="soa-voice-create-button" onClick={() => { onClose(); onCreateVoice() }}>내 목소리</button>
         </header>
+        <div className="soa-voice-picker-scroll">
         <div
           className={`soa-voice-apply-target ${applyTargetCount > 0 ? '' : 'is-default'}`.trim()}
           role="note"
@@ -88,7 +97,7 @@ export function VoicePickerSheet({
                       <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
                       <span><strong>{voice.name}<em>MY VOICE</em></strong><small>{voice.description}</small><span className="soa-voice-fit">{voice.meta}</span></span>
                     </button>
-                    {voice.ready ? <VoicePreviewButton className="soa-voice-sheet-preview" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={onPreview} /> : <span className="soa-my-voice-engine-wait">엔진 준비 필요</span>}
+                    {voice.ready ? <VoicePreviewButton className="soa-voice-sheet-preview" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={previewAndSelect} /> : <span className="soa-my-voice-engine-wait">엔진 준비 필요</span>}
                     <span className="soa-voice-sheet-check" aria-hidden="true">{selected ? '✓' : ''}</span>
                   </div>
                 )
@@ -113,11 +122,12 @@ export function VoicePickerSheet({
                   <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
                   <span><strong>{voice.name} · {voice.gender === 'custom' ? '내 목소리' : voiceGenderLabels[voice.gender]}{recommended ? <em>대본 추천</em> : null}</strong><small>{voice.description}</small><span className="soa-voice-fit">잘 맞음 · {voice.bestFor.join(' · ')}</span><span className="soa-voice-pro">장점 · {voice.strengths.join(' / ')}</span><span className="soa-voice-con">주의 · {voice.tradeoffs.join(' / ')}</span></span>
                 </button>
-                <VoicePreviewButton className="soa-voice-sheet-preview" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={onPreview} />
+                <VoicePreviewButton className="soa-voice-sheet-preview" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={previewAndSelect} />
                 <span className="soa-voice-sheet-check" aria-hidden="true">{selected ? '✓' : ''}</span>
               </div>
             )
           })}
+        </div>
         </div>
       </section>
     </div>

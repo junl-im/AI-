@@ -10,12 +10,12 @@ import {
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 
 export function FinalExportControls({ blocks }: { blocks: TimelineBlock[] }) {
-  const [busy, setBusy] = useState<'wav' | 'mp3' | null>(null)
+  const [busy, setBusy] = useState<'mp3' | null>(null)
   const [result, setResult] = useState<FinalExportResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [receipt, setReceipt] = useState<ExportArchiveReceipt | null>(() => loadExportArchiveReceipts()[0] ?? null)
 
-  async function run(format: 'wav' | 'mp3') {
+  async function run(format: 'mp3') {
     setBusy(format)
     setError(null)
     try {
@@ -42,10 +42,7 @@ export function FinalExportControls({ blocks }: { blocks: TimelineBlock[] }) {
   return (
     <div className="mt-3 rounded-2xl border border-soa-line bg-white p-3">
       <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => void run('wav')} disabled={busy !== null || !blocks.length} className="focus-ring min-h-10 rounded-xl bg-soa-ink px-4 text-xs font-black text-white disabled:opacity-45">
-          {busy === 'wav' ? 'WAV 병합 중…' : '최종 WAV + 자막'}
-        </button>
-        <button type="button" onClick={() => void run('mp3')} disabled={busy !== null || !blocks.length} className="focus-ring min-h-10 rounded-xl border border-soa-line px-4 text-xs font-black disabled:opacity-45">
+        <button type="button" onClick={() => void run('mp3')} disabled={busy !== null || !blocks.length} className="focus-ring min-h-10 rounded-xl bg-soa-ink px-4 text-xs font-black text-white disabled:opacity-45">
           {busy === 'mp3' ? 'MP3 변환 중…' : '최종 MP3 + 자막'}
         </button>
       </div>

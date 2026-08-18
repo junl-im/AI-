@@ -1,0 +1,297 @@
+/* 0.11.23 targeted PC voice surface refresh.
+   Keep the masthead structure; replace only the auxiliary live-voice card and voice picker surface. */
+
+.soa-voice-picker-close__desktop { display: none; }
+
+.soa-voice-picker-sheet {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  padding: 9px 0 0;
+}
+
+.soa-voice-picker-sheet .soa-sheet-handle { flex: 0 0 auto; }
+
+.soa-voice-picker-sheet .soa-sheet-header {
+  flex: 0 0 auto;
+  margin-inline: 16px;
+}
+
+.soa-voice-picker-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 16px max(22px, env(safe-area-inset-bottom));
+  scrollbar-gutter: stable;
+}
+
+.soa-voice-picker-scroll::-webkit-scrollbar { width: 8px; }
+.soa-voice-picker-scroll::-webkit-scrollbar-track { background: transparent; }
+.soa-voice-picker-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(209, 218, 240, 0.24);
+  background-clip: padding-box;
+}
+
+@media (min-width: 760px) {
+  .soa-hero-grid {
+    grid-template-columns: minmax(0, 1.12fr) minmax(430px, 0.88fr);
+  }
+
+  .soa-voice-console--focused {
+    display: block;
+    min-height: 104px;
+    overflow: hidden;
+    border-color: rgba(156, 176, 222, 0.15);
+    border-radius: 22px;
+    padding: 14px 15px;
+    background:
+      radial-gradient(circle at 8% 14%, rgba(87, 218, 255, 0.12), transparent 28%),
+      radial-gradient(circle at 88% 82%, rgba(144, 112, 255, 0.12), transparent 34%),
+      linear-gradient(135deg, rgba(16, 25, 45, 0.98), rgba(13, 18, 34, 0.98));
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.045), 0 14px 36px rgba(2, 8, 20, 0.2);
+  }
+
+  .soa-voice-console--focused::before {
+    background: linear-gradient(115deg, transparent 8%, rgba(255, 255, 255, 0.025) 34%, transparent 52%);
+  }
+
+  .soa-voice-console__focused-head {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 22px;
+  }
+
+  .soa-voice-console__focused-head .soa-live-voice-signature {
+    color: rgba(211, 224, 250, 0.44);
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+  }
+
+  .soa-voice-console__focused-body {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 52px minmax(130px, 1fr) minmax(105px, auto) auto;
+    align-items: center;
+    gap: 12px;
+    margin-top: 7px;
+  }
+
+  .soa-voice-console--focused .soa-live-voice-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+  }
+
+  .soa-voice-console--focused .soa-live-voice-avatar__ring {
+    inset: -3px;
+    border-radius: 19px;
+  }
+
+  .soa-voice-console--focused .soa-voice-console__copy {
+    position: static;
+    min-width: 0;
+    width: auto;
+  }
+
+  .soa-voice-console--focused .soa-voice-console__copy strong {
+    font-size: 15px;
+  }
+
+  .soa-voice-console--focused .soa-voice-console__copy > span:last-child {
+    overflow: hidden;
+    margin-top: 4px;
+    color: rgba(205, 219, 245, 0.42);
+    font-size: 7px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .soa-voice-console__engine-compact {
+    min-width: 0;
+    border-left: 1px solid rgba(155, 176, 221, 0.1);
+    padding-left: 12px;
+  }
+
+  .soa-voice-console__engine-compact span,
+  .soa-voice-console__engine-compact strong,
+  .soa-voice-console__engine-compact small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .soa-voice-console__engine-compact span {
+    color: rgba(190, 207, 240, 0.32);
+    font-size: 6px;
+    font-weight: 950;
+    letter-spacing: 0.16em;
+  }
+
+  .soa-voice-console__engine-compact strong {
+    margin-top: 4px;
+    color: rgba(241, 246, 255, 0.92);
+    font-size: 9px;
+  }
+
+  .soa-voice-console__engine-compact small {
+    margin-top: 3px;
+    color: rgba(181, 199, 232, 0.38);
+    font-size: 6px;
+  }
+
+  .soa-voice-console--focused .soa-live-voice-open {
+    display: grid;
+    grid-column: auto;
+    grid-row: auto;
+    grid-template-columns: auto 28px;
+    min-height: 38px;
+    gap: 8px;
+    border-radius: 12px;
+    padding: 4px 5px 4px 11px;
+    font-size: 8px;
+  }
+
+  .soa-voice-console--focused .soa-live-voice-open b {
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+  }
+}
+
+@media (min-width: 900px) {
+  .soa-sheet-backdrop:has(.soa-voice-picker-sheet) {
+    align-items: center;
+    padding: 28px;
+    background: rgba(4, 7, 14, 0.7);
+    backdrop-filter: blur(9px);
+  }
+
+  .soa-voice-picker-sheet {
+    width: min(760px, calc(100vw - 56px));
+    max-height: min(80vh, 680px);
+    border-color: rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 0;
+    background: rgba(24, 25, 31, 0.985);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.52);
+  }
+
+  .soa-voice-picker-sheet .soa-sheet-handle { display: none; }
+
+  .soa-voice-picker-sheet .soa-sheet-header {
+    grid-template-columns: 42px minmax(0, 1fr) 82px;
+    min-height: 66px;
+    margin: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.012);
+  }
+
+  .soa-voice-picker-sheet .soa-sheet-header h2 {
+    text-align: left;
+    font-size: 17px;
+    letter-spacing: -0.025em;
+  }
+
+  .soa-voice-picker-close {
+    display: grid;
+    width: 34px;
+    min-height: 34px !important;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03) !important;
+    text-align: center !important;
+    font-size: 20px !important;
+    line-height: 1;
+  }
+
+  .soa-voice-picker-close__mobile { display: none; }
+  .soa-voice-picker-close__desktop { display: inline; }
+
+  .soa-voice-create-button {
+    min-height: 34px !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border-radius: 10px;
+    padding: 0 11px;
+    background: rgba(255, 255, 255, 0.04) !important;
+    text-align: center !important;
+  }
+
+  .soa-voice-picker-scroll {
+    padding: 12px 18px 18px;
+  }
+
+  .soa-voice-picker-sheet .soa-voice-sheet-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding-top: 10px;
+  }
+
+  .soa-voice-picker-sheet .soa-voice-sheet-list > div {
+    position: relative;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    min-width: 0;
+    min-height: 82px;
+    gap: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.065);
+    border-radius: 14px;
+    padding: 7px 8px;
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  .soa-voice-picker-sheet .soa-voice-sheet-list > div.is-selected {
+    border-color: rgba(83, 164, 255, 0.5);
+    background: rgba(83, 164, 255, 0.08);
+  }
+
+  .soa-voice-picker-sheet .soa-voice-sheet-choice {
+    min-height: 66px;
+    gap: 10px;
+    padding: 4px;
+  }
+
+  .soa-voice-picker-sheet .soa-voice-avatar {
+    width: 42px;
+    height: 42px;
+    font-size: 14px;
+  }
+
+  .soa-voice-picker-sheet .soa-voice-sheet-choice strong {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .soa-voice-picker-sheet .soa-voice-sheet-choice small {
+    margin-top: 5px;
+    font-size: 9px;
+  }
+
+  .soa-voice-picker-sheet .soa-voice-sheet-preview {
+    width: 36px;
+    height: 36px;
+  }
+
+  .soa-voice-picker-sheet .soa-voice-sheet-check {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 760px) and (max-width: 980px) {
+  .soa-voice-console__focused-body {
+    grid-template-columns: 48px minmax(120px, 1fr) auto;
+  }
+
+  .soa-voice-console__engine-compact { display: none; }
+}

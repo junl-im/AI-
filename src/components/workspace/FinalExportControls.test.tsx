@@ -39,12 +39,12 @@ describe('FinalExportControls', () => {
     vi.mocked(createFinalExport).mockReset()
   })
 
-  it('완료 블록을 최종 WAV와 자막으로 요청하고 다운로드 링크를 보여준다', async () => {
+  it('완료 블록을 MP3와 자막으로 요청하고 WAV 완료 버튼은 노출하지 않는다', async () => {
     vi.mocked(createFinalExport).mockResolvedValue({
-      audioUrl: 'http://localhost/final.wav',
+      audioUrl: 'http://localhost/final.mp3',
       srtUrl: 'http://localhost/final.srt',
       vttUrl: 'http://localhost/final.vtt',
-      outputFormat: 'wav',
+      outputFormat: 'mp3',
       durationSeconds: 1.2,
       skippedSegments: 0,
       message: '완료',
@@ -54,12 +54,13 @@ describe('FinalExportControls', () => {
     })
 
     render(<FinalExportControls blocks={[readyBlock]} />)
-    fireEvent.click(screen.getByRole('button', { name: '최종 WAV + 자막' }))
+    expect(screen.queryByRole('button', { name: '최종 WAV + 자막' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '최종 MP3 + 자막' }))
 
-    await waitFor(() => expect(createFinalExport).toHaveBeenCalledWith([readyBlock], 'wav'))
+    await waitFor(() => expect(createFinalExport).toHaveBeenCalledWith([readyBlock], 'mp3'))
     expect(screen.getByRole('link', { name: '음원 받기' })).toHaveAttribute(
       'href',
-      'http://localhost/final.wav',
+      'http://localhost/final.mp3',
     )
     expect(screen.getByRole('link', { name: 'SRT' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'VTT' })).toBeInTheDocument()

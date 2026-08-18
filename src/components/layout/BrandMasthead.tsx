@@ -16,18 +16,6 @@ const readinessLabels: Record<LiveVoiceReadiness, string> = {
   generating: 'LIVE',
 }
 
-function LightningWave({ active }: { active: boolean }) {
-  return (
-    <div className={`soa-core-wave ${active ? 'is-active' : ''}`} aria-hidden="true">
-      <span />
-      <b />
-      {[18, 38, 68, 30, 88, 44, 74, 26, 94, 48, 66, 22, 58, 34, 82, 28, 62, 40].map((height, index) => (
-        <i key={`${height}-${index}`} style={{ height: `${height}%` }} />
-      ))}
-    </div>
-  )
-}
-
 export function BrandMasthead() {
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const exitWorkspace = useAppStore((state) => state.exitWorkspace)
@@ -75,16 +63,16 @@ export function BrandMasthead() {
           </div>
 
           <section
-            className={`soa-voice-console is-${liveVoice.readiness}`}
+            className={`soa-voice-console soa-voice-console--focused is-${liveVoice.readiness}`}
             aria-label={`현재 목소리 ${liveVoice.voiceName}, ${liveVoice.engineName}, ${readinessLabels[liveVoice.readiness]}`}
           >
             <div className="soa-live-voice-glow" aria-hidden="true" />
-            <div className="soa-voice-console__topline">
-              <span className="soa-live-voice-signature"><i aria-hidden="true" /> SORION · LIVE VOICE</span>
+            <div className="soa-voice-console__focused-head">
+              <span className="soa-live-voice-signature"><i aria-hidden="true" /> CURRENT VOICE</span>
               <span className="soa-live-dot" data-ready={ready ? 'true' : 'false'}>{readinessLabels[liveVoice.readiness]}</span>
             </div>
 
-            <div className="soa-live-voice-main">
+            <div className="soa-voice-console__focused-body">
               <div className={`soa-live-voice-avatar ${liveVoice.voiceKind === 'my-voice' ? 'is-mine' : ''}`} aria-hidden="true">
                 <span className="soa-live-voice-avatar__ring" />
                 {liveVoice.voiceKind === 'my-voice'
@@ -97,23 +85,18 @@ export function BrandMasthead() {
                 <strong>{liveVoice.voiceName}</strong>
                 <span>{liveVoice.detail}</span>
               </div>
-            </div>
 
-            <div className="soa-live-voice-signal" aria-hidden="true">
-              <span className="soa-live-voice-signal__label">VOICE SIGNAL</span>
-              <LightningWave active={ready} />
-            </div>
+              <div className="soa-voice-console__engine-compact">
+                <span>ENGINE</span>
+                <strong>{liveVoice.engineName}</strong>
+                <small>{liveVoice.engineId ?? 'auto routing'}</small>
+              </div>
 
-            <div className="soa-live-engine">
-              <span>ENGINE</span>
-              <strong>{liveVoice.engineName}</strong>
-              <small>{liveVoice.engineId ?? 'auto routing'}</small>
+              <button type="button" className="soa-live-voice-open" onClick={() => enterWorkspace('home')}>
+                <span>텍스트를 음성으로</span>
+                <b aria-hidden="true">→</b>
+              </button>
             </div>
-
-            <button type="button" className="soa-live-voice-open" onClick={() => enterWorkspace('home')}>
-              <span>텍스트를 음성으로</span>
-              <b aria-hidden="true">→</b>
-            </button>
           </section>
         </div>
       </div>
