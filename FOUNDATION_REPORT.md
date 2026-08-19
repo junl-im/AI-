@@ -1,3 +1,21 @@
+## 0.11.27 R1 · Chromium Multi-Scene Runner Stabilization
+
+- GitHub Actions run `32120737467`에서 reproducible Web quality/report verify, desktop 1024/1280/1440 layout, mobile 360/390/430 layout은 실제 PASS했습니다.
+- 최종 실패는 새 multi-scene runner 두 곳으로 제한됐습니다: desktop `voice-surface-1024`의 collapsed Voice Drawer, mobile `recovery-fixture`의 restored workspace/LandingHome 단일 가정입니다.
+- runner는 이제 Voice Drawer와 project rail을 필요할 때 명시적으로 펼치고, 캡처/프로젝트 open 뒤 runner가 바꾼 compact 상태를 복원합니다. `openStudio`는 이미 workspace가 열린 session-restore 상태를 정상 입력으로 허용합니다.
+- production UI/TTS/recovery/API/Worker는 변경하지 않습니다.
+
+### 검증
+
+- Product semver: **0.11.27 유지**
+- Repository preflight: **51/51 PASS**
+- Chromium multi-scene static contract: **PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- 0.11.27 기준 PATCH overlay: **1052/1052 files · missing 0 / extra 0 / changed 0**
+- 실제 corrected 18-scene Chromium: **다음 GitHub Actions 최종 확인 필요**
+
 ## 0.11.27 · Field Device & MY VOICE Runtime Certification
 
 - Kakao Android/iOS에서 preset preview 직접 시작 또는 WebView 실패+외부 브라우저 fallback, exit dialog open/stay close를 `field-device-certification/1` observed-device evidence로 기록합니다.

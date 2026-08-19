@@ -1,29 +1,38 @@
 # NEXT UPDATE
 
-Current baseline: `0.11.27 · Field Device & MY VOICE Runtime Certification`
+Current baseline: `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization`
+
+## 선행 gate
+
+- GitHub Actions에서 corrected desktop/mobile multi-scene runner가 모두 통과하고 Web quality final gate와 Pages 경로가 green이어야 새 음성 품질 기능을 시작합니다.
+- 실패가 남아 있으면 기능 추가보다 해당 CI 실패를 우선 안정화합니다.
 
 ## 목표 버전
 
-`0.11.28 · Certification Intake & Release Readiness`
+`0.11.28 · Voice Naturalness & Preview Quality`
 
 ### 핵심 기능
 
-1. `field-device-certification/1` Android/iOS JSON을 Quality Lab에서 불러와 schema/privacy/READY 조건을 즉시 검증하고 저장소/API evidence intake와 연결합니다.
-2. GitHub Actions의 desktop/mobile Chromium multi-scene manifest를 함께 불러와 18개 PNG SHA/assertion 결과를 release readiness에 연결합니다.
-3. `my-voice-recovery-runtime/1` 실제 completed evidence가 있으면 consent/Worker/model/first-audio/playback/recovery subset 계약을 같은 release readiness에 합칩니다.
-4. `field ready`, `chromium ready`, `MY VOICE pending`처럼 증거 등급별 상태를 분리하고, synthetic fixture나 미수집 값을 전체 RELEASE READY로 승격하지 않습니다.
-5. 실제 0.11.26 R1/0.11.27 GitHub Actions 결과를 확인해 lint, critical regression, full Vitest, typecheck, build, desktop/mobile Chromium이 녹색인지 release gate에 포함합니다.
+1. 혜린을 우선 대상으로 Browser Speech preview의 과도한 pitch 변조를 줄여 얇고 금속성/전자음처럼 들리는 현상을 완화합니다. 현재 `1.00×` 자연 속도 보정은 유지하고 pitch와 음색 역할을 분리합니다.
+2. 5개 SoriON preset의 browser fallback pitch/rate 범위를 다시 청취 가능한 안전 범위로 정리하고, 프리셋 캐릭터 차이는 pitch 과변조보다 실제 neural voice/reference를 우선하도록 계약을 명확히 합니다.
+3. Browser Speech는 `빠른 로컬 fallback/미리듣기`로, 실제 고품질 성우 결과는 CosyVoice 등 neural TTS WAV/reference path로 구분해 UI와 evidence에서 동일 음질처럼 오인되지 않게 합니다.
+4. 전용 reference WAV/동의/사람 검수가 준비된 preset만 neural preview 승격을 허용하고, 준비되지 않은 경우 synthetic/시스템 음성을 실제 성우 품질로 표시하지 않습니다.
+5. PC/모바일 Voice Drawer/Picker에서 같은 문장·같은 preset의 preview source와 effective rate/pitch를 privacy-safe evidence로 비교할 수 있는 regression/diagnostic 계약을 추가합니다.
 
 ### 예상 변경 영역
 
-- `src/components/evaluation/*Certification*`, `src/quality/*Evidence*`
-- `services/api/app/{schemas,api/routes,services}/evidence*` (필요한 최소 intake 확장)
-- GitHub Actions artifact/release readiness verification scripts
-- `docs/FIELD_DEVICE_RUNTIME_CERTIFICATION.md`, evidence intake 문서, HANDOVER/CHANGELOG
+- `src/tts/voicePresets.ts`, `src/tts/browserSpeech.ts` 및 관련 테스트
+- `services/api/app/services/voice_presets.py`와 preset parity 테스트
+- Voice preview source/diagnostic UI 및 Quality Lab evidence
+- `docs/VOICE_PRESETS.md`, 새 Voice Naturalness 설계 문서, HANDOVER/CHANGELOG
 
 ### 선행 조건과 위험
 
-- 0.11.27 PATCH는 `0.11.26 R1` 기준입니다. Actions run `32117983645`에서 R1 lint는 통과했고 critical regression 64/65 뒤 exit-history test harness 1건이 교정됐으므로, 최신 0.11.27 ZIP을 Push한 뒤 Web quality 전체 녹색을 확인해야 합니다.
-- 카카오 Android/iOS JSON은 실제 기기 수행자 확인이 있어야 하며 전체 UA·기기명·원문·오디오를 저장하지 않습니다.
-- MY VOICE는 실제 동의된 프로필과 Worker/model이 없으면 pending으로 유지합니다.
-- Chromium fixture는 `realWorkerClaimed=false`이므로 MY VOICE 운영 성공을 대신하지 않습니다.
+- 0.11.27 R1의 multi-scene CI가 실제 green이어야 합니다.
+- 실제 neural reference WAV가 없는 preset은 Browser Speech 음질 한계를 완전히 제거할 수 없으며, pitch 보정만으로 실제 AI 성우 품질을 가장하지 않습니다.
+- 혜린의 전자음 개선을 위해 pitch를 낮추더라도 사용자 설정 `높낮이`와 preset 기본값의 의미가 뒤섞이지 않도록 frontend/API 계약을 함께 조정해야 합니다.
+- MY VOICE clone cadence는 built-in preset 보정과 별도이며 이번 목표에서 무리하게 함께 조정하지 않습니다.
+
+## 후속 보류 항목
+
+이전에 계획한 `Certification Intake & Release Readiness`는 Voice Naturalness 패치 뒤로 순서를 조정합니다. 기존 field-device/Chromium/MY VOICE certification schema와 verifier는 그대로 유지하며 evidence가 없으면 pending입니다.

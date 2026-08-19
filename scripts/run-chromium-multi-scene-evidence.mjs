@@ -170,6 +170,8 @@ async function setViewport(cdp, viewport) {
 }
 
 async function openStudio(cdp) {
+  const alreadyOpen = await evaluate(cdp, `(() => Boolean(document.querySelector('.soa-dubbing-workspace')))()` )
+  if (alreadyOpen) return
   await waitForCondition(
     cdp,
     `(() => [...document.querySelectorAll('button')].some((item) => item.textContent?.includes('장문 음성 스튜디오 시작')))()`,
@@ -182,6 +184,60 @@ async function openStudio(cdp) {
   })()`)
   if (!opened) throw new Error('장문 음성 스튜디오 시작 버튼을 실행하지 못했습니다.')
   await waitForCondition(cdp, `(() => Boolean(document.querySelector('.soa-dubbing-workspace')))()`, '더빙 작업공간')
+}
+
+async function ensureDesktopVoiceDrawerOpen(cdp) {
+  if (mobileMode) return false
+  const state = await evaluate(cdp, `(() => {
+    const drawer = document.querySelector('.soa-voice-drawer')
+    if (!(drawer instanceof HTMLElement)) return 'missing-drawer'
+    if (!drawer.classList.contains('is-collapsed')) return 'already-open'
+    const toggle = drawer.querySelector('button[aria-label="보이스 패널 펼치기"]')
+    if (!(toggle instanceof HTMLButtonElement)) return 'missing-toggle'
+    toggle.click()
+    return 'opened-by-runner'
+  })()`)
+  if (state === 'missing-drawer' || state === 'missing-toggle') {
+    throw new Error(`Desktop Voice Drawer를 펼칠 수 없습니다. state=${state}`)
+  }
+  await waitForCondition(cdp, `(() => {
+    const drawer = document.querySelector('.soa-voice-drawer')
+    return Boolean(drawer && !drawer.classList.contains('is-collapsed') && drawer.querySelectorAll('.soa-voice-drawer__play').length >= 2)
+  })()`, 'Desktop Voice Drawer 펼침')
+  return state === 'opened-by-runner'
+}
+
+async function ensureProjectRailOpen(cdp) {
+  const state = await evaluate(cdp, `(() => {
+    const rail = document.querySelector('.soa-project-rail')
+    if (!(rail instanceof HTMLElement)) return 'missing-rail'
+    if (!rail.classList.contains('is-collapsed')) return 'already-open'
+    const toggle = rail.querySelector('button[aria-label="프로젝트 패널 펼치기"]')
+    if (!(toggle instanceof HTMLButtonElement)) return 'missing-toggle'
+    toggle.click()
+    return 'opened-by-runner'
+  })()`)
+  if (state === 'missing-rail' || state === 'missing-toggle') {
+    throw new Error(`프로젝트 패널을 펼칠 수 없습니다. state=${state}`)
+  }
+  await waitForCondition(cdp, `(() => {
+    const rail = document.querySelector('.soa-project-rail')
+    return Boolean(rail && !rail.classList.contains('is-collapsed') && rail.querySelector('.soa-project-rail__list'))
+  })()`, '프로젝트 패널 펼침')
+  return state === 'opened-by-runner'
+}
+
+async function collapsePanelIfOpenedByRunner(cdp, side, openedByRunner) {
+  if (!openedByRunner) return
+  const selector = side === 'voice' ? '.soa-voice-drawer' : '.soa-project-rail'
+  const label = side === 'voice' ? '보이스 패널 접기' : '프로젝트 패널 접기'
+  await evaluate(cdp, `(() => {
+    const panel = document.querySelector(${JSON.stringify(selector)})
+    const toggle = panel?.querySelector('button[aria-label=${JSON.stringify(label)}]')
+    if (toggle instanceof HTMLButtonElement) toggle.click()
+    return true
+  })()`)
+  await waitForCondition(cdp, `(() => Boolean(document.querySelector(${JSON.stringify(selector)})?.classList.contains('is-collapsed')))()`, `${label} 완료`)
 }
 
 async function buildWorkspaceFixture(cdp) {
@@ -256,6 +312,7 @@ async function exerciseVoiceSurface(cdp) {
     return { ...interaction, after, changed: interaction.before !== after, surface: 'voice-picker' }
   }
 
+  const openedByRunner = await ensureDesktopVoiceDrawerOpen(cdp)
   const interaction = await evaluate(cdp, `(() => {
     const drawer = document.querySelector('.soa-voice-drawer')
     if (!(drawer instanceof HTMLElement)) return null
@@ -272,11 +329,14 @@ async function exerciseVoiceSurface(cdp) {
   if (!interaction) throw new Error('Desktop Voice Drawer 미리듣기 대상을 찾지 못했습니다.')
   await waitForCondition(cdp, `(() => Boolean(document.querySelector('.soa-voice-drawer [role="radio"][aria-checked="true"]')?.closest('article')?.classList.contains('is-selected')))()`, 'Desktop 미리듣기 선택 반영')
   const after = await evaluate(cdp, `(() => document.querySelector('.soa-voice-drawer [role="radio"][aria-checked="true"]')?.textContent?.trim() ?? null)()`)
-  return { ...interaction, after, changed: interaction.before !== after, surface: 'voice-drawer' }
+  return { ...interaction, after, changed: interaction.before !== after, surface: 'voice-drawer', openedByRunner }
 }
 
-async function closeVoiceSurface(cdp) {
-  if (!mobileMode) return
+async function closeVoiceSurface(cdp, interaction = null) {
+  if (!mobileMode) {
+    await collapsePanelIfOpenedByRunner(cdp, 'voice', Boolean(interaction?.openedByRunner))
+    return
+  }
   await evaluate(cdp, `(() => {
     const button = document.querySelector('button[aria-label="목소리 선택 닫기"]')
     if (button instanceof HTMLButtonElement) button.click()
@@ -339,6 +399,7 @@ async function buildRecoveryFixture(cdp, url) {
   if (navigation?.errorText) throw new Error(`recovery fixture reload 실패: ${navigation.errorText}`)
   await waitForCondition(cdp, `(() => document.readyState === 'complete')()`, 'recovery page load', 20_000)
   await openStudio(cdp)
+  const projectRailOpenedByRunner = await ensureProjectRailOpen(cdp)
   await waitForCondition(cdp, `(() => Boolean(document.querySelector('button[aria-label="Visual Recovery Evidence 프로젝트 열기"]')))()`, 'recovery project rail item', 20_000)
   const opened = await evaluate(cdp, `(() => {
     const button = document.querySelector('button[aria-label="Visual Recovery Evidence 프로젝트 열기"]')
@@ -347,6 +408,7 @@ async function buildRecoveryFixture(cdp, url) {
     return true
   })()`)
   if (!opened) throw new Error('recovery fixture 프로젝트를 열지 못했습니다.')
+  await collapsePanelIfOpenedByRunner(cdp, 'project', projectRailOpenedByRunner)
   await waitForCondition(cdp, `(() => [...document.querySelectorAll('article.soa-dubbing-block')].filter((item) => item.querySelector('.soa-dubbing-block__script-preview')).length === 3)()`, 'recovery fixture 음성 클립 3개', 20_000)
   const selected = await evaluate(cdp, `(() => {
     const voices = [...document.querySelectorAll('article.soa-dubbing-block')].filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
@@ -521,7 +583,7 @@ try {
     const voiceCapture = await captureScene(cdp, 'voice-surface', viewport, voiceProbe, interaction)
     captures.push(voiceCapture)
     if (!voiceCapture.passed) failed = true
-    await closeVoiceSurface(cdp)
+    await closeVoiceSurface(cdp, interaction)
   }
 
   stage = 'recovery-fixture'

@@ -1,0 +1,27 @@
+# SoriON AI 0.11.27 R1 Patch Manifest
+
+Base: 0.11.27 - Field Device & MY VOICE Runtime Certification (corrected release)
+Target: 0.11.27 R1 - Chromium Multi-Scene Runner Stabilization
+Product semver: 0.11.27
+Added: 4
+Modified: 8
+Deleted: 0
+
+[ADDED]
+docs/CHROMIUM_MULTI_SCENE_RUNNER_STABILIZATION_0.11.27_R1.md
+docs/patches/0.11.27-r1-chromium-multi-scene-runner-stabilization/DELETE_LIST.txt
+docs/patches/0.11.27-r1-chromium-multi-scene-runner-stabilization/PATCH_MANIFEST.txt
+docs/patches/0.11.27-r1-chromium-multi-scene-runner-stabilization/PATCH_README.md
+
+[MODIFIED]
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+scripts/check-chromium-multi-scene-evidence.mjs
+scripts/run-chromium-multi-scene-evidence.mjs
+
+[DELETED]
+(none)

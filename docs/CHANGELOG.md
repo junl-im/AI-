@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 0.11.27 R1 · Chromium Multi-Scene Runner Stabilization
+
+- GitHub Actions run `32120737467`은 Web lint/Vitest/typecheck/build와 report verify, 기존 desktop/mobile Chromium layout까지 통과한 뒤 새 multi-scene runner 두 곳에서만 실패했습니다.
+- Desktop `voice-surface-1024`는 제품 기본값으로 접혀 있는 Voice Drawer에서 preview 버튼을 찾으려 한 runner 가정이 원인이므로, runner가 Drawer를 명시적으로 펼치고 preview controls mount를 기다린 뒤 캡처하고 다시 접습니다.
+- Mobile `recovery-fixture`는 reload 뒤 항상 LandingHome 시작 버튼이 나온다고 가정했지만 workspace session restore로 이미 studio가 열린 상태가 될 수 있었습니다. `openStudio()`를 idempotent하게 만들고 recovery project rail도 명시적으로 펼친 뒤 seeded project를 열고 다시 compact 상태로 복원합니다.
+- headless Chromium의 D-Bus/UPower stderr는 실패 판정 원인이 아니며 stage error만 actionable failure로 취급합니다.
+- production Voice/Timeline/Kakao/MY VOICE 로직은 변경하지 않고 evidence runner와 정적 계약만 안정화합니다. 제품 semver는 `0.11.27`을 유지합니다.
+
+### 검증
+
+- Repository preflight: **51/51 PASS**
+- Chromium multi-scene static contract: **PASS**
+- Changed Node `.mjs` syntax: **PASS**
+- API pytest: **220/220 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- 0.11.27 기준 PATCH overlay: **1052/1052 files · missing 0 / extra 0 / changed 0**
+- corrected 18-scene Chromium runtime: **다음 GitHub Actions 최종 gate**
+
 ## 0.11.27 · Field Device & MY VOICE Runtime Certification
 
 - 카카오톡 Android/iOS에서 preset 미리듣기 시도, 실제 Speech Synthesis 시작, 차단/unsupported/watchdog/exception, 외부 브라우저 요청, 뒤로가기 dialog 열림, `계속 만들기` 닫힘을 개인정보 최소 local evidence로 기록합니다.

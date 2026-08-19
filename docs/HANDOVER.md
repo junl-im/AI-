@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.27 · Field Device & MY VOICE Runtime Certification**
+Current baseline: **0.11.27 R1 · Chromium Multi-Scene Runner Stabilization**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-18 KST**
 제품 소유·디자인: **곰같은여우**
@@ -10,6 +10,18 @@ Current baseline: **0.11.27 · Field Device & MY VOICE Runtime Certification**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+
+## 2026-08-18 KST · 0.11.27 R1 Chromium Multi-Scene Runner Stabilization
+1. **작업 일시(KST)**: 2026-08-18.
+2. **대상/기준 버전**: `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization` / GitHub main `0.11.27 · Field Device & MY VOICE Runtime Certification` corrected release, head run `32120737467`. 제품 semver는 `0.11.27`을 유지하고 전달 리비전만 R1로 구분합니다.
+3. **변경 내용**: Actions run `32120737467`의 Web quality는 reproducible lint/critical/full Vitest/typecheck/build/report verify와 기존 desktop/mobile layout을 실제 통과했고, 새 multi-scene desktop/mobile runner만 실패했습니다. Desktop `voice-surface-1024`에서는 기본 접힘 상태의 Voice Drawer를 runner가 먼저 펼치고 preview controls mount를 기다린 뒤 상호작용/캡처하며, runner가 펼쳤다면 다시 접어 다음 workspace scene을 compact 상태로 복원합니다. Recovery fixture에서는 `openStudio()`가 reload 후 이미 `.soa-dubbing-workspace`가 복원된 상태를 정상 입력으로 허용하고, 기본 접힘 project rail을 명시적으로 펼쳐 seeded project를 연 뒤 다시 원상복원합니다. `check-chromium-multi-scene-evidence.mjs`가 이 계약을 정적으로 고정합니다.
+4. **변경 이유**: 실제 Actions 로그에서 desktop은 `Desktop Voice Drawer 미리듣기 대상을 찾지 못했습니다`, mobile은 `장문 음성 스튜디오 시작 버튼 준비 대기 시간이 초과되었습니다`로 실패했습니다. 두 오류 모두 제품 기능 자체보다 runner가 hidden/collapsed panel과 session-restored workspace를 고려하지 않은 orchestration 가정 때문입니다. Chromium D-Bus/UPower stderr는 headless 환경 노이즈이며 실패 predicate가 아닙니다.
+5. **영향 범위**: `scripts/run-chromium-multi-scene-evidence.mjs`, `scripts/check-chromium-multi-scene-evidence.mjs`, CI evidence 문서/릴리스 메타데이터입니다. production Voice 선택/미리듣기, Kakao Speech Synthesis/watchdog, Timeline stale recovery, MY VOICE Worker/model, Voice pace/pitch, API/Worker synthesis 및 저장 schema는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `scripts/run-chromium-multi-scene-evidence.mjs`, `scripts/check-chromium-multi-scene-evidence.mjs`, `docs/CHROMIUM_MULTI_SCENE_RUNNER_STABILIZATION_0.11.27_R1.md`, `docs/{CHANGELOG,HANDOVER,NEXT_UPDATE}.md`, `README.md`, `START_HERE.md`, `FOUNDATION_REPORT.md`, `docs/patches/0.11.27-r1-chromium-multi-scene-runner-stabilization/*`.
+7. **검증 결과**: Repository preflight **51/51 PASS**, Chromium multi-scene static contract **PASS**, changed Node `.mjs` syntax **PASS**, API pytest **220/220 PASS** (기존 FastAPI deprecation warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, 0.11.27 기준 PATCH overlay **1052/1052 files · missing 0 / extra 0 / changed 0**입니다. 수정 전 GitHub run `32120737467`은 Web quality/report/기존 desktop+mobile Chromium까지 실제 PASS했고 multi-scene 두 단계에서만 실패했습니다. corrected 18-scene runtime은 이 전달 환경에 설치된 Web toolchain/dist가 없어 다음 GitHub Actions를 최종 gate로 둡니다.
+8. **알려진 제한과 주의사항**: R1을 GitHub에 Push하기 전에는 multi-scene 18장 전체 PASS를 선언하지 않습니다. runner는 panel을 programmatic click으로 노출하지만 production UI 상태를 변경하는 기능 패치가 아닙니다. 실 MY VOICE runtime과 Kakao 실기기 certification은 기존대로 실제 evidence가 없으면 pending입니다. 사용자 피드백으로 확인된 혜린 등 Browser Speech의 전자음/자연스러움 개선은 CI green 이후 별도 Voice Naturalness 패치에서 처리합니다.
+9. **생성 산출물**: `SoriON-AI-0.11.27-r1-chromium-multi-scene-runner-stabilization-full.zip`, `SoriON-AI-0.11.27-to-0.11.27-r1-chromium-multi-scene-runner-stabilization-patch.zip`, `SoriON-AI-0.11.27-r1-chromium-multi-scene-runner-stabilization-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: R1 Web quality가 green이면 `0.11.28 · Voice Naturalness & Preview Quality`로 이동해 혜린을 우선으로 browser preview pitch 변조를 줄이고 neural TTS/reference preview 경계를 강화합니다. 실패가 남으면 새 기능 전에 해당 CI 실패를 먼저 안정화합니다.
 
 ## 2026-08-18 KST · 0.11.27 Field Device & MY VOICE Runtime Certification
 1. **작업 일시(KST)**: 2026-08-18.
