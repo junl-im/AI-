@@ -345,6 +345,73 @@ async function closeVoiceSurface(cdp, interaction = null) {
   await waitForCondition(cdp, `(() => !document.querySelector('.soa-voice-picker-sheet'))()`, '모바일 목소리 Sheet 닫기')
 }
 
+async function recoveryFixtureDiagnostics(cdp) {
+  return evaluate(cdp, `(() => {
+    const voices = [...document.querySelectorAll('article.soa-dubbing-block')]
+      .filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
+    const selected = voices.filter((item) => item.classList.contains('is-selected'))
+    const unavailable = voices.filter((item) => item.classList.contains('is-voice-unavailable'))
+    const selectedUnavailable = selected.filter((item) => item.classList.contains('is-voice-unavailable'))
+    const recovery = document.querySelector('[aria-label="선택 사용 불가 목소리 복구"]')
+    const batch = document.querySelector('.soa-timeline-quick-editor.is-batch')
+    return {
+      voiceBlockCount: voices.length,
+      selectedVoiceBlockCount: selected.length,
+      unavailableVoiceBlockCount: unavailable.length,
+      selectedUnavailableVoiceBlockCount: selectedUnavailable.length,
+      batchEditorVisible: Boolean(batch),
+      recoveryStatusText: recovery?.textContent?.trim() ?? null,
+      blocks: voices.map((item) => ({
+        ariaLabel: item.getAttribute('aria-label'),
+        className: item.className,
+        text: item.querySelector('.soa-dubbing-block__script-preview')?.textContent?.trim() ?? null,
+      })),
+    }
+  })()`)
+}
+
+async function writeRecoveryFixtureDiagnostics(cdp, phase, error = null) {
+  let diagnostics = null
+  try {
+    diagnostics = await recoveryFixtureDiagnostics(cdp)
+  } catch (diagnosticError) {
+    diagnostics = {
+      diagnosticError: diagnosticError instanceof Error ? diagnosticError.message : String(diagnosticError),
+    }
+  }
+  const payload = {
+    schemaVersion: 'chromium-recovery-fixture-diagnostics/1',
+    phase,
+    mode: mobileMode ? 'mobile' : 'desktop',
+    error: error instanceof Error ? error.message : error ? String(error) : null,
+    capturedAt: new Date().toISOString(),
+    ...diagnostics,
+  }
+  await writeFile(join(output, 'recovery-fixture-diagnostics.json'), `${JSON.stringify(payload, null, 2)}\n`)
+  return payload
+}
+
+async function selectAllRecoveryVoiceClips(cdp) {
+  await waitForCondition(cdp, `(() => {
+    const actions = document.querySelector('[aria-label="타임라인 빠른 선택"]')
+    const button = actions ? [...actions.querySelectorAll('button')].find((item) => item.textContent?.trim() === '대사 전체') : null
+    return button instanceof HTMLButtonElement && !button.disabled
+  })()`, 'recovery 대사 전체 선택 버튼')
+  const clicked = await evaluate(cdp, `(() => {
+    const actions = document.querySelector('[aria-label="타임라인 빠른 선택"]')
+    const button = actions ? [...actions.querySelectorAll('button')].find((item) => item.textContent?.trim() === '대사 전체') : null
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return false
+    button.click()
+    return true
+  })()`)
+  if (!clicked) throw new Error('recovery fixture 대사 전체 선택 버튼을 실행하지 못했습니다.')
+  await waitForCondition(cdp, `(() => {
+    const voices = [...document.querySelectorAll('article.soa-dubbing-block')]
+      .filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
+    return voices.length === 3 && voices.every((item) => item.classList.contains('is-selected'))
+  })()`, 'recovery voice clip 3개 선택')
+}
+
 async function seedRecoveryProject(cdp) {
   const project = {
     id: 'visual-recovery-evidence',
@@ -410,25 +477,27 @@ async function buildRecoveryFixture(cdp, url) {
   if (!opened) throw new Error('recovery fixture 프로젝트를 열지 못했습니다.')
   await collapsePanelIfOpenedByRunner(cdp, 'project', projectRailOpenedByRunner)
   await waitForCondition(cdp, `(() => [...document.querySelectorAll('article.soa-dubbing-block')].filter((item) => item.querySelector('.soa-dubbing-block__script-preview')).length === 3)()`, 'recovery fixture 음성 클립 3개', 20_000)
-  const selected = await evaluate(cdp, `(() => {
-    const voices = [...document.querySelectorAll('article.soa-dubbing-block')].filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
-    if (voices.length !== 3) return 0
-    voices[0].click()
-    for (const voice of voices.slice(1)) {
-      if (${mobileMode ? 'true' : 'false'}) {
-        const touch = voice.querySelector('.soa-timeline-touch-select')
-        if (touch instanceof HTMLButtonElement) touch.click()
-      } else {
-        voice.dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }))
-      }
-    }
-    return voices.length
-  })()`)
-  if (selected !== 3) throw new Error(`recovery fixture 선택 대상이 3개가 아닙니다: ${selected}`)
-  await waitForCondition(cdp, `(() => {
-    const recovery = document.querySelector('[aria-label="선택 사용 불가 목소리 복구"]')
-    return Boolean(recovery && recovery.textContent?.includes('사용 불가 MY VOICE 2개'))
-  })()`, '사용 불가 MY VOICE 2/3 recovery status')
+  try {
+    await selectAllRecoveryVoiceClips(cdp)
+    await waitForCondition(cdp, `(() => {
+      const voices = [...document.querySelectorAll('article.soa-dubbing-block')]
+        .filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
+      return voices.filter((item) => item.classList.contains('is-voice-unavailable')).length === 2
+    })()`, 'recovery 사용 불가 MY VOICE 2개 표시')
+    await waitForCondition(cdp, `(() => {
+      const voices = [...document.querySelectorAll('article.soa-dubbing-block')]
+        .filter((item) => item.querySelector('.soa-dubbing-block__script-preview'))
+      const selectedUnavailable = voices.filter((item) => item.classList.contains('is-selected') && item.classList.contains('is-voice-unavailable'))
+      return selectedUnavailable.length === 2
+    })()`, 'recovery 선택 사용 불가 MY VOICE 2개')
+    await waitForCondition(cdp, `(() => {
+      const recovery = document.querySelector('[aria-label="선택 사용 불가 목소리 복구"]')
+      return Boolean(recovery && recovery.textContent?.includes('사용 불가 MY VOICE 2개'))
+    })()`, '사용 불가 MY VOICE 2/3 recovery status')
+  } catch (error) {
+    const diagnostics = await writeRecoveryFixtureDiagnostics(cdp, 'selection-and-unavailable-status', error)
+    throw new Error(`${error instanceof Error ? error.message : String(error)} · recovery diagnostics=${JSON.stringify(diagnostics)}`)
+  }
   const impactOpened = await evaluate(cdp, `(() => {
     const recovery = document.querySelector('[aria-label="선택 사용 불가 목소리 복구"]')
     const button = recovery ? [...recovery.querySelectorAll('button')].find((item) => item.textContent?.includes('복구 영향 확인')) : null

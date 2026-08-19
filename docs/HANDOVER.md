@@ -1,8 +1,8 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.27 R1 · Chromium Multi-Scene Runner Stabilization**
+Current baseline: **0.11.27 R2 · Recovery Scene Selection Stabilization**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-18 KST**
+최종 갱신: **2026-08-19 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -10,6 +10,18 @@ Current baseline: **0.11.27 R1 · Chromium Multi-Scene Runner Stabilization**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+
+## 2026-08-19 KST · 0.11.27 R2 Recovery Scene Selection Stabilization
+1. **작업 일시(KST)**: 2026-08-19.
+2. **대상/기준 버전**: `0.11.27 R2 · Recovery Scene Selection Stabilization` / GitHub main `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization`, Actions run `32206091853`, head `501c46478bfcb2bf15e7ef27d05cdbc978114e07`. 제품 semver는 `0.11.27`을 유지합니다.
+3. **변경 내용**: run `32206091853`에서 Web quality/report와 기존 desktop/mobile layout은 실제 PASS했고, multi-scene desktop/mobile만 동일한 `recovery-fixture`의 `사용 불가 MY VOICE 2/3 recovery status` 대기에서 실패했습니다. R2 runner는 3개 카드를 직접 click/Ctrl-click/touch-toggle하지 않고 Timeline UI의 `대사 전체` 명령을 실제로 눌러 Voice clip 3개를 선택합니다. 이후 `voiceBlockCount=3`, `selectedVoiceBlockCount=3`, `unavailableVoiceBlockCount=2`, `selectedUnavailableVoiceBlockCount=2`를 단계별로 확인하고 recovery status/dialog를 검증합니다. 실패 시 `recovery-fixture-diagnostics.json`을 artifact에 남깁니다.
+4. **변경 이유**: Vitest의 stale MY VOICE 2/3 계약은 `대사 전체` 선택에서 이미 통과하지만 Chromium runner만 카드별 programmatic 선택을 사용해 React selection update timing에 의존했습니다. production recovery를 바꾸는 대신 runner를 실제 사용자 명령과 같은 경로로 맞추는 것이 안전합니다.
+5. **영향 범위**: `scripts/run-chromium-multi-scene-evidence.mjs`, `scripts/check-chromium-multi-scene-evidence.mjs`, CI evidence/릴리스 문서입니다. production Timeline recovery, Voice/TTS, Kakao WebView, MY VOICE Worker/model, API/Worker synthesis, 저장 schema는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `scripts/run-chromium-multi-scene-evidence.mjs`, `scripts/check-chromium-multi-scene-evidence.mjs`, `docs/CHROMIUM_RECOVERY_SCENE_SELECTION_STABILIZATION_0.11.27_R2.md`, `docs/{CHANGELOG,HANDOVER,NEXT_UPDATE}.md`, `README.md`, `START_HERE.md`, `FOUNDATION_REPORT.md`, `docs/patches/0.11.27-r2-recovery-scene-selection-stabilization/*`.
+7. **검증 결과**: Repository preflight **51/51 PASS**, Chromium multi-scene static contract **PASS**, changed Node `.mjs` syntax **PASS**, API pytest **220/220 PASS**(기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**입니다. 수정 전 Actions run `32206091853`은 reproducible Web quality/report verify와 기존 desktop/mobile Chromium layout을 실제 PASS했고 multi-scene recovery fixture에서만 실패했습니다. corrected 18-scene runtime은 다음 GitHub Actions를 최종 gate로 둡니다.
+8. **알려진 제한과 주의사항**: R2를 Push하기 전에는 18-scene 전체 PASS를 선언하지 않습니다. diagnostics에는 DOM의 aria-label/class와 fixture 문장만 포함하며 실제 사용자 원문/오디오/프로필 정보는 넣지 않습니다. 실 MY VOICE runtime과 Kakao field certification은 실제 evidence가 없으면 계속 pending입니다.
+9. **생성 산출물**: `SoriON-AI-0.11.27-r2-recovery-scene-selection-stabilization-full.zip`, `SoriON-AI-0.11.27-r1-to-0.11.27-r2-recovery-scene-selection-stabilization-patch.zip`, `SoriON-AI-0.11.27-r2-recovery-scene-selection-stabilization-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: R2 Web quality가 green이면 `0.11.28 · Voice Naturalness & Preview Quality`로 이동해 혜린을 우선으로 Browser Speech pitch 변조와 neural preview 경계를 개선합니다. 실패가 남으면 해당 CI 실패를 먼저 안정화합니다.
 
 ## 2026-08-18 KST · 0.11.27 R1 Chromium Multi-Scene Runner Stabilization
 1. **작업 일시(KST)**: 2026-08-18.

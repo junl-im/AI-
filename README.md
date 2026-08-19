@@ -8,11 +8,11 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- Version: `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization` (product semver remains `0.11.27`)
-- Multi-scene runner stabilization: Actions run `32120737467`에서 Web quality/report/기존 desktop·mobile Chromium은 통과했고 새 scene runner만 실패했습니다. Desktop은 접힌 Voice Drawer를 명시적으로 펼쳐 검증하고, recovery reload는 이미 workspace가 복원된 상태도 허용하며 project rail을 runner가 잠시 펼쳐 fixture를 엽니다.
+- Version: `0.11.27 R2 · Recovery Scene Selection Stabilization` (product semver remains `0.11.27`)
+- Multi-scene runner stabilization: Actions run `32206091853`에서 Web quality/report와 기존 desktop·mobile Chromium은 모두 통과했고 multi-scene recovery fixture만 desktop/mobile 공통으로 실패했습니다. R2는 카드별 programmatic 선택 대신 제품의 `대사 전체` 명령으로 3개 Voice clip을 선택하고 selected 3 / unavailable 2를 단계별로 확인합니다.
 - Field device certification: 카카오톡 Android/iOS에서 실제 미리듣기 start 또는 실패+외부 브라우저 fallback, 뒤로가기 dialog/계속 만들기 닫힘을 개인정보 최소 JSON으로 기록하고 실제 수행자 확인 뒤에만 READY로 판정합니다.
 - Runtime certification: Android/iOS field evidence, desktop/mobile Chromium 9+9 scene manifest, 실제 `my-voice-recovery-runtime/1` completed evidence를 통합 verifier로 검증하며 미수집 항목은 pending을 유지합니다.
-- Web CI state: Actions run `32120737467`에서 corrected exit-history test를 포함한 reproducible Web quality/report verify와 기존 desktop/mobile Chromium layout까지 실제 PASS했습니다. 남은 실패는 새 multi-scene runner의 collapsed panel/session-restore 가정으로 R1에서 수정합니다.
+- Web CI state: Actions run `32206091853`에서 reproducible Web quality/report verify와 기존 desktop/mobile Chromium layout까지 실제 PASS했습니다. 남은 실패는 multi-scene recovery fixture의 선택 orchestration 하나이며 R2가 이를 안정화합니다.
 - Chromium multi-scene evidence: desktop 1024/1280/1440과 mobile 360/390/430에서 workspace / Voice Picker·Drawer / recovery-impact를 각각 캡처하고 PNG SHA-256 + layout/interaction assertion을 GitHub Actions artifact에 보존합니다.
 - MY VOICE runtime evidence: UI fixture는 실제 Worker 성공으로 간주하지 않으며, 동의·Worker/model ready·first-audio를 갖춘 `my-voice-recovery-runtime/1` observed evidence만 실 runtime 성공으로 인정합니다.
 - PC 가로 타임라인: ruler·클립·플레이헤드를 하나의 시간→픽셀 X축으로 통일하고, 클립 폭을 실제 재생 길이에 비례시켜 좌→우 흐름을 그대로 편집 구조에 반영합니다.

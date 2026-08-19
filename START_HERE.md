@@ -1,13 +1,13 @@
 # START HERE
 
-Current version: `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization`
+Current version: `0.11.27 R2 · Recovery Scene Selection Stabilization`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
-1-0. 0.11.27 R1은 제품 semver `0.11.27`을 유지하는 CI evidence hotfix입니다. Actions run 32120737467에서 핵심 Web quality와 기존 layout은 모두 통과했고, collapsed Voice Drawer / restored workspace를 가정하지 못한 multi-scene runner만 안정화합니다.
-1-1. 이번 R1 PATCH 기준은 GitHub main의 corrected `0.11.27`입니다. 기존 0.11.26/0.11.26 R1에 직접 덮어쓰지 않습니다.
+1-0. 0.11.27 R2는 제품 semver `0.11.27`을 유지하는 CI evidence hotfix입니다. Actions run 32206091853에서 Web quality/report와 기존 desktop/mobile Chromium은 통과했고, desktop/mobile 공통 recovery fixture 선택 orchestration만 안정화합니다.
+1-1. 이번 R2 PATCH 기준은 GitHub main의 `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization`입니다. plain 0.11.27이나 0.11.26 계열에 직접 덮어쓰지 않습니다.
 1-2. Quality Lab의 `카카오 실기기 동작 인증`은 실제 Kakao Android/iOS 이벤트만 기록하고 수행자 확인 뒤 READY가 됩니다. 전체 UA/기기명/원문/오디오는 저장하지 않습니다.
 1-3. Chromium fixture는 `realWorkerClaimed=false`이며 실제 MY VOICE 성공은 `my-voice-recovery-runtime/1` completed evidence가 있을 때만 인정합니다.
-1-4. Actions run `32120737467`은 corrected exit-history test를 포함한 Web quality와 기존 desktop/mobile Chromium layout까지 통과했습니다. 최종 실패는 multi-scene desktop/mobile runner의 collapsed panel/session-restore 가정뿐이며 R1이 이를 안정화합니다.
+1-4. Actions run `32206091853`은 Web quality/report와 기존 desktop/mobile Chromium layout까지 통과했습니다. 최종 실패는 multi-scene desktop/mobile의 동일한 recovery fixture 2/3 상태 대기이며 R2는 `대사 전체` UI 명령과 단계별 diagnostics로 이를 안정화합니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
 4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.

@@ -1,3 +1,21 @@
+## 0.11.27 R2 · Recovery Scene Selection Stabilization
+
+- Actions run `32206091853`은 lint/Vitest/typecheck/build/report verify와 기존 desktop/mobile Chromium layout을 실제 통과했습니다.
+- 남은 실패는 desktop/mobile multi-scene의 동일한 `recovery-fixture` 한 지점이며, 카드별 programmatic 선택 대신 제품의 `대사 전체` 명령을 사용하도록 runner를 안정화합니다.
+- recovery fixture는 selected/unavailable 상태를 단계별로 검증하고 실패 시 privacy-safe DOM diagnostics JSON을 evidence artifact에 보존합니다.
+- production Voice/Timeline/Kakao/MY VOICE/API/Worker 로직은 변경하지 않습니다.
+
+### 검증
+
+- Product semver: **0.11.27 유지**
+- Repository preflight: **51/51 PASS**
+- Chromium multi-scene static contract: **PASS**
+- Changed Node `.mjs` syntax: **PASS**
+- API pytest: **220/220 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- 실제 corrected 18-scene Chromium: **다음 GitHub Actions 최종 확인 필요**
+
 ## 0.11.27 R1 · Chromium Multi-Scene Runner Stabilization
 
 - GitHub Actions run `32120737467`에서 reproducible Web quality/report verify, desktop 1024/1280/1440 layout, mobile 360/390/430 layout은 실제 PASS했습니다.

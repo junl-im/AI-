@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 0.11.27 R2 · Recovery Scene Selection Stabilization
+
+- GitHub Actions run `32206091853`은 Web quality/report verify, 기존 desktop/mobile Chromium layout까지 통과했고 multi-scene desktop/mobile만 동일한 `recovery-fixture` 단계에서 실패했습니다.
+- 실패 원인은 recovery fixture가 3개 Voice clip을 카드 click/Ctrl-click/touch-toggle로 직접 선택해 실제 React selection update 타이밍에 의존한 것입니다. 이미 Vitest에서 검증된 제품 UI 명령인 `대사 전체`를 runner가 사용하도록 변경합니다.
+- recovery scene은 `voice block 3개 -> selected 3개 -> unavailable 2개 -> selected+unavailable 2개 -> recovery status 2개`를 단계별로 확인한 뒤 impact dialog를 엽니다.
+- 실패 시 `.sorion/web-quality/multi-scene-*/recovery-fixture-diagnostics.json`에 clip 수, selected/unavailable 수, aria-label/class/text를 남겨 다음 CI에서 원인을 즉시 식별합니다.
+- production Timeline recovery, Voice 선택, Kakao WebView, TTS/API/Worker는 변경하지 않습니다. 제품 semver는 `0.11.27`을 유지합니다.
+
+### 검증
+
+- Repository preflight: **51/51 PASS**
+- Chromium multi-scene static contract: **PASS**
+- Changed Node `.mjs` syntax: **PASS**
+- API pytest: **220/220 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- GitHub Actions run `32206091853`: **reproducible Web quality/report + 기존 desktop/mobile Chromium PASS; multi-scene recovery fixture만 실패**
+- corrected multi-scene 18-scene runtime: **다음 GitHub Actions 최종 gate**
+
 ## 0.11.27 R1 · Chromium Multi-Scene Runner Stabilization
 
 - GitHub Actions run `32120737467`은 Web lint/Vitest/typecheck/build와 report verify, 기존 desktop/mobile Chromium layout까지 통과한 뒤 새 multi-scene runner 두 곳에서만 실패했습니다.

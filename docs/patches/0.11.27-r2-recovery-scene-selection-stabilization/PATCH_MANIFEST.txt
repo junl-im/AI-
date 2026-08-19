@@ -1,0 +1,19 @@
+Base: 0.11.27 R1 - Chromium Multi-Scene Runner Stabilization
+Target: 0.11.27 R2 - Recovery Scene Selection Stabilization
+Delete count: 0
+
+Added files:
+docs/CHROMIUM_RECOVERY_SCENE_SELECTION_STABILIZATION_0.11.27_R2.md
+docs/patches/0.11.27-r2-recovery-scene-selection-stabilization/DELETE_LIST.txt
+docs/patches/0.11.27-r2-recovery-scene-selection-stabilization/PATCH_MANIFEST.txt
+docs/patches/0.11.27-r2-recovery-scene-selection-stabilization/PATCH_README.md
+
+Modified files:
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+scripts/check-chromium-multi-scene-evidence.mjs
+scripts/run-chromium-multi-scene-evidence.mjs

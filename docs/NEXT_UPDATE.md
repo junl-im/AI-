@@ -1,10 +1,10 @@
 # NEXT UPDATE
 
-Current baseline: `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization`
+Current baseline: `0.11.27 R2 · Recovery Scene Selection Stabilization`
 
 ## 선행 gate
 
-- GitHub Actions에서 corrected desktop/mobile multi-scene runner가 모두 통과하고 Web quality final gate와 Pages 경로가 green이어야 새 음성 품질 기능을 시작합니다.
+- GitHub Actions에서 R2 desktop/mobile multi-scene recovery scene이 모두 통과하고 Web quality final gate와 Pages 경로가 green이어야 새 음성 품질 기능을 시작합니다.
 - 실패가 남아 있으면 기능 추가보다 해당 CI 실패를 우선 안정화합니다.
 
 ## 목표 버전
@@ -28,7 +28,7 @@ Current baseline: `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization`
 
 ### 선행 조건과 위험
 
-- 0.11.27 R1의 multi-scene CI가 실제 green이어야 합니다.
+- 0.11.27 R2의 multi-scene CI가 실제 green이어야 합니다.
 - 실제 neural reference WAV가 없는 preset은 Browser Speech 음질 한계를 완전히 제거할 수 없으며, pitch 보정만으로 실제 AI 성우 품질을 가장하지 않습니다.
 - 혜린의 전자음 개선을 위해 pitch를 낮추더라도 사용자 설정 `높낮이`와 preset 기본값의 의미가 뒤섞이지 않도록 frontend/API 계약을 함께 조정해야 합니다.
 - MY VOICE clone cadence는 built-in preset 보정과 별도이며 이번 목표에서 무리하게 함께 조정하지 않습니다.
