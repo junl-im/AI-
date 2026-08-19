@@ -3,6 +3,7 @@ import { BrowserPlaybackEvidenceCard } from '../components/evaluation/BrowserPla
 import { PlaybackSeamEvidenceCard } from '../components/evaluation/PlaybackSeamEvidenceCard'
 import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
 import { FieldDeviceCertificationCard } from '../components/evaluation/FieldDeviceCertificationCard'
+import { ReleaseReadinessCard } from '../components/evaluation/ReleaseReadinessCard'
 import { BenchmarkDashboardCard } from '../components/evaluation/BenchmarkDashboardCard'
 import { VoicePresetApprovalCard } from '../components/evaluation/VoicePresetApprovalCard'
 import { DeviceSoakRecorderCard } from '../components/evaluation/DeviceSoakRecorderCard'
@@ -286,6 +287,8 @@ export function QualityPage() {
         />
 
         <FieldDeviceCertificationCard />
+
+        <ReleaseReadinessCard />
 
         <BenchmarkDashboardCard
           deviceSummary={deviceSummary}

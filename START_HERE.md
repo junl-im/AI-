@@ -1,13 +1,13 @@
 # START HERE
 
-Current version: `0.11.27 R2 · Recovery Scene Selection Stabilization`
+Current version: `0.11.29 · Certification Intake & Release Readiness`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
-1-0. 0.11.27 R2는 제품 semver `0.11.27`을 유지하는 CI evidence hotfix입니다. Actions run 32206091853에서 Web quality/report와 기존 desktop/mobile Chromium은 통과했고, desktop/mobile 공통 recovery fixture 선택 orchestration만 안정화합니다.
-1-1. 이번 R2 PATCH 기준은 GitHub main의 `0.11.27 R1 · Chromium Multi-Scene Runner Stabilization`입니다. plain 0.11.27이나 0.11.26 계열에 직접 덮어쓰지 않습니다.
-1-2. Quality Lab의 `카카오 실기기 동작 인증`은 실제 Kakao Android/iOS 이벤트만 기록하고 수행자 확인 뒤 READY가 됩니다. 전체 UA/기기명/원문/오디오는 저장하지 않습니다.
-1-3. Chromium fixture는 `realWorkerClaimed=false`이며 실제 MY VOICE 성공은 `my-voice-recovery-runtime/1` completed evidence가 있을 때만 인정합니다.
-1-4. Actions run `32206091853`은 Web quality/report와 기존 desktop/mobile Chromium layout까지 통과했습니다. 최종 실패는 multi-scene desktop/mobile의 동일한 recovery fixture 2/3 상태 대기이며 R2는 `대사 전체` UI 명령과 단계별 diagnostics로 이를 안정화합니다.
+1-0. 0.11.29는 Quality Lab에서 CI / Kakao Android / Kakao iOS / Chromium desktop / Chromium mobile / MY VOICE를 6개 독립 슬롯으로 검증하는 Release Readiness 패치입니다.
+1-1. 여섯 증거가 모두 실제 READY일 때만 Overall CERTIFIED가 됩니다. synthetic fixture나 누락된 실기기/runtime 증거를 성공으로 승격하지 않습니다.
+1-2. Browser Speech는 `기기 음성` 근사 미리듣기이며 실제 neural AI 성우 음색과 동일하지 않습니다. 카카오 WebView가 음성을 막으면 direct user-gesture + 1.8초 watchdog + 외부 브라우저 안내가 복구 경로입니다.
+1-3. 이번 PATCH 기준은 `0.11.28 · Voice Naturalness & Preview Quality`입니다. GitHub가 아직 0.11.27 R2라면 0.11.28을 먼저 적용한 뒤 0.11.29를 적용합니다.
+1-4. `verify-release-readiness.mjs --require-certified`는 Web quality report, Android/iOS field JSON, desktop/mobile Chromium manifest, MY VOICE runtime JSON이 모두 유효할 때만 성공합니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
 4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.

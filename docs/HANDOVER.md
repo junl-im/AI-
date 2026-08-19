@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.27 R2 · Recovery Scene Selection Stabilization**
+Current baseline: **0.11.29 · Certification Intake & Release Readiness**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-19 KST**
 제품 소유·디자인: **곰같은여우**
@@ -10,6 +10,30 @@ Current baseline: **0.11.27 R2 · Recovery Scene Selection Stabilization**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
+## 2026-08-19 KST · 0.11.29 Certification Intake & Release Readiness
+1. **작업 일시(KST)**: 2026-08-19.
+2. **대상/기준 버전**: `0.11.29 · Certification Intake & Release Readiness` / `0.11.28 · Voice Naturalness & Preview Quality` FULL ZIP. 작업 시작 시 GitHub main 최신 커밋은 `0.11.27 R2` 계열이어서 0.11.28을 먼저 적용한 뒤 이번 PATCH를 적용해야 합니다.
+3. **변경 내용**: Quality Lab에 Release Readiness 카드를 추가해 Web quality report, Kakao Android/iOS `field-device-certification/1`, Chromium desktop/mobile `chromium-multi-scene/1`, MY VOICE `my-voice-recovery-runtime/1`을 별도 슬롯으로 불러옵니다. CI/Device/Chromium/MY VOICE를 READY/PENDING/BLOCKED로 분리하고 6개가 전부 READY일 때만 Overall CERTIFIED를 허용합니다. Browser-side Web quality는 현재 app version, 8 phase PASS, report/evidence checksum 재계산을 확인합니다. CLI `verify-release-readiness.mjs`도 같은 6개 입력을 받아 `release-readiness/1` summary를 생성하고 `--require-certified`를 지원합니다.
+4. **변경 이유**: 기존 인증 증거가 각각 존재했지만 사용자가 릴리스 전에 여러 JSON과 CI 상태를 따로 비교해야 했습니다. 일부 synthetic/UI evidence가 실제 device/runtime 성공과 혼동되지 않으면서 현재 릴리스의 준비 상태를 한눈에 확인할 단일 intake/checklist가 필요했습니다.
+5. **영향 범위**: Quality Lab certification intake UI, browser-side evidence parser/checksum summary, release-readiness CLI/preflight 계약, 릴리스 문서입니다. Voice pitch/rate, Kakao direct speech/watchdog, Timeline recovery, MY VOICE 생성 로직, API/Worker synthesis는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/quality/{releaseReadiness.ts,releaseReadiness.test.ts}`, `src/components/evaluation/ReleaseReadinessCard.tsx`, `src/pages/QualityPage.tsx`, `scripts/{verify-release-readiness,check-release-readiness}.mjs`, `scripts/run-preflight.mjs`, `package.json`, `docs/RELEASE_READINESS.md`, 릴리스/패치 문서 및 version sync 파일.
+7. **검증 결과**: Product version sync **0.11.29 PASS**, Repository preflight **52/52 PASS**, release readiness static contract **PASS**, 6/6 certified fixture CLI **PASS**, API pytest **220/220 PASS**(기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, TS/TSX dependency-free transpile syntax **250/250 PASS**. 로컬 dependency install은 완료되지 않아 eslint/vitest/tsc/vite 실행 파일이 생성되지 않았고, 전체 dependency 기반 lint/Vitest/typecheck/build/Chromium은 0.11.29 Push 뒤 GitHub Actions 최종 gate입니다.
+8. **알려진 제한과 주의사항**: 0.11.29 자체의 GitHub Actions green은 아직 확인 전입니다. 실제 Kakao Android/iOS와 실제 MY VOICE runtime evidence가 없으면 Overall은 의도적으로 PENDING입니다. Browser UI는 GitHub API를 직접 제어하지 않고 Actions artifact의 report JSON을 사용합니다. raw MY VOICE profile/sample data는 readiness summary에 넣지 않습니다.
+9. **생성 산출물**: `SoriON-AI-0.11.29-certification-intake-release-readiness-full.zip`, `SoriON-AI-0.11.28-to-0.11.29-certification-intake-release-readiness-patch.zip`, `SoriON-AI-0.11.29-certification-intake-release-readiness-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.30 · Neural Voice Reference Intake & Preview Promotion`에서 권리·동의가 확인된 per-preset reference WAV/model fingerprint를 intake하고 neural preview가 검증된 경우에만 기기 음성보다 우선하도록 승격합니다. 실제 reference가 없으면 Browser/System fallback을 유지하며 품질 성공을 가장하지 않습니다.
+
+
+## 2026-08-19 KST · 0.11.28 Voice Naturalness & Preview Quality
+1. **작업 일시(KST)**: 2026-08-19.
+2. **대상/기준 버전**: `0.11.28 · Voice Naturalness & Preview Quality` / `0.11.27 R2 · Recovery Scene Selection Stabilization`.
+3. **변경 내용**: 혜린의 시스템 근사 pitch offset을 `+1.5 -> +0.5`로 낮추고 도윤/소리/준호/민준도 `-0.5 / 0 / -1.0 / +0.25`로 재보정했습니다. Browser Speech는 사용자 pitch를 40%만 반영하고 preset offset과 합산한 semitone을 12음 평균율 ratio로 변환한 뒤 Web Speech pitch를 `0.90~1.12`로 제한합니다. Browser Speech UI 메시지는 `기기 음성` 근사 미리듣기임을 명시합니다.
+4. **변경 이유**: 사용자 청취에서 특히 혜린이 전자음/금속성으로 들렸고, 기존 `1 + (request.pitch + preset.pitchOffset) / 12` 계산이 시스템 음성에 과한 pitch 변조를 적용했습니다. 시스템 근사에서 억지 캐릭터화를 줄이고 실제 neural voice identity/reference에 음색 책임을 옮기기 위함입니다.
+5. **영향 범위**: built-in preset의 Browser Speech/System/eSpeak 근사 pitch 기본값, Browser Speech pitch 계산, preview 설명/테스트/문서입니다. 0.11.24 R1 speed multiplier, MY VOICE clone cadence, Timeline recovery, 카카오 user-gesture/watchdog/exit guard, API/Worker routing은 유지합니다.
+6. **변경·추가된 주요 파일**: `src/tts/{voicePresets,browserSpeech}.ts`, 관련 tests, `services/api/app/services/voice_presets.py`, `services/api/tests/test_voice_presets.py`, `src/pages/HomePage.tsx`, `scripts/check-voice-preset-contracts.mjs`, `docs/VOICE_NATURALNESS_AND_PREVIEW_QUALITY.md`, 릴리스/패치 문서.
+7. **검증 결과**: voice preset contract **PASS**, Repository preflight **51/51 PASS**, 관련 API preset/Melo tests **8/8 PASS**, API pytest **220/220 PASS**(기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, changed TS/TSX parse **6/6 PASS**입니다. 전체 dependency 기반 Web quality와 Chromium은 0.11.28 Push 뒤 GitHub Actions를 최종 gate로 둡니다. 직전 R2 Actions green은 사용자 확인으로 전달받았습니다.
+8. **알려진 제한과 주의사항**: Browser Speech는 OS 설치 음성 자체의 품질 한계를 제거하지 못합니다. 카카오 WebView가 Speech Synthesis 시작을 차단하는 기기에서는 direct user-gesture + watchdog + 외부 브라우저 fallback까지만 보장하며 WebView 엔진 자체를 강제할 수 없습니다. 실제 동일 성우 음색은 검증된 neural reference/model이 필요합니다.
+9. **생성 산출물**: `SoriON-AI-0.11.28-voice-naturalness-preview-quality-full.zip`, `SoriON-AI-0.11.27-r2-to-0.11.28-voice-naturalness-preview-quality-patch.zip`, `SoriON-AI-0.11.28-voice-naturalness-preview-quality-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.29 · Certification Intake & Release Readiness`에서 field-device/Chromium/MY VOICE evidence를 한 화면의 release readiness로 결합합니다. 실제 neural reference가 준비되면 별도 voice-quality 승격 경로로 수집합니다.
 
 ## 2026-08-19 KST · 0.11.27 R2 Recovery Scene Selection Stabilization
 1. **작업 일시(KST)**: 2026-08-19.

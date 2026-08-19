@@ -1,5 +1,48 @@
 # CHANGELOG
 
+## 0.11.29 · Certification Intake & Release Readiness
+
+- Quality Lab에 `출시 인증 상태` 카드를 추가해 Web quality, Kakao Android/iOS, Chromium desktop/mobile, MY VOICE runtime 6개 evidence를 한 화면에서 불러옵니다.
+- 각 evidence는 `READY/PENDING/BLOCKED`로 독립 판정하며 CI / DEVICE / CHROMIUM / MY VOICE 그룹을 분리합니다. 여섯 슬롯이 모두 READY일 때만 Overall `CERTIFIED`가 됩니다.
+- Web quality report는 현재 app version, 8개 phase PASS, `reportSha256`/`evidenceSha256` 재계산 일치까지 확인합니다.
+- Chromium manifest는 desktop/mobile 각각 9/9 capture PASS + SHA-256과 `realWorkerClaimed=false`를 요구합니다. synthetic recovery fixture를 실제 MY VOICE 성공으로 승격하지 않습니다.
+- Kakao field evidence는 direct preview 또는 실패+실제 외부 브라우저 fallback, exit dialog open/stay close, operator confirmation을 요구합니다.
+- MY VOICE는 `observed-runtime`, 동의, Worker/model ready, replace-and-regenerate, completed playback만 READY로 인정하고 raw profile/sample 식별자는 거부합니다.
+- `verify-release-readiness.mjs`와 `release-readiness/1` summary를 추가해 같은 계약을 CLI에서 검증하고 source file SHA-256/run/commit metadata를 보존합니다.
+
+### 검증
+
+- Product version sync: **0.11.29 PASS**
+- Repository preflight: **52/52 PASS**
+- Release readiness static contract: **PASS**
+- Release readiness 6/6 certified fixture CLI: **PASS**
+- API pytest: **220/220 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX dependency-free transpile syntax: **250/250 PASS**
+- 로컬 dependency install: **미완료 · eslint/vitest/tsc/vite 실행 파일 미생성**
+- 전체 dependency 기반 Web lint/Vitest/typecheck/build/Chromium: **0.11.29 Push 후 GitHub Actions 최종 gate**
+
+## 0.11.28 · Voice Naturalness & Preview Quality
+
+- GitHub Actions R2 green 이후 음성 자연스러움 개선으로 이동합니다.
+- 혜린 preset pitch offset을 `+1.5 -> +0.5`로 낮추고 도윤/소리/준호/민준도 시스템 근사 pitch를 `-0.5 / 0 / -1.0 / +0.25`로 재보정합니다.
+- Browser Speech는 사용자 pitch를 40%만 반영하고 12음 평균율 ratio로 변환한 뒤 `0.90~1.12`에 제한해 과도한 Web Speech 변조를 줄입니다.
+- Browser Speech 결과/채팅은 `기기 음성` 근사 미리듣기임을 명시해 neural AI 성우와 같은 품질로 오인되지 않게 합니다.
+- 카카오 direct user-gesture 재생, 1.8초 watchdog, 외부 브라우저 복구 경로는 유지되며 같은 naturalized prosody를 사용합니다.
+
+### 검증
+
+- Voice preset contract: **PASS**
+- Repository preflight: **51/51 PASS**
+- 관련 API preset/Melo tests: **8/8 PASS**
+- API pytest: **220/220 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Changed TS/TSX parse: **6/6 PASS**
+- GitHub Actions R2: **사용자 확인 green**
+- 전체 Web lint/Vitest/typecheck/build/Chromium: **0.11.28 Push 후 GitHub Actions 최종 gate**
+
 ## 0.11.27 R2 · Recovery Scene Selection Stabilization
 
 - GitHub Actions run `32206091853`은 Web quality/report verify, 기존 desktop/mobile Chromium layout까지 통과했고 multi-scene desktop/mobile만 동일한 `recovery-fixture` 단계에서 실패했습니다.

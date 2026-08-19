@@ -1,6 +1,6 @@
 # Voice Preset Fidelity Contract
 
-현재 기준: `0.10.4 · Voice Preset Engine Reliability Hotfix`
+현재 기준: `0.11.29 · Certification Intake & Release Readiness`
 
 ## 0.10.4 엔진 복구 강화
 
@@ -9,6 +9,13 @@
 - System TTS는 한 프로세스에서 가능한 로컬 백엔드를 목록으로 유지합니다. Windows System.Speech 또는 macOS `say`가 해당 프리셋을 거부하거나 실행에 실패하고 eSpeak 한국어 음성이 설치돼 있으면 eSpeak를 보조 백엔드로 다시 시도합니다.
 - eSpeak 보조 경로도 설치된 로컬 도구이며 전용 인물 음색이 아닙니다. eSpeak가 없고 운영체제/브라우저에도 호환 성별 한국어 음성이 없으며 전용 CosyVoice WAV도 준비되지 않았다면 해당 프리셋은 정상적으로 지원 불가가 됩니다.
 - MeloTTS 화자 이름 성별 판정은 Browser/System과 같은 `youngho` 남성 토큰을 사용하도록 맞췄습니다. 단일 `KR`처럼 성별을 확인할 수 없는 화자를 남성/여성 프리셋으로 강제 사용하는 정책은 도입하지 않습니다.
+
+## 0.11.28 시스템 근사 pitch 정책
+
+- Browser Speech/System TTS에서 캐릭터를 만들기 위한 과도한 pitch 변조를 줄입니다.
+- 혜린/도윤/소리/준호/민준 기본 offset은 `+0.5 / -0.5 / 0 / -1.0 / +0.25`입니다.
+- Browser Speech는 사용자 pitch를 40%만 반영하고 최종 `utterance.pitch`를 `0.90~1.12`로 제한합니다.
+- 이는 기기 시스템 음성의 전자음·금속성 완화 정책이며, 실제 인물 음색 fidelity는 검증된 neural reference/model에서만 다룹니다.
 
 ## 목적
 

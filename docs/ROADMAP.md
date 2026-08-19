@@ -1,6 +1,6 @@
 # ROADMAP
 
-현재 제품 버전: `0.11.25`
+현재 제품 버전: `0.11.29`
 
 ## 0.11.12 완료 · Editing History, Speaker Memory & Engine Routing Trace
 

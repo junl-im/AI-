@@ -1,3 +1,41 @@
+## 0.11.29 · Certification Intake & Release Readiness
+
+- Quality Lab에 Web quality, Kakao Android/iOS, Chromium desktop/mobile, MY VOICE runtime을 6개 독립 evidence 슬롯으로 불러오는 Release Readiness 카드를 추가했습니다.
+- 각 슬롯은 READY/PENDING/BLOCKED를 독립 판정하며 여섯 슬롯이 모두 READY일 때만 Overall CERTIFIED를 허용합니다.
+- Web quality report는 현재 앱 버전, 8개 phase PASS, report/evidence SHA-256 재계산을 확인하고 Chromium은 9/9 capture+SHA-256+`realWorkerClaimed=false`를 요구합니다.
+- MY VOICE는 observed-runtime, 동의, Worker/model ready, replace-and-regenerate, completed playback이 모두 있어야 READY이며 raw profile/sample 데이터는 readiness summary에 저장하지 않습니다.
+- 동일한 계약의 CLI `verify-release-readiness.mjs`와 `release-readiness/1` summary를 추가했습니다.
+
+### 검증
+
+- Product version sync: **0.11.29 PASS**
+- Repository preflight: **52/52 PASS**
+- Release readiness static contract: **PASS**
+- Release readiness 6/6 certified fixture CLI: **PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX dependency-free transpile syntax: **250/250 PASS**
+- Dependency-based Web lint/Vitest/typecheck/build/Chromium: **0.11.29 Push 후 GitHub Actions 최종 gate**
+
+## 0.11.28 · Voice Naturalness & Preview Quality
+
+- 혜린의 시스템 근사 pitch를 +1.5에서 +0.5로 낮추고 5개 preset의 기본 pitch를 보수적으로 재보정했습니다.
+- Browser Speech는 사용자 pitch 40% + preset offset을 12음 평균율 ratio로 변환하고 최종 pitch를 0.90~1.12로 clamp합니다.
+- Browser Speech 결과는 `기기 음성` 근사값임을 명시하고 실제 neural preset 품질과 분리합니다.
+- 카카오 user-gesture 재생, 1.8초 watchdog, 외부 브라우저 fallback은 유지됩니다.
+
+### 검증
+
+- Voice preset contract: **PASS**
+- Repository preflight: **51/51 PASS**
+- Related API tests: **8/8 PASS**
+- API pytest: **220/220 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Changed TS/TSX parse: **6/6 PASS**
+- Full Web/Chromium: **GitHub Actions final gate after push**
+
 ## 0.11.27 R2 · Recovery Scene Selection Stabilization
 
 - Actions run `32206091853`은 lint/Vitest/typecheck/build/report verify와 기존 desktop/mobile Chromium layout을 실제 통과했습니다.
