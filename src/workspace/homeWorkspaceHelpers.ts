@@ -6,7 +6,7 @@ import {
 } from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
-import { synthesizeSpeech } from '../tts/voiceApi'
+import type { synthesizeSpeech } from '../tts/voiceApi'
 import { isMyVoiceId } from '../voiceclone/voiceIdentity'
 
 export function generatedWorkspacePreview(

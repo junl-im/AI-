@@ -8,7 +8,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- Version: `0.11.30 · Neural Voice Reference Intake & Preview Promotion`
+- Version: `0.11.30 R1 · Web Lint Type-Only Import Stabilization`
+- Web CI stabilization: GitHub `main` head `a6dcc7e6c9a8008f3e629b52b78380adabb855cd`의 0.11.30 Web quality는 `homeWorkspaceHelpers.ts`에서 type-only `synthesizeSpeech`를 일반 import한 ESLint 오류 하나로 차단되었습니다. R1은 해당 import를 `import type`으로 교정하며 runtime 동작은 변경하지 않습니다.
 - Neural preview promotion: 5개 preset은 v4 manifest의 consent/rights/review 승인, 실제 reference SHA 일치, model fingerprint, `cosyvoice3` provenance가 모두 READY일 때만 neural 미리듣기로 승격합니다.
 - Reference privacy boundary: 실제 WAV·모델·동의 문서는 Git/전달 ZIP에 넣지 않고 운영 디렉터리에 보관하며, 앱에는 SHA-256 fingerprint와 approval/cache identity만 노출합니다.
 - Safe fallback: neural READY가 아니거나 neural 요청이 실패하면 0.11.28의 자연화된 `기기 음성` fallback과 카카오 watchdog/외부 브라우저 복구를 유지합니다.

@@ -1,3 +1,20 @@
+## 0.11.30 R1 · Web Lint Type-Only Import Stabilization
+
+- GitHub `main` head `a6dcc7e6c9a8008f3e629b52b78380adabb855cd`의 Web quality는 `src/workspace/homeWorkspaceHelpers.ts`에서 `synthesizeSpeech`가 `ReturnType<typeof ...>` 타입 계산에만 사용되는데 value import로 선언되어 ESLint `consistent-type-imports` 계열 규칙에 의해 실패했습니다.
+- `import { synthesizeSpeech }`를 `import type { synthesizeSpeech }`로 변경합니다. emitted JavaScript/runtime behavior에는 변화가 없습니다.
+- Neural Voice v4 provenance, preset preview routing, Browser Speech fallback, API/Worker, Kakao/Timeline/MY VOICE 기능은 변경하지 않습니다.
+
+### 검증
+
+- Product semver: **0.11.30 유지**
+- Repository preflight: **53/53 PASS**
+- API pytest: **223/223 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Changed TypeScript syntax: **1/1 PASS**
+- Local `npm ci`: **120초 timeout · local eslint 실행 파일 미생성**
+- 실제 ESLint/Vitest/typecheck/build/Chromium: **다음 GitHub Actions 최종 gate**
+
 ## 0.11.30 · Neural Voice Reference Intake & Preview Promotion
 
 - Voice preset evidence manifest v4에 neural preview engine/model/reference fingerprint를 추가하면서 v1~v3 일반 생성 호환성을 유지합니다.

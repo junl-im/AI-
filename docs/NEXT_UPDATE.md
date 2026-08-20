@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-Current baseline: `0.11.30 · Neural Voice Reference Intake & Preview Promotion`
+Current baseline: `0.11.30 R1 · Web Lint Type-Only Import Stabilization`
 
 ## 목표 버전
 
@@ -15,6 +15,7 @@ Current baseline: `0.11.30 · Neural Voice Reference Intake & Preview Promotion`
 
 ### 선행 조건과 위험
 
+- **Stabilization gate:** 0.11.30 R1을 Push한 뒤 Web quality가 lint → critical regression → full Vitest → typecheck → Vite build → desktop/mobile Chromium → multi-scene까지 green인지 먼저 확인합니다. 실패가 남으면 0.11.31 기능보다 CI 안정화를 우선합니다.
 - 0.11.30 GitHub Actions Web quality/Chromium gate가 green이어야 합니다.
 - 실제 reference WAV/model은 권리와 라이선스가 확인된 운영 자산만 사용합니다.
 - 원본 WAV, 모델, 동의 문서는 Git/전달 ZIP에 포함하지 않습니다.

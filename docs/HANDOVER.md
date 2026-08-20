@@ -1,14 +1,27 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.30 · Neural Voice Reference Intake & Preview Promotion**
+Current baseline: **0.11.30 R1 · Web Lint Type-Only Import Stabilization**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-19 KST**
+최종 갱신: **2026-08-20 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 2026-08-20 KST · 0.11.30 R1 Web Lint Type-Only Import Stabilization
+1. **작업 일시(KST)**: 2026-08-20.
+2. **대상/기준 버전**: `0.11.30 R1 · Web Lint Type-Only Import Stabilization` / `0.11.30 · Neural Voice Reference Intake & Preview Promotion`, GitHub `main` head `a6dcc7e6c9a8008f3e629b52b78380adabb855cd`. 제품 semver는 `0.11.30`을 유지합니다.
+3. **변경 내용**: Web quality annotation의 실제 lint 오류는 `src/workspace/homeWorkspaceHelpers.ts`에서 `synthesizeSpeech`가 `ReturnType<typeof synthesizeSpeech>` 타입 계산에만 사용되는데 일반 value import로 선언된 것입니다. `import { synthesizeSpeech }`를 `import type { synthesizeSpeech }`로 교정합니다.
+4. **변경 이유**: TypeScript의 타입 전용 의존성을 runtime import로 남기지 않는 ESLint 규칙을 만족하고, 0.11.30 neural preview 기능과 emitted runtime 동작을 바꾸지 않은 채 CI를 안정화하기 위해서입니다.
+5. **영향 범위**: TypeScript import declaration과 release/patch 문서만 변경합니다. Neural Voice v4 provenance, preset preview promotion/fallback, API/Worker synthesis, Kakao 모바일, Timeline recovery, MY VOICE runtime semantics는 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/workspace/homeWorkspaceHelpers.ts`, `FOUNDATION_REPORT.md`, `README.md`, `START_HERE.md`, `docs/{CHANGELOG,HANDOVER,NEXT_UPDATE}.md`, `docs/WEB_LINT_STABILIZATION_0.11.30_R1.md`, `docs/patches/0.11.30-r1-web-lint-stabilization/*`.
+7. **검증 결과**: Product semver `0.11.30` 유지, Repository preflight **53/53 PASS**, API pytest **223/223 PASS**(기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, 변경 TypeScript syntax **1/1 PASS**. Local `npm ci --no-audit --no-fund`는 120초 timeout되어 `node_modules/.bin/eslint`가 생성되지 않았으므로 실제 local ESLint/Vitest/typecheck/build는 PASS를 주장하지 않습니다.
+8. **알려진 제한과 주의사항**: R1의 최종 Web lint/critical regression/full Vitest/typecheck/build/Chromium 성공은 다음 GitHub Actions가 확인해야 합니다. 이 known CI failure가 green으로 닫히기 전에는 `0.11.31` 기능 패치를 진행하지 않습니다.
+9. **생성 산출물**: `SoriON-AI-0.11.30-r1-web-lint-type-import-stabilization-full.zip`, `SoriON-AI-0.11.30-to-0.11.30-r1-web-lint-type-import-stabilization-patch.zip`, `SoriON-AI-0.11.30-r1-web-lint-type-import-stabilization-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: R1 Actions green을 먼저 확인한 뒤 `0.11.31 · Neural Voice Runtime Certification & Shared Preview Cache`로 진행합니다.
 
 ## 2026-08-19 KST · 0.11.30 Neural Voice Reference Intake & Preview Promotion
 1. **작업 일시(KST)**: 2026-08-19.

@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.11.30 R1 · Web Lint Type-Only Import Stabilization
+
+- GitHub `main` head `a6dcc7e6c9a8008f3e629b52b78380adabb855cd`의 Web quality가 `src/workspace/homeWorkspaceHelpers.ts` type-only import 오류로 실패한 것을 확인했습니다.
+- `synthesizeSpeech`는 runtime에서 호출되지 않고 `ReturnType<typeof synthesizeSpeech>`에만 사용되므로 value import를 `import type`으로 교정합니다. production 동작은 변경하지 않습니다.
+- 제품 semver는 `0.11.30`을 유지하고, 0.11.31 기능 개발은 R1 Web quality green 이후로 미룹니다.
+
+### 검증
+
+- Repository preflight: **53/53 PASS**
+- API pytest: **223/223 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Changed TypeScript syntax: **1/1 PASS**
+- Local `npm ci`: **120초 timeout · eslint 미설치 상태**
+- GitHub Actions Web quality: **R1 Push 후 최종 확인 필요**
+
 ## 0.11.30 · Neural Voice Reference Intake & Preview Promotion
 
 - preset evidence manifest를 v4로 확장해 `neural_preview`의 engine/model/reference fingerprint를 기록하고 v1~v3 호환성은 유지합니다.
