@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.11.30 · Neural Voice Reference Intake & Preview Promotion
+
+- preset evidence manifest를 v4로 확장해 `neural_preview`의 engine/model/reference fingerprint를 기록하고 v1~v3 호환성은 유지합니다.
+- `/setup`은 승인된 reference WAV SHA와 `reference_fingerprint`, 64자리 model fingerprint, `cosyvoice3` engine, 기존 consent/rights/review 승인을 모두 만족한 경우에만 `neural_preview_ready=true`와 동일 source `preview_cache_key`를 노출합니다.
+- Home의 5개 성우 미리듣기는 READY가 캐시된 preset만 `cosyvoice3`를 명시적으로 우선 사용합니다. v1~v3 또는 미검증 v4는 neural-ready로 승격하지 않고 0.11.28의 자연화된 `기기 음성` fallback을 유지합니다.
+- Quality Lab에 `성우 reference intake · 미리듣기 승격` 카드를 추가해 5개 preset의 reference/model/approval/cache 상태를 보고 권리 확인용 v4 manifest 템플릿을 다운로드할 수 있습니다.
+- 실제 reference WAV, 모델 파일, 동의 문서, 사용자 음성은 Git/전달 ZIP에 포함하지 않습니다.
+- neural 요청이 실패하고 Browser Speech가 가능한 경우 기기 음성 fallback을 시도하며 기존 카카오 user-gesture/watchdog/외부 브라우저 복구 경계는 유지합니다.
+
+### 검증
+
+- Product version sync: **0.11.30 PASS**
+- Neural Voice reference/promotion static contract: **PASS**
+- API targeted setup/approval tests: **13/13 PASS**
+- API pytest: **223/223 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Repository preflight: **53/53 PASS**
+- Changed TS/TSX dependency-free transpile syntax: **9/9 PASS**
+- TypeScript project semantic check: **환경상 미완료 · node_modules가 없어 Vite/Vitest/Node type definitions를 찾지 못함**
+- 실제 rights-cleared reference/model runtime: **미수집 · neural 음질 성공을 주장하지 않음**
+
 ## 0.11.29 · Certification Intake & Release Readiness
 
 - Quality Lab에 `출시 인증 상태` 카드를 추가해 Web quality, Kakao Android/iOS, Chromium desktop/mobile, MY VOICE runtime 6개 evidence를 한 화면에서 불러옵니다.

@@ -67,7 +67,7 @@ def test_setup_status_explains_required_steps(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.11.29"
+    assert body["version"] == "0.11.30"
     assert isinstance(body["ready"], bool)
     assert isinstance(body["real_engine_count"], int)
     assert body["voice_preset_expected_count"] == 5
@@ -168,3 +168,55 @@ def test_voice_preset_check_invalidates_review_after_wav_replacement(tmp_path):
     assert item.human_review_status == "stale"
     assert item.review_checksum_matches is False
     assert any("자동 무효화" in issue for issue in item.issues)
+
+
+def test_voice_preset_v4_neural_preview_requires_matching_reference_and_model_fingerprint(tmp_path):
+    voice_id = "sori-warm"
+    wav_path = tmp_path / f"{voice_id}.wav"
+    write_wav(wav_path, amplitude=1301)
+    write_approved_manifest(tmp_path, voice_id)
+    manifest_path = tmp_path / f"{voice_id}.manifest.json"
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    audio_sha256 = hashlib.sha256(wav_path.read_bytes()).hexdigest()
+    payload["schema_version"] = 4
+    payload["human_review"]["approval_id"] = "apr-neural-preview-test"
+    payload["neural_preview"] = {
+        "engine_id": "cosyvoice3",
+        "model_id": "cosyvoice3-korean-preset",
+        "model_fingerprint": "b" * 64,
+        "reference_fingerprint": audio_sha256,
+        "notes": "test",
+    }
+    manifest_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+    _, ready_count, diagnostics = _voice_preset_check(tmp_path)
+
+    item = next(value for value in diagnostics if value.voice_id == voice_id)
+    assert ready_count == 1
+    assert item.usable is True
+    assert item.neural_preview_ready is True
+    assert item.neural_preview_engine_id == "cosyvoice3"
+    assert item.model_fingerprint == "b" * 64
+    assert item.reference_fingerprint == audio_sha256
+    assert item.preview_cache_key is not None
+    assert len(item.preview_cache_key) == 64
+
+
+def test_voice_preset_v3_stays_usable_without_neural_preview_promotion(tmp_path):
+    voice_id = "on-clear"
+    wav_path = tmp_path / f"{voice_id}.wav"
+    write_wav(wav_path, amplitude=1302)
+    write_approved_manifest(tmp_path, voice_id)
+    manifest_path = tmp_path / f"{voice_id}.manifest.json"
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    payload["schema_version"] = 3
+    payload["human_review"]["approval_id"] = "apr-v3-compatible"
+    manifest_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+    _, ready_count, diagnostics = _voice_preset_check(tmp_path)
+
+    item = next(value for value in diagnostics if value.voice_id == voice_id)
+    assert ready_count == 1
+    assert item.usable is True
+    assert item.neural_preview_ready is False
+    assert item.preview_cache_key is None

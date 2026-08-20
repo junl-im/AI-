@@ -19,6 +19,13 @@ const expectedPace = new Map([
   ['jun-deep', { frontend: "rateMultiplier: 0.98,", backend: '        0.98,' }],
   ['min-energetic', { frontend: "rateMultiplier: 1.08,", backend: '        1.08,' }],
 ])
+const expectedPitch = new Map([
+  ['sori-warm', { frontend: 'pitchOffset: 0.5,', backend: '        0.5,' }],
+  ['on-clear', { frontend: 'pitchOffset: -0.5,', backend: '        -0.5,' }],
+  ['dam-calm', { frontend: 'pitchOffset: 0,', backend: '        0.0,' }],
+  ['jun-deep', { frontend: 'pitchOffset: -1.0,', backend: '        -1.0,' }],
+  ['min-energetic', { frontend: 'pitchOffset: 0.25,', backend: '        0.25,' }],
+])
 for (const voiceId of requiredIds) {
   if (!frontend.includes(`id: '${voiceId}'`)) failures.push(`frontend preset 누락: ${voiceId}`)
   if (!backend.includes(`"${voiceId}"`)) failures.push(`backend preset 누락: ${voiceId}`)
@@ -30,6 +37,14 @@ for (const [voiceId, pace] of expectedPace) {
   const backendSlice = backend.slice(backendStart, backendStart + 420)
   if (!frontendSlice.includes(pace.frontend)) failures.push(`frontend pace calibration 불일치: ${voiceId}`)
   if (!backendSlice.includes(pace.backend)) failures.push(`backend pace calibration 불일치: ${voiceId}`)
+}
+for (const [voiceId, pitch] of expectedPitch) {
+  const frontendStart = frontend.indexOf(`id: '${voiceId}'`)
+  const backendStart = backend.indexOf(`"${voiceId}"`)
+  const frontendSlice = frontend.slice(frontendStart, frontendStart + 900)
+  const backendSlice = backend.slice(backendStart, backendStart + 420)
+  if (!frontendSlice.includes(pitch.frontend)) failures.push(`frontend natural pitch calibration 불일치: ${voiceId}`)
+  if (!backendSlice.includes(pitch.backend)) failures.push(`backend natural pitch calibration 불일치: ${voiceId}`)
 }
 for (const required of [
   "export type VoiceGender = 'female' | 'male' | 'neutral'",
@@ -109,6 +124,12 @@ for (const required of [
   "selectionBasis: 'preferred-token' | 'variant-index' | 'compatible-cycle' | 'none'",
   'preset.voiceVariantIndex % compatible.length',
   'requireVoicePreset',
+  'BROWSER_USER_PITCH_SCALE = 0.4',
+  'BROWSER_PITCH_MIN = 0.9',
+  'BROWSER_PITCH_MAX = 1.12',
+  'diagnoseBrowserSpeechProsody',
+  "policy: 'naturalized-system'",
+  '2 ** (effectivePitchSemitones / 12)',
 ]) {
   if (!browserSpeech.includes(required)) failures.push(`browserSpeech.ts: ${required} 누락`)
 }
@@ -174,6 +195,14 @@ if (!browserTests.includes('expect(playback.rate).toBeCloseTo(request.speed, 5)'
 }
 if (browserTests.includes('expect(playback.rate).toBeLessThan(request.speed)')) {
   failures.push('browserSpeech.test.ts: R1 이전 감속 기대값이 남아 있습니다.')
+}
+for (const required of [
+  "presetPitchOffset: 0.5",
+  "policy: 'naturalized-system'",
+  'expect(high.webSpeechPitch).toBe(1.12)',
+  'expect(low.webSpeechPitch).toBe(0.9)',
+]) {
+  if (!browserTests.includes(required)) failures.push(`browserSpeech.test.ts: natural pitch 회귀 계약 누락: ${required}`)
 }
 for (const required of [
   'test_cosyvoice_does_not_fallback_missing_preset_to_default_reference',

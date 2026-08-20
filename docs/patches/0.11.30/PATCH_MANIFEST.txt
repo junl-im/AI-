@@ -1,0 +1,54 @@
+Base: 0.11.29 · Certification Intake & Release Readiness
+Target: 0.11.30 · Neural Voice Reference Intake & Preview Promotion
+Added count: 8
+Modified count: 34
+Deleted count: 0
+
+Added files:
+docs/NEURAL_VOICE_REFERENCE_PREVIEW.md
+docs/patches/0.11.30/PATCH_MANIFEST.txt
+docs/patches/0.11.30/PATCH_README.md
+scripts/check-neural-voice-reference-contracts.mjs
+src/components/evaluation/NeuralVoiceReferenceCard.tsx
+src/quality/neuralVoiceReference.test.ts
+src/quality/neuralVoiceReference.ts
+src/workspace/homeWorkspaceHelpers.ts
+
+Modified files:
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+VERSION
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+package-lock.json
+package.json
+scripts/check-reproducible-web-quality.mjs
+scripts/run-preflight.mjs
+services/api/app/schemas/setup.py
+services/api/app/schemas/voice_preset_evidence.py
+services/api/app/services/setup_diagnostics.py
+services/api/app/services/voice_preset_approval.py
+services/api/app/services/voice_preset_evidence.py
+services/api/pyproject.toml
+services/api/tests/test_ai_director.py
+services/api/tests/test_connectivity.py
+services/api/tests/test_engine_catalog.py
+services/api/tests/test_engine_strategy.py
+services/api/tests/test_evidence.py
+services/api/tests/test_health.py
+services/api/tests/test_quality.py
+services/api/tests/test_setup.py
+services/api/tests/test_voice_preset_approval.py
+services/api/uv.lock
+services/worker/pyproject.toml
+services/worker/uv.lock
+src/pages/HomePage.tsx
+src/pages/QualityPage.tsx
+src/settings/setupApi.ts
+src/settings/setupTypes.ts
+src/update/buildInfo.ts
+
+Deleted files:
+(none)

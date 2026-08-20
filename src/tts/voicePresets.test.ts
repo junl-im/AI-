@@ -19,4 +19,17 @@ describe('voicePresets pace calibration', () => {
     expect(calm.naturalSpeedRange).toEqual([0.95, 1.15])
     expect(deep.naturalSpeedRange).toEqual([0.95, 1.12])
   })
+
+  it('시스템 근사 음성의 기본 pitch를 전자음이 두드러지지 않는 범위로 낮춘다', () => {
+    expect(Object.fromEntries(voicePresets.map((voice) => [voice.id, voice.pitchOffset]))).toEqual({
+      'sori-warm': 0.5,
+      'on-clear': -0.5,
+      'dam-calm': 0,
+      'jun-deep': -1.0,
+      'min-energetic': 0.25,
+    })
+    expect(voicePresets.find((voice) => voice.id === 'sori-warm')?.naturalPitchRange).toEqual([-1, 2])
+    expect(voicePresets.find((voice) => voice.id === 'dam-calm')?.naturalPitchRange).toEqual([-1, 1])
+    expect(voicePresets.find((voice) => voice.id === 'jun-deep')?.naturalPitchRange).toEqual([-3, 0])
+  })
 })

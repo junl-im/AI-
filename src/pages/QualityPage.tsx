@@ -4,6 +4,7 @@ import { PlaybackSeamEvidenceCard } from '../components/evaluation/PlaybackSeamE
 import { DeviceEvidenceCard } from '../components/evaluation/DeviceEvidenceCard'
 import { FieldDeviceCertificationCard } from '../components/evaluation/FieldDeviceCertificationCard'
 import { ReleaseReadinessCard } from '../components/evaluation/ReleaseReadinessCard'
+import { NeuralVoiceReferenceCard } from '../components/evaluation/NeuralVoiceReferenceCard'
 import { BenchmarkDashboardCard } from '../components/evaluation/BenchmarkDashboardCard'
 import { VoicePresetApprovalCard } from '../components/evaluation/VoicePresetApprovalCard'
 import { DeviceSoakRecorderCard } from '../components/evaluation/DeviceSoakRecorderCard'
@@ -289,6 +290,8 @@ export function QualityPage() {
         <FieldDeviceCertificationCard />
 
         <ReleaseReadinessCard />
+
+        <NeuralVoiceReferenceCard />
 
         <BenchmarkDashboardCard
           deviceSummary={deviceSummary}

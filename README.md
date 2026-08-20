@@ -8,7 +8,10 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- Version: `0.11.29 · Certification Intake & Release Readiness`
+- Version: `0.11.30 · Neural Voice Reference Intake & Preview Promotion`
+- Neural preview promotion: 5개 preset은 v4 manifest의 consent/rights/review 승인, 실제 reference SHA 일치, model fingerprint, `cosyvoice3` provenance가 모두 READY일 때만 neural 미리듣기로 승격합니다.
+- Reference privacy boundary: 실제 WAV·모델·동의 문서는 Git/전달 ZIP에 넣지 않고 운영 디렉터리에 보관하며, 앱에는 SHA-256 fingerprint와 approval/cache identity만 노출합니다.
+- Safe fallback: neural READY가 아니거나 neural 요청이 실패하면 0.11.28의 자연화된 `기기 음성` fallback과 카카오 watchdog/외부 브라우저 복구를 유지합니다.
 - Release readiness: Quality Lab에서 Web quality, Kakao Android/iOS, Chromium desktop/mobile, MY VOICE runtime 증거를 각각 READY/PENDING/BLOCKED로 판정하고 6개 모두 READY일 때만 Overall CERTIFIED를 허용합니다.
 - Readiness integrity: Web quality report/checksum과 Chromium 9/9 capture SHA-256을 재검증하며 synthetic Chromium fixture는 실제 MY VOICE 성공으로 승격하지 않습니다.
 - Voice naturalness: 혜린의 시스템 근사 pitch를 +1.5에서 +0.5로 낮추고 5개 preset의 pitch 보정을 전반적으로 축소했습니다. Browser Speech는 사용자 pitch를 완화해 `0.90~1.12` 범위로 제한합니다.

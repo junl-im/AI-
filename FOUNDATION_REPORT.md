@@ -1,3 +1,24 @@
+## 0.11.30 · Neural Voice Reference Intake & Preview Promotion
+
+- Voice preset evidence manifest v4에 neural preview engine/model/reference fingerprint를 추가하면서 v1~v3 일반 생성 호환성을 유지합니다.
+- `/setup`은 consent/rights/review 승인, usable WAV, v4, `cosyvoice3`, 64자리 model SHA-256, 실제 WAV와 일치하는 reference fingerprint를 모두 만족해야 `neural_preview_ready`와 deterministic `preview_cache_key`를 노출합니다.
+- Quality Lab에서 5개 preset의 provenance/readiness를 확인하고 pending 상태의 안전한 v4 manifest 템플릿을 다운로드합니다.
+- Home preset preview는 READY가 캐시된 경우에만 explicit `cosyvoice3`를 사용하고, 미준비/실패 시 0.11.28의 자연화된 `기기 음성` fallback을 유지합니다.
+- 실제 reference WAV, 모델 파일, 동의 문서는 프로젝트/ZIP에 포함하지 않습니다.
+
+### 검증
+
+- Product version sync: **0.11.30 PASS**
+- Neural Voice static contract: **PASS**
+- Targeted API setup/approval: **13/13 PASS**
+- API pytest: **223/223 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Repository preflight: **53/53 PASS**
+- Changed TS/TSX dependency-free transpile syntax: **9/9 PASS**
+- Global TypeScript semantic check: **node_modules 부재로 dependency type definitions를 찾지 못해 미완료**
+- 실제 neural reference/model runtime 품질: **미수집**
+
 ## 0.11.29 · Certification Intake & Release Readiness
 
 - Quality Lab에 Web quality, Kakao Android/iOS, Chromium desktop/mobile, MY VOICE runtime을 6개 독립 evidence 슬롯으로 불러오는 Release Readiness 카드를 추가했습니다.

@@ -41,6 +41,10 @@ class VoicePresetEvidenceInspection:
     signing_key_id: str | None
     signature_status: str
     signed_payload_sha256: str | None
+    neural_preview_engine_id: str | None
+    model_id: str | None
+    model_fingerprint: str | None
+    reference_fingerprint: str | None
     consent_expires_at: datetime | None
     rights_expires_at: datetime | None
     consent_days_remaining: int | None
@@ -153,6 +157,10 @@ def _empty_inspection(
         signing_key_id=None,
         signature_status="missing",
         signed_payload_sha256=None,
+        neural_preview_engine_id=None,
+        model_id=None,
+        model_fingerprint=None,
+        reference_fingerprint=None,
         consent_expires_at=None,
         rights_expires_at=None,
         consent_days_remaining=None,
@@ -280,6 +288,22 @@ def inspect_voice_preset_evidence(
                 "WAV 교체 뒤 재검수가 필요합니다.",
             )
 
+    neural = manifest.neural_preview
+    neural_preview_engine_id = neural.engine_id.strip() or None
+    model_id = neural.model_id.strip() or None
+    model_fingerprint = neural.model_fingerprint.strip().lower() or None
+    reference_fingerprint = neural.reference_fingerprint.strip().lower() or None
+    if model_fingerprint is not None and not _valid_sha256(model_fingerprint):
+        _blocked_issue(issues, "neural_preview.model_fingerprint가 SHA-256 형식이 아닙니다.")
+    if reference_fingerprint is not None and not _valid_sha256(reference_fingerprint):
+        _blocked_issue(issues, "neural_preview.reference_fingerprint가 SHA-256 형식이 아닙니다.")
+    elif reference_fingerprint is not None and actual_sha256 is not None:
+        if reference_fingerprint != actual_sha256:
+            _blocked_issue(
+                issues,
+                "neural_preview.reference_fingerprint와 현재 WAV SHA-256가 다릅니다.",
+            )
+
     review_status = manifest.human_review.status
     review_audio_sha256 = manifest.human_review.audio_sha256.strip().lower() or None
     review_checksum_matches: bool | None = None
@@ -373,6 +397,10 @@ def inspect_voice_preset_evidence(
         signing_key_id=signing_key,
         signature_status=signature_status,
         signed_payload_sha256=signed_payload_sha256,
+        neural_preview_engine_id=neural_preview_engine_id,
+        model_id=model_id,
+        model_fingerprint=model_fingerprint,
+        reference_fingerprint=reference_fingerprint,
         consent_expires_at=consent_expires_at,
         rights_expires_at=rights_expires_at,
         consent_days_remaining=consent_days_remaining,

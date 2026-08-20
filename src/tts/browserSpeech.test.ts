@@ -5,6 +5,7 @@ import {
   createBrowserSpeechPlayback,
   createBrowserSpeechResult,
   createBrowserSpeechUtterance,
+  diagnoseBrowserSpeechProsody,
   diagnoseBrowserSpeechVoices,
   estimateBrowserSpeechDuration,
   getBrowserSpeechEngine,
@@ -111,6 +112,7 @@ describe('browserSpeech', () => {
     expect(playback).toMatchObject({ text: request.text, lang: 'ko-KR', voiceId: 'sori-warm' })
     expect(playback.rate).toBeCloseTo(request.speed, 5)
     expect(playback.pitch).toBeGreaterThan(1)
+    expect(playback.pitch).toBeLessThan(1.1)
   })
 
   it('한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다', () => {
@@ -125,6 +127,28 @@ describe('browserSpeech', () => {
     expect(utterance.lang).toBe('ko-KR')
     expect(utterance.rate).toBe(playback.rate)
     expect(utterance.voice?.lang).toBe('ko-KR')
+  })
+
+  it('브라우저 pitch를 자연스러운 안전 범위로 압축하고 혜린 기본값을 중립에 가깝게 유지한다', () => {
+    installBrowserSpeech()
+    const warmNeutralRequest = { ...request, speed: 1, pitch: 0 }
+    const warm = diagnoseBrowserSpeechProsody(warmNeutralRequest)
+    const deep = diagnoseBrowserSpeechProsody({ ...warmNeutralRequest, voiceId: 'jun-deep' })
+    const high = diagnoseBrowserSpeechProsody({ ...warmNeutralRequest, pitch: 6 })
+    const low = diagnoseBrowserSpeechProsody({ ...warmNeutralRequest, voiceId: 'jun-deep', pitch: -6 })
+
+    expect(warm).toMatchObject({
+      voiceId: 'sori-warm',
+      presetPitchOffset: 0.5,
+      effectivePitchSemitones: 0.5,
+      policy: 'naturalized-system',
+    })
+    expect(warm.webSpeechPitch).toBeGreaterThan(1)
+    expect(warm.webSpeechPitch).toBeLessThan(1.04)
+    expect(deep.webSpeechPitch).toBeGreaterThan(0.94)
+    expect(deep.webSpeechPitch).toBeLessThan(1)
+    expect(high.webSpeechPitch).toBe(1.12)
+    expect(low.webSpeechPitch).toBe(0.9)
   })
 
   it('프리셋마다 브라우저 음성과 운율을 다르게 적용한다', () => {

@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.29 · Certification Intake & Release Readiness**
+Current baseline: **0.11.30 · Neural Voice Reference Intake & Preview Promotion**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-19 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,18 @@ Current baseline: **0.11.29 · Certification Intake & Release Readiness**
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-19 KST · 0.11.30 Neural Voice Reference Intake & Preview Promotion
+1. **작업 일시(KST)**: 2026-08-19.
+2. **대상/기준 버전**: `0.11.30 · Neural Voice Reference Intake & Preview Promotion` / `0.11.29 · Certification Intake & Release Readiness`. 작업 시작 시 GitHub main 최신 커밋은 `70de02eeb19495b69af06bf623274bab383e10cf`(`0.11.29`)였으며 Push 직후라 0.11.29 Actions green은 확인하지 않았습니다.
+3. **변경 내용**: Voice preset evidence manifest를 v4로 확장해 neural preview engine/model/reference fingerprint를 보존합니다. `/setup`은 기존 reference WAV/evidence 승인이 usable이고 v4, `cosyvoice3`, 유효한 model SHA-256, 실제 WAV와 일치하는 reference fingerprint가 모두 있을 때만 `neural_preview_ready`와 deterministic `preview_cache_key`를 노출합니다. Quality Lab은 5개 preset의 readiness/provenance를 표시하고 안전한 v4 manifest 템플릿을 다운로드합니다. Home preset preview는 READY가 캐시된 성우만 `cosyvoice3`를 명시적으로 우선 사용하며 미검증 preset은 Browser Speech 기기 음성을 유지합니다.
+4. **변경 이유**: 0.11.28에서 시스템 TTS의 과한 pitch 변조는 줄였지만 기기 음성은 동일 성우의 최종 neural 음색이 아닙니다. 실제 reference/model이 존재할 때만 품질을 승격하고, 원본 음성·동의 문서를 제품 저장소에 넣지 않으면서 PC/모바일이 같은 provenance/cache identity를 공유할 운영 경계가 필요했습니다.
+5. **영향 범위**: Voice preset manifest/setup diagnostics, Quality Lab reference intake UI, Home preset preview routing, neural preview cache identity, static/preflight 계약, 릴리스 문서입니다. MY VOICE clone, Timeline recovery, 0.11.28 speed/pitch naturalization, 카카오 direct user-gesture/watchdog/exit guard, 일반 v1~v3 preset 생성 호환성은 유지합니다.
+6. **변경·추가된 주요 파일**: `services/api/app/schemas/{voice_preset_evidence,setup}.py`, `services/api/app/services/{voice_preset_evidence,voice_preset_approval,setup_diagnostics}.py`, `src/quality/{neuralVoiceReference.ts,neuralVoiceReference.test.ts}`, `src/components/evaluation/NeuralVoiceReferenceCard.tsx`, `src/pages/{HomePage,QualityPage}.tsx`, `src/workspace/homeWorkspaceHelpers.ts`, `scripts/check-neural-voice-reference-contracts.mjs`, `docs/NEURAL_VOICE_REFERENCE_PREVIEW.md`, version/release/patch 문서.
+7. **검증 결과**: Product version sync **0.11.30 PASS**, neural Voice static contract **PASS**, targeted API setup/approval **13/13 PASS**, 전체 API pytest **223/223 PASS**(기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**. 최초 preflight는 3/53 실패였고 원인은 새 preview 변수에 대한 기존 mobile static token, `test:web-critical` exact contract, HomePage 1200줄 상한/CHANGELOG 미작성으로 확인했습니다. mobile/reproducible 계약은 수정 후 각각 PASS했고 HomePage helper 분리로 project rule 상한을 통과했습니다. 릴리스 문서 반영 후 final Repository preflight **53/53 PASS**, 변경 TS/TSX dependency-free transpile syntax **9/9 PASS**입니다. Global `tsc -b`는 `node_modules` 부재로 `vite/client`, `vitest/globals`, Node/Vite 패키지 타입을 찾지 못해 semantic PASS를 주장하지 않습니다.
+8. **알려진 제한과 주의사항**: 0.11.30에는 실제 성우 reference WAV, 모델 파일, 동의/계약 문서를 포함하지 않습니다. 따라서 기본 설치의 neural READY는 pending일 수 있으며 실제 neural 음질·PC/모바일 동일 음색 성공은 아직 미인증입니다. v1~v3 manifest는 일반 생성에는 계속 usable일 수 있지만 neural preview default로 승격되지 않습니다. 승격된 API 요청 실패 후 Browser Speech fallback은 카카오 WebView 자체의 Speech Synthesis 제한을 없애지는 않으며 기존 watchdog/외부 브라우저 복구가 안전망입니다.
+9. **생성 산출물**: `SoriON-AI-0.11.30-neural-voice-reference-preview-promotion-full.zip`, `SoriON-AI-0.11.29-to-0.11.30-neural-voice-reference-preview-promotion-patch.zip`, `SoriON-AI-0.11.30-neural-voice-reference-preview-promotion-SHA256SUMS.txt`. PATCH overlay는 FULL과 1078/1078 files, missing 0 / extra 0 / changed 0으로 일치했고 두 ZIP의 금지 경로는 0건입니다.
+10. **다음 예상 업데이트**: `0.11.31 · Neural Voice Runtime Certification & Shared Preview Cache`에서 실제 rights-cleared preset v4 reference/model runtime이 준비된 경우 source/cache identity와 PC·모바일 동일 neural preview를 실증하고, 준비되지 않으면 neural READY를 pending으로 유지합니다.
 
 ## 2026-08-19 KST · 0.11.29 Certification Intake & Release Readiness
 1. **작업 일시(KST)**: 2026-08-19.

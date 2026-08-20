@@ -42,6 +42,12 @@ class VoicePresetDiagnostic(BaseModel):
     signing_key_id: str | None = None
     signature_status: str = "missing"
     signed_payload_sha256: str | None = None
+    neural_preview_engine_id: str | None = None
+    model_id: str | None = None
+    model_fingerprint: str | None = None
+    reference_fingerprint: str | None = None
+    neural_preview_ready: bool = False
+    preview_cache_key: str | None = None
     consent_expires_at: str | None = None
     rights_expires_at: str | None = None
     consent_days_remaining: int | None = None

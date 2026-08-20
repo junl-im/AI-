@@ -56,6 +56,7 @@ const checks = [
   ['device soak / audio archive policy', 'check-device-soak-archive.mjs'],
   ['voice presets', 'check-voice-preset-contracts.mjs'],
   ['voice preset evidence', 'check-voice-preset-evidence.mjs'],
+  ['neural voice reference / preview promotion', 'check-neural-voice-reference-contracts.mjs'],
   ['voice review sync / telemetry', 'check-voice-review-sync.mjs'],
   ['signed review approval / benchmark dashboard', 'check-signed-review-benchmark.mjs'],
   ['voice review operator gate / CI unblock', 'check-voice-review-operator-gate.mjs'],

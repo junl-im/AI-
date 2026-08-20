@@ -36,6 +36,12 @@ interface ApiVoicePresetDiagnostic {
   signing_key_id?: string | null
   signature_status?: string
   signed_payload_sha256?: string | null
+  neural_preview_engine_id?: string | null
+  model_id?: string | null
+  model_fingerprint?: string | null
+  reference_fingerprint?: string | null
+  neural_preview_ready?: boolean
+  preview_cache_key?: string | null
   consent_expires_at?: string | null
   rights_expires_at?: string | null
   consent_days_remaining?: number | null
@@ -121,6 +127,12 @@ export async function getSetupStatus(baseUrl?: string, signal?: AbortSignal): Pr
       signingKeyId: item.signing_key_id ?? null,
       signatureStatus: item.signature_status ?? 'missing',
       signedPayloadSha256: item.signed_payload_sha256 ?? null,
+      neuralPreviewEngineId: item.neural_preview_engine_id ?? null,
+      modelId: item.model_id ?? null,
+      modelFingerprint: item.model_fingerprint ?? null,
+      referenceFingerprint: item.reference_fingerprint ?? null,
+      neuralPreviewReady: item.neural_preview_ready ?? false,
+      previewCacheKey: item.preview_cache_key ?? null,
       consentExpiresAt: item.consent_expires_at ?? null,
       rightsExpiresAt: item.rights_expires_at ?? null,
       consentDaysRemaining: item.consent_days_remaining ?? null,

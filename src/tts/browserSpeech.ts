@@ -8,6 +8,22 @@ import {
 
 export const BROWSER_SPEECH_ENGINE_ID = 'browser-speech'
 
+const BROWSER_USER_PITCH_SCALE = 0.4
+const BROWSER_PITCH_MIN = 0.9
+const BROWSER_PITCH_MAX = 1.12
+
+export interface BrowserSpeechProsodyDiagnostic {
+  voiceId: string
+  presetName: string
+  requestedSpeed: number
+  effectiveRate: number
+  requestedPitch: number
+  presetPitchOffset: number
+  effectivePitchSemitones: number
+  webSpeechPitch: number
+  policy: 'naturalized-system'
+}
+
 export interface BrowserSpeechPlayback {
   text: string
   lang: string
@@ -95,7 +111,7 @@ export function getBrowserSpeechEngine(): EngineInfo | null {
     supportsPitch: true,
     supportsVoiceClone: false,
     ready: true,
-    reason: '기기에 설치된 한국어 음성을 사용합니다. 성별이 확인되지 않거나 반대인 음성은 자동 선택하지 않습니다.',
+    reason: '기기에 설치된 한국어 음성을 쓰는 빠른 근사 미리듣기입니다. 자연스러움을 위해 pitch 변조를 제한하며 전용 neural 성우 음색과 동일하지 않습니다.',
     autoEligible: true,
     recommended: false,
     health: 'ready',
@@ -245,7 +261,7 @@ export function createBrowserSpeechResult(
       createBrowserSpeechPlayback(request).rate,
     ),
     message: selected
-      ? `${preset.name} 프리셋과 성별이 맞는 기기 내장 한국어 음성(${selected.name})을 선택했습니다. 전용 AI 화자와는 다른 시스템 근사 음성입니다.`
+      ? `${preset.name} 프리셋과 성별이 맞는 기기 내장 한국어 음성(${selected.name})을 선택했습니다. pitch 변조를 보수적으로 제한한 시스템 근사 음성이며 전용 neural 성우와는 다릅니다.`
       : '브라우저 음성 목록을 불러오는 중입니다. 재생 시 프리셋 성별을 다시 확인하며 반대 성별 음성은 사용하지 않습니다.',
     normalizedText: request.text,
     segmentCount: 1,
@@ -259,13 +275,35 @@ export function createBrowserSpeechResult(
   }
 }
 
+export function diagnoseBrowserSpeechProsody(
+  request: TtsSynthesisRequest,
+): BrowserSpeechProsodyDiagnostic {
+  const preset = requireVoicePreset(request.voiceId)
+  const effectiveRate = Math.min(2, Math.max(0.5, request.speed * preset.rateMultiplier))
+  const effectivePitchSemitones = request.pitch * BROWSER_USER_PITCH_SCALE + preset.pitchOffset
+  const pitchRatio = 2 ** (effectivePitchSemitones / 12)
+  const webSpeechPitch = Math.min(BROWSER_PITCH_MAX, Math.max(BROWSER_PITCH_MIN, pitchRatio))
+  return {
+    voiceId: preset.id,
+    presetName: preset.name,
+    requestedSpeed: request.speed,
+    effectiveRate,
+    requestedPitch: request.pitch,
+    presetPitchOffset: preset.pitchOffset,
+    effectivePitchSemitones,
+    webSpeechPitch,
+    policy: 'naturalized-system',
+  }
+}
+
 export function createBrowserSpeechPlayback(request: TtsSynthesisRequest): BrowserSpeechPlayback {
   const preset = requireVoicePreset(request.voiceId)
+  const prosody = diagnoseBrowserSpeechProsody(request)
   return {
     text: request.text,
     lang: 'ko-KR',
-    rate: Math.min(2, Math.max(0.5, request.speed * preset.rateMultiplier)),
-    pitch: Math.min(2, Math.max(0, 1 + (request.pitch + preset.pitchOffset) / 12)),
+    rate: prosody.effectiveRate,
+    pitch: prosody.webSpeechPitch,
     voiceId: preset.id,
     expectedGender: preset.gender,
   }

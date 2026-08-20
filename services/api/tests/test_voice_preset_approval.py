@@ -288,3 +288,44 @@ def test_previous_trust_key_remains_valid_and_can_be_resigned(tmp_path):
     )
     assert rollback.event == "rolled-back"
     assert restored["human_review"]["status"] == "pending"
+
+
+def test_approval_preserves_v4_neural_preview_fingerprints(tmp_path):
+    preset_dir = tmp_path / "voice-presets"
+    preset_dir.mkdir()
+    audio = preset_dir / "on-clear.wav"
+    _write_wave(audio)
+    payload = _manifest(_sha256(audio), audio.stat().st_size)
+    payload["schema_version"] = 4
+    payload["neural_preview"] = {
+        "engine_id": "cosyvoice3",
+        "model_id": "cosyvoice3-korean-preset",
+        "model_fingerprint": "d" * 64,
+        "reference_fingerprint": _sha256(audio),
+        "notes": "rights-safe runtime fingerprint",
+    }
+    manifest_path = preset_dir / "on-clear.manifest.json"
+    manifest_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    service = VoicePresetApprovalService(preset_dir, tmp_path / "history.jsonl")
+    base = VoicePresetApprovalInput(
+        voice_id="on-clear",
+        reviewer="reviewer-v4",
+        sample_text="도윤 neural reference를 같은 문장으로 검수했습니다.",
+        review_bundle_sha256="e" * 64,
+        expected_audio_sha256=_sha256(audio),
+        reviewed_at=datetime(2026, 8, 19, 4, 0, tzinfo=timezone.utc),
+    )
+
+    preview = service.preview(base)
+    _record, applied = service.apply(
+        VoicePresetApprovalApplyRequest(
+            **base.model_dump(),
+            preview_id=preview.preview_id,
+            confirmation="현재 WAV 승인",
+        ),
+        actor="test-operator",
+    )
+
+    assert applied["schema_version"] == 4
+    assert applied["neural_preview"]["model_fingerprint"] == "d" * 64
+    assert applied["neural_preview"]["reference_fingerprint"] == _sha256(audio)

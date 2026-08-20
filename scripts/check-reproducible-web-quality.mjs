@@ -13,7 +13,7 @@ for (const [name, expected] of Object.entries({
   'quality:web-repro': 'node scripts/run-web-quality.mjs',
   'quality:web-report:verify': 'node scripts/verify-web-quality-report.mjs',
   'quality:reproducible-web': 'node scripts/check-reproducible-web-quality.mjs',
-  'test:web-critical': 'vitest run src/tts/browserSpeech.test.ts src/components/navigation/LinkedPlayerDock.test.tsx src/hooks/useExitConfirmation.test.tsx src/browser/inAppBrowser.test.ts src/components/workspace/DesktopVoiceDrawer.test.tsx src/components/workspace/TimelineEditor.test.tsx src/hooks/useTimelineGeneration.test.ts src/quality/fieldDeviceCertification.test.ts --fileParallelism=false',
+  'test:web-critical': 'vitest run src/tts/browserSpeech.test.ts src/components/navigation/LinkedPlayerDock.test.tsx src/hooks/useExitConfirmation.test.tsx src/browser/inAppBrowser.test.ts src/components/workspace/DesktopVoiceDrawer.test.tsx src/components/workspace/TimelineEditor.test.tsx src/hooks/useTimelineGeneration.test.ts src/quality/fieldDeviceCertification.test.ts src/quality/neuralVoiceReference.test.ts --fileParallelism=false',
 })) {
   if (packageJson.scripts?.[name] !== expected) failures.push(`package.json ${name} 계약 불일치`)
 }

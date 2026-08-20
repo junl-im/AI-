@@ -53,6 +53,14 @@ class VoiceHumanReviewRecord(BaseModel):
     notes: str = ""
 
 
+class VoiceNeuralPreviewRecord(BaseModel):
+    engine_id: str = "cosyvoice3"
+    model_id: str = ""
+    model_fingerprint: str = ""
+    reference_fingerprint: str = ""
+    notes: str = ""
+
+
 class VoiceApprovalSignatureRecord(BaseModel):
     mode: ApprovalSignatureMode = "unsigned"
     key_id: str = ""
@@ -62,7 +70,7 @@ class VoiceApprovalSignatureRecord(BaseModel):
 
 
 class VoicePresetManifest(BaseModel):
-    schema_version: Literal[1, 2, 3] = 2
+    schema_version: Literal[1, 2, 3, 4] = 2
     voice_id: str = Field(min_length=1, max_length=100)
     display_name: str = Field(min_length=1, max_length=100)
     declared_gender: VoiceGender
@@ -71,4 +79,5 @@ class VoicePresetManifest(BaseModel):
     rights: VoiceRightsRecord = Field(default_factory=VoiceRightsRecord)
     integrity: VoiceIntegrityRecord = Field(default_factory=VoiceIntegrityRecord)
     human_review: VoiceHumanReviewRecord = Field(default_factory=VoiceHumanReviewRecord)
+    neural_preview: VoiceNeuralPreviewRecord = Field(default_factory=VoiceNeuralPreviewRecord)
     approval: VoiceApprovalSignatureRecord = Field(default_factory=VoiceApprovalSignatureRecord)

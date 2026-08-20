@@ -3,6 +3,11 @@ import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
 import { requestAutomaticApiReconnect } from '../api/httpClient'
 import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
 import { recordFieldDeviceEvent } from '../quality/fieldDeviceCertification'
+import {
+  getCachedNeuralPresetPreview,
+  NEURAL_PREVIEW_ENGINE_ID,
+  refreshNeuralPresetPreviewCatalog,
+} from '../quality/neuralVoiceReference'
 import { DesktopVoiceDrawer } from '../components/workspace/DesktopVoiceDrawer'
 import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader'
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
@@ -14,16 +19,12 @@ import { WorkspaceProjectRail } from '../components/workspace/WorkspaceProjectRa
 import { useDesktopStudioLayout } from '../hooks/useDesktopStudioLayout'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import { useMyVoiceProfiles } from '../hooks/useMyVoiceProfiles'
-import {
-  useTimelineGeneration,
-  type TimelineGenerationOptions,
-} from '../hooks/useTimelineGeneration'
+import { useTimelineGeneration, type TimelineGenerationOptions } from '../hooks/useTimelineGeneration'
 import { useSelectiveSttRegeneration } from '../hooks/useSelectiveSttRegeneration'
 import { useWorkspaceSessionPersistence } from '../hooks/useWorkspaceSessionPersistence'
 import { saveProject } from '../projects/projectRepository'
 import { useAppStore } from '../store/useAppStore'
 import { getCurrentTrack, usePlayerStore } from '../store/usePlayerStore'
-import { buildAudioFilename } from '../tts/audioFile'
 import {
   BROWSER_SPEECH_ENGINE_ID,
   createBrowserSpeechPlayback,
@@ -31,7 +32,6 @@ import {
   isBrowserSpeechSupported,
 } from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
-import { createMockWave, getMockWaveDuration } from '../tts/mockWave'
 import { synthesizeSpeech } from '../tts/voiceApi'
 import { getVoicePreset, voicePresets } from '../tts/voicePresets'
 import { clampVoiceSettingsToNaturalRange } from '../tts/voiceRecommendation'
@@ -49,6 +49,7 @@ import {
   rememberSpeakerVoiceAssignments,
 } from '../workspace/speakerVoiceMemory'
 import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
+import { formatWorkspaceSavedLabel, generatedWorkspacePreview } from '../workspace/homeWorkspaceHelpers'
 import type { ComposerDirective, TimelineVoiceBlock, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
 import { synthesizeVoiceCloneProfile } from '../voiceclone/voiceCloneSynthesis'
@@ -71,56 +72,6 @@ const initialMessages: WorkspaceMessage[] = [
     text: '내용을 입력하면 문장별 대사 블록으로 나누고 순서대로 음성을 생성합니다.',
   },
 ]
-function generatedPreview(
-  result: Awaited<ReturnType<typeof synthesizeSpeech>>,
-  request: TtsSynthesisRequest,
-  voiceName: string,
-): GeneratedAudio {
-  if (result.audioUrl) {
-    return {
-      url: result.audioUrl,
-      filename: buildAudioFilename(request.text, voiceName, 'wav'),
-      source: 'api',
-      durationSeconds: result.estimatedDurationSeconds,
-      ...(isMyVoiceId(request.voiceId) ? {} : { rehydration: { kind: 'tts-final' as const, jobId: result.jobId } }),
-      result,
-    }
-  }
-  if (result.engineId === BROWSER_SPEECH_ENGINE_ID) {
-    return {
-      url: null,
-      filename: buildAudioFilename(request.text, voiceName, 'wav'),
-      source: 'browser-speech',
-      durationSeconds: result.estimatedDurationSeconds,
-      browserSpeech: createBrowserSpeechPlayback(request),
-      result,
-    }
-  }
-  const blob = createMockWave(request.text, request.voiceId)
-  return {
-    url: URL.createObjectURL(blob),
-    filename: buildAudioFilename(request.text, voiceName, 'wav'),
-    source: 'browser-demo',
-    durationSeconds: getMockWaveDuration(request.text),
-    revokeOnRemove: true,
-    result: {
-      ...result,
-      message: '샘플 미리듣기입니다. 실제 AI 음성이 아닙니다.',
-      fileSizeBytes: blob.size,
-    },
-  }
-}
-function formatSavedLabel(savedAt: string | null, hydrated: boolean, memoryOnly: boolean): string {
-  if (!hydrated) return '작업공간 불러오는 중'
-  if (!savedAt) return memoryOnly ? '이 탭에 임시 저장됨' : '자동 저장 준비됨'
-  const date = new Date(savedAt)
-  if (!Number.isFinite(date.getTime())) return '자동 저장됨'
-  const time = new Intl.DateTimeFormat('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
-  return `${time} ${memoryOnly ? '임시 저장됨' : '자동 저장됨'}`
-}
 export function HomePage() {
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const page = useAppStore((state) => state.page)
@@ -330,6 +281,13 @@ export function HomePage() {
   const generationRouteReady = selectedVoice.kind === 'my-voice'
     ? selectedVoice.ready && backendStatus !== 'offline'
     : engineAvailable
+
+  useEffect(() => {
+    if (backendStatus === 'offline') return undefined
+    const controller = new AbortController()
+    void refreshNeuralPresetPreviewCatalog(controller.signal).catch(() => undefined)
+    return () => controller.abort()
+  }, [backendStatus])
 
   useEffect(() => {
     if (selectedTimelineVoiceBlocks.length === 0) return
@@ -793,6 +751,17 @@ export function HomePage() {
     }
 
     const text = sampleText?.trim().slice(0, 600) || `안녕하세요. 소리온의 ${voice.name} 목소리입니다.`
+    const neuralPreview = voice.kind === 'preset'
+      ? getCachedNeuralPresetPreview(voice.id)
+      : null
+    const neuralPromoted = Boolean(neuralPreview?.ready && neuralPreview.engineId === NEURAL_PREVIEW_ENGINE_ID)
+    const presetPreviewEngineId = neuralPromoted
+      ? NEURAL_PREVIEW_ENGINE_ID
+      : selectedEngineId === BROWSER_SPEECH_ENGINE_ID
+        ? BROWSER_SPEECH_ENGINE_ID
+        : selectedEngineId === 'auto' && isBrowserSpeechSupported()
+          ? BROWSER_SPEECH_ENGINE_ID
+          : selectedEngineId
     try {
       const request: TtsSynthesisRequest = {
         text,
@@ -803,19 +772,19 @@ export function HomePage() {
         format: 'wav',
         engineId: voice.kind === 'my-voice'
           ? voice.profile?.engineId ?? 'cosyvoice3-worker'
-          : selectedEngineId,
+          : presetPreviewEngineId,
         normalizeText,
       }
       if (
         voice.kind === 'preset'
-        && selectedEngineId === BROWSER_SPEECH_ENGINE_ID
+        && presetPreviewEngineId === BROWSER_SPEECH_ENGINE_ID
         && startKakaoBrowserPreview(request, voice.id)
       ) {
         setPendingPreview(null)
         appendMessage({
           role: 'assistant',
-          badge: '모바일 바로 듣기',
-          text: `${voice.name} 목소리를 카카오톡 모바일 재생 경로로 바로 시작했습니다.`,
+          badge: '기기 음성',
+          text: `${voice.name}의 기기 내장 근사 음성을 카카오톡 모바일 재생 경로로 시작했습니다. 실제 neural 성우 음색과는 다를 수 있습니다.`,
         })
         return
       }
@@ -827,7 +796,7 @@ export function HomePage() {
           })
         : await synthesizeSpeech(request, createRandomId(), controller.signal)
       if (!result || previewRunIdRef.current !== runId || controller.signal.aborted) return
-      const audio = generatedPreview(result, request, voice.name)
+      const audio = generatedWorkspacePreview(result, request, voice.name)
       setPendingPreview(null)
       const previewTrackId = enqueueAndPlay(audio, `${voice.name} 프리뷰`)
       setActivePreview({ voiceId: voice.id, trackId: previewTrackId })
@@ -835,26 +804,63 @@ export function HomePage() {
         role: 'assistant',
         badge: voice.kind === 'my-voice'
           ? 'MY VOICE'
-          : audio.source === 'browser-speech'
-            ? '바로 듣기'
-            : audio.source === 'browser-demo'
-              ? '미리 듣기'
-              : audio.result.fallbackUsed
-                ? '자동 완성'
-                : '목소리 프리뷰',
+          : neuralPromoted && audio.result.engineId === NEURAL_PREVIEW_ENGINE_ID && !audio.result.fallbackUsed
+            ? 'NEURAL VOICE'
+            : audio.source === 'browser-speech'
+              ? '기기 음성'
+              : audio.source === 'browser-demo'
+                ? '미리 듣기'
+                : audio.result.fallbackUsed
+                  ? '자동 완성'
+                  : '목소리 프리뷰',
         text: voice.kind === 'my-voice'
           ? `${voice.name} 프로필로 실제 내 목소리 테스트 음성을 만들었습니다.`
-          : sampleText
-            ? `${voice.name} 설정으로 대본 첫 문장을 미리 들려드립니다.`
-            : audio.source === 'browser-speech'
-              ? `${voice.name} 설정으로 바로 재생했습니다.`
-              : audio.result.fallbackUsed
-                ? `${voice.name} 프리뷰를 자동으로 완성했습니다.`
-                : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
+          : neuralPromoted && audio.result.engineId === NEURAL_PREVIEW_ENGINE_ID && !audio.result.fallbackUsed
+            ? `${voice.name}의 검증된 neural reference로 생성한 미리듣기입니다. cache ${neuralPreview?.cacheKey?.slice(0, 12) ?? '-'}.`
+            : sampleText
+              ? `${voice.name} 설정으로 대본 첫 문장을 미리 들려드립니다.`
+              : audio.source === 'browser-speech'
+                ? `${voice.name}의 기기 내장 근사 음성을 재생했습니다. 실제 neural 성우 음색과는 다를 수 있습니다.`
+                : audio.result.fallbackUsed
+                  ? `${voice.name} 프리뷰를 자동으로 완성했습니다.`
+                  : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
       })
       setPreviewingId(null)
     } catch {
       if (previewRunIdRef.current !== runId || controller.signal.aborted) return
+      if (voice.kind === 'preset' && neuralPromoted && isBrowserSpeechSupported()) {
+        try {
+          const fallbackRequest: TtsSynthesisRequest = {
+            text,
+            voiceId: voice.id,
+            emotion: speechEmotion,
+            speed: normalizeVoiceSpeed(speechSpeed),
+            pitch: normalizeVoicePitch(speechPitch),
+            format: 'wav',
+            engineId: BROWSER_SPEECH_ENGINE_ID,
+            normalizeText,
+          }
+          const fallbackResult = await synthesizeSpeech(
+            fallbackRequest,
+            createRandomId(),
+            controller.signal,
+          )
+          if (previewRunIdRef.current !== runId || controller.signal.aborted) return
+          const fallbackAudio = generatedWorkspacePreview(fallbackResult, fallbackRequest, voice.name)
+          setPendingPreview(null)
+          const fallbackTrackId = enqueueAndPlay(fallbackAudio, `${voice.name} 기기 음성 fallback`)
+          setActivePreview({ voiceId: voice.id, trackId: fallbackTrackId })
+          setPreviewingId(null)
+          appendMessage({
+            role: 'assistant',
+            badge: '기기 음성',
+            text: `${voice.name} neural 미리듣기를 시작하지 못해 검증된 fallback 규칙으로 기기 내장 음성으로 전환했습니다.`,
+          })
+          return
+        } catch {
+          // Browser Speech fallback도 실패하면 기존 reconnect 경로가 상태를 복구합니다.
+        }
+      }
       if (voice.kind === 'my-voice') {
         setPendingPreview(null)
         setPreviewingId(null)
@@ -989,7 +995,7 @@ export function HomePage() {
     startNewWorkspace()
   }
   if (!workspaceEntered) return <LandingHome />
-  const savedLabel = formatSavedLabel(lastSavedAt, hydrated, storageMode === 'memory')
+  const savedLabel = formatWorkspaceSavedLabel(lastSavedAt, hydrated, storageMode === 'memory')
   return (
     <div className="soa-dubbing-workspace">
       <div className="soa-desktop-studio" style={desktopLayout.style}>

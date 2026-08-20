@@ -1,13 +1,14 @@
 # START HERE
 
-Current version: `0.11.29 · Certification Intake & Release Readiness`
+Current version: `0.11.30 · Neural Voice Reference Intake & Preview Promotion`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
-1-0. 0.11.29는 Quality Lab에서 CI / Kakao Android / Kakao iOS / Chromium desktop / Chromium mobile / MY VOICE를 6개 독립 슬롯으로 검증하는 Release Readiness 패치입니다.
-1-1. 여섯 증거가 모두 실제 READY일 때만 Overall CERTIFIED가 됩니다. synthetic fixture나 누락된 실기기/runtime 증거를 성공으로 승격하지 않습니다.
-1-2. Browser Speech는 `기기 음성` 근사 미리듣기이며 실제 neural AI 성우 음색과 동일하지 않습니다. 카카오 WebView가 음성을 막으면 direct user-gesture + 1.8초 watchdog + 외부 브라우저 안내가 복구 경로입니다.
-1-3. 이번 PATCH 기준은 `0.11.28 · Voice Naturalness & Preview Quality`입니다. GitHub가 아직 0.11.27 R2라면 0.11.28을 먼저 적용한 뒤 0.11.29를 적용합니다.
-1-4. `verify-release-readiness.mjs --require-certified`는 Web quality report, Android/iOS field JSON, desktop/mobile Chromium manifest, MY VOICE runtime JSON이 모두 유효할 때만 성공합니다.
+1-0. 0.11.30은 권리·동의·사람 검수·reference SHA·model fingerprint가 모두 확인된 preset만 neural 미리듣기로 승격하는 provenance 패치입니다.
+1-1. Quality Lab의 `성우 reference intake · 미리듣기 승격` 카드에서 5개 preset v4 템플릿을 내려받을 수 있지만 템플릿 자체는 pending이며 READY를 의미하지 않습니다.
+1-2. 실제 `{voiceId}.wav`와 manifest는 `SORION_COSYVOICE_PRESET_DIRECTORY`에 두고 raw WAV, 모델 파일, 동의/계약 문서는 Git/전달 ZIP에 넣지 않습니다.
+1-3. v1~v3 manifest는 기존 일반 생성 호환성을 유지하지만 neural preview default로 승격되지 않습니다. v4도 reference/model fingerprint와 기존 승인이 완전하지 않으면 `기기 음성`을 유지합니다.
+1-4. 카카오 모바일 fallback은 기존 direct user-gesture + 1.8초 watchdog + 외부 브라우저 안내를 유지합니다. WebView가 Speech Synthesis 자체를 막는 기기에서 강제 재생을 약속하지 않습니다.
+1-5. 이번 PATCH 기준은 `0.11.29 · Certification Intake & Release Readiness`입니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
 4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.

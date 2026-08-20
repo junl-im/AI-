@@ -270,7 +270,7 @@ class VoicePresetApprovalService:
         }
         approval_id = "apr-" + approval_primitives.manifest_digest(approval_seed)[:24]
         proposed = manifest.model_copy(deep=True)
-        proposed.schema_version = 3
+        proposed.schema_version = max(manifest.schema_version, 3)
         proposed.human_review = VoiceHumanReviewRecord(
             status="approved",
             reviewer=payload.reviewer.strip(),
@@ -472,7 +472,7 @@ class VoicePresetApprovalService:
         if signed_at.tzinfo is None:
             signed_at = signed_at.replace(tzinfo=timezone.utc)
         proposed = manifest.model_copy(deep=True)
-        proposed.schema_version = 3
+        proposed.schema_version = max(manifest.schema_version, 3)
         proposed.approval = VoiceApprovalSignatureRecord(
             mode="hmac-sha256",
             key_id=self.trust_store.active_key_id,

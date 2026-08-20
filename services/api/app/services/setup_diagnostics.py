@@ -1,3 +1,4 @@
+import hashlib
 import os
 import shutil
 import sys
@@ -64,6 +65,8 @@ def _voice_preset_check(
                 audio_usable=False,
                 manifest_status="missing",
                 manifest_valid=False,
+                neural_preview_ready=False,
+                preview_cache_key=None,
                 issues=["프리셋 폴더가 연결되지 않았습니다."],
             )
             for profile in profiles
@@ -119,6 +122,33 @@ def _voice_preset_check(
         else:
             status = "warning"
         usable = bool(audio.usable and evidence.ready)
+        model_fingerprint_ready = bool(
+            evidence.model_fingerprint
+            and len(evidence.model_fingerprint) == 64
+            and all(char in "0123456789abcdef" for char in evidence.model_fingerprint)
+        )
+        reference_fingerprint_ready = bool(
+            evidence.actual_sha256
+            and evidence.reference_fingerprint == evidence.actual_sha256
+        )
+        neural_preview_ready = bool(
+            usable
+            and (evidence.schema_version or 0) >= 4
+            and evidence.neural_preview_engine_id == "cosyvoice3"
+            and model_fingerprint_ready
+            and reference_fingerprint_ready
+        )
+        preview_cache_key = None
+        if neural_preview_ready:
+            preview_cache_key = hashlib.sha256(
+                ":".join([
+                    profile.id,
+                    evidence.actual_sha256 or "",
+                    evidence.model_fingerprint or "",
+                    evidence.approval_id or "",
+                    evidence.signed_payload_sha256 or "",
+                ]).encode("utf-8")
+            ).hexdigest()
         issues = [*audio.issues, *evidence.issues]
         if audio.usable and not evidence.ready and not issues:
             issues.append("WAV는 사용 가능하지만 증거 manifest 인증이 완료되지 않았습니다.")
@@ -148,6 +178,12 @@ def _voice_preset_check(
             signing_key_id=evidence.signing_key_id,
             signature_status=evidence.signature_status,
             signed_payload_sha256=evidence.signed_payload_sha256,
+            neural_preview_engine_id=evidence.neural_preview_engine_id,
+            model_id=evidence.model_id,
+            model_fingerprint=evidence.model_fingerprint,
+            reference_fingerprint=evidence.reference_fingerprint,
+            neural_preview_ready=neural_preview_ready,
+            preview_cache_key=preview_cache_key,
             consent_expires_at=(
                 evidence.consent_expires_at.isoformat()
                 if evidence.consent_expires_at

@@ -37,6 +37,12 @@ export interface VoicePresetDiagnostic {
   signingKeyId: string | null
   signatureStatus: string
   signedPayloadSha256: string | null
+  neuralPreviewEngineId: string | null
+  modelId: string | null
+  modelFingerprint: string | null
+  referenceFingerprint: string | null
+  neuralPreviewReady: boolean
+  previewCacheKey: string | null
   consentExpiresAt: string | null
   rightsExpiresAt: string | null
   consentDaysRemaining: number | null
