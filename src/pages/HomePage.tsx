@@ -33,6 +33,7 @@ import {
 } from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
 import { synthesizeSpeech } from '../tts/voiceApi'
+import { synthesizeNeuralPreview } from '../tts/neuralPreviewApi'
 import { getVoicePreset, voicePresets } from '../tts/voicePresets'
 import { clampVoiceSettingsToNaturalRange } from '../tts/voiceRecommendation'
 import { createRandomId } from '../utils/randomId'
@@ -671,7 +672,6 @@ export function HomePage() {
     }
     await generateLongform(pending)
   }
-
   async function resumeLongformGeneration() {
     if (!resumeGeneration || busy) return
     if (!generationRouteReady) {
@@ -749,7 +749,6 @@ export function HomePage() {
       requestAutomaticApiReconnect()
       return
     }
-
     const text = sampleText?.trim().slice(0, 600) || `안녕하세요. 소리온의 ${voice.name} 목소리입니다.`
     const neuralPreview = voice.kind === 'preset'
       ? getCachedNeuralPresetPreview(voice.id)
@@ -794,7 +793,9 @@ export function HomePage() {
             text,
             signal: controller.signal,
           })
-        : await synthesizeSpeech(request, createRandomId(), controller.signal)
+        : neuralPromoted && neuralPreview?.cacheKey
+          ? await synthesizeNeuralPreview(request, neuralPreview.cacheKey, controller.signal)
+          : await synthesizeSpeech(request, createRandomId(), controller.signal)
       if (!result || previewRunIdRef.current !== runId || controller.signal.aborted) return
       const audio = generatedWorkspacePreview(result, request, voice.name)
       setPendingPreview(null)
@@ -816,7 +817,7 @@ export function HomePage() {
         text: voice.kind === 'my-voice'
           ? `${voice.name} 프로필로 실제 내 목소리 테스트 음성을 만들었습니다.`
           : neuralPromoted && audio.result.engineId === NEURAL_PREVIEW_ENGINE_ID && !audio.result.fallbackUsed
-            ? `${voice.name}의 검증된 neural reference로 생성한 미리듣기입니다. cache ${neuralPreview?.cacheKey?.slice(0, 12) ?? '-'}.`
+            ? `${voice.name}의 runtime 인증 neural 미리듣기입니다. ${audio.result.neuralPreview?.cacheHit ? '공유 cache 재사용' : '새 cache 생성'} · audio ${audio.result.neuralPreview?.audioSha256.slice(0, 12) ?? '-'}.`
             : sampleText
               ? `${voice.name} 설정으로 대본 첫 문장을 미리 들려드립니다.`
               : audio.source === 'browser-speech'
@@ -917,14 +918,12 @@ export function HomePage() {
     }
     void previewVoice(nextVoiceId, undefined, true)
   }
-
   function changeSpeakerAssignment(speaker: string, nextVoiceId: string) {
     setSpeakerAssignments((current) => current.map((item) => (
       item.speaker === speaker ? { ...item, voiceId: nextVoiceId } : item
     )))
     setSpeakerAssignmentsConfirmed(false)
   }
-
   function confirmSpeakerAssignments() {
     if (!multiSpeakerAnalysis.eligible || speakerAssignments.length !== multiSpeakerAnalysis.speakers.length) return
     setSpeakerAssignmentsConfirmed(true)

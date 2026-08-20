@@ -57,6 +57,31 @@ class TtsSynthesisResponse(BaseModel):
     fallback_used: bool = False
 
 
+class NeuralPreviewRequest(TtsSynthesisRequest):
+    expected_preview_cache_key: str = Field(min_length=64, max_length=64)
+
+
+class NeuralPreviewResponse(BaseModel):
+    voice_id: str
+    cache_id: str
+    cache_hit: bool
+    preview_cache_key: str
+    text_sha256: str
+    style_sha256: str
+    audio_sha256: str
+    audio_url: str
+    engine_id: str
+    model_fingerprint: str
+    reference_fingerprint: str
+    first_audio_ms: int | None = None
+    processing_ms: int | None = None
+    estimated_duration_seconds: float
+    file_size_bytes: int
+    generated_at: str
+    runtime_certified: bool = True
+    message: str
+
+
 class JobSegmentAudio(BaseModel):
     index: int = Field(ge=1)
     total_segments: int = Field(ge=1)

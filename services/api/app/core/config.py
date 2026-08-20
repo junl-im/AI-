@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     segment_url_signing_secret: str = ""
     max_segment_chars: int = 180
     audio_directory: str = ".sorion/audio"
+    neural_preview_cache_directory: str = ".sorion/neural-preview-cache"
+    neural_preview_cache_ttl_minutes: int = Field(default=10080, ge=30, le=43200)
     voice_clone_directory: str = ".sorion/voice-clones"
     voice_clone_ttl_days: int = 7
     voice_clone_max_file_bytes: int = 25 * 1024 * 1024
@@ -97,6 +99,10 @@ class Settings(BaseSettings):
     @property
     def audio_path(self) -> Path:
         return Path(self.audio_directory).expanduser().resolve()
+
+    @property
+    def neural_preview_cache_path(self) -> Path:
+        return Path(self.neural_preview_cache_directory).expanduser().resolve()
 
     @property
     def job_store_file(self) -> Path:

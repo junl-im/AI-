@@ -1,3 +1,29 @@
+## 0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache
+
+- preset v4가 READY여도 미리듣기 요청 시 서버가 현재 reference/model provenance를 다시 검사하고 Worker `model_digest`가 승인 `model_fingerprint`와 같아야 neural runtime을 허용합니다.
+- `POST /api/v1/tts/neural-preview`와 content-addressed shared cache를 추가했습니다. cache identity는 `previewCacheKey + normalized text SHA + style SHA`이고 PC/모바일의 같은 요청은 같은 WAV cache ID를 사용합니다.
+- cache WAV는 metadata `audio_sha256`을 다시 계산해 변조된 파일을 hit로 인정하지 않으며 explicit `cosyvoice3` 단일 경로만 저장합니다.
+- Home preset preview는 neural READY에서 새 전용 endpoint를 사용하고 cache/runtime 검증이 실패하면 기존 Browser Speech 기기 음성 fallback으로 복구합니다.
+- 실제 audio element의 `playing`/`ended`를 관찰해 `neural-voice-runtime-certification/1` evidence를 기록합니다. API 성공만으로 playback complete를 만들지 않습니다.
+- Quality Lab에 PC/mobile runtime evidence를 병합하는 카드를 추가하고 cache/audio/model/reference identity가 모두 같은 경우에만 성우별 `SHARED READY`를 표시합니다.
+- `verify-neural-voice-runtime-certification.mjs --require-shared`는 5명 모두 desktop/mobile playback completed + 동일 source SHA를 요구합니다. raw 대본/URL/User-Agent/기기명/reference 경로는 evidence에서 제외합니다.
+- 실제 rights-cleared reference/model은 저장소에 없으므로 실제 neural 5/5 SHARED READY와 음질 성공은 아직 **미수집/PENDING**입니다.
+
+### 검증
+
+- Product version sync: **0.11.32 PASS**
+- Neural runtime/shared cache static contract: **PASS**
+- Neural runtime verifier 5/5 shared valid-format fixture: **PASS · verifier logic validation only**
+- Targeted cache/setup/CosyVoice API tests: **19/19 PASS**
+- Neural runtime route unit tests: **2/2 PASS**
+- API full pytest: **232/232 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- All TS/TSX dependency-free syntax: **261/261 PASS**
+- Repository preflight: **55/55 PASS**
+- Actual rights-cleared neural runtime / PC-mobile shared playback: **미수집 · 성공으로 표시하지 않음**
+- Dependency-based ESLint/Vitest/typecheck/build/Chromium: **GitHub Actions final gate**
+
 ## 0.11.31 · Studio Entry & Voice Character Overhaul
 
 - Landing → Studio 최초 진입은 `#text-to-speech-studio`를 sticky compact header 아래로 정렬해 사용자가 곧바로 `텍스트를 음성으로`부터 시작합니다.

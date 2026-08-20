@@ -377,3 +377,14 @@ def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> 
         voice_selection_diagnostics=_voice_selection_diagnostics(engines),
         steps=steps,
     )
+
+
+def inspect_voice_preset_diagnostics(settings: Settings) -> list[VoicePresetDiagnostic]:
+    """Return current preset diagnostics without exposing raw reference assets."""
+    _, _, diagnostics = _voice_preset_check(
+        settings.cosyvoice_preset_path,
+        settings.voice_review_signing_secret,
+        settings.voice_review_signing_key_id,
+        settings.voice_review_trusted_key_map,
+    )
+    return diagnostics

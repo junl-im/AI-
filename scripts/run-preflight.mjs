@@ -58,6 +58,7 @@ const checks = [
   ['voice presets', 'check-voice-preset-contracts.mjs'],
   ['voice preset evidence', 'check-voice-preset-evidence.mjs'],
   ['neural voice reference / preview promotion', 'check-neural-voice-reference-contracts.mjs'],
+  ['neural voice runtime / shared preview cache', 'check-neural-voice-runtime-cache.mjs'],
   ['voice review sync / telemetry', 'check-voice-review-sync.mjs'],
   ['signed review approval / benchmark dashboard', 'check-signed-review-benchmark.mjs'],
   ['voice review operator gate / CI unblock', 'check-voice-review-operator-gate.mjs'],

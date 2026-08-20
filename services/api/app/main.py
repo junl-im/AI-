@@ -20,6 +20,7 @@ from app.services.device_benchmark_store import DeviceBenchmarkStore
 from app.services.engine_orchestrator import EngineOrchestrator
 from app.services.evidence_intake_store import EvidenceIntakeStore
 from app.services.job_manager import JobManager
+from app.services.neural_preview_cache import NeuralPreviewCache
 from app.services.operator_baseline_store import OperatorBaselineStore
 from app.services.proxy_headers import client_address
 from app.services.quality_evidence_store import QualityEvidenceStore
@@ -58,6 +59,11 @@ async def lifespan(app: FastAPI):
     store = AudioStore(settings.audio_path, settings.audio_ttl_minutes)
     store.cleanup_expired()
     app.state.audio_store = store
+    app.state.neural_preview_cache = NeuralPreviewCache(
+        settings.neural_preview_cache_path,
+        settings.neural_preview_cache_ttl_minutes,
+    )
+    app.state.neural_preview_cache.cleanup_expired()
     app.state.segment_audio_signer = SegmentAudioSigner(
         settings.segment_url_signing_secret,
         settings.segment_url_ttl_seconds,
@@ -137,6 +143,7 @@ async def lifespan(app: FastAPI):
         settings.worker_signature_secret,
     )
     await cosyvoice_worker.probe()
+    app.state.cosyvoice_worker = cosyvoice_worker
     engine_registry.register_tts(
         CosyVoiceWorkerTtsEngine(
             store,

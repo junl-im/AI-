@@ -10,6 +10,10 @@ import {
   type SyntheticEvent,
 } from 'react'
 import { primaryNavigationItems } from '../../navigation/navigationItems'
+import {
+  recordNeuralVoicePlaybackCompleted,
+  recordNeuralVoicePlaybackStarted,
+} from '../../quality/neuralVoiceRuntimeCertification'
 import { useAppStore } from '../../store/useAppStore'
 import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
 import {
@@ -194,6 +198,9 @@ export function LinkedPlayerDock() {
   }
 
   function handleEnded() {
+    if (track?.audio.result.neuralPreview?.runtimeCertified) {
+      recordNeuralVoicePlaybackCompleted(track.audio.result)
+    }
     const element = ref.current
     if (progressiveActive && activeSegment) {
       const playedDuration = Number.isFinite(element?.duration) && (element?.duration ?? 0) > 0
@@ -642,6 +649,9 @@ export function LinkedPlayerDock() {
       }}
       onPlaying={() => {
         recordPlaybackMetric('playingMs')
+        if (track?.audio.result.neuralPreview?.runtimeCertified) {
+          recordNeuralVoicePlaybackStarted(track.audio.result)
+        }
         recordProgressiveSeam()
         playingRef.current = true
         setPlaying(true)

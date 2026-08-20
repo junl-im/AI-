@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.31 · Studio Entry & Voice Character Overhaul**
+Current baseline: **0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-20 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,20 @@ Current baseline: **0.11.31 · Studio Entry & Voice Character Overhaul**
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+
+## 2026-08-20 KST · 0.11.32 Neural Voice Runtime Certification & Shared Preview Cache
+1. **작업 일시(KST)**: 2026-08-20.
+2. **대상/기준 버전**: `0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache` / 로컬 전달 기준 `0.11.31 · Studio Entry & Voice Character Overhaul`. 작업 시작 시 GitHub `main` 최신 커밋은 `838f5adcaa37e42caea9f802c79814aadf3eafe9`(`0.11.30 R1`)이므로 0.11.31은 아직 Push되지 않았습니다. 이번 PATCH는 반드시 0.11.31 위에 적용합니다.
+3. **변경 내용**: verified preset preview를 일반 `/tts/synthesize`에서 분리해 `POST /api/v1/tts/neural-preview` runtime gate를 추가했습니다. 서버는 현재 v4 preset diagnostic과 클라이언트 expected preview cache key를 다시 비교하고 CosyVoice Worker를 force probe해 runtime `model_digest`가 승인 `model_fingerprint`와 같아야 explicit `cosyvoice3` 생성을 허용합니다. `previewCacheKey + normalized text SHA + style SHA` 기반 content-addressed `neural-preview-cache/1`을 추가하고 WAV SHA-256 변조 검사를 수행합니다. 같은 cache ID는 deterministic JobManager ID로 생성 조정을 받습니다. Web은 neural READY에서 전용 endpoint를 사용하고 실패 시 기존 Browser Speech fallback을 유지합니다. 실제 audio `playing`/`ended`를 `neural-voice-runtime-certification/1` observed evidence로 기록하고 Quality Lab에서 PC/mobile cache/audio/model/reference identity가 모두 같을 때만 `SHARED READY`로 표시합니다. CLI verifier와 JSON import/export를 추가했습니다.
+4. **변경 이유**: 0.11.30의 manifest READY는 등록 시점 provenance만 확인했으며 실제 요청 시 Worker에 올라온 모델이 같은지, PC와 모바일이 실제로 같은 neural WAV를 들었는지까지 증명하지 못했습니다. 미검증 모델 교체, stale cache, 서로 다른 device asset을 neural 성공으로 오인하지 않도록 runtime source identity와 실제 playback completion을 분리 인증하기 위해서입니다.
+5. **영향 범위**: API TTS neural preview endpoint, runtime Worker fingerprint cross-check, server neural preview cache/config, Home preset preview routing, player playback evidence, Quality Lab neural runtime card, CLI verifier, critical Web test/preflight 계약, 릴리스 문서입니다. 0.11.31 studio entry/persona/cadence, MY VOICE, Timeline recovery, Kakao Browser Speech watchdog/exit guard, 일반 TTS endpoint는 유지합니다.
+6. **변경·추가된 주요 파일**: `services/api/app/{api/routes/tts.py,schemas/tts.py,services/neural_preview_cache.py,services/setup_diagnostics.py,core/config.py,main.py}`, `services/api/tests/{test_neural_preview_cache.py,test_neural_preview_runtime.py,conftest.py}`, `src/tts/neuralPreviewApi.ts`, `src/quality/{neuralVoiceRuntimeCertification.ts,neuralVoiceRuntimeCertification.test.ts}`, `src/components/evaluation/NeuralVoiceRuntimeCertificationCard.tsx`, `src/components/navigation/LinkedPlayerDock.tsx`, `src/pages/{HomePage,QualityPage}.tsx`, `scripts/{check-neural-voice-runtime-cache.mjs,verify-neural-voice-runtime-certification.mjs,run-preflight.mjs}`, `docs/NEURAL_VOICE_RUNTIME_SHARED_CACHE.md` 및 version/release/patch 문서입니다.
+7. **검증 결과**: Product version sync **0.11.32 PASS**, neural runtime/shared cache static contract **PASS**, targeted cache/setup/CosyVoice API **19/19 PASS**, runtime model digest route tests **2/2 PASS**, verifier 5/5 shared valid-format fixture **PASS(검증기 로직 확인용이며 실제 runtime 증거 아님)**, 최종 Repository preflight **55/55 PASS**, API pytest **232/232 PASS**(기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, 전체 TS/TSX dependency-free syntax **261/261 PASS**. dependency 기반 ESLint/Vitest/semantic typecheck/Vite build/Chromium은 GitHub Actions final gate입니다.
+8. **알려진 제한과 주의사항**: 실제 rights-cleared v4 reference WAV/model은 저장소에 없으므로 실제 neural 5/5 SHARED READY, 혜린 등 실제 neural 음질, Kakao 실기기 HTTP WAV 성공을 주장하지 않습니다. Cache에는 생성 WAV가 저장되지만 reference WAV/원문 대본/audio URL/User-Agent/기기명은 evidence metadata에 저장하지 않습니다. 0.11.31이 GitHub에 아직 없으므로 0.11.32를 main 0.11.30 R1에 직접 덮어쓰면 안 됩니다.
+9. **생성 산출물**: `SoriON-AI-0.11.32-neural-voice-runtime-shared-preview-cache-full.zip`, `SoriON-AI-0.11.31-to-0.11.32-neural-voice-runtime-shared-preview-cache-patch.zip`, `SoriON-AI-0.11.32-neural-voice-runtime-shared-preview-cache-SHA256SUMS.txt`를 생성합니다.
+10. **다음 예상 업데이트**: `0.11.33 · Neural Voice Field Playback & Release Gate`에서 실제 rights-cleared asset이 준비된 preset부터 Android/iOS/desktop neural HTTP audio를 관찰하고 neural shared evidence를 Release Readiness gate에 연결합니다.
 
 
 ## 2026-08-20 KST · 0.11.31 Studio Entry & Voice Character Overhaul

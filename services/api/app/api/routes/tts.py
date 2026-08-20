@@ -4,7 +4,7 @@ import time
 from collections.abc import AsyncIterator
 from pathlib import Path
 from urllib.parse import urlparse
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, HTTPException, Query, Request, status
 from fastapi.responses import FileResponse, StreamingResponse
@@ -14,6 +14,8 @@ from app.schemas.tts import (
     JobCancelResponse,
     JobProgressResponse,
     JobSegmentAudio,
+    NeuralPreviewRequest,
+    NeuralPreviewResponse,
     TtsSynthesisRequest,
     TtsSynthesisResponse,
 )
@@ -29,6 +31,8 @@ from app.services.job_manager import (
 )
 from app.services.proxy_headers import effective_origin
 from app.services.segment_audio import SegmentAudioSigner
+from app.services.setup_diagnostics import inspect_voice_preset_diagnostics
+from app.services.text_normalizer import normalize_korean_text
 
 router = APIRouter()
 
@@ -203,6 +207,203 @@ async def synthesize(payload: TtsSynthesisRequest, request: Request) -> TtsSynth
         ) from error
 
     return _signed_final_result(request, result)
+
+
+def _neural_runtime_diagnostic(request: Request, voice_id: str):
+    settings = request.app.state.settings
+    return next(
+        (
+            item
+            for item in inspect_voice_preset_diagnostics(settings)
+            if item.voice_id == voice_id
+        ),
+        None,
+    )
+
+
+async def _require_neural_runtime_ready(
+    request: Request,
+    payload: NeuralPreviewRequest,
+):
+    diagnostic = _neural_runtime_diagnostic(request, payload.voice_id)
+    if (
+        diagnostic is None
+        or not diagnostic.neural_preview_ready
+        or not diagnostic.preview_cache_key
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "SOA-4030: 이 성우는 검증된 neural preview reference/model이 "
+                "아직 준비되지 않았습니다."
+            ),
+        )
+    if diagnostic.preview_cache_key != payload.expected_preview_cache_key:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "SOA-4031: neural preview provenance가 변경되었습니다. "
+                "상태를 새로고침해 주세요."
+            ),
+        )
+    worker = request.app.state.cosyvoice_worker
+    ready = await worker.probe(force=True)
+    snapshot = worker.probe_snapshot()
+    runtime = snapshot.get("diagnostics") if isinstance(snapshot, dict) else None
+    runtime = runtime if isinstance(runtime, dict) else {}
+    runtime_digest = str(runtime.get("model_digest") or "").lower()
+    expected_digest = str(diagnostic.model_fingerprint or "").lower()
+    if not ready or not runtime_digest or runtime_digest != expected_digest:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "SOA-4032: Worker runtime model fingerprint가 승인 manifest와 "
+                "일치하지 않습니다."
+            ),
+        )
+    return diagnostic
+
+
+def _neural_preview_response(
+    request: Request,
+    entry,
+    *,
+    cache_hit: bool,
+) -> NeuralPreviewResponse:
+    return NeuralPreviewResponse(
+        voice_id=entry.voice_id,
+        cache_id=entry.cache_id,
+        cache_hit=cache_hit,
+        preview_cache_key=entry.preview_cache_key,
+        text_sha256=entry.text_sha256,
+        style_sha256=entry.style_sha256,
+        audio_sha256=entry.audio_sha256,
+        audio_url=_absolute_audio_url(
+            request,
+            f"/api/v1/tts/neural-preview/cache/{entry.cache_id}.wav",
+        ) or "",
+        engine_id=entry.engine_id,
+        model_fingerprint=entry.model_fingerprint,
+        reference_fingerprint=entry.reference_fingerprint,
+        first_audio_ms=entry.first_audio_ms,
+        processing_ms=entry.processing_ms,
+        estimated_duration_seconds=entry.duration_seconds,
+        file_size_bytes=entry.file_size_bytes,
+        generated_at=entry.created_at,
+        runtime_certified=True,
+        message=(
+            "동일 provenance·대본의 검증된 neural preview cache를 재사용했습니다."
+            if cache_hit
+            else (
+                "runtime model/reference fingerprint를 교차 검증하고 "
+                "neural preview cache를 생성했습니다."
+            )
+        ),
+    )
+
+
+@router.post("/neural-preview", response_model=NeuralPreviewResponse)
+async def neural_preview(
+    payload: NeuralPreviewRequest,
+    request: Request,
+) -> NeuralPreviewResponse:
+    diagnostic = await _require_neural_runtime_ready(request, payload)
+    normalized_text = (
+        normalize_korean_text(payload.text).normalized
+        if payload.normalize_text
+        else payload.text.strip()
+    )
+    cache = request.app.state.neural_preview_cache
+    cache.cleanup_expired()
+    text_sha256 = cache.text_digest(normalized_text)
+    style_sha256 = cache.style_digest(
+        emotion=payload.emotion,
+        speed=payload.speed,
+        pitch=payload.pitch,
+    )
+    cache_id = cache.cache_id(
+        diagnostic.preview_cache_key,
+        text_sha256,
+        style_sha256,
+    )
+    cached = cache.get(cache_id)
+    if cached is not None:
+        return _neural_preview_response(request, cached, cache_hit=True)
+
+    job_id = UUID(cache_id[:32])
+    synthesis = TtsSynthesisRequest(
+        text=normalized_text,
+        voice_id=payload.voice_id,
+        emotion=payload.emotion,
+        speed=payload.speed,
+        pitch=payload.pitch,
+        output_format="wav",
+        engine_id="cosyvoice3",
+        normalize_text=False,
+        job_id=job_id,
+    )
+    try:
+        result = await request.app.state.job_manager.run(
+            str(job_id),
+            lambda: request.app.state.engine_orchestrator.synthesize(
+                synthesis,
+                lambda engine, engine_request: request.app.state.tts_pipeline.synthesize(
+                    engine,
+                    engine_request,
+                ),
+            ),
+            request_key=cache_id,
+        )
+    except (
+        EngineUnavailableError,
+        EngineExhaustedError,
+        EngineRequestUnsupportedError,
+        GenerationTimeoutError,
+        JobConflictError,
+        JobResultExpiredError,
+    ) as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"SOA-4033: neural preview 생성 엔진을 사용할 수 없습니다. {error}",
+        ) from error
+    if result.engine_id != "cosyvoice3" or result.fallback_used or not result.audio_url:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="SOA-4034: neural preview가 검증된 CosyVoice 단일 경로로 완료되지 않았습니다.",
+        )
+    source_name = Path(urlparse(result.audio_url).path).name
+    source_audio = request.app.state.audio_store.resolve(source_name)
+    if source_audio is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="SOA-4035: 생성된 neural preview WAV를 확인할 수 없습니다.",
+        )
+    entry = cache.put(
+        cache_id=cache_id,
+        source_audio=source_audio,
+        voice_id=payload.voice_id,
+        preview_cache_key=diagnostic.preview_cache_key,
+        text_sha256=text_sha256,
+        style_sha256=style_sha256,
+        engine_id=result.engine_id,
+        model_fingerprint=diagnostic.model_fingerprint or "",
+        reference_fingerprint=diagnostic.reference_fingerprint or "",
+        first_audio_ms=result.first_audio_ms,
+        processing_ms=result.processing_ms,
+        duration_seconds=result.estimated_duration_seconds,
+    )
+    return _neural_preview_response(request, entry, cache_hit=False)
+
+
+@router.get("/neural-preview/cache/{cache_id}.wav")
+async def neural_preview_audio(cache_id: str, request: Request) -> FileResponse:
+    path = request.app.state.neural_preview_cache.resolve_audio(cache_id)
+    if path is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SOA-4036: neural preview cache 음원을 찾지 못했습니다.",
+        )
+    return FileResponse(path, media_type="audio/wav", filename=f"{cache_id}.wav")
 
 
 @router.get("/jobs/{job_id}", response_model=JobProgressResponse)

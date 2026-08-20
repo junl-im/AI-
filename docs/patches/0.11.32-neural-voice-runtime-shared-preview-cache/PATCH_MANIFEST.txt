@@ -1,0 +1,53 @@
+# SoriON AI 0.11.31 -> 0.11.32 PATCH MANIFEST
+# Added: 13
+# Modified: 34
+# Deleted: 0
+# Total overlay files: 47
+
+A	docs/NEURAL_VOICE_RUNTIME_SHARED_CACHE.md
+A	docs/patches/0.11.32-neural-voice-runtime-shared-preview-cache/DELETE_LIST.txt
+A	docs/patches/0.11.32-neural-voice-runtime-shared-preview-cache/PATCH_MANIFEST.txt
+A	docs/patches/0.11.32-neural-voice-runtime-shared-preview-cache/PATCH_README.md
+A	scripts/check-neural-voice-runtime-cache.mjs
+A	scripts/verify-neural-voice-runtime-certification.mjs
+A	services/api/app/services/neural_preview_cache.py
+A	services/api/tests/test_neural_preview_cache.py
+A	services/api/tests/test_neural_preview_runtime.py
+A	src/components/evaluation/NeuralVoiceRuntimeCertificationCard.tsx
+A	src/quality/neuralVoiceRuntimeCertification.test.ts
+A	src/quality/neuralVoiceRuntimeCertification.ts
+A	src/tts/neuralPreviewApi.ts
+M	FOUNDATION_REPORT.md
+M	README.md
+M	START_HERE.md
+M	VERSION
+M	docs/CHANGELOG.md
+M	docs/HANDOVER.md
+M	docs/NEXT_UPDATE.md
+M	package-lock.json
+M	package.json
+M	scripts/check-reproducible-web-quality.mjs
+M	scripts/run-preflight.mjs
+M	services/api/app/api/routes/tts.py
+M	services/api/app/core/config.py
+M	services/api/app/main.py
+M	services/api/app/schemas/tts.py
+M	services/api/app/services/setup_diagnostics.py
+M	services/api/pyproject.toml
+M	services/api/tests/conftest.py
+M	services/api/tests/test_ai_director.py
+M	services/api/tests/test_connectivity.py
+M	services/api/tests/test_engine_catalog.py
+M	services/api/tests/test_engine_strategy.py
+M	services/api/tests/test_evidence.py
+M	services/api/tests/test_health.py
+M	services/api/tests/test_quality.py
+M	services/api/tests/test_setup.py
+M	services/api/uv.lock
+M	services/worker/pyproject.toml
+M	services/worker/uv.lock
+M	src/ai/contracts.ts
+M	src/components/navigation/LinkedPlayerDock.tsx
+M	src/pages/HomePage.tsx
+M	src/pages/QualityPage.tsx
+M	src/update/buildInfo.ts

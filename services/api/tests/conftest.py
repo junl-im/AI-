@@ -11,6 +11,10 @@ def client(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("SORION_JOB_STORE_PATH", str(app_path / "jobs.sqlite3"))
     monkeypatch.setenv("SORION_AUDIO_DIRECTORY", str(app_path / "audio"))
     monkeypatch.setenv(
+        "SORION_NEURAL_PREVIEW_CACHE_DIRECTORY",
+        str(app_path / "neural-preview-cache"),
+    )
+    monkeypatch.setenv(
         "SORION_VOICE_CLONE_DIRECTORY",
         str(app_path / "voice-clones"),
     )

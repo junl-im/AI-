@@ -29,6 +29,19 @@ export interface TtsSynthesisResult {
   requestedEngineId?: string | null
   attemptedEngineIds?: string[]
   fallbackUsed?: boolean
+  neuralPreview?: {
+    voiceId: string
+    cacheId: string
+    cacheHit: boolean
+    previewCacheKey: string
+    textSha256: string
+    styleSha256: string
+    audioSha256: string
+    modelFingerprint: string
+    referenceFingerprint: string
+    generatedAt: string
+    runtimeCertified: boolean
+  }
 }
 
 export interface EngineInfo {

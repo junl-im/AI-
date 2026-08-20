@@ -8,7 +8,10 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- Version: `0.11.31 · Studio Entry & Voice Character Overhaul`
+- Version: `0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache`
+- Neural runtime gate: v4 preset READY를 그대로 신뢰하지 않고 preview 요청마다 현재 reference provenance와 Worker runtime `model_digest`를 승인 model fingerprint와 다시 비교합니다.
+- Shared neural preview cache: `previewCacheKey + normalized text SHA + style SHA`로 content-addressed WAV를 만들고 PC/모바일이 동일 요청에서 같은 cache/audio SHA를 재사용합니다.
+- Runtime playback evidence: 실제 `<audio>` playing/ended를 관찰한 `observed-runtime`만 저장하며 Quality Lab에서 PC/mobile cache/audio/model/reference identity가 모두 같을 때만 `SHARED READY`로 표시합니다.
 - Studio entry: Landing의 `장문 음성 스튜디오 시작`은 workspace 진입 뒤 `텍스트를 음성으로`를 sticky compact header 바로 아래로 자동 정렬합니다. 이전 scroll 위치를 그대로 끌고 들어가지 않습니다.
 - Landing visual: Masthead 오른쪽 Current Voice/Engine/CTA 기능 카드를 제거하고 cyan/violet SoriON Signature Visual로 교체했습니다. visual 내부에는 클릭 기능이 없습니다.
 - Voice character: 혜린 `따뜻한 대화 +6%`, 도윤 `또렷한 설명 +11%`, 소리 `편안한 장문 +4%`, 준호 `묵직한 다큐 +5%`, 민준 `빠른 숏폼 +14%` persona/cadence를 적용합니다.
