@@ -8,15 +8,6 @@ describe('BrandMasthead', () => {
     useAppStore.setState({
       page: 'home',
       workspaceEntered: false,
-      liveVoice: {
-        voiceId: 'sori-warm',
-        voiceName: '혜린',
-        voiceKind: 'preset',
-        engineId: 'cosyvoice3-worker',
-        engineName: 'CosyVoice 3',
-        readiness: 'ready',
-        detail: '음성 생성 준비가 끝났습니다.',
-      },
     })
   })
 
@@ -39,33 +30,14 @@ describe('BrandMasthead', () => {
     expect(introduction.getByText('생성부터 내 목소리와 편집까지 한 작업공간에서.')).toBeInTheDocument()
   })
 
-  it('현재 선택된 목소리와 엔진 준비 상태를 라이브 바에 보여준다', () => {
-    useAppStore.setState({
-      liveVoice: {
-        voiceId: 'myvoice:mine-1',
-        voiceName: '내 메인 보이스',
-        voiceKind: 'my-voice',
-        engineId: 'cosyvoice3-worker',
-        engineName: 'CosyVoice 3',
-        readiness: 'generating',
-        detail: '내 목소리로 생성 중입니다.',
-      },
-    })
+  it('우측 상단은 기능 없이 SoriON 시그니처 그래픽만 보여준다', () => {
     render(<BrandMasthead />)
 
-    expect(screen.getByLabelText('현재 목소리 내 메인 보이스, CosyVoice 3, LIVE')).toBeInTheDocument()
-    expect(screen.getByText('MY VOICE')).toBeInTheDocument()
-    expect(screen.getByText('내 메인 보이스')).toBeInTheDocument()
-    expect(screen.getByText('LIVE')).toBeInTheDocument()
-  })
-
-  it('라이브 바에서 텍스트 음성 작업공간으로 바로 들어간다', () => {
-    render(<BrandMasthead />)
-
-    fireEvent.click(screen.getByRole('button', { name: /텍스트를 음성으로/ }))
-
-    expect(useAppStore.getState().workspaceEntered).toBe(true)
-    expect(useAppStore.getState().page).toBe('home')
+    const visual = screen.getByLabelText('SoriON 음성 브랜드 비주얼')
+    expect(within(visual).getByText(/목소리에/)).toBeInTheDocument()
+    expect(within(visual).getByText(/감정을 입히다/)).toBeInTheDocument()
+    expect(within(visual).queryByRole('button')).not.toBeInTheDocument()
+    expect(within(visual).queryByText('CURRENT VOICE')).not.toBeInTheDocument()
   })
 
   it('브랜드 영역을 누르면 첫 페이지 상태를 유지한다', () => {

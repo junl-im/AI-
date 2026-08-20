@@ -10,6 +10,7 @@ import {
   estimateBrowserSpeechDuration,
   getBrowserSpeechEngine,
   isBrowserSpeechSupported,
+  prepareBrowserSpeechText,
   selectBrowserSpeechVoice,
 } from './browserSpeech'
 
@@ -110,7 +111,7 @@ describe('browserSpeech', () => {
     })
     expect(result.estimatedDurationSeconds).toBeGreaterThan(0)
     expect(playback).toMatchObject({ text: request.text, lang: 'ko-KR', voiceId: 'sori-warm' })
-    expect(playback.rate).toBeCloseTo(request.speed, 5)
+    expect(playback.rate).toBeCloseTo(request.speed * 1.06, 5)
     expect(playback.pitch).toBeGreaterThan(1)
     expect(playback.pitch).toBeLessThan(1.1)
   })
@@ -139,16 +140,28 @@ describe('browserSpeech', () => {
 
     expect(warm).toMatchObject({
       voiceId: 'sori-warm',
-      presetPitchOffset: 0.5,
-      effectivePitchSemitones: 0.5,
-      policy: 'naturalized-system',
+      presetPitchOffset: 0.35,
+      effectivePitchSemitones: 0.35,
+      cadence: 'conversation',
+      personaLabel: '따뜻한 대화',
+      policy: 'characterized-korean-system',
     })
     expect(warm.webSpeechPitch).toBeGreaterThan(1)
     expect(warm.webSpeechPitch).toBeLessThan(1.04)
     expect(deep.webSpeechPitch).toBeGreaterThan(0.94)
     expect(deep.webSpeechPitch).toBeLessThan(1)
-    expect(high.webSpeechPitch).toBe(1.12)
-    expect(low.webSpeechPitch).toBe(0.9)
+    expect(high.webSpeechPitch).toBe(1.08)
+    expect(low.webSpeechPitch).toBe(0.92)
+  })
+
+  it('성우 cadence에 따라 줄바꿈과 긴 말줄임 쉼을 다르게 정리한다', () => {
+    const source = '첫 문장입니다…\n다음 문장을 이어갑니다'
+
+    expect(prepareBrowserSpeechText(source, 'sori-warm')).toContain('첫 문장입니다… 다음 문장을')
+    expect(prepareBrowserSpeechText(source, 'on-clear')).toContain('첫 문장입니다. 다음 문장을')
+    expect(prepareBrowserSpeechText(source, 'min-energetic')).toContain('첫 문장입니다, 다음 문장을')
+    expect(createBrowserSpeechPlayback({ ...request, text: source, voiceId: 'min-energetic' }))
+      .toMatchObject({ cadence: 'shortform', personaLabel: '빠른 숏폼' })
   })
 
   it('프리셋마다 브라우저 음성과 운율을 다르게 적용한다', () => {

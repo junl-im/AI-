@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.11.31 · Studio Entry & Voice Character Overhaul
+
+- `장문 음성 스튜디오 시작`은 workspace만 여는 대신 `#text-to-speech-studio`를 sticky compact header 바로 아래로 정렬해 `텍스트를 음성으로`가 첫 작업 위치가 됩니다. 렌더 지연을 고려해 최대 8 frame까지 anchor를 재탐색하며 작업 중 임의 scroll reset은 하지 않습니다.
+- 첫 화면 오른쪽의 `CURRENT VOICE / ENGINE / CTA` 기능 카드를 제거하고 SoriON Voice / Emotion / Rhythm을 표현하는 graphics-only Signature Visual로 교체했습니다. visual 내부에는 버튼이 없고 reduced-motion 환경에서는 waveform animation을 중지합니다.
+- 혜린/도윤/소리/준호/민준에 서로 다른 persona, cadence, pace, rhythm tag를 추가하고 기본 pace를 `+6% / +11% / +4% / +5% / +14%`로 높였습니다. `차분함·저음 = 느리게`라는 기존 보정을 제거합니다.
+- Browser Speech는 whitespace/line/ellipsis cadence를 성우별로 정리하고 사용자 pitch 반영을 30%로 낮추며 Web Speech pitch를 `0.92~1.08`로 제한해 전자음성 변조를 더 줄였습니다.
+- Windows System TTS의 integer Rate 민감도를 x8에서 x16으로 높여 +4~6% 수준의 preset pace도 실제 명령에 반영되게 했습니다.
+- Desktop Voice Drawer와 Voice Picker는 persona summary, pace, rhythm micrograph, 잘 맞는 콘텐츠, 장점/주의를 표시해 재생 전에도 5개 성우 차이를 볼 수 있습니다.
+- 기존 0.11.30 verified neural preview promotion, Kakao watchdog/fallback, Timeline/MY VOICE 경계는 유지합니다.
+
+### 검증
+
+- Product version sync: **0.11.31 PASS**
+- Studio/Voice overhaul static contract: **PASS**
+- Voice preset contract: **PASS**
+- Mobile studio/reproducible Web static contracts: **PASS**
+- Changed TS/TSX dependency-free syntax: **17/17 PASS**
+- Targeted API preset/System TTS tests: **16/16 PASS**
+- Repository preflight: **54/54 PASS**
+- API pytest: **228/228 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- All TS/TSX dependency-free syntax: **257/257 PASS**
+- Dependency-based Web lint/Vitest/typecheck/build/Chromium: **GitHub Actions final gate**
+
 ## 0.11.30 R1 · Web Lint Type-Only Import Stabilization
 
 - GitHub `main` head `a6dcc7e6c9a8008f3e629b52b78380adabb855cd`의 Web quality가 `src/workspace/homeWorkspaceHelpers.ts` type-only import 오류로 실패한 것을 확인했습니다.

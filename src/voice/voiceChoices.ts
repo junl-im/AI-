@@ -1,7 +1,7 @@
 import { calculateVoiceSampleScore } from '../voiceclone/sampleQualityScore'
 import type { VoiceCloneProfile } from '../voiceclone/voiceCloneTypes'
 import { findMyVoiceProfile, isMyVoiceId, myVoiceInitial, toMyVoiceId } from '../voiceclone/voiceIdentity'
-import { getVoicePreset, voicePresets, type VoiceGender } from '../tts/voicePresets'
+import { getVoicePreset, voicePresets, type VoiceCadence, type VoiceGender } from '../tts/voicePresets'
 
 export interface VoiceChoice {
   id: string
@@ -17,6 +17,11 @@ export interface VoiceChoice {
   bestFor: string[]
   strengths: string[]
   tradeoffs: string[]
+  personaLabel: string
+  personaSummary: string
+  cadence: VoiceCadence | 'custom'
+  paceLabel: string
+  rhythmTags: string[]
 }
 
 function customChoice(profile: VoiceCloneProfile): VoiceChoice {
@@ -39,6 +44,11 @@ function customChoice(profile: VoiceCloneProfile): VoiceChoice {
     tradeoffs: profile.status === 'engine-ready'
       ? ['샘플 품질에 따라 결과 차이', '일반 프리셋보다 생성 시간이 길 수 있음']
       : ['엔진 준비가 필요함', '준비 전에는 생성할 수 없음'],
+    personaLabel: '내 목소리',
+    personaSummary: '등록한 샘플의 원래 음색과 말투를 우선합니다.',
+    cadence: 'custom',
+    paceLabel: '샘플 원본 페이스',
+    rhythmTags: ['원본 음색', '샘플 기반', '개인 보이스'],
   }
 }
 
@@ -58,6 +68,11 @@ function presetChoice(voiceId: string): VoiceChoice {
     bestFor: [...preset.bestFor],
     strengths: [...preset.strengths],
     tradeoffs: [...preset.tradeoffs],
+    personaLabel: preset.personaLabel,
+    personaSummary: preset.personaSummary,
+    cadence: preset.cadence,
+    paceLabel: preset.paceLabel,
+    rhythmTags: [...preset.rhythmTags],
   }
 }
 
@@ -95,6 +110,11 @@ export function resolveVoiceChoice(
       bestFor: ['내 목소리'],
       strengths: ['개인 음성'],
       tradeoffs: ['프로필을 다시 선택해 주세요.'],
+      personaLabel: '내 목소리',
+      personaSummary: '저장된 샘플 프로필을 다시 연결해 주세요.',
+      cadence: 'custom',
+      paceLabel: '프로필 확인 필요',
+      rhythmTags: ['프로필 없음'],
     }
   }
   return presetChoice(voiceId)

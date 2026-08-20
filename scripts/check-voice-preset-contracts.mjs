@@ -13,18 +13,18 @@ const frontend = await read('src/tts/voicePresets.ts')
 const backend = await read('services/api/app/services/voice_presets.py')
 const requiredIds = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
 const expectedPace = new Map([
-  ['sori-warm', { frontend: "rateMultiplier: 1.0,", backend: '        1.00,' }],
-  ['on-clear', { frontend: "rateMultiplier: 1.04,", backend: '        1.04,' }],
-  ['dam-calm', { frontend: "rateMultiplier: 0.98,", backend: '        0.98,' }],
-  ['jun-deep', { frontend: "rateMultiplier: 0.98,", backend: '        0.98,' }],
-  ['min-energetic', { frontend: "rateMultiplier: 1.08,", backend: '        1.08,' }],
+  ['sori-warm', { frontend: "rateMultiplier: 1.06,", backend: '        1.06,' }],
+  ['on-clear', { frontend: "rateMultiplier: 1.11,", backend: '        1.11,' }],
+  ['dam-calm', { frontend: "rateMultiplier: 1.04,", backend: '        1.04,' }],
+  ['jun-deep', { frontend: "rateMultiplier: 1.05,", backend: '        1.05,' }],
+  ['min-energetic', { frontend: "rateMultiplier: 1.14,", backend: '        1.14,' }],
 ])
 const expectedPitch = new Map([
-  ['sori-warm', { frontend: 'pitchOffset: 0.5,', backend: '        0.5,' }],
-  ['on-clear', { frontend: 'pitchOffset: -0.5,', backend: '        -0.5,' }],
-  ['dam-calm', { frontend: 'pitchOffset: 0,', backend: '        0.0,' }],
-  ['jun-deep', { frontend: 'pitchOffset: -1.0,', backend: '        -1.0,' }],
-  ['min-energetic', { frontend: 'pitchOffset: 0.25,', backend: '        0.25,' }],
+  ['sori-warm', { frontend: 'pitchOffset: 0.35,', backend: '        0.35,' }],
+  ['on-clear', { frontend: 'pitchOffset: -0.65,', backend: '        -0.65,' }],
+  ['dam-calm', { frontend: 'pitchOffset: -0.1,', backend: '        -0.1,' }],
+  ['jun-deep', { frontend: 'pitchOffset: -1.2,', backend: '        -1.2,' }],
+  ['min-energetic', { frontend: 'pitchOffset: 0.45,', backend: '        0.45,' }],
 ])
 for (const voiceId of requiredIds) {
   if (!frontend.includes(`id: '${voiceId}'`)) failures.push(`frontend preset 누락: ${voiceId}`)
@@ -54,6 +54,10 @@ for (const required of [
   'voiceVariantIndex',
   'requiresDedicatedReference',
   'requireVoicePreset',
+  'personaLabel',
+  'personaSummary',
+  'rhythmTags',
+  "export type VoiceCadence = 'conversation' | 'explainer' | 'narrative' | 'documentary' | 'shortform'",
 ]) {
   if (!frontend.includes(required)) failures.push(`src/tts/voicePresets.ts: ${required} 누락`)
 }
@@ -124,12 +128,15 @@ for (const required of [
   "selectionBasis: 'preferred-token' | 'variant-index' | 'compatible-cycle' | 'none'",
   'preset.voiceVariantIndex % compatible.length',
   'requireVoicePreset',
-  'BROWSER_USER_PITCH_SCALE = 0.4',
-  'BROWSER_PITCH_MIN = 0.9',
-  'BROWSER_PITCH_MAX = 1.12',
+  'BROWSER_USER_PITCH_SCALE = 0.3',
+  'BROWSER_PITCH_MIN = 0.92',
+  'BROWSER_PITCH_MAX = 1.08',
   'diagnoseBrowserSpeechProsody',
-  "policy: 'naturalized-system'",
+  "policy: 'characterized-korean-system'",
   '2 ** (effectivePitchSemitones / 12)',
+  'prepareBrowserSpeechText',
+  'preset.cadence',
+  'preset.personaLabel',
 ]) {
   if (!browserSpeech.includes(required)) failures.push(`browserSpeech.ts: ${required} 누락`)
 }
@@ -190,17 +197,17 @@ for (const required of [
 ]) {
   if (!browserTests.includes(required)) failures.push(`browserSpeech.test.ts: ${required} 누락`)
 }
-if (!browserTests.includes('expect(playback.rate).toBeCloseTo(request.speed, 5)')) {
-  failures.push('browserSpeech.test.ts: 혜린 1.00 pace가 요청 speed를 보존하는 계약 누락')
+if (!browserTests.includes('expect(playback.rate).toBeCloseTo(request.speed * 1.06, 5)')) {
+  failures.push('browserSpeech.test.ts: 혜린 +6% pace 계약 누락')
 }
 if (browserTests.includes('expect(playback.rate).toBeLessThan(request.speed)')) {
   failures.push('browserSpeech.test.ts: R1 이전 감속 기대값이 남아 있습니다.')
 }
 for (const required of [
-  "presetPitchOffset: 0.5",
-  "policy: 'naturalized-system'",
-  'expect(high.webSpeechPitch).toBe(1.12)',
-  'expect(low.webSpeechPitch).toBe(0.9)',
+  "presetPitchOffset: 0.35",
+  "policy: 'characterized-korean-system'",
+  'expect(high.webSpeechPitch).toBe(1.08)',
+  'expect(low.webSpeechPitch).toBe(0.92)',
 ]) {
   if (!browserTests.includes(required)) failures.push(`browserSpeech.test.ts: natural pitch 회귀 계약 누락: ${required}`)
 }

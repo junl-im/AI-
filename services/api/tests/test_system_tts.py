@@ -253,3 +253,46 @@ def test_system_adapter_refresh_redetects_newly_available_backend(monkeypatch):
     assert adapter.backend is not None
     assert adapter.backend.kind == "espeak"
     assert adapter.reason is None
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("voice_id", "expected_rate"),
+    [
+        ("sori-warm", "1"),
+        ("on-clear", "2"),
+        ("dam-calm", "1"),
+        ("jun-deep", "1"),
+        ("min-energetic", "2"),
+    ],
+)
+async def test_windows_preset_pace_is_observable_at_default_speed(
+    voice_id,
+    expected_rate,
+    tmp_path,
+    monkeypatch,
+):
+    adapter = object.__new__(SystemSpeechAdapter)
+    adapter.backend = type(
+        "Backend",
+        (),
+        {"kind": "windows", "executable": "powershell.exe", "voice": ""},
+    )()
+    captured = []
+
+    async def capture(command):
+        captured.append(command)
+
+    monkeypatch.setattr(adapter, "_run", capture)
+    await adapter._windows(
+        TtsSynthesisRequest(
+            text="한국어 성우 기본 페이스를 확인합니다.",
+            voice_id=voice_id,
+            speed=1.0,
+            job_id=uuid4(),
+        ),
+        tmp_path / f"{voice_id}.wav",
+    )
+
+    command = captured[0]
+    rate_index = command.index("-Rate")
+    assert command[rate_index + 1] == expected_rate

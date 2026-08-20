@@ -1,4 +1,5 @@
-import { useAppStore, type LiveVoiceReadiness } from '../../store/useAppStore'
+import type { CSSProperties } from 'react'
+import { useAppStore } from '../../store/useAppStore'
 import { currentBuildInfo } from '../../update/buildInfo'
 import { BrandIcon } from '../ui/BrandIcon'
 
@@ -8,20 +9,11 @@ const subtitles = [
   '생성부터 내 목소리와 편집까지 한 작업공간에서.',
 ]
 
-const readinessLabels: Record<LiveVoiceReadiness, string> = {
-  checking: 'CHECKING',
-  ready: 'READY',
-  limited: 'LIMITED',
-  offline: 'OFFLINE',
-  generating: 'LIVE',
-}
+const waveformBars = [18, 32, 48, 70, 42, 86, 54, 34, 66, 92, 58, 38, 74, 44, 28, 52]
 
 export function BrandMasthead() {
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
   const exitWorkspace = useAppStore((state) => state.exitWorkspace)
-  const liveVoice = useAppStore((state) => state.liveVoice)
-  const live = liveVoice.readiness === 'generating'
-  const ready = liveVoice.readiness === 'ready' || live
 
   return (
     <header className="soa-masthead" aria-label="곰같은여우 SoriON AI 소개">
@@ -62,40 +54,22 @@ export function BrandMasthead() {
             </div>
           </div>
 
-          <section
-            className={`soa-voice-console soa-voice-console--focused is-${liveVoice.readiness}`}
-            aria-label={`현재 목소리 ${liveVoice.voiceName}, ${liveVoice.engineName}, ${readinessLabels[liveVoice.readiness]}`}
-          >
-            <div className="soa-live-voice-glow" aria-hidden="true" />
-            <div className="soa-voice-console__focused-head">
-              <span className="soa-live-voice-signature"><i aria-hidden="true" /> CURRENT VOICE</span>
-              <span className="soa-live-dot" data-ready={ready ? 'true' : 'false'}>{readinessLabels[liveVoice.readiness]}</span>
+          <section className="soa-signature-visual" aria-label="SoriON 음성 브랜드 비주얼">
+            <div className="soa-signature-visual__aurora" aria-hidden="true" />
+            <div className="soa-signature-visual__copy">
+              <span>SORI ON · VOICE / EMOTION / RHYTHM</span>
+              <strong>목소리에<br />감정을 입히다.</strong>
+              <small>자연스러운 한국어 AI Voice를 위한 SoriON Signature.</small>
             </div>
-
-            <div className="soa-voice-console__focused-body">
-              <div className={`soa-live-voice-avatar ${liveVoice.voiceKind === 'my-voice' ? 'is-mine' : ''}`} aria-hidden="true">
-                <span className="soa-live-voice-avatar__ring" />
-                {liveVoice.voiceKind === 'my-voice'
-                  ? <strong>{liveVoice.voiceName.trim().slice(0, 1) || 'V'}</strong>
-                  : <BrandIcon className="soa-console-brand-icon" />}
+            <div className="soa-signature-visual__signal" aria-hidden="true">
+              <span className="soa-signature-orbit is-outer" />
+              <span className="soa-signature-orbit is-inner" />
+              <span className="soa-signature-core"><i /></span>
+              <div className="soa-signature-wave">
+                {waveformBars.map((height, index) => (
+                  <i key={`${height}-${index}`} style={{ '--signal-height': `${height}%` } as CSSProperties} />
+                ))}
               </div>
-
-              <div className="soa-voice-console__copy">
-                <span className="soa-live-voice-kind">{liveVoice.voiceKind === 'my-voice' ? 'MY VOICE' : 'SoriON VOICE'}</span>
-                <strong>{liveVoice.voiceName}</strong>
-                <span>{liveVoice.detail}</span>
-              </div>
-
-              <div className="soa-voice-console__engine-compact">
-                <span>ENGINE</span>
-                <strong>{liveVoice.engineName}</strong>
-                <small>{liveVoice.engineId ?? 'auto routing'}</small>
-              </div>
-
-              <button type="button" className="soa-live-voice-open" onClick={() => enterWorkspace('home')}>
-                <span>텍스트를 음성으로</span>
-                <b aria-hidden="true">→</b>
-              </button>
             </div>
           </section>
         </div>

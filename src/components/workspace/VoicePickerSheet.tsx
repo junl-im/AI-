@@ -5,6 +5,7 @@ import { recommendVoiceForScript } from '../../tts/voiceRecommendation'
 import { voiceGenderLabels, voicePresets, type VoiceGender } from '../../tts/voicePresets'
 import type { VoiceChoice } from '../../voice/voiceChoices'
 import { VoicePreviewButton } from '../voice/VoicePreviewButton'
+import { VoiceRhythmSignature } from './VoiceRhythmSignature'
 
 interface VoicePickerSheetProps {
   open: boolean
@@ -120,7 +121,22 @@ export function VoicePickerSheet({
               <div key={voice.id} className={`${selected ? 'is-selected' : ''} ${recommended ? 'is-recommended' : ''}`.trim()}>
                 <button ref={(element) => { choiceRefs.current[index] = element }} type="button" role="radio" aria-checked={selected} tabIndex={selected || (!hasSelectedPreset && index === 0) ? 0 : -1} className="soa-voice-sheet-choice" onKeyDown={(event) => handleChoiceKeyDown(event, index)} onClick={() => { onSelect(voice.id); onClose() }}>
                   <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
-                  <span><strong>{voice.name} · {voice.gender === 'custom' ? '내 목소리' : voiceGenderLabels[voice.gender]}{recommended ? <em>대본 추천</em> : null}</strong><small>{voice.description}</small><span className="soa-voice-fit">잘 맞음 · {voice.bestFor.join(' · ')}</span><span className="soa-voice-pro">장점 · {voice.strengths.join(' / ')}</span><span className="soa-voice-con">주의 · {voice.tradeoffs.join(' / ')}</span></span>
+                  <span>
+                    <strong>
+                      {voice.name} · {voice.gender === 'custom' ? '내 목소리' : voiceGenderLabels[voice.gender]}
+                      <b className="soa-voice-persona-chip">{voice.personaLabel}</b>
+                      {recommended ? <em>대본 추천</em> : null}
+                    </strong>
+                    <small>{voice.personaSummary}</small>
+                    <span className="soa-voice-fit is-character">
+                      <VoiceRhythmSignature cadence={voice.cadence} compact />
+                      {voice.paceLabel}
+                    </span>
+                    <span className="soa-voice-fit">잘 맞음 · {voice.bestFor.join(' · ')}</span>
+                    <span className="soa-voice-pro">장점 · {voice.strengths.join(' / ')}</span>
+                    <span className="soa-voice-pro is-rhythm">리듬 · {voice.rhythmTags.join(' / ')}</span>
+                    <span className="soa-voice-con">주의 · {voice.tradeoffs.join(' / ')}</span>
+                  </span>
                 </button>
                 <VoicePreviewButton className="soa-voice-sheet-preview" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={previewAndSelect} />
                 <span className="soa-voice-sheet-check" aria-hidden="true">{selected ? '✓' : ''}</span>

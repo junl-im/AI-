@@ -62,7 +62,7 @@ async def test_melo_single_speaker_allows_neutral_preset_only(tmp_path):
     assert result.status == "completed"
     assert store.output_path(job_id).stat().st_size > 44
     assert model.speaker_id == 0
-    assert model.speed == pytest.approx(1.1 * 0.98)
+    assert model.speed == pytest.approx(1.1 * 1.04)
 
 
 @pytest.mark.asyncio

@@ -494,7 +494,7 @@ class SystemSpeechAdapter:
         text_path.write_text(request.text, encoding="utf-8")
         preset = get_voice_preset(request.voice_id)
         effective_speed = request.speed * preset.rate_multiplier
-        rate = max(-10, min(10, round((effective_speed - 1) * 8)))
+        rate = max(-10, min(10, round((effective_speed - 1) * 16)))
         try:
             try:
                 await self._run([

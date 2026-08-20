@@ -2,15 +2,16 @@ import type { EngineInfo, TtsSynthesisRequest, TtsSynthesisResult } from '../ai/
 import {
   requireVoicePreset,
   voicePresets,
+  type VoiceCadence,
   type VoiceGender,
   type VoicePreset,
 } from './voicePresets'
 
 export const BROWSER_SPEECH_ENGINE_ID = 'browser-speech'
 
-const BROWSER_USER_PITCH_SCALE = 0.4
-const BROWSER_PITCH_MIN = 0.9
-const BROWSER_PITCH_MAX = 1.12
+const BROWSER_USER_PITCH_SCALE = 0.3
+const BROWSER_PITCH_MIN = 0.92
+const BROWSER_PITCH_MAX = 1.08
 
 export interface BrowserSpeechProsodyDiagnostic {
   voiceId: string
@@ -21,7 +22,9 @@ export interface BrowserSpeechProsodyDiagnostic {
   presetPitchOffset: number
   effectivePitchSemitones: number
   webSpeechPitch: number
-  policy: 'naturalized-system'
+  cadence: VoiceCadence
+  personaLabel: string
+  policy: 'characterized-korean-system'
 }
 
 export interface BrowserSpeechPlayback {
@@ -31,6 +34,8 @@ export interface BrowserSpeechPlayback {
   pitch: number
   voiceId: string
   expectedGender?: VoiceGender
+  cadence?: VoiceCadence
+  personaLabel?: string
 }
 
 export interface BrowserVoiceSelectionDiagnostic {
@@ -85,6 +90,50 @@ function koreanTextUnits(text: string): number {
   ), 0)
 }
 
+function cleanSpeechWhitespace(text: string): string {
+  return text
+    .normalize('NFC')
+    .replace(/\r\n?/g, '\n')
+    .replace(/[\t ]+/g, ' ')
+    .replace(/ *\n */g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\.{3,}/g, '…')
+    .replace(/…{2,}/g, '…')
+    .trim()
+}
+
+function joinSpeechLines(text: string, separator: ', ' | '. '): string {
+  return text
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, index, lines) => {
+      if (index === lines.length - 1 || /[.!?。！？…]$/.test(line)) return line
+      return `${line}${separator.trimEnd()}`
+    })
+    .join(' ')
+    .replace(/\s{2,}/g, ' ')
+}
+
+export function prepareBrowserSpeechText(text: string, voiceId: string): string {
+  const preset = requireVoicePreset(voiceId)
+  const normalized = cleanSpeechWhitespace(text)
+  if (!normalized) return normalized
+
+  switch (preset.cadence) {
+    case 'conversation':
+      return joinSpeechLines(normalized, ', ')
+    case 'explainer':
+      return joinSpeechLines(normalized.replace(/\s*…\s*/g, '. '), '. ')
+    case 'narrative':
+      return joinSpeechLines(normalized, '. ')
+    case 'documentary':
+      return joinSpeechLines(normalized, '. ')
+    case 'shortform':
+      return joinSpeechLines(normalized.replace(/\s*…\s*/g, ', '), ', ')
+  }
+}
+
 export function estimateBrowserSpeechDuration(text: string, rate = 1): number {
   const units = koreanTextUnits(text)
   return Math.max(0.9, units / (5.4 * Math.max(0.5, rate)))
@@ -111,7 +160,7 @@ export function getBrowserSpeechEngine(): EngineInfo | null {
     supportsPitch: true,
     supportsVoiceClone: false,
     ready: true,
-    reason: '기기에 설치된 한국어 음성을 쓰는 빠른 근사 미리듣기입니다. 자연스러움을 위해 pitch 변조를 제한하며 전용 neural 성우 음색과 동일하지 않습니다.',
+    reason: '기기에 설치된 한국어 음성을 쓰는 빠른 근사 미리듣기입니다. 성우별 pace·문장 리듬을 적용하고 pitch 변조는 제한하며 전용 neural 성우 음색과 동일하지 않습니다.',
     autoEligible: true,
     recommended: false,
     health: 'ready',
@@ -250,18 +299,16 @@ export function createBrowserSpeechResult(
       + '반대 성별 음성으로 자동 대체하지 않습니다. 전용 CosyVoice WAV를 준비하거나 운영체제에 맞는 한국어 음성을 설치해 주세요.',
     )
   }
+  const playback = createBrowserSpeechPlayback(request)
   return {
     jobId,
     status: 'completed',
     engineId: BROWSER_SPEECH_ENGINE_ID,
     engineMode: 'browser',
     audioUrl: null,
-    estimatedDurationSeconds: estimateBrowserSpeechDuration(
-      request.text,
-      createBrowserSpeechPlayback(request).rate,
-    ),
+    estimatedDurationSeconds: estimateBrowserSpeechDuration(playback.text, playback.rate),
     message: selected
-      ? `${preset.name} 프리셋과 성별이 맞는 기기 내장 한국어 음성(${selected.name})을 선택했습니다. pitch 변조를 보수적으로 제한한 시스템 근사 음성이며 전용 neural 성우와는 다릅니다.`
+      ? `${preset.name} · ${preset.personaLabel} 프로필로 기기 내장 한국어 음성(${selected.name})을 재생합니다. 성우별 pace·문장 리듬과 제한된 pitch를 적용한 근사 음성이며 전용 neural 성우와는 다릅니다.`
       : '브라우저 음성 목록을 불러오는 중입니다. 재생 시 프리셋 성별을 다시 확인하며 반대 성별 음성은 사용하지 않습니다.',
     normalizedText: request.text,
     segmentCount: 1,
@@ -292,7 +339,9 @@ export function diagnoseBrowserSpeechProsody(
     presetPitchOffset: preset.pitchOffset,
     effectivePitchSemitones,
     webSpeechPitch,
-    policy: 'naturalized-system',
+    cadence: preset.cadence,
+    personaLabel: preset.personaLabel,
+    policy: 'characterized-korean-system',
   }
 }
 
@@ -300,12 +349,14 @@ export function createBrowserSpeechPlayback(request: TtsSynthesisRequest): Brows
   const preset = requireVoicePreset(request.voiceId)
   const prosody = diagnoseBrowserSpeechProsody(request)
   return {
-    text: request.text,
+    text: prepareBrowserSpeechText(request.text, preset.id),
     lang: 'ko-KR',
     rate: prosody.effectiveRate,
     pitch: prosody.webSpeechPitch,
     voiceId: preset.id,
     expectedGender: preset.gender,
+    cadence: preset.cadence,
+    personaLabel: preset.personaLabel,
   }
 }
 

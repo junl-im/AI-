@@ -1,0 +1,61 @@
+# SoriON AI 0.11.30 R1 -> 0.11.31 PATCH MANIFEST
+# Added: 9
+# Modified: 46
+# Deleted: 0
+# Total overlay files: 55
+
+A	docs/STUDIO_ENTRY_VOICE_CHARACTER_OVERHAUL.md
+A	docs/patches/0.11.31-studio-entry-voice-character-overhaul/DELETE_LIST.txt
+A	docs/patches/0.11.31-studio-entry-voice-character-overhaul/PATCH_MANIFEST.txt
+A	docs/patches/0.11.31-studio-entry-voice-character-overhaul/PATCH_README.md
+A	scripts/check-studio-voice-overhaul.mjs
+A	src/components/workspace/VoiceRhythmSignature.tsx
+A	src/navigation/studioEntryNavigation.test.ts
+A	src/navigation/studioEntryNavigation.ts
+A	src/styles/studio-voice-overhaul.css
+M	FOUNDATION_REPORT.md
+M	README.md
+M	START_HERE.md
+M	VERSION
+M	docs/CHANGELOG.md
+M	docs/HANDOVER.md
+M	docs/NEURAL_VOICE_REFERENCE_PREVIEW.md
+M	docs/NEXT_UPDATE.md
+M	package-lock.json
+M	package.json
+M	scripts/check-reproducible-web-quality.mjs
+M	scripts/check-voice-preset-contracts.mjs
+M	scripts/run-preflight.mjs
+M	services/api/app/engines/tts/system_tts.py
+M	services/api/app/services/voice_presets.py
+M	services/api/pyproject.toml
+M	services/api/tests/test_ai_director.py
+M	services/api/tests/test_connectivity.py
+M	services/api/tests/test_engine_catalog.py
+M	services/api/tests/test_engine_strategy.py
+M	services/api/tests/test_evidence.py
+M	services/api/tests/test_health.py
+M	services/api/tests/test_melo_tts.py
+M	services/api/tests/test_quality.py
+M	services/api/tests/test_setup.py
+M	services/api/tests/test_system_tts.py
+M	services/api/tests/test_voice_presets.py
+M	services/api/uv.lock
+M	services/worker/pyproject.toml
+M	services/worker/uv.lock
+M	src/components/layout/BrandMasthead.test.tsx
+M	src/components/layout/BrandMasthead.tsx
+M	src/components/workspace/DesktopVoiceDrawer.tsx
+M	src/components/workspace/DubbingVoiceControls.tsx
+M	src/components/workspace/LongformComposer.tsx
+M	src/components/workspace/VoiceLibrary.tsx
+M	src/components/workspace/VoicePickerSheet.tsx
+M	src/pages/LandingHome.tsx
+M	src/styles/index.css
+M	src/tts/browserSpeech.test.ts
+M	src/tts/browserSpeech.ts
+M	src/tts/voicePresets.test.ts
+M	src/tts/voicePresets.ts
+M	src/tts/voiceRecommendation.ts
+M	src/update/buildInfo.ts
+M	src/voice/voiceChoices.ts

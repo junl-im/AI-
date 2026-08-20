@@ -55,3 +55,7 @@ READY가 아니면 기존의 자연화된 `기기 음성` Browser Speech fallbac
 ## 현재 릴리스의 한계
 
 0.11.30은 intake, provenance 검증, preview promotion/fallback 배관을 제공합니다. 실제 5개 성우 reference WAV와 모델 fingerprint는 제품 ZIP에 포함하지 않으므로 기본 설치에서는 neural READY가 의도적으로 pending일 수 있습니다. 실제 품질·PC/모바일 동일 음색 인증은 다음 단계에서 운영 reference와 Worker/model이 준비된 뒤 수집합니다.
+
+## 0.11.31 Browser/System persona fallback
+
+0.11.31은 neural READY가 아직 없는 preset의 fallback을 개선합니다. 5개 preset은 persona/cadence/pace를 갖고 Browser Speech의 user pitch 영향은 30%, final pitch는 0.92~1.08로 제한됩니다. 이 fallback 개선은 v4 neural READY 조건을 완화하지 않습니다. 실제 neural reference/model이 READY이면 기존 verified neural 우선 경로가 계속 더 높은 품질 계층입니다.

@@ -20,11 +20,11 @@ def test_builtin_voice_presets_have_distinct_prosody_and_three_male_options():
         deep.id: deep.rate_multiplier,
         energetic.id: energetic.rate_multiplier,
     } == {
-        "sori-warm": 1.00,
-        "on-clear": 1.04,
-        "dam-calm": 0.98,
-        "jun-deep": 0.98,
-        "min-energetic": 1.08,
+        "sori-warm": 1.06,
+        "on-clear": 1.11,
+        "dam-calm": 1.04,
+        "jun-deep": 1.05,
+        "min-energetic": 1.14,
     }
     assert deep.variant_index != clear.variant_index
     assert {
@@ -34,18 +34,18 @@ def test_builtin_voice_presets_have_distinct_prosody_and_three_male_options():
         deep.id: deep.pitch_offset,
         energetic.id: energetic.pitch_offset,
     } == {
-        "sori-warm": 0.5,
-        "on-clear": -0.5,
-        "dam-calm": 0.0,
-        "jun-deep": -1.0,
-        "min-energetic": 0.25,
+        "sori-warm": 0.35,
+        "on-clear": -0.65,
+        "dam-calm": -0.1,
+        "jun-deep": -1.2,
+        "min-energetic": 0.45,
     }
     assert (
         deep.pitch_offset
         < clear.pitch_offset
         < calm.pitch_offset
-        < energetic.pitch_offset
         < warm.pitch_offset
+        < energetic.pitch_offset
     )
     with pytest.raises(ValueError, match="지원하지 않는"):
         get_voice_preset("missing")

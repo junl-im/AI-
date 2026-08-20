@@ -8,14 +8,18 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- Version: `0.11.30 R1 · Web Lint Type-Only Import Stabilization`
-- Web CI stabilization: GitHub `main` head `a6dcc7e6c9a8008f3e629b52b78380adabb855cd`의 0.11.30 Web quality는 `homeWorkspaceHelpers.ts`에서 type-only `synthesizeSpeech`를 일반 import한 ESLint 오류 하나로 차단되었습니다. R1은 해당 import를 `import type`으로 교정하며 runtime 동작은 변경하지 않습니다.
+- Version: `0.11.31 · Studio Entry & Voice Character Overhaul`
+- Studio entry: Landing의 `장문 음성 스튜디오 시작`은 workspace 진입 뒤 `텍스트를 음성으로`를 sticky compact header 바로 아래로 자동 정렬합니다. 이전 scroll 위치를 그대로 끌고 들어가지 않습니다.
+- Landing visual: Masthead 오른쪽 Current Voice/Engine/CTA 기능 카드를 제거하고 cyan/violet SoriON Signature Visual로 교체했습니다. visual 내부에는 클릭 기능이 없습니다.
+- Voice character: 혜린 `따뜻한 대화 +6%`, 도윤 `또렷한 설명 +11%`, 소리 `편안한 장문 +4%`, 준호 `묵직한 다큐 +5%`, 민준 `빠른 숏폼 +14%` persona/cadence를 적용합니다.
+- Korean speech naturalness: Browser Speech는 성우별 줄바꿈/말줄임 cadence를 정리하고 사용자 pitch 영향 30%, 최종 pitch `0.92~1.08`로 제한합니다. Windows System TTS pace quantization도 x16으로 높였습니다.
+- Voice surface: Desktop Drawer/Voice Picker는 persona summary, pace, rhythm micrograph, 잘 맞는 콘텐츠, 장점/주의를 보여 5개 성우 역할을 재생 전에도 구분합니다.
 - Neural preview promotion: 5개 preset은 v4 manifest의 consent/rights/review 승인, 실제 reference SHA 일치, model fingerprint, `cosyvoice3` provenance가 모두 READY일 때만 neural 미리듣기로 승격합니다.
 - Reference privacy boundary: 실제 WAV·모델·동의 문서는 Git/전달 ZIP에 넣지 않고 운영 디렉터리에 보관하며, 앱에는 SHA-256 fingerprint와 approval/cache identity만 노출합니다.
 - Safe fallback: neural READY가 아니거나 neural 요청이 실패하면 0.11.28의 자연화된 `기기 음성` fallback과 카카오 watchdog/외부 브라우저 복구를 유지합니다.
 - Release readiness: Quality Lab에서 Web quality, Kakao Android/iOS, Chromium desktop/mobile, MY VOICE runtime 증거를 각각 READY/PENDING/BLOCKED로 판정하고 6개 모두 READY일 때만 Overall CERTIFIED를 허용합니다.
 - Readiness integrity: Web quality report/checksum과 Chromium 9/9 capture SHA-256을 재검증하며 synthetic Chromium fixture는 실제 MY VOICE 성공으로 승격하지 않습니다.
-- Voice naturalness: 혜린의 시스템 근사 pitch를 +1.5에서 +0.5로 낮추고 5개 preset의 pitch 보정을 전반적으로 축소했습니다. Browser Speech는 사용자 pitch를 완화해 `0.90~1.12` 범위로 제한합니다.
+- Voice naturalness boundary: 0.11.31은 pitch를 character의 주 수단으로 쓰지 않고 pace/cadence를 우선합니다. Browser/System fallback은 기기 음성 근사이며 실제 neural timbre와 동일 품질로 표시하지 않습니다.
 - Preview quality boundary: Browser Speech는 `기기 음성` 근사 미리듣기이며 실제 neural 성우와 동일 품질로 표시하지 않습니다. 카카오 direct user-gesture/watchdog/fallback은 그대로 유지합니다.
 - Chromium evidence baseline: 0.11.27 R2의 multi-scene recovery 선택 안정화 이후 GitHub Actions green을 사용자 확인했습니다. 0.11.28은 이 안정화 baseline을 유지하고 음성 자연스러움만 조정합니다.
 - Field device certification: 카카오톡 Android/iOS에서 실제 미리듣기 start 또는 실패+외부 브라우저 fallback, 뒤로가기 dialog/계속 만들기 닫힘을 개인정보 최소 JSON으로 기록하고 실제 수행자 확인 뒤에만 READY로 판정합니다.

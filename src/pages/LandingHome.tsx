@@ -1,7 +1,13 @@
+import { scheduleStudioEntryAlignment } from '../navigation/studioEntryNavigation'
 import { useAppStore } from '../store/useAppStore'
 
 export function LandingHome() {
   const enterWorkspace = useAppStore((state) => state.enterWorkspace)
+
+  function startLongformStudio() {
+    enterWorkspace('home')
+    scheduleStudioEntryAlignment()
+  }
 
   return (
     <section className="soa-landing-overview" aria-labelledby="landing-title">
@@ -15,7 +21,7 @@ export function LandingHome() {
           대본·오디오북·강의 내용을 그대로 붙여 넣으세요. 소리온이 한국어 발음을 다듬고
           문장별 음성 블록으로 나누어 순서대로 제작합니다.
         </p>
-        <button type="button" onClick={() => enterWorkspace('home')}>
+        <button type="button" onClick={startLongformStudio}>
           장문 음성 스튜디오 시작
           <span aria-hidden="true">→</span>
         </button>

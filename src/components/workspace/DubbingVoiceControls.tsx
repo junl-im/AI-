@@ -70,7 +70,7 @@ export function DubbingVoiceControls({
           <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
           <span>
             <strong>{voice.name}{customVoice ? <em>MY VOICE</em> : null}</strong>
-            <small>{customVoice ? voice.meta : voice.bestFor.join(' · ')}</small>
+            <small>{customVoice ? voice.meta : `${voice.personaLabel} · ${voice.paceLabel}`}</small>
           </span>
           <b aria-hidden="true">⌄</b>
         </button>

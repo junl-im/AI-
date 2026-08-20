@@ -24,6 +24,7 @@
 @import "./my-voice-engine.css";
 @import "./linkage-convenience.css";
 @import "./voice-surface-refresh.css";
+@import "./studio-voice-overhaul.css";
 
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -95,3 +96,4 @@ select:focus-visible {
   outline: 3px solid color-mix(in srgb, #9d8cff 48%, transparent);
   outline-offset: 2px;
 }
+

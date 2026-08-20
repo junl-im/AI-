@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { getVoicePreset, voicePresets } from '../../tts/voicePresets'
+import { VoiceRhythmSignature } from './VoiceRhythmSignature'
 
 interface VoiceLibraryProps {
   value: string
@@ -38,7 +39,7 @@ export function VoiceLibrary({
         </span>
         <span>
           <strong>{selectedVoice.name}</strong>
-          <small>{selectedVoice.tags.join(' · ')}</small>
+          <small>{selectedVoice.personaLabel} · {selectedVoice.paceLabel}</small>
         </span>
         <b aria-hidden="true">{mobileOpen ? '⌃' : '⌄'}</b>
       </button>
@@ -66,8 +67,9 @@ export function VoiceLibrary({
                 </span>
                 <span className="soa-voice-copy">
                   <strong>{voice.name}</strong>
-                  <span>{voice.tags.join(' · ')}</span>
-                  <small>{previewingId === voice.id ? '프리뷰 생성 중…' : voice.description}</small>
+                  <span>{voice.personaLabel} · {voice.paceLabel}</span>
+                  <small>{previewingId === voice.id ? '프리뷰 생성 중…' : voice.personaSummary}</small>
+                  <VoiceRhythmSignature cadence={voice.cadence} compact />
                 </span>
                 <span className="soa-voice-select-mark" aria-hidden="true">
                   {selected ? '✓' : '▶'}

@@ -212,7 +212,7 @@ export function LongformComposer({
   }
 
   return (
-    <section className="soa-dubbing-script soa-one-flow-composer" aria-labelledby="dubbing-script-title">
+    <section id="text-to-speech-studio" className="soa-dubbing-script soa-one-flow-composer" aria-labelledby="dubbing-script-title" data-studio-entry-anchor="true">
       <div className="soa-one-flow-composer__heading">
         <div>
           <span>TEXT TO SPEECH</span>

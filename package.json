@@ -1,6 +1,6 @@
 {
   "name": "sorion-ai",
-  "version": "0.11.30",
+  "version": "0.11.31",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,14 +11,14 @@
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run",
     "test:ci": "vitest run --fileParallelism=false",
-    "test:web-critical": "vitest run src/tts/browserSpeech.test.ts src/components/navigation/LinkedPlayerDock.test.tsx src/hooks/useExitConfirmation.test.tsx src/browser/inAppBrowser.test.ts src/components/workspace/DesktopVoiceDrawer.test.tsx src/components/workspace/TimelineEditor.test.tsx src/hooks/useTimelineGeneration.test.ts src/quality/fieldDeviceCertification.test.ts src/quality/neuralVoiceReference.test.ts --fileParallelism=false",
+    "test:web-critical": "vitest run src/tts/browserSpeech.test.ts src/components/navigation/LinkedPlayerDock.test.tsx src/hooks/useExitConfirmation.test.tsx src/browser/inAppBrowser.test.ts src/components/workspace/DesktopVoiceDrawer.test.tsx src/components/workspace/TimelineEditor.test.tsx src/hooks/useTimelineGeneration.test.ts src/quality/fieldDeviceCertification.test.ts src/quality/neuralVoiceReference.test.ts src/tts/voicePresets.test.ts src/navigation/studioEntryNavigation.test.ts --fileParallelism=false",
     "test:watch": "vitest",
     "test:api": "python -m pytest services/api/tests",
     "quality:rules": "node scripts/check-project-rules.mjs",
     "cleanup:stale-brand": "node scripts/remove-stale-brand-assets.mjs",
     "quality:web-manifest": "node scripts/check-web-toolchain.mjs --manifest-only",
     "quality:web-toolchain": "node scripts/check-web-toolchain.mjs",
-    "quality": "npm run quality:lock-network && npm run quality:version-sync && npm run quality:ci-architecture && npm run quality:reproducible-web && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:runtime-update && npm run quality:seamless-engine && npm run quality:engine-resilience && npm run quality:batch-recovery-routing && npm run quality:editor-command-engine && npm run quality:edit-history-routing && npm run quality:one-flow-ux && npm run quality:multi-speaker-resume && npm run quality:mobile-studio && npm run quality:recovery-session-safety && npm run quality:always-on-workspace && npm run quality:operator-baselines && npm run quality:recovery-soak && npm run quality:recovery-evidence && npm run quality:studio-ux && npm run quality:trust-key-renewal && npm run quality:benchmark-audit && npm run quality:long-run-writer && npm run quality:playback-flow && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:partial-audio-bridge && npm run quality:ordered-segment-playback && npm run quality:seam-metrics && npm run quality:signed-audio-certification && npm run quality:device-soak-archive && npm run quality:voice-presets && npm run quality:voice-preset-evidence && npm run quality:neural-voice-reference && npm run quality:voice-review-sync && npm run quality:signed-review-benchmark && npm run quality:voice-review-operator && npm run quality:evidence && npm run quality:evidence-intake && npm run quality:recovery-batch-editor-split && npm run quality:field-certification-contract && npm run quality:release-readiness && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
+    "quality": "npm run quality:lock-network && npm run quality:version-sync && npm run quality:ci-architecture && npm run quality:reproducible-web && npm run quality:web-toolchain && npm run quality:dependency-tree && npm run quality:stale-files && npm run quality:pwa-assets && npm run quality:runtime-update && npm run quality:seamless-engine && npm run quality:engine-resilience && npm run quality:batch-recovery-routing && npm run quality:editor-command-engine && npm run quality:edit-history-routing && npm run quality:one-flow-ux && npm run quality:multi-speaker-resume && npm run quality:mobile-studio && npm run quality:recovery-session-safety && npm run quality:always-on-workspace && npm run quality:operator-baselines && npm run quality:recovery-soak && npm run quality:recovery-evidence && npm run quality:studio-ux && npm run quality:trust-key-renewal && npm run quality:benchmark-audit && npm run quality:long-run-writer && npm run quality:playback-flow && npm run quality:firebase && npm run quality:rules && npm run quality:free-only && npm run quality:engine-blueprint && npm run quality:model-onboarding && npm run quality:partial-audio-bridge && npm run quality:ordered-segment-playback && npm run quality:seam-metrics && npm run quality:signed-audio-certification && npm run quality:device-soak-archive && npm run quality:studio-voice-overhaul && npm run quality:voice-presets && npm run quality:voice-preset-evidence && npm run quality:neural-voice-reference && npm run quality:voice-review-sync && npm run quality:signed-review-benchmark && npm run quality:voice-review-operator && npm run quality:evidence && npm run quality:evidence-intake && npm run quality:recovery-batch-editor-split && npm run quality:field-certification-contract && npm run quality:release-readiness && npm run lint && npm run typecheck && npm run test && npm run test:api && npm run test:worker",
     "dev:web": "npm run dev",
     "build:web": "npm run build",
     "test:web": "npm run test",
@@ -107,7 +107,8 @@
     "quality:field-runtime-certification": "node scripts/verify-field-runtime-certification.mjs",
     "quality:release-readiness": "node scripts/check-release-readiness.mjs",
     "quality:release-readiness:verify": "node scripts/verify-release-readiness.mjs",
-    "quality:neural-voice-reference": "node scripts/check-neural-voice-reference-contracts.mjs"
+    "quality:neural-voice-reference": "node scripts/check-neural-voice-reference-contracts.mjs",
+    "quality:studio-voice-overhaul": "node scripts/check-studio-voice-overhaul.mjs"
   },
   "engines": {
     "node": ">=22.12.0 <25",

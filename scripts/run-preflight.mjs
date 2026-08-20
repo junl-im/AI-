@@ -54,6 +54,7 @@ const checks = [
   ['seam metrics / session restore', 'check-seam-metrics-session.mjs'],
   ['signed audio / device certification', 'check-signed-audio-certification.mjs'],
   ['device soak / audio archive policy', 'check-device-soak-archive.mjs'],
+  ['studio entry / voice character overhaul', 'check-studio-voice-overhaul.mjs'],
   ['voice presets', 'check-voice-preset-contracts.mjs'],
   ['voice preset evidence', 'check-voice-preset-evidence.mjs'],
   ['neural voice reference / preview promotion', 'check-neural-voice-reference-contracts.mjs'],

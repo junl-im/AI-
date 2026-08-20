@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.30 R1 · Web Lint Type-Only Import Stabilization**
+Current baseline: **0.11.31 · Studio Entry & Voice Character Overhaul**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-20 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,6 +9,19 @@ Current baseline: **0.11.30 R1 · Web Lint Type-Only Import Stabilization**
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+
+## 2026-08-20 KST · 0.11.31 Studio Entry & Voice Character Overhaul
+1. **작업 일시(KST)**: 2026-08-20.
+2. **대상/기준 버전**: `0.11.31 · Studio Entry & Voice Character Overhaul` / `0.11.30 R1 · Web Lint Type-Only Import Stabilization`, GitHub `main` head `838f5adcaa37e42caea9f802c79814aadf3eafe9`. 제품 semver는 `0.11.31`로 올립니다. 작업 시작 시 공개/connector 경로로 R1 push-run green을 확정하지 못했지만 R1 코드가 main에 반영된 것은 확인했습니다. 사용자 첨부 화면은 `v0.11.29` Pages 빌드였습니다.
+3. **변경 내용**: Landing의 `장문 음성 스튜디오 시작`이 `#text-to-speech-studio`를 sticky header 아래로 자동 정렬하도록 studio entry navigation을 추가했습니다. Masthead 오른쪽 기능형 Current Voice/Engine/CTA를 graphics-only SoriON Signature Visual로 교체했습니다. 5개 built-in preset에 persona/cadence/pace/rhythm metadata를 추가하고 pace를 혜린 1.06, 도윤 1.11, 소리 1.04, 준호 1.05, 민준 1.14로 상향했습니다. Browser Speech는 성우별 text cadence normalization과 더 보수적인 pitch 정책(사용자 pitch 30%, clamp 0.92~1.08)을 사용합니다. Windows System Speech rate quantization은 x16으로 높였습니다. Desktop Drawer/Voice Picker는 persona와 rhythm을 시각화합니다.
+4. **변경 이유**: 사용자가 장문 스튜디오 진입 후 타임라인 중간으로 이동하는 UX, 5개 성우가 서로 비슷하게 보이고 들리는 문제, 기본 한국어 말속도가 느리고 어눅하게 느껴지는 문제를 대규모로 개선해달라고 요청했습니다. 시스템 TTS의 timbre 한계를 과한 pitch로 감추지 않고 pace/cadence/persona와 verified neural 경계를 분리하기 위함입니다.
+5. **영향 범위**: Landing/Brand masthead, studio entry scroll navigation, built-in voice preset metadata/rate/pitch, Browser Speech text/prosody, Windows System TTS pace mapping, Desktop Voice Drawer/Voice Picker/current voice UI, voice recommendation, CSS, static/preflight/test/release 문서입니다. Neural v4 provenance/promotion, MY VOICE clone, Timeline recovery, Kakao direct user-gesture/watchdog/exit guard는 유지합니다.
+6. **변경·추가된 주요 파일**: `src/navigation/studioEntryNavigation.ts`, `src/components/layout/BrandMasthead.tsx`, `src/styles/studio-voice-overhaul.css`, `src/tts/{voicePresets,browserSpeech,voiceRecommendation}.ts`, `src/voice/voiceChoices.ts`, `src/components/workspace/{VoiceRhythmSignature,DesktopVoiceDrawer,VoicePickerSheet,DubbingVoiceControls,VoiceLibrary,LongformComposer}.tsx`, `src/pages/LandingHome.tsx`, `services/api/app/{services/voice_presets.py,engines/tts/system_tts.py}`, 관련 tests, `scripts/check-studio-voice-overhaul.mjs`, `docs/STUDIO_ENTRY_VOICE_CHARACTER_OVERHAUL.md` 및 릴리스 문서입니다.
+7. **검증 결과**: Product version sync **0.11.31 PASS**, studio/voice static contract **PASS**, Voice preset static contract **PASS**, mobile studio/reproducible Web static contract **PASS**, 변경 TS/TSX dependency-free syntax **17/17 PASS**, targeted API System/preset tests **16/16 PASS**. 최종 Repository preflight **54/54 PASS**, API pytest **228/228 PASS**(기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, 전체 TS/TSX dependency-free syntax **257/257 PASS**입니다. dependency 기반 ESLint/Vitest/semantic typecheck/Vite build/Chromium은 로컬 `node_modules`가 없는 전달 환경이라 GitHub Actions를 최종 gate로 둡니다.
+8. **알려진 제한과 주의사항**: OS에 호환 한국어 음성이 하나뿐이면 Browser/System fallback의 실제 timbre는 5개로 완전히 분리되지 않습니다. 이번 패치는 pace/cadence/prosody/UI distinction을 강화하지만 neural 음질 완성을 주장하지 않습니다. 실제 동일 성우 음색은 rights-cleared v4 reference/model이 필요합니다. Kakao WebView가 Speech Synthesis 자체를 막으면 기존 watchdog/외부 브라우저 fallback까지만 보장합니다. 실제 eslint/Vitest/typecheck/build/Chromium은 npm dependency toolchain이 준비된 GitHub Actions가 최종 gate입니다.
+9. **생성 산출물**: `SoriON-AI-0.11.31-studio-entry-voice-character-overhaul-full.zip`, `SoriON-AI-0.11.30-r1-to-0.11.31-studio-entry-voice-character-overhaul-patch.zip`, `SoriON-AI-0.11.31-studio-entry-voice-character-overhaul-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache`에서 rights-cleared v4 reference/model이 실제 준비된 preset만 runtime source/cache identity와 PC·모바일 동일 neural preview를 인증합니다.
 
 
 ## 2026-08-20 KST · 0.11.30 R1 Web Lint Type-Only Import Stabilization

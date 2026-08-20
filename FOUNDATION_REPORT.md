@@ -1,3 +1,34 @@
+## 0.11.31 · Studio Entry & Voice Character Overhaul
+
+- Landing → Studio 최초 진입은 `#text-to-speech-studio`를 sticky compact header 아래로 정렬해 사용자가 곧바로 `텍스트를 음성으로`부터 시작합니다.
+- Masthead 오른쪽 기능형 Current Voice/Engine/CTA를 제거하고 기능 없는 SoriON Signature Visual로 교체했습니다.
+- Built-in 5 voices에 persona/cadence/rhythm metadata를 추가하고 기본 pace를 혜린 1.06, 도윤 1.11, 소리 1.04, 준호 1.05, 민준 1.14로 상향했습니다.
+- Browser Speech는 성우별 text cadence normalization을 적용하고 user pitch scale 0.30, Web Speech pitch clamp 0.92~1.08로 금속성 변조를 줄입니다.
+- Windows System TTS rate quantization을 x16으로 높여 작은 preset pace 차이도 기본속도에서 실제 command에 반영합니다.
+- Desktop Drawer/Voice Picker는 persona summary, pace label, rhythm micrograph, 장점/주의를 노출합니다.
+- 0.11.30 verified neural v4 promotion/fallback, MY VOICE, Timeline recovery, Kakao watchdog/exit guard는 유지합니다.
+
+### 검증
+
+- Product version sync: **0.11.31 PASS**
+- Studio/Voice static contract: **PASS**
+- Voice preset contract: **PASS**
+- Mobile studio/reproducible Web contracts: **PASS**
+- Changed TS/TSX syntax: **17/17 PASS**
+- Targeted API System/preset tests: **16/16 PASS**
+- Repository preflight: **54/54 PASS**
+- API pytest: **228/228 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- All TS/TSX dependency-free syntax: **257/257 PASS**
+- Dependency-based Web lint/Vitest/typecheck/build/Chromium: **GitHub Actions final gate**
+
+### 품질 경계
+
+- OS에 compatible 한국어 음성이 하나뿐이면 Browser/System fallback의 timbre를 5개로 완전 분리할 수 없습니다.
+- 실제 rights-cleared neural reference/model이 없으면 neural 음질 성공을 주장하지 않습니다.
+- 실제 WAV/model/동의 문서는 Git·FULL/PATCH ZIP에 포함하지 않습니다.
+
 ## 0.11.30 R1 · Web Lint Type-Only Import Stabilization
 
 - GitHub `main` head `a6dcc7e6c9a8008f3e629b52b78380adabb855cd`의 Web quality는 `src/workspace/homeWorkspaceHelpers.ts`에서 `synthesizeSpeech`가 `ReturnType<typeof ...>` 타입 계산에만 사용되는데 value import로 선언되어 ESLint `consistent-type-imports` 계열 규칙에 의해 실패했습니다.

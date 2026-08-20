@@ -1,5 +1,6 @@
 import type { VoiceEmotion } from '../../ai/contracts'
 import { VoicePreviewButton } from '../voice/VoicePreviewButton'
+import { VoiceRhythmSignature } from './VoiceRhythmSignature'
 import type { VoiceChoice } from '../../voice/voiceChoices'
 import {
   formatPitch,
@@ -51,9 +52,27 @@ export function DesktopVoiceDrawer({
     const active = voice.id === voiceId
     return (
       <article key={voice.id} className={`${active ? 'is-selected' : ''} ${voice.kind === 'my-voice' ? 'is-my-voice' : ''} ${voice.ready ? '' : 'is-unavailable'}`.trim()}>
-        <button type="button" className="soa-voice-drawer__select" role="radio" aria-checked={active} disabled={!voice.ready} onClick={() => onVoiceChange(voice.id)}>
+        <button
+          type="button"
+          className="soa-voice-drawer__select"
+          role="radio"
+          aria-checked={active}
+          disabled={!voice.ready}
+          onClick={() => onVoiceChange(voice.id)}
+          data-voice-cadence={voice.cadence}
+        >
           <span className={`soa-voice-avatar ${voice.tone}`} aria-hidden="true">{voice.shortName}</span>
-          <span><strong>{voice.name}{voice.kind === 'my-voice' ? <em>MY</em> : null}</strong><small>{voice.kind === 'my-voice' ? voice.meta : voice.meta}</small></span>
+          <span className="soa-voice-drawer__identity">
+            <span className="soa-voice-drawer__name-row">
+              <strong>{voice.name}{voice.kind === 'my-voice' ? <em>MY</em> : null}</strong>
+              <b>{voice.personaLabel}</b>
+            </span>
+            <small>{voice.personaSummary}</small>
+            <span className="soa-voice-drawer__character">
+              <VoiceRhythmSignature cadence={voice.cadence} compact />
+              <i>{voice.paceLabel}</i>
+            </span>
+          </span>
         </button>
         {voice.ready ? <VoicePreviewButton className="soa-voice-drawer__play" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={previewAndSelect} labelContext="보이스 라이브러리" /> : <span className="soa-my-voice-engine-wait">준비</span>}
       </article>
@@ -65,7 +84,7 @@ export function DesktopVoiceDrawer({
       <button type="button" className="soa-studio-panel-toggle" aria-label={collapsed ? '보이스 패널 펼치기' : '보이스 패널 접기'} aria-expanded={!collapsed} aria-controls="soa-voice-drawer" onClick={onToggleCollapsed}>{collapsed ? '‹' : '›'}</button>
       {collapsed ? <span className="soa-studio-panel-monogram" aria-hidden="true">V</span> : (
         <>
-          <header><span>VOICE DRAWER</span><strong>목소리 라이브러리</strong><p>▶를 누르면 해당 목소리를 선택하고 바로 미리듣습니다.</p></header>
+          <header><span>VOICE DRAWER</span><strong>목소리 라이브러리</strong><p>성우마다 속도·호흡·문장 리듬이 다릅니다. ▶로 실제 차이를 바로 들어보세요.</p></header>
           {applyTargetCount > 0 ? (
             <div className="soa-voice-drawer__apply-target" role="note" aria-label="보이스 라이브러리 적용 대상">
               <strong>타임라인 선택 · {applyTargetLabel ?? `${applyTargetCount}개 대사`}</strong>
@@ -82,7 +101,7 @@ export function DesktopVoiceDrawer({
             </section>
           ) : (
             <section className="soa-voice-drawer__settings" aria-label="음성 세부 설정">
-              <label><span><b>속도</b><strong>{speed.toFixed(2)}×</strong></span><input type="range" min={VOICE_SPEED_CONTROL.min} max={VOICE_SPEED_CONTROL.max} step={VOICE_SPEED_CONTROL.step} value={speed} onChange={(event) => onSpeedChange(Number(event.target.value))} aria-label="음성 속도" aria-valuetext={`${speed.toFixed(2)}배`} /></label>
+              <label className="soa-voice-drawer__speed"><span><b>속도</b><strong>{speed.toFixed(2)}×</strong></span><small>{selected?.paceLabel ?? '성우 기본 페이스 적용'}</small><input type="range" min={VOICE_SPEED_CONTROL.min} max={VOICE_SPEED_CONTROL.max} step={VOICE_SPEED_CONTROL.step} value={speed} onChange={(event) => onSpeedChange(Number(event.target.value))} aria-label="음성 속도" aria-valuetext={`${speed.toFixed(2)}배`} /></label>
               <label><span><b>높낮이</b><strong>{formatPitch(pitch)}</strong></span><input type="range" min={VOICE_PITCH_CONTROL.min} max={VOICE_PITCH_CONTROL.max} step={VOICE_PITCH_CONTROL.step} value={pitch} onChange={(event) => onPitchChange(Number(event.target.value))} aria-label="음성 높낮이" aria-valuetext={formatPitch(pitch)} /></label>
               <div className="soa-voice-drawer__emotion"><b>말투</b><div role="radiogroup" aria-label="음성 말투">{VOICE_EMOTION_OPTIONS.map((item) => <button key={item.id} type="button" role="radio" aria-checked={emotion === item.id} className={emotion === item.id ? 'is-active' : ''} onClick={() => onEmotionChange(item.id)}>{item.label}</button>)}</div></div>
               <label className="soa-voice-drawer__normalize"><span><b>숫자·기호 읽기 보정</b><small>자동 최적화</small></span><input type="checkbox" checked={normalizeText} onChange={(event) => onNormalizeTextChange(event.target.checked)} aria-label="숫자와 기호 읽기 보정" /></label>
