@@ -1,3 +1,21 @@
+## 0.11.32 R1 · CI Static Contract Stabilization
+
+- GitHub `main` head `f0a2a0d6e081a3e02be6abc80bb31eec297a488b`의 0.11.32 annotations에서 두 concrete root cause를 확인했습니다.
+- API Ruff UP012: `hashlib.sha256(text.encode("utf-8"))`의 불필요한 UTF-8 인자를 제거해 `text.encode()`로 교정합니다. Python 기본 encoding 동작은 동일합니다.
+- Web Vitest: 0.11.31에서 준호 preset pitch를 `-1.2 semitone`으로 조정해 실제 Web Speech pitch가 `0.9330329915...`가 되었지만 테스트가 이전 `> 0.94` 하한을 유지했습니다. 새 안전 clamp `0.92~1.08`과 캐릭터 계약에 맞춰 `0.92 < deep pitch < 0.95`로 갱신합니다.
+- production neural runtime/cache, preset pace/cadence, Kakao direct speech/fallback, MY VOICE, Timeline은 변경하지 않습니다. 제품 semver는 `0.11.32`를 유지합니다.
+
+### 검증
+
+- Repository preflight: **55/55 PASS**
+- Targeted neural preview API tests: **4/4 PASS**
+- API full pytest: **232/232 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Ruff UP012 source contract: **PASS · explicit UTF-8 encode argument 제거 확인**
+- Deep pitch numeric contract: **PASS · 0.9330329915368074**
+- Local Ruff/Vitest binaries: **미설치 · 실제 Ruff/Vitest는 다음 GitHub Actions final gate**
+
 ## 0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache
 
 - preset v4가 READY여도 미리듣기 요청 시 서버가 현재 reference/model provenance를 다시 검사하고 Worker `model_digest`가 승인 `model_fingerprint`와 같아야 neural runtime을 허용합니다.

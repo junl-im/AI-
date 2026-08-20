@@ -8,7 +8,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- Version: `0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache`
+- Version: `0.11.32 R1 · CI Static Contract Stabilization` (product semver remains `0.11.32`)
+- CI stabilization: GitHub `main` head `f0a2a0d6e081a3e02be6abc80bb31eec297a488b`의 0.11.32 annotations에서 Python Ruff UP012와 Browser Speech 준호 pitch stale assertion 두 concrete failure를 교정합니다. Runtime neural cache, studio/voice character, Kakao/MY VOICE 동작은 변경하지 않습니다.
 - Neural runtime gate: v4 preset READY를 그대로 신뢰하지 않고 preview 요청마다 현재 reference provenance와 Worker runtime `model_digest`를 승인 model fingerprint와 다시 비교합니다.
 - Shared neural preview cache: `previewCacheKey + normalized text SHA + style SHA`로 content-addressed WAV를 만들고 PC/모바일이 동일 요청에서 같은 cache/audio SHA를 재사용합니다.
 - Runtime playback evidence: 실제 `<audio>` playing/ended를 관찰한 `observed-runtime`만 저장하며 Quality Lab에서 PC/mobile cache/audio/model/reference identity가 모두 같을 때만 `SHARED READY`로 표시합니다.

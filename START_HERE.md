@@ -1,8 +1,10 @@
 # START HERE
 
-Current version: `0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache`
+Current version: `0.11.32 R1 · CI Static Contract Stabilization`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
+1-0R1. 0.11.32 R1은 제품 semver `0.11.32`를 유지하는 CI 안정화 리비전입니다. `neural_preview_cache.py`의 Ruff UP012를 `text.encode()`로 교정하고, 준호 `-1.2 semitone` 기본 pitch의 실제 Web Speech 값 `0.9330...`에 맞춰 stale Vitest 범위를 `0.92 < pitch < 0.95`로 갱신합니다.
+1-0R1a. R1은 runtime/음질 정책을 바꾸지 않습니다. GitHub Actions가 Ruff → Web critical/full Vitest → typecheck/build/Chromium까지 green인지 확인하기 전에는 0.11.33 기능 작업보다 CI 안정화를 우선합니다.
 1-0. 0.11.32는 verified v4 preset의 runtime model/reference fingerprint를 다시 확인하고 server shared neural preview cache + PC/mobile playback evidence를 연결합니다.
 1-0a. neural preview cache는 `previewCacheKey + text/style digest`를 사용하고 WAV SHA-256을 재검증합니다. 실제 `playing`/`ended`가 없는 API 성공은 runtime READY가 아닙니다.
 1-0b. Quality Lab에서 다른 기기의 runtime JSON을 병합할 수 있지만 `synthetic=true`, raw 대본/audio URL/User-Agent/기기명/reference 경로가 있는 증거는 인증용으로 사용하지 않습니다.

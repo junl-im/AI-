@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.11.32 R1 · CI Static Contract Stabilization
+
+- 0.11.32 GitHub Actions annotations의 API Ruff UP012를 교정했습니다. `text.encode("utf-8")`는 `text.encode()`와 동일한 동작이므로 runtime cache digest 결과는 변하지 않습니다.
+- Browser Speech의 준호 기본 pitch는 `-1.2 semitone`에 의해 `0.9330329915...`이며 새 안전 범위 `0.92~1.08` 안에 있습니다. 테스트의 오래된 `>0.94` 기대를 `0.92 < pitch < 0.95`로 갱신했습니다.
+- 제품 semver는 `0.11.32`를 유지하고 neural shared cache/voice character/Kakao/MY VOICE production 로직은 변경하지 않습니다.
+
+### 검증
+
+- Repository preflight: **55/55 PASS**
+- Targeted neural preview API tests: **4/4 PASS**
+- API pytest: **232/232 PASS** (기존 FastAPI deprecated status alias warning 1건)
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- Deep pitch numeric contract: **0.9330329915368074 · PASS**
+- Local Ruff/Vitest: **실행 파일 미설치 · GitHub Actions final gate**
+
 ## 0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache
 
 - preset v4가 READY여도 미리듣기 요청 시 서버가 현재 reference/model provenance를 다시 검사하고 Worker `model_digest`가 승인 `model_fingerprint`와 같아야 neural runtime을 허용합니다.

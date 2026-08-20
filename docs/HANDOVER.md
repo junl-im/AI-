@@ -1,6 +1,6 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache**
+Current baseline: **0.11.32 R1 · CI Static Contract Stabilization**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-20 KST**
 제품 소유·디자인: **곰같은여우**
@@ -9,9 +9,17 @@ Current baseline: **0.11.32 · Neural Voice Runtime Certification & Shared Previ
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
-
-
-
+## 2026-08-20 KST · 0.11.32 R1 CI Static Contract Stabilization
+1. **작업 일시(KST)**: 2026-08-20.
+2. **대상/기준 버전**: `0.11.32 R1 · CI Static Contract Stabilization` / `0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache`, GitHub `main` head `f0a2a0d6e081a3e02be6abc80bb31eec297a488b`. 제품 semver는 `0.11.32`를 유지합니다.
+3. **변경 내용**: 사용자 제공 GitHub Actions annotations에서 API Ruff UP012(`services/api/app/services/neural_preview_cache.py:52`)와 Web Vitest 준호 pitch assertion(`src/tts/browserSpeech.test.ts:151`)을 확인했습니다. SHA-256 text digest의 `text.encode("utf-8")`를 `text.encode()`로 교정하고, 준호 preset `-1.2 semitone`의 실제 Web Speech pitch `0.9330329915368074`에 맞춰 stale 테스트 하한을 `>0.94`에서 `>0.92`, 상한을 `<0.95`로 명시했습니다.
+4. **변경 이유**: Python Ruff 현대화 규칙을 만족하고, 0.11.31에서 의도적으로 강화한 준호 deep persona pitch가 새 Browser Speech 안전 clamp `0.92~1.08` 안에서 정상인데도 이전 테스트 수치 때문에 CI가 실패하는 문제를 production 동작 변경 없이 해소하기 위해서입니다.
+5. **영향 범위**: API cache digest 표현식 1곳, Browser Speech 테스트 assertion 2줄, CI 안정화/릴리스 문서입니다. neural preview endpoint/cache identity, audio SHA, preset pace/cadence/pitch production 계산, Kakao 모바일, Timeline/MY VOICE에는 runtime 변경이 없습니다.
+6. **변경·추가된 주요 파일**: `services/api/app/services/neural_preview_cache.py`, `src/tts/browserSpeech.test.ts`, `FOUNDATION_REPORT.md`, `README.md`, `START_HERE.md`, `docs/{CHANGELOG,HANDOVER,NEXT_UPDATE}.md`, `docs/CI_STATIC_CONTRACT_STABILIZATION_0.11.32_R1.md`, `docs/patches/0.11.32-r1-ci-static-contract-stabilization/*`.
+7. **검증 결과**: Repository preflight **55/55 PASS**, targeted neural preview API tests **4/4 PASS**, API pytest **232/232 PASS**(기존 FastAPI deprecated status alias warning 1건), Worker pytest **14/14 PASS**, Python compileall **PASS**, Ruff UP012 source contract **PASS**, 준호 deep pitch numeric contract **0.9330329915368074 PASS**. 현재 로컬에는 Ruff/Vitest 실행 파일이 없어 실제 Ruff/Vitest 재실행은 다음 GitHub Actions final gate입니다.
+8. **알려진 제한과 주의사항**: 사용자 annotations의 5 errors 중 이번에 concrete root cause로 제공된 것은 Ruff 1건과 Vitest assertion 1건입니다. wrapper/final gate 오류는 이 concrete failures의 결과일 수 있으므로 R1 Push 뒤 전체 Actions를 다시 확인해야 합니다. 실제 neural rights-cleared asset/SHARED READY는 여전히 미수집입니다.
+9. **생성 산출물**: `SoriON-AI-0.11.32-r1-ci-static-contract-stabilization-full.zip`, `SoriON-AI-0.11.32-to-0.11.32-r1-ci-static-contract-stabilization-patch.zip`, `SoriON-AI-0.11.32-r1-ci-static-contract-stabilization-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: R1 GitHub Actions가 Ruff → critical/full Vitest → typecheck → build → Chromium/multi-scene까지 green인지 먼저 확인한 뒤 `0.11.33 · Neural Voice Field Playback & Release Gate`로 진행합니다.
 ## 2026-08-20 KST · 0.11.32 Neural Voice Runtime Certification & Shared Preview Cache
 1. **작업 일시(KST)**: 2026-08-20.
 2. **대상/기준 버전**: `0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache` / 로컬 전달 기준 `0.11.31 · Studio Entry & Voice Character Overhaul`. 작업 시작 시 GitHub `main` 최신 커밋은 `838f5adcaa37e42caea9f802c79814aadf3eafe9`(`0.11.30 R1`)이므로 0.11.31은 아직 Push되지 않았습니다. 이번 PATCH는 반드시 0.11.31 위에 적용합니다.
@@ -23,8 +31,6 @@ Current baseline: **0.11.32 · Neural Voice Runtime Certification & Shared Previ
 8. **알려진 제한과 주의사항**: 실제 rights-cleared v4 reference WAV/model은 저장소에 없으므로 실제 neural 5/5 SHARED READY, 혜린 등 실제 neural 음질, Kakao 실기기 HTTP WAV 성공을 주장하지 않습니다. Cache에는 생성 WAV가 저장되지만 reference WAV/원문 대본/audio URL/User-Agent/기기명은 evidence metadata에 저장하지 않습니다. 0.11.31이 GitHub에 아직 없으므로 0.11.32를 main 0.11.30 R1에 직접 덮어쓰면 안 됩니다.
 9. **생성 산출물**: `SoriON-AI-0.11.32-neural-voice-runtime-shared-preview-cache-full.zip`, `SoriON-AI-0.11.31-to-0.11.32-neural-voice-runtime-shared-preview-cache-patch.zip`, `SoriON-AI-0.11.32-neural-voice-runtime-shared-preview-cache-SHA256SUMS.txt`를 생성합니다.
 10. **다음 예상 업데이트**: `0.11.33 · Neural Voice Field Playback & Release Gate`에서 실제 rights-cleared asset이 준비된 preset부터 Android/iOS/desktop neural HTTP audio를 관찰하고 neural shared evidence를 Release Readiness gate에 연결합니다.
-
-
 ## 2026-08-20 KST · 0.11.31 Studio Entry & Voice Character Overhaul
 1. **작업 일시(KST)**: 2026-08-20.
 2. **대상/기준 버전**: `0.11.31 · Studio Entry & Voice Character Overhaul` / `0.11.30 R1 · Web Lint Type-Only Import Stabilization`, GitHub `main` head `838f5adcaa37e42caea9f802c79814aadf3eafe9`. 제품 semver는 `0.11.31`로 올립니다. 작업 시작 시 공개/connector 경로로 R1 push-run green을 확정하지 못했지만 R1 코드가 main에 반영된 것은 확인했습니다. 사용자 첨부 화면은 `v0.11.29` Pages 빌드였습니다.
@@ -36,8 +42,6 @@ Current baseline: **0.11.32 · Neural Voice Runtime Certification & Shared Previ
 8. **알려진 제한과 주의사항**: OS에 호환 한국어 음성이 하나뿐이면 Browser/System fallback의 실제 timbre는 5개로 완전히 분리되지 않습니다. 이번 패치는 pace/cadence/prosody/UI distinction을 강화하지만 neural 음질 완성을 주장하지 않습니다. 실제 동일 성우 음색은 rights-cleared v4 reference/model이 필요합니다. Kakao WebView가 Speech Synthesis 자체를 막으면 기존 watchdog/외부 브라우저 fallback까지만 보장합니다. 실제 eslint/Vitest/typecheck/build/Chromium은 npm dependency toolchain이 준비된 GitHub Actions가 최종 gate입니다.
 9. **생성 산출물**: `SoriON-AI-0.11.31-studio-entry-voice-character-overhaul-full.zip`, `SoriON-AI-0.11.30-r1-to-0.11.31-studio-entry-voice-character-overhaul-patch.zip`, `SoriON-AI-0.11.31-studio-entry-voice-character-overhaul-SHA256SUMS.txt`.
 10. **다음 예상 업데이트**: `0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache`에서 rights-cleared v4 reference/model이 실제 준비된 preset만 runtime source/cache identity와 PC·모바일 동일 neural preview를 인증합니다.
-
-
 ## 2026-08-20 KST · 0.11.30 R1 Web Lint Type-Only Import Stabilization
 1. **작업 일시(KST)**: 2026-08-20.
 2. **대상/기준 버전**: `0.11.30 R1 · Web Lint Type-Only Import Stabilization` / `0.11.30 · Neural Voice Reference Intake & Preview Promotion`, GitHub `main` head `a6dcc7e6c9a8008f3e629b52b78380adabb855cd`. 제품 semver는 `0.11.30`을 유지합니다.
@@ -49,7 +53,6 @@ Current baseline: **0.11.32 · Neural Voice Runtime Certification & Shared Previ
 8. **알려진 제한과 주의사항**: R1의 최종 Web lint/critical regression/full Vitest/typecheck/build/Chromium 성공은 다음 GitHub Actions가 확인해야 합니다. 이 known CI failure가 green으로 닫히기 전에는 `0.11.31` 기능 패치를 진행하지 않습니다.
 9. **생성 산출물**: `SoriON-AI-0.11.30-r1-web-lint-type-import-stabilization-full.zip`, `SoriON-AI-0.11.30-to-0.11.30-r1-web-lint-type-import-stabilization-patch.zip`, `SoriON-AI-0.11.30-r1-web-lint-type-import-stabilization-SHA256SUMS.txt`.
 10. **다음 예상 업데이트**: R1 Actions green을 먼저 확인한 뒤 `0.11.31 · Neural Voice Runtime Certification & Shared Preview Cache`로 진행합니다.
-
 ## 2026-08-19 KST · 0.11.30 Neural Voice Reference Intake & Preview Promotion
 1. **작업 일시(KST)**: 2026-08-19.
 2. **대상/기준 버전**: `0.11.30 · Neural Voice Reference Intake & Preview Promotion` / `0.11.29 · Certification Intake & Release Readiness`. 작업 시작 시 GitHub main 최신 커밋은 `70de02eeb19495b69af06bf623274bab383e10cf`(`0.11.29`)였으며 Push 직후라 0.11.29 Actions green은 확인하지 않았습니다.
@@ -61,7 +64,6 @@ Current baseline: **0.11.32 · Neural Voice Runtime Certification & Shared Previ
 8. **알려진 제한과 주의사항**: 0.11.30에는 실제 성우 reference WAV, 모델 파일, 동의/계약 문서를 포함하지 않습니다. 따라서 기본 설치의 neural READY는 pending일 수 있으며 실제 neural 음질·PC/모바일 동일 음색 성공은 아직 미인증입니다. v1~v3 manifest는 일반 생성에는 계속 usable일 수 있지만 neural preview default로 승격되지 않습니다. 승격된 API 요청 실패 후 Browser Speech fallback은 카카오 WebView 자체의 Speech Synthesis 제한을 없애지는 않으며 기존 watchdog/외부 브라우저 복구가 안전망입니다.
 9. **생성 산출물**: `SoriON-AI-0.11.30-neural-voice-reference-preview-promotion-full.zip`, `SoriON-AI-0.11.29-to-0.11.30-neural-voice-reference-preview-promotion-patch.zip`, `SoriON-AI-0.11.30-neural-voice-reference-preview-promotion-SHA256SUMS.txt`. PATCH overlay는 FULL과 1078/1078 files, missing 0 / extra 0 / changed 0으로 일치했고 두 ZIP의 금지 경로는 0건입니다.
 10. **다음 예상 업데이트**: `0.11.31 · Neural Voice Runtime Certification & Shared Preview Cache`에서 실제 rights-cleared preset v4 reference/model runtime이 준비된 경우 source/cache identity와 PC·모바일 동일 neural preview를 실증하고, 준비되지 않으면 neural READY를 pending으로 유지합니다.
-
 ## 2026-08-19 KST · 0.11.29 Certification Intake & Release Readiness
 1. **작업 일시(KST)**: 2026-08-19.
 2. **대상/기준 버전**: `0.11.29 · Certification Intake & Release Readiness` / `0.11.28 · Voice Naturalness & Preview Quality` FULL ZIP. 작업 시작 시 GitHub main 최신 커밋은 `0.11.27 R2` 계열이어서 0.11.28을 먼저 적용한 뒤 이번 PATCH를 적용해야 합니다.
@@ -73,7 +75,6 @@ Current baseline: **0.11.32 · Neural Voice Runtime Certification & Shared Previ
 8. **알려진 제한과 주의사항**: 0.11.29 자체의 GitHub Actions green은 아직 확인 전입니다. 실제 Kakao Android/iOS와 실제 MY VOICE runtime evidence가 없으면 Overall은 의도적으로 PENDING입니다. Browser UI는 GitHub API를 직접 제어하지 않고 Actions artifact의 report JSON을 사용합니다. raw MY VOICE profile/sample data는 readiness summary에 넣지 않습니다.
 9. **생성 산출물**: `SoriON-AI-0.11.29-certification-intake-release-readiness-full.zip`, `SoriON-AI-0.11.28-to-0.11.29-certification-intake-release-readiness-patch.zip`, `SoriON-AI-0.11.29-certification-intake-release-readiness-SHA256SUMS.txt`.
 10. **다음 예상 업데이트**: `0.11.30 · Neural Voice Reference Intake & Preview Promotion`에서 권리·동의가 확인된 per-preset reference WAV/model fingerprint를 intake하고 neural preview가 검증된 경우에만 기기 음성보다 우선하도록 승격합니다. 실제 reference가 없으면 Browser/System fallback을 유지하며 품질 성공을 가장하지 않습니다.
-
 
 ## 2026-08-19 KST · 0.11.28 Voice Naturalness & Preview Quality
 1. **작업 일시(KST)**: 2026-08-19.

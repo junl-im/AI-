@@ -34,7 +34,7 @@ class NeuralPreviewCache:
 
     @staticmethod
     def text_digest(text: str) -> str:
-        return hashlib.sha256(text.encode("utf-8")).hexdigest()
+        return hashlib.sha256(text.encode()).hexdigest()
 
     @staticmethod
     def style_digest(*, emotion: str, speed: float, pitch: int) -> str:

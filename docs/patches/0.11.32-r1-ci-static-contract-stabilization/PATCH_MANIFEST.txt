@@ -1,0 +1,26 @@
+SoriON AI 0.11.32 R1 PATCH MANIFEST
+Base: 0.11.32 · Neural Voice Runtime Certification & Shared Preview Cache
+Target: 0.11.32 R1 · CI Static Contract Stabilization
+Added: 4
+Modified: 8
+Deleted: 0
+Total overlay files: 12
+
+[ADDED]
+docs/CI_STATIC_CONTRACT_STABILIZATION_0.11.32_R1.md
+docs/patches/0.11.32-r1-ci-static-contract-stabilization/DELETE_LIST.txt
+docs/patches/0.11.32-r1-ci-static-contract-stabilization/PATCH_MANIFEST.txt
+docs/patches/0.11.32-r1-ci-static-contract-stabilization/PATCH_README.md
+
+[MODIFIED]
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+services/api/app/services/neural_preview_cache.py
+src/tts/browserSpeech.test.ts
+
+[DELETED]
+(none)
