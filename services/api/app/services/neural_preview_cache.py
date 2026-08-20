@@ -44,12 +44,12 @@ class NeuralPreviewCache:
             separators=(",", ":"),
             sort_keys=True,
         )
-        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        return hashlib.sha256(payload.encode()).hexdigest()
 
     @staticmethod
     def cache_id(preview_cache_key: str, text_sha256: str, style_sha256: str) -> str:
         return hashlib.sha256(
-            f"{preview_cache_key}:{text_sha256}:{style_sha256}".encode("utf-8")
+            f"{preview_cache_key}:{text_sha256}:{style_sha256}".encode()
         ).hexdigest()
 
     @staticmethod

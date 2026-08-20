@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-Current baseline: `0.11.32 R1 · CI Static Contract Stabilization`
+Current baseline: `0.11.32 R2 · CI Static Contract Completion`
 
 ## 목표 버전
 
@@ -16,7 +16,7 @@ Current baseline: `0.11.32 R1 · CI Static Contract Stabilization`
 
 ### 선행 조건과 위험
 
-- **Stabilization gate:** 0.11.32 R1 Push 뒤 API Ruff, Web critical/full Vitest, typecheck, Vite build, desktop/mobile Chromium/multi-scene까지 green을 먼저 확인합니다. 실패가 남으면 0.11.33 기능보다 CI 안정화를 우선합니다.
+- **Stabilization gate:** 0.11.32 R2 Push 뒤 API Ruff, Web critical/full Vitest, typecheck, Vite build, desktop/mobile Chromium/multi-scene까지 green을 먼저 확인합니다. 실패가 남으면 0.11.33 기능보다 CI 안정화를 우선합니다.
 - GitHub main에는 0.11.31과 0.11.32가 순서대로 반영되었습니다. R1은 현재 0.11.32 위에만 적용합니다.
 - 실제 reference WAV/model은 권리와 라이선스가 확인된 운영 자산만 사용합니다.
 - 원본 WAV, 모델, 동의 문서는 Git/전달 ZIP에 포함하지 않습니다.

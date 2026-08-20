@@ -8,7 +8,8 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- Version: `0.11.32 R1 · CI Static Contract Stabilization` (product semver remains `0.11.32`)
+- CI static contract completion: R1 이후 남은 `neural_preview_cache.py` UP012 두 지점을 기본 `str.encode()`로 통일하고, 소리 `dam-calm` natural speed upper bound `1.16`에 맞춰 stale voice recommendation test를 갱신했습니다. runtime 음성/캐시 의미는 변경하지 않습니다.
+- Version: `0.11.32 R2 · CI Static Contract Completion` (product semver remains `0.11.32`)
 - CI stabilization: GitHub `main` head `f0a2a0d6e081a3e02be6abc80bb31eec297a488b`의 0.11.32 annotations에서 Python Ruff UP012와 Browser Speech 준호 pitch stale assertion 두 concrete failure를 교정합니다. Runtime neural cache, studio/voice character, Kakao/MY VOICE 동작은 변경하지 않습니다.
 - Neural runtime gate: v4 preset READY를 그대로 신뢰하지 않고 preview 요청마다 현재 reference provenance와 Worker runtime `model_digest`를 승인 model fingerprint와 다시 비교합니다.
 - Shared neural preview cache: `previewCacheKey + normalized text SHA + style SHA`로 content-addressed WAV를 만들고 PC/모바일이 동일 요청에서 같은 cache/audio SHA를 재사용합니다.

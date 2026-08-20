@@ -27,6 +27,11 @@ for (const required of [
   if (!presets.includes(required)) failures.push(`voicePresets.ts: ${required} 누락`)
 }
 
+const recommendationTest = await read('src/tts/voiceRecommendation.test.ts')
+if (!recommendationTest.includes('{ speed: 1.16, pitch: 1 }')) {
+  failures.push('voiceRecommendation.test.ts: 소리 natural speed upper bound 1.16 계약 누락')
+}
+
 const browser = await read('src/tts/browserSpeech.ts')
 for (const required of [
   'BROWSER_USER_PITCH_SCALE = 0.3',

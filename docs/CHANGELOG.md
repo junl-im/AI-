@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.11.32 R2 · CI Static Contract Completion
+
+- R1 Push 뒤 Ruff UP012가 `neural_preview_cache.py`의 다음 explicit UTF-8 encode 지점을 추가 검출했습니다. `style_digest`와 `cache_id`까지 모두 기본 `str.encode()`로 통일해 같은 파일의 UP012 연쇄 실패를 차단합니다.
+- Web full Vitest가 `dam-calm` natural speed upper bound를 예전 `1.15`로 기대했지만 0.11.31 production preset은 이미 `[1.00, 1.16]`입니다. `voiceRecommendation.test.ts` 기대값을 `1.16`으로 동기화합니다.
+- neural cache preflight는 explicit `.encode("utf-8")` 재유입을 거부하고 studio voice preflight는 소리 `1.16` clamp 계약을 확인합니다.
+- runtime neural cache identity, 5개 성우 production pace/cadence/pitch, Kakao/MY VOICE/Timeline 동작은 변경하지 않습니다. 제품 semver는 `0.11.32` 유지입니다.
+
+### 검증
+
+- Repository preflight: **55/55 PASS**
+- API pytest: **232/232 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX dependency-free syntax: **261/261 PASS**
+- `dam-calm` clamp runtime smoke: **1.16 / pitch 1 PASS**
+- neural cache explicit `.encode("utf-8")`: **0건**
+- 실제 Ruff 0.15.22/Vitest: **로컬 dependency/network 제약으로 미실행 · GitHub Actions final gate**
+
 ## 0.11.32 R1 · CI Static Contract Stabilization
 
 - 0.11.32 GitHub Actions annotations의 API Ruff UP012를 교정했습니다. `text.encode("utf-8")`는 `text.encode()`와 동일한 동작이므로 runtime cache digest 결과는 변하지 않습니다.

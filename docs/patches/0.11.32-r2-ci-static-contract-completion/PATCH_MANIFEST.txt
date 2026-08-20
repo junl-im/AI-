@@ -1,0 +1,29 @@
+SoriON AI 0.11.32 R2 PATCH MANIFEST
+Base: 0.11.32 R1 · CI Static Contract Stabilization
+Target: 0.11.32 R2 · CI Static Contract Completion
+Added: 5
+Modified: 10
+Deleted: 0
+Total overlay files: 15
+
+[ADDED]
+docs/CI_STATIC_CONTRACT_COMPLETION_0.11.32_R2.md
+docs/archive/HANDOVER_HISTORY_0.11.4_TO_0.11.9.md
+docs/patches/0.11.32-r2-ci-static-contract-completion/DELETE_LIST.txt
+docs/patches/0.11.32-r2-ci-static-contract-completion/PATCH_MANIFEST.txt
+docs/patches/0.11.32-r2-ci-static-contract-completion/PATCH_README.md
+
+[MODIFIED]
+FOUNDATION_REPORT.md
+README.md
+START_HERE.md
+docs/CHANGELOG.md
+docs/HANDOVER.md
+docs/NEXT_UPDATE.md
+scripts/check-neural-voice-runtime-cache.mjs
+scripts/check-studio-voice-overhaul.mjs
+services/api/app/services/neural_preview_cache.py
+src/tts/voiceRecommendation.test.ts
+
+[DELETED]
+(none)

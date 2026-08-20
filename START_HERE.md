@@ -1,21 +1,23 @@
 # START HERE
 
-Current version: `0.11.32 R1 · CI Static Contract Stabilization`
+Current version: `0.11.32 R2 · CI Static Contract Completion`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
+1-0R2. 0.11.32 R2는 제품 semver `0.11.32`를 유지하는 CI 계약 완결 리비전입니다. `neural_preview_cache.py`에 남아 있던 explicit UTF-8 `encode`를 모두 기본 `encode()`로 통일하고, 소리 natural speed 상한 `1.16`에 맞춰 stale `voiceRecommendation` Vitest를 교정합니다.
+1-0R2a. R2는 runtime 음성 정책을 바꾸지 않습니다. GitHub Actions가 API Ruff → Web critical/full Vitest → typecheck/build/Chromium까지 green인지 확인하기 전에는 0.11.33 기능 작업보다 CI 안정화를 우선합니다.
 1-0R1. 0.11.32 R1은 제품 semver `0.11.32`를 유지하는 CI 안정화 리비전입니다. `neural_preview_cache.py`의 Ruff UP012를 `text.encode()`로 교정하고, 준호 `-1.2 semitone` 기본 pitch의 실제 Web Speech 값 `0.9330...`에 맞춰 stale Vitest 범위를 `0.92 < pitch < 0.95`로 갱신합니다.
 1-0R1a. R1은 runtime/음질 정책을 바꾸지 않습니다. GitHub Actions가 Ruff → Web critical/full Vitest → typecheck/build/Chromium까지 green인지 확인하기 전에는 0.11.33 기능 작업보다 CI 안정화를 우선합니다.
 1-0. 0.11.32는 verified v4 preset의 runtime model/reference fingerprint를 다시 확인하고 server shared neural preview cache + PC/mobile playback evidence를 연결합니다.
 1-0a. neural preview cache는 `previewCacheKey + text/style digest`를 사용하고 WAV SHA-256을 재검증합니다. 실제 `playing`/`ended`가 없는 API 성공은 runtime READY가 아닙니다.
 1-0b. Quality Lab에서 다른 기기의 runtime JSON을 병합할 수 있지만 `synthetic=true`, raw 대본/audio URL/User-Agent/기기명/reference 경로가 있는 증거는 인증용으로 사용하지 않습니다.
-1-0c. 현재 GitHub main에는 0.11.31이 아직 올라가지 않았으므로 0.11.32 PATCH는 반드시 0.11.31 FULL/PATCH 적용 후 사용합니다.
+1-0c. 현재 GitHub `main`은 `0.11.32 R1` head `f9d2e8d86f516f6e8aac0141c452830653c2e19b`입니다. 이번 R2 PATCH는 반드시 이 R1 위에 적용합니다.
 1-0. 0.11.31은 `Studio Entry & Voice Character Overhaul`입니다. Landing의 `장문 음성 스튜디오 시작`은 `텍스트를 음성으로`를 sticky header 아래 첫 작업 위치로 정렬합니다.
 1-1. 첫 화면 Masthead 오른쪽은 기능 카드가 아니라 SoriON Voice / Emotion / Rhythm Signature Visual입니다. Current Voice/Engine/CTA는 이 그래픽 영역에 두지 않습니다.
 1-2. 5개 built-in 성우는 `따뜻한 대화 / 또렷한 설명 / 편안한 장문 / 묵직한 다큐 / 빠른 숏폼` persona와 서로 다른 pace/cadence를 사용합니다. Browser pitch 변조는 `0.92~1.08`로 제한합니다.
 1-3. Browser/System TTS는 OS 음성 inventory 한계를 갖습니다. compatible 한국어 음성이 하나뿐이면 timbre는 완전히 분리되지 않으며 verified neural v4 reference/model이 최종 음색 계층입니다.
 1-4. 실제 reference WAV, 모델, 동의/계약 문서는 Git/전달 ZIP에 넣지 않습니다. 0.11.30의 v4 neural preview promotion 경계를 그대로 유지합니다.
 1-5. 카카오 모바일은 direct user-gesture + 1.8초 watchdog + 외부 브라우저 fallback을 유지합니다. WebView 엔진 자체가 Speech Synthesis를 막는 경우 강제 재생을 약속하지 않습니다.
-1-6. 이번 PATCH 기준은 `0.11.31 · Studio Entry & Voice Character Overhaul`입니다.
+1-6. 이번 PATCH 기준은 `0.11.32 R1 · CI Static Contract Stabilization`입니다. plain 0.11.32나 0.11.31에 R2 PATCH를 직접 덮어쓰지 않습니다.
 2. 누적 패치는 ZIP을 덮어쓴 뒤 GitHub Desktop에서 변경사항 전체를 Commit·Push합니다.
 3. `public/sorion-icon.svg`가 남아 있으면 `APPLY_PATCH.cmd` 또는 `APPLY_PATCH.sh`가 삭제합니다.
 4. 일반 Push·PR은 커밋된 `package-lock.json`만 검증합니다. 누락·stale lock은 실패하며 CI가 소스를 자동 수정하지 않습니다.

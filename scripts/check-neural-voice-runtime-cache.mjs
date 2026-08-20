@@ -13,6 +13,11 @@ async function requireText(relativePath, needles) {
   }
 }
 
+const neuralPreviewCacheSource = await readFile(join(root, 'services/api/app/services/neural_preview_cache.py'), 'utf8')
+if (/\.encode\([\"']utf-8[\"']\)/.test(neuralPreviewCacheSource)) {
+  throw new Error('neural_preview_cache.py에 Ruff UP012 대상 explicit UTF-8 encode가 남아 있습니다.')
+}
+
 await requireText('services/api/app/services/neural_preview_cache.py', [
   'neural-preview-cache/1',
   'preview_cache_key',

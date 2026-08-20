@@ -1,3 +1,20 @@
+## 0.11.32 R2 · CI Static Contract Completion
+
+- GitHub R1 이후 API Ruff UP012가 neural preview cache의 남은 명시적 UTF-8 encode를 검출해 `style_digest`/`cache_id`까지 기본 `str.encode()`로 통일했습니다.
+- Web full Vitest의 `dam-calm` clamp 기대값을 production natural speed upper bound `1.16`에 맞춰 `1.15 → 1.16`으로 동기화했습니다.
+- preflight가 같은 두 종류의 stale/static contract 재유입을 직접 차단합니다.
+- production neural cache identity, voice persona/pace/cadence/pitch, Kakao/MY VOICE/Timeline runtime은 변경하지 않습니다.
+
+### 검증
+
+- Repository preflight: **55/55 PASS**
+- API pytest: **232/232 PASS**
+- Worker pytest: **14/14 PASS**
+- Python compileall: **PASS**
+- TS/TSX syntax: **261/261 PASS**
+- `dam-calm` clamp runtime smoke: **1.16 PASS**
+- actual Ruff/Vitest: **GitHub Actions final gate**
+
 ## 0.11.32 R1 · CI Static Contract Stabilization
 
 - GitHub `main` head `f0a2a0d6e081a3e02be6abc80bb31eec297a488b`의 0.11.32 annotations에서 두 concrete root cause를 확인했습니다.
