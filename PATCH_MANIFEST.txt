@@ -4,9 +4,9 @@
 적용 버전: 0.11.33 · Voice Engine Major Hardening
 
 - 추가 5개
-- 수정 66개
-- 삭제 48개
-- 총 119개
+- 수정 68개
+- 삭제 47개
+- 총 120개
 
 ## 추가 파일
 - docs/VOICE_ENGINE_MAJOR_HARDENING_0_11_33.md
@@ -40,6 +40,7 @@
 - package-lock.json
 - package.json
 - scripts/check-device-soak-archive.mjs
+- scripts/apply-delete-list.mjs
 - scripts/check-firebase-config.mjs
 - services/api/app/api/router.py
 - services/api/app/api/routes/connectivity.py
@@ -56,6 +57,7 @@
 - services/api/tests/test_engine_catalog.py
 - services/api/tests/test_engine_strategy.py
 - services/api/tests/test_evidence.py
+- services/api/tests/test_exports.py
 - services/api/tests/test_health.py
 - services/api/tests/test_quality.py
 - services/api/tests/test_setup.py
@@ -123,7 +125,6 @@
 - payload/src/styles/live-voice-bar.css
 - services/api/app/api/routes/exports.py
 - services/api/app/schemas/export.py
-- services/api/tests/test_exports.py
 - src/components/workspace/FinalExportControls.test.tsx
 - src/components/workspace/FinalExportControls.tsx
 - src/components/workspace/FinalExportDialog.test.tsx

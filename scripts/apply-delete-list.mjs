@@ -34,7 +34,7 @@ const gitCheck = spawnSync('git', ['rev-parse', '--is-inside-work-tree'], {
 if (gitCheck.status === 0 && entries.length) {
   const result = spawnSync(
     'git',
-    ['rm', '--cached', '--ignore-unmatch', '--', ...entries],
+    ['rm', '-r', '--cached', '--ignore-unmatch', '--', ...entries],
     { cwd: root, encoding: 'utf8' },
   )
   if (result.status !== 0) {

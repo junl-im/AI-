@@ -37,7 +37,6 @@ payload/src/store/useAppStore.ts
 payload/src/styles/live-voice-bar.css
 services/api/app/api/routes/exports.py
 services/api/app/schemas/export.py
-services/api/tests/test_exports.py
 src/components/workspace/FinalExportControls.test.tsx
 src/components/workspace/FinalExportControls.tsx
 src/components/workspace/FinalExportDialog.test.tsx
