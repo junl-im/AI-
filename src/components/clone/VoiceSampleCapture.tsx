@@ -35,15 +35,15 @@ export function VoiceSampleCapture({
       <div className="soa-clone-card__head">
         <div>
           <span>STEP 01</span>
-          <h2 id="clone-capture-title">10초만 자연스럽게 말해 주세요.</h2>
+          <h2 id="clone-capture-title">20~30초 자연스럽게 말해 주세요.</h2>
         </div>
         <strong className={recording ? 'is-recording' : ''}>{formatSeconds(seconds)}</strong>
       </div>
-      <p>조용한 곳에서 평소 목소리로 한 문단을 읽으면 됩니다. 30초까지 녹음하면 더 안정적입니다.</p>
+      <p>조용한 곳에서 평소 목소리로 또렷하게 읽어 주세요. 20~30초가 가장 안정적이며 30초에서 자동으로 멈춥니다.</p>
       <div className="soa-record-guide" aria-hidden="true">
-        <i style={{ width: `${Math.min(100, (seconds / 10) * 100)}%` }} />
-        <span>10초 권장</span>
-        <span>30초 고품질</span>
+        <i style={{ width: `${Math.min(100, (seconds / 30) * 100)}%` }} />
+        <span>20초 권장</span>
+        <span>30초 최대</span>
       </div>
       <div className="soa-capture-actions">
         <button

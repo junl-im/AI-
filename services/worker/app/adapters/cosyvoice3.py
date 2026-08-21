@@ -1,4 +1,5 @@
 import asyncio
+import wave
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +23,25 @@ class OfficialCosyVoice3Adapter:
         self.device = device
         self.model = AutoModel(model_dir=str(model_path))
 
+    @staticmethod
+    def _validate_reference(sample_path: Path) -> None:
+        if sample_path.suffix.lower() != ".wav":
+            raise ValueError("CosyVoice 기준 음성은 정규화된 WAV여야 합니다.")
+        try:
+            with wave.open(str(sample_path), "rb") as reader:
+                frame_rate = reader.getframerate()
+                frame_count = reader.getnframes()
+                channels = reader.getnchannels()
+        except (wave.Error, EOFError, OSError) as error:
+            raise ValueError("CosyVoice 기준 WAV를 읽지 못했습니다.") from error
+        duration = frame_count / frame_rate if frame_rate else 0
+        if duration < 5:
+            raise ValueError("CosyVoice 기준 음성은 최소 5초 이상이어야 합니다.")
+        if duration > 30:
+            raise ValueError("CosyVoice 기준 음성은 30초를 넘길 수 없습니다.")
+        if frame_rate != 16_000 or channels != 1:
+            raise ValueError("CosyVoice 기준 음성은 16kHz mono WAV로 정규화되어야 합니다.")
+
     async def generate(
         self,
         sample_path: Path,
@@ -31,12 +51,15 @@ class OfficialCosyVoice3Adapter:
         cancel_event: asyncio.Event,
     ) -> None:
         await on_progress(4, "CosyVoice 입력을 준비하고 있습니다.")
-        prompt = f"You are a helpful assistant.<|endofprompt|>{text}"
+        await asyncio.to_thread(self._validate_reference, sample_path)
+        target_text = text.strip()
+        if not target_text:
+            raise ValueError("생성할 문장이 비어 있습니다.")
         iterator = await asyncio.to_thread(
             self.model.inference_cross_lingual,
-            prompt,
+            target_text,
             str(sample_path),
-            True,
+            stream=True,
         )
         chunks: list[Any] = []
         chunk_count = 0

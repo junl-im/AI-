@@ -23,7 +23,7 @@ from app.services.voice_presets import get_voice_preset
 def _write_wave(path):
     sample_rate = 16000
     frames = []
-    for index in range(sample_rate * 2):
+    for index in range(sample_rate * 6):
         sample = round(math.sin(index / 20) * 5000)
         frames.append(struct.pack("<h", sample))
     with wave.open(str(path), "wb") as output:

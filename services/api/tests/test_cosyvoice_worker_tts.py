@@ -1,6 +1,8 @@
 import hashlib
 import io
 import json
+import math
+import struct
 import wave
 from uuid import uuid4
 
@@ -15,11 +17,20 @@ from app.storage.audio_store import AudioStore
 
 def wav_bytes() -> bytes:
     stream = io.BytesIO()
+    sample_rate = 16_000
+    frame_count = sample_rate * 6
     with wave.open(stream, "wb") as audio:
         audio.setnchannels(1)
         audio.setsampwidth(2)
-        audio.setframerate(24000)
-        audio.writeframes(b"\xe8\x03" * 28800)
+        audio.setframerate(sample_rate)
+        frames = b"".join(
+            struct.pack(
+                "<h",
+                int(5000 * math.sin(2 * math.pi * 220 * index / sample_rate)),
+            )
+            for index in range(frame_count)
+        )
+        audio.writeframes(frames)
     return stream.getvalue()
 
 

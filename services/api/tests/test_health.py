@@ -5,7 +5,7 @@ def test_health_returns_service_status(client):
     assert response.json() == {
         "status": "ok",
         "service": "sorion-api",
-        "version": "0.11.32",
+        "version": "0.11.33",
         "default_engine": "auto",
     }
     assert response.headers["X-Request-ID"]

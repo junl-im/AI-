@@ -6,7 +6,7 @@ from app.services.setup_diagnostics import _voice_preset_check
 from app.services.voice_presets import get_voice_preset
 
 
-def write_wav(path, *, seconds=1.2, sample_rate=24000, amplitude=1000):
+def write_wav(path, *, seconds=6.0, sample_rate=16000, amplitude=1000):
     with wave.open(str(path), "wb") as audio:
         audio.setnchannels(1)
         audio.setsampwidth(2)
@@ -67,7 +67,7 @@ def test_setup_status_explains_required_steps(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.11.32"
+    assert body["version"] == "0.11.33"
     assert isinstance(body["ready"], bool)
     assert isinstance(body["real_engine_count"], int)
     assert body["voice_preset_expected_count"] == 5
@@ -220,3 +220,32 @@ def test_voice_preset_v3_stays_usable_without_neural_preview_promotion(tmp_path)
     assert item.usable is True
     assert item.neural_preview_ready is False
     assert item.preview_cache_key is None
+
+
+def test_voice_preset_check_blocks_noncanonical_worker_audio(tmp_path):
+    voice_id = "on-clear"
+    wav_path = tmp_path / f"{voice_id}.wav"
+    write_wav(wav_path, seconds=8.0, sample_rate=24000, amplitude=1800)
+    write_approved_manifest(tmp_path, voice_id)
+
+    _, ready_count, diagnostics = _voice_preset_check(tmp_path)
+
+    item = next(value for value in diagnostics if value.voice_id == voice_id)
+    assert ready_count == 0
+    assert item.status == "blocked"
+    assert item.sample_rate == 24000
+    assert any("16kHz" in issue for issue in item.issues)
+
+
+def test_voice_preset_diagnostic_exposes_signal_level(tmp_path):
+    voice_id = "sori-warm"
+    wav_path = tmp_path / f"{voice_id}.wav"
+    write_wav(wav_path, seconds=12.0, amplitude=2400)
+    write_approved_manifest(tmp_path, voice_id)
+
+    _, ready_count, diagnostics = _voice_preset_check(tmp_path)
+
+    item = next(value for value in diagnostics if value.voice_id == voice_id)
+    assert ready_count == 1
+    assert item.rms_db is not None
+    assert item.rms_db > -50

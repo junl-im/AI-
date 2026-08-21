@@ -146,7 +146,7 @@ API `GET /api/v1/connectivity`는 `worker-model-integrity` 검사로 이 상태�
 - `GET /api/v1/quality/stt/probe`: Faster Whisper 선택 설치 상태
 - `POST /api/v1/quality/stt/measure`: 원문·전사문의 CER·WER·핵심 토큰 오류 측정
 - `POST /api/v1/quality/stt/transcribe`: 로컬 음원 전사와 측정
-- `POST /api/v1/exports`: 완료 WAV·쉼 병합, SRT·VTT, 선택적 MP3 생성
+- ~~`POST /api/v1/exports`~~: 공개 최종 MP3+자막 Export API는 2026-08-21 제거됨. 장시간 결합/자막 검증은 내부 Quality soak만 유지
 
 ## 0.9.3-beta.2 실기기 summary와 선택 STT 재생성
 
@@ -169,8 +169,8 @@ POST /api/v1/quality/stt/verify-segments
 ```
 
 `GET /setup`의 `voice_preset_diagnostics`는 프리셋별 `status`, `usable`, 길이, 샘플레이트,
-채널, 비트 깊이, 무음·클리핑 비율과 조치 사유를 반환합니다. 1~30초, 16~48kHz, 모노·스테레오
-8·16·24·32비트 PCM WAV가 기본 허용 범위입니다.
+채널, 비트 깊이, RMS, 무음·클리핑 비율과 조치 사유를 반환합니다. CosyVoice 성우 기준 음성은
+5~30초, 16kHz mono, 8·16·24·32비트 PCM WAV만 승인 대상으로 삼고 12초 이상을 권장합니다.
 
 TTS 완료 응답의 `first_audio_ms`는 첫 사용 가능 서버 음성 파일 준비 시간입니다. 여러 구간은 첫
 구간 준비, 한 구간은 최종 파일 준비 시점이며 실제 브라우저 재생 시작을 의미하지 않습니다.
@@ -220,9 +220,9 @@ GET /api/v1/tts/jobs/{job_id}/segments/{index}/audio?file=...&expires=...&signat
 
 `GET /quality/device-benchmarks/summary`의 `metric_groups`는 device profile·engine ID·preset ID별 P95, 평균 RTF와 실패율을 반환합니다.
 
-## POST /exports · archive policy
+## 공개 Final Export API 상태
 
-응답에는 `server_expires_at`, `server_retention_minutes`, `preservation_mode: download-only`가 포함됩니다. 서버 파일은 임시 보관만 하며 사용자 보존은 음원·SRT·VTT 다운로드로 수행합니다.
+`POST /exports` 공개 경로는 제거되었습니다. 최종 MP3+자막 번들 UI와 API는 제품 표면에 존재하지 않으며, 장시간 WAV 결합·자막 타이밍 검증 로직은 Quality soak 내부 도구로만 유지합니다.
 
 ## Heartbeat 6.7 Evidence Intake
 

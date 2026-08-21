@@ -33,12 +33,23 @@ class VoiceCloneConsent(BaseModel):
     allowed_purpose: VoiceClonePurpose
 
 
+class VoiceCloneClientAnalysis(BaseModel):
+    duration_seconds: float = Field(default=0, ge=0, le=600)
+    sample_rate: int | None = Field(default=None, ge=8_000, le=384_000)
+    channel_count: int | None = Field(default=None, ge=1, le=16)
+    rms_db: float | None = Field(default=None, ge=-160, le=20)
+    silence_ratio: float | None = Field(default=None, ge=0, le=1)
+    clipping_ratio: float | None = Field(default=None, ge=0, le=1)
+    status: Literal["good", "warning", "blocked"]
+    messages: list[str] = Field(default_factory=list, max_length=12)
+
+
 class VoiceCloneCapabilityResponse(BaseModel):
     engine_id: str
     engine_name: str
     ready: bool
     reason: str | None = None
-    recommended_seconds: int = 10
+    recommended_seconds: int = 25
     max_file_bytes: int
     accepted_extensions: list[str]
     worker_version: str | None = None
@@ -53,23 +64,13 @@ class VoiceCloneProfileResponse(BaseModel):
     sample_file_name: str
     created_at: str
     message: str
+    server_analysis: VoiceCloneClientAnalysis | None = None
 
 
 class VoiceCloneDeleteResponse(BaseModel):
     id: str
     deleted: bool
     message: str
-
-
-class VoiceCloneClientAnalysis(BaseModel):
-    duration_seconds: float = Field(default=0, ge=0, le=600)
-    sample_rate: int | None = Field(default=None, ge=8_000, le=384_000)
-    channel_count: int | None = Field(default=None, ge=1, le=16)
-    rms_db: float | None = Field(default=None, ge=-160, le=20)
-    silence_ratio: float | None = Field(default=None, ge=0, le=1)
-    clipping_ratio: float | None = Field(default=None, ge=0, le=1)
-    status: Literal["good", "warning", "blocked"]
-    messages: list[str] = Field(default_factory=list, max_length=12)
 
 
 class VoiceCloneJobCreateRequest(BaseModel):

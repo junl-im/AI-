@@ -1,3 +1,30 @@
+## 0.11.33 · Voice Engine Major Hardening
+
+- MY VOICE 업로드를 서버가 실제 디코딩해 길이·RMS·무음·clipping을 다시 검사하고, 검증된 reference를 16 kHz mono PCM WAV로 정규화합니다.
+- reference 정책을 20~30초 권장 / 30초 상한으로 통일하고 recorder를 29.5초 hard stop으로 제한해 타이머 오차에 의한 서버 거부를 줄입니다.
+- zero-byte 녹음과 reset 직후 늦은 MediaRecorder stop 이벤트가 폐기 파일을 되살리는 race를 차단합니다.
+- local profile ID를 `client_profile_id`로 서버에 전달해 재시도/응답 유실 시 중복 profile을 줄이고, profile GET에서 현재 Worker readiness를 다시 반영해 `engine-unavailable` 상태를 복구할 수 있게 합니다.
+- API가 없을 때 만든 local-only profile은 자동 업로드하지 않고 명시적 서버 재등록 경로를 사용합니다.
+- CosyVoice adapter는 16 kHz mono·5~30초 reference를 재검증하고 `inference_cross_lingual(..., stream=True)` keyword 호출을 사용합니다.
+- 5개 성우 preset validation을 16 kHz mono·5~30초 + RMS·무음·clipping 기준으로 강화하고 diagnostics에 RMS를 추가합니다. 기존 동의/권리/사람 검수/SHA/중복 WAV 차단은 유지합니다.
+- 사용자용 `최종 MP3 + 자막` / `최종 WAV + 자막` Web UI, 공개 `/exports` API/schema, 관련 테스트를 제거했습니다. 내부 WAV/자막 soak 도구는 Quality 전용으로 유지합니다.
+- 오래된 0.11.15 Live Voice/MY VOICE apply script와 payload snapshot을 제거하고, 최신 `VERIFY_LIVE_VOICE_MYVOICE.mjs`가 폐기 파일/route의 재유입까지 차단합니다.
+- 릴리스 ZIP에서 실제 `.env.development/.env.production`을 제외해도 preflight가 `.env.example`의 공개 Firebase client metadata를 검증하도록 packaging contract를 보강했습니다.
+- 실제 rights-cleared 성우 WAV/model/동의 문서는 저장소에 없으므로 neural 5/5 품질 성공을 주장하지 않고 fail-closed를 유지합니다.
+
+### 검증
+
+- Product version sync: **0.11.33 PASS**
+- API pytest: **235/235 PASS** (108/108 + 127/127 분할 실행, 기존 FastAPI deprecated alias warning 1건)
+- Worker pytest: **16/16 PASS**
+- Python compileall: **PASS**
+- Live Voice / MY VOICE hardening verifier: **51/51 PASS**
+- Repository preflight: **55/55 PASS**
+- TypeScript dependency-free syntax: **254/254 PASS**
+- Voice preset/evidence, device soak, release readiness, internal verification contracts: **PASS**
+- Full API 단일 실행은 **88%까지 실패 없이 진행 후 실행 제한으로 중단**, 동일 40개 파일을 20+20으로 분할해 전부 통과했습니다.
+- Dependency 기반 Web lint/Vitest/typecheck/build: **npm registry DNS `EAI_AGAIN`으로 로컬 실행 불가 · GitHub Actions final gate**
+
 # CHANGELOG
 
 ## 0.11.32 R2 · CI Static Contract Completion

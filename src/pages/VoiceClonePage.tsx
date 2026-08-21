@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { ApiError } from '../api/httpClient'
 import { CloneConsentCard } from '../components/clone/CloneConsentCard'
 import { CloneExecutionCard } from '../components/clone/CloneExecutionCard'
 import { CloneReadyCard } from '../components/clone/CloneReadyCard'
@@ -48,6 +49,8 @@ function localProfile(input: {
   const now = new Date().toISOString()
   return {
     id: createRandomId(),
+    remoteProfileId: null,
+    remoteSynced: false,
     displayName: input.displayName,
     status: 'engine-unavailable',
     engineId: 'cosyvoice3-worker',
@@ -66,6 +69,21 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : '음성 복제 요청을 처리하지 못했습니다.'
 }
 
+const DEFINITE_LOCAL_FALLBACK_KINDS = new Set([
+  'unconfigured',
+  'offline',
+  'mixed-content',
+  'mobile-localhost',
+])
+const UNCERTAIN_REMOTE_KINDS = new Set(['timeout', 'cors-or-network'])
+
+function localFallbackMode(error: unknown): 'local-only' | 'remote-unknown' | null {
+  if (!(error instanceof ApiError)) return null
+  if (DEFINITE_LOCAL_FALLBACK_KINDS.has(error.kind)) return 'local-only'
+  if (UNCERTAIN_REMOTE_KINDS.has(error.kind)) return 'remote-unknown'
+  return null
+}
+
 export function VoiceClonePage() {
   const recorder = useVoiceRecorder()
   const { profiles, loading: profilesLoading } = useMyVoiceProfiles()
@@ -80,6 +98,7 @@ export function VoiceClonePage() {
   const [profile, setProfile] = useState<VoiceCloneProfile | null>(null)
   const [capability, setCapability] = useState<VoiceCloneCapability | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [syncingProfile, setSyncingProfile] = useState(false)
   const [job, setJob] = useState<VoiceCloneJob | null>(null)
   const activeJobId = job?.id ?? null
   const activeJobStatus = job?.status ?? null
@@ -115,6 +134,13 @@ export function VoiceClonePage() {
       window.removeEventListener('online', refreshNow)
     }
   }, [])
+
+  useEffect(() => {
+    setProfile((current) => {
+      if (!current) return current
+      return profiles.find((candidate) => candidate.id === current.id) ?? current
+    })
+  }, [profiles])
 
   useEffect(() => {
     const file = recorder.file
@@ -240,21 +266,32 @@ export function VoiceClonePage() {
     try {
       const remote = await prepareVoiceCloneProfile({
         file: recorder.file,
+        profileId: nextProfile.id,
         displayName: displayName.trim(),
         consent: completedConsent,
         analysis,
       })
       nextProfile = {
         ...nextProfile,
-        id: remote.id,
+        remoteProfileId: remote.id,
+        remoteSynced: true,
         status: remote.status,
-        engineId: remote.engine_id,
-        createdAt: remote.created_at,
-        updatedAt: remote.created_at,
+        engineId: remote.engineId,
+        analysis: remote.serverAnalysis ?? nextProfile.analysis,
+        updatedAt: remote.createdAt,
         message: remote.message,
       }
-    } catch {
-      // 공개 Pages와 오프라인 환경에서는 로컬 우선 프로필을 만든다.
+    } catch (error) {
+      const fallbackMode = localFallbackMode(error)
+      if (!fallbackMode) {
+        showNotice(errorMessage(error))
+        setSubmitting(false)
+        return
+      }
+      nextProfile.remoteSynced = fallbackMode === 'remote-unknown' ? null : false
+      nextProfile.message = fallbackMode === 'remote-unknown'
+        ? '서버 응답이 끊겨 등록 여부를 확정하지 못했습니다. 연결이 회복되면 같은 프로필 ID로 자동 확인합니다.'
+        : '서버에 연결하지 못해 샘플과 동의 기록만 이 기기에 저장했습니다. 서버 연결 후 직접 다시 준비할 수 있습니다.'
     }
 
     try {
@@ -290,12 +327,46 @@ export function VoiceClonePage() {
     }
   }
 
+  async function handleResync() {
+    if (!profile || profile.remoteSynced === true || syncingProfile) return
+    setSyncingProfile(true)
+    try {
+      const file = new File([profile.sampleBlob], profile.fileName, { type: profile.mimeType })
+      const remote = await prepareVoiceCloneProfile({
+        file,
+        profileId: profile.id,
+        displayName: profile.displayName,
+        consent: profile.consent,
+        analysis: profile.analysis,
+      })
+      const nextProfile: VoiceCloneProfile = {
+        ...profile,
+        remoteProfileId: remote.id,
+        remoteSynced: true,
+        status: remote.status,
+        engineId: remote.engineId,
+        analysis: remote.serverAnalysis ?? profile.analysis,
+        updatedAt: new Date().toISOString(),
+        message: remote.message,
+      }
+      await saveVoiceProfile(nextProfile)
+      setProfile(nextProfile)
+      showNotice('서버 재검증까지 완료해 실제 생성용 내 목소리를 준비했습니다.')
+    } catch (error) {
+      showNotice(errorMessage(error))
+    } finally {
+      setSyncingProfile(false)
+    }
+  }
+
   async function handleStart(text: string) {
     if (!profile || !capability?.ready) return
     setJobBusy(true)
     setJobError(null)
     try {
-      const nextJob = await startVoiceCloneJob(profile.id, text)
+      const remoteId = profile.remoteProfileId ?? (profile.remoteSynced === false ? null : profile.id)
+      if (!remoteId) throw new Error('서버에 다시 준비한 뒤 실제 목소리를 생성할 수 있습니다.')
+      const nextJob = await startVoiceCloneJob(remoteId, text)
       enqueuedJobId.current = null
       setJob(nextJob)
     } catch (error) {
@@ -332,15 +403,28 @@ export function VoiceClonePage() {
 
   async function handleDelete() {
     if (!profile) return
-    await deleteVoiceProfile(profile.id).catch(() => undefined)
-    await deleteRemoteVoiceCloneProfile(profile.id).catch(() => undefined)
+    const remoteId = profile.remoteProfileId ?? (profile.remoteSynced === false ? null : profile.id)
+    if (remoteId) {
+      try {
+        await deleteRemoteVoiceCloneProfile(remoteId)
+      } catch (error) {
+        showNotice(`서버 샘플 삭제를 확인하지 못했습니다. 연결을 확인한 뒤 다시 삭제해 주세요. ${errorMessage(error)}`)
+        return
+      }
+    }
+    try {
+      await deleteVoiceProfile(profile.id)
+    } catch {
+      showNotice('서버 샘플은 삭제했지만 이 기기의 사본을 지우지 못했습니다. 브라우저 저장소를 확인해 주세요.')
+      return
+    }
     setProfile(null)
     setJob(null)
     setJobError(null)
     recorder.reset()
     setAnalysis(null)
     setConsent(initialConsent)
-    showNotice('동의를 철회하고 저장된 음성 샘플을 삭제했습니다.')
+    showNotice('동의를 철회하고 서버와 이 기기의 음성 샘플 삭제를 확인했습니다.')
   }
 
   return (
@@ -378,11 +462,23 @@ export function VoiceClonePage() {
           onConsent={setConsent}
           onSubmit={() => void handlePrepare()}
         />
-        {profile ? <CloneReadyCard profile={profile} onDelete={() => void handleDelete()} /> : null}
+        {profile ? (
+          <CloneReadyCard
+            profile={profile}
+            syncing={syncingProfile}
+            onSync={() => void handleResync()}
+            onDelete={() => void handleDelete()}
+          />
+        ) : null}
         {profile ? (
           <CloneExecutionCard
             profileName={profile.displayName}
-            ready={Boolean(capability?.ready && profile.status === 'engine-ready')}
+            ready={Boolean(
+              capability?.ready
+              && profile.status === 'engine-ready'
+              && profile.remoteSynced !== false
+              && profile.remoteSynced !== null
+            )}
             job={job}
             busy={jobBusy}
             error={jobError}

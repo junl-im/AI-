@@ -277,12 +277,12 @@ async def connectivity(request: Request) -> ConnectivityResponse:
         ),
         ConnectivityCheck(
             id="ffmpeg-export",
-            label="MP3 Export",
+            label="FFmpeg 오디오 도구",
             status="ready" if ffmpeg_path else "warning",
             detail=(
-                f"FFmpeg 준비됨: {ffmpeg_path}"
+                f"FFmpeg 준비됨: {ffmpeg_path} · 비-WAV 내 목소리 샘플 서버 검증 가능"
                 if ffmpeg_path
-                else "FFmpeg가 없어 WAV·SRT·VTT만 사용할 수 있습니다."
+                else "FFmpeg가 없어 내 목소리 서버 검증은 WAV 샘플만 지원합니다."
             ),
         ),
         ConnectivityCheck(

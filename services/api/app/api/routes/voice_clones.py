@@ -29,7 +29,6 @@ from app.schemas.voiceclone import (
     VoiceCloneProfileResponse,
     VoiceCloneWorkerResponse,
 )
-from app.storage.voice_clone_store import ALLOWED_EXTENSIONS
 
 router = APIRouter()
 
@@ -120,7 +119,7 @@ async def capabilities(request: Request) -> VoiceCloneCapabilityResponse:
         ready=info.ready if info else False,
         reason=info.reason if info else "음성 복제 엔진이 등록되지 않았습니다.",
         max_file_bytes=settings.voice_clone_max_file_bytes,
-        accepted_extensions=sorted(ALLOWED_EXTENSIONS),
+        accepted_extensions=sorted(request.app.state.voice_clone_store.accepted_extensions()),
         worker_version=snapshot.get("worker_version"),
         diagnostics=snapshot.get("diagnostics"),
     )
@@ -152,6 +151,79 @@ async def worker_status() -> VoiceCloneWorkerResponse:
     )
 
 
+def _profile_response(
+    profile_id: UUID,
+    metadata: dict[str, object],
+    *,
+    engine_ready: bool,
+    engine_id: str,
+    quality_blocked: bool = False,
+) -> VoiceCloneProfileResponse:
+    profile_status = (
+        "sample-ready"
+        if quality_blocked
+        else "engine-ready" if engine_ready else "engine-unavailable"
+    )
+    message = (
+        "기존 샘플이 강화된 서버 품질 기준을 통과하지 못했습니다. "
+        "20~30초의 깨끗한 발화로 다시 준비해 주세요."
+        if quality_blocked
+        else (
+            "서버 검증을 통과한 샘플이며 Worker가 준비되어 실제 복제 작업을 시작할 수 있습니다."
+            if engine_ready
+            else (
+                "서버 검증을 통과한 샘플을 보관했습니다. "
+                "Worker 연결 전까지 복제는 실행하지 않습니다."
+            )
+        )
+    )
+    return VoiceCloneProfileResponse(
+        id=str(profile_id),
+        display_name=str(metadata.get("display_name") or "내 목소리"),
+        status=profile_status,
+        engine_id=engine_id,
+        sample_file_name=str(metadata.get("sample_file") or ""),
+        created_at=str(metadata.get("created_at") or ""),
+        message=message,
+        server_analysis=(
+            VoiceCloneClientAnalysis.model_validate(metadata["server_analysis"])
+            if isinstance(metadata.get("server_analysis"), dict)
+            else None
+        ),
+    )
+
+
+async def _current_engine_state() -> tuple[str, bool]:
+    engine = engine_registry.resolve_voice_clone("auto")
+    if engine is not None:
+        await engine.probe()
+    info = engine.info() if engine else None
+    return (info.id if info else "cosyvoice3-worker", bool(info and info.ready))
+
+
+def _reject_server_analysis(server_analysis: dict[str, object]) -> None:
+    if server_analysis.get("status") != "blocked":
+        return
+    duration = server_analysis.get("duration_seconds")
+    silence = server_analysis.get("silence_ratio")
+    clipping = server_analysis.get("clipping_ratio")
+    rms_db = server_analysis.get("rms_db")
+    if isinstance(duration, (int, float)) and duration < 5:
+        detail = "SOA-5009: 음성 샘플은 최소 5초 이상이어야 합니다."
+    elif isinstance(duration, (int, float)) and duration > 30:
+        detail = "SOA-5013: 기준 음성은 30초를 넘길 수 없습니다. 20~30초 구간으로 잘라 주세요."
+    elif isinstance(clipping, (int, float)) and clipping > 0.02:
+        detail = "SOA-5012: 클리핑이 심한 샘플은 음색 왜곡 위험 때문에 사용할 수 없습니다."
+    elif (
+        isinstance(silence, (int, float))
+        and silence > 0.85
+    ) or (isinstance(rms_db, (int, float)) and rms_db < -50):
+        detail = "SOA-5011: 무음이 많거나 발화 신호가 너무 작은 샘플은 사용할 수 없습니다."
+    else:
+        detail = "SOA-5014: 서버 파형 품질 검사를 통과하지 못한 샘플입니다."
+    raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=detail)
+
+
 @router.post("/profiles", response_model=VoiceCloneProfileResponse)
 async def create_profile(
     request: Request,
@@ -159,6 +231,7 @@ async def create_profile(
     display_name: Annotated[str, Form(min_length=1, max_length=40)],
     consent_json: Annotated[str, Form()],
     client_analysis_json: Annotated[str, Form()],
+    client_profile_id: Annotated[str | None, Form()] = None,
 ) -> VoiceCloneProfileResponse:
     consent = parse_consent(consent_json)
     analysis = parse_client_analysis(client_analysis_json)
@@ -168,8 +241,45 @@ async def create_profile(
             detail="SOA-5007: 품질 검사에서 차단된 샘플은 복제 준비에 사용할 수 없습니다.",
         )
 
-    profile_id = uuid4()
+    if client_profile_id:
+        try:
+            profile_id = UUID(client_profile_id)
+        except ValueError as error:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="SOA-5015: 내 목소리 프로필 식별자가 올바르지 않습니다.",
+            ) from error
+    else:
+        profile_id = uuid4()
+
     store = request.app.state.voice_clone_store
+    existing_metadata = store.load_metadata(profile_id)
+    existing_sample = store.sample_path(profile_id)
+    if existing_metadata is not None and existing_sample is not None:
+        try:
+            server_analysis = store.inspect_sample(existing_sample)
+            _reject_server_analysis(server_analysis)
+            existing_sample = store.normalize_for_engine(profile_id, existing_sample)
+            server_analysis = store.inspect_sample(existing_sample)
+            _reject_server_analysis(server_analysis)
+        except ValueError as error:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=str(error),
+            ) from error
+        existing_metadata["sample_file"] = existing_sample.name
+        existing_metadata["server_analysis"] = server_analysis
+        store.save_metadata(profile_id, existing_metadata)
+        engine_id, engine_ready = await _current_engine_state()
+        return _profile_response(
+            profile_id,
+            existing_metadata,
+            engine_ready=engine_ready,
+            engine_id=engine_id,
+        )
+    if existing_metadata is not None or existing_sample is not None:
+        store.delete_profile(profile_id)
+
     try:
         sample_path = await store.save_sample(profile_id, sample)
     except ValueError as error:
@@ -186,52 +296,72 @@ async def create_profile(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(error),
         ) from error
-    duration = server_analysis["duration_seconds"]
-    if isinstance(duration, float) and duration < 5:
+    try:
+        _reject_server_analysis(server_analysis)
+        sample_path = store.normalize_for_engine(profile_id, sample_path)
+        server_analysis = store.inspect_sample(sample_path)
+        _reject_server_analysis(server_analysis)
+    except (HTTPException, ValueError) as error:
         store.delete_profile(profile_id)
+        if isinstance(error, HTTPException):
+            raise
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="SOA-5009: WAV 음성 샘플은 최소 5초 이상이어야 합니다.",
-        )
+            detail=str(error),
+        ) from error
 
     created_at = datetime.now(timezone.utc).isoformat()
-    engine = engine_registry.resolve_voice_clone("auto")
-    if engine is not None:
-        await engine.probe()
-    info = engine.info() if engine else None
-    engine_id = info.id if info else "cosyvoice3-worker"
-    engine_ready = bool(info and info.ready)
-    profile_status = "engine-ready" if engine_ready else "engine-unavailable"
-    ready_message = (
-        "동의된 샘플을 안전하게 보관했습니다. "
-        "Worker가 준비되어 실제 복제 작업을 시작할 수 있습니다."
-    )
-    waiting_message = (
-        "동의된 샘플을 안전하게 보관했습니다. "
-        "CosyVoice Worker 연결 전까지 복제는 실행하지 않습니다."
-    )
-    message = ready_message if engine_ready else waiting_message
-    store.save_metadata(
+    engine_id, engine_ready = await _current_engine_state()
+    metadata: dict[str, object] = {
+        "id": str(profile_id),
+        "display_name": display_name.strip(),
+        "engine_id": engine_id,
+        "sample_file": sample_path.name,
+        "created_at": created_at,
+        "consent": consent.model_dump(mode="json"),
+        "client_analysis": analysis.model_dump(mode="json"),
+        "server_analysis": server_analysis,
+    }
+    store.save_metadata(profile_id, metadata)
+    return _profile_response(
         profile_id,
-        {
-            "id": str(profile_id),
-            "display_name": display_name.strip(),
-            "engine_id": engine_id,
-            "sample_file": sample_path.name,
-            "created_at": created_at,
-            "consent": consent.model_dump(mode="json"),
-            "client_analysis": analysis.model_dump(mode="json"),
-            "server_analysis": server_analysis,
-        },
-    )
-    return VoiceCloneProfileResponse(
-        id=str(profile_id),
-        display_name=display_name.strip(),
-        status=profile_status,
+        metadata,
+        engine_ready=engine_ready,
         engine_id=engine_id,
-        sample_file_name=sample_path.name,
-        created_at=created_at,
-        message=message,
+    )
+
+
+@router.get("/profiles/{profile_id}", response_model=VoiceCloneProfileResponse)
+async def get_profile(profile_id: UUID, request: Request) -> VoiceCloneProfileResponse:
+    store = request.app.state.voice_clone_store
+    metadata = store.load_metadata(profile_id)
+    sample_path = store.sample_path(profile_id)
+    if metadata is None or sample_path is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="SOA-5102: 동의된 음성 프로필을 찾지 못했습니다.",
+        )
+    try:
+        server_analysis = store.inspect_sample(sample_path)
+        if server_analysis.get("status") != "blocked":
+            sample_path = store.normalize_for_engine(profile_id, sample_path)
+            server_analysis = store.inspect_sample(sample_path)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
+    metadata["sample_file"] = sample_path.name
+    metadata["server_analysis"] = server_analysis
+    store.save_metadata(profile_id, metadata)
+    quality_blocked = server_analysis.get("status") == "blocked"
+    engine_id, engine_ready = await _current_engine_state()
+    return _profile_response(
+        profile_id,
+        metadata,
+        engine_ready=engine_ready,
+        engine_id=engine_id,
+        quality_blocked=quality_blocked,
     )
 
 
@@ -251,6 +381,23 @@ async def create_clone_job(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="SOA-5102: 동의된 음성 프로필을 찾지 못했습니다.",
         )
+    store = request.app.state.voice_clone_store
+    try:
+        server_analysis = store.inspect_sample(sample_path)
+        _reject_server_analysis(server_analysis)
+        sample_path = store.normalize_for_engine(profile_id, sample_path)
+        server_analysis = store.inspect_sample(sample_path)
+        _reject_server_analysis(server_analysis)
+        metadata = store.load_metadata(profile_id)
+        if metadata is not None:
+            metadata["sample_file"] = sample_path.name
+            metadata["server_analysis"] = server_analysis
+            store.save_metadata(profile_id, metadata)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=str(error),
+        ) from error
     engine = get_clone_engine()
     if not await engine.probe():
         raise HTTPException(

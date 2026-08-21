@@ -1,14 +1,27 @@
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.32 R2 · CI Static Contract Completion**
+Current baseline: **0.11.33 · Voice Engine Major Hardening**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-20 KST**
+최종 갱신: **2026-08-21 18:01 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+## 2026-08-21 KST · 0.11.33 Voice Engine Major Hardening
+1. **작업 일시(KST)**: 2026-08-21 18:01 KST.
+2. **대상/기준 버전**: `0.11.33 · Voice Engine Major Hardening` / `0.11.32 R2 · CI Static Contract Completion`.
+3. **변경 내용**: MY VOICE 실제 서버 파형 재검증·16 kHz mono 정규화·20~30초 권장/30초 상한·29.5초 녹음 hard stop·zero-byte/race 차단, idempotent profile 등록과 Worker 복구 readiness 동기화, CosyVoice `stream=True` 호출 교정, 5개 성우 preset RMS/무음/clipping/canonical WAV gate를 적용했습니다. 사용자용 Final Export UI/API와 과거 0.11.15 apply payload를 제거하고 재유입 verifier를 최신 구조로 교체했습니다.
+4. **변경 이유**: 브라우저 분석값 신뢰, Worker 복구 뒤 stale profile, reference format 불일치, 잘못된 CosyVoice positional 인수, 오래된 패치가 폐기 UI를 되살릴 수 있는 위험을 함께 닫기 위해서입니다.
+5. **영향 범위**: Web MY VOICE capture/library/voice selection, FastAPI voice-clone/preset diagnostics, CosyVoice Worker adapter, Final Export 공개 표면, 릴리스/검증 문서입니다. 내부 장시간 WAV/자막 soak 도구는 Quality 전용으로 유지합니다.
+   릴리스 packaging은 실제 `.env.development/.env.production` 없이 `.env.example`을 검증하는 release-safe Firebase preflight도 포함합니다.
+6. **변경·추가된 주요 파일**: `src/{hooks/useVoiceRecorder.ts,voiceclone/*,pages/VoiceClonePage.tsx,voice/voiceChoices.ts}`, `services/api/app/{api/routes/voice_clones.py,storage/voice_clone_store.py,services/voice_preset_validation.py}`, `services/worker/app/adapters/cosyvoice3.py`, `VERIFY_LIVE_VOICE_MYVOICE.mjs`, `docs/VOICE_ENGINE_MAJOR_HARDENING_0_11_33.md`, 관련 테스트와 patch 문서입니다. 공개 export UI/API와 stale apply/payload 파일은 삭제합니다.
+7. **검증 결과**: Product version sync **0.11.33 PASS**, API pytest **235/235 PASS**(108+127 분할, 기존 FastAPI deprecated alias warning 1건), Worker pytest **16/16 PASS**, Python compileall **PASS**, Live Voice/MY VOICE verifier **51/51 PASS**, Repository preflight **55/55 PASS**, TypeScript dependency-free syntax **254/254 PASS**, voice preset/evidence/device soak/release readiness/internal verification 계약 **PASS**. 단일 API full run은 88%까지 실패 없이 진행 후 실행 제한으로 중단됐고 동일 40개 test file을 분할해 모두 통과했습니다. Web dependency 기반 lint/Vitest/typecheck/build는 npm registry DNS `EAI_AGAIN` 때문에 로컬에서 완료하지 못해 GitHub Actions final gate입니다.
+8. **알려진 제한과 주의사항**: 실제 rights-cleared 5개 성우 WAV/model/동의 문서는 저장소에 없고 manifest는 pending이므로 실제 neural 5/5 음질 성공을 주장하지 않습니다. local-only MY VOICE는 개인정보 경계 때문에 자동 업로드하지 않습니다. 내부 `final_export.py`/export soak는 공개 Final Export 기능이 아니라 품질검사용입니다.
+9. **생성 산출물**: `SoriON-AI-0.11.33-voice-engine-major-hardening-full.zip`, `SoriON-AI-0.11.32-r2-to-0.11.33-voice-engine-major-hardening-patch.zip`, `SoriON-AI-0.11.33-voice-engine-major-hardening-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.34 · Neural Voice Field Playback & Release Gate`. 실제 승인 성우 asset과 실기기 MY VOICE/neural playback 증거가 준비된 경우에만 runtime 품질 인증으로 진행하고, GitHub Actions Web gate 실패가 있으면 기능보다 CI 안정화를 우선합니다.
 
 ## 2026-08-20 KST · 0.11.32 R2 CI Static Contract Completion
 1. **작업 일시(KST)**: 2026-08-20.

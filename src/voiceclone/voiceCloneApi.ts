@@ -7,6 +7,17 @@ import type {
   VoiceSampleAnalysis,
 } from './voiceCloneTypes'
 
+interface ApiVoiceSampleAnalysis {
+  duration_seconds: number
+  sample_rate: number | null
+  channel_count: number | null
+  rms_db: number | null
+  silence_ratio: number | null
+  clipping_ratio: number | null
+  status: VoiceSampleAnalysis['status']
+  messages: string[]
+}
+
 interface ApiVoiceCloneProfile {
   id: string
   display_name: string
@@ -15,6 +26,18 @@ interface ApiVoiceCloneProfile {
   sample_file_name: string
   created_at: string
   message: string
+  server_analysis: ApiVoiceSampleAnalysis | null
+}
+
+export interface RemoteVoiceCloneProfile {
+  id: string
+  displayName: string
+  status: VoiceCloneProfileStatus
+  engineId: string
+  sampleFileName: string
+  createdAt: string
+  message: string
+  serverAnalysis: VoiceSampleAnalysis | null
 }
 
 export interface VoiceCloneCapability {
@@ -67,6 +90,33 @@ interface ApiVoiceCloneJob {
   events_url: string
   error: string | null
   segments: ApiVoiceCloneSegment[]
+}
+
+function mapAnalysis(value: ApiVoiceSampleAnalysis | null): VoiceSampleAnalysis | null {
+  if (!value) return null
+  return {
+    durationSeconds: value.duration_seconds,
+    sampleRate: value.sample_rate,
+    channelCount: value.channel_count,
+    rmsDb: value.rms_db,
+    silenceRatio: value.silence_ratio,
+    clippingRatio: value.clipping_ratio,
+    status: value.status,
+    messages: value.messages,
+  }
+}
+
+function mapProfile(value: ApiVoiceCloneProfile): RemoteVoiceCloneProfile {
+  return {
+    id: value.id,
+    displayName: value.display_name,
+    status: value.status,
+    engineId: value.engine_id,
+    sampleFileName: value.sample_file_name,
+    createdAt: value.created_at,
+    message: value.message,
+    serverAnalysis: mapAnalysis(value.server_analysis),
+  }
 }
 
 function mapJob(value: ApiVoiceCloneJob): VoiceCloneJob {
@@ -157,12 +207,14 @@ export function invalidateVoiceCloneCapabilityCache(): void {
 
 export async function prepareVoiceCloneProfile(input: {
   file: File
+  profileId?: string
   displayName: string
   consent: VoiceCloneConsent
   analysis: VoiceSampleAnalysis
-}): Promise<ApiVoiceCloneProfile> {
+}): Promise<RemoteVoiceCloneProfile> {
   const form = new FormData()
   form.set('sample', input.file)
+  if (input.profileId) form.set('client_profile_id', input.profileId)
   form.set('display_name', input.displayName)
   form.set('consent_json', JSON.stringify({
     rights_confirmed: input.consent.rightsConfirmed,
@@ -181,10 +233,23 @@ export async function prepareVoiceCloneProfile(input: {
     status: input.analysis.status,
     messages: input.analysis.messages,
   }))
-  return apiRequest<ApiVoiceCloneProfile>('/voice-clones/profiles', {
+  const result = await apiRequest<ApiVoiceCloneProfile>('/voice-clones/profiles', {
     method: 'POST',
     body: form,
   }, { timeoutMs: 45_000 })
+  return mapProfile(result)
+}
+
+export async function getRemoteVoiceCloneProfile(
+  profileId: string,
+  signal?: AbortSignal,
+): Promise<RemoteVoiceCloneProfile> {
+  const result = await apiRequest<ApiVoiceCloneProfile>(
+    `/voice-clones/profiles/${encodeURIComponent(profileId)}`,
+    undefined,
+    { timeoutMs: 8_000, signal },
+  )
+  return mapProfile(result)
 }
 
 export async function startVoiceCloneJob(

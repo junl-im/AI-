@@ -1,5 +1,7 @@
 import json
+import math
 import os
+import struct
 import wave
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
@@ -9,13 +11,21 @@ from uuid import UUID, uuid4
 from app.storage.voice_clone_store import VoiceCloneStore
 
 
-def wav_bytes(seconds: float = 5.2) -> bytes:
+def wav_bytes(seconds: float = 5.2, *, silent: bool = False) -> bytes:
     output = BytesIO()
+    frame_count = int(16_000 * seconds)
     with wave.open(output, "wb") as writer:
         writer.setnchannels(1)
         writer.setsampwidth(2)
         writer.setframerate(16_000)
-        writer.writeframes(b"\x00\x00" * int(16_000 * seconds))
+        if silent:
+            frames = b"\x00\x00" * frame_count
+        else:
+            frames = b"".join(
+                struct.pack("<h", int(7_000 * math.sin(2 * math.pi * 220 * index / 16_000)))
+                for index in range(frame_count)
+            )
+        writer.writeframes(frames)
     return output.getvalue()
 
 
@@ -51,7 +61,7 @@ def test_voice_clone_capability_is_explicit(client):
     assert response.status_code == 200
     body = response.json()
     assert body["engine_id"] == "cosyvoice3-worker"
-    assert body["recommended_seconds"] == 10
+    assert body["recommended_seconds"] == 25
     assert ".wav" in body["accepted_extensions"]
 
 
@@ -97,13 +107,67 @@ def test_voice_clone_profile_can_be_prepared_and_deleted(client, tmp_path: Path)
     assert response.status_code == 200
     body = response.json()
     profile_id = UUID(body["id"])
-    assert body["status"] in {"sample-ready", "engine-unavailable"}
+    assert body["status"] in {"engine-ready", "engine-unavailable"}
+    assert body["server_analysis"]["status"] in {"good", "warning"}
     assert list(tmp_path.glob(f"{profile_id}.*"))
 
     deleted = client.delete(f"/api/v1/voice-clones/profiles/{profile_id}")
     assert deleted.status_code == 200
     assert deleted.json()["deleted"] is True
     assert not list(tmp_path.glob(f"{profile_id}.*"))
+
+
+def test_voice_clone_profile_reuses_client_id_for_idempotent_retry(client, tmp_path: Path):
+    client.app.state.voice_clone_store = VoiceCloneStore(tmp_path, 7, 1024 * 1024)
+    profile_id = uuid4()
+    request = {
+        "data": {
+            "display_name": "안정 복구",
+            "consent_json": consent_payload(),
+            "client_analysis_json": analysis_payload(),
+            "client_profile_id": str(profile_id),
+        },
+        "files": {"sample": ("sample.wav", wav_bytes(), "audio/wav")},
+    }
+    first = client.post("/api/v1/voice-clones/profiles", **request)
+    assert first.status_code == 200
+    assert first.json()["id"] == str(profile_id)
+
+    retry = client.post("/api/v1/voice-clones/profiles", **request)
+    assert retry.status_code == 200
+    assert retry.json()["id"] == str(profile_id)
+    assert len(list(tmp_path.glob(f"{profile_id}.*"))) == 2
+
+
+def test_saved_profile_status_recovers_when_worker_becomes_ready(
+    client, tmp_path: Path, monkeypatch
+):
+    from app.engines.registry import engine_registry
+
+    client.app.state.voice_clone_store = VoiceCloneStore(tmp_path, 7, 1024 * 1024)
+    created = client.post(
+        "/api/v1/voice-clones/profiles",
+        data={
+            "display_name": "복구 목소리",
+            "consent_json": consent_payload(),
+            "client_analysis_json": analysis_payload(),
+        },
+        files={"sample": ("sample.wav", wav_bytes(), "audio/wav")},
+    )
+    assert created.status_code == 200
+    profile_id = created.json()["id"]
+    engine = engine_registry.resolve_voice_clone("auto")
+
+    async def probe_ready():
+        engine._ready = True
+        engine._reason = "준비됨"
+        return True
+
+    monkeypatch.setattr(engine, "probe", probe_ready)
+    refreshed = client.get(f"/api/v1/voice-clones/profiles/{profile_id}")
+    assert refreshed.status_code == 200
+    assert refreshed.json()["status"] == "engine-ready"
+    assert refreshed.json()["server_analysis"]["status"] in {"good", "warning"}
 
 
 def test_voice_clone_profile_rejects_damaged_wav(client, tmp_path: Path):
@@ -134,6 +198,38 @@ def test_voice_clone_profile_rejects_short_wav(client, tmp_path: Path):
     )
     assert response.status_code == 422
     assert "SOA-5009" in response.json()["detail"]
+
+
+def test_voice_clone_profile_rejects_silent_audio_even_if_client_claims_good(
+    client, tmp_path: Path
+):
+    client.app.state.voice_clone_store = VoiceCloneStore(tmp_path, 7, 2 * 1024 * 1024)
+    response = client.post(
+        "/api/v1/voice-clones/profiles",
+        data={
+            "display_name": "무음 샘플",
+            "consent_json": consent_payload(),
+            "client_analysis_json": analysis_payload(),
+        },
+        files={"sample": ("sample.wav", wav_bytes(20, silent=True), "audio/wav")},
+    )
+    assert response.status_code == 422
+    assert "SOA-5011" in response.json()["detail"]
+
+
+def test_voice_clone_profile_rejects_reference_over_30_seconds(client, tmp_path: Path):
+    client.app.state.voice_clone_store = VoiceCloneStore(tmp_path, 7, 4 * 1024 * 1024)
+    response = client.post(
+        "/api/v1/voice-clones/profiles",
+        data={
+            "display_name": "긴 샘플",
+            "consent_json": consent_payload(),
+            "client_analysis_json": analysis_payload(),
+        },
+        files={"sample": ("sample.wav", wav_bytes(30.5), "audio/wav")},
+    )
+    assert response.status_code == 422
+    assert "SOA-5013" in response.json()["detail"]
 
 
 def test_voice_clone_profile_rejects_unsupported_extension(client, tmp_path: Path):
@@ -312,3 +408,29 @@ def test_voice_clone_job_routes_proxy_worker(client, tmp_path: Path, monkeypatch
     segment = client.get(f"/api/v1/voice-clones/jobs/{job_id}/segments/1/audio")
     assert segment.status_code == 200
     assert segment.content[:4] == b"RIFF"
+
+
+def test_voice_clone_store_without_ffmpeg_requires_canonical_wav(tmp_path, monkeypatch):
+    from app.storage import voice_clone_store as module
+
+    profile_id = uuid4()
+    store = VoiceCloneStore(tmp_path, ttl_days=7, max_file_bytes=4 * 1024 * 1024)
+    path = tmp_path / f"{profile_id}.wav"
+    output = BytesIO()
+    sample_rate = 24_000
+    with wave.open(output, "wb") as writer:
+        writer.setnchannels(2)
+        writer.setsampwidth(2)
+        writer.setframerate(sample_rate)
+        frame = struct.pack("<hh", 2400, 2400)
+        writer.writeframes(frame * (sample_rate * 6))
+    path.write_bytes(output.getvalue())
+    monkeypatch.setattr(module.shutil, "which", lambda _name: None)
+
+    try:
+        store.normalize_for_engine(profile_id, path)
+    except ValueError as error:
+        assert "SOA-5016" in str(error)
+        assert "16kHz mono" in str(error)
+    else:
+        raise AssertionError("비정규 WAV가 FFmpeg 없이 통과했습니다.")

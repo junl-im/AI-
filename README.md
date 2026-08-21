@@ -8,9 +8,11 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- CI static contract completion: R1 이후 남은 `neural_preview_cache.py` UP012 두 지점을 기본 `str.encode()`로 통일하고, 소리 `dam-calm` natural speed upper bound `1.16`에 맞춰 stale voice recommendation test를 갱신했습니다. runtime 음성/캐시 의미는 변경하지 않습니다.
-- Version: `0.11.32 R2 · CI Static Contract Completion` (product semver remains `0.11.32`)
-- CI stabilization: GitHub `main` head `f0a2a0d6e081a3e02be6abc80bb31eec297a488b`의 0.11.32 annotations에서 Python Ruff UP012와 Browser Speech 준호 pitch stale assertion 두 concrete failure를 교정합니다. Runtime neural cache, studio/voice character, Kakao/MY VOICE 동작은 변경하지 않습니다.
+- Version: `0.11.33 · Voice Engine Major Hardening`. MY VOICE 실제 파형 재검증, 16 kHz mono 정규화, 20~30초 권장/30초 상한, 엔진 복구 재동기화, CosyVoice 호출 교정과 성우 preset 품질 게이트를 포함합니다.
+- MY VOICE trust boundary: 브라우저 분석만 신뢰하지 않고 서버가 RMS·무음·clipping·길이를 다시 검사합니다. local-only 음성은 사용자 명시 동작 없이 서버에 자동 업로드하지 않습니다.
+- Voice preset gate: 5개 성우 reference는 16 kHz mono·5~30초·RMS·무음·clipping + 동의/권리/사람 검수/SHA가 모두 맞아야 neural 경로를 사용할 수 있습니다. 실제 rights-cleared WAV가 없는 현재 릴리스는 fail-closed입니다.
+- Final Export retirement: 사용자용 `최종 MP3 + 자막` / `최종 WAV + 자막` UI와 공개 `/exports` API, 과거 hotfix/apply payload를 제거했습니다. 내부 장시간 WAV/자막 soak는 품질검사용으로만 유지합니다.
+- Stale-patch guard: `VERIFY_LIVE_VOICE_MYVOICE.mjs`가 최신 MY VOICE/Worker/preset 계약과 폐기 파일의 재유입을 동시에 검사합니다.
 - Neural runtime gate: v4 preset READY를 그대로 신뢰하지 않고 preview 요청마다 현재 reference provenance와 Worker runtime `model_digest`를 승인 model fingerprint와 다시 비교합니다.
 - Shared neural preview cache: `previewCacheKey + normalized text SHA + style SHA`로 content-addressed WAV를 만들고 PC/모바일이 동일 요청에서 같은 cache/audio SHA를 재사용합니다.
 - Runtime playback evidence: 실제 `<audio>` playing/ended를 관찰한 `observed-runtime`만 저장하며 Quality Lab에서 PC/mobile cache/audio/model/reference identity가 모두 같을 때만 `SHARED READY`로 표시합니다.
@@ -97,7 +99,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - PC 편집: 1024px부터 3단 분할, 재생 버튼 바로 옆 진행바를 둔 한 줄 Compact Dock, 클릭 seek·확대·단축키와 선택 클립 빠른 편집기를 갖춘 가로 타임라인
 - 자동 음성 준비: 일반 화면에는 기술 연결 상태를 숨기고 가장 빠른 경로를 병렬 탐색·자동 재연결·heartbeat로 유지
 - 모바일 Bridge: 공개 HTTPS Origin을 `/connectivity`와 Engine Doctor에서 별도 진단
-- 프리셋 안전성: WAV 포맷·길이·샘플레이트·무음·클리핑을 Worker 요청 전에 검사
+- 프리셋 안전성: 16kHz mono·5~30초·RMS·무음·클리핑과 증거 manifest를 Worker 요청 전에 검사
 - 지연 지표: 서버 첫 음성 파일 준비 시간과 전체 생성 시간을 분리 표시
 - PC 레이아웃: 좌우 패널 드래그·키보드 조절, 접기와 로컬 상태 저장
 - 설정 일관성: PC·모바일이 속도·높낮이·말투 6종을 같은 계약으로 사용
@@ -110,13 +112,12 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - Bridge 보안: 신뢰 CIDR의 직접 proxy만 전달 헤더를 사용하고 공개 rate-limit은 실제 client IP로 고정
 - 실기기 인증: 단순 기록과 Android/iOS의 기본 재생·네트워크 전환·백그라운드 복귀·설치형 PWA 시나리오 READY를 분리
 - 실기기 recorder: 10·30·60분 wall-clock 측정과 SSE·fetch·재생 중단 시간을 저장하고 기기·엔진·프리셋별 P95를 집계
-- Export 보존: 서버 임시 만료 시각을 표시하고 사용자가 내려받은 음원·SRT·VTT만 보존본으로 취급
 - CI 안정화: 복원 자동재생 차단, 부분→최종 음원 위치·상태 승계, visibility 시계와 SSE/WAV 테스트 fixture를 GitHub Actions 계약에 맞게 보강
 - Stream 안정화: `ReadableStream.tee()` probe 취소를 재생 분기 소비 뒤 완료해 첫 구간 준비 교착을 차단하고, 최종 WAV 교체 테스트는 실제 DOM source 반영 순서를 따름
 - Web 품질 증거: 동일한 7단계 실행 계획, 단계별 로그 SHA-256, package lock 입력 해시와 dist 파일 manifest를 CI artifact로 보존
 - 필드 증거 manifest: 개인정보 최소 레코드별 SHA-256과 묶음 SHA-256을 만들고 다운로드 직전 서버에서 다시 검증
 - 증거 Intake: field evidence v2와 Web quality run report를 5MiB 제한·서버 checksum 재검증·bundle/record 중복 차단 뒤 등록
-- 로컬 Export ZIP: WAV·MP3·SRT·VTT·JSON 최대 20개/250MiB를 서버 업로드 없이 SHA-256 manifest, 진행률과 취소를 포함해 묶음
+- 검증 증거 ZIP: Quality/Evidence용 로컬 감사 묶음은 유지하지만 타임라인의 `최종 MP3 + 자막` 제품 기능과는 분리합니다.
 - Lock gate: repository preflight가 package-lock 존재와 package.json 직접 의존성 일치를 필수 검사하며 패치는 기존 검증 lock을 보존
 - 음성 정합성: 전용 인물 WAV가 없으면 시스템 근사 음성으로 처리하며 같은 성별 후보는 프리셋 운율로 재사용하고 반대 성별은 차단
 - 프리셋 증거: 전용 WAV는 동일 ID manifest의 동의·권리·사람 검수·SHA-256과 실제 파일 일치가 모두 확인돼야 사용

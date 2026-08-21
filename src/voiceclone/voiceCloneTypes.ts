@@ -24,6 +24,8 @@ export interface VoiceCloneConsent {
 
 export interface VoiceCloneProfile {
   id: string
+  remoteProfileId?: string | null
+  remoteSynced?: boolean | null
   displayName: string
   status: VoiceCloneProfileStatus
   engineId: string

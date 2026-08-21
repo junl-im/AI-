@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -23,7 +24,11 @@ function parseEnv(content) {
     }))
 }
 
-for (const filename of ['.env.development', '.env.production']) {
+const runtimeEnvFiles = ['.env.development', '.env.production']
+  .filter((filename) => existsSync(resolve(root, filename)))
+const configFiles = runtimeEnvFiles.length ? runtimeEnvFiles : ['.env.example']
+
+for (const filename of configFiles) {
   const values = parseEnv(await readFile(resolve(root, filename), 'utf8'))
   for (const name of required) {
     if (!values[name]?.trim()) failures.push(`${filename}: ${name} is missing`)
@@ -64,4 +69,5 @@ if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`)
   process.exit(1)
 }
-console.log(`Firebase Web 설정 검사 통과 · ${expectedProjectId}`)
+const sourceLabel = runtimeEnvFiles.length ? runtimeEnvFiles.join(' + ') : '.env.example (release-safe)'
+console.log(`Firebase Web 설정 검사 통과 · ${expectedProjectId} · ${sourceLabel}`)

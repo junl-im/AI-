@@ -1,3 +1,5 @@
+> **2026-08-21 변경:** 이 문서의 Final Export UI/API 설명은 역사 기록입니다. 공개 `최종 MP3 + 자막` 및 `/exports` 경로는 제거되었습니다.
+
 # 0.11.23 · Focused Voice Surface & Picker Polish
 
 ## 사용자 결정

@@ -46,4 +46,11 @@ describe('voiceChoices', () => {
     const choices = buildVoiceChoices([profile('engine-unavailable')])
     expect(choices[0].ready).toBe(false)
   })
+
+  it('서버 등록 여부가 불확실한 MY VOICE는 생성 대상으로 활성화하지 않는다', () => {
+    const uncertain = profile()
+    uncertain.remoteSynced = null
+    const choices = buildVoiceChoices([uncertain])
+    expect(choices[0].ready).toBe(false)
+  })
 })

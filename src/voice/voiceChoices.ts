@@ -32,16 +32,22 @@ function customChoice(profile: VoiceCloneProfile): VoiceChoice {
     shortName: myVoiceInitial(profile.displayName),
     kind: 'my-voice',
     description: profile.status === 'engine-ready'
+      && profile.remoteSynced !== false
+      && profile.remoteSynced !== null
       ? '내 샘플로 준비된 개인 음성'
       : profile.message || '내 목소리 엔진 준비가 필요합니다.',
     meta: `샘플 ${Math.round(profile.analysis.durationSeconds)}초 · 품질 ${quality}/100`,
     tone: 'soa-my-voice-tone',
-    ready: profile.status === 'engine-ready',
+    ready: profile.status === 'engine-ready'
+      && profile.remoteSynced !== false
+      && profile.remoteSynced !== null,
     profile,
     gender: 'custom',
     bestFor: ['내레이션', '개인 콘텐츠', '내 목소리'],
     strengths: ['내 샘플 기반 음색', '프로젝트 전체에 재사용'],
     tradeoffs: profile.status === 'engine-ready'
+      && profile.remoteSynced !== false
+      && profile.remoteSynced !== null
       ? ['샘플 품질에 따라 결과 차이', '일반 프리셋보다 생성 시간이 길 수 있음']
       : ['엔진 준비가 필요함', '준비 전에는 생성할 수 없음'],
     personaLabel: '내 목소리',

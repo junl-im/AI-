@@ -230,7 +230,7 @@ npm run test:worker
 
 ### Web
 
-- 정상 10초 샘플과 짧고 클리핑된 샘플의 품질 판정
+- 정상 20~30초 샘플과 짧음·무음·클리핑·30초 초과 샘플의 품질 판정
 - Player store의 대기열 추가와 현재 트랙 선택
 - Object URL 소유 트랙 삭제 시 URL 해제
 - FormData 요청에서 브라우저가 multipart boundary를 설정하도록 Content-Type 강제 금지

@@ -91,7 +91,7 @@ export function MyVoiceLibrary({
       ) : (
         <div className="soa-myvoice-empty">
           <strong>아직 저장된 내 목소리가 없습니다.</strong>
-          <span>15~30초의 깨끗한 샘플 하나면 첫 프로필을 만들 수 있습니다.</span>
+          <span>20~30초의 깨끗한 샘플 하나면 첫 프로필을 만들 수 있습니다.</span>
           <button type="button" onClick={onCreate}>첫 목소리 만들기</button>
         </div>
       )}

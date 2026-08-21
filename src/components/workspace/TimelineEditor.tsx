@@ -29,7 +29,6 @@ import {
   getTimelineCanvasWidth,
   getTimelineContentWidth,
 } from '../../timeline/timelineGeometry'
-import { FinalExportControls } from './FinalExportControls'
 import { TimelineQuickEditor } from './TimelineQuickEditor'
 import { TimelineVoiceBlockCard } from './TimelineVoiceBlockCard'
 
@@ -933,8 +932,6 @@ export function TimelineEditor({
           </div>
         </div>
       </div>
-
-      <FinalExportControls blocks={blocks} />
 
       <button type="button" className="soa-dubbing-add-block" onClick={onAddVoice} aria-label="새 대사 블록 추가">＋</button>
     </section>

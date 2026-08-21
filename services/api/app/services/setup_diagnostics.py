@@ -201,6 +201,7 @@ def _voice_preset_check(
             sample_rate=audio.sample_rate,
             channel_count=audio.channel_count,
             sample_width_bits=audio.sample_width_bits,
+            rms_db=audio.rms_db,
             silence_ratio=audio.silence_ratio,
             clipping_ratio=audio.clipping_ratio,
             issues=issues,
@@ -340,8 +341,12 @@ def setup_status(version: str, settings: Settings, engines: list[TtsEngine]) -> 
             label="FFmpeg 변환 도구",
             status="ready" if ffmpeg else "warning",
             required=False,
-            detail=ffmpeg or "설치되지 않았습니다. WAV 생성에는 필요하지 않습니다.",
-            action=None if ffmpeg else "MP3·FLAC 변환이 필요할 때 FFmpeg를 설치하세요.",
+            detail=ffmpeg or "설치되지 않았습니다. WAV 샘플 검증은 계속 사용할 수 있습니다.",
+            action=(
+                None
+                if ffmpeg
+                else "MP3·M4A·WEBM·OGG 내 목소리 샘플 검증에는 FFmpeg가 필요합니다."
+            ),
         ),
         SetupStep(
             id="cors",

@@ -44,24 +44,4 @@ await requireText('src/components/evaluation/PlaybackSeamEvidenceCard.tsx', [
   '생성 대기 P95',
   '순수 전환 P95',
 ])
-await requireText('services/api/app/schemas/export.py', [
-  'server_expires_at',
-  'server_retention_minutes',
-  'download-only',
-])
-await requireText('src/export/exportArchive.ts', [
-  'sorion.export-archive-receipts.v1',
-  'preserveExportByDownload',
-  'filenames',
-])
-await requireText('src/components/workspace/FinalExportControls.tsx', [
-  '서버 임시 보관',
-  '음원·SRT·VTT를 내 기기에 보존',
-  '기록 삭제',
-])
-await requireText('src/export/exportArchive.test.ts', [
-  'records only local download metadata',
-  'not.toContain',
-])
-
-console.log('Device soak recorder / audio archive policy contract 통과')
+console.log('Device soak recorder contract 통과')

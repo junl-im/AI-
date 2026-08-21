@@ -39,17 +39,23 @@ export function summarizeSampleQuality(
   if (durationSeconds < 5) {
     status = 'blocked'
     messages.push('5초보다 짧아 목소리 특징을 확인하기 어렵습니다.')
-  } else if (durationSeconds < 10) {
+  } else if (durationSeconds < 12) {
     status = 'warning'
-    messages.push('10초 이상 녹음하면 복제 안정성이 좋아집니다.')
+    messages.push('12초 이상, 가능하면 20~30초를 녹음하면 음색 안정성이 좋아집니다.')
+  } else if (durationSeconds < 20) {
+    status = 'warning'
+    messages.push('사용할 수 있지만 20~30초의 깨끗한 발화가 가장 안정적입니다.')
   }
 
-  if (durationSeconds > 120) {
-    status = status === 'blocked' ? status : 'warning'
-    messages.push('120초를 넘는 샘플은 필요한 부분만 잘라 사용하는 편이 좋습니다.')
+  if (durationSeconds > 30) {
+    status = 'blocked'
+    messages.push('기준 음성은 30초를 넘길 수 없습니다. 20~30초 구간으로 잘라 주세요.')
   }
-  if (silenceRatio > 0.58) {
-    status = status === 'blocked' ? status : 'warning'
+  if (silenceRatio > 0.85) {
+    status = 'blocked'
+    messages.push('대부분이 무음입니다. 실제 말소리가 이어지는 샘플로 다시 녹음해 주세요.')
+  } else if (silenceRatio > 0.58) {
+    status = status === 'good' ? 'warning' : status
     messages.push('무음 구간이 많습니다. 말소리가 이어지는 구간으로 다시 녹음해 주세요.')
   }
   if (clippingRatio > 0.02) {
@@ -59,9 +65,16 @@ export function summarizeSampleQuality(
     status = status === 'good' ? 'warning' : status
     messages.push('일부 구간의 입력이 너무 큽니다.')
   }
-  if (rmsDb < -38) {
-    status = status === 'blocked' ? status : 'warning'
-    messages.push('목소리가 너무 작습니다. 조용한 곳에서 마이크 가까이 말해 주세요.')
+  if (rmsDb < -50) {
+    status = 'blocked'
+    messages.push('실제 발화 신호가 너무 작아 목소리 특징을 신뢰하기 어렵습니다.')
+  } else if (rmsDb < -38) {
+    status = status === 'good' ? 'warning' : status
+    messages.push('목소리가 작습니다. 조용한 곳에서 마이크 가까이 말해 주세요.')
+  }
+  if (sampleRate != null && sampleRate < 16_000) {
+    status = status === 'good' ? 'warning' : status
+    messages.push('16kHz 미만 샘플은 세부 음색 정보가 줄어들 수 있습니다.')
   }
   if (messages.length === 0) messages.push('복제 샘플로 사용하기 좋은 음질입니다.')
 

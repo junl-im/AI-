@@ -6,7 +6,6 @@ from app.api.routes import (
     director,
     engines,
     evidence,
-    exports,
     health,
     quality,
     setup,
@@ -26,7 +25,6 @@ api_router.include_router(quality.router, prefix="/quality", tags=["quality"])
 api_router.include_router(verification.router, prefix="/quality", tags=["quality"])
 api_router.include_router(voice_preset_approvals.router, prefix="/quality", tags=["quality"])
 api_router.include_router(evidence.router, prefix="/quality", tags=["quality"])
-api_router.include_router(exports.router, prefix="/exports", tags=["exports"])
 api_router.include_router(setup.router, prefix="/setup", tags=["setup"])
 api_router.include_router(audio.router, prefix="/audio", tags=["audio"])
 api_router.include_router(

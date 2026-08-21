@@ -1,8 +1,9 @@
 import type { VoiceSampleAnalysis } from './voiceCloneTypes'
 
 function scoreDuration(seconds: number): number {
-  if (seconds >= 20 && seconds <= 45) return 30
-  if (seconds >= 12 && seconds <= 60) return 25
+  if (seconds >= 20 && seconds <= 30) return 30
+  if (seconds >= 12 && seconds <= 30) return 25
+  if (seconds > 30) return 0
   if (seconds >= 8) return 17
   if (seconds >= 4) return 8
   return 0

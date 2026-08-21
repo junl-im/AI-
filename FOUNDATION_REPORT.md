@@ -1,3 +1,24 @@
+## 0.11.33 · Voice Engine Major Hardening
+
+- MY VOICE upload를 서버가 실제 디코딩해 길이·RMS·무음·clipping을 재검증하고, 승인 reference를 16 kHz mono PCM WAV로 정규화합니다.
+- 녹음은 20~30초를 목표로 하고 29.5초 hard stop, zero-byte 차단, reset/stop race guard를 적용합니다.
+- profile ID를 서버와 공유해 재시도 중복을 줄이고, Worker 복구 시 저장 profile readiness를 다시 동기화합니다.
+- CosyVoice Worker reference 계약을 16 kHz mono·5~30초로 고정하고 `stream=True` keyword 호출로 교정합니다.
+- 5개 성우 preset은 RMS·무음·clipping + 16 kHz mono + evidence/rights/review/SHA를 모두 검사합니다. 실제 approved WAV가 없으면 fail-closed입니다.
+- 사용자용 Final Export UI/API와 stale 0.11.15 apply payload를 제거하고 재유입 검증기를 최신 구조로 교체합니다.
+
+상세: `docs/VOICE_ENGINE_MAJOR_HARDENING_0_11_33.md`
+
+### 검증
+
+- API pytest: **235/235 PASS** (20개 파일 108/108 + 20개 파일 127/127, 기존 FastAPI deprecated alias warning 1건)
+- Worker pytest: **16/16 PASS**
+- Python compileall / git diff check: **PASS**
+- Live Voice / MY VOICE hardening verifier: **51/51 PASS**
+- TypeScript dependency-free syntax: **254/254 PASS**
+- Voice preset / evidence / device soak / release readiness / internal verification contracts: **PASS**
+- Dependency 기반 Web lint/Vitest/typecheck/build: **로컬 npm registry DNS `EAI_AGAIN`으로 미실행 · GitHub Actions final gate**
+
 ## 0.11.32 R2 · CI Static Contract Completion
 
 - GitHub R1 이후 API Ruff UP012가 neural preview cache의 남은 명시적 UTF-8 encode를 검출해 `style_digest`/`cache_id`까지 기본 `str.encode()`로 통일했습니다.

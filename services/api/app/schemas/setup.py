@@ -57,6 +57,7 @@ class VoicePresetDiagnostic(BaseModel):
     sample_rate: int | None = None
     channel_count: int | None = None
     sample_width_bits: int | None = None
+    rms_db: float | None = None
     silence_ratio: float | None = None
     clipping_ratio: float | None = None
     issues: list[str]

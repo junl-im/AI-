@@ -1,8 +1,12 @@
 # START HERE
 
-Current version: `0.11.32 R2 · CI Static Contract Completion`
+Current version: `0.11.33 · Voice Engine Major Hardening`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
+1-0M. 0.11.33은 MY VOICE와 성우 engine의 대규모 hardening 릴리스입니다. 내 목소리는 20~30초 권장/30초 상한, 서버 실제 파형 재검증, 16 kHz mono 정규화, idempotent profile 등록, Worker 복구 재동기화를 사용합니다.
+1-0Ma. CosyVoice reference와 preset reference는 16 kHz mono·5~30초 계약을 공유하며 RMS·무음·clipping을 fail-closed로 검사합니다. 실제 rights-cleared 5개 성우 WAV가 없으면 neural READY를 가장하지 않습니다.
+1-0Mb. 사용자용 `최종 MP3 + 자막`/`최종 WAV + 자막` UI와 공개 `/exports` API, 과거 0.11.15 apply payload는 제거되었습니다. 내부 export soak는 품질검사용이며 사용자 제품 기능이 아닙니다.
+1-0Mc. 0.11.33 PATCH 기준은 `0.11.32 R2 · CI Static Contract Completion`입니다.
 1-0R2. 0.11.32 R2는 제품 semver `0.11.32`를 유지하는 CI 계약 완결 리비전입니다. `neural_preview_cache.py`에 남아 있던 explicit UTF-8 `encode`를 모두 기본 `encode()`로 통일하고, 소리 natural speed 상한 `1.16`에 맞춰 stale `voiceRecommendation` Vitest를 교정합니다.
 1-0R2a. R2는 runtime 음성 정책을 바꾸지 않습니다. GitHub Actions가 API Ruff → Web critical/full Vitest → typecheck/build/Chromium까지 green인지 확인하기 전에는 0.11.33 기능 작업보다 CI 안정화를 우선합니다.
 1-0R1. 0.11.32 R1은 제품 semver `0.11.32`를 유지하는 CI 안정화 리비전입니다. `neural_preview_cache.py`의 Ruff UP012를 `text.encode()`로 교정하고, 준호 `-1.2 semitone` 기본 pitch의 실제 Web Speech 값 `0.9330...`에 맞춰 stale Vitest 범위를 `0.92 < pitch < 0.95`로 갱신합니다.
