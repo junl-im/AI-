@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-Current baseline: `0.11.33 · Voice Engine Major Hardening`
+Current baseline: `0.11.33 R1 · Baseline Integrity Repair`
 
 ## 목표 버전
 

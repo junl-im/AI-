@@ -1,3 +1,18 @@
+# HANDOVER
+
+## 2026-08-26 KST · 0.11.33 R1 Baseline Integrity Repair
+
+1. **작업 일시(KST)**: 2026-08-26.
+2. **대상/기준 버전**: `0.11.33 R1 · Baseline Integrity Repair` / 사용자 전달 `0.11.33 · Voice Engine Major Hardening`. 제품 semver는 `0.11.33` 유지.
+3. **변경 내용**: 0.11.33 DELETE_LIST에 이미 퇴역 대상으로 선언됐지만 전달본에 잔존하던 Final Export Web/API/schema, 구형 Live Voice/MY VOICE apply 스크립트, payload snapshot을 실제 저장소에서 제거했습니다. 릴리스 산출물은 `.git`, `.sorion`, `node_modules`, `dist`, Python cache, 실제 `.env*`를 제외하는 전달 규칙으로 재패키징합니다.
+4. **변경 이유**: 문서와 verifier는 Final Export/구형 payload 제거를 요구했지만 전달 ZIP에는 잔존해 기준선이 자기모순 상태였습니다. 0.11.34 기능 추가 전에 저장소·문서·검증 계약을 다시 일치시키기 위함입니다.
+5. **영향 범위**: 퇴역/미등록 코드와 패치 잔재만 제거합니다. 현재 Timeline, Voice Picker, MY VOICE, Neural Preview, Quality Lab, API/Worker 활성 라우팅은 변경하지 않습니다.
+6. **주요 변경 파일**: `docs/HANDOVER.md`, `docs/CHANGELOG.md`, `docs/NEXT_UPDATE.md`, `docs/BASELINE_INTEGRITY_REPAIR_0.11.33_R1.md`, `docs/patches/0.11.33-r1-baseline-integrity-repair/*` 및 0.11.33 DELETE_LIST 대상 잔존 파일 삭제.
+7. **검증 결과**: Live Voice/MY VOICE hardening **51/51 PASS**, API pytest **237/237 PASS** (기존 FastAPI deprecated alias warning 1건), Worker pytest **16/16 PASS**. `npm ci --ignore-scripts`는 실행 환경 제한 시간 45초 안에 완료되지 않아 Web lint/Vitest/typecheck/build는 로컬 미검증이며 GitHub Actions final gate를 유지합니다.
+8. **알려진 제한/주의**: 실제 rights-cleared neural 성우 WAV/model이 없어 5/5 Neural READY를 주장하지 않습니다. 실제 PC/Android/iOS playback evidence도 아직 필요합니다.
+9. **생성 산출물**: `SoriON-AI-0.11.33-r1-baseline-integrity-repair-full.zip`, `SoriON-AI-0.11.33-to-0.11.33-r1-baseline-integrity-repair-patch.zip`, `SoriON-AI-0.11.33-r1-baseline-integrity-repair-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: `0.11.34 · Neural Voice Field Playback & Release Gate`. 실제 neural/MY VOICE 재생의 `playing → ended` 증거와 release readiness gate를 닫습니다.
+
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
 Current baseline: **0.11.33 · Voice Engine Major Hardening**

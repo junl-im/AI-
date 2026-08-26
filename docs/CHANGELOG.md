@@ -1,3 +1,18 @@
+# CHANGELOG
+
+## 0.11.33 R1 · Baseline Integrity Repair
+
+- 0.11.33 DELETE_LIST에 선언됐지만 전달본에 남아 있던 Final Export Web/API/schema와 구형 Live Voice/MY VOICE apply/payload 잔재를 실제 제거했습니다.
+- 활성 Timeline/MY VOICE/Neural Preview/Quality Lab 동작은 변경하지 않고 저장소와 0.11.33 문서·verifier의 기준선만 일치시켰습니다.
+- 전체 전달 ZIP은 `.git`, `.sorion`, `node_modules`, `dist`, Python cache, 실제 `.env*`를 제외해 재현 가능한 소스 전달 형태로 정리합니다.
+
+### 검증
+
+- Live Voice / MY VOICE hardening verifier: **51/51 PASS**
+- API pytest: **237/237 PASS** (기존 FastAPI deprecated alias warning 1건)
+- Worker pytest: **16/16 PASS**
+- Web dependency install: **45초 실행 제한으로 미완료**; lint/Vitest/typecheck/build는 GitHub Actions final gate
+
 ## 0.11.33 · Voice Engine Major Hardening
 
 - MY VOICE 업로드를 서버가 실제 디코딩해 길이·RMS·무음·clipping을 다시 검사하고, 검증된 reference를 16 kHz mono PCM WAV로 정규화합니다.
