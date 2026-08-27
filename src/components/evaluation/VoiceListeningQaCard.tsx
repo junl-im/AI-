@@ -25,8 +25,7 @@ export function VoiceListeningQaCard() {
   const [scenarioId, setScenarioId] = useState(voiceListeningScenarios[0].id)
   const [scores, setScores] = useState<VoiceListeningScores>(initialScores)
   const [note, setNote] = useState('')
-  const [revision, setRevision] = useState(0)
-  const entries = useMemo(() => listVoiceListeningQa(), [revision])
+  const [entries, setEntries] = useState(() => listVoiceListeningQa())
   const summaries = useMemo(() => summarizeVoiceListeningQa(entries), [entries])
   const scenario = voiceListeningScenarios.find((item) => item.id === scenarioId) ?? voiceListeningScenarios[0]
   const readyCount = summaries.filter((item) => item.ready).length
@@ -39,7 +38,7 @@ export function VoiceListeningQaCard() {
 
   function save() {
     saveVoiceListeningQa({ voiceId, scenarioId, scores, note })
-    setRevision((value) => value + 1)
+    setEntries(listVoiceListeningQa())
   }
 
   return (

@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.11.35 R1 · Web Quality Hotfix
+
+- `VoiceListeningQaCard`의 `revision` 강제 재계산 패턴을 제거하고 Listening QA entries를 명시적인 React state로 관리하도록 수정했습니다.
+- 저장 직후 `listVoiceListeningQa()`를 다시 읽어 state를 갱신하므로 기존 QA 즉시 갱신 동작을 유지하면서 `react-hooks/exhaustive-deps` unnecessary dependency 경고를 제거합니다.
+- 전체 통파일에서 실수로 누락됐던 안전한 설정 템플릿 `.env.example`을 복구했습니다. 실제 secret `.env`는 포함하지 않습니다.
+- Repository preflight **55/55 PASS**를 재확인했습니다.
+
 ## 0.11.35 · Voice Reference Intake & Listening QA
 
 - 5개 성우를 일상 대화·설명·장문·다큐·숏폼의 고정 청취 시나리오로 분리 평가하는 Listening QA를 추가했습니다.
