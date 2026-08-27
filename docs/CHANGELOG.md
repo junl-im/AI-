@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.11.35 R3 · Chromium CI Runner Hotfix
+
+- visual layout runner를 고정 랜덤 debug port 대신 Chromium `--remote-debugging-port=0` + `DevToolsActivePort` discovery로 변경해 GitHub Actions에서의 endpoint bind 실패를 줄였습니다.
+- Chromium endpoint 준비는 15초 내 fail-fast하고, cleanup은 SIGTERM 후 미종료 시 SIGKILL까지 수행해 visual step이 job timeout까지 매달리지 않도록 했습니다.
+- DBus stderr는 비치명 진단 정보로만 보존하며 release failure 조건으로 승격하지 않습니다.
+- R2 전체 통파일에서 누락된 release-safe `.env.example`을 복구했습니다.
+- Node syntax check, visual-layout contract, Repository preflight **55/55 PASS**. 로컬 Chromium 144에서 DevToolsActivePort 생성 및 약 6초 내 실패 종료를 확인했습니다.
+
 ## 0.11.35 R2 · Web Quality Syntax Hotfix
 
 - `src/quality/releaseReadiness.test.ts`의 Neural runtime fixture에서 중첩 `flatMap(...map(...))` 호출을 닫는 괄호가 하나 누락되어 ESLint parser가 `Argument expression expected`로 중단되던 문제를 수정했습니다.

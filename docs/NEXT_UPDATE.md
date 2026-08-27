@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-Current baseline: `0.11.35 R2 · Web Quality Syntax Hotfix`
+Current baseline: `0.11.35 R3 · Chromium CI Runner Hotfix`
 
 ## 목표 버전
 
@@ -19,3 +19,10 @@ Current baseline: `0.11.35 R2 · Web Quality Syntax Hotfix`
 - 현실적인 말하기 속도를 벗어나는 과속 보정 금지.
 - 장문 청취 피로도 4/5 미만은 성우 출시 인증 금지.
 - local-only MY VOICE는 사용자 명시 동작 없이 서버에 자동 업로드하지 않습니다.
+
+### R3에서 넘기는 결정
+
+- visual CI는 고정 remote-debugging port를 다시 사용하지 않습니다.
+- Chromium bootstrap failure는 15초대 fail-fast + 강제 child cleanup을 유지합니다.
+- DBus 경고만으로 visual regression을 실패 처리하지 않습니다.
+- 0.11.36 기능 개발은 현재 R3의 GitHub Actions Web quality green 확인 후 진행합니다.

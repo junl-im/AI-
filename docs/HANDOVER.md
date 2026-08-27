@@ -1,3 +1,16 @@
+## 2026-08-27 KST · 0.11.35 R3 Chromium CI Runner Hotfix
+
+1. **작업 일시(KST)**: 2026-08-27.
+2. **대상/기준 버전**: `0.11.35 R3 · Chromium CI Runner Hotfix` / `0.11.35 R2 · Web Quality Syntax Hotfix`. 제품 semver는 `0.11.35` 유지.
+3. **변경 내용**: visual layout runner의 고정 랜덤 remote-debugging port를 Chromium의 `--remote-debugging-port=0` + `DevToolsActivePort` 탐지 방식으로 교체했습니다. endpoint 준비 실패 시 15초 내 fail-fast하고, 종료 시 SIGTERM 뒤 미종료 Chromium을 SIGKILL해 CI job이 수십 분 매달리는 상황을 차단합니다. R2 전체 통파일에서 누락된 안전한 `.env.example`도 복구했습니다.
+4. **변경 이유**: GitHub Actions에서 Chromium이 `127.0.0.1:9614/json/version` endpoint를 열지 못한 뒤 DBus 경고만 남기고 visual step이 약 22분 동안 종료되지 않아 job 전체가 취소되었습니다. DBus 메시지는 비치명적이며 핵심은 debug port discovery와 child-process cleanup의 취약성이었습니다.
+5. **영향 범위**: `scripts/run-visual-layout-regression.mjs`, 정적 계약 checker, 릴리스 문서/패키징만 변경합니다. 제품 UI, 음성 엔진, Neural/MY VOICE, Listening QA runtime은 변경하지 않습니다.
+6. **주요 변경 파일**: `scripts/run-visual-layout-regression.mjs`, `scripts/check-visual-layout-regression.mjs`, `.env.example`, `docs/{HANDOVER,CHANGELOG,NEXT_UPDATE}.md`, `docs/patches/0.11.35-r3-chromium-ci-runner-hotfix/*`.
+7. **검증 결과**: Node syntax check PASS, Chromium visual-layout static contract PASS, Repository preflight **55/55 PASS**. 로컬 Chromium 144에서 DBus 경고가 존재하는 조건으로 DevToolsActivePort가 실제 생성되고 실패 fixture가 약 6초 안에 종료되는 것을 확인했습니다. 실제 production visual capture 전체 성공은 GitHub Actions final gate입니다.
+8. **알려진 제한/주의**: DBus stderr 자체는 CI headless Chromium에서 발생 가능한 비치명 경고이므로 이를 실패 조건으로 사용하지 않습니다. GitHub runner의 실제 screenshot/baseline 결과는 재실행으로 확인해야 합니다.
+9. **생성 산출물**: `SoriON-AI-0.11.35-r3-chromium-ci-runner-hotfix-full.zip`, `SoriON-AI-0.11.35-r2-to-0.11.35-r3-chromium-ci-runner-hotfix-patch.zip`, `SoriON-AI-0.11.35-r3-chromium-ci-runner-hotfix-SHA256SUMS.txt`.
+10. **다음 예상 업데이트**: GitHub Actions Web quality green 확인 후 `0.11.36 · Prosody Director & Long-form Naturalness`.
+
 ## 2026-08-27 KST · 0.11.35 R2 Web Quality Syntax Hotfix
 
 1. **현재 기준선**: `0.11.35 R2 · Web Quality Syntax Hotfix` (제품 semver `0.11.35` 유지).
@@ -46,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.34 · Natural Voice Engine & Field Playback Gate**
+Current baseline: **0.11.35 R3 · Chromium CI Runner Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-08-27 KST**
 제품 소유·디자인: **곰같은여우**

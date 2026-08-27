@@ -108,6 +108,29 @@ async function startStaticServer() {
   return { server, url: `http://127.0.0.1:${address.port}/` }
 }
 
+async function waitForDevToolsPort(userDataDirectory, timeoutMs = 15_000, browserState = null) {
+  const devToolsActivePort = join(userDataDirectory, 'DevToolsActivePort')
+  const deadline = Date.now() + timeoutMs
+  let lastError = null
+  while (Date.now() < deadline) {
+    if (browserState?.exited()) {
+      throw new Error(`Chromium이 디버깅 endpoint 준비 전에 종료되었습니다. exit=${browserState.exitCode()} stderr=${browserState.stderr()}`)
+    }
+    try {
+      const content = await readFile(devToolsActivePort, 'utf8')
+      const [portLine] = content.trim().split(/\r?\n/)
+      const port = Number(portLine)
+      if (Number.isInteger(port) && port > 0) return port
+      lastError = new Error(`invalid DevToolsActivePort: ${portLine ?? '<empty>'}`)
+    } catch (error) {
+      lastError = error
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+  const suffix = lastError instanceof Error ? ` · 마지막 오류: ${lastError.message}` : ''
+  throw new Error(`시간 안에 Chromium DevToolsActivePort가 생성되지 않았습니다.${suffix}`)
+}
+
 async function waitForJson(url, timeoutMs = 20_000, browserState = null) {
   const deadline = Date.now() + timeoutMs
   let lastError = null
@@ -452,7 +475,6 @@ await mkdir(output, { recursive: true })
 const browser = resolveBrowser()
 const userDataDirectory = await mkdtemp(join(tmpdir(), 'sorion-visual-'))
 const { server, url } = await startStaticServer()
-const debuggingPort = 9222 + Math.floor(Math.random() * 400)
 const child = spawn(browser.command, [
   '--headless=new',
   '--no-sandbox',
@@ -462,7 +484,7 @@ const child = spawn(browser.command, [
   '--proxy-bypass-list=*',
   '--hide-scrollbars',
   '--force-device-scale-factor=1',
-  `--remote-debugging-port=${debuggingPort}`,
+  '--remote-debugging-port=0',
   `--user-data-dir=${userDataDirectory}`,
   'about:blank',
 ], { stdio: ['ignore', 'ignore', 'pipe'] })
@@ -480,7 +502,8 @@ const browserState = {
 let stage = 'chromium-debug-endpoint'
 
 try {
-  await waitForJson(`http://127.0.0.1:${debuggingPort}/json/version`, 20_000, browserState)
+  const debuggingPort = await waitForDevToolsPort(userDataDirectory, 15_000, browserState)
+  await waitForJson(`http://127.0.0.1:${debuggingPort}/json/version`, 5_000, browserState)
   stage = 'chromium-target'
   const targetResponse = await fetch(
     `http://127.0.0.1:${debuggingPort}/json/new?${encodeURIComponent(url)}`,
@@ -648,9 +671,16 @@ try {
   }, null, 2)}\n`, 'utf8').catch(() => {})
   process.exitCode = 1
 } finally {
-  const exited = new Promise((resolve) => child.once('exit', resolve))
-  child.kill('SIGTERM')
-  server.close()
-  await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 1_000))])
+  const waitForExit = (timeoutMs) => Promise.race([
+    child.exitCode !== null
+      ? Promise.resolve(true)
+      : new Promise((resolve) => child.once('exit', () => resolve(true))),
+    new Promise((resolve) => setTimeout(() => resolve(false), timeoutMs)),
+  ])
+  if (child.exitCode === null) child.kill('SIGTERM')
+  const exitedGracefully = await waitForExit(1_000)
+  if (!exitedGracefully && child.exitCode === null) child.kill('SIGKILL')
+  await waitForExit(1_000)
+  await new Promise((resolve) => server.close(resolve))
   await rm(userDataDirectory, { recursive: true, force: true, maxRetries: 3, retryDelay: 80 })
 }
