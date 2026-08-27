@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-Current baseline: `0.11.35 · Voice Reference Intake & Listening QA`
+Current baseline: `0.11.35 R2 · Web Quality Syntax Hotfix`
 
 ## 목표 버전
 

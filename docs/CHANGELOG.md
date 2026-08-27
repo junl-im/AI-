@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.11.35 R2 · Web Quality Syntax Hotfix
+
+- `src/quality/releaseReadiness.test.ts`의 Neural runtime fixture에서 중첩 `flatMap(...map(...))` 호출을 닫는 괄호가 하나 누락되어 ESLint parser가 `Argument expression expected`로 중단되던 문제를 수정했습니다.
+- runtime/product 로직은 변경하지 않고 테스트 fixture 문법만 정상화했습니다.
+- Release Readiness contract **PASS**, Repository preflight **55/55 PASS**, TypeScript parser-level syntax diagnostic **0건**을 확인했습니다.
+- 전체 ESLint/Vitest/typecheck/build의 최종 판정은 dependency가 설치되는 GitHub Actions Web quality run으로 유지합니다.
+
 ## 0.11.35 R1 · Web Quality Hotfix
 
 - `VoiceListeningQaCard`의 `revision` 강제 재계산 패턴을 제거하고 Listening QA entries를 명시적인 React state로 관리하도록 수정했습니다.

@@ -1,3 +1,11 @@
+## 2026-08-27 KST · 0.11.35 R2 Web Quality Syntax Hotfix
+
+1. **현재 기준선**: `0.11.35 R2 · Web Quality Syntax Hotfix` (제품 semver `0.11.35` 유지).
+2. **원인**: `src/quality/releaseReadiness.test.ts`의 `voices.flatMap(...map(...))` fixture에서 `flatMap`을 닫는 괄호 하나가 누락되어 GitHub Actions ESLint가 line 104에서 `Parsing error: Argument expression expected`로 중단됐습니다.
+3. **수정**: line 103의 `})),`를 `}))),`로 교정했습니다. 제품 runtime/Neural gate/성우 정책에는 변화가 없습니다.
+4. **검증**: Release Readiness contract PASS, Repository preflight **55/55 PASS**, 해당 TypeScript 파일 parser-level syntax diagnostic **0건**. 전체 Web quality는 GitHub Actions final gate입니다.
+5. **다음 목표**: 이 hotfix의 GitHub Actions green 확인 후 `0.11.36 · Prosody Director & Long-form Naturalness`.
+
 ## 2026-08-27 KST · 0.11.35 Voice Reference Intake & Listening QA
 
 1. **현재 기준선**: `0.11.35 · Voice Reference Intake & Listening QA`.
