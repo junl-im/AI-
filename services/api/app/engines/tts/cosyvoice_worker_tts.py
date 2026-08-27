@@ -1,4 +1,5 @@
 import asyncio
+import shutil
 import time
 from collections.abc import Mapping
 from datetime import datetime, timezone
@@ -81,7 +82,7 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             languages=["ko-KR"],
             output_formats=["wav"],
             supports_emotion=False,
-            supports_speed=False,
+            supports_speed=bool(shutil.which("ffmpeg")),
             supports_pitch=False,
             supports_voice_clone=True,
             ready=ready,
@@ -218,6 +219,39 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
     async def refresh_runtime(self) -> None:
         await self.worker.probe()
 
+    async def _apply_natural_tempo(self, output_path: Path, effective_rate: float) -> bool:
+        """Apply pitch-preserving tempo correction when FFmpeg is available.
+
+        CosyVoice cross-lingual inference follows the reference cadence but does not
+        expose a stable public speed control across supported runtimes. We therefore
+        use FFmpeg atempo after synthesis so preset/user speed remains realistic
+        without shifting pitch.
+        """
+        if abs(effective_rate - 1.0) < 0.015:
+            return False
+        ffmpeg = shutil.which("ffmpeg")
+        if not ffmpeg:
+            return False
+        temp_path = output_path.with_name(f"{output_path.stem}.tempo.wav")
+        process = await asyncio.create_subprocess_exec(
+            ffmpeg,
+            "-nostdin", "-hide_banner", "-loglevel", "error",
+            "-y", "-i", str(output_path),
+            "-filter:a", f"atempo={effective_rate:.4f}",
+            "-acodec", "pcm_s16le",
+            str(temp_path),
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        _, stderr = await process.communicate()
+        if process.returncode != 0:
+            temp_path.unlink(missing_ok=True)
+            detail = stderr.decode("utf-8", errors="replace").strip()
+            raise RuntimeError(f"Neural 자연 속도 보정에 실패했습니다: {detail[:500]}")
+        validate_wave(temp_path)
+        temp_path.replace(output_path)
+        return True
+
     async def synthesize(self, request: TtsSynthesisRequest) -> TtsSynthesisResponse:
         if request.output_format != "wav":
             raise ValueError("CosyVoice Worker 일반 TTS는 현재 WAV만 지원합니다.")
@@ -227,12 +261,23 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
                 or "CosyVoice Worker 일반 TTS가 준비되지 않았습니다."
             )
         reference_path, profile_id, preset_applied = self._reference_for(request.voice_id)
+        preset = (
+            get_voice_preset(request.voice_id)
+            if request.voice_id in PRESET_VOICE_IDS
+            else None
+        )
+        effective_rate = (
+            preset.effective_rate(request.speed)
+            if preset is not None
+            else max(0.5, min(2.0, request.speed))
+        )
 
         started = time.perf_counter()
         local_job_id = request.job_id or uuid4()
         worker_job_id: str | None = None
         status: dict[str, object] = {}
         output_path = self.store.output_path(UUID(str(local_job_id)), "wav")
+        tempo_applied = False
         try:
             created = await self.worker.create_job(
                 profile_id,
@@ -258,6 +303,8 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
                 message = str(status.get("error") or status.get("message") or final_status)
                 raise WorkerClientError(f"CosyVoice Worker 생성 실패: {message}")
             output_path.write_bytes(await self.worker.download_audio(worker_job_id))
+            validate_wave(output_path)
+            tempo_applied = await self._apply_natural_tempo(output_path, effective_rate)
             validate_wave(output_path)
         except BaseException as error:
             self.store.remove(output_path)
@@ -293,7 +340,12 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             message=(
                 f"{request.voice_id} 전용 WAV와 동의·권리·사람 검수·SHA-256 "
                 "manifest를 확인해 생성했습니다. 다른 프리셋 음성 폴백은 "
-                "사용하지 않았습니다."
+                f"사용하지 않았습니다. 자연 속도 {effective_rate:.2f}×"
+                + (
+                    "를 pitch 보존 방식으로 적용했습니다."
+                    if tempo_applied
+                    else " 기준으로 reference cadence를 유지했습니다."
+                )
                 if preset_applied
                 else (
                     "명시적으로 지정한 SoriON CosyVoice 기본 한국어 "

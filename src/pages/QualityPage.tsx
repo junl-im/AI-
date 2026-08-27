@@ -8,6 +8,7 @@ import { NeuralVoiceReferenceCard } from '../components/evaluation/NeuralVoiceRe
 import { NeuralVoiceRuntimeCertificationCard } from '../components/evaluation/NeuralVoiceRuntimeCertificationCard'
 import { BenchmarkDashboardCard } from '../components/evaluation/BenchmarkDashboardCard'
 import { VoicePresetApprovalCard } from '../components/evaluation/VoicePresetApprovalCard'
+import { VoiceListeningQaCard } from '../components/evaluation/VoiceListeningQaCard'
 import { DeviceSoakRecorderCard } from '../components/evaluation/DeviceSoakRecorderCard'
 import { RuntimeSoakComparisonCard } from '../components/evaluation/RuntimeSoakComparisonCard'
 import { RecoveryInjectionCard } from '../components/evaluation/RecoveryInjectionCard'
@@ -301,6 +302,8 @@ export function QualityPage() {
           loading={loadingDeviceSummary || loadingWorkerSummary}
           onRefresh={() => { void refreshDeviceSummary(); void refreshWorkerSummary() }}
         />
+
+        <VoiceListeningQaCard />
 
         <VoicePresetApprovalCard />
 

@@ -1,8 +1,12 @@
 # START HERE
 
-Current version: `0.11.33 · Voice Engine Major Hardening`
+Current version: `0.11.34 · Natural Voice Engine & Field Playback Gate`
 
 1. `docs/HANDOVER.md`와 `DELIVERY_RULES.md`를 먼저 읽습니다.
+1-0N. 0.11.34는 5개 성우의 기본 pace를 현실 범위로 낮추고 softness/articulation/pause identity를 고정합니다. 혜린 1.02×, 도윤 1.04×, 소리 0.99×, 준호 1.00×, 민준 1.07×가 기본이며 backend별 natural speed clamp를 공유합니다.
+1-0Na. CosyVoice는 FFmpeg가 있을 때 pitch 보존 `atempo`로 Neural WAV tempo를 보정합니다. FFmpeg가 없으면 reference cadence를 유지하며 speed 지원을 READY로 주장하지 않습니다.
+1-0Nb. Release Readiness는 7개 evidence가 필요합니다. Neural 5성우는 PC/mobile에서 실제 `playing → ended`와 동일 cache/audio/model/reference fingerprint가 모두 확인되어야 READY입니다.
+
 1-0M. 0.11.33은 MY VOICE와 성우 engine의 대규모 hardening 릴리스입니다. 내 목소리는 20~30초 권장/30초 상한, 서버 실제 파형 재검증, 16 kHz mono 정규화, idempotent profile 등록, Worker 복구 재동기화를 사용합니다.
 1-0Ma. CosyVoice reference와 preset reference는 16 kHz mono·5~30초 계약을 공유하며 RMS·무음·clipping을 fail-closed로 검사합니다. 실제 rights-cleared 5개 성우 WAV가 없으면 neural READY를 가장하지 않습니다.
 1-0Mb. 사용자용 `최종 MP3 + 자막`/`최종 WAV + 자막` UI와 공개 `/exports` API, 과거 0.11.15 apply payload는 제거되었습니다. 내부 export soak는 품질검사용이며 사용자 제품 기능이 아닙니다.

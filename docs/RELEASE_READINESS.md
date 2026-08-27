@@ -1,17 +1,17 @@
-# Release Readiness · 0.11.29
+# Release Readiness · 0.11.34
 
 `release-readiness/1`은 SoriON AI의 출시 준비 상태를 한 화면과 한 JSON summary에서 확인하기 위한 인증 집계 계약입니다.
 
 ## 원칙
 
 - 파일이 존재한다는 이유만으로 READY가 되지 않습니다.
-- GitHub Actions, Kakao Android, Kakao iOS, Chromium desktop, Chromium mobile, MY VOICE를 서로 독립적으로 판정합니다.
+- GitHub Actions, Kakao Android, Kakao iOS, Chromium desktop, Chromium mobile, MY VOICE, Neural Voice playback을 서로 독립적으로 판정합니다.
 - 하나라도 누락되거나 BLOCKED이면 Overall은 `PENDING`입니다.
 - 모든 슬롯이 READY일 때만 Overall `CERTIFIED`를 허용합니다.
 - Chromium recovery fixture의 `realWorkerClaimed=false`를 유지하며 synthetic UI fixture를 실제 MY VOICE 성공으로 승격하지 않습니다.
 - MY VOICE는 `observed-runtime`, 사용자 동의, Worker/model ready, 실제 completed playback이 있어야 READY입니다.
 
-## 필수 6개 evidence
+## 필수 7개 evidence
 
 1. **GitHub Actions Web quality**
    - `.sorion/web-quality/report.json`
@@ -36,15 +36,21 @@
    - `evidenceClass=observed-runtime`
    - consent verified, Worker/model ready, replace-and-regenerate, completed playback
    - raw profile ID, sample path, sample blob은 evidence에 포함 금지
+7. **Neural Voice PC/Mobile playback**
+   - `neural-voice-runtime-bundle/1`
+   - 기본 프리셋 5종 모두 desktop-browser + mobile-browser observed-runtime 필요
+   - 각 record는 실제 `playing → ended`에 해당하는 playbackStartedAt / playbackCompletedAt 필요
+   - PC/mobile cacheId, audio SHA-256, model fingerprint, reference fingerprint가 동일해야 READY
 
 ## Quality Lab 사용법
 
-Quality Lab의 **출시 인증 상태** 카드에서 6개 JSON을 각각 선택합니다. 각 슬롯은 `READY`, `PENDING`, `BLOCKED`로 표시되고 상단에서 다음 그룹을 별도로 보여줍니다.
+Quality Lab의 **출시 인증 상태** 카드에서 7개 JSON을 각각 선택합니다. 각 슬롯은 `READY`, `PENDING`, `BLOCKED`로 표시되고 상단에서 다음 그룹을 별도로 보여줍니다.
 
 - `CI READY`
 - `DEVICE READY`
 - `CHROMIUM READY`
 - `MY VOICE READY`
+- `NEURAL READY`
 - `Overall CERTIFIED` 또는 `PENDING`
 
 `readiness JSON 저장`은 원본 audio/sample/profile data를 포함하지 않고 파일 SHA-256, app version, commit/run metadata, 판정 결과만 저장합니다.
@@ -59,11 +65,12 @@ node scripts/verify-release-readiness.mjs \
   --desktop-scenes desktop/manifest.json \
   --mobile-scenes mobile/manifest.json \
   --my-voice my-voice-runtime.json \
+  --neural-runtime neural-runtime-bundle.json \
   --output release-readiness.json \
   --require-certified
 ```
 
-`--require-certified`가 없으면 미수집 슬롯을 `pending`으로 보존한 summary를 만들 수 있습니다. 이 옵션이 있으면 여섯 슬롯이 모두 READY가 아니면 non-zero exit로 실패합니다.
+`--require-certified`가 없으면 미수집 슬롯을 `pending`으로 보존한 summary를 만들 수 있습니다. 이 옵션이 있으면 일곱 슬롯이 모두 READY가 아니면 non-zero exit로 실패합니다.
 
 ## GitHub Actions 연결
 
@@ -74,3 +81,4 @@ Web quality report의 `source.commitSha`와 `source.runId`는 readiness summary�
 - 브라우저 UI는 GitHub API에 직접 로그인하거나 Actions를 원격 제어하지 않습니다. Actions artifact에서 내려받은 JSON을 사용합니다.
 - Kakao WebView가 Speech Synthesis를 차단하는 기기는 direct preview가 아니라 실제 fallback 관찰로 READY가 될 수 있으며, 두 경로를 detail에서 구분합니다.
 - 실제 MY VOICE runtime evidence가 없으면 Overall은 계속 `PENDING`입니다.
+- 5개 Neural 성우 중 하나라도 PC/mobile 실제 재생 완료가 없거나 동일 audio/model/reference fingerprint를 증명하지 못하면 Overall은 계속 `PENDING`입니다.

@@ -1,0 +1,12 @@
+SoriON AI 0.11.34 -> 0.11.35 patch manifest
+source: 0.11.34 Natural Voice Engine & Field Playback Gate
+target: 0.11.35 Voice Reference Intake & Listening QA
+
+Highlights:
+- Quality Lab 5 voices x 5 scenarios Listening QA
+- 6 listening dimensions: softness, natural pace, distinctiveness, articulation, breathing, low fatigue
+- fail-closed Listening READY gate
+- local-only QA persistence + explicit JSON export
+- HANDOVER archive split to retain project-rule line cap
+
+DELETE_LIST: none

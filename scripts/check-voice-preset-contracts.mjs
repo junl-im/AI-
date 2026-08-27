@@ -13,11 +13,11 @@ const frontend = await read('src/tts/voicePresets.ts')
 const backend = await read('services/api/app/services/voice_presets.py')
 const requiredIds = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
 const expectedPace = new Map([
-  ['sori-warm', { frontend: "rateMultiplier: 1.06,", backend: '        1.06,' }],
-  ['on-clear', { frontend: "rateMultiplier: 1.11,", backend: '        1.11,' }],
-  ['dam-calm', { frontend: "rateMultiplier: 1.04,", backend: '        1.04,' }],
-  ['jun-deep', { frontend: "rateMultiplier: 1.05,", backend: '        1.05,' }],
-  ['min-energetic', { frontend: "rateMultiplier: 1.14,", backend: '        1.14,' }],
+  ['sori-warm', { frontend: "rateMultiplier: 1.02,", backend: '        1.02,' }],
+  ['on-clear', { frontend: "rateMultiplier: 1.04,", backend: '        1.04,' }],
+  ['dam-calm', { frontend: "rateMultiplier: 0.99,", backend: '        0.99,' }],
+  ['jun-deep', { frontend: "rateMultiplier: 1.0,", backend: '        1.00,' }],
+  ['min-energetic', { frontend: "rateMultiplier: 1.07,", backend: '        1.07,' }],
 ])
 const expectedPitch = new Map([
   ['sori-warm', { frontend: 'pitchOffset: 0.35,', backend: '        0.35,' }],
@@ -57,6 +57,10 @@ for (const required of [
   'personaLabel',
   'personaSummary',
   'rhythmTags',
+  'softness',
+  'articulation',
+  'pauseStyle',
+  'naturalSpeedRange',
   "export type VoiceCadence = 'conversation' | 'explainer' | 'narrative' | 'documentary' | 'shortform'",
 ]) {
   if (!frontend.includes(required)) failures.push(`src/tts/voicePresets.ts: ${required} 누락`)
@@ -68,6 +72,9 @@ for (const required of [
   'class VoicePresetUnavailableError',
   'requires_gender_match',
   'variant_index',
+  'effective_rate',
+  'natural_speed_min',
+  'natural_speed_max',
   '지원하지 않는 음성 프리셋',
 ]) {
   if (!backend.includes(required)) failures.push(`voice_presets.py: ${required} 누락`)
@@ -197,8 +204,8 @@ for (const required of [
 ]) {
   if (!browserTests.includes(required)) failures.push(`browserSpeech.test.ts: ${required} 누락`)
 }
-if (!browserTests.includes('expect(playback.rate).toBeCloseTo(request.speed * 1.06, 5)')) {
-  failures.push('browserSpeech.test.ts: 혜린 +6% pace 계약 누락')
+if (!browserTests.includes('expect(playback.rate).toBeCloseTo(1.08, 5)')) {
+  failures.push('browserSpeech.test.ts: 현실 속도 상한 clamp 계약 누락')
 }
 if (browserTests.includes('expect(playback.rate).toBeLessThan(request.speed)')) {
   failures.push('browserSpeech.test.ts: R1 이전 감속 기대값이 남아 있습니다.')
@@ -252,4 +259,4 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log('Voice preset 계약 검사 통과 · 5종/남성 3종 · 같은 성별 순환 사용 및 반대 성별 차단')
+console.log('Voice preset 계약 검사 통과 · 5종 개성 분리 · 현실 속도 clamp · 같은 성별 순환 사용 및 반대 성별 차단')

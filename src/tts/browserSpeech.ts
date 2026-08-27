@@ -326,7 +326,11 @@ export function diagnoseBrowserSpeechProsody(
   request: TtsSynthesisRequest,
 ): BrowserSpeechProsodyDiagnostic {
   const preset = requireVoicePreset(request.voiceId)
-  const effectiveRate = Math.min(2, Math.max(0.5, request.speed * preset.rateMultiplier))
+  const rawRate = request.speed * preset.rateMultiplier
+  const effectiveRate = Math.min(
+    preset.naturalSpeedRange[1],
+    Math.max(preset.naturalSpeedRange[0], rawRate),
+  )
   const effectivePitchSemitones = request.pitch * BROWSER_USER_PITCH_SCALE + preset.pitchOffset
   const pitchRatio = 2 ** (effectivePitchSemitones / 12)
   const webSpeechPitch = Math.min(BROWSER_PITCH_MAX, Math.max(BROWSER_PITCH_MIN, pitchRatio))

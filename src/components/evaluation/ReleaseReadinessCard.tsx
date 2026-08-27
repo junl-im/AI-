@@ -47,6 +47,11 @@ const slotDefinitions: SlotDefinition[] = [
     title: 'MY VOICE Runtime',
     hint: 'observed-runtime evidence',
   },
+  {
+    kind: 'neural-runtime',
+    title: 'Neural Playback',
+    hint: 'PC/mobile 5 voices playing→ended',
+  },
 ]
 
 function statusTone(status: ReleaseReadinessSlotStatus | 'certified') {
@@ -115,11 +120,12 @@ export function ReleaseReadinessCard() {
         실제 증거 JSON의 schema·버전·checksum 필드를 검사합니다. 일부 항목만 READY여도 전체를 성공으로 합치지 않습니다.
       </p>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 text-[10px] font-black sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-2 text-[10px] font-black sm:grid-cols-5">
         <StatusPill label={`CI ${statusLabel(summary.groups.githubActions)}`} tone={statusTone(summary.groups.githubActions)} />
         <StatusPill label={`DEVICE ${statusLabel(summary.groups.fieldDevices)}`} tone={statusTone(summary.groups.fieldDevices)} />
         <StatusPill label={`CHROMIUM ${statusLabel(summary.groups.chromium)}`} tone={statusTone(summary.groups.chromium)} />
         <StatusPill label={`MY VOICE ${statusLabel(summary.groups.myVoice)}`} tone={statusTone(summary.groups.myVoice)} />
+        <StatusPill label={`NEURAL ${statusLabel(summary.groups.neuralVoice)}`} tone={statusTone(summary.groups.neuralVoice)} />
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -162,7 +168,7 @@ export function ReleaseReadinessCard() {
       </div>
 
       <div className="mt-4 rounded-2xl bg-[#f4f2ec] p-3 text-[10px] font-bold leading-5 text-soa-muted">
-        현재 앱 v{currentBuildInfo.appVersion} · 필수 증거 {6 - summary.missing.length}/6 ·
+        현재 앱 v{currentBuildInfo.appVersion} · 필수 증거 {7 - summary.missing.length}/7 ·
         raw MY VOICE sample/profile ID는 readiness manifest에 포함하지 않습니다.
       </div>
 

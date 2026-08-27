@@ -23,6 +23,8 @@ requireTokens('src/quality/releaseReadiness.ts', readiness, [
   "'chromium-desktop'",
   "'chromium-mobile'",
   "'my-voice'",
+  "'neural-runtime'",
+  "'neural-runtime'",
   "value.evidenceClass !== 'observed-runtime'",
   "fixture?.realWorkerClaimed === false",
   'verifyWebQualityChecksums',
@@ -39,6 +41,7 @@ requireTokens('src/components/evaluation/ReleaseReadinessCard.tsx', card, [
   'Chromium Desktop',
   'Chromium Mobile',
   'MY VOICE Runtime',
+  'Neural Playback',
   'readiness JSON 저장',
 ])
 const page = await read('src/pages/QualityPage.tsx')
@@ -52,6 +55,8 @@ requireTokens('scripts/verify-release-readiness.mjs', verifier, [
   "value.recoveryFixture?.realWorkerClaimed === false",
   "value.evidenceClass !== 'observed-runtime'",
   "overall: certified ? 'certified' : 'pending'",
+  '--neural-runtime',
+  'verifyNeuralRuntime',
 ])
 const tests = await read('src/quality/releaseReadiness.test.ts')
 requireTokens('src/quality/releaseReadiness.test.ts', tests, [
@@ -60,6 +65,8 @@ requireTokens('src/quality/releaseReadiness.test.ts', tests, [
   "'kakao-android'",
   "'chromium-desktop'",
   "'my-voice'",
+  "'neural-runtime'",
+  "'neural-runtime'",
 ])
 const docs = await read('docs/RELEASE_READINESS.md')
 requireTokens('docs/RELEASE_READINESS.md', docs, [
@@ -69,6 +76,8 @@ requireTokens('docs/RELEASE_READINESS.md', docs, [
   'Kakao iOS',
   'Chromium',
   'MY VOICE',
+  'Neural',
+  'playing',
   'synthetic',
 ])
 
@@ -77,4 +86,4 @@ if (failures.length) {
   failures.forEach((failure) => console.error(`- ${failure}`))
   process.exit(1)
 }
-console.log('Release readiness 계약 검사 통과 · CI + field device + Chromium + MY VOICE')
+console.log('Release readiness 계약 검사 통과 · CI + field device + Chromium + MY VOICE + Neural playback')

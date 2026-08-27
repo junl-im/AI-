@@ -5,6 +5,7 @@ export type ReleaseReadinessKind =
   | 'chromium-desktop'
   | 'chromium-mobile'
   | 'my-voice'
+  | 'neural-runtime'
 
 export type ReleaseReadinessSlotStatus = 'pending' | 'ready' | 'blocked'
 export type OverallReleaseReadinessStatus = 'pending' | 'certified'
@@ -32,6 +33,7 @@ export interface ReleaseReadinessSummary {
     fieldDevices: ReleaseReadinessSlotStatus
     chromium: ReleaseReadinessSlotStatus
     myVoice: ReleaseReadinessSlotStatus
+    neuralVoice: ReleaseReadinessSlotStatus
   }
   slots: Partial<Record<ReleaseReadinessKind, ReleaseReadinessSlot>>
   missing: ReleaseReadinessKind[]
@@ -59,6 +61,7 @@ const labels: Record<ReleaseReadinessKind, string> = {
   'chromium-desktop': 'Chromium Desktop 9-scene',
   'chromium-mobile': 'Chromium Mobile 9-scene',
   'my-voice': 'MY VOICE observed runtime',
+  'neural-runtime': 'Neural Voice PC/Mobile playback',
 }
 
 function isObject(value: unknown): value is JsonObject {
@@ -270,6 +273,49 @@ function myVoiceSlot(
   }
 }
 
+
+function neuralRuntimeSlot(
+  value: JsonObject,
+): Pick<ReleaseReadinessSlot, 'status' | 'detail' | 'sourceAppVersion' | 'sourceCommitSha' | 'sourceRunId'> {
+  if (value.schema !== 'neural-voice-runtime-bundle/1' || !Array.isArray(value.records)) {
+    throw new Error('neural-voice-runtime-bundle/1 evidence가 아닙니다.')
+  }
+  const expectedVoices = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
+  const records = value.records.filter(isObject)
+  const completed = (voiceId: string, surface: 'desktop-browser' | 'mobile-browser') => records.find((record) => (
+    record.schema === 'neural-voice-runtime-certification/1'
+    && record.evidenceClass === 'observed-runtime'
+    && record.synthetic === false
+    && record.voiceId === voiceId
+    && record.surface === surface
+    && typeof record.playbackStartedAt === 'string'
+    && typeof record.playbackCompletedAt === 'string'
+    && isSha256(record.audioSha256)
+    && isSha256(record.modelFingerprint)
+    && isSha256(record.referenceFingerprint)
+  ))
+  let shared = 0
+  for (const voiceId of expectedVoices) {
+    const desktop = completed(voiceId, 'desktop-browser')
+    const mobile = completed(voiceId, 'mobile-browser')
+    if (desktop && mobile
+      && desktop.cacheId === mobile.cacheId
+      && desktop.audioSha256 === mobile.audioSha256
+      && desktop.modelFingerprint === mobile.modelFingerprint
+      && desktop.referenceFingerprint === mobile.referenceFingerprint
+    ) shared += 1
+  }
+  return {
+    status: shared === expectedVoices.length ? 'ready' : 'blocked',
+    detail: shared === expectedVoices.length
+      ? '5/5 voices · PC/mobile playing→ended · shared neural audio verified'
+      : `shared playback ${shared}/5 · desktop/mobile 실제 재생 완료가 더 필요합니다.`,
+    sourceAppVersion: null,
+    sourceCommitSha: null,
+    sourceRunId: null,
+  }
+}
+
 export function evaluateReleaseReadinessValue(
   value: JsonObject,
   kind: ReleaseReadinessKind,
@@ -280,7 +326,8 @@ export function evaluateReleaseReadinessValue(
   if (kind === 'kakao-ios') return fieldDeviceSlot(value, 'kakao-ios')
   if (kind === 'chromium-desktop') return chromiumSlot(value, 'desktop', expectedAppVersion)
   if (kind === 'chromium-mobile') return chromiumSlot(value, 'mobile', expectedAppVersion)
-  return myVoiceSlot(value, expectedAppVersion)
+  if (kind === 'my-voice') return myVoiceSlot(value, expectedAppVersion)
+  return neuralRuntimeSlot(value)
 }
 
 export async function inspectReleaseReadinessFile(
@@ -322,6 +369,7 @@ export function buildReleaseReadinessSummary(
     'chromium-desktop',
     'chromium-mobile',
     'my-voice',
+    'neural-runtime',
   ]
   const missing = expectedKinds.filter((kind) => !slots[kind])
   const groups = {
@@ -329,6 +377,7 @@ export function buildReleaseReadinessSummary(
     fieldDevices: groupStatus([slots['kakao-android'], slots['kakao-ios']]),
     chromium: groupStatus([slots['chromium-desktop'], slots['chromium-mobile']]),
     myVoice: groupStatus([slots['my-voice']]),
+    neuralVoice: groupStatus([slots['neural-runtime']]),
   }
   const overall = missing.length === 0
     && Object.values(groups).every((status) => status === 'ready')

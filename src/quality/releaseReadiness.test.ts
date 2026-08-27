@@ -84,6 +84,26 @@ function myVoice() {
   }
 }
 
+function neuralRuntime() {
+  const voices = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
+  return {
+    schema: 'neural-voice-runtime-bundle/1',
+    records: voices.flatMap((voiceId) => ['desktop-browser', 'mobile-browser'].map((surface) => ({
+      schema: 'neural-voice-runtime-certification/1',
+      evidenceClass: 'observed-runtime',
+      synthetic: false,
+      voiceId,
+      surface,
+      cacheId: `${voiceId}-cache`,
+      audioSha256: sha,
+      modelFingerprint: sha,
+      referenceFingerprint: sha,
+      playbackStartedAt: '2026-08-27T00:00:00.000Z',
+      playbackCompletedAt: '2026-08-27T00:00:01.000Z',
+    })),
+  }
+}
+
 function slot(kind: ReleaseReadinessKind): ReleaseReadinessSlot {
   return {
     kind,
@@ -124,7 +144,14 @@ describe('releaseReadiness', () => {
     expect(evaluateReleaseReadinessValue(failed, 'my-voice', version).status).toBe('blocked')
   })
 
-  it('6개 증거가 모두 ready일 때만 overall certified다', () => {
+  it('Neural runtime은 5개 성우가 PC/mobile에서 같은 음원을 playing→ended까지 재생해야 ready다', () => {
+    expect(evaluateReleaseReadinessValue(neuralRuntime(), 'neural-runtime', version).status).toBe('ready')
+    const failed = neuralRuntime()
+    failed.records = failed.records.filter((record) => !(record.voiceId === 'min-energetic' && record.surface === 'mobile-browser'))
+    expect(evaluateReleaseReadinessValue(failed, 'neural-runtime', version).status).toBe('blocked')
+  })
+
+  it('7개 증거가 모두 ready일 때만 overall certified다', () => {
     const slots: Partial<Record<ReleaseReadinessKind, ReleaseReadinessSlot>> = {
       'web-quality': slot('web-quality'),
       'kakao-android': slot('kakao-android'),
@@ -132,6 +159,7 @@ describe('releaseReadiness', () => {
       'chromium-desktop': slot('chromium-desktop'),
       'chromium-mobile': slot('chromium-mobile'),
       'my-voice': slot('my-voice'),
+      'neural-runtime': slot('neural-runtime'),
     }
     expect(buildReleaseReadinessSummary(slots, version).overall).toBe('certified')
     delete slots['my-voice']

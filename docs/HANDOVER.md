@@ -1,4 +1,27 @@
+## 2026-08-27 KST · 0.11.35 Voice Reference Intake & Listening QA
+
+1. **현재 기준선**: `0.11.35 · Voice Reference Intake & Listening QA`.
+2. **핵심 변경**: 5성우 × 5청취 시나리오 × 6평가축의 사람 청취 QA를 Quality Lab에 추가했습니다.
+3. **출시 기준**: 5시나리오 완료, 평균 4.0+, 모든 항목 3+, 장문 낮은 피로도 4+일 때만 LISTENING READY입니다.
+4. **데이터 정책**: 청취 기록은 브라우저 localStorage에 저장하고 사용자가 명시적으로 JSON 내보내기를 실행할 때만 파일로 나갑니다.
+5. **Neural 정책**: 기존 consent/rights/SHA/model/reference fingerprint와 PC/mobile playing→ended fail-closed gate를 유지합니다.
+6. **다음 목표**: `0.11.36 · Prosody Director & Long-form Naturalness`.
+
 # HANDOVER
+
+## 2026-08-27 KST · 0.11.34 Natural Voice Engine & Field Playback Gate
+
+1. **작업 일시(KST)**: 2026-08-27.
+2. **대상/기준 버전**: `0.11.34 · Natural Voice Engine & Field Playback Gate` / `0.11.33 R1 · Baseline Integrity Repair`.
+3. **변경 내용**: 5개 기본 성우의 기본 속도를 현실적인 좁은 범위로 재보정하고 softness/articulation/pause identity를 추가했습니다. Browser/Melo/System TTS는 같은 natural speed clamp를 사용하며 CosyVoice는 FFmpeg가 있을 때 pitch를 보존하는 `atempo`로 최종 WAV tempo를 보정합니다. Release Readiness에는 5성우 PC/mobile `playing → ended` shared neural evidence 슬롯을 추가해 필수 7개 evidence로 확장했습니다.
+4. **변경 이유**: 기존 +6~14% 중심 차별화는 일부 성우를 실제 사람보다 빠르게 들리게 만들 수 있고, Neural 경로는 UI speed가 실제 WAV에 충분히 반영되지 않았습니다. 성우 개성은 과속이 아니라 음색·호흡·명료도·종결 방식으로 분리하고 실제 재생 완료만 Neural 출시 인증으로 인정하기 위함입니다.
+5. **영향 범위**: `src/tts/voicePresets.ts`, Browser Speech prosody, API voice preset 공통 정책, Melo/System/CosyVoice TTS, Release Readiness UI/verifier/tests/docs. 실제 rights-cleared reference/model 자산은 추가하지 않습니다.
+6. **성우 정책**: 혜린 1.02×(0.96–1.08), 도윤 1.04×(0.98–1.10), 소리 0.99×(0.94–1.05), 준호 1.00×(0.95–1.06), 민준 1.07×(1.00–1.13). 각 preset은 서로 다른 softness/articulation/pauseStyle을 갖습니다.
+7. **Neural gate**: 5개 preset 각각 desktop/mobile observed-runtime의 playbackStartedAt + playbackCompletedAt이 필요하고 cache/audio/model/reference fingerprint가 PC/mobile에서 동일해야 `neural-runtime READY`입니다.
+8. **검증 결과**: targeted API voice/system/melo/cosy tests **32/32 PASS**, API pytest **238/238 PASS** (기존 FastAPI deprecated alias warning 1건), Worker pytest **16/16 PASS**, Repository preflight **55/55 PASS**, Live Voice/MY VOICE **51/51 PASS**, voice preset/neural runtime/release readiness contract **PASS**. `npm ci --ignore-scripts`는 120초 실행 제한 내 완료되지 않아 dependency 기반 lint/Vitest/typecheck/build는 로컬 미검증이며 GitHub Actions final gate를 유지합니다.
+9. **알려진 제한**: FFmpeg가 없는 CosyVoice 환경은 reference cadence를 유지하고 speed 지원 READY를 주장하지 않습니다. 실제 rights-cleared 5성우 WAV/model과 PC/mobile observed playback이 없으면 Neural 5/5 CERTIFIED를 주장하지 않습니다.
+10. **생성 산출물**: `SoriON-AI-0.11.34-natural-voice-engine-field-playback-gate-full.zip`, `SoriON-AI-0.11.33-r1-to-0.11.34-natural-voice-engine-field-playback-gate-patch.zip`, `SoriON-AI-0.11.34-natural-voice-engine-field-playback-gate-SHA256SUMS.txt`.
+11. **다음 예상 업데이트**: `0.11.35 · Voice Reference Intake & Listening QA` — 실제 승인 reference가 제공될 때 성우별 청취 기준, loudness/발음/호흡 A/B QA와 장문 피로도 검증을 강화합니다.
 
 ## 2026-08-26 KST · 0.11.33 R1 Baseline Integrity Repair
 
@@ -15,9 +38,9 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.33 · Voice Engine Major Hardening**
+Current baseline: **0.11.34 · Natural Voice Engine & Field Playback Gate**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-21 18:01 KST**
+최종 갱신: **2026-08-27 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -1005,114 +1028,12 @@ GET  /v1/jobs/{job_id}/segments/{index}/audio
 Web 내부 키:
 - `sorion-api-last-good-url`: 마지막 성공 주소.
 - `sorion-api-url-history`: 최근 정상 주소 최대 5개.
-- `sorion-client-id`: 익명 연결·rate-limit 식별자.
-우선순위는 빌드 주입 HTTPS API, 성공 이력, 비정적 same-origin, 안전한 개발 후보다.
-GitHub Pages는 same-origin과 8443 후보에서 제외한다. 전체 LAN은 스캔하지 않는다.
-사용자 주소 입력 UI는 없으며 공개 운영자는 Repository Variable
-`SORION_PUBLIC_API_BASE_URL`을 한 번 설정한다.
-## 11. 저장·개인정보·동의
-IndexedDB `sorion-ai`, schema v4:
-- `projects`: 프로젝트 메타데이터.
-- `qualityReviews`: 품질 평가·메모.
-- `voiceProfiles`: 샘플 Blob·분석·동의 기록.
-정책:
-- 샘플은 기본 브라우저 로컬 저장.
-- Firebase 자동 업로드 금지.
-- 서버 샘플 TTL 7일, 생성 음원 30분, Worker 종료 job 60분.
-- 사용자 파일명을 서버 저장 경로로 사용하지 않는다.
-- 동의 철회 시 로컬 프로필·서버 샘플·향후 prompt cache를 함께 폐기한다.
-- 원문과 음성 본문은 감사 로그에 기록하지 않는다.
-## 12. 보안 경계
-공유 Secret:
-```env
-SORION_WORKER_SERVICE_TOKEN=
-SORION_WORKER_SIGNATURE_SECRET=
-```
-헤더:
-```text
-X-SoriON-Service-Token
-X-SoriON-Timestamp
-X-SoriON-Signature
-```
-- 서명은 method + path + timestamp + body SHA-256의 HMAC-SHA256.
-- `/health`만 무인증, `/ready`와 `/v1/*`는 인증.
-- Worker는 인터넷에 직접 공개하지 않는다.
-- 공개 FastAPI는 TLS reverse proxy 뒤에 두고 Worker와 같은 포트를 직접 노출하지 않는다.
-- `X-Forwarded-*`는 Heartbeat 5에서 공개 Origin 진단 전용이며 인증·권한 판정에 사용하지 않는다.
-- reverse proxy는 외부 forwarded header를 제거한 뒤 자신의 값만 전달한다.
-- Secret은 저장소와 ZIP에 넣지 않는다.
-- production에서 Secret이 없으면 ready가 되지 않아야 한다.
-## 13. 환경 변수
-전체 기본값과 설명의 원본은 루트 `.env.example`이다. 릴리스 ZIP에 실제 `.env`를 넣지 않는다.
-Web·배포:
-```text
-VITE_API_BASE_URL, VITE_API_BASE_URLS, SORION_PUBLIC_API_BASE_URL, SORION_PUBLIC_API_BASE_URLS
-VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_APP_ID
-```
-API core·job:
-```text
-SORION_ENVIRONMENT, SORION_CORS_ORIGINS, 삭제된 비용 정책 변수, SORION_DEFAULT_TTS_ENGINE, SORION_TTS_ENGINE_ORDER
-SORION_ENGINE_FAILURE_THRESHOLD, SORION_ENGINE_COOLDOWN_SECONDS, SORION_GENERATION_TIMEOUT_SECONDS
-SORION_MAX_CONCURRENT_GENERATIONS, SORION_JOB_STORE_PATH, SORION_JOB_CLAIM_TTL_SECONDS
-SORION_JOB_RESULT_TTL_MINUTES, SORION_JOB_HISTORY_TTL_HOURS, SORION_JOB_POLL_INTERVAL_SECONDS
-SORION_AUDIO_TTL_MINUTES, SORION_AUDIO_DIRECTORY, SORION_MAX_SEGMENT_CHARS
-```
-엔진·Worker proxy:
-```text
-SORION_ENABLE_MELO_TTS, SORION_MELO_DEVICE, SORION_ENABLE_SYSTEM_TTS, SORION_SYSTEM_TTS_VOICE
-SORION_COSYVOICE_WORKER_URL, SORION_COSYVOICE_WORKER_TIMEOUT_SECONDS
-SORION_COSYVOICE_WORKER_JOB_TIMEOUT_SECONDS, SORION_COSYVOICE_TTS_REFERENCE_PATH
-SORION_COSYVOICE_TTS_PROFILE_ID, SORION_COSYVOICE_PRESET_DIRECTORY
-SORION_WORKER_SERVICE_TOKEN, SORION_WORKER_SIGNATURE_SECRET
-```
-보안·저장·Worker:
-```text
-SORION_PUBLIC_RATE_LIMIT_PER_MINUTE, SORION_ALLOW_PRIVATE_NETWORK, SORION_AUDIT_LOG_PATH
-SORION_VOICE_CLONE_DIRECTORY, SORION_VOICE_CLONE_TTL_DAYS, SORION_VOICE_CLONE_MAX_FILE_BYTES
-SORION_WORKER_ENVIRONMENT, SORION_WORKER_OUTPUT_PATH, SORION_WORKER_MODEL_PATH
-SORION_WORKER_MODEL_MANIFEST_PATH, SORION_WORKER_REQUIRE_MODEL_MANIFEST
-SORION_WORKER_MODEL_LICENSE_ACCEPTED, SORION_WORKER_REQUIRED_MODEL_FILES
-SORION_WORKER_ADAPTER_MODULE, SORION_WORKER_DEVICE, SORION_WORKER_ALLOW_CPU
-SORION_WORKER_MIN_VRAM_MB, SORION_WORKER_MIN_DISK_FREE_MB, SORION_WORKER_MAX_CONCURRENT_JOBS
-SORION_WORKER_MAX_SAMPLE_BYTES, SORION_WORKER_AUTH_TTL_SECONDS, SORION_WORKER_RATE_LIMIT_PER_MINUTE
-SORION_WORKER_JOB_TTL_MINUTES, SORION_WORKER_CORS_ORIGINS, SORION_WORKER_AUDIT_PATH
-SORION_FASTER_WHISPER_MODEL, SORION_FASTER_WHISPER_DEVICE, SORION_FASTER_WHISPER_COMPUTE_TYPE
-SORION_STT_DIRECTORY, SORION_DEVICE_BENCHMARK_PATH
-```
-## 14. 코딩 규칙
-- 소스 파일은 800줄부터 분리를 권고하고 1,200줄 안전 상한만 차단.
-- 큰 함수 분리, 중복 제거, 하드코딩 최소화.
-- 공식 브랜드 원본은 사용자 제공 `public/sorion-logo.png`이며 근사 SVG를 다시 만들지 않는다.
-- 폐기 라이브러리 사용 금지.
-- Python 최소 지원 버전 3.10.
-- Python은 Ruff 표시 폭 100칸 이하.
-- React Hook dependency 경고 0건.
-- 직접 npm 의존성 exact pin과 Web peer compatibility gate를 유지한다.
-- 테스트 간 DOM을 명시적으로 cleanup.
-- 새 기능에는 Web 또는 API·Worker 테스트를 추가한다.
-- 실제 기능 미연결 상태를 Demo 성공으로 숨기지 않는다.
-## 15. 브랜치와 배포 규칙
-- 브랜치: `main`, `develop`, `feature/*`, `fix/*`.
-- main 직접 개발 금지.
-- 활성 Workflow는 `.github/workflows/ci.yml` 하나.
-- main push, pull request 범위를 분리해 중복 실행을 막는다.
-- GitHub Pages Source는 GitHub Actions.
-- Web, API Python 3.10, Worker Python 3.10이 모두 통과해야 배포한다.
-## 16. 현재 산출물과 패치 기준
-- 전체 후보본: `SoriON-AI-0.11.24-recovery-batch-editor-responsibility-split-full.zip`.
-- 덮어쓰기 패치: `SoriON-AI-0.11.23-to-0.11.24-recovery-batch-editor-responsibility-split-patch.zip`.
-- 정확한 패치 기준: 사용자가 전달한 `0.11.23 · Focused Voice Surface & Picker Polish` 전체본.
-- 이번 릴리스 추적 파일 삭제: 없음.
-- `.git`, `.sorion`, `node_modules`, `dist`, Python cache, 실행 DB, 사용자 음성·Secret·모델 가중치는 산출물에서 제외한다.
-## 17. 절대 변경 금지 결정
-- 초기 브랜드 랜딩을 제거하지 않는다.
-- 편집 진입 후 대형 헤더를 다시 노출하지 않는다.
-- API 연결을 사용자 주소 입력이나 엔진 수동 선택에 의존시키지 않는다.
-- 초기 랜딩에 Dock이나 플레이어를 노출하지 않는다.
-- 플레이어를 Dock 메뉴 아래로 내리지 않는다.
-- 고급 감정·피치 설정을 초보자 첫 흐름에 다시 넣지 않는다.
-- 채팅형 한 문장 composer를 장문 기본 제작 화면으로 되돌리지 않는다.
-- HANDOVER를 단순 변경 목록으로 축소하지 않는다.
+
+## Archived history
+
+- 오래된 상세 이력은 `docs/archive/HANDOVER_HISTORY_PRE_0_9_3.md`로 분리했습니다.
+- 최신 개발자는 이 문서 상단의 현재 기준선과 `docs/NEXT_UPDATE.md`를 우선합니다.
+
 ## 18. 알려진 제한과 위험
 - GitHub Pages만으로 서버 AI 합성은 불가능하며 별도 HTTPS FastAPI가 필요하다.
 - 공개 API가 없으면 Browser Speech만 재생되며 AI·WAV 다운로드·복제는 준비되지 않는다.

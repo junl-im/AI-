@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## 0.11.35 · Voice Reference Intake & Listening QA
+
+- 5개 성우를 일상 대화·설명·장문·다큐·숏폼의 고정 청취 시나리오로 분리 평가하는 Listening QA를 추가했습니다.
+- 부드러움·현실 속도·성우 개성·발음 명료도·호흡·낮은 피로도 6축을 1~5점으로 기록합니다.
+- 5개 시나리오 완주, 평균 4.0 이상, 모든 세부 항목 3점 이상, 장문 피로도 4점 이상이 아니면 LISTENING READY로 승격하지 않습니다.
+- 평가 기록은 기본적으로 브라우저 로컬 저장소에만 보관하며 JSON으로 명시적으로 내보낼 수 있습니다.
+- 기존 Neural reference의 consent/rights/SHA/model fingerprint fail-closed 정책과 PC/mobile playing→ended 인증을 유지합니다.
+
+## 0.11.34 · Natural Voice Engine & Field Playback Gate
+
+- 5개 기본 성우의 기본 pace를 `+6~14%` 중심에서 현실적인 `-1~+7%` 범위로 재보정했습니다.
+- 프리셋마다 `softness`, `articulation`, `pauseStyle`을 추가해 개성을 속도보다 호흡·명료도·문장 종결에서 분리합니다.
+- Browser Speech, MeloTTS, Windows/macOS/eSpeak가 동일한 natural speed clamp를 사용합니다.
+- CosyVoice는 FFmpeg 사용 가능 시 `atempo`로 pitch를 보존한 tempo 보정을 적용하며, FFmpeg가 없으면 speed 지원을 READY로 주장하지 않습니다.
+- Release Readiness에 `neural-runtime` 슬롯을 추가해 5개 성우 모두 PC/mobile에서 실제 `playing → ended` 완료 및 동일 cache/audio/model/reference fingerprint를 증명해야 전체 CERTIFIED가 가능합니다.
+- 실제 rights-cleared 5성우 WAV/model이 없는 상태에서는 기존 fail-closed 원칙을 유지합니다.
+
+### 검증
+
+- Targeted API preset/system/melo/cosy tests: **32/32 PASS**
+- Voice preset contract: **PASS**
+- Neural runtime shared cache contract: **PASS**
+- Release readiness 7-slot contract: **PASS**
+- Repository preflight: **55/55 PASS**
+- Live Voice / MY VOICE hardening: **51/51 PASS**
+- API pytest: **238/238 PASS** (기존 FastAPI deprecated alias warning 1건)
+- Worker pytest: **16/16 PASS**
+- Web dependency install: `npm ci --ignore-scripts`가 120초 실행 제한 내 완료되지 않아 lint/Vitest/typecheck/build는 GitHub Actions final gate
+
 ## 0.11.33 R1 · Baseline Integrity Repair
 
 - 0.11.33 DELETE_LIST에 선언됐지만 전달본에 남아 있던 Final Export Web/API/schema와 구형 Live Voice/MY VOICE apply/payload 잔재를 실제 제거했습니다.

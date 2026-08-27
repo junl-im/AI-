@@ -427,7 +427,7 @@ class SystemSpeechAdapter:
         resolved = backend or self.backend
         assert resolved is not None
         preset = get_voice_preset(request.voice_id)
-        speed = max(80, min(360, round(175 * request.speed * preset.rate_multiplier)))
+        speed = max(80, min(360, round(175 * preset.effective_rate(request.speed))))
         pitch = max(0, min(99, round(50 + (request.pitch + preset.pitch_offset) * 3)))
         command = [
             resolved.executable,
@@ -456,7 +456,7 @@ class SystemSpeechAdapter:
         selected_voice = self._macos_voice_for(preset, resolved)
         words_per_minute = max(
             90,
-            min(360, round(180 * request.speed * preset.rate_multiplier)),
+            min(360, round(180 * preset.effective_rate(request.speed))),
         )
         try:
             await self._run([
@@ -493,7 +493,7 @@ class SystemSpeechAdapter:
         text_path = output_path.with_suffix(".txt")
         text_path.write_text(request.text, encoding="utf-8")
         preset = get_voice_preset(request.voice_id)
-        effective_speed = request.speed * preset.rate_multiplier
+        effective_speed = preset.effective_rate(request.speed)
         rate = max(-10, min(10, round((effective_speed - 1) * 16)))
         try:
             try:

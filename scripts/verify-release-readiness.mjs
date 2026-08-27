@@ -21,6 +21,7 @@ const inputs = {
   desktopScenes: option('--desktop-scenes'),
   mobileScenes: option('--mobile-scenes'),
   myVoice: option('--my-voice'),
+  neuralRuntime: option('--neural-runtime'),
 }
 const output = option('--output')
 const appVersion = (await readFile(resolve(root, 'VERSION'), 'utf8')).trim()
@@ -136,6 +137,35 @@ function verifyMyVoice(loaded) {
   return result('my-voice', loaded, ready ? 'ready' : 'blocked', ready ? `completed · firstAudio=${Math.round(value.firstAudioMs)}ms` : 'observed runtime 미완료')
 }
 
+function verifyNeuralRuntime(loaded) {
+  if (!loaded) return result('neural-runtime', null, 'pending', 'evidence missing')
+  const value = loaded.value
+  if (value.schema !== 'neural-voice-runtime-bundle/1' || !Array.isArray(value.records)) fail('Neural runtime bundle schema 오류')
+  const hash = /^[a-f0-9]{64}$/i
+  const expected = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
+  let shared = 0
+  for (const voiceId of expected) {
+    const complete = (surface) => value.records.find((record) => record?.schema === 'neural-voice-runtime-certification/1'
+      && record.evidenceClass === 'observed-runtime'
+      && record.synthetic === false
+      && record.voiceId === voiceId
+      && record.surface === surface
+      && record.playbackStartedAt
+      && record.playbackCompletedAt
+      && hash.test(record.audioSha256 ?? '')
+      && hash.test(record.modelFingerprint ?? '')
+      && hash.test(record.referenceFingerprint ?? ''))
+    const desktop = complete('desktop-browser')
+    const mobile = complete('mobile-browser')
+    if (desktop && mobile
+      && desktop.cacheId === mobile.cacheId
+      && desktop.audioSha256 === mobile.audioSha256
+      && desktop.modelFingerprint === mobile.modelFingerprint
+      && desktop.referenceFingerprint === mobile.referenceFingerprint) shared += 1
+  }
+  return result('neural-runtime', loaded, shared === 5 ? 'ready' : 'blocked', `shared playback ${shared}/5`)
+}
+
 const loaded = {
   webQuality: await load(inputs.webQuality, 'Web quality'),
   android: await load(inputs.android, 'Kakao Android'),
@@ -143,6 +173,7 @@ const loaded = {
   desktopScenes: await load(inputs.desktopScenes, 'Chromium desktop'),
   mobileScenes: await load(inputs.mobileScenes, 'Chromium mobile'),
   myVoice: await load(inputs.myVoice, 'MY VOICE'),
+  neuralRuntime: await load(inputs.neuralRuntime, 'Neural runtime'),
 }
 
 const slots = [
@@ -152,6 +183,7 @@ const slots = [
   verifyScenes(loaded.desktopScenes, 'desktop'),
   verifyScenes(loaded.mobileScenes, 'mobile'),
   verifyMyVoice(loaded.myVoice),
+  verifyNeuralRuntime(loaded.neuralRuntime),
 ]
 
 function groupStatus(kinds) {
@@ -166,6 +198,7 @@ const groups = {
   fieldDevices: groupStatus(['kakao-android', 'kakao-ios']),
   chromium: groupStatus(['chromium-desktop', 'chromium-mobile']),
   myVoice: groupStatus(['my-voice']),
+  neuralVoice: groupStatus(['neural-runtime']),
 }
 const certified = slots.every((item) => item.status === 'ready')
 const summary = {
@@ -182,4 +215,4 @@ if (output) await writeFile(output, `${JSON.stringify(summary, null, 2)}\n`, 'ut
 if (requireCertified && !certified) {
   fail(`--require-certified 조건 미충족 · ${slots.filter((item) => item.status !== 'ready').map((item) => `${item.kind}:${item.status}`).join(', ')}`)
 }
-console.log(`Release readiness 검증 통과 · overall=${summary.overall} · ready=${slots.filter((item) => item.status === 'ready').length}/6`)
+console.log(`Release readiness 검증 통과 · overall=${summary.overall} · ready=${slots.filter((item) => item.status === 'ready').length}/7`)

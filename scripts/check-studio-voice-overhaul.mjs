@@ -18,18 +18,18 @@ for (const required of [
   "cadence: 'narrative'",
   "cadence: 'documentary'",
   "cadence: 'shortform'",
-  'rateMultiplier: 1.06',
-  'rateMultiplier: 1.11',
-  'rateMultiplier: 1.04',
-  'rateMultiplier: 1.05',
-  'rateMultiplier: 1.14',
+  'rateMultiplier: 1.02',
+  'rateMultiplier: 0.99',
+  'rateMultiplier: 0.99',
+  'rateMultiplier: 1.0',
+  'rateMultiplier: 1.07',
 ]) {
   if (!presets.includes(required)) failures.push(`voicePresets.ts: ${required} 누락`)
 }
 
 const recommendationTest = await read('src/tts/voiceRecommendation.test.ts')
-if (!recommendationTest.includes('{ speed: 1.16, pitch: 1 }')) {
-  failures.push('voiceRecommendation.test.ts: 소리 natural speed upper bound 1.16 계약 누락')
+if (!recommendationTest.includes('{ speed: 1.05, pitch: 1 }')) {
+  failures.push('voiceRecommendation.test.ts: 소리 natural speed upper bound 1.05 계약 누락')
 }
 
 const browser = await read('src/tts/browserSpeech.ts')
@@ -70,7 +70,7 @@ for (const required of ['VoiceRhythmSignature', 'personaLabel', 'personaSummary'
 }
 
 const backend = await read('services/api/app/services/voice_presets.py')
-for (const rate of ['        1.06,', '        1.11,', '        1.04,', '        1.05,', '        1.14,']) {
+for (const rate of ['        1.02,', '        1.04,', '        0.99,', '        1.00,', '        1.07,']) {
   if (!backend.includes(rate)) failures.push(`voice_presets.py: pace ${rate.trim()} 누락`)
 }
 const systemTts = await read('services/api/app/engines/tts/system_tts.py')

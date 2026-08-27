@@ -258,11 +258,11 @@ def test_system_adapter_refresh_redetects_newly_available_backend(monkeypatch):
 @pytest.mark.parametrize(
     ("voice_id", "expected_rate"),
     [
-        ("sori-warm", "1"),
-        ("on-clear", "2"),
-        ("dam-calm", "1"),
-        ("jun-deep", "1"),
-        ("min-energetic", "2"),
+        ("sori-warm", "0"),
+        ("on-clear", "1"),
+        ("dam-calm", "0"),
+        ("jun-deep", "0"),
+        ("min-energetic", "1"),
     ],
 )
 async def test_windows_preset_pace_is_observable_at_default_speed(

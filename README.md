@@ -8,7 +8,7 @@ Adapter는 프로젝트에 포함하지 않습니다.
 
 ## 현재 상태
 
-- Version: `0.11.33 · Voice Engine Major Hardening`. MY VOICE 실제 파형 재검증, 16 kHz mono 정규화, 20~30초 권장/30초 상한, 엔진 복구 재동기화, CosyVoice 호출 교정과 성우 preset 품질 게이트를 포함합니다.
+- Version: `0.11.34 · Natural Voice Engine & Field Playback Gate`. MY VOICE 실제 파형 재검증, 16 kHz mono 정규화, 20~30초 권장/30초 상한, 엔진 복구 재동기화, CosyVoice 호출 교정과 성우 preset 품질 게이트를 포함합니다.
 - MY VOICE trust boundary: 브라우저 분석만 신뢰하지 않고 서버가 RMS·무음·clipping·길이를 다시 검사합니다. local-only 음성은 사용자 명시 동작 없이 서버에 자동 업로드하지 않습니다.
 - Voice preset gate: 5개 성우 reference는 16 kHz mono·5~30초·RMS·무음·clipping + 동의/권리/사람 검수/SHA가 모두 맞아야 neural 경로를 사용할 수 있습니다. 실제 rights-cleared WAV가 없는 현재 릴리스는 fail-closed입니다.
 - Final Export retirement: 사용자용 `최종 MP3 + 자막` / `최종 WAV + 자막` UI와 공개 `/exports` API, 과거 hotfix/apply payload를 제거했습니다. 내부 장시간 WAV/자막 soak는 품질검사용으로만 유지합니다.
@@ -18,13 +18,13 @@ Adapter는 프로젝트에 포함하지 않습니다.
 - Runtime playback evidence: 실제 `<audio>` playing/ended를 관찰한 `observed-runtime`만 저장하며 Quality Lab에서 PC/mobile cache/audio/model/reference identity가 모두 같을 때만 `SHARED READY`로 표시합니다.
 - Studio entry: Landing의 `장문 음성 스튜디오 시작`은 workspace 진입 뒤 `텍스트를 음성으로`를 sticky compact header 바로 아래로 자동 정렬합니다. 이전 scroll 위치를 그대로 끌고 들어가지 않습니다.
 - Landing visual: Masthead 오른쪽 Current Voice/Engine/CTA 기능 카드를 제거하고 cyan/violet SoriON Signature Visual로 교체했습니다. visual 내부에는 클릭 기능이 없습니다.
-- Voice character: 혜린 `따뜻한 대화 +6%`, 도윤 `또렷한 설명 +11%`, 소리 `편안한 장문 +4%`, 준호 `묵직한 다큐 +5%`, 민준 `빠른 숏폼 +14%` persona/cadence를 적용합니다.
+- Voice character: 혜린 `부드러운 대화 +2%`, 도윤 `또렷한 설명 +4%`, 소리 `편안한 장문 -1%`, 준호 `묵직한 다큐 ±0%`, 민준 `경쾌한 숏폼 +7%`를 기본으로 하고 softness/articulation/pause identity를 분리합니다.
 - Korean speech naturalness: Browser Speech는 성우별 줄바꿈/말줄임 cadence를 정리하고 사용자 pitch 영향 30%, 최종 pitch `0.92~1.08`로 제한합니다. Windows System TTS pace quantization도 x16으로 높였습니다.
 - Voice surface: Desktop Drawer/Voice Picker는 persona summary, pace, rhythm micrograph, 잘 맞는 콘텐츠, 장점/주의를 보여 5개 성우 역할을 재생 전에도 구분합니다.
 - Neural preview promotion: 5개 preset은 v4 manifest의 consent/rights/review 승인, 실제 reference SHA 일치, model fingerprint, `cosyvoice3` provenance가 모두 READY일 때만 neural 미리듣기로 승격합니다.
 - Reference privacy boundary: 실제 WAV·모델·동의 문서는 Git/전달 ZIP에 넣지 않고 운영 디렉터리에 보관하며, 앱에는 SHA-256 fingerprint와 approval/cache identity만 노출합니다.
 - Safe fallback: neural READY가 아니거나 neural 요청이 실패하면 0.11.28의 자연화된 `기기 음성` fallback과 카카오 watchdog/외부 브라우저 복구를 유지합니다.
-- Release readiness: Quality Lab에서 Web quality, Kakao Android/iOS, Chromium desktop/mobile, MY VOICE runtime 증거를 각각 READY/PENDING/BLOCKED로 판정하고 6개 모두 READY일 때만 Overall CERTIFIED를 허용합니다.
+- Release readiness: Quality Lab에서 Web quality, Kakao Android/iOS, Chromium desktop/mobile, MY VOICE runtime, Neural 5성우 PC/mobile playback 증거를 각각 판정하고 7개 모두 READY일 때만 Overall CERTIFIED를 허용합니다.
 - Readiness integrity: Web quality report/checksum과 Chromium 9/9 capture SHA-256을 재검증하며 synthetic Chromium fixture는 실제 MY VOICE 성공으로 승격하지 않습니다.
 - Voice naturalness boundary: 0.11.31은 pitch를 character의 주 수단으로 쓰지 않고 pace/cadence를 우선합니다. Browser/System fallback은 기기 음성 근사이며 실제 neural timbre와 동일 품질로 표시하지 않습니다.
 - Preview quality boundary: Browser Speech는 `기기 음성` 근사 미리듣기이며 실제 neural 성우와 동일 품질로 표시하지 않습니다. 카카오 direct user-gesture/watchdog/fallback은 그대로 유지합니다.

@@ -1,0 +1,52 @@
+SoriON AI 0.11.33 R1 -> 0.11.34 patch manifest
+base: 0.11.33 R1 Baseline Integrity Repair
+target: 0.11.34 Natural Voice Engine & Field Playback Gate
+
+changed/new files:
+- README.md
+- START_HERE.md
+- VERSION
+- docs/CHANGELOG.md
+- docs/HANDOVER.md
+- docs/NEXT_UPDATE.md
+- docs/RELEASE_READINESS.md
+- docs/VOICE_NATURALNESS_ENGINE_0_11_34.md
+- docs/patches/0.11.34-natural-voice-engine-field-playback-gate/DELETE_LIST.txt
+- docs/patches/0.11.34-natural-voice-engine-field-playback-gate/PATCH_README.md
+- package-lock.json
+- package.json
+- scripts/check-release-readiness.mjs
+- scripts/check-studio-voice-overhaul.mjs
+- scripts/check-voice-preset-contracts.mjs
+- scripts/verify-release-readiness.mjs
+- services/api/app/engines/tts/cosyvoice_worker_tts.py
+- services/api/app/engines/tts/melo_tts.py
+- services/api/app/engines/tts/system_tts.py
+- services/api/app/services/voice_presets.py
+- services/api/pyproject.toml
+- services/api/tests/test_ai_director.py
+- services/api/tests/test_connectivity.py
+- services/api/tests/test_engine_catalog.py
+- services/api/tests/test_engine_strategy.py
+- services/api/tests/test_evidence.py
+- services/api/tests/test_health.py
+- services/api/tests/test_melo_tts.py
+- services/api/tests/test_quality.py
+- services/api/tests/test_setup.py
+- services/api/tests/test_system_tts.py
+- services/api/tests/test_voice_presets.py
+- services/api/uv.lock
+- services/worker/pyproject.toml
+- services/worker/uv.lock
+- src/components/evaluation/ReleaseReadinessCard.tsx
+- src/quality/releaseReadiness.test.ts
+- src/quality/releaseReadiness.ts
+- src/tts/browserSpeech.test.ts
+- src/tts/browserSpeech.ts
+- src/tts/voicePresets.test.ts
+- src/tts/voicePresets.ts
+- src/tts/voiceRecommendation.test.ts
+- src/update/buildInfo.ts
+
+deleted files:
+- none

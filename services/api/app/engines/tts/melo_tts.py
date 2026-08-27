@@ -275,7 +275,7 @@ class MeloTtsEngine(TtsEngine):
             "selected_gender": str(selection["speaker_gender"]),
             "selection_basis": str(selection["selection_basis"]),
         }
-        effective_speed = max(0.5, min(2.0, request.speed * preset.rate_multiplier))
+        effective_speed = max(0.5, min(2.0, preset.effective_rate(request.speed)))
         model.tts_to_file(request.text, speaker_id, str(output_path), speed=effective_speed)
         if not output_path.is_file() or output_path.stat().st_size <= 44:
             raise RuntimeError("MeloTTS가 유효한 WAV 파일을 만들지 못했습니다.")
