@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-Current baseline: `0.11.35 R3 · Chromium CI Runner Hotfix`
+Current baseline: `0.11.35 R4 · Windows npm portability`
 
 ## 목표 버전
 
@@ -26,3 +26,9 @@ Current baseline: `0.11.35 R3 · Chromium CI Runner Hotfix`
 - Chromium bootstrap failure는 15초대 fail-fast + 강제 child cleanup을 유지합니다.
 - DBus 경고만으로 visual regression을 실패 처리하지 않습니다.
 - 0.11.36 기능 개발은 현재 R3의 GitHub Actions Web quality green 확인 후 진행합니다.
+
+### R4에서 넘기는 결정
+
+- GitHub Desktop에서 로컬 변경을 검토한 뒤 commit/push합니다.
+- npm 실행은 shell 없이 Node CLI를 사용하고 fixture는 Windows/Linux 공통으로 유지합니다.
+- 다음 변경 영역은 voice prosody, 한국어 전처리, Listening QA이며 GitHub CI green과 실제 승인된 voice/model 검증이 선행 조건입니다.

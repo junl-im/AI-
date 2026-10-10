@@ -452,3 +452,9 @@
 현재 전달 환경의 npm 설치가 완전하지 않아 전체 frontend Vitest / semantic TypeScript / Vite production build를 이 환경에서 다시 실행하지 못했습니다. Push 후 GitHub Web quality가 최종 판정입니다.
 
 다음 성능 패스에서는 실제 Worker를 연결한 상태에서 `first_audio_ms`, 전체 completion latency, P50/P95, 취소 후 Worker 회수 시간, 20~50개 Timeline batch의 probe/cache hit를 soak evidence로 측정하는 것이 권장됩니다. 현재 SSE는 **진행 상태를 빠르게 전달**하지만 segment audio URL을 즉시 재생하는 progressive MY VOICE streaming은 아직 별도 단계입니다.
+
+## 2026-10-10 · 0.11.35-r4-windows-npm
+
+Windows npm 실행을 Node CLI 직접 실행으로 보정하고 POSIX shell 전용 lock fallback fixture를 플랫폼 독립 Node fixture로 교체했습니다. shell을 사용하지 않으며 공백과 &가 포함된 임시 경로에서도 fallback과 기존 lock 복원을 검증합니다.
+
+Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ignore-scripts 성공(557 packages), typecheck PASS, lint PASS, Vitest 75 files / 283 tests PASS, Vite build PASS, lock fallback/restoration fixture PASS. API/Worker, 실제 음성 모델, Android/iOS, 배포 화면 검증은 이번 개발 도구 수정 범위에서 미실행. build에 500kB chunk 권고가 남습니다. 로컬 Node 24.16.0/npm 11.13.0이며 CI 고정 런타임 재검증은 Push 후 필요합니다.

@@ -1,9 +1,8 @@
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
-import { isRetryableNetworkFailure, runCommandWithRetry } from './lock-retry.mjs'
+import { isRetryableNetworkFailure, runCommandWithRetry, spawnCommandSync } from './lock-retry.mjs'
 import { rankRegistryCandidates } from './npm-registry-probe.mjs'
 
 const root = process.env.SORION_LOCK_ROOT || fileURLToPath(new URL('..', import.meta.url))
@@ -27,8 +26,8 @@ async function restoreLock(previousLock) {
 }
 
 function requireRuntime() {
-  const npmResult = spawnSync('npm', ['--version'], { encoding: 'utf8' })
-  const npm = npmResult.stdout.trim()
+  const npmResult = spawnCommandSync('npm', ['--version'], { encoding: 'utf8' })
+  const npm = (npmResult.stdout || '').trim()
   const failures = []
   if (process.versions.node !== '22.18.0') failures.push(`Node ${process.versions.node}`)
   if (npm !== '10.9.3') failures.push(`npm ${npm || '확인 실패'}`)

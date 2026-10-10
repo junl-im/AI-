@@ -1121,3 +1121,16 @@ CI Hotfix 4 테스트 규칙:
 0.8.0~0.9.3 Heartbeat 6.8.0의 상세 릴리스 이력은 `docs/archive/HANDOVER_HISTORY_0.8.0_TO_0.9.3_HEARTBEAT_6.8.0.md`로 이동했습니다. 현재 목표·규칙·아키텍처·제한과 0.11.x 최신 이력은 이 본문을 기준으로 합니다.
 
 0.11.4~0.11.9 상세 릴리스 이력은 `docs/archive/HANDOVER_HISTORY_0.11.4_TO_0.11.9.md`로 이동했습니다. 현재 목표·규칙·아키텍처·제한과 최근 릴리스 이력은 이 본문을 기준으로 합니다.
+
+## 2026-10-10 KST · 0.11.35-r4-windows-npm
+
+1. 작업 일시: 2026-10-10 KST.
+2. 대상/기준: 0.11.35 R4 / 로컬 R3, Git b544e44. 제품 semver 0.11.35 유지.
+3. 변경 내용: Windows npm 실행을 Node CLI 직접 실행으로 보정하고 POSIX shell 전용 lock fallback fixture를 플랫폼 독립 Node fixture로 교체했습니다. shell을 사용하지 않으며 공백과 &가 포함된 임시 경로에서도 fallback과 기존 lock 복원을 검증합니다.
+4. 이유: Windows preflight가 selected-registry.txt ENOENT로 실패했고 spawnSync npm이 Windows cmd launcher를 직접 실행할 수 없었습니다.
+5. 영향: npm 의존성 설치/lock bootstrap/정적 검사. 제품 음성 런타임 변경 없음.
+6. 주요 파일: scripts/{lock-retry,refresh-npm-lock,check-lock-network-retry}.mjs, 인수인계/변경/다음 계획/패치 문서.
+7. 검증: Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ignore-scripts 성공(557 packages), typecheck PASS, lint PASS, Vitest 75 files / 283 tests PASS, Vite build PASS, lock fallback/restoration fixture PASS. API/Worker, 실제 음성 모델, Android/iOS, 배포 화면 검증은 이번 개발 도구 수정 범위에서 미실행. build에 500kB chunk 권고가 남습니다. 로컬 Node 24.16.0/npm 11.13.0이며 CI 고정 런타임 재검증은 Push 후 필요합니다.
+8. 제한: 공유 ChatGPT 링크 내용을 읽지 못했으며 실제 Pages 화면/서버 연결은 미검증. 검증된 로컬 코드를 GitHub Desktop Changes에서 검토한 뒤 사용자가 commit/push합니다.
+9. 산출물: SoriON-AI-0.11.35-r4-windows-npm-full.zip, SoriON-AI-0.11.35-r3-to-0.11.35-r4-windows-npm-patch.zip, SHA256SUMS.txt. 저장 위치는 현재 Codex 작업공간의 SoriON-delivery/0.11.35-r4-windows-npm.
+10. 다음: 0.11.36 Prosody Director & Long-form Naturalness. CI green과 승인된 실제 음성 자산이 선행 조건.

@@ -1771,3 +1771,8 @@
 - Firebase Hosting Spark와 GitHub Pages를 정적 Web 전용으로 명시했습니다.
 - 데스크톱 정적 Web의 localhost 무료 런타임 자동 탐색을 추가했습니다.
 - CI에 허용 목록 밖 엔진과 서버형 Firebase 설정을 차단하는 검사를 추가했습니다.
+
+## 2026-10-10 · 0.11.35-r4-windows-npm
+
+- Windows npm 실행을 Node CLI 직접 실행으로 보정하고 POSIX shell 전용 lock fallback fixture를 플랫폼 독립 Node fixture로 교체했습니다. shell을 사용하지 않으며 공백과 &가 포함된 임시 경로에서도 fallback과 기존 lock 복원을 검증합니다.
+- Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ignore-scripts 성공(557 packages), typecheck PASS, lint PASS, Vitest 75 files / 283 tests PASS, Vite build PASS, lock fallback/restoration fixture PASS. API/Worker, 실제 음성 모델, Android/iOS, 배포 화면 검증은 이번 개발 도구 수정 범위에서 미실행. build에 500kB chunk 권고가 남습니다. 로컬 Node 24.16.0/npm 11.13.0이며 CI 고정 런타임 재검증은 Push 후 필요합니다.

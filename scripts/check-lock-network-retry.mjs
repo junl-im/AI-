@@ -1,6 +1,6 @@
-import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { delimiter, join } from 'node:path'
+import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
@@ -58,44 +58,27 @@ if (ranked.ordered[0] !== 'https://fast.invalid/') {
   failures.push('응답 가능한 registry를 먼저 선택하지 못했습니다.')
 }
 
-const fixture = await mkdtemp(join(tmpdir(), 'sorion-npm-fallback-'))
+const fixture = await mkdtemp(join(tmpdir(), 'sorion npm & fallback-'))
 try {
   const bin = join(fixture, 'bin')
   await mkdir(bin, { recursive: true })
-  const fakeNpm = join(bin, 'npm')
-  await writeFile(fakeNpm, `#!/bin/sh
-if [ "$FAKE_NPM_MODE" = "fail" ] && echo "$*" | grep -q -- "--registry="; then
-  echo "npm error code ETIMEDOUT" >&2
-  exit 1
-fi
-case "$*" in
-  *"--offline"*)
-    if echo "$*" | grep -q "package-lock-only"; then
-      echo "npm error code ENOTCACHED" >&2
-      exit 1
-    fi
-    exit 0
-    ;;
-  *"registry.npmjs.org"*)
-    echo "npm error code ETIMEDOUT" >&2
-    exit 1
-    ;;
-  *"registry.npmjs.com"*)
-    if [ "$FAKE_NPM_MODE" = "fail" ]; then
-      echo "npm error code ETIMEDOUT" >&2
-      exit 1
-    fi
-    printf '%s\\n' '{"lockfileVersion":3,"packages":{"":{"version":"0.9.3-beta.3"}}}' > package-lock.json
-    exit 0
-    ;;
-esac
-exit 0
+  const fakeNpm = join(bin, 'fake-npm.cjs')
+  await writeFile(fakeNpm, `
+const fs = require('node:fs')
+const args = process.argv.slice(2)
+const fail = (code) => { console.error('npm error code ' + code); process.exit(1) }
+if (args.includes('--offline')) {
+  if (args.includes('--package-lock-only')) fail('ENOTCACHED')
+  process.exit(0)
+}
+if (process.env.FAKE_NPM_MODE === 'fail' || args.some((arg) => arg.includes('registry.npmjs.org'))) fail('ETIMEDOUT')
+if (!args.some((arg) => arg.includes('registry.npmjs.com'))) fail('ERESOLVE')
+fs.writeFileSync('package-lock.json', JSON.stringify({ lockfileVersion: 3, packages: { '': { version: '0.9.3-beta.3' } } }))
 `, 'utf8')
-  await chmod(fakeNpm, 0o755)
   await writeFile(join(fixture, 'package.json'), '{"name":"fixture","version":"0.9.3-beta.3"}\n')
   const env = {
     ...process.env,
-    PATH: `${bin}${delimiter}${process.env.PATH}`,
+    npm_execpath: fakeNpm,
     SORION_LOCK_ROOT: fixture,
     SORION_LOCK_TEST_MODE: '1',
   }
@@ -105,8 +88,10 @@ exit 0
     timeout: 30_000,
   })
   if (fallback.status !== 0) failures.push(`공식 registry fallback fixture 실패: ${fallback.stderr}`)
-  const selected = await readFile(join(fixture, '.sorion', 'lock-audit', 'npm', 'selected-registry.txt'), 'utf8')
-  if (!selected.includes('registry.npmjs.com')) failures.push('두 번째 공식 npm endpoint를 선택하지 못했습니다.')
+  if (fallback.status === 0) {
+    const selected = await readFile(join(fixture, '.sorion', 'lock-audit', 'npm', 'selected-registry.txt'), 'utf8')
+    if (!selected.includes('registry.npmjs.com')) failures.push('두 번째 공식 npm endpoint를 선택하지 못했습니다.')
+  }
 
   const oldLock = '{"lockfileVersion":3,"packages":{"":{"version":"old"}}}\n'
   await writeFile(join(fixture, 'package-lock.json'), oldLock, 'utf8')

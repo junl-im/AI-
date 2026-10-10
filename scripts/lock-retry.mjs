@@ -1,4 +1,23 @@
 import { spawnSync } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { delimiter, dirname, join } from 'node:path'
+
+export function spawnCommandSync(command, args, options = {}) {
+  const env = options.env || process.env
+  if (command === 'npm') {
+    const candidates = [
+      env.npm_execpath,
+      ...(process.platform === 'win32' ? [
+        join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js'),
+        ...(env.PATH || env.Path || '').split(delimiter).map((entry) =>
+          join(entry, 'node_modules', 'npm', 'bin', 'npm-cli.js')),
+      ] : []),
+    ]
+    const cli = candidates.find((candidate) => candidate && existsSync(candidate))
+    if (cli) return spawnSync(process.execPath, [cli, ...args], options)
+  }
+  return spawnSync(command, args, options)
+}
 
 const NETWORK_PATTERNS = [
   /ETIMEDOUT/i,
@@ -41,7 +60,7 @@ export function runCommandWithRetry({
 }) {
   let lastResult = null
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    const result = spawnSync(command, args, {
+    const result = spawnCommandSync(command, args, {
       cwd,
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,

@@ -1,0 +1,9 @@
+scripts/lock-retry.mjs
+scripts/refresh-npm-lock.mjs
+scripts/check-lock-network-retry.mjs
+docs/HANDOVER.md
+docs/CHANGELOG.md
+docs/NEXT_UPDATE.md
+FOUNDATION_REPORT.md
+docs/patches/0.11.35-r4-windows-npm/PATCH_README.md
+docs/patches/0.11.35-r4-windows-npm/PATCH_MANIFEST.txt
