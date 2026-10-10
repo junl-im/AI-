@@ -20,6 +20,12 @@ import {
 import type { WorkspaceMessage } from '../../workspace/workspaceTypes'
 
 
+const starterScripts = [
+  { label: '내레이션', text: '모든 이야기는 작은 한 문장에서 시작됩니다. 오늘은 당신의 마음에 오래 남을 이야기를 들려드릴게요.' },
+  { label: '강의·안내', text: '안녕하세요. 오늘은 새로운 일을 시작하는 세 가지 방법을 알아보겠습니다. 첫 번째는 목표를 작게 나누는 것입니다.' },
+  { label: '두 사람 대화', text: '지우: 오늘은 어떤 이야기를 해볼까요?\n하늘: 오래 기억하고 싶은 순간에 대해 이야기해요.\n지우: 좋아요. 당신의 이야기를 들려주세요.' },
+]
+
 export interface LongformGenerationProgress {
   total: number
   ready: number
@@ -217,10 +223,14 @@ export function LongformComposer({
         <div>
           <span>TEXT TO SPEECH</span>
           <h1 id="dubbing-script-title">텍스트를 음성으로</h1>
-          <p>목소리를 고르고 대본을 입력하세요. 문장 분할부터 생성 순서, 첫 재생까지 자동으로 이어집니다.</p>
+          <p>대본을 담고, 목소리를 고르고. 첫 문장부터 들어보세요.</p>
         </div>
         <span className="soa-one-flow-composer__shortcut" aria-label="제작 단축키">⌘/Ctrl + Enter</span>
       </div>
+
+      <ol className="soa-studio-steps" aria-label="음성 제작 순서">
+        <li><b>01</b> 목소리 선택</li><li><b>02</b> 대본 입력</li><li><b>03</b> 생성·듣기</li>
+      </ol>
 
       {voiceControls ? (
         <div className="soa-one-flow-composer__voice" aria-label="빠른 목소리 선택">
@@ -229,6 +239,18 @@ export function LongformComposer({
       ) : null}
 
       {speakerAssist}
+
+      {!value.trim() && !disabled ? (
+        <div className="soa-script-starters" aria-label="시작 대본 예제">
+          <span>가볍게 시작해 보세요</span>
+          <div>{starterScripts.map((script) => (
+            <button type="button" key={script.label} onClick={() => {
+              onValueChange(script.text)
+              window.requestAnimationFrame?.(() => editorRef.current?.focus({ preventScroll: true }))
+            }}>{script.label} <span aria-hidden="true">↗</span></button>
+          ))}</div>
+        </div>
+      ) : null}
 
       <div
         className="soa-dubbing-script__editor"
@@ -245,11 +267,12 @@ export function LongformComposer({
           onPaste={handlePaste}
           placeholder={'읽을 텍스트를 입력하거나 붙여 넣으세요.\n\n긴 대본도 그대로 넣으면 문장별로 자동 나눕니다.'}
           aria-label="음성으로 만들 장문 내용"
+          aria-describedby="sorion-script-stats"
           rows={9}
           maxLength={MAX_DUBBING_SCRIPT_LENGTH}
           spellCheck="true"
         />
-        <div className="soa-dubbing-script__stats" aria-label="내용 통계">
+        <div id="sorion-script-stats" className="soa-dubbing-script__stats" aria-label="내용 통계">
           <span>{value.length.toLocaleString()} / {MAX_DUBBING_SCRIPT_LENGTH.toLocaleString()}자</span>
           <span>{stats.segments}개 대사</span>
           {stats.speakers > 0 ? <span>{stats.speakers}명 화자</span> : null}

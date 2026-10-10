@@ -23,10 +23,15 @@ export function alignStudioEntryToTop(): boolean {
   const headerHeight = header instanceof HTMLElement
     ? header.getBoundingClientRect().height
     : 50
+  const projectHeader = document.querySelector('.soa-dubbing-header')
+  const projectHeaderHeight = projectHeader instanceof HTMLElement
+    && window.getComputedStyle(projectHeader).position === 'sticky'
+    ? projectHeader.getBoundingClientRect().height
+    : 0
   const targetTop = calculateStudioEntryScrollTop(
     anchor.getBoundingClientRect().top,
     window.scrollY,
-    headerHeight,
+    headerHeight + projectHeaderHeight,
   )
   window.scrollTo({ top: targetTop, behavior: 'auto' })
   return true

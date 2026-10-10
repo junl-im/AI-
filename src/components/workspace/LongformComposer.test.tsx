@@ -11,6 +11,22 @@ const activity = {
 }
 
 describe('LongformComposer', () => {
+  it('시작 예제는 빈 대본에만 나타나고 생성 요청 없이 대본을 채운다', () => {
+    const onValueChange = vi.fn()
+    const onSubmit = vi.fn()
+    const props = { disabled: false, value: '', activity, onValueChange, onSubmit }
+    const view = render(<LongformComposer {...props} />)
+    fireEvent.click(screen.getByRole('button', { name: /두 사람 대화/ }))
+    expect(onValueChange).toHaveBeenCalledWith(expect.stringContaining('지우:'))
+    expect(onValueChange).toHaveBeenCalledWith(expect.stringContaining('하늘:'))
+    expect(onSubmit).not.toHaveBeenCalled()
+    view.rerender(<LongformComposer {...props} value="사용자가 작성한 대본" />)
+    expect(screen.queryByRole('button', { name: /두 사람 대화/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })).toHaveValue('사용자가 작성한 대본')
+    view.rerender(<LongformComposer {...props} disabled />)
+    expect(screen.queryByRole('button', { name: /내레이션/ })).not.toBeInTheDocument()
+  })
+
   it('핵심 제작 경로는 텍스트 입력과 생성 및 재생을 우선한다', () => {
     render(
       <LongformComposer

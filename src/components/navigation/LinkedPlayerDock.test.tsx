@@ -137,11 +137,11 @@ describe('LinkedPlayerDock', () => {
     vi.restoreAllMocks()
   })
 
-  it('만들기 화면에서는 음성이 없어도 고정 재생바를 표시한다', () => {
+  it('만들기 화면에 음성이 없으면 재생 컨트롤 없이 주요 메뉴를 유지한다', () => {
     render(<LinkedPlayerDock />)
 
     expect(screen.getByRole('complementary', { name: '더빙 재생 플레이어' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '재생' })).toBeDisabled()
+    expect(screen.queryByRole('button', { name: '재생' })).not.toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: '주요 메뉴' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /만들기/ })).toHaveAttribute('aria-current', 'page')
   })

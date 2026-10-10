@@ -93,7 +93,7 @@ export function DubbingStudioHeader({
             aria-pressed={!sidePanelsCollapsed}
             title={sidePanelsCollapsed ? '프로젝트·보이스 패널 펼치기' : '양쪽 패널 접기'}
           >
-            {sidePanelsCollapsed ? '▦' : '◫'}
+            <span aria-hidden="true">{sidePanelsCollapsed ? '▦' : '◫'}</span><span className="soa-panel-toggle-label">{sidePanelsCollapsed ? '프로 패널' : '간편 모드'}</span>
           </button>
           {downloadHref ? (
             <a href={downloadHref} download={downloadName} aria-label="현재 음성 다운로드">⇩</a>

@@ -1134,3 +1134,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: 공유 ChatGPT 링크 내용을 읽지 못했으며 실제 Pages 화면/서버 연결은 미검증. 검증된 로컬 코드를 GitHub Desktop Changes에서 검토한 뒤 사용자가 commit/push합니다.
 9. 산출물: SoriON-AI-0.11.35-r4-windows-npm-full.zip, SoriON-AI-0.11.35-r3-to-0.11.35-r4-windows-npm-patch.zip, SHA256SUMS.txt. 저장 위치는 현재 Codex 작업공간의 SoriON-delivery/0.11.35-r4-windows-npm.
 10. 다음: 0.11.36 Prosody Director & Long-form Naturalness. CI green과 승인된 실제 음성 자산이 선행 조건.
+
+## 2026-10-11 KST · 0.11.36 Calm Studio & Research-led UX
+
+1. 작업 일시: 2026-10-10~11 KST.
+2. 대상/기준: 0.11.36 / 0.11.35 R4, Git bb7a05d. 이전 CI run 38059497704 success 확인.
+3. 변경: 서비스 6곳·오픈소스 11개 공식 조사, 밝은 소개/차분한 편집 화면, 3단계 흐름, 빈 대본 예제 3종, 반응형 가독성·44px 주요 도구 버튼, reduced motion, sticky 헤더 스크롤 보정, 빈 재생 컨트롤 숨김.
+4. 이유: 사용자 요청에 따라 장문·한국어·다화자 작업을 처음 사용하는 사람도 쉽게 시작하도록 개선했습니다.
+5. 영향: React UI/CSS/진입 정렬과 버전 metadata. 엔진·동의·권리·동시성 경계 유지, 새 의존성 없음.
+6. 주요 파일: LandingHome, LongformComposer, DubbingStudioHeader, LinkedPlayerDock, App, studioEntryNavigation, studio-calm.css, UIUX_RESEARCH_0.11.36.md, 변경·계획·패치 문서. 관련 동작 회귀 테스트 보강.
+7. 검증: lint PASS, TypeScript+Vite production build PASS, 전체 Vitest 75 files/285 tests PASS, 마지막 도크 스타일 변경 뒤 관련 3 files/30 tests PASS. Repository preflight 55/55 PASS. 실제 Chrome 320/360/390/430/768/1024/1280/1440px 가로 넘침·예제 입력·대본 보존·빈 플레이어 PASS, pageerror 0. 화면 캡처 육안 확인. 최종 증거: docs/validation/0.11.36-responsive.json.
+8. 제한: 실제 Neural 모델·API/Worker pytest·모바일 실기기 검증은 이번 UI 범위에서 미실행. AI 음질 성공으로 표시하지 않음. 기존 500kB 초과 초기 JS 경고 유지(약 568kB/gzip175kB). 유사 서비스는 공식 자료 조사이며 로그인 후 음질/속도 실측 아님. pixel baseline 임의 승인 없음.
+9. 산출물: SoriON-AI-0.11.36-calm-studio-full.zip, SoriON-AI-0.11.35-r4-to-0.11.36-calm-studio-patch.zip, SHA256SUMS.txt. Codex 작업공간 SoriON-delivery/0.11.36-calm-studio. 삭제 파일 없음.
+10. 다음: 0.11.37 Prosody Director & Listening Verification. 기존 자연스러움 계획 이월, 승인 실제 음성·CI green 선행. 파형/Radix/STT는 비교 후보이며 이번 버전에 도입하지 않음.

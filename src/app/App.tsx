@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, MotionConfig, motion } from 'motion/react'
 import { AppShell } from '../components/layout/AppShell'
 import { HomePage } from '../pages/HomePage'
 import { useAppStore } from '../store/useAppStore'
@@ -41,27 +41,29 @@ export function App() {
   const SecondaryPage = page === 'home' ? null : secondaryPages[page]
 
   return (
-    <AppShell>
-      <main className="min-h-0 flex-1">
-        <section hidden={page !== 'home'} aria-hidden={page !== 'home'}>
-          <HomePage />
-        </section>
-        <AnimatePresence mode="wait" initial={false}>
-          {SecondaryPage ? (
-            <motion.section
-              key={page}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-            >
-              <Suspense fallback={<PageLoading />}>
-                <SecondaryPage />
-              </Suspense>
-            </motion.section>
-          ) : null}
-        </AnimatePresence>
-      </main>
-    </AppShell>
+    <MotionConfig reducedMotion="user">
+      <AppShell>
+        <main className="min-h-0 flex-1">
+          <section hidden={page !== 'home'} aria-hidden={page !== 'home'}>
+            <HomePage />
+          </section>
+          <AnimatePresence mode="wait" initial={false}>
+            {SecondaryPage ? (
+              <motion.section
+                key={page}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+              >
+                <Suspense fallback={<PageLoading />}>
+                  <SecondaryPage />
+                </Suspense>
+              </motion.section>
+            ) : null}
+          </AnimatePresence>
+        </main>
+      </AppShell>
+    </MotionConfig>
   )
 }

@@ -16,6 +16,24 @@ describe('studioEntryNavigation', () => {
     expect(calculateStudioEntryScrollTop(20, 0, 50)).toBe(0)
   })
 
+  it('PC의 고정 프로젝트 헤더가 제작 제목을 가리지 않는다', () => {
+    const header = document.createElement('header')
+    header.className = 'soa-compact-header'
+    vi.spyOn(header, 'getBoundingClientRect').mockReturnValue({ height: 50 } as DOMRect)
+    const projectHeader = document.createElement('header')
+    projectHeader.className = 'soa-dubbing-header'
+    projectHeader.style.position = 'sticky'
+    vi.spyOn(projectHeader, 'getBoundingClientRect').mockReturnValue({ height: 72 } as DOMRect)
+    const anchor = document.createElement('section')
+    anchor.id = STUDIO_ENTRY_ANCHOR_ID
+    vi.spyOn(anchor, 'getBoundingClientRect').mockReturnValue({ top: 360 } as DOMRect)
+    document.body.append(header, projectHeader, anchor)
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 120 })
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+    expect(alignStudioEntryToTop()).toBe(true)
+    expect(scrollTo).toHaveBeenCalledWith({ top: 350, behavior: 'auto' })
+  })
+
   it('첫 스튜디오 진입 시 텍스트를 음성으로 섹션을 화면 최상단 기준으로 맞춘다', () => {
     const header = document.createElement('header')
     header.className = 'soa-compact-header'

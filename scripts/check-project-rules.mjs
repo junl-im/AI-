@@ -249,7 +249,7 @@ await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   '<nav className="soa-dock__nav"',
 ])
 await requireText('src/components/navigation/LinkedPlayerDock.test.tsx', [
-  '만들기 화면에서는 음성이 없어도 고정 재생바를 표시한다',
+  '만들기 화면에 음성이 없으면 재생 컨트롤 없이 주요 메뉴를 유지한다',
   '완성 음성이 생기면 만들기 재생바에서 바로 재생할 수 있다',
   '더빙 재생 플레이어',
 ])
@@ -361,7 +361,9 @@ await import('./check-session-rules.mjs')
 await requireText('src/pages/LandingHome.tsx', [
   '장문 음성 스튜디오 시작',
   '긴 내용도,',
-  '문장별 목소리로 완성합니다.',
+  'scheduleStudioEntryAlignment',
+  '작업공간 미리보기',
+  '소리온 장문 작업 흐름',
 ])
 await requireText('src/components/workspace/LongformComposer.tsx', [
   'MAX_DUBBING_SCRIPT_LENGTH',

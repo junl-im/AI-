@@ -25,6 +25,7 @@
 @import "./linkage-convenience.css";
 @import "./voice-surface-refresh.css";
 @import "./studio-voice-overhaul.css";
+@import "./studio-calm.css";
 
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

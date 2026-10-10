@@ -1,0 +1,145 @@
+/* 0.11.36: a quiet introduction and a readable, document-first studio. */
+.soa-app-root.is-landing { background: #f4f3ef; }
+.soa-app-root.is-landing .soa-masthead {
+  margin: 0; border: 0; border-radius: 0; color: #252820; background: #f4f3ef;
+}
+.soa-app-root.is-landing .soa-masthead__inner { max-width: 1240px; padding: 0 32px; }
+.soa-app-root.is-landing .soa-meta-bar { min-height: 34px; border: 0; color: #666b61; font-size: 10px; }
+.soa-app-root.is-landing .soa-meta-label { color: #70766a; }
+.soa-app-root.is-landing .soa-hero-grid { display: flex; align-items: center; padding: 16px 0 20px; border-bottom: 1px solid #dddcd4; }
+.soa-app-root.is-landing .soa-main-brand { gap: 12px; }
+.soa-app-root.is-landing .soa-main-brand__icon { width: 48px; height: 48px; box-shadow: none; }
+.soa-app-root.is-landing .soa-main-brand > span > small { display: none; }
+.soa-app-root.is-landing .soa-main-brand > span > strong { margin: 0; color: #252820; font-size: 24px; letter-spacing: -.055em; }
+.soa-app-root.is-landing .soa-main-brand > span > strong i { margin-bottom: 4px; color: #73796d; font-size: 10px; }
+.soa-app-root.is-landing .soa-subtitle-stage,
+.soa-app-root.is-landing .soa-signature-visual { display: none; }
+.soa-app-root.is-landing .soa-settings-button { min-width: 44px; min-height: 44px; border: 1px solid #ddded6; color: #3e4438; background: transparent; }
+.soa-workspace-shell--landing { max-width: 1240px; padding: 0 32px 48px; }
+.soa-workspace-shell--landing .soa-primary-frame { min-height: 0; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.soa-landing-overview { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 48px 64px; padding: 64px 0 0; align-items: center; }
+.soa-landing-kicker { color: #62704e; font-size: 12px; font-weight: 750; letter-spacing: .025em; }
+.soa-landing-overview h1 { margin: 22px 0; font-size: clamp(40px, 4.8vw, 68px); line-height: 1.12; letter-spacing: -.065em; }
+.soa-landing-overview h1 strong, .soa-landing-overview h1 span { display: block; font-size: inherit; font-weight: 750; }
+.soa-landing-overview h1 strong { color: #252820; }
+.soa-landing-overview h1 span { margin-top: 5px; color: #7b826d; }
+.soa-landing-overview .soa-landing-copy > p { max-width: 470px; margin: 0; color: #62685b; font-size: 16px; line-height: 1.85; font-weight: 450; word-break: keep-all; }
+.soa-landing-overview .soa-landing-copy > button { display: inline-flex; min-height: 54px; gap: 32px; align-items: center; margin-top: 30px; border: 0; border-radius: 14px; padding: 0 22px; color: #f7f8ef; background: #30392a; box-shadow: none; font-size: 14px; font-weight: 700; transition: background 150ms, transform 150ms; }
+.soa-landing-overview .soa-landing-copy > button:hover { background: #47553d; transform: translateY(-2px); }
+.soa-landing-note { margin-top: 16px; color: #757a6e; font-size: 12px; }
+.soa-landing-note > span { padding: 0 8px; }
+.soa-studio-preview { min-width: 0; margin: 0; padding: 24px; border: 1px solid #373c35; border-radius: 24px; color: #e9ede3; background: #1b201c; box-shadow: 0 24px 50px -24px #303b3638; transform: rotate(-1.5deg); }
+.soa-studio-preview figcaption { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 20px; color: #e0e5d9; font-size: 13px; }
+.soa-studio-preview figcaption > span:last-child { color: #a2ad9c; font-size: 11px; }
+.soa-studio-preview__voice { display: flex; gap: 10px; align-items: center; padding: 12px; border: 1px solid #3c4439; border-radius: 12px; background: #252d26; }
+.soa-studio-preview__voice > span { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; color: #665241; background: #f1dfce; font-weight: 700; }
+.soa-studio-preview__voice strong, .soa-studio-preview__voice small { display: block; }
+.soa-studio-preview__voice strong { font-size: 13px; }
+.soa-studio-preview__voice small { margin-top: 4px; color: #a8b0a2; font-size: 11px; }
+.soa-studio-preview__voice > b { margin-left: auto; color: #c8d4a3; font-size: 9px; letter-spacing: .08em; }
+.soa-studio-preview__script { padding: 24px 12px 12px; }
+.soa-studio-preview__script > span { color: #919e88; font-size: 11px; }
+.soa-studio-preview__script p { margin: 18px 0; color: #e7ecdf; font-size: clamp(15px, 1.5vw, 20px); font-weight: 450; line-height: 1.75; letter-spacing: -.025em; }
+.soa-studio-preview__script p:last-child { color: #b3bca9; }
+.soa-studio-preview__timeline { display: flex; height: 44px; gap: 5px; align-items: center; justify-content: center; margin: 6px 0 16px; padding: 8px 16px; border-radius: 8px; background: #292f25; }
+.soa-studio-preview__timeline i { flex: 1; max-width: 6px; height: 30%; border-radius: 8px; background: #c8d99b; }
+.soa-studio-preview__timeline i:nth-child(3n) { height: 80%; }
+.soa-studio-preview__timeline i:nth-child(4n) { height: 55%; }
+.soa-studio-preview__caption { display: flex; gap: 16px; color: #a9b49e; font-size: 10px; }
+.soa-landing-overview .soa-landing-workflow { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin: 12px 0 0; padding: 28px 0 0; border-top: 1px solid #dddfd3; }
+.soa-landing-workflow li { display: flex; gap: 14px; padding: 0; border-radius: 0; background: transparent; }
+.soa-landing-workflow li > b { color: #8a947a; font-size: 13px; font-weight: 550; }
+.soa-landing-workflow li strong { display: block; color: #353c2e; font-size: 15px; }
+.soa-landing-workflow li span { display: block; margin-top: 8px; color: #72796a; font-size: 12px; line-height: 1.6; }
+/* Studio: keep established dark voice/timeline surfaces, increase legibility. */
+.soa-one-flow-composer { --studio-muted: #a9b1ba; padding: 24px; border: 1px solid #30353c; border-radius: 20px; background: #14181d; }
+.soa-one-flow-composer__heading { gap: 16px; margin-bottom: 20px; }
+.soa-one-flow-composer__heading span:first-child { color: #b1c68a; font-size: 10px; letter-spacing: .12em; }
+.soa-one-flow-composer__heading h1 { margin-top: 8px; font-size: clamp(24px, 3vw, 30px); font-weight: 750; }
+.soa-one-flow-composer__heading p { max-width: 100%; margin-top: 8px; color: var(--studio-muted); font-size: 13px; line-height: 1.65; }
+.soa-one-flow-composer__shortcut { flex: 0 0 auto; color: #aeb5bf; font-size: 10px !important; }
+.soa-studio-steps { display: flex; gap: 24px; margin: 0 0 18px; padding: 0 0 16px; border-bottom: 1px solid #2d333a; list-style: none; color: #bec5cf; font-size: 12px; }
+.soa-studio-steps li { display: flex; gap: 7px; align-items: center; }
+.soa-studio-steps b { color: #a1b680; font-size: 10px; font-weight: 550; }
+.soa-one-flow-composer__voice { margin-bottom: 16px; padding: 8px; border: 1px solid #303740; background: #1c2229; }
+.soa-one-flow-composer__voice .soa-dubbing-voice-choice { min-height: 48px; }
+.soa-one-flow-composer__voice .soa-dubbing-voice-choice strong { font-size: 15px; }
+.soa-one-flow-composer__voice .soa-dubbing-voice-row { grid-template-columns: minmax(0, 1fr) 44px 44px; gap: 8px; }
+.soa-one-flow-composer__voice .soa-dubbing-voice-row > button:not(.soa-dubbing-voice-choice) { width: 44px; height: 44px; }
+.soa-script-starters { margin: 0 0 16px; }
+.soa-script-starters > span { color: var(--studio-muted); font-size: 12px; }
+.soa-script-starters > div { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.soa-script-starters button { display: flex; min-height: 44px; gap: 16px; align-items: center; border: 1px solid #3a424d; border-radius: 10px; padding: 0 14px; color: #dbe2e9; background: #1b222a; font-size: 12px; cursor: pointer; transition: border-color 150ms, background 150ms; }
+.soa-script-starters button:hover { border-color: #83976b; background: #252e27; }
+.soa-script-starters button > span { color: #b9cd97; }
+.soa-one-flow-composer .soa-dubbing-script__editor { border-color: #3e4854; border-radius: 14px; background: #101419; }
+.soa-one-flow-composer .soa-dubbing-script__editor textarea { min-height: 260px; padding: 20px; color: #e6ebf1; font-size: 17px; line-height: 1.85; letter-spacing: -.015em; }
+.soa-one-flow-composer .soa-dubbing-script__editor textarea::placeholder { color: #8c97a6; opacity: 1; }
+.soa-one-flow-composer .soa-dubbing-script__stats { gap: 10px; padding: 12px 14px; color: #a5b0bd; font-size: 11px; }
+.soa-one-flow-composer .soa-one-flow-composer__auto { color: #c4d6af; background: #273329; }
+.soa-one-flow-composer__activity { gap: 10px; padding: 12px 0 4px; }
+.soa-one-flow-composer__activity > span { color: #c3d69b; font-size: 10px; }
+.soa-one-flow-composer__activity p { color: var(--studio-muted); font-size: 12px; line-height: 1.6; }
+.soa-one-flow-composer__actions { gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.soa-one-flow-composer__blank { min-height: 44px; padding: 0 12px; color: #c2cbd5; font-size: 12px; }
+.soa-one-flow-composer__blank:disabled { color: #727c88; }
+.soa-one-flow-composer__generate { min-height: 64px; margin-top: 16px; padding: 14px 18px; border-radius: 14px; background: #d7e9ad; }
+.soa-one-flow-composer__generate span { font-size: 16px; font-weight: 750; }
+.soa-one-flow-composer__generate small { color: #38432d; font-size: 11px; line-height: 1.5; }
+.soa-one-flow-composer__generate:disabled { opacity: 1; color: #a3adb9; background: #2a323c; }
+.soa-one-flow-composer__generate:disabled small { color: #a3adb9; }
+.soa-dubbing-header .soa-dubbing-pro-toggle { display: flex; width: auto; min-height: 44px; gap: 7px; align-items: center; padding: 0 12px; font-size: 16px; }
+.soa-panel-toggle-label { font-size: 12px; white-space: nowrap; }
+.soa-dubbing-project-title p { color: #9ba6b3; font-size: 11px; }
+@media (max-width: 760px) {
+  .soa-app-root.is-landing .soa-masthead__inner { padding-inline: 22px; }
+  .soa-app-root.is-landing .soa-meta-label, .soa-app-root.is-landing .soa-device-mark { display: none; }
+  .soa-app-root.is-landing .soa-meta-bar { font-size: 9px; }
+  .soa-app-root.is-landing .soa-hero-grid { padding-top: 8px; }
+  .soa-app-root.is-landing .soa-main-brand__icon { width: 42px; height: 42px; }
+  .soa-app-root.is-landing .soa-main-brand > span > strong { font-size: 22px; }
+  .soa-workspace-shell--landing { padding: 0 22px 36px; }
+  .soa-landing-overview { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 38px; }
+  .soa-landing-overview h1 { margin: 18px 0; font-size: clamp(38px, 10vw, 56px); }
+  .soa-landing-overview .soa-landing-copy > p { font-size: 14px; line-height: 1.8; }
+  .soa-landing-overview .soa-landing-copy > button { display: flex; width: 100%; justify-content: space-between; margin-top: 24px; }
+  .soa-studio-preview { padding: 20px; transform: none; border-radius: 18px; }
+  .soa-studio-preview__script { padding: 20px 8px 4px; }
+  .soa-studio-preview__script p { font-size: 16px; }
+  .soa-landing-overview .soa-landing-workflow { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 0; }
+  .soa-one-flow-composer { margin-inline: -14px; border: 0; border-radius: 0; padding: 22px 16px; }
+  .soa-one-flow-composer__heading { margin-bottom: 16px; }
+  .soa-one-flow-composer__heading h1 { font-size: 25px; }
+  .soa-one-flow-composer__heading p { font-size: 12px; }
+  .soa-studio-steps { justify-content: space-between; gap: 8px; font-size: 11px; }
+  .soa-one-flow-composer .soa-dubbing-script__editor textarea { min-height: 220px; padding: 16px; font-size: 16px; }
+  .soa-one-flow-composer .soa-dubbing-script__stats { flex-wrap: wrap; gap: 6px 10px; padding: 10px; font-size: 10px; }
+  .soa-one-flow-composer__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; gap: 6px; }
+  .soa-one-flow-composer__blank { border-color: #303842; padding: 0 8px; font-size: 11px; }
+  .soa-one-flow-composer__activity { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .soa-one-flow-composer__activity > span { justify-self: start; }
+  .soa-one-flow-composer__generate { min-height: 66px; }
+  .soa-one-flow-composer__generate small { font-size: 10px; }
+  .soa-script-starters > div { gap: 6px; }
+  .soa-script-starters button { gap: 8px; padding: 0 10px; font-size: 11px; }
+  .soa-dubbing-header .soa-panel-toggle-label { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .soa-landing-overview .soa-landing-copy > button, .soa-script-starters button { transition: none; }
+  .soa-landing-overview .soa-landing-copy > button:hover { transform: none; }
+}
+.soa-compact-header__actions > button { min-width: 44px; white-space: nowrap; }
+.soa-dubbing-header .soa-dubbing-pro-toggle { height: 44px; }
+.soa-one-flow-composer .soa-dubbing-script__editor textarea { height: 280px; }
+@media (max-width: 760px) {
+  .soa-one-flow-composer .soa-dubbing-script__editor textarea { height: 220px; }
+}
+
+@media (min-width: 1024px) {
+  .soa-dubbing-header .soa-dubbing-pro-toggle { display: flex !important; flex-direction: row; }
+  .soa-dubbing-header .soa-panel-toggle-label { font-size: 12px; white-space: nowrap; }
+}
+
+@media (min-width: 761px) {
+  .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { border: 0; padding: 0; background: transparent; box-shadow: none; backdrop-filter: none; }
+}

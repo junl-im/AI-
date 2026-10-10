@@ -667,9 +667,9 @@ export function LinkedPlayerDock() {
 
   if (page === 'home') {
     return (
-      <aside className="soa-dubbing-player-dock" aria-label="더빙 재생 플레이어">
+      <aside className={`soa-dubbing-player-dock${track ? '' : ' soa-dubbing-player-dock--empty'}`} aria-label="더빙 재생 플레이어">
         <div className="soa-dubbing-player-dock__inner">
-          <div className="soa-dubbing-player-compact">
+          {track ? <div className="soa-dubbing-player-compact">
             <button
               type="button"
               className={`soa-dubbing-player-toggle ${playing ? 'is-playing' : ''}`}
@@ -715,7 +715,7 @@ export function LinkedPlayerDock() {
               {track?.audio.url && !track.audio.partial ? <a href={track.audio.url} download={track.audio.filename} aria-label="다운로드">↓</a> : null}
               {browserPlayback ? <span className="soa-browser-voice-label">브라우저</span> : null}
             </div>
-          </div>
+          </div> : null}
           {audio}
           <div className="soa-dubbing-player-dock__nav">{navigation}</div>
           {track && queueOpen ? (

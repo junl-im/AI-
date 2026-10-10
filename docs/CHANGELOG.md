@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.11.36 · Calm Studio & Research-led UX
+
+- 실제 유사 서비스 6곳과 오픈소스 11개를 공식 자료·라이선스·도입 적합성으로 비교: docs/UIUX_RESEARCH_0.11.36.md.
+- 소개 화면을 작업 미리보기와 3단계 안내로 재구성하고 편집 화면의 글자·간격·버튼·모바일 배치를 개선했습니다.
+- 빈 대본에서만 내레이션/강의/대화 예제를 제공하며 자동 생성 없이 입력창을 채웁니다.
+- OS reduced motion 설정을 반영하고 작업 진입 sticky 헤더 정렬을 수정했습니다. 빈 플레이어는 주요 메뉴만 표시합니다.
+- 검증: Vitest 75 files/285 tests, 최종 관련 회귀 3 files/30 tests, lint/typecheck/build, preflight 55/55 PASS. Chrome 8개 폭에서 overflow/pageerror 0 및 예제·대본 보존 확인.
+- 새 외부 의존성/모델 다운로드/유료 API 추가 없음. 실제 모델 음질·실기기 인증은 별도입니다.
+
+
 ## 0.11.35 R3 · Chromium CI Runner Hotfix
 
 - visual layout runner를 고정 랜덤 debug port 대신 Chromium `--remote-debugging-port=0` + `DevToolsActivePort` discovery로 변경해 GitHub Actions에서의 endpoint bind 실패를 줄였습니다.

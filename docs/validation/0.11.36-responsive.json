@@ -1,0 +1,96 @@
+{
+  "version": "0.11.36",
+  "verifiedAt": "2026-10-11 KST",
+  "browser": "Local Chrome headless; reducedMotion reduce",
+  "scope": "UI only; no Neural audio generation",
+  "checks": [
+    {
+      "width": 320,
+      "errors": [],
+      "layout": {
+        "scroll": 320,
+        "width": 320
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 360,
+      "errors": [],
+      "layout": {
+        "scroll": 360,
+        "width": 360
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 390,
+      "errors": [],
+      "layout": {
+        "scroll": 390,
+        "width": 390
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 430,
+      "errors": [],
+      "layout": {
+        "scroll": 430,
+        "width": 430
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 768,
+      "errors": [],
+      "layout": {
+        "scroll": 768,
+        "width": 768
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 1024,
+      "errors": [],
+      "layout": {
+        "scroll": 1024,
+        "width": 1024
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 1280,
+      "errors": [],
+      "layout": {
+        "scroll": 1280,
+        "width": 1280
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 1440,
+      "errors": [],
+      "layout": {
+        "scroll": 1440,
+        "width": 1440
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    }
+  ]
+}
