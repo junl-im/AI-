@@ -1,0 +1,98 @@
+{
+  "version": "0.11.39",
+  "date": "2026-10-12 KST",
+  "browser": "Chrome Windows headless",
+  "thresholds": {
+    "normalText": 4.5,
+    "largeText": 3
+  },
+  "scenes": [
+    {
+      "scene": "studio-390",
+      "checkedText": 30,
+      "issues": []
+    },
+    {
+      "scene": "picker-390",
+      "checkedText": 51,
+      "issues": []
+    },
+    {
+      "scene": "voice-settings-390",
+      "checkedText": 16,
+      "issues": []
+    },
+    {
+      "scene": "timeline-390",
+      "checkedText": 53,
+      "issues": []
+    },
+    {
+      "scene": "품질-390",
+      "checkedText": 367,
+      "issues": []
+    },
+    {
+      "scene": "프로젝트-390",
+      "checkedText": 6,
+      "issues": []
+    },
+    {
+      "scene": "내 목소리-390",
+      "checkedText": 30,
+      "issues": []
+    },
+    {
+      "scene": "settings-390",
+      "checkedText": 21,
+      "issues": []
+    },
+    {
+      "scene": "studio-1440",
+      "checkedText": 33,
+      "issues": []
+    },
+    {
+      "scene": "pro-1440",
+      "checkedText": 79,
+      "issues": []
+    },
+    {
+      "scene": "picker-1440",
+      "checkedText": 51,
+      "issues": []
+    },
+    {
+      "scene": "voice-settings-1440",
+      "checkedText": 16,
+      "issues": []
+    },
+    {
+      "scene": "timeline-1440",
+      "checkedText": 58,
+      "issues": []
+    },
+    {
+      "scene": "품질-1440",
+      "checkedText": 367,
+      "issues": []
+    },
+    {
+      "scene": "프로젝트-1440",
+      "checkedText": 6,
+      "issues": []
+    },
+    {
+      "scene": "내 목소리-1440",
+      "checkedText": 30,
+      "issues": []
+    },
+    {
+      "scene": "settings-1440",
+      "checkedText": 21,
+      "issues": []
+    }
+  ],
+  "method": "Visible enabled direct text nodes; computed foreground and ancestor solid background alpha composition; canvas normalizes modern CSS color syntax. Gradients/images, placeholders, non-text controls and every interactive state are not exhaustively measured. Screenshots inspected separately.",
+  "notCertification": "Not a full WCAG conformance or physical-device certification."
+}

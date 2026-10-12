@@ -382,7 +382,7 @@ export function QualityPage() {
                   className={`focus-ring min-h-16 rounded-2xl border px-4 text-left ${active ? 'border-soa-violet bg-soa-violet text-white' : 'border-soa-line bg-white'}`}
                 >
                   <strong className="block text-sm">{voice.name} · {voiceGenderLabels[voice.gender]}</strong>
-                  <span className={`mt-1 block text-[10px] font-bold ${active ? 'text-white/70' : 'text-soa-muted'}`}>
+                  <span className={`mt-1 block text-[10px] font-bold ${active ? 'text-white/90' : 'text-soa-muted'}`}>
                     {voice.id} · {voice.description}
                   </span>
                 </button>

@@ -27,6 +27,7 @@
 @import "./studio-voice-overhaul.css";
 @import "./studio-calm.css";
 @import "./studio-intelligent.css";
+@import "./readable-colors.css";
 
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

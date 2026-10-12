@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.11.39 · Readable Colors
+
+- 밝은 배경에 남은 흰 글씨와 음성 설정의 검은 카드/어두운 글씨 충돌을 수정했습니다.
+- 따뜻한 회색 배경·진한 본문·차분한 보라 강조색으로 스튜디오·설정·타임라인·프로 패널·보조 페이지 색상 쌍을 정리했습니다.
+- Chrome390/1440px의17화면에서 측정 대상 텍스트 대비 기준 미달0건(일반4.5:1/큰글자3:1). 전체 WCAG 인증이나 실기기 피로도 검증은 아닙니다.
+- 웹303 tests, API244 passed/1 skipped, Worker16, lint/typecheck/build·preflight55/55·CI 확인. 기능·음성 엔진 정책 변경 없음.
+- 상세: docs/READABLE_COLORS_0.11.39.md, docs/validation/0.11.39-contrast.json.
+
 ## 0.11.38 · Streamed Waveform & Leaner Controls
 
 - 파형을 전체 디코딩에서 순차 PCM 분석으로 교체: 128MiB/60분 이하 WAV, 모든 채널 peak, 8/16/24/32-bit PCM·float32 지원.

@@ -1,0 +1,100 @@
+/* Readability palette: backgrounds and foregrounds are changed together. */
+.soa-app-root.is-editor {
+  --readable-text: #30343b;
+  --readable-muted: #59616b;
+  --readable-accent: #655079;
+  --readable-surface: #faf9f6;
+  --readable-soft: #efeeeb;
+  --color-soa-muted: #59616b;
+  --color-soa-violet: #655079;
+  --color-soa-lime: #dce4d5;
+  color: var(--readable-text);
+  background: var(--readable-soft);
+}
+.soa-app-root.is-editor .soa-dubbing-workspace,
+.soa-app-root.is-editor .soa-dubbing-header { background: var(--readable-soft); }
+.soa-app-root.is-editor .soa-compact-header,
+.soa-app-root.is-editor .soa-one-flow-composer,
+.soa-app-root.is-editor .soa-bottom-sheet,
+.soa-app-root.is-editor .soa-sheet-header { background: var(--readable-surface); }
+.soa-app-root.is-editor .soa-dubbing-script__editor { background: #f3f2ef; }
+.soa-app-root.is-editor .soa-dubbing-script__editor textarea::placeholder { color: #646b75; }
+.soa-app-root.is-editor .soa-dubbing-project-title p,
+.soa-app-root.is-editor .soa-script-starters > span,
+.soa-app-root.is-editor .soa-director__label small,
+.soa-app-root.is-editor .soa-dubbing-script__stats,
+.soa-app-root.is-editor .soa-dubbing-script__stats strong { color: var(--readable-muted); }
+.soa-app-root.is-editor .soa-one-flow-composer__shortcut { color: var(--readable-muted) !important; }
+.soa-app-root.is-editor .soa-page-header h1 { color: var(--readable-text); }
+.soa-app-root.is-editor .soa-page-header > div > span { color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-page-header p { color: var(--readable-muted); }
+/* Voice settings previously mixed dark card backgrounds with inherited dark text. */
+.soa-app-root.is-editor .soa-voice-settings-sheet > label,
+.soa-app-root.is-editor .soa-emotion-settings,
+.soa-app-root.is-editor .soa-normalize-setting { color: var(--readable-text); background: #eeece8; }
+.soa-app-root.is-editor .soa-voice-settings-sheet strong,
+.soa-app-root.is-editor .soa-normalize-setting small { color: var(--readable-muted); }
+.soa-app-root.is-editor .soa-emotion-settings button { color: var(--readable-muted); border-color: #cbc6d1; background: var(--readable-surface); }
+.soa-app-root.is-editor .soa-emotion-settings button.is-active { color: #fff; background: var(--readable-accent); border-color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-voice-settings-sheet input { accent-color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-sheet-actions button.is-primary { color: #fff; background: var(--readable-accent); }
+.soa-app-root.is-editor .soa-voice-sheet-list > header span,
+.soa-app-root.is-editor .soa-voice-fit { color: var(--readable-muted); }
+.soa-app-root.is-editor .soa-voice-con { color: #805249; }
+.soa-app-root.is-editor .soa-voice-linkage-target { color: var(--readable-text); background: #eae5ef; }
+.soa-app-root.is-editor .soa-voice-linkage-target b { color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-voice-linkage-target span,
+.soa-app-root.is-editor .soa-voice-linkage-target small { color: var(--readable-muted); }
+/* Project and voice rails: replace white labels and fluorescent accents. */
+.soa-app-root.is-editor .soa-project-rail,
+.soa-app-root.is-editor .soa-voice-drawer { background: #f3f2ef; }
+.soa-app-root.is-editor .soa-project-rail small,
+.soa-app-root.is-editor .soa-project-rail p,
+.soa-app-root.is-editor .soa-project-rail__nav button,
+.soa-app-root.is-editor .soa-voice-drawer p,
+.soa-app-root.is-editor .soa-voice-drawer small { color: var(--readable-muted); }
+.soa-app-root.is-editor .soa-project-rail__head span,
+.soa-app-root.is-editor .soa-voice-drawer__head > span { color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-project-rail__head > button,
+.soa-app-root.is-editor .soa-voice-drawer button.is-active { color: #fff; background: var(--readable-accent); }
+.soa-app-root.is-editor .soa-voice-drawer__preview { color: var(--readable-accent); background: #e8e1ee; }
+.soa-app-root.is-editor .soa-voice-drawer label small { color: var(--readable-muted); }
+/* Light timeline controls and a deliberately dark track use separate pairs. */
+.soa-app-root.is-editor .soa-dubbing-timeline__head span { color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-dubbing-timeline__head button,
+.soa-app-root.is-editor .soa-timeline-toolbar strong,
+.soa-app-root.is-editor .soa-timeline-toolbar span,
+.soa-app-root.is-editor .soa-timeline-toolbar p,
+.soa-app-root.is-editor .soa-timeline-quick-editor { color: var(--readable-text); }
+.soa-app-root.is-editor .soa-timeline-quick-editor :is(span, strong, small),
+.soa-app-root.is-editor .soa-timeline-quick-editor__nav small,
+.soa-app-root.is-editor .soa-timeline-quick-editor__actions button { color: var(--readable-muted); }
+.soa-app-root.is-editor .soa-timeline-quick-editor__actions button.is-danger { color: #994539; }
+.soa-app-root.is-editor .soa-timeline-quick-editor textarea { color: var(--readable-text); background: #efede9; border-color: #c8c3ce; }
+.soa-app-root.is-editor .soa-capcut-track-label :is(span, em),
+.soa-app-root.is-editor .soa-dubbing-block time,
+.soa-app-root.is-editor .soa-capcut-ruler span { color: #c0c5cf; }
+.soa-app-root.is-editor .soa-workspace-conversation article { color: var(--readable-text); background: #eeece8; }
+.soa-app-root.is-editor .soa-workspace-conversation article > span { color: var(--readable-accent); background: #e5deed; }
+/* MY VOICE headings inherit the same light-surface palette. */
+.soa-app-root.is-editor .soa-myvoice-library__head h2,
+.soa-app-root.is-editor .soa-clone-step h2,
+.soa-app-root.is-editor .soa-clone-name { color: var(--readable-text); }
+.soa-app-root.is-editor .soa-myvoice-library__head > div > span,
+.soa-app-root.is-editor .soa-clone-step__head > span { color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-myvoice-create { color: #fff; background: var(--readable-accent); }
+::selection { color: #30343b; background: #ded5e8; }
+.soa-app-root.is-editor .soa-sheet-tags > span,
+.soa-app-root.is-editor .soa-voice-drawer__section-title > span,
+.soa-app-root.is-editor .soa-voice-drawer__name-row b,
+.soa-app-root.is-editor .soa-voice-drawer__character i { color: var(--readable-muted); }
+.soa-app-root.is-editor .soa-voice-drawer > header > span { color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-voice-drawer .soa-voice-drawer__speed > small { color: var(--readable-muted) !important; }
+.soa-app-root.is-editor .soa-voice-drawer__emotion button { color: var(--readable-muted); background: #e9e6e1; }
+.soa-app-root.is-editor .soa-voice-drawer__emotion button.is-active { color: #fff; background: var(--readable-accent); }
+.soa-app-root.is-editor .soa-voice-drawer__create { color: var(--readable-accent); border-color: #bdb4c5; }
+.soa-app-root.is-editor .soa-voice-drawer__play { color: var(--readable-accent); background: #e8e1ee; }
+.soa-app-root.is-editor .soa-clone-card__head h2 { color: var(--readable-text); }
+.soa-app-root.is-editor .soa-clone-card__head > strong { color: var(--readable-muted); }
+.soa-app-root.is-editor .soa-clone-card__head span { color: var(--readable-accent); }
+.soa-app-root.is-editor .soa-dubbing-block__status { color: #c0c5cf; }

@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.38 · Streamed Waveform & Leaner Controls**
+Current baseline: **0.11.39 · Readable Colors**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-12 KST**
 제품 소유·디자인: **곰같은여우**
@@ -1173,3 +1173,15 @@ CI Hotfix 4 테스트 규칙:
 8. **제한**: 승인 WAV·모델 미제공으로 실제 음질·장문 청취 보류. 128MiB/60분·지원 PCM 제한, 데이터 다운로드 필요, 실기기 실측 미실행, main510.81kB 경고 잔존.
 9. **산출물**: SoriON-AI-0.11.38-streamed-waveform-full.zip / SoriON-AI-0.11.37-to-0.11.38-streamed-waveform-patch.zip / SHA256SUMS.txt.
 10. **다음 업데이트**: 0.11.39 실제 승인 자산 기반 청취·성우 조정, 큰 파일 실기기 성능·초기 청크 개선. 기존 동의·무료·업로드 경계 유지.
+
+## 2026-10-12 KST · 0.11.39 Readable Colors
+1. **작업 일시(KST)**: 2026-10-12.
+2. **대상/기준 버전**: 0.11.39 / 0.11.38(ea75729).
+3. **변경 내용**: 따뜻한 회색 배경·진한 본문·차분한 보라 강조, 설정/타임라인/보조 제목/프로 패널의 색상 쌍 수정.
+4. **변경 이유**: 배경과 주요 글씨 색이 겹쳐 눈이 아프다는 사용자 피드백. 밝은 테마와 기존 dark 하위 규칙 충돌을 해소.
+5. **영향 범위**: CSS·Quality 선택 설명 색상·버전 메타데이터. 생성/재생/동의/엔진 정책 변화 없음.
+6. **주요 파일**: readable-colors.css, styles/index.css, QualityPage.tsx, docs/READABLE_COLORS_0.11.39.md, validation/0.11.39-contrast.json.
+7. **검증 결과**: Chrome17화면 대비 기준 미달0건(측정 대상), 웹303 tests/API244·1skip/Worker16, lint/typecheck/build·preflight55/55·Actions 최종 확인.
+8. **제한**: 단색 텍스트 측정·육안 검토이며 전체 WCAG/실기기 피로도 인증 아님. 실제 승인 음성·모델 청취 보류.
+9. **산출물**: SoriON-AI-0.11.39-readable-colors-full.zip / SoriON-AI-0.11.38-to-0.11.39-readable-colors-patch.zip / SHA256SUMS.txt.
+10. **다음 업데이트**: 0.11.40 상태별/실기기 가독성·큰 파형 성능, 승인 자산 기반 청취. 다음 인수인계는1200줄 상한을 고려해 역사 archive 유지 필요.
