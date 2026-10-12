@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   memo,
   useCallback,
   useEffect,
@@ -22,6 +24,8 @@ import {
 } from '../../tts/browserSpeech'
 import { refreshSpeechFinalAudio } from '../../tts/voiceApi'
 import { PlayerQueuePanel } from './PlayerQueuePanel'
+
+const AudioWaveform = lazy(() => import('./AudioWaveform').then((module) => ({ default: module.AudioWaveform })))
 
 const rates = [0.75, 1, 1.25, 1.5, 2]
 
@@ -717,6 +721,9 @@ export function LinkedPlayerDock() {
             </div>
           </div> : null}
           {audio}
+          {track?.audio.url && !track.audio.partial && !browserPlayback ? (
+            <Suspense fallback={null}><AudioWaveform key={track.id + track.audio.url} url={track.audio.url} duration={duration} current={current} onSeek={(fraction) => { if (ref.current && Number.isFinite(duration) && duration > 0) ref.current.currentTime = fraction * duration }} /></Suspense>
+          ) : null}
           <div className="soa-dubbing-player-dock__nav">{navigation}</div>
           {track && queueOpen ? (
             <PlayerQueuePanel

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { voicePresets } from '../../tts/voicePresets'
 import {
+  pronunciationStressSamples,
   summarizeVoiceListeningQa,
   voiceListeningDimensionLabels,
   voiceListeningScenarios,
@@ -51,8 +52,14 @@ export function VoiceListeningQaCard() {
         <StatusPill label={`${readyCount}/5 LISTENING READY`} tone={readyCount === 5 ? 'good' : 'warning'} />
       </div>
       <p className="mt-2 text-xs font-semibold leading-5 text-soa-muted">
-        동일 성우를 일상·설명·장문·다큐·숏폼 5개 상황에서 따로 듣습니다. 평균만 높아도 통과하지 않으며, 장문 피로도 4점 이상과 모든 품질 항목 3점 이상이 필수입니다.
+        동일 성우를 일상·설명·장문·다큐·숏폼 5개 상황에서 따로 듣습니다. 평균만 높아도 통과하지 않으며, 장문 피로도 4점 이상과 모든 품질 항목 3점 이상, 모든 상황의 현실 속도 4점 이상이 필수입니다.
       </p>
+
+      <details className="mt-4 rounded-2xl border border-soa-line bg-white p-4 text-xs">
+        <summary className="cursor-pointer font-bold">한국어 발음·긴 호흡 추가 검증 문장</summary>
+        <p className="mt-2 text-soa-muted">아래 문장을 작업공간에 붙여 넣고 실제 생성 결과를 들어보세요. 이 문장 목록은 청취 완료나 모델 인증 증거가 아닙니다.</p>
+        {pronunciationStressSamples.map((sample) => <div key={sample.label} className="mt-3"><strong>{sample.label}</strong><p className="mt-1 leading-6">{sample.text}</p></div>)}
+      </details>
 
       <div className="mt-4 grid gap-3 lg:grid-cols-[220px_1fr]">
         <div className="space-y-3">

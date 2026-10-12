@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
 import { requestAutomaticApiReconnect } from '../api/httpClient'
 import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
@@ -13,7 +13,6 @@ import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
 import { LongformComposer } from '../components/workspace/LongformComposer'
 import { SpeakerVoiceAssignmentPanel } from '../components/workspace/SpeakerVoiceAssignment'
-import { TimelineEditor } from '../components/workspace/TimelineEditor'
 import { WorkspaceConversation } from '../components/workspace/WorkspaceConversation'
 import { WorkspaceProjectRail } from '../components/workspace/WorkspaceProjectRail'
 import { useDesktopStudioLayout } from '../hooks/useDesktopStudioLayout'
@@ -57,7 +56,7 @@ import { synthesizeVoiceCloneProfile } from '../voiceclone/voiceCloneSynthesis'
 import { isMyVoiceId, toMyVoiceId } from '../voiceclone/voiceIdentity'
 import { buildVoiceChoices, resolveVoiceChoice } from '../voice/voiceChoices'
 import { LandingHome } from './LandingHome'
-
+const TimelineEditor = lazy(() => import('../components/workspace/TimelineEditor').then((module) => ({ default: module.TimelineEditor })))
 interface PendingLongformGeneration {
   text: string
   options: TimelineGenerationOptions
@@ -136,7 +135,6 @@ export function HomePage() {
     if (isBrowserSpeechSupported()) window.speechSynthesis.cancel()
     if (resetState) setDirectBrowserPreview(null)
   }, [])
-
   const startKakaoBrowserPreview = useCallback((request: TtsSynthesisRequest, nextVoiceId: string) => {
     if (!isKakaoInAppBrowser()) return false
     recordFieldDeviceEvent('preset-preview-attempted')
@@ -206,7 +204,6 @@ export function HomePage() {
     }, 1_800)
     return true
   }, [showNotice, stopDirectBrowserPreview])
-
   const engineCatalog = useEngineCatalog()
   const { profiles: myVoiceProfiles, loading: myVoiceProfilesLoading } = useMyVoiceProfiles()
   const voiceChoices = useMemo(() => buildVoiceChoices(myVoiceProfiles), [myVoiceProfiles])
@@ -282,14 +279,12 @@ export function HomePage() {
   const generationRouteReady = selectedVoice.kind === 'my-voice'
     ? selectedVoice.ready && backendStatus !== 'offline'
     : engineAvailable
-
   useEffect(() => {
     if (backendStatus === 'offline') return undefined
     const controller = new AbortController()
     void refreshNeuralPresetPreviewCatalog(controller.signal).catch(() => undefined)
     return () => controller.abort()
   }, [backendStatus])
-
   useEffect(() => {
     if (selectedTimelineVoiceBlocks.length === 0) return
     const selectedVoiceIds = Array.from(new Set<string>(selectedTimelineVoiceBlocks.map((block) => block.voiceId)))
@@ -298,7 +293,6 @@ export function HomePage() {
     if (nextVoice.kind === 'my-voice' && !nextVoice.ready) return
     setVoiceId(nextVoice.id)
   }, [selectedTimelineVoiceBlocks, voiceChoices, voiceId])
-
   useEffect(() => {
     if (myVoiceProfilesLoading || !isMyVoiceId(voiceId)) return
     const selectedProfileStillExists = myVoiceProfiles.some((profile) => toMyVoiceId(profile.id) === voiceId)
@@ -336,7 +330,6 @@ export function HomePage() {
               : readiness === 'offline'
                 ? '음성 엔진 연결을 복구하고 있습니다.'
                 : '사용 가능한 음성 엔진을 확인하고 있습니다.'
-
     setLiveVoice({
       voiceId,
       voiceName: selectedVoice.name,
@@ -352,7 +345,6 @@ export function HomePage() {
     [composerDraft],
   )
   const speakerSignature = multiSpeakerAnalysis.speakers.join('\u001f')
-
   useEffect(() => {
     if (!multiSpeakerAnalysis.eligible) {
       setSpeakerAssignments([])
@@ -714,7 +706,6 @@ export function HomePage() {
       setSpeakerSeedVoiceId(voice.id)
     }
   }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, stopDirectBrowserPreview, updateTimelineVoices, voiceChoices])
-
   const previewVoice = useCallback(async (
     nextVoiceId: string,
     sampleText?: string,
@@ -737,7 +728,6 @@ export function HomePage() {
     previewAbortRef.current = controller
     if (!preserveSelection) setVoiceId(voice.id)
     setPreviewingId(nextVoiceId)
-
     if (voice.kind === 'preset' && (!engineAvailable || !engineCatalog.selected)) {
       setPendingPreview((current) => ({
         voiceId: nextVoiceId,
@@ -894,7 +884,6 @@ export function HomePage() {
     startKakaoBrowserPreview,
     voiceChoices,
   ])
-
 
   function handlePreview(nextVoiceId: string) {
     if (directBrowserPreview?.voiceId === nextVoiceId) {
@@ -1097,6 +1086,7 @@ export function HomePage() {
             />
             <WorkspaceConversation messages={messages} />
             {timeline.blocks.length > 0 || timeline.canUndo || timeline.canRedo ? (
+            <Suspense fallback={<p role="status">편집 도구를 준비하고 있습니다…</p>}>
             <TimelineEditor
               blocks={timeline.blocks}
               voiceChoices={voiceChoices}
@@ -1151,6 +1141,7 @@ export function HomePage() {
               onUndo={timeline.undoEdit}
               onRedo={timeline.redoEdit}
             />
+            </Suspense>
             ) : null}
           </main>
         </section>

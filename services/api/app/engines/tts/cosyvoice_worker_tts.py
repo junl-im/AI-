@@ -243,7 +243,19 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             stdout=asyncio.subprocess.DEVNULL,
             stderr=asyncio.subprocess.PIPE,
         )
-        _, stderr = await process.communicate()
+        try:
+            _, stderr = await asyncio.wait_for(process.communicate(), timeout=60)
+        except BaseException:
+            try:
+                if process.returncode is None:
+                    try:
+                        process.kill()
+                    except ProcessLookupError:
+                        pass
+                await asyncio.wait_for(process.communicate(), timeout=5)
+            finally:
+                temp_path.unlink(missing_ok=True)
+            raise
         if process.returncode != 0:
             temp_path.unlink(missing_ok=True)
             detail = stderr.decode("utf-8", errors="replace").strip()
@@ -307,6 +319,11 @@ class CosyVoiceWorkerTtsEngine(TtsEngine):
             tempo_applied = await self._apply_natural_tempo(output_path, effective_rate)
             validate_wave(output_path)
         except BaseException as error:
+            if isinstance(error, asyncio.CancelledError) and worker_job_id:
+                try:
+                    await asyncio.wait_for(self.worker.cancel_job(worker_job_id), timeout=5)
+                except Exception:
+                    pass  # Preserve original cancellation even if Worker is unreachable.
             self.store.remove(output_path)
             processing_ms = round((time.perf_counter() - started) * 1000)
             await self._record_telemetry(

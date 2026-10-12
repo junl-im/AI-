@@ -12,9 +12,10 @@ from app.schemas.tts import (
     TtsSynthesisRequest,
     TtsSynthesisResponse,
 )
+from app.services.prosody_director import plan_prosody
 from app.services.text_normalizer import NormalizationResult, normalize_korean_text
 from app.services.text_segmenter import split_korean_text
-from app.services.wav_tools import merge_wav_files, wav_duration_seconds
+from app.services.wav_tools import ensure_trailing_silence, merge_wav_files, wav_duration_seconds
 from app.storage.audio_store import AudioStore
 
 ProgressReporter = Callable[[JobPhase, int, int, int, str], Awaitable[None]]
@@ -47,11 +48,17 @@ class TtsPipeline:
             ),
         )
         normalization = self._normalize(request)
-        segments = split_korean_text(normalization.normalized, self.max_segment_chars)
+        plan = plan_prosody(
+            request.voice_id, request.text, request.speed, self.max_segment_chars
+        )
+        segments = split_korean_text(normalization.normalized, plan.max_chars)
         total_segments = max(1, len(segments))
         parent_id = request.job_id or uuid4()
         normalized_request = request.model_copy(
-            update={"text": normalization.normalized, "job_id": parent_id}
+            update={
+                "text": normalization.normalized, "job_id": parent_id,
+                "speed": plan.requested_speed if engine.info().supports_speed else request.speed,
+            }
         )
 
         if len(segments) <= 1 or engine.info().mode == "mock":
@@ -100,6 +107,9 @@ class TtsPipeline:
                 if path is None:
                     raise RuntimeError(f"{index}번째 구간 WAV를 임시 저장소에서 찾지 못했습니다.")
                 paths.append(path)
+                if index < total_segments:
+                    # Publish the exact same boundary audio used in final merging.
+                    ensure_trailing_silence(path, plan.pause_ms)
                 ready_after_ms = round((time.perf_counter() - started) * 1000)
                 if first_result is None:
                     first_result = child_result
@@ -132,7 +142,7 @@ class TtsPipeline:
                 "분할 음성을 하나의 WAV로 연결합니다.",
             )
             output = self.store.output_path(UUID(str(parent_id)), "wav")
-            duration = merge_wav_files(paths, output)
+            duration = merge_wav_files(paths, output, silence_ms=0)
             elapsed_ms = round((time.perf_counter() - started) * 1000)
             await self._report(
                 progress,

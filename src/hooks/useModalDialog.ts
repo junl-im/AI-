@@ -15,7 +15,10 @@ let bodyOverflowBeforeDialogs = ''
 
 function focusableElements(container: HTMLElement): HTMLElement[] {
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
-    .filter((element) => element.getAttribute('aria-hidden') !== 'true')
+    .filter((element) => element.tabIndex >= 0
+      && !element.closest('[hidden], [inert], [aria-hidden="true"]')
+      && getComputedStyle(element).display !== 'none'
+      && getComputedStyle(element).visibility !== 'hidden')
 }
 
 export function useModalDialog<T extends HTMLElement>(

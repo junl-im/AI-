@@ -39,3 +39,34 @@ def merge_wav_files(inputs: list[Path], output: Path, silence_ms: int = 120) -> 
                 merged.writeframes(silence)
             merged.writeframes(frames)
     return wav_duration_seconds(output)
+
+
+def ensure_trailing_silence(path: Path, minimum_ms: int) -> None:
+    """Top up short PCM16 tails; never trim speech or double existing long pauses."""
+    minimum_ms = max(0, min(340, minimum_ms))
+    with wave.open(str(path), "rb") as audio:
+        params = audio.getparams()
+        if params.sampwidth != 2 or params.comptype != "NONE":
+            return
+        frames = audio.readframes(params.nframes)
+    frame_width = params.nchannels * params.sampwidth
+    target_frames = round(params.framerate * minimum_ms / 1000)
+    quiet_frames = 0
+    for index in range(params.nframes - 1, max(-1, params.nframes - target_frames - 1), -1):
+        frame = frames[index * frame_width:(index + 1) * frame_width]
+        if any(abs(int.from_bytes(frame[c:c + 2], "little", signed=True)) > 128
+               for c in range(0, frame_width, 2)):
+            break
+        quiet_frames += 1
+    missing = max(0, target_frames - quiet_frames)
+    if not missing:
+        return
+    temporary = path.with_suffix(".breath.wav")
+    try:
+        with wave.open(str(temporary), "wb") as audio:
+            audio.setparams(params)
+            audio.writeframes(frames)
+            audio.writeframes(b"\x00" * missing * frame_width)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)

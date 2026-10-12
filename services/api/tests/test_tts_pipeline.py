@@ -122,3 +122,25 @@ async def test_pipeline_can_disable_korean_pronunciation_normalization(tmp_path)
 
     assert result.normalized_text == "2026-08-01에 시작합니다."
     assert engine.seen_texts == ["2026-08-01에 시작합니다."]
+
+@pytest.mark.asyncio
+async def test_progressive_wavs_and_final_wav_have_identical_pcm(tmp_path):
+    store = AudioStore(tmp_path, ttl_minutes=30)
+    engine = SegmentWaveEngine(store)
+    pipeline = TtsPipeline(store, max_segment_chars=45)
+    published = []
+
+    async def segment_ready(segment):
+        path = store.resolve(segment.filename)
+        with wave.open(str(path), "rb") as audio:
+            published.append(audio.readframes(audio.getnframes()))
+
+    result = await pipeline.synthesize(
+        engine,
+        TtsSynthesisRequest(text="실제 쉼과 최종 음원을 비교합니다. " * 14, voice_id="jun-deep"),
+        segment_ready=segment_ready,
+    )
+    output = store.resolve(result.audio_url.rsplit("/", 1)[1])
+    with wave.open(str(output), "rb") as audio:
+        assert audio.readframes(audio.getnframes()) == b"".join(published)
+    assert len(published) == result.segment_count

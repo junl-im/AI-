@@ -105,7 +105,13 @@ export function scoreVoiceListeningEntry(entry: VoiceListeningQaEntry): number {
 
 export function summarizeVoiceListeningQa(entries: VoiceListeningQaEntry[]): VoiceListeningVoiceSummary[] {
   return voicePresets.map((preset) => {
-    const voiceEntries = entries.filter((entry) => entry.voiceId === preset.id)
+    const latest = new Map<string, VoiceListeningQaEntry>()
+    for (const entry of entries) {
+      if (entry.voiceId !== preset.id || !voiceListeningScenarios.some((scenario) => scenario.id === entry.scenarioId)) continue
+      const previous = latest.get(entry.scenarioId)
+      if (!previous || entry.updatedAt >= previous.updatedAt) latest.set(entry.scenarioId, entry)
+    }
+    const voiceEntries = [...latest.values()]
     const scenarioIds = new Set(voiceEntries.map((entry) => entry.scenarioId))
     const entryScores = voiceEntries.map(scoreVoiceListeningEntry)
     const allDimensionScores = voiceEntries.flatMap((entry) => Object.values(normalizeListeningScores(entry.scores)))
@@ -132,8 +138,15 @@ export function summarizeVoiceListeningQa(entries: VoiceListeningQaEntry[]): Voi
       ready: scenarioIds.size === voiceListeningScenarios.length
         && averageScore >= 4
         && minimumScore >= 3
+        && voiceEntries.every((entry) => normalizeListeningScores(entry.scores).naturalPace >= 4)
         && (longformFatigueScore ?? 0) >= 4,
       issues,
     }
   })
 }
+
+export const pronunciationStressSamples = [
+  { label: "숫자·단위", text: "2026년 10월 12일 오전 9시 30분, 참가자는 12명입니다. 할인율은 3.5%, 가격은 12,500원입니다." },
+  { label: "영문·괄호·인용", text: "API(에이피아이) 연결을 확인한 뒤, 담당자는 ‘준비가 되면 시작하세요.’라고 말했습니다. SoriON의 새 이야기가 시작됩니다." },
+  { label: "긴 호흡", text: "새로운 일을 시작할 때에는 결과를 서두르기보다 지금 할 수 있는 작은 일을 하나씩 고르고, 중간에 생각이 바뀌더라도 잠시 쉬면서 다음 문장을 준비하는 편이 좋습니다. 조용한 호흡 뒤에 이야기를 이어갑니다." },
+]

@@ -40,7 +40,7 @@ describe('HomePage', () => {
       .not.toBeInTheDocument()
   })
 
-  it('작업공간에서는 장문 내용을 문장별 타임라인 블록으로 만든다', () => {
+  it('작업공간에서는 장문 내용을 문장별 타임라인 블록으로 만든다', async () => {
     useAppStore.setState({ workspaceEntered: true })
     const view = render(<HomePage />)
     const scoped = within(view.container)
@@ -55,10 +55,10 @@ describe('HomePage', () => {
       target: { value: '첫 번째 문장입니다. 두 번째 문장입니다.' },
     })
     fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    await scoped.findByRole('textbox', { name: '선택 대사 빠른 수정' })
 
     expect(textbox).toHaveValue('첫 번째 문장입니다. 두 번째 문장입니다.')
-    expect(scoped.getByRole('textbox', { name: '선택 대사 빠른 수정' }))
-      .toHaveValue('첫 번째 문장입니다.')
+    await waitFor(() => expect(scoped.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('첫 번째 문장입니다.'))
     expect(scoped.getByText('두 번째 문장입니다.')).toBeInTheDocument()
     expect(scoped.getAllByText('혜린').length).toBeGreaterThanOrEqual(3)
     expect(scoped.getByRole('complementary', { name: '프로젝트 목록' })).toBeInTheDocument()
@@ -113,7 +113,7 @@ describe('HomePage', () => {
     expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })).toBeEnabled()
   })
 
-  it('명확한 다중 화자 대본은 목소리 확인 뒤에만 타임라인으로 적용한다', () => {
+  it('명확한 다중 화자 대본은 목소리 확인 뒤에만 타임라인으로 적용한다', async () => {
     useAppStore.setState({ workspaceEntered: true })
     const view = render(<HomePage />)
     const scoped = within(view.container)
@@ -130,6 +130,7 @@ describe('HomePage', () => {
     expect(scoped.getByRole('button', { name: /전체 내용 음성 제작/ })).toBeEnabled()
 
     fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    await scoped.findByRole('textbox', { name: '선택 대사 빠른 수정' })
     expect(scoped.getByRole('textbox', { name: '선택 대사 빠른 수정' })).toHaveValue('안녕하세요.')
     expect(scoped.getByText('반가워요.')).toBeInTheDocument()
   })
@@ -148,6 +149,7 @@ describe('HomePage', () => {
     expect(submit).toBeEnabled()
 
     fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    await scoped.findByRole('textbox', { name: '선택 대사 빠른 수정' })
     fireEvent.click(scoped.getByRole('article', { name: /클립 2/ }))
 
     await waitFor(() => expect(scoped.getByRole('button', { name: /전체 내용 음성 제작/ })).toBeEnabled())
@@ -161,6 +163,7 @@ describe('HomePage', () => {
 
     fireEvent.change(textbox, { target: { value: '모바일 목소리 연계 테스트 문장입니다.' } })
     fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    await scoped.findByRole('textbox', { name: '선택 대사 빠른 수정' })
     fireEvent.click(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' }))
     const picker = scoped.getByRole('dialog', { name: '목소리 선택' })
     const nextVoice = within(picker).getAllByRole('radio').find((item) => !item.getAttribute('aria-checked')?.includes('true'))
@@ -178,6 +181,7 @@ describe('HomePage', () => {
 
     fireEvent.change(textbox, { target: { value: '첫 번째 문장입니다. 두 번째 문장입니다.' } })
     fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
+    await scoped.findByRole('textbox', { name: '선택 대사 빠른 수정' })
 
     fireEvent.click(scoped.getByRole('article', { name: /클립 2 · 혜린/ }))
     fireEvent.click(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' }))

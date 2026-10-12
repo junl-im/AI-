@@ -1,0 +1,148 @@
+/* 0.11.37: light editorial studio, contextual direction, and distinct voice cards. */
+.soa-app-root.is-editor { --studio-text: #232639; --studio-muted: #60677b; color: #232639; background: #f1f0f6; }
+.soa-app-root.is-editor .soa-primary-frame,
+.soa-app-root.is-editor .soa-desktop-studio,
+.soa-app-root.is-editor .soa-desktop-studio__center { background: transparent; color: #232639; }
+.soa-app-root.is-editor .soa-compact-header { border-bottom: 1px solid #e1dfec; background: #faf9fd; color: #232639; }
+.soa-compact-header__brand strong, .soa-compact-header__brand small { color: #232639; }
+.soa-app-root.is-editor .soa-compact-header__actions > button { color: #4e5267; background: #eceaf3; }
+.soa-app-root.is-editor .soa-dubbing-header { background: #f1f0f6; border-color: #dfdce9; }
+.soa-app-root.is-editor .soa-dubbing-project-title input { color: #242639; }
+.soa-app-root.is-editor .soa-dubbing-project-title p { color: #686e80; }
+.soa-app-root.is-editor .soa-dubbing-toolbar__actions > button { border-color: #dcd9e7; color: #4f5269; background: #fff; }
+.soa-app-root.is-editor .soa-one-flow-composer { border: 1px solid #e1deeb; border-radius: 24px; padding: 28px; background: #fff; box-shadow: 0 8px 32px #35304408; }
+.soa-app-root.is-editor .soa-one-flow-composer__heading { margin-bottom: 22px; }
+.soa-app-root.is-editor .soa-one-flow-composer__heading > div > span { color: #7561a8; letter-spacing: .12em; }
+.soa-app-root.is-editor .soa-one-flow-composer__heading h1 { color: #232639; font-size: clamp(28px, 3vw, 38px); line-height: 1.25; }
+.soa-app-root.is-editor .soa-one-flow-composer__heading p { color: #666d80; font-size: 14px; }
+.soa-app-root.is-editor .soa-one-flow-composer__shortcut { color: #73798a; border-color: #e4e1ed; background: #f7f6fa; }
+.soa-app-root.is-editor .soa-studio-steps { color: #646a7c; border-color: #e8e5f0; padding-bottom: 20px; }
+.soa-app-root.is-editor .soa-studio-steps b { display: inline-grid; place-items: center; width: 24px; height: 24px; margin-right: 6px; border-radius: 8px; color: #7356a5; background: #f0eafa; }
+.soa-app-root.is-editor .soa-dubbing-voice-row { border-color: #ddd5ec; border-radius: 14px; background: #f5f1fb; }
+.soa-app-root.is-editor .soa-dubbing-voice-choice strong { color: #332847; }
+.soa-app-root.is-editor .soa-dubbing-voice-choice small { color: #70647f; }
+.soa-app-root.is-editor .soa-dubbing-voice-row > button:not(.soa-dubbing-voice-choice) { color: #67547f; background: #e9e1f3; }
+.soa-director { margin: 14px 0 0; border: 1px solid #e5e1ec; border-radius: 14px; padding: 15px 16px; color: #586075; background: #faf9fc; }
+.soa-director__label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.soa-director__label > span { color: #8464b3; }
+.soa-director__label strong { color: #40354f; font-size: 12px; }
+.soa-director__label small { margin-left: auto; color: #7b7487; font-size: 10px; }
+.soa-director p { margin: 9px 0 0; font-size: 12px; line-height: 1.7; }
+.soa-director__identity b { display: inline-block; margin-right: 8px; color: #4b3e60; }
+.soa-director__suggestion { display: flex; align-items: center; gap: 16px; }
+.soa-director__suggestion p { flex: 1; }
+.soa-director__suggestion button { flex-shrink: 0; min-height: 44px; padding: 0 14px; border: 1px solid #d8cbe9; border-radius: 10px; color: #604585; background: #f0e8fa; font-size: 12px; font-weight: 700; }
+.soa-director__suggestion > span { flex-shrink: 0; color: #626b56; font-size: 10px; }
+.soa-director ul { margin: 10px 0 0; padding-left: 16px; color: #6c6179; font-size: 12px; line-height: 1.7; }
+.soa-app-root.is-editor .soa-script-starters { margin-top: 18px; }
+.soa-app-root.is-editor .soa-script-starters > span { color: #72788b; }
+.soa-app-root.is-editor .soa-script-starters button { color: #51576e; background: #fff; border-color: #dedbe8; }
+.soa-app-root.is-editor .soa-script-starters button:hover { color: #674886; background: #f6f1fc; border-color: #bda9d9; }
+.soa-app-root.is-editor .soa-script-starters button > span { color: #8a6bb3; }
+.soa-app-root.is-editor .soa-dubbing-script__editor { margin-top: 20px; border: 1px solid #d8d5e4; border-radius: 16px; background: #fcfbfe; }
+.soa-app-root.is-editor .soa-dubbing-script__editor:focus-within { border-color: #a188c0; box-shadow: 0 0 0 3px #9d80c512; }
+.soa-app-root.is-editor .soa-dubbing-script__editor textarea { height: 280px; color: #33384c; background: transparent; }
+.soa-app-root.is-editor .soa-dubbing-script__editor textarea::placeholder { color: #8b8c9f; }
+.soa-app-root.is-editor .soa-dubbing-script__stats { color: #6f7586; border-color: #e8e5ef; background: #f7f5fb; }
+.soa-app-root.is-editor .soa-one-flow-composer__auto { color: #6d557f; background: #ebe4f4; }
+.soa-app-root.is-editor .soa-one-flow-composer__blank { border-color: #dedbe7; color: #5b5570; background: #f7f5fb; }
+.soa-app-root.is-editor .soa-one-flow-composer__blank:disabled { color: #9695a4; background: #f7f6f9; }
+.soa-app-root.is-editor .soa-one-flow-composer__generate { color: #fff; background: #645178; box-shadow: 0 5px 16px #58406e18; }
+.soa-app-root.is-editor .soa-one-flow-composer__generate small { color: #ece4f4; }
+.soa-app-root.is-editor .soa-one-flow-composer__generate:disabled { color: #8c8798; background: #eeebf3; box-shadow: none; }
+.soa-app-root.is-editor .soa-one-flow-composer__generate:disabled small { color: #8c8798; }
+.soa-app-root.is-editor .soa-one-flow-composer__activity p { color: #6b7183; }
+.soa-app-root.is-editor .soa-one-flow-composer__activity > span { color: #74618a; }
+.soa-app-root.is-editor .soa-workspace-conversation { color: #5e6377; border-color: #e1dce9; background: #fbfafd; }
+.soa-app-root.is-editor .soa-workspace-conversation > summary { color: #5e6377; }
+.soa-app-root.is-editor .soa-project-rail,
+.soa-app-root.is-editor .soa-voice-drawer { color: #41475c; border-color: #e0dce9; background: #f8f7fb; }
+.soa-app-root.is-editor .soa-project-rail strong,
+.soa-app-root.is-editor .soa-voice-drawer strong { color: #35394e; }
+.soa-app-root.is-editor .soa-project-rail p,
+.soa-app-root.is-editor .soa-voice-drawer p,
+.soa-app-root.is-editor .soa-voice-drawer small { color: #71758a; }
+.soa-app-root.is-editor .soa-studio-panel-toggle { color: #6e5b88; border-color: #ddd5e8; background: #f0eaf7; }
+.soa-app-root.is-editor .soa-studio-panel-monogram { color: #6d528e; background: #e7dbf6; }
+.soa-app-root.is-editor .soa-voice-drawer__presets > article { background: #fff; border-color: #e4dfec; }
+.soa-app-root.is-editor .soa-voice-drawer__presets > article.is-selected { background: #f0e8fa; border-color: #bda8d4; }
+.soa-app-root.is-editor .soa-voice-drawer__identity b,
+.soa-app-root.is-editor .soa-voice-drawer__character i { color: #786589; }
+.soa-app-root.is-editor .soa-bottom-sheet { color: #2d3046; background: #fcfbfe; border-color: #e1dae9; }
+.soa-app-root.is-editor .soa-sheet-header { background: #fcfbfe; border-color: #e6e1ee; }
+.soa-app-root.is-editor .soa-sheet-header h2 { color: #2d3046; }
+.soa-app-root.is-editor .soa-sheet-header button { color: #6c5784; background: #f0eaf7; }
+.soa-app-root.is-editor .soa-voice-apply-target { background: #f1ebf8; color: #6e5c83; border-color: #e4dbee; }
+.soa-app-root.is-editor .soa-voice-apply-target strong { color: #65527e; }
+.soa-app-root.is-editor .soa-voice-sheet-list { gap: 12px; }
+.soa-app-root.is-editor .soa-voice-sheet-list > div { border: 1px solid #e3deec; border-radius: 16px; background: #fff; padding: 15px 12px; }
+.soa-app-root.is-editor .soa-voice-sheet-list > div.is-selected { border-color: #aa8dc8; background: #f3edfa; box-shadow: 0 0 0 2px #a387c20c; }
+.soa-app-root.is-editor .soa-voice-sheet-choice strong { color: #363047; font-size: 15px; }
+.soa-app-root.is-editor .soa-voice-sheet-choice small { color: #6e6b7b; font-size: 12px; }
+.soa-app-root.is-editor .soa-voice-fit { color: #777286; }
+.soa-app-root.is-editor .soa-voice-pro { color: #4d705b; }
+.soa-app-root.is-editor .soa-voice-con { color: #906c64; }
+.soa-app-root.is-editor .soa-voice-persona-chip,
+.soa-app-root.is-editor .soa-sheet-tags button { color: #756187; background: #f0ebf7; border-color: #ddd4e7; }
+.soa-app-root.is-editor .soa-sheet-tags button[aria-pressed="true"] { color: #fff; background: #7a6099; }
+.soa-app-root.is-editor .soa-voice-context-recommendation { color: #5f5275; background: #f1ebf9; }
+.soa-app-root.is-editor .soa-voice-context-recommendation small { color: #786c86; }
+.soa-app-root.is-editor .soa-dubbing-timeline { color: #41465c; background: #fcfbfe; border-color: #e1dce9; }
+.soa-app-root.is-editor .soa-timeline-toolbar { background: #f3f0f8; color: #5a536d; }
+.soa-app-root.is-editor .soa-timeline-toolbar button { color: #625474; background: #e8e1f1; }
+.soa-app-root.is-editor .soa-dubbing-player-dock__inner { color: #fff; background: #333044f5; }
+.soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { background: transparent; }
+.soa-audio-waveform { min-width: 0; padding-top: 8px; }
+.soa-audio-waveform > button { min-height: 36px; border: 1px solid #ffffff30; border-radius: 8px; padding: 0 12px; color: #e7def3; background: #ffffff0a; font-size: 11px; }
+.soa-audio-waveform svg { display: block; width: 100%; height: 38px; fill: #9383ac; }
+.soa-audio-waveform rect.is-played { fill: #d9c3f5; }
+.soa-audio-waveform input { display: block; width: 100%; height: 30px; accent-color: #cab1e8; }
+.soa-audio-waveform p { margin: 4px 0; color: #c1b8ce; font-size: 10px; }
+.soa-app-root.is-landing .soa-landing-copy > button { color: #fff; background: #65517d; }
+.soa-app-root.is-landing .soa-landing-kicker { color: #7d6399; }
+.soa-app-root.is-landing .soa-landing-overview h1 span { color: #947fa7; }
+.soa-app-root.is-landing .soa-landing-workflow b { color: #8b719e; }
+@media (min-width: 761px) {
+  .soa-voice-picker-sheet .soa-voice-sheet-list:not(.is-my-voice) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
+  .soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { background: transparent; }
+}
+@media (max-width: 760px) {
+  .soa-app-root.is-editor .soa-one-flow-composer { margin-inline: -14px; border: 0; border-radius: 0; padding: 24px 16px; }
+  .soa-app-root.is-editor .soa-one-flow-composer__heading h1 { font-size: 28px; }
+  .soa-app-root.is-editor .soa-one-flow-composer__heading p { font-size: 12px; }
+  .soa-app-root.is-editor .soa-studio-steps { font-size: 10px; gap: 4px; }
+  .soa-app-root.is-editor .soa-studio-steps b { width: 20px; height: 20px; margin-right: 3px; }
+  .soa-director { padding: 12px; }
+  .soa-director__label small { font-size: 9px; }
+  .soa-director__suggestion { display: block; }
+  .soa-director__suggestion button { margin-top: 10px; }
+  .soa-director__suggestion > span { display: inline-block; margin-top: 8px; }
+  .soa-app-root.is-editor .soa-dubbing-script__editor textarea { height: 220px; }
+  .soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { background: #f9f7fdf5; border-color: #ded8e9; }
+  .soa-app-root.is-editor .soa-dock__nav button { color: #746b83; }
+  .soa-app-root.is-editor .soa-dock__nav button.is-active { color: #57446f; background: #e9dff6; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .soa-director, .soa-voice-sheet-list > div { transition: background-color 160ms, border-color 160ms; }
+}
+.soa-app-root.is-editor .soa-dubbing-workspace { background: #f1f0f6; color: #232639; }
+.soa-app-root.is-editor .soa-one-flow-composer__voice { border: 0; padding: 0; background: transparent; }
+.soa-app-root.is-editor .soa-one-flow-composer__shortcut { color: #73798b !important; }
+.soa-app-root.is-editor .soa-brand-mark__copy strong { color: #272a3b; }
+.soa-app-root.is-editor .soa-brand-mark__copy small,
+.soa-app-root.is-editor .soa-compact-brand__page { color: #777487; }
+.soa-app-root.is-editor .soa-dubbing-script__stats strong { color: #777487; }
+.soa-app-root.is-editor .soa-dubbing-project-title__copy > button { color: #80738e; }
+.soa-app-root.is-editor .soa-dubbing-toolbar__actions > button:disabled { color: #a4a0af; opacity: .65; }
+.soa-app-root.is-editor .soa-dubbing-more__trigger { color: #665676; border-color: #dbd5e5; background: #fff; }
+.soa-app-root.is-editor .soa-dubbing-menu { color: #51465f; border-color: #ddd5e8; background: #fff; box-shadow: 0 12px 32px #44335522; }
+.soa-app-root.is-editor .soa-dubbing-menu button { color: #51465f; }
+.soa-app-root.is-editor .soa-dubbing-menu button:hover { background: #f1eaf9; }
+.soa-app-root.is-editor .soa-voice-context-recommendation strong,
+.soa-app-root.is-editor .soa-voice-context-recommendation span { color: #624b80; }
+.soa-app-root.is-editor .soa-voice-sheet-preview { color: #624b80; background: #eae1f5; }
+.soa-app-root.is-editor .soa-voice-sheet-preview[data-preview-state="playing"] { color: #fff; background: #745591; }
+.soa-app-root.is-editor .soa-sheet-tags button { min-height: 40px; }
+.soa-app-root.is-editor .soa-voice-drawer input[type="range"] { accent-color: #81619d; }
+/* Keep sheets above the header when their mobile voice controls are sticky. */
+.soa-app-root.is-editor .soa-one-flow-composer__voice:has(.soa-sheet-backdrop) { z-index: 1001; }

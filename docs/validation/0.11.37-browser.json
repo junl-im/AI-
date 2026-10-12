@@ -1,0 +1,38 @@
+{
+  "version": "0.11.37",
+  "checkedAt": "2026-10-12 KST",
+  "browser": "Chrome Windows headless",
+  "responsiveWidths": [
+    320,
+    360,
+    390,
+    430,
+    768,
+    1024,
+    1280,
+    1440
+  ],
+  "overflow": 0,
+  "pageErrors": 0,
+  "scenes": [
+    "landing",
+    "studio",
+    "voice picker",
+    "lazy timeline"
+  ],
+  "keyboard": [
+    "Home",
+    "End",
+    "Escape focus return"
+  ],
+  "waveform": {
+    "fixture": "synthetic tone; not voice quality evidence",
+    "bars": 96,
+    "keyboardSeek": "0.1",
+    "pageErrors": []
+  },
+  "notVerified": [
+    "real Neural voice quality",
+    "physical mobile audio"
+  ]
+}

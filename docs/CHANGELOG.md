@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.11.37 · Intelligent Studio & Prosody Director
+
+- 라벤더 스튜디오와 성우 비교 UI, 대본 특성 기반 로컬 추천·청취 안내를 추가했습니다.
+- 5성우별 분할·호흡·속도 보정, 점진/최종 PCM 일치, Worker 취소 전달과 FFmpeg 종료·시간 제한을 강화했습니다. 정책 변경 시 preview cache를 무효화합니다.
+- 실제 WAV 기반 선택적 파형과 키보드 탐색, 성우 Home/End 이동·모달 포커스 개선, 타임라인 지연 로딩을 적용했습니다.
+- 청취 QA의 속도 미달·중복 시나리오 집계를 수정하고 추가 스트레스 대본을 제공했습니다.
+- 검증: 웹 77 files/292 tests, API 244 passed/1 skipped, Worker 16 passed. lint/typecheck/build, Ruff, preflight 55/55와 Chrome 8개 폭·선택창·타임라인 점검. 최종 배포는 GitHub Actions로 확인합니다.
+- 실제 승인 성우 WAV·모델 미제공으로 Neural 음질·장문 청취·실기기 인증은 보류입니다. 상세: docs/INTELLIGENT_STUDIO_0.11.37.md.
+
 ## 0.11.36 · Calm Studio & Research-led UX
 
 - 실제 유사 서비스 6곳과 오픈소스 11개를 공식 자료·라이선스·도입 적합성으로 비교: docs/UIUX_RESEARCH_0.11.36.md.

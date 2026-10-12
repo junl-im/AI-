@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { StudioDirector } from './StudioDirector'
 import type { VoiceEmotion } from '../../ai/contracts'
 import type { EngineInfo } from '../../ai/contracts'
 import { VoicePreviewButton } from '../voice/VoicePreviewButton'
@@ -100,6 +101,8 @@ export function DubbingVoiceControls({
           </span>
         ) : null}
       </section>
+
+      <StudioDirector text={scriptText} voiceId={voiceId} onVoiceChange={onVoiceChange} />
 
       <VoicePickerSheet
         open={pickerOpen}

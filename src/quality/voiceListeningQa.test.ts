@@ -15,6 +15,21 @@ function entry(voiceId: string, scenarioId: VoiceListeningQaEntry['scenarioId'],
 }
 
 describe('voice listening QA', () => {
+  it('does not certify a high average when one scenario has unnatural pace', () => {
+    const entries = voiceListeningScenarios.map((scenario) => entry('sori-warm', scenario.id, 5))
+    entries[0].scores.naturalPace = 3
+    expect(summarizeVoiceListeningQa(entries)[0].ready).toBe(false)
+  })
+  it('uses the latest rating once per valid scenario and ignores unknown scenarios', () => {
+    const entries = voiceListeningScenarios.map((scenario) => entry('sori-warm', scenario.id, 4))
+    const latest = { ...entry('sori-warm', 'longform', 2), updatedAt: '2026-10-12T00:00:00Z' }
+    entries.push(latest, { ...entry('sori-warm', 'conversation', 5), scenarioId: 'unknown' as never })
+    const summary = summarizeVoiceListeningQa(entries)[0]
+    expect(summary.scenarioCount).toBe(5)
+    expect(summary.longformFatigueScore).toBe(2)
+    expect(summary.ready).toBe(false)
+  })
+
   it('requires all five scenarios and healthy longform fatigue', () => {
     const entries = voiceListeningScenarios.map((scenario) => entry('sori-warm', scenario.id, 4))
     const summary = summarizeVoiceListeningQa(entries).find((item) => item.voiceId === 'sori-warm')!

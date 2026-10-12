@@ -13,6 +13,7 @@ from app.schemas.setup import (
     VoicePresetDiagnostic,
     VoiceSelectionDiagnostic,
 )
+from app.services.prosody_director import PROSODY_POLICY_REVISION
 from app.services.voice_preset_evidence import (
     inspect_voice_preset_evidence,
     mark_duplicate_checksums,
@@ -143,6 +144,7 @@ def _voice_preset_check(
             preview_cache_key = hashlib.sha256(
                 ":".join([
                     profile.id,
+                    PROSODY_POLICY_REVISION,
                     evidence.actual_sha256 or "",
                     evidence.model_fingerprint or "",
                     evidence.approval_id or "",

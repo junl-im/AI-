@@ -282,3 +282,42 @@ async def test_cosyvoice_rejects_same_wav_registered_for_multiple_presets(tmp_pa
                 job_id=uuid4(),
             )
         )
+
+@pytest.mark.asyncio
+async def test_cancelled_synthesis_cancels_worker_job(tmp_path):
+    import asyncio
+    from unittest.mock import AsyncMock
+
+    sample = tmp_path / "reference.wav"
+    sample.write_bytes(wav_bytes())
+    worker = FakeWorker()
+    worker.get_job = AsyncMock(side_effect=asyncio.CancelledError)
+    worker.cancel_job = AsyncMock()
+    store = AudioStore(tmp_path / "audio", 30)
+    engine = CosyVoiceWorkerTtsEngine(store, worker, str(sample), "sorion-reference")
+    with pytest.raises(asyncio.CancelledError):
+        await engine.synthesize(TtsSynthesisRequest(
+            text="한국어 기준 음색을 확인합니다.", voice_id="sorion-reference",
+        ))
+    worker.cancel_job.assert_awaited_once_with("worker-job")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("failure", ["cancel", "timeout"])
+async def test_tempo_abort_kills_process_and_removes_temporary_wav(tmp_path, monkeypatch, failure):
+    import asyncio
+    from unittest.mock import AsyncMock, Mock
+
+    output = tmp_path / "output.wav"
+    temporary = tmp_path / "output.tempo.wav"
+    temporary.write_bytes(b"incomplete")
+    process = Mock(returncode=None)
+    error = asyncio.CancelledError() if failure == "cancel" else asyncio.TimeoutError()
+    process.communicate = AsyncMock(side_effect=[error, (b"", b"")])
+    monkeypatch.setattr("app.engines.tts.cosyvoice_worker_tts.shutil.which", lambda _: "ffmpeg")
+    monkeypatch.setattr(asyncio, "create_subprocess_exec", AsyncMock(return_value=process))
+    engine = CosyVoiceWorkerTtsEngine(AudioStore(tmp_path / "audio", 30), FakeWorker(), "")
+    with pytest.raises(type(error)):
+        await engine._apply_natural_tempo(output, 1.04)
+    process.kill.assert_called_once()
+    assert not temporary.exists()

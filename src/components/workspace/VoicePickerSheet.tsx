@@ -55,9 +55,10 @@ export function VoicePickerSheet({
   function handleChoiceKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const forward = event.key === 'ArrowDown' || event.key === 'ArrowRight'
     const backward = event.key === 'ArrowUp' || event.key === 'ArrowLeft'
-    if ((!forward && !backward) || visibleVoices.length === 0) return
+    const endpoint = event.key === 'Home' || event.key === 'End'
+    if ((!forward && !backward && !endpoint) || visibleVoices.length === 0) return
     event.preventDefault()
-    const nextIndex = forward ? (index + 1) % visibleVoices.length : (index - 1 + visibleVoices.length) % visibleVoices.length
+    const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? visibleVoices.length - 1 : forward ? (index + 1) % visibleVoices.length : (index - 1 + visibleVoices.length) % visibleVoices.length
     const next = visibleVoices[nextIndex]
     onSelect(next.id)
     choiceRefs.current[nextIndex]?.focus({ preventScroll: true })

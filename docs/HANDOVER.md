@@ -59,9 +59,9 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.35 R3 · Chromium CI Runner Hotfix**
+Current baseline: **0.11.37 · Intelligent Studio & Prosody Director**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-08-27 KST**
+최종 갱신: **2026-10-12 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -1147,3 +1147,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: 실제 Neural 모델·API/Worker pytest·모바일 실기기 검증은 이번 UI 범위에서 미실행. AI 음질 성공으로 표시하지 않음. 기존 500kB 초과 초기 JS 경고 유지(약 568kB/gzip175kB). 유사 서비스는 공식 자료 조사이며 로그인 후 음질/속도 실측 아님. pixel baseline 임의 승인 없음.
 9. 산출물: SoriON-AI-0.11.36-calm-studio-full.zip, SoriON-AI-0.11.35-r4-to-0.11.36-calm-studio-patch.zip, SHA256SUMS.txt. Codex 작업공간 SoriON-delivery/0.11.36-calm-studio. 삭제 파일 없음.
 10. 다음: 0.11.37 Prosody Director & Listening Verification. 기존 자연스러움 계획 이월, 승인 실제 음성·CI green 선행. 파형/Radix/STT는 비교 후보이며 이번 버전에 도입하지 않음.
+
+## 2026-10-12 KST · 0.11.37 Intelligent Studio & Prosody Director
+
+1. **작업 일시(KST)**: 2026-10-12.
+2. **대상/기준 버전**: 0.11.37 / 0.11.36(c1e32fa).
+3. **변경 내용**: 라벤더 스튜디오·성우 비교·로컬 대본 도우미, 성우별 호흡 정책, 실제 WAV 파형, 키보드·지연 로딩 개선.
+4. **변경 이유**: 대규모 UIUX 개편과 성우 개성·한국어 장문 자연스러움·엔진 안정성 강화 요청.
+5. **영향 범위**: Web Studio/Listening QA, API 구간 생성·병합·취소·preview cache. Worker 모델 자체는 변경 없음.
+6. **주요 파일**: prosody_director.py, tts_pipeline.py, wav_tools.py, cosyvoice_worker_tts.py, AudioWaveform.tsx, StudioDirector.tsx, studio-intelligent.css, docs/INTELLIGENT_STUDIO_0.11.37.md.
+7. **검증**: 웹 292 tests, API 244 passed/1 skipped, Worker 16 passed; lint/typecheck/build, Ruff, preflight 55/55, Chrome 8폭 및 선택창/타임라인. 배포 최종 결과는 Actions 확인.
+8. **제한**: 승인 5성우 WAV·모델 미제공. 실제 Neural 음질·장문 청취·실기기 인증 미실행. 파형 20MB/5분 이하 WAV, cache 정책 변경에 따라 재검증 필요. 기존 보안·동의·무료 경계 유지.
+9. **산출물**: SoriON-AI-0.11.37-intelligent-studio-full.zip / SoriON-AI-0.11.36-to-0.11.37-intelligent-studio-patch.zip / SHA256SUMS.txt.
+10. **다음 업데이트**: 0.11.38 승인 reference 기반 실제 성우 청취·실측, 큰 파일 파형·초기 로딩·실기기 점검.
