@@ -1,3 +1,4 @@
+import { ProjectDeleteButton } from '../components/workspace/ProjectDeleteButton'
 import { useCallback, useEffect, useState } from 'react'
 import { WorkspacePageScaffold } from '../components/layout/WorkspacePageScaffold'
 import { StatusPill } from '../components/ui/StatusPill'
@@ -81,7 +82,7 @@ export function ProjectsPage() {
                       ? '완료'
                       : '초안'
             return (
-              <li key={project.id}>
+              <li key={project.id} className="soa-project-card">
                 <button
                   type="button"
                   onClick={() => openProject(project)}
@@ -102,6 +103,7 @@ export function ProjectsPage() {
                     <strong className="ml-auto text-soa-ink">불러오기 →</strong>
                   </div>
                 </button>
+                <ProjectDeleteButton project={project} onDeleted={(id) => setProjects((items) => items.filter((item) => item.id !== id))} />
               </li>
             )
           })}

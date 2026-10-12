@@ -214,7 +214,11 @@ async def test_sqlite_job_store_propagates_cancel_between_managers(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_sqlite_job_store_deletes_expired_history(tmp_path):
+async def test_sqlite_job_store_deletes_expired_history(tmp_path, monkeypatch):
+    import time
+
+    clock = [time.time()]
+    monkeypatch.setattr("app.services.sqlite_job_store.time.time", lambda: clock[0])
     database = tmp_path / "jobs.sqlite3"
     manager = JobManager(
         max_concurrent=1,
@@ -229,7 +233,7 @@ async def test_sqlite_job_store_deletes_expired_history(tmp_path):
         lambda: asyncio.sleep(0, result="done"),
         request_key="request-a",
     ) == "done"
-    await asyncio.sleep(0.03)
+    clock[0] += 1.0
 
     cleanup = await manager.cleanup_expired()
     assert cleanup.expired_results == 1

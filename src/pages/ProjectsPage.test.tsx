@@ -5,6 +5,7 @@ import { ProjectsPage } from './ProjectsPage'
 
 const projectMocks = vi.hoisted(() => ({
   listProjects: vi.fn(),
+  deleteProject: vi.fn(),
   project: {
     id: 'project-1',
     title: '아침 안내 음성',
@@ -21,10 +22,12 @@ const projectMocks = vi.hoisted(() => ({
 
 vi.mock('../projects/projectRepository', () => ({
   listProjects: projectMocks.listProjects,
+  deleteProject: projectMocks.deleteProject,
 }))
 
 describe('ProjectsPage', () => {
   beforeEach(() => {
+    projectMocks.deleteProject.mockReset().mockResolvedValue(undefined)
     projectMocks.listProjects.mockReset().mockResolvedValue([projectMocks.project])
     useAppStore.setState({
       page: 'projects',
@@ -61,6 +64,31 @@ describe('ProjectsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '다시 확인' }))
 
     await waitFor(() => expect(projectMocks.listProjects).toHaveBeenCalledTimes(2))
+    expect(await screen.findByText('아직 저장된 작업이 없습니다')).toBeInTheDocument()
+  })
+
+  it('cancels without deleting, then removes only after confirmation', async () => {
+    render(<ProjectsPage />)
+    fireEvent.click(await screen.findByRole('button', { name: '아침 안내 음성 프로젝트 삭제' }))
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('현재 편집 내용')
+    expect(screen.getByRole('button', { name: '취소' })).toHaveFocus()
+    fireEvent.click(screen.getByRole('button', { name: '취소' }))
+    expect(projectMocks.deleteProject).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: '아침 안내 음성 프로젝트 삭제' }))
+    fireEvent.click(screen.getByRole('button', { name: '삭제하기' }))
+    expect(await screen.findByText('아직 저장된 작업이 없습니다')).toBeInTheDocument()
+    expect(projectMocks.deleteProject).toHaveBeenCalledExactlyOnceWith('project-1')
+    expect(useAppStore.getState().workspaceResetToken).toBe(0)
+  })
+
+  it('retains the entry on deletion failure and allows retry', async () => {
+    projectMocks.deleteProject.mockRejectedValueOnce(new Error('storage blocked'))
+    render(<ProjectsPage />)
+    fireEvent.click(await screen.findByRole('button', { name: '아침 안내 음성 프로젝트 삭제' }))
+    fireEvent.click(screen.getByRole('button', { name: '삭제하기' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('삭제하지 못했습니다')
+    expect(screen.getByRole('button', { name: '아침 안내 음성 프로젝트 불러오기' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '삭제하기' }))
     expect(await screen.findByText('아직 저장된 작업이 없습니다')).toBeInTheDocument()
   })
 

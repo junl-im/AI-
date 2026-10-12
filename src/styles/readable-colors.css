@@ -98,3 +98,33 @@
 .soa-app-root.is-editor .soa-clone-card__head > strong { color: var(--readable-muted); }
 .soa-app-root.is-editor .soa-clone-card__head span { color: var(--readable-accent); }
 .soa-app-root.is-editor .soa-dubbing-block__status { color: #c0c5cf; }
+
+/* Reserve a real header row for collapse controls, even in the narrowest rail. */
+.soa-app-root.is-editor .soa-project-rail:not(.is-collapsed) > .soa-studio-panel-toggle {
+  position: static; align-self: flex-end; flex: 0 0 36px; margin-bottom: 8px;
+}
+.soa-app-root.is-editor .soa-project-rail__head { flex-wrap: wrap; }
+.soa-app-root.is-editor .soa-project-rail__item {
+  display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: center;
+}
+.soa-app-root.is-editor .soa-project-rail__item > button:first-child { min-width: 0; }
+.soa-project-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.soa-project-delete,
+.soa-app-root.is-editor .soa-project-rail__list .soa-project-delete {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; width: auto; justify-self: end; padding: 8px;
+  border: 1px solid #c6b7b2; border-radius: 10px;
+  background: #faf6f2; color: #853d36; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.soa-project-delete:hover { background: #efe3de; }
+.soa-project-delete-title { overflow-wrap: anywhere; font-weight: 700; }
+.soa-exit-dialog button:disabled { cursor: wait; opacity: .65; }
+
+.soa-app-root.is-editor .soa-studio-panel-toggle {
+  min-width: 36px; min-height: 36px; color: #655079; background: #e8e1ee; border-color: #c9bfd1;
+}
+.soa-exit-dialog > section { max-height: calc(100dvh - 40px); overflow-y: auto; color: #30343b; background: #faf9f6; border-color: #c9c5c0; }
+.soa-exit-dialog p { color: #59616b; font-size: 13px; }
+.soa-exit-dialog button { color: #fff; background: #655079; font-size: 13px; }
+.soa-exit-dialog button.is-danger { color: #853d36; background: #efe3de; }
+.soa-exit-dialog__icon { color: #655079; background: #e8e1ee; }

@@ -1,0 +1,32 @@
+[
+  {
+    "width": 320,
+    "deletePersists": true,
+    "otherProjectPreserved": true,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "deletePersists": true,
+    "otherProjectPreserved": true,
+    "overflow": false
+  },
+  {
+    "width": 1024,
+    "deletePersists": true,
+    "otherProjectPreserved": true,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "deletePersists": true,
+    "otherProjectPreserved": true,
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "deletePersists": true,
+    "otherProjectPreserved": true,
+    "overflow": false
+  }
+]

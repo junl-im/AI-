@@ -1,3 +1,4 @@
+import { ProjectDeleteButton } from './ProjectDeleteButton'
 import { useEffect, useState } from 'react'
 import { listProjects } from '../../projects/projectRepository'
 import type { VoiceProject } from '../../projects/projectTypes'
@@ -36,16 +37,19 @@ export function WorkspaceProjectRail({
 }: WorkspaceProjectRailProps) {
   const [projects, setProjects] = useState<VoiceProject[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [retry, setRetry] = useState(0)
 
   useEffect(() => {
     let active = true
     setLoading(true)
+    setLoadError(false)
     void listProjects()
       .then((items) => {
         if (active) setProjects(items.slice(0, 10))
       })
       .catch(() => {
-        if (active) setProjects([])
+        if (active) { setProjects([]); setLoadError(true) }
       })
       .finally(() => {
         if (active) setLoading(false)
@@ -53,7 +57,7 @@ export function WorkspaceProjectRail({
     return () => {
       active = false
     }
-  }, [refreshKey])
+  }, [refreshKey, retry])
 
   return (
     <aside
@@ -87,10 +91,11 @@ export function WorkspaceProjectRail({
 
       <div className="soa-project-rail__list" aria-live="polite">
         {loading ? <p>최근 작업을 불러오는 중…</p> : null}
-        {!loading && projects.length === 0 ? <p>저장된 프로젝트가 없습니다.</p> : null}
+        {!loading && !loadError && projects.length === 0 ? <p>저장된 프로젝트가 없습니다.</p> : null}
+        {loadError && <div role="alert"><p>최근 작업을 불러오지 못했습니다.</p><button type="button" onClick={() => setRetry((value) => value + 1)}>다시 확인</button></div>}
         {projects.map((project) => (
+          <div key={project.id} className="soa-project-rail__item">
           <button
-            key={project.id}
             type="button"
             onClick={() => onOpenProject(project)}
             aria-label={`${project.title} 프로젝트 열기`}
@@ -101,6 +106,8 @@ export function WorkspaceProjectRail({
               <small>{projectTime(project.updatedAt)}</small>
             </span>
           </button>
+          <ProjectDeleteButton project={project} onDeleted={(id) => setProjects((items) => items.filter((item) => item.id !== id))} />
+          </div>
         ))}
       </div>
 

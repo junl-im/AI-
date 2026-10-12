@@ -1,0 +1,42 @@
+[
+  {
+    "scene": "delete-320",
+    "checkedText": 5,
+    "issues": []
+  },
+  {
+    "scene": "delete-390",
+    "checkedText": 5,
+    "issues": []
+  },
+  {
+    "scene": "rail-1024",
+    "checkedText": 84,
+    "issues": []
+  },
+  {
+    "scene": "delete-1024",
+    "checkedText": 5,
+    "issues": []
+  },
+  {
+    "scene": "rail-1280",
+    "checkedText": 84,
+    "issues": []
+  },
+  {
+    "scene": "delete-1280",
+    "checkedText": 5,
+    "issues": []
+  },
+  {
+    "scene": "rail-1440",
+    "checkedText": 84,
+    "issues": []
+  },
+  {
+    "scene": "delete-1440",
+    "checkedText": 5,
+    "issues": []
+  }
+]

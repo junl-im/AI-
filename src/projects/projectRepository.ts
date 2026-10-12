@@ -19,3 +19,15 @@ export async function listProjects(): Promise<VoiceProject[]> {
   database.close()
   return projects.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 }
+
+/** Removes the local saved entry; downloaded files and server audio are retained. */
+export async function deleteProject(id: string): Promise<void> {
+  const database = await openSoriOnDatabase()
+  try {
+    const transaction = database.transaction(PROJECT_STORE, 'readwrite')
+    transaction.objectStore(PROJECT_STORE).delete(id)
+    await completeTransaction(transaction)
+  } finally {
+    database.close()
+  }
+}

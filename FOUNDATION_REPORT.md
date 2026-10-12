@@ -1,3 +1,7 @@
+## 0.11.40 · Workspace Polish & Project Deletion
+
+사이드바 조작 겹침 및 저장 프로젝트 삭제 누락 개선. 검증·제한: docs/WORKSPACE_POLISH_0.11.40.md.
+
 ## 0.11.33 · Voice Engine Major Hardening
 
 - MY VOICE upload를 서버가 실제 디코딩해 길이·RMS·무음·clipping을 재검증하고, 승인 reference를 16 kHz mono PCM WAV로 정규화합니다.
