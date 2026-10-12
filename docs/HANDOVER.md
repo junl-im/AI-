@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.40 · Workspace Polish & Project Deletion**
+Current baseline: **0.11.41 · Native Scrollbar Theme**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-12 KST**
 제품 소유·디자인: **곰같은여우**
@@ -439,3 +439,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: 로컬 저장 프로젝트 삭제는 되돌릴 수 없음. 서버 음성/샘플 삭제와 별도이며 확인창에서 안내. 전체 접근성 인증 아님.
 9. ZIP: SoriON-AI-0.11.40-workspace-polish-full.zip / SoriON-AI-0.11.39-to-0.11.40-workspace-polish-patch.zip.
 10. 다음 예상 업데이트: 0.11.41 · 상태별 조작/가독성과 초기 로딩 개선, 실제 음질 검증은 승인 자산 필요.
+
+## 2026-10-12 KST · 0.11.41 Native Scrollbar Theme
+
+1. 작업 일시(KST): 2026-10-12.
+2. 대상/기준 버전: 0.11.41 / 0.11.40 (75642ef).
+3. 변경 내용: 공통 둥근 회보라 native 스크롤바, hover/active, 어두운 타임라인 색상 분리, coarse pointer 14px, 고대비 시스템 색상, 숨김 규칙 제거, 페이지·입력창·목소리 목록 gutter 확보.
+4. 변경 이유: 사이트 디자인 통일과 가로 스크롤 발견성·조작 영역 개선.
+5. 영향 범위: CSS 스크롤바 디자인과 버전 표기. 스크롤 이벤트/음성 엔진/저장 정책 유지.
+6. 주요 파일: styles/scrollbars.css, index.css, creation-workspace/focused-creation-surface/timeline-horizontal-mobile/voice-surface-refresh.css 및 버전·문서.
+7. 검증 결과: build/typecheck/lint PASS, 핵심 Web 12파일/81 PASS. Chromium 320/390/768/1024/1440에서 가로 넘침 없음. 장문 끝 이동 scrollTop 5419, 목소리 목록과 dark timeline 스타일 확인. 필수 계약 및 GitHub CI는 배포 단계에서 확인.
+8. 제한: Firefox/Safari 및 실제 터치·고대비 장치 런타임은 미실행. 운영체제 overlay scrollbar 설정에 따라 표시 방식은 달라질 수 있음. 초기 JS 513.01kB 기존 경고 유지.
+9. ZIP: SoriON-AI-0.11.41-scrollbar-theme-full.zip / SoriON-AI-0.11.40-to-0.11.41-scrollbar-theme-patch.zip.
+10. 다음 예상 업데이트: 0.11.42 · 실기기 상태별 UI와 초기 로딩 점검. 음질 검증은 승인 자산·모델 필요.

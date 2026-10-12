@@ -168,11 +168,6 @@
   margin-top: 12px;
   padding: 2px 2px 8px;
   scroll-snap-type: x proximity;
-  scrollbar-width: none;
-}
-
-.soa-voice-chip-row::-webkit-scrollbar {
-  display: none;
 }
 
 .soa-voice-chip {

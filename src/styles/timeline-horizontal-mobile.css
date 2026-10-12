@@ -230,11 +230,7 @@
   .soa-timeline-selection-actions {
     max-width: 100%;
     overflow-x: auto;
-    scrollbar-width: none;
   }
-
-  .soa-timeline-toolbar::-webkit-scrollbar,
-  .soa-timeline-selection-actions::-webkit-scrollbar { display: none; }
 }
 
 /* 0.11.16 mobile touch selection: modifier keys are not required on phones. */

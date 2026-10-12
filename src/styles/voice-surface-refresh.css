@@ -25,15 +25,6 @@
   scrollbar-gutter: stable;
 }
 
-.soa-voice-picker-scroll::-webkit-scrollbar { width: 8px; }
-.soa-voice-picker-scroll::-webkit-scrollbar-track { background: transparent; }
-.soa-voice-picker-scroll::-webkit-scrollbar-thumb {
-  border: 2px solid transparent;
-  border-radius: 999px;
-  background: rgba(209, 218, 240, 0.24);
-  background-clip: padding-box;
-}
-
 @media (min-width: 760px) {
   .soa-hero-grid {
     grid-template-columns: minmax(0, 1.12fr) minmax(430px, 0.88fr);

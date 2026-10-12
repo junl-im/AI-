@@ -1,3 +1,7 @@
+## 0.11.41 · Native Scrollbar Theme
+
+공통 native 스크롤바 디자인과 가로 스크롤 발견성 개선. 검증 범위와 제한: docs/SCROLLBAR_THEME_0.11.41.md.
+
 ## 0.11.40 · Workspace Polish & Project Deletion
 
 사이드바 조작 겹침 및 저장 프로젝트 삭제 누락 개선. 검증·제한: docs/WORKSPACE_POLISH_0.11.40.md.

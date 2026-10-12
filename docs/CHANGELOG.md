@@ -1,3 +1,9 @@
+## 0.11.41 · Native Scrollbar Theme
+
+- 페이지·입력창·사이드바·목소리 목록·가로 도구 모음의 스크롤바 디자인 통일.
+- 회보라 손잡이, 둥근 모서리, hover/active 색상, 어두운 타임라인 대비 적용.
+- 숨겨진 가로 스크롤바 표시 및 안정적인 gutter, coarse pointer·고대비 시스템 색상 대응.
+
 ## 0.11.40 · Workspace Polish & Project Deletion
 
 - 사이드바 접기/새 작업 버튼을 별도 행으로 분리하고 최소 클릭 영역·색 대비 개선.

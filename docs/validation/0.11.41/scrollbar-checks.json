@@ -1,0 +1,18 @@
+{
+  "widths": [
+    320,
+    390,
+    768,
+    1024,
+    1440
+  ],
+  "horizontalOverflow": false,
+  "editorEndScrollTop": 5419,
+  "pickerClientHeight": 612,
+  "pickerScrollHeight": 836,
+  "scrollbarSize": "12px",
+  "darkTrack": "rgb(23, 26, 34)",
+  "darkThumb": "rgb(155, 139, 169)",
+  "dragVerified": false,
+  "scope": "Chromium via local UI; no real Firefox/Safari/touch/forced-colors run"
+}
