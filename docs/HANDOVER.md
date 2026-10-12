@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.37 · Intelligent Studio & Prosody Director**
+Current baseline: **0.11.38 · Streamed Waveform & Leaner Controls**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-12 KST**
 제품 소유·디자인: **곰같은여우**
@@ -1160,3 +1160,16 @@ CI Hotfix 4 테스트 규칙:
 8. **제한**: 승인 5성우 WAV·모델 미제공. 실제 Neural 음질·장문 청취·실기기 인증 미실행. 파형 20MB/5분 이하 WAV, cache 정책 변경에 따라 재검증 필요. 기존 보안·동의·무료 경계 유지.
 9. **산출물**: SoriON-AI-0.11.37-intelligent-studio-full.zip / SoriON-AI-0.11.36-to-0.11.37-intelligent-studio-patch.zip / SHA256SUMS.txt.
 10. **다음 업데이트**: 0.11.38 승인 reference 기반 실제 성우 청취·실측, 큰 파일 파형·초기 로딩·실기기 점검.
+
+## 2026-10-12 KST · 0.11.38 Streamed Waveform & Leaner Controls
+
+1. **작업 일시(KST)**: 2026-10-12.
+2. **대상/기준 버전**: 0.11.38 / 0.11.37(d31cf73).
+3. **변경 내용**: 128MiB/60분 WAV 순차 파형·진행률·취소·시간 제한·재시도, 성우 선택/설정창 lazy loading.
+4. **변경 이유**: 큰 파일 전체 디코딩 메모리와 대기·취소 UX를 개선하고 초기 청크를 축소합니다.
+5. **영향 범위**: Web 파형·선택창, 버전 메타데이터. 실제 엔진 prosody 정책은 변경 없음.
+6. **주요 파일**: streamWavPeaks.ts/test.ts, AudioWaveform.tsx/test.tsx, DubbingVoiceControls.tsx/test.tsx, HomePage.test.tsx, docs/STREAMED_WAVEFORM_0.11.38.md.
+7. **검증 결과**: 웹 전체 301개·추가 waveform 회귀(총303개), API 244/1 skipped, Worker16, lint/typecheck/build·preflight55/55, Chrome8폭·키보드·10분 WAV. Actions/배포 최종 확인.
+8. **제한**: 승인 WAV·모델 미제공으로 실제 음질·장문 청취 보류. 128MiB/60분·지원 PCM 제한, 데이터 다운로드 필요, 실기기 실측 미실행, main510.81kB 경고 잔존.
+9. **산출물**: SoriON-AI-0.11.38-streamed-waveform-full.zip / SoriON-AI-0.11.37-to-0.11.38-streamed-waveform-patch.zip / SHA256SUMS.txt.
+10. **다음 업데이트**: 0.11.39 실제 승인 자산 기반 청취·성우 조정, 큰 파일 실기기 성능·초기 청크 개선. 기존 동의·무료·업로드 경계 유지.

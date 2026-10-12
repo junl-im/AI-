@@ -87,7 +87,7 @@ describe('HomePage', () => {
     expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' }))
       .toHaveValue('아직 제작하지 않은 모바일 장문 내용')
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
-    const voiceSettings = screen.getByRole('dialog', { name: '음성 설정' })
+    const voiceSettings = await screen.findByRole('dialog', { name: '음성 설정' })
     expect(within(voiceSettings).getByRole('radio', { name: '밝게' })).toHaveClass('is-active')
   })
   it('엔진 자동 복구 중에도 기술 실패 상태를 작업 화면에 노출하지 않는다', () => {
@@ -165,7 +165,7 @@ describe('HomePage', () => {
     fireEvent.keyDown(textbox, { key: 'Enter', code: 'Enter', ctrlKey: true })
     await scoped.findByRole('textbox', { name: '선택 대사 빠른 수정' })
     fireEvent.click(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' }))
-    const picker = scoped.getByRole('dialog', { name: '목소리 선택' })
+    const picker = await scoped.findByRole('dialog', { name: '목소리 선택' })
     const nextVoice = within(picker).getAllByRole('radio').find((item) => !item.getAttribute('aria-checked')?.includes('true'))
     expect(nextVoice).toBeTruthy()
     fireEvent.click(nextVoice!)
@@ -185,7 +185,7 @@ describe('HomePage', () => {
 
     fireEvent.click(scoped.getByRole('article', { name: /클립 2 · 혜린/ }))
     fireEvent.click(scoped.getByRole('button', { name: '현재 목소리 혜린 선택' }))
-    const picker = scoped.getByRole('dialog', { name: '목소리 선택' })
+    const picker = await scoped.findByRole('dialog', { name: '목소리 선택' })
     fireEvent.click(within(picker).getByRole('radio', { name: /도윤/ }))
     await waitFor(() => expect(scoped.getByRole('button', { name: '현재 목소리 도윤 선택' })).toBeInTheDocument())
 

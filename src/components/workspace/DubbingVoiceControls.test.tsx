@@ -21,8 +21,8 @@ const baseProps = {
   onCreateVoice: vi.fn(),
 }
 
-describe('DubbingVoiceControls', () => {
-  it('현재 목소리 하나만 표시하고 목록은 선택 Sheet에서 연다', () => {
+describe('DubbingVoiceControls', async () => {
+  it('현재 목소리 하나만 표시하고 목록은 선택 Sheet에서 연다', async () => {
     render(<DubbingVoiceControls {...baseProps} />)
 
     expect(screen.getByRole('button', { name: '현재 목소리 혜린 선택' })).toBeInTheDocument()
@@ -30,7 +30,7 @@ describe('DubbingVoiceControls', () => {
     expect(screen.queryByLabelText('빠른 목소리 선택')).not.toBeInTheDocument()
   })
 
-  it('화자 선택과 읽기 설정을 별도 Sheet로 연다', () => {
+  it('화자 선택과 읽기 설정을 별도 Sheet로 연다', async () => {
     render(<DubbingVoiceControls {...baseProps} />)
 
     const voicePickerButton = screen.getByRole('button', { name: '현재 목소리 혜린 선택' })
@@ -38,11 +38,13 @@ describe('DubbingVoiceControls', () => {
     expect(screen.getByRole('button', { name: '혜린 목소리 미리듣기' })).toBeInTheDocument()
 
     fireEvent.click(voicePickerButton)
+    await screen.findByRole('dialog', { name: '목소리 선택' })
     expect(screen.getByRole('dialog', { name: '목소리 선택' })).toBeInTheDocument()
     expect(voicePickerButton).toHaveAttribute('aria-expanded', 'true')
     fireEvent.click(screen.getByRole('button', { name: '목소리 선택 닫기' }))
 
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
+    await screen.findByRole('dialog', { name: '음성 설정' })
     const settings = screen.getByRole('dialog', { name: '음성 설정' })
     expect(settings).toBeInTheDocument()
     expect(within(settings).getByText('한국어 숫자·기호 읽기 보정')).toBeInTheDocument()
@@ -52,10 +54,11 @@ describe('DubbingVoiceControls', () => {
     expect(within(settings).getByRole('button', { name: /현재 설정 적용 · 재생/ })).toBeInTheDocument()
   })
 
-  it('PC와 모바일에서 같은 음성 범위와 전체 말투를 사용한다', () => {
+  it('PC와 모바일에서 같은 음성 범위와 전체 말투를 사용한다', async () => {
     render(<DubbingVoiceControls {...baseProps} emotion="angry" speed={1.4} pitch={5} />)
 
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
+    await screen.findByRole('dialog', { name: '음성 설정' })
     const settings = screen.getByRole('dialog', { name: '음성 설정' })
     const speed = within(settings).getByRole('slider', { name: '음성 속도' })
     const pitch = within(settings).getByRole('slider', { name: '음성 높낮이' })
@@ -76,6 +79,7 @@ describe('DubbingVoiceControls', () => {
     const settingsButton = screen.getByRole('button', { name: '음성 설정 열기' })
     settingsButton.focus()
     fireEvent.click(settingsButton)
+    await screen.findByRole('dialog', { name: '음성 설정' })
 
     expect(screen.getByRole('button', { name: '음성 설정 닫기' })).toHaveFocus()
     expect(document.body.style.overflow).toBe('hidden')
@@ -87,19 +91,21 @@ describe('DubbingVoiceControls', () => {
     expect(document.body.style.overflow).toBe('')
   })
 
-  it('프리뷰 준비 중에는 현재 요청은 취소할 수 있고 다른 프리셋만 잠근다', () => {
+  it('프리뷰 준비 중에는 현재 요청은 취소할 수 있고 다른 프리셋만 잠근다', async () => {
     render(<DubbingVoiceControls {...baseProps} previewingId="sori-warm" />)
 
     expect(screen.getByRole('button', { name: '혜린 미리듣기 준비 취소' })).not.toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    await screen.findByRole('dialog', { name: '목소리 선택' })
     expect(screen.getByRole('button', { name: '도윤 목소리 미리듣기' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: '목소리 선택 닫기' }))
 
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
+    await screen.findByRole('dialog', { name: '음성 설정' })
     expect(screen.getByRole('button', { name: '현재 설정으로 재생 준비 중…' })).toBeDisabled()
   })
 
-  it('재생 중인 프리셋 버튼은 일시정지로 바뀌고 다시 누를 수 있다', () => {
+  it('재생 중인 프리셋 버튼은 일시정지로 바뀌고 다시 누를 수 있다', async () => {
     render(
       <DubbingVoiceControls
         {...baseProps}
@@ -111,11 +117,12 @@ describe('DubbingVoiceControls', () => {
     expect(screen.getByRole('button', { name: '혜린 미리듣기 일시정지' })).toHaveTextContent('Ⅱ')
   })
 
-  it('목소리 라디오는 방향키로 이동하고 선택값을 갱신한다', () => {
+  it('목소리 라디오는 방향키로 이동하고 선택값을 갱신한다', async () => {
     const onVoiceChange = vi.fn()
     render(<DubbingVoiceControls {...baseProps} onVoiceChange={onVoiceChange} />)
 
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    await screen.findByRole('dialog', { name: '목소리 선택' })
     const warmVoice = screen.getByRole('radio', { name: /혜린/ })
     warmVoice.focus()
     fireEvent.keyDown(warmVoice, { key: 'ArrowDown' })
@@ -129,10 +136,11 @@ describe('DubbingVoiceControls', () => {
   })
 
 
-  it('남성 필터에서 세 가지 남성 프리셋을 비교한다', () => {
+  it('남성 필터에서 세 가지 남성 프리셋을 비교한다', async () => {
     render(<DubbingVoiceControls {...baseProps} />)
 
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    await screen.findByRole('dialog', { name: '목소리 선택' })
     fireEvent.click(screen.getByRole('button', { name: '남성' }))
 
     expect(screen.getAllByRole('radio')).toHaveLength(3)
@@ -142,33 +150,36 @@ describe('DubbingVoiceControls', () => {
     expect(screen.queryByRole('radio', { name: /혜린/ })).not.toBeInTheDocument()
   })
 
-  it('목소리 목록의 재생 버튼은 해당 목소리를 선택하고 바로 미리듣는다', () => {
+  it('목소리 목록의 재생 버튼은 해당 목소리를 선택하고 바로 미리듣는다', async () => {
     const onVoiceChange = vi.fn()
     const onPreview = vi.fn()
     render(<DubbingVoiceControls {...baseProps} onVoiceChange={onVoiceChange} onPreview={onPreview} />)
 
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    await screen.findByRole('dialog', { name: '목소리 선택' })
     fireEvent.click(screen.getByRole('button', { name: '도윤 목소리 미리듣기' }))
 
     expect(onVoiceChange).toHaveBeenCalledWith('on-clear')
     expect(onPreview).toHaveBeenCalledWith('on-clear')
   })
 
-  it('대본 추천과 각 목소리의 장점·주의점을 목록에서 비교한다', () => {
+  it('대본 추천과 각 목소리의 장점·주의점을 목록에서 비교한다', async () => {
     render(<DubbingVoiceControls {...baseProps} scriptText="이 기능의 사용법을 세 단계로 설명합니다." />)
 
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    await screen.findByRole('dialog', { name: '목소리 선택' })
     const recommendation = screen.getByRole('status')
     expect(recommendation).toHaveTextContent('대본 맞춤 추천')
     expect(recommendation).toHaveTextContent('도윤')
     expect(screen.getAllByText(/장점 ·/).length).toBeGreaterThan(0)
     expect(screen.getAllByText(/주의 ·/).length).toBeGreaterThan(0)
   })
-  it('모바일 목소리 Sheet는 선택된 타임라인 적용 대상을 명확히 보여준다', () => {
+  it('모바일 목소리 Sheet는 선택된 타임라인 적용 대상을 명확히 보여준다', async () => {
     render(<DubbingVoiceControls {...baseProps} applyTargetCount={2} />)
 
     expect(screen.getByRole('note', { name: '현재 목소리 적용 대상' })).toHaveTextContent('2개 대사')
     fireEvent.click(screen.getByRole('button', { name: '현재 목소리 혜린 선택' }))
+    await screen.findByRole('dialog', { name: '목소리 선택' })
 
     const target = screen.getByRole('note', { name: '목소리 적용 범위' })
     expect(target).toHaveTextContent('타임라인 2개 선택')

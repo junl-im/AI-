@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.11.38 · Streamed Waveform & Leaner Controls
+
+- 파형을 전체 디코딩에서 순차 PCM 분석으로 교체: 128MiB/60분 이하 WAV, 모든 채널 peak, 8/16/24/32-bit PCM·float32 지원.
+- 진행률·취소·60초 제한·재시도와 stale 결과 차단을 추가했습니다. 손상·비정상 헤더·초과 파일을 거부합니다.
+- 성우 선택·음성 설정창을 지연 로딩해 main JS 519.18 → 510.81kB로 줄였습니다. 대본·세션 보존 흐름을 유지합니다.
+- 검증: 웹 전체 301개 및 최종 추가 waveform 회귀 통과(총 303개), API 244 passed/1 skipped, Worker 16 passed, lint/typecheck/build·preflight 55/55, Chrome 8폭·키보드·10분 WAV 파형 확인.
+- 승인 성우 WAV·모델 미제공으로 실제 Neural 음질·장문 청취·실기기 인증은 보류했습니다. 상세: docs/STREAMED_WAVEFORM_0.11.38.md.
+
 ## 0.11.37 · Intelligent Studio & Prosody Director
 
 - 라벤더 스튜디오와 성우 비교 UI, 대본 특성 기반 로컬 추천·청취 안내를 추가했습니다.

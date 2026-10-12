@@ -1,0 +1,104 @@
+{
+  "version": "0.11.38",
+  "date": "2026-10-12 KST",
+  "responsive": [
+    {
+      "width": 320,
+      "errors": [],
+      "layout": {
+        "scroll": 320,
+        "width": 320
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 360,
+      "errors": [],
+      "layout": {
+        "scroll": 360,
+        "width": 360
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 390,
+      "errors": [],
+      "layout": {
+        "scroll": 390,
+        "width": 390
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 430,
+      "errors": [],
+      "layout": {
+        "scroll": 430,
+        "width": 430
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 768,
+      "errors": [],
+      "layout": {
+        "scroll": 768,
+        "width": 768
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 1024,
+      "errors": [],
+      "layout": {
+        "scroll": 1024,
+        "width": 1024
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 1280,
+      "errors": [],
+      "layout": {
+        "scroll": 1280,
+        "width": 1280
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    },
+    {
+      "width": 1440,
+      "errors": [],
+      "layout": {
+        "scroll": 1440,
+        "width": 1440
+      },
+      "examples": "pass",
+      "draft": "pass",
+      "emptyPlayer": "pass"
+    }
+  ],
+  "waveform": {
+    "fixture": "synthetic tone; not voice quality evidence",
+    "duration": 600,
+    "audioContextUsed": false,
+    "bars": 96,
+    "keyboardSeek": "0.1",
+    "pageErrors": []
+  },
+  "keyboard": "Home/End/Escape focus return PASS at 390/1440",
+  "scope": "Chrome headless, not physical device or voice quality certification"
+}

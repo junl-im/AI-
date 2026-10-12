@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { StudioDirector } from './StudioDirector'
 import type { VoiceEmotion } from '../../ai/contracts'
 import type { EngineInfo } from '../../ai/contracts'
 import { VoicePreviewButton } from '../voice/VoicePreviewButton'
 import { buildVoiceChoices, resolveVoiceChoice, type VoiceChoice } from '../../voice/voiceChoices'
-import { VoicePickerSheet } from './VoicePickerSheet'
-import { VoiceSettingsSheet } from './VoiceSettingsSheet'
+const VoicePickerSheet = lazy(() => import('./VoicePickerSheet').then(module => ({ default: module.VoicePickerSheet })))
+const VoiceSettingsSheet = lazy(() => import('./VoiceSettingsSheet').then(module => ({ default: module.VoiceSettingsSheet })))
 
 interface DubbingVoiceControlsProps {
   voiceId: string
@@ -104,37 +104,41 @@ export function DubbingVoiceControls({
 
       <StudioDirector text={scriptText} voiceId={voiceId} onVoiceChange={onVoiceChange} />
 
-      <VoicePickerSheet
-        open={pickerOpen}
-        voices={voiceChoices}
-        selectedId={voiceId}
-        contextText={scriptText}
-        previewingId={previewingId}
-        activePreviewId={activePreviewId}
-        previewPlaying={previewPlaying}
-        onClose={() => setPickerOpen(false)}
-        onSelect={onVoiceChange}
-        onPreview={onPreview}
-        onCreateVoice={onCreateVoice}
-        applyTargetCount={applyTargetCount}
-      />
-      <VoiceSettingsSheet
-        open={settingsOpen}
-        speed={speed}
-        pitch={pitch}
-        emotion={emotion}
-        normalizeText={normalizeText}
-        supportsSpeed={!customVoice && (engine?.supportsSpeed ?? false)}
-        supportsPitch={!customVoice && (engine?.supportsPitch ?? false)}
-        supportsEmotion={!customVoice && (engine?.supportsEmotion ?? false)}
-        previewing={previewingId !== null}
-        onClose={() => setSettingsOpen(false)}
-        onSpeedChange={onSpeedChange}
-        onPitchChange={onPitchChange}
-        onEmotionChange={onEmotionChange}
-        onNormalizeTextChange={onNormalizeTextChange}
-        onPreview={() => onPreview(voiceId)}
-      />
+      <Suspense fallback={<p role="status">목소리 선택을 준비하고 있습니다…</p>}>
+        {pickerOpen ? <VoicePickerSheet
+          open={pickerOpen}
+          voices={voiceChoices}
+          selectedId={voiceId}
+          contextText={scriptText}
+          previewingId={previewingId}
+          activePreviewId={activePreviewId}
+          previewPlaying={previewPlaying}
+          onClose={() => setPickerOpen(false)}
+          onSelect={onVoiceChange}
+          onPreview={onPreview}
+          onCreateVoice={onCreateVoice}
+          applyTargetCount={applyTargetCount}
+        /> : null}
+      </Suspense>
+      <Suspense fallback={<p role="status">음성 설정을 준비하고 있습니다…</p>}>
+        {settingsOpen ? <VoiceSettingsSheet
+          open={settingsOpen}
+          speed={speed}
+          pitch={pitch}
+          emotion={emotion}
+          normalizeText={normalizeText}
+          supportsSpeed={!customVoice && (engine?.supportsSpeed ?? false)}
+          supportsPitch={!customVoice && (engine?.supportsPitch ?? false)}
+          supportsEmotion={!customVoice && (engine?.supportsEmotion ?? false)}
+          previewing={previewingId !== null}
+          onClose={() => setSettingsOpen(false)}
+          onSpeedChange={onSpeedChange}
+          onPitchChange={onPitchChange}
+          onEmotionChange={onEmotionChange}
+          onNormalizeTextChange={onNormalizeTextChange}
+          onPreview={() => onPreview(voiceId)}
+        /> : null}
+      </Suspense>
     </>
   )
 }

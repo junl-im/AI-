@@ -465,3 +465,6 @@ Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ig
 
 ## 2026-10-12 · 0.11.37
 라벤더 스튜디오·성우별 prosody·실제 WAV 파형·키보드·타임라인 지연 로딩을 반영했습니다. 점진/최종 PCM 일치, 취소·시간 제한과 cache 무효화를 강화했습니다. 실제 모델·승인 reference 미제공으로 음질 인증은 보류합니다. 상세는 docs/INTELLIGENT_STUDIO_0.11.37.md를 참조합니다.
+
+## 2026-10-12 · 0.11.38
+128MiB/60분 WAV를 전체 디코딩 없이 순차 분석하고 진행률·취소·시간 제한·재시도를 제공합니다. 성우/설정창 지연 로딩으로 main510.81kB. 실제 승인 음성·모델 미제공으로 음질 인증은 보류합니다. 상세: docs/STREAMED_WAVEFORM_0.11.38.md.
