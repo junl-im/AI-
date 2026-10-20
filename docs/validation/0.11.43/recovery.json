@@ -1,0 +1,32 @@
+[
+  {
+    "width": 390,
+    "pwaOfflineReload": true,
+    "offlineSettingsChunk": true,
+    "draftNavigation": true,
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "pwaOfflineReload": true,
+    "offlineSettingsChunk": true,
+    "draftNavigation": true,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "failedUpdateStays": true,
+    "offlineStays": true,
+    "retryReloadRestores": true,
+    "touchHeight": 44,
+    "overflow": false
+  },
+  {
+    "width": 1440,
+    "failedUpdateStays": true,
+    "offlineStays": true,
+    "retryReloadRestores": true,
+    "touchHeight": 44,
+    "overflow": false
+  }
+]

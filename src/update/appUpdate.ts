@@ -62,6 +62,7 @@ export async function checkForAppUpdate(options: {
   now?: () => number
   allowDevelopment?: boolean
 } = {}): Promise<boolean> {
+  if (useAppUpdateStore.getState().status === 'applying') return false
   if (import.meta.env.DEV && !options.allowDevelopment) {
     useAppUpdateStore.getState().setState({
       status: 'current',
@@ -92,6 +93,7 @@ export async function checkForAppUpdate(options: {
         controller.signal,
       )
       const available = isDifferentBuild(currentBuildInfo, remote)
+      if (useAppUpdateStore.getState().status === 'applying') return available
       useAppUpdateStore.getState().setState({
         status: available ? 'available' : 'current',
         remote,
@@ -103,6 +105,7 @@ export async function checkForAppUpdate(options: {
       })
       return available
     } catch (error) {
+      if (useAppUpdateStore.getState().status === 'applying') return false
       const message = error instanceof Error && error.name === 'AbortError'
         ? '업데이트 확인 시간이 초과되었습니다.'
         : error instanceof Error
@@ -128,27 +131,43 @@ export function dismissAppUpdate(): void {
   useAppUpdateStore.getState().setState({ dismissedBuildId: remoteBuildId })
 }
 
-export async function applyAppUpdate(): Promise<void> {
+export async function applyAppUpdate(options: { navigate?: (url: string) => void } = {}): Promise<void> {
+  if (useAppUpdateStore.getState().status === 'applying') return
+  if (navigator.onLine === false) {
+    useAppUpdateStore.getState().setState({ status: 'error', message: '오프라인 상태입니다. 연결 후 다시 적용해 주세요. 현재 작업은 유지됩니다.' })
+    return
+  }
   useAppUpdateStore.getState().setState({ status: 'applying', message: '새 버전을 적용하고 있습니다.' })
   const remoteBuildId = useAppUpdateStore.getState().remote?.buildId ?? String(Date.now())
+  let cleanup = () => {}
   try {
     if ('serviceWorker' in navigator) {
-      const controllerChanged = new Promise<void>((resolve) => {
-        navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true })
-      })
+      const serviceWorker = navigator.serviceWorker
+      let timer: number | undefined
+      let changed = () => {}
+      const controllerChanged = new Promise<void>((resolve) => { changed = resolve })
+      serviceWorker.addEventListener('controllerchange', changed, { once: true })
+      cleanup = () => {
+        serviceWorker.removeEventListener('controllerchange', changed)
+        window.clearTimeout(timer)
+      }
       const registrations = await navigator.serviceWorker.getRegistrations()
-      await Promise.allSettled(registrations.map(async (registration) => {
+      await Promise.all(registrations.map(async (registration) => {
         await registration.update()
         registration.waiting?.postMessage({ type: 'SKIP_WAITING' })
       }))
-      await Promise.race([
+      if (registrations.length) await Promise.race([
         controllerChanged,
-        new Promise<void>((resolve) => window.setTimeout(resolve, 4_000)),
+        new Promise<void>((resolve) => { timer = window.setTimeout(resolve, 4_000) }),
       ])
     }
-  } finally {
     const nextUrl = new URL(window.location.href)
     nextUrl.searchParams.set('sorion-build', remoteBuildId)
-    window.location.replace(nextUrl.toString())
+    if (options.navigate) options.navigate(nextUrl.toString())
+    else window.location.replace(nextUrl.toString())
+  } catch {
+    useAppUpdateStore.getState().setState({ status: 'error', message: '새 버전을 준비하지 못했습니다. 연결을 확인하고 다시 적용해 주세요. 현재 작업은 유지됩니다.' })
+  } finally {
+    cleanup()
   }
 }

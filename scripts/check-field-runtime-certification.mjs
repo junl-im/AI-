@@ -25,8 +25,8 @@ requireTokens('src/quality/fieldDeviceCertification.ts', evidence, [
   "'exit-stay-closed'",
   'operatorConfirmed',
 ])
-const home = await read('src/pages/HomePage.tsx')
-requireTokens('src/pages/HomePage.tsx', home, [
+const preview = await read('src/hooks/useDirectBrowserPreview.ts')
+requireTokens('src/hooks/useDirectBrowserPreview.ts', preview, [
   "recordFieldDeviceEvent('preset-preview-attempted')",
   "recordFieldDeviceEvent('preset-preview-started')",
   "recordFieldDeviceEvent('preset-preview-blocked')",

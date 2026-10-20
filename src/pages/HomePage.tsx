@@ -1,8 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { TtsSynthesisRequest, VoiceEmotion } from '../ai/contracts'
 import { requestAutomaticApiReconnect } from '../api/httpClient'
-import { isKakaoInAppBrowser } from '../browser/inAppBrowser'
-import { recordFieldDeviceEvent } from '../quality/fieldDeviceCertification'
 import {
   getCachedNeuralPresetPreview,
   NEURAL_PREVIEW_ENGINE_ID,
@@ -15,6 +13,7 @@ import { LongformComposer } from '../components/workspace/LongformComposer'
 import { SpeakerVoiceAssignmentPanel } from '../components/workspace/SpeakerVoiceAssignment'
 import { WorkspaceConversation } from '../components/workspace/WorkspaceConversation'
 import { WorkspaceProjectRail } from '../components/workspace/WorkspaceProjectRail'
+import { useDirectBrowserPreview } from '../hooks/useDirectBrowserPreview'
 import { useDesktopStudioLayout } from '../hooks/useDesktopStudioLayout'
 import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import { useMyVoiceProfiles } from '../hooks/useMyVoiceProfiles'
@@ -26,8 +25,6 @@ import { useAppStore } from '../store/useAppStore'
 import { getCurrentTrack, usePlayerStore } from '../store/usePlayerStore'
 import {
   BROWSER_SPEECH_ENGINE_ID,
-  createBrowserSpeechPlayback,
-  createBrowserSpeechUtterance,
   isBrowserSpeechSupported,
 } from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
@@ -109,7 +106,6 @@ export function HomePage() {
   const [batchRetrySnapshot, setBatchRetrySnapshot] = useState<WorkspaceBatchRetrySnapshot>({ retryCount: 0, history: [] })
   const [previewingId, setPreviewingId] = useState<string | null>(null)
   const [activePreview, setActivePreview] = useState<{ voiceId: string; trackId: string } | null>(null)
-  const [directBrowserPreview, setDirectBrowserPreview] = useState<{ voiceId: string; playing: boolean } | null>(null)
   const [pendingPreview, setPendingPreview] = useState<{
     voiceId: string
     attempt: number
@@ -128,86 +124,7 @@ export function HomePage() {
   const explicitWorkspaceActionRef = useRef(workspaceResetToken > 0)
   const previewRunIdRef = useRef(0)
   const previewAbortRef = useRef<AbortController | null>(null)
-  const directPreviewRunIdRef = useRef(0)
-  const directPreviewWatchdogRef = useRef<number | null>(null)
-  const stopDirectBrowserPreview = useCallback((resetState = true) => {
-    directPreviewRunIdRef.current += 1
-    if (directPreviewWatchdogRef.current !== null) {
-      window.clearTimeout(directPreviewWatchdogRef.current)
-      directPreviewWatchdogRef.current = null
-    }
-    if (isBrowserSpeechSupported()) window.speechSynthesis.cancel()
-    if (resetState) setDirectBrowserPreview(null)
-  }, [])
-  const startKakaoBrowserPreview = useCallback((request: TtsSynthesisRequest, nextVoiceId: string) => {
-    if (!isKakaoInAppBrowser()) return false
-    recordFieldDeviceEvent('preset-preview-attempted')
-    if (!isBrowserSpeechSupported()) {
-      recordFieldDeviceEvent('preset-preview-unsupported')
-      return false
-    }
-    stopDirectBrowserPreview(false)
-    const runId = directPreviewRunIdRef.current + 1
-    directPreviewRunIdRef.current = runId
-    let utterance: SpeechSynthesisUtterance
-    try {
-      utterance = createBrowserSpeechUtterance(createBrowserSpeechPlayback(request))
-    } catch (error) {
-      recordFieldDeviceEvent('preset-preview-voice-unavailable')
-      setPreviewingId(null)
-      setDirectBrowserPreview(null)
-      showNotice(error instanceof Error
-        ? error.message
-        : '카카오톡 브라우저에서 사용할 수 있는 한국어 음성을 찾지 못했습니다.')
-      return true
-    }
-    let started = false
-    utterance.onstart = () => {
-      if (directPreviewRunIdRef.current !== runId) return
-      started = true
-      recordFieldDeviceEvent('preset-preview-started')
-      if (directPreviewWatchdogRef.current !== null) {
-        window.clearTimeout(directPreviewWatchdogRef.current)
-        directPreviewWatchdogRef.current = null
-      }
-      setPreviewingId(null)
-      setDirectBrowserPreview({ voiceId: nextVoiceId, playing: true })
-    }
-    const finish = () => {
-      if (directPreviewRunIdRef.current !== runId) return
-      if (directPreviewWatchdogRef.current !== null) {
-        window.clearTimeout(directPreviewWatchdogRef.current)
-        directPreviewWatchdogRef.current = null
-      }
-      setPreviewingId(null)
-      setDirectBrowserPreview(null)
-    }
-    utterance.onend = finish
-    utterance.onerror = () => {
-      recordFieldDeviceEvent('preset-preview-blocked')
-      finish()
-      showNotice('카카오톡 브라우저가 음성 재생을 차단했습니다. 외부 브라우저로 열면 안정적으로 들을 수 있습니다.')
-    }
-    try {
-      // Kakao mobile WebView needs speak() to stay inside the original tap gesture.
-      window.speechSynthesis.cancel()
-      window.speechSynthesis.speak(utterance)
-    } catch {
-      recordFieldDeviceEvent('preset-preview-exception')
-      finish()
-      showNotice('카카오톡 브라우저가 음성 재생을 시작하지 못했습니다. 외부 브라우저로 열어 주세요.')
-      return true
-    }
-    directPreviewWatchdogRef.current = window.setTimeout(() => {
-      if (directPreviewRunIdRef.current !== runId || started) return
-      recordFieldDeviceEvent('preset-preview-watchdog-timeout')
-      window.speechSynthesis.cancel()
-      setPreviewingId(null)
-      setDirectBrowserPreview(null)
-      showNotice('카카오톡 브라우저에서 음성 시작 응답이 없습니다. 외부 브라우저로 열어 주세요.')
-    }, 1_800)
-    return true
-  }, [showNotice, stopDirectBrowserPreview])
+  const { directBrowserPreview, stopDirectBrowserPreview, startKakaoBrowserPreview } = useDirectBrowserPreview(setPreviewingId, showNotice)
   const engineCatalog = useEngineCatalog()
   const { profiles: myVoiceProfiles, loading: myVoiceProfilesLoading } = useMyVoiceProfiles()
   const voiceChoices = useMemo(() => buildVoiceChoices(myVoiceProfiles), [myVoiceProfiles])
@@ -936,10 +853,6 @@ export function HomePage() {
     if (playerQueue.some((track) => track.id === activePreview.trackId)) return
     setActivePreview(null)
   }, [activePreview, playerQueue])
-
-  useEffect(() => () => {
-    stopDirectBrowserPreview(false)
-  }, [stopDirectBrowserPreview])
 
   useEffect(() => {
     if (!pendingPreview) return

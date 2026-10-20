@@ -108,12 +108,18 @@ requireTokens('src/pages/HomePage.tsx', home, [
   'applyTargetCount={selectedTimelineVoiceIds.length}',
   'applyTargetLabel={selectedTimelineVoiceScope}',
   '선택한 대사 ${selectedTimelineVoiceIds.length}개에',
-  'isKakaoInAppBrowser()',
   'startKakaoBrowserPreview',
   'selectedEngineId === BROWSER_SPEECH_ENGINE_ID',
-  'window.speechSynthesis.speak(utterance)',
 ])
 
+
+const directPreview = await source('src/hooks/useDirectBrowserPreview.ts')
+requireTokens('src/hooks/useDirectBrowserPreview.ts', directPreview, [
+  'isKakaoInAppBrowser()',
+  'window.speechSynthesis.speak(utterance)',
+  'directPreviewRunIdRef.current !== runId',
+  'preset-preview-watchdog-timeout',
+])
 
 const appShell = await source('src/components/layout/AppShell.tsx')
 requireTokens('src/components/layout/AppShell.tsx', appShell, [

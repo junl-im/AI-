@@ -59,9 +59,9 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.42 · Lean Entry & Responsive Waveform**
+Current baseline: **0.11.43 · Recovery & Preview Lifecycle**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-10-20 KST**
+최종 갱신: **2026-10-21 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -465,3 +465,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: 측정은 이 PC Chromium/합성 WAV. 실제 폰·Firefox/Safari·Neural 음질 검증 미실행. PWA는 기존 offline precache 유지하여 전체 다운로드21% 감소를 주장하지 않음. HomePage1194줄로 다음 책임 분리 우선.
 9. ZIP: SoriON-AI-0.11.42-lean-entry-full.zip / SoriON-AI-0.11.41-to-0.11.42-lean-entry-patch.zip.
 10. 다음 예상 업데이트: 0.11.43 · 복구·모바일 상태 점검과 HomePage 책임 분리. 승인 WAV·모델 없이 음질 인증하지 않음.
+
+## 2026-10-21 KST · 0.11.43 Recovery & Preview Lifecycle
+
+1. 작업 일시(KST): 2026-10-21.
+2. 대상/기준 버전: 0.11.43 / 0.11.42 (d77aeca).
+3. 변경 내용: 업데이트 offline/갱신 실패 시 현재 화면 유지, 재시도·중복/상태 덮어쓰기 방지·listener/timer 정리, 알림44px 버튼. 직접 미리듣기 hook 분리와 취소/종료 후 stale 오류·start callback 무시.
+4. 변경 이유: 실패해도 finally에서 reload하던 경로 제거, 편집기1194줄 책임 분리, 늦은 음성 callback의 잘못된 오류 안내 방지.
+5. 영향 범위: Web update/preview lifecycle 및 UI/버전. PWA cache·실제 음성 엔진·동의/업로드·저장 정책 유지.
+6. 주요 파일: useDirectBrowserPreview/tests, HomePage, appUpdate/tests, AppUpdateNotice/tests, AppUpdateStatusCard, 계측 정적검사2개, 릴리스 문서.
+7. 검증 결과: RECOVERY_PREVIEW_0.11.43.md와 docs/validation/0.11.43 참조. Chromium390/1440 PWA offline reload·설정 chunk·대본복원·실패 유지·재시도 reload 복원 PASS. 버튼44px, 가로 넘침 없음. Web82파일/322 PASS, API244 PASS/1 skip, Worker16 PASS. lint/typecheck/build/Ruff PASS, preflight55/55 PASS.
+8. 제한: 합성 네트워크/SW 오류 및 데스크톱 Chromium viewport 검증. 실제 Kakao iOS/Android·Firefox/Safari·Neural 청취 미실행. HomePage1106줄. 새 hook은 같은 speechSynthesis를 사용하고 자체 오디오 모델 아님.
+9. ZIP: SoriON-AI-0.11.43-recovery-polish-full.zip / SoriON-AI-0.11.42-to-0.11.43-recovery-polish-patch.zip.
+10. 다음: 0.11.44 · 모바일 편집·세션 복원 분리·저장 안내. 현재 작업 보존과 동의 경계 유지.

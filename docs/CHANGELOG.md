@@ -1,3 +1,10 @@
+## 0.11.43 · Recovery & Preview Lifecycle
+
+- 업데이트 준비 실패·오프라인에서는 현재 화면을 유지하고 상단/설정에서 재시도 제공. 중복 적용 및 적용 중 확인 결과의 상태 덮어쓰기 방지.
+- controllerchange listener와 대기 timer 정리. 새 배포가 아닌 확인 오류를 업데이트 있음으로 표시하지 않음. 알림 버튼 최소44px.
+- 카카오 브라우저 직접 미리듣기를 useDirectBrowserPreview로 분리. 취소·종료·watchdog 뒤 늦은 콜백 무시. HomePage1194→1106줄.
+- PWA offline precache·대본 저장·계측·동의/엔진 정책 유지.
+
 ## 0.11.42 · Lean Entry & Responsive Waveform
 
 - 첫 방문은 소개 화면부터 표시하며, 편집기는 시작 또는 저장된 세션 감지 후 로드. 초기 진입 JS 513.01→405.46kB, 500kB 경고 해소.

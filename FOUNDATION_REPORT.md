@@ -1,3 +1,7 @@
+## 0.11.43 · Recovery & Preview Lifecycle
+
+업데이트 실패 시 현재 작업 유지·재시도와 직접 미리듣기 수명주기 분리. 검증·제한: docs/RECOVERY_PREVIEW_0.11.43.md.
+
 ## 0.11.42 · Lean Entry & Responsive Waveform
 
 초기 편집기 실행 분리·대본 복원과 실패 복구·큰 WAV 취소 응답 개선. 상세 검증과 제한: docs/LEAN_ENTRY_0.11.42.md.

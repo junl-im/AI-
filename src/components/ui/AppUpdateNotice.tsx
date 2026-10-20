@@ -1,12 +1,13 @@
 import { applyAppUpdate, dismissAppUpdate, useAppUpdateStore } from '../../update/appUpdate'
-import { formatBuildLabel } from '../../update/buildInfo'
+import { currentBuildInfo, isDifferentBuild, formatBuildLabel } from '../../update/buildInfo'
 
 export function AppUpdateNotice() {
   const status = useAppUpdateStore((state) => state.status)
+  const message = useAppUpdateStore((state) => state.message)
   const remote = useAppUpdateStore((state) => state.remote)
   const dismissedBuildId = useAppUpdateStore((state) => state.dismissedBuildId)
 
-  if (status !== 'available' || !remote || dismissedBuildId === remote.buildId) return null
+  if (!['available', 'applying', 'error'].includes(status) || !remote || !isDifferentBuild(currentBuildInfo, remote) || dismissedBuildId === remote.buildId) return null
 
   return (
     <aside
@@ -16,19 +17,22 @@ export function AppUpdateNotice() {
       <div>
         <strong className="font-black text-soa-ink">새 SoriON 업데이트가 준비됐습니다.</strong>
         <p className="mt-0.5 text-xs font-semibold text-soa-muted">{formatBuildLabel(remote)}</p>
+        {message && status !== 'available' ? <p className="mt-1 text-sm text-soa-ink">{message}</p> : null}
       </div>
       <div className="flex items-center gap-2">
         <button
           type="button"
+          disabled={status === 'applying'}
           onClick={() => void applyAppUpdate()}
-          className="focus-ring min-h-10 rounded-xl bg-soa-ink px-4 font-black text-white"
+          className="focus-ring min-h-11 rounded-xl bg-soa-ink px-4 font-black text-white"
         >
-          지금 적용
+          {status === 'applying' ? '적용 준비 중…' : status === 'error' ? '다시 적용' : '지금 적용'}
         </button>
         <button
           type="button"
+          disabled={status === 'applying'}
           onClick={dismissAppUpdate}
-          className="focus-ring min-h-10 rounded-xl border border-soa-line bg-white px-3 font-bold"
+          className="focus-ring min-h-11 rounded-xl border border-soa-line bg-white px-3 font-bold"
           aria-label="업데이트 알림 닫기"
         >
           나중에

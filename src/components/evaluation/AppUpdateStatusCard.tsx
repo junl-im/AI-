@@ -1,6 +1,6 @@
 import { StatusPill } from '../ui/StatusPill'
 import { applyAppUpdate, checkForAppUpdate, useAppUpdateStore, type AppUpdateStatus } from '../../update/appUpdate'
-import { currentBuildInfo, formatBuildDiagnosticsLabel, formatBuildLabel } from '../../update/buildInfo'
+import { currentBuildInfo, isDifferentBuild, formatBuildDiagnosticsLabel, formatBuildLabel } from '../../update/buildInfo'
 
 function statusLabel(status: AppUpdateStatus): string {
   if (status === 'checking') return '확인 중'
@@ -16,6 +16,7 @@ export function AppUpdateStatusCard() {
   const remote = useAppUpdateStore((state) => state.remote)
   const checkedAt = useAppUpdateStore((state) => state.checkedAt)
   const message = useAppUpdateStore((state) => state.message)
+  const canApply = Boolean(remote && isDifferentBuild(currentBuildInfo, remote) && (status === 'available' || status === 'error'))
   const busy = status === 'checking' || status === 'applying'
   const tone = status === 'available' || status === 'error' ? 'warning' : status === 'current' ? 'good' : 'neutral'
 
@@ -29,13 +30,13 @@ export function AppUpdateStatusCard() {
         <StatusPill label={statusLabel(status)} tone={tone} />
       </div>
       <p className="mt-3 text-sm leading-6 text-soa-muted">
-        배포본의 version.json을 캐시 없이 확인해 새 빌드가 있으면 안전하게 새로고침합니다.
+        새 버전을 확인하고 적용합니다. 준비에 실패하면 현재 작업 화면을 유지하며 다시 시도할 수 있습니다.
       </p>
       <details className="mt-3 text-xs text-soa-muted">
         <summary className="cursor-pointer font-bold">고급 빌드 정보</summary>
         <p className="mt-2 break-all">{formatBuildDiagnosticsLabel(currentBuildInfo)}</p>
       </details>
-      {remote && status === 'available' ? (
+      {remote && canApply ? (
         <p className="mt-3 rounded-2xl bg-amber-50 p-3 text-xs font-black text-amber-900">
           새 배포본: {formatBuildLabel(remote)}
         </p>
@@ -55,7 +56,7 @@ export function AppUpdateStatusCard() {
         </button>
         <button
           type="button"
-          disabled={status !== 'available' || busy}
+          disabled={!canApply || busy}
           onClick={() => void applyAppUpdate()}
           className="focus-ring min-h-12 rounded-2xl bg-soa-ink font-black text-white disabled:cursor-not-allowed disabled:opacity-35"
         >
