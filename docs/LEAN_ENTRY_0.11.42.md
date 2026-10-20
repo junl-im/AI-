@@ -18,3 +18,8 @@ Chromium390/1440: service worker를 차단한 격리 테스트에서 시작 전 
 
 ## 최종 로컬 검사
 Web 전체80파일/311 PASS 이후 추가 새 작업 복원 케이스 포함 HomePage9 PASS(총312개). API244 PASS/1 skip, Worker16 PASS. lint/typecheck/build/Ruff PASS, preflight55/55 PASS. 주요17화면 단색 텍스트 대비 미달0건(전체 접근성 인증 아님). GitHub CI와 실제 Pages 버전은 push 후 별도 확인합니다.
+
+## CI 복원 진입 경합 수정
+첫 CI는 데스크톱/모바일 기본 레이아웃까지 통과했지만 recovery-fixture에서 자동 복원이 완료되어 사라진 시작 버튼을 15초 기다리다 실패했습니다. openStudio가 단발 alreadyOpen 검사 후 버튼만 기다리던 로직을, 매 poll마다 편집기 존재 확인과 시작 버튼 클릭을 같은 평가에서 수행하도록 수정했습니다. 검사·복원 fixture·출시 gate는 유지합니다.
+
+실제 runner의 openStudio 함수를 Chromium에서 호출해 일반 시작과 단발 검사 직후 이미 편집기가 열린 경합 모두 PASS. 증거: docs/validation/0.11.42/runner-entry.json.

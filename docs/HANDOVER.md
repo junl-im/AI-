@@ -457,7 +457,7 @@ CI Hotfix 4 테스트 규칙:
 
 1. 작업 일시(KST): 2026-10-20.
 2. 대상/기준 버전: 0.11.42 / 0.11.41 (fed1200).
-3. 변경 내용: App의 HomePage lazy 진입, 세션 감지 후 기존 복원 주체 호출, 편집기 mounted 유지, 느린 로딩 후 정렬, chunk 실패 안내. 큰 WAV 시간 양보·청크 복사 절감·pending reader abort. 비활성 버튼 가독성 보강.
+3. 변경 내용: CI openStudio가 자동 복원 뒤 사라진 시작 버튼을 기다리던 경합을 동일 poll에서 시작/복원 검사로 안정화. App의 HomePage lazy 진입, 세션 감지 후 기존 복원 주체 호출, 편집기 mounted 유지, 느린 로딩 후 정렬, chunk 실패 안내. 큰 WAV 시간 양보·청크 복사 절감·pending reader abort. 비활성 버튼 가독성 보강.
 4. 변경 이유: 초기 JS 500kB 경고와 큰 응답 처리 중 취소·화면 응답 지연 개선.
 5. 영향 범위: Web 진입·파형 분석·CSS·버전 metadata. API/Worker 엔진 모델과 동의·업로드 정책 유지.
 6. 주요 파일: app/App.tsx/tests, WorkspaceLoadBoundary/tests, streamWavPeaks/tests, HomePage/tests, readable-colors.css, 버전·릴리스 문서.

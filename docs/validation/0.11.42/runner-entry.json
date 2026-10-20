@@ -1,0 +1,10 @@
+[
+  {
+    "automaticRestoreBetweenPolls": false,
+    "passed": true
+  },
+  {
+    "automaticRestoreBetweenPolls": true,
+    "passed": true
+  }
+]

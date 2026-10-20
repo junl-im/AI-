@@ -172,18 +172,13 @@ async function setViewport(cdp, viewport) {
 async function openStudio(cdp) {
   const alreadyOpen = await evaluate(cdp, `(() => Boolean(document.querySelector('.soa-dubbing-workspace')))()` )
   if (alreadyOpen) return
-  await waitForCondition(
-    cdp,
-    `(() => [...document.querySelectorAll('button')].some((item) => item.textContent?.includes('장문 음성 스튜디오 시작')))()`,
-    '장문 음성 스튜디오 시작 버튼',
-  )
-  const opened = await evaluate(cdp, `(() => {
+  // Restoration can replace LandingHome between CDP polls. Check and act atomically.
+  await waitForCondition(cdp, `(() => {
+    if (document.querySelector('.soa-dubbing-workspace')) return true
     const button = [...document.querySelectorAll('button')].find((item) => item.textContent?.includes('장문 음성 스튜디오 시작'))
     button?.click()
-    return Boolean(button)
-  })()`)
-  if (!opened) throw new Error('장문 음성 스튜디오 시작 버튼을 실행하지 못했습니다.')
-  await waitForCondition(cdp, `(() => Boolean(document.querySelector('.soa-dubbing-workspace')))()`, '더빙 작업공간')
+    return false
+  })()`, '장문 음성 스튜디오 시작 또는 복원된 더빙 작업공간')
 }
 
 async function ensureDesktopVoiceDrawerOpen(cdp) {

@@ -8,9 +8,11 @@ docs/patches/0.11.42-lean-entry/PATCH_MANIFEST.txt
 docs/patches/0.11.42-lean-entry/PATCH_README.md
 docs/validation/0.11.42/contrast.json
 docs/validation/0.11.42/lean-loading.json
+docs/validation/0.11.42/runner-entry.json
 docs/validation/0.11.42/wave-response.json
 package-lock.json
 package.json
+scripts/run-chromium-multi-scene-evidence.mjs
 services/api/pyproject.toml
 services/api/tests/test_ai_director.py
 services/api/tests/test_connectivity.py
