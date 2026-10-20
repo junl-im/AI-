@@ -1,0 +1,9 @@
+{
+  "bytes": 33554476,
+  "singleChunk": true,
+  "cancelMs": 40.3,
+  "decodeMs": 988.3,
+  "heartbeat": 78,
+  "peaks": 96,
+  "duration": 349.5253333333333
+}

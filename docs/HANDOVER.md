@@ -59,9 +59,9 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.41 · Native Scrollbar Theme**
+Current baseline: **0.11.42 · Lean Entry & Responsive Waveform**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-10-12 KST**
+최종 갱신: **2026-10-20 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -452,3 +452,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: Firefox/Safari 및 실제 터치·고대비 장치 런타임은 미실행. 운영체제 overlay scrollbar 설정에 따라 표시 방식은 달라질 수 있음. 초기 JS 513.01kB 기존 경고 유지.
 9. ZIP: SoriON-AI-0.11.41-scrollbar-theme-full.zip / SoriON-AI-0.11.40-to-0.11.41-scrollbar-theme-patch.zip.
 10. 다음 예상 업데이트: 0.11.42 · 실기기 상태별 UI와 초기 로딩 점검. 음질 검증은 승인 자산·모델 필요.
+
+## 2026-10-20 KST · 0.11.42 Lean Entry & Responsive Waveform
+
+1. 작업 일시(KST): 2026-10-20.
+2. 대상/기준 버전: 0.11.42 / 0.11.41 (fed1200).
+3. 변경 내용: App의 HomePage lazy 진입, 세션 감지 후 기존 복원 주체 호출, 편집기 mounted 유지, 느린 로딩 후 정렬, chunk 실패 안내. 큰 WAV 시간 양보·청크 복사 절감·pending reader abort. 비활성 버튼 가독성 보강.
+4. 변경 이유: 초기 JS 500kB 경고와 큰 응답 처리 중 취소·화면 응답 지연 개선.
+5. 영향 범위: Web 진입·파형 분석·CSS·버전 metadata. API/Worker 엔진 모델과 동의·업로드 정책 유지.
+6. 주요 파일: app/App.tsx/tests, WorkspaceLoadBoundary/tests, streamWavPeaks/tests, HomePage/tests, readable-colors.css, 버전·릴리스 문서.
+7. 검증 결과: 상세 LEAN_ENTRY_0.11.42.md 및 docs/validation/0.11.42 참조. 초기 JS 405.46kB/gzip128.23kB, Home chunk89.80kB. Chromium390/1440 지연600ms·복원·이동·로딩실패 PASS. 32MB single chunk 취소40.3ms·UI heartbeat78회. Web 전체80파일/311 PASS 후 새 복원 케이스 포함 HomePage9 PASS(총312개). API244 PASS/1 skip, Worker16 PASS. lint/typecheck/build/Ruff·preflight55/55 PASS. 주요17화면 텍스트 대비 미달0건.
+8. 제한: 측정은 이 PC Chromium/합성 WAV. 실제 폰·Firefox/Safari·Neural 음질 검증 미실행. PWA는 기존 offline precache 유지하여 전체 다운로드21% 감소를 주장하지 않음. HomePage1194줄로 다음 책임 분리 우선.
+9. ZIP: SoriON-AI-0.11.42-lean-entry-full.zip / SoriON-AI-0.11.41-to-0.11.42-lean-entry-patch.zip.
+10. 다음 예상 업데이트: 0.11.43 · 복구·모바일 상태 점검과 HomePage 책임 분리. 승인 WAV·모델 없이 음질 인증하지 않음.

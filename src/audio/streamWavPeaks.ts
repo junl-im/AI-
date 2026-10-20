@@ -11,7 +11,10 @@ export async function streamWavPeaks(url: string, signal: AbortSignal, onProgres
     throw new Error('128MB 이하 WAV에서 파형을 볼 수 있어요.')
   }
   const reader = response.body.getReader()
+  const cancelReader = () => { void reader.cancel().catch(() => undefined) }
+  signal.addEventListener('abort', cancelReader, { once: true })
   let pending = new Uint8Array(0)
+  let yieldStartedAt = performance.now()
   let received = 0
   let headerBytes = 0
   let riff = false
@@ -24,11 +27,12 @@ export async function streamWavPeaks(url: string, signal: AbortSignal, onProgres
     while (true) {
       if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
       const { done, value } = await reader.read()
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
       if (done) break
       received += value.byteLength
       if (received > MAX_BYTES) throw new Error('128MB 이하 WAV에서 파형을 볼 수 있어요.')
-      const bytes = new Uint8Array(pending.length + value.length)
-      bytes.set(pending); bytes.set(value, pending.length)
+      const bytes = pending.length ? new Uint8Array(pending.length + value.length) : value
+      if (pending.length) { bytes.set(pending); bytes.set(value, pending.length) }
       let offset = 0
       if (!riff) {
         if (bytes.length < 12) { pending = bytes; continue }
@@ -62,6 +66,12 @@ export async function streamWavPeaks(url: string, signal: AbortSignal, onProgres
       const view = new DataView(bytes.buffer, bytes.byteOffset + offset, length)
       const totalFrames = dataSize / align
       for (let frame = 0; frame < length; frame += align) {
+        // A cached/blob response may arrive as one huge chunk. Yield to cancel/paint events.
+        if (frames % 32768 === 0 && performance.now() - yieldStartedAt >= 8) {
+          await new Promise<void>((resolve) => setTimeout(resolve, 0))
+          if (signal.aborted) throw new DOMException('Aborted', 'AbortError')
+          yieldStartedAt = performance.now()
+        }
         let peak = 0
         for (let channel = 0; channel < channels; channel++) {
           const sample = frame + channel * bits / 8
@@ -83,6 +93,7 @@ export async function streamWavPeaks(url: string, signal: AbortSignal, onProgres
     }
     throw new Error('WAV 파일이 불완전합니다. 다시 시도해 주세요.')
   } finally {
+    signal.removeEventListener('abort', cancelReader)
     await reader.cancel().catch(() => undefined)
     reader.releaseLock()
   }

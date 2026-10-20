@@ -56,6 +56,7 @@ import { synthesizeVoiceCloneProfile } from '../voiceclone/voiceCloneSynthesis'
 import { isMyVoiceId, toMyVoiceId } from '../voiceclone/voiceIdentity'
 import { buildVoiceChoices, resolveVoiceChoice } from '../voice/voiceChoices'
 import { LandingHome } from './LandingHome'
+import { scheduleStudioEntryAlignment } from '../navigation/studioEntryNavigation'
 const TimelineEditor = lazy(() => import('../components/workspace/TimelineEditor').then((module) => ({ default: module.TimelineEditor })))
 interface PendingLongformGeneration {
   text: string
@@ -75,6 +76,9 @@ const initialMessages: WorkspaceMessage[] = [
 export function HomePage() {
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const page = useAppStore((state) => state.page)
+  useEffect(() => {
+    if (workspaceEntered && page === 'home') scheduleStudioEntryAlignment()
+  }, [workspaceEntered, page])
   const backendStatus = useAppStore((state) => state.backendStatus)
   const setLiveVoice = useAppStore((state) => state.setLiveVoice)
   const showNotice = useAppStore((state) => state.showNotice)
@@ -121,7 +125,7 @@ export function HomePage() {
   const [rememberedSpeakerVoices, setRememberedSpeakerVoices] = useState<Record<string, string>>({})
   const observedResetTokenRef = useRef(workspaceResetToken)
   const pendingResetSaveRef = useRef<number | null>(null)
-  const explicitWorkspaceActionRef = useRef(false)
+  const explicitWorkspaceActionRef = useRef(workspaceResetToken > 0)
   const previewRunIdRef = useRef(0)
   const previewAbortRef = useRef<AbortController | null>(null)
   const directPreviewRunIdRef = useRef(0)

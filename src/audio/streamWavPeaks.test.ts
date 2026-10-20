@@ -20,7 +20,7 @@ function serve(bytes: Uint8Array, chunk=7) {
   vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(stream)))
   return cancel
 }
-afterEach(()=>vi.unstubAllGlobals())
+afterEach(()=>{ vi.unstubAllGlobals(); vi.restoreAllMocks() })
 describe('streamed WAV peaks',()=>{
   it('handles split headers and stereo frames without losing channel peaks',async()=>{
     serve(wav([0,16384,-32768,0,0,0],{channels:2}))
@@ -68,6 +68,29 @@ describe('streamed WAV peaks',()=>{
     const bytes=wav([0]);bytes.set(new TextEncoder().encode('JUNK'),12);new DataView(bytes.buffer).setUint32(16,100000,true);serve(bytes)
     await expect(streamWavPeaks('blob:test',new AbortController().signal)).rejects.toThrow('헤더')
   })
+  it('cancels a pending stream read even when the body never delivers another chunk', async () => {
+    const cancel = vi.fn()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(new ReadableStream({ cancel }))))
+    const controller = new AbortController()
+    const pending = streamWavPeaks('blob:stalled', controller.signal)
+    await Promise.resolve()
+    controller.abort()
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    expect(cancel).toHaveBeenCalledOnce()
+  })
+
+  it('lets a scheduled cancel interrupt decoding of a single large cached chunk', async () => {
+    const bytes = wav(Array(200000).fill(1000))
+    serve(bytes, bytes.length)
+    // Make the frame-budget boundary deterministic, independent of CPU speed.
+    let now = 0
+    vi.spyOn(performance, 'now').mockImplementation(() => now += 10)
+    const controller = new AbortController()
+    const pending = streamWavPeaks('blob:large', controller.signal)
+    setTimeout(() => controller.abort(), 0)
+    await expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+  })
+
   it('cancels its reader when already aborted',async()=>{
     const cancel=serve(wav([0]));const controller=new AbortController();controller.abort()
     await expect(streamWavPeaks('blob:test',controller.signal)).rejects.toMatchObject({name:'AbortError'})

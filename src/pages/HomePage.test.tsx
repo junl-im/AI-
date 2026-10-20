@@ -28,6 +28,7 @@ describe('HomePage', () => {
       notice: null,
     })
     vi.restoreAllMocks()
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
   })
 
   it('초기 화면에서는 장문 스튜디오 시작 동선을 유지한다', () => {
@@ -89,6 +90,18 @@ describe('HomePage', () => {
     fireEvent.click(screen.getByRole('button', { name: '음성 설정 열기' }))
     const voiceSettings = await screen.findByRole('dialog', { name: '음성 설정' })
     expect(within(voiceSettings).getByRole('radio', { name: '밝게' })).toHaveClass('is-active')
+  })
+  it('lazy mount after an explicit new-work request does not restore an older draft', async () => {
+    window.localStorage.setItem('sorion-active-workspace-session', JSON.stringify({
+      id: 'active-workspace', schemaVersion: 1, revision: 4,
+      savedAt: new Date().toISOString(), workspaceEntered: true, page: 'home',
+      voiceId: 'sori-warm', composerDraft: '이전 대본', directiveIds: ['numbers'],
+      messages: [], blocks: [],
+    }))
+    useAppStore.setState({ workspaceEntered: true, workspaceResetToken: 1 })
+    render(<HomePage />)
+    await waitFor(() => expect(screen.getByText(/자동 저장됨/)).toBeInTheDocument())
+    expect(screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' })).toHaveValue('')
   })
   it('엔진 자동 복구 중에도 기술 실패 상태를 작업 화면에 노출하지 않는다', () => {
     useAppStore.setState({

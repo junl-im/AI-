@@ -1,0 +1,33 @@
+[
+  {
+    "width": 390,
+    "homeChunkDeferred": true,
+    "delayedEntryAligned": true,
+    "draftNavigation": true,
+    "reloadRestored": true,
+    "overflow": false,
+    "disabled": {
+      "disabled": true,
+      "color": "rgb(98, 97, 108)",
+      "bg": "rgb(233, 230, 237)",
+      "opacity": "1"
+    }
+  },
+  {
+    "width": 1440,
+    "homeChunkDeferred": true,
+    "delayedEntryAligned": true,
+    "draftNavigation": true,
+    "reloadRestored": true,
+    "overflow": false,
+    "disabled": {
+      "disabled": true,
+      "color": "rgb(98, 97, 108)",
+      "bg": "rgb(233, 230, 237)",
+      "opacity": "1"
+    }
+  },
+  {
+    "failedChunkRecovery": true
+  }
+]

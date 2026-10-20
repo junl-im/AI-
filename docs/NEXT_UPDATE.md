@@ -1,13 +1,14 @@
 # NEXT UPDATE
 
-현재 기준: 0.11.41 · Native Scrollbar Theme
+현재 기준: 0.11.42 · Lean Entry & Responsive Waveform
 ## 목표 버전
-0.11.42 · Field Comfort & Lean Loading
+0.11.43 · Recovery & Field Polish
 
-- 실제 PC/터치 기기의 스크롤·상태별 버튼·가독성을 추가 점검합니다.
-- HomePage 초기 JS 분할 및 큰 WAV 파형의 메모리·취소 응답을 개선합니다.
-- 승인된 성우 WAV·권리·모델 확보 시 장문·숫자·영문 청취 검증을 진행합니다.
+- 저장소/오프라인/버전 교체 시 복구 흐름과 모바일 도구 접근성을 추가 점검합니다.
+- HomePage의 세션·미리듣기 책임을 분리해 1,200줄 한계에 여유를 확보합니다.
+- 실제 장치·Firefox/Safari에서 스크롤 및 큰 WAV 처리 응답을 확인합니다.
+- 승인 성우 WAV·권리·모델 확보 시 장문·숫자·영문 청취 검증 진행.
 
-예상 영역: 공통 UI/스크롤바, 초기 청크, waveform, Listening QA.
-선행 조건: 실제 Firefox/Safari·터치·고대비 장치 피드백. 음질은 승인 음성/모델 필요.
-유지 결정: native 스크롤 동작과 OS 접근성 설정 존중, 현재 편집 보존, 유료 API·자동 모델 다운로드·자동 음성 업로드 없음.
+예상 영역: HomePage 보조 훅, 세션·미리듣기, 업데이트 안내와 모바일 UI.
+선행 조건/위험: 현재 CI green과 장치 피드백. 음질 개선 인증에는 승인 자산/모델 필요.
+유지 결정: 소개 화면의 지연 로딩, 편집기 상태·PWA offline precache 유지. 전송량 전체가 21% 줄었다고 표현하지 않음. 유료 API·모델 자동 다운로드·음성 자동 업로드 없음.

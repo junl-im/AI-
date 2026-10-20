@@ -1,3 +1,7 @@
+## 0.11.42 · Lean Entry & Responsive Waveform
+
+초기 편집기 실행 분리·대본 복원과 실패 복구·큰 WAV 취소 응답 개선. 상세 검증과 제한: docs/LEAN_ENTRY_0.11.42.md.
+
 ## 0.11.41 · Native Scrollbar Theme
 
 공통 native 스크롤바 디자인과 가로 스크롤 발견성 개선. 검증 범위와 제한: docs/SCROLLBAR_THEME_0.11.41.md.

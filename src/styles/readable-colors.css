@@ -128,3 +128,16 @@
 .soa-exit-dialog button { color: #fff; background: #655079; font-size: 13px; }
 .soa-exit-dialog button.is-danger { color: #853d36; background: #efe3de; }
 .soa-exit-dialog__icon { color: #655079; background: #e8e1ee; }
+
+.soa-workspace-load-error { margin: 24px auto; max-width: 600px; padding: 24px; border: 1px solid #cbc6d1; border-radius: 20px; background: #faf9f6; color: #30343b; }
+.soa-workspace-load-error h2 { font-weight: 800; }
+.soa-workspace-load-error p { margin: 12px 0 18px; color: #59616b; line-height: 1.7; }
+
+/* Disabled actions remain readable while their native disabled behavior stays intact. */
+.soa-app-root.is-editor .soa-one-flow-composer__actions button:disabled,
+.soa-app-root.is-editor .soa-one-flow-composer__generate:disabled,
+.soa-app-root.is-editor .soa-one-flow-composer__generate:disabled small,
+.soa-app-root.is-editor .soa-dubbing-toolbar__actions > button:disabled {
+  opacity: 1; color: #62616c; background-color: #e9e6ed; cursor: not-allowed; box-shadow: none;
+}
+.soa-app-root.is-editor .soa-one-flow-composer__actions button:disabled:hover { transform: none; }

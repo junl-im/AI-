@@ -1,9 +1,13 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { AnimatePresence, MotionConfig, motion } from 'motion/react'
 import { AppShell } from '../components/layout/AppShell'
-import { HomePage } from '../pages/HomePage'
+import { LandingHome } from '../pages/LandingHome'
+import { loadWorkspaceSession } from '../workspace/workspaceSessionRepository'
+import { WorkspaceLoadBoundary } from '../components/ui/WorkspaceLoadBoundary'
 import { useAppStore } from '../store/useAppStore'
 import { usePlayerSessionPersistence } from '../hooks/usePlayerSessionPersistence'
+
+const HomePage = lazy(() => import('../pages/HomePage').then((module) => ({ default: module.HomePage })))
 
 const VoiceClonePage = lazy(() => import('../pages/VoiceClonePage').then((module) => ({
   default: module.VoiceClonePage,
@@ -38,6 +42,19 @@ function PageLoading() {
 export function App() {
   usePlayerSessionPersistence()
   const page = useAppStore((state) => state.page)
+  const workspaceEntered = useAppStore((state) => state.workspaceEntered)
+  const [studioRequested, setStudioRequested] = useState(workspaceEntered)
+  useEffect(() => {
+    let active = true
+    // The existing workspace hook owns restoration; only decide whether to load it here.
+    void loadWorkspaceSession().then(({ session }) => {
+      if (active && session) setStudioRequested(true)
+    }).catch(() => { /* Landing remains usable when local storage is unavailable. */ })
+    return () => { active = false }
+  }, [])
+  useEffect(() => {
+    if (workspaceEntered) setStudioRequested(true)
+  }, [workspaceEntered])
   const SecondaryPage = page === 'home' ? null : secondaryPages[page]
 
   return (
@@ -45,7 +62,13 @@ export function App() {
       <AppShell>
         <main className="min-h-0 flex-1">
           <section hidden={page !== 'home'} aria-hidden={page !== 'home'}>
-            <HomePage />
+            {studioRequested || workspaceEntered ? (
+              <WorkspaceLoadBoundary>
+                <Suspense fallback={<PageLoading />}>
+                  <HomePage />
+                </Suspense>
+              </WorkspaceLoadBoundary>
+            ) : <LandingHome />}
           </section>
           <AnimatePresence mode="wait" initial={false}>
             {SecondaryPage ? (
