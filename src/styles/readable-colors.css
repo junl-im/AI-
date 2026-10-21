@@ -156,3 +156,9 @@
   .soa-app-root.is-editor:has(#sorion-content-editor:focus, .soa-timeline-quick-editor textarea:focus) .soa-dubbing-player-dock,
   .soa-app-root.is-editor:has(#sorion-content-editor:focus, .soa-timeline-quick-editor textarea:focus) .soa-dubbing-add-block { position: static; }
 }
+
+.soa-app-root.is-editor .soa-dubbing-save-status { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 3px; }
+.soa-app-root.is-editor .soa-dubbing-save-status p { margin: 0; }
+.soa-app-root.is-editor .soa-dubbing-save-status button { min-height: 32px; border: 1px solid #9a6570; border-radius: 9px; padding: 4px 10px; color: #6c2938; background: #fff2f1; font-size: 11px; font-weight: 800; }
+.soa-app-root.is-editor .soa-dubbing-save-status button:hover { background: #ffe5e3; }
+.soa-app-root.is-editor .soa-dubbing-save-status button:disabled { opacity: .6; cursor: wait; }

@@ -1,4 +1,4 @@
-const SENTENCE_BOUNDARY = /(?<=[.!?。！？])\s+/
+const SENTENCE_BOUNDARY = /(?<=[.!?。！？])(?:\s+|(?=[가-힣]))/
 
 function splitOversized(text: string, maxChars: number): string[] {
   const output: string[] = []

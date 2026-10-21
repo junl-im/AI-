@@ -921,6 +921,9 @@ export function HomePage() {
           <DubbingStudioHeader
             title={projectTitle}
             savedLabel={savedLabel}
+            saveRecoveryNeeded={hydrated && storageMode === 'memory'}
+            saveRetryPending={savePending}
+            onRetrySave={() => void saveWorkspaceNow()}
             downloadHref={currentTrack?.audio.url ?? null}
             downloadName={currentTrack?.audio.filename ?? 'sorion-voice.wav'}
             onTitleChange={setProjectTitle}

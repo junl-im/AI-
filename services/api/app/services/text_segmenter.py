@@ -1,6 +1,6 @@
 import re
 
-_SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?。！？])\s+")
+_SENTENCE_BOUNDARY = re.compile(r"(?<=[.!?。！？])(?:\s+|(?=[가-힣]))")
 
 
 def _split_oversized(text: str, max_chars: int) -> list[str]:

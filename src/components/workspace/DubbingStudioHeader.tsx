@@ -4,6 +4,9 @@ import { useModalDialog } from '../../hooks/useModalDialog'
 interface DubbingStudioHeaderProps {
   title: string
   savedLabel: string
+  saveRecoveryNeeded?: boolean
+  saveRetryPending?: boolean
+  onRetrySave?: () => void
   downloadHref: string | null
   downloadName: string
   onTitleChange: (value: string) => void
@@ -19,6 +22,9 @@ interface DubbingStudioHeaderProps {
 export function DubbingStudioHeader({
   title,
   savedLabel,
+  saveRecoveryNeeded = false,
+  saveRetryPending = false,
+  onRetrySave,
   downloadHref,
   downloadName,
   onTitleChange,
@@ -81,7 +87,12 @@ export function DubbingStudioHeader({
             aria-label="프로젝트 제목"
           />
           <button type="button" onClick={() => titleRef.current?.focus()} aria-label="프로젝트 제목 수정">✎</button>
-          <p role="status" aria-label="작업 저장 상태">{savedLabel}</p>
+          <div className="soa-dubbing-save-status">
+            <p role="status" aria-label="작업 저장 상태">{savedLabel}</p>
+            {saveRecoveryNeeded && onRetrySave ? (
+              <button type="button" onClick={onRetrySave} disabled={saveRetryPending} aria-label="작업 저장 다시 시도">{saveRetryPending ? '저장 중…' : '저장 다시 시도'}</button>
+            ) : null}
+          </div>
         </div>
 
         <div className="soa-dubbing-toolbar__actions" aria-label="프로젝트 동작">

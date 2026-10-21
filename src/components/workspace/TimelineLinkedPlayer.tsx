@@ -60,7 +60,7 @@ export function TimelineLinkedPlayer() {
       <div className="soa-timeline-linked-player__identity">
         <span>PLAYER</span>
         <strong>{track?.title ?? '완성된 대사를 선택하세요'}</strong>
-        <small>하단 Dock과 같은 재생 상태를 사용합니다.</small>
+        <small>{seekBlocked ? '현재 음성은 재생만 가능하며 위치 이동을 지원하지 않습니다.' : '하단 Dock과 같은 재생 상태를 사용합니다.'}</small>
       </div>
       <button type="button" className="soa-timeline-linked-player__skip" onClick={() => move(-1)} disabled={!queue.length || currentIndex <= 0} aria-label="이전 음성">‹</button>
       <button type="button" className="soa-timeline-linked-player__toggle" onClick={() => currentTrackId && toggleTrack(currentTrackId)} disabled={!track} aria-label={playing ? '일시정지' : '재생'} aria-pressed={playing}>{playing ? 'Ⅱ' : '▶'}</button>

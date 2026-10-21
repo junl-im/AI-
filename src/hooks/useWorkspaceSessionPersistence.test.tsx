@@ -41,3 +41,16 @@ it('clears saving on storage failure and accurately labels memory-only work', as
   expect(formatWorkspaceSavedLabel('2026-10-21T00:00:00Z', true, true)).toContain('창을 닫으면 사라집니다')
   expect(formatWorkspaceSavedLabel(null, true, false, true)).toBe('변경 내용 저장 중…')
 })
+
+it('memory-only draft can be retried and persisted without changing its text', async () => {
+  mocks.load.mockResolvedValue({ session: null, mode: 'memory' })
+  mocks.save.mockResolvedValue({ mode: 'indexeddb', persisted: true })
+  const onRestore = vi.fn(); const onPersistenceUnavailable = vi.fn()
+  const { result } = renderHook(() => useWorkspaceSessionPersistence({ ...draft, onRestore, onPersistenceUnavailable }))
+  await act(async () => {})
+  expect(result.current.storageMode).toBe('memory')
+  await act(async () => { await result.current.saveNow() })
+  expect(result.current.storageMode).toBe('indexeddb')
+  expect(result.current.lastSavedAt).not.toBeNull()
+  expect(mocks.save.mock.lastCall?.[0].composerDraft).toBe('첫 대본')
+})

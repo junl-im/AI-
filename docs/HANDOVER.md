@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.46 · Timeline Navigation & Recovery**
+Current baseline: **0.11.47 · Draft Recovery & Korean Phrasing**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-21 KST**
 제품 소유·디자인: **곰같은여우**
@@ -530,3 +530,16 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 실제 Android/iOS·Firefox/Safari 및 승인 WAV 기반 성우 청취는 미검증입니다. 저장소가 계속 실패하면 재시도 전에도 작성 중인 대본으로 복귀할 수 있으나 저장 성공을 뜻하지 않습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.46-timeline-navigation-recovery-full.zip` / `SoriON-AI-0.11.45-r1-chromium-startup-to-0.11.46-timeline-navigation-recovery-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.47 · Draft Recovery & Playback Feedback. 저장 실패 재시도 및 탐색 불가 상태 안내 개선. 승인 음성·모델/권리 없는 품질 인증 금지.
+
+## 2026-10-22 KST · 0.11.47 Draft Recovery & Korean Phrasing
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.47 / 0.11.46 (`61adc4d`).
+3. **변경 내용**: 메모리 전용 대본의 저장 재시도 버튼, 부분/브라우저 음원의 위치 이동 불가 안내, 붙여 쓴 한국어 문장부호의 Web/API 분할과 브라우저 음성 간격 처리를 추가했습니다. 소수점은 보존합니다.
+4. **변경 이유**: 저장 불가 상태의 사용자 행동이 불분명했고, 재생만 가능한 음원에서 비활성 탐색의 이유가 보이지 않았습니다. 한국어 대본에서 문장부호 다음을 붙여 쓰면 긴 발화의 문장 경계가 사라졌습니다.
+5. **영향 범위**: Web 헤더/플레이어/한국어 분할/브라우저 미리듣기, API 텍스트 분할, 테스트와 버전. Neural 모델·사용자 음성/동의 정책 유지.
+6. **변경·추가된 주요 파일**: `DubbingStudioHeader`, `HomePage`, `TimelineLinkedPlayer`, `segmentText`, `browserSpeech`, `text_segmenter.py`, 테스트, `readable-colors.css`, 버전 및 릴리스 문서.
+7. **검증 결과**: Web 전체 84파일/338 PASS, API245 PASS/1skip, Worker16 PASS, lint/typecheck/build/Ruff·preflight55/55 PASS. CI·Pages 최종 결과는 릴리스 검증에서 확인합니다.
+8. **알려진 제한과 주의사항**: 저장 재시도는 현재 작업공간 세션 대상이며 생성 완료 프로젝트 목록 저장 실패의 전용 재시도는 0.11.48 과제입니다. 승인 WAV/모델·실기기 부재로 실제 성우 음색/청취 품질을 인증하지 않았습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.47-draft-recovery-korean-phrasing-full.zip` / `SoriON-AI-0.11.46-timeline-navigation-recovery-to-0.11.47-draft-recovery-korean-phrasing-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.48 · Project Save Recovery & Prosody QA. 중복 없는 프로젝트 저장 재시도와 장문 성우 청취 검증 준비.

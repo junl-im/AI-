@@ -164,6 +164,13 @@ describe('browserSpeech', () => {
       .toMatchObject({ cadence: 'shortform', personaLabel: '빠른 숏폼' })
   })
 
+  it('모든 기본 성우의 붙여 쓴 한국어 문장에 호흡 간격을 넣고 소수점은 지킨다', () => {
+    for (const voiceId of ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']) {
+      expect(prepareBrowserSpeechText('비율은 3.5%입니다.다음 문장입니다!확인하세요.', voiceId))
+        .toBe('비율은 3.5%입니다. 다음 문장입니다! 확인하세요.')
+    }
+  })
+
   it('프리셋마다 브라우저 음성과 운율을 다르게 적용한다', () => {
     const voices = installBrowserSpeech()
     const warm = createBrowserSpeechPlayback(request)

@@ -18,6 +18,12 @@ describe('splitTextForUi', () => {
     ])
   })
 
+  it('붙여 쓴 한국어 문장부호를 나누고 소수점은 유지한다', () => {
+    expect(splitTextForUi('값은 3.5%입니다.다음은 2.1%입니다!확인하세요.')).toEqual([
+      '값은 3.5%입니다.', '다음은 2.1%입니다!', '확인하세요.',
+    ])
+  })
+
   it('빈 문장은 빈 구간을 반환한다', () => {
     expect(splitTextForUi('   ')).toEqual([])
   })

@@ -25,3 +25,10 @@ def test_segmenter_preserves_all_text_and_limits_chunks():
     assert all(1 <= len(chunk) <= 80 for chunk in chunks)
     assert "첫 번째 문장입니다." in chunks[0]
     assert chunks[-1].endswith("마지막입니다.")
+
+
+def test_korean_sentence_boundary_without_space_keeps_decimal_intact():
+    chunks = split_korean_text(
+        "값은 3.5%입니다.다음은 2.1%입니다!확인하세요.", max_chars=40
+    )
+    assert chunks == ["값은 3.5%입니다. 다음은 2.1%입니다! 확인하세요."]

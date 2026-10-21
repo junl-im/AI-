@@ -30,6 +30,16 @@ describe('DubbingStudioHeader', () => {
     expect(screen.queryByText(/엔진|API|Worker|GPU|System Voice/)).not.toBeInTheDocument()
   })
 
+  it('저장 실패 상태에서 명시적 재시도를 제공한다', () => {
+    const retry = vi.fn()
+    render(<DubbingStudioHeader title="오디오북" savedLabel="이 창에서만 보관 중" saveRecoveryNeeded
+      onRetrySave={retry} downloadHref={null} downloadName="voice.wav" onTitleChange={vi.fn()}
+      onOpenClone={vi.fn()} onOpenQuality={vi.fn()} onOpenProjects={vi.fn()}
+      onOpenSettings={vi.fn()} sidePanelsCollapsed onToggleSidePanels={vi.fn()} onClear={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: '작업 저장 다시 시도' }))
+    expect(retry).toHaveBeenCalledOnce()
+  })
+
   it('작업 비우기는 앱 내부 확인 뒤에만 실행한다', () => {
     const onClear = vi.fn()
     renderHeader(onClear)

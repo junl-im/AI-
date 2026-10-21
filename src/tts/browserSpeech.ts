@@ -95,6 +95,7 @@ function cleanSpeechWhitespace(text: string): string {
     .normalize('NFC')
     .replace(/\r\n?/g, '\n')
     .replace(/[\t ]+/g, ' ')
+    .replace(/([.!?。！？])(?=[가-힣])/g, '$1 ')
     .replace(/ *\n */g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .replace(/\.{3,}/g, '…')

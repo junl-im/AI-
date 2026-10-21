@@ -58,6 +58,13 @@ describe('TimelineLinkedPlayer', () => {
     expect(usePlayerStore.getState().seekTargetSeconds).toBe(12)
   })
 
+  it('부분 음원은 위치 이동 불가 이유를 보이고 탐색 버튼을 막는다', () => {
+    usePlayerStore.getState().enqueue({ ...audio('partial'), partial: { index: 1, totalSegments: 2, readyAfterMs: 10 } }, '부분 음원')
+    render(<TimelineLinkedPlayer />)
+    expect(screen.getByText('현재 음성은 재생만 가능하며 위치 이동을 지원하지 않습니다.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '현재 음성은 위치 이동을 지원하지 않음' })).toBeDisabled()
+  })
+
   it('재생 중 다음 음성을 누르면 같은 queue를 다음 track으로 재생 요청한다', () => {
     const firstId = usePlayerStore.getState().enqueue(audio('first'), '첫 대사')
     const secondId = usePlayerStore.getState().enqueue(audio('second'), '둘째 대사')
