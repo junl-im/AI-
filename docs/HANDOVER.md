@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.43 · Recovery & Preview Lifecycle**
+Current baseline: **0.11.44 · Mobile Editing & Session Clarity**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-21 KST**
 제품 소유·디자인: **곰같은여우**
@@ -478,3 +478,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: 합성 네트워크/SW 오류 및 데스크톱 Chromium viewport 검증. 실제 Kakao iOS/Android·Firefox/Safari·Neural 청취 미실행. HomePage1106줄. 새 hook은 같은 speechSynthesis를 사용하고 자체 오디오 모델 아님.
 9. ZIP: SoriON-AI-0.11.43-recovery-polish-full.zip / SoriON-AI-0.11.42-to-0.11.43-recovery-polish-patch.zip.
 10. 다음: 0.11.44 · 모바일 편집·세션 복원 분리·저장 안내. 현재 작업 보존과 동의 경계 유지.
+
+## 2026-10-21 KST · 0.11.44 Mobile Editing & Session Clarity
+
+1. 작업 일시(KST): 2026-10-21. 자동 승인 검토 크레딧 오류로 한 검사 중단 후 사용자 재개 요청으로 완료.
+2. 대상/기준 버전: 0.11.44 / 0.11.43 (3716811).
+3. 변경 내용: 모바일 편집 focus 동안 성우/생성 sticky 해제, 대본 focus 중 도크 static 전환. 저장 중/메모리 전용 경고 및 오래된 저장 완료 상태 경합 방지. 세션 복원 정규화·명시적 새 작업 우선 경계 hook 분리.
+4. 변경 이유: 좁은 키보드 편집 공간에서 고정 도구 겹침 방지, 저장 상태 오해와 복원 책임 밀집 해소.
+5. 영향 범위: Web CSS·저장 상태·복원 hook·버전 metadata. API/Worker 모델·동의·업로드 정책 유지.
+6. 주요 파일: useWorkspaceRestoration, useWorkspaceSessionPersistence/tests, HomePage, DubbingStudioHeader, homeWorkspaceHelpers, readable-colors.css, 릴리스 문서.
+7. 검증 결과: Web83파일/324 PASS, API244 PASS/1 skip, Worker16 PASS. Chromium6개 너비 긴 대본 스크롤/새로고침 PASS, 모바일360/390/430 높이420 focus 고정 해제/blur 도크 복귀, 저장소 차단 경고 PASS. lint/typecheck/Ruff·preflight 최종 검증은 MOBILE_SESSION_0.11.44.md 참조.
+8. 제한: 높이420은 키보드 유사 viewport 검증이며 실제 Android/iOS 키보드 인증 아님. Firefox/Safari·Neural 청취 미실행. HomePage1093줄. 저장 데이터 형식·기존 보관 정책 유지.
+9. ZIP: SoriON-AI-0.11.44-mobile-session-full.zip / SoriON-AI-0.11.43-to-0.11.44-mobile-session-patch.zip.
+10. 다음: 0.11.45 · 타임라인 모바일 편집·프로젝트/저장 안내. 세션·재생·동의 경계 유지.

@@ -1,0 +1,68 @@
+[
+  {
+    "width": 360,
+    "height": 420,
+    "overflow": false,
+    "voice": "static",
+    "generate": "static",
+    "dock": "static",
+    "editorScroll": 4527,
+    "reloadedDraft": true
+  },
+  {
+    "width": 390,
+    "height": 420,
+    "overflow": false,
+    "voice": "static",
+    "generate": "static",
+    "dock": "static",
+    "editorScroll": 4527,
+    "reloadedDraft": true
+  },
+  {
+    "width": 430,
+    "height": 420,
+    "overflow": false,
+    "voice": "static",
+    "generate": "static",
+    "dock": "static",
+    "editorScroll": 4527,
+    "reloadedDraft": true
+  },
+  {
+    "width": 768,
+    "height": 844,
+    "overflow": false,
+    "voice": "static",
+    "generate": "static",
+    "dock": "fixed",
+    "editorScroll": 2250,
+    "reloadedDraft": true
+  },
+  {
+    "width": 1024,
+    "height": 844,
+    "overflow": false,
+    "voice": "static",
+    "generate": "static",
+    "dock": "fixed",
+    "editorScroll": 2250,
+    "reloadedDraft": true
+  },
+  {
+    "width": 1440,
+    "height": 844,
+    "overflow": false,
+    "voice": "static",
+    "generate": "static",
+    "dock": "fixed",
+    "editorScroll": 2250,
+    "reloadedDraft": true
+  },
+  {
+    "width": 390,
+    "storageBlocked": true,
+    "memoryOnlyWarning": true,
+    "overflow": false
+  }
+]

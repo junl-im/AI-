@@ -81,7 +81,7 @@ export function DubbingStudioHeader({
             aria-label="프로젝트 제목"
           />
           <button type="button" onClick={() => titleRef.current?.focus()} aria-label="프로젝트 제목 수정">✎</button>
-          <p>{savedLabel}</p>
+          <p role="status" aria-label="작업 저장 상태">{savedLabel}</p>
         </div>
 
         <div className="soa-dubbing-toolbar__actions" aria-label="프로젝트 동작">

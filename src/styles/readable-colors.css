@@ -141,3 +141,14 @@
   opacity: 1; color: #62616c; background-color: #e9e6ed; cursor: not-allowed; box-shadow: none;
 }
 .soa-app-root.is-editor .soa-one-flow-composer__actions button:disabled:hover { transform: none; }
+
+/* Give the mobile editor the screen while a field or its tools have focus. */
+@media (max-width: 760px) {
+  .soa-app-root.is-editor .soa-one-flow-composer:focus-within .soa-one-flow-composer__voice,
+  .soa-app-root.is-editor .soa-one-flow-composer:focus-within .soa-one-flow-composer__generate {
+    position: static;
+  }
+  .soa-app-root.is-editor #sorion-content-editor { scroll-margin-block: 90px; }
+  .soa-app-root.is-editor:has(#sorion-content-editor:focus) .soa-dock,
+  .soa-app-root.is-editor:has(#sorion-content-editor:focus) .soa-dubbing-player-dock { position: static; }
+}

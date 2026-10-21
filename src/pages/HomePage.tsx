@@ -19,6 +19,7 @@ import { useEngineCatalog } from '../hooks/useEngineCatalog'
 import { useMyVoiceProfiles } from '../hooks/useMyVoiceProfiles'
 import { useTimelineGeneration, type TimelineGenerationOptions } from '../hooks/useTimelineGeneration'
 import { useSelectiveSttRegeneration } from '../hooks/useSelectiveSttRegeneration'
+import { useWorkspaceRestoration } from '../hooks/useWorkspaceRestoration'
 import { useWorkspaceSessionPersistence } from '../hooks/useWorkspaceSessionPersistence'
 import { saveProject } from '../projects/projectRepository'
 import { useAppStore } from '../store/useAppStore'
@@ -119,9 +120,7 @@ export function HomePage() {
   const [speakerAssignments, setSpeakerAssignments] = useState<SpeakerVoiceAssignment[]>([])
   const [speakerAssignmentsConfirmed, setSpeakerAssignmentsConfirmed] = useState(false)
   const [rememberedSpeakerVoices, setRememberedSpeakerVoices] = useState<Record<string, string>>({})
-  const observedResetTokenRef = useRef(workspaceResetToken)
   const pendingResetSaveRef = useRef<number | null>(null)
-  const explicitWorkspaceActionRef = useRef(workspaceResetToken > 0)
   const previewRunIdRef = useRef(0)
   const previewAbortRef = useRef<AbortController | null>(null)
   const { directBrowserPreview, stopDirectBrowserPreview, startKakaoBrowserPreview } = useDirectBrowserPreview(setPreviewingId, showNotice)
@@ -289,30 +288,22 @@ export function HomePage() {
     })
     setSpeakerAssignmentsConfirmed(false)
   }, [speakerSignature, multiSpeakerAnalysis.eligible, multiSpeakerAnalysis.speakers, speakerSeedVoiceId])
-  const restoreWorkspaceSession = useCallback((session: WorkspaceSession) => {
-    if (explicitWorkspaceActionRef.current || useAppStore.getState().activeProject) return
-    setProjectTitle(session.projectTitle || '새 프로젝트')
-    const restoredVoiceId = isMyVoiceId(session.voiceId) ? session.voiceId : getVoicePreset(session.voiceId).id
-    setVoiceId(restoredVoiceId)
-    setSpeakerSeedVoiceId(restoredVoiceId)
-    setSpeechSpeed(normalizeVoiceSpeed(session.speechSpeed))
-    setSpeechPitch(normalizeVoicePitch(session.speechPitch))
-    setSpeechEmotion(
-      session.speechEmotion !== 'neutral'
-        ? session.speechEmotion
-        : session.directiveIds.includes('commercial')
-          ? 'commercial'
-          : session.directiveIds.includes('bright')
-            ? 'happy'
-            : 'neutral',
-    )
+  const applyRestoredDraft = useCallback((session: WorkspaceSession, recoveryIds: string[]) => {
+    setProjectTitle(session.projectTitle)
+    setVoiceId(session.voiceId)
+    setSpeakerSeedVoiceId(session.voiceId)
+    setSpeechSpeed(session.speechSpeed)
+    setSpeechPitch(session.speechPitch)
+    setSpeechEmotion(session.speechEmotion)
     setComposerDraft(session.composerDraft)
-    setDirectiveIds(session.directiveIds.includes('numbers') ? ['numbers'] : [])
-    setMessages(session.messages.length > 0 ? session.messages : initialMessages)
-    setPendingRecoveryIds(restoreSession(session.blocks))
+    setDirectiveIds(session.directiveIds)
+    setMessages(session.messages)
+    setPendingRecoveryIds(recoveryIds)
     setBatchRetrySnapshot(session.batchRetrySnapshot)
-    if (session.workspaceEntered) enterWorkspace(session.page)
-  }, [enterWorkspace, restoreSession])
+  }, [])
+  const { restoreWorkspaceSession, observedResetTokenRef } = useWorkspaceRestoration({
+    workspaceResetToken, activeProject, initialMessages, restoreSession, applyDraft: applyRestoredDraft,
+  })
   const notifyPersistenceUnavailable = useCallback(() => {
     showNotice('이 브라우저에서는 작업공간 자동 저장을 유지할 수 없습니다.')
   }, [showNotice])
@@ -320,6 +311,7 @@ export function HomePage() {
     hydrated,
     storageMode,
     lastSavedAt,
+    savePending,
     saveNow: saveWorkspaceNow,
   } = useWorkspaceSessionPersistence({
     workspaceEntered,
@@ -337,11 +329,6 @@ export function HomePage() {
     onRestore: restoreWorkspaceSession,
     onPersistenceUnavailable: notifyPersistenceUnavailable,
   })
-  useLayoutEffect(() => {
-    if (activeProject || observedResetTokenRef.current !== workspaceResetToken) {
-      explicitWorkspaceActionRef.current = true
-    }
-  }, [activeProject, workspaceResetToken])
   useLayoutEffect(() => {
     if (observedResetTokenRef.current === workspaceResetToken) return
     observedResetTokenRef.current = workspaceResetToken
@@ -367,7 +354,7 @@ export function HomePage() {
     previewRunIdRef.current += 1
     previewAbortRef.current?.abort()
     stopDirectBrowserPreview()
-  }, [clearQueue, clearTimeline, resetTimelineEditHistory, stopDirectBrowserPreview, workspaceResetToken])
+  }, [clearQueue, clearTimeline, observedResetTokenRef, resetTimelineEditHistory, stopDirectBrowserPreview, workspaceResetToken])
   useEffect(() => {
     if (pendingResetSaveRef.current !== workspaceResetToken) return
     pendingResetSaveRef.current = null
@@ -900,7 +887,7 @@ export function HomePage() {
     startNewWorkspace()
   }
   if (!workspaceEntered) return <LandingHome />
-  const savedLabel = formatWorkspaceSavedLabel(lastSavedAt, hydrated, storageMode === 'memory')
+  const savedLabel = formatWorkspaceSavedLabel(lastSavedAt, hydrated, storageMode === 'memory', savePending)
   return (
     <div className="soa-dubbing-workspace">
       <div className="soa-desktop-studio" style={desktopLayout.style}>

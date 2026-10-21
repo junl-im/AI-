@@ -53,14 +53,17 @@ export function formatWorkspaceSavedLabel(
   savedAt: string | null,
   hydrated: boolean,
   memoryOnly: boolean,
+  savePending = false,
 ): string {
   if (!hydrated) return '작업공간 불러오는 중'
-  if (!savedAt) return memoryOnly ? '이 탭에 임시 저장됨' : '자동 저장 준비됨'
+  if (savePending) return '변경 내용 저장 중…'
+  if (memoryOnly) return '이 탭에만 보관 중 · 창을 닫으면 사라집니다'
+  if (!savedAt) return '자동 저장 준비됨'
   const date = new Date(savedAt)
   if (!Number.isFinite(date.getTime())) return '자동 저장됨'
   const time = new Intl.DateTimeFormat('ko-KR', {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date)
-  return `${time} ${memoryOnly ? '임시 저장됨' : '자동 저장됨'}`
+  return `${time} 자동 저장됨`
 }

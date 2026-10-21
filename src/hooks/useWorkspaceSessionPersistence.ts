@@ -23,6 +23,7 @@ interface WorkspaceSessionPersistenceState {
   hydrated: boolean
   storageMode: WorkspaceStorageMode
   lastSavedAt: string | null
+  savePending: boolean
   saveNow: () => Promise<void>
 }
 
@@ -47,7 +48,9 @@ export function useWorkspaceSessionPersistence({
   const [hydrated, setHydrated] = useState(false)
   const [storageMode, setStorageMode] = useState<WorkspaceStorageMode>('memory')
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
+  const [savePending, setSavePending] = useState(false)
   const revisionRef = useRef(0)
+  const draftChangeRef = useRef(0)
   const saveTimerRef = useRef<number | null>(null)
   const loadStartedRef = useRef(false)
   const loadPromiseRef = useRef<ReturnType<typeof loadWorkspaceSession> | null>(null)
@@ -152,6 +155,7 @@ export function useWorkspaceSessionPersistence({
   const persistCurrentDraft = useCallback(async (checkpoint: boolean) => {
     if (!loadStartedRef.current) return
     revisionRef.current += 1
+    const changeAtStart = draftChangeRef.current
     const session = createWorkspaceSession(latestDraftRef.current, revisionRef.current)
     if (checkpoint) {
       const checkpointResult = checkpointWorkspaceSession(session)
@@ -161,7 +165,10 @@ export function useWorkspaceSessionPersistence({
         onPersistenceUnavailable()
       }
     }
-    const result = await saveWorkspaceSession(session)
+    setSavePending(true)
+    const result = await saveWorkspaceSession(session).catch(() => ({ mode: 'memory' as const, persisted: false }))
+    if (revisionRef.current !== session.revision || draftChangeRef.current !== changeAtStart) return
+    setSavePending(false)
     setStorageMode(result.mode)
     if (result.persisted) setLastSavedAt(session.savedAt)
     if (!result.persisted && !persistenceWarningShownRef.current) {
@@ -177,6 +184,8 @@ export function useWorkspaceSessionPersistence({
 
   useEffect(() => {
     if (!hydrated) return
+    draftChangeRef.current += 1
+    setSavePending(true)
     if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current)
     saveTimerRef.current = window.setTimeout(() => {
       saveTimerRef.current = null
@@ -222,5 +231,5 @@ export function useWorkspaceSessionPersistence({
     }
   }, [hydrated, persistCurrentDraft])
 
-  return { hydrated, storageMode, lastSavedAt, saveNow }
+  return { hydrated, storageMode, lastSavedAt, savePending, saveNow }
 }

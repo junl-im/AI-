@@ -1,3 +1,7 @@
+## 0.11.44 · Mobile Editing & Session Clarity
+
+모바일 편집 focus 중 고정 도구 충돌 완화, 저장 상태 정확성 및 세션 복원 hook 분리. 검증/제한: docs/MOBILE_SESSION_0.11.44.md.
+
 ## 0.11.43 · Recovery & Preview Lifecycle
 
 업데이트 실패 시 현재 작업 유지·재시도와 직접 미리듣기 수명주기 분리. 검증·제한: docs/RECOVERY_PREVIEW_0.11.43.md.
