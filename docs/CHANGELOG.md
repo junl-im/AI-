@@ -1,3 +1,7 @@
+## 0.11.45 · Timeline Editing & Project Clarity
+
+개별 타임라인 삭제 확인·취소, 빈/생성 중 대사 분할 방지, 모바일 빠른 편집 16px·도크 겹침 개선, 빈 프로젝트 목록에서 기존 대본 복귀. 검증과 제한: docs/TIMELINE_EDITING_0.11.45.md.
+
 ## 0.11.44 · Mobile Editing & Session Clarity
 
 - 모바일 대본/도구에 초점이 있을 때 성우·생성 도구의 sticky를 해제. 대본 입력 중 하단 도크도 문서 흐름으로 이동해 편집 영역 확보.

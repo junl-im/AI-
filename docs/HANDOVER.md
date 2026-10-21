@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.44 · Mobile Editing & Session Clarity**
+Current baseline: **0.11.45 · Timeline Editing & Project Clarity**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-21 KST**
 제품 소유·디자인: **곰같은여우**
@@ -491,3 +491,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: 높이420은 키보드 유사 viewport 검증이며 실제 Android/iOS 키보드 인증 아님. Firefox/Safari·Neural 청취 미실행. HomePage1093줄. 저장 데이터 형식·기존 보관 정책 유지.
 9. ZIP: SoriON-AI-0.11.44-mobile-session-full.zip / SoriON-AI-0.11.43-to-0.11.44-mobile-session-patch.zip.
 10. 다음: 0.11.45 · 타임라인 모바일 편집·프로젝트/저장 안내. 세션·재생·동의 경계 유지.
+
+## 2026-10-21 KST · 0.11.45 Timeline Editing & Project Clarity
+
+1. 작업 일시(KST): 2026-10-21.
+2. 대상/기준 버전: 0.11.45 / 0.11.44 (c5361f6).
+3. 변경 내용: 개별/선택 클립 직접 삭제를 대상 개수·대사 미리보기 확인창으로 보호. 취소 기본 포커스·Escape·포커스 잠금, 확인 전 최신 대상/생성 상태 재검사. 빈/생성 중 대사 분할 차단. 모바일 빠른 편집16px·높이 제한·focus 중 도크 static. 프로젝트 빈 상태에서 기존 대본으로 복귀.
+4. 변경 이유: 개별 버튼/메뉴/키보드 삭제의 즉시 실행, 빈 draft 저장 실패 후 이전 문장 분할, 작은 입력과 고정 도크 겹침, 빈 목록의 기술 용어 안내 개선.
+5. 영향 범위: Web 타임라인·프로젝트 안내/CSS·버전 metadata. 원본 대본·저장 프로젝트와 API/Worker 모델·동의·업로드 정책 유지.
+6. 주요 파일: TimelineDeleteDialog/tests, TimelineEditor/tests, TimelineQuickEditor, TimelineVoiceBlockCard, ProjectsPage/tests, readable-colors.css, 릴리스 문서.
+7. 검증 결과: Web84파일/330 PASS, API244 PASS/1skip, Worker16 PASS, lint/typecheck/build/Ruff·preflight55/55 PASS. Chromium6너비 장문 편집/분할/삭제 취소·확인/원본 대본 보존·확인창 화면 내 표시 PASS, 17화면 대비 미달0. 상세 TIMELINE_EDITING_0.11.45.md 및 docs/validation/0.11.45 참조. GitHub Actions·Pages는 배포 후 최종 확인.
+8. 제한: 데스크톱 Chromium의 모바일 viewport 검증이며 실제 휴대폰 키보드/Firefox/Safari 인증 아님. Neural 청취는 승인 자산·모델 미제공으로 보류. 기존 일괄 명령 안전 미리보기는 유지.
+9. ZIP: SoriON-AI-0.11.45-timeline-editing-full.zip / SoriON-AI-0.11.44-to-0.11.45-timeline-editing-patch.zip, SHA256SUMS.txt. 삭제 파일 없음.
+10. 다음: 0.11.46 · 타임라인 탐색·재생 위치·프로젝트 복구. 승인 음성 없이 음질 인증하지 않음.

@@ -166,7 +166,7 @@ export function TimelineQuickEditor({
             </button>
             <button type="button" onClick={onSave} disabled={!quickDraftDirty}>저장</button>
             <button type="button" onClick={onRegenerate} disabled={voiceUnavailable || selectedVoiceBlock.status === 'generating' || !quickDraftTrimmed}>재생성</button>
-            <button type="button" onClick={onSplit}>나누기</button>
+            <button type="button" onClick={onSplit} disabled={selectedVoiceBlock.status === 'generating' || quickDraftTrimmed.length < 2}>나누기</button>
             <button type="button" className="is-danger" onClick={onRemove}>삭제</button>
           </div>
         </>

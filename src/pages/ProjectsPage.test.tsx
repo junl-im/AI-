@@ -92,6 +92,13 @@ describe('ProjectsPage', () => {
     expect(await screen.findByText('아직 저장된 작업이 없습니다')).toBeInTheDocument()
   })
 
+  it('returns to the existing draft from an empty list without resetting it', async () => {
+    projectMocks.listProjects.mockResolvedValue([])
+    render(<ProjectsPage />)
+    fireEvent.click(await screen.findByRole('button', { name: '대본 계속 편집' }))
+    expect(useAppStore.getState()).toMatchObject({ page: 'home', workspaceResetToken: 0 })
+  })
+
   it('starts a truly empty workspace instead of returning to the old draft', async () => {
     render(<ProjectsPage />)
     await screen.findByRole('button', { name: '아침 안내 음성 프로젝트 불러오기' })

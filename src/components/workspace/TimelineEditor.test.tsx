@@ -213,8 +213,37 @@ describe('TimelineEditor', () => {
     expect(menuButton).toHaveAttribute('aria-expanded', 'true')
     fireEvent.click(screen.getByRole('button', { name: '클립 삭제' }))
 
+    expect(onRemove).not.toHaveBeenCalled()
+    expect(screen.getByRole('alertdialog')).toHaveTextContent('대사 1개 · 쉼 0개')
+    fireEvent.click(screen.getByRole('button', { name: '삭제 실행' }))
     expect(onRemove).toHaveBeenCalledWith('voice-2')
     expect(screen.queryByRole('button', { name: '클립 삭제' })).not.toBeInTheDocument()
+  })
+
+  it('개별 키보드 삭제는 취소 후 다시 확인해야 실행한다', () => {
+    const onRemove = vi.fn()
+    render(<TimelineEditor blocks={blocks} onMove={vi.fn()} onReorder={vi.fn()}
+      onSplit={vi.fn()} onUpdateText={vi.fn()} onRetry={vi.fn()} onAddVoice={vi.fn()}
+      onAddPause={vi.fn()} onRemove={onRemove} onClear={vi.fn()} />)
+    const clip = screen.getByRole('article', { name: /클립 1 · 혜린/ })
+    fireEvent.keyDown(clip, { key: 'Delete' })
+    fireEvent.click(screen.getByRole('button', { name: '취소' }))
+    expect(onRemove).not.toHaveBeenCalled()
+    fireEvent.keyDown(clip, { key: 'Backspace' })
+    fireEvent.click(screen.getByRole('button', { name: '삭제 실행' }))
+    expect(onRemove).toHaveBeenCalledExactlyOnceWith('voice-1')
+  })
+
+  it('빈 편집 내용과 생성 중 대사는 나누기를 차단한다', () => {
+    const onSplit = vi.fn()
+    const props = { onMove: vi.fn(), onReorder: vi.fn(), onSplit, onUpdateText: vi.fn(),
+      onRetry: vi.fn(), onAddVoice: vi.fn(), onAddPause: vi.fn(), onRemove: vi.fn(), onClear: vi.fn() }
+    const { rerender } = render(<TimelineEditor blocks={blocks} {...props} />)
+    fireEvent.change(screen.getByRole('textbox', { name: '선택 대사 빠른 수정' }), { target: { value: ' ' } })
+    expect(screen.getByRole('button', { name: '나누기' })).toBeDisabled()
+    rerender(<TimelineEditor blocks={blocks.map((block) => block.kind === 'voice' ? { ...block, status: 'generating' } : block)} {...props} />)
+    expect(screen.getByRole('button', { name: '1번 대사 가위로 나누기' })).toBeDisabled()
+    expect(onSplit).not.toHaveBeenCalled()
   })
 
   it('선택 클립을 빠른 편집 패널에서 수정하고 저장한다', () => {

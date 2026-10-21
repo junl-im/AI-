@@ -8,6 +8,7 @@ import { useAppStore } from '../store/useAppStore'
 import { getVoicePreset } from '../tts/voicePresets'
 
 export function ProjectsPage() {
+  const setPage = useAppStore((state) => state.setPage)
   const openProject = useAppStore((state) => state.openProject)
   const startNewWorkspace = useAppStore((state) => state.startNewWorkspace)
   const [projects, setProjects] = useState<VoiceProject[]>([])
@@ -35,7 +36,7 @@ export function ProjectsPage() {
     <WorkspacePageScaffold
       eyebrow="PROJECTS · LOCAL FIRST"
       title="최근 프로젝트"
-      description="이 기기에 저장된 음성 작업을 이어서 편집하고, 서버에 남은 생성 결과를 자동으로 복구합니다."
+      description="이 기기에 저장된 대본과 목소리 설정을 불러옵니다. 서버 음원이 만료된 경우 다시 생성할 수 있습니다."
       actions={(
         <button
           type="button"
@@ -61,7 +62,8 @@ export function ProjectsPage() {
         <section className="rounded-[28px] border border-dashed border-soa-line bg-soa-card p-8 text-center">
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#ece9e1] text-2xl" aria-hidden="true">▣</div>
           <h2 className="mt-4 font-black tracking-[-0.035em]">아직 저장된 작업이 없습니다</h2>
-          <p className="mt-2 text-sm leading-6 text-soa-muted">음성을 생성하면 이 기기의 IndexedDB에 프로젝트 정보가 자동 저장됩니다.</p>
+          <p className="mt-2 text-sm leading-6 text-soa-muted">음성을 생성한 작업은 이 기기에 저장됩니다. 작성 중인 대본은 만들기 화면에서 계속 편집할 수 있습니다.</p>
+          <button type="button" className="soa-page-action mt-4" onClick={() => setPage('home')}>대본 계속 편집</button>
         </section>
       ) : (
         <ul className="space-y-3">

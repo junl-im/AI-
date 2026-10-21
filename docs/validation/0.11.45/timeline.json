@@ -1,0 +1,128 @@
+[
+  {
+    "width": 360,
+    "focused": {
+      "font": "16px",
+      "scroll": 1355,
+      "dock": "static"
+    },
+    "dialog": {
+      "left": 20,
+      "right": 340,
+      "bottom": 372.53125,
+      "height": 420,
+      "focus": true
+    },
+    "split": true,
+    "cancelPreserved": true,
+    "deleteConfirmed": true,
+    "projectReturnPreservedDraft": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 390,
+    "focused": {
+      "font": "16px",
+      "scroll": 1355,
+      "dock": "static"
+    },
+    "dialog": {
+      "left": 20,
+      "right": 370,
+      "bottom": 372.53125,
+      "height": 420,
+      "focus": true
+    },
+    "split": true,
+    "cancelPreserved": true,
+    "deleteConfirmed": true,
+    "projectReturnPreservedDraft": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 430,
+    "focused": {
+      "font": "16px",
+      "scroll": 1354,
+      "dock": "static"
+    },
+    "dialog": {
+      "left": 20,
+      "right": 410,
+      "bottom": 361.8125,
+      "height": 420,
+      "focus": true
+    },
+    "split": true,
+    "cancelPreserved": true,
+    "deleteConfirmed": true,
+    "projectReturnPreservedDraft": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 768,
+    "focused": {
+      "font": "13px",
+      "scroll": 1109,
+      "dock": "fixed"
+    },
+    "dialog": {
+      "left": 183,
+      "right": 573,
+      "bottom": 573.8125,
+      "height": 844,
+      "focus": true
+    },
+    "split": true,
+    "cancelPreserved": true,
+    "deleteConfirmed": true,
+    "projectReturnPreservedDraft": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 1024,
+    "focused": {
+      "font": "13px",
+      "scroll": 1109,
+      "dock": "fixed"
+    },
+    "dialog": {
+      "left": 311,
+      "right": 701,
+      "bottom": 573.8125,
+      "height": 844,
+      "focus": true
+    },
+    "split": true,
+    "cancelPreserved": true,
+    "deleteConfirmed": true,
+    "projectReturnPreservedDraft": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "focused": {
+      "font": "13px",
+      "scroll": 1109,
+      "dock": "fixed"
+    },
+    "dialog": {
+      "left": 519,
+      "right": 909,
+      "bottom": 573.8125,
+      "height": 844,
+      "focus": true
+    },
+    "split": true,
+    "cancelPreserved": true,
+    "deleteConfirmed": true,
+    "projectReturnPreservedDraft": true,
+    "overflow": false,
+    "errors": []
+  }
+]

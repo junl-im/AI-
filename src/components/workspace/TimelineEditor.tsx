@@ -29,6 +29,7 @@ import {
   getTimelineCanvasWidth,
   getTimelineContentWidth,
 } from '../../timeline/timelineGeometry'
+import { TimelineDeleteDialog } from './TimelineDeleteDialog'
 import { TimelineQuickEditor } from './TimelineQuickEditor'
 import { TimelineVoiceBlockCard } from './TimelineVoiceBlockCard'
 
@@ -113,6 +114,7 @@ export function TimelineEditor({
   const timelineScrubbingRef = useRef(false)
   const [zoom, setZoom] = useState(getDefaultTimelineZoom)
   const [quickDraft, setQuickDraft] = useState('')
+  const [removalIds, setRemovalIds] = useState<string[] | null>(null)
   const [shortcutHelpOpen, setShortcutHelpOpen] = useState(false)
 
   const selection = useTimelineEditorSelection({ blocks, onSelectionChange })
@@ -355,12 +357,7 @@ export function TimelineEditor({
   }
 
   function removeSelection(id: string) {
-    if (selectedBlockIds.has(id) && selectedBlockIds.size > 1 && onRemoveMany) {
-      onRemoveMany(selectedIds)
-      clearSelection()
-      return
-    }
-    onRemove(id)
+    setRemovalIds(selectedBlockIds.has(id) && selectedBlockIds.size > 1 && onRemoveMany ? selectedIds : [id])
   }
 
   function seekFromTimeline(event: PointerEvent<HTMLDivElement>) {
@@ -734,7 +731,7 @@ export function TimelineEditor({
             saveQuickDraft()
             onRetry(selectedVoiceBlock.id)
           }}
-          onSplit={() => { if (selectedVoiceBlock) { saveQuickDraft(); onSplit(selectedVoiceBlock.id) } }}
+          onSplit={() => { if (selectedVoiceBlock && saveQuickDraft()) onSplit(selectedVoiceBlock.id) }}
           onRemove={() => removeSelection(selectedBlock.id)}
           onMovePause={(direction) => moveSelection(selectedBlock.id, direction)}
           onNavigateVoice={navigateVoiceSelection}
@@ -933,6 +930,15 @@ export function TimelineEditor({
         </div>
       </div>
 
+      {removalIds ? <TimelineDeleteDialog
+        blocks={blocks.filter((block) => removalIds.includes(block.id))}
+        onCancel={() => setRemovalIds(null)}
+        onConfirm={(ids) => {
+          setRemovalIds(null)
+          if (ids.length > 1 && onRemoveMany) { onRemoveMany(ids); clearSelection() }
+          else if (ids[0]) onRemove(ids[0])
+        }}
+      /> : null}
       <button type="button" className="soa-dubbing-add-block" onClick={onAddVoice} aria-label="새 대사 블록 추가">＋</button>
     </section>
   )

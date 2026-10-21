@@ -200,6 +200,7 @@ export function TimelineVoiceBlockCard({
               event.stopPropagation()
               onSplit(block.id)
             }}
+            disabled={block.status === 'generating' || block.text.trim().length < 2}
             aria-label={`${voiceIndex + 1}번 대사 가위로 나누기`}
           >
             ✂
@@ -231,7 +232,7 @@ export function TimelineVoiceBlockCard({
             </button>
             {blockMenuOpen ? (
               <div id={blockMenuId} className="soa-dubbing-block-menu__items" aria-label={`${voiceIndex + 1}번 대사 블록 메뉴`}>
-                <button type="button" onClick={() => { setBlockMenuOpen(false); onSplit(block.id) }}>문장 나누기</button>
+                <button type="button" disabled={block.status === 'generating' || block.text.trim().length < 2} onClick={() => { setBlockMenuOpen(false); onSplit(block.id) }}>문장 나누기</button>
                 <button type="button" disabled={index === 0} onClick={() => { setBlockMenuOpen(false); onMove(block.id, -1) }}>앞으로 이동</button>
                 <button type="button" disabled={index === total - 1} onClick={() => { setBlockMenuOpen(false); onMove(block.id, 1) }}>뒤로 이동</button>
                 <button type="button" className="is-danger" onClick={() => { setBlockMenuOpen(false); onRemove(block.id) }}>클립 삭제</button>
