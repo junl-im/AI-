@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react'
+import type { KeyboardEvent, MouseEvent } from 'react'
 import { getCurrentTrack, usePlayerStore } from '../../store/usePlayerStore'
 
 function formatTime(value: number): string {
@@ -36,6 +36,17 @@ export function TimelineLinkedPlayer() {
     else select(target.id)
   }
 
+  function seekWithKeyboard(event: KeyboardEvent<HTMLButtonElement>) {
+    if (!track || !currentTrackId || !duration || seekBlocked) return
+    const target = event.key === 'ArrowRight' ? Math.min(duration, current + 5)
+      : event.key === 'ArrowLeft' ? Math.max(0, current - 5)
+        : event.key === 'Home' ? 0
+          : event.key === 'End' ? duration : null
+    if (target === null) return
+    event.preventDefault()
+    seekTrack(currentTrackId, target)
+  }
+
   function seek(event: MouseEvent<HTMLButtonElement>) {
     if (!track || !currentTrackId || !duration || seekBlocked) return
     const rect = event.currentTarget.getBoundingClientRect()
@@ -55,7 +66,7 @@ export function TimelineLinkedPlayer() {
       <button type="button" className="soa-timeline-linked-player__toggle" onClick={() => currentTrackId && toggleTrack(currentTrackId)} disabled={!track} aria-label={playing ? '일시정지' : '재생'} aria-pressed={playing}>{playing ? 'Ⅱ' : '▶'}</button>
       <button type="button" className="soa-timeline-linked-player__skip" onClick={() => move(1)} disabled={!queue.length || currentIndex < 0 || currentIndex >= queue.length - 1} aria-label="다음 음성">›</button>
       <div className="soa-timeline-linked-player__transport">
-        <button type="button" className="soa-timeline-linked-player__scrub" onClick={seek} disabled={!track || !duration || seekBlocked} aria-label={seekBlocked ? '현재 음성은 위치 이동을 지원하지 않음' : '타임라인 재생 위치 이동'}>
+        <button type="button" className="soa-timeline-linked-player__scrub" onClick={seek} onKeyDown={seekWithKeyboard} disabled={!track || !duration || seekBlocked} title="←/→ 5초 이동 · Home/End 처음/끝" aria-label={seekBlocked ? '현재 음성은 위치 이동을 지원하지 않음' : '타임라인 재생 위치 이동'}>
           <i style={{ width: `${progress}%` }} />
           <b style={{ left: `${progress}%` }} />
         </button>

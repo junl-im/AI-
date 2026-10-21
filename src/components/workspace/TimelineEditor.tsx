@@ -109,6 +109,7 @@ export function TimelineEditor({
   const playbackActive = usePlayerStore((state) => state.playbackActive)
   const toggleTrack = usePlayerStore((state) => state.toggleTrack)
   const seekTrack = usePlayerStore((state) => state.seekTrack)
+  const playerQueue = usePlayerStore((state) => state.queue)
   const clipRefs = useRef(new Map<string, HTMLElement>())
   const quickEditorRef = useRef<HTMLTextAreaElement | null>(null)
   const timelineScrubbingRef = useRef(false)
@@ -369,9 +370,11 @@ export function TimelineEditor({
     if (!metric) return
     const block = blocks.find((item) => item.id === metric.id)
     if (!block || block.kind !== 'voice' || !block.trackId || block.status !== 'ready') return
+    const track = playerQueue.find((item) => item.id === block.trackId)
+    if (!track || track.audio.browserSpeech || track.audio.partial || !track.audio.durationSeconds) return
     const ratio = Math.max(0, Math.min(1, (x - metric.offset) / metric.width))
     selectBlock(block.id)
-    seekTrack(block.trackId, ratio * metric.duration)
+    seekTrack(block.trackId, ratio * track.audio.durationSeconds)
   }
 
   function startTimelineScrub(event: PointerEvent<HTMLDivElement>) {

@@ -1,3 +1,7 @@
+## 0.11.46 · Timeline Navigation & Recovery
+
+타임라인/연계 플레이어 위치 이동의 실제 음원 길이·지원 여부를 일치시켰고, 키보드 5초 탐색과 프로젝트 저장소 오류 시 기존 대본 복귀를 보강했습니다. 실제 음질·실기기 인증은 별도입니다. 상세: docs/TIMELINE_NAVIGATION_0.11.46.md.
+
 ## 0.11.45 R1 · Chromium Startup CI Hotfix
 
 데스크톱 Chromium visual runner 시작 지연의 제한적 복구. 검사 기준·제품 런타임은 유지. 상세: docs/CHROMIUM_STARTUP_0.11.45_R1.md.

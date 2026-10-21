@@ -61,10 +61,18 @@ describe('ProjectsPage', () => {
     render(<ProjectsPage />)
 
     expect(await screen.findByRole('alert')).toHaveTextContent('프로젝트를 열 수 없습니다')
+    expect(screen.getByRole('button', { name: '대본 계속 편집' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '다시 확인' }))
 
     await waitFor(() => expect(projectMocks.listProjects).toHaveBeenCalledTimes(2))
     expect(await screen.findByText('아직 저장된 작업이 없습니다')).toBeInTheDocument()
+  })
+
+  it('저장소 읽기 실패 때 대본 복귀는 작업공간을 초기화하지 않는다', async () => {
+    projectMocks.listProjects.mockRejectedValue(new Error('indexeddb unavailable'))
+    render(<ProjectsPage />)
+    fireEvent.click(await screen.findByRole('button', { name: '대본 계속 편집' }))
+    expect(useAppStore.getState()).toMatchObject({ page: 'home', workspaceResetToken: 0 })
   })
 
   it('cancels without deleting, then removes only after confirmation', async () => {

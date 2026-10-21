@@ -160,6 +160,33 @@ describe('TimelineEditor', () => {
     expect(voiceSlots[1].style.getPropertyValue('--soa-clip-width')).toBe('288px')
   })
 
+  it('타임라인 탐색은 실제 음원 길이를 사용하고 부분 음원은 건너뛴다', () => {
+    const track = linkedTrack('track-seek')
+    track.audio = { ...track.audio, durationSeconds: 12 }
+    const playableBlocks: TimelineBlock[] = blocks.map((block) => block.id === 'voice-1' && block.kind === 'voice'
+      ? { ...block, trackId: track.id }
+      : block)
+    usePlayerStore.getState().restoreSession([track], track.id, 'off', 1)
+    const props = { blocks: playableBlocks, onMove: vi.fn(), onReorder: vi.fn(), onSplit: vi.fn(),
+      onUpdateText: vi.fn(), onRetry: vi.fn(), onAddVoice: vi.fn(), onAddPause: vi.fn(),
+      onRemove: vi.fn(), onClear: vi.fn() }
+    const { container, rerender } = render(<TimelineEditor {...props} />)
+    const canvas = container.querySelector<HTMLElement>('.soa-capcut-track-canvas')!
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ left: 0, width: 640 } as DOMRect)
+    const before = usePlayerStore.getState().seekRequestId
+    fireEvent(canvas, new MouseEvent('pointerdown', { bubbles: true, clientX: 124 }))
+    fireEvent(canvas, new MouseEvent('pointerup', { bubbles: true }))
+    expect(usePlayerStore.getState().seekRequestId).toBe(before + 1)
+    expect(usePlayerStore.getState().seekTargetSeconds).toBe(6)
+
+    track.audio = { ...track.audio, partial: { index: 0, totalSegments: 2, readyAfterMs: 0 } }
+    usePlayerStore.getState().restoreSession([track], track.id, 'off', 1)
+    rerender(<TimelineEditor {...props} />)
+    fireEvent(canvas, new MouseEvent('pointerdown', { bubbles: true, clientX: 124 }))
+    fireEvent(canvas, new MouseEvent('pointerup', { bubbles: true }))
+    expect(usePlayerStore.getState().seekRequestId).toBe(before + 1)
+  })
+
   it('완료·쉼·실패 블록과 문장별 재시도를 보여준다', () => {
     const onRetry = vi.fn()
     render(

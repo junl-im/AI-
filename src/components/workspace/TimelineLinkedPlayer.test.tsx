@@ -45,6 +45,19 @@ describe('TimelineLinkedPlayer', () => {
     expect(usePlayerStore.getState().toggleRequestId).toBe(before + 1)
   })
 
+  it('키보드 화살표와 Home/End로 재생 위치를 이동한다', () => {
+    const id = usePlayerStore.getState().enqueue(audio('keyboard'), '키보드 대사')
+    usePlayerStore.getState().setPlaybackSnapshot(id, 4, false)
+    render(<TimelineLinkedPlayer />)
+    const scrub = screen.getByRole('button', { name: '타임라인 재생 위치 이동' })
+    fireEvent.keyDown(scrub, { key: 'ArrowRight' })
+    expect(usePlayerStore.getState().seekTargetSeconds).toBe(9)
+    fireEvent.keyDown(scrub, { key: 'Home' })
+    expect(usePlayerStore.getState().seekTargetSeconds).toBe(0)
+    fireEvent.keyDown(scrub, { key: 'End' })
+    expect(usePlayerStore.getState().seekTargetSeconds).toBe(12)
+  })
+
   it('재생 중 다음 음성을 누르면 같은 queue를 다음 track으로 재생 요청한다', () => {
     const firstId = usePlayerStore.getState().enqueue(audio('first'), '첫 대사')
     const secondId = usePlayerStore.getState().enqueue(audio('second'), '둘째 대사')

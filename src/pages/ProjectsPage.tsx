@@ -56,7 +56,11 @@ export function ProjectsPage() {
         <section className="rounded-[28px] border border-soa-coral/40 bg-soa-card p-8 text-center" role="alert">
           <h2 className="font-black tracking-[-0.035em]">프로젝트를 열 수 없습니다</h2>
           <p className="mt-2 text-sm leading-6 text-soa-muted">{loadError}</p>
-          <button type="button" className="soa-page-action mt-4" onClick={() => void loadProjects()}>다시 확인</button>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <button type="button" className="soa-page-action" onClick={() => void loadProjects()}>다시 확인</button>
+            <button type="button" className="soa-page-action" onClick={() => setPage('home')}>대본 계속 편집</button>
+          </div>
+          <p className="mt-3 text-xs text-soa-muted">작성 중인 대본은 그대로 두고 편집 화면으로 돌아갑니다.</p>
         </section>
       ) : projects.length === 0 ? (
         <section className="rounded-[28px] border border-dashed border-soa-line bg-soa-card p-8 text-center">

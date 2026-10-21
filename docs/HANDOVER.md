@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.45 R1 · Chromium Startup CI Hotfix**
+Current baseline: **0.11.46 · Timeline Navigation & Recovery**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-21 KST**
 제품 소유·디자인: **곰같은여우**
@@ -517,3 +517,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: 한 번 재시도 후에도 준비되지 않으면 정확히 실패·증거 기록. DBus warning 자체는 비치명적일 수 있으며 근본 자원 상태 원인까지 확정하지 않음. 실제 Neural 청취·실기기 인증 없음.
 9. ZIP: SoriON-AI-0.11.45-r1-chromium-startup-full.zip / SoriON-AI-0.11.45-to-0.11.45-r1-chromium-startup-patch.zip, SHA256SUMS.txt. 삭제 파일 없음.
 10. 다음: 0.11.46 · Timeline Navigation & Recovery. CI green 확인 후 기능 진행.
+
+## 2026-10-21 KST · 0.11.46 Timeline Navigation & Recovery
+
+1. **작업 일시(KST)**: 2026-10-21.
+2. **대상/기준 버전**: 0.11.46 / 0.11.45 R1 (`eff863a`).
+3. **변경 내용**: 타임라인 클릭 이동을 실제 음원 길이에 맞추고 부분 음원·브라우저 음성 탐색 요청을 차단했습니다. 연계 플레이어 화살표 5초와 Home/End 이동을 추가했습니다. 프로젝트 저장소 오류에서도 기존 대본으로 돌아가는 버튼을 추가했습니다.
+4. **변경 이유**: 클립 표시 길이와 실제 음원 길이 불일치로 오차가 발생하고, 탐색 불가 음원에도 위치 이동 요청이 생겼습니다. 저장소 오류 화면에서는 편집 중 대본으로 돌아갈 수 없었습니다.
+5. **영향 범위**: Web 타임라인·연계 플레이어·최근 프로젝트 UI와 테스트. 음성 엔진, 데이터 정책, 외부 업로드는 유지.
+6. **변경·추가된 주요 파일**: `src/components/workspace/{TimelineEditor,TimelineLinkedPlayer}*`, `src/pages/ProjectsPage*`, 버전 파일, `docs/{HANDOVER,CHANGELOG,NEXT_UPDATE,TIMELINE_NAVIGATION_0.11.46}.md`, `docs/patches/0.11.46-timeline-navigation-recovery/*`.
+7. **검증 결과**: 관련 Web 회귀 31/31 PASS, Web 전체 84파일/333 PASS, API244 PASS/1skip, Worker16 PASS, lint/typecheck/build/Ruff·preflight55/55 PASS. CI·Pages 최종 결과는 릴리스 검증에서 확인합니다.
+8. **알려진 제한과 주의사항**: 실제 Android/iOS·Firefox/Safari 및 승인 WAV 기반 성우 청취는 미검증입니다. 저장소가 계속 실패하면 재시도 전에도 작성 중인 대본으로 복귀할 수 있으나 저장 성공을 뜻하지 않습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.46-timeline-navigation-recovery-full.zip` / `SoriON-AI-0.11.45-r1-chromium-startup-to-0.11.46-timeline-navigation-recovery-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.47 · Draft Recovery & Playback Feedback. 저장 실패 재시도 및 탐색 불가 상태 안내 개선. 승인 음성·모델/권리 없는 품질 인증 금지.
