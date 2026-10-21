@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: 0.11.45 · Timeline Editing & Project Clarity
+현재 기준: 0.11.45 R1 · Chromium Startup CI Hotfix
 ## 목표 버전
 0.11.46 · Timeline Navigation & Recovery
 
@@ -10,5 +10,5 @@
 - 승인 WAV·권리·모델 확보 시 성우별 장문/숫자/영문 청취 검증을 진행합니다.
 
 예상 영역: TimelineEditor 보조 컴포넌트, 플레이어·프로젝트 복구 안내.
-선행 조건: 현재 CI green. 음질 인증은 승인 자산/모델과 실제 재생 증거 필요.
+선행 조건: 0.11.45 R1 CI green. 음질 인증은 승인 자산/모델과 실제 재생 증거 필요.
 유지 결정: 삭제 전 대상 확인, 원본 대본 보존, 모바일 입력 중 도크 겹침 방지. 유료 API·음성 자동 업로드·모델 자동 다운로드 없음.

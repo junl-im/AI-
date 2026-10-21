@@ -473,37 +473,65 @@ await stat(join(dist, 'index.html')).catch(() => {
 })
 await mkdir(output, { recursive: true })
 const browser = resolveBrowser()
-const userDataDirectory = await mkdtemp(join(tmpdir(), 'sorion-visual-'))
+let userDataDirectory = await mkdtemp(join(tmpdir(), 'sorion-visual-'))
 const { server, url } = await startStaticServer()
-const child = spawn(browser.command, [
-  '--headless=new',
-  '--no-sandbox',
-  '--disable-gpu',
-  '--disable-dev-shm-usage',
-  '--no-proxy-server',
-  '--proxy-bypass-list=*',
-  '--hide-scrollbars',
-  '--force-device-scale-factor=1',
-  '--remote-debugging-port=0',
-  `--user-data-dir=${userDataDirectory}`,
-  'about:blank',
-], { stdio: ['ignore', 'ignore', 'pipe'] })
 const chromiumStderr = []
-child.stderr?.setEncoding('utf8')
-child.stderr?.on('data', (chunk) => {
-  chromiumStderr.push(String(chunk))
-  if (chromiumStderr.length > 40) chromiumStderr.shift()
-})
+function launchChromium(directory) {
+  const process = spawn(browser.command, [
+    '--headless=new',
+    '--no-sandbox',
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    '--no-proxy-server',
+    '--proxy-bypass-list=*',
+    '--hide-scrollbars',
+    '--force-device-scale-factor=1',
+    '--remote-debugging-port=0',
+    `--user-data-dir=${directory}`,
+    'about:blank',
+  ], { stdio: ['ignore', 'ignore', 'pipe'] })
+  process.stderr?.setEncoding('utf8')
+  process.stderr?.on('data', (chunk) => {
+    chromiumStderr.push(String(chunk))
+    if (chromiumStderr.length > 40) chromiumStderr.shift()
+  })
+  process.on('error', (error) => chromiumStderr.push(error.message))
+  return process
+}
+async function stopChromium(process) {
+  if (process.exitCode !== null || process.signalCode !== null) return
+  const exited = new Promise((resolve) => process.once('exit', resolve))
+  process.kill('SIGTERM')
+  await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 1_000))])
+  if (process.exitCode === null && process.signalCode === null) process.kill('SIGKILL')
+  await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 1_000))])
+}
+let child = launchChromium(userDataDirectory)
 const browserState = {
-  exited: () => child.exitCode !== null,
-  exitCode: () => child.exitCode,
+  exited: () => child.exitCode !== null || child.signalCode !== null,
+  exitCode: () => child.exitCode ?? child.signalCode,
   stderr: () => chromiumStderr.join('').trim().slice(-4_000),
 }
 let stage = 'chromium-debug-endpoint'
 
 try {
-  const debuggingPort = await waitForDevToolsPort(userDataDirectory, 15_000, browserState)
-  await waitForJson(`http://127.0.0.1:${debuggingPort}/json/version`, 5_000, browserState)
+  let debuggingPort
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      debuggingPort = await waitForDevToolsPort(userDataDirectory, 30_000, browserState)
+      await waitForJson(`http://127.0.0.1:${debuggingPort}/json/version`, 10_000, browserState)
+      break
+    } catch (error) {
+      if (attempt === 2) throw error
+      console.warn('Chromium 시작이 지연되어 새 프로필로 한 번 다시 시도합니다.')
+      await stopChromium(child)
+      if (child.exitCode === null && child.signalCode === null) throw new Error('Chromium 시작 재시도 전에 이전 프로세스가 종료되지 않았습니다.')
+      await rm(userDataDirectory, { recursive: true, force: true, maxRetries: 3, retryDelay: 80 })
+      userDataDirectory = await mkdtemp(join(tmpdir(), 'sorion-visual-'))
+      chromiumStderr.length = 0
+      child = launchChromium(userDataDirectory)
+    }
+  }
   stage = 'chromium-target'
   const targetResponse = await fetch(
     `http://127.0.0.1:${debuggingPort}/json/new?${encodeURIComponent(url)}`,
@@ -670,17 +698,8 @@ try {
     capturedAt: new Date().toISOString(),
   }, null, 2)}\n`, 'utf8').catch(() => {})
   process.exitCode = 1
-} finally {
-  const waitForExit = (timeoutMs) => Promise.race([
-    child.exitCode !== null
-      ? Promise.resolve(true)
-      : new Promise((resolve) => child.once('exit', () => resolve(true))),
-    new Promise((resolve) => setTimeout(() => resolve(false), timeoutMs)),
-  ])
-  if (child.exitCode === null) child.kill('SIGTERM')
-  const exitedGracefully = await waitForExit(1_000)
-  if (!exitedGracefully && child.exitCode === null) child.kill('SIGKILL')
-  await waitForExit(1_000)
+ } finally {
+  await stopChromium(child)
   await new Promise((resolve) => server.close(resolve))
   await rm(userDataDirectory, { recursive: true, force: true, maxRetries: 3, retryDelay: 80 })
 }

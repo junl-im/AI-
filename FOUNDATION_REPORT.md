@@ -1,3 +1,7 @@
+## 0.11.45 R1 · Chromium Startup CI Hotfix
+
+데스크톱 Chromium visual runner 시작 지연의 제한적 복구. 검사 기준·제품 런타임은 유지. 상세: docs/CHROMIUM_STARTUP_0.11.45_R1.md.
+
 ## 0.11.45 · Timeline Editing & Project Clarity
 
 개별 타임라인 삭제 확인·취소, 빈/생성 중 대사 분할 방지, 모바일 빠른 편집 16px·도크 겹침 개선, 빈 프로젝트 목록에서 기존 대본 복귀. 검증과 제한: docs/TIMELINE_EDITING_0.11.45.md.

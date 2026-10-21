@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.45 · Timeline Editing & Project Clarity**
+Current baseline: **0.11.45 R1 · Chromium Startup CI Hotfix**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-21 KST**
 제품 소유·디자인: **곰같은여우**
@@ -504,3 +504,16 @@ CI Hotfix 4 테스트 규칙:
 8. 제한: 데스크톱 Chromium의 모바일 viewport 검증이며 실제 휴대폰 키보드/Firefox/Safari 인증 아님. Neural 청취는 승인 자산·모델 미제공으로 보류. 기존 일괄 명령 안전 미리보기는 유지.
 9. ZIP: SoriON-AI-0.11.45-timeline-editing-full.zip / SoriON-AI-0.11.44-to-0.11.45-timeline-editing-patch.zip, SHA256SUMS.txt. 삭제 파일 없음.
 10. 다음: 0.11.46 · 타임라인 탐색·재생 위치·프로젝트 복구. 승인 음성 없이 음질 인증하지 않음.
+
+## 2026-10-21 KST · 0.11.45 R1 Chromium Startup CI Hotfix
+
+1. 작업 일시(KST): 2026-10-21.
+2. 대상/기준 버전: 0.11.45 R1 / 0.11.45 (9c9322f), 제품 semver 유지.
+3. 변경 내용: visual runner Chromium 준비 최대30초, 실패 시 자식 프로세스 종료·임시 프로필 정리 후 한 번 재시도. signalCode 종료도 인식. 정적 계약 갱신.
+4. 변경 이유: run 39552501846의 데스크톱 DevToolsActivePort 생성이 15초 안에 이뤄지지 않아 두 번 실패. 동일 커밋 모바일 레이아웃은 통과, 제품 레이아웃 실패 증거 없음.
+5. 영향 범위: CI 화면 검사 실행기만. Web UI/음성 엔진/저장/동의 정책 변화 없음.
+6. 주요 파일: scripts/run-visual-layout-regression.mjs, scripts/check-visual-layout-regression.mjs, docs/CHROMIUM_STARTUP_0.11.45_R1.md, 릴리스 문서.
+7. 검증 결과: Node syntax/정적 계약/preflight55 PASS. Windows Chrome desktop1024/1280/1440·mobile360/390/430 PASS. GitHub Actions Ubuntu는 새 커밋 CI final gate.
+8. 제한: 한 번 재시도 후에도 준비되지 않으면 정확히 실패·증거 기록. DBus warning 자체는 비치명적일 수 있으며 근본 자원 상태 원인까지 확정하지 않음. 실제 Neural 청취·실기기 인증 없음.
+9. ZIP: SoriON-AI-0.11.45-r1-chromium-startup-full.zip / SoriON-AI-0.11.45-to-0.11.45-r1-chromium-startup-patch.zip, SHA256SUMS.txt. 삭제 파일 없음.
+10. 다음: 0.11.46 · Timeline Navigation & Recovery. CI green 확인 후 기능 진행.
