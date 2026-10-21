@@ -153,5 +153,6 @@
     font-size: 16px; min-height: 96px; max-height: 40dvh; scroll-margin-block: 90px;
   }
   .soa-app-root.is-editor:has(#sorion-content-editor:focus, .soa-timeline-quick-editor textarea:focus) .soa-dock,
-  .soa-app-root.is-editor:has(#sorion-content-editor:focus, .soa-timeline-quick-editor textarea:focus) .soa-dubbing-player-dock { position: static; }
+  .soa-app-root.is-editor:has(#sorion-content-editor:focus, .soa-timeline-quick-editor textarea:focus) .soa-dubbing-player-dock,
+  .soa-app-root.is-editor:has(#sorion-content-editor:focus, .soa-timeline-quick-editor textarea:focus) .soa-dubbing-add-block { position: static; }
 }

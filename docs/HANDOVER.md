@@ -483,7 +483,7 @@ CI Hotfix 4 테스트 규칙:
 
 1. 작업 일시(KST): 2026-10-21. 자동 승인 검토 크레딧 오류로 한 검사 중단 후 사용자 재개 요청으로 완료.
 2. 대상/기준 버전: 0.11.44 / 0.11.43 (3716811).
-3. 변경 내용: 모바일 편집 focus 동안 성우/생성 sticky 해제, 대본 focus 중 도크 static 전환. 저장 중/메모리 전용 경고 및 오래된 저장 완료 상태 경합 방지. 세션 복원 정규화·명시적 새 작업 우선 경계 hook 분리.
+3. 변경 내용: 모바일 편집 focus 동안 성우/생성 sticky 해제, 대본 focus 중 도크·대사 추가 버튼 static 전환. 저장 중/메모리 전용 경고 및 오래된 저장 완료 상태 경합 방지. 세션 복원 정규화·명시적 새 작업 우선 경계 hook 분리.
 4. 변경 이유: 좁은 키보드 편집 공간에서 고정 도구 겹침 방지, 저장 상태 오해와 복원 책임 밀집 해소.
 5. 영향 범위: Web CSS·저장 상태·복원 hook·버전 metadata. API/Worker 모델·동의·업로드 정책 유지.
 6. 주요 파일: useWorkspaceRestoration, useWorkspaceSessionPersistence/tests, HomePage, DubbingStudioHeader, homeWorkspaceHelpers, readable-colors.css, 릴리스 문서.
@@ -496,7 +496,7 @@ CI Hotfix 4 테스트 규칙:
 
 1. 작업 일시(KST): 2026-10-21.
 2. 대상/기준 버전: 0.11.45 / 0.11.44 (c5361f6).
-3. 변경 내용: 개별/선택 클립 직접 삭제를 대상 개수·대사 미리보기 확인창으로 보호. 취소 기본 포커스·Escape·포커스 잠금, 확인 전 최신 대상/생성 상태 재검사. 빈/생성 중 대사 분할 차단. 모바일 빠른 편집16px·높이 제한·focus 중 도크 static. 프로젝트 빈 상태에서 기존 대본으로 복귀.
+3. 변경 내용: 개별/선택 클립 직접 삭제를 대상 개수·대사 미리보기 확인창으로 보호. 취소 기본 포커스·Escape·포커스 잠금, 확인 전 최신 대상/생성 상태 재검사. 빈/생성 중 대사 분할 차단. 모바일 빠른 편집16px·높이 제한·focus 중 도크·대사 추가 버튼 static. 프로젝트 빈 상태에서 기존 대본으로 복귀.
 4. 변경 이유: 개별 버튼/메뉴/키보드 삭제의 즉시 실행, 빈 draft 저장 실패 후 이전 문장 분할, 작은 입력과 고정 도크 겹침, 빈 목록의 기술 용어 안내 개선.
 5. 영향 범위: Web 타임라인·프로젝트 안내/CSS·버전 metadata. 원본 대본·저장 프로젝트와 API/Worker 모델·동의·업로드 정책 유지.
 6. 주요 파일: TimelineDeleteDialog/tests, TimelineEditor/tests, TimelineQuickEditor, TimelineVoiceBlockCard, ProjectsPage/tests, readable-colors.css, 릴리스 문서.
