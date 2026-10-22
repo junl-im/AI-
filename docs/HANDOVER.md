@@ -98,7 +98,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.57 · Silent Capture Recovery & Recording Persistence**
+Current baseline: **0.11.57 R1 · Multi-Scene IndexedDB Fixture Repair**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**
@@ -671,3 +671,16 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 브라우저 Web Speech 기본 성우의 원본 오디오는 파일로 직접 주어지지 않습니다. 화면 공유에서 무음이면 녹음 파일을 만들 수 없고, 로컬 모델은 다른 음색이며 첫 다운로드가 큽니다. 보관된 음원은 같은 브라우저 프로필에만 있습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.57-silent-capture-recovery-full.zip` / `SoriON-AI-0.11.56-to-0.11.57-silent-capture-recovery-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.58 · Direct File Generation & Cross-Device Recovery. 원본 음색의 파일 생성 엔진 경로를 검증하고 로컬 WAV 프로젝트 복구·묶음 이전을 진행합니다.
+
+## 2026-10-22 KST · 0.11.57 R1 Multi-Scene IndexedDB Fixture Repair
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.57 R1 / 0.11.57 (`b963ab4`); 제품 버전 0.11.57 유지.
+3. **변경 내용**: 다중 화면 Chromium 복구 fixture의 IndexedDB open 버전을 4에서 5로 맞췄습니다.
+4. **변경 이유**: 실제 저장소 스키마가 5로 올라간 뒤 CI fixture가 4를 요청해 VersionError를 내고 Pages 배포를 차단했습니다.
+5. **영향 범위**: CI 다중 화면 증거 검사. 제품 런타임 기능은 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `scripts/run-chromium-multi-scene-evidence.mjs`, 릴리스·패치 문서.
+7. **검증 결과**: Chrome 데스크톱 9장·모바일 9장 다중 화면 검사 통과. 0.11.57의 Web 363개 테스트·preflight 55개·빌드 통과 결과를 유지합니다.
+8. **알려진 제한과 주의사항**: 기본 성우 화면 공유가 무음인 PC에서는 기본 음색 파일 저장이 아직 불가능합니다. 별도 로컬 모델은 다른 음색입니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.57-r1-full.zip` / `SoriON-AI-0.11.57-to-0.11.57-r1-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.58 · Direct File Generation & Cross-Device Recovery. 기본 음색 파일 생성 엔진과 로컬 WAV 프로젝트 복구를 검증합니다.

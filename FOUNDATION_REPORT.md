@@ -545,3 +545,7 @@ Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ig
 ## 0.11.57 · Silent Capture Recovery & Recording Persistence
 
 기본 성우 화면 공유 녹음이 무음인 PC에서는 WAV/MP3 변환을 완료할 수 없습니다. 저장 UI는 이 제한을 설명하고 별도 로컬 음색 WAV 생성 동선으로 안내합니다. 실제로 녹음된 WAV/MP3는 IndexedDB에 저장되어 동일 대본과 성우 설정으로 재방문하면 다시 다운로드할 수 있습니다. 기본 성우의 원본 음색 파일을 안정적으로 생성하는 엔진은 별도 필요합니다.
+
+## 0.11.57 R1 · Multi-Scene IndexedDB Fixture Repair
+
+CI 다중 화면 fixture를 IndexedDB 스키마 5에 맞춰 Pages 배포 게이트를 복구했습니다. 제품 런타임 기능은 바뀌지 않았습니다.

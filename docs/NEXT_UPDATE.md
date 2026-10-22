@@ -1,6 +1,6 @@
 # NEXT UPDATE
 
-현재 기준: 0.11.57 · Silent Capture Recovery & Recording Persistence
+현재 기준: 0.11.57 R1 · Multi-Scene IndexedDB Fixture Repair
 
 ## 목표 버전
 
