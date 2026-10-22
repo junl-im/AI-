@@ -162,3 +162,8 @@
 .soa-app-root.is-editor .soa-dubbing-save-status button { min-height: 32px; border: 1px solid #9a6570; border-radius: 9px; padding: 4px 10px; color: #6c2938; background: #fff2f1; font-size: 11px; font-weight: 800; }
 .soa-app-root.is-editor .soa-dubbing-save-status button:hover { background: #ffe5e3; }
 .soa-app-root.is-editor .soa-dubbing-save-status button:disabled { opacity: .6; cursor: wait; }
+
+.soa-app-root.is-editor .soa-project-save-recovery { margin: 12px 0; border: 1px solid #b78080; border-radius: 14px; padding: 12px 14px; color: #552a30; background: #fff0ef; }
+.soa-app-root.is-editor .soa-project-save-recovery p { margin: 0 0 10px; font-size: 13px; line-height: 1.5; font-weight: 700; }
+.soa-app-root.is-editor .soa-project-save-recovery button { min-height: 44px; border: 1px solid #8f4857; border-radius: 10px; padding: 7px 12px; color: #fff; background: #75384a; font-size: 12px; font-weight: 800; }
+.soa-app-root.is-editor .soa-project-save-recovery button:disabled { opacity: .6; cursor: wait; }

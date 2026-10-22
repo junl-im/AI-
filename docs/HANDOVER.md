@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.47 · Draft Recovery & Korean Phrasing**
+Current baseline: **0.11.48 · Project Save Recovery & Prosody QA**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-21 KST**
 제품 소유·디자인: **곰같은여우**
@@ -543,3 +543,16 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 저장 재시도는 현재 작업공간 세션 대상이며 생성 완료 프로젝트 목록 저장 실패의 전용 재시도는 0.11.48 과제입니다. 승인 WAV/모델·실기기 부재로 실제 성우 음색/청취 품질을 인증하지 않았습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.47-draft-recovery-korean-phrasing-full.zip` / `SoriON-AI-0.11.46-timeline-navigation-recovery-to-0.11.47-draft-recovery-korean-phrasing-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.48 · Project Save Recovery & Prosody QA. 중복 없는 프로젝트 저장 재시도와 장문 성우 청취 검증 준비.
+
+## 2026-10-22 KST · 0.11.48 Project Save Recovery & Prosody QA
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.48 / 0.11.47 (`d43c0a1`).
+3. **변경 내용**: 생성 완료 프로젝트 목록 저장 실패 시 같은 ID의 기록을 보관하고 화면에서 재시도하도록 했습니다. 성공하면 복구 안내를 닫고 실패 시 다시 시도할 수 있습니다. 기본 성우 5명의 혼합 한국어 장문 분할·쉼·속도 경계를 테스트했습니다.
+4. **변경 이유**: 기존에는 실패 알림만 보여 다시 생성하면 새 ID의 중복 프로젝트가 생길 수 있었습니다. 성우별 장문 발화 경계의 회귀 증거도 부족했습니다.
+5. **영향 범위**: Web HomePage/프로젝트 저장 복구 훅·스타일·테스트, API Prosody 테스트, 버전 및 릴리스 문서. 실제 음성 엔진/동의 정책 변경 없음.
+6. **변경·추가된 주요 파일**: `src/hooks/useProjectSaveRecovery*`, `src/pages/HomePage.tsx`, `src/styles/readable-colors.css`, `services/api/tests/test_prosody_director.py`, 버전 파일, `docs/{HANDOVER,CHANGELOG,NEXT_UPDATE,PROJECT_RECOVERY_0.11.48}.md`.
+7. **검증 결과**: Web 전체 85파일/340 PASS, API246 PASS/1skip, Worker16 PASS, lint/typecheck/build/Ruff·preflight55/55 PASS. CI·Pages 최종 결과는 릴리스 검증에서 확인합니다.
+8. **알려진 제한과 주의사항**: 프로젝트 저장 재시도 기록은 현재 편집 탭의 메모리에만 남습니다. 새로고침 후 전용 재시도 복원은 0.11.49 과제입니다. 승인 WAV/모델 없이 실제 Neural 음질·사람 청취를 인증하지 않았습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.48-project-save-recovery-full.zip` / `SoriON-AI-0.11.47-to-0.11.48-project-save-recovery-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.49 · Durable Project Recovery & Listening Evidence. 새로고침을 넘는 안전한 로컬 복구와 승인 자산 기반 사람 청취.

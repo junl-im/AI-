@@ -21,7 +21,8 @@ import { useTimelineGeneration, type TimelineGenerationOptions } from '../hooks/
 import { useSelectiveSttRegeneration } from '../hooks/useSelectiveSttRegeneration'
 import { useWorkspaceRestoration } from '../hooks/useWorkspaceRestoration'
 import { useWorkspaceSessionPersistence } from '../hooks/useWorkspaceSessionPersistence'
-import { saveProject } from '../projects/projectRepository'
+import { useProjectSaveRecovery } from '../hooks/useProjectSaveRecovery'
+import type { VoiceProject } from '../projects/projectTypes'
 import { useAppStore } from '../store/useAppStore'
 import { getCurrentTrack, usePlayerStore } from '../store/usePlayerStore'
 import {
@@ -117,6 +118,13 @@ export function HomePage() {
   const [pendingRecoveryIds, setPendingRecoveryIds] = useState<string[]>([])
   const [pendingGeneration, setPendingGeneration] = useState<PendingLongformGeneration | null>(null)
   const [resumeGeneration, setResumeGeneration] = useState<PendingLongformGeneration | null>(null)
+  const {
+    pendingProject: pendingProjectSave,
+    retrying: projectSaveRetrying,
+    save: saveGeneratedProject,
+    retry: retryGeneratedProject,
+    clear: clearPendingProject,
+  } = useProjectSaveRecovery()
   const [speakerAssignments, setSpeakerAssignments] = useState<SpeakerVoiceAssignment[]>([])
   const [speakerAssignmentsConfirmed, setSpeakerAssignmentsConfirmed] = useState(false)
   const [rememberedSpeakerVoices, setRememberedSpeakerVoices] = useState<Record<string, string>>({})
@@ -431,14 +439,14 @@ export function HomePage() {
       : selectedEngineId,
     normalizeText,
   }), [normalizeText, selectedEngineId, selectedVoice, speechEmotion, speechPitch, speechSpeed, voiceId])
-  const saveLongformProject = useCallback(async (
+  const buildLongformProject = useCallback((
     text: string,
     options: TimelineGenerationOptions,
     blockIds: string[],
     generated: Array<{ blockId: string; audio: GeneratedAudio }>,
-  ) => {
+  ): VoiceProject | null => {
     const first = generated[0]?.audio
-    if (!first) return
+    if (!first) return null
     const now = new Date().toISOString()
     const blockSnapshots = getVoiceBlockSnapshots(blockIds)
     const timelineClips = blockSnapshots.map((block) => ({
@@ -446,7 +454,7 @@ export function HomePage() {
       voiceId: block.voiceId,
       voiceName: block.voiceName,
     }))
-    await saveProject({
+    return {
       id: createRandomId(),
       title: projectTitle.trim() && projectTitle.trim() !== '새 프로젝트'
         ? projectTitle.trim()
@@ -467,7 +475,7 @@ export function HomePage() {
       normalizeText: options.normalizeText,
       jobIds: blockSnapshots.map((block) => block.jobId),
       timelineClips,
-    })
+    }
   }, [getVoiceBlockSnapshots, projectTitle])
   const generateLongform = useCallback(async (pending: PendingLongformGeneration) => {
     appendMessage({
@@ -508,20 +516,29 @@ export function HomePage() {
       badge: '제작 완료',
       text: `${generated.length}개 음성 블록을 원문 순서로 정리해 플레이어와 프로젝트에 연결했습니다. 엔진 기록 · ${formatEngineRoutingTrace(batch.routing)}`,
     })
-    try {
-      await saveLongformProject(pending.text, pending.options, pending.allBlockIds, generated)
-      await saveWorkspaceNow()
-    } catch {
-      showNotice('음성은 완성됐지만 프로젝트 저장에는 실패했습니다.')
+    const project = buildLongformProject(pending.text, pending.options, pending.allBlockIds, generated)
+    if (project) {
+      if (!await saveGeneratedProject(project)) {
+        showNotice('음성은 완성됐지만 프로젝트 목록 저장에 실패했습니다. 아래에서 다시 시도할 수 있습니다.')
+      }
     }
+    await saveWorkspaceNow()
   }, [
     appendMessage,
     generateAllTimelineBlocks,
     getQueuedVoiceBlockIds,
-    saveLongformProject,
+    buildLongformProject,
     saveWorkspaceNow,
     showNotice,
+    saveGeneratedProject,
   ])
+  async function retryProjectSave() {
+    if (await retryGeneratedProject()) {
+      showNotice('완성된 음성의 프로젝트 목록 저장을 마쳤습니다.')
+    } else {
+      showNotice('프로젝트 목록 저장에 다시 실패했습니다. 현재 대본과 음성은 그대로 유지됩니다.')
+    }
+  }
   useEffect(() => {
     if (!generationRouteReady || !pendingGeneration || busy) return
     const pending = pendingGeneration
@@ -536,6 +553,7 @@ export function HomePage() {
     }
     setPendingGeneration(null)
     setResumeGeneration(null)
+    clearPendingProject()
     clearTimeline()
     clearQueue()
     const multiSpeakerSegments = speakerAssignmentsConfirmed
@@ -884,6 +902,7 @@ export function HomePage() {
   function clearCurrentWork() {
     setPendingGeneration(null)
     setResumeGeneration(null)
+    clearPendingProject()
     startNewWorkspace()
   }
   if (!workspaceEntered) return <LandingHome />
@@ -991,6 +1010,14 @@ export function HomePage() {
               }}
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
+            {pendingProjectSave ? (
+              <div role="alert" className="soa-project-save-recovery">
+                <p>음성은 완성됐지만 프로젝트 목록에 저장하지 못했습니다. 현재 대본과 음성은 이 화면에 남아 있습니다.</p>
+                <button type="button" onClick={() => void retryProjectSave()} disabled={projectSaveRetrying}>
+                  {projectSaveRetrying ? '프로젝트 저장 중…' : '프로젝트 저장 다시 시도'}
+                </button>
+              </div>
+            ) : null}
             <WorkspaceConversation messages={messages} />
             {timeline.blocks.length > 0 || timeline.canUndo || timeline.canRedo ? (
             <Suspense fallback={<p role="status">편집 도구를 준비하고 있습니다…</p>}>
