@@ -59,9 +59,9 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.48 · Project Save Recovery & Prosody QA**
+Current baseline: **0.11.49 · Durable Project Recovery**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-10-21 KST**
+최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -556,3 +556,16 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 프로젝트 저장 재시도 기록은 현재 편집 탭의 메모리에만 남습니다. 새로고침 후 전용 재시도 복원은 0.11.49 과제입니다. 승인 WAV/모델 없이 실제 Neural 음질·사람 청취를 인증하지 않았습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.48-project-save-recovery-full.zip` / `SoriON-AI-0.11.47-to-0.11.48-project-save-recovery-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.49 · Durable Project Recovery & Listening Evidence. 새로고침을 넘는 안전한 로컬 복구와 승인 자산 기반 사람 청취.
+
+## 2026-10-22 KST · 0.11.49 Durable Project Recovery
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.49 / 0.11.48 (`ec3f0d0c7882`).
+3. **변경 내용**: 생성 완료 프로젝트 저장 실패 시 같은 ID와 원본 대본·타임라인을 브라우저에 제한된 기간 임시 보관합니다. 새로고침 후 재시도, IndexedDB 이미 저장된 항목 확인, 성공 후 최근 프로젝트 목록 갱신을 추가했습니다.
+4. **변경 이유**: 0.11.48 재시도 상태는 탭을 닫으면 사라지고, 저장 성공이 늦게 확인될 때 잘못된 실패 안내가 남을 수 있었습니다.
+5. **영향 범위**: Web 프로젝트 저장소·복구 훅·HomePage 안내·테스트, 버전 및 릴리스 문서. API/Worker 엔진이나 동의 정책은 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/projects/{pendingProjectSave,projectRepository}*`, `src/hooks/useProjectSaveRecovery*`, `src/pages/HomePage.tsx`, 버전 파일, `docs/{HANDOVER,CHANGELOG,NEXT_UPDATE,PROJECT_RECOVERY_0.11.49}.md`.
+7. **검증 결과**: Web 전체 86파일/344 PASS, 추가 저장소 테스트 7 PASS, API 246 PASS/1skip, Worker 16 PASS, lint/build/version-sync/Ruff PASS, preflight 단독 재검 55/55 PASS. CI·Pages 최종 결과는 배포 후 확인합니다.
+8. **알려진 제한과 주의사항**: 임시 사본은 같은 브라우저·프로필에만 남고 브라우저 데이터 삭제·차단·용량 초과 시 지속되지 않습니다. 오디오 바이트는 보관하지 않습니다. 승인 WAV/모델 없이 사람 청취와 Neural 음질을 인증하지 않았습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.49-durable-project-recovery-full.zip` / `SoriON-AI-0.11.48-to-0.11.49-durable-project-recovery-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.50 · Project Recovery Export & Listening Evidence. 저장소 전체 차단 시 사용자 선택 내보내기와 승인 자산 기반 사람 청취·실기기 검증.

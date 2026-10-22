@@ -1,15 +1,15 @@
 # NEXT UPDATE
 
-현재 기준: 0.11.48 · Project Save Recovery & Prosody QA
+현재 기준: 0.11.49 · Durable Project Recovery
 ## 목표 버전
 
-0.11.49 · Durable Project Recovery & Listening Evidence
+0.11.50 · Project Recovery Export & Listening Evidence
 
-- 페이지 새로고침을 넘어 생성 완료 프로젝트 저장 실패를 복구할 수 있는 안전한 로컬 보관 경로를 검토합니다.
-- 저장 복구 안내와 최근 프로젝트 목록의 동기화 상태를 점검합니다.
+- 브라우저 저장소가 모두 막힌 경우 원본 대본을 사용자가 안전하게 내보낼 수 있는 경로를 검토합니다.
+- 실제 브라우저 새로고침·저장소 quota/차단 상태에서 복구 안내와 최근 프로젝트 목록을 점검합니다.
 - 승인 WAV·권리·모델이 확보되면 기본 성우별 실제 장문/숫자/영문 청취 평가를 진행합니다.
 - 실제 Android/iOS·Firefox/Safari 입력·재생 검증은 장치 확보 후 진행합니다.
 
-예상 영역: workspaceSessionRepository/projectRepository, HomePage 복구 상태, 청취 QA.
-선행 조건: 0.11.48 CI green. 권리 확인 없는 음성 샘플을 자동 업로드/모델에 사용하지 않습니다.
+예상 영역: HomePage 복구 내보내기, 프로젝트 저장소 실브라우저 QA, 청취 QA.
+선행 조건: 0.11.49 CI green과 승인된 음성 자산·권리·모델. 권리 확인 없는 음성 샘플을 자동 업로드/모델에 사용하지 않습니다.
 유지 결정: 원본 대본 보존, 같은 프로젝트 ID 재시도, 명시적 복구, 유료 API·음성 자동 업로드·모델 자동 다운로드 없음.

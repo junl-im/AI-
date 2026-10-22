@@ -118,8 +118,10 @@ export function HomePage() {
   const [pendingRecoveryIds, setPendingRecoveryIds] = useState<string[]>([])
   const [pendingGeneration, setPendingGeneration] = useState<PendingLongformGeneration | null>(null)
   const [resumeGeneration, setResumeGeneration] = useState<PendingLongformGeneration | null>(null)
+  const [projectListRevision, setProjectListRevision] = useState(0)
   const {
     pendingProject: pendingProjectSave,
+    durable: projectSaveDurable,
     retrying: projectSaveRetrying,
     save: saveGeneratedProject,
     retry: retryGeneratedProject,
@@ -520,6 +522,8 @@ export function HomePage() {
     if (project) {
       if (!await saveGeneratedProject(project)) {
         showNotice('음성은 완성됐지만 프로젝트 목록 저장에 실패했습니다. 아래에서 다시 시도할 수 있습니다.')
+      } else {
+        setProjectListRevision((revision) => revision + 1)
       }
     }
     await saveWorkspaceNow()
@@ -534,6 +538,7 @@ export function HomePage() {
   ])
   async function retryProjectSave() {
     if (await retryGeneratedProject()) {
+      setProjectListRevision((revision) => revision + 1)
       showNotice('완성된 음성의 프로젝트 목록 저장을 마쳤습니다.')
     } else {
       showNotice('프로젝트 목록 저장에 다시 실패했습니다. 현재 대본과 음성은 그대로 유지됩니다.')
@@ -912,7 +917,7 @@ export function HomePage() {
       <div className="soa-desktop-studio" style={desktopLayout.style}>
         <WorkspaceProjectRail
           currentTitle={projectTitle}
-          refreshKey={messages.length + timeline.blocks.length}
+          refreshKey={messages.length + timeline.blocks.length + projectListRevision}
           onOpenProject={openProject}
           onNewProject={clearCurrentWork}
           onOpenProjects={() => enterWorkspace('projects')}
@@ -1012,7 +1017,9 @@ export function HomePage() {
             />
             {pendingProjectSave ? (
               <div role="alert" className="soa-project-save-recovery">
-                <p>음성은 완성됐지만 프로젝트 목록에 저장하지 못했습니다. 현재 대본과 음성은 이 화면에 남아 있습니다.</p>
+                <p>음성은 완성됐지만 프로젝트 목록에 저장하지 못했습니다. {projectSaveDurable
+                  ? '원본 대본과 프로젝트 구성을 이 브라우저에 임시 보관했습니다. 새로고침 후에도 다시 저장할 수 있습니다.'
+                  : '브라우저 임시 보관도 사용할 수 없습니다. 이 탭을 닫기 전에 다시 저장해 주세요.'}</p>
                 <button type="button" onClick={() => void retryProjectSave()} disabled={projectSaveRetrying}>
                   {projectSaveRetrying ? '프로젝트 저장 중…' : '프로젝트 저장 다시 시도'}
                 </button>
