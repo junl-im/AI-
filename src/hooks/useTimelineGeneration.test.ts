@@ -703,7 +703,7 @@ describe('useTimelineGeneration fast ordered batch', () => {
     usePlayerStore.getState().clearQueue()
   })
 
-  it('첫 음성은 먼저 재생하고 나머지는 최대 2개 병렬 처리한 뒤 원문 순서로 정렬한다', async () => {
+  it('첫 음성을 먼저 만들고 나머지를 병렬 처리한 뒤 첫 클립을 한 번만 재생한다', async () => {
     let active = 0
     let maxActive = 0
     voiceApiMocks.synthesizeSpeech.mockImplementation(async (request, jobId) => {
@@ -736,11 +736,14 @@ describe('useTimelineGeneration fast ordered batch', () => {
       })
     })
 
+    const playRequestsBefore = usePlayerStore.getState().playRequestId
     let batch!: TimelineGenerationBatchResult
     await act(async () => {
       batch = await result.current.generateAll(ids, true)
     })
 
+    expect(usePlayerStore.getState().playRequestId).toBe(playRequestsBefore + 1)
+    expect(usePlayerStore.getState().currentTrackId).toBe(usePlayerStore.getState().queue[0].id)
     expect(batch.cancelled).toBe(false)
     expect(batch.concurrency).toBe(2)
     expect(batch.results.map((item) => item.blockId)).toEqual(ids)

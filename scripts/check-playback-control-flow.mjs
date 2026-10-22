@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('..', import.meta.url))
 
 async function read(relativePath) {
-  return readFile(join(root, relativePath), 'utf8')
+  return (await readFile(join(root, relativePath), 'utf8')).replace(/\r\n/g, '\n')
 }
 
 function requireText(text, needle, label) {

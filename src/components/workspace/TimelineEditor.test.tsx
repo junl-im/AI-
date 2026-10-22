@@ -131,6 +131,19 @@ describe('TimelineEditor', () => {
     expect(usePlayerStore.getState().playRequestId).toBe(0)
   })
 
+  it('타임라인 듣기 속도는 안전한 선택지로 Dock 재생 속도에 연결된다', () => {
+    render(
+      <TimelineEditor blocks={blocks} onMove={vi.fn()} onReorder={vi.fn()}
+        onSplit={vi.fn()} onUpdateText={vi.fn()} onRetry={vi.fn()}
+        onAddVoice={vi.fn()} onAddPause={vi.fn()} onRemove={vi.fn()} onClear={vi.fn()} />,
+    )
+    const control = screen.getByRole('combobox', { name: '타임라인 재생 속도' })
+    expect(control).toHaveValue('1')
+    fireEvent.change(control, { target: { value: '1.1' } })
+    expect(usePlayerStore.getState().playbackRate).toBe(1.1)
+    expect(screen.getByText('음정 유지 · 재생만')).toBeInTheDocument()
+  })
+
   it('모바일용 + 선택 버튼으로 modifier key 없이 여러 대사를 고른다', async () => {
     const onSelectionChange = vi.fn()
     render(

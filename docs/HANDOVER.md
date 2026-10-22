@@ -1,3 +1,16 @@
+## 2026-10-22 KST · 0.11.52 Generation Replay & Download Clarity
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.52 / 0.11.51 (`da9f4c3e1720`).
+3. **변경 내용**: 새 제작 시 이전 한 곡 반복을 해제하고, 전체 클립 준비 뒤 첫 클립을 한 번만 자동 재생합니다. 성별 미확인 한국어 시스템 음성은 근사 fallback으로 사용하며 배정 한계를 밝힙니다. 타임라인 0.9~1.2배 듣기 속도와 음정 유지, 생성 결과 파일·전체 MP3·대본 TXT 저장 동선을 추가했습니다.
+4. **변경 이유**: 사용자 상담 대본에서 첫 인사말이 반복됐고, 다른 PC에서 일부 성우가 사용 불가였으며 생성 후 저장 버튼을 찾기 어려웠습니다.
+5. **영향 범위**: Web 생성 일괄 처리, 플레이어 대기열/속도, 브라우저 음성 호환, 생성 결과 저장 UI. API/Worker 엔진 자체는 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `src/hooks/useTimelineGeneration*`, `src/store/usePlayerStore*`, `src/tts/{browserSpeech,segmentText}*`, `src/components/workspace/{GeneratedAudioSave,TimelineEditor,LongformComposer}*`, `src/pages/HomePage.tsx`, `src/components/navigation/LinkedPlayerDock.tsx`, `src/styles/readable-colors.css`, 버전 파일, 릴리스 문서.
+7. **검증 결과**: Web 87파일/355 PASS, API 246 PASS/1 skip, Worker 16 PASS, lint/build/version-sync/Ruff·preflight 55/55 PASS. 실제 Chromium 시각 검사와 Pages 공개 결과는 GitHub Actions에서 확인합니다.
+8. **알려진 제한과 주의사항**: 기기 내장 브라우저 음성은 Web Speech 재생용이며 WAV/MP3 파일을 생성하지 않습니다. 전체 MP3는 실제 서버 음원과 공개 API가 필요합니다. 성별 미확인 음성의 실제 음색은 보증하지 않으며 승인 WAV/사람 청취/다른 PC 실기기 검증은 별도입니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.52-generation-download-full.zip` / `SoriON-AI-0.11.51-to-0.11.52-generation-download-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.53 · Cross-Device Audio Persistence. 공개 서버/저장·권한 정책과 실제 다른 PC 다운로드·성우 검증을 진행합니다.
+
 ## 2026-10-22 KST · 0.11.51 Timeline Dock Target & Voice Guide Clarity
 
 1. **작업 일시(KST)**: 2026-10-22.
@@ -72,7 +85,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.51 · Timeline Dock Target & Voice Guide Clarity**
+Current baseline: **0.11.52 · Generation Replay & Download Clarity**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**

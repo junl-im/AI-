@@ -198,3 +198,45 @@
 
 .soa-app-root.is-editor .soa-project-rail:not(.is-collapsed) > .soa-studio-panel-toggle { flex: 0 0 auto; min-width: 76px; }
 .soa-app-root.is-editor .soa-voice-drawer:not(.is-collapsed) > .soa-studio-panel-toggle { min-width: 76px; }
+
+.soa-app-root.is-editor .soa-timeline-playback-speed {
+  display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 5px 8px; border: 1px solid #c4b3d7; border-radius: 10px;
+  color: #4a365d; background: #eee7f7; font-size: 11px; font-weight: 800;
+}
+.soa-app-root.is-editor .soa-timeline-playback-speed select {
+  min-height: 32px; border: 1px solid #9d84b7; border-radius: 7px;
+  padding: 2px 7px; color: #332044; background: #fff; font-weight: 800;
+}
+.soa-app-root.is-editor .soa-timeline-playback-speed small { color: #675978; font-size: 10px; }
+.soa-app-root.is-editor .soa-timeline-playback-speed select:focus-visible {
+  outline: 2px solid #604284; outline-offset: 2px;
+}
+
+.soa-app-root.is-editor .soa-timeline-toolbar { display: flex; flex-wrap: wrap; }
+.soa-app-root.is-editor .soa-timeline-toolbar > div:first-child { flex: 1 1 100%; }
+.soa-app-root.is-editor .soa-timeline-toolbar > p { flex: 1 1 100%; }
+
+.soa-app-root.is-editor .soa-generated-save {
+  margin: 12px 0; padding: 16px; border: 1px solid #bba6d1;
+  border-radius: 14px; color: #30263b; background: #faf7fd;
+}
+.soa-generated-save__heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.soa-generated-save__heading strong { font-size: 15px; }
+.soa-generated-save__heading span { color: #665276; font-size: 12px; }
+.soa-generated-save p { margin: 8px 0; font-size: 12px; line-height: 1.5; }
+.soa-generated-save__clips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.soa-app-root.is-editor .soa-generated-save :is(a, button) {
+  display: inline-flex; align-items: center; min-height: 40px; margin-right: 8px;
+  padding: 8px 12px; border: 1px solid #74528f; border-radius: 9px;
+  color: #fff; background: #654784; font-size: 12px; font-weight: 800; cursor: pointer;
+}
+.soa-app-root.is-editor .soa-generated-save :is(a, button):focus-visible {
+  outline: 2px solid #63458a; outline-offset: 2px;
+}
+.soa-app-root.is-editor .soa-generated-save .soa-generated-save__script {
+  color: #46325c; background: #eee4f8;
+}
+.soa-app-root.is-editor .soa-generated-save .soa-generated-save__limit {
+  color: #755347; font-weight: 700;
+}

@@ -213,13 +213,22 @@ describe('browserSpeech', () => {
       .not.toBe(createBrowserSpeechPlayback({ ...request, voiceId: 'min-energetic' }).rate)
   })
 
-  it('중성 프리셋을 성별이 명시된 음성으로 자동 대체하지 않는다', () => {
+  it('중성 음성이 없으면 한국어 기기 음성으로 근사하며 음색 한계를 밝힌다', () => {
     const genderedOnly = [
       { name: 'Korean Female', lang: 'ko-KR', voiceURI: 'female' },
       { name: 'Korean Male', lang: 'ko-KR', voiceURI: 'male' },
     ] as SpeechSynthesisVoice[]
 
-    expect(selectBrowserSpeechVoice(genderedOnly, 'dam-calm')).toBeNull()
+    expect(selectBrowserSpeechVoice(genderedOnly, 'dam-calm')?.name).toBe('Korean Female')
+    expect(diagnoseBrowserSpeechVoices(genderedOnly).find((item) => item.voiceId === 'dam-calm'))
+      .toMatchObject({ status: 'ready', selectionBasis: 'neutral-device-fallback' })
+  })
+
+  it('성별을 밝히지 않는 한국어 음성도 근사 프리셋으로 제공한다', () => {
+    const unverified = [{ name: 'Korean Voice', lang: 'ko-KR', voiceURI: 'generic-ko' }] as SpeechSynthesisVoice[]
+    expect(diagnoseBrowserSpeechVoices(unverified).every((item) => item.status === 'ready')).toBe(true)
+    expect(diagnoseBrowserSpeechVoices(unverified).find((item) => item.voiceId === 'jun-deep'))
+      .toMatchObject({ selectionBasis: 'unverified-gender', inferredGender: 'unknown' })
   })
 
   it('알 수 없는 프리셋 ID를 첫 여성 프리셋으로 바꾸지 않는다', () => {

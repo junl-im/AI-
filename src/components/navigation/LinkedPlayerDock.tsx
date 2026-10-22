@@ -383,6 +383,7 @@ export function LinkedPlayerDock() {
       element.pause()
       element.load()
       element.playbackRate = playbackRateRef.current
+      element.preservesPitch = true
       const shouldRestoreNativePosition = !progressiveActive && !browserPlayback && handoffPosition > 0
       const resumeNativeAudio = () => {
         if (shouldRestoreNativePosition && Number.isFinite(element.duration)) {
@@ -443,7 +444,10 @@ export function LinkedPlayerDock() {
 
   useEffect(() => {
     playbackRateRef.current = playbackRate
-    if (ref.current) ref.current.playbackRate = playbackRate
+    if (ref.current) {
+      ref.current.playbackRate = playbackRate
+      ref.current.preservesPitch = true
+    }
   }, [playbackRate])
 
   useEffect(() => {

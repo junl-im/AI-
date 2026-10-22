@@ -46,7 +46,7 @@ export interface BrowserVoiceSelectionDiagnostic {
   selectedVoiceName: string | null
   selectedVoiceUri: string | null
   inferredGender: VoiceGender | 'unknown' | null
-  selectionBasis: 'preferred-token' | 'variant-index' | 'compatible-cycle' | 'none'
+  selectionBasis: 'preferred-token' | 'variant-index' | 'compatible-cycle' | 'unverified-gender' | 'neutral-device-fallback' | 'none'
   koreanCandidateCount: number
   compatibleCandidateCount: number
   reason: string
@@ -196,12 +196,11 @@ function compatibleVoices(
   preset: VoicePreset,
 ): { korean: SpeechSynthesisVoice[]; compatible: SpeechSynthesisVoice[] } {
   const korean = voices.filter((voice) => voice.lang.toLowerCase().startsWith('ko'))
-  const compatible = korean.filter((voice) => {
-    const inferredGender = inferBrowserVoiceGender(voice)
-    return preset.gender === 'neutral'
-      ? inferredGender === 'unknown'
-      : inferredGender === preset.gender
-  })
+  const confirmed = korean.filter((voice) => inferBrowserVoiceGender(voice) === preset.gender)
+  const unverified = korean.filter((voice) => inferBrowserVoiceGender(voice) === 'unknown')
+  const compatible = preset.gender === 'neutral'
+    ? (unverified.length ? unverified : korean)
+    : (confirmed.length ? confirmed : unverified)
   return { korean, compatible }
 }
 
@@ -253,11 +252,16 @@ function selectBrowserSpeechVoiceWithEvidence(
   })
   const exactVariant = compatible[preset.voiceVariantIndex] ?? null
   const selected = preferred ?? exactVariant ?? compatible[preset.voiceVariantIndex % compatible.length]
-  const selectionBasis = preferred
-    ? 'preferred-token'
-    : exactVariant
-      ? 'variant-index'
-      : 'compatible-cycle'
+  const inferredGender = inferBrowserVoiceGender(selected)
+  const selectionBasis = preset.gender === 'neutral' && inferredGender !== 'unknown'
+    ? 'neutral-device-fallback'
+    : inferredGender === 'unknown'
+      ? 'unverified-gender'
+      : preferred
+        ? 'preferred-token'
+        : exactVariant
+          ? 'variant-index'
+          : 'compatible-cycle'
   return {
     voice: selected,
     diagnostic: {
@@ -267,15 +271,19 @@ function selectBrowserSpeechVoiceWithEvidence(
       status: 'ready',
       selectedVoiceName: selected.name,
       selectedVoiceUri: selected.voiceURI,
-      inferredGender: inferBrowserVoiceGender(selected),
+      inferredGender,
       selectionBasis,
       koreanCandidateCount: korean.length,
       compatibleCandidateCount: compatible.length,
-      reason: selectionBasis === 'preferred-token'
-        ? '프리셋 선호 토큰과 성별이 일치하는 음성을 선택했습니다.'
-        : selectionBasis === 'variant-index'
-          ? `성별 호환 후보 중 프리셋 전용 순번 ${preset.voiceVariantIndex + 1}을 선택했습니다.`
-          : '설치된 같은 성별 한국어 음성이 제한적이어서 해당 음성을 프리셋 속도·높낮이 설정과 함께 재사용합니다.',
+      reason: selectionBasis === 'unverified-gender'
+        ? '이 기기의 한국어 음성은 성별 정보가 확인되지 않았습니다. 운율만 적용한 근사 성우로 재생합니다.'
+        : selectionBasis === 'neutral-device-fallback'
+          ? '중성 한국어 음성이 없어 기기 한국어 음성으로 근사 재생합니다. 중성 음색을 보장하지 않습니다.'
+          : selectionBasis === 'preferred-token'
+            ? '프리셋 선호 토큰과 성별이 일치하는 음성을 선택했습니다.'
+            : selectionBasis === 'variant-index'
+              ? `성별 호환 후보 중 프리셋 전용 순번 ${preset.voiceVariantIndex + 1}을 선택했습니다.`
+              : '설치된 같은 성별 한국어 음성이 제한적이어서 해당 음성을 프리셋 속도·높낮이 설정과 함께 재사용합니다.',
     },
   }
 }
@@ -293,7 +301,8 @@ export function createBrowserSpeechResult(
 ): TtsSynthesisResult {
   const preset = requireVoicePreset(request.voiceId)
   const voices = availableBrowserVoices()
-  const selected = selectBrowserSpeechVoice(voices, request.voiceId)
+  const assignment = selectBrowserSpeechVoiceWithEvidence(voices, preset)
+  const selected = assignment.voice
   if (voices.length === 0) {
     throw new Error('이 브라우저에서 음성 목록을 아직 불러오지 못했습니다. 잠시 후 다시 시도하고, 계속 비어 있으면 한국어 시스템 음성 설치를 확인해 주세요.')
   }
@@ -312,7 +321,7 @@ export function createBrowserSpeechResult(
     audioUrl: null,
     estimatedDurationSeconds: estimateBrowserSpeechDuration(playback.text, playback.rate),
     message: selected
-      ? `${preset.name} · ${preset.personaLabel} 프로필로 기기 내장 한국어 음성(${selected.name})을 재생합니다. 성우별 pace·문장 리듬과 제한된 pitch를 적용한 근사 음성이며 전용 neural 성우와는 다릅니다.`
+      ? `${preset.name} · ${preset.personaLabel} 프로필로 기기 내장 한국어 음성(${selected.name})을 재생합니다. ${assignment.diagnostic.reason} 성우별 pace·문장 리듬과 제한된 pitch를 적용한 근사 음성이며 전용 neural 성우와는 다릅니다.`
       : '브라우저 음성 목록을 불러오는 중입니다. 재생 시 프리셋 성별을 다시 확인하며 반대 성별 음성은 사용하지 않습니다.',
     normalizedText: request.text,
     segmentCount: 1,

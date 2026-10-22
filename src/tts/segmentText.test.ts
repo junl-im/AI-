@@ -24,6 +24,20 @@ describe('splitTextForUi', () => {
     ])
   })
 
+  it('상담 안내 예시의 첫 인사말은 한 클립만 생성한다', () => {
+    const script = [
+      '안녕하세요. 매장 운영의 새로운 가치를 만들어가는 메타씨티입니다.',
+      '포스와 키오스크, 그리고 메타플레이스까지.',
+      '더욱 편리한 주문과 스마트한 결제, 효율적인 매장 운영을 위해 언제나 고객님과 함께하겠습니다.',
+      '잠시만 기다려 주시면 전문 상담원에게 친절하게 연결해 드리겠습니다.',
+      '감사합니다.',
+    ].join('\n')
+    const clips = splitTextForUi(script)
+    expect(clips[0]).toBe('안녕하세요.')
+    expect(clips.filter((clip) => clip === '안녕하세요.')).toHaveLength(1)
+    expect(clips.join(' ')).toContain('감사합니다.')
+  })
+
   it('빈 문장은 빈 구간을 반환한다', () => {
     expect(splitTextForUi('   ')).toEqual([])
   })

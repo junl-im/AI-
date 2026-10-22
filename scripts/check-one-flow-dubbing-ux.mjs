@@ -137,7 +137,8 @@ const timeline = await source('src/hooks/useTimelineGeneration.ts')
 requireTokens('src/hooks/useTimelineGeneration.ts', timeline, [
   'async (ids: string[], autoplayFirst = false)',
   'TIMELINE_GENERATION_CONCURRENCY = 2',
-  'await generateOne(requestedIds[0], true)',
+  'await generateOne(requestedIds[0])',
+  'selectAndPlay(orderedTrackIds[0])',
   'runBoundedOrderedBatch(',
   'alignTrackOrder(orderedTrackIds)',
   'cancelAllGeneration',

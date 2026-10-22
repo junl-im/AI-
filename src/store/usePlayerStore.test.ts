@@ -199,6 +199,13 @@ describe('usePlayerStore', () => {
     }])
   })
 
+  it('새 제작을 위해 대기열을 비우면 이전 한 곡 반복을 해제한다', () => {
+    usePlayerStore.getState().enqueue(audio('one'))
+    usePlayerStore.setState({ repeatMode: 'one' })
+    usePlayerStore.getState().clearQueue()
+    expect(usePlayerStore.getState().repeatMode).toBe('off')
+  })
+
   it('안전하게 저장된 대기열과 재생 위치를 빈 store에 복원한다', () => {
     const restored = {
       id: 'restored-track',

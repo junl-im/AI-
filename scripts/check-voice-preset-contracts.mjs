@@ -132,7 +132,7 @@ for (const required of [
   'preset.voiceVariantIndex',
   '반대 성별 음성 재생을 차단했습니다',
   'compatible.length === 0',
-  "selectionBasis: 'preferred-token' | 'variant-index' | 'compatible-cycle' | 'none'",
+  "selectionBasis: 'preferred-token' | 'variant-index' | 'compatible-cycle' | 'unverified-gender' | 'neutral-device-fallback' | 'none'",
   'preset.voiceVariantIndex % compatible.length',
   'requireVoicePreset',
   'BROWSER_USER_PITCH_SCALE = 0.3',

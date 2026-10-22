@@ -264,6 +264,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     return {
       queue: [],
       currentTrackId: null,
+      repeatMode: 'off',
       playbackTrackId: null,
       playbackPositionSeconds: 0,
       playbackActive: false,

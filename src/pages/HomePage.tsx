@@ -10,6 +10,8 @@ import { DesktopVoiceDrawer } from '../components/workspace/DesktopVoiceDrawer'
 import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader'
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
 import { LongformComposer } from '../components/workspace/LongformComposer'
+import { GeneratedAudioSave } from '../components/workspace/GeneratedAudioSave'
+import { FinalExportDialog } from '../components/workspace/FinalExportDialog'
 import { SpeakerVoiceAssignmentPanel } from '../components/workspace/SpeakerVoiceAssignment'
 import { WorkspaceConversation } from '../components/workspace/WorkspaceConversation'
 import { WorkspaceProjectRail } from '../components/workspace/WorkspaceProjectRail'
@@ -79,6 +81,7 @@ export function HomePage() {
   useEffect(() => {
     if (workspaceEntered && page === 'home') scheduleStudioEntryAlignment()
   }, [workspaceEntered, page])
+  const [exportOpen, setExportOpen] = useState(false)
   const backendStatus = useAppStore((state) => state.backendStatus)
   const setLiveVoice = useAppStore((state) => state.setLiveVoice)
   const showNotice = useAppStore((state) => state.showNotice)
@@ -491,7 +494,7 @@ export function HomePage() {
       badge: pending.resume ? '이어서 생성' : '빠른 생성',
       text: pending.resume
         ? `남은 ${pending.blockIds.length}개 대사만 이어서 안전하게 생성합니다.`
-        : `${pending.blockIds.length}개 대사를 첫 음성부터 들려주고, 나머지는 안전하게 동시 처리합니다.`,
+        : `${pending.blockIds.length}개 대사를 모든 대사를 원문 순서로 준비한 뒤 첫 음성부터 한 번만 재생합니다.`,
     })
     const batch = await generateAllTimelineBlocks(pending.blockIds, !pending.resume)
     const generated = batch.results
@@ -978,7 +981,7 @@ export function HomePage() {
           <main className="soa-dubbing-main">
             {!engineCatalog.loading && backendStatus === 'degraded' && engineCatalog.selected?.mode === 'browser' ? (
               <div className="soa-device-playback-note" role="status">
-                <p>이 PC는 기기 내장 음성으로 대사를 재생합니다. 한국어 시스템 음성이 없거나 현재 성우와 맞지 않으면 생성할 수 없습니다.</p>
+                <p>이 PC는 기기 내장 음성으로 대사를 재생합니다. 한국어 시스템 음성이 없으면 재생할 수 없습니다. 성별 정보를 확인할 수 없는 기기 음성은 근사 성우로 안내하며 사용합니다.</p>
                 {window.speechSynthesis.getVoices().length === 0 ? (
                   <p>브라우저 음성 목록을 불러오는 중입니다. 계속 비어 있으면 한국어 시스템 음성을 확인해 주세요.</p>
                 ) : null}
@@ -1048,6 +1051,8 @@ export function HomePage() {
               }}
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
+            <GeneratedAudioSave blocks={timeline.blocks} scriptText={timeline.blocks.filter((block) => block.kind === 'voice').map((block) => block.text).join('\n')} onOpenExport={() => setExportOpen(true)} />
+            <FinalExportDialog open={exportOpen} blocks={timeline.blocks} onClose={() => setExportOpen(false)} />
             {pendingProjectSave ? (
               <div role="alert" className="soa-project-save-recovery">
                 <p>음성은 완성됐지만 프로젝트 목록에 저장하지 못했습니다. {projectSaveDurable

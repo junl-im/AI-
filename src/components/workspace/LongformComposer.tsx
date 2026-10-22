@@ -391,7 +391,7 @@ export function LongformComposer({
         <span>{disabled ? '생성 중…' : submitBlockedReason ? '화자 목소리 확인 필요' : '▶ 생성 및 재생'}</span>
         <small>
           {stats.segments > 0
-            ? `${stats.segments}개 대사 · 자동 분할 · 첫 음성 재생 · 순서 유지`
+            ? `${stats.segments}개 대사 · 자동 분할 · 전체 준비 후 첫 음성 재생 · 순서 유지`
             : '대본을 입력하면 바로 시작할 수 있습니다.'}
         </small>
       </button>

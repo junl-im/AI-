@@ -1,3 +1,7 @@
+## 0.11.52 · Generation Replay & Download Clarity
+
+이전 한 곡 반복 설정을 새 제작에서 해제하고 전체 클립 준비 후 첫 대사를 한 번만 재생합니다. 성별 정보가 없는 한국어 시스템 음성을 근사 fallback으로 명시하며 타임라인 안전 듣기 속도와 생성 결과 다운로드 UI를 제공합니다. 서버 음원과 브라우저 재생 전용 음성의 파일 가능 여부는 `docs/HANDOVER.md`에 기록했습니다.
+
 ## 0.11.51 · Timeline Dock Target & Voice Guide Clarity
 
 클립 선택과 Dock 현재 트랙을 동기화하고 재생 시작을 해당 클립의 0초로 맞췄습니다. 짧은 초안의 일률적인 혜린 추천을 숨기고 현재 성우와 추천을 구분했습니다. 자세한 검증·기기 간 재생 제한은 `docs/HANDOVER.md`와 `docs/NEXT_UPDATE.md`를 참조하세요.

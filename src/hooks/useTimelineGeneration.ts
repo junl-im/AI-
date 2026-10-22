@@ -85,6 +85,7 @@ export function useTimelineGeneration() {
   const [editHistory, setEditHistory] = useState<TimelineEditHistoryState>(EMPTY_TIMELINE_EDIT_HISTORY)
   const enqueue = usePlayerStore((state) => state.enqueue)
   const enqueueAndPlay = usePlayerStore((state) => state.enqueueAndPlay)
+  const selectAndPlay = usePlayerStore((state) => state.selectAndPlay)
   const replaceTrack = usePlayerStore((state) => state.replace)
   const alignTrackOrder = usePlayerStore((state) => state.alignTrackOrder)
   const appendProgressiveSegment = usePlayerStore((state) => state.appendProgressiveSegment)
@@ -284,7 +285,7 @@ export function useTimelineGeneration() {
 
     let startIndex = 0
     if (autoplayFirst && requestedIds.length > 0) {
-      await generateOne(requestedIds[0], true)
+      await generateOne(requestedIds[0])
       startIndex = 1
     }
 
@@ -310,13 +311,16 @@ export function useTimelineGeneration() {
       const audio = resultById.get(blockId)
       return audio ? [{ blockId, audio }] : []
     })
+    if (autoplayFirst && batchGenerationRunRef.current === runId && orderedTrackIds[0]) {
+      selectAndPlay(orderedTrackIds[0])
+    }
     return {
       results,
       cancelled: batchGenerationRunRef.current !== runId,
       concurrency,
       routing: buildEngineRoutingTrace(results),
     }
-  }, [alignTrackOrder, runBlock])
+  }, [alignTrackOrder, runBlock, selectAndPlay])
 
   const cancelAllGeneration = useCallback(() => {
     batchGenerationRunRef.current += 1

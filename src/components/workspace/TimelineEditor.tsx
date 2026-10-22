@@ -107,6 +107,8 @@ export function TimelineEditor({
   const playbackTrackId = usePlayerStore((state) => state.playbackTrackId)
   const playbackPositionSeconds = usePlayerStore((state) => state.playbackPositionSeconds)
   const playbackActive = usePlayerStore((state) => state.playbackActive)
+  const playbackRate = usePlayerStore((state) => state.playbackRate)
+  const setPlaybackRate = usePlayerStore((state) => state.setPlaybackRate)
   const toggleTrack = usePlayerStore((state) => state.toggleTrack)
   const selectTrack = usePlayerStore((state) => state.select)
   const updateResumePosition = usePlayerStore((state) => state.updateResumePosition)
@@ -502,6 +504,14 @@ export function TimelineEditor({
             title={redoLabel ? `다시 실행 · ${redoLabel}` : '다시 실행 · Ctrl/Cmd+Shift+Z'}
           >↷ <span>Redo</span></button>
         </div>
+        <label className="soa-timeline-playback-speed">
+          <span>듣기 속도</span>
+          <select aria-label="타임라인 재생 속도" value={playbackRate} onChange={(event) => setPlaybackRate(Number(event.target.value))}>
+            {![0.9, 1, 1.1, 1.2].includes(playbackRate) ? <option value={playbackRate}>{playbackRate}× · Dock 설정</option> : null}
+            {[0.9, 1, 1.1, 1.2].map((rate) => <option key={rate} value={rate}>{rate}×</option>)}
+          </select>
+          <small>음정 유지 · 재생만</small>
+        </label>
         <div className="soa-timeline-zoom" aria-label="타임라인 확대 축소">
           <button type="button" onClick={() => setZoom((value) => Math.max(0.72, value - 0.14))} aria-label="타임라인 축소">−</button>
           <button type="button" onClick={() => setZoom(getDefaultTimelineZoom())} aria-label="타임라인 기본 배율">{Math.round(zoom * 100)}%</button>
