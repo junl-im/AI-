@@ -391,6 +391,14 @@ export function TimelineEditor({
     seekTrack(block.trackId, ratio * track.audio.durationSeconds)
   }
 
+  function seekWithinVoiceClip(id: string, fraction: number) {
+    const block = blocks.find((item) => item.id === id)
+    if (block?.kind !== 'voice' || !block.trackId || block.status !== 'ready') return
+    const track = playerQueue.find((item) => item.id === block.trackId)
+    if (!track || track.audio.browserSpeech || track.audio.partial || !track.audio.durationSeconds) return
+    seekTrack(block.trackId, Math.max(0, Math.min(1, fraction)) * track.audio.durationSeconds)
+  }
+
   function startTimelineScrub(event: PointerEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement
     if (target.closest('button, textarea, input, a, .soa-dubbing-block, .soa-dubbing-pause-block')) return
@@ -938,6 +946,7 @@ export function TimelineEditor({
                           dockTarget={currentTrackId === block.trackId && selectedBlockIds.has(block.id)}
                           voiceUnavailable={resolveVoiceChoice(voiceChoices, block.voiceId).kind === 'my-voice' && !resolveVoiceChoice(voiceChoices, block.voiceId).ready}
                           onSelect={selectBlock}
+                          onSeekAtFraction={seekWithinVoiceClip}
                           onToggleTrack={toggleTrack}
                           onMove={moveSelection}
                           onReorder={onReorder}

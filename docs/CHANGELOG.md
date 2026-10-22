@@ -1910,3 +1910,8 @@ GitHub Actions의 Chromium 시작 15초 제한으로 두 번 실패한 화면 �
 
 - Windows npm 실행을 Node CLI 직접 실행으로 보정하고 POSIX shell 전용 lock fallback fixture를 플랫폼 독립 Node fixture로 교체했습니다. shell을 사용하지 않으며 공백과 &가 포함된 임시 경로에서도 fallback과 기존 lock 복원을 검증합니다.
 - Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ignore-scripts 성공(557 packages), typecheck PASS, lint PASS, Vitest 75 files / 283 tests PASS, Vite build PASS, lock fallback/restoration fixture PASS. API/Worker, 실제 음성 모델, Android/iOS, 배포 화면 검증은 이번 개발 도구 수정 범위에서 미실행. build에 500kB chunk 권고가 남습니다. 로컬 Node 24.16.0/npm 11.13.0이며 CI 고정 런타임 재검증은 Push 후 필요합니다.
+## 0.11.54 · Local Korean WAV & Clip-Position Seek
+
+- 파일 음원 클립 내부를 클릭하면 해당 위치로 Dock 재생 헤드가 이동합니다. 기기 내장 Web Speech처럼 파일이 없는 트랙은 WAV 변환 후 중간 탐색을 사용할 수 있습니다.
+- 선택형 Supertonic 3 브라우저 모델을 연결해 한국어 대사를 실제 WAV로 생성하고 클립별 파일 및 전체 타임라인 WAV를 다운로드합니다. 첫 실행 시 약 380MB 다운로드가 필요하며 다섯 기본 성우는 원본 음색이 아닌 근사 스타일에 매핑됩니다.
+- 헤더에 현재 버전을 표시해 오래된 PWA 화면과 새 배포를 구별합니다. 브라우저 음성의 탭 오디오 WebM 녹음 경로도 유지합니다.

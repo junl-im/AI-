@@ -1,0 +1,85 @@
+import type * as SupertonicHelper from '../vendor/supertonicHelper.js'
+import type { TimelineVoiceBlock } from '../workspace/workspaceTypes'
+
+const MODEL_REVISION = 'aafc6e32416a594460b32413efc49d7fe4ce6d46'
+const MODEL_BASE = `https://huggingface.co/supertone-oss-archive/supertonic-3/resolve/${MODEL_REVISION}`
+
+// Style mapping is an approximation of the five product personas, not the original speakers.
+export const LOCAL_STYLE_BY_VOICE: Record<string, string> = {
+  'sori-warm': 'F2',
+  'on-clear': 'M1',
+  'dam-calm': 'F3',
+  'jun-deep': 'M2',
+  'min-energetic': 'M3',
+}
+
+type Helper = typeof SupertonicHelper
+type Model = Awaited<ReturnType<Helper['loadTextToSpeech']>>['textToSpeech']
+let modelPromise: Promise<{ model: Model; helper: Helper }> | null = null
+const stylePromises = new Map<string, Promise<Awaited<ReturnType<Helper['loadVoiceStyle']>>>>()
+
+async function loadModel(onProgress: (message: string) => void): Promise<{ model: Model; helper: Helper }> {
+  if (!modelPromise) {
+    modelPromise = (async () => {
+      onProgress('한국어 WAV 엔진을 불러오는 중입니다. 첫 실행 시 약 380MB 모델을 내려받습니다.')
+      const [ort, helper] = await Promise.all([
+        import('onnxruntime-web'),
+        import('../vendor/supertonicHelper.js'),
+      ])
+      ort.env.wasm.numThreads = 1
+      const load = (provider: 'webgpu' | 'wasm') => helper.loadTextToSpeech(
+        `${MODEL_BASE}/onnx`,
+        { executionProviders: [provider], graphOptimizationLevel: 'all' },
+        (name, index, total) => onProgress(`한국어 WAV 엔진 불러오는 중 · ${name} ${index}/${total}`),
+      )
+      if ('gpu' in navigator) {
+        try {
+          const loaded = await load('webgpu')
+          return { model: loaded.textToSpeech, helper }
+        } catch {
+          onProgress('GPU를 사용할 수 없어 CPU 모드로 전환합니다.')
+        }
+      }
+      const loaded = await load('wasm')
+      return { model: loaded.textToSpeech, helper }
+    })().catch((error: unknown) => {
+      modelPromise = null
+      throw error
+    })
+  }
+  return modelPromise
+}
+
+export interface LocalWavResult {
+  blob: Blob
+  durationSeconds: number
+  styleId: string
+}
+
+export async function synthesizeSupertonicWav(
+  block: TimelineVoiceBlock,
+  signal: AbortSignal,
+  onProgress: (message: string) => void,
+): Promise<LocalWavResult> {
+  if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
+  const { model, helper } = await loadModel(onProgress)
+  if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
+  const styleId = LOCAL_STYLE_BY_VOICE[block.voiceId] ?? 'F2'
+  let stylePromise = stylePromises.get(styleId)
+  if (!stylePromise) {
+    stylePromise = helper.loadVoiceStyle([`${MODEL_BASE}/voice_styles/${styleId}.json`]).catch((error: unknown) => {
+      stylePromises.delete(styleId)
+      throw error
+    })
+    stylePromises.set(styleId, stylePromise)
+  }
+  const style = await stylePromise
+  if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
+  onProgress(`${block.voiceName} · 음성 파일 생성 중`)
+  const { wav, duration } = await model.call(block.text, 'ko', style, 6,
+    Math.max(0.9, Math.min(1.13, block.speed)), 0.25)
+  if (signal.aborted) throw new DOMException('생성이 취소되었습니다.', 'AbortError')
+  const sampleCount = Math.min(wav.length, Math.floor(model.sampleRate * duration[0]))
+  const buffer = helper.writeWavFile(wav.slice(0, sampleCount), model.sampleRate)
+  return { blob: new Blob([buffer], { type: 'audio/wav' }), durationSeconds: sampleCount / model.sampleRate, styleId }
+}

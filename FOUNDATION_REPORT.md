@@ -533,3 +533,6 @@ Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ig
 
 ## 2026-10-12 · 0.11.39
 밝은 테마와 dark 하위 규칙의 색 충돌을 수정하고 배경/글자/강조색 쌍을 정리했습니다. Chrome17화면의 측정 대상 대비 기준 미달0건. 전체 접근성·실기기 피로도 인증은 아닙니다. 상세: docs/READABLE_COLORS_0.11.39.md.
+## 0.11.54 · Local Korean WAV & Clip-Position Seek
+
+정적 Pages 환경에서도 파일 저장이 가능하도록 MIT 코드와 OpenRAIL-M 모델의 Supertonic 3를 사용자 선택 시 내려받는 브라우저 ONNX 경로로 연결했습니다. Chrome에서 한국어 문장으로 245,484바이트, 약 2.78초 WAV 생성을 직접 확인했습니다. 클립 내 클릭 위치를 Dock 재생 헤드로 전달하고 대사별·전체 WAV 내보내기를 추가했습니다. 모델 음색은 기존 다섯 성우의 동일한 음색이 아니며 모델·파일의 다른 PC 자동 동기화는 아직 없습니다. 근거와 위험은 `docs/LOCAL_WAV_ENGINE_0.11.54.md`에 기록합니다.

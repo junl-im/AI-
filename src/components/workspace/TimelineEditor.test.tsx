@@ -222,6 +222,23 @@ describe('TimelineEditor', () => {
     expect(usePlayerStore.getState().seekRequestId).toBe(before + 1)
   })
 
+  it('대사 클립 안을 클릭하면 선택된 Dock 음원의 해당 초로 이동한다', () => {
+    const track = linkedTrack('track-clip-seek')
+    track.audio = { ...track.audio, durationSeconds: 12 }
+    const playableBlocks: TimelineBlock[] = blocks.map((block) => block.id === 'voice-1' && block.kind === 'voice'
+      ? { ...block, trackId: track.id }
+      : block)
+    usePlayerStore.getState().restoreSession([track], track.id, 'off', 1)
+    const { container } = render(<TimelineEditor blocks={playableBlocks} onMove={vi.fn()}
+      onReorder={vi.fn()} onSplit={vi.fn()} onUpdateText={vi.fn()} onRetry={vi.fn()}
+      onAddVoice={vi.fn()} onAddPause={vi.fn()} onRemove={vi.fn()} onClear={vi.fn()} />)
+    const clip = container.querySelector<HTMLElement>('.soa-dubbing-block')!
+    vi.spyOn(clip, 'getBoundingClientRect').mockReturnValue({ left: 100, width: 200 } as DOMRect)
+    fireEvent.click(clip, { clientX: 150 })
+    expect(usePlayerStore.getState().currentTrackId).toBe(track.id)
+    expect(usePlayerStore.getState().seekTargetSeconds).toBe(3)
+  })
+
   it('완료·쉼·실패 블록과 문장별 재시도를 보여준다', () => {
     const onRetry = vi.fn()
     render(

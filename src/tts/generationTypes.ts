@@ -3,7 +3,7 @@ import type { BrowserSpeechPlayback } from './browserSpeech'
 import type { SpeechJobProgress } from './voiceApi'
 
 export type GenerationPhase = 'idle' | 'preparing' | 'requesting' | 'rendering' | 'completed' | 'cancelled' | 'failed'
-export type AudioSource = 'api' | 'browser-demo' | 'browser-speech'
+export type AudioSource = 'api' | 'browser-demo' | 'browser-speech' | 'browser-model'
 
 export interface PlaybackSeamMetric {
   fromSegment: number

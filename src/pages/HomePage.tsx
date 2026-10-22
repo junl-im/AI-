@@ -967,7 +967,8 @@ export function HomePage() {
             saveRecoveryNeeded={hydrated && storageMode === 'memory'}
             saveRetryPending={savePending}
             onRetrySave={() => void saveWorkspaceNow()}
-            downloadHref={currentTrack?.audio.source === 'api' && !currentTrack.audio.partial ? currentTrack.audio.url : null}
+            downloadHref={(currentTrack?.audio.source === 'api' || currentTrack?.audio.source === 'browser-model')
+              && !currentTrack.audio.partial ? currentTrack.audio.url : null}
             downloadName={currentTrack?.audio.filename ?? 'sorion-voice.wav'}
             onOpenDownload={() => {
               const target = document.getElementById('soa-generated-save')
@@ -1056,7 +1057,8 @@ export function HomePage() {
               }}
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
-            <GeneratedAudioSave blocks={timeline.blocks} scriptText={timeline.blocks.filter((block) => block.kind === 'voice').map((block) => block.text).join('\n')} onOpenExport={() => setExportOpen(true)} />
+            <GeneratedAudioSave blocks={timeline.blocks} scriptText={timeline.blocks.filter((block) => block.kind === 'voice').map((block) => block.text).join('\n')}
+              onOpenExport={() => setExportOpen(true)} onRenderLocalWav={timeline.renderLocalWav} />
             <FinalExportDialog open={exportOpen} blocks={timeline.blocks} onClose={() => setExportOpen(false)} />
             {pendingProjectSave ? (
               <div role="alert" className="soa-project-save-recovery">

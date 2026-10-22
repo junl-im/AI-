@@ -98,7 +98,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.53 · Visible Download & Browser Recording**
+Current baseline: **0.11.54 · Local Korean WAV & Clip-Position Seek**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**
@@ -107,6 +107,8 @@ Current baseline: **0.11.53 · Visible Download & Browser Recording**
 > 다음 AI 또는 개발자는 작업 전에 이 파일과 루트 `DELIVERY_RULES.md`를 끝까지 읽는다.
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
+
+현재 기능 상태(0.11.54): GitHub Pages 정적 Web은 공개 음성 서버 없이도 사용자가 선택한 Supertonic 3 브라우저 모델로 실제 한국어 WAV를 만들고 대사별·전체 파일을 내려받습니다. 기본 5성우는 모델 스타일의 근사 매핑이며 승인된 원본 성우가 아닙니다. Web Speech와 탭 오디오 WebM 대체 경로는 남아 있습니다. WAV는 현재 메모리 Blob URL이므로 재방문·다른 PC 자동 복구는 되지 않습니다. 0.11.55에서는 오디오 바이트의 지속 저장과 사용자 주도 내보내기/가져오기를 우선합니다. 기술·라이선스·실측 검증은 `docs/LOCAL_WAV_ENGINE_0.11.54.md`를 참조합니다.
 
 ## 보존 이력
 
@@ -621,3 +623,15 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 기존 PC 음원·프로젝트는 다른 PC로 자동 동기화되지 않습니다. `public/sorion-runtime-config.json` 공개 API 후보는 비어 있습니다. 다른 PC의 실제 한국어 음성 설치·스피커 출력은 원격으로 검증하지 못했습니다. 승인 WAV·모델 청취 인증도 없습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.50-other-pc-playback-clarity-full.zip` / `SoriON-AI-0.11.49-to-0.11.50-other-pc-playback-clarity-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.51 · Cross-Device Playback Plan & Recovery Export. 공개 서버·저장소·권한 정책, 로컬 복구 내보내기, 실제 다른 PC 음성·재생 검증.
+## 2026-10-22 KST · 0.11.54 Local Korean WAV & Clip-Position Seek
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.54 / 0.11.53 (`50f2bd9ab4d9`).
+3. **변경 내용**: 파일 음원 클립 내부 클릭 비율을 Dock 재생 위치로 전달했습니다. 사용자 선택 시 Supertonic 3를 브라우저에 내려받아 한국어 WAV를 만들고 클립별·전체 타임라인 WAV를 다운로드합니다. 헤더에 실행 중인 버전을 표시합니다.
+4. **변경 이유**: 다른 PC의 정적 Pages에서 Web Speech 재생만으로는 음성 파일 저장·중간 탐색이 불가능했고, 오래된 PWA 화면이 최신 안내를 가릴 수 있었습니다.
+5. **영향 범위**: Web 타임라인, Dock 탐색, 저장 패널, ONNX 브라우저 모델, WAV 결합, 버전 표시. API/Worker·공개 서버·계정 동기화는 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `src/tts/supertonicWav.ts`, `src/vendor/supertonicHelper.js`, `src/export/timelineWav.ts`, `src/components/workspace/{TimelineEditor,TimelineVoiceBlockCard,GeneratedAudioSave}*`, `src/hooks/useTimelineGeneration.ts`, `src/components/layout/CompactWorkspaceHeader.tsx`, 버전·릴리스 문서.
+7. **검증 결과**: Chrome headless에서 한국어 문장 245,484바이트/약 2.78초 WAV 생성 확인. 관련 30개 테스트, 타입 검사, 린트 통과. 전체 CI/공개 Pages는 배포 검증 결과를 기록합니다.
+8. **알려진 제한과 주의사항**: 모델 첫 다운로드 약 380MB와 브라우저 메모리가 필요합니다. WebGPU 실패 시 WASM CPU로 전환합니다. 기본 5성우는 기존 원본 음색이 아닌 근사 스타일입니다. WAV Blob URL은 새로고침 후 유지되지 않으므로 즉시 파일 다운로드해야 합니다. 다른 PC 자동 동기화와 실제 사람 청취 인증은 없습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.54-local-wav-full.zip` / `SoriON-AI-0.11.53-to-0.11.54-local-wav-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.55 · Durable Audio & Cross-Device Recovery. WAV 바이트 지속 저장, 프로젝트 묶음 내보내기/가져오기, 다른 PC 실기기 청취·탐색 QA.

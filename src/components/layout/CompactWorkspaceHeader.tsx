@@ -1,6 +1,7 @@
 import { workspacePageLabels } from '../../navigation/navigationItems'
 import { useAppStore } from '../../store/useAppStore'
 import { BrandMark } from '../ui/BrandMark'
+import { currentBuildInfo } from '../../update/buildInfo'
 
 export function CompactWorkspaceHeader() {
   const page = useAppStore((state) => state.page)
@@ -17,6 +18,7 @@ export function CompactWorkspaceHeader() {
       >
         <BrandMark compact />
         <span className="soa-compact-brand__page">{workspacePageLabels[page]}</span>
+        <span className="soa-compact-brand__version">v{currentBuildInfo.appVersion}</span>
       </button>
       <div className="soa-compact-header__actions">
         <button

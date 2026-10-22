@@ -16,6 +16,8 @@ import {
 } from '../workspace/timelineBlocks'
 import { createRandomId } from '../utils/randomId'
 import { runTimelineVoiceBlock } from '../timeline/generationRuntime'
+import { synthesizeSupertonicWav } from '../tts/supertonicWav'
+import { buildAudioFilename } from '../tts/audioFile'
 import {
   EMPTY_TIMELINE_EDIT_HISTORY,
   TIMELINE_EDIT_HISTORY_LIMIT,
@@ -652,6 +654,59 @@ export function useTimelineGeneration() {
     commitEdit('타임라인 전체 비우기', () => [])
   }, [cancelActiveGeneration, commitEdit, removeTrack])
 
+  const renderLocalWav = useCallback(async (
+    blockId: string,
+    signal: AbortSignal,
+    onProgress: (message: string) => void,
+  ): Promise<GeneratedAudio> => {
+    const block = blocksRef.current.find((item) => item.id === blockId)
+    if (!block || block.kind !== 'voice' || block.status === 'generating') {
+      throw new Error('생성 중이 아닌 대사만 WAV 파일로 만들 수 있습니다.')
+    }
+    const revision = block.revision
+    const generated = await synthesizeSupertonicWav(block, signal, onProgress)
+    const latest = blocksRef.current.find((item) => item.id === blockId)
+    if (signal.aborted || latest?.kind !== 'voice' || latest.revision !== revision) {
+      throw new DOMException('대사가 변경되어 WAV 생성을 중단했습니다.', 'AbortError')
+    }
+    const url = URL.createObjectURL(generated.blob)
+    const audio: GeneratedAudio = {
+      url,
+      filename: buildAudioFilename(block.text, block.voiceName, 'wav'),
+      source: 'browser-model',
+      durationSeconds: generated.durationSeconds,
+      revokeOnRemove: true,
+      result: {
+        jobId: `local-${block.id}`,
+        status: 'completed',
+        engineId: 'supertonic-local',
+        engineMode: 'browser',
+        audioUrl: url,
+        estimatedDurationSeconds: generated.durationSeconds,
+        message: `기기 내 Supertonic 3 ${generated.styleId} 스타일로 만든 WAV입니다. 기존 성우의 원본 음색과는 다릅니다.`,
+        normalizedText: block.text,
+        segmentCount: 1,
+        processingMs: null,
+        fileSizeBytes: generated.blob.size,
+        realtimeFactor: null,
+      },
+    }
+    const existsInQueue = Boolean(block.trackId && usePlayerStore.getState().queue.some((track) => track.id === block.trackId))
+    const trackId = existsInQueue && block.trackId
+      ? (replaceTrack(block.trackId, audio), block.trackId)
+      : enqueue(audio, `${block.voiceName} · ${block.text.slice(0, 22)}`)
+    updateVoiceBlock(blockId, {
+      status: 'ready',
+      progress: 100,
+      audio,
+      trackId,
+      jobId: null,
+      durationSeconds: generated.durationSeconds,
+      error: null,
+    }, revision)
+    return audio
+  }, [enqueue, replaceTrack, updateVoiceBlock])
+
   return {
     blocks,
     stageText,
@@ -661,6 +716,7 @@ export function useTimelineGeneration() {
     restoreSession,
     recoverBlocks,
     generateAll,
+    renderLocalWav,
     cancelAllGeneration,
     getQueuedVoiceBlockIds,
     getVoiceBlockSnapshots,

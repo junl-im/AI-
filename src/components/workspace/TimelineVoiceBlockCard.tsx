@@ -18,6 +18,7 @@ interface TimelineVoiceBlockCardProps {
   dockTarget?: boolean
   voiceUnavailable?: boolean
   onSelect: (id: string, mode: 'single' | 'toggle' | 'range') => void
+  onSeekAtFraction?: (id: string, fraction: number) => void
   onToggleTrack: (trackId: string) => void
   onMove: (id: string, direction: -1 | 1) => void
   onReorder: (sourceId: string, targetId: string) => void
@@ -39,6 +40,7 @@ export function TimelineVoiceBlockCard({
   dockTarget = false,
   voiceUnavailable = false,
   onSelect,
+  onSeekAtFraction,
   onToggleTrack,
   onMove,
   onReorder,
@@ -114,10 +116,15 @@ export function TimelineVoiceBlockCard({
       tabIndex={0}
       aria-current={selected ? 'true' : undefined}
       draggable={block.status !== 'generating' && !multiSelected}
-      onClick={(event) => onSelect(
-        block.id,
-        event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single',
-      )}
+      onClick={(event) => {
+        const mode = event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single'
+        onSelect(block.id, mode)
+        if (mode !== 'single' || !onSeekAtFraction) return
+        if ((event.target as HTMLElement).closest('button, textarea, input, a, .soa-dubbing-block__grip')) return
+        const rect = event.currentTarget.getBoundingClientRect()
+        if (rect.width <= 0) return
+        onSeekAtFraction(block.id, Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)))
+      }}
       title={block.text}
       aria-label={`클립 ${voiceIndex + 1} · ${block.voiceName} · ${formatDuration(block.durationSeconds)} · ${statusLabel}${voiceUnavailable ? ' · 사용 불가 목소리' : ''}`}
       onKeyDown={handleKeyboard}
