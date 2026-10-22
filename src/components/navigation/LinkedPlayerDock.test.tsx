@@ -172,6 +172,22 @@ describe('LinkedPlayerDock', () => {
     expect(screen.getByRole('button', { name: '재생' })).toHaveAttribute('aria-pressed', 'false')
   })
 
+  it('타임라인이 지정한 트랙은 Dock 재생을 누를 때 그 음원으로 시작한다', async () => {
+    const play = vi.mocked(HTMLMediaElement.prototype.play)
+    usePlayerStore.getState().enqueue(generatedAudio(), '첫 대사')
+    const targetId = usePlayerStore.getState().enqueue(
+      { ...generatedAudio(), url: 'blob:second-dialogue' }, '선택한 대사',
+    )
+    render(<LinkedPlayerDock />)
+    act(() => usePlayerStore.getState().select(targetId))
+
+    expect(screen.getByText('선택한 대사')).toBeInTheDocument()
+    expect(play).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: '재생' }))
+    await vi.waitFor(() => expect(play).toHaveBeenCalledTimes(1))
+    expect(document.querySelector('audio')?.getAttribute('src')).toBe('blob:second-dialogue')
+  })
+
   it('재생 요청이 포함된 트랙은 선택 즉시 재생한다', async () => {
     const play = vi.mocked(HTMLMediaElement.prototype.play)
     render(<LinkedPlayerDock />)

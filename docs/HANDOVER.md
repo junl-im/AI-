@@ -5,8 +5,8 @@
 3. **변경 내용**: 완료된 타임라인 대사 클릭을 Dock 현재 트랙과 클립 시작 위치에 연결했습니다. 선택 클립에 Dock 대상 표식을 보입니다. 스크럽 중복 탐색을 제거하고, 대본 도우미의 현재 성우·다른 추천을 구분하며 짧은 대본의 기본 혜린 추천을 숨겼습니다. 양측 패널 숨김 버튼을 선명하게 했습니다.
 4. **변경 이유**: 클립 선택 후 Dock 재생이 이전 음원을 가리키고, 성우 안내와 추천이 섞여 보이며, 접기 버튼이 눈에 띄지 않았습니다.
 5. **영향 범위**: Web 타임라인, Dock 선택 상태, 대본 도우미, 데스크톱 패널 버튼. API/Worker 엔진과 기기 간 저장 정책은 변경하지 않았습니다.
-6. **변경·추가된 주요 파일**: `src/components/workspace/{TimelineEditor,TimelineVoiceBlockCard,StudioDirector,WorkspaceProjectRail,DesktopVoiceDrawer}*`, `src/styles/readable-colors.css`, `src/studio/scriptDirector.test.tsx`, 버전 파일, 릴리스 문서.
-7. **검증 결과**: Web 전체 348개·관련 25개 테스트, 빌드, 린트, preflight 55개, version sync, API 246 passed/1 skipped, Worker 16 passed, Ruff 통과. 실제 Chromium 시각 검사와 공개 배포는 GitHub Actions에서 확인합니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/{TimelineEditor,TimelineVoiceBlockCard,StudioDirector,WorkspaceProjectRail,DesktopVoiceDrawer}*, `src/components/navigation/LinkedPlayerDock.test.tsx``, `src/styles/readable-colors.css`, `src/studio/scriptDirector.test.tsx`, 버전 파일, 릴리스 문서.
+7. **검증 결과**: Web 전체 349개·타임라인/도우미 25개 및 Dock 17개 테스트, 빌드, 린트, preflight 55개, version sync, API 246 passed/1 skipped, Worker 16 passed, Ruff 통과. 실제 Chromium 시각 검사와 공개 배포는 GitHub Actions에서 확인합니다.
 8. **알려진 제한과 주의사항**: 생성 중·실패한 클립에는 재생 트랙이 없어 Dock 타깃으로 선택되지 않습니다. 다른 PC 간 음원 자동 동기화는 없습니다. 실제 기기 및 승인 성우 청취 검증은 별도입니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.51-timeline-dock-target-full.zip` / `SoriON-AI-0.11.50-to-0.11.51-timeline-dock-target-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.52 · Cross-Device Playback Recovery. 공개 HTTPS 음성 보관 정책과 로컬 복구 내보내기, 실기기 선택 재생 QA를 검토합니다.

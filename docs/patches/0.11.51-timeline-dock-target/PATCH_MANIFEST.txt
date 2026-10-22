@@ -23,6 +23,7 @@ services/api/tests/test_setup.py
 services/api/uv.lock
 services/worker/pyproject.toml
 services/worker/uv.lock
+src/components/navigation/LinkedPlayerDock.test.tsx
 src/components/workspace/DesktopVoiceDrawer.tsx
 src/components/workspace/StudioDirector.tsx
 src/components/workspace/TimelineEditor.test.tsx
