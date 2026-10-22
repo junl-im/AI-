@@ -27,6 +27,7 @@ import { useAppStore } from '../store/useAppStore'
 import { getCurrentTrack, usePlayerStore } from '../store/usePlayerStore'
 import {
   BROWSER_SPEECH_ENGINE_ID,
+  diagnoseBrowserSpeechVoices,
   isBrowserSpeechSupported,
 } from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
@@ -148,6 +149,11 @@ export function HomePage() {
   const getVoiceBlockSnapshots = timeline.getVoiceBlockSnapshots
   const updateTimelineVoices = timeline.updateVoiceMany
   const selectedVoice = useMemo(() => resolveVoiceChoice(voiceChoices, voiceId), [voiceChoices, voiceId])
+  const browserVoiceDiagnostics = engineCatalog.selected?.mode === 'browser'
+    ? diagnoseBrowserSpeechVoices()
+    : []
+  const selectedBrowserVoiceDiagnostic = browserVoiceDiagnostics.find((item) => item.voiceId === voiceId)
+  const availableBrowserPreset = browserVoiceDiagnostics.find((item) => item.status === 'ready')
   const selectedTimelineVoiceBlocks = useMemo(() => {
     if (selectedTimelineIds.length === 0) return []
     const selected = new Set(selectedTimelineIds)
@@ -506,10 +512,13 @@ export function HomePage() {
     }
     setResumeGeneration(null)
     if (generated.length === 0) {
+      const firstFailure = getVoiceBlockSnapshots(pending.blockIds).find((block) => block.error)?.error
       appendMessage({
         role: 'system',
         badge: '생성 실패',
-        text: '완성된 음성이 없습니다. 실패한 대사 블록에서 다시 생성해 주세요.',
+        text: firstFailure
+          ? `완성된 음성이 없어 하단 플레이어에 추가하지 못했습니다. 원인: ${firstFailure}`
+          : '완성된 음성이 없습니다. 실패한 대사 블록에서 다시 생성해 주세요.',
       })
       return
     }
@@ -531,6 +540,7 @@ export function HomePage() {
     appendMessage,
     generateAllTimelineBlocks,
     getQueuedVoiceBlockIds,
+    getVoiceBlockSnapshots,
     buildLongformProject,
     saveWorkspaceNow,
     showNotice,
@@ -748,8 +758,14 @@ export function HomePage() {
                   : `${voice.name} 목소리를 하단 플레이어에 연결했습니다.`,
       })
       setPreviewingId(null)
-    } catch {
+    } catch (error) {
       if (previewRunIdRef.current !== runId || controller.signal.aborted) return
+      if (voice.kind === 'preset' && presetPreviewEngineId === BROWSER_SPEECH_ENGINE_ID && !neuralPromoted) {
+        setPendingPreview(null)
+        setPreviewingId(null)
+        showNotice(error instanceof Error ? error.message : '이 기기에서 한국어 음성을 시작하지 못했습니다. 기기의 음성 언어 설정을 확인해 주세요.')
+        return
+      }
       if (voice.kind === 'preset' && neuralPromoted && isBrowserSpeechSupported()) {
         try {
           const fallbackRequest: TtsSynthesisRequest = {
@@ -960,6 +976,23 @@ export function HomePage() {
             onClear={clearCurrentWork}
           />
           <main className="soa-dubbing-main">
+            {!engineCatalog.loading && backendStatus === 'degraded' && engineCatalog.selected?.mode === 'browser' ? (
+              <div className="soa-device-playback-note" role="status">
+                <p>이 PC는 기기 내장 음성으로 대사를 재생합니다. 한국어 시스템 음성이 없거나 현재 성우와 맞지 않으면 생성할 수 없습니다.</p>
+                {window.speechSynthesis.getVoices().length === 0 ? (
+                  <p>브라우저 음성 목록을 불러오는 중입니다. 계속 비어 있으면 한국어 시스템 음성을 확인해 주세요.</p>
+                ) : null}
+                {selectedBrowserVoiceDiagnostic?.status === 'missing' && window.speechSynthesis.getVoices().length > 0 ? (
+                  <p>{selectedVoice.name}: {selectedBrowserVoiceDiagnostic.reason}</p>
+                ) : null}
+                {selectedBrowserVoiceDiagnostic?.status === 'missing' && availableBrowserPreset ? (
+                  <button type="button" onClick={() => selectVoice(availableBrowserPreset.voiceId)}>{availableBrowserPreset.presetName} 목소리로 전환</button>
+                ) : null}
+              </div>
+            ) : null}
+            {!engineCatalog.loading && !engineCatalog.selected ? (
+              <p className="soa-device-playback-note" role="status">이 PC에서 사용할 음성 엔진을 찾지 못했습니다. 한국어 시스템 음성을 설치하거나 설정에서 음성 서버 연결을 확인해 주세요.</p>
+            ) : null}
             <LongformComposer
               disabled={busy}
               value={composerDraft}

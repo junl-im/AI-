@@ -142,6 +142,7 @@ describe('LinkedPlayerDock', () => {
 
     expect(screen.getByRole('complementary', { name: '더빙 재생 플레이어' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '재생' })).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('이 기기의 재생 목록이 비어 있습니다')
     expect(screen.getByRole('navigation', { name: '주요 메뉴' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /만들기/ })).toHaveAttribute('aria-current', 'page')
   })

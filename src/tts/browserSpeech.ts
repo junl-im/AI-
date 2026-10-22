@@ -294,7 +294,10 @@ export function createBrowserSpeechResult(
   const preset = requireVoicePreset(request.voiceId)
   const voices = availableBrowserVoices()
   const selected = selectBrowserSpeechVoice(voices, request.voiceId)
-  if (voices.length > 0 && !selected) {
+  if (voices.length === 0) {
+    throw new Error('이 브라우저에서 음성 목록을 아직 불러오지 못했습니다. 잠시 후 다시 시도하고, 계속 비어 있으면 한국어 시스템 음성 설치를 확인해 주세요.')
+  }
+  if (!selected) {
     throw new Error(
       `${preset.name}(${preset.gender === 'male' ? '남성' : preset.gender === 'female' ? '여성' : '중성'}) 프리셋과 맞는 한국어 시스템 음성을 찾지 못했습니다. `
       + '반대 성별 음성으로 자동 대체하지 않습니다. 전용 CosyVoice WAV를 준비하거나 운영체제에 맞는 한국어 음성을 설치해 주세요.',

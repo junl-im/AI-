@@ -719,7 +719,7 @@ export function LinkedPlayerDock() {
               {track?.audio.url && !track.audio.partial ? <a href={track.audio.url} download={track.audio.filename} aria-label="다운로드">↓</a> : null}
               {browserPlayback ? <span className="soa-browser-voice-label">브라우저</span> : null}
             </div>
-          </div> : null}
+          </div> : <p className="soa-dubbing-player-empty" role="status">이 기기의 재생 목록이 비어 있습니다. 목소리 미리듣기 또는 음성 만들기를 누르면 여기에서 재생할 수 있습니다.</p>}
           {audio}
           {track?.audio.url && !track.audio.partial && !browserPlayback ? (
             <Suspense fallback={null}><AudioWaveform key={track.id + track.audio.url} url={track.audio.url} duration={duration} current={current} onSeek={(fraction) => { if (ref.current && Number.isFinite(duration) && duration > 0) ref.current.currentTime = fraction * duration }} /></Suspense>

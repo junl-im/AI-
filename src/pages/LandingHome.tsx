@@ -28,6 +28,7 @@ export function LandingHome() {
           장문 음성 스튜디오 시작 <span aria-hidden="true">↗</span>
         </button>
         <div className="soa-landing-note">한국어 중심 <span aria-hidden="true">·</span> 모바일에서도 편하게</div>
+        <p className="soa-landing-device-note">이 PC에서 새 대사를 만들려면 한국어 기기 음성 또는 연결된 음성 서버가 필요합니다. 작업과 재생 목록은 이 기기에 저장됩니다. 다른 PC에서 만든 음성은 원래 PC에서 파일로 내려받아 옮겨 주세요.</p>
       </div>
       <figure className="soa-studio-preview" aria-label="문장별 편집 작업공간 미리보기">
         <figcaption><span>SoriON Studio</span><span>작업공간 미리보기</span></figcaption>

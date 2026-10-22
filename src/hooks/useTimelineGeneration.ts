@@ -349,6 +349,7 @@ export function useTimelineGeneration() {
             voiceId: block.voiceId,
             voiceName: block.voiceName,
             jobId: block.jobId,
+            error: block.error,
           }]
         : []
     ))

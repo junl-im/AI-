@@ -37,6 +37,7 @@ describe('HomePage', () => {
     expect(screen.getByRole('heading', { name: /긴 내용도/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /장문 음성 스튜디오 시작/ }))
       .toBeInTheDocument()
+    expect(screen.getByText(/이 PC에서 새 대사를 만들려면 한국어 기기 음성/)).toBeInTheDocument()
     expect(screen.queryByRole('textbox', { name: '음성으로 만들 장문 내용' }))
       .not.toBeInTheDocument()
   })

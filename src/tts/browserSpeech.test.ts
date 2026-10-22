@@ -116,6 +116,15 @@ describe('browserSpeech', () => {
     expect(playback.pitch).toBeLessThan(1.1)
   })
 
+  it('Chrome/Edge에 한국어 음성이 없으면 완료 트랙을 만들지 않는다', () => {
+    installBrowserSpeech()
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: { getVoices: () => [{ name: 'English', lang: 'en-US', voiceURI: 'english' }] },
+    })
+    expect(() => createBrowserSpeechResult(request, 'missing-korean-voice')).toThrow('한국어 시스템 음성')
+  })
+
   it('한국어 목소리를 우선 선택하고 utterance에 속도를 반영한다', () => {
     const voices = installBrowserSpeech()
     const playback = createBrowserSpeechPlayback(request)

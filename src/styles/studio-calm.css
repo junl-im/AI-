@@ -141,5 +141,5 @@
 }
 
 @media (min-width: 761px) {
-  .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { border: 0; padding: 0; background: transparent; box-shadow: none; backdrop-filter: none; }
+  .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { border-color: #ded8e9; }
 }

@@ -91,7 +91,7 @@
 .soa-app-root.is-editor .soa-timeline-toolbar { background: #f3f0f8; color: #5a536d; }
 .soa-app-root.is-editor .soa-timeline-toolbar button { color: #625474; background: #e8e1f1; }
 .soa-app-root.is-editor .soa-dubbing-player-dock__inner { color: #fff; background: #333044f5; }
-.soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { background: transparent; }
+.soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { background: #333044f5; }
 .soa-audio-waveform { min-width: 0; padding-top: 8px; }
 .soa-audio-waveform > button { min-height: 36px; border: 1px solid #ffffff30; border-radius: 8px; padding: 0 12px; color: #e7def3; background: #ffffff0a; font-size: 11px; }
 .soa-audio-waveform svg { display: block; width: 100%; height: 38px; fill: #9383ac; }
@@ -104,7 +104,7 @@
 .soa-app-root.is-landing .soa-landing-workflow b { color: #8b719e; }
 @media (min-width: 761px) {
   .soa-voice-picker-sheet .soa-voice-sheet-list:not(.is-my-voice) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; }
-  .soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { background: transparent; }
+  .soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { background: #333044f5; }
 }
 @media (max-width: 760px) {
   .soa-app-root.is-editor .soa-one-flow-composer { margin-inline: -14px; border: 0; border-radius: 0; padding: 24px 16px; }

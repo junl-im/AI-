@@ -59,7 +59,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.49 · Durable Project Recovery**
+Current baseline: **0.11.50 · Other-PC Playback Clarity**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**
@@ -569,3 +569,16 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 임시 사본은 같은 브라우저·프로필에만 남고 브라우저 데이터 삭제·차단·용량 초과 시 지속되지 않습니다. 오디오 바이트는 보관하지 않습니다. 승인 WAV/모델 없이 사람 청취와 Neural 음질을 인증하지 않았습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.49-durable-project-recovery-full.zip` / `SoriON-AI-0.11.48-to-0.11.49-durable-project-recovery-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.50 · Project Recovery Export & Listening Evidence. 저장소 전체 차단 시 사용자 선택 내보내기와 승인 자산 기반 사람 청취·실기기 검증.
+
+## 2026-10-22 KST · 0.11.50 Other-PC Playback Clarity
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.50 / 0.11.49 (`8e9e33ae5a98`).
+3. **변경 내용**: 새 PC의 첫 방문과 빈 하단 플레이어에 상태를 표시하고, 기기 음성·엔진 부재를 구분합니다. 현재 성우와 맞는 한국어 음성이 없으면 호환 기본 성우 전환을 제공하고, 새 대사 생성이 모두 실패하면 실제 대사 오류를 작업 메시지에 표시합니다. 음성 목록이 비면 완료 트랙을 만들지 않으며 브라우저 음성 실패 시 무한 연결 재시도 대신 오류를 알립니다.
+4. **변경 이유**: 다른 PC의 Chrome/Edge에서 새 대사를 만들 때 공개 음성 서버가 없고 해당 기기에 호환 한국어 시스템 음성이 없으면 생성 결과와 Dock 트랙이 생기지 않습니다. 빈 플레이어도 PC에서 투명하게 처리되어 원인이 보이지 않았습니다.
+5. **영향 범위**: Web 첫 방문/스튜디오/하단 플레이어 UI와 브라우저 음성 실패 처리, 버전·릴리스 문서. 서버 배포·원격 동기화·오디오 보관은 변경하지 않습니다.
+6. **변경·추가된 주요 파일**: `src/pages/{LandingHome,HomePage}*`, `src/hooks/useTimelineGeneration.ts`, `src/tts/{browserSpeech,voiceApi.test}.ts`, `src/components/navigation/LinkedPlayerDock*`, `src/styles/{studio-calm,studio-intelligent,readable-colors}.css`, 버전 파일, `docs/{HANDOVER,CHANGELOG,NEXT_UPDATE,OTHER_PC_PLAYBACK_0.11.50}.md`.
+7. **검증 결과**: Web 전체 86파일/346 PASS, API 246 PASS/1skip, Worker 16 PASS, lint/build/version-sync/Ruff·preflight 55/55 PASS. 로컬 Chromium 실행 파일이 없어 PC 화면 픽셀 비교는 CI 최종 검증에 맡깁니다. CI·Pages 확인 결과는 배포 후 확인합니다.
+8. **알려진 제한과 주의사항**: 기존 PC 음원·프로젝트는 다른 PC로 자동 동기화되지 않습니다. `public/sorion-runtime-config.json` 공개 API 후보는 비어 있습니다. 다른 PC의 실제 한국어 음성 설치·스피커 출력은 원격으로 검증하지 못했습니다. 승인 WAV·모델 청취 인증도 없습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.50-other-pc-playback-clarity-full.zip` / `SoriON-AI-0.11.49-to-0.11.50-other-pc-playback-clarity-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.51 · Cross-Device Playback Plan & Recovery Export. 공개 서버·저장소·권한 정책, 로컬 복구 내보내기, 실제 다른 PC 음성·재생 검증.

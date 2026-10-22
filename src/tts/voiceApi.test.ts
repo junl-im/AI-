@@ -17,7 +17,7 @@ afterEach(() => {
 })
 
 describe('synthesizeSpeech', () => {
-  it('브라우저 엔진이 선택되면 죽은 API를 기다리지 않고 즉시 완료한다', async () => {
+  it('브라우저 음성 목록이 비면 완료를 가장하거나 죽은 API에 요청하지 않는다', async () => {
     Object.defineProperty(window, 'speechSynthesis', {
       configurable: true,
       value: { getVoices: () => [] },
@@ -38,10 +38,7 @@ describe('synthesizeSpeech', () => {
       normalizeText: true,
     }
 
-    const result = await synthesizeSpeech(request, 'browser-fast-path')
-
-    expect(result.engineId).toBe(BROWSER_SPEECH_ENGINE_ID)
-    expect(result.fallbackUsed).toBe(false)
+    await expect(synthesizeSpeech(request, 'browser-fast-path')).rejects.toThrow('음성 목록을 아직 불러오지 못했습니다')
     expect(fetchSpy).not.toHaveBeenCalled()
   })
   it('auto 엔진의 프리셋 호환 실패는 브라우저 음성으로 계속 폴백한다', async () => {

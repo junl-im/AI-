@@ -167,3 +167,15 @@
 .soa-app-root.is-editor .soa-project-save-recovery p { margin: 0 0 10px; font-size: 13px; line-height: 1.5; font-weight: 700; }
 .soa-app-root.is-editor .soa-project-save-recovery button { min-height: 44px; border: 1px solid #8f4857; border-radius: 10px; padding: 7px 12px; color: #fff; background: #75384a; font-size: 12px; font-weight: 800; }
 .soa-app-root.is-editor .soa-project-save-recovery button:disabled { opacity: .6; cursor: wait; }
+.soa-landing-device-note { max-width: 58ch; margin: 10px 0 0; color: #5d536b; font-size: 12px; line-height: 1.6; }
+.soa-device-playback-note { margin: 0 0 12px; border: 1px solid #ad9abe; border-radius: 12px; padding: 10px 12px; color: #4e3b61; background: #f8f2ff; font-size: 12px; line-height: 1.5; }
+.soa-device-playback-note p { margin: 0; }
+.soa-device-playback-note p + p { margin-top: 5px; font-weight: 750; }
+.soa-device-playback-note button { min-height: 40px; margin-top: 8px; border: 1px solid #76518e; border-radius: 9px; padding: 6px 11px; color: #fff; background: #674379; font-weight: 800; }
+.soa-dubbing-player-empty { grid-column: 1 / -1; margin: 0; padding: 8px 12px; color: #f5eefe; text-align: center; font-size: 12px; line-height: 1.5; }
+@media (min-width: 761px) {
+  .soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-dock__inner { border: 1px solid #5c526b; padding: 8px 12px; background: #333044f5; box-shadow: 0 -12px 30px #0003; }
+}
+@media (max-width: 760px) {
+  .soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-empty { color: #51445f; }
+}
