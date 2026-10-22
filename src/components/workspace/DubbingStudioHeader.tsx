@@ -9,6 +9,7 @@ interface DubbingStudioHeaderProps {
   onRetrySave?: () => void
   downloadHref: string | null
   downloadName: string
+  onOpenDownload?: () => void
   onTitleChange: (value: string) => void
   onOpenClone: () => void
   onOpenQuality: () => void
@@ -27,6 +28,7 @@ export function DubbingStudioHeader({
   onRetrySave,
   downloadHref,
   downloadName,
+  onOpenDownload,
   onTitleChange,
   onOpenClone,
   onOpenQuality,
@@ -106,11 +108,9 @@ export function DubbingStudioHeader({
           >
             <span aria-hidden="true">{sidePanelsCollapsed ? '▦' : '◫'}</span><span className="soa-panel-toggle-label">{sidePanelsCollapsed ? '프로 패널' : '간편 모드'}</span>
           </button>
-          {downloadHref ? (
-            <a href={downloadHref} download={downloadName} aria-label="현재 음성 다운로드">⇩</a>
-          ) : (
-            <button type="button" disabled aria-label="현재 음성은 파일 다운로드를 지원하지 않음">⇩</button>
-          )}
+          <button type="button" className="soa-download-entry" onClick={onOpenDownload}
+            aria-label="저장·다운로드 열기">↓ <span>저장·다운로드</span></button>
+          {downloadHref ? <a href={downloadHref} download={downloadName} aria-label="현재 음성 다운로드">⇩</a> : null}
           <div ref={projectMenuRef} className="soa-dubbing-more">
             <button
               ref={projectMenuButtonRef}

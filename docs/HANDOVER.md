@@ -1,3 +1,16 @@
+## 2026-10-22 KST · 0.11.53 Visible Download & Browser Recording
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.53 / 0.11.52 (`3c2897ba1839`).
+3. **변경 내용**: PC 상단 저장·다운로드 버튼을 항상 표시하고 결과 저장 영역으로 연결했습니다. 브라우저 음성은 현재 탭 오디오를 WebM으로 녹음해 미리 듣고 내려받을 수 있습니다. 음성 시작 대기 제한을 1.8초에서 5초로 늘렸습니다.
+4. **변경 이유**: 사용자가 PC에서 다운로드를 찾지 못했고 정적 GitHub Pages의 기기 음성에는 서버 음원 파일이 없어 저장 버튼이 비활성화됐습니다. 느린 PC에서 시작 응답 지연 시 재생이 조기 중단될 여지가 있었습니다.
+5. **영향 범위**: Web 헤더, 저장 UI, 브라우저 탭 오디오 녹음, Dock 시작 대기. API/Worker 모델·서버 기능은 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/{DubbingStudioHeader,GeneratedAudioSave}*`, `src/export/recordBrowserSpeech.ts`, `src/components/navigation/LinkedPlayerDock*`, `src/pages/HomePage.tsx`, `src/styles/readable-colors.css`, 버전·릴리스 문서.
+7. **검증 결과**: Web 87파일/356 PASS, 타입 검사, 린트, 프로덕션 빌드, repository preflight 55/55 PASS. 실제 Chrome/Edge 탭 오디오 녹음과 공개 Pages는 배포 후 실기기 확인이 필요합니다.
+8. **알려진 제한과 주의사항**: 탭 오디오 녹음은 Chrome/Edge의 현재 탭 오디오 공유 동의가 필요하며 WebM 형식입니다. 브라우저 또는 OS가 기기 음성을 탭 오디오로 전달하지 않으면 무음일 수 있으므로 미리 듣기 검증이 필수입니다. 실제 다른 PC 청취/재생 중단은 아직 확인하지 못했습니다. 기기 간 자동 동기화는 없습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.53-visible-download-full.zip` / `SoriON-AI-0.11.52-to-0.11.53-visible-download-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.54 · Cross-Device Audio Persistence. 공개 음원 서버·저장 정책과 실기기 녹음·재생 QA를 진행합니다.
+
 ## 2026-10-22 KST · 0.11.52 Generation Replay & Download Clarity
 
 1. **작업 일시(KST)**: 2026-10-22.
@@ -85,7 +98,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.52 · Generation Replay & Download Clarity**
+Current baseline: **0.11.53 · Visible Download & Browser Recording**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**

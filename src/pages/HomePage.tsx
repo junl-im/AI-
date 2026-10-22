@@ -967,8 +967,13 @@ export function HomePage() {
             saveRecoveryNeeded={hydrated && storageMode === 'memory'}
             saveRetryPending={savePending}
             onRetrySave={() => void saveWorkspaceNow()}
-            downloadHref={currentTrack?.audio.url ?? null}
+            downloadHref={currentTrack?.audio.source === 'api' && !currentTrack.audio.partial ? currentTrack.audio.url : null}
             downloadName={currentTrack?.audio.filename ?? 'sorion-voice.wav'}
+            onOpenDownload={() => {
+              const target = document.getElementById('soa-generated-save')
+              target?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              target?.focus({ preventScroll: true })
+            }}
             onTitleChange={setProjectTitle}
             onOpenClone={() => enterWorkspace('clone')}
             onOpenQuality={() => enterWorkspace('quality')}

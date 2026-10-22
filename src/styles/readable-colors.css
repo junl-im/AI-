@@ -221,6 +221,24 @@
   margin: 12px 0; padding: 16px; border: 1px solid #bba6d1;
   border-radius: 14px; color: #30263b; background: #faf7fd;
 }
+.soa-app-root.is-editor .soa-dubbing-toolbar__actions .soa-download-entry {
+  display: inline-flex; width: auto; min-width: 132px; gap: 5px; padding: 0 12px;
+  border: 1px solid #69418a; color: #fff; background: #654784;
+  font-size: 12px; font-weight: 850; white-space: nowrap;
+}
+.soa-app-root.is-editor .soa-dubbing-toolbar__actions .soa-download-entry:hover { background: #50346a; }
+.soa-app-root.is-editor .soa-dubbing-toolbar__actions .soa-download-entry:focus-visible {
+  outline: 2px solid #50346a; outline-offset: 2px;
+}
+.soa-generated-save { scroll-margin: 24px; }
+.soa-generated-save:focus { outline: 2px solid #74528f; outline-offset: 3px; }
+.soa-generated-save__browser b { font-weight: 900; }
+.soa-generated-save__preview { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
+.soa-generated-save__preview audio { max-width: 100%; }
+@media (max-width: 560px) {
+  .soa-app-root.is-editor .soa-dubbing-toolbar__actions .soa-download-entry { min-width: 42px; padding: 0 8px; }
+  .soa-download-entry span { display: none; }
+}
 .soa-generated-save__heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
 .soa-generated-save__heading strong { font-size: 15px; }
 .soa-generated-save__heading span { color: #665276; font-size: 12px; }

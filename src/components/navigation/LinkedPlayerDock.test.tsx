@@ -250,7 +250,7 @@ describe('LinkedPlayerDock', () => {
     fireEvent.click(screen.getByRole('button', { name: '재생' }))
     expect(screen.getByRole('button', { name: '일시정지' })).toHaveAttribute('aria-pressed', 'true')
 
-    act(() => vi.advanceTimersByTime(1_900))
+    act(() => vi.advanceTimersByTime(5_100))
 
     expect(synthesis.cancel).toHaveBeenCalled()
     expect(screen.getByRole('button', { name: '재생' })).toHaveAttribute('aria-pressed', 'false')

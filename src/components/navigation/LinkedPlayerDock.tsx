@@ -304,7 +304,7 @@ export function LinkedPlayerDock() {
       speechElapsedRef.current = 0
       setPlaying(false)
       setPlaybackError('음성 시작 응답이 없습니다. 모바일 인앱 브라우저라면 외부 브라우저로 열어 주세요.')
-    }, 1_800)
+    }, 5_000)
   }
 
   useEffect(() => {

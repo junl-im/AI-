@@ -29,12 +29,20 @@ describe('GeneratedAudioSave', () => {
     expect(open).toHaveBeenCalledOnce()
   })
 
-  it('브라우저 재생 음성은 파일 저장 불가 이유와 대본 저장을 보여준다', () => {
-    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech' } }
+  it('브라우저 재생 음성은 탭 오디오 녹음과 대본 저장을 보여준다', () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
+      text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
+    } } }
     render(<GeneratedAudioSave blocks={[block]} scriptText={voice.text} onOpenExport={vi.fn()} />)
     expect(screen.queryByRole('button', { name: '전체 음성 MP3로 저장' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /음성 파일 다운로드/ })).not.toBeInTheDocument()
-    expect(screen.getByText(/WAV\/MP3 파일이 생성되지 않습니다/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '기기 음성 녹음해 다운로드' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '대본 TXT 다운로드' })).toHaveAttribute('download', 'sorion-script.txt')
+  })
+
+  it('아직 대사가 없어도 저장 위치와 다음 동작을 보여준다', () => {
+    render(<GeneratedAudioSave blocks={[]} scriptText="" onOpenExport={vi.fn()} />)
+    expect(screen.getByLabelText('생성한 음성 저장')).toBeInTheDocument()
+    expect(screen.getByText(/먼저 대사를 입력하고/)).toBeInTheDocument()
   })
 })

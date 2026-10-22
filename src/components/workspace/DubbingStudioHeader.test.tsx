@@ -28,6 +28,7 @@ describe('DubbingStudioHeader', () => {
     expect(screen.getByRole('textbox', { name: '프로젝트 제목' })).toHaveValue('오디오북 1장')
     expect(screen.getByText('오후 07:30 자동 저장됨')).toBeInTheDocument()
     expect(screen.queryByText(/엔진|API|Worker|GPU|System Voice/)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '저장·다운로드 열기' })).toBeInTheDocument()
   })
 
   it('저장 실패 상태에서 명시적 재시도를 제공한다', () => {
