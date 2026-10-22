@@ -1,10 +1,11 @@
 export const DATABASE_NAME = 'sorion-ai'
-export const DATABASE_VERSION = 5
+export const DATABASE_VERSION = 6
 export const PROJECT_STORE = 'projects'
 export const QUALITY_REVIEW_STORE = 'qualityReviews'
 export const VOICE_PROFILE_STORE = 'voiceProfiles'
 export const WORKSPACE_SESSION_STORE = 'workspaceSessions'
 export const RECORDED_AUDIO_STORE = 'recordedAudio'
+export const LOCAL_AUDIO_STORE = 'localAudio'
 
 export function openSoriOnDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -30,6 +31,9 @@ export function openSoriOnDatabase(): Promise<IDBDatabase> {
       }
       if (!database.objectStoreNames.contains(RECORDED_AUDIO_STORE)) {
         database.createObjectStore(RECORDED_AUDIO_STORE, { keyPath: 'id' })
+      }
+      if (!database.objectStoreNames.contains(LOCAL_AUDIO_STORE)) {
+        database.createObjectStore(LOCAL_AUDIO_STORE, { keyPath: 'id' })
       }
     }
     request.onsuccess = () => {

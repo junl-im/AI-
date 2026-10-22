@@ -549,3 +549,7 @@ Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ig
 ## 0.11.57 R1 · Multi-Scene IndexedDB Fixture Repair
 
 CI 다중 화면 fixture를 IndexedDB 스키마 5에 맞춰 Pages 배포 게이트를 복구했습니다. 제품 런타임 기능은 바뀌지 않았습니다.
+
+## 0.11.58 · Local WAV Recovery & Transfer
+
+로컬 모델 WAV를 IndexedDB에 저장하고 작업공간 세션에서 해당 음원 출처를 기록해 재방문 때 Dock·다운로드를 복구합니다. 대본과 로컬 WAV를 사용자 선택 JSON 백업으로 내보내고 다른 PC에서 가져옵니다. Web Speech 기본 성우 원본 음성은 API에서 파일 바이트를 제공하지 않으므로 무음 화면 공유 PC에서는 별도 파일 출력 엔진이 필요합니다.

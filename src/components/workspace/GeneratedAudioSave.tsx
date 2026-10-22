@@ -9,11 +9,14 @@ import type { TimelineBlock } from '../../workspace/workspaceTypes'
 
 interface Props {
   blocks: TimelineBlock[]
+  localAudioSaveWarning?: string | null
   onOpenExport: () => void
   onRenderLocalWav?: (blockId: string, signal: AbortSignal, onProgress: (message: string) => void) => Promise<GeneratedAudio>
+  onExportWorkspace?: () => Promise<Blob>
+  onImportWorkspace?: (file: File) => Promise<void>
 }
 
-export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: Props) {
+export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport, onRenderLocalWav, onExportWorkspace, onImportWorkspace }: Props) {
   const [recording, setRecording] = useState(false)
   const [recordProgress, setRecordProgress] = useState('')
   const [recordError, setRecordError] = useState('')
@@ -25,6 +28,12 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
   const [fullWavUrl, setFullWavUrl] = useState<string | null>(null)
   const [fullMp3Url, setFullMp3Url] = useState<string | null>(null)
   const [fullWavBusy, setFullWavBusy] = useState(false)
+  const [bundleBusy, setBundleBusy] = useState(false)
+  const [bundleError, setBundleError] = useState('')
+  const [bundleStatus, setBundleStatus] = useState('')
+  const [bundleUrl, setBundleUrl] = useState<string | null>(null)
+  const bundleRef = useRef<string | null>(null)
+  const bundleInputRef = useRef<HTMLInputElement | null>(null)
   const fullWavRef = useRef<string | null>(null)
   const fullMp3Ref = useRef<string | null>(null)
   const wavAbortRef = useRef<AbortController | null>(null)
@@ -40,6 +49,7 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
     if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
+    if (bundleRef.current) URL.revokeObjectURL(bundleRef.current)
   }, [])
   const voices = blocks.filter((block) => block.kind === 'voice')
   const ready = voices.filter((block) => block.status === 'ready')
@@ -78,6 +88,10 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
     if (sourceRef.current === sourceSignature) return
     sourceRef.current = sourceSignature
     abortRef.current?.abort()
+    if (bundleRef.current) URL.revokeObjectURL(bundleRef.current)
+    bundleRef.current = null
+    setBundleUrl(null)
+    setBundleStatus('')
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     fullWavRef.current = null
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
@@ -182,6 +196,41 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
     }
   }
 
+  async function exportWorkspace() {
+    if (!onExportWorkspace) return
+    setBundleBusy(true)
+    setBundleError('')
+    try {
+      const bundle = await onExportWorkspace()
+      if (bundleRef.current) URL.revokeObjectURL(bundleRef.current)
+      bundleRef.current = URL.createObjectURL(bundle)
+      setBundleUrl(bundleRef.current)
+      setBundleStatus('작업 백업이 준비됐습니다. 아래 링크를 눌러 파일을 내려받으세요.')
+    } catch (error) {
+      setBundleError(error instanceof Error ? error.message : '작업 백업을 만들지 못했습니다.')
+    } finally {
+      setBundleBusy(false)
+    }
+  }
+
+  async function importWorkspace(file: File) {
+    if (!onImportWorkspace || !window.confirm('현재 작업공간을 가져온 백업으로 바꿀까요?')) {
+      if (bundleInputRef.current) bundleInputRef.current.value = ''
+      return
+    }
+    setBundleBusy(true)
+    setBundleError('')
+    try {
+      await onImportWorkspace(file)
+      setBundleStatus('대본과 보관된 로컬 WAV를 가져왔습니다. 타임라인과 Dock을 확인해 주세요.')
+    } catch (error) {
+      setBundleError(error instanceof Error ? error.message : '작업 백업을 가져오지 못했습니다.')
+    } finally {
+      if (bundleInputRef.current) bundleInputRef.current.value = ''
+      setBundleBusy(false)
+    }
+  }
+
   return (
     <section id="soa-generated-save" className="soa-generated-save" aria-label="생성한 음성 저장" tabIndex={-1}>
       <div className="soa-generated-save__heading">
@@ -189,6 +238,20 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
         <span>완료 {ready.length}/{voices.length}개 대사</span>
       </div>
       <p>완성한 음성을 WAV 또는 MP3 파일로 내려받아 보관하세요. 프로젝트 자동 저장은 이 브라우저에서만 유지됩니다.</p>
+      {localAudioSaveWarning ? <p role="alert">{localAudioSaveWarning}</p> : null}
+      {onExportWorkspace && onImportWorkspace ? <div className="soa-generated-save__full-wav">
+        <p>다른 PC로 옮길 때 대본과 기기 내 모델 WAV를 함께 백업하세요. 기본 성우 화면 녹음은 별도 WAV·MP3 다운로드가 필요합니다.</p>
+        <button type="button" disabled={bundleBusy} onClick={() => void exportWorkspace()}>작업·WAV 백업 만들기</button>
+        {bundleUrl ? <a href={bundleUrl} download="sorion-workspace.sorion.json">작업 백업 다운로드</a> : null}
+        <button type="button" disabled={bundleBusy} onClick={() => bundleInputRef.current?.click()}>작업 백업 가져오기</button>
+        <input ref={bundleInputRef} hidden type="file" accept=".json,.sorion.json,application/json"
+          aria-label="소리온 작업 백업 파일 선택" onChange={(event) => {
+            const file = event.target.files?.[0]
+            if (file) void importWorkspace(file)
+          }} />
+        {bundleStatus ? <p role="status">{bundleStatus}</p> : null}
+        {bundleError ? <p role="alert">{bundleError}</p> : null}
+      </div> : null}
       {downloadable.length ? (
         <div className="soa-generated-save__clips">
           {downloadable.map((block) => (

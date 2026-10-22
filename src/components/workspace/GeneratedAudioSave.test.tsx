@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import { GeneratedAudioSave } from './GeneratedAudioSave'
@@ -59,5 +59,20 @@ describe('GeneratedAudioSave', () => {
     render(<GeneratedAudioSave blocks={[]} onOpenExport={vi.fn()} />)
     expect(screen.getByLabelText('생성한 음성 저장')).toBeInTheDocument()
     expect(screen.getByText(/먼저 대사를 입력하고/)).toBeInTheDocument()
+  })
+
+  it('작업·WAV 백업을 만들고 파일을 가져오는 사용자 동선을 연결한다', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:workspace-backup')
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const exportWorkspace = vi.fn().mockResolvedValue(new Blob(['backup'], { type: 'application/json' }))
+    const importWorkspace = vi.fn().mockResolvedValue(undefined)
+    render(<GeneratedAudioSave blocks={[voice]} onOpenExport={vi.fn()}
+      onExportWorkspace={exportWorkspace} onImportWorkspace={importWorkspace} />)
+    fireEvent.click(screen.getByRole('button', { name: '작업·WAV 백업 만들기' }))
+    expect(await screen.findByRole('link', { name: '작업 백업 다운로드' }))
+      .toHaveAttribute('href', 'blob:workspace-backup')
+    const file = new File(['backup'], 'backup.sorion.json', { type: 'application/json' })
+    fireEvent.change(screen.getByLabelText('소리온 작업 백업 파일 선택'), { target: { files: [file] } })
+    await waitFor(() => expect(importWorkspace).toHaveBeenCalledWith(file))
   })
 })

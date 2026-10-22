@@ -430,7 +430,7 @@ async function seedRecoveryProject(cdp) {
   const seeded = await evaluate(cdp, `(async () => {
     const project = ${JSON.stringify(project)}
     const db = await new Promise((resolve, reject) => {
-      const request = indexedDB.open('sorion-ai', 5)
+      const request = indexedDB.open('sorion-ai', 6)
       request.onupgradeneeded = () => {
         const database = request.result
         if (!database.objectStoreNames.contains('projects')) database.createObjectStore('projects', { keyPath: 'id' })

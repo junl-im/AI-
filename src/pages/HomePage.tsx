@@ -11,6 +11,7 @@ import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
 import { LongformComposer } from '../components/workspace/LongformComposer'
 import { GeneratedAudioSave } from '../components/workspace/GeneratedAudioSave'
+import { createWorkspaceBundle, importWorkspaceBundle } from '../export/workspaceBundle'
 import { FinalExportDialog } from '../components/workspace/FinalExportDialog'
 import { SpeakerVoiceAssignmentPanel } from '../components/workspace/SpeakerVoiceAssignment'
 import { WorkspaceConversation } from '../components/workspace/WorkspaceConversation'
@@ -50,7 +51,7 @@ import {
   getRememberedSpeakerVoiceMap,
   rememberSpeakerVoiceAssignments,
 } from '../workspace/speakerVoiceMemory'
-import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
+import { clearWorkspaceSession, loadWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import { formatWorkspaceSavedLabel, generatedWorkspacePreview } from '../workspace/homeWorkspaceHelpers'
 import type { ComposerDirective, TimelineVoiceBlock, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
@@ -348,6 +349,23 @@ export function HomePage() {
     onRestore: restoreWorkspaceSession,
     onPersistenceUnavailable: notifyPersistenceUnavailable,
   })
+  const exportWorkspaceBundle = useCallback(async () => {
+    await saveWorkspaceNow()
+    const { session } = await loadWorkspaceSession()
+    if (!session) throw new Error('백업할 작업공간을 찾지 못했습니다.')
+    return createWorkspaceBundle(session)
+  }, [saveWorkspaceNow])
+  const restoreWorkspaceBundle = useCallback(async (file: File) => {
+    const session = await importWorkspaceBundle(file)
+    clearQueue()
+    clearActiveProject()
+    setSelectedTimelineIds([])
+    setPendingGeneration(null)
+    setResumeGeneration(null)
+    const recoveryIds = restoreSession(session.blocks)
+    applyRestoredDraft(session, recoveryIds)
+    enterWorkspace('home')
+  }, [applyRestoredDraft, clearActiveProject, clearQueue, enterWorkspace, restoreSession])
   useLayoutEffect(() => {
     if (observedResetTokenRef.current === workspaceResetToken) return
     observedResetTokenRef.current = workspaceResetToken
@@ -1055,8 +1073,9 @@ export function HomePage() {
               }}
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
-            <GeneratedAudioSave blocks={timeline.blocks}
-              onOpenExport={() => setExportOpen(true)} onRenderLocalWav={timeline.renderLocalWav} />
+            <GeneratedAudioSave blocks={timeline.blocks} localAudioSaveWarning={timeline.localAudioSaveWarning}
+              onOpenExport={() => setExportOpen(true)} onRenderLocalWav={timeline.renderLocalWav}
+              onExportWorkspace={exportWorkspaceBundle} onImportWorkspace={restoreWorkspaceBundle} />
             <FinalExportDialog open={exportOpen} blocks={timeline.blocks} onClose={() => setExportOpen(false)} />
             {pendingProjectSave ? (
               <div role="alert" className="soa-project-save-recovery">

@@ -10,6 +10,13 @@ const streamMocks = vi.hoisted(() => ({
   streamSpeechProgress: vi.fn(),
 }))
 
+const localAudioMocks = vi.hoisted(() => ({
+  loadLocalAudio: vi.fn(),
+  saveLocalAudio: vi.fn(),
+}))
+
+vi.mock('../storage/localAudioRepository', () => localAudioMocks)
+
 const voiceApiMocks = vi.hoisted(() => ({
   getSpeechProgress: vi.fn(),
   getSpeechResult: vi.fn(),
@@ -47,6 +54,7 @@ function audioResponse(value: string): Response {
 describe('useTimelineGeneration mobile recovery', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localAudioMocks.loadLocalAudio.mockResolvedValue(null)
     streamMocks.streamSpeechProgress.mockResolvedValue(true)
     usePlayerStore.getState().clearQueue()
   })
@@ -310,6 +318,27 @@ describe('useTimelineGeneration revision safety', () => {
       audio: null,
       trackId: null,
     })
+  })
+
+  it('reconnects a saved local WAV to the timeline and Dock after restoration', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:restored-local-wav')
+    localAudioMocks.loadLocalAudio.mockResolvedValueOnce({
+      id: 'local-voice', wav: new Blob(['wav'], { type: 'audio/wav' }),
+      durationSeconds: 2, styleId: 'F2',
+    })
+    const { result } = renderHook(() => useTimelineGeneration())
+    await act(async () => {
+      result.current.restoreSession([{
+        id: 'local-voice', kind: 'voice', text: '복구할 음성', voiceId: 'sori-warm',
+        voiceName: '혜린', emotion: 'neutral', speed: 1, pitch: 0,
+        normalizeText: true, jobId: null, status: 'ready', progress: 100,
+        durationSeconds: 2, error: null, revision: 2, audioSource: 'browser-model',
+      }])
+    })
+    expect(result.current.blocks[0]).toMatchObject({
+      status: 'ready', audio: { source: 'browser-model', url: 'blob:restored-local-wav' },
+    })
+    expect(usePlayerStore.getState().queue[0]?.audio.url).toBe('blob:restored-local-wav')
   })
 })
 

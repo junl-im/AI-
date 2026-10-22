@@ -71,6 +71,18 @@ describe('workspace session codec', () => {
     expect(voice).not.toHaveProperty('trackId')
   })
 
+  it('marks locally generated WAV clips for byte-level restoration', () => {
+    const draft = sessionDraft()
+    const block = { ...draft.blocks[0], audio: { ...draft.blocks[0].audio, source: 'browser-model' as const } }
+    const session = createWorkspaceSession({ ...draft, blocks: [block] }, 8)
+    expect(session.blocks[0]).toMatchObject({ audioSource: 'browser-model' })
+    expect(normalizeWorkspaceSession(session)?.blocks[0]).toMatchObject({ audioSource: 'browser-model' })
+    const reconnecting = createWorkspaceSession({
+      ...draft, blocks: [{ ...block, audio: null, audioSource: 'browser-model', status: 'queued' }],
+    }, 9)
+    expect(reconnecting.blocks[0]).toMatchObject({ audioSource: 'browser-model' })
+  })
+
 
   it('keeps a long-form draft up to the studio limit', () => {
     const draft = '가'.repeat(20_000)

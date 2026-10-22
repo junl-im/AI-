@@ -47,6 +47,7 @@ export interface PersistedTimelineVoiceBlock {
   durationSeconds: number
   error: string | null
   revision: number
+  audioSource?: 'browser-model'
   sttVerification?: TimelineSttVerification
 }
 

@@ -1935,3 +1935,9 @@ GitHub Actions의 Chromium 시작 15초 제한으로 두 번 실패한 화면 �
 ## 0.11.57 R1 · Multi-Scene IndexedDB Fixture Repair
 
 - 다중 화면 Chromium CI fixture가 IndexedDB 스키마 5를 열도록 고쳐 VersionError와 Pages 배포 차단을 해소합니다. 제품 버전과 런타임 기능은 그대로입니다.
+
+## 0.11.58 · Local WAV Recovery & Transfer
+
+- 기기 내 모델 WAV를 IndexedDB에 보관하고 동일 작업공간으로 돌아왔을 때 대사 클립·Dock 재생·다운로드를 복구합니다. 브라우저 저장 공간이 부족하면 즉시 다운로드하도록 알립니다.
+- 대본과 보관된 로컬 WAV를 사용자 선택 JSON 백업 파일로 내보내고 다른 PC에서 가져올 수 있습니다. 손상·누락 WAV와 대본 불일치를 거부합니다. 기본 성우 화면 녹음 파일은 별도 다운로드가 필요합니다.
+- Web Speech API는 원본 PCM/WAV를 제공하지 않으므로 화면 공유가 무음인 PC의 기본 성우 원본 음색 저장은 여전히 해결되지 않았습니다.

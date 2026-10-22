@@ -122,6 +122,7 @@ function normalizeBlock(value: unknown): PersistedTimelineBlock | null {
     durationSeconds: Math.max(0.1, finiteNumber(value.durationSeconds, 1.2)),
     error: typeof value.error === 'string' ? value.error.slice(0, 500) : null,
     revision: Math.max(1, Math.floor(finiteNumber(value.revision, 1))),
+    audioSource: value.audioSource === 'browser-model' ? 'browser-model' : undefined,
     sttVerification: normalizeSttVerification(value.sttVerification),
   }
 }
@@ -155,6 +156,9 @@ export function createWorkspaceSession(
       durationSeconds: block.durationSeconds,
       error: block.error?.slice(0, 500) ?? null,
       revision: block.revision,
+      audioSource: block.audio
+        ? block.audio.source === 'browser-model' ? 'browser-model' : undefined
+        : block.audioSource,
       sttVerification: block.sttVerification,
     }
   })

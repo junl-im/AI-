@@ -18,6 +18,7 @@ import { createRandomId } from '../utils/randomId'
 import { runTimelineVoiceBlock } from '../timeline/generationRuntime'
 import { synthesizeSupertonicWav } from '../tts/supertonicWav'
 import { buildAudioFilename } from '../tts/audioFile'
+import { loadLocalAudio, saveLocalAudio } from '../storage/localAudioRepository'
 import {
   EMPTY_TIMELINE_EDIT_HISTORY,
   TIMELINE_EDIT_HISTORY_LIMIT,
@@ -75,9 +76,35 @@ function classifyBatchFailure(message: string | null | undefined): TimelineBatch
   if (/engine|엔진|worker|melo|cosyvoice|system tts|espeak/.test(normalized)) return 'engine'
   return 'unknown'
 }
+
+function createLocalAudio(block: TimelineVoiceBlock, wav: Blob, durationSeconds: number, styleId: string): GeneratedAudio {
+  const url = URL.createObjectURL(wav)
+  return {
+    url,
+    filename: buildAudioFilename(block.text, block.voiceName, 'wav'),
+    source: 'browser-model',
+    durationSeconds,
+    revokeOnRemove: true,
+    result: {
+      jobId: `local-${block.id}`,
+      status: 'completed',
+      engineId: 'supertonic-local',
+      engineMode: 'browser',
+      audioUrl: url,
+      estimatedDurationSeconds: durationSeconds,
+      message: `기기 내 Supertonic 3 ${styleId} 스타일로 만든 WAV입니다. 기존 성우의 원본 음색과는 다릅니다.`,
+      normalizedText: block.text,
+      segmentCount: 1,
+      processingMs: null,
+      fileSizeBytes: wav.size,
+      realtimeFactor: null,
+    },
+  }
+}
 type BlocksUpdater = (current: TimelineBlock[]) => TimelineBlock[]
 export function useTimelineGeneration() {
   const [blocks, setBlocks] = useState<TimelineBlock[]>([])
+  const [localAudioSaveWarning, setLocalAudioSaveWarning] = useState<string | null>(null)
   const blocksRef = useRef<TimelineBlock[]>([])
   const controllers = useRef(new Map<string, AbortController>())
   const timers = useRef(new Map<string, number>())
@@ -194,7 +221,11 @@ export function useTimelineGeneration() {
     commit((current) => current.map((block) => {
       if (block.id !== id || block.kind !== 'voice') return block
       if (expectedRevision !== undefined && block.revision !== expectedRevision) return block
-      return { ...block, ...patch }
+      const next = { ...block, ...patch }
+      if (patch.audio !== undefined) {
+        next.audioSource = patch.audio?.source === 'browser-model' ? 'browser-model' : undefined
+      }
+      return next
     }))
   }, [commit])
   const stageText = useCallback((
@@ -391,6 +422,7 @@ export function useTimelineGeneration() {
         status: 'queued' as const,
         progress: 0,
         audio: null,
+        audioSource: undefined,
         trackId: null,
         jobId: null,
         error: null,
@@ -417,6 +449,7 @@ export function useTimelineGeneration() {
       if (block.kind !== 'voice' || !voiceIdSet.has(block.id)) return block
       const alreadyClean = block.status === 'queued'
         && !block.audio
+        && !block.audioSource
         && !block.trackId
         && !block.jobId
         && !block.error
@@ -427,6 +460,7 @@ export function useTimelineGeneration() {
         status: 'queued' as const,
         progress: 0,
         audio: null,
+        audioSource: undefined,
         trackId: null,
         jobId: null,
         error: null,
@@ -482,10 +516,26 @@ export function useTimelineGeneration() {
     })
     commit(() => restored)
     resetEditHistory()
+    savedBlocks.forEach((savedBlock) => {
+      if (savedBlock.kind !== 'voice' || savedBlock.audioSource !== 'browser-model') return
+      const block = restored.find((item): item is TimelineVoiceBlock => item.id === savedBlock.id && item.kind === 'voice')
+      if (!block) return
+      void loadLocalAudio(block).then((record) => {
+        const latest = blocksRef.current.find((item) => item.id === block.id)
+        if (!record || latest?.kind !== 'voice' || latest.revision !== block.revision
+          || latest.text !== block.text || latest.voiceId !== block.voiceId || latest.audio) return
+        const audio = createLocalAudio(latest, record.wav, record.durationSeconds, record.styleId)
+        const trackId = enqueue(audio, `${latest.voiceName} · ${latest.text.slice(0, 22)}`)
+        updateVoiceBlock(block.id, {
+          status: 'ready', progress: 100, audio, trackId, jobId: null,
+          durationSeconds: record.durationSeconds, error: null,
+        }, block.revision)
+      }).catch(() => setLocalAudioSaveWarning('저장된 WAV를 읽지 못했습니다. 브라우저 저장소를 확인해 주세요.'))
+    })
     return restored
       .filter((block): block is TimelineVoiceBlock => block.kind === 'voice' && Boolean(block.jobId))
       .map((block) => block.id)
-  }, [commit, removeTrack, resetEditHistory])
+  }, [commit, enqueue, removeTrack, resetEditHistory, updateVoiceBlock])
   const restoreProject = useCallback((
     project: VoiceProject,
     options: TimelineGenerationOptions,
@@ -587,6 +637,7 @@ export function useTimelineGeneration() {
         status: 'queued' as const,
         progress: 0,
         audio: null,
+        audioSource: undefined,
         trackId: null,
         jobId: null,
         error: null,
@@ -669,28 +720,17 @@ export function useTimelineGeneration() {
     if (signal.aborted || latest?.kind !== 'voice' || latest.revision !== revision) {
       throw new DOMException('대사가 변경되어 WAV 생성을 중단했습니다.', 'AbortError')
     }
-    const url = URL.createObjectURL(generated.blob)
-    const audio: GeneratedAudio = {
-      url,
-      filename: buildAudioFilename(block.text, block.voiceName, 'wav'),
-      source: 'browser-model',
-      durationSeconds: generated.durationSeconds,
-      revokeOnRemove: true,
-      result: {
-        jobId: `local-${block.id}`,
-        status: 'completed',
-        engineId: 'supertonic-local',
-        engineMode: 'browser',
-        audioUrl: url,
-        estimatedDurationSeconds: generated.durationSeconds,
-        message: `기기 내 Supertonic 3 ${generated.styleId} 스타일로 만든 WAV입니다. 기존 성우의 원본 음색과는 다릅니다.`,
-        normalizedText: block.text,
-        segmentCount: 1,
-        processingMs: null,
-        fileSizeBytes: generated.blob.size,
-        realtimeFactor: null,
-      },
+    try {
+      await saveLocalAudio(block, generated.blob, generated.durationSeconds, generated.styleId)
+      setLocalAudioSaveWarning(null)
+    } catch {
+      setLocalAudioSaveWarning('WAV는 준비됐지만 브라우저에 보관하지 못했습니다. 저장 공간을 확인하고 지금 파일을 다운로드해 주세요.')
     }
+    const afterSave = blocksRef.current.find((item) => item.id === blockId)
+    if (signal.aborted || afterSave?.kind !== 'voice' || afterSave.revision !== revision) {
+      throw new DOMException('대사가 변경되어 WAV 생성을 중단했습니다.', 'AbortError')
+    }
+    const audio = createLocalAudio(block, generated.blob, generated.durationSeconds, generated.styleId)
     const existsInQueue = Boolean(block.trackId && usePlayerStore.getState().queue.some((track) => track.id === block.trackId))
     const trackId = existsInQueue && block.trackId
       ? (replaceTrack(block.trackId, audio), block.trackId)
@@ -709,6 +749,7 @@ export function useTimelineGeneration() {
 
   return {
     blocks,
+    localAudioSaveWarning,
     stageText,
     stageSegments,
     addVoiceBlock,

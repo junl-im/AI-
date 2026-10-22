@@ -32,6 +32,7 @@ export interface TimelineVoiceBlock extends TimelineBaseBlock {
   status: TimelineBlockStatus
   progress: number
   audio: GeneratedAudio | null
+  audioSource?: 'browser-model'
   trackId: string | null
   error: string | null
   revision: number
