@@ -22,7 +22,7 @@ export function audioBufferToWav(audio: PcmAudio): Blob {
     pcm[index] = Math.round(sample * (sample < 0 ? 32768 : 32767))
   }
   if (peak < 0.002 || Math.sqrt(squareSum / audio.length) < 0.0002) {
-    throw new Error('녹음에 음성이 들어오지 않았습니다. 공유 창에서 화면 전체와 시스템 오디오를 선택해 다시 시도하거나 음성 서버를 연결해 주세요.')
+    throw new Error('공유된 오디오가 무음입니다. 이 PC에서는 기기 성우 소리가 화면 공유에 포함되지 않을 수 있습니다. 아래의 녹음 없는 WAV 생성 기능을 사용하거나 음성 서버를 연결해 주세요.')
   }
   const buffer = new ArrayBuffer(44 + pcm.byteLength)
   const view = new DataView(buffer)
@@ -54,7 +54,7 @@ export async function recordedWebmToFiles(webm: Blob): Promise<{ wav: Blob; mp3:
     const wav = audioBufferToWav(decoded)
     return { wav, mp3: await wavToMp3(wav) }
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith('녹음에 음성이')) throw error
+    if (error instanceof Error && error.message.startsWith('공유된 오디오가 무음')) throw error
     throw new Error('녹음 파일을 WAV/MP3로 변환하지 못했습니다. Chrome 또는 Edge의 오디오 공유 설정을 확인해 주세요.', { cause: error })
   } finally {
     await context.close()

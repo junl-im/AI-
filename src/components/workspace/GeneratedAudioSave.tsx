@@ -3,6 +3,7 @@ import { recordBrowserSpeech } from '../../export/recordBrowserSpeech'
 import { recordedWebmToFiles } from '../../export/recordedAudioFormats'
 import { buildTimelineWav } from '../../export/timelineWav'
 import { wavToMp3 } from '../../export/wavToMp3'
+import { loadRecordedAudio, saveRecordedAudio } from '../../storage/recordedAudioRepository'
 import type { GeneratedAudio } from '../../tts/generationTypes'
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 
@@ -31,6 +32,7 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
   const recordedWavRef = useRef<string | null>(null)
   const recordedMp3Ref = useRef<string | null>(null)
   const sourceRef = useRef<string | null>(null)
+  const recordingSignatureRef = useRef<string | null>(null)
   useEffect(() => () => {
     abortRef.current?.abort()
     wavAbortRef.current?.abort()
@@ -42,6 +44,32 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
   const voices = blocks.filter((block) => block.kind === 'voice')
   const ready = voices.filter((block) => block.status === 'ready')
   const sourceSignature = voices.map((block) => `${block.id}:${block.revision}:${block.status}:${block.audio?.source ?? ''}`).join('|')
+  const recordingSignature = JSON.stringify(voices.map((block) => [
+    block.id, block.revision, block.text, block.voiceId, block.speed, block.pitch,
+  ]))
+  useEffect(() => {
+    let active = true
+    recordingSignatureRef.current = recordingSignature
+    if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
+    if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
+    recordedWavRef.current = null
+    recordedMp3Ref.current = null
+    setRecordedWavUrl(null)
+    setRecordedMp3Url(null)
+    if (voices.length) {
+      void loadRecordedAudio(recordingSignature).then((record) => {
+        if (!active || !record || recordingSignatureRef.current !== recordingSignature) return
+        recordedWavRef.current = URL.createObjectURL(record.wav)
+        recordedMp3Ref.current = URL.createObjectURL(record.mp3)
+        setRecordedWavUrl(recordedWavRef.current)
+        setRecordedMp3Url(recordedMp3Ref.current)
+        setRecordProgress('이 브라우저에 보관된 기본 성우 녹음을 복구했습니다.')
+      }).catch(() => {
+        if (active) setRecordError('저장된 녹음을 읽지 못했습니다. 브라우저 저장소를 확인해 주세요.')
+      })
+    }
+    return () => { active = false }
+  }, [recordingSignature, voices.length])
   useEffect(() => {
     if (sourceRef.current === null) {
       sourceRef.current = sourceSignature
@@ -50,18 +78,12 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
     if (sourceRef.current === sourceSignature) return
     sourceRef.current = sourceSignature
     abortRef.current?.abort()
-    if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
-    if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
-    recordedWavRef.current = null
-    recordedMp3Ref.current = null
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     fullWavRef.current = null
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
     fullMp3Ref.current = null
     setFullWavUrl(null)
     setFullMp3Url(null)
-    setRecordedWavUrl(null)
-    setRecordedMp3Url(null)
     setRecordProgress('')
     setRecordError('')
   }, [sourceSignature])
@@ -139,6 +161,11 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
       setRecordProgress('녹음한 기본 성우 음성을 WAV·MP3로 변환 중…')
       const { wav, mp3 } = await recordedWebmToFiles(blob)
       if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
+      try {
+        await saveRecordedAudio(recordingSignature, wav, mp3)
+      } catch {
+        setRecordError('WAV·MP3 파일은 준비됐지만 브라우저 저장 공간에 보관하지 못했습니다. 지금 다운로드해 주세요.')
+      }
       if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
       if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
       recordedWavRef.current = URL.createObjectURL(wav)
@@ -182,15 +209,18 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
         </button>
         {fullMp3Url ? <a href={fullMp3Url} download="sorion-full.mp3">전체 MP3 다운로드</a> : null}
       </div> : null}
-      {canRecordBrowser ? <div className="soa-generated-save__browser">
+      {canRecordBrowser || recordedWavUrl ? <div className="soa-generated-save__browser">
         <strong>기본 성우 음색 그대로 저장</strong>
-        <p>기기 성우가 대사를 다시 읽는 소리를 녹음해 WAV·MP3로 자동 변환합니다. Chrome/Edge 공유 창에서 소리가 포함된 탭이나 화면 전체의 시스템 오디오를 선택해 주세요. 녹음이 무음이면 파일을 만들지 않습니다.</p>
-        <button type="button" disabled={recording} onClick={() => void startRecording()}>
+        {canRecordBrowser ? <p>기기 성우가 대사를 다시 읽는 소리를 녹음해 WAV·MP3로 변환합니다. Chrome/Edge에서 현재 탭 또는 화면 전체의 오디오 공유가 필요합니다. PC에 따라 기기 성우 소리가 공유 오디오에 포함되지 않을 수 있습니다.</p> : null}
+        {canRecordBrowser ? <button type="button" disabled={recording} onClick={() => void startRecording()}>
           {recording ? '기본 성우 녹음·변환 중…' : '기본 성우를 WAV·MP3로 저장'}
-        </button>
+        </button> : null}
         {recording ? <button type="button" onClick={() => abortRef.current?.abort()}>녹음 취소</button> : null}
         {recordProgress ? <p role="status">{recordProgress}</p> : null}
         {recordError ? <p role="alert">{recordError}</p> : null}
+        {recordError && canRenderLocalWav ? <button type="button" disabled={renderingWav} onClick={() => void makeLocalWav()}>
+          녹음 없이 다른 음색으로 WAV 만들기
+        </button> : null}
         {recordedWavUrl && recordedMp3Url ? <div className="soa-generated-save__preview">
           <audio controls src={recordedWavUrl} aria-label="기본 성우 녹음 미리 듣기" />
           <a href={recordedWavUrl} download="sorion-default-voices.wav">기본 성우 WAV 다운로드</a>

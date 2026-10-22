@@ -542,3 +542,6 @@ Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ig
 ## 0.11.56 · Default Voice Recording to WAV/MP3
 
 0.11.55는 별도 모델의 WAV/MP3 저장만 제공해 사용자가 원한 기본 성우 음색 보존을 해결하지 못했습니다. 이번 패치는 Web Speech 재생 중 캡처한 WebM을 브라우저 `decodeAudioData`로 PCM화하고 단일 채널 WAV 및 MP3로 변환합니다. PCM peak/RMS가 낮으면 무음으로 실패시켜 빈 파일을 성공으로 보여주지 않습니다. Chrome에서 1초 실제 MediaRecorder WebM(15,752B)을 WAV(84,714B)와 MP3(15,882B)로 변환하고 헤더를 확인했습니다. 이는 변환 검증이며 기본 성우의 운영체제 출력이 화면 공유에 실제 포함되는지의 실기기 인증은 아닙니다. 상세 제한은 `docs/DEFAULT_VOICE_EXPORT_0.11.56.md`에 기록합니다.
+## 0.11.57 · Silent Capture Recovery & Recording Persistence
+
+기본 성우 화면 공유 녹음이 무음인 PC에서는 WAV/MP3 변환을 완료할 수 없습니다. 저장 UI는 이 제한을 설명하고 별도 로컬 음색 WAV 생성 동선으로 안내합니다. 실제로 녹음된 WAV/MP3는 IndexedDB에 저장되어 동일 대본과 성우 설정으로 재방문하면 다시 다운로드할 수 있습니다. 기본 성우의 원본 음색 파일을 안정적으로 생성하는 엔진은 별도 필요합니다.

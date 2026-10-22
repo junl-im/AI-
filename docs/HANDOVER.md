@@ -98,7 +98,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.56 · Default Voice Recording to WAV/MP3**
+Current baseline: **0.11.57 · Silent Capture Recovery & Recording Persistence**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**
@@ -108,7 +108,7 @@ Current baseline: **0.11.56 · Default Voice Recording to WAV/MP3**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
-현재 기능 상태(0.11.56): GitHub Pages 정적 Web의 기본 성우(Web Speech)는 화면/시스템 오디오 캡처가 실제 성공하면 WebM을 WAV/MP3로 자동 변환해 저장합니다. 무음은 실패 처리하고 미리 듣기를 제공합니다. 별도 Supertonic 3 모델의 한국어 WAV/MP3 생성은 다른 음색 대안이며 기본 5성우 원본 음색이 아닙니다. 두 MP3 경로 모두 LGPL-3.0 `@breezystack/lamejs`를 지연 로드합니다. 실제 다른 PC의 기본 성우 캡처·청취는 미검증입니다. 생성 파일은 현재 메모리 Blob URL이므로 재방문·다른 PC 자동 복구는 되지 않습니다. 0.11.57에서는 오디오 바이트 지속 저장과 사용자 주도 내보내기/가져오기를 우선합니다. 기술·라이선스·실측 검증은 `docs/{LOCAL_WAV_ENGINE_0.11.54,DEFAULT_VOICE_EXPORT_0.11.56}.md`를 참조합니다.
+현재 기능 상태(0.11.57): GitHub Pages 정적 Web의 기본 성우(Web Speech)는 화면/시스템 오디오 캡처에 실제 음성이 들어올 때만 WAV/MP3를 만듭니다. 사용자 보고로 다른 PC의 무음 실패가 확인됐고, 해당 PC에서는 기본 음색 저장이 아직 불가능합니다. 녹음 성공 파일은 동일 브라우저 프로필의 IndexedDB에 저장하고 동일 대본·성우 설정에서 복구합니다. 별도 Supertonic 3 모델의 한국어 WAV/MP3 생성은 다른 음색 대안이며 기본 5성우 원본 음색이 아닙니다. 두 MP3 경로 모두 LGPL-3.0 `@breezystack/lamejs`를 지연 로드합니다. 기기 간 자동 동기화는 없습니다. 0.11.58에서는 직접 파일 생성 엔진과 사용자 주도 내보내기/가져오기를 우선합니다. 기술·라이선스·실측 검증은 `docs/{LOCAL_WAV_ENGINE_0.11.54,DEFAULT_VOICE_EXPORT_0.11.56}.md`를 참조합니다.
 
 ## 보존 이력
 
@@ -659,3 +659,15 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: Web Speech는 PCM을 직접 반환하지 않습니다. Chrome/Edge 화면 공유가 기기 성우의 운영체제 오디오를 실제 포함하는지는 OS·브라우저·공유 방식에 좌우됩니다. 무음이면 실패로 안내하며 원본 음색 저장 성공을 보장하지 않습니다. 사용자의 PC에서 실제 성우 청취와 파일 열기 검증이 필요합니다. 마이크·시스템의 다른 소리가 녹음에 섞일 수 있습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.56-default-voice-export-full.zip` / `SoriON-AI-0.11.55-to-0.11.56-default-voice-export-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.57 · Durable Audio & Cross-Device Recovery. 생성 파일 지속 저장, 프로젝트 묶음 내보내기·가져오기, 기본 성우의 다른 PC 실기기 오디오 캡처 검증.
+## 2026-10-22 KST · 0.11.57 Silent Capture Recovery & Recording Persistence
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.57 / 0.11.56 (`a53d98b`).
+3. **변경 내용**: 기본 성우 녹음 무음 오류의 원인을 화면 공유 오디오 제한으로 명시하고 별도 로컬 음색 WAV 생성 버튼을 오류 바로 아래에 둡니다. 녹음 성공 시 WAV·MP3 바이트를 IndexedDB에 저장하고 동일 대본·성우 설정 재방문 때 다운로드를 복구합니다.
+4. **변경 이유**: 실제 다른 PC에서는 기기 성우 소리가 공유 오디오에 포함되지 않아 파일 저장에 실패했습니다. 성공한 녹음도 새로고침 뒤 임시 URL이 사라졌습니다.
+5. **영향 범위**: Web 저장 UI·오디오 변환 오류·IndexedDB 스키마. API/Worker 음성 모델은 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/GeneratedAudioSave.tsx`, `src/export/recordedAudioFormats.ts`, `src/storage/{database,recordedAudioRepository}.ts`, 버전·릴리스 문서.
+7. **검증 결과**: Web 363개 테스트, 타입 검사·빌드 통과. 실제 타 PC 기본 성우 무음은 사용자 보고로 확인했으며 해당 PC를 원격 조작한 재검증은 못했습니다.
+8. **알려진 제한과 주의사항**: 브라우저 Web Speech 기본 성우의 원본 오디오는 파일로 직접 주어지지 않습니다. 화면 공유에서 무음이면 녹음 파일을 만들 수 없고, 로컬 모델은 다른 음색이며 첫 다운로드가 큽니다. 보관된 음원은 같은 브라우저 프로필에만 있습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.57-silent-capture-recovery-full.zip` / `SoriON-AI-0.11.56-to-0.11.57-silent-capture-recovery-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.58 · Direct File Generation & Cross-Device Recovery. 원본 음색의 파일 생성 엔진 경로를 검증하고 로컬 WAV 프로젝트 복구·묶음 이전을 진행합니다.

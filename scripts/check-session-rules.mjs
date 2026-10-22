@@ -6,7 +6,7 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 const requirements = new Map([
   ['src/pages/HomePage.tsx', ['useWorkspaceSessionPersistence', 'workspaceResetToken']],
   ['src/storage/database.ts', [
-    'DATABASE_VERSION = 4',
+    'DATABASE_VERSION = 5',
     "WORKSPACE_SESSION_STORE = 'workspaceSessions'",
     'onversionchange',
   ]],
