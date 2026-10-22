@@ -81,7 +81,7 @@ export function DesktopVoiceDrawer({
 
   return (
     <aside id="soa-voice-drawer" className={`soa-voice-drawer ${collapsed ? 'is-collapsed' : ''}`} aria-label="미니 보이스 라이브러리">
-      <button type="button" className="soa-studio-panel-toggle" aria-label={collapsed ? '보이스 패널 펼치기' : '보이스 패널 접기'} aria-expanded={!collapsed} aria-controls="soa-voice-drawer" onClick={onToggleCollapsed}>{collapsed ? '‹' : '›'}</button>
+      <button type="button" className="soa-studio-panel-toggle" aria-label={collapsed ? '보이스 패널 펼치기' : '보이스 패널 접기'} aria-expanded={!collapsed} aria-controls="soa-voice-drawer" onClick={onToggleCollapsed}><span aria-hidden="true">{collapsed ? '‹' : '›'}</span>{!collapsed ? <b>숨기기</b> : null}</button>
       {collapsed ? <span className="soa-studio-panel-monogram" aria-hidden="true">V</span> : (
         <>
           <header><span>VOICE DRAWER</span><strong>목소리 라이브러리</strong><p>성우마다 속도·호흡·문장 리듬이 다릅니다. ▶로 실제 차이를 바로 들어보세요.</p></header>

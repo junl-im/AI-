@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import type { GeneratedAudio } from '../../tts/generationTypes'
 import type { PlayerTrack } from '../../player/playerTypes'
-import type { TimelineBlock } from '../../workspace/workspaceTypes'
+import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import { TimelineEditor } from './TimelineEditor'
 
 const blocks: TimelineBlock[] = [
@@ -107,6 +107,28 @@ describe('TimelineEditor', () => {
     await waitFor(() => expect(onSelectionChange).toHaveBeenLastCalledWith(['voice-1']))
     fireEvent.click(screen.getByLabelText(/클립 2 · 혜린/))
     await waitFor(() => expect(onSelectionChange).toHaveBeenLastCalledWith(['voice-2']))
+  })
+
+  it('클립 클릭을 Dock 재생 대상으로 연결하고 클립 시작점으로 되돌린다', async () => {
+    usePlayerStore.setState({
+      queue: [linkedTrack('track-1'), { ...linkedTrack('track-2'), resumePositionSeconds: 2 }],
+      currentTrackId: 'track-1',
+    })
+    const voiceBlock = blocks[0] as TimelineVoiceBlock
+    const readyBlocks: TimelineBlock[] = [
+      { ...voiceBlock, trackId: 'track-1' },
+      { ...voiceBlock, id: 'voice-2', text: '두 번째', trackId: 'track-2' },
+    ]
+    render(
+      <TimelineEditor blocks={readyBlocks} onMove={vi.fn()} onReorder={vi.fn()}
+        onSplit={vi.fn()} onUpdateText={vi.fn()} onRetry={vi.fn()}
+        onAddVoice={vi.fn()} onAddPause={vi.fn()} onRemove={vi.fn()} onClear={vi.fn()} />,
+    )
+    fireEvent.click(screen.getByRole('article', { name: /클립 2 · 혜린/ }))
+    await waitFor(() => expect(usePlayerStore.getState().currentTrackId).toBe('track-2'))
+    expect(usePlayerStore.getState().queue[1].resumePositionSeconds).toBe(0)
+    expect(screen.getByText('Dock 재생 대상')).toBeInTheDocument()
+    expect(usePlayerStore.getState().playRequestId).toBe(0)
   })
 
   it('모바일용 + 선택 버튼으로 modifier key 없이 여러 대사를 고른다', async () => {

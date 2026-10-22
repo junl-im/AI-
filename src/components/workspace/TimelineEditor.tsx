@@ -108,6 +108,8 @@ export function TimelineEditor({
   const playbackPositionSeconds = usePlayerStore((state) => state.playbackPositionSeconds)
   const playbackActive = usePlayerStore((state) => state.playbackActive)
   const toggleTrack = usePlayerStore((state) => state.toggleTrack)
+  const selectTrack = usePlayerStore((state) => state.select)
+  const updateResumePosition = usePlayerStore((state) => state.updateResumePosition)
   const seekTrack = usePlayerStore((state) => state.seekTrack)
   const playerQueue = usePlayerStore((state) => state.queue)
   const clipRefs = useRef(new Map<string, HTMLElement>())
@@ -197,8 +199,8 @@ export function TimelineEditor({
   const totalDuration = blocks.reduce((total, block) => total + Math.max(0, block.durationSeconds), 0)
   const timelineContentWidth = getTimelineContentWidth(metrics)
   const canvasWidth = getTimelineCanvasWidth(metrics)
-  const playbackBlock = blocks.find((block) => block.kind === 'voice' && block.trackId === playbackTrackId)
-    ?? blocks.find((block) => block.kind === 'voice' && block.trackId === currentTrackId)
+  const playbackBlock = blocks.find((block) => block.kind === 'voice' && block.trackId === currentTrackId)
+    ?? blocks.find((block) => block.kind === 'voice' && block.trackId === playbackTrackId)
     ?? null
   const observedPlaybackBlockIdRef = useRef<string | null>(playbackBlock?.id ?? null)
   const playbackMetric = playbackBlock ? metrics.find((metric) => metric.id === playbackBlock.id) : null
@@ -342,6 +344,16 @@ export function TimelineEditor({
   function selectBlock(id: string, mode: TimelineSelectionMode = 'single') {
     if (quickDraftDirty) saveQuickDraft()
     selection.selectBlock(id, mode)
+    if (mode !== 'single') return
+    const block = blocks.find((item) => item.id === id)
+    if (block?.kind !== 'voice' || block.status !== 'ready' || !block.trackId) return
+    if (!playerQueue.some((track) => track.id === block.trackId)) return
+    updateResumePosition(block.trackId, 0)
+    selectTrack(block.trackId)
+    if (currentTrackId === block.trackId) {
+      const track = playerQueue.find((item) => item.id === block.trackId)
+      if (track && !track.audio.browserSpeech && !track.audio.partial) seekTrack(block.trackId, 0)
+    }
   }
 
   function editBlock(id: string) {
@@ -373,7 +385,7 @@ export function TimelineEditor({
     const track = playerQueue.find((item) => item.id === block.trackId)
     if (!track || track.audio.browserSpeech || track.audio.partial || !track.audio.durationSeconds) return
     const ratio = Math.max(0, Math.min(1, (x - metric.offset) / metric.width))
-    selectBlock(block.id)
+    selection.selectBlock(block.id)
     seekTrack(block.trackId, ratio * track.audio.durationSeconds)
   }
 
@@ -913,6 +925,7 @@ export function TimelineEditor({
                           selected={selectedBlockIds.has(block.id)}
                           multiSelected={selectedBlockIds.size > 1 && selectedBlockIds.has(block.id)}
                           playbackActive={active && playbackActive}
+                          dockTarget={currentTrackId === block.trackId && selectedBlockIds.has(block.id)}
                           voiceUnavailable={resolveVoiceChoice(voiceChoices, block.voiceId).kind === 'my-voice' && !resolveVoiceChoice(voiceChoices, block.voiceId).ready}
                           onSelect={selectBlock}
                           onToggleTrack={toggleTrack}

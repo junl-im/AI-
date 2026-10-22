@@ -15,6 +15,7 @@ interface TimelineVoiceBlockCardProps {
   selected: boolean
   multiSelected: boolean
   playbackActive: boolean
+  dockTarget?: boolean
   voiceUnavailable?: boolean
   onSelect: (id: string, mode: 'single' | 'toggle' | 'range') => void
   onToggleTrack: (trackId: string) => void
@@ -35,6 +36,7 @@ export function TimelineVoiceBlockCard({
   selected,
   multiSelected,
   playbackActive,
+  dockTarget = false,
   voiceUnavailable = false,
   onSelect,
   onToggleTrack,
@@ -246,6 +248,7 @@ export function TimelineVoiceBlockCard({
 
       <footer>
         <span className="soa-dubbing-block__status"><i aria-hidden="true" />{statusLabel}</span>
+        {dockTarget ? <span className="soa-dubbing-block__dock-target">Dock 재생 대상</span> : null}
         {block.audio?.partial ? (
           <small>구간 {block.audio.partial.index}/{block.audio.partial.totalSegments} · 첫 구간 {block.audio.telemetry?.serverSegmentReadyMs ?? block.audio.partial.readyAfterMs}ms</small>
         ) : block.audio?.result.firstAudioMs != null ? (

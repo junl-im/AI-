@@ -73,7 +73,7 @@ export function WorkspaceProjectRail({
         aria-controls="soa-project-rail"
         onClick={onToggleCollapsed}
       >
-        {collapsed ? '›' : '‹'}
+        <span aria-hidden="true">{collapsed ? '›' : '‹'}</span>{!collapsed ? <b>숨기기</b> : null}
       </button>
       {collapsed ? (
         <span className="soa-studio-panel-monogram" aria-hidden="true">P</span>

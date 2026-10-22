@@ -179,3 +179,22 @@
 @media (max-width: 760px) {
   .soa-app-root.is-editor .soa-dubbing-player-dock--empty .soa-dubbing-player-empty { color: #51445f; }
 }
+
+.soa-app-root.is-editor .soa-studio-panel-toggle {
+  min-height: 40px; border: 1px solid #8569a2; color: #3e2857;
+  background: #e8dcf6; box-shadow: 0 1px 5px #33214724;
+  font-size: 19px; font-weight: 850; cursor: pointer;
+}
+.soa-app-root.is-editor .soa-studio-panel-toggle b { font-size: 11px; font-weight: 850; }
+.soa-app-root.is-editor .soa-studio-panel-toggle:hover,
+.soa-app-root.is-editor .soa-studio-panel-toggle:focus-visible {
+  border-color: #583a77; color: #fff; background: #664985;
+  outline: 2px solid #bfa8d8; outline-offset: 2px;
+}
+.soa-dubbing-block__dock-target {
+  color: #efe2ff; background: #5a3c79; border-radius: 6px;
+  padding: 2px 5px; font-size: 10px; font-weight: 800;
+}
+
+.soa-app-root.is-editor .soa-project-rail:not(.is-collapsed) > .soa-studio-panel-toggle { flex: 0 0 auto; min-width: 76px; }
+.soa-app-root.is-editor .soa-voice-drawer:not(.is-collapsed) > .soa-studio-panel-toggle { min-width: 76px; }
