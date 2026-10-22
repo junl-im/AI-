@@ -38,6 +38,9 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const [fullMp3Url, setFullMp3Url] = useState<string | null>(null)
   const [fullWavBusy, setFullWavBusy] = useState(false)
   const [downloadStatus, setDownloadStatus] = useState('')
+  const [clipMp3BusyId, setClipMp3BusyId] = useState<string | null>(null)
+  const [clipMp3Urls, setClipMp3Urls] = useState<Record<string, string>>({})
+  const clipMp3Refs = useRef<Record<string, string>>({})
   const [bundleBusy, setBundleBusy] = useState(false)
   const [bundleError, setBundleError] = useState('')
   const [bundleStatus, setBundleStatus] = useState('')
@@ -60,10 +63,11 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
     if (bundleRef.current) URL.revokeObjectURL(bundleRef.current)
+    Object.values(clipMp3Refs.current).forEach((url) => URL.revokeObjectURL(url))
   }, [])
   const voices = blocks.filter((block) => block.kind === 'voice')
   const ready = voices.filter((block) => block.status === 'ready')
-  const sourceSignature = voices.map((block) => `${block.id}:${block.revision}:${block.status}:${block.audio?.source ?? ''}`).join('|')
+  const sourceSignature = voices.map((block) => `${block.id}:${block.revision}:${block.status}:${block.audio?.source ?? ''}:${block.audio?.url ?? ''}`).join('|')
   const recordingSignature = JSON.stringify(voices.map((block) => [
     block.id, block.revision, block.text, block.voiceId, block.speed, block.pitch,
   ]))
@@ -109,6 +113,9 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     setFullWavUrl(null)
     setFullMp3Url(null)
     setDownloadStatus('')
+    Object.values(clipMp3Refs.current).forEach((url) => URL.revokeObjectURL(url))
+    clipMp3Refs.current = {}
+    setClipMp3Urls({})
     setRecordProgress('')
     setRecordError('')
   }, [sourceSignature])
@@ -151,6 +158,29 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       setWavError(error instanceof Error ? error.message : '전체 음성 파일을 만들지 못했습니다.')
     } finally {
       setFullWavBusy(false)
+    }
+  }
+
+  async function downloadClipMp3(block: TimelineBlock) {
+    if (block.kind !== 'voice' || block.audio?.source !== 'browser-model' || !block.audio.url) return
+    const signature = sourceSignature
+    setClipMp3BusyId(block.id)
+    setWavError('')
+    try {
+      const response = await fetch(block.audio.url)
+      if (!response.ok) throw new Error('클립 WAV를 읽지 못했습니다. 다시 생성해 주세요.')
+      const mp3 = await wavToMp3(await response.blob())
+      if (sourceRef.current !== signature) return
+      const url = URL.createObjectURL(mp3)
+      if (clipMp3Refs.current[block.id]) URL.revokeObjectURL(clipMp3Refs.current[block.id])
+      clipMp3Refs.current[block.id] = url
+      setClipMp3Urls({ ...clipMp3Refs.current })
+      startDownload(url, `sorion-voice-${voices.indexOf(block) + 1}.mp3`)
+      setDownloadStatus(`대사 ${voices.indexOf(block) + 1} MP3 다운로드를 시작했습니다. 저장되지 않았다면 다시 다운로드 링크를 눌러 주세요.`)
+    } catch (error) {
+      setWavError(error instanceof Error ? error.message : '클립 MP3를 만들지 못했습니다.')
+    } finally {
+      setClipMp3BusyId(null)
     }
   }
 
@@ -270,10 +300,18 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       {downloadable.length ? (
         <div className="soa-generated-save__clips">
           {downloadable.map((block) => (
-            <a key={block.id} href={block.audio!.url!} download={block.audio!.filename}
-              aria-label={`완료 대사 ${voices.indexOf(block) + 1} 음성 파일 다운로드`}>
-              ↓ {downloadable.length === 1 ? '음성 파일 다운로드' : `대사 ${voices.indexOf(block) + 1} 파일 다운로드`}
-            </a>
+            <div key={block.id}>
+              <a href={block.audio!.url!} download={block.audio!.filename}
+                aria-label={`완료 대사 ${voices.indexOf(block) + 1} 음성 파일 다운로드`}>
+                ↓ {downloadable.length === 1 ? '음성 파일 다운로드' : `대사 ${voices.indexOf(block) + 1} 파일 다운로드`}
+              </a>
+              {block.audio?.source === 'browser-model' ? <button type="button" disabled={clipMp3BusyId !== null}
+                onClick={() => void downloadClipMp3(block)}>
+                {clipMp3BusyId === block.id ? 'MP3 변환 중…' : `대사 ${voices.indexOf(block) + 1} MP3 다운로드`}
+              </button> : null}
+              {clipMp3Urls[block.id] ? <a href={clipMp3Urls[block.id]}
+                download={`sorion-voice-${voices.indexOf(block) + 1}.mp3`}>MP3 다시 다운로드</a> : null}
+            </div>
           ))}
         </div>
       ) : null}

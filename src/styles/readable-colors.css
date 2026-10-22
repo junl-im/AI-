@@ -248,6 +248,7 @@
 .soa-generated-save__heading span { color: #665276; font-size: 12px; }
 .soa-generated-save p { margin: 8px 0; font-size: 12px; line-height: 1.5; }
 .soa-generated-save__clips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.soa-generated-save__clips > div { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
 .soa-app-root.is-editor .soa-generated-save :is(a, button) {
   display: inline-flex; align-items: center; min-height: 40px; margin-right: 8px;
   padding: 8px 12px; border: 1px solid #74528f; border-radius: 9px;

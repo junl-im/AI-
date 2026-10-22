@@ -3,6 +3,9 @@ import { describe, expect, it, vi } from 'vitest'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import { GeneratedAudioSave } from './GeneratedAudioSave'
 
+const mp3 = vi.hoisted(() => ({ wavToMp3: vi.fn() }))
+vi.mock('../../export/wavToMp3', () => mp3)
+
 const voice: TimelineVoiceBlock = {
   id: 'v1', kind: 'voice', text: '안녕하세요.', voiceId: 'sori-warm', voiceName: '혜린',
   emotion: 'neutral', speed: 1, pitch: 0, normalizeText: true, jobId: 'job-1',
@@ -53,6 +56,29 @@ describe('GeneratedAudioSave', () => {
       .toHaveAttribute('download', 'local.wav')
     expect(screen.getByRole('button', { name: '전체 WAV 다운로드' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '전체 MP3 다운로드' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '대사 1 MP3 다운로드' })).toBeInTheDocument()
+  })
+
+  it('기기 내 모델 클립을 MP3로 변환하면 다운로드를 시작하고 재다운로드 링크를 남긴다', async () => {
+    const block: TimelineBlock = {
+      ...voice,
+      audio: { ...voice.audio!, source: 'browser-model', url: 'blob:local-wav', filename: 'local.wav' },
+    }
+    const wav = new Blob(['wav'], { type: 'audio/wav' })
+    mp3.wavToMp3.mockResolvedValue(new Blob(['mp3'], { type: 'audio/mpeg' }))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, blob: () => Promise.resolve(wav) }))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:converted-mp3')
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const { rerender } = render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: '대사 1 MP3 다운로드' }))
+    expect(await screen.findByRole('link', { name: 'MP3 다시 다운로드' }))
+      .toHaveAttribute('download', 'sorion-voice-1.mp3')
+    expect(mp3.wavToMp3).toHaveBeenCalledWith(wav)
+    expect(click).toHaveBeenCalledOnce()
+    rerender(<GeneratedAudioSave blocks={[{ ...block, audio: { ...block.audio!, url: 'blob:new-wav' } }]} onOpenExport={vi.fn()} />)
+    await waitFor(() => expect(screen.queryByRole('link', { name: 'MP3 다시 다운로드' })).not.toBeInTheDocument())
+    click.mockRestore()
+    vi.unstubAllGlobals()
   })
 
   it('아직 대사가 없어도 저장 위치와 다음 동작을 보여준다', () => {
