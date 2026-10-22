@@ -200,7 +200,7 @@ function compatibleVoices(
   const unverified = korean.filter((voice) => inferBrowserVoiceGender(voice) === 'unknown')
   const compatible = preset.gender === 'neutral'
     ? (unverified.length ? unverified : korean)
-    : (confirmed.length ? confirmed : unverified)
+    : confirmed
   return { korean, compatible }
 }
 
@@ -241,7 +241,7 @@ function selectBrowserSpeechVoiceWithEvidence(
         selectionBasis: 'none',
         koreanCandidateCount: korean.length,
         compatibleCandidateCount: 0,
-        reason: '성별이 확인되는 호환 한국어 음성이 없습니다. 반대 성별은 사용하지 않습니다.',
+        reason: '성별이 확인된 호환 한국어 음성이 없습니다. 성별 미확인 음성은 자동 배정하지 않으며 반대 성별은 사용하지 않습니다.',
       },
     }
   }
@@ -309,7 +309,7 @@ export function createBrowserSpeechResult(
   if (!selected) {
     throw new Error(
       `${preset.name}(${preset.gender === 'male' ? '남성' : preset.gender === 'female' ? '여성' : '중성'}) 프리셋과 맞는 한국어 시스템 음성을 찾지 못했습니다. `
-      + '반대 성별 음성으로 자동 대체하지 않습니다. 전용 CosyVoice WAV를 준비하거나 운영체제에 맞는 한국어 음성을 설치해 주세요.',
+      + '성별 미확인·반대 성별 음성으로 자동 대체하지 않습니다. 아래 저장 영역에서 다른 음색의 로컬 WAV를 만들거나 운영체제에 맞는 한국어 음성을 설치해 주세요.',
     )
   }
   const playback = createBrowserSpeechPlayback(request)
@@ -392,7 +392,7 @@ export function createBrowserSpeechUtterance(
   const preset = requireVoicePreset(playback.voiceId)
   if (!selected) {
     throw new Error(
-      `${preset.name} 프리셋과 성별이 맞는 한국어 브라우저 음성이 없습니다. 반대 성별 음성 재생을 차단했습니다.`,
+      `${preset.name} 프리셋과 성별이 확인된 한국어 브라우저 음성이 없습니다. 성별 미확인·반대 성별 음성 재생을 차단했습니다.`,
     )
   }
   const utterance = new SpeechSynthesisUtterance(playback.text)

@@ -224,11 +224,32 @@ describe('browserSpeech', () => {
       .toMatchObject({ status: 'ready', selectionBasis: 'neutral-device-fallback' })
   })
 
-  it('성별을 밝히지 않는 한국어 음성도 근사 프리셋으로 제공한다', () => {
+  it('성별을 밝히지 않는 한국어 음성을 남성·여성 프리셋에 자동 배정하지 않는다', () => {
     const unverified = [{ name: 'Korean Voice', lang: 'ko-KR', voiceURI: 'generic-ko' }] as SpeechSynthesisVoice[]
-    expect(diagnoseBrowserSpeechVoices(unverified).every((item) => item.status === 'ready')).toBe(true)
+    expect(selectBrowserSpeechVoice(unverified, 'sori-warm')).toBeNull()
+    expect(selectBrowserSpeechVoice(unverified, 'jun-deep')).toBeNull()
+    expect(selectBrowserSpeechVoice(unverified, 'min-energetic')).toBeNull()
     expect(diagnoseBrowserSpeechVoices(unverified).find((item) => item.voiceId === 'jun-deep'))
-      .toMatchObject({ selectionBasis: 'unverified-gender', inferredGender: 'unknown' })
+      .toMatchObject({ status: 'missing', selectionBasis: 'none' })
+    expect(diagnoseBrowserSpeechVoices(unverified).find((item) => item.voiceId === 'dam-calm'))
+      .toMatchObject({ status: 'ready', inferredGender: 'unknown' })
+  })
+
+  it('확인된 여성과 성별 미확인 음성만 있으면 남성 성우를 사용할 수 없다고 알린다', () => {
+    const voices = [
+      { name: 'Microsoft Heami Female', lang: 'ko-KR', voiceURI: 'heami' },
+      { name: 'Google 한국어', lang: 'ko-KR', voiceURI: 'google-ko' },
+    ] as SpeechSynthesisVoice[]
+    const diagnostic = diagnoseBrowserSpeechVoices(voices).find((item) => item.voiceId === 'jun-deep')
+    expect(diagnostic).toMatchObject({ status: 'missing', compatibleCandidateCount: 0 })
+    expect(diagnostic?.reason).toContain('성별 미확인 음성')
+    installBrowserSpeech()
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: { getVoices: () => voices },
+    })
+    expect(() => createBrowserSpeechResult({ ...request, voiceId: 'jun-deep' }, 'job'))
+      .toThrow('성별 미확인·반대 성별 음성으로 자동 대체하지 않습니다')
   })
 
   it('알 수 없는 프리셋 ID를 첫 여성 프리셋으로 바꾸지 않는다', () => {

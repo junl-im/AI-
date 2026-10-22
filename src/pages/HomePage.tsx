@@ -157,7 +157,9 @@ export function HomePage() {
     ? diagnoseBrowserSpeechVoices()
     : []
   const selectedBrowserVoiceDiagnostic = browserVoiceDiagnostics.find((item) => item.voiceId === voiceId)
-  const availableBrowserPreset = browserVoiceDiagnostics.find((item) => item.status === 'ready')
+  const availableBrowserPreset = browserVoiceDiagnostics.find((item) => (
+    item.status === 'ready' && item.expectedGender === selectedBrowserVoiceDiagnostic?.expectedGender
+  ))
   const selectedTimelineVoiceBlocks = useMemo(() => {
     if (selectedTimelineIds.length === 0) return []
     const selected = new Set(selectedTimelineIds)
@@ -666,8 +668,11 @@ export function HomePage() {
       showNotice(`선택한 대사 ${selectedTimelineVoiceIds.length}개에 ${voice.name} 목소리를 적용했습니다.`)
     } else {
       setSpeakerSeedVoiceId(voice.id)
+      if (timeline.blocks.some((block) => block.kind === 'voice' && block.status === 'ready')) {
+        showNotice(`${voice.name}은(는) 새 대사에 적용됩니다. 기존 음성을 바꾸려면 타임라인 대사를 선택한 뒤 목소리를 바꾸고 다시 생성해 주세요.`)
+      }
     }
-  }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, stopDirectBrowserPreview, updateTimelineVoices, voiceChoices])
+  }, [selectedTimelineVoiceIds, showNotice, speechPitch, speechSpeed, stopDirectBrowserPreview, timeline.blocks, updateTimelineVoices, voiceChoices])
   const previewVoice = useCallback(async (
     nextVoiceId: string,
     sampleText?: string,
@@ -1003,7 +1008,7 @@ export function HomePage() {
           <main className="soa-dubbing-main">
             {!engineCatalog.loading && backendStatus === 'degraded' && engineCatalog.selected?.mode === 'browser' ? (
               <div className="soa-device-playback-note" role="status">
-                <p>이 PC는 기기 내장 음성으로 대사를 재생합니다. 한국어 시스템 음성이 없으면 재생할 수 없습니다. 성별 정보를 확인할 수 없는 기기 음성은 근사 성우로 안내하며 사용합니다.</p>
+                <p>이 PC는 기기 내장 음성으로 대사를 재생합니다. 남성·여성 성우는 성별이 확인된 한국어 음성만 사용합니다. 맞는 음성이 없으면 아래 저장 영역에서 다른 음색의 로컬 WAV를 만들 수 있습니다.</p>
                 {window.speechSynthesis.getVoices().length === 0 ? (
                   <p>브라우저 음성 목록을 불러오는 중입니다. 계속 비어 있으면 한국어 시스템 음성을 확인해 주세요.</p>
                 ) : null}
