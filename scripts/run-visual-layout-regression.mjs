@@ -365,6 +365,7 @@ const layoutProbeExpression = `(() => {
   const dock = rect('.soa-dubbing-player-dock')
   const toggle = rect('.soa-dubbing-player-toggle')
   const progress = rect('.soa-dubbing-player-progress')
+  const emptyPlayer = rect('.soa-dubbing-player-empty')
   const studio = rect('.soa-desktop-studio')
   const rail = rect('.soa-project-rail')
   const center = rect('.soa-desktop-studio__center')
@@ -387,7 +388,9 @@ const layoutProbeExpression = `(() => {
     assertions: {
       noHorizontalOverflow: overflow <= 1,
       compactDockHeight: Boolean(dock && dock.height <= 82),
-      transportOrder: Boolean(toggle && progress && toggle.x < progress.x),
+      transportOrder: toggle || progress
+        ? Boolean(toggle && progress && toggle.x < progress.x)
+        : Boolean(emptyPlayer && emptyPlayer.height > 0),
       threeColumnVisible: Boolean(rail && center && drawer && rail.width > 0 && center.width > 0 && drawer.width > 0),
       batchVisible: Boolean(batch && batch.height > 0),
       batchControlsContained: Boolean(batch && batchControls && batchControls.right <= batch.right + 1),
