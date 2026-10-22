@@ -940,7 +940,6 @@ export function HomePage() {
           onOpenProject={openProject}
           onNewProject={clearCurrentWork}
           onOpenProjects={() => enterWorkspace('projects')}
-          onOpenSettings={() => enterWorkspace('settings')}
           collapsed={desktopLayout.leftCollapsed}
           onToggleCollapsed={desktopLayout.toggleLeft}
         />
@@ -979,7 +978,6 @@ export function HomePage() {
             onOpenClone={() => enterWorkspace('clone')}
             onOpenQuality={() => enterWorkspace('quality')}
             onOpenProjects={() => enterWorkspace('projects')}
-            onOpenSettings={() => enterWorkspace('settings')}
             sidePanelsCollapsed={desktopLayout.sidePanelsCollapsed}
             onToggleSidePanels={desktopLayout.toggleSidePanels}
             onClear={clearCurrentWork}
@@ -1057,7 +1055,7 @@ export function HomePage() {
               }}
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
-            <GeneratedAudioSave blocks={timeline.blocks} scriptText={timeline.blocks.filter((block) => block.kind === 'voice').map((block) => block.text).join('\n')}
+            <GeneratedAudioSave blocks={timeline.blocks}
               onOpenExport={() => setExportOpen(true)} onRenderLocalWav={timeline.renderLocalWav} />
             <FinalExportDialog open={exportOpen} blocks={timeline.blocks} onClose={() => setExportOpen(false)} />
             {pendingProjectSave ? (

@@ -13,7 +13,6 @@ function renderHeader(onClear = vi.fn()) {
       onOpenClone={vi.fn()}
       onOpenQuality={vi.fn()}
       onOpenProjects={vi.fn()}
-      onOpenSettings={vi.fn()}
       sidePanelsCollapsed
       onToggleSidePanels={vi.fn()}
       onClear={onClear}
@@ -36,7 +35,7 @@ describe('DubbingStudioHeader', () => {
     render(<DubbingStudioHeader title="오디오북" savedLabel="이 창에서만 보관 중" saveRecoveryNeeded
       onRetrySave={retry} downloadHref={null} downloadName="voice.wav" onTitleChange={vi.fn()}
       onOpenClone={vi.fn()} onOpenQuality={vi.fn()} onOpenProjects={vi.fn()}
-      onOpenSettings={vi.fn()} sidePanelsCollapsed onToggleSidePanels={vi.fn()} onClear={vi.fn()} />)
+      sidePanelsCollapsed onToggleSidePanels={vi.fn()} onClear={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: '작업 저장 다시 시도' }))
     expect(retry).toHaveBeenCalledOnce()
   })
@@ -100,7 +99,6 @@ describe('DubbingStudioHeader', () => {
         onOpenClone={vi.fn()}
         onOpenQuality={vi.fn()}
         onOpenProjects={vi.fn()}
-        onOpenSettings={vi.fn()}
         sidePanelsCollapsed
         onToggleSidePanels={onToggleSidePanels}
         onClear={vi.fn()}

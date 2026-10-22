@@ -30,7 +30,7 @@ export function CompactWorkspaceHeader() {
           설정
         </button>
         <button type="button" className="soa-intro-button" onClick={exitWorkspace}>
-          처음
+          첫 화면으로
         </button>
       </div>
     </header>

@@ -14,7 +14,6 @@ interface DubbingStudioHeaderProps {
   onOpenClone: () => void
   onOpenQuality: () => void
   onOpenProjects: () => void
-  onOpenSettings: () => void
   sidePanelsCollapsed: boolean
   onToggleSidePanels: () => void
   onClear: () => void
@@ -33,7 +32,6 @@ export function DubbingStudioHeader({
   onOpenClone,
   onOpenQuality,
   onOpenProjects,
-  onOpenSettings,
   sidePanelsCollapsed,
   onToggleSidePanels,
   onClear,
@@ -151,15 +149,6 @@ export function DubbingStudioHeader({
                   }}
                 >
                   음성 품질 확인
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setProjectMenuOpen(false)
-                    onOpenSettings()
-                  }}
-                >
-                  설정
                 </button>
                 <button
                   type="button"

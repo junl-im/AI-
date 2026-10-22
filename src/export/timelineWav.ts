@@ -5,7 +5,7 @@ interface PcmWav {
   samples: Uint8Array
 }
 
-function readPcmWav(buffer: ArrayBuffer): PcmWav {
+export function readPcmWav(buffer: ArrayBuffer): PcmWav {
   const view = new DataView(buffer)
   if (buffer.byteLength < 44 || view.getUint32(0, false) !== 0x52494646 || view.getUint32(8, false) !== 0x57415645) {
     throw new Error('WAV 파일 형식이 올바르지 않습니다.')

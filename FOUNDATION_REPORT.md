@@ -536,3 +536,6 @@ Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ig
 ## 0.11.54 · Local Korean WAV & Clip-Position Seek
 
 정적 Pages 환경에서도 파일 저장이 가능하도록 MIT 코드와 OpenRAIL-M 모델의 Supertonic 3를 사용자 선택 시 내려받는 브라우저 ONNX 경로로 연결했습니다. Chrome에서 한국어 문장으로 245,484바이트, 약 2.78초 WAV 생성을 직접 확인했습니다. 클립 내 클릭 위치를 Dock 재생 헤드로 전달하고 대사별·전체 WAV 내보내기를 추가했습니다. 모델 음색은 기존 다섯 성우의 동일한 음색이 아니며 모델·파일의 다른 PC 자동 동기화는 아직 없습니다. 근거와 위험은 `docs/LOCAL_WAV_ENGINE_0.11.54.md`에 기록합니다.
+## 0.11.55 · WAV/MP3 Save & Workspace UI Cleanup
+
+브라우저 로컬 모델의 PCM16 WAV를 `@breezystack/lamejs@1.2.7`으로 지연 변환해 실제 MP3 파일 다운로드를 추가했습니다. 해당 인코더는 LGPL-3.0이며 npm 패키지를 별도 동적 번들로 유지합니다. `src/export/wavToMp3.test.ts`는 실제 PCM을 MP3로 인코딩해 프레임 동기 바이트와 파일 크기를 검사합니다. 타임라인 전용 `+`를 레이블 안의 일반 버튼으로 이동하고 중복 설정 링크·TXT 다운로드를 제거했습니다. 모델 음색/대용량 다운로드·저장 지속성 한계는 기존과 같습니다.

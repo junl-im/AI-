@@ -256,9 +256,6 @@
 .soa-app-root.is-editor .soa-generated-save :is(a, button):focus-visible {
   outline: 2px solid #63458a; outline-offset: 2px;
 }
-.soa-app-root.is-editor .soa-generated-save .soa-generated-save__script {
-  color: #46325c; background: #eee4f8;
-}
 .soa-app-root.is-editor .soa-generated-save .soa-generated-save__limit {
   color: #755347; font-weight: 700;
 }

@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { recordBrowserSpeech } from '../../export/recordBrowserSpeech'
 import { buildTimelineWav } from '../../export/timelineWav'
+import { wavToMp3 } from '../../export/wavToMp3'
 import type { GeneratedAudio } from '../../tts/generationTypes'
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 
 interface Props {
   blocks: TimelineBlock[]
-  scriptText: string
   onOpenExport: () => void
   onRenderLocalWav?: (blockId: string, signal: AbortSignal, onProgress: (message: string) => void) => Promise<GeneratedAudio>
 }
 
-export function GeneratedAudioSave({ blocks, scriptText, onOpenExport, onRenderLocalWav }: Props) {
+export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: Props) {
   const [recording, setRecording] = useState(false)
   const [recordProgress, setRecordProgress] = useState('')
   const [recordError, setRecordError] = useState('')
@@ -20,8 +20,10 @@ export function GeneratedAudioSave({ blocks, scriptText, onOpenExport, onRenderL
   const [wavProgress, setWavProgress] = useState('')
   const [wavError, setWavError] = useState('')
   const [fullWavUrl, setFullWavUrl] = useState<string | null>(null)
+  const [fullMp3Url, setFullMp3Url] = useState<string | null>(null)
   const [fullWavBusy, setFullWavBusy] = useState(false)
   const fullWavRef = useRef<string | null>(null)
+  const fullMp3Ref = useRef<string | null>(null)
   const wavAbortRef = useRef<AbortController | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const urlRef = useRef<string | null>(null)
@@ -31,6 +33,7 @@ export function GeneratedAudioSave({ blocks, scriptText, onOpenExport, onRenderL
     wavAbortRef.current?.abort()
     if (urlRef.current) URL.revokeObjectURL(urlRef.current)
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
+    if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
   }, [])
   const voices = blocks.filter((block) => block.kind === 'voice')
   const ready = voices.filter((block) => block.status === 'ready')
@@ -47,7 +50,10 @@ export function GeneratedAudioSave({ blocks, scriptText, onOpenExport, onRenderL
     urlRef.current = null
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     fullWavRef.current = null
+    if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
+    fullMp3Ref.current = null
     setFullWavUrl(null)
+    setFullMp3Url(null)
     setRecordedUrl(null)
     setRecordProgress('')
     setRecordError('')
@@ -67,17 +73,25 @@ export function GeneratedAudioSave({ blocks, scriptText, onOpenExport, onRenderL
   const canExportLocalWav = voices.length > 0 && ready.length === voices.length
     && ready.every((block) => block.audio?.source === 'browser-model' && block.audio.url)
 
-  async function makeFullWav() {
+  async function makeFullAudio(format: 'wav' | 'mp3') {
     setFullWavBusy(true)
     setWavError('')
     try {
       const blob = await buildTimelineWav(blocks)
-      if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
-      const url = URL.createObjectURL(blob)
-      fullWavRef.current = url
-      setFullWavUrl(url)
+      if (format === 'wav') {
+        if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
+        const url = URL.createObjectURL(blob)
+        fullWavRef.current = url
+        setFullWavUrl(url)
+      } else {
+        const mp3 = await wavToMp3(blob)
+        if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
+        const url = URL.createObjectURL(mp3)
+        fullMp3Ref.current = url
+        setFullMp3Url(url)
+      }
     } catch (error) {
-      setWavError(error instanceof Error ? error.message : '전체 WAV를 만들지 못했습니다.')
+      setWavError(error instanceof Error ? error.message : '전체 음성 파일을 만들지 못했습니다.')
     } finally {
       setFullWavBusy(false)
     }
@@ -134,7 +148,7 @@ export function GeneratedAudioSave({ blocks, scriptText, onOpenExport, onRenderL
         <strong>생성한 음성 저장하기</strong>
         <span>완료 {ready.length}/{voices.length}개 대사</span>
       </div>
-      <p>음성 파일은 이 PC에 직접 내려받아 보관하세요. 프로젝트 자동 저장은 이 브라우저에서만 유지됩니다.</p>
+      <p>완성한 음성을 WAV 또는 MP3 파일로 내려받아 보관하세요. 프로젝트 자동 저장은 이 브라우저에서만 유지됩니다.</p>
       {downloadable.length ? (
         <div className="soa-generated-save__clips">
           {downloadable.map((block) => (
@@ -146,10 +160,14 @@ export function GeneratedAudioSave({ blocks, scriptText, onOpenExport, onRenderL
         </div>
       ) : null}
       {canExportLocalWav ? <div className="soa-generated-save__full-wav">
-        <button type="button" disabled={fullWavBusy} onClick={() => void makeFullWav()}>
-          {fullWavBusy ? '전체 WAV 합치는 중…' : '전체 대사 WAV 만들기'}
+        <button type="button" disabled={fullWavBusy} onClick={() => void makeFullAudio('wav')}>
+          {fullWavBusy ? '음성 파일 만드는 중…' : '전체 WAV 만들기'}
         </button>
         {fullWavUrl ? <a href={fullWavUrl} download="sorion-full.wav">전체 WAV 다운로드</a> : null}
+        <button type="button" disabled={fullWavBusy} onClick={() => void makeFullAudio('mp3')}>
+          {fullWavBusy ? '음성 파일 만드는 중…' : '전체 MP3 만들기'}
+        </button>
+        {fullMp3Url ? <a href={fullMp3Url} download="sorion-full.mp3">전체 MP3 다운로드</a> : null}
       </div> : null}
       {canRenderLocalWav || renderingWav || wavError || wavProgress ? (
         <div className="soa-generated-save__local-wav">
@@ -184,8 +202,6 @@ export function GeneratedAudioSave({ blocks, scriptText, onOpenExport, onRenderL
             : '전체 음성 저장은 대사를 모두 서버 음원 또는 기기 내 WAV로 완성한 뒤 사용할 수 있습니다. 완성된 클립은 위에서 개별 다운로드할 수 있습니다.'}
         </p>
       )}
-      {scriptText ? <a className="soa-generated-save__script" href={`data:text/plain;charset=utf-8,${encodeURIComponent(scriptText)}`}
-        download="sorion-script.txt">대본 TXT 다운로드</a> : null}
     </section>
   )
 }

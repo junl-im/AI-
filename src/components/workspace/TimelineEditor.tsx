@@ -846,6 +846,7 @@ export function TimelineEditor({
             <small>대사 트랙</small>
             <span>{playbackActive ? '재생 중' : '편집 준비'}</span>
             <em>시간 →</em>
+            <button type="button" className="soa-dubbing-add-block" onClick={onAddVoice} aria-label="새 대사 블록 추가" title="대사 트랙에 새 대사 추가">＋</button>
           </div>
           <div className="soa-capcut-track-lane">
             {blocks.length === 0 ? (
@@ -974,7 +975,6 @@ export function TimelineEditor({
           else if (ids[0]) onRemove(ids[0])
         }}
       /> : null}
-      <button type="button" className="soa-dubbing-add-block" onClick={onAddVoice} aria-label="새 대사 블록 추가">＋</button>
     </section>
   )
 }

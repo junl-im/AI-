@@ -98,7 +98,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.54 · Local Korean WAV & Clip-Position Seek**
+Current baseline: **0.11.55 · WAV/MP3 Save & Workspace UI Cleanup**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**
@@ -108,7 +108,7 @@ Current baseline: **0.11.54 · Local Korean WAV & Clip-Position Seek**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
-현재 기능 상태(0.11.54): GitHub Pages 정적 Web은 공개 음성 서버 없이도 사용자가 선택한 Supertonic 3 브라우저 모델로 실제 한국어 WAV를 만들고 대사별·전체 파일을 내려받습니다. 기본 5성우는 모델 스타일의 근사 매핑이며 승인된 원본 성우가 아닙니다. Web Speech와 탭 오디오 WebM 대체 경로는 남아 있습니다. WAV는 현재 메모리 Blob URL이므로 재방문·다른 PC 자동 복구는 되지 않습니다. 0.11.55에서는 오디오 바이트의 지속 저장과 사용자 주도 내보내기/가져오기를 우선합니다. 기술·라이선스·실측 검증은 `docs/LOCAL_WAV_ENGINE_0.11.54.md`를 참조합니다.
+현재 기능 상태(0.11.55): GitHub Pages 정적 Web은 공개 음성 서버 없이도 사용자가 선택한 Supertonic 3 브라우저 모델로 한국어 WAV를 만들고 전체 파일을 WAV 또는 MP3로 내려받습니다. MP3는 LGPL-3.0 `@breezystack/lamejs` 브라우저 변환 경로입니다. 기본 5성우는 모델 스타일의 근사 매핑이며 승인된 원본 성우가 아닙니다. Web Speech와 탭 오디오 WebM 대체 경로는 남아 있습니다. 생성 파일은 현재 메모리 Blob URL이므로 재방문·다른 PC 자동 복구는 되지 않습니다. 0.11.56에서는 오디오 바이트 지속 저장과 사용자 주도 내보내기/가져오기를 우선합니다. 기술·라이선스·실측 검증은 `docs/LOCAL_WAV_ENGINE_0.11.54.md`를 참조합니다.
 
 ## 보존 이력
 
@@ -635,3 +635,15 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 모델 첫 다운로드 약 380MB와 브라우저 메모리가 필요합니다. WebGPU 실패 시 WASM CPU로 전환합니다. 기본 5성우는 기존 원본 음색이 아닌 근사 스타일입니다. WAV Blob URL은 새로고침 후 유지되지 않으므로 즉시 파일 다운로드해야 합니다. 다른 PC 자동 동기화와 실제 사람 청취 인증은 없습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.54-local-wav-full.zip` / `SoriON-AI-0.11.53-to-0.11.54-local-wav-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.55 · Durable Audio & Cross-Device Recovery. WAV 바이트 지속 저장, 프로젝트 묶음 내보내기/가져오기, 다른 PC 실기기 청취·탐색 QA.
+## 2026-10-22 KST · 0.11.55 WAV/MP3 Save & Workspace UI Cleanup
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.55 / 0.11.54 (`f42e858063a2`).
+3. **변경 내용**: 로컬 모델 WAV를 브라우저에서 MP3로 변환해 전체 대사를 WAV/MP3 중 선택해 저장합니다. 대본 TXT 다운로드를 제거했습니다. 트랙 `+`는 스크롤을 따라다니지 않고 트랙 라벨 안에 놓입니다. 설정 진입은 상단 하나로 정리하고 `처음`을 `첫 화면으로`로 변경했습니다.
+4. **변경 이유**: 사용자는 음성 파일 저장을 원하며 TXT 링크·따라다니는 대사 추가 버튼·중복 설정 진입이 작업 흐름을 흐렸습니다.
+5. **영향 범위**: Web 저장 패널, MP3 인코더, 타임라인/프로젝트 패널, 스튜디오 헤더, 상단 헤더. API/Worker 서버는 제품 버전 동기화 외 기능 변경이 없습니다.
+6. **변경·추가된 주요 파일**: `src/export/wavToMp3*`, `src/components/workspace/{GeneratedAudioSave,TimelineEditor,WorkspaceProjectRail,DubbingStudioHeader}*`, `src/components/layout/CompactWorkspaceHeader.tsx`, `src/styles/{dubbing-overlays,pc-editor-polish,readable-colors}.css`, `package*.json`, 릴리스 문서.
+7. **검증 결과**: 관련 39개 테스트, TypeScript, 린트, 프로덕션 빌드, Chrome 데스크톱 3개/모바일 3개 화면 회귀 통과. 전체 CI/공개 Pages 결과는 배포 후 확인합니다.
+8. **알려진 제한과 주의사항**: MP3는 로컬 모델이 만든 WAV의 변환본이며 기존 5성우 원본 음색이 아닙니다. 첫 모델 다운로드 약 380MB가 필요합니다. 브라우저 메모리 내 WAV/MP3는 새로고침 후 사라져 다운로드가 필요합니다. 기기 간 자동 동기화는 없습니다. MP3 인코더는 LGPL-3.0 패키지로 지연 로드합니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.55-audio-save-ui-full.zip` / `SoriON-AI-0.11.54-to-0.11.55-audio-save-ui-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.56 · Durable Audio & Cross-Device Recovery. 생성 WAV/MP3의 지속 저장, 프로젝트 묶음 가져오기/내보내기, 실기기 QA.

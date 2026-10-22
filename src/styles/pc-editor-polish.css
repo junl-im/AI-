@@ -271,7 +271,6 @@
   .soa-dubbing-timeline > .soa-timeline-linked-player { order: 4; }
   .soa-dubbing-timeline > .soa-timeline-quick-editor { order: 5; margin-top: 9px; }
   .soa-dubbing-timeline > .soa-timeline-batch-result { order: 6; }
-  .soa-dubbing-timeline > .soa-dubbing-add-block { order: 7; }
 
   .soa-dubbing-timeline__head {
     align-items: center;

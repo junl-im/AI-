@@ -9,7 +9,6 @@ interface WorkspaceProjectRailProps {
   onOpenProject: (project: VoiceProject) => void
   onNewProject: () => void
   onOpenProjects: () => void
-  onOpenSettings: () => void
   collapsed: boolean
   onToggleCollapsed: () => void
 }
@@ -31,7 +30,6 @@ export function WorkspaceProjectRail({
   onOpenProject,
   onNewProject,
   onOpenProjects,
-  onOpenSettings,
   collapsed,
   onToggleCollapsed,
 }: WorkspaceProjectRailProps) {
@@ -113,7 +111,6 @@ export function WorkspaceProjectRail({
 
       <nav className="soa-project-rail__nav" aria-label="작업공간 바로가기">
         <button type="button" onClick={onOpenProjects}>전체 프로젝트</button>
-        <button type="button" onClick={onOpenSettings}>설정</button>
       </nav>
         </>
       )}
