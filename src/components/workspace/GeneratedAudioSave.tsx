@@ -16,6 +16,15 @@ interface Props {
   onImportWorkspace?: (file: File) => Promise<void>
 }
 
+function startDownload(url: string, filename: string) {
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+}
+
 export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport, onRenderLocalWav, onExportWorkspace, onImportWorkspace }: Props) {
   const [recording, setRecording] = useState(false)
   const [recordProgress, setRecordProgress] = useState('')
@@ -28,6 +37,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const [fullWavUrl, setFullWavUrl] = useState<string | null>(null)
   const [fullMp3Url, setFullMp3Url] = useState<string | null>(null)
   const [fullWavBusy, setFullWavBusy] = useState(false)
+  const [downloadStatus, setDownloadStatus] = useState('')
   const [bundleBusy, setBundleBusy] = useState(false)
   const [bundleError, setBundleError] = useState('')
   const [bundleStatus, setBundleStatus] = useState('')
@@ -98,6 +108,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     fullMp3Ref.current = null
     setFullWavUrl(null)
     setFullMp3Url(null)
+    setDownloadStatus('')
     setRecordProgress('')
     setRecordError('')
   }, [sourceSignature])
@@ -126,13 +137,16 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         const url = URL.createObjectURL(blob)
         fullWavRef.current = url
         setFullWavUrl(url)
+        startDownload(url, 'sorion-full.wav')
       } else {
         const mp3 = await wavToMp3(blob)
         if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
         const url = URL.createObjectURL(mp3)
         fullMp3Ref.current = url
         setFullMp3Url(url)
+        startDownload(url, 'sorion-full.mp3')
       }
+      setDownloadStatus(`${format.toUpperCase()} 다운로드를 시작했습니다. 저장 창이 열리지 않았다면 아래 다운로드 링크를 눌러 주세요.`)
     } catch (error) {
       setWavError(error instanceof Error ? error.message : '전체 음성 파일을 만들지 못했습니다.')
     } finally {
@@ -152,7 +166,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         setWavProgress(`WAV 파일 ${index + 1}/${renderTargets.length} 준비 중`)
         await onRenderLocalWav(block.id, controller.signal, setWavProgress)
       }
-      setWavProgress('WAV 파일 생성 완료 · 아래의 대사별 다운로드를 이용해 주세요.')
+      setWavProgress('WAV 파일 생성 완료 · 위의 대사별 다운로드 또는 전체 WAV·MP3 다운로드를 이용해 주세요.')
     } catch (error) {
       setWavError(error instanceof Error ? error.message : 'WAV 생성에 실패했습니다.')
     } finally {
@@ -205,7 +219,8 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       if (bundleRef.current) URL.revokeObjectURL(bundleRef.current)
       bundleRef.current = URL.createObjectURL(bundle)
       setBundleUrl(bundleRef.current)
-      setBundleStatus('작업 백업이 준비됐습니다. 아래 링크를 눌러 파일을 내려받으세요.')
+      startDownload(bundleRef.current, 'sorion-workspace.sorion.json')
+      setBundleStatus('작업 백업 다운로드를 시작했습니다. 저장 창이 열리지 않았다면 아래 링크를 눌러 주세요.')
     } catch (error) {
       setBundleError(error instanceof Error ? error.message : '작업 백업을 만들지 못했습니다.')
     } finally {
@@ -264,13 +279,14 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       ) : null}
       {canExportLocalWav ? <div className="soa-generated-save__full-wav">
         <button type="button" disabled={fullWavBusy} onClick={() => void makeFullAudio('wav')}>
-          {fullWavBusy ? '음성 파일 만드는 중…' : '전체 WAV 만들기'}
+          {fullWavBusy ? '음성 파일 만드는 중…' : '전체 WAV 다운로드'}
         </button>
-        {fullWavUrl ? <a href={fullWavUrl} download="sorion-full.wav">전체 WAV 다운로드</a> : null}
+        {fullWavUrl ? <a href={fullWavUrl} download="sorion-full.wav">WAV 다시 다운로드</a> : null}
         <button type="button" disabled={fullWavBusy} onClick={() => void makeFullAudio('mp3')}>
-          {fullWavBusy ? '음성 파일 만드는 중…' : '전체 MP3 만들기'}
+          {fullWavBusy ? '음성 파일 만드는 중…' : '전체 MP3 다운로드'}
         </button>
-        {fullMp3Url ? <a href={fullMp3Url} download="sorion-full.mp3">전체 MP3 다운로드</a> : null}
+        {fullMp3Url ? <a href={fullMp3Url} download="sorion-full.mp3">MP3 다시 다운로드</a> : null}
+        {downloadStatus ? <p role="status">{downloadStatus}</p> : null}
       </div> : null}
       {canRecordBrowser || recordedWavUrl ? <div className="soa-generated-save__browser">
         <strong>기본 성우 음색 그대로 저장</strong>

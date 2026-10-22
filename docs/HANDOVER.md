@@ -1,3 +1,16 @@
+## 2026-10-23 KST · 0.11.59 Download First Workflow
+
+1. **작업 일시(KST)**: 2026-10-23.
+2. **대상/기준 버전**: 0.11.59 / 0.11.58 (`53d73720f8e3`).
+3. **변경 내용**: 로컬 모델 전체 WAV·MP3와 작업 백업 파일을 만들면 다운로드를 바로 시작합니다. 브라우저가 자동 저장을 차단한 경우 다시 누를 링크와 상태 안내를 남깁니다. 로컬 WAV 생성 완료 안내의 다운로드 위치를 바로잡았습니다.
+4. **변경 이유**: 기존에는 ‘만들기’ 다음 별도 링크를 한 번 더 눌러야 하므로 파일 저장을 놓치기 쉬웠습니다.
+5. **영향 범위**: Web 저장 UI와 작업 백업 내보내기. API/Worker 음성 엔진은 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/GeneratedAudioSave*`, 버전 파일, 릴리스 문서.
+7. **검증 결과**: Web 단위 테스트, 린트, 빌드, preflight 및 원격 CI 결과를 별도 확인합니다.
+8. **알려진 제한과 주의사항**: 기기 기본 성우의 Web Speech 출력은 직접 WAV/MP3 파일을 제공하지 않습니다. 화면 공유 녹음에 음성이 들어오지 않는 PC에서는 원본 음색 저장이 아직 불가능합니다. 브라우저의 다운로드 정책에 따라 재다운로드 링크를 눌러야 할 수 있습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.59-download-first-full.zip` / `SoriON-AI-0.11.58-to-0.11.59-download-first-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.60 · Reliable Voice File Engine & Device QA. 승인된 기본 성우 파일 출력 엔진과 다른 PC 실기기 검증.
+
 ## 2026-10-22 KST · 0.11.53 Visible Download & Browser Recording
 
 1. **작업 일시(KST)**: 2026-10-22.
@@ -98,7 +111,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.58 · Local WAV Recovery & Transfer**
+Current baseline: **0.11.59 · Download First Workflow**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**
@@ -108,7 +121,7 @@ Current baseline: **0.11.58 · Local WAV Recovery & Transfer**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
-현재 기능 상태(0.11.58): GitHub Pages 정적 Web의 기본 성우(Web Speech)는 화면/시스템 오디오 캡처에 실제 음성이 들어올 때만 WAV/MP3를 만듭니다. 사용자 보고로 다른 PC의 무음 실패가 확인됐고, 해당 PC에서는 기본 음색 저장이 아직 불가능합니다. 성공한 녹음은 동일 브라우저 프로필에만 보관됩니다. 별도 Supertonic 3 모델은 기본 5성우 원본과 다른 음색으로 WAV/MP3를 만들며, 로컬 WAV 바이트는 IndexedDB에 저장되어 동일 작업공간 재방문 때 Dock·다운로드에 복구됩니다. 작업·로컬 WAV를 사용자가 JSON 백업 파일로 내보내 다른 PC에서 가져올 수 있습니다. 기본 성우 화면 녹음 파일은 백업에 포함되지 않아 별도 다운로드가 필요합니다. 두 MP3 경로 모두 LGPL-3.0 `@breezystack/lamejs`를 지연 로드합니다. 기기 간 자동 동기화는 없습니다. 0.11.59에서는 승인된 원본 성우의 파일 출력 엔진과 다른 PC 실기기 검증을 우선합니다. 기술·라이선스·실측 검증은 `docs/{LOCAL_WAV_ENGINE_0.11.54,DEFAULT_VOICE_EXPORT_0.11.56}.md`를 참조합니다.
+현재 기능 상태(0.11.59): GitHub Pages 정적 Web의 기본 성우(Web Speech)는 화면/시스템 오디오 캡처에 실제 음성이 들어올 때만 WAV/MP3를 만듭니다. 사용자 보고로 다른 PC의 무음 실패가 확인됐고, 해당 PC에서는 기본 음색 저장이 아직 불가능합니다. 성공한 녹음은 동일 브라우저 프로필에만 보관됩니다. 별도 Supertonic 3 모델은 기본 5성우 원본과 다른 음색으로 WAV/MP3를 만들며, 로컬 WAV 바이트는 IndexedDB에 저장되어 동일 작업공간 재방문 때 Dock·다운로드에 복구됩니다. 작업·로컬 WAV를 사용자가 JSON 백업 파일로 내보내 다른 PC에서 가져올 수 있습니다. 기본 성우 화면 녹음 파일은 백업에 포함되지 않아 별도 다운로드가 필요합니다. 두 MP3 경로 모두 LGPL-3.0 `@breezystack/lamejs`를 지연 로드합니다. 기기 간 자동 동기화는 없습니다. 0.11.60에서는 승인된 원본 성우의 파일 출력 엔진과 다른 PC 실기기 검증을 우선합니다. 기술·라이선스·실측 검증은 `docs/{LOCAL_WAV_ENGINE_0.11.54,DEFAULT_VOICE_EXPORT_0.11.56}.md`를 참조합니다.
 
 ## 보존 이력
 

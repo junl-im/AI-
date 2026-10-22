@@ -43,7 +43,7 @@ describe('GeneratedAudioSave', () => {
     expect(screen.queryByRole('link', { name: '대본 TXT 다운로드' })).not.toBeInTheDocument()
   })
 
-  it('기기 내 모델 WAV는 대사별 다운로드와 전체 WAV 생성을 보여준다', () => {
+  it('기기 내 모델 WAV는 대사별 다운로드와 전체 파일 다운로드를 보여준다', () => {
     const block: TimelineBlock = {
       ...voice,
       audio: { ...voice.audio!, source: 'browser-model', url: 'blob:local-wav', filename: 'local.wav' },
@@ -51,8 +51,8 @@ describe('GeneratedAudioSave', () => {
     render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
     expect(screen.getByRole('link', { name: '완료 대사 1 음성 파일 다운로드' }))
       .toHaveAttribute('download', 'local.wav')
-    expect(screen.getByRole('button', { name: '전체 WAV 만들기' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '전체 MP3 만들기' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '전체 WAV 다운로드' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '전체 MP3 다운로드' })).toBeInTheDocument()
   })
 
   it('아직 대사가 없어도 저장 위치와 다음 동작을 보여준다', () => {
@@ -66,13 +66,16 @@ describe('GeneratedAudioSave', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     const exportWorkspace = vi.fn().mockResolvedValue(new Blob(['backup'], { type: 'application/json' }))
     const importWorkspace = vi.fn().mockResolvedValue(undefined)
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
     render(<GeneratedAudioSave blocks={[voice]} onOpenExport={vi.fn()}
       onExportWorkspace={exportWorkspace} onImportWorkspace={importWorkspace} />)
     fireEvent.click(screen.getByRole('button', { name: '작업·WAV 백업 만들기' }))
     expect(await screen.findByRole('link', { name: '작업 백업 다운로드' }))
       .toHaveAttribute('href', 'blob:workspace-backup')
+    expect(click).toHaveBeenCalledOnce()
     const file = new File(['backup'], 'backup.sorion.json', { type: 'application/json' })
     fireEvent.change(screen.getByLabelText('소리온 작업 백업 파일 선택'), { target: { files: [file] } })
     await waitFor(() => expect(importWorkspace).toHaveBeenCalledWith(file))
+    click.mockRestore()
   })
 })
