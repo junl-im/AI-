@@ -43,14 +43,15 @@ export async function recordBrowserSpeech(
   }
   const stream = await navigator.mediaDevices.getDisplayMedia({
     video: true,
-    audio: { restrictOwnAudio: false },
+    audio: { restrictOwnAudio: false, suppressLocalAudioPlayback: false },
+    systemAudio: 'include',
     preferCurrentTab: true,
     selfBrowserSurface: 'include',
   } as DisplayMediaStreamOptions)
   try {
     if (signal.aborted) throw new Error('녹음이 취소되었습니다.')
     const audioTrack = stream.getAudioTracks()[0]
-    if (!audioTrack) throw new Error('탭 오디오가 공유되지 않았습니다. 현재 탭을 선택하고 ‘탭 오디오 공유’를 켜 주세요.')
+    if (!audioTrack) throw new Error('오디오가 공유되지 않았습니다. 현재 탭의 오디오 공유 또는 화면 전체의 시스템 오디오를 켜 주세요.')
     const audioStream = new MediaStream([audioTrack])
     const mimeType = ['audio/webm;codecs=opus', 'audio/webm'].find((type) => MediaRecorder.isTypeSupported(type))
     if (!mimeType) throw new Error('이 브라우저는 WebM 오디오 저장을 지원하지 않습니다.')

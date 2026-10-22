@@ -539,3 +539,6 @@ Repository preflight 55/55 PASS, 실제 Windows npm CLI 실행 PASS, npm ci --ig
 ## 0.11.55 · WAV/MP3 Save & Workspace UI Cleanup
 
 브라우저 로컬 모델의 PCM16 WAV를 `@breezystack/lamejs@1.2.7`으로 지연 변환해 실제 MP3 파일 다운로드를 추가했습니다. 해당 인코더는 LGPL-3.0이며 npm 패키지를 별도 동적 번들로 유지합니다. `src/export/wavToMp3.test.ts`는 실제 PCM을 MP3로 인코딩해 프레임 동기 바이트와 파일 크기를 검사합니다. 타임라인 전용 `+`를 레이블 안의 일반 버튼으로 이동하고 중복 설정 링크·TXT 다운로드를 제거했습니다. 모델 음색/대용량 다운로드·저장 지속성 한계는 기존과 같습니다.
+## 0.11.56 · Default Voice Recording to WAV/MP3
+
+0.11.55는 별도 모델의 WAV/MP3 저장만 제공해 사용자가 원한 기본 성우 음색 보존을 해결하지 못했습니다. 이번 패치는 Web Speech 재생 중 캡처한 WebM을 브라우저 `decodeAudioData`로 PCM화하고 단일 채널 WAV 및 MP3로 변환합니다. PCM peak/RMS가 낮으면 무음으로 실패시켜 빈 파일을 성공으로 보여주지 않습니다. Chrome에서 1초 실제 MediaRecorder WebM(15,752B)을 WAV(84,714B)와 MP3(15,882B)로 변환하고 헤더를 확인했습니다. 이는 변환 검증이며 기본 성우의 운영체제 출력이 화면 공유에 실제 포함되는지의 실기기 인증은 아닙니다. 상세 제한은 `docs/DEFAULT_VOICE_EXPORT_0.11.56.md`에 기록합니다.

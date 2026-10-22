@@ -29,7 +29,7 @@ describe('GeneratedAudioSave', () => {
     expect(open).toHaveBeenCalledOnce()
   })
 
-  it('브라우저 재생 음성은 탭 오디오 녹음과 대본 저장을 보여준다', () => {
+  it('기본 성우 재생 음성에는 WAV·MP3 녹음 저장을 우선 보여준다', () => {
     const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
       text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
     } } }
@@ -37,8 +37,8 @@ describe('GeneratedAudioSave', () => {
     render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderLocalWav={renderLocalWav} />)
     expect(screen.queryByRole('button', { name: '전체 음성 MP3로 저장' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /음성 파일 다운로드/ })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '기기 음성 녹음해 다운로드' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '대사 WAV 파일 만들기' }))
+    expect(screen.getByRole('button', { name: '기본 성우를 WAV·MP3로 저장' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '다른 음색으로 WAV 만들기' }))
     expect(renderLocalWav).toHaveBeenCalledWith('v1', expect.any(AbortSignal), expect.any(Function))
     expect(screen.queryByRole('link', { name: '대본 TXT 다운로드' })).not.toBeInTheDocument()
   })

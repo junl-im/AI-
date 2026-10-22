@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { recordBrowserSpeech } from '../../export/recordBrowserSpeech'
+import { recordedWebmToFiles } from '../../export/recordedAudioFormats'
 import { buildTimelineWav } from '../../export/timelineWav'
 import { wavToMp3 } from '../../export/wavToMp3'
 import type { GeneratedAudio } from '../../tts/generationTypes'
@@ -15,7 +16,8 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
   const [recording, setRecording] = useState(false)
   const [recordProgress, setRecordProgress] = useState('')
   const [recordError, setRecordError] = useState('')
-  const [recordedUrl, setRecordedUrl] = useState<string | null>(null)
+  const [recordedWavUrl, setRecordedWavUrl] = useState<string | null>(null)
+  const [recordedMp3Url, setRecordedMp3Url] = useState<string | null>(null)
   const [renderingWav, setRenderingWav] = useState(false)
   const [wavProgress, setWavProgress] = useState('')
   const [wavError, setWavError] = useState('')
@@ -26,12 +28,14 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
   const fullMp3Ref = useRef<string | null>(null)
   const wavAbortRef = useRef<AbortController | null>(null)
   const abortRef = useRef<AbortController | null>(null)
-  const urlRef = useRef<string | null>(null)
+  const recordedWavRef = useRef<string | null>(null)
+  const recordedMp3Ref = useRef<string | null>(null)
   const sourceRef = useRef<string | null>(null)
   useEffect(() => () => {
     abortRef.current?.abort()
     wavAbortRef.current?.abort()
-    if (urlRef.current) URL.revokeObjectURL(urlRef.current)
+    if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
+    if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
   }, [])
@@ -46,15 +50,18 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
     if (sourceRef.current === sourceSignature) return
     sourceRef.current = sourceSignature
     abortRef.current?.abort()
-    if (urlRef.current) URL.revokeObjectURL(urlRef.current)
-    urlRef.current = null
+    if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
+    if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
+    recordedWavRef.current = null
+    recordedMp3Ref.current = null
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     fullWavRef.current = null
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
     fullMp3Ref.current = null
     setFullWavUrl(null)
     setFullMp3Url(null)
-    setRecordedUrl(null)
+    setRecordedWavUrl(null)
+    setRecordedMp3Url(null)
     setRecordProgress('')
     setRecordError('')
   }, [sourceSignature])
@@ -122,17 +129,23 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
     const controller = new AbortController()
     abortRef.current = controller
     setRecordError('')
-    setRecordProgress('현재 탭과 탭 오디오 공유를 선택해 주세요.')
+    setRecordProgress('브라우저 공유 창에서 소리가 포함된 탭 또는 화면 전체와 시스템 오디오를 선택해 주세요.')
     setRecording(true)
     try {
       const blob = await recordBrowserSpeech(blocks, controller.signal, (index, total) => {
         setRecordProgress(`대사·쉼표 녹음 중 ${index}/${total}`)
       })
-      if (urlRef.current) URL.revokeObjectURL(urlRef.current)
-      const url = URL.createObjectURL(blob)
-      urlRef.current = url
-      setRecordedUrl(url)
-      setRecordProgress('녹음 완료 · 아래에서 재생 확인 후 다운로드하세요.')
+      if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
+      setRecordProgress('녹음한 기본 성우 음성을 WAV·MP3로 변환 중…')
+      const { wav, mp3 } = await recordedWebmToFiles(blob)
+      if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
+      if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
+      if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
+      recordedWavRef.current = URL.createObjectURL(wav)
+      recordedMp3Ref.current = URL.createObjectURL(mp3)
+      setRecordedWavUrl(recordedWavRef.current)
+      setRecordedMp3Url(recordedMp3Ref.current)
+      setRecordProgress('기본 성우 녹음 완료 · 먼저 재생해 음색을 확인한 뒤 WAV 또는 MP3를 내려받으세요.')
     } catch (error) {
       setRecordError(error instanceof Error ? error.message : '녹음에 실패했습니다.')
       setRecordProgress('')
@@ -169,11 +182,26 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
         </button>
         {fullMp3Url ? <a href={fullMp3Url} download="sorion-full.mp3">전체 MP3 다운로드</a> : null}
       </div> : null}
+      {canRecordBrowser ? <div className="soa-generated-save__browser">
+        <strong>기본 성우 음색 그대로 저장</strong>
+        <p>기기 성우가 대사를 다시 읽는 소리를 녹음해 WAV·MP3로 자동 변환합니다. Chrome/Edge 공유 창에서 소리가 포함된 탭이나 화면 전체의 시스템 오디오를 선택해 주세요. 녹음이 무음이면 파일을 만들지 않습니다.</p>
+        <button type="button" disabled={recording} onClick={() => void startRecording()}>
+          {recording ? '기본 성우 녹음·변환 중…' : '기본 성우를 WAV·MP3로 저장'}
+        </button>
+        {recording ? <button type="button" onClick={() => abortRef.current?.abort()}>녹음 취소</button> : null}
+        {recordProgress ? <p role="status">{recordProgress}</p> : null}
+        {recordError ? <p role="alert">{recordError}</p> : null}
+        {recordedWavUrl && recordedMp3Url ? <div className="soa-generated-save__preview">
+          <audio controls src={recordedWavUrl} aria-label="기본 성우 녹음 미리 듣기" />
+          <a href={recordedWavUrl} download="sorion-default-voices.wav">기본 성우 WAV 다운로드</a>
+          <a href={recordedMp3Url} download="sorion-default-voices.mp3">기본 성우 MP3 다운로드</a>
+        </div> : null}
+      </div> : null}
       {canRenderLocalWav || renderingWav || wavError || wavProgress ? (
         <div className="soa-generated-save__local-wav">
-          {canRenderLocalWav ? <p>파일로 저장하고 타임라인 중간부터 재생하려면 기기 내 한국어 모델로 WAV를 만드세요. 기기 음성 설치가 없어도 사용할 수 있습니다. 첫 실행 시 약 380MB를 다운로드하며, 기존 성우 음색과는 다른 근사 스타일입니다.</p> : null}
+          {canRenderLocalWav ? <p>다른 음색으로 만들고 싶거나 기기 성우 녹음이 되지 않으면 별도 한국어 모델을 사용할 수 있습니다. 첫 실행 시 약 380MB를 다운로드하며, 기본 성우 원본 음색과 다릅니다.</p> : null}
           {canRenderLocalWav ? <button type="button" disabled={renderingWav} onClick={() => void makeLocalWav()}>
-            {renderingWav ? 'WAV 생성 중…' : '대사 WAV 파일 만들기'}
+            {renderingWav ? 'WAV 생성 중…' : '다른 음색으로 WAV 만들기'}
           </button> : null}
           {renderingWav ? <button type="button" onClick={() => wavAbortRef.current?.abort()}>WAV 생성 취소</button> : null}
           {wavProgress ? <p role="status">{wavProgress}</p> : null}
@@ -182,21 +210,7 @@ export function GeneratedAudioSave({ blocks, onOpenExport, onRenderLocalWav }: P
       ) : null}
       {canExportAll ? (
         <button type="button" onClick={onOpenExport}>전체 음성 MP3로 저장</button>
-      ) : canRecordBrowser ? (
-        <div className="soa-generated-save__browser">
-          <p>현재 기기 내장 음성은 중간 위치 이동용 파일이 없습니다. 위 WAV 생성 또는 Chrome/Edge의 <b>현재 탭 오디오 공유</b>로 재생 소리를 녹음해 WebM으로 저장할 수 있습니다.</p>
-          <button type="button" disabled={recording} onClick={() => void startRecording()}>
-            {recording ? '녹음 중…' : '기기 음성 녹음해 다운로드'}
-          </button>
-          {recording ? <button type="button" onClick={() => abortRef.current?.abort()}>녹음 취소</button> : null}
-          {recordProgress ? <p role="status">{recordProgress}</p> : null}
-          {recordError ? <p role="alert">{recordError}</p> : null}
-          {recordedUrl ? <div className="soa-generated-save__preview">
-            <audio controls src={recordedUrl} aria-label="녹음된 음성 미리 듣기" />
-            <a href={recordedUrl} download="sorion-browser-voice.webm">녹음 음성 WebM 다운로드</a>
-          </div> : null}
-        </div>
-      ) : canExportLocalWav ? null : (
+      ) : canRecordBrowser || canExportLocalWav ? null : (
         <p className="soa-generated-save__limit" role="note">
           {voices.length === 0 ? '먼저 대사를 입력하고 ‘대사로 만들기’를 눌러 주세요.'
             : '전체 음성 저장은 대사를 모두 서버 음원 또는 기기 내 WAV로 완성한 뒤 사용할 수 있습니다. 완성된 클립은 위에서 개별 다운로드할 수 있습니다.'}

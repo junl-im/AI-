@@ -98,7 +98,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.55 · WAV/MP3 Save & Workspace UI Cleanup**
+Current baseline: **0.11.56 · Default Voice Recording to WAV/MP3**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-22 KST**
 제품 소유·디자인: **곰같은여우**
@@ -108,7 +108,7 @@ Current baseline: **0.11.55 · WAV/MP3 Save & Workspace UI Cleanup**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
-현재 기능 상태(0.11.55): GitHub Pages 정적 Web은 공개 음성 서버 없이도 사용자가 선택한 Supertonic 3 브라우저 모델로 한국어 WAV를 만들고 전체 파일을 WAV 또는 MP3로 내려받습니다. MP3는 LGPL-3.0 `@breezystack/lamejs` 브라우저 변환 경로입니다. 기본 5성우는 모델 스타일의 근사 매핑이며 승인된 원본 성우가 아닙니다. Web Speech와 탭 오디오 WebM 대체 경로는 남아 있습니다. 생성 파일은 현재 메모리 Blob URL이므로 재방문·다른 PC 자동 복구는 되지 않습니다. 0.11.56에서는 오디오 바이트 지속 저장과 사용자 주도 내보내기/가져오기를 우선합니다. 기술·라이선스·실측 검증은 `docs/LOCAL_WAV_ENGINE_0.11.54.md`를 참조합니다.
+현재 기능 상태(0.11.56): GitHub Pages 정적 Web의 기본 성우(Web Speech)는 화면/시스템 오디오 캡처가 실제 성공하면 WebM을 WAV/MP3로 자동 변환해 저장합니다. 무음은 실패 처리하고 미리 듣기를 제공합니다. 별도 Supertonic 3 모델의 한국어 WAV/MP3 생성은 다른 음색 대안이며 기본 5성우 원본 음색이 아닙니다. 두 MP3 경로 모두 LGPL-3.0 `@breezystack/lamejs`를 지연 로드합니다. 실제 다른 PC의 기본 성우 캡처·청취는 미검증입니다. 생성 파일은 현재 메모리 Blob URL이므로 재방문·다른 PC 자동 복구는 되지 않습니다. 0.11.57에서는 오디오 바이트 지속 저장과 사용자 주도 내보내기/가져오기를 우선합니다. 기술·라이선스·실측 검증은 `docs/{LOCAL_WAV_ENGINE_0.11.54,DEFAULT_VOICE_EXPORT_0.11.56}.md`를 참조합니다.
 
 ## 보존 이력
 
@@ -647,3 +647,15 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: MP3는 로컬 모델이 만든 WAV의 변환본이며 기존 5성우 원본 음색이 아닙니다. 첫 모델 다운로드 약 380MB가 필요합니다. 브라우저 메모리 내 WAV/MP3는 새로고침 후 사라져 다운로드가 필요합니다. 기기 간 자동 동기화는 없습니다. MP3 인코더는 LGPL-3.0 패키지로 지연 로드합니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.55-audio-save-ui-full.zip` / `SoriON-AI-0.11.54-to-0.11.55-audio-save-ui-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.56 · Durable Audio & Cross-Device Recovery. 생성 WAV/MP3의 지속 저장, 프로젝트 묶음 가져오기/내보내기, 실기기 QA.
+## 2026-10-22 KST · 0.11.56 Default Voice Recording to WAV/MP3
+
+1. **작업 일시(KST)**: 2026-10-22.
+2. **대상/기준 버전**: 0.11.56 / 0.11.55 (`d56e853e3081`).
+3. **변경 내용**: 기본 성우 Web Speech를 캡처한 WebM을 브라우저에서 WAV/MP3로 자동 변환합니다. 무음을 차단하고 미리 듣기·각 형식 다운로드를 제공합니다. 저장 UI는 기본 성우 녹음을 우선합니다.
+4. **변경 이유**: 0.11.55의 WAV/MP3 선택은 별도 모델 음색만 저장해 사용자가 요청한 기본 성우 음색 보존을 해결하지 못했습니다.
+5. **영향 범위**: Web 녹음/변환, 저장 패널, 미디어 캡처 옵션. API/Worker 기능은 변경하지 않고 버전만 동기화합니다.
+6. **변경·추가된 주요 파일**: `src/export/{recordBrowserSpeech,recordedAudioFormats}*`, `src/components/workspace/GeneratedAudioSave*`, 버전·릴리스 문서.
+7. **검증 결과**: Chrome MediaRecorder 1초 WebM 15,752B를 WAV 84,714B·MP3 15,882B로 변환하고 파일 헤더를 확인했습니다. 변환·무음 차단 관련 단위 테스트, 타입·빌드 통과. 전체 CI·공개 Pages는 배포 후 확인합니다.
+8. **알려진 제한과 주의사항**: Web Speech는 PCM을 직접 반환하지 않습니다. Chrome/Edge 화면 공유가 기기 성우의 운영체제 오디오를 실제 포함하는지는 OS·브라우저·공유 방식에 좌우됩니다. 무음이면 실패로 안내하며 원본 음색 저장 성공을 보장하지 않습니다. 사용자의 PC에서 실제 성우 청취와 파일 열기 검증이 필요합니다. 마이크·시스템의 다른 소리가 녹음에 섞일 수 있습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.56-default-voice-export-full.zip` / `SoriON-AI-0.11.55-to-0.11.56-default-voice-export-patch.zip`, `SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.57 · Durable Audio & Cross-Device Recovery. 생성 파일 지속 저장, 프로젝트 묶음 내보내기·가져오기, 기본 성우의 다른 PC 실기기 오디오 캡처 검증.
