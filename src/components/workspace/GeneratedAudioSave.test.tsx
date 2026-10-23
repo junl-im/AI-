@@ -7,6 +7,10 @@ const mp3 = vi.hoisted(() => ({ wavToMp3: vi.fn() }))
 vi.mock('../../export/wavToMp3', () => mp3)
 const conversion = vi.hoisted(() => ({ recordedWebmToFiles: vi.fn() }))
 vi.mock('../../export/recordedAudioFormats', () => conversion)
+const recording = vi.hoisted(() => ({ recordBrowserSpeech: vi.fn() }))
+vi.mock('../../export/recordBrowserSpeech', () => recording)
+const fullWav = vi.hoisted(() => ({ buildTimelineWav: vi.fn() }))
+vi.mock('../../export/timelineWav', () => fullWav)
 
 const voice: TimelineVoiceBlock = {
   id: 'v1', kind: 'voice', text: '안녕하세요.', voiceId: 'sori-warm', voiceName: '혜린',
@@ -76,6 +80,32 @@ describe('GeneratedAudioSave', () => {
     expect(await screen.findByRole('link', { name: '가져온 음성 WAV 다운로드' })).toHaveAttribute('href', 'blob:imported-wav')
     expect(screen.getByRole('link', { name: '가져온 음성 MP3 다운로드' })).toHaveAttribute('download', 'sorion-imported.mp3')
     expect(conversion.recordedWebmToFiles).toHaveBeenCalledWith(file)
+    expect(click).toHaveBeenCalledOnce()
+    click.mockRestore()
+  })
+
+  it('무음 녹음 뒤 파일 생성 엔진으로 대사를 다시 만들 수 있다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
+      text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
+    } } }
+    recording.recordBrowserSpeech.mockRejectedValueOnce(new Error('녹음된 오디오가 무음입니다.'))
+    fullWav.buildTimelineWav.mockResolvedValue(new Blob(['RIFF'], { type: 'audio/wav' }))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:full-wav')
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const renderFileAudio = vi.fn().mockImplementation(async () => {
+      rerender(<GeneratedAudioSave blocks={[{ ...block, audio: {
+        ...block.audio!, source: 'browser-model', url: 'blob:local-wav', filename: 'local.wav',
+      } }]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
+      return { source: 'browser-model', url: 'blob:local-wav' }
+    })
+    const { rerender } = render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
+    fireEvent.click(screen.getByRole('button', { name: '기본 성우를 WAV·MP3로 저장' }))
+    await waitFor(() => expect(recording.recordBrowserSpeech).toHaveBeenCalled())
+    await waitFor(() => expect(screen.getByRole('button', { name: '파일 음성으로 다시 생성해 WAV 저장' })).toBeInTheDocument())
+    expect(screen.getByText(/기존 성우와 음색이 달라집니다/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '파일 음성으로 다시 생성해 WAV 저장' }))
+    await waitFor(() => expect(renderFileAudio).toHaveBeenCalledWith('v1', expect.any(AbortSignal), expect.any(Function)))
+    await waitFor(() => expect(fullWav.buildTimelineWav).toHaveBeenCalled())
     expect(click).toHaveBeenCalledOnce()
     click.mockRestore()
   })

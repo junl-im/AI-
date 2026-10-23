@@ -1061,7 +1061,7 @@ export function HomePage() {
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
             <GeneratedAudioSave blocks={timeline.blocks} localAudioSaveWarning={timeline.localAudioSaveWarning}
-              onOpenExport={() => setExportOpen(true)} />
+              onOpenExport={() => setExportOpen(true)} onRenderFileAudio={timeline.renderLocalWav} />
             <FinalExportDialog open={exportOpen} blocks={timeline.blocks} onClose={() => setExportOpen(false)} />
             {pendingProjectSave ? (
               <div role="alert" className="soa-project-save-recovery">
