@@ -6,6 +6,7 @@ interface MenuState { x: number; y: number; start: number; end: number }
 export function useTextEditMenu(value: string, onChange: (value: string) => void, maxLength: number, suppliedRef?: RefObject<HTMLTextAreaElement | null>) {
   const ownRef = useRef<HTMLTextAreaElement>(null)
   const editorRef = suppliedRef ?? ownRef
+  const menuRef = useRef<HTMLDivElement>(null)
   const history = useRef<string[]>([])
   const future = useRef<string[]>([])
   const lastEmitted = useRef<string | null>(null)
@@ -22,6 +23,7 @@ export function useTextEditMenu(value: string, onChange: (value: string) => void
 
   useEffect(() => {
     if (!menu) return
+    menuRef.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus({ preventScroll: true })
     const close = (event: PointerEvent) => {
       if (!(event.target as HTMLElement).closest('.soa-text-edit-menu')) setMenu(null)
     }
@@ -73,7 +75,7 @@ export function useTextEditMenu(value: string, onChange: (value: string) => void
   }
 
   const editMenu = menu ? createPortal(
-    <div className="soa-text-edit-menu" role="menu" aria-label="대사 편집 메뉴"
+    <div ref={menuRef} className="soa-text-edit-menu" role="menu" aria-label="대사 편집 메뉴"
       style={{ left: Math.max(8, Math.min(menu.x, window.innerWidth - 200)), top: Math.max(8, Math.min(menu.y, window.innerHeight - 290)) }}>
       <button type="button" role="menuitem" disabled={!history.current.length} onClick={undo}>되돌리기 <kbd>Ctrl+Z</kbd></button>
       <button type="button" role="menuitem" disabled={!future.current.length} onClick={redo}>다시 실행 <kbd>Ctrl+Y</kbd></button>
@@ -99,6 +101,13 @@ export function useTextEditMenu(value: string, onChange: (value: string) => void
     changeText: change,
     onTextChange: (event: ChangeEvent<HTMLTextAreaElement>) => change(event.target.value),
     onTextKeyDown: (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+        event.preventDefault()
+        const rect = event.currentTarget.getBoundingClientRect()
+        setNotice('')
+        setMenu({ x: rect.left + 12, y: rect.top + 24, start: event.currentTarget.selectionStart, end: event.currentTarget.selectionEnd })
+        return true
+      }
       if (!(event.ctrlKey || event.metaKey)) return false
       const key = event.key.toLowerCase()
       if (key === 'z' && !event.shiftKey) { event.preventDefault(); undo(); return true }

@@ -1,35 +1,67 @@
 import { createBrowserSpeechUtterance } from '../tts/browserSpeech'
 import type { TimelineBlock } from '../workspace/workspaceTypes'
 
-function waitForSpeech(block: Extract<TimelineBlock, { kind: 'voice' }>, signal: AbortSignal): Promise<void> {
+export function waitForSpeech(block: Extract<TimelineBlock, { kind: 'voice' }>, signal: AbortSignal): Promise<void> {
   const playback = block.audio?.browserSpeech
   if (!playback) throw new Error('녹음할 브라우저 음성이 없습니다.')
   const utterance = createBrowserSpeechUtterance(playback)
   return new Promise((resolve, reject) => {
+    let settled = false
+    let startTimer = 0
+    let finishTimer = 0
+    const cleanup = () => {
+      window.clearTimeout(startTimer)
+      window.clearTimeout(finishTimer)
+      signal.removeEventListener('abort', abort)
+    }
+    const finish = (error?: Error) => {
+      if (settled) return
+      settled = true
+      cleanup()
+      if (error) reject(error)
+      else resolve()
+    }
     const abort = () => {
       window.speechSynthesis.cancel()
-      reject(new Error('녹음이 취소되었습니다.'))
+      finish(new Error('녹음이 취소되었습니다.'))
     }
+    if (signal.aborted) { abort(); return }
     signal.addEventListener('abort', abort, { once: true })
-    utterance.onend = () => {
-      signal.removeEventListener('abort', abort)
-      resolve()
+    utterance.onstart = () => {
+      if (settled) return
+      window.clearTimeout(startTimer)
+      const maxPlaybackMs = Math.min(180_000, Math.max(30_000, playback.text.length * 450))
+      finishTimer = window.setTimeout(() => {
+        window.speechSynthesis.cancel()
+        finish(new Error('기기 음성 재생이 끝나지 않아 녹음을 중단했습니다. 클립을 나누어 다시 시도해 주세요.'))
+      }, maxPlaybackMs)
     }
+    utterance.onend = () => finish()
     utterance.onerror = () => {
-      signal.removeEventListener('abort', abort)
-      reject(new Error('기기 음성 재생이 중단되어 녹음을 완료하지 못했습니다.'))
+      finish(new Error('기기 음성 재생이 중단되어 녹음을 완료하지 못했습니다.'))
     }
-    window.speechSynthesis.speak(utterance)
+    startTimer = window.setTimeout(() => {
+      window.speechSynthesis.cancel()
+      finish(new Error('기기 음성이 시작되지 않아 녹음을 중단했습니다. 음성 재생을 확인한 뒤 다시 시도해 주세요.'))
+    }, 8_000)
+    try { window.speechSynthesis.speak(utterance) }
+    catch { finish(new Error('기기 음성을 시작하지 못했습니다.')) }
   })
 }
 
 function waitForPause(seconds: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
-    const timer = window.setTimeout(resolve, Math.max(0, seconds) * 1000)
-    signal.addEventListener('abort', () => {
+    let timer = 0
+    const abort = () => {
       window.clearTimeout(timer)
       reject(new Error('녹음이 취소되었습니다.'))
-    }, { once: true })
+    }
+    if (signal.aborted) { abort(); return }
+    timer = window.setTimeout(() => {
+      signal.removeEventListener('abort', abort)
+      resolve()
+    }, Math.max(0, seconds) * 1000)
+    signal.addEventListener('abort', abort, { once: true })
   })
 }
 

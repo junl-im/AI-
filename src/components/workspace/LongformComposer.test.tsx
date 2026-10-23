@@ -11,6 +11,14 @@ const activity = {
 }
 
 describe('LongformComposer', () => {
+  it('대사 입력 메뉴를 키보드 메뉴 키로 열고 첫 명령에 초점을 둔다', () => {
+    render(<LongformComposer disabled={false} value="안녕하세요." activity={activity} onValueChange={vi.fn()} onSubmit={vi.fn()} />)
+    const editor = screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' }) as HTMLTextAreaElement
+    editor.focus()
+    fireEvent.keyDown(editor, { key: 'ContextMenu' })
+    expect(screen.getByRole('menu', { name: '대사 편집 메뉴' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: /붙여넣기/ })).toHaveFocus()
+  })
   it('대사 입력 우클릭에서 선택 내용 삭제와 되돌리기를 제공한다', () => {
     const onValueChange = vi.fn()
     const props = { disabled: false, value: '안녕하세요.', activity, onValueChange, onSubmit: vi.fn() }
