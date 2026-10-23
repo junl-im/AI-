@@ -323,6 +323,16 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         {fullMp3Url ? <a href={fullMp3Url} download="sorion-full.mp3">MP3 다시 다운로드</a> : null}
         {downloadStatus ? <p role="status">{downloadStatus}</p> : null}
       </div> : null}
+      {onRenderFileAudio && canRenderFileAudio && (!canExportLocalWav || fileAudioError || renderingFileAudio) ? <div className="soa-generated-save__file-recovery">
+        <strong>파일 다운로드가 우선이라면</strong>
+        <p>녹음 없이 한국어 음성을 WAV 파일로 직접 만듭니다. 기존 기기 성우와 음색이 달라집니다. 첫 실행에는 약 380MB 모델 다운로드가 필요합니다.</p>
+        <button type="button" disabled={renderingFileAudio} onClick={() => void renderDownloadableVoice()}>
+          {renderingFileAudio ? '파일 음성 생성 중…' : '파일 음성으로 생성해 WAV 저장'}
+        </button>
+        {renderingFileAudio ? <button type="button" onClick={() => fileAudioAbortRef.current?.abort()}>파일 음성 생성 취소</button> : null}
+        {fileAudioProgress ? <p role="status">{fileAudioProgress}</p> : null}
+        {fileAudioError ? <p role="alert">{fileAudioError}</p> : null}
+      </div> : null}
       {canRecordBrowser || recordedWavUrl ? <div className="soa-generated-save__browser">
         <strong>기본 성우 음색 그대로 저장</strong>
         {canRecordBrowser ? <p>기기 성우가 대사를 다시 읽는 소리를 녹음해 WAV·MP3로 변환합니다. Chrome/Edge에서 현재 탭 또는 화면 전체의 오디오 공유가 필요합니다. PC에 따라 기기 성우 소리가 공유 오디오에 포함되지 않을 수 있습니다.</p> : null}
@@ -355,15 +365,6 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
           <a href={recordedWavUrl} download={recordedSource === 'import' ? 'sorion-imported.wav' : 'sorion-default-voices.wav'}>{recordedSource === 'import' ? '가져온 음성 WAV 다운로드' : '기본 성우 WAV 다운로드'}</a>
           <a href={recordedMp3Url} download={recordedSource === 'import' ? 'sorion-imported.mp3' : 'sorion-default-voices.mp3'}>{recordedSource === 'import' ? '가져온 음성 MP3 다운로드' : '기본 성우 MP3 다운로드'}</a>
         </div> : null}
-      </div> : null}
-      {onRenderFileAudio && canRenderFileAudio && (recordError || fileAudioError || renderingFileAudio) ? <div className="soa-generated-save__file-recovery">
-        <p>기본 성우 녹음이 무음이면 파일을 직접 만드는 한국어 음성으로 다시 생성할 수 있습니다. 기존 성우와 음색이 달라집니다. 첫 실행에는 약 380MB 모델 다운로드가 필요합니다.</p>
-        <button type="button" disabled={renderingFileAudio} onClick={() => void renderDownloadableVoice()}>
-          {renderingFileAudio ? '파일 음성 생성 중…' : '파일 음성으로 다시 생성해 WAV 저장'}
-        </button>
-        {renderingFileAudio ? <button type="button" onClick={() => fileAudioAbortRef.current?.abort()}>파일 음성 생성 취소</button> : null}
-        {fileAudioProgress ? <p role="status">{fileAudioProgress}</p> : null}
-        {fileAudioError ? <p role="alert">{fileAudioError}</p> : null}
       </div> : null}
       {wavError ? <p role="alert">{wavError}</p> : null}
       {canExportAll ? (

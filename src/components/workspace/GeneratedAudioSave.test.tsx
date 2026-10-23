@@ -99,15 +99,29 @@ describe('GeneratedAudioSave', () => {
       return { source: 'browser-model', url: 'blob:local-wav' }
     })
     const { rerender } = render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
+    expect(screen.getByRole('button', { name: '파일 음성으로 생성해 WAV 저장' })).toBeInTheDocument()
+    expect(screen.getByText(/기존 기기 성우와 음색이 달라집니다/)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '기본 성우를 WAV·MP3로 저장' }))
     await waitFor(() => expect(recording.recordBrowserSpeech).toHaveBeenCalled())
-    await waitFor(() => expect(screen.getByRole('button', { name: '파일 음성으로 다시 생성해 WAV 저장' })).toBeInTheDocument())
-    expect(screen.getByText(/기존 성우와 음색이 달라집니다/)).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '파일 음성으로 다시 생성해 WAV 저장' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: '파일 음성으로 생성해 WAV 저장' })).toBeInTheDocument())
+    expect(screen.getByText(/기존 기기 성우와 음색이 달라집니다/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '파일 음성으로 생성해 WAV 저장' }))
     await waitFor(() => expect(renderFileAudio).toHaveBeenCalledWith('v1', expect.any(AbortSignal), expect.any(Function)))
     await waitFor(() => expect(fullWav.buildTimelineWav).toHaveBeenCalled())
     expect(click).toHaveBeenCalledOnce()
     click.mockRestore()
+  })
+
+  it('녹음 실패를 기다리지 않고 파일 음성 생성을 시작할 수 있다', async () => {
+    recording.recordBrowserSpeech.mockClear()
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
+      text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
+    } } }
+    const renderFileAudio = vi.fn().mockResolvedValue({ source: 'browser-model', url: 'blob:local-wav' })
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
+    fireEvent.click(screen.getByRole('button', { name: '파일 음성으로 생성해 WAV 저장' }))
+    await waitFor(() => expect(renderFileAudio).toHaveBeenCalledOnce())
+    expect(recording.recordBrowserSpeech).not.toHaveBeenCalled()
   })
 
   it('기기 내 모델 클립을 MP3로 변환하면 다운로드를 시작하고 재다운로드 링크를 남긴다', async () => {
