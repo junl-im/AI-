@@ -29,7 +29,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const [renderingFileAudio, setRenderingFileAudio] = useState(false)
   const [fileAudioProgress, setFileAudioProgress] = useState('')
   const [fileAudioError, setFileAudioError] = useState('')
-  const [autoDownloadFileAudio, setAutoDownloadFileAudio] = useState(false)
+  const [autoDownloadFileAudio, setAutoDownloadFileAudio] = useState<'wav' | 'mp3' | null>(null)
   const fileAudioAbortRef = useRef<AbortController | null>(null)
   const [recordProgress, setRecordProgress] = useState('')
   const [recordError, setRecordError] = useState('')
@@ -131,13 +131,14 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     && ready.every((block) => block.audio?.source === 'browser-model' && block.audio.url)
   useEffect(() => {
     if (!autoDownloadFileAudio || !canExportLocalWav) return
-    setAutoDownloadFileAudio(false)
-    void makeFullAudio('wav')
+    const format = autoDownloadFileAudio
+    setAutoDownloadFileAudio(null)
+    void makeFullAudio(format)
   // The action is armed only after all file-producing clips replace browser speech clips.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoDownloadFileAudio, canExportLocalWav])
 
-  async function renderDownloadableVoice() {
+  async function renderDownloadableVoice(format: 'wav' | 'mp3') {
     if (!onRenderFileAudio || renderingFileAudio) return
     const controller = new AbortController()
     fileAudioAbortRef.current = controller
@@ -154,8 +155,8 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         })
       }
       if (controller.signal.aborted) throw new Error('파일 음성 생성이 취소되었습니다.')
-      setFileAudioProgress('파일 음성이 준비됐습니다. 전체 WAV 다운로드를 시작합니다.')
-      setAutoDownloadFileAudio(true)
+      setFileAudioProgress(`파일 음성이 준비됐습니다. 전체 ${format.toUpperCase()} 다운로드를 시작합니다.`)
+      setAutoDownloadFileAudio(format)
     } catch (error) {
       setFileAudioError(error instanceof Error ? error.message : '파일 음성을 만들지 못했습니다.')
       setFileAudioProgress('')
@@ -328,9 +329,12 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       </div> : null}
       {onRenderFileAudio && canRenderFileAudio && (!canExportLocalWav || fileAudioError || renderingFileAudio) ? <div className="soa-generated-save__file-recovery">
         <strong>파일 다운로드가 우선이라면</strong>
-        <p>대사가 아직 준비 중이거나 기기 성우 생성에 실패해도 녹음 없이 한국어 WAV를 직접 만듭니다. 기존 기기 성우와 음색이 달라집니다. 첫 실행에는 약 380MB 모델 다운로드가 필요합니다.</p>
-        <button type="button" disabled={renderingFileAudio} onClick={() => void renderDownloadableVoice()}>
+        <p>대사가 아직 준비 중이거나 기기 성우 생성에 실패해도 녹음 없이 한국어 음성 파일을 직접 만듭니다. 기존 기기 성우와 음색이 달라집니다. 첫 실행에는 약 380MB 모델 다운로드가 필요합니다.</p>
+        <button type="button" disabled={renderingFileAudio} onClick={() => void renderDownloadableVoice('wav')}>
           {renderingFileAudio ? '파일 음성 생성 중…' : '파일 음성으로 생성해 WAV 저장'}
+        </button>
+        <button type="button" disabled={renderingFileAudio} onClick={() => void renderDownloadableVoice('mp3')}>
+          파일 음성으로 생성해 MP3 저장
         </button>
         {renderingFileAudio ? <button type="button" onClick={() => fileAudioAbortRef.current?.abort()}>파일 음성 생성 취소</button> : null}
         {fileAudioProgress ? <p role="status">{fileAudioProgress}</p> : null}
@@ -376,7 +380,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         <p className="soa-generated-save__limit" role="note">
           {voices.length === 0 ? '먼저 대사를 입력하고 ‘대사로 만들기’를 눌러 주세요.'
             : canRenderFileAudio && onRenderFileAudio
-              ? '위의 파일 음성 생성 버튼으로 대사를 WAV로 만든 뒤 전체 WAV·MP3를 다운로드할 수 있습니다.'
+              ? '위의 파일 음성 생성 버튼에서 WAV 또는 MP3를 선택해 바로 다운로드할 수 있습니다.'
               : '전체 음성 저장은 대사를 모두 서버 음원 또는 기기 내 WAV로 완성한 뒤 사용할 수 있습니다. 완성된 클립은 위에서 개별 다운로드할 수 있습니다.'}
         </p>
       )}

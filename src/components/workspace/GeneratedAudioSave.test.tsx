@@ -135,6 +135,27 @@ describe('GeneratedAudioSave', () => {
     expect(prepare).toHaveBeenCalledOnce()
   })
 
+  it('실패한 대사에서 MP3를 바로 선택하면 생성 완료 뒤 전체 MP3 다운로드를 시작한다', async () => {
+    const block: TimelineBlock = { ...voice, status: 'failed', audio: null, trackId: null, error: '기기 성우 없음' }
+    const mp3Blob = new Blob(['mp3'], { type: 'audio/mpeg' })
+    fullWav.buildTimelineWav.mockResolvedValue(new Blob(['RIFF'], { type: 'audio/wav' }))
+    mp3.wavToMp3.mockResolvedValue(mp3Blob)
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:full-mp3')
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const renderFileAudio = vi.fn().mockImplementation(async () => {
+      rerender(<GeneratedAudioSave blocks={[{ ...block, status: 'ready', audio: {
+        ...voice.audio!, source: 'browser-model', url: 'blob:local-wav', filename: 'local.wav',
+      } }]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
+      return { source: 'browser-model', url: 'blob:local-wav' }
+    })
+    const { rerender } = render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
+    fireEvent.click(screen.getByRole('button', { name: '파일 음성으로 생성해 MP3 저장' }))
+    await waitFor(() => expect(mp3.wavToMp3).toHaveBeenCalled())
+    expect(click).toHaveBeenCalledOnce()
+    expect(screen.getByRole('link', { name: 'MP3 다시 다운로드' })).toHaveAttribute('href', 'blob:full-mp3')
+    click.mockRestore()
+  })
+
   it('기기 내 모델 클립을 MP3로 변환하면 다운로드를 시작하고 재다운로드 링크를 남긴다', async () => {
     const block: TimelineBlock = {
       ...voice,
