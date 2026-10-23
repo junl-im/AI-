@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
 const int Port = 18717;
@@ -37,7 +38,17 @@ app.Use(async (context, next) => {
     await next(context);
 });
 
-app.MapGet("/status", () => Results.Ok(new { ready = true, captureActive = current is not null }));
+app.MapGet("/status", () => {
+    try {
+        using var devices = new MMDeviceEnumerator();
+        using var output = devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+        return Results.Ok(new { ready = true, captureActive = current is not null,
+            outputDevice = output.FriendlyName, outputState = output.State.ToString(),
+            helperVersion = "0.11.74" });
+    } catch (Exception error) {
+        return Results.Problem($"기본 Windows 출력 장치를 찾지 못했습니다: {error.Message}", statusCode: 503);
+    }
+});
 app.MapPost("/capture/start", async () => {
     await gate.WaitAsync();
     try {
@@ -56,7 +67,7 @@ app.MapPost("/capture/stop", async () => {
         current = null;
         var wav = await session.StopAsync();
         return wav is null
-            ? Results.UnprocessableEntity(new { error = "Windows 출력 소리가 무음입니다. 출력 장치와 기본 성우 재생을 확인해 주세요." })
+            ? Results.UnprocessableEntity(new { error = $"Windows 출력 소리가 무음입니다. 캡처 장치: {session.OutputDevice}. 피크: {session.Peak:F4}. 기본 성우 소리가 이 장치에서 실제로 들리는지 확인해 주세요." })
             : Results.File(wav, "audio/wav", "sorion-system-capture.wav");
     } catch (Exception error) {
         return Results.Problem($"시스템 소리 녹음을 마치지 못했습니다: {error.Message}", statusCode: 500);
@@ -93,8 +104,13 @@ sealed class LoopbackSession {
     private float peak;
     private bool completed;
     private bool limitReached;
+    public string OutputDevice { get; }
+    public float Peak => peak;
 
     public LoopbackSession() {
+        using (var devices = new MMDeviceEnumerator())
+        using (var output = devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia))
+            OutputDevice = output.FriendlyName;
         writer = new WaveFileWriter(stream, capture.WaveFormat);
         capture.DataAvailable += (_, args) => {
             if (completed) return;

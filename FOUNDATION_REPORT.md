@@ -610,3 +610,7 @@ CI 다중 화면 fixture를 IndexedDB 스키마 5에 맞춰 Pages 배포 게이�
 ## 0.11.73 · Public Voice Download QA
 
 이 PC의 Chrome·Edge에서 공개 Pages의 실제 원본 음색 MP3 저장 버튼을 눌러 각각 유효한 음성 파일을 다운로드했습니다. Chrome은 WAV 링크 다운로드도 확인했습니다. Windows 보조 앱과 화면 공유 녹음의 안내를 분리하고 대체 녹음 방법을 접었습니다. 다른 PC와 프리셋별 청감 검증은 남아 있습니다. `docs/PUBLIC_VOICE_DOWNLOAD_0.11.73.md` 참조.
+
+## 0.11.74 · Windows Output Diagnostics
+
+Windows 보조 앱의 상태에 기본 출력 장치 이름·상태·버전을 추가하고, 무음 오류에 녹음 장치·신호 피크를 포함합니다. 웹 저장 화면이 연결된 출력 장치를 표시합니다. 새 보조 앱으로 공개 Pages에서 MP3/WAV를 다시 다운로드해 유효 음성임을 확인했습니다. `docs/WINDOWS_CAPTURE_DIAG_0.11.74.md` 참조.

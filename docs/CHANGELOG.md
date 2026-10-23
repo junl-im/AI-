@@ -1998,3 +1998,7 @@ GitHub Actions의 Chromium 시작 15초 제한으로 두 번 실패한 화면 �
 ## 0.11.73 · Public Voice Download QA
 
 공개 Pages에서 Chrome과 Edge의 실제 `Windows 보조 앱으로 원래 음색 MP3 저장` 버튼을 눌러 MP3 다운로드와 디코딩된 음성 신호를 확인했습니다. Chrome에서는 WAV 링크 다운로드도 확인했습니다. 저장 화면은 Windows 보조 앱이 화면 공유 없이 PC 출력 소리를 직접 녹음한다는 점을 설명하고, 연결 상태를 표시하며, 화면 공유·입력 장치·WebM 대체 방법은 접힌 영역으로 정리했습니다. 같은 PC 한 대의 검증이며 다른 PC와 프리셋별 청감 확인은 남아 있습니다. 수치와 조건은 `docs/PUBLIC_VOICE_DOWNLOAD_0.11.73.md`에 기록했습니다.
+
+## 0.11.74 · Windows Output Diagnostics
+
+Windows 보조 앱이 현재 기본 출력 장치 이름과 상태·버전을 보고합니다. 무음 녹음 오류에는 캡처 장치와 신호 피크를 포함하며, 웹 저장 화면에도 연결된 출력 장치를 표시합니다. 새 자체 포함 x64 보조 앱 ZIP을 사이트에서 내려받습니다. 이 PC의 공개 Pages 버튼으로 새 보조 앱의 MP3/WAV를 실제 다운로드해 유효한 음성 신호를 확인했습니다. 다른 PC 실측과 NAudio 녹음 API 이전은 남아 있습니다. `docs/WINDOWS_CAPTURE_DIAG_0.11.74.md` 참조.

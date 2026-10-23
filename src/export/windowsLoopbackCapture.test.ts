@@ -11,10 +11,11 @@ describe('Windows 오디오 보조 앱 연결', () => {
   it('실행 토큰을 주소에서 지우고 루프백 접근으로 상태를 확인한다', async () => {
     const token = 'A'.repeat(48)
     window.history.replaceState(null, '', `/?sorion-capture-token=${token}`)
-    const fetch = vi.fn().mockResolvedValue({ ok: true })
+    const fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ outputDevice: '스피커 (테스트)', helperVersion: '0.11.74' }) })
     vi.stubGlobal('fetch', fetch)
 
     expect(await windowsCaptureAvailable()).toBe(true)
+    expect(await windowsCaptureStatus()).toMatchObject({ ready: true, outputDevice: '스피커 (테스트)', helperVersion: '0.11.74' })
     expect(window.location.search).not.toContain('sorion-capture-token')
     expect(readWindowsCaptureToken()).toBe(token)
     expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:18717/status', expect.objectContaining({

@@ -8,7 +8,7 @@ import { captureBrowserSpeechWithWindowsLoopback, windowsCaptureStatus } from '.
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 import type { GeneratedAudio } from '../../tts/generationTypes'
 
-const WINDOWS_BRIDGE_DOWNLOAD = `${import.meta.env.BASE_URL}downloads/SoriON-Audio-Bridge-0.11.71-win-x64.zip`
+const WINDOWS_BRIDGE_DOWNLOAD = `${import.meta.env.BASE_URL}downloads/SoriON-Audio-Bridge-0.11.74-win-x64.zip`
 
 interface Props {
   blocks: TimelineBlock[]
@@ -39,6 +39,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const [recordStorageError, setRecordStorageError] = useState('')
   const [windowsCaptureReady, setWindowsCaptureReady] = useState(false)
   const [windowsCaptureError, setWindowsCaptureError] = useState('')
+  const [windowsOutputDevice, setWindowsOutputDevice] = useState('')
   const [captureDevices, setCaptureDevices] = useState<MediaDeviceInfo[]>([])
   const [captureDeviceId, setCaptureDeviceId] = useState('default')
   const [captureOptionsOpen, setCaptureOptionsOpen] = useState(false)
@@ -75,6 +76,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       if (!controller.signal.aborted) {
         setWindowsCaptureReady(status.ready)
         setWindowsCaptureError(status.error)
+        setWindowsOutputDevice(status.outputDevice ?? '')
       }
     })
     return () => controller.abort()
@@ -321,6 +323,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     const status = await windowsCaptureStatus()
     setWindowsCaptureReady(status.ready)
     setWindowsCaptureError(status.error)
+    setWindowsOutputDevice(status.outputDevice ?? '')
   }
 
   async function importWebm(file: File) {
@@ -399,8 +402,8 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       {canRecordBrowser || recordedWavUrl ? <div className="soa-generated-save__browser">
         <strong>기본 성우 음색 그대로 MP3·WAV 저장</strong>
         {canRecordBrowser ? <p>Windows 보조 앱은 이 PC의 스피커 출력 소리를 직접 녹음합니다. 화면 공유는 필요하지 않습니다. 기본 성우 소리가 실제로 들리는 출력 장치를 사용하고, 녹음 중 다른 앱 소리는 꺼 주세요.</p> : null}
-        {canRecordBrowser ? <p><a href={WINDOWS_BRIDGE_DOWNLOAD} download="SoriON-Audio-Bridge-0.11.71-win-x64.zip">Windows 보조 앱 다운로드 (약 50MB)</a> · 압축을 풀고 <code>SoriONAudioBridge.exe</code>를 실행한 뒤, 앱이 새로 연 소리온 페이지에서 저장하세요.</p> : null}
-        {canRecordBrowser && windowsCaptureReady ? <p role="status" className="soa-generated-save__connected">Windows 보조 앱 연결됨 · 원본 음색 파일을 저장할 수 있습니다.</p> : null}
+        {canRecordBrowser ? <p><a href={WINDOWS_BRIDGE_DOWNLOAD} download="SoriON-Audio-Bridge-0.11.74-win-x64.zip">Windows 보조 앱 다운로드 (약 50MB)</a> · 압축을 풀고 <code>SoriONAudioBridge.exe</code>를 실행한 뒤, 앱이 새로 연 소리온 페이지에서 저장하세요.</p> : null}
+        {canRecordBrowser && windowsCaptureReady ? <p role="status" className="soa-generated-save__connected">Windows 보조 앱 연결됨{windowsOutputDevice ? ` · 출력: ${windowsOutputDevice}` : ''} · 원본 음색 파일을 저장할 수 있습니다.</p> : null}
         {canRecordBrowser && windowsCaptureReady ? <button type="button" disabled={recording} onClick={() => void startWindowsRecording()}>
           {recording ? '원본 음색 녹음 중…' : 'Windows 보조 앱으로 원래 음색 MP3 저장'}
         </button> : null}

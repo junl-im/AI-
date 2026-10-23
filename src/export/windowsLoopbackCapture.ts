@@ -43,11 +43,19 @@ async function bridgeRequest(path: string, signal?: AbortSignal): Promise<Respon
   return response
 }
 
-export async function windowsCaptureStatus(signal?: AbortSignal): Promise<{ ready: boolean; error: string }> {
+export interface WindowsCaptureStatus {
+  ready: boolean
+  error: string
+  outputDevice?: string
+  helperVersion?: string
+}
+
+export async function windowsCaptureStatus(signal?: AbortSignal): Promise<WindowsCaptureStatus> {
   if (!readWindowsCaptureToken()) return { ready: false, error: '보조 앱이 연 새 소리온 탭에서 접속해야 합니다. 앱을 실행하고 자동으로 열린 탭에서 다시 시도해 주세요.' }
   try {
-    await bridgeRequest('/status', signal)
-    return { ready: true, error: '' }
+    const response = await bridgeRequest('/status', signal)
+    const status = await response.json() as { outputDevice?: string; helperVersion?: string }
+    return { ready: true, error: '', outputDevice: status.outputDevice, helperVersion: status.helperVersion }
   } catch (error) {
     if (signal?.aborted) return { ready: false, error: '' }
     return { ready: false, error: error instanceof Error ? error.message : '보조 앱 연결을 확인하지 못했습니다.' }

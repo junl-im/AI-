@@ -55,7 +55,7 @@ describe('GeneratedAudioSave', () => {
     expect(screen.queryByRole('link', { name: /음성 파일 다운로드/ })).not.toBeInTheDocument()
     expect(screen.getByText('다른 녹음 방법 보기')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Windows 보조 앱 다운로드/ })).toHaveAttribute('href',
-      expect.stringContaining('downloads/SoriON-Audio-Bridge-0.11.71-win-x64.zip'))
+      expect.stringContaining('downloads/SoriON-Audio-Bridge-0.11.74-win-x64.zip'))
     fireEvent.click(screen.getByText('다른 녹음 방법 보기'))
     expect(screen.getByRole('button', { name: '브라우저 오디오 공유로 저장 시도' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '시스템 소리 입력 장치 확인' })).toBeInTheDocument()
@@ -69,13 +69,13 @@ describe('GeneratedAudioSave', () => {
       text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
     } } }
     const wav = new Blob(['RIFF'], { type: 'audio/wav' })
-    windowsCapture.windowsCaptureStatus.mockResolvedValueOnce({ ready: true, error: '' })
+    windowsCapture.windowsCaptureStatus.mockResolvedValueOnce({ ready: true, error: '', outputDevice: '스피커 (테스트)' })
     windowsCapture.captureBrowserSpeechWithWindowsLoopback.mockResolvedValueOnce(wav)
     mp3.wavToMp3.mockResolvedValueOnce(new Blob(['mp3'], { type: 'audio/mpeg' }))
     vi.spyOn(URL, 'createObjectURL').mockReturnValueOnce('blob:windows-wav').mockReturnValueOnce('blob:windows-mp3')
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
     render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
-    expect(await screen.findByText(/Windows 보조 앱 연결됨/)).toBeInTheDocument()
+    expect(await screen.findByText(/출력: 스피커 \(테스트\)/)).toBeInTheDocument()
     fireEvent.click(await screen.findByRole('button', { name: 'Windows 보조 앱으로 원래 음색 MP3 저장' }))
     await waitFor(() => expect(click).toHaveBeenCalledOnce())
     expect(windowsCapture.captureBrowserSpeechWithWindowsLoopback).toHaveBeenCalledWith([block], expect.any(AbortSignal), expect.any(Function))
