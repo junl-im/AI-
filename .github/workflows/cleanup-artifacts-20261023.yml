@@ -1,0 +1,52 @@
+name: One-time safe artifact cleanup (2026-10-23)
+on:
+  push:
+    branches:
+      - maintenance/actions-artifact-cleanup-20261023
+    paths:
+      - .github/workflows/cleanup-artifacts-20261023.yml
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  cleanup:
+    if: github.repository == 'junl-im/AI-'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Remove superseded artifacts while protecting recent builds
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo} = context.repo;
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {owner,repo,per_page:100});
+            artifacts.sort((a,b) => Date.parse(b.created_at)-Date.parse(a.created_at));
+            const seen = new Map();
+            const recent = Date.now() - 6*60*60*1000;
+            let removed=0, freed=0, retained=0, errors=0;
+            for (const a of artifacts) {
+              const key = a.name.toLowerCase();
+              const rank = seen.get(key) || 0;
+              seen.set(key,rank+1);
+              const keepCount = key === 'github-pages' ? 3 : 2;
+              if (rank < keepCount || Date.parse(a.created_at) >= recent) {
+                retained++;
+                continue;
+              }
+              if (removed >= 300) {
+                core.warning('Deletion cap reached.');
+                break;
+              }
+              try {
+                await github.rest.actions.deleteArtifact({owner,repo,artifact_id:a.id});
+                removed++;
+                freed += a.size_in_bytes || 0;
+                await new Promise(resolve => setTimeout(resolve,150));
+              } catch (e) {
+                errors++;
+                core.warning('Could not remove artifact '+a.id+': '+e.message);
+              }
+            }
+            core.info('CLEANUP_RESULT '+JSON.stringify({repo,found:artifacts.length,removed,freed_bytes:freed,retained,errors}));
+            if (errors) core.setFailed(errors+' deletion errors');
