@@ -239,6 +239,11 @@
 .soa-generated-save__browser b { font-weight: 900; }
 .soa-generated-save__preview { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
 .soa-generated-save__preview audio { max-width: 100%; }
+.soa-generated-save__fallback { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0; padding: 12px; border: 1px solid #bba6d1; border-radius: 11px; background: #faf7fd; }
+.soa-generated-save__fallback p { flex-basis: 100%; margin: 0; color: #443550; }
+.soa-generated-save__fallback select { max-width: 100%; min-height: 40px; padding: 7px; border: 1px solid #74528f; border-radius: 8px; color: #2b2135; background: #fff; }
+.soa-generated-save__fallback label { display: grid; gap: 5px; max-width: 100%; color: #443550; font-size: 12px; font-weight: 700; }
+.soa-generated-save__fallback input[type="file"] { max-width: 100%; color: #443550; }
 @media (max-width: 560px) {
   .soa-app-root.is-editor .soa-dubbing-toolbar__actions .soa-download-entry { min-width: 42px; padding: 0 8px; }
   .soa-download-entry span { display: none; }

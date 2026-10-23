@@ -1,34 +1,32 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { TimelineVoiceBlock } from '../workspace/workspaceTypes'
-import { waitForSpeech } from './recordBrowserSpeech'
+import { getBrowserSpeechCaptureStream } from './recordBrowserSpeech'
 
-vi.mock('../tts/browserSpeech', () => ({ createBrowserSpeechUtterance: () => ({ onstart: null, onend: null, onerror: null }) }))
+const originalMediaDevices = Object.getOwnPropertyDescriptor(navigator, 'mediaDevices')
+afterEach(() => {
+  if (originalMediaDevices) Object.defineProperty(navigator, 'mediaDevices', originalMediaDevices)
+  else Reflect.deleteProperty(navigator, 'mediaDevices')
+})
 
-const block = { audio: { browserSpeech: { text: '안녕하세요.', lang: 'ko-KR', rate: 1, pitch: 1, voiceId: 'sori-warm' } } } as TimelineVoiceBlock
-
-describe('browser speech recording watchdog', () => {
-  afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals() })
-
-  it('음성이 시작되지 않으면 녹음 대기를 끝낸다', async () => {
-    vi.useFakeTimers()
-    const cancel = vi.fn()
-    vi.stubGlobal('speechSynthesis', { speak: vi.fn(), cancel })
-    const result = waitForSpeech(block, new AbortController().signal)
-    const failure = expect(result).rejects.toThrow('기기 음성이 시작되지 않아')
-    await vi.advanceTimersByTimeAsync(8_000)
-    await failure
-    expect(cancel).toHaveBeenCalledTimes(1)
+describe('browser speech audio capture', () => {
+  it('화면 공유가 무음인 PC에서 선택한 입력 장치를 오디오 소스로 요청한다', async () => {
+    const stream = {} as MediaStream
+    const getUserMedia = vi.fn().mockResolvedValue(stream)
+    const getDisplayMedia = vi.fn()
+    Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia, getDisplayMedia } })
+    await expect(getBrowserSpeechCaptureStream('stereo-mix')).resolves.toBe(stream)
+    expect(getUserMedia).toHaveBeenCalledWith({ audio: {
+      deviceId: { exact: 'stereo-mix' }, echoCancellation: false, noiseSuppression: false, autoGainControl: false,
+    } })
+    expect(getDisplayMedia).not.toHaveBeenCalled()
   })
 
-  it('음성이 끝나지 않으면 제한 시간 뒤 종료한다', async () => {
-    vi.useFakeTimers()
-    const cancel = vi.fn()
-    const speak = vi.fn((utterance: SpeechSynthesisUtterance) => utterance.onstart?.(new Event('start') as SpeechSynthesisEvent))
-    vi.stubGlobal('speechSynthesis', { speak, cancel })
-    const result = waitForSpeech(block, new AbortController().signal)
-    const failure = expect(result).rejects.toThrow('기기 음성 재생이 끝나지 않아')
-    await vi.advanceTimersByTimeAsync(30_000)
-    await failure
-    expect(cancel).toHaveBeenCalledTimes(1)
+  it('기존 기본 녹음은 화면 오디오 공유를 요청한다', async () => {
+    const stream = {} as MediaStream
+    const getUserMedia = vi.fn()
+    const getDisplayMedia = vi.fn().mockResolvedValue(stream)
+    Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: { getUserMedia, getDisplayMedia } })
+    await expect(getBrowserSpeechCaptureStream()).resolves.toBe(stream)
+    expect(getDisplayMedia).toHaveBeenCalledWith(expect.objectContaining({ systemAudio: 'include' }))
+    expect(getUserMedia).not.toHaveBeenCalled()
   })
 })

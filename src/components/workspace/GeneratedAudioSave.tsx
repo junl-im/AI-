@@ -25,8 +25,12 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const [recording, setRecording] = useState(false)
   const [recordProgress, setRecordProgress] = useState('')
   const [recordError, setRecordError] = useState('')
+  const [captureDevices, setCaptureDevices] = useState<MediaDeviceInfo[]>([])
+  const [captureDeviceId, setCaptureDeviceId] = useState('default')
+  const [captureOptionsOpen, setCaptureOptionsOpen] = useState(false)
   const [recordedWavUrl, setRecordedWavUrl] = useState<string | null>(null)
   const [recordedMp3Url, setRecordedMp3Url] = useState<string | null>(null)
+  const [recordedSource, setRecordedSource] = useState<'capture' | 'import'>('capture')
   const [wavError, setWavError] = useState('')
   const [fullWavUrl, setFullWavUrl] = useState<string | null>(null)
   const [fullMp3Url, setFullMp3Url] = useState<string | null>(null)
@@ -65,6 +69,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     recordedMp3Ref.current = null
     setRecordedWavUrl(null)
     setRecordedMp3Url(null)
+    setRecordedSource('capture')
     if (voices.length) {
       void loadRecordedAudio(recordingSignature).then((record) => {
         if (!active || !record || recordingSignatureRef.current !== recordingSignature) return
@@ -161,16 +166,30 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     }
   }
 
-  async function startRecording() {
+  async function listCaptureDevices() {
+    setRecordError('')
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream.getTracks().forEach((track) => track.stop())
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      setCaptureDevices(devices.filter((device) => device.kind === 'audioinput'))
+      setCaptureOptionsOpen(true)
+    } catch {
+      setRecordError('소리 입력 장치에 접근하지 못했습니다. 브라우저 마이크 권한과 Windows 입력 장치 설정을 확인해 주세요.')
+    }
+  }
+
+  async function startRecording(inputDeviceId?: string) {
     const controller = new AbortController()
     abortRef.current = controller
     setRecordError('')
-    setRecordProgress('브라우저 공유 창에서 소리가 포함된 탭 또는 화면 전체와 시스템 오디오를 선택해 주세요.')
+    setRecordProgress(inputDeviceId ? '선택한 소리 입력 장치에서 성우 재생 소리를 녹음합니다.'
+      : '브라우저 공유 창에서 소리가 포함된 탭 또는 화면 전체와 시스템 오디오를 선택해 주세요.')
     setRecording(true)
     try {
       const blob = await recordBrowserSpeech(blocks, controller.signal, (index, total) => {
         setRecordProgress(`대사·쉼표 녹음 중 ${index}/${total}`)
-      })
+      }, inputDeviceId)
       if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
       setRecordProgress('녹음한 기본 성우 음성을 WAV·MP3로 변환 중…')
       const { wav, mp3 } = await recordedWebmToFiles(blob)
@@ -186,13 +205,38 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       recordedMp3Ref.current = URL.createObjectURL(mp3)
       setRecordedWavUrl(recordedWavRef.current)
       setRecordedMp3Url(recordedMp3Ref.current)
-      setRecordProgress('기본 성우 녹음 완료 · 먼저 재생해 음색을 확인한 뒤 WAV 또는 MP3를 내려받으세요.')
+      setRecordedSource('capture')
+      startDownload(recordedWavRef.current, 'sorion-default-voices.wav')
+      setRecordProgress('기본 성우 WAV 다운로드를 시작했습니다. 저장되지 않았다면 아래 링크를 누르고, MP3도 선택해 받으세요.')
     } catch (error) {
       setRecordError(error instanceof Error ? error.message : '녹음에 실패했습니다.')
       setRecordProgress('')
     } finally {
       abortRef.current = null
       setRecording(false)
+    }
+  }
+
+  async function importWebm(file: File) {
+    const signature = recordingSignature
+    setRecordError('')
+    setRecordProgress('선택한 WebM의 소리를 WAV·MP3로 변환 중…')
+    try {
+      if (file.size > 250 * 1024 * 1024) throw new Error('WebM 파일이 250MB를 넘습니다. 녹음을 나누어 가져와 주세요.')
+      const { wav, mp3 } = await recordedWebmToFiles(file)
+      if (recordingSignatureRef.current !== signature) return
+      if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
+      if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
+      recordedWavRef.current = URL.createObjectURL(wav)
+      recordedMp3Ref.current = URL.createObjectURL(mp3)
+      setRecordedWavUrl(recordedWavRef.current)
+      setRecordedMp3Url(recordedMp3Ref.current)
+      setRecordedSource('import')
+      startDownload(recordedWavRef.current, 'sorion-imported.wav')
+      setRecordProgress('WebM에서 변환한 WAV 다운로드를 시작했습니다. 저장되지 않았다면 아래 링크를 누르고 MP3도 선택해 받으세요.')
+    } catch (error) {
+      setRecordError(error instanceof Error ? error.message : 'WebM 파일을 변환하지 못했습니다.')
+      setRecordProgress('')
     }
   }
 
@@ -239,13 +283,30 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         {canRecordBrowser ? <button type="button" disabled={recording} onClick={() => void startRecording()}>
           {recording ? '기본 성우 녹음·변환 중…' : '기본 성우를 WAV·MP3로 저장'}
         </button> : null}
+        {canRecordBrowser ? <div className="soa-generated-save__fallback">
+          <p>화면 공유 녹음이 무음이면 Windows의 ‘스테레오 믹스’나 가상 루프백 입력 장치를 선택해 다시 녹음할 수 있습니다. 스피커 소리를 마이크로 받는 경우 주변 소음도 녹음됩니다.</p>
+          <button type="button" disabled={recording} onClick={() => void listCaptureDevices()}>소리 입력 장치 선택</button>
+          {captureOptionsOpen ? <>
+            <select aria-label="녹음할 소리 입력 장치" value={captureDeviceId} onChange={(event) => setCaptureDeviceId(event.target.value)}>
+              <option value="default">Windows 기본 입력 장치</option>
+              {captureDevices.filter((device) => device.deviceId && device.deviceId !== 'default').map((device) => (
+                <option key={device.deviceId} value={device.deviceId}>{device.label || '이름 없는 소리 입력 장치'}</option>
+              ))}
+            </select>
+            <button type="button" disabled={recording} onClick={() => void startRecording(captureDeviceId)}>선택한 장치로 녹음·변환</button>
+          </> : null}
+          <label>소리가 담긴 WebM 파일이 있다면 불러와 WAV·MP3로 변환
+            <input type="file" accept=".webm,audio/webm,video/webm" aria-label="소리가 담긴 WebM 불러오기"
+              onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file) void importWebm(file); event.currentTarget.value = '' }} />
+          </label>
+        </div> : null}
         {recording ? <button type="button" onClick={() => abortRef.current?.abort()}>녹음 취소</button> : null}
         {recordProgress ? <p role="status">{recordProgress}</p> : null}
         {recordError ? <p role="alert">{recordError}</p> : null}
         {recordedWavUrl && recordedMp3Url ? <div className="soa-generated-save__preview">
-          <audio controls src={recordedWavUrl} aria-label="기본 성우 녹음 미리 듣기" />
-          <a href={recordedWavUrl} download="sorion-default-voices.wav">기본 성우 WAV 다운로드</a>
-          <a href={recordedMp3Url} download="sorion-default-voices.mp3">기본 성우 MP3 다운로드</a>
+          <audio controls src={recordedWavUrl} aria-label={recordedSource === 'import' ? '가져온 WebM 변환 미리 듣기' : '기본 성우 녹음 미리 듣기'} />
+          <a href={recordedWavUrl} download={recordedSource === 'import' ? 'sorion-imported.wav' : 'sorion-default-voices.wav'}>{recordedSource === 'import' ? '가져온 음성 WAV 다운로드' : '기본 성우 WAV 다운로드'}</a>
+          <a href={recordedMp3Url} download={recordedSource === 'import' ? 'sorion-imported.mp3' : 'sorion-default-voices.mp3'}>{recordedSource === 'import' ? '가져온 음성 MP3 다운로드' : '기본 성우 MP3 다운로드'}</a>
         </div> : null}
       </div> : null}
       {wavError ? <p role="alert">{wavError}</p> : null}

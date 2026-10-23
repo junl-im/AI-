@@ -21,6 +21,6 @@ describe('audioBufferToWav', () => {
 
   it('공유된 오디오 트랙이 무음이면 파일 저장을 성공 처리하지 않는다', () => {
     expect(() => audioBufferToWav(audio(new Float32Array(48_000))))
-      .toThrow('공유된 오디오가 무음입니다.')
+      .toThrow('녹음된 오디오가 무음입니다.')
   })
 })

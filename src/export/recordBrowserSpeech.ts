@@ -65,25 +65,39 @@ function waitForPause(seconds: number, signal: AbortSignal): Promise<void> {
   })
 }
 
-export async function recordBrowserSpeech(
-  blocks: TimelineBlock[],
-  signal: AbortSignal,
-  onProgress: (index: number, total: number) => void,
-): Promise<Blob> {
-  if (!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder === 'undefined') {
-    throw new Error('이 브라우저는 탭 오디오 녹음을 지원하지 않습니다. 최신 Chrome 또는 Edge를 사용해 주세요.')
+export async function getBrowserSpeechCaptureStream(inputDeviceId?: string): Promise<MediaStream> {
+  if (!navigator.mediaDevices
+    || (inputDeviceId ? !navigator.mediaDevices.getUserMedia : !navigator.mediaDevices.getDisplayMedia)) {
+    throw new Error('이 브라우저는 선택한 오디오 녹음 방식을 지원하지 않습니다. 최신 Chrome 또는 Edge를 사용해 주세요.')
   }
-  const stream = await navigator.mediaDevices.getDisplayMedia({
+  return inputDeviceId ? navigator.mediaDevices.getUserMedia({
+    audio: {
+      deviceId: inputDeviceId === 'default' ? undefined : { exact: inputDeviceId },
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+    },
+  }) : await navigator.mediaDevices.getDisplayMedia({
     video: true,
     audio: { restrictOwnAudio: false, suppressLocalAudioPlayback: false },
     systemAudio: 'include',
     preferCurrentTab: true,
     selfBrowserSurface: 'include',
   } as DisplayMediaStreamOptions)
+}
+
+export async function recordBrowserSpeech(
+  blocks: TimelineBlock[],
+  signal: AbortSignal,
+  onProgress: (index: number, total: number) => void,
+  inputDeviceId?: string,
+): Promise<Blob> {
+  if (typeof MediaRecorder === 'undefined') throw new Error('이 브라우저는 오디오 녹음을 지원하지 않습니다.')
+  const stream = await getBrowserSpeechCaptureStream(inputDeviceId)
   try {
     if (signal.aborted) throw new Error('녹음이 취소되었습니다.')
     const audioTrack = stream.getAudioTracks()[0]
-    if (!audioTrack) throw new Error('오디오가 공유되지 않았습니다. 현재 탭의 오디오 공유 또는 화면 전체의 시스템 오디오를 켜 주세요.')
+    if (!audioTrack) throw new Error(inputDeviceId ? '선택한 소리 입력 장치에 오디오가 없습니다.' : '오디오가 공유되지 않았습니다. 현재 탭의 오디오 공유 또는 화면 전체의 시스템 오디오를 켜 주세요.')
     const audioStream = new MediaStream([audioTrack])
     const mimeType = ['audio/webm;codecs=opus', 'audio/webm'].find((type) => MediaRecorder.isTypeSupported(type))
     if (!mimeType) throw new Error('이 브라우저는 WebM 오디오 저장을 지원하지 않습니다.')

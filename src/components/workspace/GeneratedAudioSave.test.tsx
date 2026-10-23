@@ -5,6 +5,8 @@ import { GeneratedAudioSave } from './GeneratedAudioSave'
 
 const mp3 = vi.hoisted(() => ({ wavToMp3: vi.fn() }))
 vi.mock('../../export/wavToMp3', () => mp3)
+const conversion = vi.hoisted(() => ({ recordedWebmToFiles: vi.fn() }))
+vi.mock('../../export/recordedAudioFormats', () => conversion)
 
 const voice: TimelineVoiceBlock = {
   id: 'v1', kind: 'voice', text: '안녕하세요.', voiceId: 'sori-warm', voiceName: '혜린',
@@ -40,6 +42,8 @@ describe('GeneratedAudioSave', () => {
     expect(screen.queryByRole('button', { name: '전체 음성 MP3로 저장' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /음성 파일 다운로드/ })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '기본 성우를 WAV·MP3로 저장' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '소리 입력 장치 선택' })).toBeInTheDocument()
+    expect(screen.getByLabelText('소리가 담긴 WebM 불러오기')).toHaveAttribute('accept', '.webm,audio/webm,video/webm')
     expect(screen.queryByRole('button', { name: /다른 음색으로 WAV 만들기/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '대본 TXT 다운로드' })).not.toBeInTheDocument()
   })
@@ -55,6 +59,25 @@ describe('GeneratedAudioSave', () => {
     expect(screen.getByRole('button', { name: '전체 WAV 다운로드' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '전체 MP3 다운로드' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '대사 1 MP3 다운로드' })).toBeInTheDocument()
+  })
+
+  it('소리가 담긴 WebM을 가져와 WAV와 MP3 다운로드를 제공한다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
+      text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
+    } } }
+    const wav = new Blob(['wav'], { type: 'audio/wav' })
+    const convertedMp3 = new Blob(['mp3'], { type: 'audio/mpeg' })
+    conversion.recordedWebmToFiles.mockResolvedValue({ wav, mp3: convertedMp3 })
+    vi.spyOn(URL, 'createObjectURL').mockReturnValueOnce('blob:imported-wav').mockReturnValueOnce('blob:imported-mp3')
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
+    const file = new File(['audio'], 'sample.webm', { type: 'audio/webm' })
+    fireEvent.change(screen.getByLabelText('소리가 담긴 WebM 불러오기'), { target: { files: [file] } })
+    expect(await screen.findByRole('link', { name: '가져온 음성 WAV 다운로드' })).toHaveAttribute('href', 'blob:imported-wav')
+    expect(screen.getByRole('link', { name: '가져온 음성 MP3 다운로드' })).toHaveAttribute('download', 'sorion-imported.mp3')
+    expect(conversion.recordedWebmToFiles).toHaveBeenCalledWith(file)
+    expect(click).toHaveBeenCalledOnce()
+    click.mockRestore()
   })
 
   it('기기 내 모델 클립을 MP3로 변환하면 다운로드를 시작하고 재다운로드 링크를 남긴다', async () => {

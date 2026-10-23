@@ -22,7 +22,7 @@ export function audioBufferToWav(audio: PcmAudio): Blob {
     pcm[index] = Math.round(sample * (sample < 0 ? 32768 : 32767))
   }
   if (peak < 0.002 || Math.sqrt(squareSum / audio.length) < 0.0002) {
-    throw new Error('공유된 오디오가 무음입니다. 이 PC에서는 기기 성우 소리가 화면 공유에 포함되지 않을 수 있습니다. Chrome 또는 Edge의 공유 창에서 현재 탭의 오디오 공유나 화면 전체의 시스템 오디오를 켜고 다시 시도해 주세요. 계속 무음이면 실제 음성 파일을 만드는 음성 서버가 필요합니다.')
+    throw new Error('녹음된 오디오가 무음입니다. WebM을 WAV로 변환해도 음성은 생기지 않습니다. 아래에서 스테레오 믹스·가상 루프백 같은 소리 입력 장치를 선택하거나 소리가 담긴 WebM 파일을 불러와 주세요.')
   }
   const buffer = new ArrayBuffer(44 + pcm.byteLength)
   const view = new DataView(buffer)
@@ -54,7 +54,7 @@ export async function recordedWebmToFiles(webm: Blob): Promise<{ wav: Blob; mp3:
     const wav = audioBufferToWav(decoded)
     return { wav, mp3: await wavToMp3(wav) }
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith('공유된 오디오가 무음')) throw error
+    if (error instanceof Error && error.message.startsWith('녹음된 오디오가 무음')) throw error
     throw new Error('녹음 파일을 WAV/MP3로 변환하지 못했습니다. Chrome 또는 Edge의 오디오 공유 설정을 확인해 주세요.', { cause: error })
   } finally {
     await context.close()
