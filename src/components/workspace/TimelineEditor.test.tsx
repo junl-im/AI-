@@ -240,6 +240,17 @@ describe('TimelineEditor', () => {
     expect(usePlayerStore.getState().seekRequestId).toBe(before + 1)
   })
 
+  it('눈금에서 쉼을 눌러도 대상 블록을 선택한다', () => {
+    const { container } = render(<TimelineEditor blocks={blocks} onMove={vi.fn()} onReorder={vi.fn()}
+      onSplit={vi.fn()} onUpdateText={vi.fn()} onRetry={vi.fn()} onAddVoice={vi.fn()}
+      onAddPause={vi.fn()} onRemove={vi.fn()} onClear={vi.fn()} />)
+    const canvas = container.querySelector<HTMLElement>('.soa-capcut-track-canvas')!
+    vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({ left: 0, width: 640 } as DOMRect)
+    fireEvent(canvas, new MouseEvent('pointerdown', { bubbles: true, clientX: 244 }))
+    fireEvent(canvas, new MouseEvent('pointerup', { bubbles: true }))
+    expect(container.querySelector('.soa-dubbing-pause-block')).toHaveClass('is-selected')
+  })
+
   it('대사 클립 안을 클릭하면 선택된 Dock 음원의 해당 초로 이동한다', () => {
     const track = linkedTrack('track-clip-seek')
     track.audio = { ...track.audio, durationSeconds: 12 }
@@ -324,6 +335,15 @@ describe('TimelineEditor', () => {
     fireEvent.keyDown(container.querySelector('.soa-dubbing-pause-block')!, { key: 'Escape' })
     fireEvent.keyDown(screen.getByRole('article', { name: /클립 1/ }), { key: 'ContextMenu' })
     expect(screen.getByRole('menu', { name: '대사 클립 편집 메뉴' })).toBeInTheDocument()
+  })
+
+  it('클립 안의 일반 버튼 우클릭은 편집 메뉴를 열지 않는다', () => {
+    render(<TimelineEditor blocks={blocks} onMove={vi.fn()} onReorder={vi.fn()} onSplit={vi.fn()}
+      onUpdateText={vi.fn()} onRetry={vi.fn()} onAddVoice={vi.fn()} onAddPause={vi.fn()}
+      onRemove={vi.fn()} onClear={vi.fn()} />)
+    fireEvent.contextMenu(screen.getByRole('button', { name: '1번 대사 바로 편집' }))
+    fireEvent.contextMenu(screen.getByRole('button', { name: '쉼 편집 메뉴 열기' }))
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
 
   it('개별 키보드 삭제는 취소 후 다시 확인해야 실행한다', () => {

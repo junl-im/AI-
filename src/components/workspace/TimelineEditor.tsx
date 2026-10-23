@@ -371,11 +371,12 @@ export function TimelineEditor({
     const metric = metrics.find((item) => x >= item.offset && x <= item.offset + item.width)
     if (!metric) return
     const block = blocks.find((item) => item.id === metric.id)
-    if (!block || block.kind !== 'voice' || !block.trackId || block.status !== 'ready') return
+    if (!block) return
+    selection.selectBlock(block.id)
+    if (block.kind !== 'voice' || !block.trackId || block.status !== 'ready') return
     const track = playerQueue.find((item) => item.id === block.trackId)
     if (!track || track.audio.browserSpeech || track.audio.partial || !track.audio.durationSeconds) return
     const ratio = Math.max(0, Math.min(1, (x - metric.offset) / metric.width))
-    selection.selectBlock(block.id)
     seekTrack(block.trackId, ratio * track.audio.durationSeconds)
   }
 
@@ -835,7 +836,7 @@ export function TimelineEditor({
             <strong>VOICE 01</strong>
             <small>대사 트랙</small>
             <span>대사 {blocks.filter((block) => block.kind === 'voice').length}개 · {formatDuration(totalDuration)}</span>
-            <em>{playbackActive ? '재생 중' : '클립을 눌러 이동'}</em>
+            <em>{playbackActive ? '재생 중' : '클립 선택 · 파일 음원 위치 이동'}</em>
             <button type="button" className="soa-dubbing-add-block" onClick={onAddVoice} aria-label="새 대사 블록 추가" title="대사 트랙에 새 대사 추가">＋</button>
           </div>
           <div className="soa-capcut-track-lane">
@@ -855,7 +856,7 @@ export function TimelineEditor({
                 onPointerMove={continueTimelineScrub}
                 onPointerUp={stopTimelineScrub}
                 onPointerCancel={stopTimelineScrub}
-                aria-label="가로 타임라인을 클릭하거나 드래그해 재생 위치 이동"
+                aria-label="가로 타임라인 클릭: 클립 선택, 파일 음원은 재생 위치 이동"
               >
                 <div className="soa-capcut-ruler" aria-hidden="true">
                   {rulerTicks.map((tick, index) => (
@@ -892,6 +893,7 @@ export function TimelineEditor({
                             event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single',
                           )}
                           onContextMenu={(event) => {
+                            if ((event.target as HTMLElement).closest('button, input, a')) return
                             event.preventDefault()
                             event.stopPropagation()
                             openContextMenu(block.id, event.clientX, event.clientY)

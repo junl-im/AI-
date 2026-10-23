@@ -29,7 +29,7 @@ requireTokens('src/components/workspace/TimelineEditor.tsx', timeline, [
   'className="soa-timeline-clip-slot"',
   "'--soa-clip-offset': `${metric.offset}px`",
   "'--soa-clip-width': `${metric.width}px`",
-  '가로 타임라인을 클릭하거나 드래그해 재생 위치 이동',
+  '가로 타임라인 클릭: 클립 선택, 파일 음원은 재생 위치 이동',
   'startTimelineScrub',
   'continueTimelineScrub',
   'stopTimelineScrub',

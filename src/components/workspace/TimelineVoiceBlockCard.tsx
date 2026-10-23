@@ -134,7 +134,7 @@ export function TimelineVoiceBlockCard({
       aria-label={`클립 ${voiceIndex + 1} · ${block.voiceName} · ${formatDuration(block.durationSeconds)} · ${statusLabel}${voiceUnavailable ? ' · 사용 불가 목소리' : ''}`}
       onKeyDown={handleKeyboard}
       onContextMenu={(event) => {
-        if ((event.target as HTMLElement).closest('textarea, input, [contenteditable="true"]')) return
+        if ((event.target as HTMLElement).closest('button, a, textarea, input, [contenteditable="true"]')) return
         event.preventDefault()
         event.stopPropagation()
         onOpenContextMenu?.(block.id, event.clientX, event.clientY)

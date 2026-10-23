@@ -6,6 +6,7 @@ import { loadWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import { WorkspaceLoadBoundary } from '../components/ui/WorkspaceLoadBoundary'
 import { useAppStore } from '../store/useAppStore'
 import { usePlayerSessionPersistence } from '../hooks/usePlayerSessionPersistence'
+import { installContextMenuBoundary } from '../browser/contextMenuBoundary'
 
 const HomePage = lazy(() => import('../pages/HomePage').then((module) => ({ default: module.HomePage })))
 
@@ -41,6 +42,7 @@ function PageLoading() {
 
 export function App() {
   usePlayerSessionPersistence()
+  useEffect(() => installContextMenuBoundary(), [])
   const page = useAppStore((state) => state.page)
   const workspaceEntered = useAppStore((state) => state.workspaceEntered)
   const [studioRequested, setStudioRequested] = useState(workspaceEntered)
