@@ -1,4 +1,4 @@
-import { useState, type CSSProperties, type DragEvent, type KeyboardEvent } from 'react'
+import { type CSSProperties, type DragEvent, type KeyboardEvent } from 'react'
 import type { TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 
 function formatDuration(seconds: number): string {
@@ -51,12 +51,15 @@ export function TimelineVoiceBlockCard({
   onRemove,
   onOpenContextMenu,
 }: TimelineVoiceBlockCardProps) {
-  const [blockMenuOpen, setBlockMenuOpen] = useState(false)
-  const blockMenuId = `dubbing-block-menu-${voiceIndex + 1}`
-
   function handleKeyboard(event: KeyboardEvent<HTMLElement>) {
     const target = event.target as HTMLElement
     if (target.closest('textarea, input, button, a, [contenteditable="true"]')) return
+    if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      event.preventDefault()
+      const rect = event.currentTarget.getBoundingClientRect()
+      onOpenContextMenu?.(block.id, rect.left + 12, rect.top + 12)
+      return
+    }
     if ((event.key === 'Delete' || event.key === 'Backspace') && block.status !== 'generating') {
       event.preventDefault()
       onRemove(block.id)
@@ -238,23 +241,14 @@ export function TimelineVoiceBlockCard({
               type="button"
               className="soa-dubbing-block-menu__trigger"
               aria-label={`${voiceIndex + 1}번 대사 블록 메뉴 열기`}
-              aria-expanded={blockMenuOpen}
-              aria-controls={blockMenuId}
               onClick={(event) => {
                 event.stopPropagation()
-                setBlockMenuOpen((open) => !open)
+                const rect = event.currentTarget.getBoundingClientRect()
+                onOpenContextMenu?.(block.id, rect.left, rect.bottom)
               }}
             >
               ⋮
             </button>
-            {blockMenuOpen ? (
-              <div id={blockMenuId} className="soa-dubbing-block-menu__items" aria-label={`${voiceIndex + 1}번 대사 블록 메뉴`}>
-                <button type="button" disabled={block.status === 'generating' || block.text.trim().length < 2} onClick={() => { setBlockMenuOpen(false); onSplit(block.id) }}>문장 나누기</button>
-                <button type="button" disabled={index === 0} onClick={() => { setBlockMenuOpen(false); onMove(block.id, -1) }}>앞으로 이동</button>
-                <button type="button" disabled={index === total - 1} onClick={() => { setBlockMenuOpen(false); onMove(block.id, 1) }}>뒤로 이동</button>
-                <button type="button" className="is-danger" onClick={() => { setBlockMenuOpen(false); onRemove(block.id) }}>클립 삭제</button>
-              </div>
-            ) : null}
           </div>
         </div>
       </header>

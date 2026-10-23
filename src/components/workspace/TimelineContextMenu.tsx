@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 
@@ -20,6 +20,12 @@ interface Props {
 
 export function TimelineContextMenu({ block, index, total, x, y, playing, onClose, onDurationChange,
   onToggle, onEdit, onSplit, onMove, onRemove }: Props) {
+  const menuRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    menuRef.current?.querySelector<HTMLElement>('input, button:not(:disabled)')?.focus({ preventScroll: true })
+    return () => previous?.focus({ preventScroll: true })
+  }, [])
   useEffect(() => {
     const closeOutside = (event: PointerEvent) => {
       if (!(event.target as HTMLElement).closest('.soa-timeline-context-menu')) onClose()
@@ -38,7 +44,7 @@ export function TimelineContextMenu({ block, index, total, x, y, playing, onClos
   }, [onClose])
   const run = (action: () => void) => { onClose(); action() }
   return createPortal(
-    <div className="soa-timeline-context-menu" role="menu" aria-label={block.kind === 'pause' ? '쉼 편집 메뉴' : '대사 클립 편집 메뉴'}
+    <div ref={menuRef} className="soa-timeline-context-menu" role="menu" aria-label={block.kind === 'pause' ? '쉼 편집 메뉴' : '대사 클립 편집 메뉴'}
       style={{ left: Math.max(8, Math.min(x, window.innerWidth - 224)), top: Math.max(8, Math.min(y, window.innerHeight - 270)) }}>
       <strong>{block.kind === 'pause' ? `쉼 · ${block.durationSeconds.toFixed(1)}초` : `${block.voiceName} · 대사 클립`}</strong>
       {block.kind === 'pause' ? (

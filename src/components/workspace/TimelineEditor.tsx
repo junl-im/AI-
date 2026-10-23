@@ -1,13 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-  type PointerEvent,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react'
 import type { TimelineBatchGenerationSummary } from '../../hooks/useTimelineGeneration'
 import { useTimelineEditorSelection, type TimelineSelectionMode } from '../../hooks/useTimelineEditorSelection'
 import {
@@ -905,6 +896,11 @@ export function TimelineEditor({
                             event.stopPropagation()
                             openContextMenu(block.id, event.clientX, event.clientY)
                           }}
+                          onKeyDown={(event) => {
+                            if (event.target !== event.currentTarget || (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10'))) return
+                            event.preventDefault(); const rect = event.currentTarget.getBoundingClientRect()
+                            openContextMenu(block.id, rect.left + 8, rect.top + 8)
+                          }}
                           onDragStart={(event) => event.dataTransfer.setData('text/plain', block.id)}
                           onDragOver={(event) => event.preventDefault()}
                           onDrop={(event) => {
@@ -923,7 +919,10 @@ export function TimelineEditor({
                           >
                             {selectedBlockIds.has(block.id) ? '✓' : '＋'}
                           </button>
-                          <button type="button" onClick={(event) => { event.stopPropagation(); removeSelection(block.id) }} aria-label="쉼 블록 삭제">×</button>
+                          <button type="button" className="soa-pause-menu-trigger" onClick={(event) => {
+                            event.stopPropagation(); const rect = event.currentTarget.getBoundingClientRect()
+                            openContextMenu(block.id, rect.left, rect.bottom)
+                          }} aria-label="쉼 편집 메뉴 열기">⋮</button>
                         </div>
                       )
                     }

@@ -22,7 +22,7 @@ export function audioBufferToWav(audio: PcmAudio): Blob {
     pcm[index] = Math.round(sample * (sample < 0 ? 32768 : 32767))
   }
   if (peak < 0.002 || Math.sqrt(squareSum / audio.length) < 0.0002) {
-    throw new Error('공유된 오디오가 무음입니다. 이 PC에서는 기기 성우 소리가 화면 공유에 포함되지 않을 수 있습니다. 아래의 녹음 없는 WAV 생성 기능을 사용하거나 음성 서버를 연결해 주세요.')
+    throw new Error('공유된 오디오가 무음입니다. 이 PC에서는 기기 성우 소리가 화면 공유에 포함되지 않을 수 있습니다. Chrome 또는 Edge의 공유 창에서 현재 탭의 오디오 공유나 화면 전체의 시스템 오디오를 켜고 다시 시도해 주세요. 계속 무음이면 실제 음성 파일을 만드는 음성 서버가 필요합니다.')
   }
   const buffer = new ArrayBuffer(44 + pcm.byteLength)
   const view = new DataView(buffer)

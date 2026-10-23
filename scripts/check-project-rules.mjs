@@ -384,13 +384,13 @@ await requireText('src/components/workspace/TimelineEditor.tsx', [
   'TimelineVoiceBlockCard',
 ])
 await requireText('src/components/workspace/TimelineVoiceBlockCard.tsx', [
-  '문장 나누기',
   '생성 실패',
   '번 대사 블록 메뉴 열기',
-  'aria-expanded={blockMenuOpen}',
+  "event.key === 'ContextMenu'",
   'sttVerification',
   'soa-timeline-touch-select',
 ])
+await requireText('src/components/workspace/TimelineContextMenu.tsx', ['문장 나누기', '쉼 삭제', '쉼 길이(초)'])
 await requireText('src/components/navigation/LinkedPlayerDock.tsx', [
   "window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }))",
 ])

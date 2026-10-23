@@ -304,17 +304,26 @@ describe('TimelineEditor', () => {
     )
 
     const menuButton = screen.getByRole('button', { name: '2번 대사 블록 메뉴 열기' })
-    expect(menuButton).toHaveAttribute('aria-expanded', 'false')
-
     fireEvent.click(menuButton)
-    expect(menuButton).toHaveAttribute('aria-expanded', 'true')
-    fireEvent.click(screen.getByRole('button', { name: '클립 삭제' }))
+    expect(screen.getByRole('menu', { name: '대사 클립 편집 메뉴' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('menuitem', { name: '클립 삭제' }))
 
     expect(onRemove).not.toHaveBeenCalled()
     expect(screen.getByRole('alertdialog')).toHaveTextContent('대사 1개 · 쉼 0개')
     fireEvent.click(screen.getByRole('button', { name: '삭제 실행' }))
     expect(onRemove).toHaveBeenCalledWith('voice-2')
-    expect(screen.queryByRole('button', { name: '클립 삭제' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: '클립 삭제' })).not.toBeInTheDocument()
+  })
+
+  it('쉼 메뉴 버튼과 키보드 메뉴 키로 같은 편집 메뉴를 연다', () => {
+    const { container } = render(<TimelineEditor blocks={blocks} onMove={vi.fn()} onReorder={vi.fn()} onSplit={vi.fn()}
+      onUpdateText={vi.fn()} onRetry={vi.fn()} onAddVoice={vi.fn()} onAddPause={vi.fn()}
+      onRemove={vi.fn()} onClear={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: '쉼 편집 메뉴 열기' }))
+    expect(screen.getByRole('menu', { name: '쉼 편집 메뉴' })).toBeInTheDocument()
+    fireEvent.keyDown(container.querySelector('.soa-dubbing-pause-block')!, { key: 'Escape' })
+    fireEvent.keyDown(screen.getByRole('article', { name: /클립 1/ }), { key: 'ContextMenu' })
+    expect(screen.getByRole('menu', { name: '대사 클립 편집 메뉴' })).toBeInTheDocument()
   })
 
   it('개별 키보드 삭제는 취소 후 다시 확인해야 실행한다', () => {
