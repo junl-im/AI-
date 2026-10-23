@@ -1,7 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
+import { readWindowsCaptureToken } from './export/windowsLoopbackCapture'
 import './styles/index.css'
+
+// The helper opens the landing route; preserve its token before navigation changes the URL.
+readWindowsCaptureToken()
 
 const root = document.getElementById('root')
 

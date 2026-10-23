@@ -36,15 +36,26 @@ async function bridgeRequest(path: string, signal?: AbortSignal): Promise<Respon
   }
   if (!response.ok) {
     const result = await response.json().catch(() => null) as { error?: string; detail?: string } | null
+    if (response.status === 401) throw new Error('보조 앱 연결 토큰이 만료되거나 다른 실행의 토큰입니다. 보조 앱을 다시 실행하고 새로 열린 소리온 탭에서 시도해 주세요.')
+    if (response.status === 403) throw new Error('이 페이지에서는 보조 앱에 접근할 수 없습니다. 공식 소리온 사이트에서 다시 시도해 주세요.')
     throw new Error(result?.error ?? result?.detail ?? `Windows 오디오 보조 앱 오류(${response.status})`)
   }
   return response
 }
 
+export async function windowsCaptureStatus(signal?: AbortSignal): Promise<{ ready: boolean; error: string }> {
+  if (!readWindowsCaptureToken()) return { ready: false, error: '보조 앱이 연 새 소리온 탭에서 접속해야 합니다. 앱을 실행하고 자동으로 열린 탭에서 다시 시도해 주세요.' }
+  try {
+    await bridgeRequest('/status', signal)
+    return { ready: true, error: '' }
+  } catch (error) {
+    if (signal?.aborted) return { ready: false, error: '' }
+    return { ready: false, error: error instanceof Error ? error.message : '보조 앱 연결을 확인하지 못했습니다.' }
+  }
+}
+
 export async function windowsCaptureAvailable(signal?: AbortSignal): Promise<boolean> {
-  if (!readWindowsCaptureToken()) return false
-  try { await bridgeRequest('/status', signal); return true }
-  catch { return false }
+  return (await windowsCaptureStatus(signal)).ready
 }
 
 export async function captureBrowserSpeechWithWindowsLoopback(

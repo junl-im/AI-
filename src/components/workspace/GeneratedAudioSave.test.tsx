@@ -9,7 +9,7 @@ const conversion = vi.hoisted(() => ({ recordedWebmToFiles: vi.fn() }))
 vi.mock('../../export/recordedAudioFormats', () => conversion)
 const recording = vi.hoisted(() => ({ recordBrowserSpeech: vi.fn() }))
 vi.mock('../../export/recordBrowserSpeech', () => recording)
-const windowsCapture = vi.hoisted(() => ({ windowsCaptureAvailable: vi.fn().mockResolvedValue(false), captureBrowserSpeechWithWindowsLoopback: vi.fn() }))
+const windowsCapture = vi.hoisted(() => ({ windowsCaptureStatus: vi.fn().mockResolvedValue({ ready: false, error: '' }), captureBrowserSpeechWithWindowsLoopback: vi.fn() }))
 vi.mock('../../export/windowsLoopbackCapture', () => windowsCapture)
 const fullWav = vi.hoisted(() => ({ buildTimelineWav: vi.fn() }))
 vi.mock('../../export/timelineWav', () => fullWav)
@@ -67,7 +67,7 @@ describe('GeneratedAudioSave', () => {
       text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
     } } }
     const wav = new Blob(['RIFF'], { type: 'audio/wav' })
-    windowsCapture.windowsCaptureAvailable.mockResolvedValueOnce(true)
+    windowsCapture.windowsCaptureStatus.mockResolvedValueOnce({ ready: true, error: '' })
     windowsCapture.captureBrowserSpeechWithWindowsLoopback.mockResolvedValueOnce(wav)
     mp3.wavToMp3.mockResolvedValueOnce(new Blob(['mp3'], { type: 'audio/mpeg' }))
     vi.spyOn(URL, 'createObjectURL').mockReturnValueOnce('blob:windows-wav').mockReturnValueOnce('blob:windows-mp3')
@@ -79,6 +79,18 @@ describe('GeneratedAudioSave', () => {
     expect(mp3.wavToMp3).toHaveBeenCalledWith(wav)
     expect(screen.getByRole('link', { name: '기본 성우 MP3 다운로드' })).toHaveAttribute('href', 'blob:windows-mp3')
     click.mockRestore()
+  })
+
+  it('연결 실패 원인을 보이고 다시 확인하면 저장 버튼을 연다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
+      text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
+    } } }
+    windowsCapture.windowsCaptureStatus.mockResolvedValueOnce({ ready: false, error: '보조 앱 연결 토큰이 만료되었습니다.' })
+      .mockResolvedValueOnce({ ready: true, error: '' })
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
+    expect(await screen.findByText('보조 앱 연결 토큰이 만료되었습니다.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Windows 보조 앱 연결 확인' }))
+    expect(await screen.findByRole('button', { name: 'Windows 보조 앱으로 원래 음색 MP3 저장' })).toBeInTheDocument()
   })
 
   it('기기 내 모델 WAV는 대사별 다운로드와 전체 파일 다운로드를 보여준다', () => {

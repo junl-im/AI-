@@ -602,3 +602,7 @@ CI 다중 화면 fixture를 IndexedDB 스키마 5에 맞춰 Pages 배포 게이�
 ## 0.11.71 · Windows Original Voice Capture
 
 화면 공유가 무음인 Windows PC에서 기본 성우가 실제 출력한 소리를 저장할 수 있도록 WASAPI 루프백 보조 앱과 웹 MP3 저장 버튼을 연결했습니다. 보조 앱 ZIP을 사이트에서 직접 받습니다. Chrome 로컬 개발 페이지에서 `sori-warm`이 Heami로 선택된 뒤 실제 MP3 파일을 다운로드하고 재디코딩해 무음이 아님을 확인했습니다. 배포된 Pages 버튼 직접 클릭과 다른 PC·Edge 실기기는 다음 단계입니다. 기술·보안 경계는 `docs/DEFAULT_VOICE_EXPORT_DIAG_0.11.71.md`에 기록했습니다.
+
+## 0.11.72 · Windows Helper Connection Recovery
+
+보조 앱 연결 토큰을 앱 시작 시 세션에 보관하고 저장 화면에서 연결 실패 원인을 표시합니다. Windows 보조 앱 바이너리는 0.11.71과 동일합니다. 배포 사이트 실제 버튼·다른 PC·Edge 실측은 남아 있습니다.

@@ -4,7 +4,7 @@ import { recordedWebmToFiles } from '../../export/recordedAudioFormats'
 import { buildTimelineWav } from '../../export/timelineWav'
 import { wavToMp3 } from '../../export/wavToMp3'
 import { loadRecordedAudio, saveRecordedAudio } from '../../storage/recordedAudioRepository'
-import { captureBrowserSpeechWithWindowsLoopback, windowsCaptureAvailable } from '../../export/windowsLoopbackCapture'
+import { captureBrowserSpeechWithWindowsLoopback, windowsCaptureStatus } from '../../export/windowsLoopbackCapture'
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 import type { GeneratedAudio } from '../../tts/generationTypes'
 
@@ -38,6 +38,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const [recordError, setRecordError] = useState('')
   const [recordStorageError, setRecordStorageError] = useState('')
   const [windowsCaptureReady, setWindowsCaptureReady] = useState(false)
+  const [windowsCaptureError, setWindowsCaptureError] = useState('')
   const [captureDevices, setCaptureDevices] = useState<MediaDeviceInfo[]>([])
   const [captureDeviceId, setCaptureDeviceId] = useState('default')
   const [captureOptionsOpen, setCaptureOptionsOpen] = useState(false)
@@ -70,8 +71,11 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   }, [])
   useEffect(() => {
     const controller = new AbortController()
-    void windowsCaptureAvailable(controller.signal).then((ready) => {
-      if (!controller.signal.aborted) setWindowsCaptureReady(ready)
+    void windowsCaptureStatus(controller.signal).then((status) => {
+      if (!controller.signal.aborted) {
+        setWindowsCaptureReady(status.ready)
+        setWindowsCaptureError(status.error)
+      }
     })
     return () => controller.abort()
   }, [])
@@ -313,6 +317,12 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     }
   }
 
+  async function checkWindowsCapture() {
+    const status = await windowsCaptureStatus()
+    setWindowsCaptureReady(status.ready)
+    setWindowsCaptureError(status.error)
+  }
+
   async function importWebm(file: File) {
     const signature = recordingSignature
     setRecordError('')
@@ -394,8 +404,8 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
           {recording ? '원본 음색 녹음 중…' : 'Windows 보조 앱으로 원래 음색 MP3 저장'}
         </button> : null}
         {canRecordBrowser && !windowsCaptureReady ? <div>
-          <p>보조 앱이 연 소리온 페이지에서 Chrome/Edge의 ‘이 기기의 앱 접근’ 요청을 허용해 주세요. 연결되면 원래 음색 MP3 저장 버튼이 나타납니다.</p>
-          <button type="button" onClick={() => void windowsCaptureAvailable().then(setWindowsCaptureReady)}>Windows 보조 앱 연결 확인</button>
+          <p role="status">{windowsCaptureError || '보조 앱 연결을 확인 중입니다.'}</p>
+          <button type="button" onClick={() => void checkWindowsCapture()}>Windows 보조 앱 연결 확인</button>
         </div> : null}
         {canRecordBrowser ? <button type="button" disabled={recording} onClick={() => void startRecording()}>
           {recording ? '브라우저 공유 녹음 중…' : '브라우저 오디오 공유로 다시 시도'}

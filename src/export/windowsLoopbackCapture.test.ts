@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { readWindowsCaptureToken, windowsCaptureAvailable } from './windowsLoopbackCapture'
+import { readWindowsCaptureToken, windowsCaptureAvailable, windowsCaptureStatus } from './windowsLoopbackCapture'
 
 afterEach(() => {
   window.sessionStorage.clear()
@@ -28,5 +28,14 @@ describe('Windows 오디오 보조 앱 연결', () => {
     vi.stubGlobal('fetch', fetch)
     expect(await windowsCaptureAvailable()).toBe(false)
     expect(fetch).not.toHaveBeenCalled()
+    expect((await windowsCaptureStatus()).error).toContain('새 소리온 탭')
+  })
+
+  it('앱을 재시작해 토큰이 달라졌을 때 해결 방법을 보여준다', async () => {
+    window.history.replaceState(null, '', `/?sorion-capture-token=${'A'.repeat(48)}`)
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 401, json: async () => ({}) }))
+    const status = await windowsCaptureStatus()
+    expect(status.ready).toBe(false)
+    expect(status.error).toContain('보조 앱을 다시 실행')
   })
 })
