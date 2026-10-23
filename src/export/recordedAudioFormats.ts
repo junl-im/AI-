@@ -47,13 +47,15 @@ export function audioBufferToWav(audio: PcmAudio): Blob {
   return new Blob([buffer], { type: 'audio/wav' })
 }
 
-export async function recordedWebmToFiles(webm: Blob): Promise<{ wav: Blob; mp3: Blob }> {
+export async function recordedWebmToFiles(webm: Blob, signal?: AbortSignal): Promise<{ wav: Blob; mp3: Blob }> {
   const context = new AudioContext()
   try {
     const decoded = await context.decodeAudioData(await webm.arrayBuffer())
+    if (signal?.aborted) throw new DOMException('음성 파일 변환이 취소되었습니다.', 'AbortError')
     const wav = audioBufferToWav(decoded)
-    return { wav, mp3: await wavToMp3(wav) }
+    return { wav, mp3: await wavToMp3(wav, { signal }) }
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') throw error
     if (error instanceof Error && error.message.startsWith('녹음된 오디오가 무음')) throw error
     throw new Error('녹음 파일을 WAV/MP3로 변환하지 못했습니다. Chrome 또는 Edge의 오디오 공유 설정을 확인해 주세요.', { cause: error })
   } finally {

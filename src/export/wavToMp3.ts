@@ -1,40 +1,50 @@
-import { readPcmWav } from './timelineWav'
+import { encodePcmMp3, throwIfMp3Aborted, type Mp3EncodeOptions } from './encodePcmMp3'
 
-interface Mp3EncodeOptions {
-  signal?: AbortSignal
-  onProgress?: (encodedSamples: number, totalSamples: number) => void
-}
+class WorkerUnavailableError extends Error {}
 
-function throwIfAborted(signal?: AbortSignal) {
-  if (signal?.aborted) throw new DOMException('MP3 변환이 취소되었습니다.', 'AbortError')
+function encodeWithWorker(wav: Blob, options: Mp3EncodeOptions): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    let worker: Worker
+    try {
+      worker = new Worker(new URL('./mp3Encoder.worker.ts', import.meta.url), { type: 'module' })
+    } catch {
+      reject(new WorkerUnavailableError('MP3 작업 스레드를 시작하지 못했습니다.'))
+      return
+    }
+    let settled = false
+    const finish = (result: Blob | Error) => {
+      if (settled) return
+      settled = true
+      options.signal?.removeEventListener('abort', onAbort)
+      worker.terminate()
+      if (result instanceof Blob) resolve(result)
+      else reject(result)
+    }
+    const onAbort = () => finish(new DOMException('MP3 변환이 취소되었습니다.', 'AbortError'))
+    options.signal?.addEventListener('abort', onAbort, { once: true })
+    if (options.signal?.aborted) { onAbort(); return }
+    worker.onmessage = (event: MessageEvent<{ type: string; done?: number; total?: number; buffer?: ArrayBuffer; message?: string }>) => {
+      const data = event.data
+      if (data.type === 'progress' && data.done !== undefined && data.total !== undefined) {
+        try { options.onProgress?.(data.done, data.total) } catch (error) { finish(error instanceof Error ? error : new Error(String(error))) }
+      } else if (data.type === 'done' && data.buffer) finish(new Blob([data.buffer], { type: 'audio/mpeg' }))
+      else if (data.type === 'error') finish(new Error(data.message || 'MP3 변환에 실패했습니다.'))
+    }
+    worker.onerror = () => finish(new WorkerUnavailableError('MP3 작업 스레드를 실행하지 못했습니다.'))
+    worker.onmessageerror = () => finish(new WorkerUnavailableError('MP3 작업 스레드 결과를 읽지 못했습니다.'))
+    try { worker.postMessage({ wav }) }
+    catch { finish(new WorkerUnavailableError('MP3 작업 스레드에 WAV를 전달하지 못했습니다.')) }
+  })
 }
 
 export async function wavToMp3(wav: Blob, options: Mp3EncodeOptions = {}): Promise<Blob> {
-  throwIfAborted(options.signal)
-  const { sampleRate, samples } = readPcmWav(await wav.arrayBuffer())
-  throwIfAborted(options.signal)
-  const { Mp3Encoder } = await import('@breezystack/lamejs')
-  throwIfAborted(options.signal)
-  const encoder = new Mp3Encoder(1, sampleRate, 128)
-  const totalSamples = samples.byteLength / 2
-  const pcm = new Int16Array(1152)
-  const view = new DataView(samples.buffer, samples.byteOffset, samples.byteLength)
-  const chunks: Uint8Array[] = []
-  for (let index = 0; index < totalSamples; index += 1152) {
-    throwIfAborted(options.signal)
-    const length = Math.min(1152, totalSamples - index)
-    for (let offset = 0; offset < length; offset += 1) pcm[offset] = view.getInt16((index + offset) * 2, true)
-    const encoded = encoder.encodeBuffer(pcm.subarray(0, length))
-    if (encoded.length) chunks.push(encoded)
-    if ((index / 1152) % 64 === 63) {
-      options.onProgress?.(Math.min(index + length, totalSamples), totalSamples)
-      await new Promise<void>((resolve) => setTimeout(resolve, 0))
-    }
+  throwIfMp3Aborted(options.signal)
+  if (typeof Worker === 'undefined') return encodePcmMp3(wav, options)
+  try {
+    return await encodeWithWorker(wav, options)
+  } catch (error) {
+    if (!(error instanceof WorkerUnavailableError)) throw error
+    throwIfMp3Aborted(options.signal)
+    return encodePcmMp3(wav, options)
   }
-  throwIfAborted(options.signal)
-  options.onProgress?.(totalSamples, totalSamples)
-  const tail = encoder.flush()
-  if (tail.length) chunks.push(tail)
-  if (!chunks.length) throw new Error('MP3 파일을 만들지 못했습니다.')
-  return new Blob(chunks.map((chunk) => Uint8Array.from(chunk)), { type: 'audio/mpeg' })
 }

@@ -1,8 +1,26 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { combineTimelinePcmWav } from './timelineWav'
 import { wavToMp3 } from './wavToMp3'
 
 describe('wavToMp3', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('작업 스레드 취소 시 즉시 종료한다', async () => {
+    const terminate = vi.fn()
+    vi.stubGlobal('Worker', class {
+      onmessage = null
+      onerror = null
+      onmessageerror = null
+      postMessage = vi.fn()
+      terminate = terminate
+    })
+    const controller = new AbortController()
+    const conversion = wavToMp3(new Blob(['RIFF']), { signal: controller.signal })
+    controller.abort()
+    await expect(conversion).rejects.toMatchObject({ name: 'AbortError' })
+    expect(terminate).toHaveBeenCalledOnce()
+  })
+
   it('취소된 변환은 MP3 파일을 만들지 않는다', async () => {
     const controller = new AbortController()
     controller.abort()

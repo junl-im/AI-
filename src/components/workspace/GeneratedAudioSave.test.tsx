@@ -260,7 +260,7 @@ describe('GeneratedAudioSave', () => {
     fireEvent.click(screen.getByRole('button', { name: '대사 1 MP3 다운로드' }))
     expect(await screen.findByRole('link', { name: 'MP3 다시 다운로드' }))
       .toHaveAttribute('download', 'sorion-voice-1.mp3')
-    expect(mp3.wavToMp3).toHaveBeenCalledWith(wav)
+    expect(mp3.wavToMp3).toHaveBeenCalledWith(wav, { onProgress: expect.any(Function) })
     expect(click).toHaveBeenCalledOnce()
     rerender(<GeneratedAudioSave blocks={[{ ...block, audio: { ...block.audio!, url: 'blob:new-wav' } }]} onOpenExport={vi.fn()} />)
     await waitFor(() => expect(screen.queryByRole('link', { name: 'MP3 다시 다운로드' })).not.toBeInTheDocument())

@@ -196,7 +196,9 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         setFullWavUrl(url)
         startDownload(url, 'sorion-full.wav')
       } else {
-        const mp3 = await wavToMp3(blob)
+        const mp3 = await wavToMp3(blob, { onProgress: (done, total) => {
+          setDownloadStatus(`전체 MP3 변환 중 ${Math.round(done / total * 100)}%`)
+        } })
         if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
         const url = URL.createObjectURL(mp3)
         fullMp3Ref.current = url
@@ -219,7 +221,9 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     try {
       const response = await fetch(block.audio.url)
       if (!response.ok) throw new Error('클립 WAV를 읽지 못했습니다. 다시 생성해 주세요.')
-      const mp3 = await wavToMp3(await response.blob())
+      const mp3 = await wavToMp3(await response.blob(), { onProgress: (done, total) => {
+        setDownloadStatus(`대사 ${voices.indexOf(block) + 1} MP3 변환 중 ${Math.round(done / total * 100)}%`)
+      } })
       if (sourceRef.current !== signature) return
       const url = URL.createObjectURL(mp3)
       if (clipMp3Refs.current[block.id]) URL.revokeObjectURL(clipMp3Refs.current[block.id])
@@ -260,7 +264,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       }, inputDeviceId)
       if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
       setRecordProgress('녹음한 기본 성우 음성을 WAV·MP3로 변환 중…')
-      const { wav, mp3 } = await recordedWebmToFiles(blob)
+      const { wav, mp3 } = await recordedWebmToFiles(blob, controller.signal)
       if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
       if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
       if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
