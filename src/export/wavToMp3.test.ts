@@ -3,6 +3,11 @@ import { combineTimelinePcmWav } from './timelineWav'
 import { wavToMp3 } from './wavToMp3'
 
 describe('wavToMp3', () => {
+  it('취소된 변환은 MP3 파일을 만들지 않는다', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    await expect(wavToMp3(new Blob(), { signal: controller.signal })).rejects.toMatchObject({ name: 'AbortError' })
+  })
   it('실제 PCM WAV를 재생 가능한 MP3 바이트로 인코딩한다', async () => {
     const sampleRate = 24_000
     const pcm = new Uint8Array(sampleRate * 2)

@@ -79,8 +79,27 @@ describe('GeneratedAudioSave', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Windows 보조 앱으로 원래 음색 MP3 저장' }))
     await waitFor(() => expect(click).toHaveBeenCalledOnce())
     expect(windowsCapture.captureBrowserSpeechWithWindowsLoopback).toHaveBeenCalledWith([block], expect.any(AbortSignal), expect.any(Function))
-    expect(mp3.wavToMp3).toHaveBeenCalledWith(wav)
+    expect(mp3.wavToMp3).toHaveBeenCalledWith(wav, {
+      signal: expect.any(AbortSignal), onProgress: expect.any(Function),
+    })
     expect(screen.getByRole('link', { name: '기본 성우 MP3 다운로드' })).toHaveAttribute('href', 'blob:windows-mp3')
+    click.mockRestore()
+  })
+
+  it('원본 음색 MP3 변환이 실패하면 녹음된 WAV를 내려받는다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
+      text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
+    } } }
+    windowsCapture.windowsCaptureStatus.mockResolvedValueOnce({ ready: true, error: '' })
+    windowsCapture.captureBrowserSpeechWithWindowsLoopback.mockResolvedValueOnce(new Blob(['RIFF'], { type: 'audio/wav' }))
+    mp3.wavToMp3.mockRejectedValueOnce(new Error('인코더 실패'))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValueOnce('blob:original-wav')
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Windows 보조 앱으로 원래 음색 MP3 저장' }))
+    await waitFor(() => expect(click).toHaveBeenCalledOnce())
+    expect(screen.getByRole('link', { name: '기본 성우 WAV 다운로드' })).toHaveAttribute('href', 'blob:original-wav')
+    expect(screen.getByText('MP3 변환에 실패해 준비된 원본 음색 WAV 다운로드를 시작했습니다.')).toBeInTheDocument()
     click.mockRestore()
   })
 

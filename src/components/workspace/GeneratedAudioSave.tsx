@@ -262,11 +262,6 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       setRecordProgress('녹음한 기본 성우 음성을 WAV·MP3로 변환 중…')
       const { wav, mp3 } = await recordedWebmToFiles(blob)
       if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
-      try {
-        await saveRecordedAudio(recordingSignature, wav, mp3)
-      } catch {
-        setRecordError('WAV·MP3 파일은 준비됐지만 브라우저 저장 공간에 보관하지 못했습니다. 지금 다운로드해 주세요.')
-      }
       if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
       if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
       recordedWavRef.current = URL.createObjectURL(wav)
@@ -276,6 +271,9 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       setRecordedSource('capture')
       startDownload(recordedWavRef.current, 'sorion-default-voices.wav')
       setRecordProgress('기본 성우 WAV 다운로드를 시작했습니다. 저장되지 않았다면 아래 링크를 누르고, MP3도 선택해 받으세요.')
+      void saveRecordedAudio(recordingSignature, wav, mp3).catch(() => {
+        setRecordStorageError('파일은 준비됐지만 브라우저 저장소에 보관하지 못했습니다. 아래 링크에서 다시 내려받아 주세요.')
+      })
     } catch (error) {
       setRecordError(error instanceof Error ? error.message : '녹음에 실패했습니다.')
       setRecordProgress('')
@@ -287,6 +285,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
 
   async function startWindowsRecording() {
     const controller = new AbortController()
+    let capturedWavUrl: string | null = null
     abortRef.current = controller
     setRecordError('')
     setRecordProgress('Windows 출력 소리를 클립별로 녹음합니다. 이 동안 다른 앱의 소리도 파일에 들어갈 수 있습니다.')
@@ -296,23 +295,32 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         setRecordProgress(`Windows 원본 음색 녹음 중 ${index}/${total}`)
       })
       if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
-      setRecordProgress('원본 음색 WAV를 MP3로 변환 중…')
-      const mp3 = await wavToMp3(wav)
-      if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
-      try { await saveRecordedAudio(recordingSignature, wav, mp3) }
-      catch { setRecordStorageError('파일은 준비됐지만 브라우저 저장소에 보관하지 못했습니다. 지금 내려받아 주세요.') }
       if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
       if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
       recordedWavRef.current = URL.createObjectURL(wav)
-      recordedMp3Ref.current = URL.createObjectURL(mp3)
+      capturedWavUrl = recordedWavRef.current
+      recordedMp3Ref.current = null
       setRecordedWavUrl(recordedWavRef.current)
-      setRecordedMp3Url(recordedMp3Ref.current)
+      setRecordedMp3Url(null)
       setRecordedSource('capture')
+      setRecordProgress('원본 음색 WAV를 MP3로 변환 중…')
+      const mp3 = await wavToMp3(wav, { signal: controller.signal, onProgress: (done, total) => {
+        setRecordProgress(`원본 음색 MP3 변환 중 ${Math.round(done / total * 100)}%`)
+      } })
+      if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
+      recordedMp3Ref.current = URL.createObjectURL(mp3)
+      setRecordedMp3Url(recordedMp3Ref.current)
       startDownload(recordedMp3Ref.current, 'sorion-default-voices.mp3')
       setRecordProgress('원본 음색 MP3 다운로드를 시작했습니다. 아래에서 WAV도 받을 수 있습니다.')
+      void saveRecordedAudio(recordingSignature, wav, mp3).catch(() => {
+        setRecordStorageError('파일은 준비됐지만 브라우저 저장소에 보관하지 못했습니다. 아래 링크에서 다시 내려받아 주세요.')
+      })
     } catch (error) {
       setRecordError(error instanceof Error ? error.message : 'Windows 출력 소리 녹음에 실패했습니다.')
-      setRecordProgress('')
+      if (!controller.signal.aborted && capturedWavUrl) {
+        startDownload(capturedWavUrl, 'sorion-default-voices.wav')
+        setRecordProgress('MP3 변환에 실패해 준비된 원본 음색 WAV 다운로드를 시작했습니다.')
+      } else setRecordProgress('')
     } finally {
       abortRef.current = null
       setRecording(false)
@@ -450,10 +458,10 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
           </> : null}
         </div> : null}
         {recordStorageError ? <p role="alert">{recordStorageError}</p> : null}
-        {recordedWavUrl && recordedMp3Url ? <div className="soa-generated-save__preview">
+        {recordedWavUrl ? <div className="soa-generated-save__preview">
           <audio controls src={recordedWavUrl} aria-label={recordedSource === 'import' ? '가져온 WebM 변환 미리 듣기' : '기본 성우 녹음 미리 듣기'} />
           <a href={recordedWavUrl} download={recordedSource === 'import' ? 'sorion-imported.wav' : 'sorion-default-voices.wav'}>{recordedSource === 'import' ? '가져온 음성 WAV 다운로드' : '기본 성우 WAV 다운로드'}</a>
-          <a href={recordedMp3Url} download={recordedSource === 'import' ? 'sorion-imported.mp3' : 'sorion-default-voices.mp3'}>{recordedSource === 'import' ? '가져온 음성 MP3 다운로드' : '기본 성우 MP3 다운로드'}</a>
+          {recordedMp3Url ? <a href={recordedMp3Url} download={recordedSource === 'import' ? 'sorion-imported.mp3' : 'sorion-default-voices.mp3'}>{recordedSource === 'import' ? '가져온 음성 MP3 다운로드' : '기본 성우 MP3 다운로드'}</a> : null}
         </div> : null}
       </div> : null}
       {wavError ? <p role="alert">{wavError}</p> : null}
