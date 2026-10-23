@@ -4,16 +4,12 @@ import { recordedWebmToFiles } from '../../export/recordedAudioFormats'
 import { buildTimelineWav } from '../../export/timelineWav'
 import { wavToMp3 } from '../../export/wavToMp3'
 import { loadRecordedAudio, saveRecordedAudio } from '../../storage/recordedAudioRepository'
-import type { GeneratedAudio } from '../../tts/generationTypes'
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 
 interface Props {
   blocks: TimelineBlock[]
   localAudioSaveWarning?: string | null
   onOpenExport: () => void
-  onRenderLocalWav?: (blockId: string, signal: AbortSignal, onProgress: (message: string) => void) => Promise<GeneratedAudio>
-  onExportWorkspace?: () => Promise<Blob>
-  onImportWorkspace?: (file: File) => Promise<void>
 }
 
 function startDownload(url: string, filename: string) {
@@ -25,14 +21,12 @@ function startDownload(url: string, filename: string) {
   link.remove()
 }
 
-export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport, onRenderLocalWav, onExportWorkspace, onImportWorkspace }: Props) {
+export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport }: Props) {
   const [recording, setRecording] = useState(false)
   const [recordProgress, setRecordProgress] = useState('')
   const [recordError, setRecordError] = useState('')
   const [recordedWavUrl, setRecordedWavUrl] = useState<string | null>(null)
   const [recordedMp3Url, setRecordedMp3Url] = useState<string | null>(null)
-  const [renderingWav, setRenderingWav] = useState(false)
-  const [wavProgress, setWavProgress] = useState('')
   const [wavError, setWavError] = useState('')
   const [fullWavUrl, setFullWavUrl] = useState<string | null>(null)
   const [fullMp3Url, setFullMp3Url] = useState<string | null>(null)
@@ -41,15 +35,8 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const [clipMp3BusyId, setClipMp3BusyId] = useState<string | null>(null)
   const [clipMp3Urls, setClipMp3Urls] = useState<Record<string, string>>({})
   const clipMp3Refs = useRef<Record<string, string>>({})
-  const [bundleBusy, setBundleBusy] = useState(false)
-  const [bundleError, setBundleError] = useState('')
-  const [bundleStatus, setBundleStatus] = useState('')
-  const [bundleUrl, setBundleUrl] = useState<string | null>(null)
-  const bundleRef = useRef<string | null>(null)
-  const bundleInputRef = useRef<HTMLInputElement | null>(null)
   const fullWavRef = useRef<string | null>(null)
   const fullMp3Ref = useRef<string | null>(null)
-  const wavAbortRef = useRef<AbortController | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const recordedWavRef = useRef<string | null>(null)
   const recordedMp3Ref = useRef<string | null>(null)
@@ -57,12 +44,10 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const recordingSignatureRef = useRef<string | null>(null)
   useEffect(() => () => {
     abortRef.current?.abort()
-    wavAbortRef.current?.abort()
     if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
     if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
-    if (bundleRef.current) URL.revokeObjectURL(bundleRef.current)
     Object.values(clipMp3Refs.current).forEach((url) => URL.revokeObjectURL(url))
   }, [])
   const voices = blocks.filter((block) => block.kind === 'voice')
@@ -102,10 +87,6 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     if (sourceRef.current === sourceSignature) return
     sourceRef.current = sourceSignature
     abortRef.current?.abort()
-    if (bundleRef.current) URL.revokeObjectURL(bundleRef.current)
-    bundleRef.current = null
-    setBundleUrl(null)
-    setBundleStatus('')
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     fullWavRef.current = null
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
@@ -127,10 +108,6 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     && ready.every((block) => block.audio?.source === 'api' && block.audio.url && !block.audio.partial)
   const canRecordBrowser = voices.length > 0 && ready.length === voices.length
     && ready.every((block) => block.audio?.source === 'browser-speech' && block.audio.browserSpeech)
-  const renderTargets = voices.filter((block) => block.status !== 'generating'
-    && block.audio?.source !== 'api' && block.audio?.source !== 'browser-model')
-  const canRenderLocalWav = Boolean(onRenderLocalWav && renderTargets.length > 0
-    && voices.every((block) => block.status !== 'generating'))
   const canExportLocalWav = voices.length > 0 && ready.length === voices.length
     && ready.every((block) => block.audio?.source === 'browser-model' && block.audio.url)
 
@@ -184,27 +161,6 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     }
   }
 
-  async function makeLocalWav() {
-    if (!onRenderLocalWav) return
-    const controller = new AbortController()
-    wavAbortRef.current = controller
-    setRenderingWav(true)
-    setWavError('')
-    try {
-      for (const [index, block] of renderTargets.entries()) {
-        if (controller.signal.aborted) throw new DOMException('취소됨', 'AbortError')
-        setWavProgress(`WAV 파일 ${index + 1}/${renderTargets.length} 준비 중`)
-        await onRenderLocalWav(block.id, controller.signal, setWavProgress)
-      }
-      setWavProgress('WAV 파일 생성 완료 · 위의 대사별 다운로드 또는 전체 WAV·MP3 다운로드를 이용해 주세요.')
-    } catch (error) {
-      setWavError(error instanceof Error ? error.message : 'WAV 생성에 실패했습니다.')
-    } finally {
-      wavAbortRef.current = null
-      setRenderingWav(false)
-    }
-  }
-
   async function startRecording() {
     const controller = new AbortController()
     abortRef.current = controller
@@ -240,63 +196,14 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     }
   }
 
-  async function exportWorkspace() {
-    if (!onExportWorkspace) return
-    setBundleBusy(true)
-    setBundleError('')
-    try {
-      const bundle = await onExportWorkspace()
-      if (bundleRef.current) URL.revokeObjectURL(bundleRef.current)
-      bundleRef.current = URL.createObjectURL(bundle)
-      setBundleUrl(bundleRef.current)
-      startDownload(bundleRef.current, 'sorion-workspace.sorion.json')
-      setBundleStatus('작업 백업 다운로드를 시작했습니다. 저장 창이 열리지 않았다면 아래 링크를 눌러 주세요.')
-    } catch (error) {
-      setBundleError(error instanceof Error ? error.message : '작업 백업을 만들지 못했습니다.')
-    } finally {
-      setBundleBusy(false)
-    }
-  }
-
-  async function importWorkspace(file: File) {
-    if (!onImportWorkspace || !window.confirm('현재 작업공간을 가져온 백업으로 바꿀까요?')) {
-      if (bundleInputRef.current) bundleInputRef.current.value = ''
-      return
-    }
-    setBundleBusy(true)
-    setBundleError('')
-    try {
-      await onImportWorkspace(file)
-      setBundleStatus('대본과 보관된 로컬 WAV를 가져왔습니다. 타임라인과 Dock을 확인해 주세요.')
-    } catch (error) {
-      setBundleError(error instanceof Error ? error.message : '작업 백업을 가져오지 못했습니다.')
-    } finally {
-      if (bundleInputRef.current) bundleInputRef.current.value = ''
-      setBundleBusy(false)
-    }
-  }
-
   return (
     <section id="soa-generated-save" className="soa-generated-save" aria-label="생성한 음성 저장" tabIndex={-1}>
       <div className="soa-generated-save__heading">
         <strong>생성한 음성 저장하기</strong>
         <span>완료 {ready.length}/{voices.length}개 대사</span>
       </div>
-      <p>완성한 음성을 WAV 또는 MP3 파일로 내려받아 보관하세요. 프로젝트 자동 저장은 이 브라우저에서만 유지됩니다.</p>
+      <p>완성된 음성 파일을 WAV 또는 MP3로 내려받으세요. 파일은 이 기기에 직접 저장됩니다.</p>
       {localAudioSaveWarning ? <p role="alert">{localAudioSaveWarning}</p> : null}
-      {onExportWorkspace && onImportWorkspace ? <div className="soa-generated-save__full-wav">
-        <p>다른 PC로 옮길 때 대본과 기기 내 모델 WAV를 함께 백업하세요. 기본 성우 화면 녹음은 별도 WAV·MP3 다운로드가 필요합니다.</p>
-        <button type="button" disabled={bundleBusy} onClick={() => void exportWorkspace()}>작업·WAV 백업 만들기</button>
-        {bundleUrl ? <a href={bundleUrl} download="sorion-workspace.sorion.json">작업 백업 다운로드</a> : null}
-        <button type="button" disabled={bundleBusy} onClick={() => bundleInputRef.current?.click()}>작업 백업 가져오기</button>
-        <input ref={bundleInputRef} hidden type="file" accept=".json,.sorion.json,application/json"
-          aria-label="소리온 작업 백업 파일 선택" onChange={(event) => {
-            const file = event.target.files?.[0]
-            if (file) void importWorkspace(file)
-          }} />
-        {bundleStatus ? <p role="status">{bundleStatus}</p> : null}
-        {bundleError ? <p role="alert">{bundleError}</p> : null}
-      </div> : null}
       {downloadable.length ? (
         <div className="soa-generated-save__clips">
           {downloadable.map((block) => (
@@ -335,26 +242,13 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         {recording ? <button type="button" onClick={() => abortRef.current?.abort()}>녹음 취소</button> : null}
         {recordProgress ? <p role="status">{recordProgress}</p> : null}
         {recordError ? <p role="alert">{recordError}</p> : null}
-        {recordError && canRenderLocalWav ? <button type="button" disabled={renderingWav} onClick={() => void makeLocalWav()}>
-          녹음 없이 다른 음색으로 WAV 만들기
-        </button> : null}
         {recordedWavUrl && recordedMp3Url ? <div className="soa-generated-save__preview">
           <audio controls src={recordedWavUrl} aria-label="기본 성우 녹음 미리 듣기" />
           <a href={recordedWavUrl} download="sorion-default-voices.wav">기본 성우 WAV 다운로드</a>
           <a href={recordedMp3Url} download="sorion-default-voices.mp3">기본 성우 MP3 다운로드</a>
         </div> : null}
       </div> : null}
-      {canRenderLocalWav || renderingWav || wavError || wavProgress ? (
-        <div className="soa-generated-save__local-wav">
-          {canRenderLocalWav ? <p>다른 음색으로 만들고 싶거나 기기 성우 녹음이 되지 않으면 별도 한국어 모델을 사용할 수 있습니다. 첫 실행 시 약 380MB를 다운로드하며, 기본 성우 원본 음색과 다릅니다.</p> : null}
-          {canRenderLocalWav ? <button type="button" disabled={renderingWav} onClick={() => void makeLocalWav()}>
-            {renderingWav ? 'WAV 생성 중…' : '다른 음색으로 WAV 만들기'}
-          </button> : null}
-          {renderingWav ? <button type="button" onClick={() => wavAbortRef.current?.abort()}>WAV 생성 취소</button> : null}
-          {wavProgress ? <p role="status">{wavProgress}</p> : null}
-          {wavError ? <p role="alert">{wavError}</p> : null}
-        </div>
-      ) : null}
+      {wavError ? <p role="alert">{wavError}</p> : null}
       {canExportAll ? (
         <button type="button" onClick={onOpenExport}>전체 음성 MP3로 저장</button>
       ) : canRecordBrowser || canExportLocalWav ? null : (

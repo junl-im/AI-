@@ -260,3 +260,67 @@
 .soa-app-root.is-editor .soa-generated-save .soa-generated-save__limit {
   color: #755347; font-weight: 700;
 }
+
+/* Timeline controls stay inside their own track header and never float over clips. */
+@media (min-width: 1024px) {
+  .soa-app-root.is-editor .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-track-row { grid-template-columns: 116px minmax(0, 1fr); }
+  .soa-app-root.is-editor .soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-capcut-track-label { padding: 12px; gap: 5px; }
+  .soa-app-root.is-editor .soa-capcut-track-label :is(span, em) { font-size: 10px; line-height: 1.35; }
+  .soa-app-root.is-editor .soa-capcut-track-label .soa-dubbing-add-block { position: static; width: 34px; height: 34px; min-height: 34px; margin-top: 5px; padding: 0; border-radius: 9px; font-size: 21px; }
+  .soa-app-root.is-editor .soa-project-rail:not(.is-collapsed) > .soa-studio-panel-toggle,
+  .soa-app-root.is-editor .soa-voice-drawer:not(.is-collapsed) > .soa-studio-panel-toggle {
+    position: static; align-self: flex-end; display: inline-flex; align-items: center; justify-content: center;
+    width: auto; min-width: 76px; min-height: 32px; height: 32px; margin: 0 0 10px; padding: 0 9px; gap: 4px;
+    border-radius: 8px; font-size: 15px;
+  }
+  .soa-app-root.is-editor .soa-voice-drawer:not(.is-collapsed) > .soa-studio-panel-toggle { align-self: flex-start; }
+}
+.soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block.is-compact { padding: 7px 5px; border-radius: 9px; }
+.soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block.is-compact .soa-dubbing-block__voice > span { display: none; }
+.soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block.is-compact .soa-dubbing-block__voice small { display: none; }
+.soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block.is-micro .soa-dubbing-block__tools button:not(:first-child),
+.soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block.is-micro .soa-dubbing-block-menu { display: none; }
+.soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-block.is-micro .soa-dubbing-block__voice strong { font-size: 10px; }
+.soa-capcut-timeline[data-timeline-axis="horizontal"] .soa-dubbing-pause-block { cursor: context-menu; }
+.soa-pause-duration-control { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+.soa-pause-duration-control label { margin-right: 4px; font-size: 12px; font-weight: 800; }
+.soa-pause-duration-control input { width: 70px; min-height: 34px; border: 1px solid #a99aba; border-radius: 7px; padding: 4px 7px; color: #30263b; background: #fff; }
+.soa-pause-duration-control button { width: 34px; height: 34px; border: 1px solid #a99aba; border-radius: 7px; color: #3e2857; background: #f4eff9; cursor: pointer; }
+.soa-text-edit-menu, .soa-timeline-context-menu {
+  position: fixed; z-index: 10020; display: grid; width: 220px; padding: 6px;
+  border: 1px solid #706080; border-radius: 12px; color: #f8f5ff; background: #25202e;
+  box-shadow: 0 14px 34px #15101b66;
+}
+.soa-text-edit-menu { width: 198px; }
+.soa-text-edit-menu button, .soa-timeline-context-menu button {
+  display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 34px;
+  border: 0; border-radius: 7px; padding: 6px 8px; color: inherit; background: transparent;
+  font-size: 12px; text-align: left; cursor: pointer;
+}
+.soa-text-edit-menu button:hover:not(:disabled), .soa-timeline-context-menu button:hover:not(:disabled) { background: #4b3a5b; }
+.soa-text-edit-menu button:disabled, .soa-timeline-context-menu button:disabled { opacity: .42; cursor: default; }
+.soa-text-edit-menu button:focus-visible, .soa-timeline-context-menu button:focus-visible,
+.soa-timeline-context-menu input:focus-visible { outline: 2px solid #dac2ff; outline-offset: 1px; }
+.soa-text-edit-menu kbd { color: #c8b9d6; font-size: 10px; }
+.soa-text-edit-menu hr, .soa-timeline-context-menu hr { width: 100%; margin: 4px 0; border: 0; border-top: 1px solid #51465b; }
+.soa-timeline-context-menu > strong { padding: 6px 8px; font-size: 12px; }
+.soa-timeline-context-menu .is-danger { color: #ffb5b0; }
+.soa-timeline-context-menu__duration { display: flex; align-items: center; gap: 7px; padding: 5px 8px; font-size: 12px; }
+.soa-timeline-context-menu__duration input { width: 67px; min-height: 30px; border: 1px solid #9986aa; border-radius: 6px; padding: 3px 6px; color: #201729; background: #fff; }
+.soa-text-edit-notice:empty { display: none; }
+.soa-text-edit-notice:not(:empty) { display: block; margin: 4px 0; color: #5d416e; font-size: 11px; }
+
+/* Batch controls live on a light canvas; keep their text and shortcuts legible. */
+.soa-app-root.is-editor .soa-timeline-command-bar { border-top-color: #d6ccdf; }
+.soa-app-root.is-editor .soa-timeline-command-bar > strong,
+.soa-app-root.is-editor .soa-timeline-batch-controls label > span { color: #544067; font-size: 10px; }
+.soa-app-root.is-editor .soa-timeline-command-bar button,
+.soa-app-root.is-editor .soa-timeline-batch-controls button,
+.soa-app-root.is-editor .soa-timeline-batch-preview button {
+  border-color: #c5b6d1; color: #352541; background: #eee7f4; font-size: 11px;
+}
+.soa-app-root.is-editor .soa-timeline-command-bar button.is-danger { color: #8d332f; background: #f9e8e5; }
+.soa-app-root.is-editor .soa-timeline-command-bar button:disabled,
+.soa-app-root.is-editor .soa-timeline-batch-controls button:disabled { opacity: .48; }
+.soa-app-root.is-editor .soa-timeline-command-bar kbd { border-color: #b7a5c7; color: #443052; background: #e4d9ed; font-size: 10px; }
+.soa-app-root.is-editor .soa-timeline-batch-preview { color: #4d3b59; border-color: #d4c5df; background: #f4eef9; }

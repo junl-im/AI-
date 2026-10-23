@@ -36,13 +36,11 @@ describe('GeneratedAudioSave', () => {
     const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
       text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
     } } }
-    const renderLocalWav = vi.fn()
-    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderLocalWav={renderLocalWav} />)
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
     expect(screen.queryByRole('button', { name: '전체 음성 MP3로 저장' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /음성 파일 다운로드/ })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '기본 성우를 WAV·MP3로 저장' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '다른 음색으로 WAV 만들기' }))
-    expect(renderLocalWav).toHaveBeenCalledWith('v1', expect.any(AbortSignal), expect.any(Function))
+    expect(screen.queryByRole('button', { name: /다른 음색으로 WAV 만들기/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '대본 TXT 다운로드' })).not.toBeInTheDocument()
   })
 
@@ -87,21 +85,9 @@ describe('GeneratedAudioSave', () => {
     expect(screen.getByText(/먼저 대사를 입력하고/)).toBeInTheDocument()
   })
 
-  it('작업·WAV 백업을 만들고 파일을 가져오는 사용자 동선을 연결한다', async () => {
-    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:workspace-backup')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
-    const exportWorkspace = vi.fn().mockResolvedValue(new Blob(['backup'], { type: 'application/json' }))
-    const importWorkspace = vi.fn().mockResolvedValue(undefined)
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
-    render(<GeneratedAudioSave blocks={[voice]} onOpenExport={vi.fn()}
-      onExportWorkspace={exportWorkspace} onImportWorkspace={importWorkspace} />)
-    fireEvent.click(screen.getByRole('button', { name: '작업·WAV 백업 만들기' }))
-    expect(await screen.findByRole('link', { name: '작업 백업 다운로드' }))
-      .toHaveAttribute('href', 'blob:workspace-backup')
-    expect(click).toHaveBeenCalledOnce()
-    const file = new File(['backup'], 'backup.sorion.json', { type: 'application/json' })
-    fireEvent.change(screen.getByLabelText('소리온 작업 백업 파일 선택'), { target: { files: [file] } })
-    await waitFor(() => expect(importWorkspace).toHaveBeenCalledWith(file))
-    click.mockRestore()
+  it('저장 화면에는 결과물 다운로드만 표시한다', () => {
+    render(<GeneratedAudioSave blocks={[voice]} onOpenExport={vi.fn()} />)
+    expect(screen.queryByRole('button', { name: /백업|다른 음색/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '완료 대사 1 음성 파일 다운로드' })).toBeInTheDocument()
   })
 })

@@ -11,6 +11,20 @@ const activity = {
 }
 
 describe('LongformComposer', () => {
+  it('대사 입력 우클릭에서 선택 내용 삭제와 되돌리기를 제공한다', () => {
+    const onValueChange = vi.fn()
+    const props = { disabled: false, value: '안녕하세요.', activity, onValueChange, onSubmit: vi.fn() }
+    const view = render(<LongformComposer {...props} />)
+    const editor = screen.getByRole('textbox', { name: '음성으로 만들 장문 내용' }) as HTMLTextAreaElement
+    editor.setSelectionRange(0, 2)
+    fireEvent.contextMenu(editor)
+    fireEvent.click(screen.getByRole('menuitem', { name: /선택 내용 삭제/ }))
+    expect(onValueChange).toHaveBeenCalledWith('하세요.')
+    view.rerender(<LongformComposer {...props} value="하세요." />)
+    fireEvent.contextMenu(editor)
+    fireEvent.click(screen.getByRole('menuitem', { name: /되돌리기/ }))
+    expect(onValueChange).toHaveBeenLastCalledWith('안녕하세요.')
+  })
   it('시작 예제는 빈 대본에만 나타나고 생성 요청 없이 대본을 채운다', () => {
     const onValueChange = vi.fn()
     const onSubmit = vi.fn()

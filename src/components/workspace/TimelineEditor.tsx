@@ -30,11 +30,10 @@ import {
   getTimelineContentWidth,
 } from '../../timeline/timelineGeometry'
 import { TimelineDeleteDialog } from './TimelineDeleteDialog'
+import { TimelineContextMenu } from './TimelineContextMenu'
 import { TimelineQuickEditor } from './TimelineQuickEditor'
 import { TimelineVoiceBlockCard } from './TimelineVoiceBlockCard'
-
 const DEFAULT_VOICE_CHOICES = buildVoiceChoices([])
-
 interface TimelineEditorProps {
   blocks: TimelineBlock[]
   onMove: (id: string, direction: -1 | 1) => void
@@ -45,6 +44,7 @@ interface TimelineEditorProps {
   onRetry: (id: string) => void
   onAddVoice: () => void
   onAddPause: () => void
+  onUpdatePauseDuration?: (id: string, seconds: number) => void
   onRemove: (id: string) => void
   onRemoveMany?: (ids: string[]) => void
   onBatchVoiceChange?: TimelineBatchVoiceChangeHandler
@@ -64,16 +64,13 @@ interface TimelineEditorProps {
   voiceChoices?: VoiceChoice[]
   currentVoiceId?: string
 }
-
 function formatDuration(seconds: number): string {
   const safe = Math.max(0, Math.round(seconds))
   return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, '0')}`
 }
-
 function getDefaultTimelineZoom(): number {
   return typeof window !== 'undefined' && window.innerWidth <= 760 ? 1.25 : 1
 }
-
 export function TimelineEditor({
   blocks,
   onMove,
@@ -84,6 +81,7 @@ export function TimelineEditor({
   onRetry,
   onAddVoice,
   onAddPause,
+  onUpdatePauseDuration,
   onRemove,
   onRemoveMany,
   onBatchVoiceChange,
@@ -121,7 +119,7 @@ export function TimelineEditor({
   const [quickDraft, setQuickDraft] = useState('')
   const [removalIds, setRemovalIds] = useState<string[] | null>(null)
   const [shortcutHelpOpen, setShortcutHelpOpen] = useState(false)
-
+  const [contextMenu, setContextMenu] = useState<{ id: string; x: number; y: number } | null>(null)
   const selection = useTimelineEditorSelection({ blocks, onSelectionChange })
   const {
     selectedBlockId,
@@ -136,7 +134,6 @@ export function TimelineEditor({
     multiSelectionActive,
     replaceSelection,
   } = selection
-
   const batch = useTimelineEditorBatch({
     blocks,
     selectedVoiceBlocks,
@@ -196,7 +193,6 @@ export function TimelineEditor({
     stageBatchCommand,
     executeBatchCommand,
   } = batch
-
   const metrics = useMemo(() => buildTimelineMetrics(blocks, zoom), [blocks, zoom])
   const totalDuration = blocks.reduce((total, block) => total + Math.max(0, block.durationSeconds), 0)
   const timelineContentWidth = getTimelineContentWidth(metrics)
@@ -227,22 +223,18 @@ export function TimelineEditor({
   const quickDraftTrimmed = quickDraft.trim()
   const quickDraftDirty = Boolean(selectedVoiceBlock && quickDraftTrimmed !== selectedVoiceBlock.text)
   const rulerTicks = buildTimelineRulerTicks(totalDuration, timelineContentWidth)
-
   function clearSelection() {
     selection.clearSelection()
     setBatchCommandPreview(null)
     setRecoveryImpactOpen(false)
   }
-
   function selectVoiceBlocks(ids: string[]) {
     selection.selectVoiceBlocks(ids)
   }
-
   function performBatchMove(direction: -1 | 1) {
     if (!onMoveMany || !selectedIds.length) return
     onMoveMany(selectedIds, direction)
   }
-
   function handleTimelineCommandKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.defaultPrevented) return
     const target = event.target as HTMLElement
@@ -375,6 +367,11 @@ export function TimelineEditor({
     setRemovalIds(selectedBlockIds.has(id) && selectedBlockIds.size > 1 && onRemoveMany ? selectedIds : [id])
   }
 
+  function openContextMenu(id: string, x: number, y: number) {
+    selectBlock(id)
+    setContextMenu({ id, x, y })
+  }
+
   function seekFromTimeline(event: PointerEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement
     if (target.closest('button, textarea, input, a, .soa-dubbing-block, .soa-dubbing-pause-block, .soa-dubbing-block__grip')) return
@@ -400,6 +397,7 @@ export function TimelineEditor({
   }
 
   function startTimelineScrub(event: PointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return
     const target = event.target as HTMLElement
     if (target.closest('button, textarea, input, a, .soa-dubbing-block, .soa-dubbing-pause-block')) return
     timelineScrubbingRef.current = true
@@ -767,6 +765,7 @@ export function TimelineEditor({
           onSplit={() => { if (selectedVoiceBlock && saveQuickDraft()) onSplit(selectedVoiceBlock.id) }}
           onRemove={() => removeSelection(selectedBlock.id)}
           onMovePause={(direction) => moveSelection(selectedBlock.id, direction)}
+          onUpdatePauseDuration={(seconds) => onUpdatePauseDuration?.(selectedBlock.id, seconds)}
           onNavigateVoice={navigateVoiceSelection}
           onRecoveryVoiceChange={setRecoveryVoiceId}
           onRecoverVoice={(regenerate) => void recoverSelectedVoice(regenerate)}
@@ -842,10 +841,10 @@ export function TimelineEditor({
       <div className="soa-capcut-timeline" data-timeline-axis="horizontal">
         <div className="soa-capcut-track-row">
           <div className="soa-capcut-track-label">
-            <strong>VOICE 1</strong>
+            <strong>VOICE 01</strong>
             <small>대사 트랙</small>
-            <span>{playbackActive ? '재생 중' : '편집 준비'}</span>
-            <em>시간 →</em>
+            <span>대사 {blocks.filter((block) => block.kind === 'voice').length}개 · {formatDuration(totalDuration)}</span>
+            <em>{playbackActive ? '재생 중' : '클립을 눌러 이동'}</em>
             <button type="button" className="soa-dubbing-add-block" onClick={onAddVoice} aria-label="새 대사 블록 추가" title="대사 트랙에 새 대사 추가">＋</button>
           </div>
           <div className="soa-capcut-track-lane">
@@ -901,6 +900,11 @@ export function TimelineEditor({
                             block.id,
                             event.shiftKey ? 'range' : event.metaKey || event.ctrlKey ? 'toggle' : 'single',
                           )}
+                          onContextMenu={(event) => {
+                            event.preventDefault()
+                            event.stopPropagation()
+                            openContextMenu(block.id, event.clientX, event.clientY)
+                          }}
                           onDragStart={(event) => event.dataTransfer.setData('text/plain', block.id)}
                           onDragOver={(event) => event.preventDefault()}
                           onDrop={(event) => {
@@ -955,6 +959,7 @@ export function TimelineEditor({
                           onEdit={editBlock}
                           onRetry={onRetry}
                           onRemove={removeSelection}
+                          onOpenContextMenu={openContextMenu}
                         />
                       </div>
                     )
@@ -965,6 +970,17 @@ export function TimelineEditor({
           </div>
         </div>
       </div>
+
+      {contextMenu && (() => {
+        const block = blocks.find((item) => item.id === contextMenu.id)
+        if (!block) return null
+        return <TimelineContextMenu block={block} index={blocks.indexOf(block)} total={blocks.length}
+          x={contextMenu.x} y={contextMenu.y} playing={playbackActive && playbackBlock?.id === block.id}
+          onClose={() => setContextMenu(null)} onDurationChange={(seconds) => onUpdatePauseDuration?.(block.id, seconds)}
+          onToggle={() => { if (block.kind === 'voice' && block.trackId) toggleTrack(block.trackId) }}
+          onEdit={() => editBlock(block.id)} onSplit={() => onSplit(block.id)}
+          onMove={(direction) => onMove(block.id, direction)} onRemove={() => removeSelection(block.id)} />
+      })()}
 
       {removalIds ? <TimelineDeleteDialog
         blocks={blocks.filter((block) => removalIds.includes(block.id))}

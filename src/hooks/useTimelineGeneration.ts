@@ -675,6 +675,14 @@ export function useTimelineGeneration() {
     ])
   }, [commitEdit])
 
+  const updatePauseDuration = useCallback((id: string, seconds: number) => {
+    if (!Number.isFinite(seconds)) return
+    const durationSeconds = Math.round(Math.max(0.1, Math.min(30, seconds)) * 10) / 10
+    commitEdit('쉼 길이 조절', (current) => current.map((block) => (
+      block.kind === 'pause' && block.id === id ? { ...block, durationSeconds } : block
+    )))
+  }, [commitEdit])
+
 
   const removeBlock = useCallback((id: string) => {
     cancelActiveGeneration(id)
@@ -772,6 +780,7 @@ export function useTimelineGeneration() {
     updateText,
     splitBlock,
     addPause,
+    updatePauseDuration,
     removeBlock,
     removeBlocks,
     clear,

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { usePlayerStore } from '../../store/usePlayerStore'
 import type { GeneratedAudio } from '../../tts/generationTypes'
@@ -49,6 +49,24 @@ const blocks: TimelineBlock[] = [
     revision: 1,
   },
 ]
+
+it('쉼 우클릭 메뉴에서 길이를 바꾸고 음성 클립 메뉴는 다른 명령을 제공한다', () => {
+  const onUpdatePauseDuration = vi.fn()
+  const onRemove = vi.fn()
+  const { container } = render(<TimelineEditor blocks={blocks} onMove={vi.fn()} onReorder={vi.fn()} onSplit={vi.fn()}
+    onUpdateText={vi.fn()} onRetry={vi.fn()} onAddVoice={vi.fn()} onAddPause={vi.fn()}
+    onUpdatePauseDuration={onUpdatePauseDuration} onRemove={onRemove} onClear={vi.fn()} />)
+  fireEvent.contextMenu(container.querySelector('.soa-dubbing-pause-block')!)
+  const pauseMenu = screen.getByRole('menu', { name: '쉼 편집 메뉴' })
+  const durationInput = within(pauseMenu).getByRole('spinbutton', { name: '쉼 길이(초)' })
+  fireEvent.change(durationInput, { target: { value: '1.8' } })
+  fireEvent.blur(durationInput)
+  expect(onUpdatePauseDuration).toHaveBeenCalledWith('pause-1', 1.8)
+  expect(pauseMenu).toHaveTextContent('쉼 삭제')
+  fireEvent.contextMenu(screen.getByRole('article', { name: /클립 1/ }))
+  expect(screen.getByRole('menu', { name: '대사 클립 편집 메뉴' })).toHaveTextContent('대사 편집')
+  expect(screen.queryByRole('menu', { name: '쉼 편집 메뉴' })).not.toBeInTheDocument()
+})
 
 const linkedAudio: GeneratedAudio = {
   url: 'https://voice.example/linked.wav',

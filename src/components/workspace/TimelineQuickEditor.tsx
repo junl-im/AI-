@@ -1,6 +1,7 @@
 import type { RefObject } from 'react'
 import type { VoiceChoice } from '../../voice/voiceChoices'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
+import { useTextEditMenu } from './useTextEditMenu'
 
 function formatDuration(seconds: number): string {
   const safe = Math.max(0, Math.round(seconds))
@@ -36,6 +37,7 @@ interface TimelineQuickEditorProps {
   onSplit: () => void
   onRemove: () => void
   onMovePause: (direction: -1 | 1) => void
+  onUpdatePauseDuration: (seconds: number) => void
   onNavigateVoice: (direction: -1 | 1) => void
   onRecoveryVoiceChange: (voiceId: string) => void
   onRecoverVoice: (regenerate: boolean) => void
@@ -61,6 +63,7 @@ export function TimelineQuickEditor({
   onSplit,
   onRemove,
   onMovePause,
+  onUpdatePauseDuration,
   onNavigateVoice,
   onRecoveryVoiceChange,
   onRecoverVoice,
@@ -69,6 +72,7 @@ export function TimelineQuickEditor({
   const existingAudioPreserved = Boolean(
     selectedVoiceBlock?.status === 'ready' && selectedVoiceBlock.trackId,
   )
+  const { editMenu, notice: editNotice, onTextChange, onTextKeyDown, onTextContextMenu } = useTextEditMenu(quickDraft, onDraftChange, 2_000, quickEditorRef)
 
   return (
     <section className={`soa-timeline-quick-editor ${voiceUnavailable ? 'has-voice-recovery' : ''}`} aria-label="선택 클립 빠른 편집">
@@ -94,9 +98,11 @@ export function TimelineQuickEditor({
             <textarea
               ref={quickEditorRef}
               value={quickDraft}
-              onChange={(event) => onDraftChange(event.target.value)}
+              onChange={onTextChange}
+              onContextMenu={onTextContextMenu}
               onBlur={onSave}
               onKeyDown={(event) => {
+                if (onTextKeyDown(event)) return
                 if (event.altKey && event.key === 'ArrowUp' && canNavigatePrevious) {
                   event.preventDefault()
                   onNavigateVoice(-1)
@@ -116,6 +122,8 @@ export function TimelineQuickEditor({
               aria-label="선택 대사 빠른 수정"
               placeholder="선택한 대사를 바로 수정하세요."
             />
+            {editMenu}
+            {editNotice ? <span className="soa-text-edit-notice" role="status">{editNotice}</span> : null}
           </div>
 
           {recovery?.unavailable ? (
@@ -171,11 +179,25 @@ export function TimelineQuickEditor({
           </div>
         </>
       ) : (
-        <div className="soa-timeline-quick-editor__actions is-pause">
-          <button type="button" disabled={!canMovePausePrevious} onClick={() => onMovePause(-1)}>앞으로</button>
-          <button type="button" disabled={!canMovePauseNext} onClick={() => onMovePause(1)}>뒤로</button>
-          <button type="button" className="is-danger" onClick={onRemove}>쉼 삭제</button>
-        </div>
+        <>
+          <div className="soa-pause-duration-control">
+            <label htmlFor={`soa-pause-duration-${selectedBlock.id}`}>쉼 길이</label>
+            <button type="button" aria-label="쉼 0.1초 줄이기" onClick={() => onUpdatePauseDuration(selectedBlock.durationSeconds - 0.1)}>−</button>
+            <input key={`${selectedBlock.id}-${selectedBlock.durationSeconds}`} id={`soa-pause-duration-${selectedBlock.id}`}
+              type="number" min="0.1" max="30" step="0.1" defaultValue={selectedBlock.durationSeconds.toFixed(1)}
+              aria-label="쉼 길이(초)" onBlur={(event) => {
+                const next = Number(event.currentTarget.value)
+                if (Number.isFinite(next) && next !== selectedBlock.durationSeconds) onUpdatePauseDuration(next)
+              }} onKeyDown={(event) => { if (event.key === 'Enter') event.currentTarget.blur() }} />
+            <span>초</span>
+            <button type="button" aria-label="쉼 0.1초 늘리기" onClick={() => onUpdatePauseDuration(selectedBlock.durationSeconds + 0.1)}>＋</button>
+          </div>
+          <div className="soa-timeline-quick-editor__actions is-pause">
+            <button type="button" disabled={!canMovePausePrevious} onClick={() => onMovePause(-1)}>앞으로</button>
+            <button type="button" disabled={!canMovePauseNext} onClick={() => onMovePause(1)}>뒤로</button>
+            <button type="button" className="is-danger" onClick={onRemove}>쉼 삭제</button>
+          </div>
+        </>
       )}
     </section>
   )

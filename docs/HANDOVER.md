@@ -1,3 +1,16 @@
+## 2026-10-23 KST · 0.11.62 Timeline Context Editing
+
+1. **작업 일시(KST)**: 2026-10-23.
+2. **대상/기준 버전**: 0.11.62 / 0.11.61 (`025cfde288ff`).
+3. **변경 내용**: 쉼 길이 0.1~30초 조절(0.1초 단위), 쉼/음성 클립별 우클릭 메뉴, 대사 입력칸별 편집 메뉴와 단축키 이력, 짧은 클립·트랙 추가 버튼·패널 접기 버튼 레이아웃 개선. 저장 화면의 백업 만들기·가져오기·다른 음색 WAV 만들기 버튼을 제거하고 실제 생성 파일의 WAV/MP3 다운로드를 유지합니다.
+4. **변경 이유**: 좁은 타임라인에서 편집 버튼이 겹치고 쉼 길이·대사 입력 조작이 직관적이지 않았습니다. 파일 다운로드와 무관한 저장 버튼이 결과물 저장 경로를 혼란스럽게 했습니다.
+5. **영향 범위**: Web 작업공간·타임라인·대본 편집·다운로드 UI. API/Worker 음성 엔진 및 기존 오디오 데이터 형식은 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/{TimelineEditor,TimelineContextMenu,TimelineQuickEditor,TimelineVoiceBlockCard,LongformComposer,useTextEditMenu,GeneratedAudioSave}*`, `src/hooks/useTimelineGeneration.ts`, `src/styles/readable-colors.css`, `src/pages/HomePage.tsx`, 버전·릴리스 문서.
+7. **검증 결과**: Web 91파일/373건, 관련 편집 테스트 43건, API 246건 통과/1건 건너뜀, Worker 16건 통과, 타입 검사, 린트, 빌드, preflight 55/55, Chrome 데스크톱·모바일 다중 장면 18장 및 레이아웃 6개 해상도 통과. Python 테스트는 사용자가 승인한 `.venv`에 pytest와 서비스 의존성을 설치해 실행했습니다. 원격 CI·Pages 공개 결과는 배포 후 확인합니다.
+8. **알려진 제한과 주의사항**: 기본 Web Speech는 PCM 출력이 없고 화면 오디오 캡처가 무음인 PC에서는 같은 음색의 WAV/MP3를 저장할 수 없습니다. 클립 편집 메뉴의 브라우저 클립보드 붙여넣기는 브라우저 권한이 필요하며 거부되면 Ctrl+V를 안내합니다. 백업 UI만 제거했고 내부 저장·호환 코드는 보존했습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.62-timeline-context-full.zip` / `SoriON-AI-0.11.61-to-0.11.62-timeline-context-patch.zip`, `SoriON-AI-0.11.62-timeline-context-SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.63 · Reliable Voice File Engine & Device QA. 승인 성우 음원·권리를 확보해 원본 음색 파일 출력을 검증하고 다른 PC Chrome/Edge의 재생·Dock·저장을 실기기로 확인합니다.
+
 ## 2026-10-23 KST · 0.11.61 Verified Voice Gender
 
 1. **작업 일시(KST)**: 2026-10-23.
@@ -137,9 +150,9 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.61 · Verified Voice Gender**
+Current baseline: **0.11.62 · Timeline Context Editing**
 기준 버전: **0.7.3 Handover Memory Baseline**
-최종 갱신: **2026-10-22 KST**
+최종 갱신: **2026-10-23 KST**
 제품 소유·디자인: **곰같은여우**
 서비스명: **SoriON AI / 소리온 AI** · 내부 코드명: **SOA**
 > 이 프로젝트는 임시채팅에서 개발 중이다. 대화 메모리를 신뢰하지 않는다.
@@ -147,7 +160,7 @@ Current baseline: **0.11.61 · Verified Voice Gender**
 > 이 파일은 목표, 사용자 결정, 구현 상태, 연결 현실, 금지 규칙과 다음 작업을 보존하는
 > 단일 프로젝트 메모리 원본이다.
 
-현재 기능 상태(0.11.61): 남성·여성 프리셋은 성별이 확인된 한국어 시스템 음성만 사용하며 미확인 음성은 자동 배정하지 않습니다. 기존 클립을 선택하지 않고 성우를 바꾸면 새 대사에만 적용되고 기존 클립은 재생성을 안내합니다. GitHub Pages 정적 Web의 기본 성우(Web Speech)는 화면/시스템 오디오 캡처에 실제 음성이 들어올 때만 WAV/MP3를 만듭니다. 사용자 보고로 다른 PC의 무음 실패가 확인됐고, 해당 PC에서는 기본 음색 저장이 아직 불가능합니다. 성공한 녹음은 동일 브라우저 프로필에만 보관됩니다. 별도 Supertonic 3 모델은 기본 5성우 원본과 다른 음색으로 WAV/MP3를 만들며, 대사별 로컬 WAV도 MP3로 변환해 즉시 다운로드할 수 있습니다. 로컬 WAV 바이트는 IndexedDB에 저장되어 동일 작업공간 재방문 때 Dock·다운로드에 복구됩니다. 작업·로컬 WAV를 사용자가 JSON 백업 파일로 내보내 다른 PC에서 가져올 수 있습니다. 기본 성우 화면 녹음 파일은 백업에 포함되지 않아 별도 다운로드가 필요합니다. 두 MP3 경로 모두 LGPL-3.0 `@breezystack/lamejs`를 지연 로드합니다. 기기 간 자동 동기화는 없습니다. 0.11.62에서는 승인된 원본 성우의 파일 출력 엔진과 다른 PC 실기기 검증을 우선합니다. 기술·라이선스·실측 검증은 `docs/{LOCAL_WAV_ENGINE_0.11.54,DEFAULT_VOICE_EXPORT_0.11.56}.md`를 참조합니다.
+현재 기능 상태(0.11.62): 남성·여성 프리셋은 성별이 확인된 한국어 시스템 음성만 사용하며 미확인 음성은 자동 배정하지 않습니다. 기존 클립을 선택하지 않고 성우를 바꾸면 새 대사에만 적용되고 기존 클립은 재생성을 안내합니다. 쉼 길이는 0.1~30초로 편집하고 쉼/음성 클립별 우클릭 메뉴에서 해당 편집 명령을 실행합니다. 대본·선택 대사 입력칸은 전용 우클릭 편집 메뉴를 제공합니다. GitHub Pages 정적 Web의 기본 성우(Web Speech)는 화면/시스템 오디오 캡처에 실제 음성이 들어올 때만 WAV/MP3를 만듭니다. 사용자 보고로 다른 PC의 무음 실패가 확인됐고, 해당 PC에서는 기본 음색 저장이 아직 불가능합니다. 성공한 녹음은 동일 브라우저 프로필에만 보관됩니다. 별도 Supertonic 3 모델은 기본 5성우 원본과 다른 음색으로 WAV/MP3를 만들며, 대사별 로컬 WAV도 MP3로 변환해 즉시 다운로드할 수 있습니다. 로컬 WAV 바이트는 IndexedDB에 저장되어 동일 작업공간 재방문 때 Dock·다운로드에 복구됩니다. 작업·로컬 WAV JSON 백업 코드와 기존 파일 호환은 유지하지만 백업 만들기/가져오기 UI는 0.11.62에서 제거했습니다. 기본 성우 화면 녹음 파일은 백업에 포함되지 않아 별도 다운로드가 필요합니다. 두 MP3 경로 모두 LGPL-3.0 `@breezystack/lamejs`를 지연 로드합니다. 기기 간 자동 동기화는 없습니다. 0.11.63에서는 승인된 원본 성우의 파일 출력 엔진과 다른 PC 실기기 검증을 우선합니다. 기술·라이선스·실측 검증은 `docs/{LOCAL_WAV_ENGINE_0.11.54,DEFAULT_VOICE_EXPORT_0.11.56}.md`를 참조합니다.
 
 ## 보존 이력
 

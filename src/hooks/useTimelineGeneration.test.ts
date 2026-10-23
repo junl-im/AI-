@@ -44,6 +44,19 @@ const completedResult: TtsSynthesisResult = {
   realtimeFactor: 0.4,
 }
 
+it('쉼 길이를 안전 범위로 제한하고 편집 이력에서 되돌린다', () => {
+  const { result } = renderHook(() => useTimelineGeneration())
+  act(() => result.current.addPause())
+  const pauseId = result.current.blocks[0].id
+  act(() => result.current.updatePauseDuration(pauseId, 1.84))
+  expect(result.current.blocks[0]).toMatchObject({ kind: 'pause', durationSeconds: 1.8 })
+  expect(result.current.undoLabel).toBe('쉼 길이 조절')
+  act(() => result.current.undoEdit())
+  expect(result.current.blocks[0]).toMatchObject({ kind: 'pause', durationSeconds: 0.5 })
+  act(() => result.current.updatePauseDuration(pauseId, 99))
+  expect(result.current.blocks[0]).toMatchObject({ durationSeconds: 30 })
+})
+
 function audioResponse(value: string): Response {
   return new Response(new TextEncoder().encode(value), {
     status: 200,

@@ -26,6 +26,7 @@ interface TimelineVoiceBlockCardProps {
   onEdit: (id: string) => void
   onRetry: (id: string) => void
   onRemove: (id: string) => void
+  onOpenContextMenu?: (id: string, x: number, y: number) => void
 }
 
 export function TimelineVoiceBlockCard({
@@ -48,6 +49,7 @@ export function TimelineVoiceBlockCard({
   onEdit,
   onRetry,
   onRemove,
+  onOpenContextMenu,
 }: TimelineVoiceBlockCardProps) {
   const [blockMenuOpen, setBlockMenuOpen] = useState(false)
   const blockMenuId = `dubbing-block-menu-${voiceIndex + 1}`
@@ -111,7 +113,7 @@ export function TimelineVoiceBlockCard({
 
   return (
     <article
-      className={`soa-dubbing-block is-${block.status} ${selected ? 'is-selected' : ''} ${playbackActive ? 'is-playing' : ''} ${voiceUnavailable ? 'is-voice-unavailable' : ''}`}
+      className={`soa-dubbing-block is-${block.status} ${width < 150 ? 'is-compact' : ''} ${width < 90 ? 'is-micro' : ''} ${selected ? 'is-selected' : ''} ${playbackActive ? 'is-playing' : ''} ${voiceUnavailable ? 'is-voice-unavailable' : ''}`}
       style={{ '--soa-clip-width': `${width}px` } as CSSProperties}
       tabIndex={0}
       aria-current={selected ? 'true' : undefined}
@@ -128,6 +130,12 @@ export function TimelineVoiceBlockCard({
       title={block.text}
       aria-label={`클립 ${voiceIndex + 1} · ${block.voiceName} · ${formatDuration(block.durationSeconds)} · ${statusLabel}${voiceUnavailable ? ' · 사용 불가 목소리' : ''}`}
       onKeyDown={handleKeyboard}
+      onContextMenu={(event) => {
+        if ((event.target as HTMLElement).closest('textarea, input, [contenteditable="true"]')) return
+        event.preventDefault()
+        event.stopPropagation()
+        onOpenContextMenu?.(block.id, event.clientX, event.clientY)
+      }}
       onDoubleClick={(event) => {
         const target = event.target as HTMLElement
         if (target.closest('button, textarea, input, a, [contenteditable="true"]')) return
@@ -161,7 +169,7 @@ export function TimelineVoiceBlockCard({
       <header>
         <div className="soa-dubbing-block__voice">
           <span aria-hidden="true">{block.voiceName.slice(0, 1)}</span>
-          <div><strong>{block.voiceName}</strong><small>클립 {voiceIndex + 1}{voiceUnavailable ? ' · 사용 불가 목소리' : ''}</small></div>
+          <div><strong>{width < 90 ? `${voiceIndex + 1}번` : block.voiceName}</strong><small>클립 {voiceIndex + 1}{voiceUnavailable ? ' · 사용 불가 목소리' : ''}</small></div>
           {voiceUnavailable ? <em className="soa-dubbing-block__voice-warning">복구 필요</em> : null}
         </div>
         <div className="soa-dubbing-block__tools">

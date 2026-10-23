@@ -11,7 +11,6 @@ import { DubbingStudioHeader } from '../components/workspace/DubbingStudioHeader
 import { DubbingVoiceControls } from '../components/workspace/DubbingVoiceControls'
 import { LongformComposer } from '../components/workspace/LongformComposer'
 import { GeneratedAudioSave } from '../components/workspace/GeneratedAudioSave'
-import { createWorkspaceBundle, importWorkspaceBundle } from '../export/workspaceBundle'
 import { FinalExportDialog } from '../components/workspace/FinalExportDialog'
 import { SpeakerVoiceAssignmentPanel } from '../components/workspace/SpeakerVoiceAssignment'
 import { WorkspaceConversation } from '../components/workspace/WorkspaceConversation'
@@ -51,7 +50,7 @@ import {
   getRememberedSpeakerVoiceMap,
   rememberSpeakerVoiceAssignments,
 } from '../workspace/speakerVoiceMemory'
-import { clearWorkspaceSession, loadWorkspaceSession } from '../workspace/workspaceSessionRepository'
+import { clearWorkspaceSession } from '../workspace/workspaceSessionRepository'
 import { formatWorkspaceSavedLabel, generatedWorkspacePreview } from '../workspace/homeWorkspaceHelpers'
 import type { ComposerDirective, TimelineVoiceBlock, WorkspaceMessage } from '../workspace/workspaceTypes'
 import { normalizeVoicePitch, normalizeVoiceSpeed } from '../voice/voiceControlOptions'
@@ -351,23 +350,6 @@ export function HomePage() {
     onRestore: restoreWorkspaceSession,
     onPersistenceUnavailable: notifyPersistenceUnavailable,
   })
-  const exportWorkspaceBundle = useCallback(async () => {
-    await saveWorkspaceNow()
-    const { session } = await loadWorkspaceSession()
-    if (!session) throw new Error('백업할 작업공간을 찾지 못했습니다.')
-    return createWorkspaceBundle(session)
-  }, [saveWorkspaceNow])
-  const restoreWorkspaceBundle = useCallback(async (file: File) => {
-    const session = await importWorkspaceBundle(file)
-    clearQueue()
-    clearActiveProject()
-    setSelectedTimelineIds([])
-    setPendingGeneration(null)
-    setResumeGeneration(null)
-    const recoveryIds = restoreSession(session.blocks)
-    applyRestoredDraft(session, recoveryIds)
-    enterWorkspace('home')
-  }, [applyRestoredDraft, clearActiveProject, clearQueue, enterWorkspace, restoreSession])
   useLayoutEffect(() => {
     if (observedResetTokenRef.current === workspaceResetToken) return
     observedResetTokenRef.current = workspaceResetToken
@@ -1008,7 +990,7 @@ export function HomePage() {
           <main className="soa-dubbing-main">
             {!engineCatalog.loading && backendStatus === 'degraded' && engineCatalog.selected?.mode === 'browser' ? (
               <div className="soa-device-playback-note" role="status">
-                <p>이 PC는 기기 내장 음성으로 대사를 재생합니다. 남성·여성 성우는 성별이 확인된 한국어 음성만 사용합니다. 맞는 음성이 없으면 아래 저장 영역에서 다른 음색의 로컬 WAV를 만들 수 있습니다.</p>
+                <p>이 PC는 기기 내장 음성으로 대사를 재생합니다. 남성·여성 성우는 성별이 확인된 한국어 음성만 사용합니다. 맞는 음성이 없다면 한국어 시스템 음성을 설치하거나 음성 서버 연결을 확인해 주세요.</p>
                 {window.speechSynthesis.getVoices().length === 0 ? (
                   <p>브라우저 음성 목록을 불러오는 중입니다. 계속 비어 있으면 한국어 시스템 음성을 확인해 주세요.</p>
                 ) : null}
@@ -1079,8 +1061,7 @@ export function HomePage() {
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
             <GeneratedAudioSave blocks={timeline.blocks} localAudioSaveWarning={timeline.localAudioSaveWarning}
-              onOpenExport={() => setExportOpen(true)} onRenderLocalWav={timeline.renderLocalWav}
-              onExportWorkspace={exportWorkspaceBundle} onImportWorkspace={restoreWorkspaceBundle} />
+              onOpenExport={() => setExportOpen(true)} />
             <FinalExportDialog open={exportOpen} blocks={timeline.blocks} onClose={() => setExportOpen(false)} />
             {pendingProjectSave ? (
               <div role="alert" className="soa-project-save-recovery">
@@ -1107,6 +1088,7 @@ export function HomePage() {
               onRetry={(id) => void retryBlock(id)}
               onAddVoice={() => timeline.addVoiceBlock(buildOptions())}
               onAddPause={timeline.addPause}
+              onUpdatePauseDuration={timeline.updatePauseDuration}
               onRemove={timeline.removeBlock}
               onRemoveMany={timeline.removeBlocks}
               onBatchVoiceChange={async (ids, nextVoiceId, regenerate, reason = 'batch') => {

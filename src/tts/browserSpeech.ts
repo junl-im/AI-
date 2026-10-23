@@ -309,7 +309,7 @@ export function createBrowserSpeechResult(
   if (!selected) {
     throw new Error(
       `${preset.name}(${preset.gender === 'male' ? '남성' : preset.gender === 'female' ? '여성' : '중성'}) 프리셋과 맞는 한국어 시스템 음성을 찾지 못했습니다. `
-      + '성별 미확인·반대 성별 음성으로 자동 대체하지 않습니다. 아래 저장 영역에서 다른 음색의 로컬 WAV를 만들거나 운영체제에 맞는 한국어 음성을 설치해 주세요.',
+      + '성별 미확인·반대 성별 음성으로 자동 대체하지 않습니다. 운영체제에 맞는 한국어 음성을 설치하거나 음성 서버 연결을 확인해 주세요.',
     )
   }
   const playback = createBrowserSpeechPlayback(request)

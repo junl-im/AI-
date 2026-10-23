@@ -18,6 +18,7 @@ import {
   polishScriptForSpeech,
 } from '../../workspace/scriptPreparation'
 import type { WorkspaceMessage } from '../../workspace/workspaceTypes'
+import { useTextEditMenu } from './useTextEditMenu'
 
 
 const starterScripts = [
@@ -79,7 +80,7 @@ export function LongformComposer({
   onValueChange,
   onSubmit,
 }: LongformComposerProps) {
-  const editorRef = useRef<HTMLTextAreaElement>(null)
+  const { editorRef, editMenu, notice: editNotice, changeText, onTextChange, onTextKeyDown, onTextContextMenu } = useTextEditMenu(value, onValueChange, MAX_DUBBING_SCRIPT_LENGTH)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const alignEditorToMobileTop = useCallback((behavior: ScrollBehavior = 'smooth') => {
     const editor = editorRef.current
@@ -88,7 +89,7 @@ export function LongformComposer({
     const targetTop = Math.max(0, window.scrollY + rect.top - 68)
     if (Math.abs(rect.top - 68) < 10) return
     window.scrollTo({ top: targetTop, behavior })
-  }, [])
+  }, [editorRef])
   const alignEditorAfterFocus = useCallback(() => {
     window.requestAnimationFrame?.(() => alignEditorToMobileTop('smooth'))
     window.setTimeout(() => alignEditorToMobileTop('auto'), 220)
@@ -117,7 +118,7 @@ export function LongformComposer({
       viewport.removeEventListener('resize', realign)
       viewport.removeEventListener('scroll', realign)
     }
-  }, [alignEditorToMobileTop])
+  }, [alignEditorToMobileTop, editorRef])
 
   useEffect(() => {
     function focusEditorFromTyping(event: KeyboardEvent) {
@@ -140,13 +141,13 @@ export function LongformComposer({
       const start = editor.selectionStart ?? value.length
       const end = editor.selectionEnd ?? start
       const next = `${value.slice(0, start)}${event.key}${value.slice(end)}`.slice(0, MAX_DUBBING_SCRIPT_LENGTH)
-      onValueChange(next)
+      changeText(next)
       const caret = Math.min(start + event.key.length, next.length)
       window.requestAnimationFrame?.(() => editor.setSelectionRange(caret, caret))
     }
     window.addEventListener('keydown', focusEditorFromTyping)
     return () => window.removeEventListener('keydown', focusEditorFromTyping)
-  }, [disabled, onValueChange, value])
+  }, [changeText, disabled, editorRef, value])
 
   function submit() {
     const trimmed = value.trim()
@@ -155,6 +156,7 @@ export function LongformComposer({
   }
 
   function handleKeyDown(event: ReactKeyboardEvent<HTMLTextAreaElement>) {
+    if (onTextKeyDown(event)) return
     if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
       event.preventDefault()
       submit()
@@ -170,7 +172,7 @@ export function LongformComposer({
     const start = editor.selectionStart ?? value.length
     const end = editor.selectionEnd ?? start
     const next = `${value.slice(0, start)}${prepared}${value.slice(end)}`.slice(0, MAX_DUBBING_SCRIPT_LENGTH)
-    onValueChange(next)
+    changeText(next)
     const caret = Math.min(start + prepared.length, next.length)
     window.requestAnimationFrame?.(() => {
       editor.focus({ preventScroll: true })
@@ -187,7 +189,7 @@ export function LongformComposer({
 
   function polishCurrentScript() {
     const next = polishScriptForSpeech(value)
-    if (next !== value) onValueChange(next)
+    if (next !== value) changeText(next)
     window.requestAnimationFrame?.(() => editorRef.current?.focus({ preventScroll: true }))
   }
 
@@ -261,7 +263,8 @@ export function LongformComposer({
           ref={editorRef}
           id="sorion-content-editor"
           value={value}
-          onChange={(event) => onValueChange(event.target.value)}
+          onChange={onTextChange}
+          onContextMenu={onTextContextMenu}
           onFocus={alignEditorAfterFocus}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
@@ -272,6 +275,8 @@ export function LongformComposer({
           maxLength={MAX_DUBBING_SCRIPT_LENGTH}
           spellCheck="true"
         />
+        {editMenu}
+        {editNotice ? <span className="soa-text-edit-notice" role="status">{editNotice}</span> : null}
         <div id="sorion-script-stats" className="soa-dubbing-script__stats" aria-label="내용 통계">
           <span>{value.length.toLocaleString()} / {MAX_DUBBING_SCRIPT_LENGTH.toLocaleString()}자</span>
           <span>{stats.segments}개 대사</span>
