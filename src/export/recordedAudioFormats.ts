@@ -22,7 +22,7 @@ export function audioBufferToWav(audio: PcmAudio): Blob {
     pcm[index] = Math.round(sample * (sample < 0 ? 32768 : 32767))
   }
   if (peak < 0.002 || Math.sqrt(squareSum / audio.length) < 0.0002) {
-    throw new Error('녹음된 오디오가 무음입니다. WebM을 WAV로 변환해도 음성은 생기지 않습니다. 아래에서 스테레오 믹스·가상 루프백 같은 소리 입력 장치를 선택하거나 소리가 담긴 WebM 파일을 불러와 주세요.')
+    throw new Error('녹음된 오디오가 무음입니다. 소리가 없는 WebM은 WAV·MP3로 변환해도 음성이 생기지 않습니다.')
   }
   const buffer = new ArrayBuffer(44 + pcm.byteLength)
   const view = new DataView(buffer)

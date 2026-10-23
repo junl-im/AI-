@@ -4,8 +4,11 @@ import { recordedWebmToFiles } from '../../export/recordedAudioFormats'
 import { buildTimelineWav } from '../../export/timelineWav'
 import { wavToMp3 } from '../../export/wavToMp3'
 import { loadRecordedAudio, saveRecordedAudio } from '../../storage/recordedAudioRepository'
+import { captureBrowserSpeechWithWindowsLoopback, windowsCaptureAvailable } from '../../export/windowsLoopbackCapture'
 import type { TimelineBlock } from '../../workspace/workspaceTypes'
 import type { GeneratedAudio } from '../../tts/generationTypes'
+
+const WINDOWS_BRIDGE_DOWNLOAD = `${import.meta.env.BASE_URL}downloads/SoriON-Audio-Bridge-0.11.71-win-x64.zip`
 
 interface Props {
   blocks: TimelineBlock[]
@@ -34,6 +37,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   const [recordProgress, setRecordProgress] = useState('')
   const [recordError, setRecordError] = useState('')
   const [recordStorageError, setRecordStorageError] = useState('')
+  const [windowsCaptureReady, setWindowsCaptureReady] = useState(false)
   const [captureDevices, setCaptureDevices] = useState<MediaDeviceInfo[]>([])
   const [captureDeviceId, setCaptureDeviceId] = useState('default')
   const [captureOptionsOpen, setCaptureOptionsOpen] = useState(false)
@@ -63,6 +67,13 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
     if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
     Object.values(clipMp3Refs.current).forEach((url) => URL.revokeObjectURL(url))
+  }, [])
+  useEffect(() => {
+    const controller = new AbortController()
+    void windowsCaptureAvailable(controller.signal).then((ready) => {
+      if (!controller.signal.aborted) setWindowsCaptureReady(ready)
+    })
+    return () => controller.abort()
   }, [])
   const voices = blocks.filter((block) => block.kind === 'voice')
   const ready = voices.filter((block) => block.status === 'ready')
@@ -124,6 +135,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     && ready.every((block) => block.audio?.source === 'api' && block.audio.url && !block.audio.partial)
   const canRecordBrowser = voices.length > 0 && ready.length === voices.length
     && ready.every((block) => block.audio?.source === 'browser-speech' && block.audio.browserSpeech)
+  const silentRecording = recordError.startsWith('녹음된 오디오가 무음')
   const canRenderFileAudio = voices.length > 0 && voices.every((block) =>
     block.status !== 'generating'
     && (!block.audio || block.audio.source === 'browser-speech' || block.audio.source === 'browser-model'))
@@ -267,6 +279,40 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     }
   }
 
+  async function startWindowsRecording() {
+    const controller = new AbortController()
+    abortRef.current = controller
+    setRecordError('')
+    setRecordProgress('Windows 출력 소리를 클립별로 녹음합니다. 이 동안 다른 앱의 소리도 파일에 들어갈 수 있습니다.')
+    setRecording(true)
+    try {
+      const wav = await captureBrowserSpeechWithWindowsLoopback(blocks, controller.signal, (index, total) => {
+        setRecordProgress(`Windows 원본 음색 녹음 중 ${index}/${total}`)
+      })
+      if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
+      setRecordProgress('원본 음색 WAV를 MP3로 변환 중…')
+      const mp3 = await wavToMp3(wav)
+      if (controller.signal.aborted) throw new Error('녹음이 취소되었습니다.')
+      try { await saveRecordedAudio(recordingSignature, wav, mp3) }
+      catch { setRecordStorageError('파일은 준비됐지만 브라우저 저장소에 보관하지 못했습니다. 지금 내려받아 주세요.') }
+      if (recordedWavRef.current) URL.revokeObjectURL(recordedWavRef.current)
+      if (recordedMp3Ref.current) URL.revokeObjectURL(recordedMp3Ref.current)
+      recordedWavRef.current = URL.createObjectURL(wav)
+      recordedMp3Ref.current = URL.createObjectURL(mp3)
+      setRecordedWavUrl(recordedWavRef.current)
+      setRecordedMp3Url(recordedMp3Ref.current)
+      setRecordedSource('capture')
+      startDownload(recordedMp3Ref.current, 'sorion-default-voices.mp3')
+      setRecordProgress('원본 음색 MP3 다운로드를 시작했습니다. 아래에서 WAV도 받을 수 있습니다.')
+    } catch (error) {
+      setRecordError(error instanceof Error ? error.message : 'Windows 출력 소리 녹음에 실패했습니다.')
+      setRecordProgress('')
+    } finally {
+      abortRef.current = null
+      setRecording(false)
+    }
+  }
+
   async function importWebm(file: File) {
     const signature = recordingSignature
     setRecordError('')
@@ -341,14 +387,22 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         {fileAudioError ? <p role="alert">{fileAudioError}</p> : null}
       </div> : null}
       {canRecordBrowser || recordedWavUrl ? <div className="soa-generated-save__browser">
-        <strong>기본 성우 음색 그대로 저장</strong>
-        {canRecordBrowser ? <p>기기 성우가 대사를 다시 읽는 소리를 녹음해 WAV·MP3로 변환합니다. Chrome/Edge에서 현재 탭 또는 화면 전체의 오디오 공유가 필요합니다. PC에 따라 기기 성우 소리가 공유 오디오에 포함되지 않을 수 있습니다.</p> : null}
+        <strong>기본 성우 음색 그대로 저장 · 시스템 소리 캡처 필요</strong>
+        {canRecordBrowser ? <p>기기 성우가 대사를 다시 읽는 소리를 녹음해 WAV·MP3로 변환합니다. 브라우저와 PC가 성우 소리를 오디오 공유에 포함할 때만 가능합니다. 공유가 무음이면 같은 방식으로 반복해도 파일에 목소리가 담기지 않습니다.</p> : null}
+        {canRecordBrowser ? <p><a href={WINDOWS_BRIDGE_DOWNLOAD} download="SoriON-Audio-Bridge-0.11.71-win-x64.zip">Windows 보조 앱 다운로드 (약 50MB)</a> · 압축을 풀고 <code>SoriONAudioBridge.exe</code>를 실행한 뒤, 앱이 새로 연 소리온 페이지에서 저장하세요.</p> : null}
+        {canRecordBrowser && windowsCaptureReady ? <button type="button" disabled={recording} onClick={() => void startWindowsRecording()}>
+          {recording ? '원본 음색 녹음 중…' : 'Windows 보조 앱으로 원래 음색 MP3 저장'}
+        </button> : null}
+        {canRecordBrowser && !windowsCaptureReady ? <div>
+          <p>보조 앱이 연 소리온 페이지에서 Chrome/Edge의 ‘이 기기의 앱 접근’ 요청을 허용해 주세요. 연결되면 원래 음색 MP3 저장 버튼이 나타납니다.</p>
+          <button type="button" onClick={() => void windowsCaptureAvailable().then(setWindowsCaptureReady)}>Windows 보조 앱 연결 확인</button>
+        </div> : null}
         {canRecordBrowser ? <button type="button" disabled={recording} onClick={() => void startRecording()}>
-          {recording ? '기본 성우 녹음·변환 중…' : '기본 성우를 WAV·MP3로 저장'}
+          {recording ? '브라우저 공유 녹음 중…' : '브라우저 오디오 공유로 다시 시도'}
         </button> : null}
         {canRecordBrowser ? <div className="soa-generated-save__fallback">
-          <p>화면 공유 녹음이 무음이면 Windows의 ‘스테레오 믹스’나 가상 루프백 입력 장치를 선택해 다시 녹음할 수 있습니다. 스피커 소리를 마이크로 받는 경우 주변 소음도 녹음됩니다.</p>
-          <button type="button" disabled={recording} onClick={() => void listCaptureDevices()}>소리 입력 장치 선택</button>
+          <p>Windows에 스테레오 믹스나 가상 루프백 입력이 실제로 연결된 경우에만 입력 장치 녹음을 시도할 수 있습니다. 마이크로 스피커 소리를 받으면 주변 소음도 녹음됩니다.</p>
+          <button type="button" disabled={recording} onClick={() => void listCaptureDevices()}>시스템 소리 입력 장치 확인</button>
           {captureOptionsOpen ? <>
             <select aria-label="녹음할 소리 입력 장치" value={captureDeviceId} onChange={(event) => setCaptureDeviceId(event.target.value)}>
               <option value="default">Windows 기본 입력 장치</option>
@@ -365,7 +419,18 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         </div> : null}
         {recording ? <button type="button" onClick={() => abortRef.current?.abort()}>녹음 취소</button> : null}
         {recordProgress ? <p role="status">{recordProgress}</p> : null}
-        {recordError ? <p role="alert">{recordError}</p> : null}
+        {recordError ? <div role="alert" className="soa-generated-save__record-error">
+          <p>{recordError}</p>
+          {silentRecording && canRenderFileAudio && onRenderFileAudio ? <>
+            <p>지금 MP3 파일이 필요하면 아래에서 파일 음성 엔진으로 다시 만드세요. 기존 기본 성우와 음색이 달라집니다.</p>
+            {windowsCaptureReady && canRecordBrowser ? <button type="button" disabled={recording} onClick={() => void startWindowsRecording()}>
+              원래 음색으로 다시 녹음
+            </button> : null}
+            <button type="button" disabled={renderingFileAudio} onClick={() => void renderDownloadableVoice('mp3')}>
+              {renderingFileAudio ? '파일 음성 생성 중…' : '다른 음색으로 MP3 바로 만들기'}
+            </button>
+          </> : null}
+        </div> : null}
         {recordStorageError ? <p role="alert">{recordStorageError}</p> : null}
         {recordedWavUrl && recordedMp3Url ? <div className="soa-generated-save__preview">
           <audio controls src={recordedWavUrl} aria-label={recordedSource === 'import' ? '가져온 WebM 변환 미리 듣기' : '기본 성우 녹음 미리 듣기'} />

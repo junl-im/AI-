@@ -49,3 +49,5 @@ outputs/
 
 # Permanently retired brand artifact (PNG is the only source of truth)
 /public/sorion-icon.svg
+**/bin/
+**/obj/

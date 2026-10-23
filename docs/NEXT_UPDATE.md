@@ -1,14 +1,15 @@
 # NEXT UPDATE
 
-현재 기준: 0.11.70 · Direct MP3 Save
+현재 기준: 0.11.71 · Windows Original Voice Capture
 
 ## 목표 버전
 
-0.11.71 · Edge & Cross-PC Download Verification
+0.11.72 · Browser Voice End-to-End QA
 
-- 승인된 원본 5성우 음성 자산·권리 또는 Windows 로컬 파일 엔진을 검증해 기존 기기 성우 음색을 유지한 WAV/MP3 출력 가능 범위를 확인합니다. Web Speech의 무음 WebM은 변환해도 복구되지 않습니다.
-- Edge의 헤드리스 실행 문제를 해결하거나 실제 Edge 창에서 대기·실패 대사 직접 파일 생성과 WAV·MP3 저장을 확인합니다. 다른 PC의 Chrome/Edge에서도 첫 모델 로드와 Dock 재생을 실기기로 점검합니다.
-- 파일 생성 실패가 네트워크·모델 로딩·메모리·저장 제한 중 어디서 발생했는지 안내하고, 부분 완료 대사를 보존하는 동선을 검증합니다.
+- 배포된 Pages의 실제 저장 버튼을 사용자 PC와 다른 PC의 Chrome/Edge에서 클릭하고, **선택한 기본 성우**의 WAV/MP3 다운로드·청취·음색 일치를 검증합니다. 0.11.71의 Chrome 로컬 개발 페이지 `sori-warm`→Heami MP3 성공을 기준으로 삼습니다. 다른 PC의 Dock·타임라인 재생 연결도 확인합니다.
+- 보조 앱에 녹음 신호·출력 장치 진단을 추가하고, 실패가 성우 재생·장치 출력·로컬 연결·MP3 변환 중 어디서 생겼는지 구별합니다.
+- 클립 재생 종료 전후 불필요한 정적 구간을 다듬고, 긴 대사/여러 클립의 녹음 크기·시간·취소 복구를 실측합니다.
+- NAudio 3 최신 `WasapiRecorder`로 이전해 레거시 API 경고를 없애되 동일 출력 신호 검증을 반복합니다.
 
-예상 영역: Edge 실기기 검증, 원본 음색 엔진 조사/연결, 파일 생성 오류 진단, 다른 PC QA.
-선행 조건: 승인 음성 자산·권리 또는 Windows 로컬 엔진 배포 방식, 실제 다른 PC 접근. 로컬 모델은 음색이 다르고 첫 다운로드와 메모리 제한이 남습니다.
+예상 영역: `tools/windows-audio-bridge`, `src/export/windowsLoopbackCapture.ts`, `GeneratedAudioSave`, Windows Chrome/Edge 실기기 QA.
+선행 조건: 사용자 PC와 다른 Windows PC에서 설치된 음성 목록 및 실제 청취 검증. 성우 다섯 음색은 각 PC의 음성 설치 상태에 의존하며, 보조 앱이 설치되지 않은 음색을 새로 합성하지는 않습니다. 시스템 믹스에는 다른 앱의 소리가 함께 들어갈 수 있습니다.

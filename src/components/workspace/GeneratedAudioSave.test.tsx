@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { TimelineBlock, TimelineVoiceBlock } from '../../workspace/workspaceTypes'
 import { GeneratedAudioSave } from './GeneratedAudioSave'
 
@@ -9,8 +9,16 @@ const conversion = vi.hoisted(() => ({ recordedWebmToFiles: vi.fn() }))
 vi.mock('../../export/recordedAudioFormats', () => conversion)
 const recording = vi.hoisted(() => ({ recordBrowserSpeech: vi.fn() }))
 vi.mock('../../export/recordBrowserSpeech', () => recording)
+const windowsCapture = vi.hoisted(() => ({ windowsCaptureAvailable: vi.fn().mockResolvedValue(false), captureBrowserSpeechWithWindowsLoopback: vi.fn() }))
+vi.mock('../../export/windowsLoopbackCapture', () => windowsCapture)
 const fullWav = vi.hoisted(() => ({ buildTimelineWav: vi.fn() }))
 vi.mock('../../export/timelineWav', () => fullWav)
+
+afterEach(() => {
+  vi.restoreAllMocks()
+  vi.unstubAllGlobals()
+  vi.clearAllMocks()
+})
 
 const voice: TimelineVoiceBlock = {
   id: 'v1', kind: 'voice', text: '안녕하세요.', voiceId: 'sori-warm', voiceName: '혜린',
@@ -45,11 +53,32 @@ describe('GeneratedAudioSave', () => {
     render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
     expect(screen.queryByRole('button', { name: '전체 음성 MP3로 저장' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /음성 파일 다운로드/ })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '기본 성우를 WAV·MP3로 저장' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '소리 입력 장치 선택' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '브라우저 오디오 공유로 다시 시도' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Windows 보조 앱 다운로드/ })).toHaveAttribute('href',
+      expect.stringContaining('downloads/SoriON-Audio-Bridge-0.11.71-win-x64.zip'))
+    expect(screen.getByRole('button', { name: '시스템 소리 입력 장치 확인' })).toBeInTheDocument()
     expect(screen.getByLabelText('소리가 담긴 WebM 불러오기')).toHaveAttribute('accept', '.webm,audio/webm,video/webm')
     expect(screen.queryByRole('button', { name: /다른 음색으로 WAV 만들기/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: '대본 TXT 다운로드' })).not.toBeInTheDocument()
+  })
+
+  it('Windows 보조 앱이 연결되면 기본 성우 음성을 MP3로 내려받는다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
+      text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
+    } } }
+    const wav = new Blob(['RIFF'], { type: 'audio/wav' })
+    windowsCapture.windowsCaptureAvailable.mockResolvedValueOnce(true)
+    windowsCapture.captureBrowserSpeechWithWindowsLoopback.mockResolvedValueOnce(wav)
+    mp3.wavToMp3.mockResolvedValueOnce(new Blob(['mp3'], { type: 'audio/mpeg' }))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValueOnce('blob:windows-wav').mockReturnValueOnce('blob:windows-mp3')
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Windows 보조 앱으로 원래 음색 MP3 저장' }))
+    await waitFor(() => expect(click).toHaveBeenCalledOnce())
+    expect(windowsCapture.captureBrowserSpeechWithWindowsLoopback).toHaveBeenCalledWith([block], expect.any(AbortSignal), expect.any(Function))
+    expect(mp3.wavToMp3).toHaveBeenCalledWith(wav)
+    expect(screen.getByRole('link', { name: '기본 성우 MP3 다운로드' })).toHaveAttribute('href', 'blob:windows-mp3')
+    click.mockRestore()
   })
 
   it('기기 내 모델 WAV는 대사별 다운로드와 전체 파일 다운로드를 보여준다', () => {
@@ -101,7 +130,7 @@ describe('GeneratedAudioSave', () => {
     const { rerender } = render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
     expect(screen.getByRole('button', { name: '파일 음성으로 생성해 WAV 저장' })).toBeInTheDocument()
     expect(screen.getByText(/기존 기기 성우와 음색이 달라집니다/)).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '기본 성우를 WAV·MP3로 저장' }))
+    fireEvent.click(screen.getByRole('button', { name: '브라우저 오디오 공유로 다시 시도' }))
     await waitFor(() => expect(recording.recordBrowserSpeech).toHaveBeenCalled())
     await waitFor(() => expect(screen.getByRole('button', { name: '파일 음성으로 생성해 WAV 저장' })).toBeInTheDocument())
     expect(screen.getByText(/기존 기기 성우와 음색이 달라집니다/)).toBeInTheDocument()
@@ -109,6 +138,31 @@ describe('GeneratedAudioSave', () => {
     await waitFor(() => expect(renderFileAudio).toHaveBeenCalledWith('v1', expect.any(AbortSignal), expect.any(Function)))
     await waitFor(() => expect(fullWav.buildTimelineWav).toHaveBeenCalled())
     expect(click).toHaveBeenCalledOnce()
+    click.mockRestore()
+  })
+
+  it('무음 녹음 오류에서 음색 변경을 밝히고 MP3 직접 생성으로 이어진다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, url: null, source: 'browser-speech', browserSpeech: {
+      text: voice.text, lang: 'ko-KR', rate: 1, pitch: 1, voiceId: voice.voiceId,
+    } } }
+    recording.recordBrowserSpeech.mockRejectedValueOnce(new Error('녹음된 오디오가 무음입니다.'))
+    fullWav.buildTimelineWav.mockResolvedValue(new Blob(['RIFF'], { type: 'audio/wav' }))
+    mp3.wavToMp3.mockResolvedValue(new Blob(['mp3'], { type: 'audio/mpeg' }))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:recovered-mp3')
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const renderFileAudio = vi.fn().mockImplementation(async () => {
+      rerender(<GeneratedAudioSave blocks={[{ ...block, audio: {
+        ...block.audio!, source: 'browser-model', url: 'blob:local-wav', filename: 'local.wav',
+      } }]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
+      return { source: 'browser-model', url: 'blob:local-wav' }
+    })
+    const { rerender } = render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
+    fireEvent.click(screen.getByRole('button', { name: '브라우저 오디오 공유로 다시 시도' }))
+    expect(await screen.findByRole('button', { name: '다른 음색으로 MP3 바로 만들기' })).toBeInTheDocument()
+    expect(screen.getByText(/기존 기본 성우와 음색이 달라집니다/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '다른 음색으로 MP3 바로 만들기' }))
+    await waitFor(() => expect(click).toHaveBeenCalledOnce())
+    expect(mp3.wavToMp3).toHaveBeenCalled()
     click.mockRestore()
   })
 
@@ -150,8 +204,8 @@ describe('GeneratedAudioSave', () => {
     })
     const { rerender } = render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} onRenderFileAudio={renderFileAudio} />)
     fireEvent.click(screen.getByRole('button', { name: '파일 음성으로 생성해 MP3 저장' }))
-    await waitFor(() => expect(mp3.wavToMp3).toHaveBeenCalled())
-    expect(click).toHaveBeenCalledOnce()
+    await waitFor(() => expect(click).toHaveBeenCalledOnce())
+    expect(mp3.wavToMp3).toHaveBeenCalled()
     expect(screen.getByRole('link', { name: 'MP3 다시 다운로드' })).toHaveAttribute('href', 'blob:full-mp3')
     click.mockRestore()
   })

@@ -247,6 +247,9 @@
 .soa-generated-save__file-recovery { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 12px 0; padding: 14px; border: 1px solid #9977b5; border-radius: 12px; color: #332740; background: #f6effb; }
 .soa-generated-save__file-recovery p { flex-basis: 100%; margin: 0; line-height: 1.55; }
 .soa-generated-save__file-recovery button { min-height: 42px; }
+.soa-generated-save__record-error { margin: 12px 0; padding: 12px; border: 1px solid #b76c72; border-radius: 11px; color: #542d33; background: #fff3f3; }
+.soa-generated-save__record-error p { margin: 0 0 8px; }
+.soa-generated-save__record-error button { min-height: 42px; }
 @media (max-width: 560px) {
   .soa-app-root.is-editor .soa-dubbing-toolbar__actions .soa-download-entry { min-width: 42px; padding: 0 8px; }
   .soa-download-entry span { display: none; }

@@ -596,3 +596,9 @@ CI 다중 화면 fixture를 IndexedDB 스키마 5에 맞춰 Pages 배포 게이�
 ## 0.11.70 · Direct MP3 Save
 
 대기·실패 대사에서 로컬 파일 엔진을 실행할 때 WAV 또는 MP3를 처음부터 선택하도록 했습니다. Chrome에서 MP3 단일 클릭 실제 다운로드를 확인했습니다. Edge 실측은 실행 환경 문제로 미검증입니다. 0.11.69에서 Edge가 통과했다는 이전 대화 보고는 Chrome 고정 하네스로 인한 오류이며 `docs/FILE_DOWNLOAD_SMOKE_0.11.70.md`에서 바로잡았습니다.
+## 0.11.71 · Silent Capture Recovery
+
+무음 녹음은 WAV/MP3 변환으로 복구할 수 없으므로 저장 오류에서 다른 음색의 로컬 MP3 생성으로 직접 이어지게 했습니다. 원본 음색 저장 UI의 오디오 캡처 조건을 명시했습니다. 이 PC의 Windows 한국어 파일 합성 음성은 Heami 한 종류만 확인돼 다섯 기본 성우의 동일 음색 파일 출력은 아직 구현할 수 없습니다. 진단 근거는 `docs/DEFAULT_VOICE_EXPORT_DIAG_0.11.71.md`에 있습니다.
+## 0.11.71 · Windows Original Voice Capture
+
+화면 공유가 무음인 Windows PC에서 기본 성우가 실제 출력한 소리를 저장할 수 있도록 WASAPI 루프백 보조 앱과 웹 MP3 저장 버튼을 연결했습니다. 보조 앱 ZIP을 사이트에서 직접 받습니다. Chrome 로컬 개발 페이지에서 `sori-warm`이 Heami로 선택된 뒤 실제 MP3 파일을 다운로드하고 재디코딩해 무음이 아님을 확인했습니다. 배포된 Pages 버튼 직접 클릭과 다른 PC·Edge 실기기는 다음 단계입니다. 기술·보안 경계는 `docs/DEFAULT_VOICE_EXPORT_DIAG_0.11.71.md`에 기록했습니다.
