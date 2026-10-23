@@ -397,9 +397,10 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
         {fileAudioError ? <p role="alert">{fileAudioError}</p> : null}
       </div> : null}
       {canRecordBrowser || recordedWavUrl ? <div className="soa-generated-save__browser">
-        <strong>기본 성우 음색 그대로 저장 · 시스템 소리 캡처 필요</strong>
-        {canRecordBrowser ? <p>기기 성우가 대사를 다시 읽는 소리를 녹음해 WAV·MP3로 변환합니다. 브라우저와 PC가 성우 소리를 오디오 공유에 포함할 때만 가능합니다. 공유가 무음이면 같은 방식으로 반복해도 파일에 목소리가 담기지 않습니다.</p> : null}
+        <strong>기본 성우 음색 그대로 MP3·WAV 저장</strong>
+        {canRecordBrowser ? <p>Windows 보조 앱은 이 PC의 스피커 출력 소리를 직접 녹음합니다. 화면 공유는 필요하지 않습니다. 기본 성우 소리가 실제로 들리는 출력 장치를 사용하고, 녹음 중 다른 앱 소리는 꺼 주세요.</p> : null}
         {canRecordBrowser ? <p><a href={WINDOWS_BRIDGE_DOWNLOAD} download="SoriON-Audio-Bridge-0.11.71-win-x64.zip">Windows 보조 앱 다운로드 (약 50MB)</a> · 압축을 풀고 <code>SoriONAudioBridge.exe</code>를 실행한 뒤, 앱이 새로 연 소리온 페이지에서 저장하세요.</p> : null}
+        {canRecordBrowser && windowsCaptureReady ? <p role="status" className="soa-generated-save__connected">Windows 보조 앱 연결됨 · 원본 음색 파일을 저장할 수 있습니다.</p> : null}
         {canRecordBrowser && windowsCaptureReady ? <button type="button" disabled={recording} onClick={() => void startWindowsRecording()}>
           {recording ? '원본 음색 녹음 중…' : 'Windows 보조 앱으로 원래 음색 MP3 저장'}
         </button> : null}
@@ -407,10 +408,13 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
           <p role="status">{windowsCaptureError || '보조 앱 연결을 확인 중입니다.'}</p>
           <button type="button" onClick={() => void checkWindowsCapture()}>Windows 보조 앱 연결 확인</button>
         </div> : null}
-        {canRecordBrowser ? <button type="button" disabled={recording} onClick={() => void startRecording()}>
-          {recording ? '브라우저 공유 녹음 중…' : '브라우저 오디오 공유로 다시 시도'}
-        </button> : null}
-        {canRecordBrowser ? <div className="soa-generated-save__fallback">
+        {canRecordBrowser ? <details className="soa-generated-save__alternatives">
+          <summary>다른 녹음 방법 보기</summary>
+          <p>보조 앱을 쓸 수 없을 때만 화면 공유 녹음을 시도하세요. 브라우저나 PC가 기기 성우 소리를 공유 오디오에 포함하지 않으면 결과가 무음일 수 있습니다.</p>
+          <button type="button" disabled={recording} onClick={() => void startRecording()}>
+            {recording ? '브라우저 공유 녹음 중…' : '브라우저 오디오 공유로 저장 시도'}
+          </button>
+          <div className="soa-generated-save__fallback">
           <p>Windows에 스테레오 믹스나 가상 루프백 입력이 실제로 연결된 경우에만 입력 장치 녹음을 시도할 수 있습니다. 마이크로 스피커 소리를 받으면 주변 소음도 녹음됩니다.</p>
           <button type="button" disabled={recording} onClick={() => void listCaptureDevices()}>시스템 소리 입력 장치 확인</button>
           {captureOptionsOpen ? <>
@@ -426,7 +430,8 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
             <input type="file" accept=".webm,audio/webm,video/webm" aria-label="소리가 담긴 WebM 불러오기"
               onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file) void importWebm(file); event.currentTarget.value = '' }} />
           </label>
-        </div> : null}
+          </div>
+        </details> : null}
         {recording ? <button type="button" onClick={() => abortRef.current?.abort()}>녹음 취소</button> : null}
         {recordProgress ? <p role="status">{recordProgress}</p> : null}
         {recordError ? <div role="alert" className="soa-generated-save__record-error">

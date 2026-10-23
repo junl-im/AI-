@@ -606,3 +606,7 @@ CI 다중 화면 fixture를 IndexedDB 스키마 5에 맞춰 Pages 배포 게이�
 ## 0.11.72 · Windows Helper Connection Recovery
 
 보조 앱 연결 토큰을 앱 시작 시 세션에 보관하고 저장 화면에서 연결 실패 원인을 표시합니다. Windows 보조 앱 바이너리는 0.11.71과 동일합니다. 배포 사이트 실제 버튼·다른 PC·Edge 실측은 남아 있습니다.
+
+## 0.11.73 · Public Voice Download QA
+
+이 PC의 Chrome·Edge에서 공개 Pages의 실제 원본 음색 MP3 저장 버튼을 눌러 각각 유효한 음성 파일을 다운로드했습니다. Chrome은 WAV 링크 다운로드도 확인했습니다. Windows 보조 앱과 화면 공유 녹음의 안내를 분리하고 대체 녹음 방법을 접었습니다. 다른 PC와 프리셋별 청감 검증은 남아 있습니다. `docs/PUBLIC_VOICE_DOWNLOAD_0.11.73.md` 참조.
