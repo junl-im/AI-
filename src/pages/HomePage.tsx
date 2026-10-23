@@ -1061,6 +1061,11 @@ export function HomePage() {
               onSubmit={(value) => void handleLongformSubmit(value)}
             />
             <GeneratedAudioSave blocks={timeline.blocks} localAudioSaveWarning={timeline.localAudioSaveWarning}
+              onPrepareFileAudio={() => {
+                setPendingGeneration(null)
+                setResumeGeneration(null)
+                timeline.cancelAllGeneration()
+              }}
               onOpenExport={() => setExportOpen(true)} onRenderFileAudio={timeline.renderLocalWav} />
             <FinalExportDialog open={exportOpen} blocks={timeline.blocks} onClose={() => setExportOpen(false)} />
             {pendingProjectSave ? (

@@ -11,6 +11,7 @@ interface Props {
   blocks: TimelineBlock[]
   localAudioSaveWarning?: string | null
   onOpenExport: () => void
+  onPrepareFileAudio?: () => void
   onRenderFileAudio?: (blockId: string, signal: AbortSignal, onProgress: (message: string) => void) => Promise<GeneratedAudio>
 }
 
@@ -23,7 +24,7 @@ function startDownload(url: string, filename: string) {
   link.remove()
 }
 
-export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport, onRenderFileAudio }: Props) {
+export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport, onPrepareFileAudio, onRenderFileAudio }: Props) {
   const [recording, setRecording] = useState(false)
   const [renderingFileAudio, setRenderingFileAudio] = useState(false)
   const [fileAudioProgress, setFileAudioProgress] = useState('')
@@ -123,8 +124,9 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     && ready.every((block) => block.audio?.source === 'api' && block.audio.url && !block.audio.partial)
   const canRecordBrowser = voices.length > 0 && ready.length === voices.length
     && ready.every((block) => block.audio?.source === 'browser-speech' && block.audio.browserSpeech)
-  const canRenderFileAudio = voices.length > 0 && ready.length === voices.length
-    && ready.every((block) => block.audio?.source === 'browser-speech' || block.audio?.source === 'browser-model')
+  const canRenderFileAudio = voices.length > 0 && voices.every((block) =>
+    block.status !== 'generating'
+    && (!block.audio || block.audio.source === 'browser-speech' || block.audio.source === 'browser-model'))
   const canExportLocalWav = voices.length > 0 && ready.length === voices.length
     && ready.every((block) => block.audio?.source === 'browser-model' && block.audio.url)
   useEffect(() => {
@@ -143,9 +145,10 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     setFileAudioProgress('파일 음성 엔진을 준비합니다. 첫 실행 시 약 380MB 모델 다운로드가 필요합니다.')
     setRenderingFileAudio(true)
     try {
+      onPrepareFileAudio?.()
       for (const [index, block] of voices.entries()) {
         if (controller.signal.aborted) throw new Error('파일 음성 생성이 취소되었습니다.')
-        if (block.kind !== 'voice' || block.audio?.source === 'browser-model') continue
+        if (block.kind !== 'voice' || (block.audio?.source === 'browser-model' && block.audio.url)) continue
         await onRenderFileAudio(block.id, controller.signal, (message) => {
           setFileAudioProgress(`대사 ${index + 1}/${voices.length} · ${message}`)
         })
@@ -325,7 +328,7 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       </div> : null}
       {onRenderFileAudio && canRenderFileAudio && (!canExportLocalWav || fileAudioError || renderingFileAudio) ? <div className="soa-generated-save__file-recovery">
         <strong>파일 다운로드가 우선이라면</strong>
-        <p>녹음 없이 한국어 음성을 WAV 파일로 직접 만듭니다. 기존 기기 성우와 음색이 달라집니다. 첫 실행에는 약 380MB 모델 다운로드가 필요합니다.</p>
+        <p>대사가 아직 준비 중이거나 기기 성우 생성에 실패해도 녹음 없이 한국어 WAV를 직접 만듭니다. 기존 기기 성우와 음색이 달라집니다. 첫 실행에는 약 380MB 모델 다운로드가 필요합니다.</p>
         <button type="button" disabled={renderingFileAudio} onClick={() => void renderDownloadableVoice()}>
           {renderingFileAudio ? '파일 음성 생성 중…' : '파일 음성으로 생성해 WAV 저장'}
         </button>
@@ -372,7 +375,9 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       ) : canRecordBrowser || canExportLocalWav ? null : (
         <p className="soa-generated-save__limit" role="note">
           {voices.length === 0 ? '먼저 대사를 입력하고 ‘대사로 만들기’를 눌러 주세요.'
-            : '전체 음성 저장은 대사를 모두 서버 음원 또는 기기 내 WAV로 완성한 뒤 사용할 수 있습니다. 완성된 클립은 위에서 개별 다운로드할 수 있습니다.'}
+            : canRenderFileAudio && onRenderFileAudio
+              ? '위의 파일 음성 생성 버튼으로 대사를 WAV로 만든 뒤 전체 WAV·MP3를 다운로드할 수 있습니다.'
+              : '전체 음성 저장은 대사를 모두 서버 음원 또는 기기 내 WAV로 완성한 뒤 사용할 수 있습니다. 완성된 클립은 위에서 개별 다운로드할 수 있습니다.'}
         </p>
       )}
     </section>

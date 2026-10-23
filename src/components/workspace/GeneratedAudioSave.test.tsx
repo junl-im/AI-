@@ -124,6 +124,17 @@ describe('GeneratedAudioSave', () => {
     expect(recording.recordBrowserSpeech).not.toHaveBeenCalled()
   })
 
+  it.each(['queued', 'failed'] as const)('기기 성우가 %s 상태여도 파일 음성으로 저장을 시작한다', async (status) => {
+    const block: TimelineBlock = { ...voice, status, audio: null, trackId: null, error: status === 'failed' ? '성우 없음' : null }
+    const prepare = vi.fn()
+    const renderFileAudio = vi.fn().mockResolvedValue({ source: 'browser-model', url: 'blob:local-wav' })
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()}
+      onPrepareFileAudio={prepare} onRenderFileAudio={renderFileAudio} />)
+    fireEvent.click(screen.getByRole('button', { name: '파일 음성으로 생성해 WAV 저장' }))
+    await waitFor(() => expect(renderFileAudio).toHaveBeenCalledWith('v1', expect.any(AbortSignal), expect.any(Function)))
+    expect(prepare).toHaveBeenCalledOnce()
+  })
+
   it('기기 내 모델 클립을 MP3로 변환하면 다운로드를 시작하고 재다운로드 링크를 남긴다', async () => {
     const block: TimelineBlock = {
       ...voice,
