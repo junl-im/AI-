@@ -2002,3 +2002,7 @@ GitHub Actions의 Chromium 시작 15초 제한으로 두 번 실패한 화면 �
 ## 0.11.74 · Windows Output Diagnostics
 
 Windows 보조 앱이 현재 기본 출력 장치 이름과 상태·버전을 보고합니다. 무음 녹음 오류에는 캡처 장치와 신호 피크를 포함하며, 웹 저장 화면에도 연결된 출력 장치를 표시합니다. 새 자체 포함 x64 보조 앱 ZIP을 사이트에서 내려받습니다. 이 PC의 공개 Pages 버튼으로 새 보조 앱의 MP3/WAV를 실제 다운로드해 유효한 음성 신호를 확인했습니다. 다른 PC 실측과 NAudio 녹음 API 이전은 남아 있습니다. `docs/WINDOWS_CAPTURE_DIAG_0.11.74.md` 참조.
+
+## 0.11.75 · Multi-Clip Capture Recovery
+
+기본 성우 녹음 취소가 마지막 짧은 대기 중에도 즉시 반영되게 했고, 중단된 로컬 요청을 연결 실패로 잘못 안내하지 않습니다. 공개 Pages의 실제 저장 버튼으로 7개 클립·26초 MP3와 WAV 파일을 확인했고, 보조 앱의 시작→취소→다시 시작도 실측했습니다. Windows 보조 앱 실행 파일은 0.11.74를 그대로 사용합니다. 상세 조건은 `docs/LONG_CAPTURE_RECOVERY_0.11.75.md`에 기록했습니다.

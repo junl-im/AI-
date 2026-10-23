@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { readWindowsCaptureToken, windowsCaptureAvailable, windowsCaptureStatus } from './windowsLoopbackCapture'
+import { captureBrowserSpeechWithWindowsLoopback, readWindowsCaptureToken, windowsCaptureAvailable, windowsCaptureStatus } from './windowsLoopbackCapture'
+
+const speech = vi.hoisted(() => ({ waitForSpeech: vi.fn() }))
+vi.mock('./recordBrowserSpeech', () => speech)
 
 afterEach(() => {
   window.sessionStorage.clear()
   window.history.replaceState(null, '', '/')
   vi.unstubAllGlobals()
+  vi.clearAllMocks()
 })
 
 describe('Windows 오디오 보조 앱 연결', () => {
@@ -38,5 +42,28 @@ describe('Windows 오디오 보조 앱 연결', () => {
     const status = await windowsCaptureStatus()
     expect(status.ready).toBe(false)
     expect(status.error).toContain('보조 앱을 다시 실행')
+  })
+
+  it('음성 녹음 취소 시 보조 앱의 활성 캡처를 해제한다', async () => {
+    window.history.replaceState(null, '', `/?sorion-capture-token=${'B'.repeat(48)}`)
+    const controller = new AbortController()
+    const fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (url.endsWith('/capture/start')) return { ok: true }
+      if (url.endsWith('/capture/cancel')) return { ok: true }
+      throw new Error(`예상하지 못한 요청: ${url}`)
+    })
+    vi.stubGlobal('fetch', fetch)
+    vi.stubGlobal('AudioContext', class { close = vi.fn() })
+    vi.stubGlobal('speechSynthesis', { cancel: vi.fn() })
+    speech.waitForSpeech.mockImplementation((_block: unknown, signal: AbortSignal) => new Promise((_resolve, reject) => {
+      signal.addEventListener('abort', () => reject(new Error('녹음이 취소되었습니다.')), { once: true })
+    }))
+    const block = { kind: 'voice', id: 'voice-1' } as Parameters<typeof captureBrowserSpeechWithWindowsLoopback>[0][number]
+    const recording = captureBrowserSpeechWithWindowsLoopback([block], controller.signal, vi.fn())
+    await vi.waitFor(() => expect(speech.waitForSpeech).toHaveBeenCalledOnce())
+    controller.abort()
+    await expect(recording).rejects.toThrow('녹음이 취소되었습니다.')
+    expect(fetch).toHaveBeenCalledWith('http://127.0.0.1:18717/capture/cancel', expect.any(Object))
+    expect(fetch).not.toHaveBeenCalledWith('http://127.0.0.1:18717/capture/stop', expect.any(Object))
   })
 })

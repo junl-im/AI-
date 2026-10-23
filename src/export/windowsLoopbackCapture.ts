@@ -32,6 +32,7 @@ async function bridgeRequest(path: string, signal?: AbortSignal): Promise<Respon
       targetAddressSpace: 'loopback',
     } as RequestInit & { targetAddressSpace: 'loopback' })
   } catch {
+    if (signal?.aborted) throw new Error('녹음이 취소되었습니다.')
     throw new Error('Windows 오디오 보조 앱에 연결하지 못했습니다. 앱 창을 확인하고 Chrome/Edge에서 이 사이트의 ‘이 기기의 앱 접근’ 권한을 허용해 주세요.')
   }
   if (!response.ok) {
@@ -66,6 +67,21 @@ export async function windowsCaptureAvailable(signal?: AbortSignal): Promise<boo
   return (await windowsCaptureStatus(signal)).ready
 }
 
+function waitForCaptureTail(signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) { reject(new Error('녹음이 취소되었습니다.')); return }
+    const abort = () => {
+      window.clearTimeout(timer)
+      reject(new Error('녹음이 취소되었습니다.'))
+    }
+    const timer = window.setTimeout(() => {
+      signal.removeEventListener('abort', abort)
+      resolve()
+    }, 150)
+    signal.addEventListener('abort', abort, { once: true })
+  })
+}
+
 export async function captureBrowserSpeechWithWindowsLoopback(
   blocks: TimelineBlock[],
   signal: AbortSignal,
@@ -85,8 +101,9 @@ export async function captureBrowserSpeechWithWindowsLoopback(
       await bridgeRequest('/capture/start', signal)
       try {
         await waitForSpeech(block, signal)
-        await new Promise((resolve) => window.setTimeout(resolve, 150))
+        await waitForCaptureTail(signal)
         const captured = await (await bridgeRequest('/capture/stop', signal)).arrayBuffer()
+        if (signal.aborted) throw new Error('녹음이 취소되었습니다.')
         const decoded = await context.decodeAudioData(captured)
         const wav = audioBufferToWav(decoded)
         parts.push({ audio: await wav.arrayBuffer() })
@@ -96,6 +113,7 @@ export async function captureBrowserSpeechWithWindowsLoopback(
         throw error
       }
     }
+    if (signal.aborted) throw new Error('녹음이 취소되었습니다.')
     return combineTimelinePcmWav(parts)
   } finally {
     await context.close()

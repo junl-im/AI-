@@ -614,3 +614,7 @@ CI 다중 화면 fixture를 IndexedDB 스키마 5에 맞춰 Pages 배포 게이�
 ## 0.11.74 · Windows Output Diagnostics
 
 Windows 보조 앱의 상태에 기본 출력 장치 이름·상태·버전을 추가하고, 무음 오류에 녹음 장치·신호 피크를 포함합니다. 웹 저장 화면이 연결된 출력 장치를 표시합니다. 새 보조 앱으로 공개 Pages에서 MP3/WAV를 다시 다운로드해 유효 음성임을 확인했습니다. `docs/WINDOWS_CAPTURE_DIAG_0.11.74.md` 참조.
+
+## 0.11.75 · Multi-Clip Capture Recovery
+
+7개 클립·26초 기본 성우 녹음을 공개 Pages의 실제 버튼으로 MP3/WAV 저장했습니다. 보조 앱의 취소 후 재시작 상태를 확인하고, 웹 취소의 마무리 대기·연결 오류 표기를 고쳤습니다. `docs/LONG_CAPTURE_RECOVERY_0.11.75.md` 참조.
