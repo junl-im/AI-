@@ -261,11 +261,58 @@ export function useTimelineGeneration() {
     commitEdit('대사 클립 추가', (current) => [...current, block])
     return block.id
   }, [commitEdit])
+  const runLocalVoiceBlock = useCallback(async (blockId: string, autoplay: boolean): Promise<GeneratedAudio | null> => {
+    const block = blocksRef.current.find((item) => item.id === blockId)
+    if (!block || block.kind !== 'voice' || controllers.current.has(blockId)) return null
+    const revision = block.revision
+    const controller = new AbortController()
+    controllers.current.set(blockId, controller)
+    updateVoiceBlock(blockId, { status: 'generating', progress: 8, error: null }, revision)
+    try {
+      const generated = await synthesizeSupertonicWav(block, controller.signal, () => {
+        updateVoiceBlock(blockId, { progress: 25 }, revision)
+      })
+      const latest = blocksRef.current.find((item) => item.id === blockId)
+      if (controller.signal.aborted || latest?.kind !== 'voice' || latest.revision !== revision) return null
+      try {
+        await saveLocalAudio(block, generated.blob, generated.durationSeconds, generated.styleId)
+        setLocalAudioSaveWarning(null)
+      } catch {
+        setLocalAudioSaveWarning('음성은 준비됐지만 브라우저에 보관하지 못했습니다. 지금 파일을 다운로드해 주세요.')
+      }
+      const afterSave = blocksRef.current.find((item) => item.id === blockId)
+      if (controller.signal.aborted || afterSave?.kind !== 'voice' || afterSave.revision !== revision) return null
+      const audio = createLocalAudio(block, generated.blob, generated.durationSeconds, generated.styleId)
+      const trackId = autoplay
+        ? enqueueAndPlay(audio, `${block.voiceName} · ${block.text.slice(0, 22)}`)
+        : enqueue(audio, `${block.voiceName} · ${block.text.slice(0, 22)}`)
+      updateVoiceBlock(blockId, {
+        status: 'ready', progress: 100, audio, trackId, jobId: null,
+        durationSeconds: generated.durationSeconds, error: null,
+      }, revision)
+      return audio
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        updateVoiceBlock(blockId, {
+          status: 'failed', progress: 0,
+          error: error instanceof Error ? error.message : '별하 음성 파일 생성에 실패했습니다.',
+        }, revision)
+      }
+      return null
+    } finally {
+      if (controllers.current.get(blockId) === controller) controllers.current.delete(blockId)
+    }
+  }, [enqueue, enqueueAndPlay, updateVoiceBlock])
   const runBlock = useCallback((
     blockId: string,
     allowSynthesis = true,
     autoplay = false,
-  ) => runTimelineVoiceBlock({
+  ) => {
+    const block = blocksRef.current.find((item) => item.id === blockId)
+    if (allowSynthesis && block?.kind === 'voice' && block.voiceId === 'byeol-oracle') {
+      return runLocalVoiceBlock(blockId, autoplay)
+    }
+    return runTimelineVoiceBlock({
     getBlocks: () => blocksRef.current,
     controllers: controllers.current,
     timers: timers.current,
@@ -276,12 +323,14 @@ export function useTimelineGeneration() {
     appendProgressiveSegment,
     removeTrack,
     stopPolling,
-  }, blockId, allowSynthesis, autoplay), [
+  }, blockId, allowSynthesis, autoplay)
+  }, [
     appendProgressiveSegment,
     enqueue,
     enqueueAndPlay,
     removeTrack,
     replaceTrack,
+    runLocalVoiceBlock,
     stopPolling,
     updateVoiceBlock,
   ])

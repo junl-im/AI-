@@ -33,6 +33,7 @@ import {
   isBrowserSpeechSupported,
 } from '../tts/browserSpeech'
 import type { GeneratedAudio } from '../tts/generationTypes'
+import { synthesizeByeolPreview } from '../tts/localVoicePreview'
 import { synthesizeSpeech } from '../tts/voiceApi'
 import { synthesizeNeuralPreview } from '../tts/neuralPreviewApi'
 import { getVoicePreset, voicePresets } from '../tts/voicePresets'
@@ -677,6 +678,20 @@ export function HomePage() {
     previewAbortRef.current = controller
     if (!preserveSelection) setVoiceId(voice.id)
     setPreviewingId(nextVoiceId)
+    if (voice.id === 'byeol-oracle') {
+      try {
+        const text = sampleText?.trim().slice(0, 600) || '오늘의 운세를 전해 드릴게요. 새로운 가능성이 당신 곁에 머물고 있습니다.'
+        const audio = await synthesizeByeolPreview(text, normalizeVoiceSpeed(speechSpeed), controller.signal, showNotice)
+        if (previewRunIdRef.current !== runId || controller.signal.aborted) { if (audio.url) URL.revokeObjectURL(audio.url); return }
+        const trackId = enqueueAndPlay(audio, `${voice.name} 프리뷰`)
+        setActivePreview({ voiceId: voice.id, trackId })
+        setPendingPreview(null)
+        appendMessage({ role: 'assistant', badge: '별하 음성', text: '별하 전용 F1 음색으로 만든 WAV를 하단 플레이어에서 재생합니다.' })
+      } catch (error) {
+        if (previewRunIdRef.current === runId && !controller.signal.aborted) showNotice(error instanceof Error ? error.message : '별하 미리듣기에 실패했습니다.')
+      } finally { if (previewRunIdRef.current === runId) setPreviewingId(null) }
+      return
+    }
     if (voice.kind === 'preset' && (!engineAvailable || !engineCatalog.selected)) {
       setPendingPreview((current) => ({
         voiceId: nextVoiceId,
@@ -988,7 +1003,7 @@ export function HomePage() {
             onClear={clearCurrentWork}
           />
           <main className="soa-dubbing-main">
-            {!engineCatalog.loading && backendStatus === 'degraded' && engineCatalog.selected?.mode === 'browser' ? (
+            {voiceId !== 'byeol-oracle' && !engineCatalog.loading && backendStatus === 'degraded' && engineCatalog.selected?.mode === 'browser' ? (
               <div className="soa-device-playback-note" role="status">
                 <p>이 PC는 기기 내장 음성으로 대사를 재생합니다. 남성·여성 성우는 성별이 확인된 한국어 음성만 사용합니다. 맞는 음성이 없다면 한국어 시스템 음성을 설치하거나 음성 서버 연결을 확인해 주세요.</p>
                 {window.speechSynthesis.getVoices().length === 0 ? (
@@ -1002,7 +1017,7 @@ export function HomePage() {
                 ) : null}
               </div>
             ) : null}
-            {!engineCatalog.loading && !engineCatalog.selected ? (
+            {voiceId !== 'byeol-oracle' && !engineCatalog.loading && !engineCatalog.selected ? (
               <p className="soa-device-playback-note" role="status">이 PC에서 사용할 음성 엔진을 찾지 못했습니다. 한국어 시스템 음성을 설치하거나 설정에서 음성 서버 연결을 확인해 주세요.</p>
             ) : null}
             <LongformComposer

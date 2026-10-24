@@ -29,6 +29,7 @@
 @import "./studio-intelligent.css";
 @import "./readable-colors.css";
 @import "./scrollbars.css";
+@import "./byeol-voice-fix.css";
 
 @theme {
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

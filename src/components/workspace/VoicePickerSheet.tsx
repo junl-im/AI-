@@ -126,6 +126,7 @@ export function VoicePickerSheet({
                     <strong>
                       {voice.name} · {voice.gender === 'custom' ? '내 목소리' : voiceGenderLabels[voice.gender]}
                       <b className="soa-voice-persona-chip">{voice.personaLabel}</b>
+                      {voice.id === 'byeol-oracle' ? <b className="soa-voice-file-chip">WAV · MP3 저장</b> : null}
                       {recommended ? <em>대본 추천</em> : null}
                     </strong>
                     <small>{voice.personaSummary}</small>
@@ -137,6 +138,7 @@ export function VoicePickerSheet({
                     <span className="soa-voice-pro">장점 · {voice.strengths.join(' / ')}</span>
                     <span className="soa-voice-pro is-rhythm">리듬 · {voice.rhythmTags.join(' / ')}</span>
                     <span className="soa-voice-con">주의 · {voice.tradeoffs.join(' / ')}</span>
+                    {voice.id === 'byeol-oracle' ? <span className="soa-voice-download-note">첫 제작 시 음성 모델 약 380MB를 한 번 불러옵니다.</span> : null}
                   </span>
                 </button>
                 <VoicePreviewButton className="soa-voice-sheet-preview" voiceId={voice.id} voiceName={voice.name} previewingId={previewingId} activePreviewId={activePreviewId} previewPlaying={previewPlaying} onPreview={previewAndSelect} />

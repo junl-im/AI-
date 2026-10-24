@@ -15,6 +15,9 @@ const localAudioMocks = vi.hoisted(() => ({
   saveLocalAudio: vi.fn(),
 }))
 
+const supertonicMocks = vi.hoisted(() => ({ synthesizeSupertonicWav: vi.fn() }))
+vi.mock('../tts/supertonicWav', () => supertonicMocks)
+
 vi.mock('../storage/localAudioRepository', () => localAudioMocks)
 
 const voiceApiMocks = vi.hoisted(() => ({
@@ -63,6 +66,35 @@ function audioResponse(value: string): Response {
     headers: { 'Content-Type': 'audio/wav' },
   })
 }
+
+it('별하 생성은 기기 성우 대신 F1 WAV 파일을 만들어 Dock에 연결한다', async () => {
+  vi.clearAllMocks()
+  usePlayerStore.getState().clearQueue()
+  localAudioMocks.saveLocalAudio.mockResolvedValue(undefined)
+  supertonicMocks.synthesizeSupertonicWav.mockResolvedValue({
+    blob: new Blob(['RIFF-voice'], { type: 'audio/wav' }),
+    durationSeconds: 1.2,
+    styleId: 'F1',
+  })
+  const { result } = renderHook(() => useTimelineGeneration())
+  let blockId = ''
+  act(() => {
+    ;[blockId] = result.current.stageText('오늘의 운세입니다.', {
+      voiceId: 'byeol-oracle', voiceName: '별하', emotion: 'neutral',
+      speed: 0.96, pitch: 0.6, engineId: 'browser-speech', normalizeText: true,
+    })
+  })
+  await act(async () => { await result.current.retryBlock(blockId) })
+  expect(supertonicMocks.synthesizeSupertonicWav).toHaveBeenCalledWith(
+    expect.objectContaining({ voiceId: 'byeol-oracle' }), expect.any(AbortSignal), expect.any(Function),
+  )
+  expect(voiceApiMocks.synthesizeSpeech).not.toHaveBeenCalled()
+  expect(result.current.blocks.find((block) => block.id === blockId)).toMatchObject({
+    status: 'ready', audioSource: 'browser-model',
+  })
+  expect(usePlayerStore.getState().queue).toHaveLength(1)
+  expect(usePlayerStore.getState().queue[0].audio.source).toBe('browser-model')
+})
 
 describe('useTimelineGeneration mobile recovery', () => {
   beforeEach(() => {

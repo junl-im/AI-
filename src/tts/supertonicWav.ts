@@ -58,7 +58,7 @@ export interface LocalWavResult {
 }
 
 export async function synthesizeSupertonicWav(
-  block: TimelineVoiceBlock,
+  block: Pick<TimelineVoiceBlock, 'text' | 'voiceId' | 'voiceName' | 'speed'>,
   signal: AbortSignal,
   onProgress: (message: string) => void,
 ): Promise<LocalWavResult> {
