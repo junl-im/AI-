@@ -966,7 +966,7 @@ CI Hotfix 4 테스트 규칙:
 4. **변경 이유**: 0.11.78 별하는 프로필과 파일 변환용 F1 매핑만 있었고 실제 기본 미리듣기·생성은 PC 기기 성우를 사용해 혜린과 같은 소리가 나거나 다른 PC에서 작동하지 않았습니다. 모바일 성우 목록과 제작 버튼도 밀도가 높거나 Dock에 가렸습니다.
 5. **영향 범위**: Web 미리듣기·대사 생성·타임라인·Dock·음성 선택 UI. API/Worker, 성우 승인 자산, 저장 파일 형식은 변경하지 않았습니다.
 6. **변경·추가된 주요 파일**: `src/tts/{supertonicWav,localVoicePreview}.ts`, `src/hooks/useTimelineGeneration*`, `src/pages/HomePage.tsx`, `src/components/workspace/VoicePickerSheet.tsx`, `src/styles/{index,byeol-voice-fix}.css`, 버전·릴리스 문서.
-7. **검증 결과**: 전체 품질 게이트(Web 94파일/397건, API 246건 통과·1건 건너뜀, Worker 16건), TypeScript·린트·배포 빌드 통과. 로컬 브라우저에서 별하 F1 미리듣기, 운세 대본 2개 클립 생성, 타임라인·Dock 재생, 전체 MP3 실제 다운로드 91,951바이트(`fffb90c4`)를 확인했습니다. 원격 CI·Pages는 푸시 후 확인합니다.
+7. **검증 결과**: 전체 품질 게이트(Web 94파일/397건, API 246건 통과·1건 건너뜀, Worker 16건), TypeScript·린트·배포 빌드 통과. 로컬 브라우저에서 별하 F1 미리듣기, 운세 대본 2개 클립 생성, 타임라인·Dock 재생, 전체 MP3 실제 다운로드 91,951바이트(`fffb90c4`)를 확인했습니다. 첫 CI에서 첫 화면 안내 문구 테스트가 실패해 새 문구로 회귀 테스트를 고쳤으며 재검증합니다.
 8. **알려진 제한과 주의사항**: 첫 별하 실행은 약 380MB 모델 다운로드와 브라우저 자원이 필요합니다. 실제 청감, 다른 PC·Edge 다운로드, 3분 이상 장문은 미검증입니다. 별하 F1은 전용 화자 녹음 기반의 원본 성우 음색이 아닙니다. 테스트 브라우저의 전체 MP3 다운로드 응답은 비정상적으로 오래 걸렸으므로 장문·다른 PC에서 변환 시간과 Worker 상태를 재측정해야 합니다. 이전 PWA 설치본은 새 버전 알림의 '지금 적용'을 한 번 눌러야 할 수 있습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.79-byeol-voice-fix-full.zip` / `SoriON-AI-0.11.78-to-0.11.79-byeol-voice-fix-patch.zip`, `SoriON-AI-0.11.79-byeol-voice-fix-SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.80 · 실제 별하 장문 청감 A/B와 다른 Windows PC Chrome/Edge의 WAV·MP3 다운로드, 긴 녹음·128MB 경계 및 NAudio 최신 캡처 API 비교.

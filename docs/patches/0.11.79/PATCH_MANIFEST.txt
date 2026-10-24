@@ -20,6 +20,7 @@ services/worker/uv.lock
 src/components/workspace/VoicePickerSheet.tsx
 src/hooks/useTimelineGeneration.test.ts
 src/hooks/useTimelineGeneration.ts
+src/pages/HomePage.test.tsx
 src/pages/HomePage.tsx
 src/pages/LandingHome.tsx
 src/styles/byeol-voice-fix.css
