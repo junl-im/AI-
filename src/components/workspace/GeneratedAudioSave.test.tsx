@@ -268,6 +268,42 @@ describe('GeneratedAudioSave', () => {
     vi.unstubAllGlobals()
   })
 
+  it('전체 MP3 변환이 실패해도 완성된 전체 WAV를 자동 저장한다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, source: 'browser-model', url: 'blob:local-wav' } }
+    fullWav.buildTimelineWav.mockResolvedValueOnce(new Blob(['RIFF'], { type: 'audio/wav' }))
+    mp3.wavToMp3.mockRejectedValueOnce(new Error('인코더 실패'))
+    vi.spyOn(URL, 'createObjectURL').mockReturnValueOnce('blob:full-wav-fallback')
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: '전체 MP3 다운로드' }))
+    await waitFor(() => expect(click).toHaveBeenCalledOnce())
+    expect(screen.getByRole('link', { name: 'WAV 다시 다운로드' })).toHaveAttribute('href', 'blob:full-wav-fallback')
+    expect(screen.getByText(/전체 MP3 대신 준비된 WAV 다운로드/)).toBeInTheDocument()
+  })
+
+  it('대사 MP3 변환이 실패해도 해당 WAV를 자동 저장한다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, source: 'browser-model', url: 'blob:clip-wav', filename: 'clip.wav' } }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, blob: () => Promise.resolve(new Blob(['RIFF'])) }))
+    mp3.wavToMp3.mockRejectedValueOnce(new Error('인코더 실패'))
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: '대사 1 MP3 다운로드' }))
+    await waitFor(() => expect(click).toHaveBeenCalledOnce())
+    expect(screen.getByText(/대사 1 MP3 대신 WAV 다운로드/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '완료 대사 1 음성 파일 다운로드' })).toHaveAttribute('href', 'blob:clip-wav')
+  })
+
+  it('대사 WAV 읽기 실패는 대체 파일을 저장했다고 안내하지 않는다', async () => {
+    const block: TimelineBlock = { ...voice, audio: { ...voice.audio!, source: 'browser-model', url: 'blob:missing-wav' } }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }))
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    render(<GeneratedAudioSave blocks={[block]} onOpenExport={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: '대사 1 MP3 다운로드' }))
+    expect(await screen.findByText('클립 WAV를 읽지 못했습니다. 다시 생성해 주세요.')).toBeInTheDocument()
+    expect(click).not.toHaveBeenCalled()
+    expect(screen.queryByText(/MP3 대신 WAV 다운로드/)).not.toBeInTheDocument()
+  })
+
   it('아직 대사가 없어도 저장 위치와 다음 동작을 보여준다', () => {
     render(<GeneratedAudioSave blocks={[]} onOpenExport={vi.fn()} />)
     expect(screen.getByLabelText('생성한 음성 저장')).toBeInTheDocument()

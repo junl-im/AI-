@@ -228,7 +228,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.81 · MP3 Worker Recovery**
+Current baseline: **0.11.82 · WAV Download Recovery**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-24 KST**
 제품 소유·디자인: **곰같은여우**
@@ -247,6 +247,8 @@ Current baseline: **0.11.81 · MP3 Worker Recovery**
 0.11.80 현재 상태 보정: 별하 모델 로딩·재생 안내 알림은 모바일 Dock의 실제 높이에 맞춰 그 위에 놓이며 Dock·화면 크기 변화에 따라 다시 정렬됩니다. 이 릴리스는 0.11.79 기준 전체/패치 ZIP으로 제공됩니다. 다음 목표 0.11.81은 별하 장문 청감, 다른 PC·Edge WAV/MP3 저장, MP3 응답 지연 진단입니다.
 
 0.11.81 현재 상태 보정: MP3 Web Worker가 45초간 응답하지 않으면 종료하고 메인 스레드 변환으로 복귀합니다. 전체·클립·Windows 녹음 MP3 저장 화면은 경로 전환을 안내합니다. Chrome에서 합성 181초 WAV를 MP3 파일로 실제 다운로드해 디코딩을 확인했습니다. 이전 짧은 별하 저장 지연의 원인은 확정되지 않았으며 실제 음성 청감과 다른 PC·Edge 저장은 미검증입니다. 이 릴리스는 0.11.80 기준 전체/패치 ZIP으로 제공되며 다음 목표는 0.11.82 청감·교차 PC 다운로드와 긴 원본 녹음 검증입니다.
+
+0.11.82 현재 상태 보정: 파일 음성의 전체·대사 MP3 변환이 실패하면 준비된 WAV를 자동 다운로드합니다. 전체 WAV는 MP3 변환 전 재다운로드 링크로 보관합니다. 클립 WAV 읽기 자체가 실패하면 성공으로 안내하지 않습니다. 이 릴리스는 0.11.81 기준 전체/패치 ZIP으로 제공되며 다음 목표는 0.11.83 별하 청감·다른 PC 저장·긴 원본 녹음 실기기 검증입니다.
 
 ## 보존 이력
 
@@ -1000,3 +1002,16 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 이전 짧은 별하 MP3 저장 지연의 원인은 확정하지 못했습니다. 다른 PC·Edge 다운로드와 사람의 실제 청감, 긴 원본 성우 녹음·128MB 경계, NAudio 3 시험은 미검증입니다. 메인 스레드 복구는 느린 PC에서 화면 응답성에 영향을 줄 수 있습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.81-mp3-worker-recovery-full.zip` / `SoriON-AI-0.11.80-to-0.11.81-mp3-worker-recovery-patch.zip`, `SoriON-AI-0.11.81-mp3-worker-recovery-SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.82 · 별하 장문 청감 A/B, 다른 Windows PC Chrome/Edge 다운로드, 긴 원본 음색 녹음·128MB 경계, Worker 복구 응답성 및 NAudio 3 시험.
+
+## 2026-10-24 KST · 0.11.82 WAV Download Recovery
+
+1. **작업 일시(KST)**: 2026-10-24.
+2. **대상/기준 버전**: 0.11.82 / 0.11.81 (`053c220`).
+3. **변경 내용**: 전체·대사 MP3 변환이 실패해도 이미 완성된 WAV를 자동 다운로드합니다. 전체 WAV 재다운로드 링크를 변환 전에 준비합니다.
+4. **변경 이유**: 인코더 실패로 WAV 결과물이 이미 있어도 다운로드가 막히는 경우를 줄이기 위함입니다.
+5. **영향 범위**: Web 파일 음성 저장 UI. TTS 모델·WAV 생성·Windows 보조 앱 바이너리는 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `src/components/workspace/GeneratedAudioSave*`, 버전·릴리스 문서.
+7. **검증 결과**: 전체·클립 MP3 실패 시 WAV 자동 다운로드와 재다운로드 링크 단위 테스트. 전체 품질·빌드·원격 CI 결과는 릴리스 확인을 따릅니다.
+8. **알려진 제한과 주의사항**: WAV 생성 또는 클립 WAV 읽기 자체가 실패하면 대체 파일이 없습니다. 다른 PC·Edge 다운로드, 별하 실제 청감, 긴 원본 녹음·128MB 경계, NAudio 3 시험은 미검증입니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.82-wav-download-recovery-full.zip` / `SoriON-AI-0.11.81-to-0.11.82-wav-download-recovery-patch.zip`, `SoriON-AI-0.11.82-wav-download-recovery-SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.83 · 별하 장문 청감 A/B, 다른 Windows PC Chrome/Edge 다운로드, 긴 원본 음색 녹음·128MB 경계, MP3 Worker 응답성과 NAudio 3 시험.

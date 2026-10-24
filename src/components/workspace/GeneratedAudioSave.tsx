@@ -187,18 +187,21 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
   async function makeFullAudio(format: 'wav' | 'mp3') {
     setFullWavBusy(true)
     setWavError('')
+    let preparedWavUrl: string | null = null
     try {
       const blob = await buildTimelineWav(blocks)
+      if (sourceRef.current !== sourceSignature) return
+      if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
+      preparedWavUrl = URL.createObjectURL(blob)
+      fullWavRef.current = preparedWavUrl
+      setFullWavUrl(preparedWavUrl)
       if (format === 'wav') {
-        if (fullWavRef.current) URL.revokeObjectURL(fullWavRef.current)
-        const url = URL.createObjectURL(blob)
-        fullWavRef.current = url
-        setFullWavUrl(url)
-        startDownload(url, 'sorion-full.wav')
+        startDownload(preparedWavUrl, 'sorion-full.wav')
       } else {
         const mp3 = await wavToMp3(blob, { onFallback: () => setDownloadStatus('MP3 작업 스레드가 멈춰 다른 변환 경로로 이어갑니다.'), onProgress: (done, total) => {
           setDownloadStatus(`전체 MP3 변환 중 ${Math.round(done / total * 100)}%`)
         } })
+        if (sourceRef.current !== sourceSignature) return
         if (fullMp3Ref.current) URL.revokeObjectURL(fullMp3Ref.current)
         const url = URL.createObjectURL(mp3)
         fullMp3Ref.current = url
@@ -207,7 +210,13 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       }
       setDownloadStatus(`${format.toUpperCase()} 다운로드를 시작했습니다. 저장 창이 열리지 않았다면 아래 다운로드 링크를 눌러 주세요.`)
     } catch (error) {
-      setWavError(error instanceof Error ? error.message : '전체 음성 파일을 만들지 못했습니다.')
+      if (sourceRef.current !== sourceSignature) return
+      const reason = error instanceof Error ? error.message : '전체 음성 파일을 만들지 못했습니다.'
+      setWavError(preparedWavUrl && format === 'mp3' ? `MP3 변환 실패: ${reason} 준비된 WAV를 다운로드했습니다.` : reason)
+      if (preparedWavUrl && format === 'mp3') {
+        startDownload(preparedWavUrl, 'sorion-full.wav')
+        setDownloadStatus('전체 MP3 대신 준비된 WAV 다운로드를 시작했습니다. 아래 WAV 링크에서도 받을 수 있습니다.')
+      }
     } finally {
       setFullWavBusy(false)
     }
@@ -218,10 +227,13 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
     const signature = sourceSignature
     setClipMp3BusyId(block.id)
     setWavError('')
+    let clipWavReady = false
     try {
       const response = await fetch(block.audio.url)
       if (!response.ok) throw new Error('클립 WAV를 읽지 못했습니다. 다시 생성해 주세요.')
-      const mp3 = await wavToMp3(await response.blob(), { onFallback: () => setDownloadStatus('MP3 작업 스레드가 멈춰 다른 변환 경로로 이어갑니다.'), onProgress: (done, total) => {
+      const wav = await response.blob()
+      clipWavReady = true
+      const mp3 = await wavToMp3(wav, { onFallback: () => setDownloadStatus('MP3 작업 스레드가 멈춰 다른 변환 경로로 이어갑니다.'), onProgress: (done, total) => {
         setDownloadStatus(`대사 ${voices.indexOf(block) + 1} MP3 변환 중 ${Math.round(done / total * 100)}%`)
       } })
       if (sourceRef.current !== signature) return
@@ -232,7 +244,13 @@ export function GeneratedAudioSave({ blocks, localAudioSaveWarning, onOpenExport
       startDownload(url, `sorion-voice-${voices.indexOf(block) + 1}.mp3`)
       setDownloadStatus(`대사 ${voices.indexOf(block) + 1} MP3 다운로드를 시작했습니다. 저장되지 않았다면 다시 다운로드 링크를 눌러 주세요.`)
     } catch (error) {
-      setWavError(error instanceof Error ? error.message : '클립 MP3를 만들지 못했습니다.')
+      if (sourceRef.current !== signature) return
+      const reason = error instanceof Error ? error.message : '클립 MP3를 만들지 못했습니다.'
+      if (clipWavReady) {
+        setWavError(`MP3 변환 실패: ${reason} 준비된 대사 WAV를 다운로드했습니다.`)
+        startDownload(block.audio.url, block.audio.filename || `sorion-voice-${voices.indexOf(block) + 1}.wav`)
+        setDownloadStatus(`대사 ${voices.indexOf(block) + 1} MP3 대신 WAV 다운로드를 시작했습니다.`)
+      } else setWavError(reason)
     } finally {
       setClipMp3BusyId(null)
     }
