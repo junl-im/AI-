@@ -132,6 +132,8 @@ export function prepareBrowserSpeechText(text: string, voiceId: string): string 
       return joinSpeechLines(normalized, '. ')
     case 'shortform':
       return joinSpeechLines(normalized.replace(/\s*…\s*/g, ', '), ', ')
+    case 'oracle':
+      return joinSpeechLines(normalized, '. ')
   }
 }
 

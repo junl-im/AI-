@@ -10,6 +10,8 @@ describe('voiceRecommendation', () => {
       .toBe('on-clear')
     expect(recommendVoiceForScript('역사 속 사건을 기록한 다큐멘터리입니다.', voicePresets)?.voiceId)
       .toBe('jun-deep')
+    expect(recommendVoiceForScript('오늘의 운세 결과와 행운의 방향을 알려드립니다.', voicePresets)?.voiceId)
+      .toBe('byeol-oracle')
   })
 
   it('목소리 변경 시 과한 속도와 높낮이를 자연 범위로 제한한다', () => {

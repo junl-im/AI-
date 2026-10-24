@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "voice_id": "byeol-oracle",
+  "display_name": "별하",
+  "declared_gender": "female",
+  "reference_file": "byeol-oracle.wav",
+  "consent": {
+    "status": "pending",
+    "subject_reference": "",
+    "evidence_reference": "",
+    "consented_at": null,
+    "expires_at": null,
+    "notes": "별하 전용 실제 화자 참조 음성은 아직 확보되지 않았습니다. 권리와 동의 검증 전에는 사용하지 않습니다."
+  },
+  "rights": {
+    "source_type": "unknown",
+    "source_reference": "",
+    "allowed_uses": ["tts-inference"],
+    "commercial_use": false,
+    "redistribution": false,
+    "training_use": false,
+    "expires_at": null,
+    "notes": "실제 화자 참조 자산을 배치할 경우 출처와 허용 범위를 검증하세요."
+  },
+  "integrity": {
+    "sha256": "",
+    "file_size_bytes": null
+  },
+  "human_review": {
+    "status": "pending",
+    "reviewer": "",
+    "reviewed_at": null,
+    "sample_text": "오늘의 운세 결과를 알려드릴게요. 새로운 기회가 가까이 다가오고 있습니다. 중요한 선택은 잠시 호흡을 고른 뒤 결정해 보세요.",
+    "audio_sha256": "",
+    "source_review_bundle_sha256": "",
+    "notes": "혜린·소리와 A/B 청취하며 여성 음색, 신비로운 여운, 긴 문장 호흡과 파일 출력 품질을 검증하세요."
+  }
+}

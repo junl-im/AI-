@@ -130,8 +130,8 @@ describe('DubbingVoiceControls', async () => {
     expect(onVoiceChange).toHaveBeenCalledWith('on-clear')
     expect(screen.getByRole('radio', { name: /도윤/ })).toHaveFocus()
     fireEvent.keyDown(screen.getByRole('radio', { name: /도윤/ }), { key: 'End' })
-    expect(screen.getByRole('radio', { name: /민준/ })).toHaveFocus()
-    fireEvent.keyDown(screen.getByRole('radio', { name: /민준/ }), { key: 'Home' })
+    expect(screen.getByRole('radio', { name: /별하/ })).toHaveFocus()
+    fireEvent.keyDown(screen.getByRole('radio', { name: /별하/ }), { key: 'Home' })
     expect(screen.getByRole('radio', { name: /혜린/ })).toHaveFocus()
   })
 

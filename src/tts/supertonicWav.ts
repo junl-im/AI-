@@ -4,13 +4,14 @@ import type { TimelineVoiceBlock } from '../workspace/workspaceTypes'
 const MODEL_REVISION = 'aafc6e32416a594460b32413efc49d7fe4ce6d46'
 const MODEL_BASE = `https://huggingface.co/supertone-oss-archive/supertonic-3/resolve/${MODEL_REVISION}`
 
-// Style mapping is an approximation of the five product personas, not the original speakers.
+// Style mapping approximates product personas; it does not recreate browser system speakers.
 export const LOCAL_STYLE_BY_VOICE: Record<string, string> = {
   'sori-warm': 'F2',
   'on-clear': 'M1',
   'dam-calm': 'F3',
   'jun-deep': 'M2',
   'min-energetic': 'M3',
+  'byeol-oracle': 'F1',
 }
 
 type Helper = typeof SupertonicHelper

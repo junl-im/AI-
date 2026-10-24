@@ -21,6 +21,7 @@ _POLICIES = {
     "dam-calm": (170, 240),
     "jun-deep": (160, 280),
     "min-energetic": (125, 110),
+    "byeol-oracle": (155, 285),
 }
 
 

@@ -142,7 +142,7 @@ function verifyNeuralRuntime(loaded) {
   const value = loaded.value
   if (value.schema !== 'neural-voice-runtime-bundle/1' || !Array.isArray(value.records)) fail('Neural runtime bundle schema 오류')
   const hash = /^[a-f0-9]{64}$/i
-  const expected = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
+  const expected = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic', 'byeol-oracle']
   let shared = 0
   for (const voiceId of expected) {
     const complete = (surface) => value.records.find((record) => record?.schema === 'neural-voice-runtime-certification/1'
@@ -163,7 +163,7 @@ function verifyNeuralRuntime(loaded) {
       && desktop.modelFingerprint === mobile.modelFingerprint
       && desktop.referenceFingerprint === mobile.referenceFingerprint) shared += 1
   }
-  return result('neural-runtime', loaded, shared === 5 ? 'ready' : 'blocked', `shared playback ${shared}/5`)
+  return result('neural-runtime', loaded, shared === expected.length ? 'ready' : 'blocked', `shared playback ${shared}/${expected.length}`)
 }
 
 const loaded = {

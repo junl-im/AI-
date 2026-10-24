@@ -49,10 +49,10 @@ export function VoiceListeningQaCard() {
           <span className="text-[10px] font-black tracking-[0.15em] text-soa-muted">VOICE LISTENING QA</span>
           <h2 className="mt-1 text-xl font-black tracking-[-0.05em]">성우 청취 QA · 현실 속도·피로도 인증</h2>
         </div>
-        <StatusPill label={`${readyCount}/5 LISTENING READY`} tone={readyCount === 5 ? 'good' : 'warning'} />
+        <StatusPill label={`${readyCount}/${voicePresets.length} LISTENING READY`} tone={readyCount === voicePresets.length ? 'good' : 'warning'} />
       </div>
-      <p className="mt-2 text-xs font-semibold leading-5 text-soa-muted">
-        동일 성우를 일상·설명·장문·다큐·숏폼 5개 상황에서 따로 듣습니다. 평균만 높아도 통과하지 않으며, 장문 피로도 4점 이상과 모든 품질 항목 3점 이상, 모든 상황의 현실 속도 4점 이상이 필수입니다.
+        <p className="mt-2 text-xs font-semibold leading-5 text-soa-muted">
+        동일 성우를 일상·설명·장문·다큐·숏폼 5개 상황에서 따로 듣습니다. 별하는 운세 결과 문장도 추가로 청취합니다. 평균만 높아도 통과하지 않으며, 장문 피로도 4점 이상과 모든 품질 항목 3점 이상, 모든 상황의 현실 속도 4점 이상이 필수입니다.
       </p>
 
       <details className="mt-4 rounded-2xl border border-soa-line bg-white p-4 text-xs">

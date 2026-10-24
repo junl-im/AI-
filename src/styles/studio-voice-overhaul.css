@@ -212,6 +212,13 @@
 .soa-voice-rhythm.is-shortform i:nth-child(2),
 .soa-voice-rhythm.is-shortform i:nth-child(4),
 .soa-voice-rhythm.is-shortform i:nth-child(6) { height: 52%; }
+.soa-voice-rhythm.is-oracle { color: #caa5ff; }
+.soa-voice-rhythm.is-oracle i:nth-child(1),
+.soa-voice-rhythm.is-oracle i:nth-child(6) { height: 30%; }
+.soa-voice-rhythm.is-oracle i:nth-child(2),
+.soa-voice-rhythm.is-oracle i:nth-child(5) { height: 58%; }
+.soa-voice-rhythm.is-oracle i:nth-child(3),
+.soa-voice-rhythm.is-oracle i:nth-child(4) { height: 88%; }
 .soa-voice-rhythm.is-custom { opacity: .55; }
 .soa-voice-rhythm.is-compact { width: 36px; height: 12px; }
 

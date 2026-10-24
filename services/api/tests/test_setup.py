@@ -67,15 +67,15 @@ def test_setup_status_explains_required_steps(client):
 
     assert response.status_code == 200
     body = response.json()
-    assert body["version"] == "0.11.77"
+    assert body["version"] == "0.11.78"
     assert isinstance(body["ready"], bool)
     assert isinstance(body["real_engine_count"], int)
-    assert body["voice_preset_expected_count"] == 5
+    assert body["voice_preset_expected_count"] == 6
     assert body["voice_preset_ready_count"] == 0
     assert body["voice_preset_audio_ready_count"] == 0
     assert body["voice_preset_manifest_ready_count"] == 0
     assert body["voice_preset_duplicate_group_count"] == 0
-    assert len(body["voice_preset_diagnostics"]) == 5
+    assert len(body["voice_preset_diagnostics"]) == 6
     steps = {item["id"]: item for item in body["steps"]}
     assert steps["python"]["required"] is True
     assert steps["audio-directory"]["status"] == "ready"
@@ -94,22 +94,22 @@ def test_voice_preset_check_reports_individual_missing_files(tmp_path):
 
     assert ready_count == 2
     assert step.status == "warning"
-    assert "인증 완료 2/5" in step.detail
+    assert "인증 완료 2/6" in step.detail
     assert "on-clear" in step.detail
     assert next(item for item in diagnostics if item.voice_id == "on-clear").status == "missing"
 
 
-def test_voice_preset_check_is_ready_with_all_five_files(tmp_path):
-    voice_ids = ("sori-warm", "on-clear", "dam-calm", "jun-deep", "min-energetic")
+def test_voice_preset_check_is_ready_with_all_six_files(tmp_path):
+    voice_ids = ("sori-warm", "on-clear", "dam-calm", "jun-deep", "min-energetic", "byeol-oracle")
     for index, voice_id in enumerate(voice_ids, start=1):
         write_wav(tmp_path / f"{voice_id}.wav", amplitude=900 + index)
         write_approved_manifest(tmp_path, voice_id)
 
     step, ready_count, diagnostics = _voice_preset_check(tmp_path)
 
-    assert ready_count == 5
+    assert ready_count == 6
     assert step.status == "ready"
-    assert "인증 완료 5/5" in step.detail
+    assert "인증 완료 6/6" in step.detail
     assert all(item.usable for item in diagnostics)
     assert all(item.checksum_matches is True for item in diagnostics)
 
@@ -124,7 +124,7 @@ def test_voice_preset_check_does_not_certify_wav_without_manifest(tmp_path):
     assert item.audio_usable is True
     assert item.manifest_status == "missing"
     assert item.usable is False
-    assert "WAV 통과 1/5" in step.detail
+    assert "WAV 통과 1/6" in step.detail
 
 
 def test_voice_preset_check_blocks_duplicate_wav_hashes(tmp_path):
@@ -142,7 +142,9 @@ def test_voice_preset_check_blocks_duplicate_wav_hashes(tmp_path):
 
 
 def test_voice_preset_check_blocks_nearly_silent_audio(tmp_path):
-    for voice_id in ("sori-warm", "on-clear", "dam-calm", "jun-deep", "min-energetic"):
+    for voice_id in (
+        "sori-warm", "on-clear", "dam-calm", "jun-deep", "min-energetic", "byeol-oracle"
+    ):
         write_wav(tmp_path / f"{voice_id}.wav", amplitude=0)
 
     step, ready_count, diagnostics = _voice_preset_check(tmp_path)

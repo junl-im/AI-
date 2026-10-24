@@ -169,12 +169,13 @@ describe('browserSpeech', () => {
     expect(prepareBrowserSpeechText(source, 'sori-warm')).toContain('첫 문장입니다… 다음 문장을')
     expect(prepareBrowserSpeechText(source, 'on-clear')).toContain('첫 문장입니다. 다음 문장을')
     expect(prepareBrowserSpeechText(source, 'min-energetic')).toContain('첫 문장입니다, 다음 문장을')
+    expect(prepareBrowserSpeechText(source, 'byeol-oracle')).toContain('첫 문장입니다… 다음 문장을')
     expect(createBrowserSpeechPlayback({ ...request, text: source, voiceId: 'min-energetic' }))
       .toMatchObject({ cadence: 'shortform', personaLabel: '빠른 숏폼' })
   })
 
   it('모든 기본 성우의 붙여 쓴 한국어 문장에 호흡 간격을 넣고 소수점은 지킨다', () => {
-    for (const voiceId of ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']) {
+    for (const voiceId of ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic', 'byeol-oracle']) {
       expect(prepareBrowserSpeechText('비율은 3.5%입니다.다음 문장입니다!확인하세요.', voiceId))
         .toBe('비율은 3.5%입니다. 다음 문장입니다! 확인하세요.')
     }
@@ -259,11 +260,11 @@ describe('browserSpeech', () => {
   })
 
 
-  it('브라우저 음성 실제 배정 근거를 5개 프리셋별로 노출한다', () => {
+  it('브라우저 음성 실제 배정 근거를 6개 프리셋별로 노출한다', () => {
     const voices = installBrowserSpeech()
     const diagnostics = diagnoseBrowserSpeechVoices(voices)
 
-    expect(diagnostics).toHaveLength(5)
+    expect(diagnostics).toHaveLength(6)
     expect(diagnostics.find((item) => item.voiceId === 'on-clear')).toMatchObject({
       status: 'ready',
       selectedVoiceName: 'Microsoft InJoon Male',

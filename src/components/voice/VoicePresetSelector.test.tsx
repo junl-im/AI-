@@ -8,7 +8,7 @@ describe('VoicePresetSelector', () => {
     render(<VoicePresetSelector value="sori-warm" onChange={onChange} />)
 
     expect(screen.getByRole('radio', { name: /^혜린 추천/ })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getAllByRole('radio')).toHaveLength(5)
+    expect(screen.getAllByRole('radio')).toHaveLength(6)
     fireEvent.click(screen.getByRole('radio', { name: /^준호 저음/ }))
     expect(onChange).toHaveBeenCalledWith('jun-deep')
   })

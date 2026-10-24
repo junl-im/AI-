@@ -38,7 +38,7 @@ for (const record of payload.records) {
   if (!record.playbackStartedAt || !record.playbackCompletedAt) throw new Error(`${record.voiceId} 재생 완료 evidence가 아닙니다.`)
 }
 
-const expected = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
+const expected = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic', 'byeol-oracle']
 let shared = 0
 for (const voiceId of expected) {
   const desktop = payload.records.find((item) => item.voiceId === voiceId && item.surface === 'desktop-browser' && item.playbackCompletedAt)
@@ -53,4 +53,4 @@ for (const voiceId of expected) {
   if (matches) shared += 1
   else if (requireShared) throw new Error(`${voiceId} PC/mobile shared neural preview 인증이 완료되지 않았습니다.`)
 }
-console.log(`Neural Voice runtime certification PASS · shared=${shared}/5 · sha256=${digest}`)
+console.log(`Neural Voice runtime certification PASS · shared=${shared}/${expected.length} · sha256=${digest}`)

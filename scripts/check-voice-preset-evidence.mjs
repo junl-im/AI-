@@ -12,6 +12,7 @@ const presets = [
   ['dam-calm', '소리', 'neutral'],
   ['jun-deep', '준호', 'male'],
   ['min-energetic', '민준', 'male'],
+  ['byeol-oracle', '별하', 'female'],
 ]
 const failures = []
 const warnings = []
@@ -111,7 +112,7 @@ if (failures.length) {
   failures.forEach((failure) => console.error(`- ${failure}`))
   process.exit(1)
 }
-console.log(`Voice preset evidence 구조 검사 통과 · manifest ${presets.length}/5`)
+console.log(`Voice preset evidence 구조 검사 통과 · manifest ${presets.length}/${presets.length}`)
 if (warnings.length) {
   console.log(`운영 준비 경고 ${warnings.length}개 · 실제 WAV/동의/검수 완료 전 CosyVoice 전용 프리셋은 비활성`)
   warnings.forEach((warning) => console.log(`- ${warning}`))

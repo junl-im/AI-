@@ -68,7 +68,7 @@ export function NeuralVoiceRuntimeCertificationCard() {
           <h2 className="mt-1 text-xl font-black tracking-[-0.05em]">PC·모바일 동일 neural preview 인증</h2>
         </div>
         <StatusPill
-          label={`${sharedCount}/5 SHARED READY`}
+          label={`${sharedCount}/${voicePresets.length} SHARED READY`}
           tone={sharedCount === voicePresets.length ? 'good' : 'warning'}
         />
       </div>

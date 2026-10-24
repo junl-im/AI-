@@ -9,8 +9,9 @@ def test_builtin_voice_presets_have_distinct_prosody_and_three_male_options():
     calm = get_voice_preset("dam-calm")
     deep = get_voice_preset("jun-deep")
     energetic = get_voice_preset("min-energetic")
+    oracle = get_voice_preset("byeol-oracle")
 
-    assert len(PRESET_VOICE_IDS) == 5
+    assert len(PRESET_VOICE_IDS) == 6
     assert {profile.id for profile in list_voice_presets()} == set(PRESET_VOICE_IDS)
     assert sum(profile.gender == "male" for profile in list_voice_presets()) == 3
     assert {
@@ -19,12 +20,14 @@ def test_builtin_voice_presets_have_distinct_prosody_and_three_male_options():
         calm.id: calm.rate_multiplier,
         deep.id: deep.rate_multiplier,
         energetic.id: energetic.rate_multiplier,
+        oracle.id: oracle.rate_multiplier,
     } == {
         "sori-warm": 1.02,
         "on-clear": 1.04,
         "dam-calm": 0.99,
         "jun-deep": 1.0,
         "min-energetic": 1.07,
+        "byeol-oracle": 0.96,
     }
     assert deep.variant_index != clear.variant_index
     assert {
@@ -33,12 +36,14 @@ def test_builtin_voice_presets_have_distinct_prosody_and_three_male_options():
         calm.id: calm.pitch_offset,
         deep.id: deep.pitch_offset,
         energetic.id: energetic.pitch_offset,
+        oracle.id: oracle.pitch_offset,
     } == {
         "sori-warm": 0.35,
         "on-clear": -0.65,
         "dam-calm": -0.1,
         "jun-deep": -1.2,
         "min-energetic": 0.45,
+        "byeol-oracle": 0.6,
     }
     assert (
         deep.pitch_offset
@@ -57,4 +62,5 @@ def test_builtin_voice_presets_clamp_to_realistic_natural_speed_ranges():
     assert get_voice_preset("dam-calm").effective_rate(0.7) == 0.94
     assert get_voice_preset("jun-deep").effective_rate(1.4) == 1.06
     assert get_voice_preset("min-energetic").effective_rate(1.0) == 1.07
-    assert len({(p.softness, p.articulation) for p in list_voice_presets()}) == 5
+    assert get_voice_preset("byeol-oracle").effective_rate(0.7) == 0.90
+    assert len({(p.softness, p.articulation) for p in list_voice_presets()}) == 6

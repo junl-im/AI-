@@ -55,7 +55,7 @@ export function NeuralVoiceReferenceCard() {
           <h2 className="mt-1 text-xl font-black tracking-[-0.05em]">성우 reference intake · 미리듣기 승격</h2>
         </div>
         <StatusPill
-          label={loading ? '검사 중' : `${readyCount}/5 NEURAL READY`}
+          label={loading ? '검사 중' : `${readyCount}/${voicePresets.length} NEURAL READY`}
           tone={readyCount === voicePresets.length ? 'good' : 'warning'}
         />
       </div>

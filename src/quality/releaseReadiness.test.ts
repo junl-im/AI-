@@ -85,7 +85,7 @@ function myVoice() {
 }
 
 function neuralRuntime() {
-  const voices = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
+  const voices = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic', 'byeol-oracle']
   return {
     schema: 'neural-voice-runtime-bundle/1',
     records: voices.flatMap((voiceId) => ['desktop-browser', 'mobile-browser'].map((surface) => ({

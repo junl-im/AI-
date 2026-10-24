@@ -83,6 +83,16 @@ _PRESETS = {
         ("young male", "energetic", "youngho"),
         1.00, 1.13, 0.78, 0.90,
     ),
+    "byeol-oracle": VoicePresetProfile(
+        "byeol-oracle",
+        "별하",
+        "female",
+        0.96,
+        0.6,
+        1,
+        ("seoyeon", "yuna", "sunhi", "heami"),
+        0.90, 1.04, 0.98, 0.80,
+    ),
 }
 
 PRESET_VOICE_IDS = tuple(_PRESETS)

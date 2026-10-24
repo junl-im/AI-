@@ -19,7 +19,7 @@ def test_persona_plans_are_distinct_bounded_and_do_not_accelerate_dense_material
         assert preset.effective_rate(dense.requested_speed) <= preset.rate_multiplier
         assert normal.pause_ms <= dense.pause_ms <= 340
         assert plan_prosody(preset.id, "긴 문장", 1.4, 60).max_chars == 60
-    assert len(set(plans)) == 5
+    assert len(set(plans)) == 6
     assert plan_prosody("my-voice:private", "원본", 1.0).requested_speed == 1.0
 
 

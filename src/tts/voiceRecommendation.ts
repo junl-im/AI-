@@ -20,6 +20,9 @@ export function recommendVoiceForScript(
     voices.some((voice) => voice.id === id) ? { voiceId: id, reason } : null
   )
 
+  if (contains(text, ['운세', '타로', '별자리', '사주', '운명', '행운의', '오늘의 운'])) {
+    return byId('byeol-oracle', '별하 · 신비로운 운세: 결과를 차분히 밝히고 문장 끝에 맑은 여운을 남기는 리듬을 추천합니다.')
+  }
   if (contains(text, ['할인', '이벤트', '구매', '구독', '지금 바로', '놓치지', '프로모션', '광고'])) {
     return byId('min-energetic', '민준 · 빠른 숏폼: 쉼을 줄이고 초반 에너지를 높이는 CTA형 리듬을 추천합니다.')
   }

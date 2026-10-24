@@ -280,7 +280,7 @@ function neuralRuntimeSlot(
   if (value.schema !== 'neural-voice-runtime-bundle/1' || !Array.isArray(value.records)) {
     throw new Error('neural-voice-runtime-bundle/1 evidence가 아닙니다.')
   }
-  const expectedVoices = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic']
+  const expectedVoices = ['sori-warm', 'on-clear', 'dam-calm', 'jun-deep', 'min-energetic', 'byeol-oracle']
   const records = value.records.filter(isObject)
   const completed = (voiceId: string, surface: 'desktop-browser' | 'mobile-browser') => records.find((record) => (
     record.schema === 'neural-voice-runtime-certification/1'
@@ -308,8 +308,8 @@ function neuralRuntimeSlot(
   return {
     status: shared === expectedVoices.length ? 'ready' : 'blocked',
     detail: shared === expectedVoices.length
-      ? '5/5 voices · PC/mobile playing→ended · shared neural audio verified'
-      : `shared playback ${shared}/5 · desktop/mobile 실제 재생 완료가 더 필요합니다.`,
+      ? `${expectedVoices.length}/${expectedVoices.length} voices · PC/mobile playing→ended · shared neural audio verified`
+      : `shared playback ${shared}/${expectedVoices.length} · desktop/mobile 실제 재생 완료가 더 필요합니다.`,
     sourceAppVersion: null,
     sourceCommitSha: null,
     sourceRunId: null,

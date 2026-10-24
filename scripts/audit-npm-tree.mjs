@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { spawnSync } from 'node:child_process'
+import { dirname, join } from 'node:path'
 
 const inputIndex = process.argv.indexOf('--input')
 let raw = ''
@@ -10,14 +11,15 @@ if (inputIndex >= 0) {
   if (!path) throw new Error('--input 다음에 npm ls JSON 경로가 필요합니다.')
   raw = await readFile(path, 'utf8')
 } else {
-  const result = spawnSync('npm', ['ls', '--all', '--json', '--long'], {
+  const npmCli = process.env.npm_execpath || join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js')
+  const result = spawnSync(process.execPath, [npmCli, 'ls', '--all', '--json', '--long'], {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
   })
-  raw = result.stdout
+  raw = result.stdout ?? ''
   commandStatus = result.status ?? 1
   if (!raw.trim()) {
-    console.error(result.stderr || 'npm ls가 JSON을 반환하지 않았습니다.')
+    console.error(result.error?.message || result.stderr || 'npm ls가 JSON을 반환하지 않았습니다.')
     process.exit(commandStatus || 1)
   }
 }

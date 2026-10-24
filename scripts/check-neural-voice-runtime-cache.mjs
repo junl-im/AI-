@@ -71,7 +71,7 @@ await requireText('services/api/tests/test_neural_preview_cache.py', [
 await requireText('scripts/verify-neural-voice-runtime-certification.mjs', [
   'neural-voice-runtime-bundle/1',
   '--require-shared',
-  'shared=${shared}/5',
+  'shared=${shared}/${expected.length}',
   'observed-runtime',
 ])
 await requireText('src/quality/neuralVoiceRuntimeCertification.test.ts', [

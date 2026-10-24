@@ -9,6 +9,7 @@ describe('voicePresets pace calibration', () => {
       'dam-calm': 0.99,
       'jun-deep': 1.0,
       'min-energetic': 1.07,
+      'byeol-oracle': 0.96,
     })
   })
 
@@ -27,6 +28,7 @@ describe('voicePresets pace calibration', () => {
       'dam-calm': -0.1,
       'jun-deep': -1.2,
       'min-energetic': 0.45,
+      'byeol-oracle': 0.6,
     })
     expect(voicePresets.find((voice) => voice.id === 'sori-warm')?.naturalPitchRange).toEqual([-1, 1.25])
     expect(voicePresets.find((voice) => voice.id === 'dam-calm')?.naturalPitchRange).toEqual([-1, 1])
@@ -36,11 +38,14 @@ describe('voicePresets pace calibration', () => {
 
 
 describe('voicePresets persona identity', () => {
-  it('다섯 성우가 서로 다른 페르소나와 cadence를 가진다', () => {
-    expect(new Set(voicePresets.map((voice) => voice.personaLabel)).size).toBe(5)
-    expect(new Set(voicePresets.map((voice) => voice.cadence)).size).toBe(5)
+  it('여섯 성우가 서로 다른 페르소나와 cadence를 가진다', () => {
+    expect(new Set(voicePresets.map((voice) => voice.personaLabel)).size).toBe(6)
+    expect(new Set(voicePresets.map((voice) => voice.cadence)).size).toBe(6)
     expect(voicePresets.every((voice) => voice.rhythmTags.length === 3)).toBe(true)
-    expect(new Set(voicePresets.map((voice) => `${voice.softness}:${voice.articulation}:${voice.pauseStyle}`)).size).toBe(5)
+    expect(new Set(voicePresets.map((voice) => `${voice.softness}:${voice.articulation}:${voice.pauseStyle}`)).size).toBe(6)
+    expect(voicePresets.find((voice) => voice.id === 'byeol-oracle')).toMatchObject({
+      name: '별하', gender: 'female', cadence: 'oracle', pauseStyle: 'luminous',
+    })
     expect(voicePresets.find((voice) => voice.id === 'min-energetic')?.rateMultiplier)
       .toBeGreaterThan(voicePresets.find((voice) => voice.id === 'jun-deep')?.rateMultiplier ?? 0)
   })

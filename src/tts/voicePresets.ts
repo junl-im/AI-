@@ -1,5 +1,5 @@
 export type VoiceGender = 'female' | 'male' | 'neutral'
-export type VoiceCadence = 'conversation' | 'explainer' | 'narrative' | 'documentary' | 'shortform'
+export type VoiceCadence = 'conversation' | 'explainer' | 'narrative' | 'documentary' | 'shortform' | 'oracle'
 
 export interface VoicePreset {
   id: string
@@ -27,7 +27,7 @@ export interface VoicePreset {
   naturalPitchRange: [number, number]
   softness: number
   articulation: number
-  pauseStyle: 'short-soft' | 'clean' | 'even-flow' | 'grounded' | 'tight'
+  pauseStyle: 'short-soft' | 'clean' | 'even-flow' | 'grounded' | 'tight' | 'luminous'
 }
 
 export const voiceGenderLabels: Record<VoiceGender, string> = {
@@ -176,6 +176,34 @@ export const voicePresets: VoicePreset[] = [
     softness: 0.78,
     articulation: 0.90,
     pauseStyle: 'tight',
+  },
+  {
+    id: 'byeol-oracle',
+    name: '별하',
+    shortName: '별',
+    description: '운세와 타로 결과를 맑고 신비로운 여운으로 전하는 여성 목소리',
+    personaLabel: '신비로운 운세',
+    personaSummary: '결과를 서두르지 않고 또렷하게 밝힌 뒤 부드러운 여운을 남기는 운세 해설형 보이스',
+    cadence: 'oracle',
+    paceLabel: '차분한 결과 안내 · -4%',
+    tone: 'bg-[#eee8ff]',
+    badge: '영롱함',
+    gender: 'female',
+    tags: ['신비로움', '여성', '한국어'],
+    rhythmTags: ['결과 전 쉼', '맑은 종결', '여운형'],
+    rateMultiplier: 0.96,
+    pitchOffset: 0.6,
+    voiceVariantIndex: 1,
+    requiresDedicatedReference: true,
+    preferredVoiceTokens: ['seoyeon', 'yuna', 'sunhi', 'heami', 'korean a'],
+    bestFor: ['운세 결과', '타로 리딩', '별자리 이야기'],
+    strengths: ['결과를 또렷하게 들려주는 차분한 호흡', '신비로운 이야기의 부드러운 여운'],
+    tradeoffs: ['빠른 안내 방송에는 느리게 들릴 수 있음', '기기 성우가 하나뿐이면 음색 차이는 제한적'],
+    naturalSpeedRange: [0.9, 1.04],
+    naturalPitchRange: [-0.4, 1.5],
+    softness: 0.98,
+    articulation: 0.8,
+    pauseStyle: 'luminous',
   },
 ]
 

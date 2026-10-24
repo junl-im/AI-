@@ -9,6 +9,7 @@
 | 소리 · 중성 | `dam-calm.wav` | `dam-calm.manifest.json` |
 | 준호 · 남성 | `jun-deep.wav` | `jun-deep.manifest.json` |
 | 민준 · 남성 | `min-energetic.wav` | `min-energetic.manifest.json` |
+| 별하 · 여성 | `byeol-oracle.wav` | `byeol-oracle.manifest.json` |
 
 `START_ENGINE.cmd`는 이 폴더를 자동 연결합니다. API를 직접 실행할 때만 환경변수 `SORION_COSYVOICE_PRESET_DIRECTORY`에 폴더 경로를 설정합니다.
 
@@ -38,11 +39,11 @@
 
 ## 중요한 차단 규칙
 
-- 알려진 5개 프리셋은 반드시 같은 ID의 전용 WAV와 인증 manifest만 사용합니다.
+- 알려진 6개 프리셋은 반드시 같은 ID의 전용 WAV와 인증 manifest만 사용합니다.
 - WAV가 없거나 품질 검사에 실패하면 공통 기본 WAV나 다른 인물 WAV로 대체하지 않습니다.
 - manifest가 없거나 동의·권리·사람 검수·checksum이 준비되지 않으면 전용 음성으로 사용하지 않습니다.
 - 같은 실제 WAV SHA-256을 여러 인물 프리셋에 등록하면 관련 프리셋을 모두 차단합니다.
 - 전용 파일이 준비되지 않은 상태는 CosyVoice 전체 장애가 아니라 해당 프리셋 미지원으로 처리합니다.
-- `SORION_COSYVOICE_TTS_REFERENCE_PATH`의 기본 기준 음성은 5개 인물 프리셋의 대체재가 아닙니다.
+- `SORION_COSYVOICE_TTS_REFERENCE_PATH`의 기본 기준 음성은 6개 인물 프리셋의 대체재가 아닙니다.
 
 실제 음성 WAV와 원본 동의·권리 자료는 로컬에서 관리하고 저장소·일반 릴리스 ZIP에는 포함하지 않습니다. manifest만으로 화자 신원·성별·권리를 자동 확정하지 않습니다. 자세한 절차는 `docs/VOICE_PRESET_EVIDENCE.md`를 따릅니다.
