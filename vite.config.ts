@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
@@ -107,6 +108,12 @@ export default defineConfig(() => {
     build: {
       target: 'es2022',
       sourcemap: true,
+      rollupOptions: {
+        input: {
+          main: fileURLToPath(new URL('./index.html', import.meta.url)),
+          byeolha: fileURLToPath(new URL('./bridge/byeolha.html', import.meta.url)),
+        },
+      },
     },
   }
 })
