@@ -1,9 +1,29 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { combineTimelinePcmWav } from './timelineWav'
-import { wavToMp3 } from './wavToMp3'
+import { MP3_WORKER_STALL_TIMEOUT_MS, wavToMp3 } from './wavToMp3'
 
 describe('wavToMp3', () => {
-  afterEach(() => vi.unstubAllGlobals())
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals() })
+
+  it('작업 스레드가 응답하지 않으면 종료하고 다른 변환 경로를 시도한다', async () => {
+    vi.useFakeTimers()
+    const terminate = vi.fn()
+    vi.stubGlobal('Worker', class {
+      onmessage = null
+      onerror = null
+      onmessageerror = null
+      postMessage = vi.fn()
+      terminate = terminate
+    })
+    const onFallback = vi.fn()
+    const conversion = wavToMp3(new Blob(['RIFF']), { onFallback })
+    const outcome = conversion.catch((error: unknown) => error)
+    vi.advanceTimersByTime(MP3_WORKER_STALL_TIMEOUT_MS)
+    vi.useRealTimers()
+    expect(await outcome).toBeInstanceOf(Error)
+    expect(terminate).toHaveBeenCalledOnce()
+    expect(onFallback).toHaveBeenCalledWith(expect.stringContaining('응답이 지연'))
+  })
 
   it('작업 스레드 취소 시 즉시 종료한다', async () => {
     const terminate = vi.fn()

@@ -228,7 +228,7 @@
 
 # SoriON AI MASTER HANDOVER
 상태: **절대 필독 · 임시채팅 영구 메모리 원본**
-Current baseline: **0.11.80 · Mobile Dock Notice Clearance**
+Current baseline: **0.11.81 · MP3 Worker Recovery**
 기준 버전: **0.7.3 Handover Memory Baseline**
 최종 갱신: **2026-10-24 KST**
 제품 소유·디자인: **곰같은여우**
@@ -245,6 +245,8 @@ Current baseline: **0.11.80 · Mobile Dock Notice Clearance**
 0.11.79 현재 상태 보정: 위 0.11.78 별하의 기기 음성 재생 설명은 과거 상태입니다. 이제 별하 미리듣기와 기본 대사 생성은 Supertonic F1 로컬 WAV 파일을 직접 만들고 타임라인·Dock·WAV/MP3 저장에 연결합니다. 첫 실행 약 380MB 다운로드가 필요합니다. 다른 5성우의 기기 음성 정책은 그대로입니다. 별하 전용 화자 원본 녹음·권리·청감 승인과 다른 PC 실기기 검증은 미완료입니다. 현재 산출물은 0.11.78 기준 0.11.79 전체/패치 ZIP이며 다음 목표는 0.11.80 실제 청감·교차 PC 다운로드·MP3 변환 지연 진단입니다.
 
 0.11.80 현재 상태 보정: 별하 모델 로딩·재생 안내 알림은 모바일 Dock의 실제 높이에 맞춰 그 위에 놓이며 Dock·화면 크기 변화에 따라 다시 정렬됩니다. 이 릴리스는 0.11.79 기준 전체/패치 ZIP으로 제공됩니다. 다음 목표 0.11.81은 별하 장문 청감, 다른 PC·Edge WAV/MP3 저장, MP3 응답 지연 진단입니다.
+
+0.11.81 현재 상태 보정: MP3 Web Worker가 45초간 응답하지 않으면 종료하고 메인 스레드 변환으로 복귀합니다. 전체·클립·Windows 녹음 MP3 저장 화면은 경로 전환을 안내합니다. Chrome에서 합성 181초 WAV를 MP3 파일로 실제 다운로드해 디코딩을 확인했습니다. 이전 짧은 별하 저장 지연의 원인은 확정되지 않았으며 실제 음성 청감과 다른 PC·Edge 저장은 미검증입니다. 이 릴리스는 0.11.80 기준 전체/패치 ZIP으로 제공되며 다음 목표는 0.11.82 청감·교차 PC 다운로드와 긴 원본 녹음 검증입니다.
 
 ## 보존 이력
 
@@ -985,3 +987,16 @@ CI Hotfix 4 테스트 규칙:
 8. **알려진 제한과 주의사항**: 다른 Android/iOS 실기기의 안전 영역·키보드 상태는 미검증입니다. 별하 첫 실행 약 380MB 모델 다운로드, 다른 PC·Edge 저장 및 실제 청감 검증은 기존 제한으로 남습니다.
 9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.80-mobile-notice-full.zip` / `SoriON-AI-0.11.79-to-0.11.80-mobile-notice-patch.zip`, `SoriON-AI-0.11.80-mobile-notice-SHA256SUMS.txt`. 삭제 파일 없음.
 10. **다음 예상 업데이트**: 0.11.81 · 별하 장문 청감 A/B, 다른 Windows PC Chrome/Edge의 WAV·MP3 다운로드, 긴 녹음·MP3 지연·128MB 경계 및 NAudio 캡처 API 비교.
+
+## 2026-10-24 KST · 0.11.81 MP3 Worker Recovery
+
+1. **작업 일시(KST)**: 2026-10-24.
+2. **대상/기준 버전**: 0.11.81 / 0.11.80 (`f896f12`).
+3. **변경 내용**: MP3 Worker가 45초간 응답하지 않으면 종료하고 메인 스레드 변환으로 복구합니다. 전체 음원·선택 클립·Windows 캡처 MP3 저장에 경로 전환 안내를 표시합니다.
+4. **변경 이유**: Worker 오류는 복구했지만 무응답 상태에는 대기 제한이 없어 다운로드가 끝없이 진행 중으로 남을 수 있었습니다.
+5. **영향 범위**: Web MP3 변환·저장 상태 표시. WAV 생성·음성 모델·Windows 보조 앱 바이너리는 변경하지 않았습니다.
+6. **변경·추가된 주요 파일**: `src/export/wavToMp3*`, `src/components/workspace/GeneratedAudioSave*`, 버전·릴리스 문서.
+7. **검증 결과**: Worker 무응답·취소·변환 테스트, Chrome 합성 181초 WAV의 MP3 변환 및 실제 파일 다운로드·디코딩 확인. 전체 품질·빌드·원격 CI 결과는 릴리스 확인을 따른다.
+8. **알려진 제한과 주의사항**: 이전 짧은 별하 MP3 저장 지연의 원인은 확정하지 못했습니다. 다른 PC·Edge 다운로드와 사람의 실제 청감, 긴 원본 성우 녹음·128MB 경계, NAudio 3 시험은 미검증입니다. 메인 스레드 복구는 느린 PC에서 화면 응답성에 영향을 줄 수 있습니다.
+9. **생성한 전체 ZIP과 패치 ZIP 이름**: `SoriON-AI-0.11.81-mp3-worker-recovery-full.zip` / `SoriON-AI-0.11.80-to-0.11.81-mp3-worker-recovery-patch.zip`, `SoriON-AI-0.11.81-mp3-worker-recovery-SHA256SUMS.txt`. 삭제 파일 없음.
+10. **다음 예상 업데이트**: 0.11.82 · 별하 장문 청감 A/B, 다른 Windows PC Chrome/Edge 다운로드, 긴 원본 음색 녹음·128MB 경계, Worker 복구 응답성 및 NAudio 3 시험.
